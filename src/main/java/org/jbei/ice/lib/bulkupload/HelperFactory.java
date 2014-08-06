@@ -2,7 +2,7 @@ package org.jbei.ice.lib.bulkupload;
 
 import java.nio.file.Path;
 
-import org.jbei.ice.lib.shared.EntryAddType;
+import org.jbei.ice.lib.dto.entry.EntryType;
 
 /**
  * Factory class that determines which upload helper to instantiate based on
@@ -12,7 +12,7 @@ import org.jbei.ice.lib.shared.EntryAddType;
  */
 public class HelperFactory {
 
-    public static BulkCSVUpload createCSVUpload(String account, EntryAddType type, Path csvFilePath) {
+    public static BulkCSVUpload createCSVUpload(String account, EntryType type, Path csvFilePath) {
         if (type == null)
             throw new IllegalArgumentException("Cannot create upload object for null entry add type");
 
@@ -28,9 +28,6 @@ public class HelperFactory {
 
             case ARABIDOPSIS:
                 return new SeedBulkCSVUpload(type, account, csvFilePath);
-
-            case STRAIN_WITH_PLASMID:
-                return new StrainWithPlasmidBulkCSVUpload(type, account, csvFilePath);
 
             default:
                 return null;

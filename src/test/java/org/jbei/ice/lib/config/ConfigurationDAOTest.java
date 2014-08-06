@@ -1,8 +1,9 @@
 package org.jbei.ice.lib.config;
 
-import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.dao.hibernate.ConfigurationDAO;
+import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.models.Configuration;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -19,18 +20,18 @@ public class ConfigurationDAOTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        HibernateHelper.initializeMock();
+        HibernateUtil.initializeMock();
     }
 
     @Before
     public void setUp() throws Exception {
-        HibernateHelper.beginTransaction();
+        HibernateUtil.beginTransaction();
         dao = new ConfigurationDAO();
     }
 
     @After
     public void tearDown() throws Exception {
-        HibernateHelper.commitTransaction();
+        HibernateUtil.commitTransaction();
     }
 
     @Test
@@ -38,7 +39,7 @@ public class ConfigurationDAOTest {
         Configuration config = new Configuration();
         config.setKey("foo");
         config.setValue("bar");
-        config = dao.save(config);
+        config = dao.create(config);
         Assert.assertNotNull(config);
         Assert.assertTrue(config.getId() > 0);
     }
@@ -48,7 +49,7 @@ public class ConfigurationDAOTest {
         Configuration config = new Configuration();
         config.setKey(ConfigurationKey.NEW_REGISTRATION_ALLOWED.name());
         config.setValue("true");
-        config = dao.save(config);
+        config = dao.create(config);
         Assert.assertNotNull(config);
         Assert.assertTrue(config.getId() > 0);
 

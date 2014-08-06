@@ -4,7 +4,8 @@ import java.util.Set;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryBooleanPropertiesBridge;
 import org.jbei.ice.lib.utils.SequenceFeatureCollection;
@@ -32,7 +33,7 @@ import org.hibernate.search.annotations.FieldBridge;
 @Entity
 @Table(name = "sequences")
 @SequenceGenerator(name = "sequence", sequenceName = "sequences_id_seq", allocationSize = 1)
-public class Sequence implements IModel {
+public class Sequence implements IDataModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -193,5 +194,15 @@ public class Sequence implements IModel {
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    @Override
+    public SequenceInfo toDataTransferObject() {
+        SequenceInfo info = new SequenceInfo();
+        if (this.entry != null) {
+            info.setEntryId(entry.getId());
+        }
+//        info.setSequence(SequenceController.);
+        return info;
     }
 }

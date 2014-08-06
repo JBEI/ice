@@ -26,21 +26,17 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.search.BlastProgram;
+import org.jbei.ice.lib.dto.search.BlastQuery;
+import org.jbei.ice.lib.dto.search.SearchResult;
+import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.entry.ArabidopsisSeedData;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
-import org.jbei.ice.lib.shared.dto.entry.PartData;
-import org.jbei.ice.lib.shared.dto.entry.PlasmidData;
-import org.jbei.ice.lib.shared.dto.entry.StrainData;
-import org.jbei.ice.lib.shared.dto.search.BlastProgram;
-import org.jbei.ice.lib.shared.dto.search.BlastQuery;
-import org.jbei.ice.lib.shared.dto.search.SearchResult;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -123,26 +119,7 @@ public class BlastPlus {
             name = idLineFields[2];
             partNumber = idLineFields[3];
 
-            PartData view;
-            switch (recordType) {
-                case PART:
-                default:
-                    view = new PartData();
-                    break;
-
-                case ARABIDOPSIS:
-                    view = new ArabidopsisSeedData();
-                    break;
-
-                case PLASMID:
-                    view = new PlasmidData();
-                    break;
-
-                case STRAIN:
-                    view = new StrainData();
-                    break;
-            }
-
+            PartData view = new PartData(recordType);
             view.setId(id);
             view.setPartId(partNumber);
             view.setName(name);
@@ -150,12 +127,8 @@ public class BlastPlus {
             info = new SearchResult();
             info.setEntryInfo(view);
 
-            try {
-                String summary = ControllerFactory.getEntryController().getEntrySummary(info.getEntryInfo().getId());
-                info.getEntryInfo().setShortDescription(summary);
-            } catch (ControllerException e) {
-                Logger.error(e);
-            }
+            String summary = new EntryRetriever().getEntrySummary(info.getEntryInfo().getId());
+            info.getEntryInfo().setShortDescription(summary);
 //                searchResult.setAlignmentLength(alignmentLength);
 //                searchResult.setPercentId(percentId);
         }
@@ -250,12 +223,16 @@ public class BlastPlus {
         String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
         final Path blastFolder = Paths.get(dataDir, BLAST_DB_FOLDER);
         File lockFile = Paths.get(blastFolder.toString(), LOCK_FILE_NAME).toFile();
-        if (lockFile.exists())
+        if (lockFile.exists()) {
+            Logger.info("Blast db locked (lockfile - " + lockFile.getAbsolutePath() + "). Rebuild aborted!");
             return;
+        }
 
         try {
-            if (!Files.exists(blastFolder))
+            if (!Files.exists(blastFolder)) {
+                Logger.info("Blast folder (" + blastFolder.toString() + ") does not exist. Creating...");
                 Files.createDirectories(blastFolder);
+            }
 
             if (!force && blastDatabaseExists()) {
                 Logger.info("Blast database found in " + blastFolder.toAbsolutePath().toString());
@@ -441,17 +418,11 @@ public class BlastPlus {
     /**
      * Retrieve all the sequences from the database, and writes it out to a fasta file on disk.
      *
-     * @param writer filewriter to write to.
      * @throws BlastException
      */
     private static void writeBigFastaFile(BufferedWriter writer) throws BlastException {
         Set<Sequence> sequencesList;
-        SequenceController sequenceController = ControllerFactory.getSequenceController();
-        try {
-            sequencesList = sequenceController.getAllSequences();
-        } catch (ControllerException e) {
-            throw new BlastException(e);
-        }
+        sequencesList = DAOFactory.getSequenceDAO().getAllSequences();
         for (Sequence sequence : sequencesList) {
             long id = sequence.getEntry().getId();
 //            boolean circular = false;

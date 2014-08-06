@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.vo;
 
-import java.io.Serializable;
-
+import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.models.AnnotationLocation;
 
 /**
@@ -9,14 +8,12 @@ import org.jbei.ice.lib.models.AnnotationLocation;
  *
  * @author Timothy Ham
  */
-public class DNAFeatureLocation implements Serializable {
+public class DNAFeatureLocation implements IDataTransferModel {
 
     private static final long serialVersionUID = 1L;
 
     private int genbankStart;
     private int end;
-    private boolean singleResidue;
-    private boolean inBetween;
     private String uri;
 
     public DNAFeatureLocation() {
@@ -42,14 +39,6 @@ public class DNAFeatureLocation implements Serializable {
 
     public void setEnd(int end) {
         this.end = end;
-    }
-
-    public void setSingleResidue(boolean singleResidue) {
-        this.singleResidue = singleResidue;
-    }
-
-    public void setInBetween(boolean inBetween) {
-        this.inBetween = inBetween;
     }
 
     public String getUri() {

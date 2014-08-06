@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.executor;
 
-import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 
 /**
  * Runnable for running tasks
@@ -19,12 +19,12 @@ class TaskHandler implements Runnable {
     @Override
     public void run() {
         try {
-            HibernateHelper.beginTransaction();
+            HibernateUtil.beginTransaction();
             task.execute();
-            HibernateHelper.commitTransaction();
+            HibernateUtil.commitTransaction();
         } catch (Throwable caught) {
             Logger.error(caught);
-            HibernateHelper.rollbackTransaction();
+            HibernateUtil.rollbackTransaction();
         }
     }
 }

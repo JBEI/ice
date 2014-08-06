@@ -2,7 +2,8 @@ package org.jbei.ice.lib.models;
 
 import javax.persistence.*;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 
 /**
  * Store genbank style attributes.
@@ -12,7 +13,7 @@ import org.jbei.ice.lib.dao.IModel;
 @Entity
 @Table(name = "sequence_feature_attribute")
 @SequenceGenerator(name = "sequence", sequenceName = "sequence_feature_attribute_id_seq", allocationSize = 1)
-public class SequenceFeatureAttribute implements IModel {
+public class SequenceFeatureAttribute implements IDataModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -74,5 +75,10 @@ public class SequenceFeatureAttribute implements IModel {
 
     public void setSequenceFeature(SequenceFeature sequenceFeature) {
         this.sequenceFeature = sequenceFeature;
+    }
+
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

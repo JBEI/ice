@@ -2,14 +2,12 @@ package org.jbei.ice.lib.bulkupload;
 
 import java.util.Date;
 
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.shared.BioSafetyOption;
-import org.jbei.ice.lib.shared.EntryAddType;
 import org.jbei.ice.lib.shared.StatusType;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadStatus;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -65,7 +63,7 @@ public class BulkUploadUtil {
      *
      * @return BulkUpload object
      */
-    public static BulkUpload createNewBulkUpload(EntryAddType addType) {
+    public static BulkUpload createNewBulkUpload(EntryType addType) {
         BulkUpload upload = new BulkUpload();
         upload.setName("Untitled");
         upload.setStatus(BulkUploadStatus.IN_PROGRESS);
@@ -86,14 +84,14 @@ public class BulkUploadUtil {
         if (!validateCommonFields(strain))
             return false;
 
-        return (!StringUtils.isBlank(strain.getSelectionMarkersAsString()));
+        return (!strain.getSelectionMarkers().isEmpty());
     }
 
     private static boolean validatePlasmid(Plasmid plasmid) {
         if (!validateCommonFields(plasmid))
             return false;
 
-        return (!StringUtils.isBlank(plasmid.getSelectionMarkersAsString()));
+        return (!plasmid.getSelectionMarkers().isEmpty());
     }
 
     /**

@@ -3,7 +3,7 @@ package org.jbei.ice.lib.vo;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import org.jbei.ice.lib.shared.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PartData;
 
 /**
  * Wrapper for part and all other information about it meant

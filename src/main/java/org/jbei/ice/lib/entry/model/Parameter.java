@@ -2,7 +2,8 @@ package org.jbei.ice.lib.entry.model;
 
 import javax.persistence.*;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 
 import org.hibernate.search.annotations.ContainedIn;
 
@@ -21,7 +22,7 @@ import org.hibernate.search.annotations.ContainedIn;
 @Entity
 @Table(name = "parameters")
 @SequenceGenerator(name = "sequence", sequenceName = "parameters_id_seq", allocationSize = 1)
-public class Parameter implements IModel {
+public class Parameter implements IDataModel {
 
     private static final long serialVersionUID = 1L;
 
@@ -77,5 +78,10 @@ public class Parameter implements IModel {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

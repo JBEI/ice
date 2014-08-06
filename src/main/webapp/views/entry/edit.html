@@ -1,0 +1,244 @@
+<form name="editEntryForm" data-ng-submit="editEntry()" class="entry-form" ng-if="entry">
+
+<div class="container-fluid" ng-init="entry.creatorEmail=user.email">
+
+<!--header-->
+<div class="row entry_general_header_td" style="height: 60px">
+    <div class="col-md-12">
+        <table>
+            <tr>
+                <td>
+                    <h4>
+                        <span style="white-space: nowrap">
+                            <strong ng-hide="part.name" class="color-888">EDIT {{entry.type}}</strong>
+                            <strong>{{entry.partId}}</strong>
+                        </span>
+                        <br>
+                        <small class="font-65em">{{entry.creationTime | date:'medium'}} -
+                            <a ng-href="/profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a>
+                        </small>
+                    </h4>
+                </td>
+                <td style="padding-left: 25px">
+                    <div class="dropdown">
+                        <span class="opacity_hover dropdown-toggle"><i class="fa fa-link"></i> Link To
+                            <span class="caret"></span>
+                        </span>
+                        <ul class="dropdown-menu">
+                            <li class="cursor_pointer font-80em"><a ng-click="addExisting=true">Existing Entry</a></li>
+                            <li class="cursor_pointer font-80em" ng-repeat="option in linkOptions">
+                                <a ng-click="addNewPartLink(option.type)"><i>New {{option.display}}</i></a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+                <td ng-show="addExisting" style="padding-left: 12px">
+                    <div class="input-group">
+                        <input type="text" ng-class="{'input_box_group':true, 'input_box_error':false}"
+                               ng-model="addExistingPartNumber"
+                               placeHolder="Enter Part Number" style="width: 205px;"
+                               typeahead-loading="loadingAddExistingData"
+                               typeahead="result as result.partId for result in getEntriesByPartNumber($viewValue) | filter:{partId:$viewValue}"
+                               typeahead-editable="true"
+                               typeahead-on-select="addExistingPartLink($item, $model, $label)">
+                    <span class="input-group-addon" data-ng-click="addExisting=false" style="padding:3px; background-color:
+         #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
+                        <i ng-show="loadingAddExistingData" class="fa fa-spinner fa-spin"></i>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<!--fields for the type of entry being edited -->
+<div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="!activePart.isExistingPart">
+    <div class="col-md-2 text-right">
+        <span style="white-space:nowrap" ng-class="{'font-bold':field.edit}">{{field.label}}
+            <span ng-if="field.required" class="required">*</span>
+        </span>
+    </div>
+
+    <!--short input field-->
+    <div class="col-md-10" ng-if="field.inputType==='short'">
+        <input type="text" ng-model="activePart[field.schema]" ng-trim="true" ng-focus="field.edit=true"
+               ng-blur="field.edit=false" ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+               maxlength="125" placeHolder="{{field.placeHolder}}" style="width: 205px;">
+        <i ng-if="field.help" class="fa fa-question-circle opacity_hover" tooltip="{{field.help}}"
+           tooltip-placement="right"></i>
+    </div>
+
+    <!-- short input field with email -->
+    <div class="col-md-10" ng-if="field.inputType==='withEmail'">
+        <input type="text" ng-model="activePart[field.schema]" ng-trim="true" ng-focus="field.edit=true"
+               ng-blur="field.edit=false" ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+               maxlength="125" style="width: 205px;">
+
+        <input type="text" ng-model="activePart[field.schema+'Email']" ng-trim="true" ng-focus="field.edit=true"
+               ng-blur="field.edit=false" ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+               placeholder="Email if known" style="width: 191px;">
+    </div>
+
+    <!--options-->
+    <div class="col-md-10" ng-if="field.options">
+        <select ng-focus="field.edit=true" ng-blur="field.edit=false" style="width: 110px" class="pull_down"
+                ng-model="activePart[field.schema]" size="1"
+                ng-options="option.text as option.text for option in field.options"></select>
+    </div>
+
+    <!--checkbox-->
+    <div class="col-md-10" ng-if="field.inputType==='bool'">
+        <input type="checkbox" ng-model="activePart[field.schema]" ng-focus="field.edit=true"
+               ng-blur="field.edit=false">
+    </div>
+
+    <!--date picker-->
+    <div class="col-md-10" ng-if="field.inputType==='date'">
+        <div class="input-group">
+            <input type="text" ng-model="activePart[field.schema]" show-button-bar="false" show-weeks="false"
+                   datepicker-popup="yyyy-MM-dd" class="input_box_group" maxlength="125" is-open="opened"
+                   datepicker-options="dateOptions" close-text="Close" style="width: 205px;"
+                   ng-focus="field.edit=true" ng-blur="field.edit=false">
+            <span class="input-group-addon" style="padding:3px; background-color: #f1f1f1;width: 19px">
+                <i class="fa fa-calendar"></i>
+            </span>
+        </div>
+    </div>
+
+    <!--medium input-->
+    <div class="col-md-10" ng-if="field.inputType==='medium'">
+        <input type="text" ng-model="activePart[field.schema]" maxlength="150" style="width:400px;"
+               ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+               ng-focus="field.edit=true" ng-blur="field.edit=false">
+    </div>
+
+    <!--auto complete-->
+    <div class="col-md-10" ng-if="field.inputType==='autoComplete'">
+        <input type="text" ng-model="activePart[field.schema]" maxlength="150"
+               ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+               placeHolder={{field.placeHolder}} style="width:205px;" typeahead-loading="loadingData"
+               typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue"
+               ng-focus="field.edit=true" ng-blur="field.edit=false">
+        <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
+    </div>
+
+    <!--add-->
+    <div class="col-md-10" ng-if="field.inputType==='add'">
+        <span ng-repeat="link in activePart[field.schema]">
+            <div ng-if="!$index">
+                <input ng-model="activePart[field.schema][$index].value" type="text" maxlength="500"
+                       style="width: 400px;"
+                       ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                       ng-focus="field.edit=true" ng-blur="field.edit=false">
+                <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
+                      ng-click="addLink(field.schema, $index)">
+                    <i class="fa fa-plus green opacity_hover"></i>
+                </span>
+            </div>
+
+            <div ng-if="$index" class="input-group pad-top-5">
+                <input type="text" ng-model="activePart[field.schema][$index].value" maxlength="125"
+                       style="width: 400px;"
+                       ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
+                       ng-focus="field.edit=true" ng-blur="field.edit=false">
+                <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)" style="padding:3px; background-color:
+                 #f1f1f1;width: 19px; border-left: 0">
+                    <i class="fa fa-minus delete_icon"></i>
+                </span>&nbsp;
+                <i class="fa fa-plus green opacity_hover" ng-click="addLink(field.schema, $index)"></i>
+            </div>
+        </span>
+    </div>
+
+    <!-- autocompleteAdd with a sub-schema-->
+    <div class="col-md-10" ng-if="field.inputType==='autoCompleteAdd'">
+
+        <!--show if there is a sub schema-->
+        <span ng-repeat="link in activePart[field.subSchema][field.schema]" ng-if="field.subSchema">
+            <div ng-if="!$index">
+                <input ng-model="link.value" type="text" typeahead-loading="loadingData"
+                       ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                       maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
+                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
+                <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
+                      ng-click="addLink(field.schema, $index)"><i ng-show="loadingData"
+                                                                  class="fa fa-spinner fa-spin"></i>
+                    <i class="fa fa-plus green opacity_hover"></i>
+                </span>
+            </div>
+
+            <div ng-if="$index" class="input-group pad-top-5">
+                <input type="text" ng-model="link.value" maxlength="125" style="width: 400px;"
+                       ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
+                       ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
+                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
+                <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)" style="padding:3px; background-color:
+                 #f1f1f1;width: 19px; border-left: 0">
+                    <i class="fa fa-minus delete_icon"></i>
+                </span>&nbsp;
+                <i class="fa fa-plus green opacity_hover" ng-click="addLink(field.schema, $index)"></i>
+            </div>
+        </span>
+
+        <!--no sub schema-->
+        <span ng-repeat="link in activePart[field.schema]" ng-if="!field.subSchema">
+            <div ng-if="!$index">
+                <input ng-model="link.value" type="text" typeahead-loading="loadingData"
+                       ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                       maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
+                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
+                <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
+                      ng-click="addLink(field.schema, $index)"><i ng-show="loadingData"
+                                                                  class="fa fa-spinner fa-spin"></i>
+                    <i class="fa fa-plus green opacity_hover"></i>
+                </span>
+            </div>
+
+            <div ng-if="$index" class="input-group pad-top-5">
+                <input type="text" ng-model="link.value" maxlength="125" style="width: 400px;"
+                       ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
+                       ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
+                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
+                <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)" style="padding:3px; background-color:
+                 #f1f1f1;width: 19px; border-left: 0">
+                    <i class="fa fa-minus delete_icon"></i>
+                </span>&nbsp;
+                <i class="fa fa-plus green opacity_hover" ng-click="addLink(field.schema, $index)"></i>
+            </div>
+        </span>
+    </div>
+
+    <!--long-->
+    <div class="col-md-10" ng-if="field.inputType==='long'">
+        <textarea ng-model="activePart[field.schema]" style="width: 640px; height: 50px;" ng-trim="true"
+                  ng-focus="field.edit=true" ng-blur="field.edit=false"
+                  ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"></textarea>
+    </div>
+</div>
+
+<div class="row pad-top-5">
+    <div class="col-md-12">
+        <div class="entry-details-subheader">
+            <strong style="color: #233559">NOTES</strong>
+        </div>
+    </div>
+</div>
+
+<div class="row pad-top-5">
+    <div class="col-md-2"></div>
+    <div class="col-md-10">
+        <textarea class="entry_add_notes_input" ng-model="entry.longDescription"></textarea>
+    </div>
+</div>
+</div>
+
+<div class="row pad-top-5">
+    <div class="col-md-2"></div>
+
+    <div class="col-md-10">
+        <button type="submit" class="btn btn-primary font-85em">Submit</button>
+        <button class="btn btn-default font-85em">Cancel</button>
+    </div>
+</div>
+
+</form>

@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.search;
 
-import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.executor.Task;
-import org.jbei.ice.lib.logging.Logger;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -20,7 +20,7 @@ public class RebuildLuceneIndexTask extends Task {
     public void execute() {
         Logger.info("Rebuilding lucene index in background");
         try {
-            Session session = HibernateHelper.newSession();
+            Session session = HibernateUtil.newSession();
             FullTextSession fullTextSession = Search.getFullTextSession(session);
             fullTextSession.createIndexer().idFetchSize(20);
             fullTextSession.createIndexer().startAndWait();

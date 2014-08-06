@@ -1,0 +1,27 @@
+<div ng-controller="PartHistoryController">
+    <div class="row pad_top" ng-if="history.length">
+        <table cellspacing="0" class="table table-condensed table-hover table-striped font-95em">
+            <thead>
+            <tr>
+                <td></td>
+                <td><b>Action</b></td>
+                <td><b>By</b></td>
+                <td><b>On</b></td>
+                <td>&nbsp;</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="item in history">
+                <td style="line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"><b>{{$index+1}}</b></td>
+                <td>{{item.action}}</td>
+                <td><a ng-href="/profile/{{item.account.id}}">{{item.account.firstName}}
+                    {{item.account.lastName}}</a></td>
+                <td>{{item.time | date:'MMM d, y, h:mm a'}}</td>
+                <td style="font-size:14px" ng-if="user.isAdmin">
+                    <i ng-click="deleteHistory(item)" class="fa fa-trash-o delete_icon"></i>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

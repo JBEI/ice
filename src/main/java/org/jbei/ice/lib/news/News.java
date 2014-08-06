@@ -3,7 +3,8 @@ package org.jbei.ice.lib.news;
 import java.util.Date;
 import javax.persistence.*;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 
 import org.hibernate.annotations.Type;
 
@@ -15,7 +16,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "news")
 @SequenceGenerator(name = "sequence", sequenceName = "news_id_seq", allocationSize = 1)
-public class News implements IModel {
+public class News implements IDataModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -101,4 +102,8 @@ public class News implements IModel {
         this.publicationTime = publicationTime;
     }
 
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 }

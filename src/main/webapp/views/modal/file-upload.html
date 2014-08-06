@@ -1,0 +1,41 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-table"></i> &nbsp;Bulk Import File Upload</span>
+</div>
+
+<div class="modal-body">
+    <alert type="'info'" style="padding: 8px">
+        <i style="font-size:60px; float: left;padding-right:10px; color: #3a87ad" class="fa fa-info-circle"></i>
+        <span class="font-90em">Supported file formats for bulk upload are:
+            <ul style="margin-left: 62px">
+                <li><b>CSV file</b>
+                    (<a class="cursor_pointer" ng-click="downloadCSVTemplate()">Download template</a>)
+                </li>
+                <li><b>Zip Archive</b> (must contain exactly 1 CSV file)</li>
+                <li><b>SBOL XML</b></li>
+            </ul>
+        </span>
+    </alert>
+
+    <div ng-if="uploadError" class="alert alert-danger font-95em"><i class="fa fa-exclamation-triangle"></i>
+        {{uploadError}}
+    </div>
+
+    <input ng-if="!processing && !modalClose" type="file" ng-file-select class="font-90em">
+
+    <div style="height: 12px; width: 100%" ng-if="!processing && !modalClose">
+        <div class="progress-bar" role="progressbar" ng-style="{ 'width': importUploader.progress + '%' }"></div>
+    </div>
+
+    <div class="alert alert-info" ng-if="processing">
+        <i class="fa fa-spin fa-gear"></i> Processing upload. This may take several minutes ...
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-default btn-sm" ng-click="cancel()">{{modalClose || 'Cancel'}}</button>
+    <button ng-if="!modalClose && !processing" type="button" ng-click="uploadFile()" class="btn btn-primary btn-sm"
+            ng-disabled="!importUploader.getNotUploadedItems().length">Upload File
+    </button>
+</div>

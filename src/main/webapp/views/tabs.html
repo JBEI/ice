@@ -1,0 +1,17 @@
+<table width="100%">
+    <tr>
+        <td ng-repeat="pane in panes">
+            <div ng-click="activateTab(pane)"
+                 ng-class="{permission_tab_active:pane.selected, permission_tab_inactive:!pane.selected}">{{pane.title}}
+                <span style="float: right">
+                    <div ng-show="pane.selected" class="edit_icon font-12em">
+                        <i ng-click="showAddPermissionOptionsClick(pane)" class="fa fa-plus-circle"></i></div>
+                    <div ng-hide="pane.selected" class="edit_icon font-12em">{{pane.count || 0}}</div>
+                </span>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" style="border-left:  1px solid #e1e1e1" ng-transclude></td>
+    </tr>
+</table>

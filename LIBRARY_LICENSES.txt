@@ -11,8 +11,6 @@ these great software and for making them available as open source.
 * BioJava: LGPL Version 2.1
 * Font Awesome font: SIL Open Font License - http://scripts.sil.org/OFL
 * Font Awesome CSS, LESS, and SASS: MIT License - http://opensource.org/licenses/mit-license.html
-* Google Web Toolkit (GWT): Apache License Version 2.0
-* GwtUpload: Apache License Version 2.0
 * hibernate: LGPL
 * javassist: MPL 1.1
 * jetty: Apache License version 2.0
@@ -23,7 +21,7 @@ these great software and for making them available as open source.
 * Simple Logging Facade for Java (SLF4J): MIT License
 
 The following software libraries are used in the VectorEditor Flex
-application within the JBEIR software.  
+application within the ICE software.
 
 * as3-rpclib: New BSD License
 * nochump.util.zip: MIT License

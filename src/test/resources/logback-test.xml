@@ -9,7 +9,7 @@
 
     <logger name="org.jbei.ice" level="TRACE"/>
 
-    <root level="info">
+    <root level="debug">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

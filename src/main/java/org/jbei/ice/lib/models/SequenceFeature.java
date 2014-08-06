@@ -5,7 +5,8 @@ import java.util.Set;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 
 import org.hibernate.annotations.Type;
 
@@ -21,7 +22,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "sequence_feature")
 @SequenceGenerator(name = "sequence", sequenceName = "sequence_feature_id_seq", allocationSize = 1)
-public class SequenceFeature implements IModel {
+public class SequenceFeature implements IDataModel {
 
     public static final String DESCRIPTION = "description";
 
@@ -35,7 +36,7 @@ public class SequenceFeature implements IModel {
     @JoinColumn(name = "sequence_id")
     private Sequence sequence;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "feature_id")
     private Feature feature;
 
@@ -102,6 +103,11 @@ public class SequenceFeature implements IModel {
 
     public void setUri(String uri) {
         this.uri = uri;
+    }
+
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
     /**

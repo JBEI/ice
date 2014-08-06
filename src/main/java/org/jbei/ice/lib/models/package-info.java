@@ -11,7 +11,7 @@
  * However, if a value objects that do not need to be saved into the database are needed,
  * they should go into the {@link org.jbei.ice.lib.vo} package.
  * <p>
- * All models are derived from {@link org.jbei.ice.lib.dao.IModel}.
+ * All models are derived from {@link org.jbei.ice.lib.dao.IDataModel}.
  */
 package org.jbei.ice.lib.models;
 

@@ -7,7 +7,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.EntryType;
 
 import org.hibernate.search.annotations.Indexed;
 

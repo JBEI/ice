@@ -1,0 +1,18 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        Rename Bulk Import</span>
+</div>
+
+<div class="modal-body">
+    <strong class="font-90em">Enter New Name</strong>
+    <br>
+    <input type="text" ng-model="newBulkUploadName" ng-trim="true" ng-focus="true" maxlength="125" class="input_box"
+           style="width: 205px">
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-default btn-sm" ng-click="$dismiss('cancel')">Cancel</button>
+    <button class="btn btn-primary btn-sm" type="button" ng-click="$close(newBulkUploadName)"
+            ng-disabled="!newBulkUploadName"><strong>Rename</strong></button>
+</div>

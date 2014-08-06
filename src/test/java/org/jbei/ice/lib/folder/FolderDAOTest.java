@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.folder;
 
-import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.dao.hibernate.FolderDAO;
+import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,14 +16,14 @@ public class FolderDAOTest {
 
     @Before
     public void setUp() {
-        HibernateHelper.initializeMock();
+        HibernateUtil.initializeMock();
         dao = new FolderDAO();
-        HibernateHelper.beginTransaction();
+        HibernateUtil.beginTransaction();
     }
 
     @After
     public void tearDown() {
-        HibernateHelper.rollbackTransaction();
+        HibernateUtil.rollbackTransaction();
     }
 
     @Test

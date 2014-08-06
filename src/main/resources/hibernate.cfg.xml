@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+
+    <session-factory>
+
+        <!-- Database connection settings -->
+        <property name="hibernate.connection.url">jdbc:hsqldb:file:data/hsqldb</property>
+        <property name="hibernate.connection.driver_class">org.hsqldb.jdbc.JDBCDriver</property>
+        <property name="hibernate.connection.username">sa</property>
+        <property name="hibernate.connection.password">password</property>
+        <!-- SQL dialect: use the correct one for your database -->
+        <property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
+
+        <!-- JDBC connection pool (using c3p0) -->
+        <property name="hibernate.c3p0.min_size">5</property>
+        <property name="hibernate.c3p0.max_size">20</property>
+        <property name="hibernate.c3p0.timeout">300</property>
+        <property name="hibernate.c3p0.max_statements">50</property>
+        <property name="hibernate.c3p0.idle_test_period">100</property>
+        <property name="hibernate.c3p0.debugUnreturnedConnectionStackTraces">true</property>
+        <property name="hibernate.c3p0.acquireRetryAttempts">0</property>
+        <!-- wait 30secs before attempting to acquire db connection after a failed attempt -->
+        <property name="hibernate.c3p0.acquireRetryDelay">30000</property>
+
+        <!-- Enables Hibernate's automatic session context management -->
+        <property name="current_session_context_class">org.hibernate.context.internal.ThreadLocalSessionContext
+        </property>
+
+        <!-- Disable the second-level cache  -->
+        <property name="cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</property>
+
+        <!-- Echo all executed SQL to stdout -->
+        <property name="show_sql">false</property>
+
+        <property name="hibernate.jdbc.batch_size">20</property>
+
+        <!-- format -->
+        <property name="format_sql">true</property>
+
+        <!-- Drop and re-create the database schema on startup (normally it should be validate) -->
+        <property name="hbm2ddl.auto">update</property>
+
+        <!-- hibernate search -->
+        <!-- use org.hibernate.search.store.RAMDirectoryProvider for testing -->
+        <property name="hibernate.search.default.directory_provider">
+            org.hibernate.search.store.impl.FSDirectoryProvider
+        </property>
+        <property name="hibernate.search.default.indexBase">data/index</property>
+
+        <!-- mapping files -->
+        <mapping class="org.jbei.ice.lib.entry.model.Entry"/>
+        <mapping class="org.jbei.ice.lib.entry.model.Plasmid"/>
+        <mapping class="org.jbei.ice.lib.entry.model.Strain"/>
+        <mapping class="org.jbei.ice.lib.entry.model.Part"/>
+        <mapping class="org.jbei.ice.lib.entry.model.ArabidopsisSeed"/>
+        <mapping class="org.jbei.ice.lib.entry.model.Link"/>
+        <mapping class="org.jbei.ice.lib.models.SelectionMarker"/>
+        <mapping class="org.jbei.ice.lib.models.Sequence"/>
+        <mapping class="org.jbei.ice.lib.models.Feature"/>
+        <mapping class="org.jbei.ice.lib.models.SequenceFeature"/>
+        <mapping class="org.jbei.ice.lib.models.SequenceFeatureAttribute"/>
+        <mapping class="org.jbei.ice.lib.models.AssemblyRelationship"/>
+        <mapping class="org.jbei.ice.lib.entry.model.EntryAssemblyRelationship"/>
+        <mapping class="org.jbei.ice.lib.models.Comment"/>
+        <mapping class="org.jbei.ice.lib.news.News"/>
+        <mapping class="org.jbei.ice.lib.account.model.Account"/>
+        <mapping class="org.jbei.ice.lib.entry.attachment.Attachment"/>
+        <mapping class="org.jbei.ice.lib.entry.sample.model.Sample"/>
+        <mapping class="org.jbei.ice.lib.account.model.AccountPreferences"/>
+        <mapping class="org.jbei.ice.lib.group.Group"/>
+        <mapping class="org.jbei.ice.lib.models.TraceSequence"/>
+        <mapping class="org.jbei.ice.lib.models.TraceSequenceAlignment"/>
+        <mapping class="org.jbei.ice.lib.models.Project"/>
+        <mapping class="org.jbei.ice.lib.models.Configuration"/>
+        <mapping class="org.jbei.ice.lib.models.Storage"/>
+        <mapping class="org.jbei.ice.lib.folder.Folder"/>
+        <mapping class="org.jbei.ice.lib.entry.model.Parameter"/>
+        <mapping class="org.jbei.ice.lib.models.AnnotationLocation"/>
+        <mapping class="org.jbei.ice.lib.bulkupload.BulkUpload"/>
+        <mapping class="org.jbei.ice.lib.access.Permission"/>
+        <mapping class="org.jbei.ice.lib.message.Message"/>
+        <mapping class="org.jbei.ice.lib.account.model.Preference"/>
+        <mapping class="org.jbei.ice.lib.net.RemotePartner"/>
+        <mapping class="org.jbei.ice.lib.entry.sample.model.Request"/>
+        <mapping class="org.jbei.ice.lib.models.Audit"/>
+        <mapping class="org.jbei.ice.lib.experiment.Experiment"/>
+    </session-factory>
+</hibernate-configuration>

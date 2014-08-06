@@ -5,11 +5,12 @@ package org.jbei.ice.lib.account;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.shared.dto.user.User;
+import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 
-import junit.framework.Assert;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,14 +25,16 @@ public class AccountControllerTest {
 
     @Before
     public void setUp() throws Exception {
-        HibernateHelper.initializeMock();
-        HibernateHelper.beginTransaction();
+        HibernateUtil.initializeMock();
+        HibernateUtil.beginTransaction();
         controller = new AccountController();
+        ConfigurationController configurationController = new ConfigurationController();
+        configurationController.setPropertyValue(ConfigurationKey.NEW_REGISTRATION_ALLOWED, "true");
     }
 
     @After
     public void tearDown() throws Exception {
-        HibernateHelper.rollbackTransaction();
+        HibernateUtil.rollbackTransaction();
     }
 
     @Test
@@ -45,7 +48,6 @@ public class AccountControllerTest {
         account.setLastName("Last");
         account.setDescription("Desc");
         account.setInitials("FL");
-        account.setIsSubscribed(1);
         account.setPassword("plom");
         account.setIp("");
         account.setInstitution("");
@@ -80,12 +82,12 @@ public class AccountControllerTest {
 
     @Test
     public void testCreateNewAccount() throws Exception {
-        User info = new User();
+        AccountTransfer info = new AccountTransfer();
         info.setEmail("testCreateNewAccount");
         info.setFirstName("Test");
         info.setLastName("Test");
-        String password = controller.createNewAccount(info, false);
-        Assert.assertNotNull(password);
+        info = controller.createNewAccount(info, false);
+        Assert.assertNotNull(info.getPassword());
     }
 
     @Test
@@ -102,7 +104,6 @@ public class AccountControllerTest {
         account.setLastName("Last");
         account.setDescription("Desc");
         account.setInitials("FL");
-        account.setIsSubscribed(1);
         account.setPassword("plom");
         account.setIp("");
         account.setInstitution("");
@@ -131,7 +132,7 @@ public class AccountControllerTest {
     public void testGetAccountBySessionKey() throws Exception {
         Account account = AccountCreator.createTestAccount("testGetAccountBySessionKey", false);
         controller.updatePassword(account.getEmail(), "p4ssw0rd");
-        User info = controller.authenticate(account.getEmail(), "p4ssw0rd");
+        AccountTransfer info = controller.authenticate(new AccountTransfer(account.getEmail(), "p4ssw0rd"));
         Assert.assertNotNull(info);
         Assert.assertFalse(info.getSessionId().isEmpty());
         Account sessIdAccount = controller.getAccountBySessionKey(info.getSessionId());

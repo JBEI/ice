@@ -2,8 +2,8 @@ package org.jbei.ice.lib.bulkupload;
 
 import java.nio.file.Path;
 
-import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryType;
 
 /**
  * Bulk CSV uploader for strains
@@ -12,7 +12,7 @@ import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
  */
 public class StrainBulkCSVUpload extends PartBulkCSVUpload {
 
-    public StrainBulkCSVUpload(EntryAddType addType, String account, Path csvFilePath) {
+    public StrainBulkCSVUpload(EntryType addType, String account, Path csvFilePath) {
         super(addType, account, csvFilePath);
     }
 

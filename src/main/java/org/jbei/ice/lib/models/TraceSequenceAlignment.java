@@ -4,7 +4,8 @@ import java.util.Date;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dto.entry.TraceSequenceAlignmentInfo;
 
 import org.hibernate.annotations.Type;
 
@@ -16,7 +17,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "trace_sequence_alignments")
 @SequenceGenerator(name = "sequence", sequenceName = "trace_sequence_alignments_id_seq", allocationSize = 1)
-public class TraceSequenceAlignment implements IModel {
+public class TraceSequenceAlignment implements IDataModel {
     private static final long serialVersionUID = 1L;
 
     @XmlTransient
@@ -178,5 +179,19 @@ public class TraceSequenceAlignment implements IModel {
 
     public void setModificationTime(Date modificationTime) {
         this.modificationTime = modificationTime;
+    }
+
+    @Override
+    public TraceSequenceAlignmentInfo toDataTransferObject() {
+        TraceSequenceAlignmentInfo alignmentInfo = new TraceSequenceAlignmentInfo();
+        alignmentInfo.setScore(score);
+        alignmentInfo.setStrand(strand);
+        alignmentInfo.setQueryStart(queryStart);
+        alignmentInfo.setQueryEnd(queryEnd);
+        alignmentInfo.setSubjectStart(subjectStart);
+        alignmentInfo.setSubjectEnd(subjectEnd);
+        alignmentInfo.setQueryAlignment(queryAlignment);
+        alignmentInfo.setSubjectAlignment(subjectAlignment);
+        return alignmentInfo;
     }
 }

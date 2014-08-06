@@ -4,17 +4,17 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.UUID;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 
 import org.apache.commons.lang.RandomStringUtils;
 
@@ -48,6 +48,11 @@ public class Utils {
 
         }
         return buffer.toString();
+    }
+
+    public static String generateToken() {
+        SecureRandom random = new SecureRandom();
+        return new BigInteger(130, random).toString(32);
     }
 
     /**
@@ -147,15 +152,18 @@ public class Utils {
     }
 
     public static String getConfigValue(ConfigurationKey key) {
-        ConfigurationController controller = ControllerFactory.getConfigurationController();
-        try {
-            String value = controller.getPropertyValue(key);
-            if (value != null)
-                return value;
-            return key.getDefaultValue();
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
+        ConfigurationController controller = new ConfigurationController();
+        String value = controller.getPropertyValue(key);
+        if (value != null)
+            return value;
+        return key.getDefaultValue();
+    }
+
+    public static boolean canRegister() {
+        String value = getConfigValue(ConfigurationKey.NEW_REGISTRATION_ALLOWED);
+        if (value == null)
+            return false;
+
+        return value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true");
     }
 }

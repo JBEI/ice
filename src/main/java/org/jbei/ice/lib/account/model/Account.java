@@ -5,29 +5,24 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.persistence.*;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.account.AccountType;
+import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.shared.dto.user.AccountType;
-import org.jbei.ice.lib.shared.dto.user.User;
 
 import org.hibernate.annotations.Type;
 
 /**
  * Store the account information for a single user.
  * <p/>
- * Because gd-ice is able to import an {@link org.jbei.ice.lib.entry.model.Entry} object from another gd-ice
- * instance, but the
- * Account associated with the entry is not imported, Entries may point to an Account that may not
- * exist. To work around this possibility, Entries are associated with an Account object via the
- * email field (Entry.ownerEmail to Account.email). This of course means that as far as the system
- * is concerned, email is the identifying value of a user, not the Account's id.
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
 @Entity
 @Table(name = "accounts")
 @SequenceGenerator(name = "sequence", sequenceName = "accounts_id_seq", allocationSize = 1)
-public class Account implements IModel {
+public class Account implements IDataModel {
+
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -56,9 +51,6 @@ public class Account implements IModel {
     @Lob
     @Type(type = "org.hibernate.type.TextType")
     private String description;
-
-    @Column(name = "is_subscribed", nullable = false)
-    private int isSubscribed;
 
     @Column(name = "ip", length = 20, nullable = false)
     private String ip;
@@ -149,14 +141,6 @@ public class Account implements IModel {
         this.institution = institution;
     }
 
-    public int getIsSubscribed() {
-        return isSubscribed;
-    }
-
-    public void setIsSubscribed(int isSubscribed) {
-        this.isSubscribed = isSubscribed;
-    }
-
     public String getIp() {
         return ip;
     }
@@ -238,19 +222,20 @@ public class Account implements IModel {
         this.salt = salt;
     }
 
-    public static User toDTO(Account account) {
-        if (account == null)
-            return null;
-
-        User info = new User();
-        info.setEmail(account.getEmail());
-        info.setFirstName(account.getFirstName());
-        info.setLastName(account.getLastName());
-        info.setInstitution(account.getInstitution());
-        info.setDescription(account.getDescription());
-        info.setInitials(account.getInitials());
-        info.setLastLogin(account.getLastLoginTime());
-        info.setId(account.getId());
+    public AccountTransfer toDataTransferObject() {
+        AccountTransfer info = new AccountTransfer();
+        info.setEmail(getEmail());
+        info.setFirstName(getFirstName());
+        info.setLastName(getLastName());
+        info.setInstitution(getInstitution());
+        info.setDescription(getDescription());
+        info.setInitials(getInitials());
+        if (lastLoginTime != null)
+            info.setLastLogin(lastLoginTime.getTime());
+        info.setAccountType(this.type);
+        if (this.creationTime != null)
+            info.setRegisterDate(this.creationTime.getTime());
+        info.setId(getId());
         return info;
     }
 }

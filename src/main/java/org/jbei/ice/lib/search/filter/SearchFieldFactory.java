@@ -2,12 +2,12 @@ package org.jbei.ice.lib.search.filter;
 
 import java.util.HashSet;
 
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.shared.dto.entry.EntryType;
 
 /**
  * @author Hector Plahar
@@ -57,22 +57,22 @@ public class SearchFieldFactory {
     }
 
     public static HashSet<String> getCommonFields() {
-        return commonFields;
+        return new HashSet<>(commonFields);
     }
 
     public static HashSet<String> entryFields(EntryType type) {
         switch (type) {
             case STRAIN:
-                return strainFields;
+                return new HashSet<>(strainFields);
 
             case PLASMID:
-                return plasmidFields;
+                return new HashSet<>(plasmidFields);
 
             case ARABIDOPSIS:
-                return seedFields;
+                return new HashSet<>(seedFields);
 
             default:
-                return commonFields;
+                return new HashSet<>(commonFields);
         }
     }
 

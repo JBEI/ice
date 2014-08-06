@@ -1,0 +1,45 @@
+<div class="row pad_top">
+    <table cellspacing="0" class="data_table">
+        <tr data-ng-show='!pendingSampleRequests'>
+            <td colspan="10"><i class="fa fa-fw fa-spin fa-gear"></i> Loading...</td>
+        </tr>
+
+        <tr data-ng-if='pendingSampleRequests && pendingSampleRequests.length > 0'>
+            <th style="width:28px">
+                <i class="fa"
+                   ng-class="{'fa-square-o':allSelected == false, 'fa-check-square-o': allSelected == true}"
+                   style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>
+                <sup style="font-size: 9px; font-weight: normal; display: inherit"
+                     ng-show="selection.length>0">{{selection.length}}</sup>
+            </th>
+            <th ng-click="sort('type')">
+                <span class="cursor_pointer">Requester</span> <i ng-show="params.sort=='type'"
+                                                                 class="fa"
+                                                                 ng-class="{'fa-caret-down':params.asc==true, 'fa-caret-up':params.asc==false}"></i>
+            </th>
+            <th style="width: 110px">Entry</th>
+            <th data-ng-click="sort('name')" style="width:230px">
+                <span class="cursor_pointer">Type</span> <i ng-show="params.sort=='name'" class="fa"
+                                                            ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
+            </th>
+            <th ng-click="sort('summary')">Requested</th>
+            <th ng-click="sort('summary')">Updated</th>
+        </tr>
+        <tr data-ng-show=" userList.length == 0">
+            <td colspan="10">No user accounts available</td>
+        </tr>
+        <tr data-ng-repeat="request in pendingSampleRequests">
+            <td width="10px">
+                <i class="fa"
+                   ng-class="{'fa-square-o':selection.indexOf(entry.id)==-1, 'fa-check-square-o':selection.indexOf(entry.id)>-1}"
+                   style="color: #999; font-size: 14px;" ng-click="select(user)"></i>
+            </td>
+            <td><a href="/profile/{{request.requester.id}}">{{request.requester.firstName}}
+                {{request.requester.lastName}}</a></td>
+            <td><a href="/entry/{{request.partData.id}}">{{request.partData.partId}}</a></td>
+            <td>{{request.requestType}}</td>
+            <td style="width:160px; white-space:nowrap">{{request.requestTime | date:'MMM d, yyyy'}}</td>
+            <td style="width:160px; white-space:nowrap">{{request.updateTime | date:'MMM d, yyyy'}}</td>
+        </tr>
+    </table>
+</div>

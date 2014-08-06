@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
-import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.DNASequence;
 
 import org.sbolstandard.core.SBOLDocument;
 import org.sbolstandard.core.SBOLFactory;
@@ -33,7 +33,7 @@ public class SBOLParser extends AbstractParser {
     }
 
     @Override
-    public IDNASequence parse(String textSequence) throws InvalidFormatParserException {
+    public DNASequence parse(String textSequence) throws InvalidFormatParserException {
         try {
             SBOLDocument document = SBOLFactory.read(new ByteArrayInputStream(textSequence.getBytes()));
             ICESBOLParserVisitor visitor = new ICESBOLParserVisitor();
@@ -52,7 +52,7 @@ public class SBOLParser extends AbstractParser {
     }
 
     @Override
-    public IDNASequence parse(byte[] bytes) throws InvalidFormatParserException {
+    public DNASequence parse(byte[] bytes) throws InvalidFormatParserException {
         return parse(new String(bytes));
     }
 }

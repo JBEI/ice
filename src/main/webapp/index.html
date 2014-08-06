@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en" data-ng-app="iceApp">
+<head>
+    <base href="/">
+
+    <meta charset="utf-8">
+    <title>ICE - Inventory of Composable Elements</title>
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+
+    <link href="css/ice.css" rel="stylesheet">
+    <script src="scripts/lib/jquery/jquery-1.11.0.min.js"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="scripts/lib/angular/angular.min-1.3.0-beta3.js"></script>
+    <script src="scripts/lib/angular/angular-route.js"></script>
+    <script src="scripts/lib/angular/angular-resource.js"></script>
+    <script src="scripts/lib/angular/angular-cookies.js"></script>
+    <script src="scripts/lib/angular/angular-animate.js"></script>
+    <script src="scripts/lib/angular/angular-touch.min.js"></script>
+
+    <script src="scripts/lib/angular-ui/angular-ui.js"></script>
+    <script src="scripts/lib/angular-ui/angular-ui-router.min.js"></script>
+    <script src="scripts/lib/angular-ui/ui-bootstrap-tpls-0.10.0.js"></script>
+
+    <script src="scripts/lib/angular-file-upload/angular-file-upload.min.js"></script>
+
+    <script src="scripts/lib/handsontable/jquery.handsontable.full.js"></script>
+    <link rel="stylesheet" media="screen" href="scripts/lib/handsontable/jquery.handsontable.full.css">
+
+    <script src="scripts/lib/angular-slider/angular-slider.min.js"></script>
+
+    <script src="scripts/lib/momentjs/moment.min.js"></script>
+    <script src="scripts/lib/angular-moment/angular-moment.min.js"></script>
+
+    <!-- GRUNT START -->
+    <script src="scripts/ice.app.js"></script>
+
+    <script src="scripts/common/ice.common.js"></script>
+    <script src="scripts/search/ice.search.js"></script>
+    <script src="scripts/upload/ice.upload.js"></script>
+    <script src="scripts/entry/ice.entry.js"></script>
+    <script src="scripts/collection/ice.collection.js"></script>
+
+
+    <script src="scripts/services.js"></script>
+
+    <script src="scripts/search/searchService.js"></script>
+    <script src="scripts/upload/uploadService.js"></script>
+
+    <script src="scripts/controllers.js"></script>
+    <script src="scripts/search/searchController.js"></script>
+    <script src="scripts/upload/uploadController.js"></script>
+    <script src="scripts/entry/entryController.js"></script>
+    <script src="scripts/collection/collectionController.js"></script>
+
+    <script src="scripts/filters.js"></script>
+    <script src="scripts/directives.js"></script>
+    <!-- GRUNT END -->
+
+    <script src="scripts/bootstrap.js"></script>
+</head>
+
+<body>
+<div id="container">
+    <div id="body" ui-view></div>
+    <div id="footer">
+        <table cellpadding="0" cellspacing="0" style="width: 100%;">
+            <tr>
+                <td colspan="2" class="footer_line"></td>
+            </tr>
+            <tr>
+                <td>
+                    <table cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td align="left" style="vertical-align: top;"><img
+                                    src="img/doe-bioenergy-research-cent.gif"></td>
+                            <td align="left" style="vertical-align: top;"><img src="img/lbnl-logo.gif"></td>
+                            <td align="left" style="vertical-align: top;"><img src="img/sandia-lab-logo.gif"></td>
+                            <td align="left" style="vertical-align: top;"><img src="img/ucb-logo.gif"></td>
+                            <td align="left" style="vertical-align: top;"><img src="img/ucdavis-logo.gif"></td>
+                            <td align="left" style="vertical-align: top;"><img
+                                    src="img/carnegie-institution-logo.gif"></td>
+                            <td align="left" style="vertical-align: top;"><img src="img/llnl-logo.gif"></td>
+                            <td align="left" style="vertical-align: top;"><img src="img/pnw.png"></td>
+                        </tr>
+                    </table>
+                </td>
+                <td align="right">
+                    <table cellspacing="0" cellpadding="0" class="font-90em">
+                        <tr>
+                            <td align="right" style="vertical-align: top;">
+                                <table cellspacing="0" cellpadding="0">
+                                    <tr>
+                                        <td align="left" style="vertical-align: top;">
+                                            <div>©&nbsp;</div>
+                                        </td>
+                                        <td align="left" style="vertical-align: top;">
+                                            <a href="https://github.com/JBEI/ice">JBEI ICE Registry</a></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right" style="vertical-align: top;">
+                                <div>All rights reserved.</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right" style="vertical-align: top;">
+                                <table cellspacing="0" cellpadding="0">
+                                    <tr>
+                                        <td align="left" style="vertical-align: top;"><a
+                                                href="https://github.com/JBEI/ice/issues/new">Submit an Issue</a></td>
+                                        <td align="left" style="vertical-align: top;">
+                                            <div>&nbsp; | &nbsp;</div>
+                                        </td>
+                                        <td align="left" style="vertical-align: top;"><a href="/api">Help</a></td>
+                                        <td align="left" style="vertical-align: top;">
+                                            <div>&nbsp; | &nbsp; v4.0.0</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

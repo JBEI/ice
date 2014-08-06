@@ -4,17 +4,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.AccountDAO;
+import org.jbei.ice.lib.dao.hibernate.MessageDAO;
+import org.jbei.ice.lib.dto.group.UserGroup;
+import org.jbei.ice.lib.dto.message.MessageInfo;
+import org.jbei.ice.lib.dto.message.MessageList;
 import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.shared.dto.group.UserGroup;
-import org.jbei.ice.lib.shared.dto.message.MessageInfo;
-import org.jbei.ice.lib.shared.dto.message.MessageList;
-import org.jbei.ice.lib.shared.dto.user.AccountType;
-import org.jbei.ice.lib.shared.dto.user.User;
 
 /**
  * @author Hector Plahar
@@ -22,9 +24,11 @@ import org.jbei.ice.lib.shared.dto.user.User;
 public class MessageController {
 
     private final MessageDAO dao;
+    private final AccountDAO accountDAO;
 
     public MessageController() {
-        dao = new MessageDAO();
+        dao = DAOFactory.getMessageDAO();
+        accountDAO = DAOFactory.getAccountDAO();
     }
 
     /**
@@ -68,8 +72,8 @@ public class MessageController {
         message.setTitle(info.getTitle());
 
         if (info.getAccounts() != null) {
-            for (User user : info.getAccounts()) {
-                Account account = ControllerFactory.getAccountController().getByEmail(user.getEmail());
+            for (AccountTransfer accountTransfer : info.getAccounts()) {
+                Account account = accountDAO.getByEmail(accountTransfer.getEmail());
                 if (account == null) {
                     success = false;
                     continue;
@@ -80,7 +84,7 @@ public class MessageController {
 
         if (info.getUserGroups() != null) {
             for (UserGroup userGroup : info.getUserGroups()) {
-                Group group = ControllerFactory.getGroupController().getGroupById(userGroup.getId());
+                Group group = DAOFactory.getGroupDAO().get(userGroup.getId());
                 if (group == null) {
                     Logger.warn("Could not retrieve group with id " + userGroup.getId() + " to send message");
                     success = false;
@@ -95,44 +99,40 @@ public class MessageController {
             return false;
 
         try {
-            dao.save(message);
+            dao.create(message);
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
         return success;
     }
 
-    public MessageList retrieveMessages(Account requester, Account owner, int start, int count)
-            throws ControllerException {
-        Logger.info(requester.getEmail() + ": retrieving messages for " + owner.getEmail());
-        if (!owner.equals(requester) && requester.getType() != AccountType.ADMIN) {
+    public MessageList retrieveMessages(String requester, String owner, int start, int count) {
+        Account requesterAccount = DAOFactory.getAccountDAO().getByEmail(requester);
+        Account account = DAOFactory.getAccountDAO().getByEmail(owner);
+
+        if (!account.equals(requesterAccount) && requesterAccount.getType() != AccountType.ADMIN) {
             Logger.error("Cannot retrieve messages for another user if non an admin");
-            throw new ControllerException("Cannot retrieve messages for another user if non an admin");
+            return null;
         }
 
-        try {
-            List<Message> results = new ArrayList<>(dao.retrieveMessages(owner, start, count));
-            ArrayList<MessageInfo> messages = new ArrayList<>();
-            for (Message message : results) {
-                Account from = ControllerFactory.getAccountController().getByEmail(message.getFromEmail());
-                if (from == null)
-                    continue;
+        List<Message> results = new ArrayList<>(dao.retrieveMessages(account, start, count));
+        ArrayList<MessageInfo> messages = new ArrayList<>();
+        for (Message message : results) {
+            Account from = accountDAO.getByEmail(message.getFromEmail());
+            if (from == null)
+                continue;
 
-                MessageInfo info = Message.toDTO(message);
-                info.setFrom(from.getFullName());
-                messages.add(info);
-            }
-            MessageList messageList = new MessageList();
-            messageList.setList(messages);
-            int totalSize = dao.retrieveMessageCount(owner);
-            messageList.setTotalSize(totalSize);
-            messageList.setStart(start);
-            messageList.setCount(count);
-            return messageList;
-        } catch (DAOException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
+            MessageInfo info = message.toDataTransferObject();
+            info.setFrom(from.getFullName());
+            messages.add(info);
         }
+        MessageList messageList = new MessageList();
+        messageList.setList(messages);
+        int totalSize = dao.retrieveMessageCount(account);
+        messageList.setTotalSize(totalSize);
+        messageList.setStart(start);
+        messageList.setCount(count);
+        return messageList;
     }
 
     public int getNewMessageCount(Account account) throws ControllerException {

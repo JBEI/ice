@@ -5,7 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dto.StorageInfo;
 
 /**
  * Store sample storage location information as well as the hierarchical structure information.
@@ -59,7 +60,7 @@ import org.jbei.ice.lib.dao.IModel;
 @Entity
 @Table(name = "storage")
 @SequenceGenerator(name = "sequence", sequenceName = "storage_id_seq", allocationSize = 1)
-public class Storage implements IModel {
+public class Storage implements IDataModel {
 
     private static final long serialVersionUID = 1L;
 
@@ -193,6 +194,15 @@ public class Storage implements IModel {
 
     public ArrayList<Storage> getSchemes() {
         return schemes;
+    }
+
+    @Override
+    public StorageInfo toDataTransferObject() {
+        StorageInfo info = new StorageInfo();
+        info.setDisplay(getIndex());
+        info.setId(getId());
+        info.setType(getStorageType().name());
+        return info;
     }
 
     @Override

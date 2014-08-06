@@ -2,7 +2,8 @@ package org.jbei.ice.lib.account;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.dao.hibernate.AccountDAO;
+import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -16,13 +17,13 @@ public class AccountDAOTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        HibernateHelper.initializeMock();
+        HibernateUtil.initializeMock();
     }
 
     @Before
     public void setUp() {
         dao = new AccountDAO();
-        HibernateHelper.beginTransaction();
+        HibernateUtil.beginTransaction();
     }
 
     @Test
@@ -37,7 +38,7 @@ public class AccountDAOTest {
         account.setDescription("");
         account.setIp("127.0.0.1");
         account.setPassword("40ntH@cKm3br0");
-        Account saved = dao.save(account);
+        Account saved = dao.create(account);
         Assert.assertNotNull(saved);
         Account ret = dao.get(saved.getId());
         Assert.assertTrue(saved.getEmail().equals(ret.getEmail()));
@@ -45,6 +46,6 @@ public class AccountDAOTest {
 
     @After
     public void tearDown() {
-        HibernateHelper.commitTransaction();
+        HibernateUtil.commitTransaction();
     }
 }

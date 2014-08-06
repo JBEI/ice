@@ -8,9 +8,9 @@ import java.util.Map;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
-import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
-import org.jbei.ice.lib.shared.dto.search.SearchBoostField;
-import org.jbei.ice.lib.shared.dto.user.PreferenceKey;
+import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
+import org.jbei.ice.lib.dto.search.SearchBoostField;
+import org.jbei.ice.lib.dto.user.PreferenceKey;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -26,14 +26,14 @@ public class PreferencesControllerTest {
 
     @Before
     public void setUp() throws Exception {
-        HibernateHelper.initializeMock();
-        HibernateHelper.beginTransaction();
+        HibernateUtil.initializeMock();
+        HibernateUtil.beginTransaction();
         controller = new PreferencesController();
     }
 
     @After
     public void tearDown() throws Exception {
-        HibernateHelper.commitTransaction();
+        HibernateUtil.commitTransaction();
     }
 
     @Test
@@ -70,9 +70,9 @@ public class PreferencesControllerTest {
         Account account = AccountCreator.createTestAccount("testRetrievePreference", false);
         Assert.assertNotNull(controller.createPreference(account, PreferenceKey.FUNDING_SOURCE.name(),
                                                          "Joint BioEnergy Institute"));
-        Preference preference = controller.retrievePreference(account, PreferenceKey.FUNDING_SOURCE.name(),
-                                                              "Joint BioEnergy Institute");
+        String preference = controller.getPreferenceValue(account.getEmail(), PreferenceKey.FUNDING_SOURCE.name());
         Assert.assertNotNull(preference);
+        Assert.assertEquals(preference, "Joint BioEnergy Institute");
     }
 
     @Test

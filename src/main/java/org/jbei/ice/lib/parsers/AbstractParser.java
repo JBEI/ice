@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.DNASequence;
 
 import org.apache.commons.io.IOUtils;
 
@@ -16,13 +16,13 @@ import org.apache.commons.io.IOUtils;
 public abstract class AbstractParser implements IDNAParser {
 
     @Override
-    public abstract IDNASequence parse(String textSequence) throws InvalidFormatParserException;
+    public abstract DNASequence parse(String textSequence) throws InvalidFormatParserException;
 
     @Override
-    public abstract IDNASequence parse(byte[] bytes) throws InvalidFormatParserException;
+    public abstract DNASequence parse(byte[] bytes) throws InvalidFormatParserException;
 
     @Override
-    public IDNASequence parse(File file) throws IOException, InvalidFormatParserException {
+    public DNASequence parse(File file) throws IOException, InvalidFormatParserException {
         byte[] bytes = IOUtils.toByteArray(new FileInputStream(file));
         return parse(bytes);
     }

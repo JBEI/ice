@@ -5,12 +5,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.parsers.sbol.ICESBOLParserVisitor;
-import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.DNASequence;
 
 import org.sbolstandard.core.SBOLDocument;
 import org.sbolstandard.core.SBOLFactory;
@@ -24,29 +22,26 @@ import org.sbolstandard.core.SBOLRootObject;
 public class BulkFileSBOLUpload {
 
     private final Path filePath;
-    private final EntryAddType addType;
+    private final EntryType addType;
     private final String userId;
 
-    public BulkFileSBOLUpload(String userId, Path path, EntryAddType addType) {
+    public BulkFileSBOLUpload(String userId, Path path, EntryType addType) {
         this.userId = userId;
         this.filePath = path;
         this.addType = addType;
     }
 
     public long processUpload() throws IOException {
-        if (addType == EntryAddType.STRAIN_WITH_PLASMID)
-            throw new IOException("No support for SBOL strain with plasmid upload");
-
-        BulkUploadController controller = ControllerFactory.getBulkUploadController();
+        BulkUploadController controller = new BulkUploadController();
         long bulkUploadId = 0;
 
         SBOLDocument document = SBOLFactory.read(new FileInputStream(filePath.toFile()));
         try {
             // walk top level object
             for (SBOLRootObject rootObject : document.getContents()) {
-                ICESBOLParserVisitor visitor = new ICESBOLParserVisitor(EntryAddType.addTypeToType(addType));
+                ICESBOLParserVisitor visitor = new ICESBOLParserVisitor(addType);
                 rootObject.accept(visitor);
-                IDNASequence sequence = visitor.getFeaturedDNASequence();
+                DNASequence sequence = visitor.getFeaturedDNASequence();
                 BulkUploadAutoUpdate update = visitor.getUpdate();
                 update.setBulkUploadId(bulkUploadId);
                 Logger.info(userId + ": " + update.toString());

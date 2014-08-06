@@ -4,18 +4,19 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.EntryDAO;
+import org.jbei.ice.lib.dao.hibernate.RequestDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.sample.SampleRequest;
+import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
+import org.jbei.ice.lib.dto.sample.SampleRequestType;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Request;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
-import org.jbei.ice.lib.shared.dto.sample.SampleRequest;
-import org.jbei.ice.lib.shared.dto.sample.SampleRequestStatus;
-import org.jbei.ice.lib.shared.dto.sample.SampleRequestType;
-import org.jbei.ice.lib.shared.dto.user.AccountType;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -27,9 +28,26 @@ import org.jbei.ice.lib.utils.Utils;
 public class SampleRequests {
 
     private final RequestDAO dao;
+    private final EntryDAO entryDAO;
 
     public SampleRequests() {
-        this.dao = new RequestDAO();
+        this.dao = DAOFactory.getRequestDAO();
+        this.entryDAO = DAOFactory.getEntryDAO();
+    }
+
+    public ArrayList<SampleRequest> getUserRequestedSamples(String userId, int offset, int limit) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        if (account == null)
+            return null;
+
+        List<Request> requests = dao.getAccountRequestList(account, offset, limit, "requested", true);
+        if (requests == null)
+            return null;
+
+        ArrayList<SampleRequest> result = new ArrayList<>();
+        for (Request request : requests)
+            result.add(request.toDataTransferObject());
+        return result;
     }
 
     /**
@@ -41,13 +59,7 @@ public class SampleRequests {
      * @param type    type of sample request
      */
     public SampleRequest placeSampleInCart(Account account, long entryID, SampleRequestType type) {
-        Entry entry;
-        try {
-            entry = ControllerFactory.getEntryController().get(account, entryID);
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
+        Entry entry = entryDAO.get(entryID);
 
         if (entry == null)
             throw new IllegalArgumentException("Cannot find entry with id: " + entryID);
@@ -65,8 +77,8 @@ public class SampleRequests {
             request.setRequested(new Date(System.currentTimeMillis()));
             request.setUpdated(request.getRequested());
 
-            request = dao.save(request);
-            return Request.toDTO(request);
+            request = dao.create(request);
+            return request.toDataTransferObject();
         } catch (DAOException e) {
             Logger.error(e);
         }
@@ -84,14 +96,15 @@ public class SampleRequests {
 
             ArrayList<SampleRequest> requests = new ArrayList<>();
             for (Request request : requestList)
-                requests.add(Request.toDTO(request));
+                requests.add(request.toDataTransferObject());
             return requests;
         } catch (DAOException e) {
             return null;
         }
     }
 
-    public ArrayList<SampleRequest> getPendingRequests(Account account) {
+    public ArrayList<SampleRequest> getPendingRequests(String userId) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         List<Request> requests;
         try {
             if (account.getType() == AccountType.ADMIN) {
@@ -104,7 +117,7 @@ public class SampleRequests {
 
         ArrayList<SampleRequest> results = new ArrayList<>();
         for (Request request : requests) {
-            results.add(Request.toDTO(request));
+            results.add(request.toDataTransferObject());
         }
         return results;
     }
@@ -113,13 +126,7 @@ public class SampleRequests {
         if (account == null)
             return null;
 
-        Entry entry;
-        try {
-            entry = ControllerFactory.getEntryController().get(account, entryId);
-        } catch (ControllerException e) {
-            Logger.error(e);
-            return null;
-        }
+        Entry entry = entryDAO.get(entryId);
 
         if (entry == null)
             throw new IllegalArgumentException("Cannot find entry with id: " + entryId);
@@ -129,9 +136,10 @@ public class SampleRequests {
             if (request == null)
                 return null;
 
+            Logger.info(account.getEmail() + ": Removing sample from cart for entry " + entryId);
             dao.delete(request);
 
-            return Request.toDTO(request);
+            return request.toDataTransferObject();
         } catch (DAOException de) {
             Logger.error(de);
             return null;
@@ -153,7 +161,7 @@ public class SampleRequests {
 
             existing.setStatus(request.getStatus());
             existing = dao.update(existing);
-            return Request.toDTO(existing);
+            return existing.toDataTransferObject();
         } catch (DAOException de) {
             return null;
         }
@@ -179,7 +187,7 @@ public class SampleRequests {
             String email = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
             if (email != null && !email.isEmpty()) {
                 String subject = "Sample request";
-                String body = "A sample request has been received from" + account.getFullName() + " for "
+                String body = "A sample request has been received from " + account.getFullName() + " for "
                         + requests.size() + " samples.\n\n";
                 body += "Please go to the following link to review pending requests.\n\n";
                 body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/#page=admin;id=sample_requests";

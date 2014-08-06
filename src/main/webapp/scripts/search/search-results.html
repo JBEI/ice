@@ -1,0 +1,185 @@
+<div class="container-fluid">
+    <div class="row entry_general_header_td">
+
+        <div class="col-md-12">
+            <h4>
+                <strong style="color: #888;">
+                    <i class="fa fa-fw fa-search" style="color: #444"></i> LOCAL RESULTS
+                </strong>
+                <img ng-if="loadingSearchResults" src="/img/loader-mini.gif">
+
+                <small class="edit_icon font-70em pad_left" ng-click="searchWebOfRegistries()">
+                    <i style="color: #555" class="fa fa-globe"></i> Search other registries
+                </small>
+            </h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <table cellspacing="0" class="data_table" ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
+               ng-class="{'opacity_4':loadingSearchResults}">
+            <tr data-ng-show="searchResults.results.length>0">
+                <th style="width: 12px">
+                    <input type="checkbox" ng-model="allSelected"/>
+                    <sup style="font-size: 9px; font-weight: normal"
+                         ng-show="selection.length>0">{{selection.length}}</sup>
+                </th>
+                <th style="width: 90px">Type</th>
+                <th style="width: 90px">Part ID</th>
+                <th style=" width: 150px">Name</th>
+                <th style="width: 400px">Summary</th>
+                <th style=" width: 200px">Alignment</th>
+                <th style="width: 50px">E-Value</th>
+                <!--<th style="width: 160px">Hits Alignment</th>-->
+            </tr>
+
+            <tr data-ng-show='!searchResults'>
+                <td colspan="11"><i class="fa fa-gear fa-spin"></i> Loading...</td>
+            </tr>
+            <tr data-ng-show="searchResults.results.length == 0">
+                <td colspan="11">No results found for your query</td>
+            </tr>
+            <tr data-ng-repeat-start="result in searchResults.results">
+                <td>
+                    <input type="checkbox" ng-click="select(result.entryInfo)"/>
+                    <!--<i class="fa fa-fw"-->
+                    <!--ng-class="checkSelectionStyle($index)"-->
+                    <!--ng-click="setSelected($index, 1)" style="color: #999; font-size: 14px;"></i>-->
+                </td>
+                <td>{{result.entryInfo.type | capitalize}}</td>
+                <td><a ng-href='/entry/{{result.entryInfo.id}}'
+                       popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
+                       popover-template="/views/template.html"
+                       popover-title="{{result.entryInfo.partId}}"
+                       popover-placement="right">{{result.entryInfo.partId}}</a>
+                </td>
+                <td>{{result.entryInfo.name}}</td>
+                <td title="{{result.entryInfo.shortDescription}}">
+                    <div style="width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
+                        {{result.entryInfo.shortDescription}}
+                    </div>
+                </td>
+                <td>
+                    <div style="width:200px;">{{result.alignment}}</div>
+                </td>
+                <td>{{result.eValue}}</td>
+                <!--<td class="cursor_pointer" ng-click="showDetails=!showDetails">-->
+                <!--<table cellpadding=0 cellspacing=0 ng-init="stripes=alignmentGraph(result)">-->
+                <!--<tr>-->
+                <!--<td ng-repeat="stripe in stripes">-->
+                <!--<hr ng-style="{ 'width': stripe + 'px' }"-->
+                <!--style="background-color: #ffff00; border: 0; height: 10px">-->
+                <!--</td>-->
+                <!--</tr>-->
+                <!--</table>-->
+                <!--</td>-->
+            </tr>
+            <tr data-ng-repeat-end ng-if="showDetails">
+                <td colspan="8">
+                    <pre>{{result.matchDetails | json}}</pre>
+                </td>
+            </tr>
+        </table>
+
+        <table cellspacing="0" class="data_table"
+               ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
+               ng-class="{'opacity_4':loadingSearchResults}">
+            <tr ng-show="searchResults.results.length>0">
+                <th style=" width:28px">
+                    <input type="checkbox" ng-model="allSelected"/>
+                    <sup style="font-size: 9px; font-weight: normal"
+                         ng-show="selection.length>0">{{selection.length}}</sup>
+                </th>
+                <th style="">
+                    Relevance
+                </th>
+                <th style="">
+                    Type
+                </th>
+                <th style=" width: 110px">
+                    Part ID
+                </th>
+                <th style=" width:230px">
+                    Name
+                </th>
+                <th style="">
+                    Summary
+                </th>
+                <th style=" width:230px">
+                    Owner
+                </th>
+                <th style=" width:10px">
+                    <i class="fa fa-paperclip fa-fw" style="font-size: 14px; "></i></th>
+                <th style=" width:10px">
+                    <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
+                </th>
+                <th style=" width:10px">
+                    <img src="img/dna.png" width="10px" alt="has dna"/></th>
+                <th style="width:160px; white-space:nowrap">
+                    Created
+                </th>
+            </tr>
+
+            <tr data-ng-show='!searchResults'>
+                <td colspan="11"><img src="/img/loader-mini.gif"> Loading...</td>
+            </tr>
+            <tr data-ng-show="searchResults.results.length == 0">
+                <td colspan="11">No results found for your query</td>
+            </tr>
+            <tr data-ng-repeat="result in searchResults.results">
+                <td width="10px">
+                    <input type="checkbox" ng-click="select(result.entryInfo)"/>
+                    <!--<i class="fa fa-fw"-->
+                    <!--ng-class="checkSelectionStyle($index)"-->
+                    <!--ng-click="setSelected($index, 1)" style="color: #999; font-size: 14px;"></i>-->
+                </td>
+                <td ng-init="val=result.score/result.maxScore*100">
+                    <progressbar animate='false' value='val' type='{{getType(val)}}'
+                                 style="margin-bottom: 0"></progressbar>
+                </td>
+                <td>{{result.entryInfo.type | capitalize}}</td>
+                <td><a ng-href='/entry/{{result.entryInfo.id}}' class="cell_mouseover form-group"
+                       popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
+                       popover-template="/views/template.html" popover-title="{{entry.partId}}"
+                       popover-placement="right">{{result.entryInfo.partId}}</a>
+                </td>
+                <td>
+                    <div title="{{result.entryInfo.name}}" class="ellipsis" style="width: 150px">
+                        {{result.entryInfo.name}}
+                    </div>
+                </td>
+                <td>
+                    <div title="{{result.entryInfo.shortDescription}}"
+                         style="width: 400px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        {{result.entryInfo.shortDescription}}
+                    </div>
+                </td>
+                <td>
+                    <div style="width:150px"><a
+                            ng-href="/profile/{{result.entryInfo.ownerId}}">{{result.entryInfo.owner}}</a>
+                    </div>
+                </td>
+                <td><i ng-show="{{result.entryInfo.hasAttachment}}" class="fa fa-paperclip fa-fw"
+                       style="color: #555; font-size: 14px;"></i></td>
+                <td><i ng-show="{{result.entryInfo.hasSample}}" class="fa fa-flask fa-fw"
+                       style="color: #555; font-size: 14px;"></i></td>
+                <td><img ng-show="{{result.entryInfo.hasSequence}}" src="img/dna.png" width="10px"/></td>
+                <td style="width:160px; white-space:nowrap">{{result.entryInfo.creationTime | date:'MMM d, yyyy'}}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="row" data-ng-if='searchResults && searchResults.results.length > 0'>
+        <div class="col-md-5" style="padding-left: 0">
+            <pagination total-items="searchResults.resultCount" on-select-page="setSearchResultPage(page)"
+                        page="currentPage" max-size="maxSize"
+                        class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+        </div>
+        <div class="col-md-7" style="margin: 22px 0;">
+            <strong class="small">
+                <i ng-show="loadingSearchResults" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
+                searchResults.resultCount)}}</strong>
+        </div>
+
+    </div>
+</div>

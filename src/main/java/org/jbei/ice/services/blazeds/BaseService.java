@@ -1,9 +1,9 @@
 package org.jbei.ice.services.blazeds;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.logging.Logger;
+import org.jbei.ice.lib.common.logging.Logger;
 
 /**
  * Base service for BlazeDS.
@@ -17,14 +17,8 @@ public class BaseService {
     }
 
     protected Account getAccountBySessionId(String sessionId) {
-        Account account;
-
-        try {
-            account = ControllerFactory.getAccountController().getAccountBySessionKey(sessionId);
-        } catch (ControllerException e) {
-            Logger.error("Failed to get account by sessionId: " + sessionId, e);
-            return null;
-        }
+        String userId = SessionHandler.getUserIdBySession(sessionId);
+        Account account = new AccountController().getByEmail(userId);
 
         if (account == null) {
             Logger.warn(getServiceName() + "User by sessionId doesn't exist: " + sessionId);

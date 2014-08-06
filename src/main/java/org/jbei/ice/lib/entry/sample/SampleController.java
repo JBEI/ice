@@ -1,22 +1,26 @@
 package org.jbei.ice.lib.entry.sample;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
-import org.jbei.ice.client.entry.display.model.SampleStorage;
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.SampleDAO;
+import org.jbei.ice.lib.dto.StorageInfo;
+import org.jbei.ice.lib.dto.sample.PartSample;
+import org.jbei.ice.lib.dto.sample.Plate96Sample;
+import org.jbei.ice.lib.dto.sample.SampleType;
+import org.jbei.ice.lib.dto.sample.ShelfSample;
+import org.jbei.ice.lib.entry.EntryAuthorization;
+import org.jbei.ice.lib.entry.EntryEditor;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Sample;
-import org.jbei.ice.lib.logging.Logger;
 import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.shared.dto.PartSample;
-import org.jbei.ice.lib.shared.dto.StorageInfo;
 
 /**
  * ABI to manipulate {@link Sample}s.
@@ -27,27 +31,12 @@ public class SampleController {
 
     private final SampleDAO dao;
     private final StorageController storageController;
+    private final EntryAuthorization entryAuthorization;
 
     public SampleController() {
-        dao = new SampleDAO();
-        storageController = ControllerFactory.getStorageController();
-    }
-
-    /**
-     * Checks if the user has write permission of the {@link Sample}. This is based on the entry that is
-     * associated with the sample
-     *
-     * @param account Account of user
-     * @param sample  sample being checked
-     * @return True if user has write permission.
-     * @throws ControllerException
-     */
-    public boolean hasWritePermission(Account account, Sample sample) throws ControllerException {
-        if (sample == null || sample.getEntry() == null) {
-            throw new ControllerException("Failed to check write permissions for null sample!");
-        }
-
-        return ControllerFactory.getPermissionController().hasWritePermission(account, sample.getEntry());
+        dao = DAOFactory.getSampleDAO();
+        storageController = new StorageController();
+        entryAuthorization = new EntryAuthorization();
     }
 
     /**
@@ -55,19 +44,10 @@ public class SampleController {
      *
      * @param sample
      * @return Saved sample.
-     * @throws ControllerException
-     * @throws PermissionException
      */
-    public Sample saveSample(Account account, Sample sample) throws ControllerException, PermissionException {
-        if (!hasWritePermission(account, sample)) {
-            throw new PermissionException("No permissions to save sample!");
-        }
-
-        try {
-            return dao.save(sample);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+    public Sample saveSample(Account account, Sample sample) {
+        entryAuthorization.expectWrite(account.getEmail(), sample.getEntry());
+        return dao.create(sample);
     }
 
     /**
@@ -79,9 +59,7 @@ public class SampleController {
      * @throws PermissionException
      */
     public void deleteSample(Account account, Sample sample) throws ControllerException, PermissionException {
-        if (!hasWritePermission(account, sample)) {
-            throw new PermissionException("No permissions to delete sample!");
-        }
+        entryAuthorization.expectWrite(account.getEmail(), sample.getEntry());
 
         try {
             Storage storage = sample.getStorage();
@@ -99,17 +77,9 @@ public class SampleController {
      *
      * @param entry
      * @return ArrayList of {@link Sample}s.
-     * @throws ControllerException
      */
-    public ArrayList<Sample> getSamples(Entry entry) throws ControllerException {
-        ArrayList<Sample> samples;
-        try {
-            samples = new ArrayList<>(dao.getSamplesByEntry(entry));
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        return samples;
+    public ArrayList<Sample> getSamples(Entry entry) {
+        return dao.getSamplesByEntry(entry);
     }
 
     /**
@@ -127,32 +97,17 @@ public class SampleController {
         }
     }
 
-    public Sample getSampleById(long id) throws ControllerException {
-        try {
-            return dao.get(id);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    public boolean hasSample(Entry entry) throws ControllerException {
-        try {
-            return dao.hasSample(entry);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+    public boolean hasSample(Entry entry) {
+        return dao.hasSample(entry);
     }
 
     // mainly used by the api to create a strain sample record
     public Sample createStrainSample(Account account, String recordId, String rack, String location, String barcode,
             String label, String strainNamePrefix) throws ControllerException {
-        //check for administrative privileges
-        if (!ControllerFactory.getAccountController().isAdministrator(account)) {
-            throw new ControllerException("Must be an administrator to perform this action");
-        }
+        entryAuthorization.expectAdmin(account.getEmail());
 
         // check if there is an existing sample with barcode
-        SampleController sampleController = ControllerFactory.getSampleController();
+        SampleController sampleController = new SampleController();
         Storage existing = storageController.retrieveStorageTube(barcode.trim());
         if (existing != null) {
             ArrayList<Sample> samples = sampleController.getSamplesByStorage(existing);
@@ -164,14 +119,9 @@ public class SampleController {
 
         // retrieve entry for record id
         Entry entry;
-        EntryController entryController = ControllerFactory.getEntryController();
-        try {
-            entry = entryController.getByRecordId(account, recordId);
-            if (entry == null)
-                throw new ControllerException("Could not locate entry to associate sample with");
-        } catch (PermissionException e) {
-            throw new ControllerException(e);
-        }
+        entry = DAOFactory.getEntryDAO().getByRecordId(recordId);
+        if (entry == null)
+            throw new ControllerException("Could not locate entry to associate sample with");
 
         Logger.info("Creating new strain sample [" + rack + ", " + location + ", " + barcode + ", " + label
                             + "] for entry \"" + entry.getId());
@@ -197,98 +147,180 @@ public class SampleController {
         Sample sample = SampleCreator.createSampleObject(label, account.getEmail(), "");
         sample.setEntry(entry);
         sample.setStorage(newLocation);
-        try {
-            sample = saveSample(account, sample);
-            String name = entry.getName();
-            if (strainNamePrefix != null && name != null && !name.startsWith(strainNamePrefix)) {
-                entryController.updateWithNextStrainName(strainNamePrefix, entry);
-            }
-        } catch (PermissionException e) {
-            throw new ControllerException(e);
+        sample = saveSample(account, sample);
+        String name = entry.getName();
+        if (strainNamePrefix != null && name != null && !name.startsWith(strainNamePrefix)) {
+            new EntryEditor().updateWithNextStrainName(strainNamePrefix, entry);
         }
         return sample;
     }
 
-    public SampleStorage createSample(Account account, long entryId, SampleStorage sampleStorage) {
-        EntryController controller = ControllerFactory.getEntryController();
-        StorageController storageController = ControllerFactory.getStorageController();
+//    public SampleStorage createSample(Account account, long entryId, SampleStorage sampleStorage) {
+//        StorageController storageController = new StorageController();
+//
+//        Entry entry = DAOFactory.getEntryDAO().get(entryId);
+//        if (entry == null) {
+//            Logger.error("Could not retrieve entry with id " + entryId + ". Skipping sample creation");
+//            return null;
+//        }
+//
+//        entryAuthorization.expectWrite(account.getEmail(), entry);
+//
+//        PartSample partSample = sampleStorage.getPartSample();
+//        LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
+//
+//        Sample sample = SampleCreator.createSampleObject(partSample.getLabel(), account.getEmail(),
+//                                                         partSample.getNotes());
+//        sample.setEntry(entry);
+//
+//        if (locations == null || locations.isEmpty()) {
+//            Logger.info("Creating sample without location");
+//
+//            // create sample, but not location
+//            sample = dao.create(sample);
+//            sampleStorage.getPartSample().setSampleId(sample.getId() + "");
+//            sampleStorage.getPartSample().setDepositor(account.getEmail());
+//            return sampleStorage;
+//        }
+//
+//        // create sample and location
+//        String[] labels = new String[locations.size()];
+//        StringBuilder sb = new StringBuilder();
+//        for (int i = 0; i < labels.length; i++) {
+//            labels[i] = locations.get(i).getDisplay();
+//            sb.append(labels[i]);
+//            if (i - 1 < labels.length)
+//                sb.append("/");
+//        }
+//
+//        Logger.info("Creating sample with locations " + sb.toString());
+//        try {
+//            Storage scheme = storageController.get(Long.parseLong(partSample.getLocationId()), false);
+//            Storage storage = storageController.getLocation(scheme, labels);
+//            storage = storageController.update(storage);
+//            sample.setStorage(storage);
+//            sample = dao.create(sample);
+//            sampleStorage.getStorageList().clear();
+//
+//            List<Storage> storages = StorageDAO.getStoragesUptoScheme(storage);
+//            if (storages != null) {
+//                for (Storage storage1 : storages) {
+//                    StorageInfo info = new StorageInfo();
+//                    info.setDisplay(storage1.getIndex());
+//                    info.setId(storage1.getId());
+//                    info.setType(storage1.getStorageType().name());
+//                    sampleStorage.getStorageList().add(info);
+//                }
+//            }
+//
+//            sampleStorage.getPartSample().setSampleId(sample.getId() + "");
+//            sampleStorage.getPartSample().setDepositor(account.getEmail());
+//            return sampleStorage;
+//        } catch (NumberFormatException | DAOException | ControllerException e) {
+//            Logger.error(e);
+//        }
+//
+//        return null;
+//    }
 
-        Entry entry;
-        try {
-            entry = controller.get(account, entryId);
-            if (entry == null) {
-                Logger.error("Could not retrieve entry with id " + entryId + ". Skipping sample creation");
-                return null;
-            }
-
-            if (!ControllerFactory.getPermissionController().hasWritePermission(account, entry)) {
-                Logger.error(account.getEmail() + ": no write permissions to create sample for " + entryId);
-                return null;
-            }
-        } catch (ControllerException e) {
-            Logger.error(e);
+    public ArrayList<PartSample> retrieveEntrySamples(String userId, long entryId) {
+        Entry entry = DAOFactory.getEntryDAO().get(entryId);
+        if (entry == null)
             return null;
-        }
 
-        PartSample partSample = sampleStorage.getPartSample();
-        LinkedList<StorageInfo> locations = sampleStorage.getStorageList();
+        entryAuthorization.expectRead(userId, entry);
 
-        Sample sample = SampleCreator.createSampleObject(partSample.getLabel(), account.getEmail(),
-                                                         partSample.getNotes());
-        sample.setEntry(entry);
+        // samples
+        ArrayList<Sample> entrySamples = new SampleController().getSamples(entry);
+        ArrayList<PartSample> samples = new ArrayList<>();
+        if (entrySamples == null)
+            return samples;
 
-        if (locations == null || locations.isEmpty()) {
-            Logger.info("Creating sample without location");
+        for (Sample sample : entrySamples) {
+            // convert sample to info
+            Storage storage = sample.getStorage();
+            SampleType type = null;
+            StorageInfo well = null;
+            StorageInfo tube = null;
+            StorageInfo box = null;
+            StorageInfo main = null;
 
-            // create sample, but not location
-            try {
-                sample = dao.save(sample);
-                sampleStorage.getPartSample().setSampleId(sample.getId() + "");
-                sampleStorage.getPartSample().setDepositor(account.getEmail());
-                return sampleStorage;
-            } catch (DAOException e) {
-                Logger.error(e);
-            }
-            return null;
-        }
+            // get the top level type
+            while (storage != null) {
+                switch (storage.getStorageType()) {
+                    case TUBE:
+                        tube = storage.toDataTransferObject();
+                        break;
 
-        // create sample and location
-        String[] labels = new String[locations.size()];
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < labels.length; i++) {
-            labels[i] = locations.get(i).getDisplay();
-            sb.append(labels[i]);
-            if (i - 1 < labels.length)
-                sb.append("/");
-        }
+                    case WELL:
+                        well = storage.toDataTransferObject();
+                        break;
 
-        Logger.info("Creating sample with locations " + sb.toString());
-        try {
-            Storage scheme = storageController.get(Long.parseLong(partSample.getLocationId()), false);
-            Storage storage = storageController.getLocation(scheme, labels);
-            storage = storageController.update(storage);
-            sample.setStorage(storage);
-            sample = dao.save(sample);
-            sampleStorage.getStorageList().clear();
+                    case BOX_INDEXED:
+                        box = storage.toDataTransferObject();
+                        break;
+                }
 
-            List<Storage> storages = StorageDAO.getStoragesUptoScheme(storage);
-            if (storages != null) {
-                for (Storage storage1 : storages) {
-                    StorageInfo info = new StorageInfo();
-                    info.setDisplay(storage1.getIndex());
-                    info.setId(storage1.getId());
-                    info.setType(storage1.getStorageType().name());
-                    sampleStorage.getStorageList().add(info);
+                storage = storage.getParent();
+                boolean isParent = (type != null && type.isTopLevel());
+
+                if (!isParent && storage.getStorageType() != Storage.StorageType.SCHEME) {
+                    type = SampleType.toSampleType(storage.getStorageType().name());
+                    if (type.isTopLevel())
+                        main = storage.toDataTransferObject();
                 }
             }
 
-            sampleStorage.getPartSample().setSampleId(sample.getId() + "");
-            sampleStorage.getPartSample().setDepositor(account.getEmail());
-            return sampleStorage;
-        } catch (NumberFormatException | DAOException | ControllerException e) {
-            Logger.error(e);
+            // get specific sample type and details about it
+            PartSample partSample = sampleFactory(type);
+            partSample.setType(type);
+            partSample.setCreationTime(sample.getCreationTime().getTime());
+            partSample.setLabel(sample.getLabel());
+            partSample.setMain(main);
+
+            Account account = DAOFactory.getAccountDAO().getByEmail(sample.getDepositor());
+            if (account != null)
+                partSample.setDepositor(account.toDataTransferObject());
+            else {
+                AccountTransfer accountTransfer = new AccountTransfer();
+                accountTransfer.setEmail(sample.getDepositor());
+                partSample.setDepositor(accountTransfer);
+            }
+
+            partSample = setFields(box, well, tube, partSample);
+            samples.add(partSample);
         }
 
-        return null;
+        return samples;
+    }
+
+    protected static PartSample sampleFactory(SampleType type) {
+        switch (type) {
+            case PLATE96:
+            default:
+                return new Plate96Sample();
+
+            case SHELF:
+                return new ShelfSample();
+
+        }
+    }
+
+    protected static PartSample setFields(StorageInfo box, StorageInfo well, StorageInfo tube, PartSample sample) {
+        switch (sample.getType()) {
+            case PLATE96:
+            default:
+                Plate96Sample plate96Sample = (Plate96Sample) sample;
+                plate96Sample.setTube(tube);
+                plate96Sample.setWell(well);
+                return plate96Sample;
+
+            case SHELF:
+                ShelfSample shelfSample = (ShelfSample) sample;
+                shelfSample.setBox(box);
+                shelfSample.setTube(tube);
+                shelfSample.setWell(well);
+                return shelfSample;
+        }
     }
 }

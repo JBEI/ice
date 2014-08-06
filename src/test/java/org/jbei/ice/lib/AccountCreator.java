@@ -1,11 +1,13 @@
 package org.jbei.ice.lib;
 
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.shared.dto.user.AccountType;
-import org.jbei.ice.lib.shared.dto.user.User;
+import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 /**
  * Helper class for creating accounts to be used in tests
@@ -16,19 +18,22 @@ import junit.framework.Assert;
 public class AccountCreator {
 
     public static Account createTestAccount(String testName, boolean admin) throws Exception {
+        ConfigurationController configurationController = new ConfigurationController();
+        configurationController.setPropertyValue(ConfigurationKey.NEW_REGISTRATION_ALLOWED, "true");
+
         String email = testName + "@TESTER";
         AccountController accountController = new AccountController();
         Account account = accountController.getByEmail(email);
         if (account != null)
             throw new Exception("duplicate account");
 
-        User user = new User();
-        user.setFirstName("TEST_FNAME");
-        user.setLastName("TEST");
-        user.setEmail(email);
-        String pass = accountController.createNewAccount(user, false);
+        AccountTransfer accountTransfer = new AccountTransfer();
+        accountTransfer.setFirstName("TEST_FNAME");
+        accountTransfer.setLastName("TEST");
+        accountTransfer.setEmail(email);
+        accountTransfer = accountController.createNewAccount(accountTransfer, false);
 
-        Assert.assertNotNull(pass);
+        Assert.assertNotNull(accountTransfer.getPassword());
         account = accountController.getByEmail(email);
         Assert.assertNotNull(account);
 

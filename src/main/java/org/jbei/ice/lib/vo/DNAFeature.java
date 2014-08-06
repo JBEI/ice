@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.vo;
 
-import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.models.SequenceFeature;
 
 /**
@@ -12,7 +12,8 @@ import org.jbei.ice.lib.models.SequenceFeature;
  *
  * @author Zinovii Dmytriv, Timothy Ham
  */
-public class DNAFeature implements Serializable {
+public class DNAFeature implements IDataTransferModel {
+
     private static final long serialVersionUID = 1L;
 
     private String type = "";

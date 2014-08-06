@@ -2,8 +2,8 @@ package org.jbei.ice.lib.bulkupload;
 
 import java.nio.file.Path;
 
-import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryType;
 
 /**
  * Supports Arabidopsis seed bulk upload including samples for the
@@ -13,7 +13,7 @@ import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
  */
 public class SeedBulkCSVUpload extends PartBulkCSVUpload {
 
-    public SeedBulkCSVUpload(EntryAddType addType, String account, Path csvFilePath) {
+    public SeedBulkCSVUpload(EntryType addType, String account, Path csvFilePath) {
         super(addType, account, csvFilePath);
     }
 
@@ -28,14 +28,6 @@ public class SeedBulkCSVUpload extends PartBulkCSVUpload {
         headerFields.add(EntryField.PLANT_TYPE);
         headerFields.add(EntryField.SELECTION_MARKERS);
         headerFields.add(EntryField.SENT_TO_ABRC);
-
-        // default sample
-        headerFields.add(EntryField.SAMPLE_NAME);
-        headerFields.add(EntryField.SAMPLE_NOTES);
-        headerFields.add(EntryField.SAMPLE_SHELF);
-        headerFields.add(EntryField.SAMPLE_BOX);
-        headerFields.add(EntryField.SAMPLE_TUBE_NUMBER);
-        headerFields.add(EntryField.SAMPLE_TUBE_BARCODE);
     }
 
     @Override

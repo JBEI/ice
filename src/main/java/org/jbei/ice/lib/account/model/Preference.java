@@ -10,13 +10,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import org.jbei.ice.lib.dao.IModel;
-import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 
 /**
  * Entity for storing user preferences. It serves a dual role in terms of storing the default user values
  * for certain supported entry fields and also the user entered boost values for searching. The list of supported
- * fields for "boosting" can be found in {@link org.jbei.ice.lib.shared.dto.search.SearchBoostField}.
+ * fields for "boosting" can be found in {@link org.jbei.ice.lib.dto.search.SearchBoostField}.
  * <p/>
  * Boost field keys are prefixed with "BOOST_". e.g. "BOOST_PRINCIPAL_INVESTIGATOR" will be the boost key for
  * the principal investigator field while the default value key will be "PRINCIPAL_INVESTIGATOR"
@@ -26,7 +26,7 @@ import org.jbei.ice.lib.shared.dto.bulkupload.PreferenceInfo;
 @Entity
 @Table(name = "PREFERENCE")
 @SequenceGenerator(name = "sequence", sequenceName = "preferences_id_seq", allocationSize = 1)
-public class Preference implements IModel {
+public class Preference implements IDataModel {
 
     private static final long serialVersionUID = 1L;
 
@@ -85,10 +85,11 @@ public class Preference implements IModel {
         this.value = value;
     }
 
-    public static PreferenceInfo toDTO(Preference preference) {
+    @Override
+    public PreferenceInfo toDataTransferObject() {
         PreferenceInfo info = new PreferenceInfo();
-        info.setKey(preference.getKey());
-        info.setValue(preference.getValue());
+        info.setKey(getKey());
+        info.setValue(getValue());
         return info;
     }
 }

@@ -1,22 +1,21 @@
 package org.jbei.ice.lib.entry.sequence;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
@@ -28,19 +27,13 @@ import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqException;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqParser;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
-import org.jbei.ice.lib.permissions.PermissionException;
-import org.jbei.ice.lib.permissions.PermissionsController;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
-import org.jbei.ice.lib.shared.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.IDNASequence;
+import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.lib.vo.SequenceTraceFile;
-import org.jbei.ice.server.servlet.ByteHolder;
-
-import org.apache.commons.io.IOUtils;
 
 /**
  * ABI to manipulate DNA sequence trace analysis
@@ -50,13 +43,13 @@ import org.apache.commons.io.IOUtils;
 public class SequenceAnalysisController {
 
     private final TraceSequenceDAO traceDao;
-    private final PermissionsController permissionsController;
+    private final EntryAuthorization entryAuthorization;
 
     public static final String tracesDirName = "traces";
 
     public SequenceAnalysisController() {
-        traceDao = new TraceSequenceDAO();
-        permissionsController = new PermissionsController();
+        traceDao = DAOFactory.getTraceSequenceDAO();
+        entryAuthorization = new EntryAuthorization();
     }
 
     /**
@@ -75,27 +68,23 @@ public class SequenceAnalysisController {
      * @throws ControllerException
      */
     public TraceSequence importTraceSequence(Entry entry, String filename, String depositor, String sequence,
-            String uuid, Date date, InputStream inputStream) throws ControllerException {
+            String uuid, Date date, InputStream inputStream) {
         if (entry == null) {
-            throw new ControllerException("Failed to save trace sequence with null entry!");
+            throw new IllegalArgumentException("Failed to save trace sequence with null entry!");
         }
 
         if (filename == null || filename.isEmpty()) {
-            throw new ControllerException("Failed to save trace sequence without filename!");
+            throw new IllegalArgumentException("Failed to save trace sequence without filename!");
         }
 
         if (sequence == null || sequence.isEmpty()) {
-            throw new ControllerException("Failed to save trace sequence without sequence!");
+            throw new IllegalArgumentException("Failed to save trace sequence without sequence!");
         }
 
         TraceSequence traceSequence = new TraceSequence(entry, uuid, filename, depositor, sequence, date);
         File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName).toFile();
 
-        try {
-            return traceDao.create(tracesDir, traceSequence, inputStream);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        return traceDao.create(tracesDir, traceSequence, inputStream);
     }
 
     /**
@@ -109,78 +98,10 @@ public class SequenceAnalysisController {
      * @param sequence
      * @param inputStream
      * @return Saved traceSequence
-     * @throws ControllerException
      */
     public TraceSequence uploadTraceSequence(Entry entry, String filename, String depositor,
-            String sequence, InputStream inputStream) throws ControllerException {
+            String sequence, InputStream inputStream) {
         return importTraceSequence(entry, filename, depositor, sequence, Utils.generateUUID(), new Date(), inputStream);
-    }
-
-    public void uploadTraceSequenceFile(Account account, Entry entry, String uploadFileName, InputStream inputStream,
-            boolean deleteExisting) throws ControllerException {
-        if (deleteExisting)
-            deleteAllEntryTraceSequences(account, entry);
-
-        ArrayList<ByteHolder> byteHolders = new ArrayList<>();
-
-        if (uploadFileName.toLowerCase().endsWith(".zip")) {
-            try (ZipInputStream zis = new ZipInputStream(inputStream)) {
-                ZipEntry zipEntry;
-                while (true) {
-                    zipEntry = zis.getNextEntry();
-
-                    if (zipEntry != null) {
-                        if (!zipEntry.isDirectory() && !zipEntry.getName().startsWith("__MACOSX")) {
-                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                            int c;
-                            while ((c = zis.read()) != -1) {
-                                byteArrayOutputStream.write(c);
-                            }
-                            ByteHolder byteHolder = new ByteHolder();
-                            byteHolder.setBytes(byteArrayOutputStream.toByteArray());
-                            String name = zipEntry.getName();
-                            int index = zipEntry.getName().lastIndexOf("/");
-                            if (index != -1 && index < name.length())
-                                name = name.substring(index + 1);
-                            byteHolder.setName(name);
-                            byteHolders.add(byteHolder);
-                        }
-                    } else {
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                String errMsg = "Error: Could not parse zip file";
-                throw new ControllerException(errMsg);
-            }
-        } else {
-            ByteHolder byteHolder = new ByteHolder();
-            try {
-                byteHolder.setBytes(IOUtils.toByteArray(inputStream));
-            } catch (IOException ioe) {
-                throw new ControllerException("Error: " + ioe.getMessage());
-            }
-            byteHolder.setName(uploadFileName);
-            byteHolders.add(byteHolder);
-        }
-
-        String currentFileName;
-        IDNASequence dnaSequence;
-        for (ByteHolder byteHolder : byteHolders) {
-            currentFileName = byteHolder.getName();
-            dnaSequence = parse(byteHolder.getBytes());
-            if (dnaSequence == null || dnaSequence.getSequence() == null) {
-                String errMsg = "Error: Could not parse \"" + currentFileName
-                        + "\". Only Fasta, GenBank & ABI files are supported";
-                throw new ControllerException(errMsg);
-            }
-
-            uploadTraceSequence(entry, byteHolder.getName(),
-                                account.getEmail(),
-                                dnaSequence.getSequence().toLowerCase(),
-                                new ByteArrayInputStream(byteHolder.getBytes()));
-        }
-        rebuildAllAlignments(entry);
     }
 
     /**
@@ -190,23 +111,16 @@ public class SequenceAnalysisController {
      * @throws ControllerException
      * @throws PermissionException
      */
-
     public void removeTraceSequence(Account account, TraceSequence traceSequence) throws ControllerException,
             PermissionException {
         if (traceSequence == null) {
             throw new ControllerException("Failed to delete null Trace Sequence!");
         }
 
-        if (!permissionsController.hasWritePermission(account, traceSequence.getEntry())) {
-            throw new PermissionException("No permissions to delete trace sequence!");
-        }
+        entryAuthorization.expectWrite(account.getEmail(), traceSequence.getEntry());
 
-        try {
-            File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName).toFile();
-            traceDao.delete(tracesDir, traceSequence);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName).toFile();
+        traceDao.delete(tracesDir, traceSequence);
     }
 
     /**
@@ -222,66 +136,52 @@ public class SequenceAnalysisController {
         }
 
         List<TraceSequence> traces;
+        Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
 
-        SequenceController sequenceController = ControllerFactory.getSequenceController();
+        if (sequence == null) { // it will remove invalid alignments
+            rebuildAllAlignments(entry);
 
-        try {
-            Sequence sequence = sequenceController.getByEntry(entry);
+            traces = traceDao.getByEntry(entry);
+        } else {
+            traces = traceDao.getByEntry(entry);
 
-            if (sequence == null) { // it will remove invalid alignments
-                rebuildAllAlignments(entry);
-
-                traces = TraceSequenceDAO.getByEntry(entry);
-            } else {
-                traces = TraceSequenceDAO.getByEntry(entry);
-
-                boolean wasUpdated = false;
-                for (TraceSequence traceSequence : traces) {
-                    if (traceSequence.getTraceSequenceAlignment() == null
-                            || traceSequence.getTraceSequenceAlignment().getSequenceHash() == null
-                            || traceSequence.getTraceSequenceAlignment().getSequenceHash()
-                                            .isEmpty()
-                            || !traceSequence.getTraceSequenceAlignment().getSequenceHash()
-                                             .equals(sequence.getFwdHash())) {
-                        buildOrRebuildAlignment(traceSequence, sequence);
-
-                        wasUpdated = true;
-                    }
-                }
-
-                if (wasUpdated) { // fetch again because alignment has been updated
-                    traces = TraceSequenceDAO.getByEntry(entry);
+            boolean wasUpdated = false;
+            for (TraceSequence traceSequence : traces) {
+                if (traceSequence.getTraceSequenceAlignment() == null
+                        || traceSequence.getTraceSequenceAlignment().getSequenceHash() == null
+                        || traceSequence.getTraceSequenceAlignment().getSequenceHash().isEmpty()
+                        || !traceSequence.getTraceSequenceAlignment().getSequenceHash().equals(sequence.getFwdHash())) {
+                    buildOrRebuildAlignment(traceSequence, sequence);
+                    wasUpdated = true;
                 }
             }
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+
+            if (wasUpdated) { // fetch again because alignment has been updated
+                traces = traceDao.getByEntry(entry);
+            }
         }
 
         return traces;
     }
 
     public TraceSequence getTraceSequenceByFileId(String fileId) throws ControllerException {
-        try {
-            return traceDao.getByFileId(fileId);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        return traceDao.getByFileId(fileId);
     }
 
     /**
-     * Parses a given sequence file (Genbank, Fasta, ABI) and return an {@link IDNASequence}.
+     * Parses a given sequence file (Genbank, Fasta, ABI) and return an {@link DNASequence}.
      *
      * @param bytes
-     * @return Parsed Sequence as {@link IDNASequence}.
+     * @return Parsed Sequence as {@link DNASequence}.
      * @throws ControllerException
      */
-    public IDNASequence parse(byte[] bytes) throws ControllerException {
+    public DNASequence parse(byte[] bytes) {
         if (bytes.length == 0) {
             return null;
         }
 
         // Trying to parse as Fasta, Genbank, etc
-        IDNASequence dnaSequence = GeneralParser.getInstance().parse(bytes);
+        DNASequence dnaSequence = GeneralParser.getInstance().parse(bytes);
 
         if (dnaSequence == null) {
             // Trying to parse as ABI
@@ -351,11 +251,10 @@ public class SequenceAnalysisController {
      *
      * @param traceSequence traceSequence
      * @param sequence      sequence
-     * @throws ControllerException
      */
-    public void buildOrRebuildAlignment(TraceSequence traceSequence, Sequence sequence) throws ControllerException {
+    public void buildOrRebuildAlignment(TraceSequence traceSequence, Sequence sequence) {
         if (traceSequence == null) {
-            throw new ControllerException("Failed to rebuild alignment for null trace sequence!");
+            throw new IllegalArgumentException("Failed to rebuild alignment for null trace sequence!");
         }
 
         // if sequence is null => delete alignment
@@ -378,7 +277,8 @@ public class SequenceAnalysisController {
         try {
             bl2seqOutput = BlastPlus.runBlast2Seq(entrySequenceString, traceSequenceString);
         } catch (BlastException | ProgramTookTooLongException e) {
-            throw new ControllerException(e);
+            Logger.error(e);
+            return;
         }
 
         if (bl2seqOutput == null || bl2seqOutput.isEmpty()) {
@@ -454,8 +354,8 @@ public class SequenceAnalysisController {
                     traceDao.save(traceSequence);
                 }
             }
-        } catch (Bl2SeqException | DAOException e) {
-            throw new ControllerException(e);
+        } catch (Bl2SeqException e) {
+            Logger.error(e);
         }
     }
 
@@ -473,8 +373,7 @@ public class SequenceAnalysisController {
             throw new ControllerException("Failed to rebuild alignment for null entry!");
         }
 
-        SequenceController sequenceController = ControllerFactory.getSequenceController();
-        Sequence sequence = sequenceController.getByEntry(entry);
+        Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
 
         if (sequence == null) {
             return;
@@ -483,23 +382,6 @@ public class SequenceAnalysisController {
         List<TraceSequence> traceSequences = getTraceSequences(entry);
         for (TraceSequence traceSequence : traceSequences) {
             buildOrRebuildAlignment(traceSequence, sequence);
-        }
-    }
-
-    public boolean deleteAllEntryTraceSequences(Account account, Entry entry) throws ControllerException {
-        if (!permissionsController.hasWritePermission(account, entry))
-            throw new ControllerException(account.getEmail() + ": no write privileges for entry " + entry.getId());
-        try {
-            List<TraceSequence> sequences = TraceSequenceDAO.getByEntry(entry);
-            if (sequences == null || sequences.isEmpty())
-                return true;
-
-            for (TraceSequence sequence : sequences) {
-                removeTraceSequence(account, sequence);
-            }
-            return true;
-        } catch (DAOException | PermissionException de) {
-            throw new ControllerException(de);
         }
     }
 }

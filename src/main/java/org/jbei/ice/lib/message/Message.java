@@ -6,9 +6,9 @@ import java.util.Set;
 import javax.persistence.*;
 
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dto.message.MessageInfo;
 import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.shared.dto.message.MessageInfo;
 
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Analyze;
@@ -29,7 +29,7 @@ import org.hibernate.search.annotations.Store;
 @Entity
 @Table(name = "MESSAGE")
 @SequenceGenerator(name = "sequence", sequenceName = "message_id_seq", allocationSize = 1)
-public class Message implements IModel {
+public class Message implements IDataModel {
 
     private static final long serialVersionUID = 1L;
 
@@ -159,14 +159,15 @@ public class Message implements IModel {
         this.destinationGroups = destinationGroups;
     }
 
-    public static MessageInfo toDTO(Message message) {
+    @Override
+    public MessageInfo toDataTransferObject() {
         MessageInfo info = new MessageInfo();
-        info.setId(message.getId());
-        info.setFrom(message.getFromEmail());
-        info.setMessage(message.getMessage());
-        info.setTitle(message.getTitle());
-        info.setRead(message.isRead());
-        info.setSent(message.getDateSent());
+        info.setId(getId());
+        info.setFrom(getFromEmail());
+        info.setMessage(getMessage());
+        info.setTitle(getTitle());
+        info.setRead(isRead());
+        info.setSent(getDateSent());
         return info;
     }
 }

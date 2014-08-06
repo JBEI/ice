@@ -7,8 +7,8 @@ import java.util.LinkedList;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.vo.DNAFeature;
+import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
-import org.jbei.ice.lib.vo.IDNASequence;
 
 import org.biojava.bio.BioException;
 import org.biojavax.bio.seq.RichSequence;
@@ -60,7 +60,7 @@ public class FastaParser extends AbstractParser {
     }
 
     @Override
-    public IDNASequence parse(byte[] bytes) throws InvalidFormatParserException {
+    public DNASequence parse(byte[] bytes) throws InvalidFormatParserException {
         return parse(new String(bytes));
     }
 }

@@ -13,15 +13,13 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.jbei.ice.controllers.ControllerFactory;
-import org.jbei.ice.controllers.common.ControllerException;
-import org.jbei.ice.lib.logging.Logger;
-import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryType;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.cxf.helpers.IOUtils;
 
 /**
  * Bulk Upload with zip files. It is expected that the zip contains a csv
@@ -34,10 +32,10 @@ public class BulkZipUpload {
 
     private BulkCSVUpload csvUpload;
     private final Path zipFilePath;
-    private final EntryAddType addType;
+    private final EntryType addType;
     private final String userId;
 
-    public BulkZipUpload(String userId, Path path, EntryAddType addType) {
+    public BulkZipUpload(String userId, Path path, EntryType addType) {
         this.userId = userId;
         this.zipFilePath = path;
         this.addType = addType;
@@ -83,8 +81,7 @@ public class BulkZipUpload {
         if (csvFile == null)
             throw new IOException("Could not find a csv file in the zip archive");
 
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(csvFile.getBytes());
-        try {
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(csvFile.getBytes())) {
             List<BulkUploadAutoUpdate> updates = csvUpload.getBulkUploadUpdates(inputStream);
             verify(updates, files.keySet());
             // create actual registry parts
@@ -96,7 +93,7 @@ public class BulkZipUpload {
 
     protected long createRegistryParts(List<BulkUploadAutoUpdate> updates, HashMap<String, InputStream> files)
             throws ControllerException {
-        BulkUploadController controller = ControllerFactory.getBulkUploadController();
+        BulkUploadController controller = new BulkUploadController();
         long bulkUploadId = 0;
 
         for (BulkUploadAutoUpdate update : updates) {
@@ -114,31 +111,31 @@ public class BulkZipUpload {
             // create sequence or attachment if any
             for (Map.Entry<EntryField, String> entrySet : update.getKeyValue().entrySet()) {
                 EntryField field = entrySet.getKey();
-                String value = entrySet.getValue().trim();
-                if (value == null || value.isEmpty())
-                    continue;
-                InputStream stream = files.get(value);
 
-                try {
-                    // create attachment based on name
-                    if (field == EntryField.ATT_FILENAME || field == EntryField.STRAIN_ATT_FILENAME
-                            || field == EntryField.PLASMID_ATT_FILENAME) {
+                // create attachment based on name
+                if (field == EntryField.ATT_FILENAME) {
+                    String value = entrySet.getValue().trim();
+                    if (value != null && !value.isEmpty()) {
                         // create attachment
-                        boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
-                                && field == EntryField.PLASMID_SEQ_FILENAME);
-                        PartFileAdd.uploadAttachmentToEntry(entryId, userId, stream, value, isStrainWithPlasmidPlasmid);
-                    } else if (field == EntryField.SEQ_FILENAME || field == EntryField.STRAIN_SEQ_FILENAME
-                            || field == EntryField.PLASMID_SEQ_FILENAME) {
-                        // create sequence based on name
-                        boolean isStrainWithPlasmidPlasmid = (addType == EntryAddType.STRAIN_WITH_PLASMID
-                                && field == EntryField.PLASMID_SEQ_FILENAME);
-                        PartFileAdd.uploadSequenceToEntry(entryId, userId, stream, isStrainWithPlasmidPlasmid);
-                    } else if (field == EntryField.SEQ_TRACE_FILES) {
-                        // TODO : strain with plasmid upload current has no support for trace sequence upload
-                        PartFileAdd.uploadTraceSequenceToEntry(entryId, userId, value, stream, true);
+                        try (InputStream stream = files.get(value)) {
+                            PartFileAdd.uploadAttachmentToEntry(entryId, userId, stream, value, false);
+                        } catch (Exception e) {
+                            Logger.error(e);
+                        }
                     }
-                } catch (Exception e) {
-                    Logger.error(e);
+                } else {
+                    // create sequence based on name
+                    if (field == EntryField.SEQ_FILENAME) {
+                        String value = entrySet.getValue().trim();
+                        if (value != null && !value.isEmpty()) {
+                            // create sequence
+                            try (InputStream stream = files.get(value)) {
+                                PartFileAdd.uploadSequenceToEntry(entryId, userId, stream, false);
+                            } catch (Exception e) {
+                                Logger.error(e);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -150,7 +147,7 @@ public class BulkZipUpload {
 
         // for each auto update
         for (BulkUploadAutoUpdate update : updates) {
-            ArrayList<EntryField> toValidate = new ArrayList<>(csvUpload.getRequiredFields());
+            ArrayList<EntryField> toValidate = new ArrayList<EntryField>(csvUpload.getRequiredFields());
 
             // for each field in the update
             for (Map.Entry<EntryField, String> entry : update.getKeyValue().entrySet()) {
@@ -158,8 +155,7 @@ public class BulkZipUpload {
                 String value = entry.getValue().trim();
 
                 // check attachment and sequence files
-                if (entryField == EntryField.ATT_FILENAME || entryField == EntryField.SEQ_FILENAME ||
-                        entryField == EntryField.SEQ_TRACE_FILES) {
+                if (entryField == EntryField.ATT_FILENAME || entryField == EntryField.SEQ_FILENAME) {
                     if (!value.isEmpty() && !fileNames.contains(value))
                         throw new Exception("File with name \"" + value + "\" not found in the zip archive");
                 }

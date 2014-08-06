@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.jbei.ice.lib.shared.EntryAddType;
-import org.jbei.ice.lib.shared.dto.bulkupload.BulkUploadAutoUpdate;
-import org.jbei.ice.lib.shared.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryType;
 
 /**
+ * // TODO : if there should check for link
  * Helper class for dealing with bulk CSV uploads
  *
  * @author Hector Plahar
@@ -19,23 +19,23 @@ public abstract class BulkCSVUpload {
 
     protected final Path csvFilePath;
     protected final String account;
-    protected final EntryAddType addType;
+    protected final EntryType addType;
     protected final List<EntryField> headerFields;
     protected final List<EntryField> requiredFields;
 
-    public BulkCSVUpload(EntryAddType addType, String userId, Path csvFilePath) {
+    public BulkCSVUpload(EntryType addType, String userId, Path csvFilePath) {
         this.addType = addType;
         this.account = userId;
         this.csvFilePath = csvFilePath;
-        this.headerFields = new LinkedList<EntryField>();
-        this.requiredFields = new LinkedList<EntryField>();
+        this.headerFields = new LinkedList<>();
+        this.requiredFields = new LinkedList<>();
 
         populateHeaderFields();
         populateRequiredFields();
     }
 
     public List<EntryField> getRequiredFields() {
-        return new ArrayList<EntryField>(requiredFields);
+        return new ArrayList<>(requiredFields);
     }
 
     abstract String processUpload();
@@ -58,11 +58,4 @@ public abstract class BulkCSVUpload {
      * Sets the header fields that are required at a minimum for upload
      */
     abstract void populateRequiredFields();
-
-    /**
-     * Sample support. Override only if the specialized upload supports samples
-     */
-    protected void processSamples() {
-
-    }
 }

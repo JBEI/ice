@@ -10,7 +10,10 @@ import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.access.Permission;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.filter.BlastFilterFactory;
 import org.jbei.ice.lib.entry.filter.EntryHasFilterFactory;
@@ -19,8 +22,6 @@ import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.permissions.model.Permission;
-import org.jbei.ice.lib.shared.dto.entry.Visibility;
 
 import com.google.common.base.Objects;
 import org.hibernate.annotations.Type;
@@ -89,7 +90,7 @@ import org.jbei.ice.lib.entry.model.Parameter;
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
 @Inheritance(strategy = InheritanceType.JOINED)
 @XmlRootElement
-public class Entry implements IModel {
+public class Entry implements IDataModel {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -199,6 +200,10 @@ public class Entry implements IModel {
     @Field
     private String principalInvestigator;
 
+    @Column(name = "principal_investigator_email", length = 127)
+    @Field(store = Store.YES, analyze = Analyze.NO)
+    private String principalInvestigatorEmail;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
     @IndexedEmbedded(depth = 1)
     private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<>();
@@ -237,9 +242,9 @@ public class Entry implements IModel {
     private Sequence sequence;
 
     public Entry() {
-        setStatus("Complete");
+//        setStatus("Complete");
         longDescriptionType = "text";
-        setBioSafetyLevel(1);
+//        setBioSafetyLevel(1);
     }
 
     @XmlTransient
@@ -329,15 +334,10 @@ public class Entry implements IModel {
         return selectionMarkers;
     }
 
-    /**
-     * Generate a String representation of the {@link SelectionMarker}s associated with this entry.
-     *
-     * @return Comma separated selection markers.
-     */
     public String getSelectionMarkersAsString() {
         String result;
         ArrayList<String> markers = new ArrayList<>();
-        for (SelectionMarker marker : selectionMarkers) {
+        for (SelectionMarker marker : this.selectionMarkers) {
             markers.add(marker.getName());
         }
         result = org.jbei.ice.lib.utils.Utils.join(", ", markers);
@@ -348,7 +348,6 @@ public class Entry implements IModel {
     public void setSelectionMarkers(Set<SelectionMarker> inputSelectionMarkers) {
         if (inputSelectionMarkers == null) {
             selectionMarkers.clear();
-
             return;
         }
 
@@ -577,5 +576,18 @@ public class Entry implements IModel {
 
     public void setSequence(Sequence sequence) {
         this.sequence = sequence;
+    }
+
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    public String getPrincipalInvestigatorEmail() {
+        return principalInvestigatorEmail;
+    }
+
+    public void setPrincipalInvestigatorEmail(String principalInvestigatorEmail) {
+        this.principalInvestigatorEmail = principalInvestigatorEmail;
     }
 }

@@ -2,7 +2,8 @@ package org.jbei.ice.lib.entry.attachment;
 
 import javax.persistence.*;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryBooleanPropertiesBridge;
 
@@ -14,14 +15,14 @@ import org.hibernate.search.annotations.FieldBridge;
 /**
  * Store information about attachments.
  * <p/>
- * The actual bytes are written to a file on disk. See {@link AttachmentDAO}.
+ * The actual bytes are written to a file on disk. See {@link org.jbei.ice.lib.dao.hibernate.AttachmentDAO}.
  *
  * @author Timothy Ham, Zinovii Dmytriv
  */
 @Entity
 @Table(name = "attachments")
 @SequenceGenerator(name = "sequence", sequenceName = "attachments_id_seq", allocationSize = 1)
-public class Attachment implements IModel {
+public class Attachment implements IDataModel {
 
     private static final long serialVersionUID = 1L;
 
@@ -108,5 +109,15 @@ public class Attachment implements IModel {
 
     public void setEntry(Entry entry) {
         this.entry = entry;
+    }
+
+    @Override
+    public AttachmentInfo toDataTransferObject() {
+        AttachmentInfo info = new AttachmentInfo();
+        info.setFileId(fileId);
+        info.setFilename(fileName);
+        info.setDescription(description);
+        info.setId(id);
+        return info;
     }
 }

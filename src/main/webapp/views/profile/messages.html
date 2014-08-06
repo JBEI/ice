@@ -1,0 +1,21 @@
+<div ng-controller="MessageController">
+
+    <div class="row pad_top">
+        <button type="button" class="ice-button"><i style="font-size: 14px" class="blue fa fa-envelope"></i><i
+                style="vertical-align: sub; font-size: 8px;" class="fa fa-plus"></i>&nbsp; Compose
+        </button>
+    </div>
+
+    <div class="row pad_top">
+        <strong>Inbox</strong>
+        <table class="table table-condensed striped table-hover">
+            <tr ng-repeat="message in messages.list" class="font-90em cursor_pointer">
+                <td>{{message.from}}</td>
+                <td>{{message.title}}</td>
+                <td>{{message.message}}</td>
+                <td>{{message.sent}}</td>
+            </tr>
+        </table>
+    </div>
+
+</div>

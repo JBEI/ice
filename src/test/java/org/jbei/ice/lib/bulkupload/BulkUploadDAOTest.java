@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.bulkupload;
 
-import org.jbei.ice.lib.dao.hibernate.HibernateHelper;
+import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 
 import org.junit.After;
 import org.junit.Before;
@@ -14,12 +14,12 @@ public class BulkUploadDAOTest {
 
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        HibernateHelper.initializeMock();
+        HibernateUtil.initializeMock();
     }
 
     @Before
     public void setUp() throws Exception {
-        HibernateHelper.beginTransaction();
+        HibernateUtil.beginTransaction();
     }
 
     @Test
@@ -41,6 +41,6 @@ public class BulkUploadDAOTest {
 
     @After
     public void tearDown() throws Exception {
-        HibernateHelper.commitTransaction();
+        HibernateUtil.commitTransaction();
     }
 }

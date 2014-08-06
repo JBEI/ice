@@ -10,7 +10,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import org.jbei.ice.lib.dao.IModel;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.models.AssemblyRelationship;
 
 /**
@@ -24,7 +25,7 @@ import org.jbei.ice.lib.models.AssemblyRelationship;
 @Entity
 @Table(name = "entry_entry_assembly_relationship")
 @SequenceGenerator(name = "sequence", sequenceName = "entry_entry_assembly_relationship_id_seq", allocationSize = 1)
-public class EntryAssemblyRelationship implements IModel {
+public class EntryAssemblyRelationship implements IDataModel {
 
     private static final long serialVersionUID = 1L;
 
@@ -76,4 +77,8 @@ public class EntryAssemblyRelationship implements IModel {
         this.relationship = relationship;
     }
 
+    @Override
+    public IDataTransferModel toDataTransferObject() {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    }
 }
