@@ -5,7 +5,9 @@ package org.jbei.ice.lib.account;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -26,6 +28,8 @@ public class AccountControllerTest {
         HibernateUtil.initializeMock();
         HibernateUtil.beginTransaction();
         controller = new AccountController();
+        ConfigurationController configurationController = new ConfigurationController();
+        configurationController.setPropertyValue(ConfigurationKey.NEW_REGISTRATION_ALLOWED, "true");
     }
 
     @After
