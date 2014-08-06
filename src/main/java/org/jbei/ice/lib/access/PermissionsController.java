@@ -548,4 +548,42 @@ public class PermissionsController {
 
         dao.delete(permission);
     }
+
+    public ArrayList<AccessPermission> getMatchingGroupsOrUsers(String userId, String val, int limit) {
+        // groups has higher priority
+        Set<Group> groups = groupController.getMatchingGroups(userId, val, limit);
+        int accountLimit;
+        if (groups != null)
+            accountLimit = limit;
+        else
+            accountLimit = (limit - groups.size());
+
+        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
+        for (Group group : groups) {
+            AccessPermission permission = new AccessPermission();
+            permission.setDisplay(group.getLabel());
+            permission.setArticle(AccessPermission.Article.GROUP);
+            permission.setArticleId(group.getId());
+            accessPermissions.add(permission);
+        }
+
+        if (accountLimit == 0)
+            return accessPermissions;
+
+        // check account match
+        Account account = accountController.getByEmail(userId);
+        Set<Account> accounts = DAOFactory.getAccountDAO().getMatchingAccounts(account, val, accountLimit);
+        if (accounts == null)
+            return accessPermissions;
+
+        for (Account userAccount : accounts) {
+            AccessPermission permission = new AccessPermission();
+            permission.setDisplay(userAccount.getFullName());
+            permission.setArticle(AccessPermission.Article.ACCOUNT);
+            permission.setArticleId(userAccount.getId());
+            accessPermissions.add(permission);
+        }
+
+        return accessPermissions;
+    }
 }

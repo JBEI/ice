@@ -248,6 +248,23 @@ iceServices.factory('Group', function ($resource, $cookieStore) {
     }
 });
 
+iceServices.factory('Permission', function ($resource, $cookieStore) {
+    return function () {
+
+        var sessionId = $cookieStore.get("sessionId");
+
+        return $resource('/rest/permission', {}, {
+            filterUsersAndGroups:{
+                method:'GET',
+                responseType:"json",
+                isArray:true,
+                url:"/rest/permission/autocomplete",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            }
+        });
+    }
+});
+
 iceServices.factory('User', function ($resource) {
     return function (sessionId) {
         return $resource('/rest/users', {userId:'@userId', preferenceKey:'@preferenceKey'}, {

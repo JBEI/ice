@@ -12,7 +12,7 @@
                             {{pane.title}}
                 <span style="float: right">
                     <div ng-show="pane.selected" class="edit_icon font-12em">
-                        <i ng-click="showAddPermissionOptionsClick(pane)" class="fa fa-plus-circle"></i></div>
+                        <i ng-click="showAddPermissionOptionsClick()" class="fa fa-plus-circle"></i></div>
                     <div ng-hide="pane.selected" class="edit_icon font-12em">{{pane.count || 0}}</div>
                 </span>
                         </div>
@@ -32,29 +32,38 @@
             <!--user select filter-->
             <div ng-show="showPermissionInput">
                 <form ng-submit="addEmailUser()">
-                    <input type="text" placeholder="Enter name or email" ng-model="userFilterInput"
+                    <input type="text" placeholder="Enter name or email" ng-model="userFilterInput" ng-change="filter()"
                            style="width: 180px; font-size: 0.80em">
                 </form>
-                <div style="overflow: auto; max-height: 120px;" class="font-75em">
-                    <div ng-repeat="user in filteredUsers | filter: userFilterInput | orderBy:'email'"
-                         style="padding-left: 6px; padding-top: 3px">
-                        <span ng-click="addRemovePermission(user)" style="cursor: pointer">
-                            <i class="fa"
-                               ng-class="{'fa-square-o':!user.selected, 'fa-check-square-o':user.selected}"></i>
-                            <i class="fa fa-user permission_user"></i> {{user.firstName}} {{user.lastName}}
-                        </span>
+                <div style="overflow: auto; height: 120px;" class="font-75em">
+                    <!--<div ng-repeat="user in filteredUsers | filter: userFilterInput | orderBy:'email'"-->
+                    <!--style="padding-left: 6px; padding-top: 3px">-->
+                    <!--<span ng-click="addRemovePermission(user)" style="cursor: pointer">-->
+                    <!--<i class="fa"-->
+                    <!--ng-class="{'fa-square-o':!user.selected, 'fa-check-square-o':user.selected}"></i>-->
+                    <!--<i class="fa fa-user permission_user"></i> {{user.firstName}} {{user.lastName}}-->
+                    <!--</span>-->
+                    <!--</div>-->
+
+                    <!--<div ng-repeat="group in filteredGroups | orderBy:'label'" style="padding-left: 6px">-->
+                    <!--<span ng-click="addRemoveGroupPermission(group)" style="cursor: pointer">-->
+                    <!--<i class="fa"-->
+                    <!--ng-class="{'fa-square-o':!group.selected, 'fa-check-square-o':group.selected}"></i>-->
+                    <!--<i class="fa fa-group permission_group"></i> {{group.label}}-->
+                    <!--</span>-->
+                    <!--</div>-->
+
+                    <div ng-if="!filtering && !accessPermissions" style="opacity: 0.7; padding: 3px 0 3px 0">
+                        <i>No matches found</i>
                     </div>
 
-                    <div ng-repeat="group in filteredGroups | orderBy:'label'" style="padding-left: 6px">
-                        <span ng-click="addRemoveGroupPermission(group)" style="cursor: pointer">
-                            <i class="fa"
-                               ng-class="{'fa-square-o':!group.selected, 'fa-check-square-o':group.selected}"></i>
-                            <i class="fa fa-group permission_group"></i> {{group.label}}
+                    <div ng-repeat="permission in accessPermissions | orderBy:'display'">
+                       <span ng-click="addRemovePermission(permission)" style="cursor: pointer">
+                        <i class="fa opacity_hover"
+                           ng-class="{'fa-square-o':!permission.selected, 'fa-check-square-o':permission.selected}"></i>
+                        <i class="fa" ng-class="{'fa-group permission_group':permission.article==='GROUP',
+                        'fa-user permission_user':permission.article==='ACCOUNT'}"></i> {{permission.display}}
                         </span>
-                    </div>
-
-                    <div ng-hide="users" style="opacity: 0.7; padding: 3px 0 3px 0">
-                        <i class="fa fa-gear fa-spin fa-1x"></i> Retrieving visible users and groups...
                     </div>
                 </div>
 

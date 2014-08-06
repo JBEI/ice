@@ -121,7 +121,7 @@ public class GroupControllerTest {
         g3.setLabel("myg3");
         Assert.assertNotNull(controller.createGroup(account2.getEmail(), g3));
 
-        Set<Group> groups = controller.getMatchingGroups(account, "myg", 10);
+        Set<Group> groups = controller.getMatchingGroups(account.getEmail(), "myg", 10);
         Assert.assertNotNull(groups);
         Assert.assertEquals(1, groups.size());
     }

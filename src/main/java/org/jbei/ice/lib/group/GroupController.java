@@ -10,7 +10,6 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.GroupDAO;
 import org.jbei.ice.lib.dto.AccountResults;
@@ -187,13 +186,11 @@ public class GroupController {
         return save(publicGroup);
     }
 
-    public Set<Group> getMatchingGroups(Account account, String query, int limit) throws ControllerException {
-        try {
-            return dao.getMatchingGroups(account, query, limit);
-        } catch (DAOException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
-        }
+    public Set<Group> getMatchingGroups(String userId, String query, int limit) {
+        Account account = accountController.getByEmail(userId);
+        if (account == null)
+            return null;
+        return dao.getMatchingGroups(account, query, limit);
     }
 
     /**

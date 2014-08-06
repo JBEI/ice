@@ -1600,13 +1600,11 @@ iceControllers.controller('GenericTabsController', function ($scope, $cookieStor
     };
 });
 
-iceControllers.controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group, filterFilter) {
-    console.log("EntryPermissionController");
+iceControllers.controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group, filterFilter, Permission) {
     var sessionId = $cookieStore.get("sessionId");
-    var user = User(sessionId);
-    var group = Group();
     var entry = Entry(sessionId);
     var panes = $scope.panes = [];
+    $scope.userFilterInput = undefined;
 
     $scope.activateTab = function (pane) {
         angular.forEach(panes, function (pane) {
@@ -1649,39 +1647,57 @@ iceControllers.controller('EntryPermissionController', function ($rootScope, $sc
         $scope.activePermissions = angular.copy($scope.readPermissions);
     });
 
-    $scope.showAddPermissionOptionsClick = function (pane) {
+    $scope.filter = function () {
+        var val = $scope.userFilterInput;
+        if (!val) {
+            $scope.accessPermissions = undefined;
+            return;
+        }
+
+        $scope.filtering = true;
+        Permission().filterUsersAndGroups({limit:10, val:val},
+            function (result) {
+                $scope.accessPermissions = result;
+                $scope.filtering = false;
+            }, function (error) {
+                $scope.filtering = false;
+                $scope.accessPermissions = undefined;
+            });
+    };
+
+    $scope.showAddPermissionOptionsClick = function () {
         $scope.showPermissionInput = true;
 
-        // TODO : consider, instead of retrieving all and filtering, try on the server first
-        user.list(function (result) {
-            $scope.users = result;
-            $scope.filteredUsers = angular.copy(result);
-
-            angular.forEach($scope.users, function (item) {
-                for (var i = 0; i < $scope.activePermissions.length; i += 1) {
-                    if (item.id == $scope.activePermissions[i].articleId && $scope.activePermissions[i].article === 'ACCOUNT') {
-                        item.selected = true;
-                        item.permissionId = $scope.activePermissions[i].id;
-                        break;
-                    }
-                }
-            });
-        });
-
-        group.getUserGroups({userId:$rootScope.user.id}, function (result) {
-            console.log(result, $scope.activePermissions);
-            $scope.filteredGroups = angular.copy(result);
-
-            angular.forEach($scope.filteredGroups, function (item) {
-                for (var i = 0; i < $scope.activePermissions.length; i += 1) {
-                    if (item.id == $scope.activePermissions[i].articleId && $scope.activePermissions[i].article === 'GROUP') {
-                        item.selected = true;
-                        item.permissionId = $scope.activePermissions[i].id;
-                        break;
-                    }
-                }
-            });
-        });
+//        // TODO : consider, instead of retrieving all and filtering, try on the server first
+//        user.list(function (result) {
+//            $scope.users = result;
+//            $scope.filteredUsers = angular.copy(result);
+//
+//            angular.forEach($scope.users, function (item) {
+//                for (var i = 0; i < $scope.activePermissions.length; i += 1) {
+//                    if (item.id == $scope.activePermissions[i].articleId && $scope.activePermissions[i].article === 'ACCOUNT') {
+//                        item.selected = true;
+//                        item.permissionId = $scope.activePermissions[i].id;
+//                        break;
+//                    }
+//                }
+//            });
+//        });
+//
+//        group.getUserGroups({userId:$rootScope.user.id}, function (result) {
+//            console.log(result, $scope.activePermissions);
+//            $scope.filteredGroups = angular.copy(result);
+//
+//            angular.forEach($scope.filteredGroups, function (item) {
+//                for (var i = 0; i < $scope.activePermissions.length; i += 1) {
+//                    if (item.id == $scope.activePermissions[i].articleId && $scope.activePermissions[i].article === 'GROUP') {
+//                        item.selected = true;
+//                        item.permissionId = $scope.activePermissions[i].id;
+//                        break;
+//                    }
+//                }
+//            });
+//        });
     };
 
     $scope.addEmailUser = function () {
@@ -1710,34 +1726,30 @@ iceControllers.controller('EntryPermissionController', function ($rootScope, $sc
             });
     };
 
-    $scope.addRemoveGroupPermission = function (group) {
-        group.selected = !group.selected;
-        if (group.selected) {
-            $scope.activePermissions.push({article:'GROUP', type:"READ_ENTRY", typeId:group.id, display:group.label});
-            console.log($scope.activePermissions);
-        }
-    };
-
     // when user clicks on the check box
-    $scope.addRemovePermission = function (user) {
-        user.selected = !user.selected;
-        if (user.selected) {
-            var type;
-            angular.forEach(panes, function (pane) {
-                if (pane.selected) {
-                    type = pane.title.toUpperCase() + "_ENTRY";
-                }
-            });
-            var permission = {article:'ACCOUNT', type:type, typeId:$scope.entry.id, articleId:user.id};
-            entry.addPermission({partId:$scope.entry.id}, permission, function (result) {
-                // result is the permission object
-                $scope.entry.id = result.typeId;
-                $scope.activePermissions.push(result);
-                user.permissionId = result.id;
-            });
-        } else {
-            removePermission(user.permissionId);
+    $scope.addRemovePermission = function (permission) {
+        permission.selected = !permission.selected;
+        if (!permission.selected) {
+            removePermission(permission.id);
+            return;
         }
+
+        // add permission
+        var type;
+        angular.forEach(panes, function (pane) {
+            if (pane.selected) {
+                type = pane.title.toUpperCase() + "_ENTRY";
+            }
+        });
+        permission.typeId = $scope.entry.id;
+        permission.type = type;
+
+        entry.addPermission({partId:$scope.entry.id}, permission, function (result) {
+            // result is the permission object
+            $scope.entry.id = result.typeId;
+            $scope.activePermissions.push(result);
+            permission.permissionId = result.id;
+        });
     };
 
     $scope.enablePublicRead = function (e) {
