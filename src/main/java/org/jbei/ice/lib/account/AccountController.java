@@ -172,8 +172,8 @@ public class AccountController {
      * @return generated password
      */
     public AccountTransfer createNewAccount(AccountTransfer info, boolean sendEmail) {
-        if (!Utils.canRegister())
-            return null;
+//        if (!Utils.canRegister())
+//            return null;
 
         // validate fields required by the database
         validateRequiredAccountFields(info);

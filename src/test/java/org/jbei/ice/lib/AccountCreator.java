@@ -4,8 +4,6 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.config.ConfigurationController;
-import org.jbei.ice.lib.dto.ConfigurationKey;
 
 import org.junit.Assert;
 
@@ -18,9 +16,6 @@ import org.junit.Assert;
 public class AccountCreator {
 
     public static Account createTestAccount(String testName, boolean admin) throws Exception {
-        ConfigurationController configurationController = new ConfigurationController();
-        configurationController.setPropertyValue(ConfigurationKey.NEW_REGISTRATION_ALLOWED, "true");
-
         String email = testName + "@TESTER";
         AccountController accountController = new AccountController();
         Account account = accountController.getByEmail(email);

@@ -22,8 +22,8 @@ public class AccountDAOTest {
 
     @Before
     public void setUp() {
-        dao = new AccountDAO();
         HibernateUtil.beginTransaction();
+        dao = new AccountDAO();
     }
 
     @Test
