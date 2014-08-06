@@ -270,7 +270,6 @@ public class SequenceController {
 
     public FeaturedDNASequence retrievePartSequence(String userId, long recordId) {
         Entry entry = DAOFactory.getEntryDAO().get(recordId);
-
         if (entry == null)
             throw new IllegalArgumentException("The part " + recordId + " could not be located");
 
@@ -278,7 +277,10 @@ public class SequenceController {
         if (sequence == null)
             return null;
 
-        return sequenceToDNASequence(sequence);
+        FeaturedDNASequence featuredDNASequence = sequenceToDNASequence(sequence);
+        boolean canEdit = authorization.canWrite(userId, entry);
+        featuredDNASequence.setCanEdit(canEdit);
+        return featuredDNASequence;
     }
 
     /**

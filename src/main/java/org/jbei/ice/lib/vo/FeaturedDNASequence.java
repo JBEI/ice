@@ -21,6 +21,7 @@ public class FeaturedDNASequence extends DNASequence {
     private String description;
     private String uri;
     private String dcUri;
+    private boolean canEdit;
 
     public FeaturedDNASequence() {
         super();
@@ -95,5 +96,13 @@ public class FeaturedDNASequence extends DNASequence {
 
     public void setDcUri(String dcUri) {
         this.dcUri = dcUri;
+    }
+
+    public boolean isCanEdit() {
+        return canEdit;
+    }
+
+    public void setCanEdit(boolean canEdit) {
+        this.canEdit = canEdit;
     }
 }
