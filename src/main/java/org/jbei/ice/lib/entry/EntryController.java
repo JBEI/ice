@@ -140,7 +140,6 @@ public class EntryController {
 
         for (Entry entry : results) {
             PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
-            info.setCanEdit(authorization.canWrite(account.getEmail(), entry));
             details.getEntries().add(info);
         }
 
