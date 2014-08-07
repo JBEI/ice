@@ -135,6 +135,8 @@ public class FolderResource extends RestResource {
 
         EntryController entryController = new EntryController();
         FolderDetails details = new FolderDetails();
+        Logger.info("Retrieving " + folderId + " entries");
+
         switch (folderId) {
             case "personal":
                 List<PartData> entries = entryController.retrieveOwnerEntries(userId, userId, field,
@@ -145,7 +147,6 @@ public class FolderResource extends RestResource {
                 return details;
 
             case "available":
-                Logger.info("Retrieving " + folderId + " entries");
                 FolderDetails retrieved = entryController.retrieveVisibleEntries(userId, field, asc, offset, limit);
                 details.setEntries(retrieved.getEntries());
                 details.setCount(entryController.getNumberOfVisibleEntries(userId));
