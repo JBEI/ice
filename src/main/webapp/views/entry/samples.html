@@ -1,12 +1,14 @@
 <div ng-controller="EntrySampleController" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
     <div class="row pad_top">
-        <button type="button" class="ice-button"><i style="font-size: 14px; color: #007dbc" class="fa fa-plus"></i>Add
-            Sample
+        <button type="button" class="ice-button" ng-if="entry.canEdit">
+            <i style="font-size: 14px; color: #007dbc" class="fa fa-plus"></i> Add Sample
         </button>
-        &nbsp;
-        <button ng-click="openAddToCart()" type="button" class="ice-button">
-            <i style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Add to Cart
-        </button>
+        <span ng-if="samples">
+            &nbsp;
+            <button ng-click="openAddToCart()" type="button" class="ice-button">
+                <i style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Add to Cart
+            </button>
+        </span>
     </div>
 
     <div class="row pad_top" ng-repeat="sample in samples">

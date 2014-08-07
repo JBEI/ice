@@ -655,6 +655,17 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     // selected entries
     $scope.selection = [];
+    $scope.shoppingCartContents = [];
+    // todo : retrieve shopping cart contents
+
+    $scope.hidePopovers = function (hide) {
+        $scope.openShoppingCart = !hide;
+    };
+
+    $scope.submitShoppingCart = function () {
+        $scope.shoppingCartContents = [];
+        $scope.openShoppingCart = false;
+    }
 
     // search
     $scope.runUserSearch = function () {
@@ -673,6 +684,11 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
             }
         );
     };
+
+    $scope.$on('SampleTypeSelected', function (event, data) {
+        // todo : save to the server
+        $scope.shoppingCartContents.push(data);
+    });
 
     // table
     $scope.alignmentGraph = function (searchResult) {
