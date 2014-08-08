@@ -152,7 +152,7 @@ public class BulkUploadController {
         EntryType type = EntryType.nameToType(draft.getImportType().split("\\s+")[0]);
 
         // retrieve the entries associated with the bulk import
-        ArrayList<Entry> contents = dao.retrieveDraftEntries(type, id, start, limit);
+        ArrayList<Entry> contents = dao.retrieveDraftEntries(id, start, limit);
 
         // convert
         draftInfo.getEntryList().addAll(convertParts(account, contents));
@@ -170,9 +170,10 @@ public class BulkUploadController {
         // retrieve the entries associated with the bulk import
         BulkUploadInfo info = draft.toDataTransferObject();
 
-        ArrayList<Entry> list = dao.retrieveDraftEntries(EntryType.PLASMID, id, offset, limit);
+        ArrayList<Entry> list = dao.retrieveDraftEntries(id, offset, limit);
         for (Entry entry : list) {
-            info.getEntryList().add(ModelToInfoFactory.getInfo(entry));
+            PartData partData = ModelToInfoFactory.getInfo(entry);
+            info.getEntryList().add(partData);
         }
 
         info.setCount(dao.retrieveSavedDraftCount(id));

@@ -50,38 +50,53 @@ public class BulkEntryCreator {
     }
 
     protected BulkUpload createOrRetrieveBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,
-            EntryType addType) throws ControllerException {
-        try {
-            BulkUpload draft = dao.retrieveById(autoUpdate.getBulkUploadId());
-            if (draft == null) {
-                draft = new BulkUpload();
-                draft.setName("Untitled");
-                draft.setAccount(account);
-                draft.setStatus(BulkUploadStatus.IN_PROGRESS);
-                draft.setImportType(addType.toString());
-                draft.setCreationTime(new Date(System.currentTimeMillis()));
-                draft.setLastUpdateTime(draft.getCreationTime());
-                dao.create(draft);
-            }
-            return draft;
-        } catch (DAOException de) {
-            throw new ControllerException(de);
+            EntryType addType) {
+        BulkUpload draft = dao.retrieveById(autoUpdate.getBulkUploadId());
+        if (draft == null) {
+            draft = new BulkUpload();
+            draft.setName("Untitled");
+            draft.setAccount(account);
+            draft.setStatus(BulkUploadStatus.IN_PROGRESS);
+            draft.setImportType(addType.toString());
+            draft.setCreationTime(new Date(System.currentTimeMillis()));
+            draft.setLastUpdateTime(draft.getCreationTime());
+            dao.create(draft);
         }
+        return draft;
     }
 
     public PartData createEntry(String userId, long bulkUploadId, PartData data) {
         BulkUpload upload = dao.get(bulkUploadId);
         authorization.expectWrite(userId, upload);
 
-        data.setType(EntryType.nameToType(upload.getImportType()));
         Entry entry = InfoToModelFactory.infoToEntry(data);
         entry.setVisibility(Visibility.DRAFT.getValue());
         Account account = accountController.getByEmail(userId);
         entry.setOwner(account.getFullName());
         entry.setOwnerEmail(account.getEmail());
-        entry = entryDAO.create(entry);
 
+        // check if there is any linked parts. create if so (expect a max of 1)
+        if (data.getLinkedParts() != null && data.getLinkedParts().size() > 0) {
+            // create linked
+            PartData linked = data.getLinkedParts().get(0);
+            Entry linkedEntry = InfoToModelFactory.infoToEntry(linked);
+            linkedEntry.setVisibility(Visibility.DRAFT.getValue());
+            linkedEntry.setOwner(account.getFullName());
+            linkedEntry.setOwnerEmail(account.getEmail());
+            linkedEntry = entryDAO.create(linkedEntry);
+
+            linked.setId(linkedEntry.getId());
+            linked.setModificationTime(linkedEntry.getModificationTime().getTime());
+            data.getLinkedParts().clear();
+            data.getLinkedParts().add(linked);
+
+            // link to main entry in the database
+            entry.getLinkedEntries().add(linkedEntry);
+        }
+
+        entry = entryDAO.create(entry);
         upload.getContents().add(entry);
+
         dao.update(upload);
         data.setId(entry.getId());
         data.setModificationTime(entry.getModificationTime().getTime());
@@ -93,16 +108,40 @@ public class BulkEntryCreator {
         authorization.expectWrite(userId, upload);
 
         Entry entry = entryDAO.get(id);
+        if (entry == null)
+            return null;
+
         // todo : check that entry is a part of upload and they are of the same type
+        data = doUpdate(data, id);
+        upload.setLastUpdateTime(entry.getModificationTime());
+        dao.update(upload);
+
+        return data;
+    }
+
+    protected PartData doUpdate(PartData data, long id) {
+        Entry entry = entryDAO.get(id);
+        if (entry == null)
+            return null;
+
         entry = InfoToModelFactory.updateEntryField(data, entry);
         entry.setVisibility(Visibility.DRAFT.getValue());
         entry.setModificationTime(new Date(System.currentTimeMillis()));
         entry = entryDAO.update(entry);
 
-        upload.setLastUpdateTime(entry.getModificationTime());
-        dao.update(upload);
         data.setId(id);
         data.setModificationTime(entry.getModificationTime().getTime());
+
+        // check if there is any linked parts. update if so (expect a max of 1)
+        if (data.getLinkedParts() == null || data.getLinkedParts().size() == 0)
+            return data;
+
+        // recursively update
+        PartData linked = doUpdate(data.getLinkedParts().get(0), data.getLinkedParts().get(0).getId());
+        data.getLinkedParts().clear();
+        if (linked != null)
+            data.getLinkedParts().add(linked);
+
         return data;
     }
 

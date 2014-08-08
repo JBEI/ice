@@ -665,7 +665,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
     $scope.submitShoppingCart = function () {
         $scope.shoppingCartContents = [];
         $scope.openShoppingCart = false;
-    }
+    };
 
     // search
     $scope.runUserSearch = function () {

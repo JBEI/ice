@@ -10,7 +10,6 @@ import org.jbei.ice.lib.bulkupload.BulkUploadStatus;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.model.Entry;
 
 import org.hibernate.HibernateException;
@@ -100,7 +99,7 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
     }
 
     @SuppressWarnings("unchecked")
-    public ArrayList<Entry> retrieveDraftEntries(EntryType type, long id, int start, int limit) throws DAOException {
+    public ArrayList<Entry> retrieveDraftEntries(long id, int start, int limit) throws DAOException {
         Query query = currentSession()
                 .createSQLQuery("select entry_id from bulk_upload_entry where bulk_upload_id = " + id
                                         + " limit " + limit + " offset " + start);
@@ -128,15 +127,7 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
                 return results;
 
             Entry next = iterator.next();
-
-            if (type == null) {
-                results.add(next);
-                continue;
-            }
-
-            if (next.getRecordType().equalsIgnoreCase(type.getName())) {
-                results.add(next);
-            }
+            results.add(next);
         }
 
         return results;
