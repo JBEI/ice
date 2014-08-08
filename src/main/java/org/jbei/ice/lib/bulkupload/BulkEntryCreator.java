@@ -2,12 +2,12 @@ package org.jbei.ice.lib.bulkupload;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.BulkUploadDAO;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
@@ -68,7 +68,10 @@ public class BulkEntryCreator {
     public PartData createEntry(String userId, long bulkUploadId, PartData data) {
         BulkUpload upload = dao.get(bulkUploadId);
         authorization.expectWrite(userId, upload);
+        return createEntryForUpload(userId, data, upload);
+    }
 
+    protected PartData createEntryForUpload(String userId, PartData data, BulkUpload upload) {
         Entry entry = InfoToModelFactory.infoToEntry(data);
         entry.setVisibility(Visibility.DRAFT.getValue());
         Account account = accountController.getByEmail(userId);
@@ -107,15 +110,13 @@ public class BulkEntryCreator {
         BulkUpload upload = dao.get(bulkUploadId);
         authorization.expectWrite(userId, upload);
 
-        Entry entry = entryDAO.get(id);
-        if (entry == null)
-            return null;
-
         // todo : check that entry is a part of upload and they are of the same type
         data = doUpdate(data, id);
-        upload.setLastUpdateTime(entry.getModificationTime());
-        dao.update(upload);
+        if (data == null)
+            return null;
 
+        upload.setLastUpdateTime(new Date(data.getModificationTime()));
+        dao.update(upload);
         return data;
     }
 
@@ -220,7 +221,7 @@ public class BulkEntryCreator {
      * @throws ControllerException
      */
     public BulkUploadAutoUpdate createOrUpdateEntry(String userId, BulkUploadAutoUpdate autoUpdate,
-            EntryType addType) throws ControllerException {
+            EntryType addType) {
         Account account = accountController.getByEmail(userId);
         BulkUpload draft = null;
 
@@ -238,7 +239,7 @@ public class BulkEntryCreator {
         if (entry == null) {
             entry = EntryUtil.createEntryFromType(autoUpdate.getType(), account.getFullName(), account.getEmail());
             if (entry == null)
-                throw new ControllerException("Don't know what to do with entry type");
+                return null;
 
             entry = creator.createEntry(account, entry, null);
 
@@ -286,14 +287,38 @@ public class BulkEntryCreator {
 
         // update bulk upload. even if no new entry was created, entries belonging to it was updated
         if (draft != null) {
-            try {
-                draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
-                autoUpdate.setLastUpdate(draft.getLastUpdateTime());
-                dao.update(draft);
-            } catch (DAOException de) {
-                throw new ControllerException(de);
-            }
+            draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
+            autoUpdate.setLastUpdate(draft.getLastUpdateTime());
+            dao.update(draft);
         }
         return autoUpdate;
+    }
+
+    public BulkUploadInfo createOrUpdateEntries(String userId, long draftId, List<PartData> data) {
+        BulkUpload draft = dao.retrieveById(draftId);
+        if (draft == null)
+            return null;
+
+        // check permissions
+        authorization.expectWrite(userId, draft);
+
+        BulkUploadInfo uploadInfo = draft.toDataTransferObject();
+
+        for (PartData datum : data) {
+            int index = datum.getIndex();
+
+            if (datum.getId() > 0) {
+                datum = doUpdate(datum, datum.getId());
+            } else {
+                datum = createEntryForUpload(userId, datum, draft);
+            }
+
+            if (datum == null)
+                return null;
+
+            datum.setIndex(index);
+            uploadInfo.getEntryList().add(datum);
+        }
+        return uploadInfo;
     }
 }

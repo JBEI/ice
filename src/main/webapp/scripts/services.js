@@ -607,6 +607,12 @@ iceServices.factory('Upload', function ($resource) {
                 method:'POST',
                 url:'rest/upload/file',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            updateList:{
+                method:'PUT',
+                url:'rest/upload/:importId',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
     }

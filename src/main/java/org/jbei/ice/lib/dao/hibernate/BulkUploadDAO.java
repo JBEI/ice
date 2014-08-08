@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.dao.hibernate;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.jbei.ice.lib.account.model.Account;
@@ -99,38 +98,36 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
     }
 
     @SuppressWarnings("unchecked")
-    public ArrayList<Entry> retrieveDraftEntries(long id, int start, int limit) throws DAOException {
+    public List<Entry> retrieveDraftEntries(long id, int start, int limit) throws DAOException {
         Query query = currentSession()
                 .createSQLQuery("select entry_id from bulk_upload_entry where bulk_upload_id = " + id
                                         + " limit " + limit + " offset " + start);
         List list = query.list();
 
         try {
-            List<Entry> result = DAOFactory.getEntryDAO().getEntriesByIdSet(list);
-            if (result != null)
-                return new ArrayList<>(result);
+            return DAOFactory.getEntryDAO().getEntriesByIdSet(list);
         } catch (Exception e) {
             Logger.error(e);
             throw new DAOException(e);
         }
 
-        BulkUpload bulkUpload = super.get(BulkUpload.class, id);
-        Iterator<Entry> iterator = bulkUpload.getContents().iterator();
-        int i = -1;
-        ArrayList<Entry> results = new ArrayList<>();
-        while (iterator.hasNext()) {
-            i += 1;
-            if (i < start)
-                continue;
-
-            if (results.size() == limit)
-                return results;
-
-            Entry next = iterator.next();
-            results.add(next);
-        }
-
-        return results;
+//        BulkUpload bulkUpload = super.get(BulkUpload.class, id);
+//        Iterator<Entry> iterator = bulkUpload.getContents().iterator();
+//        int i = -1;
+//        ArrayList<Entry> results = new ArrayList<>();
+//        while (iterator.hasNext()) {
+//            i += 1;
+//            if (i < start)
+//                continue;
+//
+//            if (results.size() == limit)
+//                return results;
+//
+//            Entry next = iterator.next();
+//            results.add(next);
+//        }
+//
+//        return results;
     }
 
     @Override

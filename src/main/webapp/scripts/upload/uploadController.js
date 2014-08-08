@@ -189,52 +189,26 @@ angular.module('ice.upload.controller', [])
             //
             var createOrUpdateEntry = function (data) {
                 var row = data[0];
-                var objectPropertyIndex = data[1];  // column which is used to map to the data schema for field
-                var value = data[3]; // user entered value
-
-                // get entry ids if entries exists for corresponding rows. it is expected that if a link has
-                // an id, then the main entry will have an id
-                var entryIdDataIndex = $scope.bulkUpload.entryIdData[row]; // used to save the index of the entry (
-                var linkedEntryIdDataIndex = $scope.bulkUpload.linkedEntryIdData[row];
-
-//                console.log("data", data, objectPropertyIndex, sheetHeaders.length);
-
-                var object = {id:entryIdDataIndex, type:$scope.importType.toUpperCase()};
-                var hasLink = false;
-
-                // note that file uploads are not represented here and are handled using the upload dialog
-                if (objectPropertyIndex >= sheetHeaders.length) {
-                    var newIndex = objectPropertyIndex - sheetHeaders.length;
-                    hasLink = true;
-
-                    // set property for linked object and add it to link
-                    var linkedObject = {id:linkedEntryIdDataIndex, type:$scope.linkedSelection.toUpperCase()};
-                    linkedObject[linkedDataSchema[newIndex]] = value;
-                    object.linkedParts = [linkedObject];
-                } else {
-                    // set the field value property for main and id if available to let backend know to update
-                    object[dataSchema[objectPropertyIndex]] = value;
-                }
-
-                // if no entry associated with row and no data, skip
-                if (value === "" && !entryIdDataIndex)
+                var object = getEntryObject(row, data[1], data[3]);
+                if (!object)
                     return;
 
+                $scope.saving = true;
                 if ($scope.bulkUpload.id === undefined) {
                     // create draft of specified type
                     upload.create({type:$scope.importType})
                         .$promise
                         .then(function (result) {
-                            // create entry.
-                            console.log("created new bulk upload", result);
+//                            console.log("created new bulk upload", result);
                             $scope.bulkUpload.id = result.id;
                             $scope.bulkUpload.lastUpdate = result.lastUpdate;
                             $scope.bulkUpload.name = result.name;
 //                            $location.path("/upload/" + result.id, false);
+
+                            // then create entry and associate with draft
                             createEntry(result.id, object, row);
                         });
                 } else {
-                    // todo : handle linked
                     // check if row being updated has existing entry
                     if (!object['id']) {
                         // create new entry for existing upload
@@ -255,6 +229,82 @@ angular.module('ice.upload.controller', [])
                 }
             };
 
+            // bulk create or update from autofill or paste
+            var bulkCreateOrUpdate = function (change) {
+                $scope.saving = true;
+
+                // array of objects that will be created or updated
+                var objects = [];
+
+                for (var i = 0; i < change.length; i += 1) {
+                    var data = change[i];
+                    var row = data[0];
+
+                    var object = getEntryObject(row, data[1], data[3]);
+                    if (object)
+                        objects.push(object);
+                }
+
+                if (objects.length === 0)
+                    return;
+
+                console.log("update", objects);
+
+                if ($scope.bulkUpload.id === undefined) {
+                    // todo : create first
+                } else {
+                    upload.updateList({importId:$scope.bulkUpload.id}, {entryList:objects}, function (success) {
+                        console.log(success);
+                        for (var j = 0; j < success.entryList.length; j += 1) {
+                            var part = success.entryList[j];
+                            console.log("created or updated", part);
+
+                            $scope.bulkUpload.entryIdData[part.index] = part.id;
+                            if (part.linkedParts && part.linkedParts.length) {
+                                var linkedId = part.linkedParts[0].id;
+                                if (linkedId) {
+                                    $scope.bulkUpload.linkedEntryIdData[part.index] = linkedId;
+                                }
+                            }
+                        }
+                        $scope.saving = false;
+                    }, function (error) {
+                        console.error(error);
+                        $scope.saving = false;
+                    });
+                }
+            };
+
+            var getEntryObject = function (row, col, value) {
+                // entry indexes
+                var entryIdDataIndex = $scope.bulkUpload.entryIdData[row];
+
+                // if no object to update
+                if (value === "" && !entryIdDataIndex)
+                    return undefined;
+
+                var object = {id:entryIdDataIndex, type:$scope.importType.toUpperCase()};
+
+                // check if there is a linked object being updated
+                if (col >= sheetHeaders.length) {   // or if ($scope.linkedSelection?
+                    var linkedEntryIdDataIndex = $scope.bulkUpload.linkedEntryIdData[row];
+
+                    if (value === "" && !linkedEntryIdDataIndex)
+                        return undefined;
+
+                    // set property for linked object and add it to link
+                    var newIndex = col - sheetHeaders.length;
+                    var linkedObject = {id:linkedEntryIdDataIndex, type:$scope.linkedSelection.toUpperCase()};
+                    linkedObject[linkedDataSchema[newIndex]] = value;
+                    object.linkedParts = [linkedObject];
+                } else {
+                    object[dataSchema[col]] = value;
+                }
+
+                object.index = row;
+                return object;
+            };
+
             var createEntry = function (importId, object, row) {
                 upload.createEntry({importId:importId}, object,
                     function (createdEntry) {
@@ -262,13 +312,13 @@ angular.module('ice.upload.controller', [])
                         if (createdEntry.linkedParts && createdEntry.linkedParts.length) {
                             var linkedId = createdEntry.linkedParts[0].id;
                             if (linkedId) {
-                                console.log("created link");
+//                                console.log("created link");
                                 $scope.bulkUpload.linkedEntryIdData[row] = linkedId;
                             }
                         }
 
                         $scope.saving = false;
-                        console.log("created entry", $scope.bulkUpload);
+//                        console.log("created entry", $scope.bulkUpload);
                     },
                     function (error) {
                         console.error(error);
@@ -285,22 +335,11 @@ angular.module('ice.upload.controller', [])
                     return; //data load, no need to save
                 }
 
-                $scope.saving = true;
-
                 // single cell edit
                 if (source === "edit") {   // single cell edit, change expected to contain single array
                     createOrUpdateEntry(change[0]);
-                } else if (source === "autofill") {
-                    // click and drag
-//                    console.log($scope.bulkUpload, change);
-                    for (var i = 0; i < change.length; i += 1) {
-                        createOrUpdateEntry(change[i]);
-                    }
-                } else if (source === "paste") {
-                    // paste from copy may contain multiple arrays as in auto fill
-                    for (var j = 0; j < change.length; j += 1) {
-                        createOrUpdateEntry(change[j]);
-                    }
+                } else if (source === "autofill" || source === "paste") {
+                    bulkCreateOrUpdate(change);
                 }
             };
 
@@ -423,6 +462,7 @@ angular.module('ice.upload.controller', [])
 
             // loop function
             var loop = function (start) {
+                console.log(start);
                 loopFunction.functionToLoop(loop, start);
             };
 
@@ -464,8 +504,7 @@ angular.module('ice.upload.controller', [])
             }
         };
 
-        // retrieve the contents of an import
-        //
+        // retrieve the contents of an import if parameter is a number
         if (!isNaN($stateParams.type)) {
             $scope.importType = undefined;
             asyncLoop({
@@ -535,6 +574,7 @@ angular.module('ice.upload.controller', [])
                                 loop(start + result.entryList.length);
                             }
                         });
+
                 }
             });
         } else {
