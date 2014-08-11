@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.dao.hibernate;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.jbei.ice.lib.account.model.Account;
@@ -49,9 +50,9 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
 
     public int getUploadEntryCount(long id) throws DAOException {
         Number number = (Number) currentSession().createCriteria(BulkUpload.class)
-                .setProjection(Projections.countDistinct("id"))
-                .add(Restrictions.eq("id", id))
-                .uniqueResult();
+                                                 .setProjection(Projections.countDistinct("id"))
+                                                 .add(Restrictions.eq("id", id))
+                                                 .uniqueResult();
 
         return number.intValue();
     }
@@ -105,29 +106,31 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         List list = query.list();
 
         try {
-            return DAOFactory.getEntryDAO().getEntriesByIdSet(list);
+            List<Entry> result = DAOFactory.getEntryDAO().getEntriesByIdSet(list);
+            if (result != null && result.size() > 0)
+                return new ArrayList<>(result);
         } catch (Exception e) {
             Logger.error(e);
             throw new DAOException(e);
         }
 
-//        BulkUpload bulkUpload = super.get(BulkUpload.class, id);
-//        Iterator<Entry> iterator = bulkUpload.getContents().iterator();
-//        int i = -1;
-//        ArrayList<Entry> results = new ArrayList<>();
-//        while (iterator.hasNext()) {
-//            i += 1;
-//            if (i < start)
-//                continue;
-//
-//            if (results.size() == limit)
-//                return results;
-//
-//            Entry next = iterator.next();
-//            results.add(next);
-//        }
-//
-//        return results;
+        BulkUpload bulkUpload = super.get(BulkUpload.class, id);
+        Iterator<Entry> iterator = bulkUpload.getContents().iterator();
+        int i = -1;
+        ArrayList<Entry> results = new ArrayList<>();
+        while (iterator.hasNext()) {
+            i += 1;
+            if (i < start)
+                continue;
+
+            if (results.size() == limit)
+                return results;
+
+            Entry next = iterator.next();
+            results.add(next);
+        }
+
+        return results;
     }
 
     @Override

@@ -218,6 +218,19 @@ angular.module('ice.upload.controller', [])
                         upload.updateEntry({importId:$scope.bulkUpload.id, entryId:object.id}, object,
                             function (updatedEntry) {
                                 $scope.bulkUpload.lastUpdate = updatedEntry.modificationTime;
+
+                                // todo : this will be an actual problem if there is a different value; undefined is ok
+                                if ($scope.bulkUpload.entryIdData[row] != updatedEntry.id) {
+                                    $scope.bulkUpload.entryIdData[row] = updatedEntry.id;
+                                }
+
+                                if (updatedEntry.linkedParts && updatedEntry.linkedParts.length) {
+                                    var linkedId = updatedEntry.linkedParts[0].id;
+                                    if (linkedId) {
+//                                console.log("created link");
+                                        $scope.bulkUpload.linkedEntryIdData[row] = linkedId;
+                                    }
+                                }
                                 $scope.saving = false;
                             },
                             function (error) {

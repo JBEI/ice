@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -111,7 +110,8 @@ public class BulkEntryCreator {
         authorization.expectWrite(userId, upload);
 
         // todo : check that entry is a part of upload and they are of the same type
-        data = doUpdate(data, id);
+        Entry entry = entryDAO.get(id);
+        data = doUpdate(userId, entry, data);
         if (data == null)
             return null;
 
@@ -120,8 +120,7 @@ public class BulkEntryCreator {
         return data;
     }
 
-    protected PartData doUpdate(PartData data, long id) {
-        Entry entry = entryDAO.get(id);
+    protected PartData doUpdate(String userId, Entry entry, PartData data) {
         if (entry == null)
             return null;
 
@@ -130,15 +129,28 @@ public class BulkEntryCreator {
         entry.setModificationTime(new Date(System.currentTimeMillis()));
         entry = entryDAO.update(entry);
 
-        data.setId(id);
         data.setModificationTime(entry.getModificationTime().getTime());
 
         // check if there is any linked parts. update if so (expect a max of 1)
         if (data.getLinkedParts() == null || data.getLinkedParts().size() == 0)
             return data;
 
+        // retrieve the entry (this is the only time you can create another entry on update)
+        PartData linkedPartData = data.getLinkedParts().get(0); // bulk upload can only link 1
+        Entry linkedEntry = entryDAO.get(linkedPartData.getId());
+        if (linkedEntry == null) {
+            linkedEntry = InfoToModelFactory.infoToEntry(linkedPartData);
+            linkedEntry.setVisibility(Visibility.DRAFT.getValue());
+            Account account = accountController.getByEmail(userId);
+            linkedEntry.setOwner(account.getFullName());
+            linkedEntry.setOwnerEmail(account.getEmail());
+            linkedEntry = entryDAO.create(linkedEntry);
+            entry.getLinkedEntries().add(linkedEntry);
+            entryDAO.update(linkedEntry);
+        }
+
         // recursively update
-        PartData linked = doUpdate(data.getLinkedParts().get(0), data.getLinkedParts().get(0).getId());
+        PartData linked = doUpdate(userId, linkedEntry, linkedPartData);
         data.getLinkedParts().clear();
         if (linked != null)
             data.getLinkedParts().add(linked);
@@ -191,9 +203,8 @@ public class BulkEntryCreator {
      * @param id     unique identifier referencing the bulk upload
      * @param name   name to assign to the bulk upload
      * @return data transfer object for the bulk upload.
-     *         returns null if no
-     * @throws org.jbei.ice.lib.access.AuthorizationException
-     *          is user performing action doesn't have privileges
+     * returns null if no
+     * @throws org.jbei.ice.lib.access.AuthorizationException is user performing action doesn't have privileges
      */
     public BulkUploadInfo renameBulkUpload(String userId, long id, String name) {
         BulkUpload upload = dao.get(id);
@@ -217,8 +228,7 @@ public class BulkEntryCreator {
      * @param autoUpdate wrapper for information used to create entry
      * @param addType    type of entry being created
      * @return updated wrapper for information used to create entry. Will contain additional information
-     *         such as the unique identifier for the part, if one was created
-     * @throws ControllerException
+     * such as the unique identifier for the part, if one was created
      */
     public BulkUploadAutoUpdate createOrUpdateEntry(String userId, BulkUploadAutoUpdate autoUpdate,
             EntryType addType) {
@@ -307,11 +317,11 @@ public class BulkEntryCreator {
         for (PartData datum : data) {
             int index = datum.getIndex();
 
-            if (datum.getId() > 0) {
-                datum = doUpdate(datum, datum.getId());
-            } else {
+            Entry entry = entryDAO.get(datum.getId());
+            if (entry != null)
+                datum = doUpdate(userId, entry, datum);
+            else
                 datum = createEntryForUpload(userId, datum, draft);
-            }
 
             if (datum == null)
                 return null;

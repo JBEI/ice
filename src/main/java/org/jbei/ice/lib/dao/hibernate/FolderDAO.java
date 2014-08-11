@@ -222,6 +222,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             query.setParameter("entry", entry);
             folders.addAll(query.list());
         } catch (HibernateException e) {
+            Logger.error(e);
             throw new DAOException("Failed to retrieve folders!", e);
         }
 
