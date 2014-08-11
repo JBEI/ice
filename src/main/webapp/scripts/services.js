@@ -329,6 +329,13 @@ iceServices.factory('User', function ($resource) {
                 url:'/rest/users/:userId/preferences/:preferenceKey',
                 responseType:'json',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            resetPassword:{
+                method:'POST',
+                url:'/rest/users/password',
+                responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
     }

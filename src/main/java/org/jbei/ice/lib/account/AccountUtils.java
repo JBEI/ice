@@ -1,6 +1,13 @@
 package org.jbei.ice.lib.account;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -26,19 +33,20 @@ public class AccountUtils {
         return Utils.encryptSHA(salt + password);
     }
 
-//    public static String encryptNewUserPassword(String password, String salt) throws UtilityException {
-//        if (password == null || password.trim().isEmpty() || salt == null || salt.trim().isEmpty())
-//            throw new UtilityException("Password and salt cannot be empty");
-//
-//        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), 20000, 160);
-//
-//        try {
-//            SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-//            return new String(f.generateSecret(spec).getEncoded());
-//        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-//            throw new UtilityException(e);
-//        }
-//    }
+    public static String encryptNewUserPassword(String password, String salt) {
+        if (password == null || password.trim().isEmpty() || salt == null || salt.trim().isEmpty())
+            throw new IllegalArgumentException("Password and salt cannot be empty");
+
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), 20000, 160);
+
+        try {
+            SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            return new String(f.generateSecret(spec).getEncoded());
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            Logger.error(e);
+            return null;
+        }
+    }
 
     public static Account fromDTO(AccountTransfer info) {
         Account account = new Account();

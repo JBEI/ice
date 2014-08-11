@@ -85,45 +85,52 @@ public class AccountController {
     /**
      * Changes user's password
      *
-     * @param email     unique account identifier
-     * @param sendEmail whether to notify user of password change
-     * @param url       current site url
-     * @throws ControllerException if account could not be retrieved using unique identifier
+     * @param email       optional unique account identifier for user making request. If valid and an administrator
+     *                    then the newly created password is also sent
+     * @param targetEmail email address of user account to be changeds
      */
-    public void resetPassword(String email, boolean sendEmail, String url) throws ControllerException {
-        Account account = getByEmail(email);
+    public AccountTransfer resetPassword(String email, String targetEmail) {
+        Account account = getByEmail(targetEmail);
         if (account == null)
-            throw new ControllerException("Could not retrieve account for account id " + email);
+            throw new IllegalArgumentException("Cannot retrieve account for " + targetEmail);
 
         String newPassword = Utils.generateUUID().substring(24);
         String encryptedNewPassword = AccountUtils.encryptPassword(newPassword, account.getSalt());
         account.setPassword(encryptedNewPassword);
 
-        save(account);
-        if (!sendEmail || url == null || url.trim().isEmpty())
-            return;
+        account = dao.update(account);
+        AccountTransfer transfer = account.toDataTransferObject();
+        transfer.setPassword(encryptedNewPassword);
 
-        String projectName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
-        String subject = projectName + " Password Reminder";
-        String name = account.getFirstName();
-        if (StringUtils.isBlank(name)) {
-            name = account.getLastName();
-            if (StringUtils.isBlank(name))
-                name = email;
+        if (email == null || !isAdministrator(email)) {
+            String url = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+            String projectName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
+            if (StringUtils.isEmpty(projectName))
+                projectName = "ICE";
+            String subject = projectName + " Password Reminder";
+            String name = account.getFirstName();
+            if (StringUtils.isBlank(name)) {
+                name = account.getLastName();
+                if (StringUtils.isBlank(name))
+                    name = email;
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, MMM d, yyyy 'at' HH:mm aaa, z");
+
+            StringBuilder builder = new StringBuilder();
+            builder.append("Dear ").append(name).append(",\n\n")
+                   .append("The password for your ").append(projectName)
+                   .append(" account (").append(targetEmail).append(") was reset on ")
+                   .append(dateFormat.format(new Date())).append(".\nYour new temporary password is\n\n")
+                   .append(newPassword).append("\n\n")
+                   .append("Please go to the following link to login and change your password.\n\n")
+                   .append("https://").append(url).append("/profile/").append(account.getId())
+                   .append("\n\nThank you.");
+
+            Emailer.send(account.getEmail(), subject, builder.toString());
+            return null;
         }
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, MMM d, yyyy 'at' HH:mm aaa, z");
-
-        StringBuilder builder = new StringBuilder();
-        builder.append("Dear ").append(name).append(",\n\n")
-               .append("The password for your ").append(projectName)
-               .append(" account (").append(email).append(") was reset on ")
-               .append(dateFormat.format(new Date())).append(". Your new temporary password is\n\n")
-               .append(newPassword).append("\n\n")
-               .append("Please go to the following link to login and change your password.\n\n").append(url)
-               .append("\n\nThank you.");
-
-        Emailer.send(account.getEmail(), subject, builder.toString());
+        return transfer;
     }
 
     /**
@@ -148,7 +155,6 @@ public class AccountController {
      * are present
      *
      * @param accountTransfer account dto for validation
-     * @throws ControllerException if validation fails
      */
     private boolean validateRequiredAccountFields(AccountTransfer accountTransfer) {
         if (accountTransfer.getFirstName() == null || accountTransfer.getFirstName().trim().isEmpty())
@@ -340,25 +346,6 @@ public class AccountController {
     }
 
     /**
-     * Return the {@link AccountPreferences} of the given account.
-     *
-     * @param account
-     * @return accountPreference
-     * @throws ControllerException
-     */
-    public AccountPreferences getAccountPreferences(Account account) throws ControllerException {
-        AccountPreferences accountPreferences;
-
-        try {
-            accountPreferences = accountPreferencesDAO.getAccountPreferences(account);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        return accountPreferences;
-    }
-
-    /**
      * Authenticate a user in the database.
      * <p/>
      * Using the {@link org.jbei.ice.lib.account.authentication.IAuthentication} specified in the settings file,
@@ -370,10 +357,9 @@ public class AccountController {
      * @param password
      * @param ip       IP Address of the user.
      * @throws InvalidCredentialsException
-     * @throws ControllerException
      */
     public String authenticate(String login, String password, String ip)
-            throws InvalidCredentialsException, ControllerException {
+            throws InvalidCredentialsException {
         IAuthentication authentication = new LocalAuthentication();
         String email;
 
@@ -398,7 +384,7 @@ public class AccountController {
 
         Account account = dao.getByEmail(email);
         if (account != null) {
-            AccountPreferences accountPreferences = getAccountPreferences(account);
+            AccountPreferences accountPreferences = accountPreferencesDAO.getAccountPreferences(account);
 
             if (accountPreferences == null) {
                 accountPreferences = new AccountPreferences();
@@ -432,7 +418,7 @@ public class AccountController {
         String email;
         try {
             email = authenticate(transfer.getEmail(), transfer.getPassword(), "");
-        } catch (InvalidCredentialsException | ControllerException e) {
+        } catch (InvalidCredentialsException e) {
             Logger.error(e);
             return null;
         }
@@ -476,15 +462,9 @@ public class AccountController {
      * Save {@link AccountPreferences} to the database.
      *
      * @param accountPreferences
-     * @throws ControllerException
      */
-    public void saveAccountPreferences(AccountPreferences accountPreferences)
-            throws ControllerException {
-        try {
-            accountPreferencesDAO.create(accountPreferences);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+    public void saveAccountPreferences(AccountPreferences accountPreferences) {
+        accountPreferencesDAO.create(accountPreferences);
     }
 
     public void resetUserPassword(String email, String url) throws ControllerException {

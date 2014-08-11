@@ -176,8 +176,21 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
     }
 });
 
-iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location) {
+iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location, User) {
     $scope.errMsg = undefined;
+    $scope.user = {};
+
+    $scope.resetPassword = function () {
+        if ($scope.user.email === undefined) {
+            $scope.user.error = true;
+            return;
+        }
+        User().resetPassword({}, $scope.user, function (success) {
+            $location.path("/login");
+        }, function (error) {
+
+        });
+    };
 
     $scope.cancel = function () {
         $location.path("/login");
@@ -246,6 +259,9 @@ iceControllers.controller('AdminController', function ($rootScope, $location, $s
         'SEND_EMAIL_ON_ERRORS'
     ];
 
+    $scope.generalSettings = [];
+    $scope.emailSettings = [];
+
     // retrieve general setting
     $scope.getSetting = function () {
         var sessionId = $cookieStore.get("sessionId");
@@ -254,9 +270,6 @@ iceControllers.controller('AdminController', function ($rootScope, $location, $s
         var settings = Settings(sessionId);
         settings.get(function (result) {
             $rootScope.settings = result;
-
-            $scope.generalSettings = [];
-            $scope.emailSettings = [];
 
             angular.forEach($rootScope.settings, function (setting) {
                 if (generalSettingKeys.indexOf(setting.key) != -1) {
@@ -569,10 +582,8 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
     };
 
     $scope.updatePassword = function () {
-    };
+        // todo :
 
-    $scope.canChangePassword = function () {
-        return false;
     };
 
     $scope.updateProfile = function () {
@@ -1131,12 +1142,12 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
 
     Settings().getSetting({key:'NEW_REGISTRATION_ALLOWED'}, function (result) {
         $scope.canCreateAccount = (result !== undefined && result.key === 'NEW_REGISTRATION_ALLOWED'
-            && (result.value === 'yes' || result.value === 'true'));
+            && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
     });
 
     Settings().getSetting({key:'PASSWORD_CHANGE_ALLOWED'}, function (result) {
         $scope.canChangePassword = (result !== undefined && result.key === 'PASSWORD_CHANGE_ALLOWED'
-            && (result.value === 'yes' || result.value === 'true'));
+            && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
     });
 });
 

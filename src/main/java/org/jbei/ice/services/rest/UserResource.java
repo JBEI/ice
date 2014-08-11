@@ -11,6 +11,7 @@ import javax.ws.rs.core.UriInfo;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.PreferencesController;
+import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -157,9 +158,23 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     public AccountTransfer update(@Context UriInfo info, @PathParam("id") long userId,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader, AccountTransfer transfer) {
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            AccountTransfer transfer) {
         String user = getUserIdFromSessionHeader(userAgentHeader);
         return controller.updateAccount(user, userId, transfer);
+    }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/password")
+    public AccountTransfer resetPassword(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+            AccountTransfer transfer) {
+        String userId = SessionHandler.getUserIdBySession(sessionId);
+        AccountTransfer newUpdate = controller.resetPassword(userId, transfer.getEmail());
+        if (newUpdate == null)
+            return transfer;
+        return newUpdate;
     }
 
     @PUT
