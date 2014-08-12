@@ -100,14 +100,14 @@ public class AccountController {
 
         account = dao.update(account);
         AccountTransfer transfer = account.toDataTransferObject();
-        transfer.setPassword(encryptedNewPassword);
+        transfer.setPassword(newPassword);
 
         if (email == null || !isAdministrator(email)) {
             String url = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
             String projectName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
             if (StringUtils.isEmpty(projectName))
                 projectName = "ICE";
-            String subject = projectName + " Password Reminder";
+            String subject = projectName + " Password Reset";
             String name = account.getFirstName();
             if (StringUtils.isBlank(name)) {
                 name = account.getLastName();
@@ -136,18 +136,17 @@ public class AccountController {
     /**
      * Updates account password associated the account email. It encrypts it before associating it
      * with the account
-     *
-     * @param email    user unique identifier
-     * @param password new password
-     * @throws ControllerException
      */
-    public void updatePassword(String email, String password) throws ControllerException {
-        Account account = getByEmail(email);
-        if (account == null)
-            throw new ControllerException("Could not retrieve account for account id " + email);
+    public AccountTransfer updatePassword(String userId, AccountTransfer transfer) {
+        Account userAccount = getByEmail(transfer.getEmail());
+        if (userAccount == null)
+            throw new IllegalArgumentException("Could not retrieve account by id " + transfer.getEmail());
 
-        account.setPassword(AccountUtils.encryptPassword(password, account.getSalt()));
-        save(account);
+        if (!isAdministrator(userId) && !userAccount.getEmail().equalsIgnoreCase(userId))
+            return null;
+
+        userAccount.setPassword(AccountUtils.encryptPassword(transfer.getPassword(), userAccount.getSalt()));
+        return dao.update(userAccount).toDataTransferObject();
     }
 
     /**
@@ -454,7 +453,7 @@ public class AccountController {
      *
      * @param sessionKey unique session identifier
      */
-    public static void invalidate(String sessionKey) {
+    public void invalidate(String sessionKey) {
         SessionHandler.invalidateSession(sessionKey);
     }
 
@@ -465,28 +464,6 @@ public class AccountController {
      */
     public void saveAccountPreferences(AccountPreferences accountPreferences) {
         accountPreferencesDAO.create(accountPreferences);
-    }
-
-    public void resetUserPassword(String email, String url) throws ControllerException {
-        Account account = getByEmail(email);
-
-        if (account == null)
-            return;
-
-        String newPassword = Utils.generateUUID().substring(24);
-        account.setPassword(AccountUtils.encryptPassword(newPassword, account.getSalt()));
-        save(account);
-        String subject = "JBEI Registry Password Reminder";
-        String body = "A request has been made to reset your password.\n\n";
-        body = body + "Your new password is " + newPassword + ".\n\n";
-        body = body + "Please go to the following link and change your password.\n\n";
-        body = body + url;
-
-        try {
-            Emailer.send(account.getEmail(), subject, body);
-        } catch (Exception e) {
-            throw new ControllerException(e);
-        }
     }
 
     public ArrayList<AccountTransfer> getMatchingAccounts(String userId, String query, int limit) {

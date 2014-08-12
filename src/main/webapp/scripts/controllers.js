@@ -467,6 +467,8 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
     $scope.showChangePassword = false;
     $scope.showEditProfile = false;
     $scope.showSendMessage = false;
+    $scope.changePass = {};
+
     $scope.preferenceEntryDefaults = [
         {display:"Principal Investigator", id:"PRINCIPAL_INVESTIGATOR", help:"Enter Email or Name"},
         {display:"Funding Source", id:"FUNDING_SOURCE"}
@@ -582,8 +584,65 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
     };
 
     $scope.updatePassword = function () {
-        // todo :
+        var pass = $scope.changePass;
+        console.log(pass);
 
+        if (!$scope.changePass || $scope.changePass.current === undefined || !$scope.changePass.current.length) {
+            $scope.changePasswordError = "Please enter your current password";
+            $scope.currentError = true;
+            return;
+        }
+
+        // check new password value
+        if (pass.new === undefined || pass.new.length === 0) {
+            $scope.changePasswordError = "Please enter a new password for your account";
+            $scope.newPassError = true;
+            return;
+        }
+
+        // check for new password confirm value
+        if (pass.new2 === undefined || pass.new2.length === 0) {
+            $scope.changePasswordError = "Please confirm the new password for your account";
+            $scope.newPass2Error = true;
+            return;
+        }
+
+        // check for matching password values
+        if (pass.new2 !== pass.new) {
+            $scope.changePasswordError = "The password for your account does not match";
+            $scope.newPassError = true;
+            $scope.newPass2Error = true;
+            return;
+        }
+
+        var user = User();
+
+        // validate existing password
+        var userId = $cookieStore.get('userId');
+        var userObj = {sessionId:$cookieStore.get("sessionId"), password:$scope.changePass.current, email:userId};
+        // authenticate new password
+        user.resetPassword({}, userObj, function (result) {
+            if (result == null) {
+                $scope.changePasswordError = "Current password is invalid";
+                $scope.currentError = true;
+                return;
+            }
+
+            user.changePassword({},
+                {email:userId, password:pass.new},
+                function (success) {
+                    if (success) {
+                        $location.path($location.path());
+                    } else {
+                        $scope.changePasswordError = "There was an error changing your password";
+                    }
+                }, function (error) {
+
+                });
+            //  change password
+        }, function (error) {
+            $scope.changePasswordError = "There was an error changing your password";
+        });
     };
 
     $scope.updateProfile = function () {

@@ -164,6 +164,7 @@ public class UserResource extends RestResource {
         return controller.updateAccount(user, userId, transfer);
     }
 
+    // reset or validate password (also include current session id for validation pending new method)
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -171,10 +172,26 @@ public class UserResource extends RestResource {
     public AccountTransfer resetPassword(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
             AccountTransfer transfer) {
         String userId = SessionHandler.getUserIdBySession(sessionId);
+        if (transfer.getPassword() != null && userId != null) {
+            return controller.authenticate(transfer);
+        }
+
+        // reset
         AccountTransfer newUpdate = controller.resetPassword(userId, transfer.getEmail());
         if (newUpdate == null)
             return transfer;
         return newUpdate;
+    }
+
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/password")
+    public AccountTransfer updatePassword(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+            AccountTransfer transfer) {
+        String user = getUserIdFromSessionHeader(sessionId);
+        return controller.updatePassword(user, transfer);
     }
 
     @PUT

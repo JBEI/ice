@@ -8,7 +8,6 @@ import javax.crypto.spec.PBEKeySpec;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
@@ -27,10 +26,7 @@ public class AccountUtils {
     public static String encryptPassword(String password, String userSalt) {
         if (password == null || password.isEmpty())
             throw new IllegalArgumentException("Cannot encrypt null or empty password");
-        String salt = Utils.getConfigValue(ConfigurationKey.SECRET_KEY);
-        if (salt == null || salt.isEmpty())
-            salt = userSalt;
-        return Utils.encryptSHA(salt + password);
+        return Utils.encryptSHA(userSalt + password);
     }
 
     public static String encryptNewUserPassword(String password, String salt) {

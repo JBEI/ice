@@ -552,19 +552,20 @@ public class PermissionsController {
     public ArrayList<AccessPermission> getMatchingGroupsOrUsers(String userId, String val, int limit) {
         // groups has higher priority
         Set<Group> groups = groupController.getMatchingGroups(userId, val, limit);
-        int accountLimit;
-        if (groups != null)
-            accountLimit = limit;
-        else
-            accountLimit = (limit - groups.size());
-
         ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
-        for (Group group : groups) {
-            AccessPermission permission = new AccessPermission();
-            permission.setDisplay(group.getLabel());
-            permission.setArticle(AccessPermission.Article.GROUP);
-            permission.setArticleId(group.getId());
-            accessPermissions.add(permission);
+
+        int accountLimit;
+        if (groups == null)
+            accountLimit = limit;
+        else {
+            for (Group group : groups) {
+                AccessPermission permission = new AccessPermission();
+                permission.setDisplay(group.getLabel());
+                permission.setArticle(AccessPermission.Article.GROUP);
+                permission.setArticleId(group.getId());
+                accessPermissions.add(permission);
+            }
+            accountLimit = (limit - groups.size());
         }
 
         if (accountLimit == 0)
