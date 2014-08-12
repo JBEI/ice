@@ -38,16 +38,21 @@
                                                 data-placement="bottom" data-content="contents"
                                                 data-template="/views/popover.html" data-trigger="focus" bs-popover>
                                             <i class="fa fa-bell" style="color: #757575; font-size: 14px"></i><sup
-                                                class="count-badge">4</sup></button>
+                                                class="count-badge">4</sup>
+                                        </button>
                                     </span>
                                     <span class="cursor_pointer" ng-if="false">&nbsp;
                                         <i class="fa fa-envelope" style="color: #757575; font-size: 14px"></i>
                                         <sup class="count-badge">8</sup>
                                     </span>
-                                    <span class="cursor_pointer" ng-if="false">
+                                    <span class="cursor_pointer" ng-click="hidePopovers(false)"
+                                          ng-if="shoppingCartContents.length" popover-toggle="openShoppingCart"
+                                          popover-trigger="manual"
+                                          popover-placement="bottom" popover-title="Samples Cart"
+                                          popover-template="/views/shopping-cart-template.html">
                                         &nbsp;
                                         <i class="fa fa-shopping-cart" style="color: #757575; font-size: 14px"></i>
-                                        <sup class="count-badge">5</sup>
+                                        <sup class="count-badge">{{shoppingCartContents.length}}</sup>
                                     </span>
                                     <span class="cursor_pointer" ng-if="user.isAdmin">&nbsp;<a href="/admin">
                                         <i class="fa fa-sliders" style="color: #757575; font-size: 20px"

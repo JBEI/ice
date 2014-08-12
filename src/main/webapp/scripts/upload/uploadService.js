@@ -4,7 +4,7 @@ angular.module('ice.upload.service', [])
     .factory('UploadUtil', function () {
         var plasmidHeaders, strainHeaders, seedHeaders;
 
-        // headers
+        // headers todo : these need to be moved to the server (similar to what is being done for parts)
         var partHeaders = ["Principal Investigator <span class='required'>*</span>"
             , "PI Email <i class='opacity_hover fa fa-question-circle' title='tooltip' style='margin-left: 20px'></i>"
             , "Funding Source"
@@ -39,7 +39,7 @@ angular.module('ice.upload.service', [])
 
         var getTypeSchema = function (type) {
             var dataSchema;
-            switch (type) {
+            switch (type.toLowerCase()) {
                 case "strain":
                     dataSchema = ['principalInvestigator', 'principalInvestigatorEmail', 'fundingSource', 'intellectualProperty', 'bioSafetyLevel', 'name', 'alias', 'keywords', 'shortDescription', 'longDescription', 'references', 'links', 'status', 'creator', 'creatorEmail', 'parentStrain', 'genotypePhenotype', 'plasmids', 'selectionMarkers', 'sequenceFilename', 'attachmentFilename'];
                     break;
@@ -69,7 +69,7 @@ angular.module('ice.upload.service', [])
             },
 
             getSheetHeaders:function (type) { // returns array of headers for specified type
-                switch (type) {
+                switch (type.toLowerCase()) {
                     case "strain":
                         return strainHeaders;
 

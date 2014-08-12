@@ -185,14 +185,18 @@ public class InfoToModelFactory {
         entry.setModificationTime(currentTime);
 
         if (info.getOwnerEmail() != null) {
-            entry.setOwner(info.getOwner());
             entry.setOwnerEmail(info.getOwnerEmail());
         }
 
+        if (info.getOwner() != null)
+            entry.setOwner(info.getOwner());
+
         if (info.getCreatorEmail() != null) {
-            entry.setCreator(info.getCreator());
             entry.setCreatorEmail(info.getCreatorEmail());
         }
+
+        if (info.getCreator() != null)
+            entry.setCreator(info.getCreator());
 
         if (info.getStatus() == null) {
             if (StringUtils.isBlank(entry.getStatus()))

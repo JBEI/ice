@@ -20,7 +20,6 @@ angular.module('ice.entry.controller', [])
             headers:{"X-ICE-Authentication-SessionId":sid}
         });
 
-
         uploader.bind('success', function (event, xhr, item, response) {
             response.description = desc;
             attachment.create({partId:$stateParams.id}, response,
@@ -97,10 +96,10 @@ angular.module('ice.entry.controller', [])
             });
 
             modalInstance.result.then(function (selected) {
-                console.log("selected", selected);
-                $scope.$emit("SampleTypeSelected", selected);
+                var sampleSelection = {type:selected, entry:$scope.entry};
+                console.log("selected", sampleSelection);
+                $scope.$emit("SampleTypeSelected", sampleSelection);
                 // "liquid" or "streak"
-
             }, function () {
                 // dismiss callback
             });

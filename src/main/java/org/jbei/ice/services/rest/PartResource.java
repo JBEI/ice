@@ -196,7 +196,6 @@ public class PartResource extends RestResource {
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
-
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")

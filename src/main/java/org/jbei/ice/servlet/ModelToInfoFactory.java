@@ -195,16 +195,6 @@ public class ModelToInfoFactory {
         info.setPrincipalInvestigator(entry.getPrincipalInvestigator());
         info.setPrincipalInvestigatorEmail(entry.getPrincipalInvestigatorEmail());
 
-        // linked entries
-        for (Entry linkedEntry : entry.getLinkedEntries()) {
-            EntryType linkedType = EntryType.nameToType(entry.getRecordType());
-            PartData data = new PartData(linkedType);
-            data.setId(linkedEntry.getId());
-//            data.setPartId(linkedEntry.getPartNumber());
-//            data.setName(linkedEntry.getName());
-            info.getLinkedParts().add(data);
-        }
-
         ArrayList<String> links = new ArrayList<>();
         if (entry.getLinks() != null) {
             for (Link link : entry.getLinks()) {
@@ -229,6 +219,14 @@ public class ModelToInfoFactory {
         info.setLongDescription(entry.getLongDescription());
         info.setShortDescription(entry.getShortDescription());
         info.setReferences(entry.getReferences());
+
+        // linked entries
+        for (Entry linkedEntry : entry.getLinkedEntries()) {
+            PartData linkedPartData = getInfo(linkedEntry);
+            if (linkedPartData != null)
+                info.getLinkedParts().add(linkedPartData);
+        }
+
         return info;
     }
 

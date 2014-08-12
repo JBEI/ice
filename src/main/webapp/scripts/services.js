@@ -329,6 +329,20 @@ iceServices.factory('User', function ($resource) {
                 url:'/rest/users/:userId/preferences/:preferenceKey',
                 responseType:'json',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            resetPassword:{
+                method:'POST',
+                url:'/rest/users/password',
+                responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            changePassword:{
+                method:'PUT',
+                url:'/rest/users/password',
+                responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
     }
@@ -607,6 +621,12 @@ iceServices.factory('Upload', function ($resource) {
                 method:'POST',
                 url:'rest/upload/file',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            updateList:{
+                method:'PUT',
+                url:'rest/upload/:importId',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
     }
@@ -795,91 +815,112 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
                 isArray:true,
                 url:'/rest/folders/:folderId/permissions',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            addPermission:{
+                method:'POST',
+                responseType:'json',
+                url:'/rest/folders/:folderId/permissions',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            removePermission:{
+                method:'DELETE',
+                responseType:'json',
+                url:'/rest/folders/:folderId/permissions/:permissionId',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             }
         });
     }
 });
 
-iceServices.factory('Authentication', function ($resource, $cookieStore, $http, $rootScope, $location, $cookies) {
-    return {
-        // logs in user to ice
-        login:function (username, password) {
-            return $http({
-                url:"/rest/accesstoken",
-                method:"POST",
-                data:"{email:" + username + ", password:\'" + password + "\'}",
-                dataType:"json" }).
-                success(function (data, status, headers, config) {
-                    if (data.length == 0) {
-                        $rootScope.errMsg = "Login failed.";
-                        $cookieStore.remove('userId');
-                        $cookieStore.remove('sessionId');
-                        return;
-                    }
-                    $rootScope.user = data;
-                    $cookieStore.put('userId', data.email);
-                    $cookieStore.put('sessionId', data.sessionId);
-                    var loginDestination = $cookies.loginDestination || '/';
-                    console.log("loginDestination", loginDestination);
-                    $cookies.loginDestination = null;
-                    $location.path(loginDestination);
-                }).
-                error(function (data, status, headers, config) {
-                    console.log(data, status);
-                    // called asynchronously if an error occurs
-                    // or server returns response with an error status.
-                });
-        },
-
-        // checks if the session is valid
-        isSessionValid:function (who) {
-            console.log("check for valid session", who);
-            var sid = $cookieStore.get('sessionId');
-            if (sid === undefined) {
-                if ($location.path() !== '/login')
-                    $cookies.loginDestination = $location.path();
-                $location.path('/login');
-                return;
+iceServices.factory('AccessToken', function ($resource, $cookieStore, $http, $rootScope, $location, $cookies) {
+    return function () {
+        return $resource('/rest/accesstoken', {}, {
+            createToken:{
+                method:'POST',
+                responseType:'json'
             }
+        })
+    }
+});
 
-            return $http.get('/rest/accesstoken',
-                {headers:{'X-ICE-Authentication-SessionId':sid}})
-                .success(function (data) {
-                    if (data.sessionId === undefined) {
+iceServices.factory('Authentication',
+    function ($resource, $cookieStore, $http, $rootScope, $location, $cookies, AccessToken) {
+        return {
+            // logs in user to ice
+            login:function (username, password) {
+                var token = AccessToken();
+                token.createToken({}, {email:username, password:password},
+                    function (success) {
+                        if (success && success.sessionId) {
+                            $rootScope.user = success;
+                            $cookieStore.put('userId', success.email);
+                            $cookieStore.put('sessionId', success.sessionId);
+                            var loginDestination = $cookies.loginDestination || '/';
+                            $cookies.loginDestination = null;
+                            $location.path(loginDestination);
+                        } else {
+                            $cookieStore.remove('userId');
+                            $cookieStore.remove('sessionId');
+                        }
+                    },
+                    function (error) {
+                        console.error(error);
+                        $rootScope.errMsg = "Login failed";
+                    }
+                );
+            },
+
+            // checks if the session is valid
+            isSessionValid:function (who) {
+                console.log("check for valid session", who);
+                var sid = $cookieStore.get('sessionId');
+                if (sid === undefined) {
+                    if ($location.path() !== '/login')
+                        $cookies.loginDestination = $location.path();
+                    $location.path('/login');
+                    return;
+                }
+
+                return $http.get('/rest/accesstoken',
+                    {headers:{'X-ICE-Authentication-SessionId':sid}})
+                    .success(function (data) {
+                        if (data.sessionId === undefined) {
+                            $cookieStore.remove('userId');
+                            $cookieStore.remove('sessionId');
+                            if ($location.path() !== '/login')
+                                $cookies.loginDestination = $location.path();
+                            $location.path('/login');
+                        }
+                        $rootScope.user = data;
+                    })
+                    .error(function (data, status) {
+                        if (status === 401) {
+                            if ($location.path() !== '/login')
+                                $cookies.loginDestination = $location.path();
+                            $location.path('/login');
+                        }
+                        console.log("ERROR", data);
+                    });
+            },
+
+            // logs out user by invalidating the session id
+            logout:function () {
+                var sid = $cookieStore.get("sessionId");
+                return $http.delete('/rest/accesstoken', {headers:{'X-ICE-Authentication-SessionId':sid}}).
+                    success(function () {
+                        $rootScope.user = undefined;
                         $cookieStore.remove('userId');
                         $cookieStore.remove('sessionId');
-                        if ($location.path() !== '/login')
-                            $cookies.loginDestination = $location.path();
                         $location.path('/login');
-                    }
-                    $rootScope.user = data;
-                })
-                .error(function (data, status) {
-                    if (status === 401) {
-                        if ($location.path() !== '/login')
-                            $cookies.loginDestination = $location.path();
-                        $location.path('/login');
-                    }
-                    console.log("ERROR", data);
-                });
-        },
+                    });
+            }
+        };
 
-        // logs out user by invalidating the session id
-        logout:function () {
-            var sid = $cookieStore.get("sessionId");
-            return $http.delete('/rest/accesstoken', {headers:{'X-ICE-Authentication-SessionId':sid}}).
-                success(function () {
-                    $rootScope.user = undefined;
-                    $cookieStore.remove('userId');
-                    $cookieStore.remove('sessionId');
-                    $location.path('/login');
-                });
-        }
-    };
-
-    // example using resource
+        // example using resource
 //    return $resource('/rest/accesstoken', {}, {
 //        'login':{ method:"POST" },
 //        "isSessionValid":{ method:"GET", headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")} }
 //    });
-});
+    });

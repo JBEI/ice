@@ -6,7 +6,9 @@
                     <td>
                         <h4>
                             <span style="white-space: nowrap">
-                            <strong style="color: #888;">{{importType.toUpperCase()}} UPLOAD</strong>
+                            <strong style="color: #888;text-transform: uppercase">{{importType}}
+                                <span ng-if="linkedSelection"> + {{linkedSelection}}</span> UPLOAD
+                            </strong>
 
                             <strong style="white-space: nowrap" class="bulk_import_name"
                                     ng-click="showBulkUploadRenameModal()">{{bulkUpload.name}}
@@ -60,7 +62,7 @@
             <button type="button" class="btn btn-xs btn-primary"
                     ng-disabled="!bulkUpload||!bulkUpload.entryIdData||!bulkUpload.entryIdData.length"
                     ng-click="submitImportForApproval()">
-                <span ng-if="bulkUpload.status=='IN_PROGRESS'">Submit</span>
+                <span ng-if="bulkUpload.status==undefined || bulkUpload.status=='IN_PROGRESS'">Submit</span>
                 <span ng-if="bulkUpload.status=='PENDING_APPROVAL'">Approve</span>
             </button>
             <button type="button" class="btn btn-xs btn-default" ng-click="confirmResetFormModal()">

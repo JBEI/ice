@@ -16,9 +16,13 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="text" class="login_input" placeholder="Username" data-ng-model="userId"/>
+                    <input type="text"
+                           ng-class="{'login_input':!login.emailError, 'login_input_error':login.emailError}"
+                           placeholder="Username" ng-model="login.email" ng-change="login.emailError=undefined"/>
                     <br>
-                    <input type="password" class="login_input" placeholder="Password" data-ng-model="userPassword"/>
+                    <input type="password"
+                           ng-class="{'login_input':!login.passwordError, 'login_input_error':login.passwordError}"
+                           placeholder="Password" ng-model="login.password" ng-change="login.passwordError=undefined"/>
                 </div>
 
                 <div class="checkbox">
