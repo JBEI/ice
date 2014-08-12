@@ -15,6 +15,7 @@ import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
+import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -496,6 +497,30 @@ public class PermissionsController {
         return data;
     }
 
+    public FolderDetails setFolderPermissions(String userId, long folderId, ArrayList<AccessPermission> permissions) {
+        Folder folder = folderDAO.get(folderId);
+        FolderAuthorization folderAuthorization = new FolderAuthorization();
+        folderAuthorization.expectWrite(userId, folder);
+
+        dao.clearPermissions(folder);
+
+        if (permissions == null)
+            return null;
+
+        Account account = accountController.getByEmail(userId);
+
+        for (AccessPermission access : permissions) {
+            Permission permission = new Permission();
+            permission.setFolder(folder);
+            permission.setAccount(account);
+            permission.setCanRead(access.isCanRead());
+            permission.setCanWrite(access.isCanWrite());
+            dao.create(permission);
+        }
+
+        return folder.toDataTransferObject();
+    }
+
     /**
      * Adds a new permission to the specified entry. If the entry does not exist, a new one is
      * created
@@ -529,6 +554,26 @@ public class PermissionsController {
         return dao.create(permission).toDataTransferObject();
     }
 
+    public AccessPermission createFolderPermission(String userId, long folderId, AccessPermission accessPermission) {
+        if (accessPermission == null)
+            return null;
+
+        Folder folder = folderDAO.get(folderId);
+        if (folder == null)
+            return null;
+
+        FolderAuthorization authorization = new FolderAuthorization();
+        authorization.expectWrite(userId, folder);
+
+        Permission permission = new Permission();
+        permission.setFolder(folder);
+        Account account = DAOFactory.getAccountDAO().get(accessPermission.getArticleId());
+        permission.setAccount(account);
+        permission.setCanRead(accessPermission.isCanRead());
+        permission.setCanWrite(accessPermission.isCanWrite());
+        return dao.create(permission).toDataTransferObject();
+    }
+
     public void removeEntryPermission(String userId, long partId, long permissionId) {
         Entry entry = DAOFactory.getEntryDAO().get(partId);
         if (entry == null)
@@ -544,6 +589,24 @@ public class PermissionsController {
 
         // permission must be for entry and specified entry
         if (permission.getEntry() == null || permission.getEntry().getId() != partId)
+            return;
+
+        dao.delete(permission);
+    }
+
+    public void removeFolderPermission(String userId, long folderId, long permissionId) {
+        Folder folder = folderDAO.get(folderId);
+        if (folder == null)
+            return;
+
+        Permission permission = dao.get(permissionId);
+        if (permission == null)
+            return;
+
+        FolderAuthorization folderAuthorization = new FolderAuthorization();
+        folderAuthorization.expectWrite(userId, folder);
+
+        if (permission.getFolder().getId() != folderId)
             return;
 
         dao.delete(permission);

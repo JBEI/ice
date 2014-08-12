@@ -6,6 +6,7 @@ import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.lib.access.PermissionsController;
@@ -185,10 +186,32 @@ public class FolderResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
-    public PartData setPermissions(@Context UriInfo info, @PathParam("id") long partId,
+    public FolderDetails setPermissions(@Context UriInfo info, @PathParam("id") long folderId,
             ArrayList<AccessPermission> permissions,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return permissionsController.setEntryPermissions(userId, partId, permissions);
+        return permissionsController.setFolderPermissions(userId, folderId, permissions);
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/permissions")
+    public AccessPermission addPermission(@Context UriInfo info, @PathParam("id") long folderId,
+            AccessPermission permission,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        return permissionsController.createFolderPermission(userId, folderId, permission);
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/permissions/{permissionId}")
+    public Response removePermission(@Context UriInfo info,
+            @PathParam("id") long partId,
+            @PathParam("permissionId") long permissionId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        permissionsController.removeFolderPermission(userId, partId, permissionId);
+        return Response.ok().build();
     }
 }

@@ -815,6 +815,20 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
                 isArray:true,
                 url:'/rest/folders/:folderId/permissions',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            addPermission:{
+                method:'POST',
+                responseType:'json',
+                url:'/rest/folders/:folderId/permissions',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            removePermission:{
+                method:'DELETE',
+                responseType:'json',
+                url:'/rest/folders/:folderId/permissions/:permissionId',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             }
         });
     }
@@ -844,7 +858,6 @@ iceServices.factory('Authentication',
                             $cookieStore.put('userId', success.email);
                             $cookieStore.put('sessionId', success.sessionId);
                             var loginDestination = $cookies.loginDestination || '/';
-                            console.log("loginDestination", loginDestination);
                             $cookies.loginDestination = null;
                             $location.path(loginDestination);
                         } else {
@@ -854,6 +867,7 @@ iceServices.factory('Authentication',
                     },
                     function (error) {
                         console.error(error);
+                        $rootScope.errMsg = "Login failed";
                     }
                 );
             },

@@ -1,7 +1,8 @@
 <div class="modal-header">
     <button type="button" class="close" ng-click="closeModal()">&times;</button>
     <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
-        <i class="fa fa-share-alt"></i> &nbsp;Folder Share Settings</span>
+        <i class="fa fa-share-alt"></i> &nbsp;Folder Share Settings <span
+            style="color:#000000;">{{folder.folderName}}</span></span>
 </div>
 
 <div class="modal-body">
@@ -23,7 +24,7 @@
                                 {{pane.title}}
             <span style="float: right">
                 <div ng-show="pane.selected" class="edit_icon font-12em">
-                    <i ng-click="showAddPermissionOptionsClick(pane)" class="fa fa-plus-circle"></i></div>
+                    <i ng-click="showAddPermissionOptionsClick()" class="fa fa-plus-circle"></i></div>
                 <div ng-hide="pane.selected" class="edit_icon font-12em">{{pane.count || 0}}</div>
             </span>
                             </div>
@@ -41,23 +42,40 @@
         <tr>
             <td>
                 <!--user select filter-->
-                <div ng-if="users">
-                    <input type="text" placeholder="Filter list" ng-model="filterUser.$"
-                           style="width: 180px; font-size: 0.80em">
+                <div ng-if="showPermissionInput">
+                    <form ng-submit="addEmailUser()">
+                        <input type="text" placeholder="Enter name or email" ng-model="userFilterInput"
+                               ng-change="filter(userFilterInput)"
+                               style="width: 220px; font-size: 0.90em">
+                    </form>
 
                     <div style="overflow: auto; max-height: 120px;" class="font-75em">
 
                         <!--<pre>{{users | json}}</pre>-->
-                        <div ng-repeat="user in users | filter:filterUser" style="padding-left: 6px; padding-top: 3px">
-                        <span ng-click="addRemovePermission(user)" style="cursor: pointer">
-                            <i class="fa"
-                               ng-class="{'fa-square-o': !user.selected, 'fa-check-square-o': user.selected}"></i>
-                            <i class="fa fa-user permission_user"></i> {{user.firstName}} {{user.lastName}}
-                        </span>
+                        <!--<div ng-repeat="user in users | filter:filterUser" style="padding-left: 6px; padding-top: 3px">-->
+                        <!--<span ng-click="addRemovePermission(user)" style="cursor: pointer">-->
+                        <!--<i class="fa"-->
+                        <!--ng-class="{'fa-square-o': !user.selected, 'fa-check-square-o': user.selected}"></i>-->
+                        <!--<i class="fa fa-user permission_user"></i> {{user.firstName}} {{user.lastName}}-->
+                        <!--</span>-->
+                        <!--</div>-->
+
+                        <div ng-if="!filtering && !accessPermissions" style="opacity: 0.7; padding: 3px 0 3px 0">
+                            <i>No matches found</i>
+                        </div>
+
+                        <div ng-repeat="permission in accessPermissions | orderBy:'display'">
+                           <span ng-click="addRemovePermission(permission)" style="cursor: pointer">
+                            <i class="fa opacity_hover"
+                               ng-class="{'fa-square-o':!permission.selected, 'fa-check-square-o':permission.selected}"></i>
+                            <i class="fa" ng-class="{'fa-group permission_group':permission.article==='GROUP',
+                            'fa-user permission_user':permission.article==='ACCOUNT'}"></i> {{permission.display}}
+                            </span>
                         </div>
 
                     </div>
-                    <div>
+                    <div style="border-top: 1px solid #e1e1e1; border-bottom: 1px solid #e1e1e1; background-color: #f7f7f7; height: 24px">
+                        <!--<strong class="font-75em opacity_hover"><i class="fa fa-square-o"></i> Remote </strong>-->
                         <button type="button" class="btn btn-xs btn-default pull-right"
                                 ng-click="closePermissionOptions()">Close
                         </button>
@@ -66,20 +84,28 @@
 
                 <div width="160px" class="permission_list"
                      ng-repeat="permission in activePermissions | orderBy:'display'">
-                    &nbsp;<i ng-if="permission.article=='GROUP'" class="fa fa-group permission_group"></i><i
-                        ng-if="permission.article=='ACCOUNT'" class="fa fa-user permission_user"></i>
-                    <i ng-if="permission.article=='GLOBAL'" class="fa fa-globe blue"></i>
-                    {{permission.display}} <i ng-click="deletePermission($index, permission)"
-                                              class="fa fa-times pull-right delete_icon"></i>
+                    &nbsp;
+                    <span ng-if="permission.article=='GROUP'"><i class="fa fa-group permission_group"></i> {{permission.display}}</span>
+                <span ng-if="permission.article=='ACCOUNT'"><i class="fa fa-user permission_user"></i> <a
+                        ng-href="/profile/{{permission.articleId}}">{{permission.display}}</a></span>
+                    <i ng-click="deletePermission($index, permission)" style="padding-top: 3px"
+                       class="fa fa-times pull-right delete_icon"></i>
                 </div>
                 <div ng-if="activePermissions.length == 0">&nbsp;</div>
-                <!--<div style="margin-left: 20px;font-size: 0.90em" ng-if="!activePermissions.length">No one</div>-->
             </td>
         </tr>
         <tr>
-            <td class="permission_footer" style="border-right: 1px solid #e1e1e1; border-bottom: 1px solid #e1e1e1">
-                <div class="permission_footer_link" ng-click="enablePublicRead(entry)">
-                    <i class="fa fa-globe"></i> Enable Public Read Access
+            <td class="permission_footer" ng-if="!entry.publicRead">
+                <div class="permission_footer_link" ng-click="enablePublicRead(entry)"><i class="fa fa-globe"></i>
+                    Enable
+                    Public Read Access
+                </div>
+            </td>
+
+            <td class="permission_footer" ng-if="entry.publicRead"
+                style="border-left: 0; background-color: #f9f9f9">
+                <div class="permission_footer_link" ng-click="disablePublicRead(entry)">
+                    <i class="fa fa-globe blue"></i> Disable Public Read Access
                 </div>
             </td>
         </tr>
