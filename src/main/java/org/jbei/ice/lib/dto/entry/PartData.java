@@ -14,6 +14,7 @@ public class PartData implements IDataTransferModel {
     private Visibility visible;
     private ArrayList<PartData> parents;
 
+    private int index;
     private String recordId;
     private String name;
     private String owner;
@@ -421,5 +422,13 @@ public class PartData implements IDataTransferModel {
 
     public void setFeatureCount(long featureCount) {
         this.featureCount = featureCount;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
     }
 }

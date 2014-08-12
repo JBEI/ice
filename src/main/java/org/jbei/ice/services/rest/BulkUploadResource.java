@@ -53,6 +53,20 @@ public class BulkUploadResource extends RestResource {
         }
     }
 
+    /**
+     * Creates or updates a list of entries that are to be associated with the specified bulk upload
+     *
+     * @return wrapper around list of created or updated entries
+     */
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}")
+    public BulkUploadInfo updateList(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+            @PathParam("id") long id, BulkUploadInfo info) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        return creator.createOrUpdateEntries(userId, id, info.getEntryList());
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pending")

@@ -22,8 +22,9 @@
                     ng-class="{collection_menu_selection:collection.name===selectedFolder}">{{collection.display}}</span>
                 <span class="menu_count">
                     <span ng-hide="showAddCollection">{{(collection.count | number) || 0}}</span>
+                    <!--shown only for personal collection-->
                     <i ng-show="showAddCollection" ng-click="hideAddCollection=!hideAddCollection"
-                       class="fa fa-plus edit_icon" style="font-size: 14px" stop-event="click"></i>
+                       class="fa fa-plus edit_icon" style="font-size: 14px"></i>
                 </span>
             </div>
 

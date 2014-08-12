@@ -176,8 +176,21 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
     }
 });
 
-iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location) {
+iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location, User) {
     $scope.errMsg = undefined;
+    $scope.user = {};
+
+    $scope.resetPassword = function () {
+        if ($scope.user.email === undefined) {
+            $scope.user.error = true;
+            return;
+        }
+        User().resetPassword({}, $scope.user, function (success) {
+            $location.path("/login");
+        }, function (error) {
+
+        });
+    };
 
     $scope.cancel = function () {
         $location.path("/login");
@@ -246,6 +259,9 @@ iceControllers.controller('AdminController', function ($rootScope, $location, $s
         'SEND_EMAIL_ON_ERRORS'
     ];
 
+    $scope.generalSettings = [];
+    $scope.emailSettings = [];
+
     // retrieve general setting
     $scope.getSetting = function () {
         var sessionId = $cookieStore.get("sessionId");
@@ -254,9 +270,6 @@ iceControllers.controller('AdminController', function ($rootScope, $location, $s
         var settings = Settings(sessionId);
         settings.get(function (result) {
             $rootScope.settings = result;
-
-            $scope.generalSettings = [];
-            $scope.emailSettings = [];
 
             angular.forEach($rootScope.settings, function (setting) {
                 if (generalSettingKeys.indexOf(setting.key) != -1) {
@@ -454,6 +467,8 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
     $scope.showChangePassword = false;
     $scope.showEditProfile = false;
     $scope.showSendMessage = false;
+    $scope.changePass = {};
+
     $scope.preferenceEntryDefaults = [
         {display:"Principal Investigator", id:"PRINCIPAL_INVESTIGATOR", help:"Enter Email or Name"},
         {display:"Funding Source", id:"FUNDING_SOURCE"}
@@ -569,10 +584,65 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
     };
 
     $scope.updatePassword = function () {
-    };
+        var pass = $scope.changePass;
+        console.log(pass);
 
-    $scope.canChangePassword = function () {
-        return false;
+        if (!$scope.changePass || $scope.changePass.current === undefined || !$scope.changePass.current.length) {
+            $scope.changePasswordError = "Please enter your current password";
+            $scope.currentError = true;
+            return;
+        }
+
+        // check new password value
+        if (pass.new === undefined || pass.new.length === 0) {
+            $scope.changePasswordError = "Please enter a new password for your account";
+            $scope.newPassError = true;
+            return;
+        }
+
+        // check for new password confirm value
+        if (pass.new2 === undefined || pass.new2.length === 0) {
+            $scope.changePasswordError = "Please confirm the new password for your account";
+            $scope.newPass2Error = true;
+            return;
+        }
+
+        // check for matching password values
+        if (pass.new2 !== pass.new) {
+            $scope.changePasswordError = "The password for your account does not match";
+            $scope.newPassError = true;
+            $scope.newPass2Error = true;
+            return;
+        }
+
+        var user = User();
+
+        // validate existing password
+        var userId = $cookieStore.get('userId');
+        var userObj = {sessionId:$cookieStore.get("sessionId"), password:$scope.changePass.current, email:userId};
+        // authenticate new password
+        user.resetPassword({}, userObj, function (result) {
+            if (result == null) {
+                $scope.changePasswordError = "Current password is invalid";
+                $scope.currentError = true;
+                return;
+            }
+
+            user.changePassword({},
+                {email:userId, password:pass.new},
+                function (success) {
+                    if (success) {
+                        $location.path($location.path());
+                    } else {
+                        $scope.changePasswordError = "There was an error changing your password";
+                    }
+                }, function (error) {
+
+                });
+            //  change password
+        }, function (error) {
+            $scope.changePasswordError = "There was an error changing your password";
+        });
     };
 
     $scope.updateProfile = function () {
@@ -655,6 +725,17 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     // selected entries
     $scope.selection = [];
+    $scope.shoppingCartContents = [];
+    // todo : retrieve shopping cart contents
+
+    $scope.hidePopovers = function (hide) {
+        $scope.openShoppingCart = !hide;
+    };
+
+    $scope.submitShoppingCart = function () {
+        $scope.shoppingCartContents = [];
+        $scope.openShoppingCart = false;
+    };
 
     // search
     $scope.runUserSearch = function () {
@@ -673,6 +754,11 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
             }
         );
     };
+
+    $scope.$on('SampleTypeSelected', function (event, data) {
+        // todo : save to the server
+        $scope.shoppingCartContents.push(data);
+    });
 
     // table
     $scope.alignmentGraph = function (searchResult) {
@@ -1100,9 +1186,49 @@ iceControllers.controller('UserController', function ($scope, $routeParams, Entr
 //    $scope.entry = Entry.query({partId:$routeParams.id});
 });
 
-iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Authentication, Settings) {
+iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Authentication, Settings, AccessToken) {
+    $scope.login = {};
+
     $scope.submit = function () {
-        Authentication.login($scope.userId, $scope.userPassword);
+        $scope.errMsg = undefined;
+
+        // validate email
+        if ($scope.login.email === undefined || $scope.login.email.trim() === "") {
+            $scope.login.emailError = true;
+        }
+
+        // validate password
+        if ($scope.login.password === undefined || $scope.login.password.trim() === "") {
+            $scope.login.passwordError = true;
+        }
+
+        if ($scope.login.emailError || $scope.login.passwordError) {
+            return;
+        }
+
+        var token = AccessToken();
+        token.createToken({}, $scope.login,
+            function (success) {
+                if (success && success.sessionId) {
+                    $rootScope.user = success;
+                    $cookieStore.put('userId', success.email);
+                    $cookieStore.put('sessionId', success.sessionId);
+                    var loginDestination = $cookies.loginDestination || '/';
+                    $cookies.loginDestination = null;
+                    $scope.errMsg = undefined;
+                    $location.path(loginDestination);
+                } else {
+                    $cookieStore.remove('userId');
+                    $cookieStore.remove('sessionId');
+                    $scope.errMsg = "Login failed";
+                }
+            },
+            function (error) {
+                $scope.errMsg = "Login failed";
+            }
+        );
+
+//        Authentication.login($scope.userId, $scope.userPassword);
     };
 
     $scope.goToRegister = function () {
@@ -1115,12 +1241,12 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
 
     Settings().getSetting({key:'NEW_REGISTRATION_ALLOWED'}, function (result) {
         $scope.canCreateAccount = (result !== undefined && result.key === 'NEW_REGISTRATION_ALLOWED'
-            && (result.value === 'yes' || result.value === 'true'));
+            && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
     });
 
     Settings().getSetting({key:'PASSWORD_CHANGE_ALLOWED'}, function (result) {
         $scope.canChangePassword = (result !== undefined && result.key === 'PASSWORD_CHANGE_ALLOWED'
-            && (result.value === 'yes' || result.value === 'true'));
+            && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
     });
 });
 
@@ -2058,13 +2184,11 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     });
 });
 
-iceControllers.controller('FolderPermissionsController', function ($scope, $modalInstance, $cookieStore, Folders, User, folder) {
-    console.log("FolderPermissionsController");
-
+iceControllers.controller('FolderPermissionsController', function ($scope, $modalInstance, $cookieStore, Folders, Permission, User, folder) {
     var sessionId = $cookieStore.get("sessionId");
     var panes = $scope.panes = [];
     $scope.folder = folder;
-    var user = User(sessionId);
+    $scope.userFilterInput = undefined;
 
     $scope.activateTab = function (pane) {
         angular.forEach(panes, function (pane) {
@@ -2094,22 +2218,53 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
         $modalInstance.close('cancel'); // todo : pass object to inform if folder is shared or cleared
     };
 
-    $scope.showAddPermissionOptionsClick = function (pane) {
-        // TODO : instead of retrieving all and filtering, try on the server first
-        user.list(function (result) {
-            $scope.users = result;
+    $scope.showAddPermissionOptionsClick = function () {
+        $scope.showPermissionInput = true;
+    };
 
-            angular.forEach($scope.users, function (item) {
+    $scope.closePermissionOptions = function () {
+        $scope.users = undefined;
+        $scope.showPermissionInput = false;
+    };
+
+    var removePermission = function (permissionId) {
+        Folders().removePermission({folderId:folder.id, permissionId:permissionId},
+            function (result) {
                 for (var i = 0; i < $scope.activePermissions.length; i += 1) {
-                    if (item.id == $scope.activePermissions[i].articleId) {
-                        item.selected = true;
-                        item.permissionId = $scope.activePermissions[i].id;
-                        break;
-                    }
+                    if (permissionId != $scope.activePermissions[i].id)
+                        continue;
+
+                    $scope.activePermissions.splice(i, 1);
+                    break;
                 }
             });
+    };
+
+    $scope.addRemovePermission = function (permission) {
+        permission.selected = !permission.selected;
+        if (!permission.selected) {
+            removePermission(permission.id);
+            return;
+        }
+
+        // add permission
+        var type;
+        angular.forEach(panes, function (pane) {
+            if (pane.selected) {
+                type = pane.title.toUpperCase() + "_FOLDER";
+            }
+        });
+        permission.typeId = folder.id;
+        permission.type = type;
+
+        Folders().addPermission({folderId:folder.id}, permission, function (result) {
+            // result is the permission object
+//            $scope.entry.id = result.typeId;
+            $scope.activePermissions.push(result);
+            permission.permissionId = result.id;
         });
     };
+
 
     // retrieve permissions for folder
     Folders().permissions({folderId:folder.id}, function (result) {
@@ -2117,7 +2272,7 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
         $scope.writePermissions = [];
 
         angular.forEach(result, function (item) {
-            if (item.type === 'WRITE_ENTRY')
+            if (item.type === 'WRITE_FOLDER')
                 $scope.writePermissions.push(item);
             else
                 $scope.readPermissions.push(item);
@@ -2127,5 +2282,29 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
         $scope.panes.push({title:'Write', count:$scope.writePermissions.length});
 
         $scope.activePermissions = angular.copy($scope.readPermissions);
-    })
+    });
+
+    $scope.deletePermission = function (index, permission) {
+        Folders().removePermission({folderId:folder.id, permissionId:permission.id},
+            function (result) {
+                $scope.activePermissions.splice(index, 1);
+            });
+    };
+
+    $scope.filter = function (val) {
+        if (!val) {
+            $scope.accessPermissions = undefined;
+            return;
+        }
+
+        $scope.filtering = true;
+        Permission().filterUsersAndGroups({limit:10, val:val},
+            function (result) {
+                $scope.accessPermissions = result;
+                $scope.filtering = false;
+            }, function (error) {
+                $scope.filtering = false;
+                $scope.accessPermissions = undefined;
+            });
+    };
 });

@@ -3,6 +3,7 @@ package org.jbei.ice.lib.bulkupload;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.ControllerException;
@@ -127,18 +128,12 @@ public class BulkUploadController {
      */
     public BulkUploadInfo retrieveById(String userId, long id, int start, int limit)
             throws ControllerException, PermissionException {
-        BulkUpload draft;
-
-        try {
-            draft = dao.retrieveById(id);
-            if (draft == null)
-                return null;
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        BulkUpload draft = dao.retrieveById(id);
+        if (draft == null)
+            return null;
 
         Account account = accountController.getByEmail(userId);
-        authorization.expectRead(account.getEmail(), draft);
+        authorization.expectRead(userId, draft);
 
         // convert bulk import db object to data transfer object
         int size = 0;
@@ -152,7 +147,7 @@ public class BulkUploadController {
         EntryType type = EntryType.nameToType(draft.getImportType().split("\\s+")[0]);
 
         // retrieve the entries associated with the bulk import
-        ArrayList<Entry> contents = dao.retrieveDraftEntries(type, id, start, limit);
+        List<Entry> contents = dao.retrieveDraftEntries(id, start, limit);
 
         // convert
         draftInfo.getEntryList().addAll(convertParts(account, contents));
@@ -170,16 +165,17 @@ public class BulkUploadController {
         // retrieve the entries associated with the bulk import
         BulkUploadInfo info = draft.toDataTransferObject();
 
-        ArrayList<Entry> list = dao.retrieveDraftEntries(EntryType.PLASMID, id, offset, limit);
+        List<Entry> list = dao.retrieveDraftEntries(id, offset, limit);
         for (Entry entry : list) {
-            info.getEntryList().add(ModelToInfoFactory.getInfo(entry));
+            PartData partData = ModelToInfoFactory.getInfo(entry);
+            info.getEntryList().add(partData);
         }
 
         info.setCount(dao.retrieveSavedDraftCount(id));
         return info;
     }
 
-    protected ArrayList<PartData> convertParts(Account account, ArrayList<Entry> contents)
+    protected ArrayList<PartData> convertParts(Account account, List<Entry> contents)
             throws ControllerException {
         ArrayList<PartData> addList = new ArrayList<>();
         SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
@@ -321,8 +317,7 @@ public class BulkUploadController {
      * @param draftId unique identifier for saved bulk import
      * @return true, if draft was sa
      */
-    public boolean submitBulkImportDraft(Account account, long draftId)
-            throws ControllerException, PermissionException {
+    public boolean submitBulkImportDraft(Account account, long draftId) throws PermissionException {
         // retrieve draft
         BulkUpload draft = dao.retrieveById(draftId);
         if (draft == null)
@@ -374,25 +369,21 @@ public class BulkUploadController {
             return false;
         }
 
-        try {
-            BulkUpload upload = dao.retrieveById(uploadId);
-            if (upload == null) {
-                Logger.warn("Could not retrieve bulk upload " + uploadId + " for reversal");
-                return false;
-            }
-
-            String previousOwner = upload.getName();
-            Account prevOwnerAccount = accountController.getByEmail(previousOwner);
-            if (prevOwnerAccount == null)
-                return false;
-
-            upload.setStatus(BulkUploadStatus.IN_PROGRESS);
-            upload.setName("Returned Upload");
-            upload.setLastUpdateTime(new Date());
-            dao.update(upload);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+        BulkUpload upload = dao.retrieveById(uploadId);
+        if (upload == null) {
+            Logger.warn("Could not retrieve bulk upload " + uploadId + " for reversal");
+            return false;
         }
+
+        String previousOwner = upload.getName();
+        Account prevOwnerAccount = accountController.getByEmail(previousOwner);
+        if (prevOwnerAccount == null)
+            return false;
+
+        upload.setStatus(BulkUploadStatus.IN_PROGRESS);
+        upload.setName("Returned Upload");
+        upload.setLastUpdateTime(new Date());
+        dao.update(upload);
 
         return true;
     }
@@ -437,6 +428,7 @@ public class BulkUploadController {
                     permissionsController.addPermission(account.getEmail(), access);
                 }
             }
+
             entryController.update(account, entry);
             if (plasmid != null)
                 entryController.update(account, plasmid);

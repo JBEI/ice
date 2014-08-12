@@ -51,21 +51,30 @@ public class ConfigurationController {
 
     public ArrayList<Setting> retrieveSystemSettings() {
         ArrayList<Setting> settings = new ArrayList<>();
-        for (Configuration configuration : dao.getAll()) {
-            settings.add(new Setting(configuration.getKey(), configuration.getValue()));
+        for (ConfigurationKey key : ConfigurationKey.values()) {
+            Configuration configuration = dao.get(key);
+            Setting setting;
+            if (configuration == null)
+                setting = new Setting(key.name(), "");
+            else
+                setting = new Setting(configuration.getKey(), configuration.getValue());
+
+            settings.add(setting);
         }
         return settings;
     }
 
-    public void setPropertyValue(ConfigurationKey key, String value) {
+    public Configuration setPropertyValue(ConfigurationKey key, String value) {
         Configuration configuration = dao.get(key);
         if (configuration == null) {
             configuration = new Configuration();
             configuration.setKey(key.name());
+            configuration.setValue(value);
+            return dao.create(configuration);
         }
 
         configuration.setValue(value);
-        dao.create(configuration);
+        return dao.update(configuration);
     }
 
     public Setting updateSetting(String userId, Setting setting) {
@@ -74,14 +83,11 @@ public class ConfigurationController {
             return null;
 
         ConfigurationKey key = ConfigurationKey.valueOf(setting.getKey());
-        Configuration configuration = dao.get(key);
-        if (configuration == null) {
+        if (key == null)
             return null;
-//            configuration = new Configuration(setting.getKey(), setting.getValue());
-//            dao.create(configuration.)
-        }
-        configuration.setValue(setting.getValue());
-        return dao.update(configuration).toDataTransferObject();
+
+        Configuration configuration = setPropertyValue(key, setting.getValue());
+        return configuration.toDataTransferObject();
     }
 
     /**

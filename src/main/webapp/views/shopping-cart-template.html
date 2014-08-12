@@ -1,0 +1,71 @@
+<!--hack alert; ng-repeat (see line 62) does not appear to work if there is only one item in the array -->
+<div ng-show="shoppingCartContents[0]">
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[0].type==='liquid',
+    'fa-circle-o':shoppingCartContents[0].type==='streak'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[0].entry.id}}">{{shoppingCartContents[0].entry.partId}}</a>
+</div>
+
+<div ng-show="shoppingCartContents[1]">
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[1].type==='liquid',
+    'fa-circle-o':shoppingCartContents[1].type==='streak'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[1].entry.id}}">{{shoppingCartContents[1].entry.partId}}</a>
+</div>
+
+<div ng-show="shoppingCartContents[2]">
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[2].type==='liquid',
+    'fa-circle-o':shoppingCartContents[2].type==='streak'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[2].entry.id}}">{{shoppingCartContents[2].entry.partId}}</a>
+</div>
+
+<div ng-show="shoppingCartContents[3]">
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[3].type==='liquid',
+    'fa-circle-o':shoppingCartContents[3].type==='streak'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[3].entry.id}}">{{shoppingCartContents[3].entry.partId}}</a>
+</div>
+
+<div ng-show="shoppingCartContents[4]">
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[4].type==='liquid',
+    'fa-circle-o':shoppingCartContents[4].type==='streak'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[4].entry.id}}">{{shoppingCartContents[4].entry.partId}}</a>
+</div>
+
+<div ng-show="shoppingCartContents[5]">
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[5].type==='liquid',
+    'fa-circle-o':shoppingCartContents[5].type==='streak'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[5].entry.id}}">{{shoppingCartContents[5].entry.partId}}</a>
+</div>
+
+<div ng-show="shoppingCartContents[6]">
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[6].type==='liquid',
+    'fa-circle-o':shoppingCartContents[6].type==='streak'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[6].entry.id}}">{{shoppingCartContents[6].entry.partId}}</a>
+</div>
+
+<div ng-show="shoppingCartContents[7]">
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[7].type==='liquid',
+    'fa-circle-o':shoppingCartContents[7].type==='streak'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[7].entry.id}}">{{shoppingCartContents[7].entry.partId}}</a>
+</div>
+
+<div ng-show="shoppingCartContents[8]">
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[8].type==='liquid',
+    'fa-circle-o':shoppingCartContents[8].type==='streak'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[8].entry.id}}">{{shoppingCartContents[8].entry.partId}}</a>
+</div>
+
+<div ng-show="shoppingCartContents[9]">
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[9].type==='liquid',
+    'fa-circle-o':shoppingCartContents[9].type==='streak'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[9].entry.id}}">{{shoppingCartContents[9].entry.partId}}</a>
+</div>
+
+<!--<div ng-repeat="content in shoppingCartContents">-->
+<!--<i class="fa" ng-class="{'fa-flask':content.type==='liquid', 'fa-circle-o':content.type==='streak'}"></i>-->
+<!--<a ng-href="/entry/{{content.entry.id}}">{{content.entry.partId}}</a>-->
+<!--</div>-->
+
+<br>
+<div class="no_wrap">
+    <button class="btn btn-xs btn-primary" ng-click="submitShoppingCart()">Submit</button>
+    <button class="btn btn-xs btn-default" ng-click="hidePopovers(true)">Close</button>
+</div>

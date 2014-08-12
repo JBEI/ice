@@ -11,7 +11,7 @@
         </button>
         &nbsp;
     </span>
-    <span ng-if="settings.PASSWORD_CHANGE_ALLOWED==='yes'">
+    <span ng-if="settings.PASSWORD_CHANGE_ALLOWED.toLowerCase()==='yes'">
         <button type="button" ng-click="editClick(false, false, true)" class="ice-button">
             <i style="font-size: 14px" class="blue fa fa-key"></i> Change Password
         </button>
@@ -66,32 +66,42 @@
 
 <div class="row margin-top-10 panel panel-default" ng-if="showChangePassword">
     <div class="panel-body">
-        <form class="font-95em" role="form">
+        <alert type="'danger'" style="width: 435px; padding: 8px" ng-if="changePasswordError">
+            <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
+            <span class="font-90em">{{changePasswordError}}</span>
+        </alert>
+
+        <form class="font-95em" role="form" ng-submit="updatePassword()">
             <div class="col-md-2 pad-top-5">
                 <span style="white-space:nowrap">Current password <span class="required">*</span> </span>
             </div>
             <div class="col-md-10 pad-top-5">
-                <input type="password" class="input_box" maxlength="125" style="width: 205px;">
+                <input type="password" ng-model="changePass.current" ng-change="currentError=false"
+                       ng-class="{'input_box':!currentError, 'input_box_error':currentError}" ng-trim="true"
+                       maxlength="125" style="width: 205px;">
             </div>
 
             <div class="col-md-2 pad-top-5">
                 <span style="white-space:nowrap">New password <span class="required">*</span></span>
             </div>
             <div class="col-md-10 pad-top-5">
-                <input type="password" class="input_box" maxlength="125" style="width: 205px;">
+                <input type="password" ng-model="changePass.new" ng-change="noMatch=false;newPassError=false"
+                       ng-class="{'input_box':!noMatch&&!newPassError, 'input_box_error':noMatch||newPassError}"
+                       maxlength="125" style="width: 205px;" ng-trim="true">
             </div>
 
             <div class="col-md-2 pad-top-5">
                 <span style="white-space:nowrap">Confirm new password</span>
             </div>
             <div class="col-md-10 pad-top-5">
-                <input type="password" class="input_box" maxlength="125" style="width: 205px;">
+                <input type="password" ng-model="changePass.new2" class="input_box" maxlength="125"
+                       style="width: 205px;">
             </div>
 
             <br>
 
             <div class="col-xs-offset-2 col-md-10 pad_top">
-                <button type="submit" ng-click="updatePassword()" class="btn btn-xs btn-primary">Save</button>
+                <button type="submit" class="btn btn-xs btn-primary">Save</button>
                 <button type="button" ng-click="editClick(false, false, false)" class="btn btn-xs btn-default">Cancel
                 </button>
             </div>

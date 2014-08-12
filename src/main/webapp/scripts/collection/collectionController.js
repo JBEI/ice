@@ -71,7 +71,6 @@ angular.module('ice.collection.controller', [])
         // called when a collection is selected. Collections are pre-defined ['Available', 'Deleted', etc]
         // and some allow folders and when that is selected then the selectCollectionFolder() is called
         $scope.selectCollection = function (name) {
-            console.log("selectCollection()", name);
             $rootScope.$broadcast("CollectionSelected", name);
             $location.path("/folders/" + name);
             $scope.selectedFolder = name;

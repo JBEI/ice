@@ -430,6 +430,9 @@ public class HibernateSearch {
     }
 
     protected Sort getSort(boolean asc, ColumnField sortField) {
+        if (sortField == null)
+            sortField = ColumnField.CREATED;
+
         switch (sortField) {
             case RELEVANCE:
             default:
