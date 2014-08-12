@@ -2284,6 +2284,13 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
         $scope.activePermissions = angular.copy($scope.readPermissions);
     });
 
+    $scope.deletePermission = function (index, permission) {
+        Folders().removePermission({folderId:folder.id, permissionId:permission.id},
+            function (result) {
+                $scope.activePermissions.splice(index, 1);
+            });
+    };
+
     $scope.filter = function (val) {
         if (!val) {
             $scope.accessPermissions = undefined;
