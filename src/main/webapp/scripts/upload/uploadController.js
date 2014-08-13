@@ -546,6 +546,10 @@ angular.module('ice.upload.controller', [])
                                     var entry = result.entryList[i];
                                     $scope.bulkUpload.entryIdData.push(entry.id);
 
+                                    // ensure capacity
+                                    if (!sheetData[l + i])
+                                        sheetData[l + i] = [];
+
                                     // display [for each field in the object]
                                     for (var j = 0; j < dataSchema.length; j += 1) {
                                         var val = entry[dataSchema[j]];
