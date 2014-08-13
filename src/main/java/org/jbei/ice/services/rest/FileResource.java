@@ -32,6 +32,7 @@ import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
@@ -106,8 +107,7 @@ public class FileResource extends RestResource {
 
     @GET
     @Path("upload/{type}")
-    public Response getUploadCSV(@PathParam("type") String type,
-            @QueryParam("link") String linkedType) {
+    public Response getUploadCSV(@PathParam("type") String type, @QueryParam("link") String linkedType) {
         final EntryType entryAddType = EntryType.nameToType(type);
         final EntryType linked;
         if (linkedType != null)
@@ -130,6 +130,30 @@ public class FileResource extends RestResource {
 
         return Response.ok(stream).header("Content-Disposition", "attachment;filename="
                 + filename + "_csv_upload.csv").build();
+    }
+
+    @GET
+    @Path("{partId}/sequence/{type}")
+    public Response downloadSequence(
+            @PathParam("partId") final long partId,
+            @PathParam("type") final String downloadType,
+            @QueryParam("sid") String sid,
+            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+        if (StringUtils.isEmpty(sessionId))
+            sessionId = sid;
+
+        final String userId = getUserIdFromSessionHeader(sessionId);
+        final ByteArrayWrapper wrapper = sequenceController.getSequenceFile(userId, partId, downloadType);
+
+        StreamingOutput stream = new StreamingOutput() {
+            @Override
+            public void write(OutputStream output) throws IOException, WebApplicationException {
+                ByteArrayInputStream stream = new ByteArrayInputStream(wrapper.getBytes());
+                IOUtils.copy(stream, output);
+            }
+        };
+
+        return Response.ok(stream).header("Content-Disposition", "attachment;filename=" + wrapper.getName()).build();
     }
 
     @GET

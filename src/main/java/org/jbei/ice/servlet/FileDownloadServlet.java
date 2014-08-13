@@ -25,7 +25,7 @@ import org.apache.commons.lang.StringUtils;
 /**
  * Servlet for serving the different kinds of files
  * available on gd-ice. Requires a valid session id as
- * a parameter
+ * a parameter // TODO : currently only being used for sbol visual download
  *
  * @author Hector Plahar
  */
