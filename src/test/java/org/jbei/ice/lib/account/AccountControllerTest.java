@@ -134,7 +134,7 @@ public class AccountControllerTest {
         AccountTransfer transfer = account.toDataTransferObject();
         transfer.setPassword("p455W0rd");
         controller.updatePassword(account.getEmail(), transfer);
-        AccountTransfer info = controller.authenticate(new AccountTransfer(account.getEmail(), "p4ssw0rd"));
+        AccountTransfer info = controller.authenticate(new AccountTransfer(account.getEmail(), "p455W0rd"));
         Assert.assertNotNull(info);
         Assert.assertFalse(info.getSessionId().isEmpty());
         Account sessIdAccount = controller.getAccountBySessionKey(info.getSessionId());
