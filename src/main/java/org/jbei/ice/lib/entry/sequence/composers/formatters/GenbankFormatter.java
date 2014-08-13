@@ -15,10 +15,7 @@ import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.Feature;
-import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.bio.symbol.Location;
-import org.biojava.ontology.InvalidTermException;
-import org.biojava.utils.ChangeVetoException;
 import org.biojavax.RichAnnotation;
 import org.biojavax.RichObjectFactory;
 import org.biojavax.SimpleNote;
@@ -147,18 +144,17 @@ public class GenbankFormatter extends AbstractFormatter {
                     featureTemplate.annotation = getAnnotations(sequenceFeature);
 
                     Set<AnnotationLocation> locations = sequenceFeature.getAnnotationLocations();
+                    if (locations == null || locations.size() == 0)
+                        continue;
 
                     if (locations.size() == 1) {
                         featureTemplate.location = new SimpleRichLocation(new SimplePosition(
                                 sequenceFeature.getUniqueGenbankStart()), new SimplePosition(
                                 sequenceFeature.getUniqueEnd()), 1, getStrand(sequenceFeature));
                     } else {
-
-                        ArrayList<Location> members = new ArrayList<Location>();
-
+                        ArrayList<Location> members = new ArrayList<>();
                         for (AnnotationLocation location : locations) {
-                            members.add(new SimpleRichLocation(new SimplePosition(location
-                                                                                          .getGenbankStart()),
+                            members.add(new SimpleRichLocation(new SimplePosition(location.getGenbankStart()),
                                                                new SimplePosition(location.getEnd()), 1,
                                                                getStrand(sequenceFeature)));
                         }
@@ -169,18 +165,13 @@ public class GenbankFormatter extends AbstractFormatter {
                     featureTemplate.type = getFeatureType(sequenceFeature);
                     featureTemplate.rankedCrossRefs = new TreeSet<Object>();
 
-                    SimpleRichFeature simpleRichFeature = new SimpleRichFeature(simpleRichSequence,
-                                                                                featureTemplate);
+                    SimpleRichFeature simpleRichFeature = new SimpleRichFeature(simpleRichSequence, featureTemplate);
                     featureSet.add(simpleRichFeature);
                 }
 
                 simpleRichSequence.setFeatureSet(featureSet);
             }
-        } catch (IllegalSymbolException e) {
-            throw new FormatterException("Failed to create generate genbank file", e);
-        } catch (ChangeVetoException e) {
-            throw new FormatterException("Failed to create generate genbank file", e);
-        } catch (InvalidTermException e) {
+        } catch (Exception e) {
             throw new FormatterException("Failed to create generate genbank file", e);
         }
 
