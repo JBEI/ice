@@ -109,21 +109,27 @@ public class FileResource extends RestResource {
     public Response getUploadCSV(@PathParam("type") String type,
             @QueryParam("link") String linkedType) {
         final EntryType entryAddType = EntryType.nameToType(type);
-        EntryType linked;
+        final EntryType linked;
         if (linkedType != null)
             linked = EntryType.nameToType(linkedType);
+        else
+            linked = null;
 
         StreamingOutput stream = new StreamingOutput() {
             @Override
             public void write(OutputStream output) throws IOException, WebApplicationException {
-                byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType);
+                byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType, linked);
                 ByteArrayInputStream stream = new ByteArrayInputStream(template);
                 IOUtils.copy(stream, output);
             }
         };
 
+        String filename = type.toLowerCase();
+        if (linkedType != null)
+            filename += ("_" + linkedType.toLowerCase());
+
         return Response.ok(stream).header("Content-Disposition", "attachment;filename="
-                + type.toLowerCase() + "_csv_upload.csv").build();
+                + filename + "_csv_upload.csv").build();
     }
 
     @GET

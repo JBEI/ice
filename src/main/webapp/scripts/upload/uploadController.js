@@ -669,7 +669,6 @@ angular.module('ice.upload.controller', [])
         });
 
         $scope.downloadCSVTemplate = function () {
-            console.log($scope.addType, linkedAddType);
             var url = "/rest/file/upload/" + $scope.addType;
             if (linkedAddType)
                 url += "?link=" + linkedAddType;
