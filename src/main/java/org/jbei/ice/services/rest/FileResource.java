@@ -232,10 +232,10 @@ public class FileResource extends RestResource {
             String fileName = contentDispositionHeader.getFileName();
             String userId = super.getUserIdFromSessionHeader(sessionId);
             String sequence = IOUtils.toString(fileInputStream);
-            SequenceInfo sequenceInfo = sequenceController.parseSequence(userId, recordId, entryType, sequence);
+            SequenceInfo sequenceInfo = sequenceController.parseSequence(userId, recordId, entryType, sequence,
+                                                                         fileName);
             if (sequenceInfo == null)
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-            sequenceInfo.setFilename(fileName);
             return Response.status(Response.Status.OK).entity(sequenceInfo).build();
         } catch (Exception e) {
             Logger.error(e);

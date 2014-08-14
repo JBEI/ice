@@ -94,7 +94,8 @@ public class SequenceController {
     }
 
     // either or both recordId and entryType has to have a value
-    public SequenceInfo parseSequence(String userId, String recordId, String entryType, String sequenceString) {
+    public SequenceInfo parseSequence(String userId, String recordId, String entryType, String sequenceString,
+            String name) {
         EntryType type = EntryType.nameToType(entryType);
         EntryRetriever retriever = new EntryRetriever();
         EntryCreator creator = new EntryCreator();
@@ -107,6 +108,8 @@ public class SequenceController {
             entry = creator.createEntry(account, entry, null);
         } else {
             entry = retriever.getByRecordId(userId, recordId);
+            if (entry == null)
+                return null;
         }
 
         // parse actual sequence
@@ -117,6 +120,8 @@ public class SequenceController {
         Sequence sequence = dnaSequenceToSequence(dnaSequence);
         sequence.setSequenceUser(sequenceString);
         sequence.setEntry(entry);
+        if (name != null)
+            sequence.setFileName(name);
         SequenceInfo info = save(userId, sequence).toDataTransferObject();
         info.setSequence(dnaSequence);
         return info;
@@ -479,7 +484,6 @@ public class SequenceController {
         if (sequence == null)
             return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
 
-        ByteArrayWrapper wrapper;
         String name;
         String sequenceString;
 

@@ -65,6 +65,9 @@ public class Sequence implements IDataModel {
     @Column(name = "component_uri")
     private String componentUri;
 
+    @Column(name = "file_name")
+    private String fileName;
+
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "entries_id", nullable = true, unique = true)
     @Field(bridge = @FieldBridge(impl = EntryBooleanPropertiesBridge.class, params = {
@@ -196,13 +199,21 @@ public class Sequence implements IDataModel {
         this.identifier = identifier;
     }
 
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
     @Override
     public SequenceInfo toDataTransferObject() {
         SequenceInfo info = new SequenceInfo();
         if (this.entry != null) {
             info.setEntryId(entry.getId());
         }
-//        info.setSequence(SequenceController.);
+        info.setFilename(fileName);
         return info;
     }
 }

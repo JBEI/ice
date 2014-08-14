@@ -19,6 +19,7 @@ angular.module('ice.upload.controller', [])
         var linkedHeaders = undefined;
         var linkedDataSchema = undefined;
         $scope.linkedSelection = undefined;
+        var linkedImportType;
 
         $scope.setNameEditMode = function (value) {
             $scope.uploadNameEditMode = value;
@@ -29,6 +30,7 @@ angular.module('ice.upload.controller', [])
         // this will be allowed as long as the user has not entered any data into the linked portion
         //
         $scope.addNewPartLink = function (type) {
+            linkedImportType = type;
             $scope.linkedSelection = type.charAt(0).toUpperCase() + type.substring(1);
             var ht = $("#dataTable").handsontable('getInstance');
             linkedHeaders = UploadUtil.getSheetHeaders(type);
@@ -36,8 +38,97 @@ angular.module('ice.upload.controller', [])
             ht.alter('insert_col', undefined, linkedHeaders.length);
         };
 
-        $scope.onFileSelect = function ($files) {
-            console.log("fileSelect");
+        var transport = function (item, row, col) {
+            var xhr = item._xhr = new XMLHttpRequest();
+            var form = new FormData();
+
+            item.formData.forEach(function (obj) {
+                angular.forEach(obj, function (value, key) {
+                    form.append(key, value);
+                });
+            });
+
+            form.append(item.alias, item.file);
+
+            xhr.upload.onprogress = function (event) {
+                var progress = event.lengthComputable ? event.loaded * 100 / event.total : 0;
+                console.log(Math.round(progress));
+            };
+
+            var transformResponse = function (response) {
+                $http.defaults.transformResponse.forEach(function (transformFn) {
+                    response = transformFn(response);
+                });
+                return response;
+            };
+
+            xhr.onload = function () {
+                var response = transformResponse(xhr.response);
+                if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+                    sheetData[row][col] = response.filename;
+                } else {
+                    console.log("error");
+                }
+            };
+
+            xhr.onerror = function () {
+                // error
+            };
+
+            xhr.onabort = function () {
+                // canceled
+            };
+
+            xhr.open(item.method, item.url, true);
+
+            angular.forEach(item.headers, function (value, name) {
+                xhr.setRequestHeader(name, value);
+            });
+
+            xhr.send(form);
+        };
+
+        $scope.onFileSelect = function (files, row, col) {
+            var id = $scope.bulkUpload.id;
+            var url = "/rest/upload/" + id + "/" + UploadUtil.indexToRestResource($scope.importType, col);
+
+            var item = {
+                method:'POST',
+                url:url,
+                file:files[0],
+                alias:"file",
+                formData:[
+                    {entryType:$scope.importType, entryId:$scope.bulkUpload.entryIdData[row]}
+                ],
+                headers:{"X-ICE-Authentication-SessionId":sid}
+            };
+
+            transport(item, row, col);
+        };
+
+        // delete file in row, col
+        $scope.onFileDelete = function (row, col) {
+            var entryId = $scope.bulkUpload.entryIdData[row];
+            var id = $scope.bulkUpload.id;
+
+            console.log(id);
+
+            if (UploadUtil.indexToRestResource($scope.importType, col) === "attachment") {
+                Upload(sid).deleteAttachment({importId:id, entryId:entryId},
+                    function (success) {
+                        sheetData[row][col] = undefined;
+                    }, function (error) {
+                        console.error(error);
+                    });
+            } else {
+                //delete sequence
+                Upload(sid).deleteSequence({importId:$scope.bulkUpload.id, entryId:entryId},
+                    function (success) {
+                        sheetData[row][col] = undefined;
+                    }, function (error) {
+                        console.error(error);
+                    });
+            }
         };
 
         //
@@ -48,17 +139,24 @@ angular.module('ice.upload.controller', [])
 
             // cell renderer for file upload
             var fileUploadRenderer = function (instance, td, row, col, prop, value, cellProperties) {
-//            console.log(instance, td, row, col, prop, value, cellProperties);
-                var escaped = Handsontable.helper.stringify(value);
+                if (value) {
+                    var $del = $('<i class="fa fa-trash-o delete_icon"></i>');
+                    $del.on("click", function (event) {
+//                        sheetData[row][col] = undefined;
+                        angular.element(this).scope().onFileDelete(row, col);
+                    });
+                    $(td).empty().append(value).append("&nbsp;").append($del);
+                } else {
+                    var $up = $('<span class="fileUpload"><i class="fa fa-upload opacity_hover opacity_4"></i> Upload '
+                        + '<input type="file" class="upload" /></span>');
 
-                var $up = $('<span class="fileUpload"><i class="fa fa-upload opacity_hover opacity_4"></i> Upload '
-                    + '<input type="file" ng-model="sequenceFiles" ng-file-select="onFileSelect($files)" class="upload" />');
+                    $up.on("change", function (event) {
+                        console.log("change", event);
+                        angular.element(this).scope().onFileSelect(this.getElementsByTagName("input")[0].files, row, col);
+                    });
 
-                $up.on("change", function (event) {
-                    console.log("change", $scope.sequenceFiles);
-                });
-
-                $(td).empty().append($up);
+                    $(td).empty().append($up);
+                }
                 return td;
             };
 
@@ -124,8 +222,9 @@ angular.module('ice.upload.controller', [])
                         };
                         break;
 
-                    case 'sequenceFilename':
-                    case "attachmentFilename":
+                    case 'sequenceFileName':
+                    case "attachments":
+                    case "sequenceTrace":
                         object.renderer = fileUploadRenderer;
                         object.type = 'text';
                         object.readOnly = true;  // file cells are readonly. all data is set programmatically
@@ -475,7 +574,6 @@ angular.module('ice.upload.controller', [])
 
             // loop function
             var loop = function (start) {
-                console.log(start);
                 loopFunction.functionToLoop(loop, start);
             };
 
@@ -544,6 +642,7 @@ angular.module('ice.upload.controller', [])
                                 // for each entry object (row)
                                 for (var i = 0; i < result.entryList.length; i += 1) {
                                     var entry = result.entryList[i];
+                                    console.log(entry);
                                     $scope.bulkUpload.entryIdData.push(entry.id);
 
                                     // ensure capacity
@@ -553,8 +652,17 @@ angular.module('ice.upload.controller', [])
                                     // display [for each field in the object]
                                     for (var j = 0; j < dataSchema.length; j += 1) {
                                         var val = entry[dataSchema[j]];
-                                        if (val === undefined || (val instanceof  Array))
+                                        if (val === undefined)
                                             val = '';
+
+                                        // currently for attachments only
+                                        if (val instanceof  Array && dataSchema[j] === "attachments") {
+                                            if (val.length) {
+                                                val = val[0].filename;
+                                            } else {
+                                                val = ""
+                                            }
+                                        }
 
                                         // "i" is for the new data added append to existing
                                         sheetData[l + i][j] = val;
@@ -575,8 +683,17 @@ angular.module('ice.upload.controller', [])
                                         var dataSchemaLength = dataSchema.length + 1;
                                         for (var k = 0; k < linkedDataSchema.length; k += 1) {
                                             val = linkedPart[linkedDataSchema[k]];
-                                            if (val === undefined || (val instanceof  Array))
+                                            if (val === undefined)
                                                 val = '';
+
+                                            // currently for attachments only
+                                            if (val instanceof Array && dataSchema[j] === "attachments") {
+                                                if (val.length) {
+                                                    val = val[0].filename;
+                                                } else {
+                                                    val = ""
+                                                }
+                                            }
 
                                             // "i" is for the new data added append to existing
                                             sheetData[l + i][k + dataSchemaLength] = val;
