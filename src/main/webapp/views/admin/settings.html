@@ -17,7 +17,10 @@
                     <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">{{setting.key}}</span>
                 </div>
                 <div class="col-md-9" ng-mouseover="partIdEdit=true" ng-mouseout="partIdEdit=false">
-                    <div data-ng-if="!setting.editMode">{{setting.value}}<span ng-click="setting.editMode=true">
+                    <div data-ng-if="!setting.editMode">
+                        <span ng-if="setting.value.trim() !==''">{{setting.value.trim()}}</span>
+                        <i class='opacity_4' ng-if="!setting.value">No value entered</i>
+                        <span ng-click="setting.editMode=true">
                         <i ng-show="partIdEdit" class="fa fa-pencil edit_icon"
                            style="margin-left: 5px; font-size: 14px;"></i></span>
                     </div>
@@ -40,7 +43,8 @@
                     <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">{{setting.key}}</span>
                 </div>
                 <div class="col-md-9" ng-mouseover="partIdEdit=true" ng-mouseout="partIdEdit=false">
-                    <div data-ng-if="!setting.editMode">{{setting.value}}<span ng-click="setting.editMode=true">
+                    <div data-ng-if="!setting.editMode"><span ng-if="setting.value&&!setting.value.trim()==''">{{setting.value}}</span>
+                        <i class='opacity_4' ng-if="!setting.value">No value entered</i><span ng-click="setting.editMode=true">
                          <i ng-show="partIdEdit" class="fa fa-pencil edit_icon"
                             style="margin-left: 5px; font-size: 14px;"></i></span>
                     </div>
