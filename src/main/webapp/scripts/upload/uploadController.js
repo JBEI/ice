@@ -174,8 +174,15 @@ angular.module('ice.upload.controller', [])
 
             var getCellProperties = function (row, col, prop) {
                 var object = {};
+                var fieldType;
 
-                switch (UploadUtil.getTypeField($scope.importType, col)) {
+                if (linkedImportType) {
+                    var newIndex = col - sheetHeaders.length;
+                    fieldType = UploadUtil.getTypeField(linkedImportType, newIndex);
+                } else
+                    fieldType = UploadUtil.getTypeField($scope.importType, col);
+
+                switch (fieldType) {
 //                    case 'circular':   todo
 //                    case 'sentToAbrc':
 //                        object.type = 'checkbox';
@@ -680,7 +687,7 @@ angular.module('ice.upload.controller', [])
                                         $scope.bulkUpload.linkedEntryIdData.push(linkedPart.id);
 
                                         // linkedDataSchema is created when addNewPartLink is called
-                                        var dataSchemaLength = dataSchema.length + 1;
+                                        var dataSchemaLength = dataSchema.length;
                                         for (var k = 0; k < linkedDataSchema.length; k += 1) {
                                             val = linkedPart[linkedDataSchema[k]];
                                             if (val === undefined)
@@ -708,7 +715,6 @@ angular.module('ice.upload.controller', [])
                                 loop(start + result.entryList.length);
                             }
                         });
-
                 }
             });
         } else {
