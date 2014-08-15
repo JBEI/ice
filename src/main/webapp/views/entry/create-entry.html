@@ -180,7 +180,7 @@
     <div class="col-md-10" ng-if="field.inputType==='autoCompleteAdd'">
         <span ng-repeat="link in activePart[field.schema] track by $index">
             <div ng-if="!$index">
-                <input ng-model="activePart[field.schema].value" type="text" typeahead-loading="loadingData"
+                <input ng-model="link.value" type="text" typeahead-loading="loadingData"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        ng-change="field.invalid=false"
                        maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
@@ -193,7 +193,8 @@
             </div>
 
             <div ng-if="$index" class="input-group pad-top-5">
-                <input type="text" ng-model="link.value" maxlength="125" style="width: 400px;"
+                <input type="text" ng-model="activePart[field.schema][$index].value" maxlength="125"
+                       style="width: 400px;"
                        ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
                        ng-change="field.invalid=false"
                        ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
