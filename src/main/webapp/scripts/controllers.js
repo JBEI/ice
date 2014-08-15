@@ -259,12 +259,12 @@ iceControllers.controller('AdminController', function ($rootScope, $location, $s
         'SEND_EMAIL_ON_ERRORS'
     ];
 
-    $scope.generalSettings = [];
-    $scope.emailSettings = [];
-
     // retrieve general setting
     $scope.getSetting = function () {
         var sessionId = $cookieStore.get("sessionId");
+
+        $scope.generalSettings = [];
+        $scope.emailSettings = [];
 
         // retrieve site wide settings
         var settings = Settings(sessionId);
