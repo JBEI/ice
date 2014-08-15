@@ -68,7 +68,7 @@
         </button>
     </div>
 
-    <div class="btn-group" style="margin-left: 12px">
+    <div class="btn-group" style="margin-left: 12px" ng-if="user.isAdmin">
         <button type="button" class="btn btn-default btn-sm subMenuTransfer dropdown-toggle" ng-disabled="addToDisabled"
                 ng-click="retrieveRegistryPartners()">
             <i style="font-size: 14px; opacity:0.85;" class="fa fa-share-square blue"></i>

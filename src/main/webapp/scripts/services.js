@@ -627,6 +627,18 @@ iceServices.factory('Upload', function ($resource) {
                 method:'PUT',
                 url:'rest/upload/:importId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            deleteSequence:{
+                method:'DELETE',
+                url:'rest/upload/:importId/entry/:entryId/sequence',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            deleteAttachment:{
+                method:'DELETE',
+                url:'rest/upload/:importId/entry/:entryId/attachment',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
     }

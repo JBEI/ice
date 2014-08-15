@@ -45,6 +45,7 @@ public class PartData implements IDataTransferModel {
     private boolean hasAttachment;
     private boolean hasSample;
     private boolean hasSequence;
+    private String sequenceFileName;
     private boolean hasOriginalSequence;
     private ArrayList<AttachmentInfo> attachments;
     private ArrayList<CustomField> parameters;
@@ -430,5 +431,13 @@ public class PartData implements IDataTransferModel {
 
     public void setIndex(int index) {
         this.index = index;
+    }
+
+    public String getSequenceFileName() {
+        return sequenceFileName;
+    }
+
+    public void setSequenceFileName(String sequenceFileName) {
+        this.sequenceFileName = sequenceFileName;
     }
 }

@@ -219,6 +219,13 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         }
     }
 
+    public String getSequenceFilename(Entry entry) throws DAOException {
+        return (String) currentSession().createCriteria(Sequence.class)
+                .setProjection(Projections.property("fileName"))
+                .add(Restrictions.eq("entry", entry))
+                .uniqueResult();
+    }
+
     /**
      * Determines if the user uploaded a sequence file and associated it with an entry
      *

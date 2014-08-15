@@ -268,21 +268,26 @@
                 <small class="dropdown opacity_hover">
                     <span class="dropdown-toggle">Download <span class="caret"></span></span>
                     <ul class="dropdown-menu">
-                        <li class="cursor_pointer font-80em"><a>Original</a></li>
-                        <li class="cursor_pointer font-80em">
-                            <a ng-click="linkCreateType='plasmid'"><i>Genbank</i></a>
+                        <li class="cursor_pointer font-80em" ng-if="entry.hasOriginalSequence">
+                            <a ng-href="/rest/file/{{entry.id}}/sequence/original?sid={{sessionId}}" target="_self">Original</a>
                         </li>
                         <li class="cursor_pointer font-80em">
-                            <a ng-click="linkCreateType='strain'"><i>FASTA</i></a>
+                            <a ng-href="/rest/file/{{entry.id}}/sequence/genbank?sid={{sessionId}}" target="_self"><i>Genbank</i></a>
                         </li>
                         <li class="cursor_pointer font-80em">
-                            <a ng-click="linkCreateType='part'"><i>SBOL</i></a>
+                            <a ng-href="/rest/file/{{entry.id}}/sequence/fasta?sid={{sessionId}}" target="_self"><i>FASTA</i></a>
                         </li>
                         <li class="cursor_pointer font-80em">
-                            <a ng-click="linkCreateType='seed'"><i>Pigeon Image</i></a>
+                            <a ng-href="/rest/file/{{entry.id}}/sequence/sbol?sid={{sessionId}}"
+                               target="_self"><i>SBOL</i></a>
                         </li>
                         <li class="cursor_pointer font-80em">
-                            <a ng-click="linkCreateType='seed'"><i>Pigeon Script</i></a>
+                            <a ng-href="/rest/file/{{entry.id}}/sequence/pigeonI?sid={{sessionId}}" target="_self"><i>Pigeon
+                                Image</i></a>
+                        </li>
+                        <li class="cursor_pointer font-80em">
+                            <a ng-href="/rest/file/{{entry.id}}/sequence/pigeonS?sid={{sessionId}}" target="_self"><i>Pigeon
+                                Script</i></a>
                         </li>
                     </ul>
                 </small>

@@ -52,9 +52,10 @@ public class FileBulkUpload {
      * Creates a CSV template for download based on the the type of entries
      *
      * @param addType entry type that is to be uploaded
+     * @param linked  type that is linked to this entry
      * @return byte array of the template or null if the headers for the type cannot be retrieved/is unsupported
      */
-    public static byte[] getCSVTemplateBytes(EntryType addType) {
+    public static byte[] getCSVTemplateBytes(EntryType addType, EntryType linked) {
         List<EntryField> headers = BulkCSVUploadHeaders.getHeadersForType(addType);
         if (headers == null)
             return null;
@@ -71,6 +72,22 @@ public class FileBulkUpload {
             if (header.isRequired())
                 sb.append("*");
             sb.append('"');
+        }
+
+        // check linked
+        if (linked != null) {
+            headers = BulkCSVUploadHeaders.getHeadersForType(linked);
+            if (headers != null) {
+                for (int i = 0; i < headers.size(); i++) {
+                    sb.append(",");
+                    sb.append('"');
+                    EntryField header = headers.get(i);
+                    sb.append(linked.getDisplay()).append(" ").append(header.getLabel());
+                    if (header.isRequired())
+                        sb.append("*");
+                    sb.append('"');
+                }
+            }
         }
 
         sb.append("\n");

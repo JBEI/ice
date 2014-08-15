@@ -18,12 +18,16 @@ import org.jbei.ice.lib.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.SequenceInfo;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.exception.UnexpectedException;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
@@ -50,6 +54,53 @@ public class BulkUploadResource extends RestResource {
             return controller.getBulkImport(userId, id, offset, limit);
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    @POST
+    @Path("/{id}/sequence")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response uploadSequenceFile(@PathParam("id") long uploadId,
+            @FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("entryId") long entryId,
+            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
+            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+        try {
+            String fileName = contentDispositionHeader.getFileName();
+            String userId = super.getUserIdFromSessionHeader(sessionId);
+            String sequence = IOUtils.toString(fileInputStream);
+            SequenceInfo sequenceInfo = controller.addSequence(userId, uploadId, entryId, sequence, fileName);
+            if (sequenceInfo == null)
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.status(Response.Status.OK).entity(sequenceInfo).build();
+        } catch (Exception e) {
+            Logger.error(e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @POST
+    @Path("/{id}/attachment")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response uploadAttachmentFile(@PathParam("id") long uploadId,
+            @FormDataParam("file") InputStream fileInputStream,
+            @FormDataParam("entryId") long entryId,
+            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
+            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+        try {
+            String fileName = contentDispositionHeader.getFileName();
+            String userId = super.getUserIdFromSessionHeader(sessionId);
+            String sequence = IOUtils.toString(fileInputStream);
+            AttachmentInfo attachmentInfo = controller.addAttachment(userId, uploadId, entryId, fileInputStream,
+                                                                     fileName);
+            if (attachmentInfo == null)
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.status(Response.Status.OK).entity(attachmentInfo).build();
+        } catch (Exception e) {
+            Logger.error(e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -177,6 +228,40 @@ public class BulkUploadResource extends RestResource {
         } catch (Exception e) {
             Logger.error(e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entry/{entryId}/sequence")
+    public Response deleteEntrySequence(@PathParam("id") long uploadId,
+            @PathParam("entryId") long entryId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        try {
+            String userId = getUserIdFromSessionHeader(userAgentHeader);
+            if (new SequenceController().deleteSequence(userId, entryId))
+                return Response.ok().build();
+            return Response.serverError().build();
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new UnexpectedException(e.getMessage());
+        }
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entry/{entryId}/attachment")
+    public Response deleteEntryAttachment(@PathParam("id") long uploadId,
+            @PathParam("entryId") long entryId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        try {
+            String userId = getUserIdFromSessionHeader(userAgentHeader);
+            if (controller.deleteAttachment(userId, uploadId, entryId))
+                return Response.ok().build();
+            return Response.serverError().build();
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new UnexpectedException(e.getMessage());
         }
     }
 }
