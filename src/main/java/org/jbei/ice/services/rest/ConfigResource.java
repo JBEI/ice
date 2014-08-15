@@ -7,10 +7,13 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.Setting;
@@ -33,6 +36,15 @@ public class ConfigResource extends RestResource {
         return controller.retrieveSystemSettings();
     }
 
+    @GET
+    @Path("/version")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Setting getVersion(@Context UriInfo uriInfo) {
+        String url = uriInfo.getBaseUri().getAuthority();
+        Logger.info(url + " requesting version");
+        return controller.getSystemVersion(url);
+    }
+
     /**
      * Retrieves the value for the specified config key
      *
@@ -42,8 +54,7 @@ public class ConfigResource extends RestResource {
     @GET
     @Path("/{key}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Setting getConfig(@PathParam("key") String key,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+    public Setting getConfig(@PathParam("key") String key) {
         return controller.getPropertyValue(key);
     }
 

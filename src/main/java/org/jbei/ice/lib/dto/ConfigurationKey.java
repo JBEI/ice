@@ -10,6 +10,7 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
  */
 public enum ConfigurationKey implements IDataTransferModel {
 
+    APPLICATION_VERSION("4.0.0"),
     DATABASE_SCHEMA_VERSION(""),
     TEMPORARY_DIRECTORY("/tmp"),
     DATA_DIRECTORY("data"),

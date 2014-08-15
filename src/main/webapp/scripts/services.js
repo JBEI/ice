@@ -682,6 +682,11 @@ iceServices.factory('Settings', function ($resource) {
                 method:'PUT',
                 url:'/rest/config/blast',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            version:{
+                method: 'GET',
+                url: '/rest/config/version'
             }
         });
     }

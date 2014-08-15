@@ -679,6 +679,14 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
         }
     });
 
+    $scope.appVersion = undefined;
+    settings.version({}, function(result){
+        console.log(result);
+        $rootScope.appVersion = result.value;
+    }, function(error){
+        console.log(error);
+    });
+
     $scope.pageCounts = function (currentPage, resultCount) {
         var maxPageCount = 15;
         var pageNum = ((currentPage - 1) * maxPageCount) + 1;
