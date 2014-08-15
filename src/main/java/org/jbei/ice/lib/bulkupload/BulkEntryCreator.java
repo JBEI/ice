@@ -50,7 +50,7 @@ public class BulkEntryCreator {
 
     protected BulkUpload createOrRetrieveBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,
             EntryType addType) {
-        BulkUpload draft = dao.retrieveById(autoUpdate.getBulkUploadId());
+        BulkUpload draft = dao.get(autoUpdate.getBulkUploadId());
         if (draft == null) {
             draft = new BulkUpload();
             draft.setName("Untitled");
@@ -203,8 +203,9 @@ public class BulkEntryCreator {
      * @param id     unique identifier referencing the bulk upload
      * @param name   name to assign to the bulk upload
      * @return data transfer object for the bulk upload.
-     * returns null if no
-     * @throws org.jbei.ice.lib.access.AuthorizationException is user performing action doesn't have privileges
+     *         returns null if no
+     * @throws org.jbei.ice.lib.access.AuthorizationException
+     *          is user performing action doesn't have privileges
      */
     public BulkUploadInfo renameBulkUpload(String userId, long id, String name) {
         BulkUpload upload = dao.get(id);
@@ -228,7 +229,7 @@ public class BulkEntryCreator {
      * @param autoUpdate wrapper for information used to create entry
      * @param addType    type of entry being created
      * @return updated wrapper for information used to create entry. Will contain additional information
-     * such as the unique identifier for the part, if one was created
+     *         such as the unique identifier for the part, if one was created
      */
     public BulkUploadAutoUpdate createOrUpdateEntry(String userId, BulkUploadAutoUpdate autoUpdate,
             EntryType addType) {
@@ -305,7 +306,7 @@ public class BulkEntryCreator {
     }
 
     public BulkUploadInfo createOrUpdateEntries(String userId, long draftId, List<PartData> data) {
-        BulkUpload draft = dao.retrieveById(draftId);
+        BulkUpload draft = dao.get(draftId);
         if (draft == null)
             return null;
 

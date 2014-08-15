@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.Permission;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
@@ -18,7 +15,6 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.utils.IceCSVSerializer;
-import org.jbei.ice.servlet.ModelToInfoFactory;
 
 /**
  * @author Hector Plahar
@@ -173,13 +169,6 @@ public class EntryRetriever {
         return dao.getEntrySummary(id);
     }
 
-    /*
-    * Generate the next part number string using system settings.
-    *
-    * @return The next part number.
-    */
-
-
     /**
      * Retrieve {@link org.jbei.ice.lib.entry.model.Entry} from the database by recordId (uuid).
      *
@@ -187,7 +176,7 @@ public class EntryRetriever {
      * @return entry retrieved from the database.
      */
     public Entry getByRecordId(String userId, String recordId) {
-        Entry entry = dao.getByRecordId(recordId);
+        Entry entry = getEntry(recordId);
         if (entry == null)
             return null;
 
@@ -195,24 +184,24 @@ public class EntryRetriever {
         return entry;
     }
 
-    public PartData getPartByRecordId(Account account, String recordId) throws ControllerException {
-        Entry entry;
-
-        try {
-            entry = dao.getByRecordId(recordId);
-            if (entry == null)
-                return null;
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-//        authorization.expectRead(account.getEmail(), entry);
-
-        PartData info = ModelToInfoFactory.getInfo(entry);
-        boolean hasSequence = DAOFactory.getSequenceDAO().hasSequence(entry.getId());
-        info.setHasSequence(hasSequence);
-        boolean hasOriginalSequence = DAOFactory.getSequenceDAO().hasOriginalSequence(entry.getId());
-        info.setHasOriginalSequence(hasOriginalSequence);
-        return info;
-    }
+//    public PartData getPartByRecordId(Account account, String recordId) throws ControllerException {
+//        Entry entry;
+//
+//        try {
+//            entry = dao.getByRecordId(recordId);
+//            if (entry == null)
+//                return null;
+//        } catch (DAOException e) {
+//            throw new ControllerException(e);
+//        }
+//
+////        authorization.expectRead(account.getEmail(), entry);
+//
+//        PartData info = ModelToInfoFactory.getInfo(entry);
+//        boolean hasSequence = DAOFactory.getSequenceDAO().hasSequence(entry.getId());
+//        info.setHasSequence(hasSequence);
+//        boolean hasOriginalSequence = DAOFactory.getSequenceDAO().hasOriginalSequence(entry.getId());
+//        info.setHasOriginalSequence(hasOriginalSequence);
+//        return info;
+//    }
 }

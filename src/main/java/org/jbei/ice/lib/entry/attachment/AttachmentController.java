@@ -153,7 +153,7 @@ public class AttachmentController {
         return attachment;
     }
 
-    public ArrayList<Attachment> getByEntry(String userId, Entry entry) throws ControllerException {
+    public ArrayList<Attachment> getByEntry(String userId, Entry entry) {
         entryAuthorization.expectRead(userId, entry);
         return dao.getByEntry(entry);
     }

@@ -1,5 +1,9 @@
 package org.jbei.ice.lib.bulkupload;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -22,16 +26,21 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -46,6 +55,7 @@ public class BulkUploadController {
     private final AccountController accountController;
     private final EntryController entryController;
     private final AttachmentController attachmentController;
+    private final SequenceController sequenceController;
 
     public BulkUploadController() {
         dao = DAOFactory.getBulkUploadDAO();
@@ -53,6 +63,7 @@ public class BulkUploadController {
         accountController = new AccountController();
         entryController = new EntryController();
         attachmentController = new AttachmentController();
+        sequenceController = new SequenceController();
     }
 
     public BulkUploadInfo create(String userId, BulkUploadInfo info) {
@@ -128,7 +139,7 @@ public class BulkUploadController {
      */
     public BulkUploadInfo retrieveById(String userId, long id, int start, int limit)
             throws ControllerException, PermissionException {
-        BulkUpload draft = dao.retrieveById(id);
+        BulkUpload draft = dao.get(id);
         if (draft == null)
             return null;
 
@@ -155,12 +166,13 @@ public class BulkUploadController {
     }
 
     public BulkUploadInfo getBulkImport(String userId, long id, int offset, int limit) {
-        BulkUpload draft = dao.retrieveById(id);
+        BulkUpload draft = dao.get(id);
         if (draft == null)
             return null;
 
         Account account = accountController.getByEmail(userId);
         authorization.expectRead(account.getEmail(), draft);
+        SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
 
         // retrieve the entries associated with the bulk import
         BulkUploadInfo info = draft.toDataTransferObject();
@@ -168,6 +180,19 @@ public class BulkUploadController {
         List<Entry> list = dao.retrieveDraftEntries(id, offset, limit);
         for (Entry entry : list) {
             PartData partData = ModelToInfoFactory.getInfo(entry);
+            if (sequenceDAO.hasSequence(entry.getId())) {
+                partData.setHasSequence(true);
+                String name = sequenceDAO.getSequenceFilename(entry);
+                partData.setSequenceFileName(name);
+            }
+
+            // check attachment
+            if (attachmentController.hasAttachment(entry)) {
+                partData.setHasAttachment(true);
+                partData.setAttachments(attachmentController.getByEntry(userId, entry.getId()));
+            }
+
+            // trace sequences
             info.getEntryList().add(partData);
         }
 
@@ -277,7 +302,7 @@ public class BulkUploadController {
      */
     public BulkUploadInfo deleteDraftById(Account requesting, long draftId)
             throws ControllerException, PermissionException {
-        BulkUpload draft = dao.retrieveById(draftId);
+        BulkUpload draft = dao.get(draftId);
         if (draft == null)
             throw new ControllerException("Could not retrieve draft with id \"" + draftId + "\"");
 
@@ -319,7 +344,7 @@ public class BulkUploadController {
      */
     public boolean submitBulkImportDraft(Account account, long draftId) throws PermissionException {
         // retrieve draft
-        BulkUpload draft = dao.retrieveById(draftId);
+        BulkUpload draft = dao.get(draftId);
         if (draft == null)
             return false;
 
@@ -369,7 +394,7 @@ public class BulkUploadController {
             return false;
         }
 
-        BulkUpload upload = dao.retrieveById(uploadId);
+        BulkUpload upload = dao.get(uploadId);
         if (upload == null) {
             Logger.warn("Could not retrieve bulk upload " + uploadId + " for reversal");
             return false;
@@ -396,7 +421,7 @@ public class BulkUploadController {
         }
 
         // retrieve bulk upload in question (at this point it is owned by system)
-        BulkUpload bulkUpload = dao.retrieveById(id);
+        BulkUpload bulkUpload = dao.get(id);
         if (bulkUpload == null) {
             Logger.error("Could not retrieve bulk upload with id \"" + id + "\" for approval");
             return false;
@@ -437,6 +462,95 @@ public class BulkUploadController {
         // when done approving, delete the bulk upload record but not the entries associated with it.
         bulkUpload.getContents().clear();
         dao.delete(bulkUpload);
+        return true;
+    }
+
+    public SequenceInfo addSequence(String userId, long bulkUploadId, long entryId, String sequenceString,
+            String fileName) {
+        BulkUpload upload = dao.get(bulkUploadId);
+        if (upload == null)
+            return null;
+
+        authorization.expectWrite(userId, upload);
+        Entry entry = dao.getUploadEntry(bulkUploadId, entryId);
+        // todo : enforcing that entry must exist
+        if (entry == null) {
+            Logger.error("Could not find entry with id " + entryId + " in bulk upload " + bulkUploadId);
+            return null;
+        }
+
+        // parse actual sequence
+        DNASequence dnaSequence = SequenceController.parse(sequenceString);
+        if (dnaSequence == null)
+            return null;
+
+        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        sequence.setSequenceUser(sequenceString);
+        sequence.setEntry(entry);
+        if (fileName != null)
+            sequence.setFileName(fileName);
+        SequenceInfo info = sequenceController.save(userId, sequence).toDataTransferObject();
+        info.setSequence(dnaSequence);
+        return info;
+    }
+
+    public AttachmentInfo addAttachment(String userId, long bulkUploadId, long entryId, InputStream fileInputStream,
+            String fileName) {
+        BulkUpload upload = dao.get(bulkUploadId);
+        if (upload == null)
+            return null;
+
+        authorization.expectWrite(userId, upload);
+        Entry entry = dao.getUploadEntry(bulkUploadId, entryId);
+        // todo : enforcing that entry must exist
+        if (entry == null) {
+            Logger.error("Could not find entry with id " + entryId + " in bulk upload " + bulkUploadId);
+            return null;
+        }
+
+        String fileId = Utils.generateUUID();
+        File attachmentFile = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
+                                        AttachmentController.attachmentDirName, fileId).toFile();
+
+        try {
+            FileUtils.copyInputStreamToFile(fileInputStream, attachmentFile);
+        } catch (IOException e) {
+            Logger.error(e);
+            return null;
+        }
+
+        AttachmentInfo info = new AttachmentInfo();
+        info.setFileId(fileId);
+        info.setFilename(fileName);
+
+        return attachmentController.addAttachmentToEntry(userId, entryId, info);
+    }
+
+    public boolean deleteAttachment(String userId, long bulkUploadId, long entryId) {
+        BulkUpload upload = dao.get(bulkUploadId);
+        if (upload == null)
+            return false;
+
+        authorization.expectWrite(userId, upload);
+        Entry entry = dao.getUploadEntry(bulkUploadId, entryId);
+        // todo : enforcing that entry must exist
+        if (entry == null) {
+            Logger.error("Could not find entry with id " + entryId + " in bulk upload " + bulkUploadId);
+            return false;
+        }
+
+        List<Attachment> attachments = DAOFactory.getAttachmentDAO().getByEntry(entry);
+
+        // actually expect only 1
+        try {
+            for (Attachment attachment : attachments) {
+                DAOFactory.getAttachmentDAO().delete(attachment);
+            }
+        } catch (Exception e) {
+            Logger.error(e);
+            return false;
+        }
+
         return true;
     }
 }

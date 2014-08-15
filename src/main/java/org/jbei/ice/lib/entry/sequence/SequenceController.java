@@ -2,6 +2,7 @@ package org.jbei.ice.lib.entry.sequence;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -30,8 +31,12 @@ import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.FormatterException;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.IFormatter;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.SBOLFormatter;
+import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.models.AnnotationLocation;
 import org.jbei.ice.lib.models.Feature;
 import org.jbei.ice.lib.models.Sequence;
@@ -47,6 +52,7 @@ import org.jbei.ice.lib.vo.DNAFeatureNote;
 import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -58,10 +64,12 @@ public class SequenceController {
 
     private final SequenceDAO dao;
     private final EntryAuthorization authorization;
+    private final EntryRetriever retriever;
 
     public SequenceController() {
         dao = new SequenceDAO();
         authorization = new EntryAuthorization();
+        retriever = new EntryRetriever();
     }
 
     public boolean parseAndSaveSequence(String userId, long partId, String sequenceString) {
@@ -86,7 +94,8 @@ public class SequenceController {
     }
 
     // either or both recordId and entryType has to have a value
-    public SequenceInfo parseSequence(String userId, String recordId, String entryType, String sequenceString) {
+    public SequenceInfo parseSequence(String userId, String recordId, String entryType, String sequenceString,
+            String name) {
         EntryType type = EntryType.nameToType(entryType);
         EntryRetriever retriever = new EntryRetriever();
         EntryCreator creator = new EntryCreator();
@@ -99,6 +108,8 @@ public class SequenceController {
             entry = creator.createEntry(account, entry, null);
         } else {
             entry = retriever.getByRecordId(userId, recordId);
+            if (entry == null)
+                return null;
         }
 
         // parse actual sequence
@@ -109,6 +120,8 @@ public class SequenceController {
         Sequence sequence = dnaSequenceToSequence(dnaSequence);
         sequence.setSequenceUser(sequenceString);
         sequence.setEntry(entry);
+        if (name != null)
+            sequence.setFileName(name);
         SequenceInfo info = save(userId, sequence).toDataTransferObject();
         info.setSequence(dnaSequence);
         return info;
@@ -136,7 +149,6 @@ public class SequenceController {
         if (account == null)
             return null;
 
-        EntryRetriever retriever = new EntryRetriever();
 
         try {
             Entry entry = retriever.get(userId, entryId);
@@ -464,5 +476,64 @@ public class SequenceController {
         } catch (DAOException e) {
             throw new ControllerException(e);
         }
+    }
+
+    public ByteArrayWrapper getSequenceFile(String userId, long partId, String type) {
+        Entry entry = retriever.get(userId, partId);
+        Sequence sequence = dao.getByEntry(entry);
+        if (sequence == null)
+            return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
+
+        String name;
+        String sequenceString;
+
+        try {
+            switch (type) {
+                case "original":
+                    sequenceString = sequence.getSequenceUser();
+                    name = entry.getName() + ".seq";
+                    break;
+
+                case "genbank":
+                default:
+                    GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
+                    // TODO
+                    genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular() : false);
+                    sequenceString = compose(sequence, genbankFormatter);
+                    name = entry.getName() + ".gb";
+                    break;
+
+                case "fasta":
+                    FastaFormatter formatter = new FastaFormatter(sequence.getEntry().getName());
+                    sequenceString = compose(sequence, formatter);
+                    name = entry.getName() + ".fasta";
+                    break;
+
+                case "sbol":
+                    sequenceString = compose(sequence, new SBOLFormatter());
+                    name = entry.getName() + ".xml";
+                    break;
+
+                case "pigeonI":
+                    try {
+                        URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
+                        byte[] bytes = IOUtils.toByteArray(uri.toURL().openStream());
+                        return new ByteArrayWrapper(bytes, entry.getName() + ".png");
+                    } catch (Exception e) {
+                        Logger.error(e);
+                        return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
+                    }
+
+                case "pigeonS":
+                    sequenceString = PigeonSBOLv.generatePigeonScript(sequence);
+                    name = entry.getName() + ".txt";
+                    break;
+            }
+        } catch (ControllerException e) {
+            Logger.error("Failed to generate genbank file for download!", e);
+            return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
+        }
+
+        return new ByteArrayWrapper(sequenceString.getBytes(), name);
     }
 }

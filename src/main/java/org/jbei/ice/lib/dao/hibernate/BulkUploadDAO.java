@@ -26,10 +26,6 @@ import org.hibernate.criterion.Restrictions;
  */
 public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
 
-    public BulkUpload retrieveById(long id) throws DAOException {
-        return super.get(BulkUpload.class, id);
-    }
-
     @SuppressWarnings("unchecked")
     public ArrayList<BulkUpload> retrieveByAccount(Account account) throws DAOException {
         Session session = currentSession();
@@ -50,9 +46,9 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
 
     public int getUploadEntryCount(long id) throws DAOException {
         Number number = (Number) currentSession().createCriteria(BulkUpload.class)
-                                                 .setProjection(Projections.countDistinct("id"))
-                                                 .add(Restrictions.eq("id", id))
-                                                 .uniqueResult();
+                .setProjection(Projections.countDistinct("id"))
+                .add(Restrictions.eq("id", id))
+                .uniqueResult();
 
         return number.intValue();
     }
@@ -133,8 +129,19 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         return results;
     }
 
+    // retrieves entries that are expected to be a part of this bulk upload.
+    public Entry getUploadEntry(long bulkUpload, long entryId) throws DAOException {
+        Entry entry = (Entry) currentSession().get(Entry.class, entryId);
+        Object object = currentSession().createCriteria(BulkUpload.class)
+                .add(Restrictions.eq("id", bulkUpload))
+                .createCriteria("contents", "entry").add(Restrictions.eq("id", entryId)).uniqueResult();
+        if (object != null)
+            return entry;
+        return null;
+    }
+
     @Override
-    public BulkUpload get(long id) {
+    public BulkUpload get(long id) throws DAOException {
         return super.get(BulkUpload.class, id);
     }
 }
