@@ -8,14 +8,12 @@ You can try out the software and use our tools on our [Public Registry](http://p
 
 <b>Documentation</b>
 
-  Read the [Manual](https://public-registry.jbei.org/site/docbkx/html/manual/manual.html) for installation and other instructions
-  Read the [Java api docs](https://public-registry.jbei.org/site/apidocs/)
+  Read the [Manual](https://public-registry.jbei.org/manual/) for installation and other instructions
 
 <b>Links</b>
 
 [ICE Google Group](http://groups.google.com/group/gd-ice)
-<br>[Continuous Build system](http://registry-test.jbei.org:8111): The WAR files are automatically created here. Login as guest and click on "Artifacts" for the Master branch to obtain the latest production version.
-<br>[Pre-packaged installation for your local machine](http://public-registry.jbei.org/site/packages): Please note that this is intended for convenient evaluation of ICE and not to be used in a production environment. 
+<br>[Continuous Build system](http://registry-test.jbei.org:8111): The WAR files are automatically created here. Login as guest and click on "Artifacts" for the Master branch to obtain the latest production version. 
 
 <b>Related Projects</b>
 
