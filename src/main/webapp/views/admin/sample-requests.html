@@ -14,17 +14,19 @@
                          ng-show="selection.length>0">{{selection.length}}</sup>
                 </th>
                 <th ng-click="sort('type')">
-                    <span class="cursor_pointer">Requester</span> <i ng-show="params.sort=='type'"
-                                                                     class="fa"
-                                                                     ng-class="{'fa-caret-down':params.asc==true, 'fa-caret-up':params.asc==false}"></i>
+                    <span class="cursor_pointer">Requester</span>
+                    <i ng-show="params.sort=='type'" class="fa"
+                       ng-class="{'fa-caret-down':params.asc==true, 'fa-caret-up':params.asc==false}"></i>
                 </th>
                 <th style="width: 110px">Entry</th>
                 <th data-ng-click="sort('name')" style="width:230px">
-                    <span class="cursor_pointer">Type</span> <i ng-show="params.sort=='name'" class="fa"
-                                                                ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
+                    <span class="cursor_pointer">Type</span>
+                    <i ng-show="params.sort=='name'" class="fa"
+                       ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
                 </th>
                 <th ng-click="sort('summary')">Requested</th>
-                <th ng-click="sort('summary')">Updated</th>
+                <th ng-click="sort('summary')">Fulfilled</th>
+                <th></th>
             </tr>
             <tr data-ng-show=" userList.length == 0">
                 <td colspan="10">No user accounts available</td>
@@ -38,9 +40,17 @@
                 <td><a href="/profile/{{request.requester.id}}">{{request.requester.firstName}}
                     {{request.requester.lastName}}</a></td>
                 <td><a href="/entry/{{request.partData.id}}">{{request.partData.partId}}</a></td>
-                <td>{{request.requestType}}</td>
+                <td>
+                    <span ng-if="request.requestType==='LIQUID_CULTURE'"><i
+                            class="fa fa-flask"></i> Liquid Culture</span>
+                    <span ng-if="request.requestType!=='LIQUID_CULTURE'"><i class="fa fa-circle-thin"></i> Streak on Agar Plate</span>
+                </td>
                 <td style="width:160px; white-space:nowrap">{{request.requestTime | date:'MMM d, yyyy'}}</td>
                 <td style="width:160px; white-space:nowrap">{{request.updateTime | date:'MMM d, yyyy'}}</td>
+                <td>
+                    <button class="btn btn-default btn-xs"><i class="fa fa-check green"></i> Fulfill</button>
+                    <button class="btn btn-default btn-xs"><i class="fa fa-times red"></i> Reject</button>
+                </td>
             </tr>
         </table>
     </div>

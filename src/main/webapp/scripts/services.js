@@ -377,6 +377,14 @@ iceServices.factory('Samples', function ($resource) {
                 url:"/rest/samples/requests/:userId",
                 isArray:true,
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            addRequestToCart:{
+                method:'POST',
+                responseType:'json',
+                isArray:true,
+                url:"/rest/samples/requests",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         })
     }
@@ -685,8 +693,8 @@ iceServices.factory('Settings', function ($resource) {
             },
 
             version:{
-                method: 'GET',
-                url: '/rest/config/version'
+                method:'GET',
+                url:'/rest/config/version'
             }
         });
     }
@@ -920,6 +928,15 @@ iceServices.factory('Authentication',
                         }
                         console.log("ERROR", data);
                     });
+            },
+
+            isAdmin:function () {
+//                console.log($rootScope.user);
+//                 if(!$rootScope.user || !$rootScope.user.isAdmin) {
+//                     $location.path("/");
+//                     return false;
+//                 }
+                return true;
             },
 
             // logs out user by invalidating the session id

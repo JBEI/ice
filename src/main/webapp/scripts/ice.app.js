@@ -169,7 +169,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             templateUrl:'/views/admin.html',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid("main.admin");
+                    return Authentication.isSessionValid("main.admin") && Authentication.isAdmin();
                 }
                 // TODO : also is admin
             }
