@@ -29,7 +29,7 @@ public class FileBulkUpload {
 
         // process csv
         if (fileName.endsWith(".csv")) {
-            BulkCSVUpload upload = HelperFactory.createCSVUpload(account, addType, filePath);
+            BulkCSVUpload upload = new BulkCSVUpload(addType, account, filePath);
             return upload.processUpload();
         }
 
