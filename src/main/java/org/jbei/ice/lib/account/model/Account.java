@@ -59,6 +59,9 @@ public class Account implements IDataModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
 
+    @Column(name = "is_subscribed")
+    private int isSubscribed;
+
     @Column(name = "modification_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationTime;
