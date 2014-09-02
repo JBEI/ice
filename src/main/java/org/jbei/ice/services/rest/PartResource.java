@@ -334,11 +334,13 @@ public class PartResource extends RestResource {
 
     @DELETE
     @Path("/{id}/traces/{traceId}")
-    public void deleteTrace(@Context UriInfo info, @PathParam("id") long partId,
+    public Response deleteTrace(@Context UriInfo info, @PathParam("id") long partId,
             @PathParam("traceId") long traceId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        controller.deleteTraceSequence(userId, partId, traceId);
+        if (!controller.deleteTraceSequence(userId, partId, traceId))
+            return super.respond(Response.Status.UNAUTHORIZED);
+        return super.respond(Response.Status.OK);
     }
 
     @GET
