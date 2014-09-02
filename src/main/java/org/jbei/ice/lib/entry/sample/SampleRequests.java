@@ -14,7 +14,6 @@ import org.jbei.ice.lib.dao.hibernate.RequestDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
-import org.jbei.ice.lib.dto.sample.SampleRequestType;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Request;
 import org.jbei.ice.lib.utils.Emailer;
@@ -53,16 +52,15 @@ public class SampleRequests {
     /**
      * Creates a new sample request for the specified user and specified entry.
      * The default status is "IN CART"
-     *
-     * @param account user account
-     * @param entryID unique identifier for the entry
-     * @param type    type of sample request
      */
-    public SampleRequest placeSampleInCart(Account account, long entryID, SampleRequestType type) {
-        Entry entry = entryDAO.get(entryID);
+    public ArrayList<SampleRequest> placeSampleInCart(String userId, SampleRequest sampleRequest) {
+        long partId = sampleRequest.getPartData().getId();
+        Entry entry = entryDAO.get(sampleRequest.getPartData().getId());
 
         if (entry == null)
-            throw new IllegalArgumentException("Cannot find entry with id: " + entryID);
+            throw new IllegalArgumentException("Cannot find entry with id: " + partId);
+
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
         // check if sample is already in cart with status of "IN CART"
         try {
@@ -73,12 +71,11 @@ public class SampleRequests {
             Request request = new Request();
             request.setAccount(account);
             request.setEntry(entry);
-            request.setType(type);
+            request.setType(sampleRequest.getRequestType());
             request.setRequested(new Date(System.currentTimeMillis()));
             request.setUpdated(request.getRequested());
-
-            request = dao.create(request);
-            return request.toDataTransferObject();
+            dao.create(request);
+            return getSampleRequestsInCart(account);
         } catch (DAOException e) {
             Logger.error(e);
         }
@@ -110,7 +107,7 @@ public class SampleRequests {
             if (account.getType() == AccountType.ADMIN) {
                 requests = dao.getAllRequestList();
             } else
-                requests = dao.getAccountRequestList(account, 0, 100, "requested", true);
+                requests = dao.getAccountRequestList(account, 0, 10, "requested", true);
         } catch (DAOException de) {
             return null;
         }

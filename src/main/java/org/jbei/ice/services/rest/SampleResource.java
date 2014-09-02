@@ -3,8 +3,10 @@ package org.jbei.ice.services.rest;
 import java.util.ArrayList;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import org.jbei.ice.lib.common.logging.Logger;
@@ -33,10 +35,22 @@ public class SampleResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/requests/:userId")
     public ArrayList<SampleRequest> getUserRequests(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            @QueryParam("status") String status) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         Logger.info(userId + ": retrieving sample requests for user");
         return sampleRequests.getPendingRequests(userId);
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/requests")
+    public ArrayList<SampleRequest> addRequest(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            SampleRequest request) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        Logger.info(userId + ": add sample request to cart for " + request.getPartData().getId());
+        return sampleRequests.placeSampleInCart(userId, request);
     }
 
 //    @GET

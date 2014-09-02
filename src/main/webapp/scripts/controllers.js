@@ -119,8 +119,11 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     };
 
     $scope.csvExport = function () {
-        // todo : if selectedEntries.length?
-        $window.open("/rest/part/" + $scope.entry.id + "/csv?sid=" + $cookieStore.get("sessionId"), "_self");
+        if (!selectedEntries.length) {
+            $window.open("/rest/part/" + $scope.entry.id + "/csv?sid=" + $cookieStore.get("sessionId"), "_self");
+        } else {
+
+        }
     }
 });
 
@@ -658,7 +661,7 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
 });
 
 // main controller.
-iceControllers.controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope, Folders, Settings, sessionValid, Search) {
+iceControllers.controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope, Folders, Settings, sessionValid, Search, Samples) {
     // todo : set on all
     // $location.search('q', null);
 
@@ -680,10 +683,10 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
     });
 
     $scope.appVersion = undefined;
-    settings.version({}, function(result){
+    settings.version({}, function (result) {
         console.log(result);
         $rootScope.appVersion = result.value;
-    }, function(error){
+    }, function (error) {
         console.log(error);
     });
 
@@ -731,9 +734,12 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 //        });
     }
 
+    var samples = Samples(sessionId);
+
     // selected entries
     $scope.selection = [];
     $scope.shoppingCartContents = [];
+//    samples.userRequests({userId:$rootScope.user.id, })
     // todo : retrieve shopping cart contents
 
     $scope.hidePopovers = function (hide) {
@@ -765,6 +771,15 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     $scope.$on('SampleTypeSelected', function (event, data) {
         // todo : save to the server
+
+        console.log(data);
+        samples.addRequestToCart({}, data, function (result) {
+            console.log(result);
+            $scope.shoppingCartContents = result;
+        }, function (error) {
+            console.error(error);
+        });
+
         $scope.shoppingCartContents.push(data);
     });
 
