@@ -6,9 +6,12 @@ import java.util.UUID;
 import org.jbei.ice.lib.access.RemotePermission;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.RemotePartnerDAO;
 import org.jbei.ice.lib.dao.hibernate.RemotePermissionDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.RemoteAccessPermission;
@@ -42,14 +45,22 @@ public class RemoteAccessController {
             return null;
 
         try {
-            FolderWrapper detail = (FolderWrapper) restClient.get(partner.getUrl(),
-                                                                  "/rest/folders/public",
+            FolderWrapper detail = (FolderWrapper) restClient.get(partner.getUrl(), "/rest/folders/public",
                                                                   FolderWrapper.class);
             return detail.getFolders();
         } catch (Exception e) {
             Logger.error(e);
         }
         return null;
+    }
+
+    public Setting getMasterVersion() {
+        String value = new ConfigurationController().getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
+        if(StringUtils.isEmpty(value))
+            return new Setting("version",ConfigurationKey.APPLICATION_VERSION.getDefaultValue());
+
+        // retrieve version
+        return (Setting) restClient.get(value, "/rest/config/version");
     }
 
     public FolderDetails getPublicEntries(long remoteId) {

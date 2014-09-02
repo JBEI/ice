@@ -10,6 +10,7 @@ import org.jbei.ice.lib.dao.hibernate.ConfigurationDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.models.Configuration;
+import org.jbei.ice.lib.net.RemoteAccessController;
 
 /**
  * @author Hector Plahar
@@ -20,6 +21,21 @@ public class ConfigurationController {
 
     public ConfigurationController() {
         dao = DAOFactory.getConfigurationDAO();
+    }
+
+    public Setting getSystemVersion(String url) {
+        String version = getPropertyValue(ConfigurationKey.APPLICATION_VERSION);
+
+        if(url.equalsIgnoreCase(getPropertyValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER))) {
+            return new Setting("version", version);
+        }
+
+        // request version from master
+        try {
+            return new RemoteAccessController().getMasterVersion();
+        } catch (Exception e) {
+            return new Setting("version", version);
+        }
     }
 
     public String retrieveDatabaseVersion() throws ControllerException {

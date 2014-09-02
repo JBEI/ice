@@ -9,18 +9,21 @@
 
     <div class="radio" style="padding-left: 40px">
         <label>
-            <input type="radio" name="sampleTypeOptions" ng-model="sampleType" value="liquid">Liquid Culture
+            <input type="radio" name="sampleTypeOptions" ng-model="sampleType" value="LIQUID_CULTURE">Liquid Culture
         </label>
     </div>
 
-    <div class="radio"  style="padding-left: 40px">
+    <div class="radio" style="padding-left: 40px">
         <label>
-            <input type="radio" name="sampleTypeOptions" ng-model="sampleType" value="streak">Streak on Agar Plate
+            <input type="radio" name="sampleTypeOptions" ng-model="sampleType" value="STREAK_ON_AGAR_PLATE">Streak on
+            Agar Plate
         </label>
     </div>
 </div>
 
 <div class="modal-footer">
     <button class="btn btn-default btn-sm" ng-click="$dismiss('cancel')">Cancel</button>
-    <button type="button" ng-click="$close(sampleType)" ng-disabled="!sampleType" class="btn btn-sm btn-primary" style="font-weight: bold">Add to Cart</button>
+    <button type="button" ng-click="$close(sampleType)" ng-disabled="!sampleType" class="btn btn-sm btn-primary"
+            style="font-weight: bold">Add to Cart
+    </button>
 </div>

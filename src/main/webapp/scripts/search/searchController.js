@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.search.controller', [])
-    .controller('SearchController', function ($scope, $http, $cookieStore, $location) {
+    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry) {
         console.log("SearchController", $scope.searchFilters);
         var sessionId = $cookieStore.get("sessionId");
         var queryString = $location.search().q;
@@ -40,6 +40,16 @@ angular.module('ice.search.controller', [])
                 return 'danger';
             return 'info';
         };
+
+        $scope.tooltipDetails = function(entry) {
+            $scope.searchResultToolTip = undefined;
+            Entry(sessionId).tooltip({partId:entry.id},
+                function (result) {
+                    $scope.searchResultToolTip = result;
+                }, function (error) {
+                    console.error(error);
+                });
+        }
     })
     .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location, Search) {
         $scope.searchTypes = {all:true, strain:true, plasmid:true, part:true, arabidopsis:true};

@@ -49,7 +49,7 @@
                 <td>{{result.entryInfo.type | capitalize}}</td>
                 <td><a ng-href='/entry/{{result.entryInfo.id}}'
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                       popover-template="/views/template.html"
+                       popover-template="/views/search/tooltip.html"
                        popover-title="{{result.entryInfo.partId}}"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
@@ -139,8 +139,8 @@
                 </td>
                 <td>{{result.entryInfo.type | capitalize}}</td>
                 <td><a ng-href='/entry/{{result.entryInfo.id}}' class="cell_mouseover form-group"
-                       popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                       popover-template="/views/template.html" popover-title="{{entry.partId}}"
+                       popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
+                       popover-template="/views/search/tooltip.html" popover-title="{{result.entryInfo.partId}}"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>

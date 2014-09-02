@@ -96,10 +96,8 @@ angular.module('ice.entry.controller', [])
             });
 
             modalInstance.result.then(function (selected) {
-                var sampleSelection = {type:selected, entry:$scope.entry};
-                console.log("selected", sampleSelection);
+                var sampleSelection = {type:selected, partData:{id:$scope.entry.id}};
                 $scope.$emit("SampleTypeSelected", sampleSelection);
-                // "liquid" or "streak"
             }, function () {
                 // dismiss callback
             });

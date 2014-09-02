@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.bulkupload;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
@@ -18,68 +17,87 @@ public class BulkCSVUploadHeaders {
         if (type == null)
             return null;
 
-        List<EntryField> headers = new ArrayList<>(getPartHeaders());
-
         switch (type) {
             case ARABIDOPSIS:
-                headers.addAll(getArabidopsisSeedHeaders());
-                return headers;
+                return getArabidopsisSeedHeaders();
 
             case STRAIN:
-                headers.addAll(getStrainHeaders());
-                return headers;
+                return getStrainHeaders();
 
             case PLASMID:
-                headers.addAll(getPlasmidHeaders());
-                return headers;
+                return getPlasmidHeaders();
 
             default:
-                return headers;
+            case PART:
+                return getPartHeaders();
         }
     }
 
+    protected static List<EntryField> getCommonFields() {
+        List<EntryField> list = new ArrayList<>();
+        list.add(EntryField.PI);
+        list.add(EntryField.PI_EMAIL);
+        list.add(EntryField.FUNDING_SOURCE);
+        list.add(EntryField.IP);
+        list.add(EntryField.BIOSAFETY_LEVEL);
+        list.add(EntryField.NAME);
+        list.add(EntryField.ALIAS);
+        list.add(EntryField.KEYWORDS);
+        list.add(EntryField.SUMMARY);
+        list.add(EntryField.NOTES);
+        list.add(EntryField.REFERENCES);
+        list.add(EntryField.LINKS);
+        list.add(EntryField.STATUS);
+        list.add(EntryField.CREATOR);
+        list.add(EntryField.CREATOR_EMAIL);
+        return list;
+    }
+
+    protected static void adddFileHeaders(List<EntryField> headers) {
+        headers.add(EntryField.SEQ_TRACE_FILES);
+        headers.add(EntryField.SEQ_FILENAME);
+        headers.add(EntryField.ATT_FILENAME);
+    }
+
     public static List<EntryField> getPartHeaders() {
-        return Arrays.asList(EntryField.PI,
-                             EntryField.PI_EMAIL,
-                             EntryField.FUNDING_SOURCE,
-                             EntryField.IP,
-                             EntryField.BIOSAFETY_LEVEL,
-                             EntryField.NAME,
-                             EntryField.ALIAS,
-                             EntryField.KEYWORDS,
-                             EntryField.SUMMARY,
-                             EntryField.NOTES,
-                             EntryField.REFERENCES,
-                             EntryField.LINKS,
-                             EntryField.STATUS,
-                             EntryField.SEQ_FILENAME,
-                             EntryField.ATT_FILENAME);
+        List<EntryField> list = getCommonFields();
+        adddFileHeaders(list);
+        return list;
     }
 
     public static List<EntryField> getStrainHeaders() {
-        return Arrays.asList(EntryField.PARENTAL_STRAIN,
-                             EntryField.GENOTYPE_OR_PHENOTYPE,
-                             EntryField.PLASMIDS,
-                             EntryField.SELECTION_MARKERS);
+        List<EntryField> list = getCommonFields();
+        list.add(EntryField.PARENTAL_STRAIN);
+        list.add(EntryField.GENOTYPE_OR_PHENOTYPE);
+        list.add(EntryField.PLASMIDS);
+        list.add(EntryField.SELECTION_MARKERS);
+        adddFileHeaders(list);
+        return list;
     }
 
     public static List<EntryField> getPlasmidHeaders() {
-        return Arrays.asList(EntryField.CIRCULAR,
-                             EntryField.BACKBONE,
-                             EntryField.PROMOTERS,
-                             EntryField.REPLICATES_IN,
-                             EntryField.ORIGIN_OF_REPLICATION,
-                             EntryField.SELECTION_MARKERS);
+        List<EntryField> list = getCommonFields();
+        list.add(EntryField.CIRCULAR);
+        list.add(EntryField.BACKBONE);
+        list.add(EntryField.PROMOTERS);
+        list.add(EntryField.REPLICATES_IN);
+        list.add(EntryField.ORIGIN_OF_REPLICATION);
+        list.add(EntryField.SELECTION_MARKERS);
+        adddFileHeaders(list);
+        return list;
     }
 
     public static List<EntryField> getArabidopsisSeedHeaders() {
-        return Arrays.asList(EntryField.HOMOZYGOSITY,
-                             EntryField.HARVEST_DATE,
-                             EntryField.ECOTYPE,
-                             EntryField.PARENTS,
-                             EntryField.GENERATION,
-                             EntryField.PLANT_TYPE,
-                             EntryField.GENERATION,
-                             EntryField.SENT_TO_ABRC);
+        List<EntryField> list = getCommonFields();
+        list.add(EntryField.HOMOZYGOSITY);
+        list.add(EntryField.HARVEST_DATE);
+        list.add(EntryField.ECOTYPE);
+        list.add(EntryField.PARENTS);
+        list.add(EntryField.GENERATION);
+        list.add(EntryField.PLANT_TYPE);
+        list.add(EntryField.GENERATION);
+        list.add(EntryField.SENT_TO_ABRC);
+        adddFileHeaders(list);
+        return list;
     }
 }

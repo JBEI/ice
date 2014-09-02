@@ -39,7 +39,7 @@ public class BulkZipUpload {
         this.userId = userId;
         this.zipFilePath = path;
         this.addType = addType;
-        csvUpload = HelperFactory.createCSVUpload(userId, addType, path);
+        csvUpload = new BulkCSVUpload(addType, userId, path);
     }
 
     /**
