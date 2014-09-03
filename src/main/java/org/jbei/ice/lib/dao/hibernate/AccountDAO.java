@@ -34,7 +34,7 @@ public class AccountDAO extends HibernateRepository<Account> {
     }
 
     @SuppressWarnings("unchecked")
-    public Set<Account> getMatchingAccounts(Account account, String token, int limit) throws DAOException {
+    public Set<Account> getMatchingAccounts(String token, int limit) {
         Session session = currentSession();
         try {
             token = token.toUpperCase();
@@ -57,9 +57,8 @@ public class AccountDAO extends HibernateRepository<Account> {
      *
      * @param email unique email identifier for account
      * @return Account
-     * @throws DAOException
      */
-    public Account getByEmail(String email) throws DAOException {
+    public Account getByEmail(String email) {
         Account account = null;
         Session session = currentSession();
         try {
@@ -91,8 +90,13 @@ public class AccountDAO extends HibernateRepository<Account> {
     }
 
     public long getAccountsCount() {
-        Number itemCount = (Number) currentSession().createCriteria(Account.class.getName())
-                .setProjection(Projections.countDistinct("id")).uniqueResult();
-        return itemCount.longValue();
+        try {
+            Number itemCount = (Number) currentSession().createCriteria(Account.class.getName())
+                    .setProjection(Projections.countDistinct("id")).uniqueResult();
+            return itemCount.longValue();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 }

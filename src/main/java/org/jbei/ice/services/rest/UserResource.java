@@ -13,7 +13,6 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.AccountResults;
 import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
@@ -43,8 +42,8 @@ public class UserResource extends RestResource {
      * Retrieves list of users that are available to user making request. Availability is
      * defined by being in the same group if the user does not have admin privileges.
      *
-     * @param userAgentHeader
-     * @return
+     * @param sessionId unique user session identifier
+     * @return wrapper around list of users
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -53,20 +52,28 @@ public class UserResource extends RestResource {
             @DefaultValue("15") @QueryParam("limit") int limit,
             @DefaultValue("lastName") @QueryParam("sort") String sort,
             @DefaultValue("true") @QueryParam("asc") boolean asc,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
-        Logger.info(userId + ": retrieving available accounts");
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        log(userId, "retrieving available accounts");
         return groupController.getAvailableAccounts(userId, offset, limit, asc, sort);
     }
 
+    /**
+     * Retrieves (up to specified limit), the list of users that match the value
+     *
+     * @param val       text to match against users
+     * @param limit     upper limit for number of users to return
+     * @param sessionId unique user session identifier
+     * @return list of matching users
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/autocomplete")
     public ArrayList<AccountTransfer> getAutoCompleteForAvailableAccounts(
             @QueryParam("val") String val,
             @DefaultValue("8") @QueryParam("limit") int limit,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
         return controller.getMatchingAccounts(userId, val, limit);
     }
 

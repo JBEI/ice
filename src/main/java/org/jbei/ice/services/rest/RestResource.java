@@ -3,6 +3,7 @@ package org.jbei.ice.services.rest;
 import javax.ws.rs.core.Response;
 
 import org.jbei.ice.lib.account.SessionHandler;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.services.exception.UnauthorizedException;
 
 /**
@@ -28,6 +29,10 @@ public class RestResource {
 
     protected Response respond(Response.Status status) {
         return Response.status(status).build();
+    }
+
+    protected void log(String userId, String message) {
+        Logger.info(userId + ": " + message);
     }
 
 //    protected Response created() {
