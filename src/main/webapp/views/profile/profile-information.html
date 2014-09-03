@@ -71,7 +71,13 @@
             <span class="font-90em">{{changePasswordError}}</span>
         </alert>
 
-        <form class="font-95em" role="form" ng-submit="updatePassword()">
+        <alert type="'info'" style="width: 435px; padding: 8px" ng-if="passwordChangeSuccess&&!changePasswordError">
+            <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
+            <span class="font-90em">Password successfully changed</span>
+        </alert>
+
+        <form class="font-95em" role="form" ng-submit="updatePassword()"
+              ng-if="!passwordChangeSuccess&&!changePasswordError">
             <div class="col-md-2 pad-top-5">
                 <span style="white-space:nowrap">Current password <span class="required">*</span> </span>
             </div>

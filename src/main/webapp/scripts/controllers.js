@@ -618,34 +618,39 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
             return;
         }
 
-        var user = User();
+        var user = User($cookieStore.get("sessionId"));
 
         // validate existing password
         var userId = $cookieStore.get('userId');
-        var userObj = {sessionId:$cookieStore.get("sessionId"), password:$scope.changePass.current, email:userId};
+        $scope.passwordChangeSuccess = undefined;
+        $scope.changePasswordError = undefined;
+
+//        var userObj = {sessionId:$cookieStore.get("sessionId"), password:$scope.changePass.current, email:userId};
+
         // authenticate new password
-        user.resetPassword({}, userObj, function (result) {
-            if (result == null) {
-                $scope.changePasswordError = "Current password is invalid";
-                $scope.currentError = true;
-                return;
-            }
+//        user.resetPassword({}, userObj, function (result) {
+//            if (result == null) {
+//                $scope.changePasswordError = "Current password is invalid";
+//                $scope.currentError = true;
+//                return;
+//            }
 
-            user.changePassword({},
-                {email:userId, password:pass.new},
-                function (success) {
-                    if (success) {
-                        $location.path($location.path());
-                    } else {
-                        $scope.changePasswordError = "There was an error changing your password";
-                    }
-                }, function (error) {
-
-                });
-            //  change password
-        }, function (error) {
-            $scope.changePasswordError = "There was an error changing your password";
-        });
+        user.changePassword({},
+            {email:userId, password:pass.new},
+            function (success) {
+                console.log("password change", success);
+                if (!success) {
+                    $scope.changePasswordError = "There was an error changing your password";
+                } else {
+                    $scope.passwordChangeSuccess = true;
+                }
+            }, function (error) {
+                $scope.changePasswordError = "There was an error changing your password";
+            });
+        //  change password
+//        }, function (error) {
+//            $scope.changePasswordError = "There was an error changing your password";
+//        });
     };
 
     $scope.updateProfile = function () {
