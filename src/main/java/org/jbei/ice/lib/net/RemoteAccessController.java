@@ -39,25 +39,32 @@ public class RemoteAccessController {
         restClient = RestClient.getInstance();
     }
 
+    /**
+     * Retrieves all folders with status "PUBLIC" on the registry partner with id specified in parameter
+     *
+     * @param partnerId unique (local) identifier for remote partner
+     * @return list of folders returned by the partner that are marked with status "PUBLIC",
+     *         null on exception
+     */
     public ArrayList<FolderDetails> getAvailableFolders(long partnerId) {
         RemotePartner partner = this.remotePartnerDAO.get(partnerId);
         if (partner == null)
             return null;
 
         try {
-            FolderWrapper detail = (FolderWrapper) restClient.get(partner.getUrl(), "/rest/folders/public",
-                                                                  FolderWrapper.class);
+            String restPath = "/rest/folders/public";
+            FolderWrapper detail = (FolderWrapper) restClient.get(partner.getUrl(), restPath, FolderWrapper.class);
             return detail.getFolders();
         } catch (Exception e) {
             Logger.error(e);
+            return null;
         }
-        return null;
     }
 
     public Setting getMasterVersion() {
         String value = new ConfigurationController().getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
-        if(StringUtils.isEmpty(value))
-            return new Setting("version",ConfigurationKey.APPLICATION_VERSION.getDefaultValue());
+        if (StringUtils.isEmpty(value))
+            return new Setting("version", ConfigurationKey.APPLICATION_VERSION.getDefaultValue());
 
         // retrieve version
         return (Setting) restClient.get(value, "/rest/config/version");
