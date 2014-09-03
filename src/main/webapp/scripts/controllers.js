@@ -947,6 +947,8 @@ iceControllers.controller('WebOfRegistriesDetailController', function ($scope, $
 
 iceControllers.controller('WorFolderContentController', function ($scope, $stateParams, Remote) {
     var id;
+    $scope.remoteRetrieveError = undefined;
+
     if ($stateParams.folderId === undefined)
         id = $scope.partnerId;
     else
@@ -954,6 +956,9 @@ iceControllers.controller('WorFolderContentController', function ($scope, $state
 
     Remote().getFolderEntries({folderId:id, id:$stateParams.partner}, function (result) {
         $scope.selectedPartnerFolder = result;
+    }, function (error) {
+        $scope.selectedPartnerFolder = undefined;
+        $scope.remoteRetrieveError = true;
     });
 });
 

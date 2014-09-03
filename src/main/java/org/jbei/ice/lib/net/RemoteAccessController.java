@@ -135,10 +135,16 @@ public class RemoteAccessController {
         if (partner == null)
             return null;
 
-        Object result = restClient.get(partner.getUrl(), "/rest/folders/" + folderId + "/entries", FolderDetails.class);
-        if (result == null)
-            return null;
+        try {
+            String restPath = "/rest/folders/" + folderId + "/entries";
+            Object result = restClient.get(partner.getUrl(), restPath, FolderDetails.class);
+            if (result == null)
+                return null;
 
-        return (FolderDetails) result;
+            return (FolderDetails) result;
+        } catch (Exception e) {
+            Logger.error("Error getting public folder entries from \"" + partner.getUrl() + "\": " + e.getMessage());
+            return null;
+        }
     }
 }
