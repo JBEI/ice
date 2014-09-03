@@ -3,9 +3,9 @@
         <div class="col-md-12 entry_general_header_td">
             <h4>
                 <span style="white-space: nowrap">
-                    <strong style="color: #888;text-transform: uppercase;"><i class="fa fa-fw fa-globe"></i> JBEI Public
-                        Registry</strong>
-                    <strong ng-class="{'color-888':part.name}">{{selectedPartnerFolder.folderName}}</strong>
+                    <strong style="color: #888;text-transform: uppercase;"><i class="fa fa-fw fa-globe"></i>
+                        {{selectedPartnerFolder.folderName}}
+                    </strong>
                 </span>
 
                 <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
@@ -69,6 +69,11 @@
                 <td colspan="10">
                     <img alt="Loading..." src="/img/loader-mini.gif"/>
                     Loading...
+                </td>
+            </tr>
+            <tr ng-if="remoteRetrieveError">
+                <td colspan="10" style="color: red;">
+                    <i class="fa fa-exclamation-triangle"></i> Error retrieving remote folder contents
                 </td>
             </tr>
             <tr data-ng-show="selectedPartnerFolder.entries.length == 0">

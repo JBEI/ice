@@ -108,7 +108,7 @@ public class FolderController {
         groups.add(publicGroup);
 
         EntryDAO entryDAO = DAOFactory.getEntryDAO();
-        Set<Entry> results = results = entryDAO.retrieveVisibleEntries(null, groups, sort, asc, offset, limit);
+        Set<Entry> results = entryDAO.retrieveVisibleEntries(null, groups, sort, asc, offset, limit);
         FolderDetails details = new FolderDetails();
 
         for (Entry entry : results) {
@@ -177,11 +177,9 @@ public class FolderController {
         if (folder == null)
             return null;
 
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-
         // should have permission to read folder (folder should be public, you should be an admin, or owner)
         if (!authorization.canRead(userId, folder)) {
-            Logger.warn(account.getEmail() + ": does not have permissions to read folder " + folder.getId());
+            Logger.warn(userId + ": does not have permissions to read folder " + folder.getId());
             return null;
         }
 
