@@ -357,8 +357,7 @@ public class AccountController {
      * @param ip       IP Address of the user.
      * @throws InvalidCredentialsException
      */
-    public String authenticate(String login, String password, String ip)
-            throws InvalidCredentialsException {
+    public String authenticate(String login, String password, String ip) throws InvalidCredentialsException {
         IAuthentication authentication = new LocalAuthentication();
         String email;
 
@@ -468,7 +467,7 @@ public class AccountController {
 
     public ArrayList<AccountTransfer> getMatchingAccounts(String userId, String query, int limit) {
         Account account = getByEmail(userId);
-        Set<Account> matches = dao.getMatchingAccounts(account, query, limit);
+        Set<Account> matches = dao.getMatchingAccounts(query, limit);
         ArrayList<AccountTransfer> result = new ArrayList<>();
         for (Account match : matches) {
             AccountTransfer info = new AccountTransfer();
