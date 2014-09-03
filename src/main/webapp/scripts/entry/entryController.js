@@ -148,6 +148,8 @@ angular.module('ice.entry.controller', [])
                 entry.deleteTraceSequence({partId:entryId, traceId:foundTrace.id}, function (result) {
                     $scope.traceSequences.splice(foundIndex, 1);
                     $scope.entryStatistics.traceSequenceCount = $scope.traceSequences.length;
+                }, function (error) {
+                    console.log(error);
                 });
             }
         };
