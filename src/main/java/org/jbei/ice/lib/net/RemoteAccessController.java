@@ -77,8 +77,8 @@ public class RemoteAccessController {
 
         FolderDetails details;
         try {
-            details = (FolderDetails) restClient.get(partner.getUrl(), "/rest/folders/available/entries",
-                                                     FolderDetails.class);
+            String restPath = "/rest/folders/public/entries";
+            details = (FolderDetails) restClient.get(partner.getUrl(), restPath, FolderDetails.class);
         } catch (Exception e) {
             Logger.error(e);
             return null;

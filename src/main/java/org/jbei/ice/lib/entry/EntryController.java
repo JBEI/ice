@@ -118,10 +118,6 @@ public class EntryController {
     }
 
     public FolderDetails retrieveVisibleEntries(String userId, ColumnField field, boolean asc, int start, int limit) {
-        if (userId == null) {
-            return new FolderController().getPublicEntries();
-        }
-
         Set<Entry> results;
         FolderDetails details = new FolderDetails();
         Account account = accountController.getByEmail(userId);
