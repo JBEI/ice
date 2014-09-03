@@ -10,6 +10,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.lib.access.PermissionsController;
+import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
@@ -125,8 +126,15 @@ public class FolderResource extends RestResource {
             @DefaultValue("false") @QueryParam("asc") boolean asc,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
 
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
         ColumnField field = ColumnField.valueOf(sort.toUpperCase());
+
+        if (folderId.equalsIgnoreCase("public")) {
+            // return public entries
+            log(uriInfo.getBaseUri().toString(), "requesting public entries");
+            return controller.getPublicEntries(field, offset, limit, asc);
+        }
+
+        String userId = SessionHandler.getUserIdBySession(userAgentHeader);
 
         try {
             long id = Long.decode(folderId);

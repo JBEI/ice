@@ -102,11 +102,16 @@ public class FolderController {
         return result;
     }
 
-    public FolderDetails getPublicEntries() {
-        Set<Entry> entries = permissionDAO.getPublicEntries(new GroupController().createOrRetrievePublicGroup());
+    public FolderDetails getPublicEntries(ColumnField sort, int limit, int offset, boolean asc) {
+        Group publicGroup = new GroupController().createOrRetrievePublicGroup();
+        Set<Group> groups = new HashSet<>();
+        groups.add(publicGroup);
+
+        EntryDAO entryDAO = DAOFactory.getEntryDAO();
+        Set<Entry> results = results = entryDAO.retrieveVisibleEntries(null, groups, sort, asc, offset, limit);
         FolderDetails details = new FolderDetails();
 
-        for (Entry entry : entries) {
+        for (Entry entry : results) {
             try {
                 PartData info = ModelToInfoFactory.createTableViewData(null, entry, false);
                 details.getEntries().add(info);

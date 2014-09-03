@@ -25,12 +25,12 @@ public class FolderAuthorization extends Authorization<Folder> {
     }
 
     public boolean canRead(String userId, Folder folder) {
+        if (folder.getType() == FolderType.PUBLIC)
+            return true;
+
         Account account = getAccount(userId);
         if (account == null)
             return false;
-
-        if (folder.getType() == FolderType.PUBLIC)
-            return true;
 
         if (account.getType() == AccountType.ADMIN)
             return true;
