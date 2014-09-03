@@ -119,13 +119,13 @@ public class Permission implements IDataModel {
         AccessPermission access = new AccessPermission();
         access.setId(id);
 
-        if (getGroup() != null) {
+        if (group != null) {
             access.setArticle(AccessPermission.Article.GROUP);
-            access.setArticleId(getGroup().getId());
-            access.setDisplay(getGroup().getLabel());
-        } else {
+            access.setArticleId(group.getId());
+            access.setDisplay(group.getLabel());
+        } else if (account != null) {
             access.setArticle(AccessPermission.Article.ACCOUNT);
-            access.setArticleId(getAccount().getId());
+            access.setArticleId(account.getId());
             access.setDisplay(getAccount().getFullName());
         }
 

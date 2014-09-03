@@ -636,7 +636,7 @@ public class PermissionsController {
 
         // check account match
         Account account = accountController.getByEmail(userId);
-        Set<Account> accounts = DAOFactory.getAccountDAO().getMatchingAccounts(account, val, accountLimit);
+        Set<Account> accounts = DAOFactory.getAccountDAO().getMatchingAccounts(val, accountLimit);
         if (accounts == null)
             return accessPermissions;
 

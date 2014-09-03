@@ -1,7 +1,8 @@
 package org.jbei.ice.lib.dao;
 
 /**
- * Unchecked exception for DAO operations.
+ * Unchecked exception for DAO operations. Typically thrown when a {@link org.hibernate.HibernateException}
+ * is encountered
  *
  * @author Hector Plahar
  */

@@ -82,6 +82,8 @@ public class EntryRetriever {
         GroupController groupController = new GroupController();
         Group publicGroup = groupController.createOrRetrievePublicGroup();
         for (Permission permission : permissions) {
+            if (permission.getAccount() == null && permission.getGroup() == null)
+                continue;
             if (permission.getGroup() != null && permission.getGroup() == publicGroup)
                 continue;
             accessPermissions.add(permission.toDataTransferObject());
