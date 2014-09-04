@@ -63,7 +63,7 @@ public class EntryRetriever {
 
         // check for global unique id
         if (entry == null)
-            dao.getByRecordId(id);
+            entry = dao.getByRecordId(id);
 
         return entry;
     }
