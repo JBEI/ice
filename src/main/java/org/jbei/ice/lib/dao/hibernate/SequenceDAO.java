@@ -3,10 +3,8 @@ package org.jbei.ice.lib.dao.hibernate;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.common.logging.Logger;
@@ -40,7 +38,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      * @return Saved Sequence object
      * @throws DAOException
      */
-    public Sequence saveSequence(Sequence sequence) throws DAOException {
+    public Sequence saveSequence(Sequence sequence) {
         if (sequence == null) {
             throw new DAOException("Failed to save null sequence!");
         }
@@ -100,7 +98,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         return f2.getUri().equalsIgnoreCase(f1.getUri());
     }
 
-    public Sequence updateSequence(Sequence sequence, Set<SequenceFeature> newFeatures) throws DAOException {
+    public Sequence updateSequence(Sequence sequence, Set<SequenceFeature> newFeatures) {
         if (sequence == null) {
             throw new DAOException("Failed to update null sequence!");
         }
@@ -137,20 +135,20 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      *
      * @param sequence          sequence to delete
      * @param pigeonImageFolder path of the image folder where the pigeon images are cached
-     * @throws DAOException
      */
-    public void deleteSequence(Sequence sequence, String pigeonImageFolder) throws DAOException {
+    public void deleteSequence(Sequence sequence, String pigeonImageFolder) {
         String sequenceHash = sequence.getFwdHash();
-        sequence.setEntry(null);
-        for (SequenceFeature feature : sequence.getSequenceFeatures()) {
-        }
-        super.delete(sequence);
-        currentSession().flush();
-
         try {
+            sequence.setEntry(null);
+            sequence.getSequenceFeatures();
+            super.delete(sequence);
+            currentSession().flush();
             Files.deleteIfExists(Paths.get(pigeonImageFolder, sequenceHash + ".png"));
         } catch (IOException e) {
-            Logger.error(e);
+            Logger.warn(e.getMessage());
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
         }
     }
 
@@ -159,21 +157,18 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      *
      * @param feature feature to save
      * @return Saved Feature object.
-     * @throws DAOException
      */
-    public Feature saveFeature(Feature feature) throws DAOException {
+    public Feature saveFeature(Feature feature) {
         if (feature == null) {
-            throw new DAOException("Failed to save null model!");
+            throw new DAOException("Cannot save null object");
         }
 
         Session session = currentSession();
         try {
             session.save(feature);
         } catch (HibernateException e) {
-            throw new DAOException("dbSave failed!", e);
-        } catch (Exception e1) {
-            Logger.error(e1);
-            throw new DAOException("Unknown database exception ", e1);
+            Logger.error(e);
+            throw new DAOException("Exception saving feature", e);
         }
 
         return feature;
@@ -184,9 +179,8 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      *
      * @param entry entry associated with sequence
      * @return Sequence object.
-     * @throws DAOException
      */
-    public Sequence getByEntry(Entry entry) throws DAOException {
+    public Sequence getByEntry(Entry entry) {
         Sequence sequence = null;
 
         Session session = currentSession();
@@ -207,7 +201,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         return sequence;
     }
 
-    public boolean hasSequence(long entryId) throws DAOException {
+    public boolean hasSequence(long entryId) {
         Session session = currentSession();
         try {
             Number itemCount = (Number) session.createCriteria(Sequence.class)
@@ -219,7 +213,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         }
     }
 
-    public String getSequenceFilename(Entry entry) throws DAOException {
+    public String getSequenceFilename(Entry entry) {
         return (String) currentSession().createCriteria(Sequence.class)
                 .setProjection(Projections.property("fileName"))
                 .add(Restrictions.eq("entry", entry))
@@ -233,7 +227,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      * @return true if there is a sequence file that was originally uploaded by user, false otherwise
      * @throws DAOException
      */
-    public boolean hasOriginalSequence(long entryId) throws DAOException {
+    public boolean hasOriginalSequence(long entryId) {
         Session session = currentSession();
         try {
             Number itemCount = (Number) session.createCriteria(Sequence.class)
@@ -257,7 +251,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public Set<Sequence> getAllSequences() throws DAOException {
+    public Set<Sequence> getAllSequences() {
         Session session = currentSession();
         try {
             Criteria criteria = session.createCriteria(Sequence.class);
@@ -276,62 +270,13 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
     }
 
     /**
-     * Retrieve the {@link Feature} object for the given Feature object. Since only one Feature
-     * object should exist for a given unique sequence, this method is used to prevent creation of
-     * duplicate features.
-     * <p/>
-     * Use this to look for a reference feature that should exist in the features table, such as
-     * known biobrick prefix/suffix/scar sequence. This method creates the feature if it doesn't
-     * exist, using the values passed.
-     * <p/>
-     *
-     * @param feature
-     * @return Feature object.
-     * @throws DAOException
-     */
-    public Feature getReferenceFeature(Feature feature) throws DAOException {
-        Feature oldFeature = getFeatureBySequence(feature.getSequence());
-        if (oldFeature == null) {
-            Feature newFeature = saveFeature(feature);
-            return newFeature;
-        } else {
-            return oldFeature;
-        }
-    }
-
-    /**
-     * Retrieve all {@link Feature} objects in the database.
-     *
-     * @return ArrayList of Feature objects.
-     * @throws DAOException
-     */
-    @SuppressWarnings("unchecked")
-    public ArrayList<Feature> getAllFeatures() throws DAOException {
-        ArrayList<Feature> features = null;
-        Session session = currentSession();
-        try {
-            Query query = session.createQuery("from " + Feature.class.getName());
-            @SuppressWarnings("rawtypes")
-            List list = query.list();
-
-            if (list != null) {
-                features = (ArrayList<Feature>) list;
-            }
-        } catch (HibernateException e) {
-            throw new DAOException(e);
-        }
-
-        return features;
-    }
-
-    /**
      * Retrieve the {@link Feature} object with the given DNA sequence string.
      *
      * @param featureDnaSequence dna sequence of feature
      * @return Feature object.
      * @throws DAOException
      */
-    private Feature getFeatureBySequence(String featureDnaSequence) throws DAOException {
+    private Feature getFeatureBySequence(String featureDnaSequence) {
         featureDnaSequence = featureDnaSequence.toLowerCase();
         Feature result;
         Session session = currentSession();
@@ -357,6 +302,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
                 }
             }
         } catch (HibernateException | UtilityException e) {
+            Logger.error(e);
             throw new DAOException("Failed to get Feature by sequence!", e);
         }
 
