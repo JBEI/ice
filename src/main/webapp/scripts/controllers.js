@@ -2246,6 +2246,8 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     });
 
     uploader.bind('progress', function (event, item, progress) {
+        $scope.serverError = undefined;
+
         if (progress != "100")  // isUploading is always true until it returns
             return;
 
@@ -2264,6 +2266,12 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     uploader.bind('beforeupload', function (event, item) {
         item.formData.push({entryType:$scope.entry.type});
         item.formData.push({entryRecordId:$scope.entry.recordId});
+    });
+
+    uploader.bind('error', function (event, xhr, item, response) {
+        console.info('Error', xhr, item, response);
+//        item.remove();
+        $scope.serverError = true;
     });
 });
 
