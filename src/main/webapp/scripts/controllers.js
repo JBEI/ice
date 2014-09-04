@@ -66,10 +66,10 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     $scope.$on("EntrySelection", function (event, data) {
         selectedEntries = [];
 
-        $scope.entrySelected = data.length > 0;
+        $scope.entrySelected = data.all || (data.selected && data.selected.length > 0);
 
         // is reading it so can add to any
-        if (data.length == 0) {
+        if (!$scope.entrySelected) {
             $scope.addToDisabled = true;
             $scope.editDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
         } else {
@@ -79,19 +79,21 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
 
         // can delete if all have canEdit=true
         var entryType = 'None';
-        for (var i = 0; i < data.length; i += 1) {
-            var entry = data[i];
-            $scope.deleteDisabled = !entry.canEdit;
+        if (data.selected) {
+            for (var i = 0; i < data.selected.length; i += 1) {
+                var entry = data.selected[i];
+                $scope.deleteDisabled = !entry.canEdit;
 
-            // to be able to edit, they all must be the same type
-            if (entryType != entry.type) {
-                // initial value?
-                if (entryType === 'None')
-                    entryType = entry.type;
-                else
-                    entryType = undefined;
+                // to be able to edit, they all must be the same type
+                if (entryType != entry.type) {
+                    // initial value?
+                    if (entryType === 'None')
+                        entryType = entry.type;
+                    else
+                        entryType = undefined;
+                }
+                selectedEntries.push(entry);
             }
-            selectedEntries.push(entry);
         }
 
         $scope.editDisabled = $scope.deleteDisabled || entryType === 'None' || entryType === undefined;
@@ -939,7 +941,6 @@ iceControllers.controller('WebOfRegistriesDetailController', function ($scope, $
     var sessionId = $cookieStore.get("sessionId");
 
     $scope.selectRemotePartnerFolder = function (folder) {
-        console.log(folder, $stateParams.partner);
         $scope.partnerId = $stateParams.partner;
         $location.path('/web/' + $stateParams.partner + "/folder/" + folder.id);
     };
@@ -955,8 +956,10 @@ iceControllers.controller('WorFolderContentController', function ($scope, $state
         id = $stateParams.folderId;
 
     Remote().getFolderEntries({folderId:id, id:$stateParams.partner}, function (result) {
+        console.log("result", result.entries, result === null);
         $scope.selectedPartnerFolder = result;
     }, function (error) {
+        console.error(error);
         $scope.selectedPartnerFolder = undefined;
         $scope.remoteRetrieveError = true;
     });
@@ -1051,23 +1054,24 @@ iceControllers.controller('WebOfRegistriesMenuController',
             $scope.selectedPartner = partner.id;
             var remote = Remote();
             remote.publicFolders({id:partner.id}, function (result) {
-                console.log(result);
                 $scope.selectedPartnerFolders = result;
+            }, function (error) {
+                console.error(error);
             });
         }
     });
 
 iceControllers.controller('WorContentController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, Remote) {
-    console.log("WorContentController");
-
+    console.log("WorContentController", "selected partner", $stateParams.partner);
     $scope.selectedPartner = $stateParams.partner;
-    console.log("wor", $scope.selectedPartner);
     $scope.loadingPage = true;
+    var sessionId = $cookieStore.get("sessionId");
 
     Remote().publicEntries({id:$stateParams.partner}, function (result) {
         $scope.loadingPage = false;
-        result.count = 894;
         $scope.selectedPartnerEntries = result;
+    }, function (error) {
+        console.error(error);
     });
 
     $scope.tooltipDetails = function (entry) {
@@ -1156,30 +1160,76 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
     $scope.allSelected = false;
     $scope.selectAll = function () {
         $scope.allSelected = !$scope.allSelected;
-        if (!$scope.allSelected) {
-            $scope.selection = [];
-            $scope.$broadcast("EntrySelection", $scope.selection);
-        } else {
-            console.log($scope.folder);
+        $scope.showAllSelected = !$scope.showAllSelected;
+
+        // clear all excluded
+        while ($scope.excludedEntries.length > 0) {
+            $scope.excludedEntries.pop();
         }
+
+        // and selected
+        while ($scope.selectedEntries.length > 0) {
+            $scope.selectedEntries.pop();
+        }
+
+        $scope.$emit("EntrySelection", {all:$scope.allSelected});
     };
 
-    $scope.counter = 0;
     $scope.selectedEntries = [];
+    $scope.selectedIndex = [];  // maintains only the ids
+    $scope.excludedEntries = [];
+
+    $scope.isSelected = function (entry) {
+        if ($scope.allSelected) {
+            return ($scope.excludedEntries.length == 0 || $scope.excludedEntries.indexOf(entry) === -1);
+        }
+
+        return ($scope.selectedEntries.indexOf(entry) !== -1);
+    };
 
     $scope.select = function (entry) {
-        var entryId = entry.id;
+        if ($scope.allSelected) {
+            // check if excluded
+            var excludedIndex = $scope.excludedEntries.indexOf(entry);
 
-        var i = $scope.selection.indexOf(entryId);
-        if (i != -1) {
-            $scope.selection.splice(i, 1);
-            $scope.selectedEntries.splice(i, 1);
+            // if in excluded, then select (by removing from excluded)
+            if (excludedIndex > -1)
+                $scope.excludedEntries.splice(excludedIndex, 1);
+            else // else de-selected (by adding to excluded list)
+                $scope.excludedEntries.push(entry);
+
+            if ($scope.excludedEntries.length === $scope.folder.count) {
+                $scope.allSelected = false;
+
+                // clear all excluded
+                while ($scope.excludedEntries.length > 0) {
+                    $scope.excludedEntries.pop();
+                }
+            }
         } else {
-            $scope.selection.push(entryId);
-            $scope.selectedEntries.push(entry);
+
+            // maintain explicit list of selected
+            // check if already selected
+            var i = $scope.selectedEntries.indexOf(entry);
+            console.log("selected", i);
+
+            if (i === -1)   // not found, add to selectedEntries
+                $scope.selectedEntries.push(entry);
+            else
+                $scope.selectedEntries.splice(i, 1);
+
+            // check if all selected
+            if ($scope.selectedEntries.length === $scope.folder.count) {
+                $scope.allSelected = true;
+                while ($scope.selectedEntries.length > 0) {
+                    $scope.selectedEntries.pop();
+                }
+            }
         }
-        $scope.allSelected = $scope.selection.length > 0;
-        $scope.$emit("EntrySelection", $scope.selectedEntries);
+
+        $scope.showAllSelected = $scope.allSelected && $scope.excludedEntries.length === 0;
+        var selected = $scope.allSelected && $scope.excludedEntries.length !== $scope.folder.count;
+        $scope.$emit("EntrySelection", {all:selected, selected:$scope.selectedEntries});
     };
 
     $scope.showEntryDetails = function (entry, index) {
@@ -2196,6 +2246,8 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     });
 
     uploader.bind('progress', function (event, item, progress) {
+        $scope.serverError = undefined;
+
         if (progress != "100")  // isUploading is always true until it returns
             return;
 
@@ -2214,6 +2266,12 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     uploader.bind('beforeupload', function (event, item) {
         item.formData.push({entryType:$scope.entry.type});
         item.formData.push({entryRecordId:$scope.entry.recordId});
+    });
+
+    uploader.bind('error', function (event, xhr, item, response) {
+        console.info('Error', xhr, item, response);
+//        item.remove();
+        $scope.serverError = true;
     });
 });
 

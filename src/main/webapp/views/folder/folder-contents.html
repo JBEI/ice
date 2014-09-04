@@ -14,7 +14,7 @@
             <tr data-ng-if='folder && folder.entries.length > 0'>
                 <th style="width:28px">
                     <i class="fa cursor_pointer"
-                       ng-class="{'fa-square-o':allSelected == false, 'fa-check-square-o': allSelected == true}"
+                       ng-class="{'fa-square-o':!showAllSelected, 'fa-check-square-o': showAllSelected}"
                        style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>
                     <sup style="font-size: 9px; font-weight: normal; display: inherit"
                          ng-show="selection.length>0">{{selection.length}}</sup>
@@ -71,8 +71,12 @@
             </tr>
             <tr data-ng-repeat="entry in folder.entries">
                 <td width="10px">
-                    <i class="fa cursor_pointer" ng-class="{'fa-square-o':selection.indexOf(entry.id)==-1||selection===undefined,
-                       'fa-check-square-o':selection.indexOf(entry.id)>-1}"
+                    <!--<i class="fa cursor_pointer fa-check-square-o" ng-if="allSelected"-->
+                    <!--style="color: #000; font-size: 14px;" ng-click="select(entry)"></i>-->
+
+                    <i class="fa cursor_pointer"
+                       ng-class="{'fa-square-o':!isSelected(entry),
+                       'fa-check-square-o':isSelected(entry)}"
                        style="color: #999; font-size: 14px;" ng-click="select(entry)"></i>
                 </td>
                 <td>{{entry.type | capitalize}}</td>
