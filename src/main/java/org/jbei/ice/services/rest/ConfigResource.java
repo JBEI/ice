@@ -13,7 +13,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.Setting;
@@ -41,14 +40,12 @@ public class ConfigResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Setting getVersion(@Context UriInfo uriInfo) {
         String url = uriInfo.getBaseUri().getAuthority();
-        Logger.info(url + " requesting version");
         return controller.getSystemVersion(url);
     }
 
     /**
      * Retrieves the value for the specified config key
      *
-     * @param userAgentHeader
      * @return setting containing the passed key and associated value if found
      */
     @GET
