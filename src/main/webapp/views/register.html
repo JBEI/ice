@@ -12,33 +12,46 @@
                 <span class="font-90em">{{errMsg}}</span>
             </alert>
 
-            <form name="registerForm" data-ng-submit="submit()">
-                <div class="form-group">
-                    <input type="text" ng-class="{'login_input':!firstNameError, 'login_input_error':firstNameError}"
-                           placeholder="First name" ng-model="newUser.firstName" ng-change="firstNameError=false"
-                           ng-trim="true"/>
-                    <br>
-                    <input type="text" ng-class="{'login_input':!lastNameError, 'login_input_error':lastNameError}"
-                           placeholder="Last name" ng-model="newUser.lastName" ng-trim="true"
-                           ng-change="lastNameError=false"/>
-                    <br>
-                    <input type="text" ng-class="{'login_input':!emailError, 'login_input_error':emailError}"
-                           ng-trim="true" ng-model="newUser.email" maxlength="125" placeHolder="Email"
-                           ng-change="emailError=false">
-                    <br>
-                    <input type="text"
-                           ng-class="{'login_input':!institutionError, 'login_input_error':institutionError}"
-                           ng-model="newUser.institution" maxlength="125" placeHolder="Institution" ng-trim="true"
-                           ng-change="institutionError=false">
-                    <br>
-                    <textarea ng-class="{'login_input':!aboutError, 'login_input_error':aboutError}" ng-trim="true"
-                              style="height: 60px;" placeHolder="About you" ng-change="aboutError=false"
-                              ng-model="newUser.about"></textarea>
-                    <br>
-                    <button type="submit" class="btn btn-primary btn-sm"><b>Submit</b></button>
-                    <button type="button" ng-click="cancel()" class="btn btn-default btn-sm">Cancel</button>
-                </div>
-            </form>
+            <alert type="'success'" style="width: 303px; padding: 8px" ng-if="registerSuccess">
+                <i class="fa fa-info-circle font-14em"></i> Your new account has been created.
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Please check your email for login
+                <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;credentials.
+                <br><br>&nbsp;&nbsp;<i class="fa fa-arrow-left"></i> <a href="/login">Back to login page</a>
+            </alert>
+
+            <div ng-if="!registerSuccess">
+                <h5><b>Create New Account</b></h5>
+
+                <form name="registerForm" data-ng-submit="submit()">
+                    <div class="form-group">
+                        <input type="text"
+                               ng-class="{'login_input':!firstNameError, 'login_input_error':firstNameError}"
+                               placeholder="First name" ng-model="newUser.firstName" ng-change="firstNameError=false"
+                               ng-trim="true" style="width: 150px" maxlength="200"/>
+
+                        <input type="text" ng-class="{'login_input':!lastNameError, 'login_input_error':lastNameError}"
+                               placeholder="Last name" ng-model="newUser.lastName" ng-trim="true"
+                               ng-change="lastNameError=false" style="width: 150px" maxlength="200"/>
+                        <br>
+                        <input type="text" ng-class="{'login_input':!emailError, 'login_input_error':emailError}"
+                               ng-trim="true" ng-model="newUser.email" maxlength="125" placeHolder="Email"
+                               ng-change="emailError=false" style="width: 303px">
+                        <br>
+                        <input type="text"
+                               ng-class="{'login_input':!institutionError, 'login_input_error':institutionError}"
+                               ng-model="newUser.institution" maxlength="125" placeHolder="Institution" ng-trim="true"
+                               ng-change="institutionError=false" style="width: 303px">
+                        <br>
+                        <textarea ng-class="{'login_input':!aboutError, 'login_input_error':aboutError}" ng-trim="true"
+                                  style="height: 60px; width: 303px" placeHolder="About you"
+                                  ng-change="aboutError=false"
+                                  ng-model="newUser.about"></textarea>
+                        <br>
+                        <button type="submit" class="btn btn-primary btn-sm"><b>Submit</b></button>
+                        <button type="button" ng-click="cancel()" class="btn btn-default btn-sm">Cancel</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

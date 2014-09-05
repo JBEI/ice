@@ -131,6 +131,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
 
 iceControllers.controller('RegisterController', function ($scope, $resource, $location, User) {
     $scope.errMsg = undefined;
+    $scope.registerSuccess = undefined;
     $scope.newUser = {firstName:undefined, lastName:undefined, institution:undefined, email:undefined, about:undefined};
 
     $scope.submit = function () {
@@ -168,9 +169,10 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
 
         User().createUser($scope.newUser, function (data) {
             if (data.length != 0)
-                $location.path("/login");
+                $scope.registerSuccess = true;
             else
                 $scope.errMsg = "Could not create account";
+
         }, function (error) {
             $scope.errMsg = "Error creating account";
         });
