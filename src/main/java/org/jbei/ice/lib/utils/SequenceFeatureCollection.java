@@ -211,14 +211,17 @@ public class SequenceFeatureCollection implements Collection<SequenceFeature>, S
     public boolean addAll(Collection<? extends SequenceFeature> c) {
         boolean result = false;
         long counter = 0;
-        for (SequenceFeature item : c) {
-            hashes.add(item.getFeature().getHash());
-            sequenceFeatures.add(item);
-            counter = counter + 1;
-        }
-        if (counter == c.size()) {
-            result = true;
-        }
+        if (c != null) {
+            for (SequenceFeature item : c) {
+                hashes.add(item.getFeature().getHash());
+                sequenceFeatures.add(item);
+                counter = counter + 1;
+            }
+            if (counter == c.size()) {
+                result = true;
+            }
+        } else
+            return true;
 
         return result;
     }

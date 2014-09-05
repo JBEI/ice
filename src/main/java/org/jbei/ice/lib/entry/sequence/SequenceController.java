@@ -146,17 +146,14 @@ public class SequenceController {
             return null;
         }
 
-        Sequence existing = DAOFactory.getSequenceDAO().getByEntry(entry);
-        if (existing != null) {
-            try {
-                Files.deleteIfExists(Paths.get(existing.getFwdHash() + ".png"));
-            } catch (IOException io) {
-                Logger.warn(io.getMessage());
-            }
-        }
         Sequence sequence = dnaSequenceToSequence(featuredDNASequence);
         sequence.setEntry(entry);
-        sequence = update(userId, sequence);
+        if (!deleteSequence(userId, entryId))
+            return null;
+
+//        sequence = update(userId, sequence);
+        sequence = save(userId, sequence);
+
         if (sequence != null)
             return sequenceToDNASequence(sequence);
         return null;
