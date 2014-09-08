@@ -529,22 +529,30 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
     };
 
     var menuOptions = $scope.profileMenuOptions = [
-        {url:'/views/profile/profile-information.html', display:'Profile', selected:true, icon:'fa-user'},
+        {url:'/views/profile/profile-information.html', display:'Profile', selected:true, icon:'fa-user', open:true},
         {id:'prefs', url:'/views/profile/preferences.html', display:'Preferences', selected:false, icon:'fa-cog'},
         {id:'groups', url:'/views/profile/groups.html', display:'Groups', selected:false, icon:'fa-group'},
         {id:'messages', url:'/views/profile/messages.html', display:'Messages', selected:false, icon:'fa-envelope-o'},
         {id:'samples', url:'/views/profile/samples.html', display:'Requested Samples', selected:false, icon:'fa-shopping-cart'},
-        {id:'entries', url:'/views/profile/entries.html', display:'Entries', selected:false, icon:'fa-th-list'}
+        {id:'entries', url:'/views/profile/entries.html', display:'Entries', selected:false, icon:'fa-th-list', open:true}
     ];
 
     $scope.showSelection = function (index) {
+        var selectedOption = menuOptions[index];
+        if (!selectedOption)
+            return;
+
+        var canViewSelected = selectedOption.open || user.isAdmin || ($scope.profile.email === user.email);
+        if (!canViewSelected)
+            return;
+
         angular.forEach(menuOptions, function (details) {
             details.selected = false;
         });
-        menuOptions[index].selected = true;
+        selectedOption.selected = true;
         $scope.profileOptionSelection = menuOptions[index].url;
-        if (menuOptions[index].id) {
-            $location.path("/profile/" + profileId + "/" + menuOptions[index].id);
+        if (selectedOption.id) {
+            $location.path("/profile/" + profileId + "/" + selectedOption.id);
         } else {
             $location.path("/profile/" + profileId);
         }
@@ -693,7 +701,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     $scope.appVersion = undefined;
     settings.version({}, function (result) {
-        console.log(result);
+//        console.log(result);
         $rootScope.appVersion = result.value;
     }, function (error) {
         console.log(error);
