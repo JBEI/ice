@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.UUID;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -26,9 +28,11 @@ import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
+import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -77,6 +81,20 @@ public class FileResource extends RestResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+
+    @GET
+    @Path("tmp/{fileId}")
+    public Response getTmpFile(@PathParam("fileId") String fileId) {
+        File tmpFile = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY), fileId).toFile();
+        if (tmpFile == null || !tmpFile.exists())
+            return super.respond(Response.Status.NOT_FOUND);
+
+        Response.ResponseBuilder response = Response.ok(tmpFile);
+        response.header("Content-Disposition", "attachment; filename=\"" + tmpFile.getName() + "\"");
+        return response.build();
+    }
+
 
     @GET
     @Path("attachment/{fileId}")
@@ -210,7 +228,8 @@ public class FileResource extends RestResource {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.error(e);
+            return null;
         }
         return null;
     }
@@ -241,5 +260,35 @@ public class FileResource extends RestResource {
             Logger.error(e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    /**
+     * Extracts the csv information and writes it to the temp dir and returns the file uuid.
+     * Then the client is expected to make another rest call with the uuid is a separate window.
+     * This workaround is due to not being able to download files using XHR or sumsuch
+     */
+    @POST
+    @Path("csv")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response downloadCSV(@HeaderParam("X-ICE-Authentication-SessionId") String sessionId,
+            ArrayList<Long> list) {
+        String userId = super.getUserIdFromSessionHeader(sessionId);
+        EntryRetriever retriever = new EntryRetriever();
+
+        final String csv = retriever.getListAsCSV(userId, list);
+        String name = UUID.randomUUID().toString() + ".csv";
+
+        if (csv != null) {
+            String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+            File file = Paths.get(tmpDir, name).toFile();
+            try {
+                FileUtils.writeStringToFile(file, csv);
+                return super.respond(Response.Status.OK, new Setting("key", name));
+            } catch (Exception e) {
+                return respond(Response.Status.INTERNAL_SERVER_ERROR);
+            }
+        }
+        return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 }

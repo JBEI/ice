@@ -17,23 +17,27 @@ public class BulkCSVUploadHeaders {
         if (type == null)
             return null;
 
+        List<EntryField> list = getCommonFields();
+
         switch (type) {
             case ARABIDOPSIS:
-                return getArabidopsisSeedHeaders();
+                addArabidopsisSeedHeaders(list);
+                break;
 
             case STRAIN:
-                return getStrainHeaders();
+                addStrainHeaders(list);
+                break;
 
             case PLASMID:
-                return getPlasmidHeaders();
-
-            default:
-            case PART:
-                return getPartHeaders();
+                addPlasmidHeaders(list);
+                break;
         }
+
+        adddFileHeaders(list);
+        return list;
     }
 
-    protected static List<EntryField> getCommonFields() {
+    public static List<EntryField> getCommonFields() {
         List<EntryField> list = new ArrayList<>();
         list.add(EntryField.PI);
         list.add(EntryField.PI_EMAIL);
@@ -53,42 +57,29 @@ public class BulkCSVUploadHeaders {
         return list;
     }
 
-    protected static void adddFileHeaders(List<EntryField> headers) {
+    public static void adddFileHeaders(List<EntryField> headers) {
         headers.add(EntryField.SEQ_TRACE_FILES);
         headers.add(EntryField.SEQ_FILENAME);
         headers.add(EntryField.ATT_FILENAME);
     }
 
-    public static List<EntryField> getPartHeaders() {
-        List<EntryField> list = getCommonFields();
-        adddFileHeaders(list);
-        return list;
-    }
-
-    public static List<EntryField> getStrainHeaders() {
-        List<EntryField> list = getCommonFields();
+    public static void addStrainHeaders(List<EntryField> list) {
         list.add(EntryField.PARENTAL_STRAIN);
         list.add(EntryField.GENOTYPE_OR_PHENOTYPE);
         list.add(EntryField.PLASMIDS);
         list.add(EntryField.SELECTION_MARKERS);
-        adddFileHeaders(list);
-        return list;
     }
 
-    public static List<EntryField> getPlasmidHeaders() {
-        List<EntryField> list = getCommonFields();
+    public static void addPlasmidHeaders(List<EntryField> list) {
         list.add(EntryField.CIRCULAR);
         list.add(EntryField.BACKBONE);
         list.add(EntryField.PROMOTERS);
         list.add(EntryField.REPLICATES_IN);
         list.add(EntryField.ORIGIN_OF_REPLICATION);
         list.add(EntryField.SELECTION_MARKERS);
-        adddFileHeaders(list);
-        return list;
     }
 
-    public static List<EntryField> getArabidopsisSeedHeaders() {
-        List<EntryField> list = getCommonFields();
+    public static void addArabidopsisSeedHeaders(List<EntryField> list) {
         list.add(EntryField.HOMOZYGOSITY);
         list.add(EntryField.HARVEST_DATE);
         list.add(EntryField.ECOTYPE);
@@ -97,7 +88,5 @@ public class BulkCSVUploadHeaders {
         list.add(EntryField.PLANT_TYPE);
         list.add(EntryField.GENERATION);
         list.add(EntryField.SENT_TO_ABRC);
-        adddFileHeaders(list);
-        return list;
     }
 }

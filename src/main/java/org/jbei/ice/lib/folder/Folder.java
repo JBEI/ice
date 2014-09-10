@@ -135,19 +135,8 @@ public class Folder implements IDataModel {
         return propagatePermissions != null && propagatePermissions;
     }
 
-    public void setPropagatePermissions(Boolean propagatePermissions) {
+    public void setPropagatePermissions(boolean propagatePermissions) {
         this.propagatePermissions = propagatePermissions;
-    }
-
-    @Override
-    public FolderDetails toDataTransferObject() {
-        FolderDetails details = new FolderDetails(id, name);
-        details.setType(type);
-        details.setDescription(description);
-        if(parent != null) {
-            details.setParent(parent.toDataTransferObject());
-        }
-        return details;
     }
 
     public Folder getParent() {
@@ -156,5 +145,16 @@ public class Folder implements IDataModel {
 
     public void setParent(Folder parent) {
         this.parent = parent;
+    }
+
+    @Override
+    public FolderDetails toDataTransferObject() {
+        FolderDetails details = new FolderDetails(id, name);
+        details.setType(type);
+        details.setDescription(description);
+        if (parent != null) {
+            details.setParent(parent.toDataTransferObject());
+        }
+        return details;
     }
 }

@@ -92,6 +92,7 @@ public class PartResource extends RestResource {
             @PathParam("id") String id,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
+        log(userId, "details for " + id);
         return controller.retrieveEntryDetails(userId, id);
     }
 

@@ -41,11 +41,11 @@ public class FolderDAO extends HibernateRepository<Folder> {
      * @return retrieved folder
      * @throws DAOException
      */
-    public Folder get(long id) throws DAOException {
+    public Folder get(long id) {
         return super.get(Folder.class, id);
     }
 
-    public Folder removeFolderEntries(Folder folder, ArrayList<Long> entries) throws DAOException {
+    public Folder removeFolderEntries(Folder folder, ArrayList<Long> entries) {
         Session session = currentSession();
         try {
             folder = (Folder) session.get(Folder.class, folder.getId());
@@ -72,9 +72,9 @@ public class FolderDAO extends HibernateRepository<Folder> {
      *
      * @param id unique folder identifier
      * @return number of child contents in the folder
-     * @throws DAOException on any exception retrieving the folder or its contents
+     * @on any exception retrieving the folder or its contents
      */
-    public Long getFolderSize(long id) throws DAOException {
+    public Long getFolderSize(long id) {
         try {
             Criteria criteria = currentSession().createCriteria(Entry.class);
             criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
@@ -89,14 +89,13 @@ public class FolderDAO extends HibernateRepository<Folder> {
     }
 
     @SuppressWarnings("unchecked")
-    public ArrayList<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit)
-            throws DAOException {
+    public ArrayList<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit) {
         Session session = currentSession();
 
         try {
             Folder folder = get(folderId);
             if (folder == null)
-                throw new DAOException();
+                throw new DAOException("Could not locate folder with id " + folderId);
 
             String sortString;
 
@@ -140,7 +139,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
         }
     }
 
-    public Folder addFolderContents(Folder folder, ArrayList<Entry> entrys) throws DAOException {
+    public Folder addFolderContents(Folder folder, ArrayList<Entry> entrys) {
         Session session = currentSession();
         try {
             folder = (Folder) session.get(Folder.class, folder.getId());
@@ -161,7 +160,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public List<Folder> getFoldersByOwner(Account account) throws DAOException {
+    public List<Folder> getFoldersByOwner(Account account) {
         ArrayList<Folder> folders;
         Session session = currentSession();
         try {
@@ -179,7 +178,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Folder> getFoldersByType(FolderType type) throws DAOException {
+    public List<Folder> getFoldersByType(FolderType type) {
         ArrayList<Folder> folders;
         Session session = currentSession();
         try {
@@ -194,7 +193,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
         return folders;
     }
 
-    public Set<Folder> getFolders(Account account, FolderType type) throws DAOException {
+    public Set<Folder> getFolders(Account account, FolderType type) {
         HashSet<Folder> folders;
         Session session = currentSession();
         try {
@@ -211,7 +210,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
     }
 
     @SuppressWarnings({"unchecked"})
-    public List<Folder> getFoldersByEntry(Entry entry) throws DAOException {
+    public List<Folder> getFoldersByEntry(Entry entry) {
         ArrayList<Folder> folders = new ArrayList<>();
         Session session = currentSession();
 
@@ -230,7 +229,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
     }
 
     @SuppressWarnings("unchecked")
-    public Set<Long> getAllFolderIds() throws DAOException {
+    public Set<Long> getAllFolderIds() {
         try {
             List list = currentSession().createCriteria(Folder.class).setProjection(Projections.property("id")).list();
             return new HashSet<Long>(list);
@@ -240,8 +239,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
         }
     }
 
-    public List<Entry> getSharedWithUserEntries(Account account, Set<Group> accountGroups, int offset, int limit)
-            throws DAOException {
+    public List<Entry> getSharedWithUserEntries(Account account, Set<Group> accountGroups, int offset, int limit) {
         // read or write permission criterion
         Criterion criterion = Restrictions.disjunction()
                                           .add(Restrictions.eq("canWrite", true))

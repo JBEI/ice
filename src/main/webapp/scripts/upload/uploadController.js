@@ -348,6 +348,34 @@ angular.module('ice.upload.controller', [])
                 }
             };
 
+            // upload entries associated with a bulk upload
+            var updateEntryList = function (objects) {
+                if ($scope.bulkUpload.id === undefined) {
+                    console.error("cannot update upload list. no bulk upload object");
+                    return;
+                }
+
+                upload.updateList({importId:$scope.bulkUpload.id}, {entryList:objects}, function (success) {
+                    console.log(success);
+                    for (var j = 0; j < success.entryList.length; j += 1) {
+                        var part = success.entryList[j];
+                        console.log("created or updated", part);
+
+                        $scope.bulkUpload.entryIdData[part.index] = part.id;
+                        if (part.linkedParts && part.linkedParts.length) {
+                            var linkedId = part.linkedParts[0].id;
+                            if (linkedId) {
+                                $scope.bulkUpload.linkedEntryIdData[part.index] = linkedId;
+                            }
+                        }
+                    }
+                    $scope.saving = false;
+                }, function (error) {
+                    console.error(error);
+                    $scope.saving = false;
+                });
+            };
+
             // bulk create or update from autofill or paste
             var bulkCreateOrUpdate = function (change) {
                 $scope.saving = true;
@@ -367,30 +395,21 @@ angular.module('ice.upload.controller', [])
                 if (objects.length === 0)
                     return;
 
-                console.log("update", objects);
-
                 if ($scope.bulkUpload.id === undefined) {
-                    // todo : create first
-                } else {
-                    upload.updateList({importId:$scope.bulkUpload.id}, {entryList:objects}, function (success) {
-                        console.log(success);
-                        for (var j = 0; j < success.entryList.length; j += 1) {
-                            var part = success.entryList[j];
-                            console.log("created or updated", part);
+                    // first create bulk upload
+                    upload.create({type:$scope.importType}), function (result) {
+                        $scope.bulkUpload.id = result.id;
+                        $scope.bulkUpload.lastUpdate = result.lastUpdate;
+                        $scope.bulkUpload.name = result.name;
+                        //                            $location.path("/upload/" + result.id, false);
 
-                            $scope.bulkUpload.entryIdData[part.index] = part.id;
-                            if (part.linkedParts && part.linkedParts.length) {
-                                var linkedId = part.linkedParts[0].id;
-                                if (linkedId) {
-                                    $scope.bulkUpload.linkedEntryIdData[part.index] = linkedId;
-                                }
-                            }
-                        }
-                        $scope.saving = false;
+                        // then update the list
+                        updateEntryList(objects);
                     }, function (error) {
-                        console.error(error);
-                        $scope.saving = false;
-                    });
+                        console.error("error creating bulk upload", error);
+                    };
+                } else {
+                    updateEntryList(objects);
                 }
             };
 

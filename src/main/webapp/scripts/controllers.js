@@ -3,7 +3,7 @@
 var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'ui.bootstrap', 'angularFileUpload',
     'vr.directives.slider', 'angularMoment']);
 
-iceControllers.controller('ActionMenuController', function ($scope, $window, $rootScope, $location, $cookieStore, Folders, Entry, WebOfRegistries) {
+iceControllers.controller('ActionMenuController', function ($scope, $window, $rootScope, $location, $cookieStore, Folders, Entry, WebOfRegistries, Files) {
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
     $scope.entrySelected = false;
 
@@ -18,6 +18,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     var folders = Folders();
     var entry = Entry(sid);
     var selectedEntries = [];
+    var selected;
     $scope.selectedFolders = [];
 
     // retrieve personal list of folders user can add or move parts to
@@ -65,6 +66,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
 
     $scope.$on("EntrySelection", function (event, data) {
         selectedEntries = [];
+        selected = data;
 
         $scope.entrySelected = data.all || (data.selected && data.selected.length > 0);
 
@@ -100,9 +102,11 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     });
 
     $rootScope.$on("EntryRetrieved", function (event, data) {
+        console.log(data);
         $scope.entry = data;
         $scope.editDisabled = !data.canEdit;
         $scope.entrySelected = true;
+        $scope.addToDisabled = false;
         var isAdmin = $scope.user.accountType === undefined ? false : $scope.user.accountType.toLowerCase() === "admin";
         $scope.deleteDisabled = ($scope.user.email != $scope.entry.ownerEmail && !isAdmin);
         // only owners or admins can delete
@@ -121,16 +125,39 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     };
 
     $scope.csvExport = function () {
-        if (!selectedEntries.length) {
-            $window.open("/rest/part/" + $scope.entry.id + "/csv?sid=" + $cookieStore.get("sessionId"), "_self");
-        } else {
-
+        // if selected.selected
+        var selectedIds = [];
+        for (var i = 0; i < selected.selected.length; i += 1) {
+            selectedIds.push(selected.selected[i].id);
         }
+
+        var files = Files();
+
+        // retrieve from server
+        files.getCSV(selectedIds,
+            function (result) {
+                if (result && result.value) {
+                    $window.open("/rest/file/tmp/" + result.value, "_self");
+                }
+
+//                console.log(result);
+//                $scope.$broadcast("RefreshAfterDeletion");
+//                $scope.$broadcast("UpdateCollectionCounts");
+            }, function (error) {
+                console.log(error);
+            });
+
+//        if (!selectedEntries.length) {
+//            $window.open("/rest/part/" + $scope.entry.id + "/csv?sid=" + $cookieStore.get("sessionId"), "_self");
+//        } else {
+//           console.log("selected", selected);
+//        }
     }
 });
 
 iceControllers.controller('RegisterController', function ($scope, $resource, $location, User) {
     $scope.errMsg = undefined;
+    $scope.registerSuccess = undefined;
     $scope.newUser = {firstName:undefined, lastName:undefined, institution:undefined, email:undefined, about:undefined};
 
     $scope.submit = function () {
@@ -168,9 +195,10 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
 
         User().createUser($scope.newUser, function (data) {
             if (data.length != 0)
-                $location.path("/login");
+                $scope.registerSuccess = true;
             else
                 $scope.errMsg = "Could not create account";
+
         }, function (error) {
             $scope.errMsg = "Error creating account";
         });
@@ -229,8 +257,11 @@ iceControllers.controller('AdminUserController', function ($rootScope, $scope, $
     });
 
     $scope.setUserListPage = function (pageNo) {
+        if (pageNo == undefined || isNaN(pageNo))
+            pageNo = 1;
+
         $scope.loadingPage = true;
-        var offset = (pageNo - 1) * 15; // TODO : make sure it is a number
+        var offset = (pageNo - 1) * 15;
         user.list({offset:offset}, function (result) {
             $scope.userList = result;
             $scope.loadingPage = false;
@@ -468,7 +499,7 @@ iceControllers.controller('ProfileEntryController', function ($scope, $location,
     });
 });
 
-iceControllers.controller('ProfileController', function ($scope, $location, $cookieStore, $stateParams, User) {
+iceControllers.controller('ProfileController', function ($scope, $location, $cookieStore, $rootScope, $stateParams, User) {
     $scope.showChangePassword = false;
     $scope.showEditProfile = false;
     $scope.showSendMessage = false;
@@ -527,22 +558,30 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
     };
 
     var menuOptions = $scope.profileMenuOptions = [
-        {url:'/views/profile/profile-information.html', display:'Profile', selected:true, icon:'fa-user'},
+        {url:'/views/profile/profile-information.html', display:'Profile', selected:true, icon:'fa-user', open:true},
         {id:'prefs', url:'/views/profile/preferences.html', display:'Preferences', selected:false, icon:'fa-cog'},
         {id:'groups', url:'/views/profile/groups.html', display:'Groups', selected:false, icon:'fa-group'},
         {id:'messages', url:'/views/profile/messages.html', display:'Messages', selected:false, icon:'fa-envelope-o'},
         {id:'samples', url:'/views/profile/samples.html', display:'Requested Samples', selected:false, icon:'fa-shopping-cart'},
-        {id:'entries', url:'/views/profile/entries.html', display:'Entries', selected:false, icon:'fa-th-list'}
+        {id:'entries', url:'/views/profile/entries.html', display:'Entries', selected:false, icon:'fa-th-list', open:true}
     ];
 
     $scope.showSelection = function (index) {
+        var selectedOption = menuOptions[index];
+        if (!selectedOption)
+            return;
+
+        var canViewSelected = selectedOption.open || user.isAdmin || ($scope.profile.email === $rootScope.user.email);
+        if (!canViewSelected)
+            return;
+
         angular.forEach(menuOptions, function (details) {
             details.selected = false;
         });
-        menuOptions[index].selected = true;
+        selectedOption.selected = true;
         $scope.profileOptionSelection = menuOptions[index].url;
-        if (menuOptions[index].id) {
-            $location.path("/profile/" + profileId + "/" + menuOptions[index].id);
+        if (selectedOption.id) {
+            $location.path("/profile/" + profileId + "/" + selectedOption.id);
         } else {
             $location.path("/profile/" + profileId);
         }
@@ -670,7 +709,7 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
 // main controller.
 iceControllers.controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope, Folders, Settings, sessionValid, Search, Samples) {
     // todo : set on all
-    // $location.search('q', null);
+    $location.search('q', null);
 
     if (sessionValid === undefined || sessionValid.data.sessionId === undefined) {
         return;
@@ -691,7 +730,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     $scope.appVersion = undefined;
     settings.version({}, function (result) {
-        console.log(result);
+//        console.log(result);
         $rootScope.appVersion = result.value;
     }, function (error) {
         console.log(error);
@@ -716,7 +755,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
         { name:'shared', display:'Shared', icon:'fa-share-alt', iconOpen:'fa-share-alt', alwaysVisible:false},
         { name:'drafts', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit', alwaysVisible:false},
         { name:'pending', display:'Pending Approval', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:false},
-        { name:'deleted', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash-o', alwaysVisible:false}
+        { name:'deleted', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash', alwaysVisible:false}
     ];
 
     // entry items that can be created
@@ -1121,13 +1160,13 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
     $scope.maxSize = 5;  // number of clickable pages to show in pagination
 
     $scope.setPage = function (pageNo) {
-        if (pageNo == undefined)
+        if (pageNo == undefined || isNaN(pageNo))
             pageNo = 1;
 
         $scope.loadingPage = true;
         if ($scope.params.folderId === undefined)
             $scope.params.folderId = 'personal';
-        $scope.params.offset = (pageNo - 1) * 15; // TODO : make sure it is a number
+        $scope.params.offset = (pageNo - 1) * 15;
         console.log("page#", pageNo, "queryParams", $scope.params);
         folders.folder($scope.params, function (result) {
             console.log("folder', result");
@@ -1172,7 +1211,7 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
             $scope.selectedEntries.pop();
         }
 
-        $scope.$emit("EntrySelection", {all:$scope.allSelected});
+        $scope.$emit("EntrySelection", {all:$scope.allSelected, folder:$scope.folder});
     };
 
     $scope.selectedEntries = [];
@@ -1207,12 +1246,9 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
                 }
             }
         } else {
-
             // maintain explicit list of selected
             // check if already selected
             var i = $scope.selectedEntries.indexOf(entry);
-            console.log("selected", i);
-
             if (i === -1)   // not found, add to selectedEntries
                 $scope.selectedEntries.push(entry);
             else
@@ -1229,7 +1265,7 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
 
         $scope.showAllSelected = $scope.allSelected && $scope.excludedEntries.length === 0;
         var selected = $scope.allSelected && $scope.excludedEntries.length !== $scope.folder.count;
-        $scope.$emit("EntrySelection", {all:selected, selected:$scope.selectedEntries});
+        $scope.$emit("EntrySelection", {all:selected, selected:$scope.selectedEntries, folder:$scope.folder});
     };
 
     $scope.showEntryDetails = function (entry, index) {
