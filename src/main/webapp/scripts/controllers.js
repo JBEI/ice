@@ -288,10 +288,11 @@ iceControllers.controller('AdminController', function ($rootScope, $location, $s
     ];
 
     var emailSettingKeys = [
-        'ERROR_EMAIL_EXCEPTION_PREFIX',
-        'ADMIN_EMAIL',
         'SMTP_HOST',
-        'SEND_EMAIL_ON_ERRORS'
+        'ADMIN_EMAIL',
+        'BULK_UPLOAD_APPROVER_EMAIL',
+        'SEND_EMAIL_ON_ERRORS',
+        'ERROR_EMAIL_EXCEPTION_PREFIX'
     ];
 
     // retrieve general setting
