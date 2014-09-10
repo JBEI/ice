@@ -1012,17 +1012,35 @@ iceControllers.controller('FullScreenFlashController', function ($scope, $locati
 });
 
 iceControllers.controller('WebOfRegistriesController',
-    function ($scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote) {
-        console.log("WebOfRegistriesController");
-
+    function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote, Settings) {
         // retrieve web of registries partners
         $scope.wor = undefined;
+        $scope.isWorEnabled = $rootScope.settings && $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] === 'yes';
+
         var wor = WebOfRegistries();
 //    $scope.getPartners = function(approveOnly) {
         wor.query({approved_only:false}, function (result) {
             $scope.wor = result;
         });
 //    };
+
+        $scope.enableDisableWor = function() {
+            var value = $scope.isWorEnabled ? 'no' : 'yes';
+            Settings( $cookieStore.get("sessionId")).update({}, {key:'JOIN_WEB_OF_REGISTRIES', value:value},
+            function(result) {
+                $scope.isWorEnabled = result.value === 'yes';
+                $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = result.value;
+            },function(error){
+
+                });
+
+//            setting.update({}, newSetting, function (result) {
+//                newSetting.key = visualKey;
+//                newSetting.value = result.value;
+//                newSetting.editMode = false;
+//            });
+
+        };
 
         $scope.newPartner = undefined;
         $scope.addPartner = function () {
