@@ -102,7 +102,6 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     });
 
     $rootScope.$on("EntryRetrieved", function (event, data) {
-        console.log(data);
         $scope.entry = data;
         $scope.editDisabled = !data.canEdit;
         $scope.entrySelected = true;
@@ -1413,7 +1412,30 @@ iceControllers.controller('EditEntryController',
             $scope.activePart = $scope.entry;
         });
 
+        // todo : this is pretty much a copy of submitPart in CreateEntryController
         $scope.editEntry = function () {
+            var canSubmit = EntryService.validateFields($scope.activePart, $scope.selectedFields);
+            $scope.activePart.type = $scope.activePart.type.toUpperCase();
+
+
+            // validate contained parts, if any
+            if ($scope.activePart.linkedParts && $scope.activePart.linkedParts.length) {
+                for (var idx = 0; idx < $scope.activePart.linkedParts.length; idx += 1) {
+                    var canSubmitLinked = EntryService.validateFields($scope.activePart.linkedParts[idx], $scope.selectedFields);
+                    if (!canSubmitLinked) {
+                        // show icon in tab
+                        // todo
+                        console.log("linked entry at idx " + idx + " is not valid");
+                        canSubmit = canSubmitLinked;
+                    }
+                }
+            }
+
+            if (!canSubmit) {
+                $("body").animate({scrollTop:130}, "slow");
+                return;
+            }
+
             if ($scope.activePart.bioSafetyLevel === 'Level 1')
                 $scope.activePart.bioSafetyLevel = 1;
             else
@@ -1422,6 +1444,14 @@ iceControllers.controller('EditEntryController',
             // convert arrays of objects to array strings
             $scope.activePart.links = EntryService.toStringArray($scope.activePart.links);
             $scope.activePart.selectionMarkers = EntryService.toStringArray($scope.activePart.selectionMarkers);
+
+            for (var i = 0; i < $scope.activePart.linkedParts.length; i += 1) {
+                $scope.activePart.linkedParts[i].links = EntryService.toStringArray($scope.activePart.linkedParts[i].links);
+                $scope.activePart.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.activePart.linkedParts[i].selectionMarkers);
+            }
+
+            // convert the part to a form the server can work with
+            $scope.activePart = EntryService.getTypeData($scope.activePart);
 
             entry.update($scope.activePart, function (result) {
                 $location.path("/entry/" + result.id);
@@ -2151,7 +2181,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         entry.query({partId:$stateParams.id},
             function (result) {
                 $rootScope.$broadcast("EntryRetrieved", result);
-                $scope.entry = result;
+                $scope.entry = EntryService.convertToUIForm(result);
                 $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
 
                 entry.statistics({partId:$stateParams.id}, function (stats) {
