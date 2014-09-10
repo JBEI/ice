@@ -108,6 +108,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
         $scope.addToDisabled = false;
         var isAdmin = $scope.user.accountType === undefined ? false : $scope.user.accountType.toLowerCase() === "admin";
         $scope.deleteDisabled = ($scope.user.email != $scope.entry.ownerEmail && !isAdmin);
+        selected = {selected:[data]};
         // only owners or admins can delete
     });
 
@@ -1013,9 +1014,15 @@ iceControllers.controller('FullScreenFlashController', function ($scope, $locati
 
 iceControllers.controller('WebOfRegistriesController',
     function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote, Settings) {
+        var setting = Settings($cookieStore.get("sessionId"));
+
         // retrieve web of registries partners
         $scope.wor = undefined;
-        $scope.isWorEnabled = $rootScope.settings && $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] === 'yes';
+        $scope.isWorEnabled = false;
+        setting.getSetting({}, {key:'JOIN_WEB_OF_REGISTRIES'}, function (result) {
+            console.log(result);
+            $scope.isWorEnabled = result.value === "yes";
+        });
 
         var wor = WebOfRegistries();
 //    $scope.getPartners = function(approveOnly) {
@@ -1024,13 +1031,13 @@ iceControllers.controller('WebOfRegistriesController',
         });
 //    };
 
-        $scope.enableDisableWor = function() {
+        $scope.enableDisableWor = function () {
             var value = $scope.isWorEnabled ? 'no' : 'yes';
-            Settings( $cookieStore.get("sessionId")).update({}, {key:'JOIN_WEB_OF_REGISTRIES', value:value},
-            function(result) {
-                $scope.isWorEnabled = result.value === 'yes';
-                $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = result.value;
-            },function(error){
+            setting.update({}, {key:'JOIN_WEB_OF_REGISTRIES', value:value},
+                function (result) {
+                    $scope.isWorEnabled = result.value === 'yes';
+                    $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = $scope.isWorEnabled ? "yes" : "no";
+                }, function (error) {
 
                 });
 
