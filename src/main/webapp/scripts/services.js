@@ -774,6 +774,12 @@ iceServices.factory('Files', function ($resource, $cookieStore) {
                 method:'GET',
                 url:'/rest/file/trace/:fileId',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            getCSV:{
+                method:'POST',
+                url:'/rest/file/csv',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             }
         });
     }

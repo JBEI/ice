@@ -61,4 +61,12 @@ public class FolderDAOTest {
     @Test
     public void testGetFoldersByEntry() throws Exception {
     }
+
+    private Folder createFolderObject() {
+        Folder folder = new Folder();
+        folder.setDescription("test");
+        folder.setName("testFolderName");
+        folder.setPropagatePermissions(false);
+        return folder;
+    }
 }

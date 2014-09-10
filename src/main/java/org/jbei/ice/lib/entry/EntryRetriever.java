@@ -2,6 +2,8 @@ package org.jbei.ice.lib.entry;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.access.Permission;
@@ -34,15 +36,17 @@ public class EntryRetriever {
             return "";
 
         StringBuilder builder = new StringBuilder();
+        List<Entry> entryList = new LinkedList<>();
+
         for (Number item : list) {
             Entry entry = this.dao.get(item.longValue());
             if (entry == null || !authorization.canRead(userId, entry))
                 continue;
 
-            builder.append(IceCSVSerializer.serialize(entry)).append('\n');
+            entryList.add(entry);
         }
 
-        return builder.toString();
+        return IceCSVSerializer.serializeList(entryList);
     }
 
     public String getAsCSV(String userId, String id) {
