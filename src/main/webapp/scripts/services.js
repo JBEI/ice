@@ -56,7 +56,7 @@ iceServices.factory('EntryService', function () {
     var plasmidFields = [
         {label:"Backbone", schema:'backbone', subSchema:'plasmidData', inputType:'medium'},
         {label:"Origin of Replication", schema:'originOfReplication', inputType:'autoComplete',
-            autoCompleteField:'ORIGIN_OF_REPLICATION'},
+            autoCompleteField:'ORIGIN_OF_REPLICATION', subSchema:'plasmidData'},
         {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
             autoCompleteField:'SELECTION_MARKERS'},
         {label:"Promoters", schema:'promoters', subSchema:'plasmidData', inputType:'autoComplete', autoCompleteField:'PROMOTERS'},
@@ -65,8 +65,8 @@ iceServices.factory('EntryService', function () {
 
     // fields peculiar to arabidopsis seeds
     var seedFields = [
-        {label:"Sent To ABRC", schema:'sentToABRC', help:"Help Text", inputType:'bool'},
-        {label:"Plant Type", schema:'plantType', options:[
+        {label:"Sent To ABRC", schema:'sentToABRC', help:"Help Text", inputType:'bool', subSchema:'arabidopsisSeedData'},
+        {label:"Plant Type", schema:'plantType', subSchema:'arabidopsisSeedData', options:[
             {value:"EMS", text:"EMS"},
             {value:"OVER_EXPRESSION", text:"Over Expression"},
             {value:"RNAI", text:"RNAi"},
@@ -74,7 +74,7 @@ iceServices.factory('EntryService', function () {
             {value:"T_DNA", text:"T-DNA"},
             {value:"OTHER", text:"Other"}
         ]},
-        {label:"Generation", schema:'generation', options:[
+        {label:"Generation", schema:'generation', subSchema:'arabidopsisSeedData', options:[
             {value:"UNKNOWN", text:"UNKNOWN"},
             {value:"F1", text:"F1"},
             {value:"F2", text:"F2"},
@@ -89,9 +89,9 @@ iceServices.factory('EntryService', function () {
             {value:"T4", text:"T4"},
             {value:"T5", text:"T5"}
         ]},
-        {label:"Harvest Date", schema:'harvestDate', inputType:'date'},
-        {label:"Homozygosity", schema:'backbone', inputType:'medium'},
-        {label:"Ecotype", schema:'backbone', inputType:'medium'},
+        {label:"Harvest Date", schema:'harvestDate', subSchema:'arabidopsisSeedData', inputType:'date'},
+        {label:"Homozygosity", schema:'backbone', subSchema:'arabidopsisSeedData', inputType:'medium'},
+        {label:"Ecotype", schema:'backbone', subSchema:'arabidopsisSeedData', inputType:'medium'},
         {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
             autoCompleteField:'SELECTION_MARKERS'}
     ];
@@ -100,8 +100,8 @@ iceServices.factory('EntryService', function () {
     var strainFields = [
         {label:"Selection Markers", required:true, schema:'selectionMarkers',
             inputType:'autoCompleteAdd', autoCompleteField:'SELECTION_MARKERS'},
-        {label:"Genotype/Phenotype", schema:'genotypePhenotype', subSchema:'strainData', inputType:'long'},
-        {label:"Plasmids", schema:'plasmids', inputType:'autoComplete', autoCompleteField:'PLASMID_PART_NUMBER'}
+        {label:"Genotype/Phenotype", schema:'genotypePhenotype', inputType:'long', subSchema:'strainData'},
+        {label:"Plasmids", schema:'plasmids', inputType:'autoComplete', autoCompleteField:'PLASMID_PART_NUMBER', subSchema:'strainData'}
     ];
 
     var generateLinkOptions = function (type) {
@@ -205,6 +205,20 @@ iceServices.factory('EntryService', function () {
                     if (entry[field.subSchema] === undefined)
                         entry[field.subSchema] = {};
                     entry[field.subSchema][field.schema] = entry[field.schema];
+                }
+            });
+
+            return entry;
+        },
+
+        // inverse of the above. converts to form ui can work with
+        convertToUIForm:function (entry) {
+            var type = entry.type.toLowerCase();
+            var fields = getFieldsForType(type);
+
+            angular.forEach(fields, function (field) {
+                if (field.subSchema && entry[field.subSchema]) {
+                    entry[field.schema] = entry[field.subSchema][field.schema];
                 }
             });
 

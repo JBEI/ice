@@ -386,10 +386,22 @@ angular.module('ice.upload.controller', [])
                 for (var i = 0; i < change.length; i += 1) {
                     var data = change[i];
                     var row = data[0];
+                    var existing = undefined;
+
+                    if (objects.length > row) {
+                        existing = objects[row];
+                    }
 
                     var object = getEntryObject(row, data[1], data[3]);
-                    if (object)
-                        objects.push(object);
+
+                    if (existing) {
+                        for (var attrname in object) {
+                            existing[attrname] = object[attrname];
+                        }
+                        objects[row] = existing;
+                    } else {
+                        objects[row] = object;
+                    }
                 }
 
                 if (objects.length === 0)
@@ -397,7 +409,7 @@ angular.module('ice.upload.controller', [])
 
                 if ($scope.bulkUpload.id === undefined) {
                     // first create bulk upload
-                    upload.create({type:$scope.importType}), function (result) {
+                    upload.create({type:$scope.importType}, function (result) {
                         $scope.bulkUpload.id = result.id;
                         $scope.bulkUpload.lastUpdate = result.lastUpdate;
                         $scope.bulkUpload.name = result.name;
@@ -407,7 +419,7 @@ angular.module('ice.upload.controller', [])
                         updateEntryList(objects);
                     }, function (error) {
                         console.error("error creating bulk upload", error);
-                    };
+                    });
                 } else {
                     updateEntryList(objects);
                 }

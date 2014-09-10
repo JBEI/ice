@@ -251,7 +251,7 @@ public class EntryController {
         entry.setModificationTime(Calendar.getInstance().getTime());
         Visibility visibility = EntryUtil.validates(part) ? Visibility.OK : Visibility.DRAFT;
         entry.setVisibility(visibility.getValue());
-        dao.update(entry);
+        entry = dao.update(entry);
 
         return entry.getId();
     }
