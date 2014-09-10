@@ -29,6 +29,22 @@ public class EntryRetriever {
         authorization = new EntryAuthorization();
     }
 
+    public String getListAsCSV(String userId, ArrayList<Long> list) {  // todo : use a file for large lists
+        if (list == null || list.isEmpty() || userId.isEmpty())
+            return "";
+
+        StringBuilder builder = new StringBuilder();
+        for (Number item : list) {
+            Entry entry = this.dao.get(item.longValue());
+            if (entry == null || !authorization.canRead(userId, entry))
+                continue;
+
+            builder.append(IceCSVSerializer.serialize(entry)).append('\n');
+        }
+
+        return builder.toString();
+    }
+
     public String getAsCSV(String userId, String id) {
         Entry entry = getEntry(id);
         if (entry == null)
