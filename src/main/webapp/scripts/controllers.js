@@ -24,6 +24,8 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     // retrieve personal list of folders user can add or move parts to
     $scope.retrieveUserFolders = function () {
         $scope.userFolders = undefined;
+        $scope.selectedFolders = [];
+
         folders.getByType({folderType:"personal"}, function (data) {
             if (data.length)
                 $scope.userFolders = data;
@@ -31,13 +33,19 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     };
 
     // select a folder in the pull down
-    $scope.select = function (folder) {
+    $scope.select = function (folder, $event) {
+        if ($event) {
+            $event.preventDefault();
+            $event.stopPropagation();
+        }
+
         var i = $scope.selectedFolders.indexOf(folder);
         if (i == -1) {
             $scope.selectedFolders.push(folder);
         } else {
             $scope.selectedFolders.splice(i, 1);
         }
+        folder.isSelected = !folder.isSelected;
     };
 
     $scope.addEntriesToFolders = function () {
@@ -49,8 +57,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
 
         folders.addEntriesToFolders(updateFolders,
             function (result) {
-                // todo : send message to update the counts
-                // emit
+                $scope.updatePersonalCollections();
             });
     };
 

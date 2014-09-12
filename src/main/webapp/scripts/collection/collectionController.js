@@ -51,6 +51,18 @@ angular.module('ice.collection.controller', [])
             updateCounts();
         });
 
+        // updates the counts for personal collection to indicate items removed/added
+        $scope.updatePersonalCollections = function () {
+            folders.getByType({folderType:"personal"},
+                function (result) {
+                    if (result) {
+                        $scope.selectedCollectionFolders = result;
+                    }
+                }, function (error) {
+                    console.error(error);
+                });
+        };
+
         // called from collections-menu-details.html when a collection's folder is selected
         // simply changes state to folder and allows the controller for that to handle it
         $scope.selectCollectionFolder = function (folder) {
