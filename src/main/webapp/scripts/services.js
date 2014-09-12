@@ -376,7 +376,7 @@ iceServices.factory('Message', function ($resource) {
 
 iceServices.factory('Samples', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/samples', {userId:'@userId'}, {
+        return $resource('/rest/samples', {userId:'@userId', requestId:'@requestId'}, {
             requests:{
                 method:'GET',
                 responseType:'json',
@@ -385,11 +385,23 @@ iceServices.factory('Samples', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            submitRequests:{
+                method:'PUT',
+                url:"/rest/samples/requests",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
             userRequests:{
                 method:'GET',
                 responseType:'json',
                 url:"/rest/samples/requests/:userId",
                 isArray:true,
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            removeRequestFromCart:{
+                method:'DELETE',
+                url:"/rest/samples/requests/:requestId",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 

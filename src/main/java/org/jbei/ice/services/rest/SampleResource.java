@@ -1,19 +1,18 @@
 package org.jbei.ice.services.rest;
 
 import java.util.ArrayList;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
+import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.entry.sample.SampleRequests;
 
 /**
+ * REST Resource for samples
+ *
  * @author Hector Plahar
  */
 @Path("/samples")
@@ -31,16 +30,69 @@ public class SampleResource extends RestResource {
         return sampleRequests.getPendingRequests(userId);
     }
 
+    /**
+     * Sets the status of sample requests. Must have admin privs to set the sample for others
+     *
+     * @param sessionId
+     * @return
+     */
+    @PUT
+    @Path("/requests")
+    public Response setRequestStatus(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+            @QueryParam("status") SampleRequestStatus status,
+            ArrayList<Long> requestIds) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        try {
+            if (requestIds == null || requestIds.isEmpty())
+                return super.respond(Response.Status.OK);
+
+            ArrayList<Long> sampleRequestIds = new ArrayList<>();
+            for (Number number : requestIds)
+                sampleRequestIds.add(number.longValue());
+
+            sampleRequests.setRequestsStatus(userId, sampleRequestIds, status);
+            return super.respond(Response.Status.OK);
+        } catch (Exception e) {
+            Logger.error(e);
+            return super.respond(Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+    @DELETE
+    @Path("/requests/{id}")
+    public Response deleteSampleRequest(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+            @PathParam("id") long requestId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        if (sampleRequests.removeSampleFromCart(userId, requestId) == null)
+            return respond(Response.Status.INTERNAL_SERVER_ERROR);
+        return respond(Response.Status.OK);
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/requests/:userId")
+    @Path("/requests/{userId}")
     public ArrayList<SampleRequest> getUserRequests(
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-            @QueryParam("status") String status) {
+            @PathParam("userId") long uid,
+            @DefaultValue("") @QueryParam("status") String status) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         Logger.info(userId + ": retrieving sample requests for user");
-        return sampleRequests.getPendingRequests(userId);
+        return sampleRequests.getSampleRequestsInCart(userId);
     }
+
+//    @GET
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Path("/requests/{userId}/{partId}")
+//    public SampleRequest getUserRequestForEntry(
+//            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+//            @PathParam("userId") long uid,
+//            @DefaultValue("") @QueryParam("status") String status) {
+//        String userId = getUserIdFromSessionHeader(userAgentHeader);
+//        Logger.info(userId + ": retrieving sample requests for user");
+//        return sampleRequests.getSampleRequestsInCart(userId);
+//    }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -49,22 +101,7 @@ public class SampleResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
             SampleRequest request) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        Logger.info(userId + ": add sample request to cart for " + request.getPartData().getId());
+        log(userId, "add sample request to cart for " + request.getPartData().getId());
         return sampleRequests.placeSampleInCart(userId, request);
     }
-
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public ArrayList<Sam> get(
-//            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-//        try {
-//            HibernateUtil.beginTransaction();
-//            String userId = getUserIdFromSessionHeader(userAgentHeader);
-//            Logger.info(userId + ": retrieving available accounts for group creation");
-//            GroupController controller = new GroupController();
-//            return controller.getAvailableAccounts(userId);
-//        } finally {
-//            HibernateUtil.commitTransaction();
-//        }
-//    }
 }

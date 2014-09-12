@@ -786,16 +786,54 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
     // selected entries
     $scope.selection = [];
     $scope.shoppingCartContents = [];
-//    samples.userRequests({userId:$rootScope.user.id, })
-    // todo : retrieve shopping cart contents
+    samples.userRequests({status:'todo'}, {userId:$rootScope.user.id}, function (result) {
+        $scope.shoppingCartContents = result;
+    });
 
     $scope.hidePopovers = function (hide) {
         $scope.openShoppingCart = !hide;
     };
 
     $scope.submitShoppingCart = function () {
-        $scope.shoppingCartContents = [];
-        $scope.openShoppingCart = false;
+        var contentIds = [];
+        for (var idx = 0; idx < $scope.shoppingCartContents.length; idx += 1)
+            contentIds.push($scope.shoppingCartContents[idx].id);
+
+        samples.submitRequests({status:'PENDING'}, contentIds, function (result) {
+            $scope.shoppingCartContents = [];
+            $scope.openShoppingCart = false;
+        }, function (error) {
+            console.error(error);
+        })
+    };
+
+    // remove sample request
+    $scope.removeFromCart = function (content, entry) {
+        console.log($scope.shoppingCartContents[0]);
+
+        if (entry) {
+            var partId = entry.id;
+            for (var idx = 0; idx < $scope.shoppingCartContents.length; idx += 1) {
+                if ($scope.shoppingCartContents[idx].partData.id == partId) {
+                    content = $scope.shoppingCartContents[idx];
+                    break;
+                }
+            }
+        }
+
+        if (content) {
+            var contentId = content.id;
+            samples.removeRequestFromCart({requestId:contentId}, function (result) {
+                var idx = $scope.shoppingCartContents.indexOf(content);
+                if (idx >= 0) {
+                    $scope.shoppingCartContents.splice(idx, 1);
+                } else {
+                    // todo : manual scan and remove
+                }
+            }, function (error) {
+                console.error(error);
+            });
+        }
     };
 
     // search
@@ -816,18 +854,8 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
         );
     };
 
-    $scope.$on('SampleTypeSelected', function (event, data) {
-        // todo : save to the server
-
-        console.log(data);
-        samples.addRequestToCart({}, data, function (result) {
-            console.log(result);
-            $scope.shoppingCartContents = result;
-        }, function (error) {
-            console.error(error);
-        });
-
-        $scope.shoppingCartContents.push(data);
+    $scope.$on('SamplesInCart', function (event, data) {
+        $scope.shoppingCartContents = data;
     });
 
     // table

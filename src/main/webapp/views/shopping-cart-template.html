@@ -1,67 +1,89 @@
 <!--hack alert; ng-repeat (see line 62) does not appear to work if there is only one item in the array -->
+
+
 <div ng-show="shoppingCartContents[0]">
-    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[0].type==='liquid',
-    'fa-circle-o':shoppingCartContents[0].type==='streak'}"></i>
-    <a ng-href="/entry/{{shoppingCartContents[0].entry.id}}">{{shoppingCartContents[0].entry.partId}}</a>
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[0].requestType==='LIQUID_CULTURE',
+    'fa-circle-o':shoppingCartContents[0].requestType==='STREAK_ON_AGAR_PLATE'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[0].partData.id}}">{{shoppingCartContents[0].partData.partId}}</a>
+
+    &nbsp;<i ng-click="removeFromCart(shoppingCartContents[0])" class="fa fa-times delete_icon"></i>
 </div>
 
 <div ng-show="shoppingCartContents[1]">
-    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[1].type==='liquid',
-    'fa-circle-o':shoppingCartContents[1].type==='streak'}"></i>
-    <a ng-href="/entry/{{shoppingCartContents[1].entry.id}}">{{shoppingCartContents[1].entry.partId}}</a>
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[1].requestType==='LIQUID_CULTURE',
+    'fa-circle-o':shoppingCartContents[1].requestType==='STREAK_ON_AGAR_PLATE'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[1].partData.id}}">{{shoppingCartContents[1].partData.partId}}</a>
+
+    &nbsp;<i ng-click="removeFromCart(shoppingCartContents[1])" class="fa fa-times delete_icon"></i>
 </div>
 
 <div ng-show="shoppingCartContents[2]">
-    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[2].type==='liquid',
-    'fa-circle-o':shoppingCartContents[2].type==='streak'}"></i>
-    <a ng-href="/entry/{{shoppingCartContents[2].entry.id}}">{{shoppingCartContents[2].entry.partId}}</a>
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[2].requestType==='LIQUID_CULTURE',
+    'fa-circle-o':shoppingCartContents[2].requestType==='STREAK_ON_AGAR_PLATE'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[2].partData.id}}">{{shoppingCartContents[2].partData.partId}}</a>
+
+    &nbsp;<i ng-click="removeFromCart(shoppingCartContents[2])" class="fa fa-times delete_icon"></i>
 </div>
 
 <div ng-show="shoppingCartContents[3]">
-    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[3].type==='liquid',
-    'fa-circle-o':shoppingCartContents[3].type==='streak'}"></i>
-    <a ng-href="/entry/{{shoppingCartContents[3].entry.id}}">{{shoppingCartContents[3].entry.partId}}</a>
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[3].requestType==='LIQUID_CULTURE',
+    'fa-circle-o':shoppingCartContents[3].requestType==='STREAK_ON_AGAR_PLATE'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[3].partData.id}}">{{shoppingCartContents[3].partData.partId}}</a>
+
+    &nbsp;<i ng-click="removeFromCart(shoppingCartContents[3])" class="fa fa-times delete_icon"></i>
 </div>
 
 <div ng-show="shoppingCartContents[4]">
-    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[4].type==='liquid',
-    'fa-circle-o':shoppingCartContents[4].type==='streak'}"></i>
-    <a ng-href="/entry/{{shoppingCartContents[4].entry.id}}">{{shoppingCartContents[4].entry.partId}}</a>
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[4].requestType==='LIQUID_CULTURE',
+    'fa-circle-o':shoppingCartContents[4].requestType==='STREAK_ON_AGAR_PLATE'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[4].partData.id}}">{{shoppingCartContents[4].partData.partId}}</a>
+
+    &nbsp;<i ng-click="removeFromCart(shoppingCartContents[4])" class="fa fa-times delete_icon"></i>
 </div>
 
 <div ng-show="shoppingCartContents[5]">
-    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[5].type==='liquid',
-    'fa-circle-o':shoppingCartContents[5].type==='streak'}"></i>
-    <a ng-href="/entry/{{shoppingCartContents[5].entry.id}}">{{shoppingCartContents[5].entry.partId}}</a>
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[5].requestType==='LIQUID_CULTURE',
+    'fa-circle-o':shoppingCartContents[5].requestType==='STREAK_ON_AGAR_PLATE'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[5].partData.id}}">{{shoppingCartContents[5].partData.partId}}</a>
+
+    &nbsp;<i ng-click="removeFromCart(shoppingCartContents[5])" class="fa fa-times delete_icon"></i>
 </div>
 
 <div ng-show="shoppingCartContents[6]">
-    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[6].type==='liquid',
-    'fa-circle-o':shoppingCartContents[6].type==='streak'}"></i>
-    <a ng-href="/entry/{{shoppingCartContents[6].entry.id}}">{{shoppingCartContents[6].entry.partId}}</a>
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[6].requestType==='LIQUID_CULTURE',
+    'fa-circle-o':shoppingCartContents[6].requestType==='STREAK_ON_AGAR_PLATE'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[6].partData.id}}">{{shoppingCartContents[6].partData.partId}}</a>
+
+    &nbsp;<i ng-click="removeFromCart(shoppingCartContents[6])" class="fa fa-times delete_icon"></i>
 </div>
 
 <div ng-show="shoppingCartContents[7]">
-    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[7].type==='liquid',
-    'fa-circle-o':shoppingCartContents[7].type==='streak'}"></i>
-    <a ng-href="/entry/{{shoppingCartContents[7].entry.id}}">{{shoppingCartContents[7].entry.partId}}</a>
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[7].requestType==='LIQUID_CULTURE',
+    'fa-circle-o':shoppingCartContents[7].requestType==='STREAK_ON_AGAR_PLATE'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[7].partData.id}}">{{shoppingCartContents[7].partData.partId}}</a>
+
+    &nbsp;<i ng-click="removeFromCart(shoppingCartContents[7])" class="fa fa-times delete_icon"></i>
 </div>
 
 <div ng-show="shoppingCartContents[8]">
-    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[8].type==='liquid',
-    'fa-circle-o':shoppingCartContents[8].type==='streak'}"></i>
-    <a ng-href="/entry/{{shoppingCartContents[8].entry.id}}">{{shoppingCartContents[8].entry.partId}}</a>
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[8].requestType==='LIQUID_CULTURE',
+    'fa-circle-o':shoppingCartContents[8].requestType==='STREAK_ON_AGAR_PLATE'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[8].partData.id}}">{{shoppingCartContents[8].partData.partId}}</a>
+
+    &nbsp;<i ng-click="removeFromCart(shoppingCartContents[8])" class="fa fa-times delete_icon"></i>
 </div>
 
 <div ng-show="shoppingCartContents[9]">
-    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[9].type==='liquid',
-    'fa-circle-o':shoppingCartContents[9].type==='streak'}"></i>
-    <a ng-href="/entry/{{shoppingCartContents[9].entry.id}}">{{shoppingCartContents[9].entry.partId}}</a>
+    <i class="fa" ng-class="{'fa-flask':shoppingCartContents[9].requestType==='LIQUID_CULTURE',
+    'fa-circle-o':shoppingCartContents[9].requestType==='STREAK_ON_AGAR_PLATE'}"></i>
+    <a ng-href="/entry/{{shoppingCartContents[9].partData.id}}">{{shoppingCartContents[9].partData.partId}}</a>
+
+    &nbsp;<i ng-click="removeFromCart(shoppingCartContents[9])" class="fa fa-times delete_icon"></i>
 </div>
 
 <!--<div ng-repeat="content in shoppingCartContents">-->
-<!--<i class="fa" ng-class="{'fa-flask':content.type==='liquid', 'fa-circle-o':content.type==='streak'}"></i>-->
-<!--<a ng-href="/entry/{{content.entry.id}}">{{content.entry.partId}}</a>-->
+<!--<i class="fa" ng-class="{'fa-flask':content.requestType==='LIQUID_CULTURE', 'fa-circle-o':content.requestType==='STREAK_ON_AGAR_PLATE'}"></i>-->
+<!--<a ng-href="/entry/{{content.partData.id}}">{{content.partData.partId}}</a>-->
 <!--</div>-->
 
 <br>
