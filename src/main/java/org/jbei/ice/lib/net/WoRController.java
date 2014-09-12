@@ -68,7 +68,7 @@ public class WoRController {
 
         ArrayList<RegistryPartner> registryPartners = new ArrayList<>();
         for (RemotePartner partner : partners) {
-            if(approvedOnly && partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+            if (approvedOnly && partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
                 continue;
             registryPartners.add(partner.toDataTransferObject());
         }
@@ -84,7 +84,7 @@ public class WoRController {
         Logger.info("Adding remote partner [" + request.toString() + "]");
 
         String myURL = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
-        if(request.getUrl().equalsIgnoreCase(myURL))
+        if (request.getUrl().equalsIgnoreCase(myURL))
             return false;
 
         // request should contain api key for use to contact third party
@@ -154,7 +154,7 @@ public class WoRController {
         // send notice to remote for key
         RestClient client = RestClient.getInstance();
         try {
-            client.post(partner.getUrl(), "/rest/web/partner/remote", thisPartner);
+            client.post(partner.getUrl(), "/rest/web/partner/remote", thisPartner, RegistryPartner.class);
 
             // save
             remotePartner = new RemotePartner();
@@ -233,7 +233,7 @@ public class WoRController {
 
         RestClient client = RestClient.getInstance();
         try {
-            client.post(partner.getUrl(), "/rest/web/partner/remote", thisPartner);
+            client.post(partner.getUrl(), "/rest/web/partner/remote", thisPartner, RegistryPartner.class);
             existing.setPartnerStatus(newStatus);
             existing.setAuthenticationToken(apiKey);
             dao.update(existing);
