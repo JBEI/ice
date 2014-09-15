@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.dto.comment;
 
-import java.util.Date;
-
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dao.IDataTransferModel;
 
@@ -16,7 +14,8 @@ public class UserComment implements IDataTransferModel {
     private long id;
     private AccountTransfer accountTransfer;
     private String message;
-    private Date commentDate;
+    private long commentDate;
+    private long modified;
     private long entryId;
 
     public UserComment() {
@@ -42,11 +41,11 @@ public class UserComment implements IDataTransferModel {
         this.message = message;
     }
 
-    public Date getCommentDate() {
+    public long getCommentDate() {
         return commentDate;
     }
 
-    public void setCommentDate(Date commentDate) {
+    public void setCommentDate(long commentDate) {
         this.commentDate = commentDate;
     }
 
@@ -64,5 +63,13 @@ public class UserComment implements IDataTransferModel {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public long getModified() {
+        return modified;
+    }
+
+    public void setModified(long modified) {
+        this.modified = modified;
     }
 }
