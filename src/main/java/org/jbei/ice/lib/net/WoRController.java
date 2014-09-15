@@ -256,7 +256,7 @@ public class WoRController {
      * @param enable if true, enables WoR; disables it otherwise
      * @return list of received partners if WoR functionality is being enabled, is successful and
      *         this is not the master node, otherwise it just returns an empty list, or null in the event of an
-     *         exeption
+     *         exception
      */
     public ArrayList<RegistryPartner> setEnable(String url, boolean enable) throws ControllerException {
         ConfigurationController controller = new ConfigurationController();

@@ -1,7 +1,7 @@
 <div class="modal-header">
     <button type="button" class="close" ng-click="closeModal()">&times;</button>
     <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
-        <i class="fa fa-share-alt"></i> &nbsp;Folder Share Settings <span
+        <i class="fa fa-share-alt"></i> &nbsp;Share <span
             style="color:#000000;">{{folder.folderName}}</span></span>
 </div>
 
@@ -43,11 +43,8 @@
             <td>
                 <!--user select filter-->
                 <div ng-if="showPermissionInput">
-                    <form ng-submit="addEmailUser()">
-                        <input type="text" placeholder="Enter name or email" ng-model="userFilterInput"
-                               ng-change="filter(userFilterInput)"
-                               style="width: 220px; font-size: 0.90em">
-                    </form>
+                    <input type="text" placeholder="Enter name or email" ng-model="userFilterInput"
+                           ng-change="filter(userFilterInput)" style="width: 220px; font-size: 0.90em">
 
                     <div style="overflow: auto; max-height: 120px;" class="font-75em">
 

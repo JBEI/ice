@@ -31,10 +31,9 @@
         <td>
             <!--user select filter-->
             <div ng-show="showPermissionInput">
-                <form ng-submit="addEmailUser()">
-                    <input type="text" placeholder="Enter name or email" ng-model="userFilterInput" ng-change="filter()"
-                           style="width: 180px; font-size: 0.80em">
-                </form>
+                <input type="text" placeholder="Enter name or email" ng-model="userFilterInput" ng-change="filter()"
+                       style="width: 180px; font-size: 0.80em">
+
                 <div style="overflow: auto; height: 120px;" class="font-75em">
                     <!--<div ng-repeat="user in filteredUsers | filter: userFilterInput | orderBy:'email'"-->
                     <!--style="padding-left: 6px; padding-top: 3px">-->

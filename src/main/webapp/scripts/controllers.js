@@ -816,8 +816,6 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     // remove sample request
     $scope.removeFromCart = function (content, entry) {
-        console.log($scope.shoppingCartContents[0]);
-
         if (entry) {
             var partId = entry.id;
             for (var idx = 0; idx < $scope.shoppingCartContents.length; idx += 1) {
@@ -1358,6 +1356,31 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
                 }
             }
         });
+    };
+
+    // returns human readable text for permissions. meant to be appended to the String "Shared with "
+    // (e.g. "2 users and 3 groups")
+    $scope.getShareText = function (permissions) {
+        if (permissions === undefined || !permissions.length) {
+            return "no one";
+        }
+
+        var groupCount = 0;
+        var userCount = 0;
+
+        for (var idx = 0; idx < permissions.length; idx += 1) {
+            var permission = permissions[idx];
+            if (permission.article === 'ACCOUNT')
+                userCount += 1;
+            else
+                groupCount += 1;
+        }
+
+        if (userCount == 0)
+            return groupCount + (groupCount == 1 ? " group" : " groups");
+
+        if (groupCount == 0)
+            return userCount + (userCount == 1 ? " user" : " users");
     }
 });
 
@@ -1472,6 +1495,10 @@ iceControllers.controller('EditEntryController',
             $scope.selectedFields = EntryService.getFieldsForType(result.type);
             $scope.activePart = $scope.entry;
         });
+
+        $scope.cancelEdit = function () {
+            $location.path("/entry/" + $stateParams.id);
+        };
 
         // todo : this is pretty much a copy of submitPart in CreateEntryController
         $scope.editEntry = function () {
@@ -2034,10 +2061,6 @@ iceControllers.controller('EntryPermissionController', function ($rootScope, $sc
 //                }
 //            });
 //        });
-    };
-
-    $scope.addEmailUser = function () {
-        console.log($scope.userFilterInput);
     };
 
     $scope.watchInput = function () {

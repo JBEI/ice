@@ -28,6 +28,7 @@ public class FolderDetails implements IDataTransferModel, Comparable<FolderDetai
     private ArrayList<AccessPermission> accessPermissions;
     private boolean publicReadAccess;
     private boolean canEdit;
+    private long created;
     private FolderDetails parent;
 
     public FolderDetails() {
@@ -139,5 +140,13 @@ public class FolderDetails implements IDataTransferModel, Comparable<FolderDetai
 
     public void setCanEdit(boolean canEdit) {
         this.canEdit = canEdit;
+    }
+
+    public long getCreated() {
+        return created;
+    }
+
+    public void setCreated(long created) {
+        this.created = created;
     }
 }
