@@ -186,8 +186,8 @@
                        maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
                        typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
                 <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
-                      ng-click="addLink(field.schema, $index)"><i ng-show="loadingData"
-                                                                  class="fa fa-spinner fa-spin"></i>
+                      ng-click="addLink(field.schema, $index)">
+                    <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
                     <i class="fa fa-plus green opacity_hover"></i>
                 </span>
             </div>

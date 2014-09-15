@@ -755,7 +755,6 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     // retrieve user settings
 
-
     // default list of collections
     $scope.collectionList = [
         { name:'available', display:'Available', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:true},
@@ -1384,10 +1383,6 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
     }
 });
 
-iceControllers.controller('UserController', function ($scope, $routeParams, Entry) {
-//    $scope.entry = Entry.query({partId:$routeParams.id});
-});
-
 iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Authentication, Settings, AccessToken) {
     $scope.login = {};
 
@@ -1453,9 +1448,10 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
 });
 
 iceControllers.controller('EditEntryController',
-    function ($scope, $location, $cookieStore, $rootScope, $stateParams, Entry, EntryService) {
+    function ($scope, $http, $location, $cookieStore, $rootScope, $stateParams, Entry, EntryService) {
 
-        var entry = Entry($cookieStore.get("sessionId"));
+        var sid = $cookieStore.get("sessionId");
+        var entry = Entry(sid);
         $scope.entry = undefined;
         entry.query({partId:$stateParams.id}, function (result) {
             $scope.entry = result;
@@ -1498,6 +1494,41 @@ iceControllers.controller('EditEntryController',
 
         $scope.cancelEdit = function () {
             $location.path("/entry/" + $stateParams.id);
+        };
+
+        $scope.getLocation = function (inputField, val) {
+            return $http.get('/rest/part/autocomplete', {
+                headers:{'X-ICE-Authentication-SessionId':sid},
+                params:{
+                    val:val,
+                    field:inputField
+                }
+            }).then(function (res) {
+                    return res.data;
+                });
+        };
+
+        $scope.getEntriesByPartNumber = function (val) {
+            return $http.get('/rest/part/autocomplete/partid', {
+                headers:{'X-ICE-Authentication-SessionId':sid},
+                params:{
+                    token:val
+                }
+            }).then(function (res) {
+                    return res.data;
+                });
+        };
+
+        $scope.addExistingPartLink = function ($item, $model, $label) {
+            entry.query({partId:$model.id}, function (result) {
+                $scope.activePart = result;
+                $scope.activePart.isExistingPart = true;
+                $scope.addExisting = false;
+                $scope.entry.linkedParts.push($scope.activePart);
+
+                $scope.colLength = 11 - $scope.entry.linkedParts.length;
+                $scope.active = $scope.entry.linkedParts.length - 1;
+            });
         };
 
         // todo : this is pretty much a copy of submitPart in CreateEntryController
@@ -1792,14 +1823,6 @@ iceControllers.controller('CreateEntryController',
             $scope.serverError = false;
         });
 
-        uploader.bind('whenaddingfilefailed', function (event, item) {
-            console.info('When adding a file failed', item);
-        });
-
-        uploader.bind('afteraddingall', function (event, items) {
-            console.info('After adding all files', items);
-        });
-
         uploader.bind('beforeupload', function (event, item) {
             var entryTypeForm;
             if ($scope.active === 'main')
@@ -1810,21 +1833,14 @@ iceControllers.controller('CreateEntryController',
         });
 
         uploader.bind('progress', function (event, item, progress) {
-            console.info('Progress: ' + progress, item);
-            console.log("process", item.file.name);
-
             if (progress != "100")  // isUploading is always true until it returns
                 return;
-
-            console.log("process", progress == "100");
 
             // upload complete. have processing
             $scope.processingFile = item.file.name;
         });
 
         uploader.bind('success', function (event, xhr, item, response) {
-            console.log("active scope", $scope.active);
-
             if ($scope.active === undefined || isNaN($scope.active)) {
                 // set main entry id
                 $scope.part.id = response.entryId;
@@ -1838,21 +1854,9 @@ iceControllers.controller('CreateEntryController',
             $scope.activePart.hasSequence = true;
         });
 
-        uploader.bind('cancel', function (event, xhr, item) {
-            console.info('Cancel', xhr, item);
-        });
-
         uploader.bind('error', function (event, xhr, item, response) {
-            console.info('Error', xhr, item, response);
             item.remove();
             $scope.serverError = true;
-        });
-
-        uploader.bind('complete', function (event, xhr, item, response) {
-            console.info('Complete', xhr, item, response);
-        });
-
-        uploader.bind('progressall', function (event, progress) {
         });
 
         uploader.bind('completeall', function (event, items) {
@@ -1964,172 +1968,184 @@ iceControllers.controller('GenericTabsController', function ($scope, $cookieStor
 });
 
 iceControllers.controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group, filterFilter, Permission) {
-    var sessionId = $cookieStore.get("sessionId");
-    var entry = Entry(sessionId);
-    var panes = $scope.panes = [];
-    $scope.userFilterInput = undefined;
+        var sessionId = $cookieStore.get("sessionId");
+        var entry = Entry(sessionId);
+        var panes = $scope.panes = [];
+        $scope.userFilterInput = undefined;
 
-    $scope.activateTab = function (pane) {
-        angular.forEach(panes, function (pane) {
-            pane.selected = false;
-        });
-        pane.selected = true;
-        if (pane.title === 'Read')
-            $scope.activePermissions = angular.copy($scope.readPermissions);
-        else
-            $scope.activePermissions = angular.copy($scope.writePermissions);
-
-        angular.forEach($scope.users, function (item) {
-            for (var i = 0; i < $scope.activePermissions.length; i += 1) {
-                item.selected = (item.id !== undefined && item.id === $scope.activePermissions[i].articleId);
-            }
-        });
-    };
-
-    this.addPane = function (pane) {
-        // activate the first pane that is added
-        if (panes.length == 0)
-            $scope.activateTab(pane);
-        panes.push(pane);
-    };
-
-    entry.permissions({partId:$scope.entry.id}, function (result) {
-        $scope.readPermissions = [];
-        $scope.writePermissions = [];
-
-        angular.forEach(result, function (item) {
-            if (item.type === 'WRITE_ENTRY')
-                $scope.writePermissions.push(item);
-            else
-                $scope.readPermissions.push(item);
-        });
-
-        $scope.panes.push({title:'Read', count:$scope.readPermissions.length, selected:true});
-        $scope.panes.push({title:'Write', count:$scope.writePermissions.length});
-
-        $scope.activePermissions = angular.copy($scope.readPermissions);
-    });
-
-    $scope.filter = function () {
-        var val = $scope.userFilterInput;
-        if (!val) {
-            $scope.accessPermissions = undefined;
-            return;
-        }
-
-        $scope.filtering = true;
-        Permission().filterUsersAndGroups({limit:10, val:val},
-            function (result) {
-                $scope.accessPermissions = result;
-                $scope.filtering = false;
-            }, function (error) {
-                $scope.filtering = false;
-                $scope.accessPermissions = undefined;
+        $scope.activateTab = function (pane) {
+            angular.forEach(panes, function (pane) {
+                pane.selected = false;
             });
-    };
+            pane.selected = true;
+            if (pane.title === 'Read')
+                $scope.activePermissions = angular.copy($scope.readPermissions);
+            else
+                $scope.activePermissions = angular.copy($scope.writePermissions);
 
-    $scope.showAddPermissionOptionsClick = function () {
-        $scope.showPermissionInput = true;
-
-//        // TODO : consider, instead of retrieving all and filtering, try on the server first
-//        user.list(function (result) {
-//            $scope.users = result;
-//            $scope.filteredUsers = angular.copy(result);
-//
-//            angular.forEach($scope.users, function (item) {
-//                for (var i = 0; i < $scope.activePermissions.length; i += 1) {
-//                    if (item.id == $scope.activePermissions[i].articleId && $scope.activePermissions[i].article === 'ACCOUNT') {
-//                        item.selected = true;
-//                        item.permissionId = $scope.activePermissions[i].id;
-//                        break;
-//                    }
-//                }
-//            });
-//        });
-//
-//        group.getUserGroups({userId:$rootScope.user.id}, function (result) {
-//            console.log(result, $scope.activePermissions);
-//            $scope.filteredGroups = angular.copy(result);
-//
-//            angular.forEach($scope.filteredGroups, function (item) {
-//                for (var i = 0; i < $scope.activePermissions.length; i += 1) {
-//                    if (item.id == $scope.activePermissions[i].articleId && $scope.activePermissions[i].article === 'GROUP') {
-//                        item.selected = true;
-//                        item.permissionId = $scope.activePermissions[i].id;
-//                        break;
-//                    }
-//                }
-//            });
-//        });
-    };
-
-    $scope.watchInput = function () {
-        $scope.filteredUsers = filterFilter($scope.users, $scope.userFilterInput);
-    };
-
-    $scope.closePermissionOptions = function () {
-        $scope.users = undefined;
-        $scope.showPermissionInput = false;
-    };
-
-    var removePermission = function (permissionId) {
-        entry.removePermission({partId:$scope.entry.id, permissionId:permissionId},
-            function (result) {
+            angular.forEach($scope.users, function (item) {
                 for (var i = 0; i < $scope.activePermissions.length; i += 1) {
-                    if (permissionId != $scope.activePermissions[i].id)
-                        continue;
-
-                    $scope.activePermissions.splice(i, 1);
-                    break;
+                    item.selected = (item.id !== undefined && item.id === $scope.activePermissions[i].articleId);
                 }
             });
-    };
+        };
 
-    // when user clicks on the check box
-    $scope.addRemovePermission = function (permission) {
-        permission.selected = !permission.selected;
-        if (!permission.selected) {
-            removePermission(permission.id);
-            return;
-        }
+        this.addPane = function (pane) {
+            // activate the first pane that is added
+            if (panes.length == 0)
+                $scope.activateTab(pane);
+            panes.push(pane);
+        };
 
-        // add permission
-        var type;
-        angular.forEach(panes, function (pane) {
-            if (pane.selected) {
-                type = pane.title.toUpperCase() + "_ENTRY";
-            }
-        });
-        permission.typeId = $scope.entry.id;
-        permission.type = type;
+        entry.permissions({partId:$scope.entry.id}, function (result) {
+            $scope.readPermissions = [];
+            $scope.writePermissions = [];
 
-        entry.addPermission({partId:$scope.entry.id}, permission, function (result) {
-            // result is the permission object
-            $scope.entry.id = result.typeId;
-            $scope.activePermissions.push(result);
-            permission.permissionId = result.id;
-        });
-    };
-
-    $scope.enablePublicRead = function (e) {
-        entry.enablePublicRead(e, function (result) {
-            $scope.entry.publicRead = true;
-        })
-    };
-
-    $scope.disablePublicRead = function (e) {
-        entry.disablePublicRead({partId:e.id}, function (result) {
-            $scope.entry.publicRead = false;
-        })
-    };
-
-    $scope.deletePermission = function (index, permission) {
-        entry.removePermission({partId:$scope.entry.id, permissionId:permission.id},
-            function (result) {
-                $scope.activePermissions.splice(index, 1);
+            angular.forEach(result, function (item) {
+                if (item.type === 'WRITE_ENTRY')
+                    $scope.writePermissions.push(item);
+                else
+                    $scope.readPermissions.push(item);
             });
-    };
-});
+
+            $scope.panes.push({title:'Read', count:$scope.readPermissions.length, selected:true});
+            $scope.panes.push({title:'Write', count:$scope.writePermissions.length});
+
+            $scope.activePermissions = angular.copy($scope.readPermissions);
+        });
+
+        $scope.filter = function () {
+            var val = $scope.userFilterInput;
+            if (!val) {
+                $scope.accessPermissions = undefined;
+                return;
+            }
+
+            $scope.filtering = true;
+            Permission().filterUsersAndGroups({limit:10, val:val},
+                function (result) {
+                    $scope.accessPermissions = result;
+                    $scope.filtering = false;
+                }, function (error) {
+                    $scope.filtering = false;
+                    $scope.accessPermissions = undefined;
+                });
+        };
+
+        $scope.showAddPermissionOptionsClick = function () {
+            $scope.showPermissionInput = true;
+        };
+
+        $scope.watchInput = function () {
+            $scope.filteredUsers = filterFilter($scope.users, $scope.userFilterInput);
+        };
+
+        $scope.closePermissionOptions = function () {
+            $scope.users = undefined;
+            $scope.showPermissionInput = false;
+        };
+
+        var removePermission = function (permissionId) {
+            entry.removePermission({partId:$scope.entry.id, permissionId:permissionId},
+                function (result) {
+                    // check which pane is selected
+                    var p1 = $scope.panes[0];
+                    var p2 = $scope.panes[1];
+
+                    for (var i = 0; i < $scope.panes.length; i += 1) {
+                        var pane = $scope.panes[i];
+                        if (!pane.selected)
+                            continue;
+
+                        var permissionsToIterate;
+                        if (pane.title === 'Read') {
+                            // read pane
+                            permissionsToIterate = $scope.readPermissions;
+                        } else {
+                            // write pane
+                            permissionsToIterate = $scope.writePermissions;
+                        }
+
+                        for (var idx = 0; idx < permissionsToIterate.length; idx += 1) {
+                            if (permissionId != permissionsToIterate[idx].id)
+                                continue;
+
+                            permissionsToIterate.splice(i, 1);
+                            break;
+                        }
+
+                        $scope.activePermissions = permissionsToIterate;
+                        break;
+                    }
+                });
+        };
+
+        // when user clicks on the check box
+        $scope.addRemovePermission = function (permission) {
+            permission.selected = !permission.selected;
+            if (!permission.selected) {
+                removePermission(permission.id);
+                return;
+            }
+
+            // add permission
+            var type;
+            for (var i = 0; i < panes.length; i += 1) {
+                if (panes[i].selected) {
+                    permission.type = panes[i].title.toUpperCase() + "_ENTRY";
+                    break;
+                }
+            }
+
+            permission.typeId = $scope.entry.id;
+
+            entry.addPermission({partId:$scope.entry.id}, permission, function (result) {
+                // result is the permission object
+                $scope.entry.id = result.typeId;
+                $scope.activePermissions.push(result);
+                permission.permissionId = result.id;
+            });
+        };
+
+        $scope.enablePublicRead = function (e) {
+            entry.enablePublicRead(e, function (result) {
+                $scope.entry.publicRead = true;
+            })
+        };
+
+        $scope.disablePublicRead = function (e) {
+            entry.disablePublicRead({partId:e.id}, function (result) {
+                $scope.entry.publicRead = false;
+            })
+        };
+
+        $scope.deletePermission = function (index, permission) {
+            entry.removePermission({partId:$scope.entry.id, permissionId:permission.id},
+                function (result) {
+                    if (!result)
+                        return;
+
+                    var foundIndex = -1;
+                    for (var i = 0; i < $scope.activePermissions.length; i += 1) {
+                        if (permission.id == $scope.activePermissions[i].id) {
+                            foundIndex = i;
+                            break;
+                        }
+                    }
+                    if (foundIndex > -1)
+                        $scope.activePermissions.splice(foundIndex, 1);
+
+//                    angular.forEach($scope.activePermissions, function(permission){
+//                        if()
+//                    })
+//                    console.log(index, $scope.activePermissions);
+//                    $scope.activePermissions.splice(index, 1);
+//                    console.log(index, $scope.activePermissions);
+                });
+        };
+    }
+)
+;
 
 iceControllers.controller('EntryDetailsController', function ($scope) {
     console.log("EntryDetailsController");
