@@ -85,10 +85,52 @@ angular.module('ice.entry.controller', [])
                 console.error("comment create error", error);
             });
         };
+
+        $scope.updateComment = function (comment) {
+            entry.updateComment({partId:entryId, commentId:comment.id}, comment, function (result) {
+                if (result) {
+                    comment.edit = false;
+                    comment.modified = result.modified;
+                }
+            }, function (error) {
+                console.error(error);
+            })
+        }
     })
-    .controller('EntrySampleController', function ($scope, $modal, $cookieStore, $stateParams, Entry) {
+    .controller('EntrySampleController', function ($rootScope, $scope, $modal, $cookieStore, $stateParams, Entry, Samples) {
         $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
         $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+
+        var sessionId = $cookieStore.get("sessionId");
+        var entry = Entry(sessionId);
+        var samples = Samples(sessionId);
+        var partId = $stateParams.id;
+
+        // retrieve samples for partId
+        entry.samples({partId:partId}, function (result) {
+            $scope.samples = result;
+        });
+
+        // marks the sample object "inCart" field if the data
+        // contains the entry id of current part being viewed
+        var setInCart = function (data) {
+            if (!data || !data.length) {
+                $scope.samples[0].inCart = false;
+                return;
+            }
+
+            // check specific values added to cart
+            for (var idx = 0; idx < data.length; idx += 1) {
+                // using "==" instead of "===" since partId is a string
+                if (data[idx].partData.id == partId) {
+                    $scope.samples[0].inCart = true;
+                    return;
+                }
+            }
+
+            // assuming not found
+            $scope.samples[0].inCart = false;
+        };
 
         $scope.openAddToCart = function () {
             var modalInstance = $modal.open({
@@ -97,17 +139,16 @@ angular.module('ice.entry.controller', [])
 
             modalInstance.result.then(function (selected) {
                 var sampleSelection = {type:selected, partData:{id:$scope.entry.id}};
-                $scope.$emit("SampleTypeSelected", sampleSelection);
+
+                // add selection to shopping cart
+                samples.addRequestToCart({}, sampleSelection, function (result) {
+                    $scope.$emit("SamplesInCart", result);
+                    setInCart(result);
+                });
             }, function () {
                 // dismiss callback
             });
         };
-
-        var sessionId = $cookieStore.get("sessionId");
-        var entry = Entry(sessionId);
-        entry.samples({partId:$stateParams.id}, function (result) {
-            $scope.samples = result;
-        });
     })
     .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, $fileUploader, Entry) {
         var entryId = $stateParams.id;

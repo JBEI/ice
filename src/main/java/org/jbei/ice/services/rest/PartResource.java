@@ -250,6 +250,17 @@ public class PartResource extends RestResource {
         return controller.createEntryComment(userId, partId, userComment);
     }
 
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/comments/{commentId}")
+    public UserComment updateComment(@PathParam("id") long partId,
+            @PathParam("commentId") long commentId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            UserComment userComment) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        return controller.updateEntryComment(userId, partId, commentId, userComment);
+    }
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

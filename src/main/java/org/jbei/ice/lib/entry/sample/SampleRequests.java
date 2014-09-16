@@ -14,6 +14,7 @@ import org.jbei.ice.lib.dao.hibernate.RequestDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
+import org.jbei.ice.lib.dto.sample.SampleRequestType;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Request;
 import org.jbei.ice.lib.utils.Emailer;
@@ -66,27 +67,27 @@ public class SampleRequests {
         try {
             ArrayList<Request> requests = dao.getSampleRequestByStatus(account, entry, SampleRequestStatus.IN_CART);
             if (requests != null && !requests.isEmpty())
-                return null;
+                return getSampleRequestsInCart(account.getEmail());
 
             Request request = new Request();
             request.setAccount(account);
             request.setEntry(entry);
+            if (sampleRequest.getRequestType() == null)
+                sampleRequest.setRequestType(SampleRequestType.LIQUID_CULTURE);
             request.setType(sampleRequest.getRequestType());
             request.setRequested(new Date(System.currentTimeMillis()));
             request.setUpdated(request.getRequested());
             dao.create(request);
-            return getSampleRequestsInCart(account);
+            return getSampleRequestsInCart(account.getEmail());
         } catch (DAOException e) {
             Logger.error(e);
         }
         return null;
     }
 
-    public ArrayList<SampleRequest> getSampleRequestsInCart(Account account) {
-        if (account == null)
-            return null;
-
+    public ArrayList<SampleRequest> getSampleRequestsInCart(String userId) {
         try {
+            Account account = DAOFactory.getAccountDAO().getByEmail(userId);
             List<Request> requestList = dao.getRequestListInCart(account);
             if (requestList == null)
                 return null;
@@ -119,23 +120,17 @@ public class SampleRequests {
         return results;
     }
 
-    public SampleRequest removeSampleFromCart(Account account, long entryId) {
-        if (account == null)
-            return null;
-
-        Entry entry = entryDAO.get(entryId);
-
-        if (entry == null)
-            throw new IllegalArgumentException("Cannot find entry with id: " + entryId);
-
+    public SampleRequest removeSampleFromCart(String userId, long requestId) {
         try {
-            Request request = dao.getSampleRequestInCart(account, entry);
+            Request request = dao.get(requestId);
             if (request == null)
                 return null;
 
-            Logger.info(account.getEmail() + ": Removing sample from cart for entry " + entryId);
-            dao.delete(request);
+            if (!request.getAccount().getEmail().equalsIgnoreCase(userId))
+                return null;
 
+            Logger.info(userId + ": Removing sample from cart for entry " + request.getEntry().getId());
+            dao.delete(request);
             return request.toDataTransferObject();
         } catch (DAOException de) {
             Logger.error(de);
@@ -143,57 +138,35 @@ public class SampleRequests {
         }
     }
 
-    public SampleRequest updateRequest(Account account, SampleRequest request) {
-        if (account == null)
-            return null;
+    public boolean setRequestsStatus(String userId, ArrayList<Long> ids, SampleRequestStatus status) {
+        boolean sendEmail = status == SampleRequestStatus.PENDING;
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
-        try {
-            Request existing = dao.get(request.getId());
-            if (existing == null)
-                return null;
+        for (long id : ids) {
+            Request request = dao.get(id);
+            if (request == null)
+                continue;
 
-            // todo this should handle other parameters; for now only using it for status
-            if (existing.getStatus() == request.getStatus())
-                return request;
+            if (!request.getAccount().getEmail().equalsIgnoreCase(userId) && account.getType() != AccountType.ADMIN)
+                continue;
 
-            existing.setStatus(request.getStatus());
-            existing = dao.update(existing);
-            return existing.toDataTransferObject();
-        } catch (DAOException de) {
-            return null;
+            request.setStatus(status);
+            dao.update(request);
         }
-    }
 
-    public boolean request(Account account, ArrayList<SampleRequest> requests) {
-        if (account == null || requests == null)
-            return false;
-
-        try {
-            for (SampleRequest sampleRequest : requests) {
-                Request request = dao.get(sampleRequest.getId());
-                if (request == null || (account.getType() != AccountType.ADMIN && request.getAccount() != account)) {
-                    Logger.error("Cannot find sample request " + sampleRequest.getId() + " or accounts do not match");
-                    return false;
-                }
-
-                request.setStatus(SampleRequestStatus.PENDING);
-                dao.update(request);
-            }
-
+        if (sendEmail) {
             // send email to strain archivist
             String email = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
             if (email != null && !email.isEmpty()) {
                 String subject = "Sample request";
                 String body = "A sample request has been received from " + account.getFullName() + " for "
-                        + requests.size() + " samples.\n\n";
+                        + ids.size() + " samples.\n\n";
                 body += "Please go to the following link to review pending requests.\n\n";
-                body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/#page=admin;id=sample_requests";
+                body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/admin/samples";
                 Emailer.send(email, subject, body);
             }
-        } catch (DAOException de) {
-            Logger.error("Could not fulfil request", de);
-            return false;
         }
+
         return true;
     }
 }

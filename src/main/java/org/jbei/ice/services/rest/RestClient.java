@@ -11,6 +11,8 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.client.ClientConfig;
 
 /**
+ * REST client
+ *
  * @author Hector Plahar
  */
 public class RestClient {
@@ -39,12 +41,12 @@ public class RestClient {
         return target.request(MediaType.APPLICATION_JSON_TYPE).buildGet().invoke();
     }
 
-    public Object post(String url, String resourcePath, Object object) {
+    public Object post(String url, String resourcePath, Object object, Class<?> responseClass) {
         WebTarget target = client.target("https://" + url).path(resourcePath);
         Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
         Response postResponse = invocationBuilder.post(Entity.entity(object, MediaType.APPLICATION_JSON_TYPE));
         if (postResponse.hasEntity())
-            return postResponse.getEntity();
+            return postResponse.readEntity(responseClass);
         return null;
     }
 }

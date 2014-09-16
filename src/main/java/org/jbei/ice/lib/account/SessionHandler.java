@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.account;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -13,11 +15,11 @@ import org.apache.commons.lang.StringUtils;
  */
 public class SessionHandler {
 
-    private final static ConcurrentHashMap<String, String> userSessionMap = new ConcurrentHashMap<>();
+    private final static ConcurrentHashMap<String, Set<String>> userSessionMap = new ConcurrentHashMap<>();
 
     public static String getUserIdBySession(String sessionId) {
-        for (Map.Entry<String, String> entrySet : userSessionMap.entrySet()) {
-            if (entrySet.getValue().equalsIgnoreCase(sessionId)) {
+        for (Map.Entry<String, Set<String>> entrySet : userSessionMap.entrySet()) {
+            if (entrySet.getValue().contains(sessionId)) {
                 return entrySet.getKey();
             }
         }
@@ -33,8 +35,17 @@ public class SessionHandler {
      */
     public static String createNewSessionForUser(String userId) {
         String newSession = UUID.randomUUID().toString();
-        userSessionMap.put(userId, newSession);
+        putSession(userId, newSession);
         return newSession;
+    }
+
+    protected static void putSession(String userId, String sessionId) {
+        Set<String> sessionIds = userSessionMap.get(userId);
+        if (sessionIds == null) {
+            sessionIds = new HashSet<>();
+            userSessionMap.put(userId, sessionIds);
+        }
+        sessionIds.add(sessionId);
     }
 
     /**
@@ -50,12 +61,15 @@ public class SessionHandler {
         if (StringUtils.isEmpty(sessionId) || sessionId.length() < 5)
             return createNewSessionForUser(userId);
 
-        userSessionMap.put(userId, sessionId);
+        putSession(userId, sessionId);
         return sessionId;
     }
 
     public static boolean isValidSession(String sid) {
-        return sid != null && userSessionMap.containsValue(sid.trim());
+        if (sid == null)
+            return false;
+
+        return getUserIdBySession(sid) != null;
     }
 
     /**

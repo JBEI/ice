@@ -34,11 +34,4 @@ public class RestResource {
     protected void log(String userId, String message) {
         Logger.info(userId + ": " + message);
     }
-
-//    protected Response created() {
-////        String href = (String)resource.get("href");
-//        URI uri = URI.create(href);
-//        return Response.created(uri).entity(resource).build();
-//    }
-
 }

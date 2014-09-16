@@ -1,40 +1,47 @@
 <div ng-controller="WebOfRegistriesController">
     <div class="row pad_top">
-        <button type="button" class="ice-button" ng-click="showAddRegistryForm=true">
-            <i style="font-size: 14px" class="fa fa-upload blue"></i> Add Registry
+        <button type="button" class="ice-button" ng-click="enableDisableWor()">
+            <i style="font-size: 14px" class="fa" ng-class="{'fa-toggle-on green':isWorEnabled, 'fa-toggle-off':!isWorEnabled}"></i>
         </button>
     </div>
 
-    <div class="row margin-top-10 panel panel-default font-95em" ng-show="showAddRegistryForm">
-        <form class="panel-body" role="form" ng-submit="addPartner()">
-            <div class="col-md-2 pad-top-5">
-                <span style="white-space:nowrap">Registry Name <span class="required">*</span> </span>
-            </div>
-            <div class="col-md-10 pad-top-5">
-                <input placeholder="Unique display identifier" type="text" class="input_box" ng-model="newPartner.name"
-                       maxlength="125" style="width: 235px;">
-            </div>
+    <div class="row" ng-init="getPartners(true)" ng-if="isWorEnabled && wor && wor.partners.length">
+        <div class="page-header">
+            <h5>
+               <strong>Registry Partners</strong>
+               <i ng-click="showAddRegistryForm=true" class="fa fa-plus blue opacity_hover" style="font-size: 14px"></i>
+            </h5>
+        </div>
 
-            <div class="col-md-2 pad-top-5">
-                <span style="white-space: nowrap">Registry URL <span class="required">*</span></span>
-            </div>
-            <div class="col-md-10 pad-top-5">
-                <input placeholder="Valid url for remote ice instance" type="text" class="input_box"
-                       ng-model="newPartner.url" maxlength="125" style="width: 235px;">
-            </div>
+        <div class=" margin-top-10 panel panel-default font-95em" ng-show="showAddRegistryForm">
+            <form class="panel-body" role="form" ng-submit="addPartner()">
+                <div class="col-md-2 pad-top-5">
+                    <span style="white-space:nowrap">Registry Name <span class="required">*</span> </span>
+                </div>
+                <div class="col-md-10 pad-top-5">
+                    <input placeholder="Unique display identifier" type="text" class="input_box" ng-model="newPartner.name"
+                           maxlength="125" style="width: 235px;">
+                </div>
 
-            <br>
+                <div class="col-md-2 pad-top-5">
+                    <span style="white-space: nowrap">Registry URL <span class="required">*</span></span>
+                </div>
+                <div class="col-md-10 pad-top-5">
+                    <input placeholder="Valid url for remote ice instance" type="text" class="input_box"
+                           ng-model="newPartner.url" maxlength="125" style="width: 235px;">
+                </div>
 
-            <div class="col-xs-offset-2 col-md-10 pad_top">
-                <button type="submit" class="btn btn-xs btn-primary">Save</button>
-                <button type="button" ng-click="showAddRegistryForm=false; newPartner=undefined"
-                        class="btn btn-xs btn-default">Cancel
-                </button>
-            </div>
-        </form>
-    </div>
+                <br>
 
-    <div class="row pad_top" ng-init="getPartners(true)" ng-if="wor && wor.partners.length">
+                <div class="col-xs-offset-2 col-md-10 pad_top">
+                    <button type="submit" class="btn btn-xs btn-primary">Save</button>
+                    <button type="button" ng-click="showAddRegistryForm=false; newPartner=undefined"
+                            class="btn btn-xs btn-default">Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+
         <table cellspacing="0" class="table table-condensed table-hover table-striped font-95em">
             <thead>
             <tr>
@@ -55,13 +62,13 @@
                 <td><a target="_blank" ng-href="https://{{partner.url}}">{{partner.url}}</a> <i
                         class="fa fa-external-link font-85em"></i></td>
                 <td>{{partner.addTime | date:'MMM d, y, h:mm a'}}</td>
-                <td>{{partner.status}}</td>
+                <td>{{partner.status | capitalize}}</td>
                 <td style="font-size:14px">
                     <span tooltip="Delete" style="padding: 2px 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);"><i
                             class="fa fa-trash-o fa-fw delete_icon" ng-click="removePartner(partner, $index)"></i></span>
-                    <span tooltip="Approve" style="padding: 2px 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);"><i
+                    <span ng-if="partner.status !== 'APPROVED'" tooltip="Approve" style="padding: 2px 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);"><i
                             class="fa fa-check fa-fw add_icon" ng-click="approvePartner(partner, $index)"></i></span>
-                    <span tooltip="Block" style="padding: 2px 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);"><i
+                    <span ng-if="partner.status !== 'BLOCKED'" tooltip="Block" style="padding: 2px 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);"><i
                             class="fa fa-ban fa-fw flag_icon" ng-click="removePartner(partner, $index)"></i></span>
                 </td>
             </tr>

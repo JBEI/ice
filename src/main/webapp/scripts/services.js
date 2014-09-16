@@ -376,7 +376,7 @@ iceServices.factory('Message', function ($resource) {
 
 iceServices.factory('Samples', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/samples', {userId:'@userId'}, {
+        return $resource('/rest/samples', {userId:'@userId', requestId:'@requestId'}, {
             requests:{
                 method:'GET',
                 responseType:'json',
@@ -385,11 +385,23 @@ iceServices.factory('Samples', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            submitRequests:{
+                method:'PUT',
+                url:"/rest/samples/requests",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
             userRequests:{
                 method:'GET',
                 responseType:'json',
                 url:"/rest/samples/requests/:userId",
                 isArray:true,
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            removeRequestFromCart:{
+                method:'DELETE',
+                url:"/rest/samples/requests/:requestId",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -431,7 +443,7 @@ iceServices.factory('Attachment', function ($resource) {
 
 iceServices.factory('Entry', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/part/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId'}, {
+        return $resource('/rest/part/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId', commentId:'@commentId'}, {
             query:{
                 method:'GET',
                 responseType:"json",
@@ -509,6 +521,13 @@ iceServices.factory('Entry', function ($resource) {
                 method:'POST',
                 responseType:'json',
                 url:'/rest/part/:partId/comments',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            updateComment:{
+                method:'PUT',
+                responseType:'json',
+                url:'/rest/part/:partId/comments/:commentId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 

@@ -28,11 +28,17 @@ public class ConfigResource extends RestResource {
 
     private ConfigurationController controller = new ConfigurationController();
 
+    /**
+     * Retrieves list of system settings available
+     *
+     * @param sessionId Session Id for user
+     * @return list of retrieved system settings that can be changed (including those with no values)
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Setting> get(@HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        getUserIdFromSessionHeader(userAgentHeader);
-        return controller.retrieveSystemSettings();
+    public ArrayList<Setting> get(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        return controller.retrieveSystemSettings(userId);
     }
 
     @GET

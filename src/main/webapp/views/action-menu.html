@@ -1,6 +1,6 @@
 <div class="btn-toolbar">
     <div class="btn-group" style="margin-left: 12px">
-        <div class="btn-group">
+        <div class="btn-group" dropdown>
             <button type="button" ng-disabled="addToDisabled" ng-click="retrieveUserFolders()"
                     class="btn btn-default btn-sm subMenuTransfer dropdown-toggle">
                 <i style="font-size: 14px;" class="fa fa-plus blue"></i> Add To <span class="caret"></span>
@@ -9,11 +9,12 @@
                 <i class="fa fa-fw fa-spin fa-spinner"></i> Loading...
             </span>
 
+            <!--displays list of folders that the user can add entries to to-->
             <ul class="dropdown-menu" ng-if="userFolders">
-                <li ng-repeat="folder in userFolders" ng-init="selected=false" stop-event="click"
-                    ng-click="selected=!selected; select(folder)" class="font-75em cursor_pointer">&nbsp;
+                <li ng-repeat="folder in userFolders" ng-click="select(folder, $event)"
+                    class="font-75em cursor_pointer">&nbsp;
                     <i class="fa fa-fw"
-                       ng-class="{'fa-square-o':selected==false, 'fa-check-square-o':selected==true}"></i>
+                       ng-class="{'fa-square-o':!folder.isSelected, 'fa-check-square-o':folder.isSelected}"></i>
                     {{folder.folderName}}
                 </li>
                 <li class="divider"></li>
@@ -32,11 +33,12 @@
             </ul>
         </div>
 
+        <!--option to remove from folder-->
         <button type="button" ng-disabled="removeDisabled" class="btn btn-default btn-sm subMenuTransfer">
             <i style="font-size: 14px;" class="fa fa-minus"></i> Remove
         </button>
 
-        <div class="btn-group">
+        <div class="btn-group" dropdown>
             <button type="button" ng-disabled="moveToDisabled"
                     class="btn btn-default btn-sm subMenuTransfer dropdown-toggle">
                 <i style="font-size: 14px;" class="fa fa-arrows blue"></i> Move To <span class="caret"></span>

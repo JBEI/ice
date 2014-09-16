@@ -189,6 +189,8 @@ public class FolderController {
         long folderSize = dao.getFolderSize(folderId);
         details.setCount(folderSize);
         details.setDescription(folder.getDescription());
+        if (folder.getCreationTime() != null)
+            details.setCreated(folder.getCreationTime().getTime());
         details.setAccessPermissions(controller.retrieveSetFolderPermission(folder, false));
         details.setPublicReadAccess(controller.isPublicVisible(folder));
         Account owner = accountController.getByEmail(folder.getOwnerEmail());

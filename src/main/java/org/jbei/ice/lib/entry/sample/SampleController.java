@@ -236,6 +236,9 @@ public class SampleController {
         if (entrySamples == null)
             return samples;
 
+        Account userAccount = DAOFactory.getAccountDAO().getByEmail(userId);
+        boolean inCart = DAOFactory.getRequestDAO().getSampleRequestInCart(userAccount, entry) != null;
+
         for (Sample sample : entrySamples) {
             // convert sample to info
             Storage storage = sample.getStorage();
@@ -277,6 +280,7 @@ public class SampleController {
             partSample.setCreationTime(sample.getCreationTime().getTime());
             partSample.setLabel(sample.getLabel());
             partSample.setMain(main);
+            partSample.setInCart(inCart);
 
             Account account = DAOFactory.getAccountDAO().getByEmail(sample.getDepositor());
             if (account != null)

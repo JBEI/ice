@@ -10,7 +10,7 @@
                 <td>
                     <h4>
                         <span style="white-space: nowrap">
-                            <strong ng-hide="part.name" class="color-888">EDIT {{entry.type}}</strong>
+                            <strong class="color-888">EDIT {{entry.type}}</strong>
                             <strong>{{entry.partId}}</strong>
                         </span>
                         <br>
@@ -150,57 +150,33 @@
         </span>
     </div>
 
-    <!-- autocompleteAdd with a sub-schema-->
+    <!-- autocompleteAdd-->
     <div class="col-md-10" ng-if="field.inputType==='autoCompleteAdd'">
 
-        <!--show if there is a sub schema-->
-        <span ng-repeat="link in activePart[field.subSchema][field.schema]" ng-if="field.subSchema">
-            <div ng-if="!$index">
-                <input ng-model="link.value" type="text" typeahead-loading="loadingData"
-                       ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-                       maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
-                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
-                <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
-                      ng-click="addLink(field.schema, $index)"><i ng-show="loadingData"
-                                                                  class="fa fa-spinner fa-spin"></i>
-                    <i class="fa fa-plus green opacity_hover"></i>
-                </span>
-            </div>
-
-            <div ng-if="$index" class="input-group pad-top-5">
-                <input type="text" ng-model="link.value" maxlength="125" style="width: 400px;"
-                       ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
-                       ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
-                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
-                <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)" style="padding:3px; background-color:
-                 #f1f1f1;width: 19px; border-left: 0">
-                    <i class="fa fa-minus delete_icon"></i>
-                </span>&nbsp;
-                <i class="fa fa-plus green opacity_hover" ng-click="addLink(field.schema, $index)"></i>
-            </div>
-        </span>
-
         <!--no sub schema-->
-        <span ng-repeat="link in activePart[field.schema]" ng-if="!field.subSchema">
+        <span ng-repeat="link in activePart[field.schema] track by $index">
             <div ng-if="!$index">
                 <input ng-model="link.value" type="text" typeahead-loading="loadingData"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                       ng-change="field.invalid=false"
                        maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
                        typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
                 <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
-                      ng-click="addLink(field.schema, $index)"><i ng-show="loadingData"
-                                                                  class="fa fa-spinner fa-spin"></i>
+                      ng-click="addLink(field.schema, $index)">
+                    <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
                     <i class="fa fa-plus green opacity_hover"></i>
                 </span>
             </div>
 
             <div ng-if="$index" class="input-group pad-top-5">
-                <input type="text" ng-model="link.value" maxlength="125" style="width: 400px;"
+                <input type="text" ng-model="activePart[field.schema][$index].value" maxlength="125"
+                       style="width: 400px;"
                        ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
+                       ng-change="field.invalid=false"
                        ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
                        typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
-                <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)" style="padding:3px; background-color:
-                 #f1f1f1;width: 19px; border-left: 0">
+                <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)"
+                      style="padding:3px; background-color: #f1f1f1;width: 19px; border-left: 0">
                     <i class="fa fa-minus delete_icon"></i>
                 </span>&nbsp;
                 <i class="fa fa-plus green opacity_hover" ng-click="addLink(field.schema, $index)"></i>
@@ -237,7 +213,7 @@
 
     <div class="col-md-10">
         <button type="submit" class="btn btn-primary font-85em">Submit</button>
-        <button class="btn btn-default font-85em">Cancel</button>
+        <button type="button" ng-click="cancelEdit()" class="btn btn-default font-85em">Cancel</button>
     </div>
 </div>
 
