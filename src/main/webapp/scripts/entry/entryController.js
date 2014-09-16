@@ -85,6 +85,17 @@ angular.module('ice.entry.controller', [])
                 console.error("comment create error", error);
             });
         };
+
+        $scope.updateComment = function (comment) {
+            entry.updateComment({partId:entryId, commentId:comment.id}, comment, function (result) {
+                if (result) {
+                    comment.edit = false;
+                    comment.modified = result.modified;
+                }
+            }, function (error) {
+                console.error(error);
+            })
+        }
     })
     .controller('EntrySampleController', function ($rootScope, $scope, $modal, $cookieStore, $stateParams, Entry, Samples) {
         $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];

@@ -443,7 +443,7 @@ iceServices.factory('Attachment', function ($resource) {
 
 iceServices.factory('Entry', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/part/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId'}, {
+        return $resource('/rest/part/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId', commentId:'@commentId'}, {
             query:{
                 method:'GET',
                 responseType:"json",
@@ -521,6 +521,13 @@ iceServices.factory('Entry', function ($resource) {
                 method:'POST',
                 responseType:'json',
                 url:'/rest/part/:partId/comments',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            updateComment:{
+                method:'PUT',
+                responseType:'json',
+                url:'/rest/part/:partId/comments/:commentId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 

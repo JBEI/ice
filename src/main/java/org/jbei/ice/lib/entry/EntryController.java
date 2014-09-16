@@ -509,6 +509,27 @@ public class EntryController {
         return comment.toDataTransferObject();
     }
 
+    public UserComment updateEntryComment(String userId, long partId, long commentId, UserComment userComment) {
+        Entry entry = dao.get(partId);
+        if (entry == null)
+            return null;
+
+        authorization.canRead(userId, entry);
+        Comment comment = commentDAO.get(commentId);
+        if (comment == null)
+            return createEntryComment(userId, partId, userComment);
+
+        if (comment.getEntry().getId() != partId)
+            return null;
+
+        if (userComment.getMessage() == null || userComment.getMessage().isEmpty())
+            return null;
+
+        comment.setBody(userComment.getMessage());
+        comment.setModificationTime(new Date());
+        return commentDAO.update(comment).toDataTransferObject();
+    }
+
     public boolean deleteTraceSequence(String userId, long entryId, long traceId) {
         Entry entry = dao.get(entryId);
         if (entry == null)
