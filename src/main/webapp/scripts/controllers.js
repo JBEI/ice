@@ -1028,7 +1028,7 @@ iceControllers.controller('WorFolderContentController', function ($scope, $state
         id = $stateParams.folderId;
 
     Remote().getFolderEntries({folderId:id, id:$stateParams.partner}, function (result) {
-        console.log("result", result.entries, result === null);
+//        console.log("result", result.entries, result === null);
         $scope.selectedPartnerFolder = result;
     }, function (error) {
         console.error(error);

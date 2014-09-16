@@ -43,7 +43,7 @@ public class AccessTokenResource extends RestResource {
             return respond(Response.Status.UNAUTHORIZED);
         }
 
-        Logger.info("User by login '" + transfer.getEmail() + "' successfully logged in");
+        Logger.info("User '" + transfer.getEmail() + "' successfully logged in");
         return respond(Response.Status.OK, info);
     }
 
