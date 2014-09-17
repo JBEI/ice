@@ -773,6 +773,7 @@ angular.module('ice.upload.controller', [])
 
             Upload(sid).updateStatus({importId:upload.id}, {id:upload.id, status:'IN_PROGRESS'}, function (result) {
                 $location.path('/folders/pending');
+                $modalInstance.close();
                 // todo : send optional message if any
             }, function (error) {
             })
