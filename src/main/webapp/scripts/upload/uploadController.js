@@ -550,6 +550,19 @@ angular.module('ice.upload.controller', [])
                 });
             };
 
+            $scope.confirmRejectUploadModal = function () {
+                var resetModalInstance = $modal.open({
+                    templateUrl:'scripts/upload/modal/reject-upload.html',
+                    controller:'BulkUploadRejectModalController',
+                    backdrop:'static',
+                    resolve:{
+                        upload:function () {
+                            return $scope.bulkUpload;
+                        }
+                    }
+                });
+            };
+
             $scope.submitImportForApproval = function () {
                 $scope.submitting = true;
                 var requiresApproval = $scope.bulkUpload.status && $scope.bulkUpload.status == 'PENDING_APPROVAL';
@@ -680,7 +693,6 @@ angular.module('ice.upload.controller', [])
                                 // for each entry object (row)
                                 for (var i = 0; i < result.entryList.length; i += 1) {
                                     var entry = result.entryList[i];
-                                    console.log(entry);
                                     $scope.bulkUpload.entryIdData.push(entry.id);
 
                                     // ensure capacity
@@ -755,7 +767,22 @@ angular.module('ice.upload.controller', [])
             createSheet();
         }
     })
-    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType, linkedAddType) {
+    .controller('BulkUploadRejectModalController', function ($scope, $cookieStore, $location, $modalInstance, upload, Upload) {
+        $scope.rejectUpload = function () {
+            var sid = $cookieStore.get("sessionId");
+
+            Upload(sid).updateStatus({importId:upload.id}, {id:upload.id, status:'IN_PROGRESS'}, function (result) {
+                $location.path('/folders/pending');
+                // todo : send optional message if any
+            }, function (error) {
+            })
+        };
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss('cancel');
+        };
+    })
+    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType, linkedAddType, upload) {
         var sid = $cookieStore.get("sessionId");
         $scope.addType = addType;
 
@@ -828,5 +855,4 @@ angular.module('ice.upload.controller', [])
                 url += "?link=" + linkedAddType;
             $window.open(url, "_self");
         }
-    })
-;
+    });

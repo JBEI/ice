@@ -65,7 +65,7 @@
                 <span ng-if="bulkUpload.status==undefined || bulkUpload.status=='IN_PROGRESS'">Submit</span>
                 <span ng-if="bulkUpload.status=='PENDING_APPROVAL'">Approve</span>
             </button>
-            <button type="button" class="btn btn-xs btn-default" ng-click="confirmResetFormModal()">
+            <button type="button" class="btn btn-xs btn-default" ng-click="confirmRejectUploadModal()">
                 <span ng-if="bulkUpload.status==undefined || bulkUpload.status=='IN_PROGRESS'">Reset</span>
                 <span ng-if="bulkUpload.status=='PENDING_APPROVAL'">Reject</span>
             </button>
