@@ -1,32 +1,76 @@
 'use strict';
 
 angular.module('ice.search.controller', [])
-    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry) {
-        console.log("SearchController", $scope.searchFilters);
-        var sessionId = $cookieStore.get("sessionId");
-        var queryString = $location.search().q;
-        $scope.queryString = queryString;
+    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search) {
+        $scope.$on("RunSearch", function (event, filters) {
+            $scope.searchResults = undefined;
+            $scope.searchFilters = filters;
+            runAdvancedSearch(filters);
+        });
 
-        // param defaults
-        if (!$scope.loadingPage) {
-            $scope.searchFilters.q = queryString;
-            $scope.searchFilters.sort = 'relevance';
-            $scope.searchFilters.asc = false;
-            $scope.searchFilters.limit = 15;
-            $scope.searchFilters.t = ['strain', 'plasmid', 'arabidopsis', 'part'];
-            $scope.searchFilters.b = "BLAST_N";
-            $scope.runUserSearch();
-        }
+        var runAdvancedSearch = function (filters) {
+            $scope.loadingSearchResults = true;
 
-        $scope.setSearchResultPage = function (pageNo) {
-            $scope.loadingPage = true;
-            $scope.searchFilters.offset = (pageNo - 1) * 15;
-            $scope.runUserSearch();
+            Search().runAdvancedSearch(filters,
+                function (result) {
+                    $scope.searchResults = result;
+                    $scope.loadingSearchResults = false;
+                },
+                function (error) {
+                    $scope.loadingSearchResults = false;
+                    $scope.searchResults = undefined;
+                    console.log(error);
+                }
+            );
         };
 
-        // TODO : sort
+        var noFilters = (!$scope.searchFilters || Object.keys($scope.searchFilters).length === 0);
+
+        // todo : $location.search('q', $scope.queryText);
+        if (noFilters) {
+            $scope.searchFilters = {entryTypes:[], parameters:{}, blastQuery:{}, queryString:""};
+            var queryString = $location.search().q;
+            if (!queryString === undefined) {
+                $scope.searchFilters.queryString = queryString;
+            }
+        }
+
+//        if (noFilters) {
+        // no filters keyword search only
+//            var queryString = $location.search().q;
+//            if (queryString === undefined)
+//                queryString = "";
+
+        // todo :
+//            if ($scope.queryText !== queryString)
+//                $scope.queryText = queryString; // update input box
+//
+//            console.log("url query parameter", queryString);
+//            $scope.searchFilters = {q:queryString, sort:'relevance', asc:false, limit:15};
+//            runSearch($scope.searchFilters);
+//        } else {
+        // filters run advanced search
+        $scope.searchFilters.parameters.start = 0;
+        $scope.searchFilters.parameters.retrieveCount = 15;
+        $scope.searchFilters.parameters.sortField = "RELEVANCE";
+        runAdvancedSearch($scope.searchFilters);
+//        }
+
+        // TODO : sort ?
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
         $scope.currentPage = 1;
+
+        $scope.setSearchResultPage = function (pageNo) {
+//            $scope.loadingPage = true;
+//            var nextOffset = ;
+//            if (noFilters) {
+//                $scope.searchFilters.offset = nextOffset;
+//                runSearch($scope.searchFilters);
+//            } else {
+            $scope.searchFilters.parameters.start = (pageNo - 1) * 15;
+            runAdvancedSearch($scope.searchFilters);
+//            }
+        };
 
         $scope.getType = function (relScore) {
             if (relScore === undefined)
@@ -41,8 +85,10 @@ angular.module('ice.search.controller', [])
             return 'info';
         };
 
-        $scope.tooltipDetails = function(entry) {
+        $scope.tooltipDetails = function (entry) {
             $scope.searchResultToolTip = undefined;
+            var sessionId = $cookieStore.get("sessionId");
+
             Entry(sessionId).tooltip({partId:entry.id},
                 function (result) {
                     $scope.searchResultToolTip = result;
@@ -66,54 +112,110 @@ angular.module('ice.search.controller', [])
             $scope.searchTypes.all = allTrue;
         };
 
-        $scope.search = function (isAdvancedSearch) {
-            $scope.searchResults = undefined;
-            if (isAdvancedSearch) {
-                $scope.loadingSearchResults = true;
-                $location.path('/search');
-                var search = Search();
-                var searchQuery = {};
-                searchQuery.queryString = $scope.queryText;
-                var blastType = $scope.blastSearchType === undefined ? "BLAST_N" : $scope.blastSearchType.toUpperCase();
-                searchQuery.blastQuery = {blastProgram:blastType, sequence:$scope.sequenceText};
-                searchQuery.entryTypes = [];
-                for (var searchType in $scope.searchTypes) {
-                    if ($scope.searchTypes.hasOwnProperty(searchType) && searchType !== 'all') {
-                        if ($scope.searchTypes[searchType])
-                            searchQuery.entryTypes.push(searchType.toUpperCase());
+//        var runAdvancedSearch = function (filters) {
+//            $scope.loadingSearchResults = true;
+//            $scope.searchResults = undefined;
+//
+//            Search().runAdvancedSearch(filters,
+//                function (result) {
+////                    $scope.searchResults = result;
+//                    $scope.loadingSearchResults = false;
+//                    $scope.$broadcast("SearchResultsAvailable", result);
+//                },
+//                function (error) {
+//                    $scope.loadingSearchResults = false;
+//                    $scope.$broadcast("SearchResultsAvailable", undefined);
+//                    $scope.searchResults = undefined;
+//                    console.log(error);
+//                }
+//            );
+//        };
+
+        var defineQuery = function () {
+            var searchQuery = {entryTypes:[], parameters:{}, blastQuery:{}};
+
+            // check search types  : {all: false, strain: true, plasmid: false, part: true, arabidopsis: true}
+            for (var type in $scope.searchTypes) {
+                if ($scope.searchTypes.hasOwnProperty(type) && type !== 'all') {
+                    if ($scope.searchTypes[type]) {
+                        searchQuery.entryTypes.push(type.toUpperCase());
                     }
                 }
+            }
 
-                search.runAdvancedSearch(searchQuery, function (result) {
-                    $scope.searchFilters = searchQuery;
-                    $scope.loadingSearchResults = false;
-                    $scope.searchResults = result;
-                }, function (error) {
-                    $scope.loadingSearchResults = false;
-                    $scope.searchResults = undefined;
-                });
+            // check blast search type
+            if ($scope.blastSearchType) {
+                searchQuery.blastQuery.blastProgram = $scope.blastSearchType;
+            }
+
+            // check "has ..."
+            if ($scope.hasAttachment)
+                searchQuery.parameters.hasAttachment = $scope.hasAttachment;
+
+            if ($scope.hasSample)
+                searchQuery.parameters.hasSample = $scope.hasSample;
+
+            if ($scope.hasSequence)
+                searchQuery.parameters.hasSequence = $scope.hasSequence;
+
+            // biosafety
+            if ($scope.bioSafetyLevelOption) {
+                searchQuery.bioSafetyOption = $scope.bioSafetyLevelOption;
+            }
+
+            //sequence
+            if ($scope.sequenceText) {
+                searchQuery.blastQuery.sequence = $scope.sequenceText;
+                if (!searchQuery.blastQuery.blastProgram)
+                    searchQuery.blastQuery.blastProgram = "BLAST_N";
+            }
+
+            searchQuery.queryString = $scope.queryText;
+            // todo : or
+//            var queryString = $location.search().q;
+//            if (queryString === undefined)
+//                queryString = "";
+            return searchQuery;
+        };
+
+        $scope.search = function () {
+            $scope.searchFilters = defineQuery();
+
+            var searchUrl = "/search";
+            if ($location.path().slice(0, searchUrl.length) != searchUrl) {
+                $location.path(searchUrl, false);
             } else {
-                $scope.searchFilters.q = $scope.queryText;
-                $scope.searchFilters.s = $scope.sequenceText;
-                $scope.searchFilters.sort = 'relevance';
-                $scope.searchFilters.asc = false;
-                $scope.searchFilters.t = [];
-                $scope.searchFilters.b = $scope.blastSearchType;
-                $scope.searchFilters.hasSample = $scope.hasSample;
-                $scope.searchFilters.hasSequence = $scope.hasSequence;
-                $scope.searchFilters.hasAttachment = $scope.hasAttachment;
+                $scope.searchFilters = defineQuery();
+                $scope.searchFilters.parameters.start = 0;
+                $scope.searchFilters.parameters.retrieveCount = 15;
+                $scope.searchFilters.parameters.sortField = "RELEVANCE";
+                $scope.$broadcast("RunSearch", $scope.searchFilters);
+//                var noFilters = (!$scope.searchFilters || Object.keys($scope.searchFilters).length === 0);
+//                console.log("no filters", noFilters);
 
-                for (var type in $scope.searchTypes) {
-                    if ($scope.searchTypes.hasOwnProperty(type) && type !== 'all') {
-                        if ($scope.searchTypes[type])
-                            $scope.searchFilters.t.push(type);
-                    }
-                }
+                // todo : $location.search('q', $scope.queryText);
 
-                $scope.loadingPage = true;
-                $location.path('/search');
-                $location.search('q', $scope.queryText);
-                $scope.runUserSearch();
+//                if (noFilters) {
+                // no filters keyword search only
+//                    var queryString = $location.search().q;
+//                    if (queryString === undefined)
+//                        queryString = "";
+
+                // todo :
+//            if ($scope.queryText !== queryString)
+//                $scope.queryText = queryString; // update input box
+//
+//                    console.log("url query parameter", queryString);
+//                    $scope.searchFilters = {q:queryString, sort:'relevance', asc:false, limit:15};
+//                    runSearch($scope.searchFilters);
+//                } else {
+//                console.log($scope.searchFilters);
+//                // filters run advanced search
+//                $scope.searchFilters.parameters.start = 0;
+//                $scope.searchFilters.parameters.retrieveCount = 15;
+//                $scope.searchFilters.parameters.sortField = "RELEVANCE";
+//                $scope.runUserSearch($scope.searchFilters);
+//                }
             }
         };
 

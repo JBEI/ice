@@ -1,9 +1,11 @@
-<form ng-submit="search(false)">
+<form ng-submit="search()">
     <table cellpadding="0" cellspacing="0" class="dropdown" style="white-space: nowrap;">
         <tr>
             <td class="quick_search">
+
                 <input type="search" class="quick_search_input" ng-model="queryText"
                        placeholder="Enter search term(s) and/or use the drop down menu">
+
                 <i class="fa fa-caret-down dropdown-toggle cursor_pointer"
                    style="padding: 4px 5px 4px 3px; position: relative; top: 2px; color: #999"></i>
 
@@ -71,20 +73,23 @@
 
                     <div>
                         <button class="btn btn-link" type="button" ng-click="searchWebOfRegistries()">
-                            <i style="color: #555" class="fa fa-globe"></i> <span class="font-90em">Search other registries</span>
+                            <i style="color: #555" class="fa fa-globe"></i> <span
+                                class="font-90em">Search other registries</span>
                         </button>
 
                         <span class="pull-right">
-                            <button type="button" class="btn btn-sm btn-primary" ng-click="search(true)">Search</button>
-                            <button type="button" class="btn btn-sm btn-default" ng-click="reset()" stop-event='click'>Reset
+                            <button type="submit" class="btn btn-sm btn-primary">Search</button>
+                            <button type="button" class="btn btn-sm btn-default" ng-click="reset()" stop-event='click'>
+                                Reset
                             </button>
                         </span>
                     </div>
                 </div>
             </td>
             <td> &nbsp;
-                <button style="width: 80px;" type="submit" class="btn btn-primary btn-sm" ng-click="search(false)">
-                    <b>SEARCH</b></button>
+                <button style="width: 80px" type="submit" class="btn btn-primary btn-sm">
+                    <b>SEARCH</b>
+                </button>
             </td>
         </tr>
     </table>

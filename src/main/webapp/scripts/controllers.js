@@ -717,7 +717,10 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
 // main controller.
 iceControllers.controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope, Folders, Settings, sessionValid, Search, Samples) {
     // todo : set on all
-    $location.search('q', null);
+    var searchUrl = "/search";
+    if ($location.path().slice(0, searchUrl.length) != searchUrl) {
+        $location.search('q', null);
+    }
 
     if (sessionValid === undefined || sessionValid.data.sessionId === undefined) {
         return;
@@ -840,18 +843,19 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
         }
     };
 
-    // search
-    $scope.runUserSearch = function () {
-        var search = Search();
+//    // search
+    $scope.runUserSearch = function (filters) {
         $scope.loadingSearchResults = true;
 
-        search.runSearch($scope.searchFilters,
+        Search().runAdvancedSearch(filters,
             function (result) {
                 $scope.searchResults = result;
                 $scope.loadingSearchResults = false;
+//                $scope.$broadcast("SearchResultsAvailable", result);
             },
             function (error) {
                 $scope.loadingSearchResults = false;
+//                $scope.$broadcast("SearchResultsAvailable", undefined);
                 $scope.searchResults = undefined;
                 console.log(error);
             }
@@ -1178,8 +1182,6 @@ iceControllers.controller('WorContentController', function ($rootScope, $scope, 
 // deals with sub collections e.g. /folders/:id
 // retrieves the contents of folders
 iceControllers.controller('CollectionFolderController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, $http, Folders, Entry) {
-    console.log("CollectionFolderController", $stateParams.collection);
-
     var sessionId = $cookieStore.get("sessionId");
     var folders = Folders();
     var entry = Entry(sessionId);

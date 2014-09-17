@@ -3,21 +3,6 @@
 /* Services */
 var iceServices = angular.module('iceApp.services', ['ngCookies', 'ngResource']);
 
-//iceServices.factory('Search', function ($resource, $cookieStore) {
-//    return function () {
-//
-//        var sessionId = $cookieStore.get("sessionId");
-//
-//        return $resource('/rest/search', {}, {
-//            runSearch:{
-//                method:'GET',
-//                responseType:"json",
-//                headers:{'X-ICE-Authentication-SessionId':sessionId}
-//            }
-//        });
-//    }
-//});
-
 iceServices.factory('EntryService', function () {
     var toStringArray = function (objArray) {
         var result = [];
