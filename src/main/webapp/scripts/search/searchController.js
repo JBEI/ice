@@ -11,7 +11,11 @@ angular.module('ice.search.controller', [])
         var runAdvancedSearch = function (filters) {
             $scope.loadingSearchResults = true;
 
-            Search().runAdvancedSearch(filters,
+            var webSearch = {};
+            if (filters.webSearch)
+                webSearch.w = true;
+
+            Search().runAdvancedSearch(webSearch, filters,
                 function (result) {
                     $scope.searchResults = result;
                     $scope.loadingSearchResults = false;
@@ -45,31 +49,19 @@ angular.module('ice.search.controller', [])
 //            if ($scope.queryText !== queryString)
 //                $scope.queryText = queryString; // update input box
 //
-//            console.log("url query parameter", queryString);
-//            $scope.searchFilters = {q:queryString, sort:'relevance', asc:false, limit:15};
-//            runSearch($scope.searchFilters);
-//        } else {
         // filters run advanced search
         $scope.searchFilters.parameters.start = 0;
         $scope.searchFilters.parameters.retrieveCount = 15;
         $scope.searchFilters.parameters.sortField = "RELEVANCE";
         runAdvancedSearch($scope.searchFilters);
-//        }
 
         // TODO : sort ?
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
         $scope.currentPage = 1;
 
         $scope.setSearchResultPage = function (pageNo) {
-//            $scope.loadingPage = true;
-//            var nextOffset = ;
-//            if (noFilters) {
-//                $scope.searchFilters.offset = nextOffset;
-//                runSearch($scope.searchFilters);
-//            } else {
             $scope.searchFilters.parameters.start = (pageNo - 1) * 15;
             runAdvancedSearch($scope.searchFilters);
-//            }
         };
 
         $scope.getType = function (relScore) {
@@ -97,7 +89,7 @@ angular.module('ice.search.controller', [])
                 });
         }
     })
-    .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location, Search) {
+    .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {
         $scope.searchTypes = {all:true, strain:true, plasmid:true, part:true, arabidopsis:true};
 
         $scope.check = function (selection) {
@@ -111,25 +103,6 @@ angular.module('ice.search.controller', [])
             }
             $scope.searchTypes.all = allTrue;
         };
-
-//        var runAdvancedSearch = function (filters) {
-//            $scope.loadingSearchResults = true;
-//            $scope.searchResults = undefined;
-//
-//            Search().runAdvancedSearch(filters,
-//                function (result) {
-////                    $scope.searchResults = result;
-//                    $scope.loadingSearchResults = false;
-//                    $scope.$broadcast("SearchResultsAvailable", result);
-//                },
-//                function (error) {
-//                    $scope.loadingSearchResults = false;
-//                    $scope.$broadcast("SearchResultsAvailable", undefined);
-//                    $scope.searchResults = undefined;
-//                    console.log(error);
-//                }
-//            );
-//        };
 
         var defineQuery = function () {
             var searchQuery = {entryTypes:[], parameters:{}, blastQuery:{}};
@@ -209,13 +182,27 @@ angular.module('ice.search.controller', [])
 //                    $scope.searchFilters = {q:queryString, sort:'relevance', asc:false, limit:15};
 //                    runSearch($scope.searchFilters);
 //                } else {
-//                console.log($scope.searchFilters);
-//                // filters run advanced search
-//                $scope.searchFilters.parameters.start = 0;
-//                $scope.searchFilters.parameters.retrieveCount = 15;
-//                $scope.searchFilters.parameters.sortField = "RELEVANCE";
-//                $scope.runUserSearch($scope.searchFilters);
 //                }
+            }
+        };
+
+        $scope.isWebSearch = function () {
+            return $scope.searchFilters.webSearch === true;
+        };
+
+        $scope.searchWebOfRegistries = function () {
+            $scope.searchFilters = defineQuery();
+            $scope.searchFilters.webSearch = true;
+
+            var searchUrl = "/search";
+            if ($location.path().slice(0, searchUrl.length) != searchUrl) {
+                $location.path(searchUrl, false);
+            } else {
+//                $scope.searchFilters = defineQuery();
+                $scope.searchFilters.parameters.start = 0;
+                $scope.searchFilters.parameters.retrieveCount = 15;
+                $scope.searchFilters.parameters.sortField = "RELEVANCE";
+                $scope.$broadcast("RunSearch", $scope.searchFilters);
             }
         };
 

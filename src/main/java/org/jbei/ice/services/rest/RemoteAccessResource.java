@@ -15,6 +15,10 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.net.RemoteAccessController;
 
 /**
+ * REST resource for sending/retrieving messages from remote
+ * ICE instances. Local instances accesses this resource which contacts the remote
+ * resource on it's behalf
+ *
  * @author Hector Plahar
  */
 @Path("/remote/{id}")

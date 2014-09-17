@@ -45,7 +45,7 @@ public class RestClient {
         WebTarget target = client.target("https://" + url).path(resourcePath);
         Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
         Response postResponse = invocationBuilder.post(Entity.entity(object, MediaType.APPLICATION_JSON_TYPE));
-        if (postResponse.hasEntity())
+        if (postResponse.hasEntity() && postResponse.getStatus() == Response.Status.OK.getStatusCode())
             return postResponse.readEntity(responseClass);
         return null;
     }

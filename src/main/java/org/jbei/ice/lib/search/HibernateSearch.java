@@ -265,10 +265,12 @@ public class HibernateSearch {
                 blastResults.keySet()));
 
         Set<String> groupUUIDs = new HashSet<>();
-        try {
-            groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(account);
-        } catch (ControllerException e) {
-            Logger.error(e);
+        if (account != null) {
+            try {
+                groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(account);
+            } catch (ControllerException e) {
+                Logger.error(e);
+            }
         }
 
         String email = account == null ? "" : account.getEmail();

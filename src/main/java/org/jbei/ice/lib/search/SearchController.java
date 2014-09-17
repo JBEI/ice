@@ -1,17 +1,19 @@
 package org.jbei.ice.lib.search;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.SearchDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -21,9 +23,12 @@ import org.jbei.ice.lib.dto.search.SearchBoostField;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
 import org.jbei.ice.lib.dto.search.SearchResults;
+import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.executor.IceExecutorService;
+import org.jbei.ice.lib.net.RemotePartner;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
+import org.jbei.ice.services.rest.RestClient;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.search.BooleanClause;
@@ -49,56 +54,61 @@ public class SearchController {
 
     /**
      * Searches all registries in the web of registries configuration with this
-     * registry
+     * registry. Without some sort of indexing locally or in some central location,
+     * this will be slow for large numbers of results
      *
-     * @param query
-     * @return
+     * @param query wrapper around search query
+     * @return list of search results
      */
     public SearchResults runWebSearch(SearchQuery query) {
-//        RestClient client = new RestClient();
+        RestClient client = RestClient.getInstance();
+        ArrayList<RemotePartner> partners = DAOFactory.getRemotePartnerDAO().retrieveRegistryPartners();
 
-        SearchResults results = null;
-        // TODO
+        if (partners == null)
+            return null;
 
-//        while (ports.hasNext()) {
-//            QName name = ports.next();
-//            if (name.getNamespaceURI() == null) {
-//                Logger.warn("Encountered port with null name in service client");
-//                continue;
-//            }
-//
-//            String myUrl = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
-//            String apiKey;
-//            try {
-//                apiKey = new WoRController().getApiKey(name.getNamespaceURI());
-//                if (apiKey == null)
-//                    continue;
-//            } catch (ControllerException e) {
-//                continue;
-//            }
-//
-//            try {
-//                IRegistryAPI api = service.getPort(name, IRegistryAPI.class);
-//                if (results == null)
-//                    results = api.runSearch(myUrl, apiKey, query);
-//                else {
-//                    SearchResults tmpResults = api.runSearch(myUrl, apiKey, query);
-//                    if (tmpResults.getResultCount() == 0)
-//                        continue;
-//
-//                    if (results.getResults() == null) {
-//                        results.setResults(tmpResults.getResults());
-//                    } else {
-//                        results.getResults().addAll(tmpResults.getResults());
-//                    }
-//                    results.setResultCount(results.getResultCount() + tmpResults.getResultCount());
-//                }
-//            } catch (Exception e) {
-//                Logger.error(e);
-//            }
-//        }
+        int offset = query.getParameters().getStart();
+        int limit = query.getParameters().getRetrieveCount();
 
-        return results;
+        // limit to 50
+        query.getParameters().setRetrieveCount(50);
+        query.getParameters().setStart(1);
+
+        LinkedList<SearchResult> resultsList = new LinkedList<>();
+        long total = 0;
+
+        for (RemotePartner partner : partners) {
+            if (partner.getUrl() == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+                continue;
+
+            try {
+                SearchResults results = (SearchResults) client.post(partner.getUrl(), "/rest/search", query,
+                                                                    SearchResults.class);
+                if (results == null)
+                    continue;
+                resultsList.addAll(results.getResults());
+                total += results.getResultCount();
+            } catch (Exception e) {
+                Logger.warn("Exception contacting partner " + partner.getUrl() + " : " + e.getMessage());
+            }
+        }
+
+        // sort the results
+        Collections.sort(resultsList, new Comparator<SearchResult>() {
+            @Override
+            public int compare(SearchResult o1, SearchResult o2) {
+                return Double.compare(o1.getScore(), o2.getScore());
+            }
+        });
+
+        int toIndex = offset + limit;
+        if (toIndex > resultsList.size())
+            toIndex = resultsList.size();
+
+        SearchResults searchResults = new SearchResults();
+        searchResults.getResults().addAll(resultsList.subList(offset, toIndex));
+        searchResults.setResultCount(total);
+        return searchResults;
     }
 
     /**
@@ -118,7 +128,9 @@ public class SearchController {
         }
 
         String queryString = query.getQueryString();
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        Account account = null;
+        if (userId != null)
+            account = DAOFactory.getAccountDAO().getByEmail(userId);
 
         // blast query only
         if (query.hasBlastQuery() && (queryString == null || queryString.isEmpty())) {
@@ -222,13 +234,5 @@ public class SearchController {
         }
 
         return terms;
-    }
-
-    public void initHibernateSearch() throws ControllerException {
-        try {
-            dao.initHibernateSearch();
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
     }
 }

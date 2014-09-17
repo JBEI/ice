@@ -2,6 +2,7 @@ package org.jbei.ice.services.rest;
 
 import java.util.Arrays;
 import java.util.List;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -10,7 +11,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
+import org.jbei.ice.lib.account.SessionHandler;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResults;
@@ -37,12 +41,19 @@ public class SearchResource extends RestResource {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public SearchResults search(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response search(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionHeader,
             @DefaultValue("false") @QueryParam("w") boolean searchWeb,
             SearchQuery query) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return controller.runSearch(userId, query, searchWeb);
+        String userId = SessionHandler.getUserIdBySession(sessionHeader);
+        try {
+            SearchResults results = controller.runSearch(userId, query, searchWeb);
+            return super.respond(Response.Status.OK, results);
+        } catch (Exception e) {
+            Logger.error(e);
+            return super.respond(Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -68,7 +79,7 @@ public class SearchResource extends RestResource {
             @DefaultValue("relevance") @QueryParam("sort") String sort,
             @DefaultValue("false") @QueryParam("asc") boolean asc,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
-        String userId = getUserIdFromSessionHeader(sessionId);
+        String userId = SessionHandler.getUserIdBySession(sessionId);
         log(userId, "query \'" + queryString + '\'');
         SearchQuery query = new SearchQuery();
         query.setQueryString(queryString);
