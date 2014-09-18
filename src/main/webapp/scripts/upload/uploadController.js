@@ -769,13 +769,17 @@ angular.module('ice.upload.controller', [])
     })
     .controller('BulkUploadRejectModalController', function ($scope, $cookieStore, $location, $modalInstance, upload, Upload) {
         $scope.rejectUpload = function () {
+            $scope.submitting = true;
             var sid = $cookieStore.get("sessionId");
 
             Upload(sid).updateStatus({importId:upload.id}, {id:upload.id, status:'IN_PROGRESS'}, function (result) {
                 $location.path('/folders/pending');
                 $modalInstance.close();
+                $scope.submitting = false;
                 // todo : send optional message if any
             }, function (error) {
+                console.error(error);
+                $scope.submitting = false;
             })
         };
 
@@ -783,7 +787,8 @@ angular.module('ice.upload.controller', [])
             $modalInstance.dismiss('cancel');
         };
     })
-    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType, linkedAddType, upload) {
+    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams,
+                                                       $modalInstance, $fileUploader, addType, linkedAddType) {
         var sid = $cookieStore.get("sessionId");
         $scope.addType = addType;
 

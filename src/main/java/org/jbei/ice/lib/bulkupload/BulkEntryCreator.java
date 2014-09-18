@@ -169,6 +169,7 @@ public class BulkEntryCreator {
 
         authorization.expectWrite(userId, upload);
         Date updateTime = new Date(System.currentTimeMillis());
+        BulkUploadStatus existingStatus = upload.getStatus();
         upload.setLastUpdateTime(updateTime);
         upload.setStatus(status);
 
@@ -182,6 +183,19 @@ public class BulkEntryCreator {
                         continue;
 
                     entry.setVisibility(Visibility.PENDING.getValue());
+                    entryDAO.update(entry);
+                }
+                return dao.update(upload).toDataTransferObject();
+
+            // rejected by admin
+            case IN_PROGRESS:
+                ArrayList<Long> entryList = dao.getEntryIds(id);
+                for (Number l : entryList) {
+                    Entry entry = entryDAO.get(l.longValue());
+                    if (entry == null || entry.getVisibility() != Visibility.PENDING.getValue())
+                        continue;
+
+                    entry.setVisibility(Visibility.DRAFT.getValue());
                     entryDAO.update(entry);
                 }
                 return dao.update(upload).toDataTransferObject();
