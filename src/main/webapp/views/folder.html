@@ -53,13 +53,14 @@
                                         <i class="fa fa-shopping-cart" style="color: #757575; font-size: 16px"></i>
                                         <sup class="count-badge">{{shoppingCartContents.length}}</sup>
                                     </span>
-                                    <span class="cursor_pointer" ng-if="user.isAdmin">&nbsp;<a href="/admin">
-                                        <i class="fa fa-sliders" style="color: #757575; font-size: 20px"
-                                           data-ng-click=""></i></a>
+                                    <span class="cursor_pointer" ng-if="user.isAdmin">&nbsp;
+                                        <a href="/admin">
+                                            <i class="fa fa-sliders" style="color: #757575; font-size: 20px"></i>
+                                        </a>
                                     </span>
                                     <span class="cursor_pointer"> &nbsp;
-                                        <i class="fa fa-sign-out" style="color: #757575; font-size: 20px"
-                                           data-ng-click="logout()"></i>
+                                        <i class="fa fa-sign-out" style="color: #757575; font-size: 20px" title="Logout"
+                                          data-ng-click="logout()"></i>
                                     </span>
                                     &nbsp;&nbsp;&nbsp;
                                 </td>
