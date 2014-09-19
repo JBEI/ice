@@ -94,12 +94,21 @@ public class RequestDAO extends HibernateRepository<Request> {
         }
     }
 
-    public List<Request> getAccountRequests(Account account, int start, int limit, String sort, boolean asc)
+    public List<Request> getAccountRequests(Account account, SampleRequestStatus status, int start, int limit,
+            String sort, boolean asc)
             throws DAOException {
-        String sql = "from " + Request.class.getName() + " request where account=:account order by " + sort;
+        String sql = "from " + Request.class.getName() + " request where account=:account";
+        if (status != null) {
+            sql += " and status=:status";
+        }
+
+        sql += " order by " + sort;
         sql += asc ? " asc" : " desc";
+
         Query query = currentSession().createQuery(sql);
         query.setParameter("account", account);
+        if (status != null)
+            query.setParameter("status", status);
         query.setMaxResults(limit);
         query.setFirstResult(start);
 

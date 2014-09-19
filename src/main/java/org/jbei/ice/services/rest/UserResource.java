@@ -19,7 +19,7 @@ import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.group.UserGroup;
-import org.jbei.ice.lib.dto.sample.SampleRequest;
+import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.user.UserPreferences;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
@@ -220,9 +220,10 @@ public class UserResource extends RestResource {
             @DefaultValue("requested") @QueryParam("sort") String sort,
             @DefaultValue("false") @QueryParam("asc") boolean asc,
             @PathParam("userId") long uid,
-            @DefaultValue("") @QueryParam("status") String status,
+            @DefaultValue("") @QueryParam("status") SampleRequestStatus status,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String user = getUserIdFromSessionHeader(userAgentHeader);
-        return super.respond(Response.Status.OK, requestRetriever.getUserSamples(user, offset, limit, sort, asc));
+        return super.respond(Response.Status.OK, requestRetriever.getUserSamples(user, status, offset, limit, sort,
+                                                                                 asc));
     }
 }

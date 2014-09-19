@@ -94,10 +94,10 @@ public class SampleResource extends RestResource {
             @DefaultValue("requested") @QueryParam("sort") String sort,
             @DefaultValue("false") @QueryParam("asc") boolean asc,
             @PathParam("userId") long uid,
-            @DefaultValue("") @QueryParam("status") String status) {
+            @DefaultValue("IN_CART") @QueryParam("status") SampleRequestStatus status) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         Logger.info(userId + ": retrieving sample requests for user");
-        UserSamples userSamples = requestRetriever.getUserSamples(userId, offset, limit, sort, asc);
+        UserSamples userSamples = requestRetriever.getUserSamples(userId, status, offset, limit, sort, asc);
         return super.respond(Response.Status.OK, userSamples);
     }
 

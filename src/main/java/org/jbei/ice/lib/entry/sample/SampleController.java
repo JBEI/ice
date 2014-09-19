@@ -242,6 +242,9 @@ public class SampleController {
         for (Sample sample : entrySamples) {
             // convert sample to info
             Storage storage = sample.getStorage();
+            if (storage == null)
+                continue; // sample with no storage
+
             SampleType type = null;
             StorageInfo well = null;
             StorageInfo tube = null;
