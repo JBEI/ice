@@ -54,7 +54,7 @@ public class AccessTokenResource extends RestResource {
      */
     @DELETE
     public void deleteToken(@HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
-        String userId = getUserIdFromSessionHeader(sessionId);
+        getUserIdFromSessionHeader(sessionId);
         accountController.invalidate(sessionId);
     }
 

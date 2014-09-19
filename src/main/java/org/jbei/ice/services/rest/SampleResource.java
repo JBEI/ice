@@ -8,7 +8,8 @@ import javax.ws.rs.core.Response;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
-import org.jbei.ice.lib.entry.sample.SampleRequests;
+import org.jbei.ice.lib.dto.sample.UserSamples;
+import org.jbei.ice.lib.entry.sample.RequestRetriever;
 
 /**
  * REST Resource for samples
@@ -18,16 +19,21 @@ import org.jbei.ice.lib.entry.sample.SampleRequests;
 @Path("/samples")
 public class SampleResource extends RestResource {
 
-    private SampleRequests sampleRequests = new SampleRequests();
+    private RequestRetriever requestRetriever = new RequestRetriever();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/requests")
-    public ArrayList<SampleRequest> getRequests(
+    public Response getRequests(
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("15") @QueryParam("limit") int limit,
+            @DefaultValue("requested") @QueryParam("sort") String sort,
+            @DefaultValue("false") @QueryParam("asc") boolean asc,
+            @DefaultValue("") @QueryParam("status") String status,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         Logger.info(userId + ": retrieving all sample requests");
-        return sampleRequests.getPendingRequests(userId);
+        return super.respond(Response.Status.OK, requestRetriever.getRequests(userId, offset, limit, sort, asc));
     }
 
     /**
@@ -51,7 +57,7 @@ public class SampleResource extends RestResource {
             for (Number number : requestIds)
                 sampleRequestIds.add(number.longValue());
 
-            sampleRequests.setRequestsStatus(userId, sampleRequestIds, status);
+            requestRetriever.setRequestsStatus(userId, sampleRequestIds, status);
             return super.respond(Response.Status.OK);
         } catch (Exception e) {
             Logger.error(e);
@@ -59,40 +65,30 @@ public class SampleResource extends RestResource {
         }
     }
 
-
     @DELETE
     @Path("/requests/{id}")
     public Response deleteSampleRequest(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
             @PathParam("id") long requestId) {
         String userId = getUserIdFromSessionHeader(sessionId);
-        if (sampleRequests.removeSampleFromCart(userId, requestId) == null)
-            return respond(Response.Status.INTERNAL_SERVER_ERROR);
-        return respond(Response.Status.OK);
+        return respond(Response.Status.OK, requestRetriever.removeSampleFromCart(userId, requestId));
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/requests/{userId}")
-    public ArrayList<SampleRequest> getUserRequests(
+    public Response getUserRequests(
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("15") @QueryParam("limit") int limit,
+            @DefaultValue("requested") @QueryParam("sort") String sort,
+            @DefaultValue("false") @QueryParam("asc") boolean asc,
             @PathParam("userId") long uid,
             @DefaultValue("") @QueryParam("status") String status) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         Logger.info(userId + ": retrieving sample requests for user");
-        return sampleRequests.getSampleRequestsInCart(userId);
+        UserSamples userSamples =  requestRetriever.getUserSamples(userId, offset, limit, sort, asc);
+        return super.respond(Response.Status.OK, userSamples);
     }
-
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Path("/requests/{userId}/{partId}")
-//    public SampleRequest getUserRequestForEntry(
-//            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-//            @PathParam("userId") long uid,
-//            @DefaultValue("") @QueryParam("status") String status) {
-//        String userId = getUserIdFromSessionHeader(userAgentHeader);
-//        Logger.info(userId + ": retrieving sample requests for user");
-//        return sampleRequests.getSampleRequestsInCart(userId);
-//    }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
@@ -102,6 +98,6 @@ public class SampleResource extends RestResource {
             SampleRequest request) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         log(userId, "add sample request to cart for " + request.getPartData().getId());
-        return sampleRequests.placeSampleInCart(userId, request);
+        return requestRetriever.placeSampleInCart(userId, request);
     }
 }

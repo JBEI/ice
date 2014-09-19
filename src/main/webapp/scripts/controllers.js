@@ -241,8 +241,12 @@ iceControllers.controller('AdminSampleRequestController', function ($scope, $loc
     $rootScope.error = undefined;
 
     var samples = Samples($cookieStore.get("sessionId"));
+    $scope.maxSize = 5;
+    $scope.currentPage = 1;
+
+    // initial sample request (uses default paging values)
     samples.requests(function (result) {
-        $scope.pendingSampleRequests = result;
+        $scope.sampleRequests = result;
     }, function (data) {
         if (data.status === 401) {
             $location.path('/login');
@@ -251,6 +255,22 @@ iceControllers.controller('AdminSampleRequestController', function ($scope, $loc
 
         $rootScope.error = data;
     });
+
+    $scope.setSamplePage = function(pageNo) {
+        if (pageNo == undefined || isNaN(pageNo))
+            pageNo = 1;
+
+        $scope.loadingPage = true;
+        $scope.offset = (pageNo - 1) * 15;
+        samples.requests({offset:$scope.offset},
+            function (result) {
+                $scope.sampleRequests = result;
+                $scope.loadingPage = false;
+            }, function (error) {
+                console.error(error);
+                $scope.loadingPage = false;
+            });
+    }
 });
 
 iceControllers.controller('AdminUserController', function ($rootScope, $scope, $stateParams, $cookieStore, User) {
@@ -505,6 +525,38 @@ iceControllers.controller('ProfileEntryController', function ($scope, $location,
     user.getEntries({userId:profileId}, function (result) {
         $scope.folder = result;
     });
+});
+
+iceControllers.controller('ProfileSamplesController', function ($scope, $cookieStore, $location, $stateParams, User) {
+    $scope.maxSize = 15;
+    $scope.currentPage = 1;
+
+    $scope.pendingSampleRequests = undefined;
+
+    var user = User($cookieStore.get("sessionId"));
+    var profileId = $stateParams.id;
+    user.samples({userId:profileId},
+        function (result) {
+            $scope.userSamples = result;
+        }, function (error) {
+            console.error(error);
+        });
+
+    $scope.setUserSamplePage = function(pageNo) {
+        if (pageNo == undefined || isNaN(pageNo))
+            pageNo = 1;
+
+        $scope.loadingPage = true;
+        $scope.offset = (pageNo - 1) * 15;
+        user.samples({offset:$scope.offset}, {userId:profileId},
+            function (result) {
+                $scope.userSamples = result;
+                $scope.loadingPage = false;
+            }, function (error) {
+                console.error(error);
+                $scope.loadingPage = false;
+            });
+    }
 });
 
 iceControllers.controller('ProfileController', function ($scope, $location, $cookieStore, $rootScope, $stateParams, User) {

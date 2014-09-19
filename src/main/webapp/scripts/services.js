@@ -342,6 +342,13 @@ iceServices.factory('User', function ($resource) {
                 url:'/rest/users/password',
                 responseType:'json',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            samples:{
+                method:'GET',
+                url: '/rest/users/:userId/samples',
+                responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
     }
@@ -366,7 +373,6 @@ iceServices.factory('Samples', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 url:"/rest/samples/requests",
-                isArray:true,
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 

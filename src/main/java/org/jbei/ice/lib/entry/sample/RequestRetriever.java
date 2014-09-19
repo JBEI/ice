@@ -15,6 +15,7 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.sample.SampleRequestType;
+import org.jbei.ice.lib.dto.sample.UserSamples;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Request;
 import org.jbei.ice.lib.utils.Emailer;
@@ -25,29 +26,14 @@ import org.jbei.ice.lib.utils.Utils;
  *
  * @author Hector Plahar
  */
-public class SampleRequests {
+public class RequestRetriever {
 
     private final RequestDAO dao;
     private final EntryDAO entryDAO;
 
-    public SampleRequests() {
+    public RequestRetriever() {
         this.dao = DAOFactory.getRequestDAO();
         this.entryDAO = DAOFactory.getEntryDAO();
-    }
-
-    public ArrayList<SampleRequest> getUserRequestedSamples(String userId, int offset, int limit) {
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        if (account == null)
-            return null;
-
-        List<Request> requests = dao.getAccountRequestList(account, offset, limit, "requested", true);
-        if (requests == null)
-            return null;
-
-        ArrayList<SampleRequest> result = new ArrayList<>();
-        for (Request request : requests)
-            result.add(request.toDataTransferObject());
-        return result;
     }
 
     /**
@@ -67,7 +53,7 @@ public class SampleRequests {
         try {
             ArrayList<Request> requests = dao.getSampleRequestByStatus(account, entry, SampleRequestStatus.IN_CART);
             if (requests != null && !requests.isEmpty())
-                return getSampleRequestsInCart(account.getEmail());
+                return null;  // todo getSampleRequestsInCart(account.getEmail());
 
             Request request = new Request();
             request.setAccount(account);
@@ -78,46 +64,43 @@ public class SampleRequests {
             request.setRequested(new Date(System.currentTimeMillis()));
             request.setUpdated(request.getRequested());
             dao.create(request);
-            return getSampleRequestsInCart(account.getEmail());
+            return null;  // todo
+//            return getSampleRequestsInCart(account.getEmail());
         } catch (DAOException e) {
             Logger.error(e);
-        }
-        return null;
-    }
-
-    public ArrayList<SampleRequest> getSampleRequestsInCart(String userId) {
-        try {
-            Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-            List<Request> requestList = dao.getRequestListInCart(account);
-            if (requestList == null)
-                return null;
-
-            ArrayList<SampleRequest> requests = new ArrayList<>();
-            for (Request request : requestList)
-                requests.add(request.toDataTransferObject());
-            return requests;
-        } catch (DAOException e) {
             return null;
         }
     }
 
-    public ArrayList<SampleRequest> getPendingRequests(String userId) {
+    public UserSamples getUserSamples(String userId, int start, int limit, String sort, boolean asc) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        List<Request> requests;
-        try {
-            if (account.getType() == AccountType.ADMIN) {
-                requests = dao.getAllRequestList();
-            } else
-                requests = dao.getAccountRequestList(account, 0, 10, "requested", true);
-        } catch (DAOException de) {
-            return null;
-        }
+        UserSamples samples = new UserSamples();
+        int count = dao.getCount(account);
+        samples.setCount(count);
 
-        ArrayList<SampleRequest> results = new ArrayList<>();
-        for (Request request : requests) {
-            results.add(request.toDataTransferObject());
+        List<Request> requestList = dao.getAccountRequests(account, start, limit, sort, asc);
+
+        for (Request request : requestList)
+            samples.getRequests().add(request.toDataTransferObject());
+
+        return samples;
+    }
+
+    public UserSamples getRequests(String userId, int start, int limit, String sort, boolean asc) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        if (account.getType() != AccountType.ADMIN)
+            return getUserSamples(userId, start, limit, sort, asc);
+
+        int count = dao.getCount(null);
+        UserSamples samples = new UserSamples();
+        samples.setCount(count);
+
+        List<Request> results = dao.get(start, limit, sort, asc);
+
+        for (Request request : results) {
+            samples.getRequests().add(request.toDataTransferObject());
         }
-        return results;
+        return samples;
     }
 
     public SampleRequest removeSampleFromCart(String userId, long requestId) {

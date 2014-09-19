@@ -22,7 +22,7 @@ import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.user.UserPreferences;
 import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.sample.SampleRequests;
+import org.jbei.ice.lib.entry.sample.RequestRetriever;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
 
@@ -36,7 +36,7 @@ public class UserResource extends RestResource {
 
     private AccountController controller = new AccountController();
     private GroupController groupController = new GroupController();
-    private SampleRequests sampleRequests = new SampleRequests();
+    private RequestRetriever requestRetriever = new RequestRetriever();
 
     /**
      * Retrieves list of users that are available to user making request. Availability is
@@ -214,11 +214,15 @@ public class UserResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
-    public ArrayList<SampleRequest> getRequestedSamples(@PathParam("id") long userId,
+    public Response getRequestedSamples(@PathParam("id") long userId,
             @DefaultValue("0") @QueryParam("offset") int offset,
-            @DefaultValue("30") @QueryParam("limit") int limit,
+            @DefaultValue("15") @QueryParam("limit") int limit,
+            @DefaultValue("requested") @QueryParam("sort") String sort,
+            @DefaultValue("false") @QueryParam("asc") boolean asc,
+            @PathParam("userId") long uid,
+            @DefaultValue("") @QueryParam("status") String status,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String user = getUserIdFromSessionHeader(userAgentHeader);
-        return sampleRequests.getUserRequestedSamples(user, offset, limit);
+        return super.respond(Response.Status.OK, requestRetriever.getUserSamples(user, offset, limit, sort, asc));
     }
 }

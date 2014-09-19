@@ -14,7 +14,8 @@ import org.jbei.ice.lib.entry.sample.model.Request;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
-import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Data accessor object for Sample Request objects
@@ -65,20 +66,26 @@ public class RequestDAO extends HibernateRepository<Request> {
         }
     }
 
-    public List<Request> getAccountRequestList(Account account, int start, int count, String sort, boolean asc)
-            throws DAOException {
-        String sql = "from " + Request.class.getName() + " where status=:status and account=:account order by " + sort;
-        if (asc)
-            sql += " asc";
-        else
-            sql += " desc";
+    public int getCount(Account account) throws DAOException {
+        try {
+            Criteria criteria = currentSession().createCriteria(Request.class.getName());
+            if (account != null)
+                criteria.add(Restrictions.eq("account", account));
+            criteria.setProjection(Projections.rowCount());
+            return ((Number) criteria.uniqueResult()).intValue();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
 
+    public List<Request> get(int start, int limit, String sort, boolean asc) throws DAOException {
+        String sql = "from " + Request.class.getName() + " request order by " + sort;
+        sql += asc ? " asc" : " desc";
         Query query = currentSession().createQuery(sql);
-        query.setParameter("status", SampleRequestStatus.PENDING);
-        query.setParameter("account", account);
-
-        query.setMaxResults(count);
+        query.setMaxResults(limit);
         query.setFirstResult(start);
+
         try {
             return new ArrayList<Request>(query.list());
         } catch (HibernateException he) {
@@ -87,27 +94,14 @@ public class RequestDAO extends HibernateRepository<Request> {
         }
     }
 
-    @Deprecated
-    public List<Request> getAllRequestList() throws DAOException {
-        Criteria criteria = currentSession().createCriteria(Request.class.getName());
-        criteria.setMaxResults(100);
-        criteria.setFirstResult(0);
-        boolean asc = true;
-        String sort = "requested";
-        criteria.addOrder(asc ? Order.asc(sort) : Order.desc(sort));
-        try {
-            return new ArrayList<Request>(criteria.list());
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
-    }
-
-    public List<Request> getRequestListInCart(Account account) throws DAOException {
-        String sql = "from " + Request.class.getName() + " request where status=:status and account=:account";
+    public List<Request> getAccountRequests(Account account, int start, int limit, String sort, boolean asc)
+            throws DAOException {
+        String sql = "from " + Request.class.getName() + " request where account=:account order by " + sort;
+        sql += asc ? " asc" : " desc";
         Query query = currentSession().createQuery(sql);
         query.setParameter("account", account);
-        query.setParameter("status", SampleRequestStatus.IN_CART);
+        query.setMaxResults(limit);
+        query.setFirstResult(start);
 
         try {
             return new ArrayList<Request>(query.list());
