@@ -253,11 +253,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
         criteria.add(Restrictions.isNotNull("entry"));
 
         criteria.createAlias("entry", "entry");
-//        criteria.createAlias("account", "account");
-//        criteria.createAlias("folder", "folder");
-//
-//        criteria.add(Restrictions.eq("entry.ownerEmail", "haplahar@lbl.gov"));
-//        criteria.add(Restrictions.ne("account.id", 123l));
+
         criteria.addOrder(Order.desc("entry.id"));
         criteria.setMaxResults(limit);
         criteria.setFirstResult(offset);
