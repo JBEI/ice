@@ -231,7 +231,7 @@ public class SampleController {
         entryAuthorization.expectRead(userId, entry);
 
         // samples
-        ArrayList<Sample> entrySamples = new SampleController().getSamples(entry);
+        ArrayList<Sample> entrySamples = dao.getSamplesByEntry(entry);
         ArrayList<PartSample> samples = new ArrayList<>();
         if (entrySamples == null)
             return samples;
