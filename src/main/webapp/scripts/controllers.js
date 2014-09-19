@@ -861,8 +861,8 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
     // selected entries
     $scope.selection = [];
     $scope.shoppingCartContents = [];
-    samples.userRequests({status:'todo'}, {userId:$rootScope.user.id}, function (result) {
-        $scope.shoppingCartContents = result;
+    samples.userRequests({status:'IN_CART'}, {userId:$rootScope.user.id}, function (result) {
+        $scope.shoppingCartContents = result.requests;
     });
 
     $scope.hidePopovers = function (hide) {
@@ -1448,6 +1448,10 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
 
         if (groupCount == 0)
             return userCount + (userCount == 1 ? " user" : " users");
+    }
+
+    $scope.promoteFolder = function (folder) {
+        console.log($scope.folder);
     }
 });
 

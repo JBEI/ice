@@ -1,24 +1,41 @@
 <div class="container-fluid">
     <div class="row entry_general_header_td" style="height: 60px;" ng-if="folder.type">
         <div class="col-md-12">
-            <h4>
-                <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
-                <strong style="color: #888;text-transform: uppercase;">{{breadCrumb || folder.folderName}}</strong>
-                <span ng-if="folder.publicReadAccess">&nbsp;
-                    <small style="font-size: 12px; position: relative; top: -4px"
-                           tooltip="Available on web of registries"
-                           tooltip-placement="right" tooltip-trigger="mouseenter"
-                           class="label label-info cursor_pointer"><i class="fa fa-globe"></i>
-                        Public
-                    </small>
-                </span>
-                &nbsp;&nbsp;&nbsp;<span ng-show="folder.id" folder-actions class="font-95em"></span>
-                <br>
-                <small ng-if="folder.created" class="font-65em">{{folder.created | date:'medium'}}</small>
-                <small ng-if="folder.type==='SHARED'" class="font-65em" style="color: #333">Shared with
-                    {{getShareText(folder.accessPermissions)}}
-                </small>
-            </h4>
+            <table>
+                <tr>
+                    <td>
+                        <h4>
+                            <span style="white-space: nowrap">
+                                <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
+                                <strong style="color: #888;text-transform: uppercase;">{{breadCrumb ||
+                                    folder.folderName}}</strong>
+                                <span ng-if="folder.publicReadAccess">&nbsp;
+                                <small style="font-size: 12px; position: relative; top: -4px"
+                                       tooltip="Available on web of registries"
+                                       tooltip-placement="right" tooltip-trigger="mouseenter"
+                                       class="label label-info cursor_pointer"><i class="fa fa-globe"></i>
+                                    Public
+                                </small>
+                            </span>
+                            </span>
+
+                            <div>
+                                <small class="font-65em" ng-if="folder.created"><b style="color: #555">Created</b>:
+                                    {{folder.created | date:'medium'}}
+                                </small>
+                                <small ng-if="!folder.created" class="font-65em"><i>No creation date</i></small>
+                                <small ng-if="folder.type==='SHARED'" class="font-65em" style="color: #333">
+                                    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+                                    Shared with {{getShareText(folder.accessPermissions)}}
+                                </small>
+                            </div>
+                        </h4>
+                    </td>
+                    <td style="padding-left: 40px">
+                        <span ng-show="folder.id" folder-actions class="font-95em"></span>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 

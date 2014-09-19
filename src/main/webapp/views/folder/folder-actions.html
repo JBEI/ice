@@ -1,14 +1,14 @@
 <span ng-if="folder.owner.email===user.email">
-<small class="opacity_hover edit_icon" ng-click="openFolderShareSettings()">
-    <i style="font-size: 14px; color: #555" class="fa fa-share-alt"></i> Share
-</small>
-    </span>
+    <small class="opacity_hover edit_icon" ng-click="openFolderShareSettings()" style="font-size: 12px;">
+        <i style="font-size: 14px; color: #555" class="fa fa-share-alt"></i> Share
+    </small>
+</span>
 
 <!--separator-->
-<span ng-if="user.isAdmin">
-    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+<span ng-if="user.isAdmin && folder.owner.email===user.email" style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
 
-    <small class="opacity_hover edit_icon">
+<span ng-if="user.isAdmin">
+    <small class="opacity_hover edit_icon" style="font-size: 12px;" ng-click="promoteFolder(folder)">
         <i style="font-size: 14px; color: #555" class="fa fa-level-up fa-flip-horizontal"></i> Promote
     </small>
 </span>

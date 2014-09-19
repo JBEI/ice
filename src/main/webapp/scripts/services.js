@@ -393,7 +393,6 @@ iceServices.factory('Samples', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 url:"/rest/samples/requests/:userId",
-                isArray:true,
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
