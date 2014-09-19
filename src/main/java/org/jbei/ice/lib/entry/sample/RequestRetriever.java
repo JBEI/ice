@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -119,6 +120,23 @@ public class RequestRetriever {
             Logger.error(de);
             return null;
         }
+    }
+
+    public SampleRequest updateStatus(String userId, long requestId, SampleRequestStatus newStatus) {
+        Request request = dao.get(requestId);
+        if (request == null)
+            return null;
+
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        if (!request.getAccount().getEmail().equalsIgnoreCase(userId) && account.getType() != AccountType.ADMIN) {
+            throw new PermissionException("No permissions for request");
+        }
+
+        if (request.getStatus() == newStatus)
+            return request.toDataTransferObject();
+
+        request.setStatus(newStatus);
+        return dao.update(request).toDataTransferObject();
     }
 
     public boolean setRequestsStatus(String userId, ArrayList<Long> ids, SampleRequestStatus status) {

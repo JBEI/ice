@@ -256,7 +256,7 @@ iceControllers.controller('AdminSampleRequestController', function ($scope, $loc
         $rootScope.error = data;
     });
 
-    $scope.setSamplePage = function(pageNo) {
+    $scope.setSamplePage = function (pageNo) {
         if (pageNo == undefined || isNaN(pageNo))
             pageNo = 1;
 
@@ -270,7 +270,21 @@ iceControllers.controller('AdminSampleRequestController', function ($scope, $loc
                 console.error(error);
                 $scope.loadingPage = false;
             });
-    }
+    };
+
+    $scope.updateStatus = function (request, newStatus) {
+        samples.update({requestId:request.id, status:newStatus}, function (result) {
+            if (result === undefined || result.id != request.id)
+                return;
+
+            var i = $scope.sampleRequests.requests.indexOf(request);
+            if (i != -1) {
+                $scope.sampleRequests.requests[i] = result;
+            }
+        }, function (error) {
+
+        });
+    };
 });
 
 iceControllers.controller('AdminUserController', function ($rootScope, $scope, $stateParams, $cookieStore, User) {
@@ -542,7 +556,7 @@ iceControllers.controller('ProfileSamplesController', function ($scope, $cookieS
             console.error(error);
         });
 
-    $scope.setUserSamplePage = function(pageNo) {
+    $scope.setUserSamplePage = function (pageNo) {
         if (pageNo == undefined || isNaN(pageNo))
             pageNo = 1;
 

@@ -346,7 +346,7 @@ iceServices.factory('User', function ($resource) {
 
             samples:{
                 method:'GET',
-                url: '/rest/users/:userId/samples',
+                url:'/rest/users/:userId/samples',
                 responseType:'json',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
@@ -368,11 +368,18 @@ iceServices.factory('Message', function ($resource) {
 
 iceServices.factory('Samples', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/samples', {userId:'@userId', requestId:'@requestId'}, {
+        return $resource('/rest/samples', {userId:'@userId', requestId:'@requestId', status:'@status'}, {
             requests:{
                 method:'GET',
                 responseType:'json',
                 url:"/rest/samples/requests",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            update:{
+                method:'PUT',
+                responseType:'json',
+                url:"/rest/samples/requests/:requestId",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 

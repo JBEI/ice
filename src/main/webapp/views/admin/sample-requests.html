@@ -44,8 +44,13 @@
                 </td>
                 <td>
                     <div ng-if="request.status==='PENDING'">
-                        <button class="btn btn-primary btn-xs"><i class="fa fa-check"></i> Fulfill</button>
-                        <button class="btn btn-default btn-xs"><i class="fa fa-ban red"></i> Reject</button>
+                        <button class="btn btn-primary btn-xs" ng-click="updateStatus(request, 'FULFILLED')">
+                            <i class="fa fa-check"></i> Fulfill
+                        </button>
+                        <button class="btn btn-default btn-xs" ng-click="updateStatus(request, 'REJECTED')>
+                            <i class=" fa fa-ban red
+                        "></i> Reject
+                        </button>
                     </div>
                 </td>
             </tr>

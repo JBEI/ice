@@ -38,9 +38,9 @@ public class SampleResource extends RestResource {
 
     /**
      * Sets the status of sample requests. Must have admin privs to set the sample for others
+     * This is intended for requesting samples
      *
-     * @param sessionId
-     * @return
+     * @param sessionId session identifire
      */
     @PUT
     @Path("/requests")
@@ -73,6 +73,17 @@ public class SampleResource extends RestResource {
         return respond(Response.Status.OK, requestRetriever.removeSampleFromCart(userId, requestId));
     }
 
+    @PUT
+    @Path("/requests/{id}")
+    public Response updateSampleRequest(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+            @PathParam("id") long requestId,
+            @QueryParam("status") SampleRequestStatus status) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        SampleRequest request = requestRetriever.updateStatus(userId, requestId, status);
+        return respond(Response.Status.OK, request);
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/requests/{userId}")
@@ -86,7 +97,7 @@ public class SampleResource extends RestResource {
             @DefaultValue("") @QueryParam("status") String status) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         Logger.info(userId + ": retrieving sample requests for user");
-        UserSamples userSamples =  requestRetriever.getUserSamples(userId, offset, limit, sort, asc);
+        UserSamples userSamples = requestRetriever.getUserSamples(userId, offset, limit, sort, asc);
         return super.respond(Response.Status.OK, userSamples);
     }
 
