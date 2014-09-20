@@ -1448,10 +1448,20 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
 
         if (groupCount == 0)
             return userCount + (userCount == 1 ? " user" : " users");
-    }
+    };
 
-    $scope.promoteFolder = function (folder) {
-        console.log($scope.folder);
+    $scope.changeFolderType = function (newType) {
+        var tmp = {id:$scope.folder.id, type:newType};
+        folders.update({id:tmp.id}, tmp, function (result) {
+            $scope.folder.type = result.type;
+            if (newType === 'PUBLIC')
+                $location.path('/folders/available');
+            else
+                $location.path('/folders/personal');
+            // todo : send message to be received by the collection menu
+        }, function (error) {
+            console, error(error);
+        });
     }
 });
 

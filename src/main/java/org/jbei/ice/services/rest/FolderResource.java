@@ -92,6 +92,16 @@ public class FolderResource extends RestResource {
         }
     }
 
+    @PUT
+    @Path("/{id}")
+    public Response update(@PathParam("id") long folderId,
+            FolderDetails details,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        FolderDetails resp = controller.update(userId, folderId, details);
+        return super.respond(Response.Status.OK, resp);
+    }
+
     @DELETE
     @Path("/{id}")
     public FolderDetails deleteFolder(@PathParam("id") long folderId,

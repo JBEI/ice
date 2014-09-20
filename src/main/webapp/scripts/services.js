@@ -870,6 +870,12 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             },
 
+            update:{
+                method:'PUT',
+                url:'/rest/folders/:folderId',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
             permissions:{
                 method:'GET',
                 responseType:'json',
@@ -895,7 +901,7 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
     }
 });
 
-iceServices.factory('AccessToken', function ($resource, $cookieStore, $http, $rootScope, $location, $cookies) {
+iceServices.factory('AccessToken', function ($resource) {
     return function () {
         return $resource('/rest/accesstoken', {}, {
             createToken:{

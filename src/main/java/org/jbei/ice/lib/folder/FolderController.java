@@ -205,6 +205,28 @@ public class FolderController {
         return details;
     }
 
+    public FolderDetails update(String userId, long folderId, FolderDetails details) {
+        Folder folder = dao.get(folderId);
+        if (folder == null)
+            return null; // resource not found
+
+        authorization.expectWrite(userId, folder);
+
+        if (details.getType() == FolderType.PUBLIC)
+            return promoteFolder(userId, folder);
+
+        if (details.getType() == FolderType.PRIVATE)
+            return demoteFolder(userId, folder);
+
+        // todo : else edit folder
+
+        folder.setModificationTime(new Date());
+        if (details.getName() != null)
+            folder.setName(details.getName());
+
+        return dao.update(folder).toDataTransferObject();
+    }
+
     public FolderDetails delete(String userId, long folderId, FolderType type) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
@@ -475,51 +497,42 @@ public class FolderController {
      * "Promote"s a collection into a system collection. This allows it to be categorised under "Collections"
      * This action is restricted to administrators
      *
-     * @param account requesting account
-     * @param id      collection id
+     * @param userId requesting account id
+     * @param folder folder to be promoted
      * @return true if promotion is successful false otherwise
      * @throws ControllerException
      */
-    public boolean promoteFolder(Account account, long id) throws ControllerException {
-        if (account.getType() != AccountType.ADMIN)
-            throw new ControllerException(account.getEmail() + " does not have sufficient access privs for action");
-
-        Folder folder = dao.get(id);
+    protected FolderDetails promoteFolder(String userId, Folder folder) {
         if (folder.getType() == FolderType.PUBLIC)
-            return true;
+            return folder.toDataTransferObject();
 
         folder.setType(FolderType.PUBLIC);
         folder.setOwnerEmail("");
         folder.setModificationTime(new Date(System.currentTimeMillis()));
-        dao.update(folder);
+        FolderDetails details = dao.update(folder).toDataTransferObject();
 
         // remove all permissions for folder
-        permissionsController.removeAllFolderPermissions(account.getEmail(), id);
-        return true;
+        permissionsController.removeAllFolderPermissions(userId, folder.getId());
+        return details;
     }
 
     /**
      * Opposite of FolderController#demoteFolder(org.jbei.ice.lib.account.model.Account, long)
      * Removes the folder from the system collections menu
      *
-     * @param account requesting account. should have administrator privileges
-     * @param id      collection identifier
+     * @param userId requesting account
+     * @param folder to be demoted
      * @return true on successful remote, false otherwise
      * @throws ControllerException
      */
-    public boolean demoteFolder(Account account, long id) throws ControllerException {
-        if (account.getType() != AccountType.ADMIN)
-            throw new ControllerException(account.getEmail() + " does not have sufficient access privs for action");
-
-        Folder folder = dao.get(id);
+    protected FolderDetails demoteFolder(String userId, Folder folder) {
         if (folder.getType() != FolderType.PUBLIC)
-            return true;
+            return folder.toDataTransferObject();
 
         folder.setType(FolderType.PRIVATE);
         folder.setModificationTime(new Date(System.currentTimeMillis()));
-        folder.setOwnerEmail(account.getEmail());
-        dao.update(folder);
-        return true;
+        folder.setOwnerEmail(userId);
+        return dao.update(folder).toDataTransferObject();
     }
 
     public boolean setPropagatePermissionForFolder(Account account, long folderId, boolean propagate)
