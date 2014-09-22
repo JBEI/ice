@@ -449,7 +449,7 @@ iceControllers.controller('MessageController', function ($scope, $location, $coo
     });
 });
 
-iceControllers.controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, User, Group, WebOfRegistries, Remote) {
+iceControllers.controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, User, Group) {
     var profileId = $stateParams.id;
     $location.path("/profile/" + profileId + "/groups", false);
     $scope.selectedUsers = [];
@@ -461,8 +461,8 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
 
     var user = User($cookieStore.get('sessionId'));
     var group = Group();
-    var wor = WebOfRegistries();
 
+    // init: retrieve groups user belongs to and created
     group.getUserGroups({userId:profileId}, function (result) {
         angular.forEach(result, function (item) {
             if (item.ownerEmail && item.ownerEmail === $rootScope.user.email)
@@ -474,19 +474,23 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
         $scope.userGroups = result;
     });
 
-    user.list(function (result) {
-        $scope.users = result;
-        $scope.activeUsers = result;
-    });
-
-    // fetch list of registry partners
-    $scope.registryPartners = undefined;
-    wor.query({}, function (result) {
-        console.log(result);
-        if (result) {
-            $scope.registryPartners = result.partners;
+    $scope.filterUsers = function () {
+        var val = $scope.enteredUser;
+        if (!val) {
+            $scope.userMatches = undefined;
+            return;
         }
-    });
+
+        $scope.filtering = true;
+        user.filter({limit:10, val:val},
+            function (result) {
+                $scope.userMatches = result;
+                $scope.filtering = false;
+            }, function (error) {
+                $scope.filtering = false;
+                $scope.userMatches = undefined;
+            });
+    };
 
     $scope.selectUser = function (user) {
         var index = $scope.selectedUsers.indexOf(user);
@@ -496,23 +500,10 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
             $scope.selectedUsers.splice(index, 1);
     };
 
-    $scope.selectRemoteUser = function (enteredUser, selectedRegistry) {
-        Remote().getUser({id:selectedRegistry, email:enteredUser}, function (result) {
-            if (result) {
-                result.isRemote = true;
-                $scope.selectedRemoteUsers.push(result);
-                $scope.enteredUser = undefined;
-            }
-        });
-    };
-
-    $scope.selectedRegistryChange = function (selected) {
-        if (selected) {
-            $scope.activeUsers = $scope.selectedRemoteUsers;
-            return;
-        }
-
-        $scope.activeUsers = $scope.users;
+    $scope.cancelGroupCreate = function () {
+        $scope.selectedUsers = undefined;
+        $scope.showCreateGroup = false;
+        $scope.userMatches = undefined;
     };
 
     $scope.resetSelectedUsers = function () {
@@ -520,10 +511,12 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
     };
 
     $scope.createGroup = function (groupName, groupDescription) {
-        $scope.newGroup = {label:groupName, description:groupDescription};
+        $scope.newGroup = {label:groupName, description:groupDescription, members:$scope.selectedUsers};
         user.createGroup({userId:profileId}, $scope.newGroup, function (result) {
             $scope.myGroups.splice(0, 0, result);
             $scope.showCreateGroup = false;
+        }, function (error) {
+            console.error(error);
         })
     };
 });

@@ -287,6 +287,14 @@ iceServices.factory('User', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            filter:{
+                method:'GET',
+                url:'/rest/users/autocomplete',
+                isArray:true,
+                responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
             getGroups:{
                 method:'GET',
                 url:"/rest/users/:userId/groups",

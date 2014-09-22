@@ -177,9 +177,6 @@ public class AccountController {
      * @return generated password
      */
     public AccountTransfer createNewAccount(AccountTransfer info, boolean sendEmail) {
-//        if (!Utils.canRegister())
-//            return null;
-
         // validate fields required by the database
         validateRequiredAccountFields(info);
 
@@ -208,7 +205,14 @@ public class AccountController {
         String subject = "Account created successfully";
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("Dear ").append(info.getEmail()).append(", ")
+        String name = account.getFirstName();
+        if (StringUtils.isBlank(name)) {
+            name = account.getLastName();
+            if (StringUtils.isBlank(name))
+                name = email;
+        }
+
+        stringBuilder.append("Dear ").append(name).append(", ")
                      .append("\n\nThank you for creating a ")
                      .append(Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
                      .append(" account. \nBy accessing ")
@@ -231,12 +235,10 @@ public class AccountController {
                      .append("\n\n");
 
         String server = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
-        if (server != null && !server.isEmpty()) {
-            stringBuilder.append("Use it to login at ")
-                         .append(server)
-                         .append(". ");
-        }
-        stringBuilder.append("\nPlease remember to change your password by going to your profile page.\n\n");
+        stringBuilder.append("Please remember to change your password by going to your profile page at \n\n")
+                     .append("https://").append(server).append("/profile/").append(account.getId())
+                     .append("\n\nThank you.");
+
         Emailer.send(info.getEmail(), subject, stringBuilder.toString());
         info.setPassword(newPassword);
         return info;

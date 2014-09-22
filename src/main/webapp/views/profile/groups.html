@@ -18,38 +18,41 @@
 
             <div class="col-md-8 pad-top-5">
                 <b class="font-75em">SELECT OR ADD USERS</b><br>
-                <input class="input_box" type="text" ng-model="enteredUser" placeHolder="Enter Email or Name"/>
-                <select class="input_box" ng-model="selectedRegistry"
-                        ng-change="selectedRegistryChange(selectedRegistry)"
-                        ng-options="option.id as option.name for option in registryPartners">
-                    <option value="">This Registry</option>
-                </select>
+                <input class="input_box" type="text" ng-model="enteredUser" placeHolder="Enter Email or Name"
+                       ng-change="filterUsers()" style="width: 210px"/>
 
-                <button type="button" class="btn btn-success btn-xs" ng-disabled="!enteredUser" ng-if="selectedRegistry"
+                <button type="button" class="btn btn-success btn-xs" ng-disabled="!enteredUser"
                         ng-click="selectRemoteUser(enteredUser, selectedRegistry)">
-                    <i class="fa fa-check"></i> Add
+                    Add by email
                 </button>
 
                 <br><br>
 
-                <small style="margin-top: 15px; color: #777"><i class="fa fa-fw fa-square-o bg_white"></i> Show selected
-                    users only
-                </small>
+                <!--<small style="margin-top: 15px; color: #777"><i class="fa fa-fw fa-square-o bg_white"></i> Show selected-->
+                <!--users only-->
+                <!--</small>-->
+
                 <div style="background-color: #fff; height: 200px; overflow: auto; width: 400px">
+
+                    <div ng-if="!filtering && !userMatches" style="opacity: 0.7;" class="small pad-8">
+                        <i>To manually add a registered user, enter the email and click "Add"</i>
+                    </div>
+
                     <table class="table table-condensed striped table-hover">
-                        <tr ng-repeat="user in activeUsers | orderBy:'firstName' | filter:enteredUser">
-                            <td ng-click="selectUser(user)" class="font-85em no_wrap hover_icon_visible cursor_pointer">
+                        <tr ng-repeat="user in userMatches | orderBy:'firstName' | orderBy:'fullName'">
+                            <td ng-click="selectUser(user)" class="font-80em no_wrap hover_icon_visible cursor_pointer">
                                 <i class="fa"
-                                   ng-class="{'fa-circle-o': selectedUsers.indexOf(user) == -1 && selectedRemoteUsers.indexOf(user) == -1, 'fa-circle green': selectedUsers.indexOf(user)!=-1||selectedRemoteUsers.indexOf(user)!=-1}"
+                                   ng-class="{'fa-circle-o': selectedUsers.indexOf(user) == -1, 'fa-circle green': selectedUsers.indexOf(user)!=-1}"
                                    style="font-size: 14px"></i>&nbsp; {{user.firstName}} {{user.lastName}}
                                 <small class="opacity_4 pad-left-8">{{user.email}}</small>
+
                             </td>
                         </tr>
                     </table>
                 </div>
+
                 <small ng-if="(selectedUsers.length+selectedRemoteUsers.length) > 0"
-                       style="margin-top: 15px; color: #777">{{selectedUsers.length+selectedRemoteUsers.length}}
-                    selected ({{selectedUsers.length}} local, {{selectedRemoteUsers.length}} remote)
+                       style="margin-top: 15px; color: #777">{{selectedUsers.length}} selected
                     <button ng-click="resetSelectedUsers()" class="btn-xs btn-link">
                         <i class="fa fa-fw fa-times"></i>Reset
                     </button>
@@ -58,15 +61,15 @@
             </div>
 
             <div class="col-xs-offset-1 col-md-11">
-                <button type="submit" ng-disabled="!groupName" class="btn btn-primary btn-sm">Submit</button>
-                <button type="reset" ng-click="showCreateGroup=false" class="btn btn-default btn-sm">Cancel</button>
+                <button type="submit" ng-disabled="!groupName" class="btn btn-primary">Submit</button>
+                <button type="reset" ng-click="cancelGroupCreate()" class="btn btn-default">Cancel</button>
             </div>
         </form>
     </div>
 
     <div class="row" ng-if="myGroups.length">
         <div class="general_sub_header">Groups you created</div>
-        <table class="table striped table-hover">
+        <table class="table striped table-hover margin-top-10">
             <tr ng-repeat="group in myGroups | orderBy:'id'">
                 <td width="300px">
                     <b style="font-size: 1.1em">{{group.label}}</b>
@@ -76,7 +79,7 @@
                         <b style="color: #222">{{group.memberCount || 3}}</b> members
                     </div>
                 </td>
-                <td width="90px">
+                <td width="90px" style="vertical-align: middle;font-size: 18px">
                     <i class="fa fa-user add_icon"></i>&nbsp;<span style="color: #DDD">|</span>&nbsp;
                     <i class="fa fa-edit edit_icon"></i>&nbsp;<span style="color: #DDD">|</span>&nbsp;
                     <i class="fa fa-trash-o delete_icon"></i>
@@ -85,7 +88,7 @@
         </table>
     </div>
 
-    <div class="row">
+    <div class="row" ng-if="groupsIBelong.length">
         <div class="general_sub_header">Groups you belong to</div>
         <table class="table striped table-hover">
             <tr ng-repeat="group in groupsIBelong | orderBy:'id'">
@@ -95,11 +98,6 @@
                     <div style="color: #777; font-size: 11px;">{{group.description}} |
                         <b style="color: #222">{{group.memberCount}}</b> members
                     </div>
-                </td>
-                <td width="90px">
-                    <i class="fa fa-user add_icon"></i>&nbsp;<span style="color: #DDD">|</span>&nbsp;
-                    <i class="fa fa-edit edit_icon"></i>&nbsp;<span style="color: #DDD">|</span>&nbsp;
-                    <i class="fa fa-trash-o delete_icon"></i>
                 </td>
             </tr>
         </table>
