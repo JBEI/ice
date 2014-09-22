@@ -54,7 +54,7 @@ public class RequestRetriever {
         try {
             ArrayList<Request> requests = dao.getSampleRequestByStatus(account, entry, SampleRequestStatus.IN_CART);
             if (requests != null && !requests.isEmpty())
-                return null;  // todo getSampleRequestsInCart(account.getEmail());
+                return getSampleRequestsInCart(account);
 
             Request request = new Request();
             request.setAccount(account);
@@ -65,12 +65,24 @@ public class RequestRetriever {
             request.setRequested(new Date(System.currentTimeMillis()));
             request.setUpdated(request.getRequested());
             dao.create(request);
-            return null;  // todo
-//            return getSampleRequestsInCart(account.getEmail());
+            return getSampleRequestsInCart(account);
         } catch (DAOException e) {
             Logger.error(e);
             return null;
         }
+    }
+
+    protected ArrayList<SampleRequest> getSampleRequestsInCart(Account account) {
+        int count = dao.getCount(account);
+        String sort = "requested";
+        List<Request> requestList = dao.getAccountRequests(account, SampleRequestStatus.IN_CART, 0, count, sort, false);
+
+        ArrayList<SampleRequest> requests = new ArrayList<>();
+
+        for (Request request : requestList)
+            requests.add(request.toDataTransferObject());
+
+        return requests;
     }
 
     public UserSamples getUserSamples(String userId, SampleRequestStatus status, int start, int limit, String sort,

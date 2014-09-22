@@ -40,7 +40,7 @@ public class SampleResource extends RestResource {
      * Sets the status of sample requests. Must have admin privs to set the sample for others
      * This is intended for requesting samples
      *
-     * @param sessionId session identifire
+     * @param sessionId session identifier
      */
     @PUT
     @Path("/requests")

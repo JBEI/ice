@@ -138,7 +138,7 @@ angular.module('ice.entry.controller', [])
             });
 
             modalInstance.result.then(function (selected) {
-                var sampleSelection = {type:selected, partData:{id:$scope.entry.id}};
+                var sampleSelection = {requestType:selected, partData:{id:$scope.entry.id}};
 
                 // add selection to shopping cart
                 samples.addRequestToCart({}, sampleSelection, function (result) {
