@@ -10,6 +10,7 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.sample.SampleRequestType;
+import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.Entry;
 
 /**
@@ -114,6 +115,8 @@ public class Request implements IDataModel {
         PartData data = new PartData(type);
         data.setId(entry.getId());
         data.setPartId(entry.getPartNumber());
+        data.setSelectionMarkers(EntryUtil.getSelectionMarkersAsList(entry.getSelectionMarkers()));
+        data.setName(entry.getName());
         sampleRequest.setPartData(data);
         sampleRequest.setRequester(getAccount().toDataTransferObject());
         sampleRequest.setRequestTime(getRequested().getTime());
