@@ -156,18 +156,16 @@ public class FolderController {
         return folders;
     }
 
-    public Folder removeFolderContents(Account account, long folderId, ArrayList<Long> entryIds)
-            throws ControllerException {
-        boolean isAdministrator = accountController.isAdministrator(account);
-
+    public boolean removeFolderContents(String userId, long folderId, ArrayList<Long> entryIds) {
+        boolean isAdministrator = accountController.isAdministrator(userId);
         Folder folder = dao.get(folderId);
 
         if (folder.getType() == FolderType.PUBLIC && !isAdministrator) {
-            throw new ControllerException(account.getEmail() + ": cannot modify non user folder " + folder.getName());
+            String errMsg = userId + ": cannot modify folder " + folder.getName();
+            throw new PermissionException(errMsg);
         }
 
-        dao.removeFolderEntries(folder, entryIds);
-        return folder;
+        return dao.removeFolderEntries(folder, entryIds) != null;
     }
 
 

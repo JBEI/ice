@@ -61,6 +61,29 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
             });
     };
 
+    $scope.removeEntriesFromFolder = function () {
+        // remove selected entries from the current folder
+        var entryIds = [];
+        angular.forEach(selectedEntries, function (entry) {
+            entryIds.push(entry.id);
+        });
+
+        folders.removeEntriesFromFolder({folderId:$scope.collectionFolderSelected.id}, entryIds,
+            function (result) {
+                if (result) {
+                    $scope.$broadcast("RefreshAfterDeletion");
+                    $scope.$broadcast("UpdateCollectionCounts");
+                }
+            }, function (error) {
+
+            });
+    };
+
+    // remove entries from folder and add to selected folders
+    $scope.moveEntriesToFolders = function () {
+
+    };
+
     $scope.deleteSelectedEntries = function () {
         Entry(sid).moveEntriesToTrash(selectedEntries,
             function (result) {
@@ -75,6 +98,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
         selectedEntries = [];
         selected = data;
 
+        // all selected or some selected
         $scope.entrySelected = data.all || (data.selected && data.selected.length > 0);
 
         // is reading it so can add to any
@@ -84,6 +108,13 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
         } else {
             // need read permission but assuming it already exists if can read and select it
             $scope.addToDisabled = false;
+
+            // can remove if user can edit folder (todo : public folders?)
+            var canRemove = $scope.collectionFolderSelected != undefined && $scope.collectionFolderSelected.canEdit;
+            $scope.removeDisabled = !canRemove;
+
+            // if can canRemove then should be able to also move
+            $scope.moveToDisabled = !canRemove;
         }
 
         // can delete if all have canEdit=true
@@ -117,6 +148,13 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
         $scope.deleteDisabled = ($scope.user.email != $scope.entry.ownerEmail && !isAdmin);
         selected = {selected:[data]};
         // only owners or admins can delete
+
+        // can remove if user can edit folder (todo : public folders?)
+        var canRemove = $scope.collectionFolderSelected != undefined && $scope.collectionFolderSelected.canEdit;
+        $scope.removeDisabled = !canRemove;
+
+        // if can canRemove then should be able to also move
+        $scope.moveToDisabled = !canRemove;
     });
 
     // function that handles "edit" click
@@ -159,7 +197,17 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
 //        } else {
 //           console.log("selected", selected);
 //        }
-    }
+    };
+
+    $rootScope.$on("CollectionSelected", function (event, data) {
+        console.log("CollectionSelected", data);
+        $scope.collectionSelected = data;
+    });
+
+    $rootScope.$on("CollectionFolderSelected", function (event, data) {
+        console.log("CollectionFolderSelected", data);
+        $scope.collectionFolderSelected = data;
+    });
 });
 
 iceControllers.controller('RegisterController', function ($scope, $resource, $location, User) {
@@ -1261,6 +1309,8 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
         folders.folder($scope.params, function (result) {
             $scope.loadingPage = false;
             $scope.folder = result;
+//            $rootScope.$emit("CollectionFolderSelected",  $scope.folder);
+
             if (result.folderName) {
                 if ($scope.breadCrumb)
                     $scope.breadCrumb += " / " + result.folderName;
@@ -1453,7 +1503,7 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
                 $location.path('/folders/personal');
             // todo : send message to be received by the collection menu
         }, function (error) {
-            console, error(error);
+            console.error(error);
         });
     }
 });

@@ -34,20 +34,39 @@
         </div>
 
         <!--option to remove from folder-->
-        <button type="button" ng-disabled="removeDisabled" class="btn btn-default btn-sm subMenuTransfer">
+        <button type="button" ng-disabled="removeDisabled" ng-click="removeEntriesFromFolder()"
+                class="btn btn-default btn-sm subMenuTransfer">
             <i style="font-size: 14px;" class="fa fa-minus"></i> Remove
         </button>
 
         <div class="btn-group" dropdown>
-            <button type="button" ng-disabled="moveToDisabled"
+            <button type="button" ng-disabled="moveToDisabled" ng-click="retrieveUserFolders()"
                     class="btn btn-default btn-sm subMenuTransfer dropdown-toggle">
                 <i style="font-size: 14px;" class="fa fa-arrows blue"></i> Move To <span class="caret"></span>
             </button>
-            <ul class="dropdown-menu font-80em" stop-event="click">
-                <li ng-repeat="folder in userFolders"><label><input type="checkbox"/>{{folder.folderName}}</label></li>
+            <span class="dropdown-menu color-888" ng-if="!userFolders">
+                <i class="fa fa-fw fa-spin fa-spinner"></i> Loading...
+            </span>
+
+            <ul class="dropdown-menu font-80em" ng-if="userFolders">
+                <li ng-repeat="folder in userFolders" ng-click="select(folder, $event)"
+                    class="font-75em cursor_pointer">&nbsp;
+                    <i class="fa fa-fw"
+                       ng-class="{'fa-square-o':!folder.isSelected, 'fa-check-square-o':folder.isSelected}"></i>
+                    {{folder.folderName}}
+                </li>
                 <li class="divider"></li>
-                <li>
-                    <button class="btn btn-sm btn-info">Submit</button>
+                <li style="padding-right: 5px">
+                    <button class="btn btn-xs btn-primary pull-right" ng-disabled="selectedFolders.length===0"
+                            ng-click="moveEntriesToFolders()">Submit
+                    </button>
+                </li>
+            </ul>
+
+            <!--if no folder available-->
+            <ul class="dropdown-menu" ng-if="!userFolders">
+                <li>&nbsp;
+                    <small><i class="color-888">No folders available</i></small>
                 </li>
             </ul>
         </div>

@@ -125,6 +125,24 @@ public class FolderResource extends RestResource {
         return controller.addEntriesToFolder(userId, data);
     }
 
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entries")
+    public Response removeEntriesFromFolder(
+            ArrayList<Long> entriesId,
+            @PathParam("id") long folderId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        Type fooType = new TypeToken<ArrayList<Long>>() {
+        }.getType();
+        Gson gson = new GsonBuilder().create();
+        ArrayList<Long> list = gson.fromJson(gson.toJsonTree(entriesId), fooType);
+        if (controller.removeFolderContents(userId, folderId, list))
+            return respond(Response.Status.OK);
+        return respond(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries")

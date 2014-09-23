@@ -299,15 +299,11 @@ public class EntryController {
         entryIds.add(entry.getId());
         if (folders != null) {
             for (Folder folder : folders) {
-                try {
-                    Folder returned = folderController.removeFolderContents(account, folder.getId(), entryIds);
-                    FolderDetails details = new FolderDetails(returned.getId(), returned.getName());
-                    long size = folderDAO.getFolderSize(folder.getId());
-                    details.setCount(size);
-                    folderList.add(details);
-                } catch (ControllerException me) {
-                    Logger.error(me);
-                }
+                folderController.removeFolderContents(account.getEmail(), folder.getId(), entryIds);
+                FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+                long size = folderDAO.getFolderSize(folder.getId());
+                details.setCount(size);
+                folderList.add(details);
             }
         }
         delete(account, entry, schedule);
