@@ -423,7 +423,7 @@ iceServices.factory('Samples', function ($resource) {
 
 iceServices.factory('Attachment', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/part/:partId/attachments', {partId:'@partId', attachmentId:'@attachmentId'}, {
+        return $resource('/rest/parts/:partId/attachments', {partId:'@partId', attachmentId:'@attachmentId'}, {
             create:{
                 method:'POST',
                 responseType:"json",
@@ -439,7 +439,7 @@ iceServices.factory('Attachment', function ($resource) {
 
             delete:{
                 method:'DELETE',
-                url:'/rest/part/:partId/attachments/:attachmentId',
+                url:'/rest/parts/:partId/attachments/:attachmentId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
@@ -448,18 +448,18 @@ iceServices.factory('Attachment', function ($resource) {
 
 iceServices.factory('Entry', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/part/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId', commentId:'@commentId'}, {
+        return $resource('/rest/parts/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId', commentId:'@commentId'}, {
             query:{
                 method:'GET',
                 responseType:"json",
-                url:"/rest/part/:partId",
+                url:"/rest/parts/:partId",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             tooltip:{
                 method:'GET',
                 responseType:'json',
-                url:"/rest/part/:partId/tooltip",
+                url:"/rest/parts/:partId/tooltip",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -473,14 +473,14 @@ iceServices.factory('Entry', function ($resource) {
             update:{
                 method:'PUT',
                 responseType:'json',
-                url:'/rest/part/:partId',
+                url:'/rest/parts/:partId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             statistics:{
                 method:'GET',
                 responseType:'json',
-                url:'/rest/part/:partId/statistics',
+                url:'/rest/parts/:partId/statistics',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -488,7 +488,7 @@ iceServices.factory('Entry', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 isArray:true,
-                url:'/rest/part/:partId/comments',
+                url:'/rest/parts/:partId/comments',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -496,7 +496,7 @@ iceServices.factory('Entry', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 isArray:true,
-                url:'/rest/part/:partId/experiments',
+                url:'/rest/parts/:partId/experiments',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -504,42 +504,42 @@ iceServices.factory('Entry', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 isArray:true,
-                url:'/rest/part/:partId/permissions',
+                url:'/rest/parts/:partId/permissions',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             addPermission:{
                 method:'POST',
                 responseType:'json',
-                url:'/rest/part/:partId/permissions',
+                url:'/rest/parts/:partId/permissions',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             removePermission:{
                 method:'DELETE',
                 responseType:'json',
-                url:'/rest/part/:partId/permissions/:permissionId',
+                url:'/rest/parts/:partId/permissions/:permissionId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             createComment:{
                 method:'POST',
                 responseType:'json',
-                url:'/rest/part/:partId/comments',
+                url:'/rest/parts/:partId/comments',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             updateComment:{
                 method:'PUT',
                 responseType:'json',
-                url:'/rest/part/:partId/comments/:commentId',
+                url:'/rest/parts/:partId/comments/:commentId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             createExperiment:{
                 method:'POST',
                 responseType:'json',
-                url:'/rest/part/:partId/experiments',
+                url:'/rest/parts/:partId/experiments',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -547,7 +547,7 @@ iceServices.factory('Entry', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 isArray:true,
-                url:'/rest/part/:partId/samples',
+                url:'/rest/parts/:partId/samples',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -555,7 +555,7 @@ iceServices.factory('Entry', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 isArray:true,
-                url:'/rest/part/:partId/traces',
+                url:'/rest/parts/:partId/traces',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -563,63 +563,63 @@ iceServices.factory('Entry', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 isArray:true,
-                url:'/rest/part/:partId/history',
+                url:'/rest/parts/:partId/history',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             deleteTraceSequence:{
                 method:'DELETE',
                 responseType:'json',
-                url:'/rest/part/:partId/traces/:traceId',
+                url:'/rest/parts/:partId/traces/:traceId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             addTraceSequence:{
                 method:'POST',
-                url:'/rest/part/:partId/traces',
+                url:'/rest/parts/:partId/traces',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             sequence:{
                 method:'GET',
                 responseType:'json',
-                url:'/rest/part/:partId/sequence',
+                url:'/rest/parts/:partId/sequence',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             deleteSequence:{
                 method:'DELETE',
-                url:'/rest/part/:partId/sequence',
+                url:'/rest/parts/:partId/sequence',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             addSequenceAsString:{
                 method:"POST",
-                url:'/rest/part/:partId/sequence',
+                url:'/rest/parts/:partId/sequence',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             moveEntriesToTrash:{
                 method:'POST',
-                url:'/rest/part/trash',
+                url:'/rest/parts/trash',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             delete:{
                 method:'DELETE',
-                url:'/rest/part/:partId',
+                url:'/rest/parts/:partId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             enablePublicRead:{
                 method:'PUT',
-                url:'/rest/part/:partId/permissions/public',
+                url:'/rest/parts/:partId/permissions/public',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             disablePublicRead:{
                 method:'DELETE',
-                url:'/rest/part/:partId/permissions/public',
+                url:'/rest/parts/:partId/permissions/public',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });

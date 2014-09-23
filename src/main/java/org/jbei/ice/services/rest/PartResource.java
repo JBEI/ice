@@ -47,7 +47,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 /**
  * @author Hector Plahar
  */
-@Path("/part")
+@Path("/parts")
 public class PartResource extends RestResource {
 
     private EntryController controller = new EntryController();
