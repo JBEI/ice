@@ -775,7 +775,7 @@ iceServices.factory('Remote', function ($resource, $cookieStore) {
 
 iceServices.factory('WebOfRegistries', function ($resource, $cookieStore) {
     return function () {
-        return $resource('/rest/web', {url:'@url'}, {
+        return $resource('/rest/web', {partnerId:'@partnerId', url:'@url'}, {
             query:{
                 method:'GET',
                 responseType:'json',
@@ -798,6 +798,13 @@ iceServices.factory('WebOfRegistries', function ($resource, $cookieStore) {
             updatePartner:{
                 method:'PUT',
                 url:'/rest/web/partner/:url',
+                responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            getPublicEntries:{
+                method:'GET',
+                url:'/rest/web/:partnerId/entries',
                 responseType:'json',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             }

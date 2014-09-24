@@ -1295,6 +1295,7 @@ iceControllers.controller('WebOfRegistriesMenuController',
 //            });
 //        };
 
+        // retrieves public folders for specified registry and re-directs
         $scope.selectPartner = function (partner) {
             $location.path("/web/" + partner.id);
             $scope.selectedPartner = partner.id;
@@ -1307,18 +1308,59 @@ iceControllers.controller('WebOfRegistriesMenuController',
         }
     });
 
-iceControllers.controller('WorContentController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, Remote) {
-    console.log("WorContentController", "selected partner", $stateParams.partner);
+iceControllers.controller('WorContentController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries) {
     $scope.selectedPartner = $stateParams.partner;
     $scope.loadingPage = true;
-    var sessionId = $cookieStore.get("sessionId");
+    var wor = WebOfRegistries();
+    $scope.queryParams = {limit:15, offset:0, sort:'created', partnerId:$stateParams.partner};
+    $scope.webResults = undefined;
 
-    Remote().publicEntries({id:$stateParams.partner}, function (result) {
+    // init: retrieve first page of results
+    wor.getPublicEntries($scope.queryParams, function (result) {
         $scope.loadingPage = false;
-        $scope.selectedPartnerEntries = result;
+        $scope.webResults = result;
     }, function (error) {
         console.error(error);
+        $scope.loadingPage = false;
     });
+
+    $scope.currentPage = 1;
+    $scope.maxSize = 5;
+
+    $scope.setPage = function (pageNo) {
+        if (pageNo == undefined || isNaN(pageNo))
+            pageNo = 1;
+
+        $scope.loadingPage = true;
+        $scope.queryParams.offset = (pageNo - 1) * 15;
+
+        wor.getPublicEntries($scope.queryParams, function (result) {
+            $scope.webResults = result;
+            $scope.loadingPage = false;
+        }, function (error) {
+            console.error(error);
+            $scope.loadingPage = false;
+            $scope.webResults = undefined;
+        });
+    };
+
+    $scope.sort = function (sortType) {
+        $scope.webResults = null;
+        $scope.queryParams.sort = sortType;
+        $scope.queryParams.offset = 0;
+        $scope.queryParams.asc = !$scope.queryParams.asc;
+        $scope.loadingPage = false;
+
+        wor.getPublicEntries($scope.queryParams, function (result) {
+            $scope.loadingPage = false;
+            $scope.webResults = result;
+            $scope.currentPage = 1;
+        }, function (error) {
+            console.log(error);
+            $scope.webResults = null;
+            $scope.loadingPage = false;
+        });
+    };
 
     $scope.tooltipDetails = function (entry) {
         $scope.currentTooltip = entry;

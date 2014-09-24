@@ -194,7 +194,7 @@ iceDirectives.directive("ice.menu.collections.details", function () {
 iceDirectives.directive("ice.menu.wor", function () {
     return {
         restrict:"E",
-        templateUrl:"/views/web-of-registries-menu.html",
+        templateUrl:"/views/wor/web-of-registries-menu.html",
         controller:"WebOfRegistriesMenuController"
     }
 });
@@ -202,7 +202,7 @@ iceDirectives.directive("ice.menu.wor", function () {
 iceDirectives.directive("ice.menu.wor.details", function () {
     return {
         restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
-        templateUrl:"/views/web-of-registries-menu-details.html",
+        templateUrl:"/views/wor/web-of-registries-menu-details.html",
         controller:"WebOfRegistriesDetailController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)
