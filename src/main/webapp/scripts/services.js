@@ -53,7 +53,7 @@ iceServices.factory('EntryService', function () {
         {label:"Sent To ABRC", schema:'sentToABRC', help:"Help Text", inputType:'bool', subSchema:'arabidopsisSeedData'},
         {label:"Plant Type", schema:'plantType', subSchema:'arabidopsisSeedData', options:[
             {value:"EMS", text:"EMS"},
-            {value:"OVER_EXPRESSION", text:"Over Expression"},
+            {value:"OVER_EXPRESSION", text:"OVER_EXPRESSION"},
             {value:"RNAI", text:"RNAi"},
             {value:"REPORTER", text:"Reporter"},
             {value:"T_DNA", text:"T-DNA"},
@@ -75,8 +75,8 @@ iceServices.factory('EntryService', function () {
             {value:"T5", text:"T5"}
         ]},
         {label:"Harvest Date", schema:'harvestDate', subSchema:'arabidopsisSeedData', inputType:'date'},
-        {label:"Homozygosity", schema:'backbone', subSchema:'arabidopsisSeedData', inputType:'medium'},
-        {label:"Ecotype", schema:'backbone', subSchema:'arabidopsisSeedData', inputType:'medium'},
+        {label:"Homozygosity", schema:'homozygosity', subSchema:'arabidopsisSeedData', inputType:'medium'},
+        {label:"Ecotype", schema:'ecotype', subSchema:'arabidopsisSeedData', inputType:'medium'},
         {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
             autoCompleteField:'SELECTION_MARKERS'}
     ];
