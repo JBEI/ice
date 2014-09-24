@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.net;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.jbei.ice.lib.access.RemotePermission;
@@ -16,6 +17,7 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.RemoteAccessPermission;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.rest.RestClient;
@@ -70,7 +72,7 @@ public class RemoteAccessController {
         return (Setting) restClient.get(value, "/rest/config/version");
     }
 
-    public FolderDetails getPublicEntries(long remoteId) {
+    public WebEntries getPublicEntries(long remoteId, int offset, int limit, String sort, boolean asc) {
         RemotePartner partner = this.remotePartnerDAO.get(remoteId);
         if (partner == null)
             return null;
@@ -78,12 +80,25 @@ public class RemoteAccessController {
         FolderDetails details;
         try {
             String restPath = "/rest/folders/public/entries";
-            details = (FolderDetails) restClient.get(partner.getUrl(), restPath, FolderDetails.class);
+            HashMap<String, Object> queryParams = new HashMap<>();
+            queryParams.put("offset", offset);
+            queryParams.put("limit", limit);
+            queryParams.put("asc", asc);
+            queryParams.put("sort", sort);
+            details = (FolderDetails) restClient.get(partner.getUrl(), restPath, FolderDetails.class, queryParams);
         } catch (Exception e) {
             Logger.error(e);
             return null;
         }
-        return details;
+
+        if (details == null)
+            return null;
+
+        WebEntries entries = new WebEntries();
+        entries.setRegistryPartner(partner.toDataTransferObject());
+        entries.setCount(details.getCount());
+        entries.setEntries(details.getEntries());
+        return entries;
     }
 
     public void addPermission(String requester, RemoteAccessPermission permission) {

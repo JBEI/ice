@@ -2,8 +2,8 @@
     <div class="row">
         <div class="col-md-12 entry_general_header_td">
             <h4>
-                <strong style="color: #888;text-transform: uppercase;"><i class="fa fa-fw fa-globe"></i> JBEI Public
-                    Registry</strong>
+                <strong style="color: #888;text-transform: uppercase;">
+                    <i class="fa fa-fw fa-globe"></i> {{webResults.registryPartner.name}}</strong>
                 <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
                 &nbsp;&nbsp;&nbsp;<span ng-show="folder.id" folder-actions class="font-95em"></span>
             </h4>
@@ -12,14 +12,14 @@
 
     <div class="row">
         <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
-            <tr data-ng-if='selectedPartnerEntries.entries'>
-                <th style="width:28px">
-                    <i class="fa"
-                       ng-class="{'fa-square-o':allSelected == false, 'fa-check-square-o': allSelected == true}"
-                       style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>
-                    <sup style="font-size: 9px; font-weight: normal; display: inherit"
-                         ng-show="selection.length>0">{{selection.length}}</sup>
-                </th>
+            <tr data-ng-if='webResults&&webResults.entries.length>0'>
+                <!--<th style="width:28px">-->
+                <!--<i class="fa"-->
+                <!--ng-class="{'fa-square-o':allSelected == false, 'fa-check-square-o': allSelected == true}"-->
+                <!--style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>-->
+                <!--<sup style="font-size: 9px; font-weight: normal; display: inherit"-->
+                <!--ng-show="selection.length>0">{{selection.length}}</sup>-->
+                <!--</th>-->
                 <th ng-click="sort('type')" class="cursor_pointer">
                     <i ng-show="params.sort=='type'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
@@ -61,21 +61,21 @@
                 </th>
             </tr>
 
-            <tr data-ng-show='!selectedPartnerEntries'>
+            <tr data-ng-show='!webResults'>
                 <td colspan="10">
                     <img alt="Loading..." src="/img/loader-mini.gif"/>
                     Loading...
                 </td>
             </tr>
-            <tr data-ng-show="selectedPartnerEntries.entries.length == 0">
-                <td colspan="10">No entries for selection</td>
+            <tr data-ng-show="webResults.entries.length == 0">
+                <td colspan="10">No entries available</td>
             </tr>
-            <tr data-ng-repeat="entry in selectedPartnerEntries.entries | orderBy:'creationTime':true">
-                <td width="10px">
-                    <i class="fa" ng-class="{'fa-square-o':selection.indexOf(entry.id)==-1||selection===undefined,
-                       'fa-check-square-o':selection.indexOf(entry.id)>-1}"
-                       style="color: #999; font-size: 14px;" ng-click="select(entry)"></i>
-                </td>
+            <tr data-ng-repeat="entry in webResults.entries">
+                <!--<td width="10px">-->
+                <!--<i class="fa" ng-class="{'fa-square-o':selection.indexOf(entry.id)==-1||selection===undefined,-->
+                <!--'fa-check-square-o':selection.indexOf(entry.id)>-1}"-->
+                <!--style="color: #999; font-size: 14px;" ng-click="select(entry)"></i>-->
+                <!--</td>-->
                 <td>{{entry.type | capitalize}}</td>
                 <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
@@ -101,18 +101,17 @@
             </tr>
         </table>
     </div>
-    <div class="row" ng-if="selectedPartnerEntries.entries.length > 0">
-        <div class="col-md-6" style="padding-left: 0">
-            <pagination total-items="selectedPartnerEntries.count" on-select-page="setPage(page)" page="currentPage"
-                        max-size="5"
-                        class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+
+    <div class="row" ng-if="webResults && webResults.entries.length > 0">
+        <div class="col-md-5" style="padding-left: 0">
+            <pagination total-items="webResults.count" on-select-page="setPage(page)" page="currentPage"
+                        max-size="maxSize" class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>
-        <div class="col-md-4" style="margin-top: 20px;"><strong class="small">1-15 of {{selectedPartnerEntries.count |
-            number}}</strong>
-        </div>
-        <div class="col-md-2 text-right" style="margin-top: 20px; padding-right: 4px">
-            <small>View:</small>
-            <button class="btn btn-xs btn-default">15</button>
+        <div class="col-md-7" style="margin-top: 25px;">
+            <strong class="small">
+                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
+                webResults.count)}}
+            </strong>
         </div>
     </div>
 </div>

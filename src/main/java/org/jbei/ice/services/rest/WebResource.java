@@ -8,7 +8,9 @@ import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.lib.dto.permission.RemoteAccessPermission;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
+import org.jbei.ice.lib.net.RemoteAccessController;
 import org.jbei.ice.lib.net.WoRController;
 
 /**
@@ -18,6 +20,7 @@ import org.jbei.ice.lib.net.WoRController;
 public class WebResource extends RestResource {
 
     private WoRController controller = new WoRController();
+    private RemoteAccessController remoteAccessController = new RemoteAccessController();
 
     /**
      * Retrieves information on other ice instances that is in a web of registries
@@ -36,10 +39,19 @@ public class WebResource extends RestResource {
         return controller.getRegistryPartners(approvedOnly);
     }
 
-    @PUT
-    public Response addPartToWeb(
+    // get public entries
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entries")
+    public Response getWebEntries(@Context UriInfo uriInfo,
+            @PathParam("id") long partnerId,
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("15") @QueryParam("limit") int limit,
+            @DefaultValue("created") @QueryParam("sort") String sort,
+            @DefaultValue("false") @QueryParam("asc") boolean asc,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        return Response.ok().build();
+        WebEntries result = remoteAccessController.getPublicEntries(partnerId, offset, limit, sort, asc);
+        return super.respond(Response.Status.OK, result);
     }
 
     @POST

@@ -215,52 +215,56 @@ public class EntryDAO extends HibernateRepository<Entry> {
     @SuppressWarnings({"unchecked"})
     public Set<Entry> retrieveVisibleEntries(Account account, Set<Group> groups, ColumnField sortField, boolean asc,
             int start, int count) throws DAOException {
-        Session session = currentSession();
-        Criteria criteria = session.createCriteria(Permission.class);
+        try {
+            Session session = currentSession();
+            Criteria criteria = session.createCriteria(Permission.class);
 
-        // expect everyone to at least belong to the everyone group so groups should never be empty
-        Junction disjunction = Restrictions.disjunction().add(Restrictions.in("group", groups));
-        if (account != null) {
-            disjunction.add(Restrictions.eq("account", account));
+            // expect everyone to at least belong to the everyone group so groups should never be empty
+            Junction disjunction = Restrictions.disjunction().add(Restrictions.in("group", groups));
+            if (account != null)
+                disjunction.add(Restrictions.eq("account", account));
+
+            criteria.add(Restrictions.isNotNull("entry"));
+
+            criteria.add(disjunction);
+            criteria.add(Restrictions.disjunction()
+                                     .add(Restrictions.eq("canWrite", true))
+                                     .add(Restrictions.eq("canRead", true)));
+
+            Criteria entryC = criteria.createCriteria("entry", "entry");
+            entryC.add(Restrictions.disjunction()
+                                   .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
+                                   .add(Restrictions.isNull("visibility")));
+            // sort
+            String fieldName = columnFieldToString(sortField);
+
+            entryC.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
+            Set<Long> set = new HashSet<>();
+            entryC.setProjection(Projections.property("id"));
+
+            List permissions = criteria.list();
+            Iterator iter = permissions.iterator();
+            Set<Entry> result = new LinkedHashSet<>();
+            while (iter.hasNext()) {
+                Number id = (Number) iter.next();
+                Entry entry = (Entry) session.get(Entry.class, id.longValue());
+                if (set.contains(entry.getId()))
+                    continue;
+
+                set.add(entry.getId());
+                if (set.size() <= start)
+                    continue;
+
+                result.add(entry);
+                if (result.size() == count)
+                    break;
+            }
+
+            return result;
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
         }
-
-        criteria.add(Restrictions.isNotNull("entry"));
-
-        criteria.add(disjunction);
-        criteria.add(Restrictions.disjunction()
-                                 .add(Restrictions.eq("canWrite", true))
-                                 .add(Restrictions.eq("canRead", true)));
-
-        Criteria entryC = criteria.createCriteria("entry", "entry");
-        entryC.add(Restrictions.disjunction()
-                               .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
-                               .add(Restrictions.isNull("visibility")));
-        // sort
-        String fieldName = columnFieldToString(sortField);
-
-        entryC.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
-        Set<Long> set = new HashSet<>();
-        entryC.setProjection(Projections.property("id"));
-
-        List permissions = criteria.list();
-        Iterator iter = permissions.iterator();
-        Set<Entry> result = new LinkedHashSet<>();
-        while (iter.hasNext()) {
-            Number id = (Number) iter.next();
-            Entry entry = (Entry) session.get(Entry.class, id.longValue());
-            if (set.contains(entry.getId()))
-                continue;
-
-            set.add(entry.getId());
-            if (set.size() <= start)
-                continue;
-
-            result.add(entry);
-            if (result.size() == count)
-                break;
-        }
-
-        return result;
     }
 
     public long visibleEntryCount(Account account, Set<Group> groups) throws DAOException {
@@ -269,7 +273,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
         // expect everyone to at least belong to the everyone group so groups should never be empty
         Junction disjunction = Restrictions.disjunction().add(Restrictions.in("group", groups));
-        disjunction.add(Restrictions.eq("account", account));
+        if (account != null)
+            disjunction.add(Restrictions.eq("account", account));
 
         criteria.add(disjunction);
         criteria.add(Restrictions.disjunction()

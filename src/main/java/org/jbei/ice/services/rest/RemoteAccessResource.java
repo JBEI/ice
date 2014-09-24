@@ -41,19 +41,6 @@ public class RemoteAccessResource extends RestResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/entries")
-    public FolderDetails getPublicEntries(
-            @PathParam("id") long remoteId,
-            @DefaultValue("0") @QueryParam("offset") int offset,
-            @DefaultValue("15") @QueryParam("limit") int limit,
-            @DefaultValue("created") @QueryParam("sort") String sort,
-            @DefaultValue("false") @QueryParam("asc") boolean asc,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        return controller.getPublicEntries(remoteId);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
     @Path("/users/{email}")
     public AccountTransfer getRemoteUser(@PathParam("id") long remoteId,
             @PathParam("email") String email,

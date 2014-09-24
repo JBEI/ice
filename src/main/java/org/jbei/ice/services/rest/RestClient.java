@@ -1,5 +1,7 @@
 package org.jbei.ice.services.rest;
 
+import java.util.HashMap;
+import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -33,6 +35,16 @@ public class RestClient {
 
     public Object get(String url, String path, Class<?> clazz) {
         WebTarget target = client.target("https://" + url).path(path);
+        return target.request(MediaType.APPLICATION_JSON_TYPE).buildGet().invoke(clazz);
+    }
+
+    public Object get(String url, String path, Class<?> clazz, HashMap<String, Object> queryParams) {
+        WebTarget target = client.target("https://" + url).path(path);
+        if (queryParams != null) {
+            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+                target = target.queryParam(entry.getKey(), entry.getValue());
+            }
+        }
         return target.request(MediaType.APPLICATION_JSON_TYPE).buildGet().invoke(clazz);
     }
 
