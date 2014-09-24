@@ -16,8 +16,8 @@ import org.jbei.ice.lib.net.RemoteAccessController;
 
 /**
  * REST resource for sending/retrieving messages from remote
- * ICE instances. Local instances accesses this resource which contacts the remote
- * resource on it's behalf
+ * ICE instances. Local instances access this resource which contacts the remote
+ * resource on its behalf
  *
  * @author Hector Plahar
  */

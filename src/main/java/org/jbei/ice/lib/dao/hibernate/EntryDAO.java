@@ -206,19 +206,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    @SuppressWarnings({"unchecked"})
-    public Set<Entry> retrieveTransferredEntries() throws DAOException {
-        try {
-            Session session = currentSession();
-            Criteria criteria = session.createCriteria(Entry.class.getName())
-                                       .add(Restrictions.eq("visibility", Visibility.TRANSFERRED.getValue()));
-            return new HashSet<Entry>(criteria.list());
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException();
-        }
-    }
-
     /**
      * Retrieve {@link Entry Entries} visible to everyone.
      *

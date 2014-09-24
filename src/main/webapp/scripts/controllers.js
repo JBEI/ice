@@ -166,7 +166,21 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     $scope.retrieveRegistryPartners = function () {
         WebOfRegistries().query({}, function (result) {
             $scope.registryPartners = result;
+        }, function (error) {
+            console.error(error);
         });
+    };
+
+    //
+    $scope.transferEntriesToRegistry = function () {
+        var toTransferTo = [];
+        angular.forEach($scope.registryPartners.partners, function (partner) {
+            if (partner.selected)
+                toTransferTo.push(partner);
+        });
+
+        // perform transfer
+
     };
 
     $scope.csvExport = function () {
@@ -200,12 +214,10 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     };
 
     $rootScope.$on("CollectionSelected", function (event, data) {
-        console.log("CollectionSelected", data);
         $scope.collectionSelected = data;
     });
 
     $rootScope.$on("CollectionFolderSelected", function (event, data) {
-        console.log("CollectionFolderSelected", data);
         $scope.collectionFolderSelected = data;
     });
 });
@@ -358,8 +370,33 @@ iceControllers.controller('AdminUserController', function ($rootScope, $scope, $
     };
 
     $scope.createProfile = function () {
-        console.log("create profile");
+        console.log("create profile");  // todo
     }
+});
+
+iceControllers.controller('AdminTransferredEntriesController', function ($rootScope, $location, $scope, Folders) {
+    // get all entries that are transferred
+    $scope.transferredEntries = undefined;
+    Folders().folder({folderId:'transferred'}, function (result) {
+        console.log(result);
+        $scope.transferredEntries = result;
+    }, function (error) {
+        console.error(error);
+    });
+
+    $scope.acceptEntries = function () {
+    };
+
+    $scope.rejectEntries = function () {
+    };
+
+    $scope.showEntryDetails = function (entry, index) {
+        if (!$scope.params.offset) {
+            $scope.params.offset = index;
+        }
+        $rootScope.collectionContext = $scope.params;
+        $location.path("/entry/" + entry.id);
+    };
 });
 
 iceControllers.controller('AdminController', function ($rootScope, $location, $scope, $stateParams, $cookieStore, Settings) {

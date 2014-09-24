@@ -204,6 +204,9 @@ public class FolderResource extends RestResource {
             case "pending":
                 return retriever.getPendingEntries(userId, field, asc, offset, limit);
 
+            case "transferred":
+                return retriever.getTransferredEntries(userId, field, asc, offset, limit);
+
             default:
                 return null;
         }

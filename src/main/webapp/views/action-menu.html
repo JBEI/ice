@@ -101,8 +101,9 @@
 
         <ul class="dropdown-menu" ng-if="registryPartners">
             <li ng-repeat="partner in registryPartners.partners" ng-init="selected=false" stop-event="click"
-                ng-click="selected=!selected; selectPartner(partner)" class="font-75em cursor_pointer">&nbsp;
-                <i class="fa fa-fw" ng-class="{'fa-square-o':selected==false, 'fa-check-square-o':selected==true}"></i>
+                ng-click="partner.selected=!partner.selected" class="font-75em cursor_pointer">&nbsp;
+                <i class="fa fa-fw"
+                   ng-class="{'fa-square-o':!partner.selected, 'fa-check-square-o':partner.selected==true}"></i>
                 {{partner.name}}
             </li>
             <li class="divider"></li>
