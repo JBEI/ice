@@ -22,7 +22,7 @@ public class CommentDAO extends HibernateRepository<Comment> {
     @SuppressWarnings("unchecked")
     public ArrayList<Comment> retrieveComments(Entry entry) {
         try {
-            Query query = currentSession().createQuery("from " + Comment.class + " where entry=:entry");
+            Query query = currentSession().createQuery("from " + Comment.class.getName() + " where entry=:entry");
             query.setParameter("entry", entry);
             return new ArrayList<Comment>(query.list());
         } catch (HibernateException he) {
