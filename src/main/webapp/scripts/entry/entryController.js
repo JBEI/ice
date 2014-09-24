@@ -161,7 +161,7 @@ angular.module('ice.entry.controller', [])
 
         var uploader = $scope.traceSequenceUploader = $fileUploader.create({
             scope:$scope, // to automatically update the html. Default: $rootScope
-            url:"/rest/part/" + entryId + "/traces",
+            url:"/rest/parts/" + entryId + "/traces",
             method:'POST',
             removeAfterUpload:true,
             headers:{"X-ICE-Authentication-SessionId":sid},

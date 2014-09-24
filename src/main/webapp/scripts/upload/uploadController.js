@@ -161,7 +161,7 @@ angular.module('ice.upload.controller', [])
             };
 
             var autoComplete = function (field, query, process) {
-                $http.get('/rest/part/autocomplete', {
+                $http.get('/rest/parts/autocomplete', {
                     headers:{'X-ICE-Authentication-SessionId':sid},
                     params:{
                         val:query,
@@ -787,8 +787,7 @@ angular.module('ice.upload.controller', [])
             $modalInstance.dismiss('cancel');
         };
     })
-    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams,
-                                                       $modalInstance, $fileUploader, addType, linkedAddType) {
+    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType, linkedAddType) {
         var sid = $cookieStore.get("sessionId");
         $scope.addType = addType;
 

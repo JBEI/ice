@@ -1,6 +1,7 @@
 <form name="editEntryForm" data-ng-submit="editEntry()" class="entry-form" ng-if="entry">
 
 <div class="container-fluid" ng-init="entry.creatorEmail=user.email">
+<!--{{entry}}-->
 
 <!--header-->
 <div class="row entry_general_header_td" style="height: 60px">
@@ -50,6 +51,29 @@
         </table>
     </div>
 </div>
+
+<!--tabs created when someone clicks on link--  -->
+<div class="row" ng-if="entry.linkedParts.length" style="margin-bottom: 14px; height: 23px; border-top: 1px solid #eee">
+    <div class="cursor_pointer col-md-1" style="padding-right: 4px; padding-left: 4px;"
+         ng-click="setActive('main')"
+         ng-class="{new_entry_tab_inactive:active!=='main', new_entry_tab_active:active==='main'}">
+        <strong class="fluid_no_wrap small">{{entry.name || 'Main Entry'}}</strong>
+        <span class="pull-right" style="">&nbsp;</span>
+    </div>
+    <div ng-repeat="linkedPart in entry.linkedParts" class="col-md-1" ng-click="setActive($index)"
+         ng-class="{new_entry_tab_inactive:active!==$index, new_entry_tab_active:active===$index}"
+         style="padding-right:3px; padding-left: 6px">
+        <small class="fluid_no_wrap">{{linkedPart.name || 'Linked ' + linkedPart.type | capitalize}}</small>
+        <span ng-click="deleteNewPartLink(linkedPart)" class="pull-right opacity_hover opacity_4" stop-event="click">
+            <i class="fa fa-times delete_icon font-70em"></i>
+        </span>
+    </div>
+
+    <div class="col-md-{{colLength}}" style="border-left: 1px solid #eee; background-color: #f7f7f7; height: 23px">
+        &nbsp;
+    </div>
+</div>
+
 
 <!--fields for the type of entry being edited -->
 <div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="!activePart.isExistingPart">
@@ -152,8 +176,6 @@
 
     <!-- autocompleteAdd-->
     <div class="col-md-10" ng-if="field.inputType==='autoCompleteAdd'">
-
-        <!--no sub schema-->
         <span ng-repeat="link in activePart[field.schema] track by $index">
             <div ng-if="!$index">
                 <input ng-model="link.value" type="text" typeahead-loading="loadingData"
@@ -192,7 +214,68 @@
     </div>
 </div>
 
-<div class="row pad-top-5">
+<!--if existing part is added then this is displayed instead-->
+<div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="activePart.isExistingPart&&selectedFields">
+    <div class="col-md-2 entryLabel text-right">
+        <span ng-class="{'entryEditLabel':field.edit}">{{field.label}}</span>
+    </div>
+    <div class="col-md-10">
+        <div>{{activePart[field.schema]}}</div>
+    </div>
+</div>
+
+<!--sequence and notes -->
+<div class="row pad-top-5" ng-if="selectedFields">
+    <div class="col-md-12">
+        <div class="entry-details-subheader">
+            <strong style="color: #233559">SEQUENCE</strong>
+
+            <div class="pull-right">
+                <small class="opacity_hover" ng-click="isPaste=false">
+                    <i style="font-size:14px" class="fa fa-upload"></i> Upload File
+                </small>
+                <span style="font-weight: normal; color: #ccc">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                <small class="opacity_hover" ng-click="isPaste=true">
+                    <i style="font-size:14px" class="fa fa-paste"></i> Paste Sequence
+                </small>
+            </div>
+        </div>
+
+        <div class="margin-top-10 font-95em" ng-hide="activePart.hasSequence">
+            <alert type="'info'" style="margin-bottom: 10px; margin-top: 10px">
+                <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Supported file formats are
+                Genbank, Fasta and SBOL
+            </alert>
+
+            <alert type="'danger'" style="margin-bottom: 10px" ng-if="serverError">
+                <i style="font-size: 18px" class="fa fa-exclamation-triangle pull-left"></i> Error parsing file
+            </alert>
+
+            <!--file upload-->
+            <span ng-if="!isPaste && !processingFile">
+                <div class="margin-top-20"><input ng-file-select type="file"/></div>
+                <div style="height: 7px; background-color: #f9f9f9;">
+                    <div class="progress-bar" role="progressbar"
+                         ng-style="{ 'width': sequenceFileUpload.progress + '%' }"></div>
+                </div>
+            </span>
+
+            <span ng-if="processingFile">
+                <i class="fa fa-spinner fa-gear"></i> Processing file {{processingFile}}
+            </span>
+
+            <!--sequence paste-->
+            <textarea ng-show="isPaste===true &&!processingFile" ng-model="pastedSequence" class="input_box"
+                      placeholder="Paste sequence" rows="14" style="width: 100%; height: 100%;"></textarea>
+        </div>
+
+        <div class="margin-top-10" ng-if="activePart.hasSequence" style="height: 600px">
+            <ice-vector-viewer entryId="{{activePart.id}}"></ice-vector-viewer>
+        </div>
+    </div>
+</div>
+
+<div class="row pad-top-5" ng-if="selectedFields">
     <div class="col-md-12">
         <div class="entry-details-subheader">
             <strong style="color: #233559">NOTES</strong>
@@ -200,15 +283,18 @@
     </div>
 </div>
 
-<div class="row pad-top-5">
-    <div class="col-md-2"></div>
-    <div class="col-md-10">
-        <textarea class="entry_add_notes_input" ng-model="entry.longDescription"></textarea>
+<div class="row pad-top-5" ng-if="selectedFields">
+    <div class="col-md-2" ng-if="!activePart.isExistingPart"></div>
+    <div class="col-md-10" ng-if="!activePart.isExistingPart">
+        <textarea class="entry_add_notes_input" ng-model="activePart.longDescription"></textarea>
+    </div>
+    <div class="col-md-12" ng-if="activePart.isExistingPart">
+        {{activePart.longDescription}}
     </div>
 </div>
 </div>
 
-<div class="row pad-top-5">
+<div class="row pad-top-5" ng-if="selectedFields">
     <div class="col-md-2"></div>
 
     <div class="col-md-10">

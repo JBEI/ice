@@ -155,6 +155,8 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
 
         // if can canRemove then should be able to also move
         $scope.moveToDisabled = !canRemove;
+
+        selectedEntries = [data];
     });
 
     // function that handles "edit" click
@@ -1616,8 +1618,10 @@ iceControllers.controller('EditEntryController',
         var entry = Entry(sid);
         $scope.entry = undefined;
         entry.query({partId:$stateParams.id}, function (result) {
-            $scope.entry = result;
+            $scope.entry = EntryService.convertToUIForm(result);
+            ;
 
+            // todo : this is used in other places and should be in a service
             // convert selection markers from array of strings to array of objects for the ui
             var arrayLength = result.selectionMarkers.length;
             if (arrayLength) {
@@ -1658,8 +1662,8 @@ iceControllers.controller('EditEntryController',
             $location.path("/entry/" + $stateParams.id);
         };
 
-        $scope.getLocation = function (inputField, val) {
-            return $http.get('/rest/part/autocomplete', {
+        $scope.getLocation = function (inputField, val) {   // todo : move to service
+            return $http.get('/rest/parts/autocomplete', {
                 headers:{'X-ICE-Authentication-SessionId':sid},
                 params:{
                     val:val,
@@ -1670,8 +1674,10 @@ iceControllers.controller('EditEntryController',
                 });
         };
 
+        // difference between this and getLocation() is getLocation() returns a list of strings
+        // and this returns a list of objects
         $scope.getEntriesByPartNumber = function (val) {
-            return $http.get('/rest/part/autocomplete/partid', {
+            return $http.get('/rest/parts/autocomplete/partid', {
                 headers:{'X-ICE-Authentication-SessionId':sid},
                 params:{
                     token:val
@@ -1684,6 +1690,36 @@ iceControllers.controller('EditEntryController',
         $scope.addExistingPartLink = function ($item, $model, $label) {
             entry.query({partId:$model.id}, function (result) {
                 $scope.activePart = result;
+
+                // convert selection markers from array of strings to array of objects for the ui
+                var arrayLength = result.selectionMarkers.length;
+                if (arrayLength) {
+                    var tmp = [];
+                    for (var i = 0; i < arrayLength; i++) {
+                        tmp.push({value:result.selectionMarkers[i]});
+                    }
+                    angular.copy(tmp, $scope.activePart.selectionMarkers);
+                } else {
+                    $scope.activePart.selectionMarkers = [
+                        {}
+                    ];
+                }
+
+                // convert links from array of strings to array of objects for the ui
+                var linkLength = result.links.length;
+
+                if (linkLength) {
+                    var tmpLinkObjectArray = [];
+                    for (var j = 0; j < linkLength; j++) {
+                        tmpLinkObjectArray.push({value:result.links[j]});
+                    }
+                    angular.copy(tmpLinkObjectArray, $scope.activePart.links);
+                } else {
+                    $scope.activePart.links = [
+                        {}
+                    ];
+                }
+
                 $scope.activePart.isExistingPart = true;
                 $scope.addExisting = false;
                 $scope.entry.linkedParts.push($scope.activePart);
@@ -1695,18 +1731,18 @@ iceControllers.controller('EditEntryController',
 
         // todo : this is pretty much a copy of submitPart in CreateEntryController
         $scope.editEntry = function () {
-            var canSubmit = EntryService.validateFields($scope.activePart, $scope.selectedFields);
-            $scope.activePart.type = $scope.activePart.type.toUpperCase();
+            console.log($scope.entry);
+            var canSubmit = EntryService.validateFields($scope.entry, $scope.selectedFields);
+            $scope.entry.type = $scope.entry.type.toUpperCase();
 
 
             // validate contained parts, if any
-            if ($scope.activePart.linkedParts && $scope.activePart.linkedParts.length) {
-                for (var idx = 0; idx < $scope.activePart.linkedParts.length; idx += 1) {
-                    var canSubmitLinked = EntryService.validateFields($scope.activePart.linkedParts[idx], $scope.selectedFields);
+            if ($scope.entry.linkedParts && $scope.entry.linkedParts.length) {
+                for (var idx = 0; idx < $scope.entry.linkedParts.length; idx += 1) {
+                    var canSubmitLinked = EntryService.validateFields($scope.entry.linkedParts[idx], $scope.selectedFields);
                     if (!canSubmitLinked) {
                         // show icon in tab
-                        // todo
-                        console.log("linked entry at idx " + idx + " is not valid");
+                        console.log("linked entry at idx " + idx + " is not valid", $scope.entry);
                         canSubmit = canSubmitLinked;
                     }
                 }
@@ -1717,26 +1753,38 @@ iceControllers.controller('EditEntryController',
                 return;
             }
 
-            if ($scope.activePart.bioSafetyLevel === 'Level 1')
-                $scope.activePart.bioSafetyLevel = 1;
+            if ($scope.entry.bioSafetyLevel === 'Level 1')
+                $scope.entry.bioSafetyLevel = 1;
             else
-                $scope.activePart.bioSafetyLevel = 2;
+                $scope.entry.bioSafetyLevel = 2;
 
             // convert arrays of objects to array strings
-            $scope.activePart.links = EntryService.toStringArray($scope.activePart.links);
-            $scope.activePart.selectionMarkers = EntryService.toStringArray($scope.activePart.selectionMarkers);
+            $scope.entry.links = EntryService.toStringArray($scope.entry.links);
+            $scope.entry.selectionMarkers = EntryService.toStringArray($scope.entry.selectionMarkers);
 
-            for (var i = 0; i < $scope.activePart.linkedParts.length; i += 1) {
-                $scope.activePart.linkedParts[i].links = EntryService.toStringArray($scope.activePart.linkedParts[i].links);
-                $scope.activePart.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.activePart.linkedParts[i].selectionMarkers);
+            for (var i = 0; i < $scope.entry.linkedParts.length; i += 1) {
+                $scope.entry.linkedParts[i].links = EntryService.toStringArray($scope.entry.linkedParts[i].links);
+                $scope.entry.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.entry.linkedParts[i].selectionMarkers);
             }
 
             // convert the part to a form the server can work with
-            $scope.activePart = EntryService.getTypeData($scope.activePart);
+            $scope.entry = EntryService.getTypeData($scope.entry);
 
-            entry.update($scope.activePart, function (result) {
+            entry.update({partId:$scope.entry.id}, $scope.entry, function (result) {
                 $location.path("/entry/" + result.id);
             });
+        };
+
+        $scope.setActive = function (index) {
+            if (!isNaN(index) && $scope.entry.linkedParts.length <= index)
+                return;
+
+            $scope.active = index;
+            if (isNaN(index))
+                $scope.activePart = $scope.entry;
+            else
+                $scope.activePart = $scope.entry.linkedParts[index];
+            $scope.selectedFields = EntryService.getFieldsForType($scope.activePart.type);
         };
     });
 
@@ -1854,7 +1902,7 @@ iceControllers.controller('CreateEntryController',
         };
 
         $scope.getLocation = function (inputField, val) {
-            return $http.get('/rest/part/autocomplete', {
+            return $http.get('/rest/parts/autocomplete', {
                 headers:{'X-ICE-Authentication-SessionId':sid},
                 params:{
                     val:val,
@@ -1925,7 +1973,7 @@ iceControllers.controller('CreateEntryController',
         $scope.format = 'MMM d, yyyy h:mm:ss a';
 
         $scope.getEntriesByPartNumber = function (val) {
-            return $http.get('/rest/part/autocomplete/partid', {
+            return $http.get('/rest/parts/autocomplete/partid', {
                 headers:{'X-ICE-Authentication-SessionId':sid},
                 params:{
                     token:val
@@ -2381,7 +2429,6 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     };
 
     $scope.deleteSequence = function (part) {
-//        console.log(part, $scope.entry);
         entry.deleteSequence({partId:part.id}, function (result) {
             console.log(result);
             part.hasSequence = false;
@@ -2415,25 +2462,6 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     if ($rootScope.collectionContext) {
         $rootScope.collectionContext.limit = 1;
         $scope.context = $rootScope.collectionContext;
-
-//        folders.folder($scope.context,
-//            function (result) {
-//                console.log("result", result);
-//                $scope.context.count = result.count;
-//
-//                if (!result.entries || result.entries.length === 0) {
-//                    // tODO : show some error msg to user
-//                    return;
-//                }
-//
-//                $scope.context.offset = $rootScope.collectionContext.offset;
-//                $rootScope.$broadcast("EntryRetrieved", result);
-//                $scope.entry = result.entries[0];
-//
-//                entry.statistics({partId:$scope.entry.id}, function (stats) {
-//                    $scope.entryStatistics = stats;
-//                });
-//            });
     }
 
     $scope.entryFields = undefined;

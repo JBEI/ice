@@ -48,7 +48,9 @@ angular.module('ice.collection.controller', [])
 
         // updates the counts for personal collection to indicate items removed/added
         $scope.updatePersonalCollections = function () {
-            folders.getByType({folderType:"personal"},
+            var folder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
+
+            folders.getByType({folderType:folder},
                 function (result) {
                     if (result) {
                         $scope.selectedCollectionFolders = result;
