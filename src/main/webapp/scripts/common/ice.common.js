@@ -11,5 +11,6 @@ angular.module('ice.dependencies', ['ngRoute',
     'ice.search',
     'ice.upload',
     'ice.entry',
-    'ice.collection'
+    'ice.collection',
+    'ice.wor'
 ]);

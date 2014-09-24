@@ -95,15 +95,25 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             }
         })
         .state('main.web', {
-            url:'web/:partner',
-            templateUrl:'/views/wor/wor-contents.html',
-            controller:'WorContentController',
+            url:'web',
+            templateUrl:'/views/wor/index.html',
             resolve:{
                 sessionValid:function (Authentication) {
                     return Authentication.isSessionValid('main.web');
                 }
             }
         })
+        .state('main.web.list', {
+            url:'/:partner',
+            templateUrl:'/views/wor/wor-contents.html',
+            controller:'WorContentController'
+        })
+        .state('main.web.entry', {
+            url:'/:partner/entry/:entryId',
+            templateUrl:'/views/wor/entry.html',
+            controller:'WorEntryController'
+        })
+
         .state('main.web_folder', {
             url:'web/:partner/folder/:folderId',
             templateUrl:'/views/wor/wor-folder-contents.html',
@@ -152,7 +162,6 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
 //                return '/views/entry/create-' + stateParams.type + '.html';
 //            }
         })
-
         .state('main.profile', {
             url:'profile/:id',
             templateUrl:'/views/profile.html'
@@ -169,9 +178,8 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             templateUrl:'/views/admin.html',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid("main.admin") && Authentication.isAdmin();
+                    return Authentication.isSessionValid() && Authentication.isAdmin();
                 }
-                // TODO : also is admin
             }
         })
         .state('main.admin.option', {

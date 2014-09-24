@@ -14,6 +14,7 @@ import java.util.Set;
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
@@ -270,6 +271,9 @@ public class SequenceController {
         Entry entry = DAOFactory.getEntryDAO().get(recordId);
         if (entry == null)
             throw new IllegalArgumentException("The part " + recordId + " could not be located");
+
+        if (!new PermissionsController().isPubliclyVisible(entry))
+            authorization.expectRead(userId, entry);
 
         Sequence sequence = dao.getByEntry(entry);
         if (sequence == null)

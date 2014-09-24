@@ -13,18 +13,24 @@ import org.jbei.ice.lib.dao.hibernate.RemotePartnerDAO;
 import org.jbei.ice.lib.dao.hibernate.RemotePermissionDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.RemoteAccessPermission;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.services.rest.RestClient;
 
 import org.apache.commons.lang.StringUtils;
 
 /**
+ * Controller for access remote registries. This registries must be in a web of registries configuration
+ * with them since it requires an api key for communication.
+ *
  * @author Hector Plahar
  */
 public class RemoteAccessController {
@@ -70,6 +76,32 @@ public class RemoteAccessController {
 
         // retrieve version
         return (Setting) restClient.get(value, "/rest/config/version");
+    }
+
+    public PartData getPublicEntry(long remoteId, long entryId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+            return null;
+
+        return (PartData) restClient.get(partner.getUrl(), "/rest/parts/" + entryId, PartData.class);
+    }
+
+    public PartData getPublicEntryTooltip(long remoteId, long entryId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+            return null;
+
+        String path = "/rest/parts/" + entryId + "/tooltip";
+        return (PartData) restClient.get(partner.getUrl(), path, PartData.class);
+    }
+
+    public FeaturedDNASequence getPublicEntrySequence(long remoteId, long entryId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+            return null;
+
+        String path = "/rest/parts/" + entryId + "/sequence";
+        return (FeaturedDNASequence) restClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
     }
 
     public WebEntries getPublicEntries(long remoteId, int offset, int limit, String sort, boolean asc) {

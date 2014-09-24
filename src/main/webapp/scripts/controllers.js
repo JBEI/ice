@@ -1159,212 +1159,11 @@ iceControllers.controller('CollectionDetailController', function ($scope, $cooki
     }
 });
 
-iceControllers.controller('WebOfRegistriesDetailController', function ($scope, $cookieStore, $location, $stateParams) {
-    var sessionId = $cookieStore.get("sessionId");
-
-    $scope.selectRemotePartnerFolder = function (folder) {
-        $scope.partnerId = $stateParams.partner;
-        $location.path('/web/' + $stateParams.partner + "/folder/" + folder.id);
-    };
-});
-
-iceControllers.controller('WorFolderContentController', function ($scope, $stateParams, Remote) {
-    var id;
-    $scope.remoteRetrieveError = undefined;
-
-    if ($stateParams.folderId === undefined)
-        id = $scope.partnerId;
-    else
-        id = $stateParams.folderId;
-
-    Remote().getFolderEntries({folderId:id, id:$stateParams.partner}, function (result) {
-//        console.log("result", result.entries, result === null);
-        $scope.selectedPartnerFolder = result;
-    }, function (error) {
-        console.error(error);
-        $scope.selectedPartnerFolder = undefined;
-        $scope.remoteRetrieveError = true;
-    });
-});
-
 iceControllers.controller('FullScreenFlashController', function ($scope, $location) {
     console.log("FullScreenFlashController");
     $scope.entryId = $location.search().entryId;
     $scope.sessionId = $location.search().sessionId;
     $scope.entry = {'recordId':$scope.entryId};
-});
-
-iceControllers.controller('WebOfRegistriesController',
-    function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote, Settings) {
-        var setting = Settings($cookieStore.get("sessionId"));
-
-        // retrieve web of registries partners
-        $scope.wor = undefined;
-        $scope.isWorEnabled = false;
-        setting.getSetting({}, {key:'JOIN_WEB_OF_REGISTRIES'}, function (result) {
-            console.log(result);
-            $scope.isWorEnabled = result.value === "yes";
-        });
-
-        var wor = WebOfRegistries();
-//    $scope.getPartners = function(approveOnly) {
-        wor.query({approved_only:false}, function (result) {
-            $scope.wor = result;
-        });
-//    };
-
-        $scope.enableDisableWor = function () {
-            var value = $scope.isWorEnabled ? 'no' : 'yes';
-            setting.update({}, {key:'JOIN_WEB_OF_REGISTRIES', value:value},
-                function (result) {
-                    $scope.isWorEnabled = result.value === 'yes';
-                    $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = $scope.isWorEnabled ? "yes" : "no";
-                }, function (error) {
-
-                });
-
-//            setting.update({}, newSetting, function (result) {
-//                newSetting.key = visualKey;
-//                newSetting.value = result.value;
-//                newSetting.editMode = false;
-//            });
-
-        };
-
-        $scope.newPartner = undefined;
-        $scope.addPartner = function () {
-            wor.addPartner({}, $scope.newPartner, function (result) {
-                $scope.wor = result;
-                $scope.showAddRegistryForm = false;
-                $scope.newPartner = undefined;
-            });
-        };
-
-        $scope.removePartner = function (partner, index) {
-            wor.removePartner({url:partner.url}, function (result) {
-                $scope.wor.partners.splice(index, 1);
-            });
-        };
-
-        $scope.approvePartner = function (partner, index) {
-            partner.status = 'APPROVED';
-            wor.updatePartner({url:partner.url}, partner, function (result) {
-
-            });
-        };
-
-        $scope.selectPartner = function (partner) {
-            $location.path("/web/" + partner.id);
-            $scope.selectedPartner = partner.id;
-            var remote = Remote();
-            remote.publicFolders({id:partner.id}, function (result) {
-                console.log(result);
-                $scope.selectedPartnerFolders = result;
-            });
-        }
-    });
-
-iceControllers.controller('WebOfRegistriesMenuController',
-    function ($scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote) {
-        // retrieve web of registries partners
-        $scope.wor = undefined;
-        var wor = WebOfRegistries();
-        wor.query({approved_only:true}, function (result) {
-            $scope.wor = result;
-        });
-
-//        $scope.newPartner = undefined;
-//        $scope.addPartner = function () {
-//            wor.addPartner({}, $scope.newPartner, function (result) {
-//                $scope.wor = result;
-//                $scope.showAddRegistryForm = false;
-//                $scope.newPartner = undefined;
-//            });
-//        };
-//
-//        $scope.removePartner = function (partner, index) {
-//            wor.removePartner({url:partner.url}, function (result) {
-//                $scope.wor.partners.splice(index, 1);
-//            });
-//        };
-//
-//        $scope.approvePartner = function (partner, index) {
-//            partner.status = 'APPROVED';
-//            wor.updatePartner({url:partner.url}, partner, function (result) {
-//
-//            });
-//        };
-
-        // retrieves public folders for specified registry and re-directs
-        $scope.selectPartner = function (partner) {
-            $location.path("/web/" + partner.id);
-            $scope.selectedPartner = partner.id;
-            var remote = Remote();
-            remote.publicFolders({id:partner.id}, function (result) {
-                $scope.selectedPartnerFolders = result;
-            }, function (error) {
-                console.error(error);
-            });
-        }
-    });
-
-iceControllers.controller('WorContentController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries) {
-    $scope.selectedPartner = $stateParams.partner;
-    $scope.loadingPage = true;
-    var wor = WebOfRegistries();
-    $scope.queryParams = {limit:15, offset:0, sort:'created', partnerId:$stateParams.partner};
-    $scope.webResults = undefined;
-
-    // init: retrieve first page of results
-    wor.getPublicEntries($scope.queryParams, function (result) {
-        $scope.loadingPage = false;
-        $scope.webResults = result;
-    }, function (error) {
-        console.error(error);
-        $scope.loadingPage = false;
-    });
-
-    $scope.currentPage = 1;
-    $scope.maxSize = 5;
-
-    $scope.setPage = function (pageNo) {
-        if (pageNo == undefined || isNaN(pageNo))
-            pageNo = 1;
-
-        $scope.loadingPage = true;
-        $scope.queryParams.offset = (pageNo - 1) * 15;
-
-        wor.getPublicEntries($scope.queryParams, function (result) {
-            $scope.webResults = result;
-            $scope.loadingPage = false;
-        }, function (error) {
-            console.error(error);
-            $scope.loadingPage = false;
-            $scope.webResults = undefined;
-        });
-    };
-
-    $scope.sort = function (sortType) {
-        $scope.webResults = null;
-        $scope.queryParams.sort = sortType;
-        $scope.queryParams.offset = 0;
-        $scope.queryParams.asc = !$scope.queryParams.asc;
-        $scope.loadingPage = false;
-
-        wor.getPublicEntries($scope.queryParams, function (result) {
-            $scope.loadingPage = false;
-            $scope.webResults = result;
-            $scope.currentPage = 1;
-        }, function (error) {
-            console.log(error);
-            $scope.webResults = null;
-            $scope.loadingPage = false;
-        });
-    };
-
-    $scope.tooltipDetails = function (entry) {
-        $scope.currentTooltip = entry;
-    };
 });
 
 // deals with sub collections e.g. /folders/:id
@@ -1416,9 +1215,7 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
         if ($scope.params.folderId === undefined)
             $scope.params.folderId = 'personal';
         $scope.params.offset = (pageNo - 1) * 15;
-        console.log("page#", pageNo, "queryParams", $scope.params);
         folders.folder($scope.params, function (result) {
-            console.log("folder', result");
             $scope.folder = result;
             $scope.loadingPage = false;
         });
@@ -1439,11 +1236,6 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
             $scope.currentPage = 1;
         });
     };
-
-    // now retrieve entries for selected folder
-//    folders.folder({folderId:$stateParams.id}, function (result) {
-//        $scope.folder = result;
-//    });
 
     $scope.allSelected = false;
     $scope.selectAll = function () {

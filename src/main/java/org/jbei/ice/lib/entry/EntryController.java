@@ -401,65 +401,16 @@ public class EntryController {
         return comment.toDataTransferObject();
     }
 
-    // TODO
-//    public PartData retrieveEntryTipDetailsFromURL(long entryId, IRegistryAPI api) throws ControllerException {
-//        try {
-//            PartData info = api.getPublicPart(entryId);
-//            boolean hasSequence = api.hasSequence(info.getRecordId());
-//            info.setHasSequence(hasSequence);
-//            boolean hasOriginalSequence = api.hasUploadedSequence(info.getRecordId());
-//            info.setHasOriginalSequence(hasOriginalSequence);
-//            return info;
-//        } catch (ServiceException se) {
-//            Logger.error(se);
-//            throw new ControllerException(se);
-//        }
-//    }
-
     public PartData retrieveEntryTipDetails(String userId, String id) {
         Entry entry = getEntry(id);
         if (entry == null)
             return null;
 
-        if (!authorization.canRead(userId, entry))
+        if (!permissionsController.isPubliclyVisible(entry) && !authorization.canRead(userId, entry))
             return null;
 
         return ModelToInfoFactory.createTipView(entry);
     }
-
-    // tODO
-//    public PartData retrieveEntryDetailsFromURL(long entryId, IRegistryAPI api) throws ControllerException {
-//        try {
-//            PartData info = api.getPublicPart(entryId);
-//            boolean hasSequence = api.hasSequence(info.getRecordId());
-//            info.setHasSequence(hasSequence);
-//            boolean hasOriginalSequence = api.hasUploadedSequence(info.getRecordId());
-//            info.setHasOriginalSequence(hasOriginalSequence);
-//
-//            if (hasSequence && info.getSbolVisualURL() != null) {
-//                // retrieve cached pigeon image or generate and cache
-//                String tmpDir = new ConfigurationController()
-//                        .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-//
-//                String hash = Utils.generateUUID();
-//                URI uri = PigeonSBOLv.postToPigeon(info.getSbolVisualURL());
-//                if (uri != null) {
-//                    try {
-//                        IOUtils.copy(uri.toURL().openStream(),
-//                                     new FileOutputStream(tmpDir + File.separatorChar + hash + ".png"));
-//                        info.setSbolVisualURL(hash + ".png");
-//                    } catch (IOException e) {
-//                        Logger.error(e);
-//                    }
-//                }
-//            }
-//
-//            return info;
-//        } catch (ServiceException e) {
-//            Logger.error(e);
-//            throw new ControllerException(e);
-//        }
-//    }
 
     public void updatePartStatus(Account account, String recordId, String newStatus) throws ControllerException {
         Entry entry = dao.getByRecordId(recordId);
@@ -686,8 +637,9 @@ public class EntryController {
         if (entry == null)
             return null;
 
-        // user must be able to read
-        authorization.expectRead(userId, entry);
+        // user must be able to read if not public entry
+        if (!permissionsController.isPubliclyVisible(entry))
+            authorization.expectRead(userId, entry);
         return retrieveEntryDetails(userId, entry);
     }
 

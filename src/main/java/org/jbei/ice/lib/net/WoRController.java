@@ -329,6 +329,10 @@ public class WoRController {
         }
     }
 
+    public RegistryPartner getWebPartner(String userId, long partnerId) {
+        return dao.get(partnerId).toDataTransferObject();
+    }
+
     /**
      * Retrieves the stored api key for the server specified in the parameter
      * and the server status is approved

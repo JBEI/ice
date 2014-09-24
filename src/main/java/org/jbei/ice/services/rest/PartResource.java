@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.lib.access.PermissionsController;
+import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.History;
@@ -82,7 +83,7 @@ public class PartResource extends RestResource {
      *
      * @param info
      * @param id
-     * @param userAgentHeader
+     * @param sessionId unique session identifier
      * @return
      */
     @GET
@@ -90,9 +91,8 @@ public class PartResource extends RestResource {
     @Path("/{id}")
     public PartData read(@Context UriInfo info,
             @PathParam("id") String id,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
-        log(userId, "details for " + id);
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = SessionHandler.getUserIdBySession(sessionId);
         return controller.retrieveEntryDetails(userId, id);
     }
 
@@ -129,7 +129,7 @@ public class PartResource extends RestResource {
     @Path("/{id}/tooltip")
     public PartData getTooltipDetails(@PathParam("id") String id,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        String userId = SessionHandler.getUserIdBySession(userAgentHeader);
         return controller.retrieveEntryTipDetails(userId, id);
     }
 
@@ -374,7 +374,7 @@ public class PartResource extends RestResource {
         if (StringUtils.isEmpty(userAgentHeader))
             userAgentHeader = sessionId;
 
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        String userId = SessionHandler.getUserIdBySession(userAgentHeader);
         return new SequenceController().retrievePartSequence(userId, partId);
     }
 

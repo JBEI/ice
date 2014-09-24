@@ -6,12 +6,14 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.permission.RemoteAccessPermission;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.net.RemoteAccessController;
 import org.jbei.ice.lib.net.WoRController;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
 /**
  * @author Hector Plahar
@@ -54,6 +56,39 @@ public class WebResource extends RestResource {
         return super.respond(Response.Status.OK, result);
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entries/{entryId}")
+    public Response getWebEntry(@Context UriInfo uriInfo,
+            @PathParam("id") long partnerId,
+            @PathParam("entryId") long entryId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        PartData result = remoteAccessController.getPublicEntry(partnerId, entryId);
+        return super.respond(Response.Status.OK, result);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entries/{entryId}/tooltip")
+    public Response getWebEntryTooltip(@Context UriInfo uriInfo,
+            @PathParam("id") long partnerId,
+            @PathParam("entryId") long entryId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        PartData result = remoteAccessController.getPublicEntryTooltip(partnerId, entryId);
+        return super.respond(Response.Status.OK, result);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entries/{entryId}/sequence")
+    public Response getWebEntrySequence(@Context UriInfo uriInfo,
+            @PathParam("id") long partnerId,
+            @PathParam("entryId") long entryId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        FeaturedDNASequence result = remoteAccessController.getPublicEntrySequence(partnerId, entryId);
+        return super.respond(Response.Status.OK, result);
+    }
+
     @POST
     @Path("/partner")
     // admin function
@@ -65,6 +100,16 @@ public class WebResource extends RestResource {
         if (registryPartner != null)
             return respond(Response.Status.OK, registryPartner);
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    @GET
+    @Path("/partner/{id}")
+    public Response getWebPartner(@Context UriInfo info,
+            @PathParam("id") long partnerId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        RegistryPartner partner = controller.getWebPartner(userId, partnerId);
+        return super.respond(Response.Status.OK, partner);
     }
 
     @POST

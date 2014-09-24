@@ -70,6 +70,8 @@ public class EntryAuthorization extends Authorization<Entry> {
 
     @Override
     public boolean canWrite(String userId, Entry entry) {
+        if (userId == null)
+            return false;
 
         // super checks for admin or owner
         if (super.canWrite(userId, entry))
