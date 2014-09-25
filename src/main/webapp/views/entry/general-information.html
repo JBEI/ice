@@ -13,7 +13,7 @@
         <i ng-if="!field.updating && field.errorUpdating" class="red fa fa-exclamation-circle"></i>
     </div>
 
-    <div class="col-md-10" ng-mouseover="showEdit=true" ng-mouseout="showEdit=false">
+    <div class="col-md-10" ng-mouseover="showEdit=entry.canEdit" ng-mouseout="showEdit=entry.canEdit&&!showEdit">
         <form ng-submit="quickEditEntry(field)">
             <!--todo : also need different display widgets for different types-->
             <div data-ng-if="!field.edit">{{entry[field.schema].toString()}}
@@ -243,7 +243,7 @@
             <strong style="color: #233559;">SEQUENCE</strong>
 
             <!-- menu if no sequence then [Create in VE | Upload File | Paste -->
-            <div class="pull-right" ng-if='!entry.hasSequence'>
+            <div class="pull-right" ng-if='!entry.hasSequence&&entry.canEdit'>
                 <small class="opacity_hover" style="text-decoration: none" ng-click="open()"
                        target="_blank"><i class="fa fa-external-link blue"></i> Create in VectorEditor
                 </small>
@@ -259,8 +259,10 @@
 
             <!--menu if entry sequence exists-->
             <div class="pull-right" ng-if='entry.hasSequence'>
-                <small class="opacity_hover" ng-click="deleteSequence(entry)">Delete</small>
-                <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                <span ng-if="entry.canEdit">
+                    <small class="opacity_hover" ng-click="deleteSequence(entry)">Delete</small>
+                    <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                </span>
                 <small class="opacity_hover" ng-click="open()"><i class="fa fa-external-link blue"></i>
                     Open in VectorEditor
                 </small>

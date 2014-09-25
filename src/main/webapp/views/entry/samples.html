@@ -1,5 +1,5 @@
 <div ng-controller="EntrySampleController" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
-    <div class="row pad_top">
+    <div class="row pad_top" ng-if="entry.canEdit||samples.length>0">
         <button type="button" class="ice-button" ng-if="entry.canEdit">
             <i style="font-size: 14px; color: #007dbc" class="fa fa-plus"></i> Add Sample
         </button>
@@ -15,7 +15,11 @@
         </span>
     </div>
 
-    <div class="row pad_top" ng-repeat="sample in samples">
+    <div class="row pad_top" ng-if="samples.length===0">
+        <i class="text-muted">No samples available</i>
+    </div>
+
+    <div class="row pad_top" ng-repeat="sample in samples" ng-if="samples.length > 0">
 
         <!--widget for plate 96 (should be a directive)-->
         <div class="row" ng-if="sample.type==='PLATE96'&&$index % 2 == 0">

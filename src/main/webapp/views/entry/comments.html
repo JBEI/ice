@@ -24,7 +24,11 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row pad_top" ng-if="entryComments.length===0">
+        <i class="text-muted">No comments available</i>
+    </div>
+
+    <div class="row" ng-if="entryComments.length > 0">
         <div class="comment margin-top-20" ng-repeat="comment in (comments = (entryComments | orderBy: 'id':true))">
             <span class="close pull-left">{{entryComments.length - $index}}</span>
             <small class="attachment_small_text pull-right">{{comment.commentDate | date:'medium'}}</small>

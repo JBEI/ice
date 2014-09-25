@@ -33,6 +33,10 @@
         </div>
     </div>
 
+    <div class="row pad_top" ng-if="entryExperiments.length===0">
+        <i class="text-muted">No experiments available</i>
+    </div>
+
     <div class="row pad_top" ng-if="entryExperiments.length">
         <table cellspacing="0" class="table table-condensed table-hover table-striped font-95em">
             <thead>

@@ -1,11 +1,11 @@
 <div ng-controller="TraceSequenceController">
-    <div class="row pad_top">
+    <div class="row pad_top" ng-if="entry.canEdit">
         <button type="button" class="ice-button" ng-click="showUploadOptions=true">
             <i style="font-size: 14px" class="fa fa-upload blue"></i> Add File
         </button>
     </div>
 
-    <div class="row pad_top font-90em" ng-if="showUploadOptions">
+    <div class="row pad_top font-90em" ng-if="showUploadOptions&&entry.canEdit">
         <alert type="'info'" style="margin-bottom: 10px">
             <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Upload Fasta, GenBank, or ABI formats
             (optionally in a zip file)
@@ -18,6 +18,10 @@
             <div class="progress-bar" role="progressbar"
                  ng-style="{ 'width': sequenceFileUpload.progress + '%' }"></div>
         </div>
+    </div>
+
+    <div class="row pad_top" ng-if="traceSequences.length===0">
+        <i class="text-muted">No trace sequences available</i>
     </div>
 
     <div class="row pad_top" ng-if="traceSequences.length">
