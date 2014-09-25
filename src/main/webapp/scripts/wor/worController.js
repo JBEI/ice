@@ -182,17 +182,57 @@ angular.module('ice.wor.controller', [])
             });
         }
     })
-    .controller('WorEntryController', function ($scope, WebOfRegistries, $stateParams) {
+    .controller('WorEntryController', function ($scope, WebOfRegistries, $stateParams, EntryService) {
         var web = WebOfRegistries();
         $scope.notFound = undefined;
         $scope.remoteEntry = undefined;
 
         web.getPublicEntry({partnerId:$stateParams.partner, entryId:$stateParams.entryId}, function (result) {
-            console.log(result);
+            $scope.remoteEntry = EntryService.convertToUIForm(result);
+            $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
         }, function (error) {
             console.error(error);
-            if (error && error.status == 401)
+            if (error)
                 $scope.notFound = true;
         });
+
+        var menuSubDetails = $scope.subDetails = [
+            {url:'/views/wor/entry/1.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
+            {id:'comments', url:'/views/wor/entry/2.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
+        ];
+
+        $scope.showSelection = function (index) {
+            angular.forEach(menuSubDetails, function (details) {
+                details.selected = false;
+            });
+            menuSubDetails[index].selected = true;
+            $scope.selection = menuSubDetails[index].url;
+//            if (menuSubDetails[index].id) {
+//                $location.path("/entry/" + $stateParams.id + "/" + menuSubDetails[index].id);
+//            } else {
+//                $location.path("/entry/" + $stateParams.id);
+//            }
+        };
+
+        // check if a selection has been made
+        var menuOption = $stateParams.option;
+        if (menuOption === undefined) {
+            $scope.selection = menuSubDetails[0].url;
+            menuSubDetails[0].selected = true;
+        } else {
+            menuSubDetails[0].selected = false;
+            for (var i = 1; i < menuSubDetails.length; i += 1) {
+                if (menuSubDetails[i].id === menuOption) {
+                    $scope.selection = menuSubDetails[i].url;
+                    menuSubDetails[i].selected = true;
+                    break;
+                }
+            }
+
+            if ($scope.selection === undefined) {
+                $scope.selection = menuSubDetails[0].url;
+                menuSubDetails[0].selected = true;
+            }
+        }
     })
 ;
