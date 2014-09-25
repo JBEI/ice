@@ -711,7 +711,8 @@ public class EntryController {
         }
 
         // create audit event if not owner
-        if (!authorization.getOwner(entry).equalsIgnoreCase(userId)) {
+        // todo : remote access check
+        if (userId != null && !authorization.getOwner(entry).equalsIgnoreCase(userId)) {
             try {
                 Audit audit = new Audit();
                 audit.setAction(AuditType.READ.getAbbrev());
