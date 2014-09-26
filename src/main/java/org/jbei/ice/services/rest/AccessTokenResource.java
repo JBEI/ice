@@ -39,7 +39,7 @@ public class AccessTokenResource extends RestResource {
     public Response create(AccountTransfer transfer) {
         AccountTransfer info = accountController.authenticate(transfer);
         if (info == null) {
-            Logger.info("Authentication failed for user " + transfer.getEmail());
+            Logger.warn("Authentication failed for user " + transfer.getEmail());
             return respond(Response.Status.UNAUTHORIZED);
         }
 

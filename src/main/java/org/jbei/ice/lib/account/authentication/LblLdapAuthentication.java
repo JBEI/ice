@@ -65,11 +65,9 @@ public class LblLdapAuthentication implements IAuthentication {
             try {
                 authenticatedEmail = authenticateWithLDAP(loginId, password);
                 if (authenticatedEmail == null) {
-                    Logger.warn("Authentication failed for user " + loginId);
                     return null;
                 }
             } catch (AuthenticationException ae) {
-                Logger.warn("Authentication failed for user " + loginId);
                 return null;
             }
 
@@ -263,7 +261,7 @@ public class LblLdapAuthentication implements IAuthentication {
             msg = loginName.toLowerCase() + " is not in wiki.";
         }
 
-        Logger.info(LblLdapAuthentication.class.getName() + " " + msg);
+        Logger.info(msg);
         return result;
     }
 
