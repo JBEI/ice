@@ -86,7 +86,7 @@ public class BulkCSVUploadHeaders {
         list.add(EntryField.PARENTS);
         list.add(EntryField.GENERATION);
         list.add(EntryField.PLANT_TYPE);
-        list.add(EntryField.GENERATION);
+        list.add(EntryField.SELECTION_MARKERS);
         list.add(EntryField.SENT_TO_ABRC);
     }
 }

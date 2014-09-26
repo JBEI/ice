@@ -170,7 +170,7 @@ public class BulkCSVUpload {
                         if (fieldStr.lastIndexOf("*") != -1)
                             fieldStr = fieldStr.substring(0, fieldStr.length() - 1);
 
-                        EntryField field = EntryField.fromString(fieldStr);
+                        EntryField field = EntryField.fromString(fieldStr.trim());
                         if (!isValidHeader(field)) {
                             throw new Exception("The selected upload type doesn't support the following field ["
                                                         + fieldStr + "]");
