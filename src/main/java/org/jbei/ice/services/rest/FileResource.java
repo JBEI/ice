@@ -23,6 +23,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -82,7 +83,6 @@ public class FileResource extends RestResource {
         }
     }
 
-
     @GET
     @Path("tmp/{fileId}")
     public Response getTmpFile(@PathParam("fileId") String fileId) {
@@ -94,7 +94,6 @@ public class FileResource extends RestResource {
         response.header("Content-Disposition", "attachment; filename=\"" + tmpFile.getName() + "\"");
         return response.build();
     }
-
 
     @GET
     @Path("attachment/{fileId}")
@@ -249,7 +248,7 @@ public class FileResource extends RestResource {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 
             String fileName = contentDispositionHeader.getFileName();
-            String userId = super.getUserIdFromSessionHeader(sessionId);
+            String userId = SessionHandler.getUserIdBySession(sessionId);
             String sequence = IOUtils.toString(fileInputStream);
             SequenceInfo sequenceInfo = sequenceController.parseSequence(userId, recordId, entryType, sequence,
                                                                          fileName);

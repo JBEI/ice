@@ -173,16 +173,22 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
         });
     };
 
-    //
     $scope.transferEntriesToRegistry = function () {
-        var toTransferTo = [];
+        var selectedIds = [];
+        for (var i = 0; i < selected.selected.length; i += 1) {
+            selectedIds.push(selected.selected[i].id);
+        }
+
         angular.forEach($scope.registryPartners.partners, function (partner) {
-            if (partner.selected)
-                toTransferTo.push(partner);
+            if (partner.selected) {
+                WebOfRegistries().transferEntries({partnerId:partner.id}, selectedIds,
+                    function (result) {
+
+                    }, function (error) {
+                        console.error(error);
+                    })
+            }
         });
-
-        // perform transfer
-
     };
 
     $scope.csvExport = function () {

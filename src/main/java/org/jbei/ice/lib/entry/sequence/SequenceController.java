@@ -98,10 +98,10 @@ public class SequenceController {
         EntryType type = EntryType.nameToType(entryType);
         EntryRetriever retriever = new EntryRetriever();
         EntryCreator creator = new EntryCreator();
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
         Entry entry;
         if (StringUtils.isBlank(recordId)) {
+            Account account = DAOFactory.getAccountDAO().getByEmail(userId);
             entry = EntryUtil.createEntryFromType(type, account.getFullName(), account.getEmail());
             entry.setVisibility(Visibility.DRAFT.getValue());
             entry = creator.createEntry(account, entry, null);
@@ -121,7 +121,10 @@ public class SequenceController {
         sequence.setEntry(entry);
         if (name != null)
             sequence.setFileName(name);
-        SequenceInfo info = save(userId, sequence).toDataTransferObject();
+
+        Sequence result = dao.saveSequence(sequence);
+        ApplicationController.scheduleBlastIndexRebuildTask(true);
+        SequenceInfo info = result.toDataTransferObject();
         info.setSequence(dnaSequence);
         return info;
     }
@@ -139,6 +142,10 @@ public class SequenceController {
         Sequence result = dao.saveSequence(sequence);
         ApplicationController.scheduleBlastIndexRebuildTask(true);
         return result;
+    }
+
+    public boolean setSequence(String userId, String recordId, FeaturedDNASequence featuredDNASequence) {
+        return false;
     }
 
     public FeaturedDNASequence updateSequence(String userId, long entryId, FeaturedDNASequence featuredDNASequence) {
@@ -252,19 +259,6 @@ public class SequenceController {
             throw new ControllerException(e);
         }
         return byteStream.toString();
-    }
-
-    public FeaturedDNASequence retrievePartSequence(String userId, String recordId) {
-        Entry entry = DAOFactory.getEntryDAO().getByRecordId(recordId);
-
-        if (entry == null)
-            throw new IllegalArgumentException("The part " + recordId + " could not be located");
-
-        Sequence sequence = dao.getByEntry(entry);
-        if (sequence == null)
-            return null;
-
-        return sequenceToDNASequence(sequence);
     }
 
     public FeaturedDNASequence retrievePartSequence(String userId, long recordId) {

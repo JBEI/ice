@@ -64,11 +64,18 @@ public class InfoToModelFactory {
         }
 
         // common fields
-        entry.setRecordId(UUID.randomUUID().toString());
-        entry.setVersionId(entry.getRecordId());
-        entry.setCreationTime(new Date(System.currentTimeMillis()));
-        entry.setModificationTime(entry.getCreationTime());
+        if (StringUtils.isEmpty(info.getRecordId()))
+            entry.setRecordId(UUID.randomUUID().toString());
+        else
+            entry.setRecordId(info.getRecordId());
 
+        entry.setVersionId(entry.getRecordId());
+        if (info.getCreationTime() == 0)
+            entry.setCreationTime(new Date());
+        else
+            entry.setCreationTime(new Date(info.getCreationTime()));
+
+        entry.setModificationTime(entry.getCreationTime());
         entry = setCommon(entry, info);
         return entry;
     }
@@ -541,11 +548,13 @@ public class InfoToModelFactory {
                 return seed;
 
             case HARVEST_DATE:
-                try {
-                    Date date = SimpleDateFormat.getDateInstance(DateFormat.SHORT).parse(value);
-                    seed.setHarvestDate(date);
-                } catch (ParseException ia) {
-                    Logger.error(ia);
+                if (value != null && !value.isEmpty()) {
+                    try {
+                        Date date = SimpleDateFormat.getDateInstance(DateFormat.SHORT).parse(value);
+                        seed.setHarvestDate(date);
+                    } catch (ParseException ia) {
+                        Logger.error(ia);
+                    }
                 }
                 return seed;
 

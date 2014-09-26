@@ -435,6 +435,16 @@ public class PartResource extends RestResource {
     }
 
     @PUT
+    @Path("/transfer")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response transfer(PartData partData) {
+        EntryCreator creator = new EntryCreator();
+        PartData response = creator.receiveTransferredEntry(partData);
+        return super.respond(Response.Status.OK, response);
+    }
+
+    @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

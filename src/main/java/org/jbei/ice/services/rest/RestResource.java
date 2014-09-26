@@ -31,6 +31,12 @@ public class RestResource {
         return Response.status(status).build();
     }
 
+    protected Response respond(boolean success) {
+        if (success)
+            return Response.status(Response.Status.OK).build();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
+
     protected void log(String userId, String message) {
         Logger.info(userId + ": " + message);
     }

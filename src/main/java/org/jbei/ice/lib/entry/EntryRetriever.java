@@ -12,6 +12,7 @@ import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.Group;
@@ -201,6 +202,9 @@ public class EntryRetriever {
         Entry entry = getEntry(recordId);
         if (entry == null)
             return null;
+
+        if (entry.getVisibility() == Visibility.TRANSFERRED.getValue())
+            return entry;
 
         authorization.expectRead(userId, entry);
         return entry;

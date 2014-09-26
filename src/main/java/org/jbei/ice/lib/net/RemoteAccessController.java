@@ -21,6 +21,8 @@ import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
+import org.jbei.ice.lib.executor.IceExecutorService;
+import org.jbei.ice.lib.executor.TransferTask;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.services.rest.RestClient;
@@ -193,5 +195,10 @@ public class RemoteAccessController {
             Logger.error("Error getting public folder entries from \"" + partner.getUrl() + "\": " + e.getMessage());
             return null;
         }
+    }
+
+    public void transferEntries(String userId, long remoteId, ArrayList<Long> data) {
+        TransferTask task = new TransferTask(userId, remoteId, data);
+        IceExecutorService.getInstance().runTask(task);
     }
 }

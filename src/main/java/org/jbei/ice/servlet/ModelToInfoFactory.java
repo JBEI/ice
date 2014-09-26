@@ -3,7 +3,6 @@ package org.jbei.ice.servlet;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
@@ -174,8 +173,8 @@ public class ModelToInfoFactory {
                 long creatorId = accountController.getAccountId(entry.getCreatorEmail());
                 info.setCreatorId(creatorId);
             }
-        } catch (ControllerException ce) {
-            Logger.warn(ce.getMessage());
+        } catch (Exception ce) {
+            Logger.debug(ce.getMessage());
         }
 
         info.setAlias(entry.getAlias());
