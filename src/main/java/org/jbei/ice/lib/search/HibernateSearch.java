@@ -183,6 +183,10 @@ public class HibernateSearch {
         List result = fullTextQuery.list();
 
         LinkedList<SearchResult> searchResults = new LinkedList<>();
+        String email = "Anon";
+        if (account != null)
+            email = account.getEmail();
+
         for (Object object : result) {
             Entry entry = (Entry) object;
             SearchResult searchResult;
@@ -193,7 +197,7 @@ public class HibernateSearch {
             } else {
                 searchResult = new SearchResult();
                 searchResult.setScore(1f);
-                PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, true);
+                PartData info = ModelToInfoFactory.createTableViewData(email, entry, true);
                 searchResult.setEntryInfo(info);
             }
 
@@ -206,9 +210,7 @@ public class HibernateSearch {
         SearchResults results = new SearchResults();
         results.setResultCount(resultCount);
         results.setResults(searchResults);
-        String email = "Anon";
-        if (account != null)
-            email = account.getEmail();
+
         Logger.info(email + ": obtained " + resultCount + " results for empty query");
         return results;
     }
