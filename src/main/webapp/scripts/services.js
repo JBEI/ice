@@ -466,7 +466,7 @@ iceServices.factory('Entry', function ($resource) {
             create:{
                 method:'PUT',
                 responseType:'json',
-                url:'/rest/part',
+                url:'/rest/parts',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
