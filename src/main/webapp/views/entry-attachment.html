@@ -3,7 +3,8 @@
     <tr>
         <td class="entry_attributes_sub_header" colspan="2">
             <i class="fa fa-paperclip font-90em"></i>&nbsp;Attachments
-            <i ng-if="entry.canEdit" style="margin-top: 4px" class="fa fa-plus-circle font-awesome edit_icon pull-right"
+            <i ng-show="entry.canEdit" style="margin-top: 4px"
+               class="fa fa-plus-circle font-awesome edit_icon pull-right"
                ng-click="showAttachmentInput=true"></i>
         </td>
     </tr>
