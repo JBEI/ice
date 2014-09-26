@@ -154,6 +154,7 @@ angular.module('ice.entry.controller', [])
         var entryId = $stateParams.id;
         var sid = $cookieStore.get("sessionId");
         var entry = Entry(sid);
+        $scope.traceUploadError = undefined;
 
         entry.traceSequences({partId:entryId}, function (result) {
             $scope.traceSequences = result;
@@ -170,6 +171,19 @@ angular.module('ice.entry.controller', [])
             formData:[
                 { entryId:entryId}
             ]
+        });
+
+        uploader.bind('success', function (event, xhr, item, response) {
+            console.log("response", response);
+            entry.traceSequences({partId:entryId}, function (result) {
+                $scope.traceSequences = result;
+                $scope.showUploadOptions = false;
+            });
+        });
+
+        uploader.bind('error', function (event, xhr, item, response) {
+            console.error('Error', xhr, item, response);
+            $scope.traceUploadError = true;
         });
 
         $scope.deleteTraceSequenceFile = function (fileId) {

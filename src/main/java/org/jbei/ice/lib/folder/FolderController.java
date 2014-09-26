@@ -84,7 +84,7 @@ public class FolderController {
     }
 
     /**
-     * Retrieves folders that are marked "public"
+     * Retrieves folders are share shared publicly
      *
      * @return list of public folders on this site
      */

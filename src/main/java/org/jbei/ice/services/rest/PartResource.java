@@ -324,7 +324,7 @@ public class PartResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/traces")
-    public void addTraceSequence(@PathParam("id") long partId,
+    public Response addTraceSequence(@PathParam("id") long partId,
             @FormDataParam("file") InputStream fileInputStream,
             @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
             @QueryParam("sid") String sessionId,
@@ -339,9 +339,10 @@ public class PartResource extends RestResource {
             FileUtils.copyInputStreamToFile(fileInputStream, file);
         } catch (IOException e) {
             Logger.error(e);
-            return;
+            return respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
-        controller.addTraceSequence(userId, partId, file, fileName);
+        boolean success = controller.addTraceSequence(userId, partId, file, fileName);
+        return respond(success);
     }
 
     @DELETE
