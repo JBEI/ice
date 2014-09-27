@@ -80,7 +80,7 @@
             </div>
         </div>
 
-        <div class="col-md-6" ng-if="sample.type==='SHELF'">
+        <div class="row col-md-6" ng-if="sample.type==='SHELF'">
             <table class="entry_sample_panel">
                 <tr>
                     <td colspan="4"><strong style="color: #a52a2a;">SHELF {{sample.main.display}} </strong></td>
@@ -104,7 +104,40 @@
                     </td>
                 </tr>
                 <tr>
-                    <td colspan="{{Plate96Cols.length+1}}" class="font-75em">
+                    <td colspan="5" class="font-75em">
+                        <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+                        <strong>{{sample.label}}</strong><br>
+                        <span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a
+                            ng-href="/profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}
+                        {{sample.depositor.lastName}}</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="row col-md-6" ng-if="sample.type==='GENERIC'">
+            <table class="entry_sample_panel">
+                <tr>
+                    <td colspan="4"><strong style="color: #a52a2a;">GENERIC </strong></td>
+                </tr>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td class="pad-8">
+                        &nbsp;
+                    </td>
+                    <td class="pad-8">
+                        <h2 class="text-center">
+                            <i class="fa fa-flask"></i>
+                        </h2>
+                    </td>
+                    <td class="pad-8">
+                        <h1>Tube
+                            <small>{{sample.tube.display}}</small>
+                        </h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="4" class="font-75em">
                         <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
                         <strong>{{sample.label}}</strong><br>
                         <span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a

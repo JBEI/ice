@@ -268,6 +268,9 @@ public class SampleController {
                 }
 
                 storage = storage.getParent();
+                if (storage == null)
+                    continue;
+
                 boolean isParent = (type != null && type.isTopLevel());
 
                 if (!isParent && storage.getStorageType() != Storage.StorageType.SCHEME) {
