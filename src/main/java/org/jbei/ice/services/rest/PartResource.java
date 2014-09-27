@@ -200,7 +200,7 @@ public class PartResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
-    public AccessPermission createComment(@Context UriInfo info, @PathParam("id") long partId,
+    public AccessPermission createPermission(@Context UriInfo info, @PathParam("id") long partId,
             AccessPermission permission,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
