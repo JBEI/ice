@@ -26,6 +26,11 @@
             <div class="col-md-6" ng-if="samples[$index+0]">
                 <table class="entry_sample_panel" ng-init="samp=samples[$index+0]">
                     <tr>
+                        <td colspan="{{Plate96Cols.length+1}}">
+                            <strong style="color: #a52a2a">PLATE {{samp.main.display}} </strong>
+                        </td>
+                    </tr>
+                    <tr>
                         <td>&nbsp;</td>
                         <td class="text-center" ng-repeat="col in Plate96Cols"><strong>{{col}}</strong></td>
                     </tr>
@@ -54,7 +59,7 @@
             <div class="col-md-6" ng-if="samples[$index+1]">
                 <table class="entry_sample_panel" ng-init="rightSamp=samples[$index+1]">
                     <tr>
-                        <td>&nbsp;</td>
+                        <td>{{rightSamp.main.display}}</td>
                         <td class="text-center" ng-repeat="col in Plate96Cols"><strong>{{col}}</strong></td>
                     </tr>
                     <tr ng-repeat="row in Plate96Rows">
