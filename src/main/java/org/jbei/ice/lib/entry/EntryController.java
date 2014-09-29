@@ -689,8 +689,7 @@ public class EntryController {
         partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
 
         // retrieve cached pigeon image or generate and cache
-        String tmpDir = new ConfigurationController()
-                .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+        String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         if (hasSequence) {
             Sequence sequence = sequenceDAO.getByEntry(entry);
             String hash = sequence.getFwdHash();
