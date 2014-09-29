@@ -24,7 +24,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.jbei.ice.lib.account.SessionHandler;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -34,7 +33,6 @@ import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.EntryRetriever;
-import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
@@ -58,6 +56,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 public class FileResource extends RestResource {
 
     private SequenceController sequenceController = new SequenceController();
+    private AttachmentController attachmentController = new AttachmentController();
 
     @POST
     @Path("attachment")
@@ -105,16 +104,13 @@ public class FileResource extends RestResource {
                 sessionId = sid;
 
             String userId = getUserIdFromSessionHeader(sessionId);
+            File file = attachmentController.getAttachmentByFileId(userId, fileId);
+            if (file == null)
+                return respond(Response.Status.NOT_FOUND);
 
-            AttachmentController controller = new AttachmentController();
-            Attachment attachment = controller.getAttachmentByFileId(fileId);
-            if (attachment == null)
-                return null;
-
-            Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-            File file = controller.getFile(account, attachment);
+            String name = DAOFactory.getAttachmentDAO().getByFileId(fileId).getFileName();
             Response.ResponseBuilder response = Response.ok(file);
-            response.header("Content-Disposition", "attachment; filename=\"" + attachment.getFileName() + "\"");
+            response.header("Content-Disposition", "attachment; filename=\"" + name + "\"");
             return response.build();
         } catch (Exception e) {
             Logger.error(e);
