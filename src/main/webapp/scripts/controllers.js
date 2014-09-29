@@ -1801,9 +1801,9 @@ iceControllers.controller('CreateEntryController',
                 });
             } else {
                 entry.create($scope.part, function (result) {
-                    console.log("created entry", result);
                     $scope.$emit("UpdateCollectionCounts");
                     $location.path('/entry/' + result.id);
+                    $scope.showSBOL = false;
                 }, function (error) {
                     console.error(error);
                 });
