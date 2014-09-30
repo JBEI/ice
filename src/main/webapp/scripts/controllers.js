@@ -1165,13 +1165,6 @@ iceControllers.controller('CollectionDetailController', function ($scope, $cooki
     }
 });
 
-iceControllers.controller('FullScreenFlashController', function ($scope, $location) {
-    console.log("FullScreenFlashController");
-    $scope.entryId = $location.search().entryId;
-    $scope.sessionId = $location.search().sessionId;
-    $scope.entry = {'recordId':$scope.entryId};
-});
-
 // deals with sub collections e.g. /folders/:id
 // retrieves the contents of folders
 iceControllers.controller('CollectionFolderController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, $http, Folders, Entry) {
@@ -2220,19 +2213,12 @@ iceControllers.controller('EntryDetailsController', function ($scope) {
 iceControllers.controller('FullScreenFlashController', function ($scope, $stateParams, $sce) {
     $scope.sessionId = $stateParams.sessionId;
     $scope.entryId = $stateParams.entryId;
+    $scope.vectorEditor = $sce.trustAsHtml('<object type="application/x-shockwave-flash" data="/swf/ve/VectorEditor.swf?entryId=' + $scope.entryId + '&sessionId=' + $scope.sessionId + '" id="vectoreditor" width="100%" height="' + ($(window).height() - 100) + 'px"><param name="wmode" value="opaque" /></object>');
 
-    $scope.test = $sce.trustAsHtml('<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540002" id="VectorEditor" width="100%" height="100%" codebase="https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"> \
-        <param name="movie" value="VectorEditor.swf"> \
-            <param name="quality" value="high">  \
-                <param name="bgcolor" value="#869ca7"> \
-                    <param name="wmode" value="opaque">  \
-                        <param name="allowScriptAccess" value="sameDomain"> \
-                            <embed src="/swf/ve/VectorEditor.swf?entryId=' + $scope.entryId + '&amp;sessionId=' + $scope.sessionId + '" \
-                            quality="high" bgcolor="#869ca7" width="100%" wmode="opaque" height="100%" \
-                            name="SequenceChecker" align="middle" play="true" loop="false"  \
-                            type="application/x-shockwave-flash" \
-                            pluginspage="http://www.adobe.com/go/getflashplayer"> \
-                            </object>');
+    $(window).resize(function () {
+        var height = $(this).height();
+        $('#vectoreditor').height(height - 100);
+    });
 });
 
 iceControllers.controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $rootScope, $fileUploader, Entry, Folders, EntryService) {
