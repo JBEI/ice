@@ -133,7 +133,8 @@ angular.module('ice.search.controller', [])
 
             // biosafety
             if ($scope.bioSafetyLevelOption) {
-                searchQuery.bioSafetyOption = $scope.bioSafetyLevelOption;
+                searchQuery.bioSafetyOption = $scope.bioSafetyLevelOption == "1" ? "LEVEL_ONE" : "LEVEL_TWO";
+                ;
             }
 
             //sequence
@@ -144,6 +145,7 @@ angular.module('ice.search.controller', [])
             }
 
             searchQuery.queryString = $scope.queryText;
+            console.log(searchQuery);
             // todo : or
 //            var queryString = $location.search().q;
 //            if (queryString === undefined)
