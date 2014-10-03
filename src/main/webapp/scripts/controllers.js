@@ -1452,7 +1452,7 @@ iceControllers.controller('EditEntryController',
         $scope.entry = undefined;
         entry.query({partId:$stateParams.id}, function (result) {
             $scope.entry = EntryService.convertToUIForm(result);
-            ;
+            $scope.entry.linkedParts = [];
 
             // todo : this is used in other places and should be in a service
             // convert selection markers from array of strings to array of objects for the ui
@@ -1489,6 +1489,7 @@ iceControllers.controller('EditEntryController',
             $scope.linkOptions = EntryService.linkOptions(result.type);
             $scope.selectedFields = EntryService.getFieldsForType(result.type);
             $scope.activePart = $scope.entry;
+            console.log($scope.activePart);
         });
 
         $scope.cancelEdit = function () {
@@ -1564,7 +1565,6 @@ iceControllers.controller('EditEntryController',
 
         // todo : this is pretty much a copy of submitPart in CreateEntryController
         $scope.editEntry = function () {
-            console.log($scope.entry);
             var canSubmit = EntryService.validateFields($scope.entry, $scope.selectedFields);
             $scope.entry.type = $scope.entry.type.toUpperCase();
 
@@ -2221,7 +2221,7 @@ iceControllers.controller('FullScreenFlashController', function ($scope, $stateP
     });
 });
 
-iceControllers.controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $rootScope, $fileUploader, Entry, Folders, EntryService) {
+iceControllers.controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope, $fileUploader, Entry, Folders, EntryService) {
     $scope.partIdEditMode = false;
     $scope.showSBOL = true;
     $scope.context = undefined;
@@ -2255,12 +2255,29 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     };
 
     $scope.deleteSequence = function (part) {
-        entry.deleteSequence({partId:part.id}, function (result) {
-            console.log(result);
-            part.hasSequence = false;
-        }, function (error) {
-            console.error(error);
-        })
+        var modalInstance = $modal.open({
+            templateUrl:'/views/modal/delete-sequence-confirmation.html',
+            controller:function ($scope, $modalInstance) {
+                $scope.toDelete = part;
+                $scope.processingDelete = undefined;
+                $scope.delete = function () {
+                    $scope.processingDelete = true;
+                    entry.deleteSequence({partId:part.id}, function (result) {
+                        $scope.processingDelete = false;
+                        $modalInstance.close(part);
+                    }, function (error) {
+                        console.error(error);
+                    })
+                }
+            },
+            backdrop:"static"
+        });
+
+        modalInstance.result.then(function (part) {
+            if (part)
+                part.hasSequence = false;
+        }, function () {
+        });
     };
 
     var partDefaults = {
@@ -2415,6 +2432,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
                 $location.path("/entry/" + result.entries[0].id);
             });
     };
+
 
     // file upload
     var uploader = $scope.sequenceFileUpload = $fileUploader.create({

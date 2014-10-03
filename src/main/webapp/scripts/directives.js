@@ -224,17 +224,7 @@ iceDirectives.directive("iceFlash", function ($cookieStore) {
 
         scope.$watch('entry', function (value) {
             if (value) {
-                element.html('<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540002" id="VectorEditor" width="100%" height="100%" codebase="https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"> \
-          <param name="movie" value="VectorViewer.swf"> \
-              <param name="quality" value="high">  \
-                  <param name="bgcolor" value="#869ca7"> \
-                      <param name="wmode" value="opaque">  \
-                          <param name="allowScriptAccess" value="sameDomain"> \
-                              <embed src="/swf/vv/VectorViewer.swf?entryId=' + value.id + '&amp;sessionId=' + sid + '" \
-                              quality="high" bgcolor="#869ca7" width="100%" wmode="opaque" height="100%" \
-                              name="VectorEditor" align="middle" play="true" loop="false"  \
-                              type="application/x-shockwave-flash" \
-                              pluginspage="http://www.adobe.com/go/getflashplayer"> \
+                element.html('<object id="VectorEditor" width="100%" height="100%" data="/swf/vv/VectorViewer.swf?entryId=' + value.id + '&amp;sessionId=' + sid + '""> \
                               </object>');
 //                element.html('<b>' + value.recordId + '</b>')
             } else {
@@ -258,12 +248,7 @@ iceDirectives.directive("iceVectorViewer", function ($cookieStore) {
             if (!id) {
                 element.html("<b>Cannot render vector viewer.</b>")
             } else {
-                element.html('<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540002" id="VectorEditor" width="100%" height="100%" codebase="https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"> \
-          <param name="movie" value="VectorViewer.swf"> \
-              <param name="quality" value="high">  \
-                  <param name="bgcolor" value="#869ca7"> \
-                      <param name="wmode" value="opaque">  \
-                          <param name="allowScriptAccess" value="sameDomain"> \
+                element.html('<object id="VectorEditor" width="100%" height="100%"> \
                               <embed src="/swf/vv/VectorViewer.swf?entryId=' + id + '&amp;sessionId=' + sid + '" \
                               quality="high" bgcolor="#869ca7" width="100%" wmode="opaque" height="100%" \
                               name="VectorEditor" align="middle" play="true" loop="false"  \
