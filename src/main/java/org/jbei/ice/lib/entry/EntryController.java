@@ -745,7 +745,7 @@ public class EntryController {
             return partData;
 
         for (Entry parent : parents) {
-            EntryType type = EntryType.nameToType(entry.getRecordType());
+            EntryType type = EntryType.nameToType(parent.getRecordType());
             PartData parentData = new PartData(type);
             parentData.setId(parent.getId());
             parentData.setName(parent.getName());

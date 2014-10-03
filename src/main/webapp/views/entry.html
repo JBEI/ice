@@ -30,7 +30,8 @@
                 &nbsp;<a ng-href="/entry/{{parent.id}}" tooltip="{{parent.name}}"
                          tooltip-placement="right" tooltip-trigger="mouseenter"
                          style="font-size: 12px; color: white; position: relative; top: -4px"
-                         class="small label label-default cursor_pointer"><i class="fa fa-level-up"></i></a>
+                         class="small label label-default cursor_pointer"><b class="small_text">{{parent.type |
+                    uppercase}}</b> <i class="fa fa-level-up"></i></a>
                     </span>
                 <br>
                 <small class="font-65em">{{entry.creationTime | date:'medium'}} - <a
