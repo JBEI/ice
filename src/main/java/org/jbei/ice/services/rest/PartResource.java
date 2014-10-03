@@ -21,6 +21,7 @@ import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
@@ -93,6 +94,9 @@ public class PartResource extends RestResource {
             @PathParam("id") String id,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = SessionHandler.getUserIdBySession(sessionId);
+        EntryType type = EntryType.nameToType(id);
+        if (type != null)
+            return controller.getPartDefaults(userId, type);
         return controller.retrieveEntryDetails(userId, id);
     }
 
@@ -369,14 +373,17 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/sequence")
-    public FeaturedDNASequence getSequence(@PathParam("id") long partId,
+    public Response getSequence(@PathParam("id") long partId,
             @QueryParam("sid") String sessionId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         if (StringUtils.isEmpty(userAgentHeader))
             userAgentHeader = sessionId;
 
         String userId = SessionHandler.getUserIdBySession(userAgentHeader);
-        return new SequenceController().retrievePartSequence(userId, partId);
+        FeaturedDNASequence sequence = new SequenceController().retrievePartSequence(userId, partId);
+        if (sequence == null)
+            return Response.status(Response.Status.NO_CONTENT).build();
+        return Response.status(Response.Status.OK).entity(sequence).build();
     }
 
 //    @GET
