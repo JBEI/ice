@@ -629,10 +629,6 @@ public class EntryController {
 //    }
 
     public PartData retrieveEntryDetails(String userId, String id) {
-        EntryType type = EntryType.nameToType(id);
-        if (type != null)
-            return getPartDefaults(userId, type);
-
         Entry entry = getEntry(id);
         if (entry == null)
             return null;
@@ -643,7 +639,7 @@ public class EntryController {
         return retrieveEntryDetails(userId, entry);
     }
 
-    protected PartData getPartDefaults(String userId, EntryType type) {
+    public PartData getPartDefaults(String userId, EntryType type) {
         PartData partData = new PartData(type);
         PreferencesController preferencesController = new PreferencesController();
 
