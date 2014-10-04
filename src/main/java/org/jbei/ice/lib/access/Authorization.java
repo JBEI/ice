@@ -26,6 +26,9 @@ public class Authorization<T extends IDataModel> {
     }
 
     protected Account getAccount(String userId) {
+        if (userId == null)
+            return null;
+
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         if (account == null)
             throw new IllegalArgumentException("Could not retrieve account information for user " + userId);
