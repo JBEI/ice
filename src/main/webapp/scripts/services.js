@@ -236,12 +236,19 @@ iceServices.factory('Group', function ($resource, $cookieStore) {
 
         var sessionId = $cookieStore.get("sessionId");
 
-        return $resource('/rest/groups', {userId:'@userId'}, {
-            getUserGroups:{
+        return $resource('/rest/groups', {groupId:'@groupId'}, {
+            members:{
                 method:'GET',
-                responseType:"json",
+                responseType:'json',
                 isArray:true,
-                url:"/rest/groups/:userId",
+                url:"/rest/groups/:groupId/members",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            update:{
+                method:'PUT',
+                responseType:'json',
+                url:"/rest/groups/:groupId",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
