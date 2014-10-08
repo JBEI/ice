@@ -556,7 +556,7 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
     var group = Group();
 
     // init: retrieve groups user belongs to and created
-    group.getUserGroups({userId:profileId}, function (result) {
+    user.getGroups({userId:profileId}, function (result) {
         angular.forEach(result, function (item) {
             if (item.ownerEmail && item.ownerEmail === $rootScope.user.email)
                 $scope.myGroups.push(item);
@@ -567,8 +567,25 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
         $scope.userGroups = result;
     });
 
-    $scope.filterUsers = function () {
-        var val = $scope.enteredUser;
+    $scope.switchToEditMode = function (selectedGroup) {
+        selectedGroup.edit = true;
+        group.members({groupId:selectedGroup.id}, function (result) {
+            selectedGroup.members = result;
+        }, function (error) {
+            console.error(error);
+            selectedGroup.members = undefined;
+        });
+    };
+
+    $scope.selectGroupUser = function (selectedGroup, user) {
+        var index = selectedGroup.members.indexOf(user);
+        if (index == -1)
+            selectedGroup.members.push(user);
+        else
+            selectedGroup.members.splice(index, 1);
+    };
+
+    $scope.filterUsers = function (val) {
         if (!val) {
             $scope.userMatches = undefined;
             return;
@@ -612,6 +629,15 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
             console.error(error);
         })
     };
+
+    $scope.updateGroup = function (selectedGroup) {
+        group.update({groupId:selectedGroup.id}, selectedGroup, function (result) {
+            selectedGroup.memberCount = selectedGroup.members.length;
+            selectedGroup.edit = false;
+        }, function (error) {
+            console.error(error);
+        });
+    }
 });
 
 iceControllers.controller('ProfileEntryController', function ($scope, $location, $cookieStore, $stateParams, User) {

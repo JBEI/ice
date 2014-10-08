@@ -23,7 +23,6 @@ import org.jbei.ice.lib.dto.AccountResults;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -511,7 +510,7 @@ public class AccountController {
         if (account == null)
             throw new ControllerException("Could not find account " + email);
 
-        Group group = new GroupController().getGroupById(id);
+        Group group = DAOFactory.getGroupDAO().get(id);
         if (group == null)
             throw new ControllerException("Could not find group " + id);
         account.getGroups().remove(group);

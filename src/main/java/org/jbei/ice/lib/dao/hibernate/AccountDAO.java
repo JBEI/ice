@@ -38,7 +38,8 @@ public class AccountDAO extends HibernateRepository<Account> {
             token = token.toUpperCase();
             String queryString = "from " + Account.class.getName()
                     + " where (UPPER(firstName) like '%" + token
-                    + "%') OR (UPPER(lastName) like '%" + token + "%')";
+                    + "%') OR (UPPER(lastName) like '%" + token
+                    + "%') OR (UPPER(email) like '%" + token + "%')";
             Query query = session.createQuery(queryString);
             if (limit > 0)
                 query.setMaxResults(limit);
