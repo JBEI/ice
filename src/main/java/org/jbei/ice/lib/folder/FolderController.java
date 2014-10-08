@@ -408,8 +408,7 @@ public class FolderController {
 
                     // or belongs to a group that has the write permissions
                     if (accessPermission.getArticle() == AccessPermission.Article.GROUP) {
-                        Group group = new GroupController().getGroupById(
-                                accessPermission.getArticleId());
+                        Group group = DAOFactory.getGroupDAO().get(accessPermission.getArticleId());
                         if (group == null)
                             continue;
 

@@ -11,6 +11,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.FolderDAO;
+import org.jbei.ice.lib.dao.hibernate.GroupDAO;
 import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -34,12 +35,14 @@ public class PermissionsController {
     private final GroupController groupController;
     private final FolderDAO folderDAO;
     private final PermissionDAO dao;
+    private final GroupDAO groupDAO;
 
     public PermissionsController() {
         accountController = new AccountController();
         groupController = new GroupController();
         folderDAO = DAOFactory.getFolderDAO();
         dao = DAOFactory.getPermissionDAO();
+        groupDAO = DAOFactory.getGroupDAO();
     }
 
     /**
@@ -50,23 +53,22 @@ public class PermissionsController {
      * @return saved permission
      * @throws ControllerException
      */
-    public Permission recordGroupPermission(AccessPermission access) throws ControllerException {
-        try {
-            Group group = groupController.getGroupById(access.getArticleId());
-            if (group == null)
-                throw new ControllerException("Could retrieve group for permission add");
-
-            Permission permission = new Permission();
-            permission.setGroup(group);
-            permission.setCanRead(access.isCanRead());
-            permission.setCanWrite(access.isCanWrite());
-            return dao.create(permission);
-        } catch (DAOException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
-        }
-    }
-
+//    public Permission recordGroupPermission(AccessPermission access) throws ControllerException {
+//        try {
+//            Group group = groupController.getGroupById(access.getArticleId());
+//            if (group == null)
+//                throw new ControllerException("Could retrieve group for permission add");
+//
+//            Permission permission = new Permission();
+//            permission.setGroup(group);
+//            permission.setCanRead(access.isCanRead());
+//            permission.setCanWrite(access.isCanWrite());
+//            return dao.create(permission);
+//        } catch (DAOException e) {
+//            Logger.error(e);
+//            throw new ControllerException(e);
+//        }
+//    }
     public Permission addPermission(String userId, AccessPermission access) {
         if (access.isEntry()) {
             Entry entry = DAOFactory.getEntryDAO().get(access.getTypeId());
@@ -108,7 +110,7 @@ public class PermissionsController {
                 break;
 
             case GROUP:
-                group = groupController.getGroupById(access.getArticleId());
+                group = groupDAO.get(access.getArticleId());
                 break;
         }
 
@@ -191,7 +193,7 @@ public class PermissionsController {
                 break;
 
             case GROUP:
-                group = groupController.getGroupById(access.getArticleId());
+                group = groupDAO.get(access.getArticleId());
                 break;
         }
 
@@ -613,7 +615,7 @@ public class PermissionsController {
     }
 
     public ArrayList<AccessPermission> getMatchingGroupsOrUsers(String userId, String val, int limit) {
-        // groups has higher priority
+        // groups have higher priority
         Set<Group> groups = groupController.getMatchingGroups(userId, val, limit);
         ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
 
