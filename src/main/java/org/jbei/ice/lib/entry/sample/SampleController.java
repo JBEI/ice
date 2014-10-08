@@ -242,8 +242,16 @@ public class SampleController {
         for (Sample sample : entrySamples) {
             // convert sample to info
             Storage storage = sample.getStorage();
-            if (storage == null)
+            if (storage == null) {
+                PartSample generic = new PartSample();
+                generic.setType(SampleType.GENERIC);
+                StorageInfo info = new StorageInfo();
+                info.setDisplay(sample.getLabel());
+                generic.setCreationTime(sample.getCreationTime().getTime());
+                generic.setMain(info);
+                samples.add(generic);
                 continue; // sample with no storage
+            }
 
             SampleType type = null;
             StorageInfo well = null;

@@ -17,6 +17,7 @@
 
     <div class="row pad_top" ng-if="samples.length===0">
         <i class="text-muted">No samples available</i>
+        {{remoteEntryStatistics}}
     </div>
 
     <div class="row pad_top" ng-repeat="sample in samples" ng-if="samples.length > 0">
