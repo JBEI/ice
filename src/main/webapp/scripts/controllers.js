@@ -2459,6 +2459,16 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
             });
     };
 
+    $scope.removeLink = function (mainEntry, linkedEntry) {
+        entry.removeLink({partId:mainEntry.id, linkId:linkedEntry.id}, function (result) {
+            var idx = mainEntry.linkedParts.indexOf(linkedEntry);
+            if (idx != -1) {
+                mainEntry.linkedParts.splice(idx, 1);
+            }
+        }, function (error) {
+
+        });
+    };
 
     // file upload
     var uploader = $scope.sequenceFileUpload = $fileUploader.create({

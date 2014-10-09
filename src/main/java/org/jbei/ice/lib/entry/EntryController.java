@@ -92,31 +92,6 @@ public class EntryController {
         auditDAO = DAOFactory.getAuditDAO();
     }
 
-    /**
-     * Retrieve {@link Entry} from the database by name.
-     * <p/>
-     * Throws exception if multiple entries have the same name.
-     *
-     * @param name entry name
-     * @return entry retrieved from the database.
-     * @throws ControllerException
-     * @throws PermissionException
-     */
-    public PartData getByUniqueName(Account account, String name) throws ControllerException, PermissionException {
-        Entry entry = dao.getByUniqueName(name);
-        if (entry == null)
-            return null;
-
-        authorization.expectRead(account.getEmail(), entry);
-
-        PartData info = ModelToInfoFactory.getInfo(entry);
-        boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
-        info.setHasSequence(hasSequence);
-        boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
-        info.setHasOriginalSequence(hasOriginalSequence);
-        return info;
-    }
-
     public FolderDetails retrieveVisibleEntries(String userId, ColumnField field, boolean asc, int start, int limit) {
         Set<Entry> results;
         FolderDetails details = new FolderDetails();
@@ -394,13 +369,6 @@ public class EntryController {
         return new ArrayList<>(dao.getEntriesByIdSet(filtered));
     }
 
-    public UserComment addCommentToEntry(Account account, UserComment userComment) throws ControllerException {
-        Entry entry = dao.get(userComment.getEntryId());
-        Comment comment = new Comment(entry, account, userComment.getMessage());
-        comment = commentDAO.create(comment);
-        return comment.toDataTransferObject();
-    }
-
     public PartData retrieveEntryTipDetails(String userId, String id) {
         Entry entry = getEntry(id);
         if (entry == null)
@@ -412,23 +380,12 @@ public class EntryController {
         return ModelToInfoFactory.createTipView(entry);
     }
 
-    public void updatePartStatus(Account account, String recordId, String newStatus) throws ControllerException {
-        Entry entry = dao.getByRecordId(recordId);
-        entry.setStatus(newStatus);
-        dao.update(entry);
-
-        if (entry.getLinkedEntries() != null) {
-            for (Entry linkedEntry : entry.getLinkedEntries()) {
-                linkedEntry.setStatus(newStatus);
-                dao.update(entry);
-            }
-        }
-    }
-
     public ArrayList<UserComment> retrieveEntryComments(String userId, long partId) {
         Entry entry = dao.get(partId);
         if (entry == null)
             return null;
+
+        authorization.expectRead(userId, entry);
 
         // comments
         ArrayList<Comment> comments = commentDAO.retrieveComments(entry);
@@ -571,6 +528,20 @@ public class EntryController {
         return true;
     }
 
+    public boolean removeLink(String userId, long partId, long linkedPart) {
+        Entry entry = dao.get(partId);
+        if (entry == null)
+            return false;
+
+        authorization.expectWrite(userId, entry);
+        Entry linkedEntry = dao.get(linkedPart);
+
+        if (!entry.getLinkedEntries().remove(linkedEntry))
+            return false;
+
+        return dao.update(entry) != null;
+    }
+
     protected Entry getEntry(String id) {
         Entry entry = null;
 
@@ -592,50 +563,11 @@ public class EntryController {
         return entry;
     }
 
-//    public PartData setPermissions(String userId, String id, ArrayList<AccessPermission> permissions) {
-//        Entry entry = getEntry(id);
-//        if (entry == null)
-//            return null;
-//
-//        EntryType type = EntryType.nameToType(entry.getRecordType());
-//        PartData data = new PartData(type);
-//
-//        // TODO :
-//        if (entry == null) {
-//            partId = new EntryCreator().createPart(userId, data);
-//            entry = DAOFactory.getEntryDAO().get(partId);
-//        } else {
-//            EntryAuthorization authorization = new EntryAuthorization();
-//            authorization.expectWrite(userId, entry);
-//            dao.clearPermissions(entry);
-//        }
-//
-//        data.setId(partId);
-//
-//        if (permissions == null)
-//            return data;
-//
-//        for (AccessPermission access : permissions) {
-//            Permission permission = new Permission();
-//            permission.setEntry(entry);
-//            entry.getPermissions().add(permission);
-//            permission.setAccount(account);
-//            permission.setCanRead(access.isCanRead());
-//            permission.setCanWrite(access.isCanWrite());
-//            dao.create(permission);
-//        }
-//
-//        return data;
-//    }
-
     public PartData retrieveEntryDetails(String userId, String id) {
         Entry entry = getEntry(id);
         if (entry == null)
             return null;
 
-        // user must be able to read if not public entry
-        if (!permissionsController.isPubliclyVisible(entry))
-            authorization.expectRead(userId, entry);
         return retrieveEntryDetails(userId, entry);
     }
 
@@ -673,6 +605,10 @@ public class EntryController {
     }
 
     protected PartData retrieveEntryDetails(String userId, Entry entry) {
+        // user must be able to read if not public entry
+        if (!permissionsController.isPubliclyVisible(entry))
+            authorization.expectRead(userId, entry);
+
         PartData partData = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
 

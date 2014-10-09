@@ -456,7 +456,7 @@ iceServices.factory('Attachment', function ($resource) {
 
 iceServices.factory('Entry', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/parts/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId', commentId:'@commentId'}, {
+        return $resource('/rest/parts/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId', commentId:'@commentId', linkId:'@linkId'}, {
             query:{
                 method:'GET',
                 responseType:"json",
@@ -628,6 +628,12 @@ iceServices.factory('Entry', function ($resource) {
             disablePublicRead:{
                 method:'DELETE',
                 url:'/rest/parts/:partId/permissions/public',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            removeLink:{
+                method:'DELETE',
+                url:'/rest/parts/:partId/links/:linkId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });

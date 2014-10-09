@@ -90,14 +90,17 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public PartData read(@Context UriInfo info,
+    public Response read(@Context UriInfo info,
             @PathParam("id") String id,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = SessionHandler.getUserIdBySession(sessionId);
         EntryType type = EntryType.nameToType(id);
+        PartData data;
         if (type != null)
-            return controller.getPartDefaults(userId, type);
-        return controller.retrieveEntryDetails(userId, id);
+            data = controller.getPartDefaults(userId, type);
+        else
+            data = controller.retrieveEntryDetails(userId, id);
+        return super.respond(data);
     }
 
     /**
@@ -244,14 +247,16 @@ public class PartResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/comments")
-    public UserComment createComment(@PathParam("id") long partId,
+    public Response createComment(@PathParam("id") long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
             UserComment userComment) {
 //        if(userComment == null || userComment.getMessage() == null)
 //            throw new Web
         // todo : check for null
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return controller.createEntryComment(userId, partId, userComment);
+        log(userId, "adding comment to entry " + partId);
+        UserComment comment = controller.createEntryComment(userId, partId, userComment);
+        return respond(comment);
     }
 
     @PUT
@@ -485,5 +490,23 @@ public class PartResource extends RestResource {
         if (controller.moveEntriesToTrash(userId, data))
             return respond(Response.Status.OK);
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Removes the linkId from id
+     *
+     * @param partId     id of entry whose link we are removing
+     * @param linkedPart
+     * @param sessionId
+     * @return
+     */
+    @DELETE
+    @Path("/{id}/links/{linkedId}")
+    public Response deleteLink(@PathParam("id") long partId,
+            @PathParam("linkedId") long linkedPart,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        boolean success = controller.removeLink(userId, partId, linkedPart);
+        return respond(success);
     }
 }

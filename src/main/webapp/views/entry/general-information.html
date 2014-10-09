@@ -193,6 +193,10 @@
                                class="">{{entry.linkedParts[$index+0].partId}}</a>
                         </div>
                         <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
+                            <!--can break the link if allowed to edit this part-->
+                            <i class="fa fa-unlink red opacity_hover"
+                               ng-click="removeLink(entry, entry.linkedParts[$index+0])"
+                               ng-if="entry.canEdit"></i>
                             <b>{{entry.linkedParts[$index+0].type}} <a
                                     ng-href="/entry/{{entry.linkedParts[$index+0].id}}"
                                     style="color: #000">{{entry.linkedParts[$index+0].name}}</a></b>
@@ -219,6 +223,10 @@
                                class="">{{entry.linkedParts[$index+1].partId}}</a>
                         </div>
                         <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
+                            <!--can break the link if allowed to edit this part-->
+                            <i class="fa fa-unlink red opacity_hover"
+                               ng-click="removeLink(entry, entry.linkedParts[$index+1])"
+                               ng-if="entry.canEdit"></i>
                             <b>{{entry.linkedParts[$index+1].type}} <a
                                     ng-href="/entry/{{entry.linkedParts[$index+1].id}}"
                                     style="color: #000">{{entry.linkedParts[$index+1].name}}</a></b>
@@ -335,7 +343,7 @@
         </div>
 
         <!--sbol-->
-        <div style="width: 100%; overflow: auto; position: relative; zoom: 1;" ng-if='entry.hasSequence'
+        <div style="width: 100%; overflow: auto; position: relative; zoom: 1;" ng-if='sbolImageReady'
              ng-show="showSBOL">
             <div style="width: 0;">
                 <img height="130px"
