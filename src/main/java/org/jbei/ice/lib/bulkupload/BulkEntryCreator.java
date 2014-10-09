@@ -38,6 +38,7 @@ public class BulkEntryCreator {
     private final AccountController accountController;
     private final EntryController entryController;
     private final BulkUploadAuthorization authorization;
+    private final BulkUploadController controller;
 
     public BulkEntryCreator() {
         dao = DAOFactory.getBulkUploadDAO();
@@ -46,6 +47,7 @@ public class BulkEntryCreator {
         accountController = new AccountController();
         entryController = new EntryController();
         authorization = new BulkUploadAuthorization();
+        controller = new BulkUploadController();
     }
 
     protected BulkUpload createOrRetrieveBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,
@@ -176,16 +178,7 @@ public class BulkEntryCreator {
         switch (status) {
             case PENDING_APPROVAL:
             default:
-                ArrayList<Long> list = dao.getEntryIds(id);
-                for (Number l : list) {
-                    Entry entry = entryDAO.get(l.longValue());
-                    if (entry == null)
-                        continue;
-
-                    entry.setVisibility(Visibility.PENDING.getValue());
-                    entryDAO.update(entry);
-                }
-                return dao.update(upload).toDataTransferObject();
+                return controller.submitBulkImportDraft(userId, id);
 
             // rejected by admin
             case IN_PROGRESS:
