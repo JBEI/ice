@@ -90,7 +90,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             templateUrl:'/views/collection-selection.html',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid('main.folder');
+                    return Authentication.isSessionValid();
                 }
             }
         })
@@ -99,7 +99,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             templateUrl:'/views/wor/index.html',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid('main.web');
+                    return Authentication.isSessionValid();
                 }
             }
         })
@@ -120,7 +120,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             controller:'WorFolderContentController',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid('main.web_folder');
+                    return Authentication.isSessionValid();
                 }
             }
         })
@@ -130,7 +130,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             controller:'SearchController',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid('main.search');
+                    return Authentication.isSessionValid();
                 }
             }
         })
@@ -145,7 +145,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             templateUrl:'/views/entry.html',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid('main.entry');
+                    return Authentication.isSessionValid();
                 }
             }
         })
@@ -169,8 +169,10 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         .state('main.profile.option', {
             url:'/:option',
             templateUrl:'/views/profile/groups.html',
-            controller:function (sessionValid) {
-                console.log("profile", sessionValid);
+            resolve:{
+                sessionValid:function (Authentication) {
+                    return Authentication.isSessionValid();
+                }
             }
         })
         .state('main.admin', {

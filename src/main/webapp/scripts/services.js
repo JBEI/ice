@@ -936,7 +936,7 @@ iceServices.factory('Authentication',
             },
 
             // checks if the session is valid
-            isSessionValid:function (who) {
+            isSessionValid:function () {
 //                console.log("check for valid session", who);
                 var sid = $cookieStore.get('sessionId');
                 if (sid === undefined) {
