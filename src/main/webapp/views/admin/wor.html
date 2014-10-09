@@ -1,4 +1,4 @@
-<div ng-controller="WebOfRegistriesController">
+<div ng-controller="WebOfRegistriesController" ng-init="showAddRegistryForm=false">
     <div class="row pad_top">
         <button type="button" class="ice-button" ng-click="enableDisableWor()">
             <span ng-if="isWorEnabled">Disable</span>
@@ -6,16 +6,9 @@
             <i style="font-size: 14px" class="fa"
                ng-class="{'fa-toggle-on green':isWorEnabled, 'fa-toggle-off':!isWorEnabled}"></i>
         </button>
-    </div>
-
-    <div class="row" ng-init="getPartners(true)" ng-if="isWorEnabled && wor && wor.partners.length">
-        <div class="page-header">
-            <h5>
-                <strong style="color: #555">REGISTRY PARTNERS</strong>
-                <i ng-click="showAddRegistryForm=true" class="fa fa-plus blue opacity_hover"
-                   style="font-size: 14px"></i>
-            </h5>
-        </div>
+        <button type="button" class="ice-button" ng-click="showAddRegistryForm=true" ng-show="isWorEnabled">
+            <i class="fa fa-plus blue opacity_hover" style="font-size: 14px"></i> Add Partner
+        </button>
 
         <div class=" margin-top-10 panel panel-default font-95em" ng-show="showAddRegistryForm">
             <form class="panel-body" role="form" ng-submit="addPartner()">
@@ -46,12 +39,14 @@
                 </div>
             </form>
         </div>
+    </div>
 
+    <div class="row pad_top" ng-init="getPartners(true)" ng-if="isWorEnabled && wor && wor.partners.length">
         <table cellspacing="0" class="table table-condensed table-hover table-striped font-95em">
             <thead>
             <tr>
                 <td>&nbsp;</td>
-                <td><b>Name</b></td>
+                <td><b>Partner Name</b></td>
                 <td><b>URL</b></td>
                 <td><b>Added</b></td>
                 <td><b>Status</b></td>
