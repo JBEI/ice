@@ -105,11 +105,11 @@ public class LblLdapAuthentication implements IAuthentication {
         AccountController retriever = new AccountController();
         Account account = retriever.getByEmail(loginId);
 
-        Date currentTime = Calendar.getInstance().getTime();
         Group group = getLblJbeiGroup();
 
         if (account == null) {
             account = new Account();
+            Date currentTime = Calendar.getInstance().getTime();
             account.setCreationTime(currentTime);
 
             account.setEmail(getEmail().toLowerCase());
@@ -151,6 +151,9 @@ public class LblLdapAuthentication implements IAuthentication {
             String employeeNumber = "";
 
             //has to look up employee number for binding
+            int idx = userName.indexOf("@lbl.gov");
+            if (idx > 0)
+                userName = userName.substring(0, idx);
             String filter = "(uid=" + userName + ")";
             SearchControls cons = new SearchControls();
             cons.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -233,7 +236,14 @@ public class LblLdapAuthentication implements IAuthentication {
 
             // find user
             NamingEnumeration<SearchResult> userResults;
-            String userQuery = MessageFormat.format(userQueryString, loginName);
+            int idx = loginName.indexOf("@lbl.gov");
+            String queryName;
+            if (idx > 0)
+                queryName = loginName.substring(0, idx);
+            else
+                queryName = loginName;
+
+            String userQuery = MessageFormat.format(userQueryString, queryName);
             userResults = dirContext.search(userDn, userQuery, searchControls);
             if (userResults.hasMore()) {
                 // find user groups
@@ -254,7 +264,7 @@ public class LblLdapAuthentication implements IAuthentication {
             throw new AuthenticationException("Error authenticating with LDAP", e);
         }
 
-        String msg = null;
+        String msg;
         if (result) {
             msg = loginName.toLowerCase() + " is in wiki.";
         } else {
