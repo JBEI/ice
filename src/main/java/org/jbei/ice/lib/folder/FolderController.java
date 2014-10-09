@@ -151,7 +151,8 @@ public class FolderController {
         ArrayList<BulkUploadInfo> list = bulkUploadController.getPendingUploads(userId);
         for (BulkUploadInfo info : list) {
             FolderDetails details = new FolderDetails();
-            details.setName(info.getName());
+            String name = info.getAccount() != null ? info.getAccount().getEmail() : info.getName();
+            details.setName(name);
             details.setCount(info.getCount());
             details.setId(info.getId());
             details.setType(FolderType.UPLOAD);
@@ -171,7 +172,6 @@ public class FolderController {
 
         return dao.removeFolderEntries(folder, entryIds) != null;
     }
-
 
     public FolderDetails retrieveFolderContents(String userId, long folderId, ColumnField sort, boolean asc,
             int start, int limit) {
