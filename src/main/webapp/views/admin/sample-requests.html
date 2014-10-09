@@ -13,7 +13,7 @@
                 </th>
                 <th style="width: 170px">Entry Name</th>
                 <th style="width: 110px">Selection Markers</th>
-                <th style="width:230px">
+                <th style="width:50px">
                     <span class="cursor_pointer">Type</span>
                     <i ng-show="params.sort=='name'" class="fa"
                        ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
@@ -34,12 +34,13 @@
                     <small>{{request.partData.selectionMarkers.toString()}}</small>
                 </td>
                 <td>
-                    <span ng-if="request.requestType==='LIQUID_CULTURE'"><i
-                            class="fa fa-flask"></i> Liquid Culture</span>
-                    <span ng-if="request.requestType!=='LIQUID_CULTURE'"><i class="fa fa-circle-thin"></i> Streak on Agar Plate</span>
+                    <span ng-if="request.requestType==='LIQUID_CULTURE'"><i title="Liquid Culture"
+                                                                            class="fa fa-flask"></i></span>
+                    <span ng-if="request.requestType!=='LIQUID_CULTURE'"><i title="Streak on Agar Plate"
+                                                                            class="fa fa-circle-o"></i></span>
                 </td>
-                <td style="width:160px; white-space:nowrap">{{request.requestTime | date:'MMM d, yyyy'}}</td>
-                <td style="width:160px; white-space:nowrap">{{request.updateTime | date:'MMM d, yyyy'}}</td>
+                <td style="width:160px; white-space:nowrap">{{request.requestTime | date:'medium'}}</td>
+                <td style="width:160px; white-space:nowrap">{{request.updateTime | date:'medium'}}</td>
                 <td>
                     <div ng-if="request.status==='REJECTED'"><i class="fa fa-circle text-danger"></i> Rejected</div>
                     <div ng-if="request.status==='FULFILLED'"><i class="fa fa-circle text-success"></i> Delivered</div>

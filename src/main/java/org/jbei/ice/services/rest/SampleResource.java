@@ -57,8 +57,8 @@ public class SampleResource extends RestResource {
             for (Number number : requestIds)
                 sampleRequestIds.add(number.longValue());
 
-            requestRetriever.setRequestsStatus(userId, sampleRequestIds, status);
-            return super.respond(Response.Status.OK);
+            boolean success = requestRetriever.setRequestsStatus(userId, sampleRequestIds, status);
+            return super.respond(success);
         } catch (Exception e) {
             Logger.error(e);
             return super.respond(Response.Status.INTERNAL_SERVER_ERROR);

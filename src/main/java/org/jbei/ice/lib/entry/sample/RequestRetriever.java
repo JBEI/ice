@@ -149,6 +149,7 @@ public class RequestRetriever {
             return request.toDataTransferObject();
 
         request.setStatus(newStatus);
+        request.setUpdated(new Date());
         return dao.update(request).toDataTransferObject();
     }
 
@@ -165,17 +166,21 @@ public class RequestRetriever {
                 continue;
 
             request.setStatus(status);
+            request.setRequested(new Date());
             dao.update(request);
         }
 
+        // send email to strain archivist
         if (sendEmail) {
-            // send email to strain archivist
             String email = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
             if (email != null && !email.isEmpty()) {
                 String subject = "Sample request";
-                String body = "A sample request has been received from " + account.getFullName() + " for "
-                        + ids.size() + " samples.\n\n";
-                body += "Please go to the following link to review pending requests.\n\n";
+                String body = "A sample request has been received from " + account.getFullName() + " for " + ids.size();
+                if (ids.size() == 1)
+                    body += " sample";
+                else
+                    body += " samples";
+                body += "\n\nPlease go to the following link to review pending requests.\n\n";
                 body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/admin/samples";
                 Emailer.send(email, subject, body);
             }
