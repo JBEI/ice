@@ -94,6 +94,7 @@ public class PartResource extends RestResource {
             @PathParam("id") String id,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = SessionHandler.getUserIdBySession(sessionId);
+        log(userId, "retrieving details for " + id);
         EntryType type = EntryType.nameToType(id);
         PartData data;
         if (type != null)
@@ -443,6 +444,7 @@ public class PartResource extends RestResource {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         EntryCreator creator = new EntryCreator();
         long id = creator.createPart(userId, partData);
+        log(userId, "created entry " + id);
         partData.setId(id);
         return partData;
     }
@@ -467,6 +469,7 @@ public class PartResource extends RestResource {
             PartData partData) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         long id = controller.updatePart(userId, partId, partData);
+        log(userId, "updated entry " + id);
         partData.setId(id);
         return partData;
     }
@@ -487,9 +490,8 @@ public class PartResource extends RestResource {
         }.getType();
         Gson gson = new GsonBuilder().create();
         ArrayList<PartData> data = gson.fromJson(gson.toJsonTree(list), fooType);
-        if (controller.moveEntriesToTrash(userId, data))
-            return respond(Response.Status.OK);
-        return respond(Response.Status.INTERNAL_SERVER_ERROR);
+        boolean success = controller.moveEntriesToTrash(userId, data);
+        return respond(success);
     }
 
     /**
@@ -506,6 +508,7 @@ public class PartResource extends RestResource {
             @PathParam("linkedId") long linkedPart,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
+        log(userId, "removing link " + linkedPart + " from " + partId);
         boolean success = controller.removeLink(userId, partId, linkedPart);
         return respond(success);
     }
