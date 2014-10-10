@@ -201,4 +201,22 @@ public class RemoteAccessController {
         TransferTask task = new TransferTask(userId, remoteId, data);
         IceExecutorService.getInstance().runTask(task);
     }
+
+    public FeaturedDNASequence getRemoteSequence(long remoteId, long partId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null)
+            return null;
+
+        try {
+            String restPath = "/rest/parts/" + partId + "/sequence";
+            Object result = restClient.get(partner.getUrl(), restPath, FeaturedDNASequence.class);
+            if (result == null)
+                return null;
+
+            return (FeaturedDNASequence) result;
+        } catch (Exception e) {
+            Logger.error(e.getMessage());
+            return null;
+        }
+    }
 }

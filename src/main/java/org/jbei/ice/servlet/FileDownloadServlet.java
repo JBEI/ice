@@ -25,10 +25,7 @@ import org.apache.commons.lang.StringUtils;
 public class FileDownloadServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
-    private static final String SEQUENCE_TYPE = "sequence";
-    private static final String ATTACHMENT_TYPE = "attachment";
     private static final String SBOL_VISUAL_TYPE = "sbol_visual";
-    private static final String TMP_FILE_TYPE = "tmp";
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String fileId = request.getParameter("id");
@@ -59,11 +56,13 @@ public class FileDownloadServlet extends HttpServlet {
         response.setContentType("image/png");
         String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         File file = Paths.get(tmpDir, fileId).toFile();
-        response.setContentLength((int) file.length());
-        try {
-            IOUtils.copy(new FileInputStream(file), response.getOutputStream());
-        } catch (IOException ioe) {
-            Logger.error(ioe);
+        if (file.exists() && file.canRead()) {
+            response.setContentLength((int) file.length());
+            try {
+                IOUtils.copy(new FileInputStream(file), response.getOutputStream());
+            } catch (IOException ioe) {
+                Logger.error(ioe);
+            }
         }
     }
 }

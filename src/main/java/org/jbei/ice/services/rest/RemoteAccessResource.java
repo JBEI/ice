@@ -9,10 +9,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.net.RemoteAccessController;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
 /**
  * REST resource for sending/retrieving messages from remote
@@ -34,8 +36,7 @@ public class RemoteAccessResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/available")
-    public ArrayList<FolderDetails> readRemoteUser(@PathParam("id") long remoteId,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+    public ArrayList<FolderDetails> readRemoteUser(@PathParam("id") long remoteId) {
         return controller.getAvailableFolders(remoteId);
     }
 
@@ -43,11 +44,20 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/users/{email}")
     public AccountTransfer getRemoteUser(@PathParam("id") long remoteId,
-            @PathParam("email") String email,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+            @PathParam("email") String email) {
         return controller.getRemoteUser(remoteId, email);
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{entryId}/sequence")
+    public Response getSequence(@PathParam("id") long remoteId,
+            @PathParam("entryId") long partId) {
+        FeaturedDNASequence sequence = controller.getRemoteSequence(remoteId, partId);
+        if (sequence == null)
+            return Response.status(Response.Status.NO_CONTENT).build();
+        return Response.status(Response.Status.OK).entity(sequence).build();
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

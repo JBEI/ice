@@ -45,30 +45,6 @@ public class PermissionsController {
         groupDAO = DAOFactory.getGroupDAO();
     }
 
-    /**
-     * Creates a new permission object for groups from the fields in the parameter.
-     * Used mainly by bulk upload since permissions are set at the group level
-     *
-     * @param access information about the access permission
-     * @return saved permission
-     * @throws ControllerException
-     */
-//    public Permission recordGroupPermission(AccessPermission access) throws ControllerException {
-//        try {
-//            Group group = groupController.getGroupById(access.getArticleId());
-//            if (group == null)
-//                throw new ControllerException("Could retrieve group for permission add");
-//
-//            Permission permission = new Permission();
-//            permission.setGroup(group);
-//            permission.setCanRead(access.isCanRead());
-//            permission.setCanWrite(access.isCanWrite());
-//            return dao.create(permission);
-//        } catch (DAOException e) {
-//            Logger.error(e);
-//            throw new ControllerException(e);
-//        }
-//    }
     public Permission addPermission(String userId, AccessPermission access) {
         if (access.isEntry()) {
             Entry entry = DAOFactory.getEntryDAO().get(access.getTypeId());
@@ -200,15 +176,6 @@ public class PermissionsController {
         dao.removePermission(entry, folder, account, group, access.isCanRead(), access.isCanWrite());
     }
 
-    public boolean accountHasReadPermission(Account account, Entry entry) {
-        try {
-            return dao.hasPermission(entry, null, account, null, true, false);
-        } catch (DAOException dao) {
-            Logger.error(dao);
-        }
-        return false;
-    }
-
     public boolean accountHasReadPermission(Account account, Set<Folder> folders) {
         try {
             return dao.hasPermissionMulti(null, folders, account, null, true, false);
@@ -291,28 +258,6 @@ public class PermissionsController {
     }
 
     /**
-     * retrieves permissions that have been explicitly set for entry with the
-     * exception of the public group read access. The check for that is a separate
-     * method call
-     *
-     * @param entry entry whose permissions are being checked
-     * @return list of set permissions
-     */
-    public ArrayList<AccessPermission> retrieveSetEntryPermissions(Entry entry) {
-        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
-        Set<Permission> permissions = dao.getEntryPermissions(entry);
-
-        Group publicGroup = groupController.createOrRetrievePublicGroup();
-        for (Permission permission : permissions) {
-            if (permission.getGroup() != null && permission.getGroup() == publicGroup)
-                continue;
-            accessPermissions.add(permission.toDataTransferObject());
-        }
-
-        return accessPermissions;
-    }
-
-    /**
      * retrieves permissions that have been explicitly set for a specified folder with the
      * exception of the public group read access. The check for that is a separate
      * method call
@@ -382,20 +327,6 @@ public class PermissionsController {
             accessPermissions.add(new AccessPermission(AccessPermission.Article.GROUP, group.getId(),
                                                        AccessPermission.Type.WRITE_FOLDER, folder.getId(),
                                                        group.getLabel()));
-        }
-
-        return accessPermissions;
-    }
-
-    public ArrayList<AccessPermission> getDefaultPermissions(Account account) {
-        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
-        for (Group group : new GroupController().getAllPublicGroupsForAccount(account)) {
-            AccessPermission accessPermission = new AccessPermission();
-            accessPermission.setType(AccessPermission.Type.READ_ENTRY);
-            accessPermission.setArticle(AccessPermission.Article.GROUP);
-            accessPermission.setArticleId(group.getId());
-            accessPermission.setDisplay(group.getLabel());
-            accessPermissions.add(accessPermission);
         }
 
         return accessPermissions;

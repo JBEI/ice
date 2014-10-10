@@ -221,15 +221,44 @@ iceDirectives.directive("ice.menu.tags", function () {
 iceDirectives.directive("iceFlash", function ($cookieStore) {
     function link(scope, element, attrs) {
         var sid = $cookieStore.get("sessionId");
+        var url;
+        var entryId;
+
+        function generateObject() {
+            element.html('<object id="VectorViewer" width="100%" height="100%" data="/swf/vv/VectorViewer.swf?entryId='
+                + entryId + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
+                              </object>');
+        }
 
         scope.$watch('entry', function (value) {
-            if (value) {
-                element.html('<object id="VectorEditor" width="100%" height="100%" data="/swf/vv/VectorViewer.swf?entryId=' + value.id + '&amp;sessionId=' + sid + '""> \
-                              </object>');
-//                element.html('<b>' + value.recordId + '</b>')
-            } else {
-                element.html('<b>No entry data loaded</b>')
-            }
+            entryId = value.id;
+//            url = attrs.entryid;
+            generateObject();
+        });
+    }
+
+    return {
+        restrict:'AE',
+        link:link
+    };
+});
+
+iceDirectives.directive("iceRemoteFlash", function ($cookieStore) {
+    function link(scope, element, attrs) {
+        var sid = $cookieStore.get("sessionId");
+        var url = "1";
+        var entryId;
+
+        function generateObject() {
+            element.html('<object id="VectorViewer" width="100%" height="100%"data="/swf/vv/VectorViewer.swf?entryId='
+                + entryId + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
+                    </object>');
+        }
+
+        scope.$watch('remoteEntry', function (value) {
+            entryId = value.id;
+//            url = attrs.entryid;
+            generateObject();
         });
     }
 
@@ -242,14 +271,15 @@ iceDirectives.directive("iceFlash", function ($cookieStore) {
 iceDirectives.directive("iceVectorViewer", function ($cookieStore) {
     function link(scope, element, attrs) {
 
-        var id, sid = $cookieStore.get("sessionId");
+        var id;
+        var sid = $cookieStore.get("sessionId");
 
         function generateObject() {
             if (!id) {
                 element.html("<b>Cannot render vector viewer.</b>")
             } else {
                 element.html('<object id="VectorEditor" width="100%" height="100%"> \
-                              <embed src="/swf/vv/VectorViewer.swf?entryId=' + id + '&amp;sessionId=' + sid + '" \
+                              <embed src="/swf/vv/VectorViewer.swf?entryId=' + id + '&amp;sessionId=' + sid + '&amp;url=blah" \
                               quality="high" bgcolor="#869ca7" width="100%" wmode="opaque" height="100%" \
                               name="VectorEditor" align="middle" play="true" loop="false"  \
                               type="application/x-shockwave-flash" \
