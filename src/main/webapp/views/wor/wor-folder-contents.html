@@ -4,8 +4,10 @@
             <h4>
                 <span style="white-space: nowrap">
                     <strong style="color: #888;text-transform: uppercase;"><i class="fa fa-fw fa-globe"></i>
-                        {{selectedPartnerFolder.folderName}}
+                        {{selectedPartner.name}}
                     </strong>
+
+                    <strong>{{selectedPartnerFolder.folderName}}</strong>
                 </span>
 
                 <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
@@ -86,7 +88,7 @@
                        style="color: #999; font-size: 14px;" ng-click="select(entry)"></i>
                 </td>
                 <td>{{entry.type | capitalize}}</td>
-                <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
+                <td><a ng-href="/web/{{selectedPartner.id}}/entry/{{entry.id}}" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
                        popover-template="/views/template.html" popover-title="{{entry.partId}}"
                        popover-placement="right">{{entry.partId}}</a>

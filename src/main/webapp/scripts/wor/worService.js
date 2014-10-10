@@ -57,4 +57,17 @@ angular.module('ice.wor.service', [])
                 }
             });
         }
+    })
+    .factory('WorService', function () {
+        var selectedPartner = undefined;
+
+        return {
+            setSelectedPartner:function (partner) {
+                selectedPartner = partner;
+            },
+
+            getSelectedPartner:function () {
+                return selectedPartner;
+            }
+        }
     });

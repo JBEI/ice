@@ -77,7 +77,8 @@
             <!--style="color: #999; font-size: 14px;" ng-click="select(entry)"></i>-->
             <!--</td>-->
             <td>{{entry.type | capitalize}}</td>
-            <td><a href="/web/1/entry/4413" ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
+            <td><a ng-href="/web/{{webResults.registryPartner.id}}/entry/{{entry.id}}"
+                   ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
                    popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
                    popover-template="/views/template.html" popover-title="{{entry.partId}}"
                    popover-placement="right">{{entry.partId}}</a>

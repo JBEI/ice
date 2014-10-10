@@ -1,34 +1,26 @@
 'use strict';
 
 angular.module('ice.wor.controller', [])
-    .controller('WorContentController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries) {
+    .controller('WorContentController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, WorService) {
         $scope.selectedPartner = $stateParams.partner;
         $scope.loadingPage = true;
         var wor = WebOfRegistries();
         $scope.queryParams = {limit:15, offset:0, sort:'created', partnerId:$stateParams.partner};
         $scope.webResults = undefined;
 
-        // init: retrieve first page of results
-        console.log("WorContentController");
+        // init: retrieve first page of all public entries
         wor.getPublicEntries($scope.queryParams, function (result) {
             $scope.loadingPage = false;
             $scope.webResults = result;
-            console.log(result);
+            WorService.setSelectedPartner($scope.webResults.registryPartner);
         }, function (error) {
             console.error(error);
             $scope.loadingPage = false;
+            WorService.setSelectedPartner(undefined);
         });
 
         $scope.currentPage = 1;
         $scope.maxSize = 5;
-
-        $scope.showEntryDetails = function (entry, index) {
-//            if (!$scope.queryParams.offset) {
-//                $scope.queryParams.offset = index;
-//            }
-////            console.log("/web/" + $scope.webResults.registryPartner.id + "/entry/" + entry.recordId);
-//            $location.path("/web/" + $scope.webResults.registryPartner.id + "/entry/" + entry.id);
-        };
 
         $scope.setPage = function (pageNo) {
             if (pageNo == undefined || isNaN(pageNo))
@@ -69,8 +61,9 @@ angular.module('ice.wor.controller', [])
             $scope.currentTooltip = entry;
         };
     })
-    .controller('WorFolderContentController', function ($scope, $stateParams, Remote) {
+    .controller('WorFolderContentController', function ($rootScope, $scope, $stateParams, Remote, WorService) {
         var id;
+
         $scope.remoteRetrieveError = undefined;
 
         if ($stateParams.folderId === undefined)
@@ -81,6 +74,12 @@ angular.module('ice.wor.controller', [])
         Remote().getFolderEntries({folderId:id, id:$stateParams.partner}, function (result) {
 //        console.log("result", result.entries, result === null);
             $scope.selectedPartnerFolder = result;
+            $scope.selectedPartner = WorService.getSelectedPartner();
+            if ($scope.selectedPartner == undefined) {
+                $scope.selectedPartner = {id:$stateParams.partner};
+                WorService.setSelectedPartner($scope.selectedPartner)
+
+            }
         }, function (error) {
             console.error(error);
             $scope.selectedPartnerFolder = undefined;
@@ -187,6 +186,7 @@ angular.module('ice.wor.controller', [])
         $scope.notFound = undefined;
         $scope.remoteEntry = undefined;
 
+        // retrieve specified entry
         web.getPublicEntry({partnerId:$stateParams.partner, entryId:$stateParams.entryId}, function (result) {
             $scope.remoteEntry = EntryService.convertToUIForm(result);
             $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
@@ -197,8 +197,8 @@ angular.module('ice.wor.controller', [])
         });
 
         var menuSubDetails = $scope.subDetails = [
-            {url:'/views/wor/entry/1.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
-            {id:'comments', url:'/views/wor/entry/2.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
+            {url:'/views/wor/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
+            {id:'comments', url:'/views/wor/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'}
         ];
 
         $scope.showSelection = function (index) {
@@ -207,11 +207,6 @@ angular.module('ice.wor.controller', [])
             });
             menuSubDetails[index].selected = true;
             $scope.selection = menuSubDetails[index].url;
-//            if (menuSubDetails[index].id) {
-//                $location.path("/entry/" + $stateParams.id + "/" + menuSubDetails[index].id);
-//            } else {
-//                $location.path("/entry/" + $stateParams.id);
-//            }
         };
 
         // check if a selection has been made
