@@ -307,6 +307,7 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
 
 iceControllers.controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, Samples) {
     $rootScope.error = undefined;
+    $scope.selectOptions = ['PENDING', 'FULFILLED', 'REJECTED'];
 
     var samples = Samples($cookieStore.get("sessionId"));
     $scope.maxSize = 5;
@@ -647,10 +648,40 @@ iceControllers.controller('ProfileEntryController', function ($scope, $location,
     var user = User($cookieStore.get("sessionId"));
     var profileId = $stateParams.id;
     $location.path("/profile/" + profileId + "/entries", false);
+    var params = {userId:profileId};
 
-    user.getEntries({userId:profileId}, function (result) {
+    user.getEntries(params, function (result) {
         $scope.folder = result;
     });
+
+    $scope.sort = function (sortType) {
+        $scope.folder = null;
+        params.sort = sortType;
+        params.offset = 0;
+        params.asc = !params.asc;
+        user.getEntries(params, function (result) {
+            $scope.folder = result;
+            $scope.currentPage = 1;
+        }, function (error) {
+            console.error(error);
+        });
+    };
+
+    $scope.setUserEntriesPage = function (pageNo) {
+        if (pageNo == undefined || isNaN(pageNo))
+            pageNo = 1;
+
+        console.log(pageNo);
+        $scope.loadingPage = true;
+        params.offset = (pageNo - 1) * 15;
+        user.getEntries(params, function (result) {
+            console.log("result", result);
+            $scope.folder = result;
+            $scope.loadingPage = false;
+        }, function (error) {
+            console.error(error);
+        });
+    };
 });
 
 iceControllers.controller('ProfileSamplesController', function ($scope, $cookieStore, $location, $stateParams, User) {

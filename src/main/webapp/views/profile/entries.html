@@ -82,7 +82,8 @@
 
     <div class="row" ng-if="folder && folder.entries.length > 0">
         <div class="col-md-6" style="padding-left: 0">
-            <pagination total-items="folder.count" on-select-page="setPage(page)" page="currentPage" max-size="maxSize"
+            <pagination total-items="folder.count" on-select-page="setUserEntriesPage(page)" page="currentPage"
+                        max-size="maxSize"
                         class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>
         <div class="col-md-4" style="margin-top: 20px;"><strong class="small">
