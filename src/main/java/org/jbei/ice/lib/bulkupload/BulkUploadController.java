@@ -386,12 +386,14 @@ public class BulkUploadController {
             if (email != null && !email.isEmpty()) {
                 String subject = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME) + " Bulk Upload Notification";
                 String body = "A bulk upload has been submitted and is pending verification.\n\n";
-                body += "Please go to the following link to verify.\n\n";
-                body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/#page=bulk";
+                body += "Please login to the registry at:\n\n";
+                body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+                body += "\n\nand use the \"Pending Approval\" menu item to approve it\n\nThanks.";
                 Emailer.send(email, subject, body);
             }
+            return bulkUpload.toDataTransferObject();
         }
-        return bulkUpload.toDataTransferObject();
+        return null;
     }
 
     public boolean revertSubmitted(Account account, long uploadId) throws ControllerException {
