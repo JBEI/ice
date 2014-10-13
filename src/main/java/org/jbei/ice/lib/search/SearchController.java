@@ -13,16 +13,14 @@ import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.SearchDAO;
-import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.search.BlastProgram;
 import org.jbei.ice.lib.dto.search.IndexType;
 import org.jbei.ice.lib.dto.search.SearchBoostField;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
 import org.jbei.ice.lib.dto.search.SearchResults;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.net.RemotePartner;
@@ -40,16 +38,10 @@ import org.apache.lucene.search.BooleanClause;
  */
 public class SearchController {
 
-    private final SearchDAO dao;
-
-    public SearchController() {
-        dao = DAOFactory.getSearchDAO();
-    }
-
     public SearchResults runSearch(String userId, SearchQuery query, boolean searchWeb) {
         if (searchWeb)
             return runWebSearch(query);
-        return runLocalSearch(userId, query, false);
+        return runLocalSearch(userId, query);
     }
 
     /**
@@ -86,8 +78,14 @@ public class SearchController {
                                                                     SearchResults.class);
                 if (results == null)
                     continue;
-                resultsList.addAll(results.getResults());
-                total += results.getResultCount();
+
+                RegistryPartner registryPartner = partner.toDataTransferObject();
+                for (SearchResult result : results.getResults()) {
+                    result.setPartner(registryPartner);
+                    resultsList.add(result);
+                }
+
+                total += results.getResults().size();
             } catch (Exception e) {
                 Logger.warn("Exception contacting partner " + partner.getUrl() + " : " + e.getMessage());
             }
@@ -97,7 +95,7 @@ public class SearchController {
         Collections.sort(resultsList, new Comparator<SearchResult>() {
             @Override
             public int compare(SearchResult o1, SearchResult o2) {
-                return Double.compare(o1.getScore(), o2.getScore());
+                return Double.compare(o2.getScore(), o1.getScore());
             }
         });
 
@@ -118,15 +116,7 @@ public class SearchController {
      * @param query
      * @return wrapper around the list of search results
      */
-    public SearchResults runLocalSearch(String userId, SearchQuery query, boolean isAPISearch) {
-        String projectName = "";
-        String projectURI = "";
-        if (isAPISearch) {
-            ConfigurationController configurationController = new ConfigurationController();
-            projectName = configurationController.getPropertyValue(ConfigurationKey.PROJECT_NAME);
-            projectURI = configurationController.getPropertyValue(ConfigurationKey.URI_PREFIX);
-        }
-
+    public SearchResults runLocalSearch(String userId, SearchQuery query) {
         String queryString = query.getQueryString();
         Account account = null;
         if (userId != null)
@@ -164,9 +154,9 @@ public class SearchController {
 
         if (!StringUtils.isEmpty(queryString)) {
             HashMap<String, BooleanClause.Occur> terms = parseQueryString(queryString);
-            return hibernateSearch.executeSearch(account, terms, query, projectName, projectURI, mapping);
+            return hibernateSearch.executeSearch(account, terms, query, mapping);
         } else {
-            return hibernateSearch.executeSearchNoTerms(account, query, projectName, projectURI);
+            return hibernateSearch.executeSearchNoTerms(account, query);
         }
     }
 

@@ -112,8 +112,7 @@ public class HibernateSearch {
         return booleanQuery;
     }
 
-    public SearchResults executeSearchNoTerms(Account account, SearchQuery searchQuery, String projectName,
-            String projectURL) {
+    public SearchResults executeSearchNoTerms(Account account, SearchQuery searchQuery) {
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null || entryTypes.isEmpty()) {
             entryTypes = new ArrayList<>();
@@ -183,7 +182,7 @@ public class HibernateSearch {
         List result = fullTextQuery.list();
 
         LinkedList<SearchResult> searchResults = new LinkedList<>();
-        String email = "Anon";
+        String email = null;
         if (account != null)
             email = account.getEmail();
 
@@ -202,8 +201,6 @@ public class HibernateSearch {
             }
 
             searchResult.setMaxScore(1f);
-            searchResult.setWebPartnerName(projectName);
-            searchResult.setWebPartnerURL(projectURL);
             searchResults.add(searchResult);
         }
 
@@ -314,8 +311,7 @@ public class HibernateSearch {
     }
 
     public SearchResults executeSearch(Account account, HashMap<String, BooleanClause.Occur> terms,
-            SearchQuery searchQuery,
-            String projectName, String projectURL, HashMap<String, Float> userBoost) {
+            SearchQuery searchQuery, HashMap<String, Float> userBoost) {
         // types for which we are searching
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null || entryTypes.isEmpty()) {
@@ -351,7 +347,7 @@ public class HibernateSearch {
         }
 
         if (booleanQuery.getClauses().length == 0)
-            return executeSearchNoTerms(account, searchQuery, projectName, projectURL);
+            return executeSearchNoTerms(account, searchQuery);
 
         // wrap Lucene query in a org.hibernate.Query
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
@@ -422,8 +418,6 @@ public class HibernateSearch {
             }
 
             searchResult.setMaxScore(maxScore);
-            searchResult.setWebPartnerName(projectName);
-            searchResult.setWebPartnerURL(projectURL);
             searchResults.add(searchResult);
         }
 
