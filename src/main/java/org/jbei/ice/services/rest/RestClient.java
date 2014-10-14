@@ -36,6 +36,7 @@ public class RestClient {
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.register(IceAuthenticationFilter.class);
         clientConfig.register(PartDataJSONHandler.class);
+        clientConfig.register(ArrayDataJSONHandler.class);
         clientConfig.register(MultiPartFeature.class);
         client = ClientBuilder.newClient(clientConfig);
     }

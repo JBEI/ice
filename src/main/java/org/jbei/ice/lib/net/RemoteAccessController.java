@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.net;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -13,6 +14,7 @@ import org.jbei.ice.lib.dao.hibernate.RemotePartnerDAO;
 import org.jbei.ice.lib.dao.hibernate.RemotePermissionDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
+import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderWrapper;
@@ -104,6 +106,21 @@ public class RemoteAccessController {
 
         String path = "/rest/parts/" + entryId + "/sequence";
         return (FeaturedDNASequence) restClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
+    }
+
+    public ArrayList<AttachmentInfo> getPublicEntryAttachments(long remoteId, long entryId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+            return null;
+
+        String path = "/rest/parts/" + entryId + "/attachments";
+        ArrayList<AttachmentInfo> resp = (ArrayList) restClient.get(partner.getUrl(), path, ArrayList.class);
+        return resp;
+    }
+
+    public File getPublicAttachment(long remoteId, String fileId) {
+        String path = "/rest/file/attachment/" + fileId; // todo
+        return null;
     }
 
     public WebEntries getPublicEntries(long remoteId, int offset, int limit, String sort, boolean asc) {

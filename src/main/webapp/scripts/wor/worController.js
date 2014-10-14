@@ -181,7 +181,7 @@ angular.module('ice.wor.controller', [])
             });
         }
     })
-    .controller('WorEntryController', function ($scope, WebOfRegistries, $stateParams, EntryService) {
+    .controller('WorEntryController', function ($scope, $window, WebOfRegistries, $stateParams, EntryService) {
         var web = WebOfRegistries();
         $scope.notFound = undefined;
         $scope.remoteEntry = undefined;
@@ -198,7 +198,10 @@ angular.module('ice.wor.controller', [])
 
         var menuSubDetails = $scope.subDetails = [
             {url:'/views/wor/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
-            {id:'comments', url:'/views/wor/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'}
+            {id:'sequences', url:'/views/wor/entry/sequence-analysis.html', display:'Sequence Analysis', isPrivileged:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
+            {id:'comments', url:'/views/wor/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
+            {id:'samples', url:'/views/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'},
+            {id:'experiments', url:'/views/entry/experiments.html', display:'Experimental Data', isPrivileged:false, countName:'experimentalDataCount', icon:'fa-magic'}
         ];
 
         $scope.showSelection = function (index) {
@@ -229,5 +232,16 @@ angular.module('ice.wor.controller', [])
                 menuSubDetails[0].selected = true;
             }
         }
+
+        $scope.getAttachments = function () {
+            web.getPublicEntryAttachments({partnerId:$stateParams.partner, entryId:$stateParams.entryId}, function (result) {
+                $scope.remoteAttachments = result;
+            }, function (error) {
+            });
+        };
+
+        $scope.downloadRemoteAttachment = function (attachment) {
+            $window.open("/rest/file/remote/" + $stateParams.partner + "/attachment/" + attachment.fileId, "_self");
+        };
     })
 ;

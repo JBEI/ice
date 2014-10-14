@@ -41,6 +41,7 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.net.RemoteAccessController;
 import org.jbei.ice.lib.utils.Utils;
 
 import org.apache.commons.io.FileUtils;
@@ -111,6 +112,33 @@ public class FileResource extends RestResource {
             String name = DAOFactory.getAttachmentDAO().getByFileId(fileId).getFileName();
             Response.ResponseBuilder response = Response.ok(file);
             response.header("Content-Disposition", "attachment; filename=\"" + name + "\"");
+            return response.build();
+        } catch (Exception e) {
+            Logger.error(e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GET
+    @Path("remote/{id}/attachment/{fileId}")
+    public Response getRemoteAttachment(@PathParam("id") long partnerId,
+            @PathParam("fileId") String fileId,
+            @QueryParam("sid") String sid,
+            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+        try {
+//            if (StringUtils.isEmpty(sessionId))
+//                sessionId = sid;
+
+//            String userId = getUserIdFromSessionHeader(sessionId);
+            RemoteAccessController controller = new RemoteAccessController();
+            File file = controller.getPublicAttachment(partnerId, fileId);
+//            File file = attachmentController.getAttachmentByFileId(userId, fileId);
+            if (file == null)
+                return respond(Response.Status.NOT_FOUND);
+
+//            String name = DAOFactory.getAttachmentDAO().getByFileId(fileId).getFileName();
+            Response.ResponseBuilder response = Response.ok(file);
+            response.header("Content-Disposition", "attachment; filename=\"remoteAttachment\"");
             return response.build();
         } catch (Exception e) {
             Logger.error(e);

@@ -55,6 +55,13 @@ iceDirectives.directive("iceEntryAttachment", function () {
     }
 });
 
+iceDirectives.directive("iceRemoteEntryAttachment", function () {
+    return {
+        restrict:"E",
+        templateUrl:"/views/wor/entry/attachment.html"
+    }
+});
+
 iceDirectives.directive("iceEntryPermission", function () {
     return {
         restrict:"E",
@@ -257,14 +264,13 @@ iceDirectives.directive("iceRemoteFlash", function ($cookieStore) {
         var entryId;
 
         function generateObject() {
-            element.html('<object id="VectorViewer" width="100%" height="100%"data="/swf/vv/VectorViewer.swf?entryId='
+            element.html('<object id="VectorViewer" width="100%" height="100%" data="/swf/vv/VectorViewer.swf?entryId='
                 + entryId + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
                     </object>');
         }
 
         scope.$watch('remoteEntry', function (value) {
             entryId = value.id;
-//            url = attrs.entryid;
             generateObject();
         });
     }
@@ -284,18 +290,9 @@ iceDirectives.directive("iceSequenceChecker", function ($cookieStore) {
             if (!id) {
                 element.html("<b>Cannot render sequence checker.</b>")
             } else {
-                element.html('<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540002" id="SequenceChecker" width="100%" height="100%" codebase="https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"> \
-          <param name="movie" value="SequenceChecker.swf"> \
-              <param name="quality" value="high">  \
-                  <param name="bgcolor" value="#869ca7"> \
-                      <param name="wmode" value="opaque">  \
-                          <param name="allowScriptAccess" value="sameDomain"> \
-                              <embed src="/swf/sc/SequenceChecker.swf?entryId=' + id + '&amp;sessionId=' + sid + '" \
-                              quality="high" bgcolor="#869ca7" width="100%" wmode="opaque" height="100%" \
-                              name="SequenceChecker" align="middle" play="true" loop="false"  \
-                              type="application/x-shockwave-flash" \
-                              pluginspage="http://www.adobe.com/go/getflashplayer"> \
-                              </object>');
+                element.html('<object id="SequenceChecker" width="100%" height="100%" data="/swf/sc/SequenceChecker.swf?entryId='
+                    + id + '&amp;sessionId=' + sid + '"> \
+                    </object>');
             }
         }
 

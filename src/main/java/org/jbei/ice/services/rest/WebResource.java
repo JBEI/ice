@@ -8,6 +8,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebEntries;
@@ -59,6 +60,16 @@ public class WebResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         WebEntries result = remoteAccessController.getPublicEntries(partnerId, offset, limit, sort, asc);
         return super.respond(Response.Status.OK, result);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entries/{entryId}/attachments")
+    public ArrayList<AttachmentInfo> getAttachments(@PathParam("id") long partnerId,
+            @PathParam("entryId") long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+//        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        return remoteAccessController.getPublicEntryAttachments(partnerId, partId);
     }
 
     @POST

@@ -34,7 +34,7 @@ public class FileDownloadServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String type = request.getParameter("type");
+        String remote = request.getParameter("remote");
         String sid = request.getParameter("sid");
         String entryId = request.getParameter("rid");
 
@@ -44,8 +44,12 @@ public class FileDownloadServlet extends HttpServlet {
 
     private void getSBOLVisualType(String userId, String entryId, HttpServletResponse response) {
         Entry entry = DAOFactory.getEntryDAO().getByRecordId(entryId);
+        if (entry == null)
+            return;
+
         Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
-        if (entry == null || sequence == null) {
+
+        if (sequence == null) {
             return;
         }
 

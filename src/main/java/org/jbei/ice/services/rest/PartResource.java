@@ -289,7 +289,7 @@ public class PartResource extends RestResource {
     @Path("/{id}/attachments")
     public ArrayList<AttachmentInfo> getAttachments(@PathParam("id") long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        String userId = SessionHandler.getUserIdBySession(userAgentHeader);
         return attachmentController.getByEntry(userId, partId);
     }
 
