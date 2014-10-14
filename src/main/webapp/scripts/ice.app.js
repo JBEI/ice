@@ -177,7 +177,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         })
         .state('main.admin', {
             url:'admin',
-            templateUrl:'/views/admin.html',
+            templateUrl:'/scripts/admin/admin.html',
             resolve:{
                 sessionValid:function (Authentication) {
                     return Authentication.isSessionValid() && Authentication.isAdmin();
