@@ -5,10 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,7 +24,6 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.AuditDAO;
@@ -36,7 +32,6 @@ import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.FolderDAO;
 import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
-import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -48,7 +43,6 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.group.Group;
@@ -619,27 +613,6 @@ public class EntryController {
         // permissions
         partData.setCanEdit(authorization.canWrite(userId, entry));
         partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
-
-        // retrieve cached pigeon image or generate and cache
-        String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-        if (hasSequence) {
-            Sequence sequence = sequenceDAO.getByEntry(entry);
-            String hash = sequence.getFwdHash();
-            if (Paths.get(tmpDir, hash + ".png").toFile().exists()) {
-                partData.setSbolVisualURL(hash + ".png");
-            } else {
-                URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
-                if (uri != null) {
-                    try {
-                        IOUtils.copy(uri.toURL().openStream(),
-                                     new FileOutputStream(tmpDir + File.separatorChar + hash + ".png"));
-                        partData.setSbolVisualURL(hash + ".png");
-                    } catch (IOException e) {
-                        Logger.error(e);
-                    }
-                }
-            }
-        }
 
         // create audit event if not owner
         // todo : remote access check

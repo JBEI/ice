@@ -346,7 +346,7 @@
         <div style="width: 100%; overflow: auto; position: relative; zoom: 1;" ng-if='entry.hasSequence && showSBOL'>
             <div style="width: 0;">
                 <img height="130px"
-                     ng-src="/download?type=sbol_visual&amp;id={{entry.sbolVisualURL}}&amp;sid={{sessionId}}">
+                     ng-src="/download?sid={{sessionId}}&amp;rid={{entry.recordId}}">
             </div>
         </div>
 
