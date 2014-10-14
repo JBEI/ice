@@ -27,9 +27,6 @@
 </div>
 
 <div class="row" ng-if="isWebSearch">
-    <!--<pre>{{ searchResults | json }}</pre>-->
-
-
     <!--non-blast results remote search results-->
     <table cellspacing="0" class="data_table"
            ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
@@ -77,7 +74,7 @@
                              style="margin-bottom: 0"></progressbar>
             </td>
             <td>{{result.entryInfo.type | capitalize}}</td>
-            <td><a ng-href='/web/{{entry.partner.id}}/entry/{{result.entryInfo.id}}' class="cell_mouseover form-group"
+            <td><a ng-href='/web/{{result.partner.id}}/entry/{{result.entryInfo.id}}' class="cell_mouseover form-group"
                    popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result.entryInfo)"
                    popover-template="/views/search/tooltip.html" popover-title="{{result.entryInfo.partId}}"
                    popover-placement="right">{{result.entryInfo.partId}}</a>
