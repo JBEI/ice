@@ -227,18 +227,17 @@ public class Account implements IDataModel {
 
     public AccountTransfer toDataTransferObject() {
         AccountTransfer info = new AccountTransfer();
-        info.setEmail(getEmail());
-        info.setFirstName(getFirstName());
-        info.setLastName(getLastName());
-        info.setInstitution(getInstitution());
-        info.setDescription(getDescription());
-        info.setInitials(getInitials());
+        info.setEmail(email);
+        info.setFirstName(firstName);
+        info.setLastName(lastName);
+        info.setInstitution(institution);
+        info.setDescription(description);
         if (lastLoginTime != null)
             info.setLastLogin(lastLoginTime.getTime());
         info.setAccountType(this.type);
         if (this.creationTime != null)
             info.setRegisterDate(this.creationTime.getTime());
-        info.setId(getId());
+        info.setId(id);
         return info;
     }
 }
