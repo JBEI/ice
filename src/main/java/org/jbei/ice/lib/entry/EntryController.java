@@ -635,6 +635,9 @@ public class EntryController {
             ArrayList<PartData> newLinks = new ArrayList<>();
             for (PartData link : partData.getLinkedParts()) {
                 Entry linkedEntry = dao.get(link.getId());
+                if (!authorization.canRead(userId, linkedEntry))
+                    continue;
+
                 link = ModelToInfoFactory.createTipView(linkedEntry);
                 Sequence sequence = sequenceDAO.getByEntry(linkedEntry);
                 if (sequence != null) {
@@ -654,6 +657,9 @@ public class EntryController {
             return partData;
 
         for (Entry parent : parents) {
+            if (!authorization.canRead(userId, parent))
+                continue;
+
             EntryType type = EntryType.nameToType(parent.getRecordType());
             PartData parentData = new PartData(type);
             parentData.setId(parent.getId());
