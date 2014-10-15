@@ -359,6 +359,7 @@ iceControllers.controller('AdminSampleRequestController', function ($scope, $loc
 iceControllers.controller('AdminUserController', function ($rootScope, $scope, $stateParams, $cookieStore, User) {
     $scope.maxSize = 5;
     $scope.currentPage = 1;
+    $scope.newProfile = undefined;
 
     var user = User($cookieStore.get("sessionId"));
 
@@ -379,7 +380,7 @@ iceControllers.controller('AdminUserController', function ($rootScope, $scope, $
     };
 
     $scope.createProfile = function () {
-        console.log("create profile");  // todo
+        console.log($scope.newProfile);  // todo
     }
 });
 
@@ -2337,6 +2338,66 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         });
     };
 
+    var entry = Entry(sessionId);
+
+    $scope.addLink = function (part) {
+
+        var modalInstance = $modal.open({
+            templateUrl:'/views/modal/add-link-modal.html',
+            controller:function ($scope, $http, $modalInstance, $cookieStore) {
+                $scope.mainEntry = part;
+                var sessionId = $cookieStore.get("sessionId");
+                $scope.getEntriesByPartNumber = function (val) {
+                    return $http.get('/rest/parts/autocomplete/partid', {
+                        headers:{'X-ICE-Authentication-SessionId':sessionId},
+                        params:{
+                            token:val
+                        }
+                    }).then(function (res) {
+                            return res.data;
+                        });
+                };
+
+                $scope.addExistingPartLink = function ($item, $model, $label) {
+                    if ($item.id == $scope.mainEntry.id)
+                        return;
+
+                    var found = false;
+                    angular.forEach($scope.mainEntry.linkedParts, function (t) {
+                        if (t.id === $item.id) {
+                            found = true;
+                        }
+                    });
+
+                    if (found)
+                        return;
+                    $scope.mainEntry.linkedParts.push($item);
+                    $scope.addExistingPartNumber = undefined;
+                };
+
+                $scope.processLinkAdd = function () {
+                    entry.update($scope.mainEntry, function (result) {
+                        entry.query({partId:result.id}, function (result) {
+                            $modalInstance.close(result);
+                        }, function (error) {
+
+                        })
+                    }, function (error) {
+
+                    })
+                };
+            },
+            backdrop:"static"
+        });
+
+        modalInstance.result.then(function (entry) {
+            if (entry) {
+                part = entry;
+            }
+        }, function () {
+        });
+    };
+
     var partDefaults = {
         type:$scope.createType,
         links:[
@@ -2356,8 +2417,6 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     $scope.sbolShowHide = function () {
         $scope.showSBOL = !$scope.showSBOL;
     };
-
-    var entry = Entry(sessionId);
 
     if ($rootScope.collectionContext) {
         $rootScope.collectionContext.limit = 1;
