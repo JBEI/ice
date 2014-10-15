@@ -26,12 +26,12 @@
                 <div class="col-md-6" ng-if="remoteEntry.linkedParts[$index+0]">
                     <div class="contained-part">
                         <div class="pull-right font-90em" style="padding: .75em .5em;">
-                            <a ng-href="/entry/{{remoteEntry.linkedParts[$index+0].id}}"
+                            <a ng-href="/web/{{currentPartner.id}}/entry/{{remoteEntry.linkedParts[$index+0].id}}"
                                class="">{{remoteEntry.linkedParts[$index+0].partId}}</a>
                         </div>
                         <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
                             <b>{{remoteEntry.linkedParts[$index+0].type}} <a
-                                    ng-href="/remoteEntry/{{remoteEntry.linkedParts[$index+0].id}}"
+                                    ng-href="/web/{{currentPartner.id}}/entry/{{remoteEntry.linkedParts[$index+0].id}}"
                                     style="color: #000">{{remoteEntry.linkedParts[$index+0].name}}</a></b>
                         </div>
 
@@ -52,12 +52,12 @@
                 <div class="col-md-6" ng-if="remoteEntry.linkedParts[$index+1]">
                     <div class="contained-part">
                         <div class="pull-right font-90em" style="padding: .75em .5em;">
-                            <a ng-href="/entry/{{remoteEntry.linkedParts[$index+1].id}}"
+                            <a ng-href="/web/{{currentPartner.id}}/entry/{{remoteEntry.linkedParts[$index+1].id}}"
                                class="">{{remoteEntry.linkedParts[$index+1].partId}}</a>
                         </div>
                         <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
                             <b>{{remoteEntry.linkedParts[$index+1].type}} <a
-                                    ng-href="/entry/{{remoteEntry.linkedParts[$index+1].id}}"
+                                    ng-href="/web/{{currentPartner.id}}/entry/{{remoteEntry.linkedParts[$index+1].id}}"
                                     style="color: #000">{{remoteEntry.linkedParts[$index+1].name}}</a></b>
                         </div>
 
@@ -127,6 +127,10 @@
             <!--<span ng-hide="showSBOL">Show</span> Pigeon Image-->
             <!--</small>-->
             <!--</div>-->
+        </div>
+
+        <div class="pad_top" ng-if='!remoteEntry.hasSequence' style="color: #999;">
+            <i style="color: #999" class="font-90em">No sequence data provided</i>
         </div>
 
         <!--sbol-->
