@@ -87,7 +87,7 @@ iceServices.factory('EntryService', function () {
             inputType:'autoCompleteAdd', autoCompleteField:'SELECTION_MARKERS'},
         {label:"Genotype/Phenotype", schema:'genotypePhenotype', inputType:'long', subSchema:'strainData'},
         {label:"Plasmids", schema:'plasmids', inputType:'autoComplete', autoCompleteField:'PLASMID_PART_NUMBER', subSchema:'strainData'},
-        {label:"Host", schema:'host', subSchema:'strainData'}
+        {label:"Host", schema:'host', inputType:'short', subSchema:'strainData'}
     ];
 
     var generateLinkOptions = function (type) {
