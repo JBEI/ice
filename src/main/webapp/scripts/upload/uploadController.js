@@ -38,6 +38,9 @@ angular.module('ice.upload.controller', [])
             ht.alter('insert_col', undefined, linkedHeaders.length);
         };
 
+        //
+        // uses to xmlHttpRequest to upload files
+        //
         var transport = function (item, row, col) {
             var xhr = item._xhr = new XMLHttpRequest();
             var form = new FormData();
@@ -187,6 +190,15 @@ angular.module('ice.upload.controller', [])
 //                    case 'sentToAbrc':
 //                        object.type = 'checkbox';
 //                        break;
+
+                    case 'status':
+                        object.type = 'autocomplete';
+                        object.source = ['Complete', 'In Progress', 'Planned', ''];
+                        object.allowInvalid = false;
+                        object.validator = function (value, callback) {
+                            callback(value == 'Complete' || value == 'In Progress' || value == 'Planned' || value == '');
+                        };
+                        break;
 
                     case 'bioSafetyLevel':
                         object.type = 'autocomplete';
