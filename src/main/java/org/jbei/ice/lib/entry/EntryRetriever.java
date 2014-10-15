@@ -125,6 +125,7 @@ public class EntryRetriever {
             PartData partData = new PartData(type);
             partData.setId(entry.getId());
             partData.setPartId(entry.getPartNumber());
+            partData.setName(entry.getName());
             dataList.add(partData);
         }
         return dataList;
