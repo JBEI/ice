@@ -31,6 +31,7 @@ iceServices.factory('EntryService', function () {
             {value:"2", text:"Level 2"}
         ]},
         {label:"Creator", required:true, schema:'creator', inputType:'withEmail', bothRequired:'true'},
+        {label:"Keywords", schema:'keywords', inputType:'medium'},
         {label:"Links", schema:'links', inputType:'add'},
         {label:"Summary", required:true, schema:'shortDescription', inputType:'long'},
         {label:"References", schema:'references', inputType:'long'},
