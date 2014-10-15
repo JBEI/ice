@@ -112,18 +112,16 @@
             </tr>
         </table>
     </div>
-    <div class="row" ng-if="selectedPartnerFolder.entries.length > 0">
-        <div class="col-md-6" style="padding-left: 0">
+    <div class="row" ng-if="selectedPartnerFolder&&selectedPartnerFolder.entries.length > 0">
+        <div class="col-md-5" style="padding-left: 0">
             <pagination total-items="selectedPartnerFolder.count" on-select-page="setPage(page)" page="currentPage"
-                        max-size="5"
-                        class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+                        max-size="5" class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>
-        <div class="col-md-4" style="margin-top: 20px;"><strong class="small">1-15 of {{selectedPartnerFolder.count |
-            number}}</strong>
-        </div>
-        <div class="col-md-2 text-right" style="margin-top: 20px; padding-right: 4px">
-            <small>View:</small>
-            <button class="btn btn-xs btn-default">15</button>
+        <div class="col-md-7" style="margin-top: 25px;">
+            <strong class="small">
+                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
+                selectedPartnerFolder.count)}}
+            </strong>
         </div>
     </div>
 </div>

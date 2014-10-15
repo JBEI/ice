@@ -196,14 +196,20 @@ public class RemoteAccessController {
         return (AccountTransfer) result;
     }
 
-    public FolderDetails getPublicFolderEntries(long remoteId, long folderId) {
+    public FolderDetails getPublicFolderEntries(long remoteId, long folderId, String sort, boolean asc, int offset,
+            int limit) {
         RemotePartner partner = this.remotePartnerDAO.get(remoteId);
         if (partner == null)
             return null;
 
         try {
             String restPath = "/rest/folders/" + folderId + "/entries";
-            Object result = restClient.get(partner.getUrl(), restPath, FolderDetails.class);
+            HashMap<String, Object> queryParams = new HashMap<>();
+            queryParams.put("offset", offset);
+            queryParams.put("limit", limit);
+            queryParams.put("asc", asc);
+            queryParams.put("sort", sort);
+            Object result = restClient.get(partner.getUrl(), restPath, FolderDetails.class, queryParams);
             if (result == null)
                 return null;
 

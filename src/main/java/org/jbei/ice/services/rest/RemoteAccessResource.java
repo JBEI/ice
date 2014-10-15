@@ -29,8 +29,7 @@ public class RemoteAccessResource extends RestResource {
     private RemoteAccessController controller = new RemoteAccessController();
 
     /**
-     * @param remoteId        unique identifier for remote partner being accessed
-     * @param userAgentHeader session id (todo : accept api key)
+     * @param remoteId unique identifier for remote partner being accessed
      * @return list of available folders that are available on the registry
      */
     @GET
@@ -70,6 +69,6 @@ public class RemoteAccessResource extends RestResource {
             @DefaultValue("created") @QueryParam("sort") String sort,
             @DefaultValue("false") @QueryParam("asc") boolean asc,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        return controller.getPublicFolderEntries(remoteId, folderId);
+        return controller.getPublicFolderEntries(remoteId, folderId, sort, asc, offset, limit);
     }
 }

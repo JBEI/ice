@@ -63,28 +63,52 @@ angular.module('ice.wor.controller', [])
     })
     .controller('WorFolderContentController', function ($rootScope, $scope, $stateParams, Remote, WorService) {
         var id;
-
         $scope.remoteRetrieveError = undefined;
-
         if ($stateParams.folderId === undefined)
             id = $scope.partnerId;
         else
             id = $stateParams.folderId;
+        $scope.folderPageParams = {folderId:id, id:$stateParams.partner};
 
-        Remote().getFolderEntries({folderId:id, id:$stateParams.partner}, function (result) {
-//        console.log("result", result.entries, result === null);
-            $scope.selectedPartnerFolder = result;
-            $scope.selectedPartner = WorService.getSelectedPartner();
-            if ($scope.selectedPartner == undefined) {
-                $scope.selectedPartner = {id:$stateParams.partner};
-                WorService.setSelectedPartner($scope.selectedPartner)
+        var getRemoteFolderEntries = function () {
+            Remote().getFolderEntries($scope.folderPageParams, function (result) {
+                $scope.selectedPartnerFolder = result;
+                $scope.selectedPartner = WorService.getSelectedPartner();
+                if ($scope.selectedPartner == undefined) {
+                    $scope.selectedPartner = {id:$stateParams.partner};
+                    WorService.setSelectedPartner($scope.selectedPartner)
+                }
+                $scope.loadingPage = false;
+            }, function (error) {
+                console.error(error);
+                $scope.selectedPartnerFolder = undefined;
+                $scope.remoteRetrieveError = true;
+                $scope.loadingPage = false;
+            });
+        };
 
-            }
-        }, function (error) {
-            console.error(error);
-            $scope.selectedPartnerFolder = undefined;
-            $scope.remoteRetrieveError = true;
-        });
+        // init
+        getRemoteFolderEntries();
+
+        $scope.setPage = function (pageNo) {
+            if (pageNo == undefined || isNaN(pageNo))
+                pageNo = 1;
+
+            $scope.loadingPage = true;
+            $scope.folderPageParams.offset = (pageNo - 1) * 15;
+            getRemoteFolderEntries();
+
+//            wor.getPublicEntries($scope.queryParams, function (result) {
+//                $scope.webResults = result;
+//                $scope.loadingPage = false;
+//            }, function (error) {
+//                console.error(error);
+//                $scope.loadingPage = false;
+//                $scope.webResults = undefined;
+//            });
+        };
+
+
     })
     .controller('WebOfRegistriesDetailController',function ($scope, $cookieStore, $location, $stateParams) {
         var sessionId = $cookieStore.get("sessionId");
@@ -186,6 +210,12 @@ angular.module('ice.wor.controller', [])
         $scope.notFound = undefined;
         $scope.remoteEntry = undefined;
 
+
+        web.getPartner({partnerId:$stateParams.partner}, function (result) {
+            $scope.currentPartner = result;
+        }, function (error) {
+        });
+
         // retrieve specified entry
         web.getPublicEntry({partnerId:$stateParams.partner, entryId:$stateParams.entryId}, function (result) {
             $scope.remoteEntry = EntryService.convertToUIForm(result);
@@ -195,6 +225,10 @@ angular.module('ice.wor.controller', [])
             if (error)
                 $scope.notFound = true;
         });
+
+        //
+        // context navigation
+        //
 
         var menuSubDetails = $scope.subDetails = [
             {url:'/views/wor/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
