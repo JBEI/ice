@@ -15,7 +15,7 @@
 
             <h4>
                 <strong style="color: #888;">{{entry.type}}</strong>
-                <strong>{{entry.name}}</strong>&nbsp;<i ng-show="showLink" title="Add link"
+                <strong>{{entry.name}}</strong>&nbsp;<i ng-show="showLink&&entry.canEdit" title="Add link"
                                                         class="fa fa-link opacity_hover font-80em"
                                                         ng-click="addLink(entry)" style="color: #777"></i>
                 <small ng-if="entry.visible!=='OK'" class="label label-danger"
