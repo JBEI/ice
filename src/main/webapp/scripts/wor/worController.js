@@ -136,6 +136,11 @@ angular.module('ice.wor.controller', [])
             web.getPublicEntry({partnerId:$stateParams.partner, entryId:entryId}, function (result) {
                 $scope.remoteEntry = EntryService.convertToUIForm(result);
                 $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
+
+                web.getPublicEntryStatistics({partId:$stateParams.id}, function (stats) {
+                    $scope.remoteEntryStatistics = stats;
+                });
+
             }, function (error) {
                 console.error(error);
                 if (error)

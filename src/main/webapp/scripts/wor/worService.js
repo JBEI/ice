@@ -49,6 +49,13 @@ angular.module('ice.wor.service', [])
                     headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
                 },
 
+                getPublicEntryStatistics:{
+                    method:'GET',
+                    url:'/rest/web/:partnerId/entries/:entryId/statistics',
+                    responseType:'json',
+                    headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+                },
+
                 transferEntries:{
                     method:'POST',
                     url:'/rest/web/:partnerId/transfer',

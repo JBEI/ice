@@ -16,6 +16,7 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.RemoteAccessPermission;
@@ -97,6 +98,15 @@ public class RemoteAccessController {
 
         String path = "/rest/parts/" + entryId + "/tooltip";
         return (PartData) restClient.get(partner.getUrl(), path, PartData.class);
+    }
+
+    public PartStatistics getPublicEntryStatistics(long remoteId, long entryId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+            return null;
+
+        String path = "/rest/parts/" + entryId + "/statistics";
+        return (PartStatistics) restClient.get(partner.getUrl(), path, PartStatistics.class);
     }
 
     public FeaturedDNASequence getPublicEntrySequence(long remoteId, long entryId) {

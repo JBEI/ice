@@ -232,7 +232,7 @@ public class PartResource extends RestResource {
     @Path("/{id}/statistics")
     public PartStatistics getStatistics(@PathParam("id") long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        String userId = SessionHandler.getUserIdBySession(userAgentHeader);
         return controller.retrieveEntryStatistics(userId, partId);
     }
 

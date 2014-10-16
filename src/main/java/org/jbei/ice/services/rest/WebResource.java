@@ -10,6 +10,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
@@ -107,6 +108,16 @@ public class WebResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         PartData result = remoteAccessController.getPublicEntryTooltip(partnerId, entryId);
         return super.respond(Response.Status.OK, result);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entries/{entryId}/statistics")
+    public Response getStatistics(@PathParam("id") long partnerId,
+            @PathParam("entryId") long entryId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        PartStatistics statistics = remoteAccessController.getPublicEntryStatistics(partnerId, entryId);
+        return super.respond(statistics);
     }
 
     @GET
