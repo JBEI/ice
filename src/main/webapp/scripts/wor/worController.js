@@ -58,10 +58,12 @@ angular.module('ice.wor.controller', [])
         };
 
         $scope.tooltipDetails = function (entry) {
-            $scope.currentTooltip = entry;
+            wor.getToolTip({partnerId:$stateParams.partner, entryId:entry.id}, function (result) {
+                $scope.currentTooltip = result;
+            })
         };
     })
-    .controller('WorFolderContentController', function ($location, $rootScope, $scope, $stateParams, Remote, WorService) {
+    .controller('WorFolderContentController', function ($location, $rootScope, $scope, $stateParams, Remote, WorService, WebOfRegistries) {
         var id;
         $scope.remoteRetrieveError = undefined;
         if ($stateParams.folderId === undefined)
@@ -103,6 +105,12 @@ angular.module('ice.wor.controller', [])
             $scope.currentPage = pageNo;
             $scope.folderPageParams.offset = (pageNo - 1) * 15;
             getRemoteFolderEntries();
+        };
+
+        $scope.tooltipDetails = function (entry) {
+            WebOfRegistries().getToolTip({partnerId:$stateParams.partner, entryId:entry.id}, function (result) {
+                $scope.currentTooltip = result;
+            })
         };
 
         $scope.getRemoteEntryDetails = function (partnerId, entryId, index) {

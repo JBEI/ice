@@ -62,6 +62,13 @@ angular.module('ice.wor.service', [])
                     isArray:true,
                     responseType:'json',
                     headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+                },
+
+                getToolTip:{
+                    method:'GET',
+                    url:'/rest/web/:partnerId/entries/:entryId/tooltip',
+                    responseType:'json',
+                    headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
                 }
             });
         }
