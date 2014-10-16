@@ -39,7 +39,7 @@ angular.module('ice.upload.controller', [])
         };
 
         //
-        // uses to xmlHttpRequest to upload files
+        // uses xmlHttpRequest to upload files
         //
         var transport = function (item, row, col) {
             var xhr = item._xhr = new XMLHttpRequest();
@@ -91,6 +91,9 @@ angular.module('ice.upload.controller', [])
             xhr.send(form);
         };
 
+        //
+        // handles file uploads when user selects a file in the bulk upload interface
+        //
         $scope.onFileSelect = function (files, row, col) {
             var id = $scope.bulkUpload.id;
             var url = "/rest/upload/" + id + "/" + UploadUtil.indexToRestResource($scope.importType, col);
@@ -258,9 +261,6 @@ angular.module('ice.upload.controller', [])
             var sheetHeaders = UploadUtil.getSheetHeaders($scope.importType);
             for (var i = 0; i < sheetHeaders.length; i += 1)
                 sheetData[0][i] = '';
-
-            // get data schema for selected type
-            var dataSchema = UploadUtil.getDataSchema($scope.importType);
 
             //
             // function to display the header at the specified index. A special case is when a link
@@ -445,7 +445,7 @@ angular.module('ice.upload.controller', [])
                 if (value === "" && !entryIdDataIndex)
                     return undefined;
 
-                var object = {id:entryIdDataIndex, type:$scope.importType.toUpperCase()};
+                var object = {id:entryIdDataIndex, type:$scope.importType.toUpperCase(), strainData:{}, plasmidData:{}, arabidopsisSeedData:{}};
 
                 // check if there is a linked object being updated
                 if (col >= sheetHeaders.length) {   // or if ($scope.linkedSelection?
@@ -456,13 +456,15 @@ angular.module('ice.upload.controller', [])
 
                     // set property for linked object and add it to link
                     var newIndex = col - sheetHeaders.length;
+                    // todo : same treatment as object above
                     var linkedObject = {id:linkedEntryIdDataIndex, type:$scope.linkedSelection.toUpperCase()};
                     linkedObject[linkedDataSchema[newIndex]] = value;
                     object.linkedParts = [linkedObject];
                 } else {
-                    object[dataSchema[col]] = value;
+                    object = UploadUtil.setDataValue($scope.importType.toUpperCase(), col, object, value);
                 }
 
+                console.log("object", object);
                 object.index = row;
                 return object;
             };
@@ -713,12 +715,13 @@ angular.module('ice.upload.controller', [])
 
                                     // display [for each field in the object]
                                     for (var j = 0; j < dataSchema.length; j += 1) {
-                                        var val = entry[dataSchema[j]];
+                                        var val = UploadUtil.getEntryValue($scope.importType, entry, j);
+//                                        entry[dataSchema[j]];
                                         if (val === undefined)
                                             val = '';
 
                                         // currently for attachments only
-                                        if (val instanceof  Array && dataSchema[j] === "attachments") {
+                                        if (val instanceof Array && dataSchema[j] === "attachments") {
                                             if (val.length) {
                                                 val = val[0].filename;
                                             } else {

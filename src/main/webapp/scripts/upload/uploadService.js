@@ -7,7 +7,7 @@ angular.module('ice.upload.service', [])
         // headers
         //
         var partHeaders = ["Principal Investigator <span class='required'>*</span>"
-            , "PI Email <i class='opacity_hover fa fa-question-circle' title='tooltip' style='margin-left: 20px'></i>"
+            , "PI Email"
             , "Funding Source"
             , "Intellectual Property"
             , "BioSafety Level <span class='required'>*</span>"
@@ -27,7 +27,7 @@ angular.module('ice.upload.service', [])
             , "Attachment File"];
 
         var strainHeaders = angular.copy(partHeaders);
-        strainHeaders.splice.apply(strainHeaders, [15, 0].concat(["Parental Strain", "Genotype or Phenotype", "Plasmids",
+        strainHeaders.splice.apply(strainHeaders, [15, 0].concat(["Host", "Genotype or Phenotype",
             "Selection Markers"]));
 
         var plasmidHeaders = angular.copy(partHeaders);
@@ -48,8 +48,7 @@ angular.module('ice.upload.service', [])
             'sequenceTrace', 'sequenceFileName', 'attachments'];
 
         var strainSchema = angular.copy(dataSchema);
-        strainSchema.splice.apply(strainSchema, [15, 0].concat('parentStrain', 'genotypePhenotype', 'plasmids',
-            'selectionMarkers'));
+        strainSchema.splice.apply(strainSchema, [15, 0].concat('host', 'genotypePhenotype', 'selectionMarkers'));
 
         var plasmidSchema = angular.copy(dataSchema);
         plasmidSchema.splice.apply(plasmidSchema, [15, 0].concat('circular', 'backbone', 'promoters', 'replicatesIn',
@@ -110,6 +109,57 @@ angular.module('ice.upload.service', [])
                     return 'attachment';
 
                 return 'attachment';
+            },
+
+            setDataValue:function (type, index, object, value) {
+
+                var dataSchema = this.getDataSchema(type);
+                if (index < 15) {
+                    object[dataSchema[index]] = value;
+                    return object;
+                }
+
+                // index is greater than 15 so it is one of the specialized types (strain, plasmid, seed)
+                // note that this method does not take links into account
+
+                switch (type.toLowerCase()) {
+                    case "strain":
+                        object.strainData[dataSchema[index]] = value;
+                        return object;
+
+                    default:
+                        return object;
+
+                    case "plasmid":
+                        object.plasmidData[dataSchema[index]] = value;
+                        return object;
+
+                    case "arabidopsis":
+                        object.arabidopsisSeedData[dataSchema[index]] = value;
+                        return object;
+                }
+            },
+
+            // retrieves the value to be displayed in the spreadsheet from the entry object retrieved from the
+            // server side. sort of acts as a mapping to handle the case of "strainData" etc
+            getEntryValue:function (type, entry, index) {
+                var dataSchema = this.getDataSchema(type);
+
+                if (index < 15)
+                    return entry[dataSchema[index]];
+
+                switch (type.toLowerCase()) {
+                    case "strain":
+                        return entry.strainData[dataSchema[index]];
+
+                    case "plasmid":
+                        return entry.plasmidData[dataSchema[index]];
+
+                    case "arabidopsis":
+                        return entry.arabidopsisSeedData[dataSchema[index]];
+                }
+
+                return undefined;
             }
         }
     });
