@@ -68,6 +68,7 @@ angular.module('ice.wor.service', [])
     })
     .factory('WorService', function () {
         var selectedPartner = undefined;
+        var context = undefined;
 
         return {
             setSelectedPartner:function (partner) {
@@ -76,6 +77,14 @@ angular.module('ice.wor.service', [])
 
             getSelectedPartner:function () {
                 return selectedPartner;
+            },
+
+            setContextObject:function (obj) {
+                context = obj;
+            },
+
+            getContext:function () {
+                return context;
             }
         }
     });

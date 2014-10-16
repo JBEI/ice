@@ -88,7 +88,8 @@
                        style="color: #999; font-size: 14px;" ng-click="select(entry)"></i>
                 </td>
                 <td>{{entry.type | capitalize}}</td>
-                <td><a ng-href="/web/{{selectedPartner.id}}/entry/{{entry.id}}" class="cell_mouseover form-group"
+                <td><a ng-click="getRemoteEntryDetails(selectedPartner.id, entry.id, $index)"
+                       class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
                        popover-template="/views/template.html" popover-title="{{entry.partId}}"
                        popover-placement="right">{{entry.partId}}</a>
@@ -115,7 +116,7 @@
     <div class="row" ng-if="selectedPartnerFolder&&selectedPartnerFolder.entries.length > 0">
         <div class="col-md-5" style="padding-left: 0">
             <pagination total-items="selectedPartnerFolder.count" on-select-page="setPage(page)" page="currentPage"
-                        max-size="5" class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+                        max-size="maxSize" class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>
         <div class="col-md-7" style="margin-top: 25px;">
             <strong class="small">

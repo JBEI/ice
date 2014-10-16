@@ -61,14 +61,19 @@ angular.module('ice.wor.controller', [])
             $scope.currentTooltip = entry;
         };
     })
-    .controller('WorFolderContentController', function ($rootScope, $scope, $stateParams, Remote, WorService) {
+    .controller('WorFolderContentController', function ($location, $rootScope, $scope, $stateParams, Remote, WorService) {
         var id;
         $scope.remoteRetrieveError = undefined;
         if ($stateParams.folderId === undefined)
             id = $scope.partnerId;
         else
             id = $stateParams.folderId;
-        $scope.folderPageParams = {folderId:id, id:$stateParams.partner};
+
+        $scope.currentPage = 1;
+        $scope.maxSize = 5;
+        $scope.itemsPerPage = 15;
+
+        $scope.folderPageParams = {folderId:id, id:$stateParams.partner, offset:0};
 
         var getRemoteFolderEntries = function () {
             Remote().getFolderEntries($scope.folderPageParams, function (result) {
@@ -95,20 +100,128 @@ angular.module('ice.wor.controller', [])
                 pageNo = 1;
 
             $scope.loadingPage = true;
+            $scope.currentPage = pageNo;
             $scope.folderPageParams.offset = (pageNo - 1) * 15;
             getRemoteFolderEntries();
-
-//            wor.getPublicEntries($scope.queryParams, function (result) {
-//                $scope.webResults = result;
-//                $scope.loadingPage = false;
-//            }, function (error) {
-//                console.error(error);
-//                $scope.loadingPage = false;
-//                $scope.webResults = undefined;
-//            });
         };
 
+        $scope.getRemoteEntryDetails = function (partnerId, entryId, index) {
+            var position = (($scope.currentPage - 1) * $scope.itemsPerPage) + index;
+            var contextObject = {partner:partnerId, count:$scope.selectedPartnerFolder.count, position:position, params:$scope.folderPageParams, limit:1};
+            WorService.setContextObject(contextObject);
+            $location.path("/web/" + partnerId + "/entry/" + entryId, true);
+        };
+    })
+    .controller('WorEntryController', function ($scope, $window, WebOfRegistries, $stateParams, EntryService, WorService, Remote) {
+        var web = WebOfRegistries();
+        $scope.notFound = undefined;
+        $scope.remoteEntry = undefined;
 
+        web.getPartner({partnerId:$stateParams.partner}, function (result) {
+            $scope.currentPartner = result;
+        }, function (error) {
+            console.error(error);
+        });
+
+        // retrieve specified entry
+        var retrieveEntry = function (entryId) {
+            web.getPublicEntry({partnerId:$stateParams.partner, entryId:entryId}, function (result) {
+                $scope.remoteEntry = EntryService.convertToUIForm(result);
+                $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
+            }, function (error) {
+                console.error(error);
+                if (error)
+                    $scope.notFound = true;
+            });
+        };
+        // init
+        retrieveEntry($stateParams.entryId);
+
+        //
+        // context navigation
+        //
+        $scope.context = WorService.getContext();
+
+        var getNextInContext = function () {
+            $scope.context.params.limit = 1;
+
+            Remote().getFolderEntries($scope.context.params, function (result) {
+                if (!result.entries)
+                    return;
+
+                var entryId = result.entries[0].id;
+                console.log(entryId);
+                retrieveEntry(entryId);
+
+                $scope.loadingPage = false;
+            }, function (error) {
+                console.error(error);
+                $scope.remoteRetrieveError = true;
+                $scope.loadingPage = false;
+            });
+        };
+
+        // get previous entry
+        $scope.prevEntryInContext = function () {
+            $scope.context.position -= 1;
+            $scope.context.params.offset = $scope.context.position;
+            getNextInContext();
+        };
+
+        $scope.nextEntryInContext = function () {
+            $scope.context.position += 1;
+            $scope.context.params.offset = $scope.context.position;
+            getNextInContext();
+        };
+
+        var menuSubDetails = $scope.subDetails = [
+            {url:'/views/wor/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
+            {id:'sequences', url:'/views/wor/entry/sequence-analysis.html', display:'Sequence Analysis', isPrivileged:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
+            {id:'comments', url:'/views/wor/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
+            {id:'samples', url:'/views/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'},
+            {id:'experiments', url:'/views/entry/experiments.html', display:'Experimental Data', isPrivileged:false, countName:'experimentalDataCount', icon:'fa-magic'}
+        ];
+
+        $scope.showSelection = function (index) {
+            angular.forEach(menuSubDetails, function (details) {
+                details.selected = false;
+            });
+            menuSubDetails[index].selected = true;
+            $scope.selection = menuSubDetails[index].url;
+        };
+
+        // check if a selection has been made
+        var menuOption = $stateParams.option;
+        if (menuOption === undefined) {
+            $scope.selection = menuSubDetails[0].url;
+            menuSubDetails[0].selected = true;
+        } else {
+            menuSubDetails[0].selected = false;
+            for (var i = 1; i < menuSubDetails.length; i += 1) {
+                if (menuSubDetails[i].id === menuOption) {
+                    $scope.selection = menuSubDetails[i].url;
+                    menuSubDetails[i].selected = true;
+                    break;
+                }
+            }
+
+            if ($scope.selection === undefined) {
+                $scope.selection = menuSubDetails[0].url;
+                menuSubDetails[0].selected = true;
+            }
+        }
+
+        $scope.getAttachments = function () {
+            web.getPublicEntryAttachments({partnerId:$stateParams.partner, entryId:$stateParams.entryId}, function (result) {
+                $scope.remoteAttachments = result;
+            }, function (error) {
+                console.error(error);
+            });
+        };
+
+        $scope.downloadRemoteAttachment = function (attachment) {
+            $window.open("/rest/file/remote/" + $stateParams.partner + "/attachment/" + attachment.fileId, "_self");
+        };
     })
     .controller('WebOfRegistriesDetailController',function ($scope, $cookieStore, $location, $stateParams) {
         var sessionId = $cookieStore.get("sessionId");
@@ -142,7 +255,7 @@ angular.module('ice.wor.controller', [])
                     $scope.isWorEnabled = result.value === 'yes';
                     $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = $scope.isWorEnabled ? "yes" : "no";
                 }, function (error) {
-
+                    console.error(error);
                 });
 
 //            setting.update({}, newSetting, function (result) {
@@ -150,7 +263,6 @@ angular.module('ice.wor.controller', [])
 //                newSetting.value = result.value;
 //                newSetting.editMode = false;
 //            });
-
         };
 
         $scope.newPartner = undefined;
@@ -204,78 +316,5 @@ angular.module('ice.wor.controller', [])
                 console.error(error);
             });
         }
-    })
-    .controller('WorEntryController', function ($scope, $window, WebOfRegistries, $stateParams, EntryService) {
-        var web = WebOfRegistries();
-        $scope.notFound = undefined;
-        $scope.remoteEntry = undefined;
-
-
-        web.getPartner({partnerId:$stateParams.partner}, function (result) {
-            $scope.currentPartner = result;
-        }, function (error) {
-        });
-
-        // retrieve specified entry
-        web.getPublicEntry({partnerId:$stateParams.partner, entryId:$stateParams.entryId}, function (result) {
-            $scope.remoteEntry = EntryService.convertToUIForm(result);
-            $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
-        }, function (error) {
-            console.error(error);
-            if (error)
-                $scope.notFound = true;
-        });
-
-        //
-        // context navigation
-        //
-
-        var menuSubDetails = $scope.subDetails = [
-            {url:'/views/wor/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
-            {id:'sequences', url:'/views/wor/entry/sequence-analysis.html', display:'Sequence Analysis', isPrivileged:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
-            {id:'comments', url:'/views/wor/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
-            {id:'samples', url:'/views/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'},
-            {id:'experiments', url:'/views/entry/experiments.html', display:'Experimental Data', isPrivileged:false, countName:'experimentalDataCount', icon:'fa-magic'}
-        ];
-
-        $scope.showSelection = function (index) {
-            angular.forEach(menuSubDetails, function (details) {
-                details.selected = false;
-            });
-            menuSubDetails[index].selected = true;
-            $scope.selection = menuSubDetails[index].url;
-        };
-
-        // check if a selection has been made
-        var menuOption = $stateParams.option;
-        if (menuOption === undefined) {
-            $scope.selection = menuSubDetails[0].url;
-            menuSubDetails[0].selected = true;
-        } else {
-            menuSubDetails[0].selected = false;
-            for (var i = 1; i < menuSubDetails.length; i += 1) {
-                if (menuSubDetails[i].id === menuOption) {
-                    $scope.selection = menuSubDetails[i].url;
-                    menuSubDetails[i].selected = true;
-                    break;
-                }
-            }
-
-            if ($scope.selection === undefined) {
-                $scope.selection = menuSubDetails[0].url;
-                menuSubDetails[0].selected = true;
-            }
-        }
-
-        $scope.getAttachments = function () {
-            web.getPublicEntryAttachments({partnerId:$stateParams.partner, entryId:$stateParams.entryId}, function (result) {
-                $scope.remoteAttachments = result;
-            }, function (error) {
-            });
-        };
-
-        $scope.downloadRemoteAttachment = function (attachment) {
-            $window.open("/rest/file/remote/" + $stateParams.partner + "/attachment/" + attachment.fileId, "_self");
-        };
     })
 ;

@@ -18,16 +18,17 @@
 <div ng-if="remoteEntry">
     <div class="row entry_general_header_td" style="height: 60px;">
 
-        <div class="col-md-12" ng-if="remoteEntry">
+        <div ng-class="{'col-md-12':!context, 'col-md-10':context}" ng-if="remoteEntry">
             <i ng-if="context" class="pull-left fa fa-arrow-circle-left entry_go_back cursor_pointer" title="Back"></i>
             <h4>
                 <i class="fa fa-globe text-info"></i> <strong style="color: #888;">{{remoteEntry.type}}</strong>
                 <strong>{{remoteEntry.name}}</strong>
                 <span ng-repeat="parent in remoteEntry.parents">
-                &nbsp;<a ng-href="/remoteEntry/{{parent.id}}" tooltip="{{parent.name}}"
+                &nbsp;<a ng-href="/web/{{currentPartner.id}}/entry/{{parent.id}}" tooltip="{{parent.name}}"
                          tooltip-placement="right" tooltip-trigger="mouseenter"
                          style="font-size: 12px; color: white; position: relative; top: -4px"
-                         class="small label label-default cursor_pointer"><i class="fa fa-level-up"></i></a>
+                         class="small label label-default cursor_pointer"><b class="small_text">{{parent.type |
+                    uppercase}}</b> <i class="fa fa-level-up"></i></a>
                     </span>
                 <br>
                 <small class="font-65em">{{remoteEntry.creationTime | date:'medium'}} - <i style="color: #333">{{remoteEntry.owner}}</i>
@@ -37,11 +38,11 @@
         </div>
 
         <div class="col-md-2" style=" margin-top: 15px; white-space: nowrap;" ng-if="context">
-            <button type="button" class="btn btn-link outline-none" ng-disabled="context.offset===0"
+            <button type="button" class="btn btn-link outline-none" ng-disabled="context.position===0"
                     ng-click="prevEntryInContext()">
                 <i class="fa fa-arrow-left context_nav_pager"></i></button>
-            <strong class="font-90em">{{context.offset+1 | number}} / {{context.count | number}}</strong>
-            <button type="button" class="btn btn-link outline-none" ng-disabled="context.offset===context.count-1"
+            <strong class="font-90em">{{context.position+1 | number}} / {{context.count | number}}</strong>
+            <button type="button" class="btn btn-link outline-none" ng-disabled="context.position===context.count-1"
                     ng-click="nextEntryInContext()">
                 <i class="fa fa-arrow-right context_nav_pager"></i></button>
         </div>
