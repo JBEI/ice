@@ -2347,6 +2347,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
             controller:function ($scope, $http, $modalInstance, $cookieStore) {
                 $scope.mainEntry = part;
                 var sessionId = $cookieStore.get("sessionId");
+                var originalLinks = angular.copy($scope.mainEntry.linkedParts);
                 $scope.getEntriesByPartNumber = function (val) {
                     return $http.get('/rest/parts/autocomplete/partid', {
                         headers:{'X-ICE-Authentication-SessionId':sessionId},
@@ -2375,17 +2376,30 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
                     $scope.addExistingPartNumber = undefined;
                 };
 
+                $scope.removeExistingPartLink = function (link) {
+                    var i = $scope.mainEntry.linkedParts.indexOf(link);
+                    if (i < 0)
+                        return;
+
+                    $scope.mainEntry.linkedParts.splice(i, 1);
+                };
+
                 $scope.processLinkAdd = function () {
                     entry.update($scope.mainEntry, function (result) {
                         entry.query({partId:result.id}, function (result) {
                             $modalInstance.close(result);
                         }, function (error) {
-
+                            console.error(error);
                         })
                     }, function (error) {
-
+                        console.error(error);
                     })
                 };
+
+                $scope.cancelAddLink = function () {
+                    $scope.mainEntry.linkedParts = originalLinks;
+                    $modalInstance.close();
+                }
             },
             backdrop:"static"
         });

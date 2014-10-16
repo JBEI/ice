@@ -1,5 +1,5 @@
 <div class="modal-header" style="border-bottom: 0">
-    <button type="button" class="close" ng-click="$close()">&times;</button>
+    <button type="button" class="close" ng-click="cancelAddLink()">&times;</button>
     <h4><b>Link Entry</b></h4>
 </div>
 
@@ -16,19 +16,20 @@
 
     <br clear="all">
 
-    <div class="panel panel-primary font-90em" style="width: 252px; margin-left: 27px">
+    <div class="panel panel-primary font-90em" style="width: 252px; margin-left: 27px"
+         ng-if="mainEntry.linkedParts.length">
         <div class="panel-body" style="width: 250px">
-            <ul style="margin-left: -20px;">
-                <li ng-repeat="link in mainEntry.linkedParts">{{link.partId}} - ({{link.type}} {{link.name}})</li>
+            <ul style="margin-left: -30px;">
+                <li ng-repeat="link in mainEntry.linkedParts" class="no_wrap">{{link.partId}} - ({{link.type}}
+                    {{link.name}}) <i class="fa fa-times delete_icon" ng-click="removeExistingPartLink(link)"></i></li>
             </ul>
         </div>
     </div>
-
 </div>
 
-<div class="modal-footer" ng-if="mainEntry.linkedParts.length">
+<div class="modal-footer">
     <div ng-if="!processing">
-        <button class="btn btn-default btn-sm" ng-click="$close()">Cancel</button>
+        <button class="btn btn-default btn-sm" ng-click="cancelAddLink()">Cancel</button>
         <button type="button" ng-disabled="mainEntry.linkedParts.length===0" ng-click="processLinkAdd()"
                 class="btn btn-sm btn-primary">Add
         </button>
