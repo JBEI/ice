@@ -464,7 +464,6 @@ angular.module('ice.upload.controller', [])
                     object = UploadUtil.setDataValue($scope.importType.toUpperCase(), col, object, value);
                 }
 
-                console.log("object", object);
                 object.index = row;
                 return object;
             };
