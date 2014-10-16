@@ -32,6 +32,9 @@ public class EntryAuthorization extends Authorization<Entry> {
         if (new PermissionsController().isPubliclyVisible(entry))
             return true;
 
+        if (userId == null)
+            return false;
+
         if (super.canRead(userId, entry) || super.canWrite(userId, entry))
             return true;
 
