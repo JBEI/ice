@@ -118,6 +118,7 @@ public class PartResource extends RestResource {
             sessionId = sid;
 
         String userId = getUserIdFromSessionHeader(sessionId);
+        log(userId, "retrieving part csv");
         String csv = retriever.getAsCSV(userId, id);
         if (csv != null) {
             String name = retriever.getPartNumber(userId, id);

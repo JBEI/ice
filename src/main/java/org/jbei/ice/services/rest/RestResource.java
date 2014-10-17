@@ -44,7 +44,15 @@ public class RestResource {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
 
+    /**
+     * Used to log user actions
+     *
+     * @param userId  unique user identifier
+     * @param message log message
+     */
     protected void log(String userId, String message) {
+        if (userId == null)
+            userId = "Unknown";
         Logger.info(userId + ": " + message);
     }
 }
