@@ -147,13 +147,16 @@ public class BulkUploadResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/status")
-    public BulkUploadInfo updateStatus(
+    public Response updateStatus(
             @PathParam("id") long id,
             BulkUploadInfo info,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
         Logger.info(userId + ": updating bulk upload status for " + info.getId() + " to " + info.getStatus());
-        return creator.updateStatus(userId, id, info.getStatus());
+        BulkUploadInfo resp = creator.updateStatus(userId, id, info.getStatus());
+        if (resp == null)
+            return super.respond(Response.Status.BAD_REQUEST);
+        return super.respond(resp);
     }
 
     @PUT

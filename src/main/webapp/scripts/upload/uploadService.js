@@ -28,11 +28,11 @@ angular.module('ice.upload.service', [])
 
         var strainHeaders = angular.copy(partHeaders);
         strainHeaders.splice.apply(strainHeaders, [15, 0].concat(["Host", "Genotype or Phenotype",
-            "Selection Markers"]));
+            "Selection Markers <span class='required'>*</span>"]));
 
         var plasmidHeaders = angular.copy(partHeaders);
         plasmidHeaders.splice.apply(plasmidHeaders, [15, 0].concat(["Circular", "Backbone", "Promoters", "Replicates In",
-            "Origin of Replication", "Selection Markers"]));
+            "Origin of Replication", "Selection Markers <span class='required'>*</span>"]));
 
         var seedHeaders = angular.copy(partHeaders);
         seedHeaders.splice.apply(seedHeaders, [15, 0].concat(["Homozygosity", "Ecotype", "Harvest Date", "Parents",

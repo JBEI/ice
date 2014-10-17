@@ -586,15 +586,37 @@ angular.module('ice.upload.controller', [])
                     tmp.status = 'APPROVED';
                 else
                     tmp.status = 'PENDING_APPROVAL';
+                $scope.requestError = undefined;
 
                 Upload(sid).updateStatus({importId:$scope.bulkUpload.id}, tmp, function (result) {
                     $scope.submitting = false;
-                    if (requiresApproval)
-                        $location.path('/folders/personal');
-                    else
-                        $location.path('/folders/pending');
+                    $location.path('/folders/personal');
                 }, function (error) {
+                    console.log(error, error.status === 400);
+
                     $scope.submitting = false;
+                    if (error.status === 400) {
+                        $scope.requestError = "Error: validation failed";
+                    } else {
+                        $scope.requestError = "Unknown server error";
+                    }
+
+                    var resetModalInstance = $modal.open({
+                        templateUrl:'views/modal/upload-submit-alert.html',
+                        controller:function ($scope, msg, isError) {
+                            $scope.requestError = msg;
+                        },
+                        backdrop:'static',
+                        resolve:{
+                            msg:function () {
+                                return $scope.requestError;
+                            },
+
+                            isError:function () {
+                                return true;
+                            }
+                        }
+                    });
                 });
             };
 

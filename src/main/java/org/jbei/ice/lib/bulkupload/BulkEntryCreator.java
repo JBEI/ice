@@ -170,10 +170,6 @@ public class BulkEntryCreator {
             return null;
 
         authorization.expectWrite(userId, upload);
-        Date updateTime = new Date(System.currentTimeMillis());
-        BulkUploadStatus existingStatus = upload.getStatus();
-        upload.setLastUpdateTime(updateTime);
-        upload.setStatus(status);
 
         switch (status) {
             case PENDING_APPROVAL:
@@ -191,6 +187,10 @@ public class BulkEntryCreator {
                     entry.setVisibility(Visibility.DRAFT.getValue());
                     entryDAO.update(entry);
                 }
+
+                Date updateTime = new Date(System.currentTimeMillis());
+                upload.setLastUpdateTime(updateTime);
+                upload.setStatus(status);
                 return dao.update(upload).toDataTransferObject();
 
             // approved by an administrator
