@@ -288,8 +288,10 @@ iceDirectives.directive("iceSequenceChecker", function ($cookieStore) {
         var url;
 
         function generateObject() {
-            if (!id) {
-                element.html("<b>Cannot render sequence checker.</b>")
+            if (!url) {
+                element.html('<object id="SequenceChecker" width="100%" height="100%" data="/swf/sc/SequenceChecker.swf?entryId='
+                    + id + '&amp;sessionId=' + sid + '"> \
+                    </object>');
             } else {
                 element.html('<object id="SequenceChecker" width="100%" height="100%" data="/swf/sc/SequenceChecker.swf?entryId='
                     + id + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
