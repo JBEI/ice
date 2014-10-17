@@ -755,7 +755,7 @@ iceServices.factory('Settings', function ($resource) {
 
 iceServices.factory('Remote', function ($resource, $cookieStore) {
     return function () {
-        return $resource('/rest/remote/:id', {id:'@id', email:'@email', folderId:'@folderId'}, {
+        return $resource('/rest/remote/:id', {id:'@id', email:'@email', partId:'@partId', folderId:'@folderId'}, {
             publicFolders:{
                 method:'GET',
                 responseType:'json',
@@ -783,7 +783,23 @@ iceServices.factory('Remote', function ($resource, $cookieStore) {
                 responseType:'json',
                 url:'/rest/remote/:id/folders/:folderId',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
-            }
+            },
+
+            samples:{
+                method:'GET',
+                responseType:'json',
+                isArray:true,
+                url:'/rest/remote/:id/parts/:partId/samples',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            comments:{
+                method:'GET',
+                responseType:'json',
+                isArray:true,
+                url:'/rest/remote/:id/parts/:partId/comments',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
         });
     }
 });

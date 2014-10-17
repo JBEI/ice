@@ -241,7 +241,7 @@ public class PartResource extends RestResource {
     @Path("/{id}/comments")
     public ArrayList<UserComment> getComments(@Context UriInfo info, @PathParam("id") long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        String userId = SessionHandler.getUserIdBySession(userAgentHeader);
         return controller.retrieveEntryComments(userId, partId);
     }
 
@@ -371,7 +371,7 @@ public class PartResource extends RestResource {
     @Path("/{id}/samples")
     public ArrayList<PartSample> getSamples(@Context UriInfo info, @PathParam("id") long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        String userId = SessionHandler.getUserIdBySession(userAgentHeader);
         SampleController sampleController = new SampleController();
         return sampleController.retrieveEntrySamples(userId, partId);
     }

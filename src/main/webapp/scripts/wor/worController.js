@@ -191,8 +191,8 @@ angular.module('ice.wor.controller', [])
             {url:'/views/wor/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
             {id:'sequences', url:'/views/wor/entry/sequence-analysis.html', display:'Sequence Analysis', isPrivileged:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
             {id:'comments', url:'/views/wor/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
-            {id:'samples', url:'/views/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'},
-            {id:'experiments', url:'/views/entry/experiments.html', display:'Experimental Data', isPrivileged:false, countName:'experimentalDataCount', icon:'fa-magic'}
+            {id:'samples', url:'/views/wor/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'}
+//            {id:'experiments', url:'/views/entry/experiments.html', display:'Experimental Data', isPrivileged:false, countName:'experimentalDataCount', icon:'fa-magic'}
         ];
 
         $scope.showSelection = function (index) {
@@ -329,5 +329,27 @@ angular.module('ice.wor.controller', [])
                 console.error(error);
             });
         }
+    })
+    .controller('WorEntrySamplesController', function ($scope, $stateParams, Remote) {
+        // retrieve remote samples
+        var remote = Remote();
+        $scope.samples = undefined;
+
+        remote.samples({id:$stateParams.partner, partId:$stateParams.entryId}, function (result) {
+            $scope.samples = result;
+        }, function (error) {
+            console.error(error);
+        });
+    })
+    .controller('WorEntryCommentController', function ($scope, $stateParams, Remote) {
+        // retrieve remote samples
+        var remote = Remote();
+        $scope.entryComments = undefined;
+
+        remote.comments({id:$stateParams.partner, partId:$stateParams.entryId}, function (result) {
+            $scope.entryComments = result;
+        }, function (error) {
+            console.error(error);
+        });
     })
 ;

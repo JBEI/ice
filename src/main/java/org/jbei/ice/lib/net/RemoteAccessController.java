@@ -14,12 +14,14 @@ import org.jbei.ice.lib.dao.hibernate.RemotePartnerDAO;
 import org.jbei.ice.lib.dao.hibernate.RemotePermissionDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
+import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.RemoteAccessPermission;
+import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.dto.web.WebEntries;
@@ -124,8 +126,7 @@ public class RemoteAccessController {
             return null;
 
         String path = "/rest/parts/" + entryId + "/attachments";
-        ArrayList<AttachmentInfo> resp = (ArrayList) restClient.get(partner.getUrl(), path, ArrayList.class);
-        return resp;
+        return (ArrayList) restClient.get(partner.getUrl(), path, ArrayList.class);
     }
 
     public File getPublicAttachment(long remoteId, String fileId) {
@@ -228,6 +229,24 @@ public class RemoteAccessController {
             Logger.error("Error getting public folder entries from \"" + partner.getUrl() + "\": " + e.getMessage());
             return null;
         }
+    }
+
+    public ArrayList<PartSample> getRemotePartSamples(long remoteId, long partId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null)
+            return null;
+
+        String restPath = "/rest/parts/" + partId + "/samples";
+        return (ArrayList) restClient.get(partner.getUrl(), restPath, ArrayList.class);
+    }
+
+    public ArrayList<UserComment> getRemotePartComments(long remoteId, long partId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null)
+            return null;
+
+        String restPath = "/rest/parts/" + partId + "/comments";
+        return (ArrayList) restClient.get(partner.getUrl(), restPath, ArrayList.class);
     }
 
     public void transferEntries(String userId, long remoteId, ArrayList<Long> data) {
