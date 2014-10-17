@@ -1,8 +1,9 @@
 <div ng-controller="EntrySampleController" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
     <div class="row pad_top" ng-if="entry.canEdit||samples.length>0">
-        <button type="button" class="ice-button" ng-if="entry.canEdit">
-            <i style="font-size: 14px; color: #007dbc" class="fa fa-plus"></i> Add Sample
-        </button>
+        <div class="col-md-12">
+            <button type="button" class="ice-button" ng-if="entry.canEdit">
+                <i style="font-size: 14px; color: #007dbc" class="fa fa-plus"></i> Add Sample
+            </button>
         <span ng-if="samples && samples.length">
             &nbsp;
             <button ng-if="!samples[0].inCart" ng-click="openAddToCart()" type="button" class="ice-button">
@@ -13,10 +14,13 @@
                 <i style="font-size: 14px;" class="fa fa-ban text-danger"></i> Remove From Cart
             </button>
         </span>
+        </div>
     </div>
 
     <div class="row pad_top" ng-if="samples.length===0">
-        <i class="text-muted">No samples available</i>
+        <div class="col-md-12">
+            <i class="text-muted">No samples available</i>
+        </div>
     </div>
 
     <div class="row pad_top" ng-repeat="sample in samples" ng-if="samples.length > 0">
