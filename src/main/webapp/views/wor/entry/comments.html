@@ -1,6 +1,13 @@
 <div ng-controller="WorEntryCommentController">
-    <div class="row">
-        <div class="comment margin-top-20" ng-repeat="comment in (comments = (entryComments | orderBy: 'id':true))">
+    <div class="row pad_top" ng-if="entryComments.length===0">
+        <div class="col-md-12">
+            <i class="text-muted">No comments available</i>
+        </div>
+    </div>
+
+    <div class="row pad_top">
+        <div class="col-md-12 comment margin-top-20"
+             ng-repeat="comment in (comments = (entryComments | orderBy: 'id':true))">
             <span class="close pull-left">{{entryComments.length - $index}}</span>
             <small class="attachment_small_text pull-right">{{comment.commentDate | date:'medium'}}</small>
             <br><br>

@@ -32,9 +32,8 @@
                         <td colspan="{{Plate96Cols.length+1}}" class="font-75em">
                             <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
                             <strong>{{samp.label}}</strong><br>
-                            <span style="color: #777">{{samp.creationTime | date : 'short'}}</span> - <a
-                                ng-href="/profile/{{samp.depositor.id}}">{{samp.depositor.firstName}}
-                            {{samp.depositor.lastName}}</a>
+                            <span style="color: #777">{{samp.creationTime | date : 'short'}}</span> - <i>{{samp.depositor.firstName}}
+                            {{samp.depositor.lastName}}</i>
                         </td>
                     </tr>
                 </table>
@@ -65,9 +64,8 @@
                         <td colspan="{{Plate96Cols.length+1}}" class="font-75em">
                             <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
                             <strong>{{rightSamp.label}}</strong><br>
-                            <span style="color: #777">{{rightSamp.creationTime | date : 'short'}}</span> - <a
-                                ng-href="/profile/{{rightSamp.depositor.id}}">{{rightSamp.depositor.firstName}}
-                            {{rightSamp.depositor.lastName}}</a>
+                            <span style="color: #777">{{rightSamp.creationTime | date : 'short'}}</span> - <i>{{rightSamp.depositor.firstName}}
+                            {{rightSamp.depositor.lastName}}</i>
                         </td>
                     </tr>
                 </table>
@@ -101,9 +99,8 @@
                     <td colspan="5" class="font-75em">
                         <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
                         <strong>{{sample.label}}</strong><br>
-                        <span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a
-                            ng-href="/profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}
-                        {{sample.depositor.lastName}}</a>
+                        <span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <i>{{sample.depositor.firstName}}
+                        {{sample.depositor.lastName}}</i>
                     </td>
                 </tr>
             </table>
