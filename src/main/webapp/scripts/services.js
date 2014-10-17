@@ -799,6 +799,14 @@ iceServices.factory('Remote', function ($resource, $cookieStore) {
                 isArray:true,
                 url:'/rest/remote/:id/parts/:partId/comments',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            traces: {
+                method:'GET',
+                responseType:'json',
+                isArray:true,
+                url:'/rest/remote/:id/parts/:partId/traces',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             }
         });
     }

@@ -1,10 +1,30 @@
-<div ng-controller="AdminSampleRequestController">
-    <div class="row">
+<div ng-controller="AdminSampleRequestController" xmlns="http://www.w3.org/1999/html">
+    <div class="row pad_top">
+        <span class="dropdown">
+            Show <select ng-model="hstep" ng-options="opt for opt in selectOptions"></select>
+
+            <!--<button class="btn btn-default btn-xs btn-sm dropdown-toggle">-->
+               <!--All <span class="caret"></span>-->
+            <!--</button>-->
+            <!--<ul class="dropdown-menu">-->
+                <!--<li ng-repeat="choice in selectOptions">-->
+                    <!--<a href class="font-90em">{{choice | capitalize}}</a>-->
+                <!--</li>-->
+            <!--</ul>-->
+        </span>
+
+        <span class="pull-right" style="border: 1px solid #ccc; padding: 2px">
+            <i class="fa fa-filter"></i>
+            <input type="text" style="border: 0" placeHolder="Filter by name" class="font-85em"
+                   ng-onchange="filterSampleRecords()"/>
+        </span>
+    </div>
+
+    <div class="row pad_top">
         <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
             <tr data-ng-show='!sampleRequests'>
                 <td colspan="10"><img src="/img/loader-mini.gif"> Loading...</td>
             </tr>
-
             <tr data-ng-if='sampleRequests && sampleRequests.requests.length > 0'>
                 <th>
                     <span class="cursor_pointer">Requester</span>

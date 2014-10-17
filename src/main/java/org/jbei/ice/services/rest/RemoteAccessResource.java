@@ -63,7 +63,7 @@ public class RemoteAccessResource extends RestResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{entryId}/traces")
+    @Path("/parts/{entryId}/traces")
     public Response getSequenceTraces(@PathParam("id") long remoteId,
             @PathParam("entryId") long partId) {
         ArrayList<TraceSequenceAnalysis> traces = controller.getRemoteTraces(remoteId, partId);

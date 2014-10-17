@@ -285,19 +285,21 @@ iceDirectives.directive("iceSequenceChecker", function ($cookieStore) {
     function link(scope, element, attrs) {
 
         var id, sid = $cookieStore.get("sessionId");
+        var url;
 
         function generateObject() {
             if (!id) {
                 element.html("<b>Cannot render sequence checker.</b>")
             } else {
                 element.html('<object id="SequenceChecker" width="100%" height="100%" data="/swf/sc/SequenceChecker.swf?entryId='
-                    + id + '&amp;sessionId=' + sid + '"> \
+                    + id + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
                     </object>');
             }
         }
 
         scope.$watch("active", function (value) {
             id = attrs.entryid;
+            url = attrs.url;
             generateObject();
         });
     }

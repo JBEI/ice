@@ -355,5 +355,15 @@ angular.module('ice.wor.controller', [])
         }, function (error) {
             console.error(error);
         });
+    }).controller('WorEntryTracesController', function ($scope, $stateParams, Remote) {
+        // retrieve remote samples
+        var remote = Remote();
+        $scope.traceSequences = undefined;
+
+        remote.traces({id:$stateParams.partner, partId:$stateParams.entryId}, function (result) {
+            $scope.traceSequences = result;
+        }, function (error) {
+            console.error(error);
+        });
     })
 ;
