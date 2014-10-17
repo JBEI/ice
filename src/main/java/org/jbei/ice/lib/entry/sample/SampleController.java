@@ -236,8 +236,11 @@ public class SampleController {
         if (entrySamples == null)
             return samples;
 
-        Account userAccount = DAOFactory.getAccountDAO().getByEmail(userId);
-        boolean inCart = DAOFactory.getRequestDAO().getSampleRequestInCart(userAccount, entry) != null;
+        boolean inCart = false;
+        if (userId != null) {
+            Account userAccount = DAOFactory.getAccountDAO().getByEmail(userId);
+            inCart = DAOFactory.getRequestDAO().getSampleRequestInCart(userAccount, entry) != null;
+        }
 
         for (Sample sample : entrySamples) {
             // convert sample to info

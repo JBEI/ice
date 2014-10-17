@@ -798,8 +798,8 @@ iceServices.factory('Remote', function ($resource, $cookieStore) {
                 responseType:'json',
                 isArray:true,
                 url:'/rest/remote/:id/parts/:partId/comments',
-                headers:{'X-ICE-Authentication-SessionId':sessionId}
-            },
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            }
         });
     }
 });
