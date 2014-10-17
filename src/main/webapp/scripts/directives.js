@@ -260,8 +260,7 @@ iceDirectives.directive("iceVectorViewer", function ($cookieStore) {
 iceDirectives.directive("iceRemoteFlash", function ($cookieStore) {
     function link(scope, element, attrs) {
         var sid = $cookieStore.get("sessionId");
-        var url = "1";
-        var entryId;
+        var entryId, url;
 
         function generateObject() {
             element.html('<object id="VectorViewer" width="100%" height="100%" data="/swf/vv/VectorViewer.swf?entryId='
@@ -271,6 +270,7 @@ iceDirectives.directive("iceRemoteFlash", function ($cookieStore) {
 
         scope.$watch('remoteEntry', function (value) {
             entryId = value.id;
+            url = value.partnerId;
             generateObject();
         });
     }

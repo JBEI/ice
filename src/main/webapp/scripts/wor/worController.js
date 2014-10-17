@@ -136,6 +136,7 @@ angular.module('ice.wor.controller', [])
             web.getPublicEntry({partnerId:$stateParams.partner, entryId:entryId}, function (result) {
                 $scope.remoteEntry = EntryService.convertToUIForm(result);
                 $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
+                $scope.remoteEntry.partnerId = $stateParams.partner;
 
                 web.getPublicEntryStatistics({partnerId:$stateParams.partner, entryId:entryId}, function (stats) {
                     $scope.remoteEntryStatistics = stats;
@@ -331,6 +332,9 @@ angular.module('ice.wor.controller', [])
         }
     })
     .controller('WorEntrySamplesController', function ($scope, $stateParams, Remote) {
+        $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+
         // retrieve remote samples
         var remote = Remote();
         $scope.samples = undefined;
