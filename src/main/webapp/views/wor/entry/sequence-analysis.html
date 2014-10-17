@@ -1,66 +1,45 @@
-<div class="row pad_top">
-    <div class="col-md-12" ng-show="entry.canEdit">
-        <button type="button" class="ice-button" ng-click="showUploadOptions=true">
-            <i style="font-size: 14px" class="fa fa-upload blue"></i> Add File
-        </button>
-    </div>
-</div>
+<div ng-controller="WorEntryTracesController">
 
-<div class="row pad_top font-90em" ng-if="showUploadOptions&&entry.canEdit">
-    <div class="col-md-12">
-        <alert type="'info'" style="margin-bottom: 10px">
-            <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Upload Fasta, GenBank, or ABI
-            formats
-            (optionally in a zip file)
-        </alert>
-
-        <alert type="'danger'" style="margin-bottom: 10px" ng-if="traceUploadError==true">
-            <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Error processing file
-        </alert>
-
-        <!--file upload-->
-        <input ng-file-select type="file"/>
-
-        <div style="height: 7px; background-color: #f9f9f9;">
-            <div class="progress-bar" role="progressbar"
-                 ng-style="{ 'width': sequenceFileUpload.progress + '%' }"></div>
+    <div class="row pad_top" ng-if="traceSequences.length===0">
+        <div class="col-md-12">
+            <i class="text-muted">No trace sequences available</i>
         </div>
     </div>
-</div>
 
-<div class="row pad_top" ng-if="traceSequences.length===0">
-    <div class="col-md-12">
-        <i class="text-muted">No trace sequences available</i>
+    <div class="row pad_top" ng-if="traceSequences.length">
+        <div class="col-md-12">
+            <table cellspacing="0" class="table table-condensed table-hover table-striped font-95em">
+                <thead>
+                <tr>
+                    <td><b>#</b></td>
+                    <td><b>Trace Sequence Files</b></td>
+                    <td><b>Uploaded By</b></td>
+                    <td><b>On</b></td>
+                    <td>&nbsp;</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="traceSequence in traceSequences">
+                    <td style="line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"><b>{{$index+1}}</b>
+                    </td>
+                    <td><a class="cursor_pointer"
+                           ng-click="downloadTraceFile(traceSequence)">{{traceSequence.filename}}</a>
+                    </td>
+                    <td><a ng-href="/profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}
+                        {{traceSequence.depositor.lastName}}</a></td>
+                    <td>{{traceSequence.created | date:'MMM d, y, h:mm a'}}</td>
+                    <td style="font-size:14px" ng-if="entry.canEdit">
+                        <i ng-click="deleteTraceSequenceFile(traceSequence.fileId)"
+                           class="fa fa-trash-o delete_icon"></i></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
-<div class="row pad_top" ng-if="traceSequences.length">
-    <div class="col-md-12">
-        <table cellspacing="0" class="table table-condensed table-hover table-striped font-95em">
-            <thead>
-            <tr>
-                <td><b>#</b></td>
-                <td><b>Trace Sequence Files</b></td>
-                <td><b>Uploaded By</b></td>
-                <td><b>On</b></td>
-                <td>&nbsp;</td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="traceSequence in traceSequences">
-                <td style="line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"><b>{{$index+1}}</b>
-                </td>
-                <td><a class="cursor_pointer"
-                       ng-click="downloadTraceFile(traceSequence)">{{traceSequence.filename}}</a>
-                </td>
-                <td><a ng-href="/profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}
-                    {{traceSequence.depositor.lastName}}</a></td>
-                <td>{{traceSequence.created | date:'MMM d, y, h:mm a'}}</td>
-                <td style="font-size:14px" ng-if="entry.canEdit">
-                    <i ng-click="deleteTraceSequenceFile(traceSequence.fileId)"
-                       class="fa fa-trash-o delete_icon"></i></td>
-            </tr>
-            </tbody>
-        </table>
+    <div class="row pad_top" ng-if="remoteEntry.hasSequence&&traceSequences.length">
+        <div class="col-md-12" style="height: 600px">
+            <ice-sequence-checker entryId="{{remoteEntry.id}}" url="{{remoteEntry.partnerId}}"></ice-sequence-checker>
+        </div>
     </div>
 </div>
