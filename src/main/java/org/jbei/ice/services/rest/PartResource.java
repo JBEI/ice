@@ -327,7 +327,7 @@ public class PartResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         if (StringUtils.isEmpty(userAgentHeader))
             userAgentHeader = sessionId;
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        String userId = SessionHandler.getUserIdBySession(userAgentHeader);
         return controller.getTraceSequences(userId, partId);
     }
 

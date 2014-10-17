@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dto.comment.UserComment;
+import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.net.RemoteAccessController;
@@ -58,6 +59,17 @@ public class RemoteAccessResource extends RestResource {
         if (sequence == null)
             return Response.status(Response.Status.NO_CONTENT).build();
         return Response.status(Response.Status.OK).entity(sequence).build();
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{entryId}/traces")
+    public Response getSequenceTraces(@PathParam("id") long remoteId,
+            @PathParam("entryId") long partId) {
+        ArrayList<TraceSequenceAnalysis> traces = controller.getRemoteTraces(remoteId, partId);
+        if (traces == null)
+            return Response.status(Response.Status.NO_CONTENT).build();
+        return Response.status(Response.Status.OK).entity(traces).build();
     }
 
     @GET

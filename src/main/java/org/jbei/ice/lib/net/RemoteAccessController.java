@@ -18,6 +18,7 @@ import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
+import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.RemoteAccessPermission;
@@ -266,6 +267,24 @@ public class RemoteAccessController {
                 return null;
 
             return (FeaturedDNASequence) result;
+        } catch (Exception e) {
+            Logger.error(e.getMessage());
+            return null;
+        }
+    }
+
+    public ArrayList<TraceSequenceAnalysis> getRemoteTraces(long remoteId, long partId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null)
+            return null;
+
+        try {
+            String restPath = "/rest/parts/" + partId + "/traces";
+            Object result = restClient.get(partner.getUrl(), restPath, ArrayList.class);
+            if (result == null)
+                return null;
+
+            return (ArrayList) result;
         } catch (Exception e) {
             Logger.error(e.getMessage());
             return null;
