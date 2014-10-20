@@ -879,10 +879,10 @@ ul#indented li a:hover {
 }
 
 .system_collection_user_menu_row {
-    border-top: 1px solid #F2F2F2;
+    border-top: 1px solid #f6f6f6;
     color: #233559;
     line-height: 90%;
-    padding: 8px;
+    padding: 8px 6px 6px 15px;
 }
 
 .user_collection_user_menu_row {
@@ -1495,13 +1495,12 @@ table.data_table tr td {
 }
 
 .collections_header {
-    font-size: 0.90em;
+    font-size: 0.85em;
     padding: 4px;
     font-weight: bold;
     /*<!-- 233559 -->*/
     font-family: Helvetica, serif;
-    color: #333;
-    border-bottom: 1px solid #bbb;
+    color: #888;
 }
 
 .ice-button {

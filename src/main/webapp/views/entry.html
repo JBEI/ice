@@ -10,7 +10,8 @@
     <div class="row entry_general_header_td" style="height: 60px;">
 
         <div class="col-md-10" ng-if="entry">
-            <i ng-if="context" class="pull-left fa fa-arrow-circle-left entry_go_back cursor_pointer" title="Back"></i>
+            <i ng-if="context" ng-click="backTo()"
+               class="pull-left fa fa-arrow-circle-left entry_go_back cursor_pointer" title="Back"></i>
 
             <h4>
                 <strong style="color: #888;">{{entry.type}}</strong>
@@ -46,8 +47,8 @@
             <button type="button" class="btn btn-link outline-none" ng-disabled="context.offset===0"
                     ng-click="prevEntryInContext()">
                 <i class="fa fa-arrow-left context_nav_pager"></i></button>
-            <strong class="font-90em">{{context.offset+1 | number}} / {{context.count | number}}</strong>
-            <button type="button" class="btn btn-link outline-none" ng-disabled="context.offset===context.count-1"
+            <strong class="font-90em">{{context.offset+1 | number}} / {{context.available | number}}</strong>
+            <button type="button" class="btn btn-link outline-none" ng-disabled="context.offset==context.available-1"
                     ng-click="nextEntryInContext()">
                 <i class="fa fa-arrow-right context_nav_pager"></i></button>
         </div>

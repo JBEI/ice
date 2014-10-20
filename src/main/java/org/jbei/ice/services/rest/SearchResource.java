@@ -44,7 +44,7 @@ public class SearchResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response search(
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionHeader,
-            @DefaultValue("false") @QueryParam("w") boolean searchWeb,
+            @DefaultValue("false") @QueryParam("webSearch") boolean searchWeb,
             SearchQuery query) {
         String userId = SessionHandler.getUserIdBySession(sessionHeader);
         try {
@@ -73,7 +73,7 @@ public class SearchResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public SearchResults search(
             @QueryParam("q") String queryString,
-            @DefaultValue("false") @QueryParam("w") boolean searchWeb,
+            @DefaultValue("false") @QueryParam("webSearch") boolean searchWeb,
             @DefaultValue("0") @QueryParam("offset") int offset,
             @DefaultValue("15") @QueryParam("limit") int limit,
             @DefaultValue("relevance") @QueryParam("sort") String sort,

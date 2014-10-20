@@ -1225,7 +1225,7 @@ iceControllers.controller('CollectionDetailController', function ($scope, $cooki
 
 // deals with sub collections e.g. /folders/:id
 // retrieves the contents of folders
-iceControllers.controller('CollectionFolderController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, $http, Folders, Entry) {
+iceControllers.controller('CollectionFolderController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, $http, Folders, Entry, EntryContextUtil) {
     var sessionId = $cookieStore.get("sessionId");
     var folders = Folders();
     var entry = Entry(sessionId);
@@ -1370,7 +1370,18 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
         if (!$scope.params.offset) {
             $scope.params.offset = index;
         }
-        $rootScope.collectionContext = $scope.params;
+
+        var offset = (($scope.currentPage - 1) * 15) + index;
+        EntryContextUtil.setContextCallback(function (offset, callback) {
+            $scope.params.offset = offset;
+            $scope.params.limit = 1;
+
+            Folders().folder($scope.params,
+                function (result) {
+                    callback(result.entries[0].id);
+                });
+        }, $scope.params.count, offset, "/folders" + $scope.params.folderId);
+
         $location.path("/entry/" + entry.id);
     };
 
@@ -2279,10 +2290,10 @@ iceControllers.controller('FullScreenFlashController', function ($scope, $stateP
     });
 });
 
-iceControllers.controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope, $fileUploader, Entry, Folders, EntryService) {
+iceControllers.controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope, $fileUploader, Entry, Folders, EntryService, EntryContextUtil) {
     $scope.partIdEditMode = false;
     $scope.showSBOL = true;
-    $scope.context = undefined;
+    $scope.context = EntryContextUtil.getContext();
     $scope.isFileUpload = false;
 
     var sessionId = $cookieStore.get("sessionId");
@@ -2432,11 +2443,6 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         $scope.showSBOL = !$scope.showSBOL;
     };
 
-    if ($rootScope.collectionContext) {
-        $rootScope.collectionContext.limit = 1;
-        $scope.context = $rootScope.collectionContext;
-    }
-
     $scope.entryFields = undefined;
     $scope.entry = undefined;
 
@@ -2533,34 +2539,20 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     var folders = Folders();
     $scope.nextEntryInContext = function () {
         $scope.context.offset += 1;
-
-        folders.folder($scope.context,
-            function (result) {
-                $scope.context.count = result.count;
-
-                if (!result.entries || result.entries.length === 0) {
-                    // TODO : show some error msg
-                    return;
-                }
-
-                $location.path("/entry/" + result.entries[0].id);
-            });
+        $scope.context.callback($scope.context.offset, function (result) {
+            $location.path("/entry/" + result);
+        });
     };
 
     $scope.prevEntryInContext = function () {
         $scope.context.offset -= 1;
+        $scope.context.callback($scope.context.offset, function (result) {
+            $location.path("/entry/" + result);
+        });
+    };
 
-        folders.folder($scope.context,
-            function (result) {
-                $scope.context.count = result.count;
-
-                if (!result.entries || result.entries.length === 0) {
-                    // tODO : show some error msg
-                    return;
-                }
-
-                $location.path("/entry/" + result.entries[0].id);
-            });
+    $scope.backTo = function () {
+        $location.path($scope.context.back);
     };
 
     $scope.removeLink = function (mainEntry, linkedEntry) {
@@ -2570,7 +2562,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
                 mainEntry.linkedParts.splice(idx, 1);
             }
         }, function (error) {
-
+            console.error(error);
         });
     };
 
@@ -2695,7 +2687,6 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
             permission.permissionId = result.id;
         });
     };
-
 
     // retrieve permissions for folder
     Folders().permissions({folderId:folder.id}, function (result) {

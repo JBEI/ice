@@ -1,4 +1,4 @@
-<form ng-submit="search()">
+<form ng-submit="search(false)">
     <table cellpadding="0" cellspacing="0" class="dropdown" style="white-space: nowrap;">
         <tr>
             <td class="quick_search">
@@ -72,7 +72,7 @@
                     <div class="divider"></div>
 
                     <div>
-                        <button class="btn btn-link" type="button" ng-click="searchWebOfRegistries()">
+                        <button class="btn btn-link" type="button" ng-click="search(true)">
                             <i style="color: #555" class="fa fa-globe"></i> <span
                                 class="font-90em">Search other registries</span>
                         </button>

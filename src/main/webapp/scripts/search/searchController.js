@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.search.controller', [])
-    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search) {
+    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil) {
         $scope.$on("RunSearch", function (event, filters) {
             $scope.searchResults = undefined;
             $scope.searchFilters = filters;
@@ -11,11 +11,9 @@ angular.module('ice.search.controller', [])
         var runAdvancedSearch = function (filters) {
             $scope.loadingSearchResults = true;
 
-            var webSearch = {};
-            if (filters.webSearch)
-                webSearch.w = true;
+            console.log(filters);
 
-            Search().runAdvancedSearch(webSearch, filters,
+            Search().runAdvancedSearch({webSearch:filters.webSearch}, filters,
                 function (result) {
                     $scope.searchResults = result;
                     $scope.loadingSearchResults = false;
@@ -30,7 +28,6 @@ angular.module('ice.search.controller', [])
 
         var noFilters = (!$scope.searchFilters || Object.keys($scope.searchFilters).length === 0);
 
-        // todo : $location.search('q', $scope.queryText);
         if (noFilters) {
             $scope.searchFilters = {entryTypes:[], parameters:{}, blastQuery:{}, queryString:""};
             var queryString = $location.search().q;
@@ -39,28 +36,18 @@ angular.module('ice.search.controller', [])
             }
         }
 
-//        if (noFilters) {
-        // no filters keyword search only
-//            var queryString = $location.search().q;
-//            if (queryString === undefined)
-//                queryString = "";
-
-        // todo :
-//            if ($scope.queryText !== queryString)
-//                $scope.queryText = queryString; // update input box
-//
         // filters run advanced search
         $scope.searchFilters.parameters.start = 0;
         $scope.searchFilters.parameters.retrieveCount = 15;
         $scope.searchFilters.parameters.sortField = "RELEVANCE";
         runAdvancedSearch($scope.searchFilters);
 
-        // TODO : sort ?
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
         $scope.currentPage = 1;
 
         $scope.setSearchResultPage = function (pageNo) {
             $scope.searchFilters.parameters.start = (pageNo - 1) * 15;
+            $scope.currentPage = pageNo;
             runAdvancedSearch($scope.searchFilters);
         };
 
@@ -87,6 +74,30 @@ angular.module('ice.search.controller', [])
                 }, function (error) {
                     console.error(error);
                 });
+        };
+
+        $scope.goToEntryDetails = function (entry, index) {
+            // this assumes that if the user is able to click on a result then search was successful
+
+            var offset = (($scope.currentPage - 1) * 15) + index;
+
+            EntryContextUtil.setContextCallback(function (offset, callback) {
+                $scope.searchFilters.parameters.start = offset;
+                $scope.searchFilters.parameters.retrieveCount = 1;
+
+//                console.log("next", $scope.searchFilters);
+
+                Search().runAdvancedSearch({webSearch:$scope.searchFilters.webSearch}, $scope.searchFilters,
+                    function (result) {
+                        callback(result.results[0].entryInfo.id);
+                    },
+                    function (error) {
+                        console.log(error);
+                    }
+                );
+            }, $scope.searchResults.resultCount, offset, "/search");
+
+            $location.path("/entry/" + entry.id);
         }
     })
     .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {
@@ -105,7 +116,7 @@ angular.module('ice.search.controller', [])
         };
 
         var defineQuery = function () {
-            var searchQuery = {entryTypes:[], parameters:{}, blastQuery:{}};
+            var searchQuery = {entryTypes:[], parameters:{start:0, retrieveCount:15, sortField:"RELEVANCE"}, blastQuery:{}};
 
             // check search types  : {all: false, strain: true, plasmid: false, part: true, arabidopsis: true}
             for (var type in $scope.searchTypes) {
@@ -131,7 +142,7 @@ angular.module('ice.search.controller', [])
             if ($scope.hasSequence)
                 searchQuery.parameters.hasSequence = $scope.hasSequence;
 
-            // biosafety
+            // bio safety
             if ($scope.bioSafetyLevelOption) {
                 searchQuery.bioSafetyOption = $scope.bioSafetyLevelOption == "1" ? "LEVEL_ONE" : "LEVEL_TWO";
             }
@@ -144,45 +155,19 @@ angular.module('ice.search.controller', [])
             }
 
             searchQuery.queryString = $scope.queryText;
-            // todo : or
-//            var queryString = $location.search().q;
-//            if (queryString === undefined)
-//                queryString = "";
             return searchQuery;
         };
 
-        $scope.search = function () {
+        $scope.search = function (isWebSearch) {
             $scope.searchFilters = defineQuery();
+            $scope.searchFilters.webSearch = isWebSearch;
 
             var searchUrl = "/search";
             if ($location.path().slice(0, searchUrl.length) != searchUrl) {
+                // triggers search controller which uses searchfilters to perform search
                 $location.path(searchUrl, false);
             } else {
-                $scope.searchFilters = defineQuery();
-                $scope.searchFilters.parameters.start = 0;
-                $scope.searchFilters.parameters.retrieveCount = 15;
-                $scope.searchFilters.parameters.sortField = "RELEVANCE";
                 $scope.$broadcast("RunSearch", $scope.searchFilters);
-//                var noFilters = (!$scope.searchFilters || Object.keys($scope.searchFilters).length === 0);
-//                console.log("no filters", noFilters);
-
-                // todo : $location.search('q', $scope.queryText);
-
-//                if (noFilters) {
-                // no filters keyword search only
-//                    var queryString = $location.search().q;
-//                    if (queryString === undefined)
-//                        queryString = "";
-
-                // todo :
-//            if ($scope.queryText !== queryString)
-//                $scope.queryText = queryString; // update input box
-//
-//                    console.log("url query parameter", queryString);
-//                    $scope.searchFilters = {q:queryString, sort:'relevance', asc:false, limit:15};
-//                    runSearch($scope.searchFilters);
-//                } else {
-//                }
             }
         };
 
@@ -190,22 +175,9 @@ angular.module('ice.search.controller', [])
             return $scope.searchFilters.webSearch === true;
         };
 
-        $scope.searchWebOfRegistries = function () {
-            $scope.searchFilters = defineQuery();
-            $scope.searchFilters.webSearch = true;
-
-            var searchUrl = "/search";
-            if ($location.path().slice(0, searchUrl.length) != searchUrl) {
-                $location.path(searchUrl, false);
-            } else {
-//                $scope.searchFilters = defineQuery();
-                $scope.searchFilters.parameters.start = 0;
-                $scope.searchFilters.parameters.retrieveCount = 15;
-                $scope.searchFilters.parameters.sortField = "RELEVANCE";
-                $scope.$broadcast("RunSearch", $scope.searchFilters);
-            }
-        };
-
+        //
+        // resets the search filters to the defaults setting
+        //
         $scope.reset = function () {
             $scope.sequenceText = "";
             $scope.queryText = "";

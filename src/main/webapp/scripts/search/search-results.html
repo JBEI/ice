@@ -7,7 +7,7 @@
             </strong>
             <img ng-if="loadingSearchResults" src="/img/loader-mini.gif">
 
-            <small class="edit_icon font-70em pad_left" ng-click="searchWebOfRegistries()">
+            <small class="edit_icon font-70em pad_left" ng-click="search(true)">
                 <i style="color: #555" class="fa fa-globe"></i> Search other registries
             </small>
         </h4>
@@ -288,7 +288,7 @@
                              style="margin-bottom: 0"></progressbar>
             </td>
             <td>{{result.entryInfo.type | capitalize}}</td>
-            <td><a ng-href='/entry/{{result.entryInfo.id}}' class="cell_mouseover form-group"
+            <td><a ng-click="goToEntryDetails(result.entryInfo, $index)" class="cell_mouseover form-group"
                    popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
                    popover-template="/views/search/tooltip.html" popover-title="{{result.entryInfo.partId}}"
                    popover-placement="right">{{result.entryInfo.partId}}</a>

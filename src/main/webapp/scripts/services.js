@@ -801,7 +801,7 @@ iceServices.factory('Remote', function ($resource, $cookieStore) {
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             },
 
-            traces: {
+            traces:{
                 method:'GET',
                 responseType:'json',
                 isArray:true,
@@ -994,6 +994,7 @@ iceServices.factory('Authentication',
             },
 
             isAdmin:function () {
+                // todo
 //                console.log($rootScope.user);
 //                 if(!$rootScope.user || !$rootScope.user.isAdmin) {
 //                     $location.path("/");
@@ -1014,10 +1015,23 @@ iceServices.factory('Authentication',
                     });
             }
         };
-
-        // example using resource
-//    return $resource('/rest/accesstoken', {}, {
-//        'login':{ method:"POST" },
-//        "isSessionValid":{ method:"GET", headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")} }
-//    });
     });
+
+iceServices.factory('EntryContextUtil', function () {
+    // default search filters
+    var context;
+
+    return {
+        getContext:function () {
+            return context;
+        },
+
+        setContextCallback:function (callback, available, offset, back) {
+            context = {};
+            context.callback = callback;
+            context.available = available;
+            context.offset = offset;
+            context.back = back;
+        }
+    }
+});
