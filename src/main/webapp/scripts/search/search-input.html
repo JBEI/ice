@@ -3,13 +3,18 @@
         <tr>
             <td class="quick_search">
 
-                <input type="search" class="quick_search_input" ng-model="queryText"
-                       placeholder="Enter search term(s) and/or use the drop down menu">
+                <i class="fa fa-times-circle opacity_hover" ng-click="reset()" title="Reset Search" ng-show="canReset()"
+                   style="padding: 4px 1px 4px 5px; background-color: #fff; color: #aaa; font-size: 14px"></i>
 
-                <i class="fa fa-caret-down dropdown-toggle cursor_pointer"
-                   style="padding: 4px 5px 4px 3px; position: relative; top: 2px; color: #999"></i>
+                <input type="search" class="quick_search_input" ng-model="queryText" placeholder="Search">
 
-                <div class="dropdown-menu" style="padding: 12px">
+                <i class="fa fa-caret-down dropdown-toggle opacity_hover"
+                   style="padding: 9px 5px 4px 5px; color: #999; height: 32px; background-color: #ededed;"></i>
+
+                <!--<i class="fa fa-search cursor_pointer blue"-->
+                <!--style="padding: 4px 9px 4px 5px; background-color: #fff; font-size: 19px"></i>-->
+
+                <div class="dropdown-menu" style="padding: 12px;width: 432px">
                     <span style="letter-spacing:-1px; color:#555;">&nbsp;<b>TYPE</b>&nbsp;&nbsp;</span>
                     <label class="checkbox-inline" stop-event='click'>
                         <input type="checkbox" ng-model="searchTypes.all" ng-change="check('all')">All

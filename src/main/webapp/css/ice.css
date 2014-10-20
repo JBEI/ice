@@ -1049,8 +1049,9 @@ ul#indented li a:hover {
     border: 1px solid #ccc;
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
-    height: 27px;
-    width: 429px;
+    height: 31px;
+    /*width: 429px;*/
+    background-color: #fff
 }
 
 .outline-none {
@@ -1123,9 +1124,9 @@ button.outline-none::-moz-focus-inner {
 }
 
 .quick_search_input {
-    font-size: 0.90em;
+    /*font-size: 0.90em;*/
     width: 407px;
-    padding: 7px;
+    padding: 4px;
     border: 0;
 }
 

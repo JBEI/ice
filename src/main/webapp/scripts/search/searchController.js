@@ -175,6 +175,23 @@ angular.module('ice.search.controller', [])
             return $scope.searchFilters.webSearch === true;
         };
 
+        $scope.canReset = function () {
+            if ($scope.queryText || $scope.sequenceText || $scope.hasSample || $scope.hasSequence || $scope.hasAttachment)
+                return true;
+
+            if ($scope.blastSearchType || $scope.bioSafetyLevelOption)
+                return true;
+
+            for (var searchType in $scope.searchTypes) {
+                if ($scope.searchTypes.hasOwnProperty(searchType)) {
+                    if ($scope.searchTypes[searchType] != true)
+                        return true;
+                }
+            }
+
+            return false;
+        };
+
         //
         // resets the search filters to the defaults setting
         //
