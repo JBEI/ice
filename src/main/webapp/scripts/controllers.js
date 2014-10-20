@@ -1380,7 +1380,7 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
                 function (result) {
                     callback(result.entries[0].id);
                 });
-        }, $scope.params.count, offset, "/folders" + $scope.params.folderId);
+        }, $scope.params.count, offset, "/folders/" + $scope.params.folderId);
 
         $location.path("/entry/" + entry.id);
     };
