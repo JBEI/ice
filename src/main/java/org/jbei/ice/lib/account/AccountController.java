@@ -94,7 +94,7 @@ public class AccountController {
             throw new IllegalArgumentException("Cannot retrieve account for " + targetEmail);
 
         String newPassword = Utils.generateUUID().substring(24);
-        String encryptedNewPassword = AccountUtils.encryptPassword(newPassword, account.getSalt());
+        String encryptedNewPassword = AccountUtils.encryptNewUserPassword(newPassword, account.getSalt());
         account.setPassword(encryptedNewPassword);
 
         account = dao.update(account);
@@ -144,7 +144,7 @@ public class AccountController {
         if (!isAdministrator(userId) && !userAccount.getEmail().equalsIgnoreCase(userId))
             return null;
 
-        userAccount.setPassword(AccountUtils.encryptPassword(transfer.getPassword(), userAccount.getSalt()));
+        userAccount.setPassword(AccountUtils.encryptNewUserPassword(transfer.getPassword(), userAccount.getSalt()));
         return dao.update(userAccount).toDataTransferObject();
     }
 
@@ -188,7 +188,7 @@ public class AccountController {
         // generate salt and encrypt password before storing
         String salt = Utils.generateSaltForUserAccount();
         String newPassword = Utils.generateUUID().substring(24);
-        String encryptedPassword = AccountUtils.encryptPassword(newPassword, salt);
+        String encryptedPassword = AccountUtils.encryptNewUserPassword(newPassword, salt);
 
         Account account = AccountUtils.fromDTO(info);
         account.setPassword(encryptedPassword);
@@ -255,7 +255,7 @@ public class AccountController {
         adminAccount.setInitials("");
         adminAccount.setInstitution("");
         adminAccount.setSalt(Utils.generateSaltForUserAccount());
-        adminAccount.setPassword(AccountUtils.encryptPassword(ADMIN_ACCOUNT_PASSWORD, adminAccount.getSalt()));
+        adminAccount.setPassword(AccountUtils.encryptNewUserPassword(ADMIN_ACCOUNT_PASSWORD, adminAccount.getSalt()));
         adminAccount.setDescription("Administrator Account");
 
         adminAccount.setIp("");
@@ -342,7 +342,7 @@ public class AccountController {
             throw new ControllerException("Failed to verify password for null Account!");
         }
 
-        return account.getPassword().equals(AccountUtils.encryptPassword(password, account.getSalt()));
+        return account.getPassword().equals(AccountUtils.encryptNewUserPassword(password, account.getSalt()));
     }
 
     /**
