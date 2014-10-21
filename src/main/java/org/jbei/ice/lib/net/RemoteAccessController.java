@@ -20,7 +20,6 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
-import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.RemoteAccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
@@ -69,8 +68,7 @@ public class RemoteAccessController {
 
         try {
             String restPath = "/rest/folders/public";
-            FolderWrapper detail = (FolderWrapper) restClient.get(partner.getUrl(), restPath, FolderWrapper.class);
-            return detail.getFolders();
+            return (ArrayList) restClient.get(partner.getUrl(), restPath, ArrayList.class);
         } catch (Exception e) {
             Logger.error(e);
             return null;

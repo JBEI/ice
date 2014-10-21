@@ -15,7 +15,6 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.folder.Collection;
@@ -58,7 +57,7 @@ public class FolderResource extends RestResource {
     @GET
     @Path("/public")
     @Produces(MediaType.APPLICATION_JSON)
-    public FolderWrapper getPublicFolders(
+    public ArrayList<FolderDetails> getPublicFolders(
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         return controller.getPublicFolders();
     }

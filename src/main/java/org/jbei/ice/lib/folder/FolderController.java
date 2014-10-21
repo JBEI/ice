@@ -26,7 +26,6 @@ import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.model.Entry;
@@ -88,18 +87,19 @@ public class FolderController {
      *
      * @return list of public folders on this site
      */
-    public FolderWrapper getPublicFolders() {
-        List<Folder> folders = dao.getFoldersByType(FolderType.PUBLIC);
-        FolderWrapper result = new FolderWrapper();
+    public ArrayList<FolderDetails> getPublicFolders() {
+        Group publicGroup = new GroupController().createOrRetrievePublicGroup();
+        Set<Folder> folders = permissionDAO.getFolders(publicGroup);
+        ArrayList<FolderDetails> list = new ArrayList<>();
         for (Folder folder : folders) {
             FolderDetails details = folder.toDataTransferObject();
             long folderSize = dao.getFolderSize(folder.getId());
             details.setCount(folderSize);
-            result.getFolders().add(details);
+            list.add(details);
         }
 
-        result.sort();
-        return result;
+        Collections.sort(list);
+        return list;
     }
 
     public FolderDetails getPublicEntries(ColumnField sort, int offset, int limit, boolean asc) {
@@ -185,7 +185,6 @@ public class FolderController {
             return null;
         }
 
-        PermissionsController controller = new PermissionsController();
         FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
         details.setType(folder.getType());
         long folderSize = dao.getFolderSize(folderId);
@@ -193,8 +192,8 @@ public class FolderController {
         details.setDescription(folder.getDescription());
         if (folder.getCreationTime() != null)
             details.setCreated(folder.getCreationTime().getTime());
-        details.setAccessPermissions(controller.retrieveSetFolderPermission(folder, false));
-        details.setPublicReadAccess(controller.isPublicVisible(folder));
+        details.setAccessPermissions(permissionsController.retrieveSetFolderPermission(folder, false));
+        details.setPublicReadAccess(permissionsController.isPublicVisible(folder));
         Account owner = accountController.getByEmail(folder.getOwnerEmail());
         if (owner != null)
             details.setOwner(owner.toDataTransferObject());
@@ -219,8 +218,6 @@ public class FolderController {
 
         if (details.getType() == FolderType.PRIVATE)
             return demoteFolder(userId, folder);
-
-        // todo : else edit folder
 
         folder.setModificationTime(new Date());
         if (details.getName() != null)
@@ -272,7 +269,7 @@ public class FolderController {
             throw new ControllerException("Could not retrieve folder with id " + id);
         folder = dao.addFolderContents(folder, entrys);
         if (folder.isPropagatePermissions()) {
-            new PermissionsController().propagateFolderPermissions(account, folder, true);
+            permissionsController.propagateFolderPermissions(account, folder, true);
         }
         return folder;
     }
@@ -321,28 +318,6 @@ public class FolderController {
         folder.setCreationTime(new Date(System.currentTimeMillis()));
         folder = dao.create(folder);
         return folder.toDataTransferObject();
-    }
-
-    public FolderDetails createNewFolder(Account account, String name, String description, ArrayList<Long> contents)
-            throws ControllerException {
-        Folder folder = new Folder(name);
-        folder.setOwnerEmail(account.getEmail());
-        folder.setDescription(description);
-        folder.setType(FolderType.PRIVATE);
-        folder.setCreationTime(new Date(System.currentTimeMillis()));
-        folder = dao.create(folder);
-        FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
-        if (contents != null && !contents.isEmpty()) {
-            ArrayList<Entry> entrys = new ArrayList<>(new EntryController().getEntriesByIdSet(account, contents));
-            dao.addFolderContents(folder, entrys);
-            details.setCount(contents.size());
-        } else {
-            details.setCount(0l);
-        }
-        details.setType(folder.getType());
-        details.setDescription(folder.getDescription());
-
-        return details;
     }
 
     public Collection getFolderStats(String userId) {
@@ -446,54 +421,6 @@ public class FolderController {
         return account;
     }
 
-    // available folders
-//    public ArrayList<FolderDetails> retrieveFoldersForUser(String userId) throws ControllerException {
-//        ArrayList<FolderDetails> results = new ArrayList<>();
-//        Account account = getAccount(userId);
-//        if (account == null)
-//            throw new IllegalArgumentException("Invalid user id \"" + userId + "\"");
-//
-//        // publicly visible collections are owned by the system
-//        List<Folder> folders = getPublicFolders();
-//        for (Folder folder : folders) {
-//            long id = folder.getId();
-//            FolderDetails details = new FolderDetails(id, folder.getName());
-//            long folderSize = dao.getFolderSize(id);
-//            details.setCount(folderSize);
-//            details.setDescription(folder.getDescription());
-//            details.setType(FolderType.PUBLIC);
-//            if (account.getType() == AccountType.ADMIN) {
-//                ArrayList<AccessPermission> accesses = permissionsController.retrieveSetFolderPermission(folder,
-// false);
-//                details.setAccessPermissions(accesses);
-//            }
-//            details.setPropagatePermission(folder.isPropagatePermissions());
-//            results.add(details);
-//        }
-//
-//        // get user folders
-//        List<Folder> userFolders = dao.getFoldersByOwner(account);
-//        if (userFolders != null) {
-//            for (Folder folder : userFolders) {
-//                long id = folder.getId();
-//                FolderDetails details = new FolderDetails(id, folder.getName());
-//                long folderSize = dao.getFolderSize(id);
-//                details.setCount(folderSize);
-//                details.setType(FolderType.PRIVATE);
-//                details.setDescription(folder.getDescription());
-//                ArrayList<AccessPermission> accesses = permissionsController.retrieveSetFolderPermission(folder,
-//                                                                                                         false);
-//                details.setAccessPermissions(accesses);
-//                details.setPropagatePermission(folder.isPropagatePermissions());
-//                details.setPublicReadAccess(permissionsController.isPublicVisible(folder));
-//                results.add(details);
-//            }
-//        }
-//
-//
-//        return results;
-//    }
-
     /**
      * "Promote"s a collection into a system collection. This allows it to be categorised under "Collections"
      * This action is restricted to administrators
@@ -501,7 +428,6 @@ public class FolderController {
      * @param userId requesting account id
      * @param folder folder to be promoted
      * @return true if promotion is successful false otherwise
-     * @throws ControllerException
      */
     protected FolderDetails promoteFolder(String userId, Folder folder) {
         if (folder.getType() == FolderType.PUBLIC)
@@ -524,7 +450,6 @@ public class FolderController {
      * @param userId requesting account
      * @param folder to be demoted
      * @return true on successful remote, false otherwise
-     * @throws ControllerException
      */
     protected FolderDetails demoteFolder(String userId, Folder folder) {
         if (folder.getType() != FolderType.PUBLIC)
@@ -536,21 +461,21 @@ public class FolderController {
         return dao.update(folder).toDataTransferObject();
     }
 
-    public boolean setPropagatePermissionForFolder(Account account, long folderId, boolean propagate)
-            throws ControllerException {
-        Folder folder = dao.get(folderId);
-        if (folder == null)
-            return false;
-
-        if (!accountController.isAdministrator(account) &&
-                !folder.getOwnerEmail().equalsIgnoreCase(account.getEmail()))
-            return false;
-
-        folder.setPropagatePermissions(propagate);
-        folder.setModificationTime(new Date(System.currentTimeMillis()));
-        dao.update(folder);
-        return permissionsController.propagateFolderPermissions(account, folder, propagate);
-    }
+//    public boolean setPropagatePermissionForFolder(Account account, long folderId, boolean propagate)
+//            throws ControllerException {
+//        Folder folder = dao.get(folderId);
+//        if (folder == null)
+//            return false;
+//
+//        if (!accountController.isAdministrator(account) &&
+//                !folder.getOwnerEmail().equalsIgnoreCase(account.getEmail()))
+//            return false;
+//
+//        folder.setPropagatePermissions(propagate);
+//        folder.setModificationTime(new Date(System.currentTimeMillis()));
+//        dao.update(folder);
+//        return permissionsController.propagateFolderPermissions(account, folder, propagate);
+//    }
 
     public void test(List<FolderDetails> folders) {
         Logger.info(folders.get(0).getName());
