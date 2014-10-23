@@ -470,8 +470,22 @@ public class PermissionsController {
 
         Permission permission = new Permission();
         permission.setFolder(folder);
-        Account account = DAOFactory.getAccountDAO().get(accessPermission.getArticleId());
-        permission.setAccount(account);
+        if (accessPermission.getArticle() == AccessPermission.Article.GROUP) {
+            Group group = DAOFactory.getGroupDAO().get(accessPermission.getArticleId());
+            if (group == null) {
+                Logger.error("Could not assign group with id " + accessPermission.getArticleId() + " to folder");
+                return null;
+            }
+            permission.setGroup(group);
+        } else {
+            Account account = DAOFactory.getAccountDAO().get(accessPermission.getArticleId());
+            if (account == null) {
+                Logger.error("Could not assign account with id " + accessPermission.getArticleId() + " to folder");
+                return null;
+            }
+            permission.setAccount(account);
+        }
+
         permission.setCanRead(accessPermission.isCanRead());
         permission.setCanWrite(accessPermission.isCanWrite());
         return dao.create(permission).toDataTransferObject();
