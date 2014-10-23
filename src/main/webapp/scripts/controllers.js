@@ -1187,7 +1187,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
     };
 });
 
-iceControllers.controller('CollectionDetailController', function ($scope, $cookieStore, Folders) {
+iceControllers.controller('CollectionDetailController', function ($scope, $cookieStore, Folders, $stateParams, $location) {
     var sessionId = $cookieStore.get("sessionId");
     var folders = Folders();
 
@@ -1201,8 +1201,6 @@ iceControllers.controller('CollectionDetailController', function ($scope, $cooki
     };
 
     $scope.deleteCollection = function (folder) {
-        console.log($scope.collectionList, folder);
-
         folders.delete({folderId:folder.id, type:folder.type}, function (result) {
             var l = $scope.selectedCollectionFolders.length;
             for (var j = 0; j < l; j += 1) {
@@ -1219,6 +1217,12 @@ iceControllers.controller('CollectionDetailController', function ($scope, $cooki
                     break;
                 }
             }
+
+            if (folder.id == $stateParams.collection) {
+                $location.path("/folders/personal");
+            }
+        }, function (error) {
+            console.error(error);
         });
     }
 });
