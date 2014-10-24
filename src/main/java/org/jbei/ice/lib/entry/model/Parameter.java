@@ -6,6 +6,7 @@ import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dao.IDataTransferModel;
 
 import org.hibernate.search.annotations.ContainedIn;
+import org.hibernate.search.annotations.Field;
 
 /**
  * Stores key-value information for {@link org.jbei.ice.lib.entry.model.Entry}.
@@ -42,6 +43,7 @@ public class Parameter implements IDataModel {
     private String key;
 
     @Column(name = "value", length = 4095, nullable = false)
+    @Field
     private String value;
 
     public Parameter() {
