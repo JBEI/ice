@@ -917,6 +917,19 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
                 responseType:'json',
                 url:'/rest/folders/:folderId/permissions/:permissionId',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            enablePublicReadAccess:{
+                method:'PUT',
+                responseType:'json',
+                url:'/rest/folders/:folderId/permissions/public',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            disablePublicReadAccess:{
+                method:'DELETE',
+                url:'/rest/folders/:folderId/permissions/public',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             }
         });
     }

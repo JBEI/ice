@@ -457,40 +457,6 @@ public class PermissionsController {
         return dao.create(permission).toDataTransferObject();
     }
 
-    public AccessPermission createFolderPermission(String userId, long folderId, AccessPermission accessPermission) {
-        if (accessPermission == null)
-            return null;
-
-        Folder folder = folderDAO.get(folderId);
-        if (folder == null)
-            return null;
-
-        FolderAuthorization authorization = new FolderAuthorization();
-        authorization.expectWrite(userId, folder);
-
-        Permission permission = new Permission();
-        permission.setFolder(folder);
-        if (accessPermission.getArticle() == AccessPermission.Article.GROUP) {
-            Group group = DAOFactory.getGroupDAO().get(accessPermission.getArticleId());
-            if (group == null) {
-                Logger.error("Could not assign group with id " + accessPermission.getArticleId() + " to folder");
-                return null;
-            }
-            permission.setGroup(group);
-        } else {
-            Account account = DAOFactory.getAccountDAO().get(accessPermission.getArticleId());
-            if (account == null) {
-                Logger.error("Could not assign account with id " + accessPermission.getArticleId() + " to folder");
-                return null;
-            }
-            permission.setAccount(account);
-        }
-
-        permission.setCanRead(accessPermission.isCanRead());
-        permission.setCanWrite(accessPermission.isCanWrite());
-        return dao.create(permission).toDataTransferObject();
-    }
-
     public void removeEntryPermission(String userId, long partId, long permissionId) {
         Entry entry = DAOFactory.getEntryDAO().get(partId);
         if (entry == null)

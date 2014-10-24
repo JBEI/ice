@@ -20,13 +20,13 @@
                             </span>
 
                             <div>
-                                <small class="font-65em" ng-if="folder.created"><b style="color: #555">Created</b>:
-                                    {{folder.created | date:'medium'}}
+                                <small class="font-65em" ng-if="folder.created">
+                                    {{folder.created | date:'short'}}
                                 </small>
-                                <small ng-if="!folder.created" class="font-65em"><i>No creation date</i></small>
-                                <small ng-if="folder.type==='SHARED'" class="font-65em" style="color: #333">
+                                <small ng-if="folder.type==='SHARED'" style="color: #333">
                                     <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
-                                    Shared with {{getShareText(folder.accessPermissions)}}
+                                    <i class="fa fa-share-alt" style="color: #ff4500;"
+                                       tooltip="Shared with {{getShareText(folder.accessPermissions)}}"></i>
                                 </small>
                             </div>
                         </h4>

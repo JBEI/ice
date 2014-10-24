@@ -214,11 +214,11 @@ public class FolderResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
-    public ArrayList<AccessPermission> getFolderPermissions(
+    public Response getFolderPermissions(
             @PathParam("id") long folderId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return permissionsController.getSetFolderPermissions(userId, folderId);
+        return respond(controller.getPermissions(userId, folderId));
     }
 
     @PUT
@@ -238,7 +238,7 @@ public class FolderResource extends RestResource {
             AccessPermission permission,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return permissionsController.createFolderPermission(userId, folderId, permission);
+        return controller.createFolderPermission(userId, folderId, permission);
     }
 
     @DELETE
@@ -251,5 +251,27 @@ public class FolderResource extends RestResource {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         permissionsController.removeFolderPermission(userId, partId, permissionId);
         return Response.ok().build();
+    }
+
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/permissions/public")
+    public Response enablePublicAccess(@Context UriInfo info, @PathParam("id") long folderId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        if (controller.enablePublicReadAccess(userId, folderId))
+            return respond(Response.Status.OK);
+        return respond(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/permissions/public")
+    public Response disablePublicAccess(@Context UriInfo info, @PathParam("id") long folderId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        if (controller.disablePublicReadAccess(userId, folderId))
+            return respond(Response.Status.OK);
+        return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 }

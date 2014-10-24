@@ -1431,11 +1431,14 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
                 groupCount += 1;
         }
 
+        console.log(userCount, groupCount);
         if (userCount == 0)
             return groupCount + (groupCount == 1 ? " group" : " groups");
 
         if (groupCount == 0)
             return userCount + (userCount == 1 ? " user" : " users");
+
+        return (userCount + (userCount == 1 ? " user" : " users")) + " & " + (groupCount + (groupCount == 1 ? " group" : " groups"));
     };
 
     $scope.changeFolderType = function (newType) {
@@ -2667,6 +2670,15 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
             });
     };
 
+    $scope.setPropagatePermission = function (folder) {
+        folder.propagatePermission = !folder.propagatePermission;
+        Folders().update({folderId:folder.id}, folder, function (result) {
+
+        }, function (error) {
+
+        })
+    };
+
     $scope.addRemovePermission = function (permission) {
         permission.selected = !permission.selected;
         if (!permission.selected) {
@@ -2674,22 +2686,36 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
             return;
         }
 
-        // add permission
-        var type;
+        // add permission (select type based on pane being view - default is read)
+        permission.type = "READ_FOLDER";
         angular.forEach(panes, function (pane) {
             if (pane.selected) {
-                type = pane.title.toUpperCase() + "_FOLDER";
+                permission.type = pane.title.toUpperCase() + "_FOLDER";
             }
         });
         permission.typeId = folder.id;
-        permission.type = type;
 
         Folders().addPermission({folderId:folder.id}, permission, function (result) {
             // result is the permission object
-//            $scope.entry.id = result.typeId;
             $scope.activePermissions.push(result);
             permission.permissionId = result.id;
         });
+    };
+
+    $scope.enablePublicRead = function (folder) {
+        Folders().enablePublicReadAccess({id:folder.id}, function (result) {
+            folder.publicReadAccess = true;
+        }, function (error) {
+
+        });
+    };
+
+    $scope.disablePublicRead = function (folder) {
+        Folders().disablePublicReadAccess({folderId:folder.id}, function (result) {
+            folder.publicReadAccess = false;
+        }, function (error) {
+
+        })
     };
 
     // retrieve permissions for folder

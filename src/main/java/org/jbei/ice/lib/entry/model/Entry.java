@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.dao.IDataModel;
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.filter.BlastFilterFactory;
@@ -22,6 +22,7 @@ import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.servlet.ModelToInfoFactory;
 
 import com.google.common.base.Objects;
 import org.hibernate.annotations.Type;
@@ -247,7 +248,6 @@ public class Entry implements IDataModel {
 //        setBioSafetyLevel(1);
     }
 
-    @XmlTransient
     public long getId() {
         return id;
     }
@@ -264,7 +264,6 @@ public class Entry implements IDataModel {
         this.recordId = recordId;
     }
 
-    @XmlTransient
     public String getVersionId() {
         return versionId;
     }
@@ -273,7 +272,6 @@ public class Entry implements IDataModel {
         this.versionId = versionId;
     }
 
-    @XmlTransient
     public String getRecordType() {
         return recordType;
     }
@@ -579,8 +577,8 @@ public class Entry implements IDataModel {
     }
 
     @Override
-    public IDataTransferModel toDataTransferObject() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public PartData toDataTransferObject() {
+        return ModelToInfoFactory.getInfo(this);
     }
 
     public String getPrincipalInvestigatorEmail() {

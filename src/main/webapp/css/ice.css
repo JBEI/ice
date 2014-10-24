@@ -2169,6 +2169,30 @@ td.selected i.font-awesome {
     background-color: #f6f6f6;
 }
 
+.folder_permission_tab_active {
+    font-size: 0.95em;
+    border-left: 1px solid #e1e1e1;
+    padding: 8px;
+    color: #222;
+    font-weight: bold;
+}
+
+.folder_permission_tab_inactive {
+    font-size: 0.95em;
+    color: #999;
+    border-left: 1px solid #e1e1e1;
+    border-bottom: 1px solid #e1e1e1;
+    padding: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    background-color: #f1f1f1;
+}
+
+.folder_permission_tab_inactive:hover {
+    color: #666;
+    background-color: #f6f6f6;
+}
+
 .permission_list {
     font-family: Arial, sans-serif;
     font-size: 0.75em;

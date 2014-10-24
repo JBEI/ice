@@ -1,6 +1,6 @@
 <span ng-if="folder.owner.email===user.email">
-    <small class="opacity_hover edit_icon" ng-click="openFolderShareSettings()" style="font-size: 12px;">
-        <i style="font-size: 14px; color: #555" class="fa fa-share-alt"></i> Share
+    <small class="opacity_hover edit_icon" ng-click="openFolderShareSettings()" style="font-size: 13px;">
+        <i style="font-size: 14px; color: #555" class="fa fa-shield"></i> Permissions
     </small>
 </span>
 
@@ -8,12 +8,12 @@
 <span ng-if="user.isAdmin && folder.owner.email===user.email" style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
 
 <span ng-if="user.isAdmin">
-    <small ng-if="folder.type!='PUBLIC'" class="opacity_hover edit_icon" style="font-size: 12px;"
+    <small ng-if="folder.type!='PUBLIC'" class="opacity_hover edit_icon" style="font-size: 13px;"
            ng-click="changeFolderType('PUBLIC')">
         <i style="font-size: 14px; color: #555" class="fa fa-level-up fa-flip-horizontal"></i> Promote
     </small>
 
-    <small ng-if="folder.type=='PUBLIC'" class="opacity_hover edit_icon" style="font-size: 12px;"
+    <small ng-if="folder.type=='PUBLIC'" class="opacity_hover edit_icon" style="font-size: 13px;"
            ng-click="changeFolderType('PRIVATE')">
         <i style="font-size: 14px; color: #555" class="fa fa-level-down fa-flip-horizontal"></i> Demote
     </small>
