@@ -66,7 +66,7 @@ public class RequestDAO extends HibernateRepository<Request> {
         }
     }
 
-    public int getCount(Account account) throws DAOException {
+    public int getCount(Account account) {
         try {
             Criteria criteria = currentSession().createCriteria(Request.class.getName());
             if (account != null)
@@ -79,9 +79,35 @@ public class RequestDAO extends HibernateRepository<Request> {
         }
     }
 
-    public List<Request> get(int start, int limit, String sort, boolean asc) throws DAOException {
-        String sql = "from " + Request.class.getName() + " request order by " + sort;
+    public int getCount(SampleRequestStatus status, String filter) throws DAOException {
+        try {
+            String sql = "select count(*) from " + Request.class.getName() + " request";
+            if (filter != null) {
+                filter = filter.toUpperCase();
+                sql += " where UPPER(account.firstName) like '" + filter + "%' OR UPPER(account.lastName) like '" +
+                        filter + "%'";
+            }
+
+            Number number = (Number) currentSession().createQuery(sql).uniqueResult();
+            return number.intValue();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    public List<Request> get(int start, int limit, String sort, boolean asc, SampleRequestStatus status, String filter)
+            throws DAOException {
+        String sql = "from " + Request.class.getName() + " request";
+        if (filter != null) {
+            filter = filter.toUpperCase();
+            sql += " where UPPER(account.firstName) like '" + filter + "%' OR UPPER(account.lastName) like '" +
+                    filter + "%'";
+        }
+
+        sql += " order by " + sort;
         sql += asc ? " asc" : " desc";
+
         Query query = currentSession().createQuery(sql);
         query.setMaxResults(limit);
         query.setFirstResult(start);
@@ -95,8 +121,7 @@ public class RequestDAO extends HibernateRepository<Request> {
     }
 
     public List<Request> getAccountRequests(Account account, SampleRequestStatus status, int start, int limit,
-            String sort, boolean asc)
-            throws DAOException {
+            String sort, boolean asc) throws DAOException {
         String sql = "from " + Request.class.getName() + " request where account=:account";
         if (status != null) {
             sql += " and status=:status";

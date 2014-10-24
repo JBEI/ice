@@ -385,7 +385,7 @@ iceServices.factory('Message', function ($resource) {
 
 iceServices.factory('Samples', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/samples', {userId:'@userId', requestId:'@requestId', status:'@status'}, {
+        return $resource('/rest/samples', {userId:'@userId', requestId:'@requestId'}, {
             requests:{
                 method:'GET',
                 responseType:'json',

@@ -29,11 +29,13 @@ public class SampleResource extends RestResource {
             @DefaultValue("15") @QueryParam("limit") int limit,
             @DefaultValue("requested") @QueryParam("sort") String sort,
             @DefaultValue("false") @QueryParam("asc") boolean asc,
-            @DefaultValue("") @QueryParam("status") SampleRequestStatus status,
+            @QueryParam("filter") String filter,
+            @QueryParam("status") SampleRequestStatus status,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        Logger.info(userId + ": retrieving all sample requests");
-        return super.respond(Response.Status.OK, requestRetriever.getRequests(userId, offset, limit, sort, asc));
+        Logger.info(userId + ": retrieving sample requests");
+        UserSamples samples = requestRetriever.getRequests(userId, offset, limit, sort, asc, status, filter);
+        return super.respond(Response.Status.OK, samples);
     }
 
     /**

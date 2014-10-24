@@ -314,7 +314,7 @@ iceControllers.controller('AdminSampleRequestController', function ($scope, $loc
     $scope.currentPage = 1;
 
     // initial sample request (uses default paging values)
-    samples.requests(function (result) {
+    samples.requests({sort:'requested'}, function (result) {
         $scope.sampleRequests = result;
     }, function (data) {
         if (data.status === 401) {
@@ -329,12 +329,18 @@ iceControllers.controller('AdminSampleRequestController', function ($scope, $loc
         if (pageNo == undefined || isNaN(pageNo))
             pageNo = 1;
 
+        $scope.currentPage = pageNo;
         $scope.loadingPage = true;
-        $scope.offset = (pageNo - 1) * 15;
-        samples.requests({offset:$scope.offset},
+        var obj = {offset:((pageNo - 1) * 15)};
+        if ($scope.filter) {
+            obj.filter = $scope.filter;
+        }
+
+        samples.requests(obj,
             function (result) {
                 $scope.sampleRequests = result;
                 $scope.loadingPage = false;
+                $scope.indexStart = ($scope.currentPage - 1) * 15;
             }, function (error) {
                 console.error(error);
                 $scope.loadingPage = false;
@@ -354,6 +360,23 @@ iceControllers.controller('AdminSampleRequestController', function ($scope, $loc
 
         });
     };
+
+    $scope.filterSampleRecords = function () {
+        console.log($scope.filter);
+        $scope.loadingPage = true;
+        // initial sample request (uses default paging values)
+        samples.requests({sort:'requested', filter:$scope.filter}, function (result) {
+            $scope.loadingPage = false;
+            $scope.sampleRequests = result;
+        }, function (data) {
+            $scope.loadingPage = false;
+            if (data.status === 401) {
+                $location.path('/login');
+                return;
+            }
+            $rootScope.error = data;
+        });
+    }
 });
 
 iceControllers.controller('AdminUserController', function ($rootScope, $scope, $stateParams, $cookieStore, User) {

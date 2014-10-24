@@ -2420,3 +2420,17 @@ td.selected i.font-awesome {
 .bulk_import_name:hover {
     background-color: #c1c1c1;
 }
+
+input.no_border {
+    border: 0;
+}
+
+input.no_border:active {
+    border: 0;
+    outline: none
+}
+
+input.no_border:focus {
+    border: 0;
+    outline: none
+}
