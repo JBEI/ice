@@ -56,7 +56,7 @@ public class Folder implements IDataModel {
     private FolderType type;
 
     @Column(name = "propagate_permissions")
-    private boolean propagatePermissions = false;
+    private Boolean propagatePermissions = Boolean.FALSE;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "folder_entry", joinColumns = {@JoinColumn(name = "folder_id", nullable = false)},
@@ -132,6 +132,8 @@ public class Folder implements IDataModel {
     }
 
     public boolean isPropagatePermissions() {
+        if (propagatePermissions == null)
+            return false;
         return propagatePermissions;
     }
 
