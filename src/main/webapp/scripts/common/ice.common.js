@@ -12,5 +12,6 @@ angular.module('ice.dependencies', ['ngRoute',
     'ice.upload',
     'ice.entry',
     'ice.collection',
-    'ice.wor'
+    'ice.wor',
+    'ice.admin'
 ]);
