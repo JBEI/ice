@@ -100,6 +100,10 @@ public class HibernateSearch {
                                       .matching(Visibility.DRAFT.getValue()).createQuery();
             booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
 
+            Query visibilityQuery2 = qb.keyword().onField("visibility")
+                                       .matching(Visibility.DELETED.getValue()).createQuery();
+            booleanQuery.add(visibilityQuery2, BooleanClause.Occur.MUST_NOT);
+
             // bio-safety level
             if (option != null) {
                 TermContext levelContext = qb.keyword();
@@ -142,6 +146,10 @@ public class HibernateSearch {
         // visibility
         Query visibilityQuery = qb.keyword().onField("visibility").matching(Visibility.DRAFT.getValue()).createQuery();
         booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
+
+        Query visibilityQuery2 = qb.keyword().onField("visibility").matching(Visibility.DELETED.getValue())
+                                   .createQuery();
+        booleanQuery.add(visibilityQuery2, BooleanClause.Occur.MUST_NOT);
 
         // biosafety
         BioSafetyOption option = searchQuery.getBioSafetyOption();
@@ -249,12 +257,13 @@ public class HibernateSearch {
             booleanQuery.add(query, BooleanClause.Occur.SHOULD);
 
             // set visibility
-            org.apache.lucene.search.Query visibilityQuery = qb.keyword()
-                                                               .onField("visibility")
-                                                               .ignoreFieldBridge()
-                                                               .matching(Visibility.DRAFT.getValue())
-                                                               .createQuery();
+            Query visibilityQuery = qb.keyword().onField("visibility").ignoreFieldBridge()
+                                      .matching(Visibility.DRAFT.getValue()).createQuery();
             booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
+
+            Query visibilityQuery2 = qb.keyword().onField("visibility").ignoreFieldBridge()
+                                       .matching(Visibility.DELETED.getValue()).createQuery();
+            booleanQuery.add(visibilityQuery2, BooleanClause.Occur.MUST_NOT);
         }
 
         // wrap Lucene query in a org.hibernate.Query
