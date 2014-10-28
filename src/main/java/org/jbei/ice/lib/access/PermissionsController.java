@@ -445,16 +445,11 @@ public class PermissionsController {
         EntryAuthorization authorization = new EntryAuthorization();
         authorization.expectWrite(userId, entry);
 
-        data.setId(partId);
+        Permission permission = addPermission(access, entry, null);
+        if (permission == null)
+            return null;
 
-        Permission permission = new Permission();
-        permission.setEntry(entry);
-        entry.getPermissions().add(permission);
-        Account account = DAOFactory.getAccountDAO().get(access.getArticleId());
-        permission.setAccount(account);
-        permission.setCanRead(access.isCanRead());
-        permission.setCanWrite(access.isCanWrite());
-        return dao.create(permission).toDataTransferObject();
+        return permission.toDataTransferObject();
     }
 
     public void removeEntryPermission(String userId, long partId, long permissionId) {
