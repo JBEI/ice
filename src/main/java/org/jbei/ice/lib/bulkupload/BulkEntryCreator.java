@@ -323,6 +323,9 @@ public class BulkEntryCreator {
         BulkUploadInfo uploadInfo = draft.toDataTransferObject();
 
         for (PartData datum : data) {
+            if (datum == null)
+                continue;
+
             int index = datum.getIndex();
 
             Entry entry = entryDAO.get(datum.getId());
