@@ -32,7 +32,7 @@
                 <th>&nbsp;</th>
                 <th>
                     <span class="cursor_pointer">Requester</span>
-                    <i ng-show="params.sort=='type'" class="fa"
+                    <i ng-show="params.sort=='account.firstName'" class="fa"
                        ng-class="{'fa-caret-down':params.asc==true, 'fa-caret-up':params.asc==false}"></i>
                 </th>
                 <th style="width: 170px">Entry Name</th>
@@ -42,9 +42,9 @@
                     <i ng-show="params.sort=='name'" class="fa"
                        ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
                 </th>
-                <th ng-click="sort('summary')">Requested</th>
-                <th ng-click="sort('summary')">Fulfilled</th>
-                <th style="width: 100px">Status</th>
+                <th ng-click="sort('requested')">Requested</th>
+                <th ng-click="sort('updated')">Updated</th>
+                <th style="width: 100px" ng-click="sort('status')">Status</th>
                 <th></th>
             </tr>
             <tr data-ng-show="sampleRequests.requests.length === 0">
