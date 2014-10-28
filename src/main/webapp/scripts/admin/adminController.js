@@ -51,12 +51,12 @@ angular.module('ice.admin.controller', [])
         var menuOption = $stateParams.option;
 
         var menuOptions = $scope.profileMenuOptions = [
-            {url:'/views/admin/settings.html', display:'Settings', selected:true, icon:'fa-cogs'},
-            {id:'web', url:'/views/admin/wor.html', display:'Web of Registries', selected:false, icon:'fa-globe'},
-            {id:'users', url:'/views/admin/users.html', display:'Users', selected:false, icon:'fa-user'},
-            {id:'groups', url:'/views/admin/groups.html', display:'Groups', selected:false, icon:'fa-group'},
-            {id:'transferred', url:'/views/admin/transferred.html', display:'Transferred Entries', selected:false, icon:'fa-list'},
-            {id:'samples', url:'/views/admin/sample-requests.html', display:'Sample Requests', selected:false, icon:'fa-shopping-cart'}
+            {url:'/scripts/admin/settings.html', display:'Settings', selected:true, icon:'fa-cogs'},
+            {id:'web', url:'/scripts/admin/wor.html', display:'Web of Registries', selected:false, icon:'fa-globe'},
+            {id:'users', url:'/scripts/admin/users.html', display:'Users', selected:false, icon:'fa-user'},
+            {id:'groups', url:'/scripts/admin/groups.html', display:'Groups', selected:false, icon:'fa-group'},
+            {id:'transferred', url:'/scripts/admin/transferred.html', display:'Transferred Entries', selected:false, icon:'fa-list'},
+            {id:'samples', url:'/scripts/admin/sample-requests.html', display:'Sample Requests', selected:false, icon:'fa-shopping-cart'}
         ];
 
         $scope.showSelection = function (index) {
