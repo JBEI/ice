@@ -367,11 +367,17 @@ angular.module('ice.upload.controller', [])
                     return;
                 }
 
-                upload.updateList({importId:$scope.bulkUpload.id}, {entryList:objects}, function (success) {
-                    console.log(success);
+                var entryList = [];
+                for (var idx = 0; idx < objects.length; idx += 1) {
+                    var o = objects[idx];
+                    if (!o)
+                        continue;
+                    entryList[entryList.length + 1] = o;
+                }
+
+                upload.updateList({importId:$scope.bulkUpload.id}, {entryList:entryList}, function (success) {
                     for (var j = 0; j < success.entryList.length; j += 1) {
                         var part = success.entryList[j];
-                        console.log("created or updated", part);
 
                         $scope.bulkUpload.entryIdData[part.index] = part.id;
                         if (part.linkedParts && part.linkedParts.length) {
@@ -408,7 +414,9 @@ angular.module('ice.upload.controller', [])
 
                     if (existing) {
                         for (var attrname in object) {
-                            existing[attrname] = object[attrname];
+                            if (object.hasOwnProperty(attrname)) {
+                                existing[attrname] = object[attrname];
+                            }
                         }
                         objects[row] = existing;
                     } else {
