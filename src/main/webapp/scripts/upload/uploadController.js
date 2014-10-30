@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.upload.controller', [])
-    .controller('UploadController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource, $stateParams, $fileUploader, $http, Upload, UploadUtil) {
+    .controller('UploadController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource, $stateParams, $fileUploader, $http, Upload, UploadUtil, EntryService) {
         var sid = $cookieStore.get("sessionId");
         var upload = Upload(sid);
         var sheetData = [

@@ -119,9 +119,13 @@ angular.module('ice.upload.service', [])
                     return object;
                 }
 
+                if (dataSchema[index] == "selectionMarkers") {
+                    object[dataSchema[index]] = [value];
+                    return object;
+                }
+
                 // index is greater than 15 so it is one of the specialized types (strain, plasmid, seed)
                 // note that this method does not take links into account
-
                 switch (type.toLowerCase()) {
                     case "strain":
                         object.strainData[dataSchema[index]] = value;
@@ -142,10 +146,11 @@ angular.module('ice.upload.service', [])
 
             // retrieves the value to be displayed in the spreadsheet from the entry object retrieved from the
             // server side. sort of acts as a mapping to handle the case of "strainData" etc
+            // with selection markers being the exception
             getEntryValue:function (type, entry, index) {
                 var dataSchema = this.getDataSchema(type);
 
-                if (index < 15)
+                if (index < 15 || dataSchema[index] == "selectionMarkers")
                     return entry[dataSchema[index]];
 
                 switch (type.toLowerCase()) {
