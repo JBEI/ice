@@ -11,7 +11,7 @@
         </button>
         &nbsp;
     </span>
-    <span ng-if="settings.PASSWORD_CHANGE_ALLOWED.toLowerCase()==='yes'">
+    <span ng-if="passwordChangeAllowed">
         <button type="button" ng-click="editClick(false, false, true)" class="ice-button">
             <i style="font-size: 14px" class="blue fa fa-key"></i> Change Password
         </button>

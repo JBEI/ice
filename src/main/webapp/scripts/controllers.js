@@ -480,11 +480,17 @@ iceControllers.controller('ProfileSamplesController', function ($scope, $cookieS
     }
 });
 
-iceControllers.controller('ProfileController', function ($scope, $location, $cookieStore, $rootScope, $stateParams, User) {
+iceControllers.controller('ProfileController', function ($scope, $location, $cookieStore, $rootScope, $stateParams, User, Settings) {
     $scope.showChangePassword = false;
     $scope.showEditProfile = false;
     $scope.showSendMessage = false;
     $scope.changePass = {};
+    $scope.passwordChangeAllowed = false;
+
+    // get settings
+    Settings().getSetting({key:'PASSWORD_CHANGE_ALLOWED'}, function (result) {
+        $scope.passwordChangeAllowed = (result.value == 'yes');
+    });
 
     $scope.preferenceEntryDefaults = [
         {display:"Principal Investigator", id:"PRINCIPAL_INVESTIGATOR", help:"Enter Email or Name"},
