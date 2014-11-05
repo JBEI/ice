@@ -150,8 +150,12 @@ angular.module('ice.upload.service', [])
             getEntryValue:function (type, entry, index) {
                 var dataSchema = this.getDataSchema(type);
 
-                if (index < 15 || dataSchema[index] == "selectionMarkers")
-                    return entry[dataSchema[index]];
+                if (index < 15 || dataSchema[index] == "selectionMarkers") {
+                    var val = entry[dataSchema[index]];
+                    if (dataSchema[index] == "bioSafetyLevel" && val == 0)
+                        return '';
+                    return val;
+                }
 
                 switch (type.toLowerCase()) {
                     case "strain":
@@ -162,6 +166,9 @@ angular.module('ice.upload.service', [])
 
                     case "arabidopsis":
                         return entry.arabidopsisSeedData[dataSchema[index]];
+
+                    case "part":
+                        return entry[dataSchema[index]];
                 }
 
                 return undefined;
