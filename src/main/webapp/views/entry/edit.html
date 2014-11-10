@@ -1,55 +1,45 @@
 <form name="editEntryForm" data-ng-submit="editEntry()" class="entry-form" ng-if="entry">
 
-<div class="container-fluid" ng-init="entry.creatorEmail=user.email">
+<div class="container-fluid">
 
 <!--header-->
 <div class="row entry_general_header_td" style="height: 60px">
     <div class="col-md-12">
-        <table>
-            <tr>
-                <td>
-                    <h4>
-                        <span style="white-space: nowrap">
-                            <strong ng-hide="part.name" class="color-888">EDIT {{entry.type}}</strong>
-                            <strong>{{entry.partId}}</strong>
-                        </span>
-                        <br>
-                        <small class="font-65em">{{entry.creationTime | date:'medium'}} -
-                            <a ng-href="/profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a>
-                        </small>
-                    </h4>
-                </td>
-                <td style="padding-left: 25px">
-                    <div class="dropdown">
-                        <span class="opacity_hover dropdown-toggle"><i class="fa fa-link"></i> Link To
-                            <span class="caret"></span>
-                        </span>
-                        <ul class="dropdown-menu">
-                            <li class="cursor_pointer font-80em"><a ng-click="addExisting=true">Existing Entry</a></li>
-                            <li class="cursor_pointer font-80em" ng-repeat="option in linkOptions">
-                                <a ng-click="addNewPartLink(option.type)"><i>New {{option.display}}</i></a>
-                            </li>
-                        </ul>
-                    </div>
-                </td>
-                <td ng-show="addExisting" style="padding-left: 12px">
-                    <div class="input-group">
-                        <input type="text" ng-class="{'input_box_group':true, 'input_box_error':false}"
-                               ng-model="addExistingPartNumber"
-                               placeHolder="Enter Part Number" style="width: 205px;"
-                               typeahead-loading="loadingAddExistingData"
-                               typeahead="result as result.partId for result in getEntriesByPartNumber($viewValue) | filter:{partId:$viewValue}"
-                               typeahead-editable="true"
-                               typeahead-on-select="addExistingPartLink($item, $model, $label)">
-                    <span class="input-group-addon" data-ng-click="addExisting=false" style="padding:3px; background-color:
-         #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
-                        <i ng-show="loadingAddExistingData" class="fa fa-spinner fa-spin"></i>
-                    </div>
-                </td>
-            </tr>
-        </table>
+        <h4>
+            <span style="white-space: nowrap">
+                <strong class="color-888">EDIT {{entry.type}}</strong>
+                <strong>{{entry.partId}}</strong>
+            </span>
+            <br>
+            <small class="font-65em">{{entry.creationTime | date:'medium'}} -
+                <a ng-href="/profile/{{entry.ownerId}}">{{entry.owner}}</a>
+            </small>
+        </h4>
     </div>
 </div>
+
+<!--tabs created when someone clicks on link--  -->
+<div class="row" ng-if="entry.linkedParts.length" style="margin-bottom: 14px; height: 23px; border-top: 1px solid #eee">
+    <div class="cursor_pointer col-md-1" style="padding-right: 4px; padding-left: 4px;"
+         ng-click="setActive('main')"
+         ng-class="{new_entry_tab_inactive:active!=='main', new_entry_tab_active:active==='main'}">
+        <strong class="fluid_no_wrap small">{{entry.name || 'Main Entry'}}</strong>
+        <span class="pull-right" style="">&nbsp;</span>
+    </div>
+    <div ng-repeat="linkedPart in entry.linkedParts" class="col-md-1" ng-click="setActive($index)"
+         ng-class="{new_entry_tab_inactive:active!==$index, new_entry_tab_active:active===$index}"
+         style="padding-right:3px; padding-left: 6px">
+        <small class="fluid_no_wrap">{{linkedPart.name || 'Linked ' + linkedPart.type | capitalize}}</small>
+        <span ng-click="deleteNewPartLink(linkedPart)" class="pull-right opacity_hover opacity_4" stop-event="click">
+            <i class="fa fa-times delete_icon font-70em"></i>
+        </span>
+    </div>
+
+    <div class="col-md-{{colLength}}" style="border-left: 1px solid #eee; background-color: #f7f7f7; height: 23px">
+        &nbsp;
+    </div>
+</div>
+
 
 <!--fields for the type of entry being edited -->
 <div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="!activePart.isExistingPart">
@@ -150,57 +140,31 @@
         </span>
     </div>
 
-    <!-- autocompleteAdd with a sub-schema-->
+    <!-- autocompleteAdd-->
     <div class="col-md-10" ng-if="field.inputType==='autoCompleteAdd'">
-
-        <!--show if there is a sub schema-->
-        <span ng-repeat="link in activePart[field.subSchema][field.schema]" ng-if="field.subSchema">
+        <span ng-repeat="link in activePart[field.schema] track by $index">
             <div ng-if="!$index">
                 <input ng-model="link.value" type="text" typeahead-loading="loadingData"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                       ng-change="field.invalid=false"
                        maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
                        typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
                 <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
-                      ng-click="addLink(field.schema, $index)"><i ng-show="loadingData"
-                                                                  class="fa fa-spinner fa-spin"></i>
+                      ng-click="addLink(field.schema, $index)">
+                    <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
                     <i class="fa fa-plus green opacity_hover"></i>
                 </span>
             </div>
 
             <div ng-if="$index" class="input-group pad-top-5">
-                <input type="text" ng-model="link.value" maxlength="125" style="width: 400px;"
+                <input type="text" ng-model="activePart[field.schema][$index].value" maxlength="125"
+                       style="width: 400px;"
                        ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
+                       ng-change="field.invalid=false"
                        ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
                        typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
-                <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)" style="padding:3px; background-color:
-                 #f1f1f1;width: 19px; border-left: 0">
-                    <i class="fa fa-minus delete_icon"></i>
-                </span>&nbsp;
-                <i class="fa fa-plus green opacity_hover" ng-click="addLink(field.schema, $index)"></i>
-            </div>
-        </span>
-
-        <!--no sub schema-->
-        <span ng-repeat="link in activePart[field.schema]" ng-if="!field.subSchema">
-            <div ng-if="!$index">
-                <input ng-model="link.value" type="text" typeahead-loading="loadingData"
-                       ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-                       maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
-                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
-                <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
-                      ng-click="addLink(field.schema, $index)"><i ng-show="loadingData"
-                                                                  class="fa fa-spinner fa-spin"></i>
-                    <i class="fa fa-plus green opacity_hover"></i>
-                </span>
-            </div>
-
-            <div ng-if="$index" class="input-group pad-top-5">
-                <input type="text" ng-model="link.value" maxlength="125" style="width: 400px;"
-                       ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
-                       ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
-                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
-                <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)" style="padding:3px; background-color:
-                 #f1f1f1;width: 19px; border-left: 0">
+                <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)"
+                      style="padding:3px; background-color: #f1f1f1;width: 19px; border-left: 0">
                     <i class="fa fa-minus delete_icon"></i>
                 </span>&nbsp;
                 <i class="fa fa-plus green opacity_hover" ng-click="addLink(field.schema, $index)"></i>
@@ -216,7 +180,68 @@
     </div>
 </div>
 
-<div class="row pad-top-5">
+<!--if existing part is added then this is displayed instead-->
+<div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="activePart.isExistingPart&&selectedFields">
+    <div class="col-md-2 entryLabel text-right">
+        <span ng-class="{'entryEditLabel':field.edit}">{{field.label}}</span>
+    </div>
+    <div class="col-md-10">
+        <div>{{activePart[field.schema]}}</div>
+    </div>
+</div>
+
+<!--sequence and notes -->
+<div class="row pad-top-5" ng-if="selectedFields">
+    <div class="col-md-12">
+        <div class="entry-details-subheader">
+            <strong style="color: #233559">SEQUENCE</strong>
+
+            <div class="pull-right">
+                <small class="opacity_hover" ng-click="isPaste=false">
+                    <i style="font-size:14px" class="fa fa-upload"></i> Upload File
+                </small>
+                <span style="font-weight: normal; color: #ccc">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                <small class="opacity_hover" ng-click="isPaste=true">
+                    <i style="font-size:14px" class="fa fa-paste"></i> Paste Sequence
+                </small>
+            </div>
+        </div>
+
+        <div class="margin-top-10 font-95em" ng-hide="activePart.hasSequence">
+            <alert type="'info'" style="margin-bottom: 10px; margin-top: 10px">
+                <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Supported file formats are
+                Genbank, Fasta and SBOL
+            </alert>
+
+            <alert type="'danger'" style="margin-bottom: 10px" ng-if="serverError">
+                <i style="font-size: 18px" class="fa fa-exclamation-triangle pull-left"></i> Error parsing file
+            </alert>
+
+            <!--file upload-->
+            <span ng-if="!isPaste && !processingFile">
+                <div class="margin-top-20"><input ng-file-select type="file"/></div>
+                <div style="height: 7px; background-color: #f9f9f9;">
+                    <div class="progress-bar" role="progressbar"
+                         ng-style="{ 'width': sequenceFileUpload.progress + '%' }"></div>
+                </div>
+            </span>
+
+            <span ng-if="processingFile">
+                <i class="fa fa-spinner fa-gear"></i> Processing file {{processingFile}}
+            </span>
+
+            <!--sequence paste-->
+            <textarea ng-show="isPaste===true &&!processingFile" ng-model="pastedSequence" class="input_box"
+                      placeholder="Paste sequence" rows="14" style="width: 100%; height: 100%;"></textarea>
+        </div>
+
+        <div class="margin-top-10" ng-if="activePart.hasSequence" style="height: 600px">
+            <ice-vector-viewer entryId="{{activePart.id}}"></ice-vector-viewer>
+        </div>
+    </div>
+</div>
+
+<div class="row pad-top-5" ng-if="selectedFields">
     <div class="col-md-12">
         <div class="entry-details-subheader">
             <strong style="color: #233559">NOTES</strong>
@@ -224,21 +249,26 @@
     </div>
 </div>
 
-<div class="row pad-top-5">
-    <div class="col-md-2"></div>
-    <div class="col-md-10">
-        <textarea class="entry_add_notes_input" ng-model="entry.longDescription"></textarea>
+<div class="row pad-top-5" ng-if="selectedFields">
+    <div class="col-md-2" ng-if="!activePart.isExistingPart"></div>
+    <div class="col-md-10" ng-if="!activePart.isExistingPart">
+        <textarea class="entry_add_notes_input" ng-model="activePart.longDescription"></textarea>
+    </div>
+    <div class="col-md-12" ng-if="activePart.isExistingPart">
+        {{activePart.longDescription}}
     </div>
 </div>
-</div>
 
-<div class="row pad-top-5">
+<div class="row pad-top-5" ng-if="selectedFields">
     <div class="col-md-2"></div>
 
     <div class="col-md-10">
         <button type="submit" class="btn btn-primary font-85em">Submit</button>
-        <button class="btn btn-default font-85em">Cancel</button>
+        <button type="button" ng-click="cancelEdit()" class="btn btn-default font-85em">Cancel</button>
     </div>
 </div>
 
+</div>
+
 </form>
+

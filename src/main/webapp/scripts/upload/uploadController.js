@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.upload.controller', [])
-    .controller('UploadController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource, $stateParams, $fileUploader, $http, Upload, UploadUtil) {
+    .controller('UploadController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource, $stateParams, $fileUploader, $http, Upload, UploadUtil, EntryService) {
         var sid = $cookieStore.get("sessionId");
         var upload = Upload(sid);
         var sheetData = [
@@ -38,6 +38,9 @@ angular.module('ice.upload.controller', [])
             ht.alter('insert_col', undefined, linkedHeaders.length);
         };
 
+        //
+        // uses xmlHttpRequest to upload files
+        //
         var transport = function (item, row, col) {
             var xhr = item._xhr = new XMLHttpRequest();
             var form = new FormData();
@@ -88,6 +91,9 @@ angular.module('ice.upload.controller', [])
             xhr.send(form);
         };
 
+        //
+        // handles file uploads when user selects a file in the bulk upload interface
+        //
         $scope.onFileSelect = function (files, row, col) {
             var id = $scope.bulkUpload.id;
             var url = "/rest/upload/" + id + "/" + UploadUtil.indexToRestResource($scope.importType, col);
@@ -161,7 +167,7 @@ angular.module('ice.upload.controller', [])
             };
 
             var autoComplete = function (field, query, process) {
-                $http.get('/rest/part/autocomplete', {
+                $http.get('/rest/parts/autocomplete', {
                     headers:{'X-ICE-Authentication-SessionId':sid},
                     params:{
                         val:query,
@@ -187,6 +193,15 @@ angular.module('ice.upload.controller', [])
 //                    case 'sentToAbrc':
 //                        object.type = 'checkbox';
 //                        break;
+
+                    case 'status':
+                        object.type = 'autocomplete';
+                        object.source = ['Complete', 'In Progress', 'Planned', ''];
+                        object.allowInvalid = false;
+                        object.validator = function (value, callback) {
+                            callback(value == 'Complete' || value == 'In Progress' || value == 'Planned' || value == '');
+                        };
+                        break;
 
                     case 'bioSafetyLevel':
                         object.type = 'autocomplete';
@@ -246,9 +261,6 @@ angular.module('ice.upload.controller', [])
             var sheetHeaders = UploadUtil.getSheetHeaders($scope.importType);
             for (var i = 0; i < sheetHeaders.length; i += 1)
                 sheetData[0][i] = '';
-
-            // get data schema for selected type
-            var dataSchema = UploadUtil.getDataSchema($scope.importType);
 
             //
             // function to display the header at the specified index. A special case is when a link
@@ -348,6 +360,40 @@ angular.module('ice.upload.controller', [])
                 }
             };
 
+            // upload entries associated with a bulk upload
+            var updateEntryList = function (objects) {
+                if ($scope.bulkUpload.id === undefined) {
+                    console.error("cannot update upload list. no bulk upload object");
+                    return;
+                }
+
+                var entryList = [];
+                for (var idx = 0; idx < objects.length; idx += 1) {
+                    var o = objects[idx];
+                    if (!o)
+                        continue;
+                    entryList[entryList.length + 1] = o;
+                }
+
+                upload.updateList({importId:$scope.bulkUpload.id}, {entryList:entryList}, function (success) {
+                    for (var j = 0; j < success.entryList.length; j += 1) {
+                        var part = success.entryList[j];
+
+                        $scope.bulkUpload.entryIdData[part.index] = part.id;
+                        if (part.linkedParts && part.linkedParts.length) {
+                            var linkedId = part.linkedParts[0].id;
+                            if (linkedId) {
+                                $scope.bulkUpload.linkedEntryIdData[part.index] = linkedId;
+                            }
+                        }
+                    }
+                    $scope.saving = false;
+                }, function (error) {
+                    console.error(error);
+                    $scope.saving = false;
+                });
+            };
+
             // bulk create or update from autofill or paste
             var bulkCreateOrUpdate = function (change) {
                 $scope.saving = true;
@@ -358,39 +404,44 @@ angular.module('ice.upload.controller', [])
                 for (var i = 0; i < change.length; i += 1) {
                     var data = change[i];
                     var row = data[0];
+                    var existing = undefined;
+
+                    if (objects.length > row) {
+                        existing = objects[row];
+                    }
 
                     var object = getEntryObject(row, data[1], data[3]);
-                    if (object)
-                        objects.push(object);
+
+                    if (existing) {
+                        for (var attrname in object) {
+                            if (object.hasOwnProperty(attrname)) {
+                                existing[attrname] = object[attrname];
+                            }
+                        }
+                        objects[row] = existing;
+                    } else {
+                        objects[row] = object;
+                    }
                 }
 
                 if (objects.length === 0)
                     return;
 
-                console.log("update", objects);
-
                 if ($scope.bulkUpload.id === undefined) {
-                    // todo : create first
-                } else {
-                    upload.updateList({importId:$scope.bulkUpload.id}, {entryList:objects}, function (success) {
-                        console.log(success);
-                        for (var j = 0; j < success.entryList.length; j += 1) {
-                            var part = success.entryList[j];
-                            console.log("created or updated", part);
+                    // first create bulk upload
+                    upload.create({type:$scope.importType}, function (result) {
+                        $scope.bulkUpload.id = result.id;
+                        $scope.bulkUpload.lastUpdate = result.lastUpdate;
+                        $scope.bulkUpload.name = result.name;
+                        //                            $location.path("/upload/" + result.id, false);
 
-                            $scope.bulkUpload.entryIdData[part.index] = part.id;
-                            if (part.linkedParts && part.linkedParts.length) {
-                                var linkedId = part.linkedParts[0].id;
-                                if (linkedId) {
-                                    $scope.bulkUpload.linkedEntryIdData[part.index] = linkedId;
-                                }
-                            }
-                        }
-                        $scope.saving = false;
+                        // then update the list
+                        updateEntryList(objects);
                     }, function (error) {
-                        console.error(error);
-                        $scope.saving = false;
+                        console.error("error creating bulk upload", error);
                     });
+                } else {
+                    updateEntryList(objects);
                 }
             };
 
@@ -402,7 +453,7 @@ angular.module('ice.upload.controller', [])
                 if (value === "" && !entryIdDataIndex)
                     return undefined;
 
-                var object = {id:entryIdDataIndex, type:$scope.importType.toUpperCase()};
+                var object = {id:entryIdDataIndex, type:$scope.importType.toUpperCase(), strainData:{}, plasmidData:{}, arabidopsisSeedData:{}};
 
                 // check if there is a linked object being updated
                 if (col >= sheetHeaders.length) {   // or if ($scope.linkedSelection?
@@ -413,11 +464,12 @@ angular.module('ice.upload.controller', [])
 
                     // set property for linked object and add it to link
                     var newIndex = col - sheetHeaders.length;
+                    // todo : same treatment as object above
                     var linkedObject = {id:linkedEntryIdDataIndex, type:$scope.linkedSelection.toUpperCase()};
                     linkedObject[linkedDataSchema[newIndex]] = value;
                     object.linkedParts = [linkedObject];
                 } else {
-                    object[dataSchema[col]] = value;
+                    object = UploadUtil.setDataValue($scope.importType.toUpperCase(), col, object, value);
                 }
 
                 object.index = row;
@@ -519,6 +571,19 @@ angular.module('ice.upload.controller', [])
                 });
             };
 
+            $scope.confirmRejectUploadModal = function () {
+                var resetModalInstance = $modal.open({
+                    templateUrl:'scripts/upload/modal/reject-upload.html',
+                    controller:'BulkUploadRejectModalController',
+                    backdrop:'static',
+                    resolve:{
+                        upload:function () {
+                            return $scope.bulkUpload;
+                        }
+                    }
+                });
+            };
+
             $scope.submitImportForApproval = function () {
                 $scope.submitting = true;
                 var requiresApproval = $scope.bulkUpload.status && $scope.bulkUpload.status == 'PENDING_APPROVAL';
@@ -529,15 +594,37 @@ angular.module('ice.upload.controller', [])
                     tmp.status = 'APPROVED';
                 else
                     tmp.status = 'PENDING_APPROVAL';
+                $scope.requestError = undefined;
 
                 Upload(sid).updateStatus({importId:$scope.bulkUpload.id}, tmp, function (result) {
                     $scope.submitting = false;
-                    if (requiresApproval)
-                        $location.path('/folders/personal');
-                    else
-                        $location.path('/folders/pending');
+                    $location.path('/folders/personal');
                 }, function (error) {
+                    console.log(error, error.status === 400);
+
                     $scope.submitting = false;
+                    if (error.status === 400) {
+                        $scope.requestError = "Error: validation failed";
+                    } else {
+                        $scope.requestError = "Unknown server error";
+                    }
+
+                    var resetModalInstance = $modal.open({
+                        templateUrl:'views/modal/upload-submit-alert.html',
+                        controller:function ($scope, msg, isError) {
+                            $scope.requestError = msg;
+                        },
+                        backdrop:'static',
+                        resolve:{
+                            msg:function () {
+                                return $scope.requestError;
+                            },
+
+                            isError:function () {
+                                return true;
+                            }
+                        }
+                    });
                 });
             };
 
@@ -649,7 +736,6 @@ angular.module('ice.upload.controller', [])
                                 // for each entry object (row)
                                 for (var i = 0; i < result.entryList.length; i += 1) {
                                     var entry = result.entryList[i];
-                                    console.log(entry);
                                     $scope.bulkUpload.entryIdData.push(entry.id);
 
                                     // ensure capacity
@@ -658,12 +744,13 @@ angular.module('ice.upload.controller', [])
 
                                     // display [for each field in the object]
                                     for (var j = 0; j < dataSchema.length; j += 1) {
-                                        var val = entry[dataSchema[j]];
+                                        var val = UploadUtil.getEntryValue($scope.importType, entry, j);
+//                                        entry[dataSchema[j]];
                                         if (val === undefined)
                                             val = '';
 
                                         // currently for attachments only
-                                        if (val instanceof  Array && dataSchema[j] === "attachments") {
+                                        if (val instanceof Array && dataSchema[j] === "attachments") {
                                             if (val.length) {
                                                 val = val[0].filename;
                                             } else {
@@ -723,6 +810,26 @@ angular.module('ice.upload.controller', [])
             generateLinkOptions($scope.importType);
             createSheet();
         }
+    })
+    .controller('BulkUploadRejectModalController', function ($scope, $cookieStore, $location, $modalInstance, upload, Upload) {
+        $scope.rejectUpload = function () {
+            $scope.submitting = true;
+            var sid = $cookieStore.get("sessionId");
+
+            Upload(sid).updateStatus({importId:upload.id}, {id:upload.id, status:'IN_PROGRESS'}, function (result) {
+                $location.path('/folders/pending');
+                $modalInstance.close();
+                $scope.submitting = false;
+                // todo : send optional message if any
+            }, function (error) {
+                console.error(error);
+                $scope.submitting = false;
+            })
+        };
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss('cancel');
+        };
     })
     .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType, linkedAddType) {
         var sid = $cookieStore.get("sessionId");
@@ -797,5 +904,4 @@ angular.module('ice.upload.controller', [])
                 url += "?link=" + linkedAddType;
             $window.open(url, "_self");
         }
-    })
-;
+    });

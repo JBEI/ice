@@ -3,21 +3,6 @@
 /* Services */
 var iceServices = angular.module('iceApp.services', ['ngCookies', 'ngResource']);
 
-//iceServices.factory('Search', function ($resource, $cookieStore) {
-//    return function () {
-//
-//        var sessionId = $cookieStore.get("sessionId");
-//
-//        return $resource('/rest/search', {}, {
-//            runSearch:{
-//                method:'GET',
-//                responseType:"json",
-//                headers:{'X-ICE-Authentication-SessionId':sessionId}
-//            }
-//        });
-//    }
-//});
-
 iceServices.factory('EntryService', function () {
     var toStringArray = function (objArray) {
         var result = [];
@@ -46,6 +31,7 @@ iceServices.factory('EntryService', function () {
             {value:"2", text:"Level 2"}
         ]},
         {label:"Creator", required:true, schema:'creator', inputType:'withEmail', bothRequired:'true'},
+        {label:"Keywords", schema:'keywords', inputType:'medium'},
         {label:"Links", schema:'links', inputType:'add'},
         {label:"Summary", required:true, schema:'shortDescription', inputType:'long'},
         {label:"References", schema:'references', inputType:'long'},
@@ -56,7 +42,7 @@ iceServices.factory('EntryService', function () {
     var plasmidFields = [
         {label:"Backbone", schema:'backbone', subSchema:'plasmidData', inputType:'medium'},
         {label:"Origin of Replication", schema:'originOfReplication', inputType:'autoComplete',
-            autoCompleteField:'ORIGIN_OF_REPLICATION'},
+            autoCompleteField:'ORIGIN_OF_REPLICATION', subSchema:'plasmidData'},
         {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
             autoCompleteField:'SELECTION_MARKERS'},
         {label:"Promoters", schema:'promoters', subSchema:'plasmidData', inputType:'autoComplete', autoCompleteField:'PROMOTERS'},
@@ -65,16 +51,16 @@ iceServices.factory('EntryService', function () {
 
     // fields peculiar to arabidopsis seeds
     var seedFields = [
-        {label:"Sent To ABRC", schema:'sentToABRC', help:"Help Text", inputType:'bool'},
-        {label:"Plant Type", schema:'plantType', options:[
+        {label:"Sent To ABRC", schema:'sentToABRC', help:"Help Text", inputType:'bool', subSchema:'arabidopsisSeedData'},
+        {label:"Plant Type", schema:'plantType', subSchema:'arabidopsisSeedData', options:[
             {value:"EMS", text:"EMS"},
-            {value:"OVER_EXPRESSION", text:"Over Expression"},
+            {value:"OVER_EXPRESSION", text:"OVER_EXPRESSION"},
             {value:"RNAI", text:"RNAi"},
             {value:"REPORTER", text:"Reporter"},
             {value:"T_DNA", text:"T-DNA"},
             {value:"OTHER", text:"Other"}
         ]},
-        {label:"Generation", schema:'generation', options:[
+        {label:"Generation", schema:'generation', subSchema:'arabidopsisSeedData', options:[
             {value:"UNKNOWN", text:"UNKNOWN"},
             {value:"F1", text:"F1"},
             {value:"F2", text:"F2"},
@@ -89,9 +75,9 @@ iceServices.factory('EntryService', function () {
             {value:"T4", text:"T4"},
             {value:"T5", text:"T5"}
         ]},
-        {label:"Harvest Date", schema:'harvestDate', inputType:'date'},
-        {label:"Homozygosity", schema:'backbone', inputType:'medium'},
-        {label:"Ecotype", schema:'backbone', inputType:'medium'},
+        {label:"Harvest Date", schema:'harvestDate', subSchema:'arabidopsisSeedData', inputType:'date'},
+        {label:"Homozygosity", schema:'homozygosity', subSchema:'arabidopsisSeedData', inputType:'medium'},
+        {label:"Ecotype", schema:'ecotype', subSchema:'arabidopsisSeedData', inputType:'medium'},
         {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',
             autoCompleteField:'SELECTION_MARKERS'}
     ];
@@ -100,8 +86,9 @@ iceServices.factory('EntryService', function () {
     var strainFields = [
         {label:"Selection Markers", required:true, schema:'selectionMarkers',
             inputType:'autoCompleteAdd', autoCompleteField:'SELECTION_MARKERS'},
-        {label:"Genotype/Phenotype", schema:'genotypePhenotype', subSchema:'strainData', inputType:'long'},
-        {label:"Plasmids", schema:'plasmids', inputType:'autoComplete', autoCompleteField:'PLASMID_PART_NUMBER'}
+        {label:"Genotype/Phenotype", schema:'genotypePhenotype', inputType:'long', subSchema:'strainData'},
+        {label:"Plasmids", schema:'plasmids', inputType:'autoComplete', autoCompleteField:'PLASMID_PART_NUMBER', subSchema:'strainData'},
+        {label:"Host", schema:'host', inputType:'short', subSchema:'strainData'}
     ];
 
     var generateLinkOptions = function (type) {
@@ -211,6 +198,20 @@ iceServices.factory('EntryService', function () {
             return entry;
         },
 
+        // inverse of the above. converts to form ui can work with
+        convertToUIForm:function (entry) {
+            var type = entry.type.toLowerCase();
+            var fields = getFieldsForType(type);
+
+            angular.forEach(fields, function (field) {
+                if (field.subSchema && entry[field.subSchema]) {
+                    entry[field.schema] = entry[field.subSchema][field.schema];
+                }
+            });
+
+            return entry;
+        },
+
         validateFields:function (part, fields) {
             return validateFields(part, fields);
         }
@@ -236,12 +237,19 @@ iceServices.factory('Group', function ($resource, $cookieStore) {
 
         var sessionId = $cookieStore.get("sessionId");
 
-        return $resource('/rest/groups', {userId:'@userId'}, {
-            getUserGroups:{
+        return $resource('/rest/groups', {groupId:'@groupId'}, {
+            members:{
                 method:'GET',
-                responseType:"json",
+                responseType:'json',
                 isArray:true,
-                url:"/rest/groups/:userId",
+                url:"/rest/groups/:groupId/members",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            update:{
+                method:'PUT',
+                responseType:'json',
+                url:"/rest/groups/:groupId",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
@@ -284,6 +292,14 @@ iceServices.factory('User', function ($resource) {
 
             list:{
                 method:'GET',
+                responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            filter:{
+                method:'GET',
+                url:'/rest/users/autocomplete',
+                isArray:true,
                 responseType:'json',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
@@ -343,6 +359,13 @@ iceServices.factory('User', function ($resource) {
                 url:'/rest/users/password',
                 responseType:'json',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            samples:{
+                method:'GET',
+                url:'/rest/users/:userId/samples',
+                responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
     }
@@ -362,12 +385,24 @@ iceServices.factory('Message', function ($resource) {
 
 iceServices.factory('Samples', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/samples', {userId:'@userId'}, {
+        return $resource('/rest/samples', {userId:'@userId', requestId:'@requestId'}, {
             requests:{
                 method:'GET',
                 responseType:'json',
                 url:"/rest/samples/requests",
-                isArray:true,
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            update:{
+                method:'PUT',
+                responseType:'json',
+                url:"/rest/samples/requests/:requestId",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            submitRequests:{
+                method:'PUT',
+                url:"/rest/samples/requests",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -375,7 +410,12 @@ iceServices.factory('Samples', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 url:"/rest/samples/requests/:userId",
-                isArray:true,
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            removeRequestFromCart:{
+                method:'DELETE',
+                url:"/rest/samples/requests/:requestId",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -392,7 +432,7 @@ iceServices.factory('Samples', function ($resource) {
 
 iceServices.factory('Attachment', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/part/:partId/attachments', {partId:'@partId', attachmentId:'@attachmentId'}, {
+        return $resource('/rest/parts/:partId/attachments', {partId:'@partId', attachmentId:'@attachmentId'}, {
             create:{
                 method:'POST',
                 responseType:"json",
@@ -408,7 +448,7 @@ iceServices.factory('Attachment', function ($resource) {
 
             delete:{
                 method:'DELETE',
-                url:'/rest/part/:partId/attachments/:attachmentId',
+                url:'/rest/parts/:partId/attachments/:attachmentId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
@@ -417,39 +457,39 @@ iceServices.factory('Attachment', function ($resource) {
 
 iceServices.factory('Entry', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/part/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId'}, {
+        return $resource('/rest/parts/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId', commentId:'@commentId', linkId:'@linkId'}, {
             query:{
                 method:'GET',
                 responseType:"json",
-                url:"/rest/part/:partId",
+                url:"/rest/parts/:partId",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             tooltip:{
                 method:'GET',
                 responseType:'json',
-                url:"/rest/part/:partId/tooltip",
+                url:"/rest/parts/:partId/tooltip",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             create:{
                 method:'PUT',
                 responseType:'json',
-                url:'/rest/part',
+                url:'/rest/parts',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             update:{
                 method:'PUT',
                 responseType:'json',
-                url:'/rest/part/:partId',
+                url:'/rest/parts/:partId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             statistics:{
                 method:'GET',
                 responseType:'json',
-                url:'/rest/part/:partId/statistics',
+                url:'/rest/parts/:partId/statistics',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -457,7 +497,7 @@ iceServices.factory('Entry', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 isArray:true,
-                url:'/rest/part/:partId/comments',
+                url:'/rest/parts/:partId/comments',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -465,7 +505,7 @@ iceServices.factory('Entry', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 isArray:true,
-                url:'/rest/part/:partId/experiments',
+                url:'/rest/parts/:partId/experiments',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -473,35 +513,42 @@ iceServices.factory('Entry', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 isArray:true,
-                url:'/rest/part/:partId/permissions',
+                url:'/rest/parts/:partId/permissions',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             addPermission:{
                 method:'POST',
                 responseType:'json',
-                url:'/rest/part/:partId/permissions',
+                url:'/rest/parts/:partId/permissions',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             removePermission:{
                 method:'DELETE',
                 responseType:'json',
-                url:'/rest/part/:partId/permissions/:permissionId',
+                url:'/rest/parts/:partId/permissions/:permissionId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             createComment:{
                 method:'POST',
                 responseType:'json',
-                url:'/rest/part/:partId/comments',
+                url:'/rest/parts/:partId/comments',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            updateComment:{
+                method:'PUT',
+                responseType:'json',
+                url:'/rest/parts/:partId/comments/:commentId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             createExperiment:{
                 method:'POST',
                 responseType:'json',
-                url:'/rest/part/:partId/experiments',
+                url:'/rest/parts/:partId/experiments',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -509,7 +556,7 @@ iceServices.factory('Entry', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 isArray:true,
-                url:'/rest/part/:partId/samples',
+                url:'/rest/parts/:partId/samples',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -517,7 +564,7 @@ iceServices.factory('Entry', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 isArray:true,
-                url:'/rest/part/:partId/traces',
+                url:'/rest/parts/:partId/traces',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -525,63 +572,69 @@ iceServices.factory('Entry', function ($resource) {
                 method:'GET',
                 responseType:'json',
                 isArray:true,
-                url:'/rest/part/:partId/history',
+                url:'/rest/parts/:partId/history',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             deleteTraceSequence:{
                 method:'DELETE',
                 responseType:'json',
-                url:'/rest/part/:partId/traces/:traceId',
+                url:'/rest/parts/:partId/traces/:traceId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             addTraceSequence:{
                 method:'POST',
-                url:'/rest/part/:partId/traces',
+                url:'/rest/parts/:partId/traces',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             sequence:{
                 method:'GET',
                 responseType:'json',
-                url:'/rest/part/:partId/sequence',
+                url:'/rest/parts/:partId/sequence',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             deleteSequence:{
                 method:'DELETE',
-                url:'/rest/part/:partId/sequence',
+                url:'/rest/parts/:partId/sequence',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             addSequenceAsString:{
                 method:"POST",
-                url:'/rest/part/:partId/sequence',
+                url:'/rest/parts/:partId/sequence',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             moveEntriesToTrash:{
                 method:'POST',
-                url:'/rest/part/trash',
+                url:'/rest/parts/trash',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             delete:{
                 method:'DELETE',
-                url:'/rest/part/:partId',
+                url:'/rest/parts/:partId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             enablePublicRead:{
                 method:'PUT',
-                url:'/rest/part/:partId/permissions/public',
+                url:'/rest/parts/:partId/permissions/public',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             disablePublicRead:{
                 method:'DELETE',
-                url:'/rest/part/:partId/permissions/public',
+                url:'/rest/parts/:partId/permissions/public',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            removeLink:{
+                method:'DELETE',
+                url:'/rest/parts/:partId/links/:linkId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         });
@@ -702,7 +755,7 @@ iceServices.factory('Settings', function ($resource) {
 
 iceServices.factory('Remote', function ($resource, $cookieStore) {
     return function () {
-        return $resource('/rest/remote/:id', {id:'@id', email:'@email', folderId:'@folderId'}, {
+        return $resource('/rest/remote/:id', {id:'@id', email:'@email', partId:'@partId', folderId:'@folderId'}, {
             publicFolders:{
                 method:'GET',
                 responseType:'json',
@@ -730,37 +783,29 @@ iceServices.factory('Remote', function ($resource, $cookieStore) {
                 responseType:'json',
                 url:'/rest/remote/:id/folders/:folderId',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
-            }
-        });
-    }
-});
+            },
 
-iceServices.factory('WebOfRegistries', function ($resource, $cookieStore) {
-    return function () {
-        return $resource('/rest/web', {url:'@url'}, {
-            query:{
+            samples:{
                 method:'GET',
                 responseType:'json',
+                isArray:true,
+                url:'/rest/remote/:id/parts/:partId/samples',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             },
 
-            addPartner:{
-                method:'POST',
-                url:'/rest/web/partner',
+            comments:{
+                method:'GET',
                 responseType:'json',
+                isArray:true,
+                url:'/rest/remote/:id/parts/:partId/comments',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             },
 
-            removePartner:{
-                method:'DELETE',
-                url:'/rest/web/partner/:url',
-                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
-            },
-
-            updatePartner:{
-                method:'PUT',
-                url:'/rest/web/partner/:url',
+            traces:{
+                method:'GET',
                 responseType:'json',
+                isArray:true,
+                url:'/rest/remote/:id/parts/:partId/traces',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             }
         });
@@ -773,6 +818,12 @@ iceServices.factory('Files', function ($resource, $cookieStore) {
             getTraceSequenceFile:{
                 method:'GET',
                 url:'/rest/file/trace/:fileId',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            getCSV:{
+                method:'POST',
+                url:'/rest/file/csv',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             }
         });
@@ -820,6 +871,12 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             },
 
+            removeEntriesFromFolder:{
+                method:'PUT',
+                url:'/rest/folders/:folderId/entries',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
             // retrieves folder contents. folderId could be a string such as "personal"
             // "available", "shared", "upload"
             folder:{
@@ -830,6 +887,12 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
 
             delete:{
                 method:'DELETE',
+                url:'/rest/folders/:folderId',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            update:{
+                method:'PUT',
                 url:'/rest/folders/:folderId',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             },
@@ -854,12 +917,25 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
                 responseType:'json',
                 url:'/rest/folders/:folderId/permissions/:permissionId',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            enablePublicReadAccess:{
+                method:'PUT',
+                responseType:'json',
+                url:'/rest/folders/:folderId/permissions/public',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            },
+
+            disablePublicReadAccess:{
+                method:'DELETE',
+                url:'/rest/folders/:folderId/permissions/public',
+                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             }
         });
     }
 });
 
-iceServices.factory('AccessToken', function ($resource, $cookieStore, $http, $rootScope, $location, $cookies) {
+iceServices.factory('AccessToken', function ($resource) {
     return function () {
         return $resource('/rest/accesstoken', {}, {
             createToken:{
@@ -898,8 +974,8 @@ iceServices.factory('Authentication',
             },
 
             // checks if the session is valid
-            isSessionValid:function (who) {
-                console.log("check for valid session", who);
+            isSessionValid:function () {
+//                console.log("check for valid session", who);
                 var sid = $cookieStore.get('sessionId');
                 if (sid === undefined) {
                     if ($location.path() !== '/login')
@@ -931,6 +1007,7 @@ iceServices.factory('Authentication',
             },
 
             isAdmin:function () {
+                // todo
 //                console.log($rootScope.user);
 //                 if(!$rootScope.user || !$rootScope.user.isAdmin) {
 //                     $location.path("/");
@@ -951,10 +1028,23 @@ iceServices.factory('Authentication',
                     });
             }
         };
-
-        // example using resource
-//    return $resource('/rest/accesstoken', {}, {
-//        'login':{ method:"POST" },
-//        "isSessionValid":{ method:"GET", headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")} }
-//    });
     });
+
+iceServices.factory('EntryContextUtil', function () {
+    // default search filters
+    var context;
+
+    return {
+        getContext:function () {
+            return context;
+        },
+
+        setContextCallback:function (callback, available, offset, back) {
+            context = {};
+            context.callback = callback;
+            context.available = available;
+            context.offset = offset;
+            context.back = back;
+        }
+    }
+});

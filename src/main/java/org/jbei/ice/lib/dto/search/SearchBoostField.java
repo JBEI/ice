@@ -1,51 +1,17 @@
 package org.jbei.ice.lib.dto.search;
 
-import java.util.HashSet;
-
-import org.jbei.ice.lib.dao.IDataTransferModel;
-
 /**
  * Search fields that have user boost support (shown in the user preference section)
  *
  * @author Hector Plahar
  */
-public enum SearchBoostField implements IDataTransferModel {
+public enum SearchBoostField {
 
-    OWNER("owner"),
-    OWNER_EMAIL("ownerEmail"),
-    CREATOR("creator"),
-    NAME("names.name"),
+    NAME("name"),
     ALIAS("alias"),
     KEYWORDS("keywords"),
     SUMMARY("shortDescription"),
-    NOTES("longDescription"),
-    CREATOR_EMAIL("creatorEmail"),
-
-    INTELLECTUAL_PROPERTY("intellectualProperty"),
-    REFERENCES("references"),
-    PART_ID("partNumbers.partNumber"),
-    LINK("links.link"),
-    //    LINK_URL("links.url"),
-    SELECTION_MARKER("selectionMarkers.name"),
-    FUNDING_SOURCE("entryFundingSources.fundingSource.fundingSource"),
-    PRINCIPAL_INVESTIGATOR("entryFundingSources.fundingSource.principalInvestigator"),
-
-    // strain fields
-    STRAIN_PLASMIDS("plasmids"),
-    GENOTYPE_OR_PHENOTYPE("genotypePhenotype"),
-    PARENT_STRAIN("host"),
-
-    // plasmid fields
-    BACKBONE("backbone"),
-    PROMOTERS("promoters"),
-    REPLICATES_IN("replicatesIn"),
-    ORIGIN_OF_REPLICATION("originOfReplication"),
-
-    // seed fields
-    ECOTYPE("ecotype"),
-    GENERATION("generation"),
-    SEED_PARENTS("parents"),
-    PLANT_TYPE("plantType");
+    SELECTION_MARKER("selectionMarkers.name");
 
     private String field; // actual field value. Should correspond to value in the SearchFieldFactory
 
@@ -53,19 +19,8 @@ public enum SearchBoostField implements IDataTransferModel {
         this.field = field;
     }
 
-    private SearchBoostField() {
-    }
-
     public String getField() {
         return this.field;
-    }
-
-    public static HashSet<String> getFields() {
-        HashSet<String> fields = new HashSet<String>();
-        for (SearchBoostField boostField : SearchBoostField.values()) {
-            fields.add(boostField.getField());
-        }
-        return fields;
     }
 
     /**

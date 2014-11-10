@@ -58,11 +58,17 @@ public class ExperimentController {
 
         entryAuthorization.expectWrite(userId, entry);
 
-        Experiment experiment = new Experiment();
+        Experiment experiment = dao.getByUrl(study.getUrl());
+        if (experiment == null) {
+            experiment = new Experiment();
+            experiment.setCreationTime(new Date());
+            experiment.setUrl(study.getUrl());
+            experiment.setLabel(study.getLabel());
+            experiment.getSubjects().add(entry);
+            experiment = dao.create(experiment);
+            return experiment.toDataTransferObject();
+        }
         experiment.getSubjects().add(entry);
-        experiment.setCreationTime(new Date());
-        experiment.setUrl(study.getUrl());
-        experiment.setLabel(study.getLabel());
-        return dao.create(experiment).toDataTransferObject();
+        return dao.update(experiment).toDataTransferObject();
     }
 }

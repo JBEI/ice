@@ -32,12 +32,38 @@ public class GroupController {
         accountController = new AccountController();
     }
 
-    public Group getGroupByUUID(String uuid) {
-        return dao.get(uuid);
+    /**
+     * Can access a group if you are an admin or the owner of that group
+     *
+     * @param userId
+     * @param id
+     * @return
+     */
+    public UserGroup getGroupById(String userId, long id) {
+        Group group = dao.get(id);
+        if (group == null || !canAccessGroup(userId, group))
+            return null;
+
+        return group.toDataTransferObject();
     }
 
-    public Group getGroupById(long id) {
-        return dao.get(id);
+    private boolean canAccessGroup(String userId, Group group) {
+        boolean isOwner = group.getOwner() != null && group.getOwner().getEmail().equalsIgnoreCase(userId);
+        return isOwner || accountController.isAdministrator(userId);
+    }
+
+    public ArrayList<AccountTransfer> getGroupMembers(String userId, long id) {
+        Group group = dao.get(id);
+        if (group == null || !canAccessGroup(userId, group))
+            return null;
+
+        // todo : add paging
+        ArrayList<AccountTransfer> list = new ArrayList<>();
+        for (Account account : group.getMembers()) {
+            list.add(account.toDataTransferObject());
+        }
+
+        return list;
     }
 
     /**
@@ -110,18 +136,16 @@ public class GroupController {
         group.setOwner(account);
         group = save(group);
 
-        ArrayList<Account> accounts = new ArrayList<>();
         for (AccountTransfer accountTransfer : info.getMembers()) {
             Account memberAccount = accountController.getByEmail(accountTransfer.getEmail());
             if (memberAccount == null)
                 continue;
             memberAccount.getGroups().add(group);
             accountController.save(memberAccount);
-            accounts.add(memberAccount);
         }
 
-        group.getMembers().addAll(accounts);
-        group = dao.update(group);
+//        group.getMembers().addAll(accounts);
+//        group = dao.update(group);
 
         info = group.toDataTransferObject();
         for (Account addedAccount : group.getMembers()) {
@@ -131,22 +155,24 @@ public class GroupController {
         return info;
     }
 
-    public UserGroup updateGroup(Account account, UserGroup user) throws ControllerException {
-        if (user.getType() == GroupType.PUBLIC && !accountController.isAdministrator(account)) {
-            String errMsg = "Non admin " + account.getEmail() + " attempting to update public group";
+    public boolean updateGroup(String userId, UserGroup user) {
+        if (user.getType() == GroupType.PUBLIC && !accountController.isAdministrator(userId)) {
+            String errMsg = "Non admin " + userId + " attempting to update public group";
             Logger.error(errMsg);
-            throw new ControllerException(errMsg);
+            return false;
         }
 
         Group group = dao.get(user.getId());
         if (group == null) {
-            throw new ControllerException("Could not find group to update");
+            return false;
         }
 
         group.setLabel(user.getLabel());
         group.setDescription(user.getDescription());
         group = dao.update(group);
-        return group.toDataTransferObject();
+
+        setGroupMembers(group, user.getMembers());
+        return group != null;
     }
 
     public UserGroup deleteGroup(Account account, UserGroup user) throws ControllerException {
@@ -173,7 +199,7 @@ public class GroupController {
     }
 
     public Group createOrRetrievePublicGroup() {
-        Group publicGroup = this.getGroupByUUID(PUBLIC_GROUP_UUID);
+        Group publicGroup = dao.get(PUBLIC_GROUP_UUID);
         if (publicGroup != null)
             return publicGroup;
 
@@ -307,27 +333,7 @@ public class GroupController {
         }
     }
 
-    public ArrayList<AccountTransfer> setGroupMembers(Account account, UserGroup info,
-            ArrayList<AccountTransfer> members) throws ControllerException {
-        Group group = getGroupById(info.getId());
-        if (group == null) {
-            String errMsg = "Could retrieve group with id " + info.getId();
-            Logger.error(errMsg);
-            throw new ControllerException(errMsg);
-        }
-
-        if (group.getUuid().equalsIgnoreCase(PUBLIC_GROUP_UUID))
-            return new ArrayList<>();
-
-        // check permissions
-        if (!account.getEmail().equalsIgnoreCase(group.getOwner().getEmail())) {
-            if (!accountController.isAdministrator(account)) {
-                String errMsg = account.getEmail() + " does not have permissions to modify group";
-                Logger.error(errMsg);
-                throw new ControllerException(errMsg);
-            }
-        }
-
+    protected void setGroupMembers(Group group, ArrayList<AccountTransfer> members) {
         // is there an easier way to do this?
         // remove
         for (Account member : group.getMembers()) {
@@ -357,6 +363,5 @@ public class GroupController {
         for (Account addedAccount : accounts) {
             members.add(addedAccount.toDataTransferObject());
         }
-        return members;
     }
 }

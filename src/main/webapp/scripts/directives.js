@@ -55,6 +55,13 @@ iceDirectives.directive("iceEntryAttachment", function () {
     }
 });
 
+iceDirectives.directive("iceRemoteEntryAttachment", function () {
+    return {
+        restrict:"E",
+        templateUrl:"/views/wor/entry/attachment.html"
+    }
+});
+
 iceDirectives.directive("iceEntryPermission", function () {
     return {
         restrict:"E",
@@ -194,7 +201,7 @@ iceDirectives.directive("ice.menu.collections.details", function () {
 iceDirectives.directive("ice.menu.wor", function () {
     return {
         restrict:"E",
-        templateUrl:"/views/web-of-registries-menu.html",
+        templateUrl:"/views/wor/web-of-registries-menu.html",
         controller:"WebOfRegistriesMenuController"
     }
 });
@@ -202,7 +209,7 @@ iceDirectives.directive("ice.menu.wor", function () {
 iceDirectives.directive("ice.menu.wor.details", function () {
     return {
         restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
-        templateUrl:"/views/web-of-registries-menu-details.html",
+        templateUrl:"/views/wor/web-of-registries-menu-details.html",
         controller:"WebOfRegistriesDetailController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)
@@ -218,28 +225,29 @@ iceDirectives.directive("ice.menu.tags", function () {
     }
 });
 
-iceDirectives.directive("iceFlash", function ($cookieStore) {
+iceDirectives.directive("iceVectorViewer", function ($cookieStore) {
     function link(scope, element, attrs) {
         var sid = $cookieStore.get("sessionId");
+        var entryId;
+
+        function generateObject() {
+            element.html('<object id="VectorViewer" width="100%" height="100%" data="/swf/vv/VectorViewer.swf?entryId='
+                + entryId + '&amp;sessionId=' + sid + '"> \
+                              </object>');
+        }
 
         scope.$watch('entry', function (value) {
-            if (value) {
-                element.html('<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540002" id="VectorEditor" width="100%" height="100%" codebase="https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"> \
-          <param name="movie" value="VectorViewer.swf"> \
-              <param name="quality" value="high">  \
-                  <param name="bgcolor" value="#869ca7"> \
-                      <param name="wmode" value="opaque">  \
-                          <param name="allowScriptAccess" value="sameDomain"> \
-                              <embed src="/swf/vv/VectorViewer.swf?entryId=' + value.id + '&amp;sessionId=' + sid + '" \
-                              quality="high" bgcolor="#869ca7" width="100%" wmode="opaque" height="100%" \
-                              name="VectorEditor" align="middle" play="true" loop="false"  \
-                              type="application/x-shockwave-flash" \
-                              pluginspage="http://www.adobe.com/go/getflashplayer"> \
-                              </object>');
-//                element.html('<b>' + value.recordId + '</b>')
+            if (!value) {
+                if (attrs.entryid) {
+                    entryId = attrs.entryid;
+                } else
+                    return;
             } else {
-                element.html('<b>No entry data loaded</b>')
+                entryId = value.id;
             }
+
+            if (entryId)
+                generateObject();
         });
     }
 
@@ -249,32 +257,20 @@ iceDirectives.directive("iceFlash", function ($cookieStore) {
     };
 });
 
-iceDirectives.directive("iceVectorViewer", function ($cookieStore) {
+iceDirectives.directive("iceRemoteFlash", function ($cookieStore) {
     function link(scope, element, attrs) {
-
-        var id, sid = $cookieStore.get("sessionId");
+        var sid = $cookieStore.get("sessionId");
+        var entryId, url;
 
         function generateObject() {
-            if (!id) {
-                element.html("<b>Cannot render vector viewer.</b>")
-            } else {
-                element.html('<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540002" id="VectorEditor" width="100%" height="100%" codebase="https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"> \
-          <param name="movie" value="VectorViewer.swf"> \
-              <param name="quality" value="high">  \
-                  <param name="bgcolor" value="#869ca7"> \
-                      <param name="wmode" value="opaque">  \
-                          <param name="allowScriptAccess" value="sameDomain"> \
-                              <embed src="/swf/vv/VectorViewer.swf?entryId=' + id + '&amp;sessionId=' + sid + '" \
-                              quality="high" bgcolor="#869ca7" width="100%" wmode="opaque" height="100%" \
-                              name="VectorEditor" align="middle" play="true" loop="false"  \
-                              type="application/x-shockwave-flash" \
-                              pluginspage="http://www.adobe.com/go/getflashplayer"> \
-                              </object>');
-            }
+            element.html('<object id="VectorViewer" width="100%" height="100%" data="/swf/vv/VectorViewer.swf?entryId='
+                + entryId + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
+                    </object>');
         }
 
-        scope.$watch("active", function (value) {
-            id = attrs.entryid;
+        scope.$watch('remoteEntry', function (value) {
+            entryId = value.id;
+            url = value.partnerId;
             generateObject();
         });
     }
@@ -289,28 +285,23 @@ iceDirectives.directive("iceSequenceChecker", function ($cookieStore) {
     function link(scope, element, attrs) {
 
         var id, sid = $cookieStore.get("sessionId");
+        var url;
 
         function generateObject() {
-            if (!id) {
-                element.html("<b>Cannot render sequence checker.</b>")
+            if (!url) {
+                element.html('<object id="SequenceChecker" width="100%" height="100%" data="/swf/sc/SequenceChecker.swf?entryId='
+                    + id + '&amp;sessionId=' + sid + '"> \
+                    </object>');
             } else {
-                element.html('<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540002" id="SequenceChecker" width="100%" height="100%" codebase="https://fpdownload.macromedia.com/get/flashplayer/current/swflash.cab"> \
-          <param name="movie" value="SequenceChecker.swf"> \
-              <param name="quality" value="high">  \
-                  <param name="bgcolor" value="#869ca7"> \
-                      <param name="wmode" value="opaque">  \
-                          <param name="allowScriptAccess" value="sameDomain"> \
-                              <embed src="/swf/sc/SequenceChecker.swf?entryId=' + id + '&amp;sessionId=' + sid + '" \
-                              quality="high" bgcolor="#869ca7" width="100%" wmode="opaque" height="100%" \
-                              name="SequenceChecker" align="middle" play="true" loop="false"  \
-                              type="application/x-shockwave-flash" \
-                              pluginspage="http://www.adobe.com/go/getflashplayer"> \
-                              </object>');
+                element.html('<object id="SequenceChecker" width="100%" height="100%" data="/swf/sc/SequenceChecker.swf?entryId='
+                    + id + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
+                    </object>');
             }
         }
 
         scope.$watch("active", function (value) {
             id = attrs.entryid;
+            url = attrs.url;
             generateObject();
         });
     }

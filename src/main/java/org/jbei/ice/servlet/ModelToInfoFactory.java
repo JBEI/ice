@@ -3,7 +3,6 @@ package org.jbei.ice.servlet;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
@@ -174,8 +173,8 @@ public class ModelToInfoFactory {
                 long creatorId = accountController.getAccountId(entry.getCreatorEmail());
                 info.setCreatorId(creatorId);
             }
-        } catch (ControllerException ce) {
-            Logger.warn(ce.getMessage());
+        } catch (Exception ce) {
+            Logger.debug(ce.getMessage());
         }
 
         info.setAlias(entry.getAlias());
@@ -265,9 +264,21 @@ public class ModelToInfoFactory {
         return view;
     }
 
+    private static long getAccountId(String email) {
+        if (email == null || email.isEmpty())
+            return 0;
+
+        Account account = DAOFactory.getAccountDAO().getByEmail(email);
+        if (account == null)
+            return 0;
+
+        return account.getId();
+    }
+
     public static PartData createTableViewData(String userId, Entry entry, boolean includeOwnerInfo) {
         if (entry == null)
             return null;
+
         EntryType type = EntryType.nameToType(entry.getRecordType());
         PartData view = new PartData(type);
         view.setId(entry.getId());
@@ -282,20 +293,16 @@ public class ModelToInfoFactory {
         if (userId != null)
             view.setCanEdit(authorization.canWrite(userId, entry));
 
-        // information about the owner
+        // information about the owner and creator
         if (includeOwnerInfo) {
             view.setOwner(entry.getOwner());
             view.setOwnerEmail(entry.getOwnerEmail());
+            view.setOwnerId(getAccountId(entry.getOwnerEmail()));
 
-            AccountController accountController = new AccountController();
-            Account account1;
-            if (entry.getOwnerEmail() != null && (account1 = accountController.getByEmail(
-                    entry.getOwnerEmail())) != null)
-                view.setOwnerId(account1.getId());
-
-            if (entry.getCreatorEmail() != null && (account1 = accountController.getByEmail(
-                    entry.getCreatorEmail())) != null)
-                view.setCreatorId(account1.getId());
+            // creator
+            view.setCreator(entry.getCreator());
+            view.setCreatorEmail(entry.getCreatorEmail());
+            view.setCreatorId(getAccountId(entry.getCreatorEmail()));
         }
 
         // attachments

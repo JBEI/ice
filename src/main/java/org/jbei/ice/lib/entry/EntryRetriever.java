@@ -2,6 +2,8 @@ package org.jbei.ice.lib.entry;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import org.jbei.ice.lib.access.Permission;
@@ -10,6 +12,7 @@ import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.Group;
@@ -27,6 +30,24 @@ public class EntryRetriever {
     public EntryRetriever() {
         this.dao = DAOFactory.getEntryDAO();
         authorization = new EntryAuthorization();
+    }
+
+    public String getListAsCSV(String userId, ArrayList<Long> list) {  // todo : use a file for large lists
+        if (list == null || list.isEmpty() || userId.isEmpty())
+            return "";
+
+        StringBuilder builder = new StringBuilder();
+        List<Entry> entryList = new LinkedList<>();
+
+        for (Number item : list) {
+            Entry entry = this.dao.get(item.longValue());
+            if (entry == null || !authorization.canRead(userId, entry))
+                continue;
+
+            entryList.add(entry);
+        }
+
+        return IceCSVSerializer.serializeList(entryList);
     }
 
     public String getAsCSV(String userId, String id) {
@@ -63,7 +84,7 @@ public class EntryRetriever {
 
         // check for global unique id
         if (entry == null)
-            dao.getByRecordId(id);
+            entry = dao.getByRecordId(id);
 
         return entry;
     }
@@ -82,6 +103,8 @@ public class EntryRetriever {
         GroupController groupController = new GroupController();
         Group publicGroup = groupController.createOrRetrievePublicGroup();
         for (Permission permission : permissions) {
+            if (permission.getAccount() == null && permission.getGroup() == null)
+                continue;
             if (permission.getGroup() != null && permission.getGroup() == publicGroup)
                 continue;
             accessPermissions.add(permission.toDataTransferObject());
@@ -102,6 +125,7 @@ public class EntryRetriever {
             PartData partData = new PartData(type);
             partData.setId(entry.getId());
             partData.setPartId(entry.getPartNumber());
+            partData.setName(entry.getName());
             dataList.add(partData);
         }
         return dataList;
@@ -179,6 +203,9 @@ public class EntryRetriever {
         Entry entry = getEntry(recordId);
         if (entry == null)
             return null;
+
+        if (entry.getVisibility() == Visibility.TRANSFERRED.getValue())
+            return entry;
 
         authorization.expectRead(userId, entry);
         return entry;

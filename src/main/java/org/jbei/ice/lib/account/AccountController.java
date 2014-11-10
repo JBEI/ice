@@ -23,7 +23,6 @@ import org.jbei.ice.lib.dto.AccountResults;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -95,7 +94,7 @@ public class AccountController {
             throw new IllegalArgumentException("Cannot retrieve account for " + targetEmail);
 
         String newPassword = Utils.generateUUID().substring(24);
-        String encryptedNewPassword = AccountUtils.encryptPassword(newPassword, account.getSalt());
+        String encryptedNewPassword = AccountUtils.encryptNewUserPassword(newPassword, account.getSalt());
         account.setPassword(encryptedNewPassword);
 
         account = dao.update(account);
@@ -145,7 +144,7 @@ public class AccountController {
         if (!isAdministrator(userId) && !userAccount.getEmail().equalsIgnoreCase(userId))
             return null;
 
-        userAccount.setPassword(AccountUtils.encryptPassword(transfer.getPassword(), userAccount.getSalt()));
+        userAccount.setPassword(AccountUtils.encryptNewUserPassword(transfer.getPassword(), userAccount.getSalt()));
         return dao.update(userAccount).toDataTransferObject();
     }
 
@@ -177,9 +176,6 @@ public class AccountController {
      * @return generated password
      */
     public AccountTransfer createNewAccount(AccountTransfer info, boolean sendEmail) {
-//        if (!Utils.canRegister())
-//            return null;
-
         // validate fields required by the database
         validateRequiredAccountFields(info);
 
@@ -192,7 +188,7 @@ public class AccountController {
         // generate salt and encrypt password before storing
         String salt = Utils.generateSaltForUserAccount();
         String newPassword = Utils.generateUUID().substring(24);
-        String encryptedPassword = AccountUtils.encryptPassword(newPassword, salt);
+        String encryptedPassword = AccountUtils.encryptNewUserPassword(newPassword, salt);
 
         Account account = AccountUtils.fromDTO(info);
         account.setPassword(encryptedPassword);
@@ -208,7 +204,14 @@ public class AccountController {
         String subject = "Account created successfully";
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("Dear ").append(info.getEmail()).append(", ")
+        String name = account.getFirstName();
+        if (StringUtils.isBlank(name)) {
+            name = account.getLastName();
+            if (StringUtils.isBlank(name))
+                name = email;
+        }
+
+        stringBuilder.append("Dear ").append(name).append(", ")
                      .append("\n\nThank you for creating a ")
                      .append(Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
                      .append(" account. \nBy accessing ")
@@ -231,12 +234,10 @@ public class AccountController {
                      .append("\n\n");
 
         String server = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
-        if (server != null && !server.isEmpty()) {
-            stringBuilder.append("Use it to login at ")
-                         .append(server)
-                         .append(". ");
-        }
-        stringBuilder.append("\nPlease remember to change your password by going to your profile page.\n\n");
+        stringBuilder.append("Please remember to change your password by going to your profile page at \n\n")
+                     .append("https://").append(server).append("/profile/").append(account.getId())
+                     .append("\n\nThank you.");
+
         Emailer.send(info.getEmail(), subject, stringBuilder.toString());
         info.setPassword(newPassword);
         return info;
@@ -254,7 +255,7 @@ public class AccountController {
         adminAccount.setInitials("");
         adminAccount.setInstitution("");
         adminAccount.setSalt(Utils.generateSaltForUserAccount());
-        adminAccount.setPassword(AccountUtils.encryptPassword(ADMIN_ACCOUNT_PASSWORD, adminAccount.getSalt()));
+        adminAccount.setPassword(AccountUtils.encryptNewUserPassword(ADMIN_ACCOUNT_PASSWORD, adminAccount.getSalt()));
         adminAccount.setDescription("Administrator Account");
 
         adminAccount.setIp("");
@@ -341,7 +342,7 @@ public class AccountController {
             throw new ControllerException("Failed to verify password for null Account!");
         }
 
-        return account.getPassword().equals(AccountUtils.encryptPassword(password, account.getSalt()));
+        return account.getPassword().equals(AccountUtils.encryptNewUserPassword(password, account.getSalt()));
     }
 
     /**
@@ -357,8 +358,7 @@ public class AccountController {
      * @param ip       IP Address of the user.
      * @throws InvalidCredentialsException
      */
-    public String authenticate(String login, String password, String ip)
-            throws InvalidCredentialsException {
+    public String authenticate(String login, String password, String ip) throws InvalidCredentialsException {
         IAuthentication authentication = new LocalAuthentication();
         String email;
 
@@ -468,7 +468,7 @@ public class AccountController {
 
     public ArrayList<AccountTransfer> getMatchingAccounts(String userId, String query, int limit) {
         Account account = getByEmail(userId);
-        Set<Account> matches = dao.getMatchingAccounts(account, query, limit);
+        Set<Account> matches = dao.getMatchingAccounts(query, limit);
         ArrayList<AccountTransfer> result = new ArrayList<>();
         for (Account match : matches) {
             AccountTransfer info = new AccountTransfer();
@@ -510,7 +510,7 @@ public class AccountController {
         if (account == null)
             throw new ControllerException("Could not find account " + email);
 
-        Group group = new GroupController().getGroupById(id);
+        Group group = DAOFactory.getGroupDAO().get(id);
         if (group == null)
             throw new ControllerException("Could not find group " + id);
         account.getGroups().remove(group);

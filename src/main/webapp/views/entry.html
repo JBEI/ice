@@ -10,11 +10,16 @@
     <div class="row entry_general_header_td" style="height: 60px;">
 
         <div class="col-md-10" ng-if="entry">
-            <i ng-if="context" class="pull-left fa fa-arrow-circle-left entry_go_back cursor_pointer" title="Back"></i>
+            <i ng-if="context" ng-click="backTo()"
+               class="pull-left fa fa-arrow-circle-left entry_go_back cursor_pointer" title="Back"></i>
 
             <h4>
                 <strong style="color: #888;">{{entry.type}}</strong>
                 <strong>{{entry.name}}</strong>
+                <span ng-show="entry.canEdit">
+                    <i title="Add link" class="fa fa-link opacity_hover font-80em"
+                       ng-click="addLink(entry)" style="color: #3a6aad;"></i>&nbsp;
+                </span>
                 <small ng-if="entry.visible!=='OK'" class="label label-danger"
                        style="font-size: 12px; position: relative; top: -4px">{{entry.visible}}
                 </small>
@@ -30,7 +35,8 @@
                 &nbsp;<a ng-href="/entry/{{parent.id}}" tooltip="{{parent.name}}"
                          tooltip-placement="right" tooltip-trigger="mouseenter"
                          style="font-size: 12px; color: white; position: relative; top: -4px"
-                         class="small label label-default cursor_pointer"><i class="fa fa-level-up"></i></a>
+                         class="small label label-default cursor_pointer"><b class="small_text">{{parent.type |
+                    uppercase}}</b> <i class="fa fa-level-up"></i></a>
                     </span>
                 <br>
                 <small class="font-65em">{{entry.creationTime | date:'medium'}} - <a
@@ -41,38 +47,40 @@
             <button type="button" class="btn btn-link outline-none" ng-disabled="context.offset===0"
                     ng-click="prevEntryInContext()">
                 <i class="fa fa-arrow-left context_nav_pager"></i></button>
-            <strong class="font-90em">{{context.offset+1 | number}} / {{context.count | number}}</strong>
-            <button type="button" class="btn btn-link outline-none" ng-disabled="context.offset===context.count-1"
+            <strong class="font-90em">{{context.offset+1 | number}} / {{context.available | number}}</strong>
+            <button type="button" class="btn btn-link outline-none" ng-disabled="context.offset==context.available-1"
                     ng-click="nextEntryInContext()">
                 <i class="fa fa-arrow-right context_nav_pager"></i></button>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-10">
-            <ng-include src="selection"></ng-include>
-        </div>
+        <table width="100%">
+            <tr>
+                <td style="vertical-align: top">
+                    <ng-include src="selection"></ng-include>
+                </td>
+                <td style="width: 25px">&nbsp;</td>
+                <td style="width: 170px; vertical-align: top">
+                    <table cellpadding="0" cellspacing="0" class="entry_detail_submenu pull-right">
+                        <tr ng-repeat="subMenu in subDetails"
+                            ng-if="(subMenu.isPrivileged&&entry.ownerEmail===user.email) || !subMenu.isPrivileged || user.isAdmin">
+                            <td ng-class="{selected:subMenu.selected}" ng-click="showSelection($index)">
+                                <i class="fa {{subMenu.icon}}" style="font-size: 14px;"></i> &nbsp;{{subMenu.display}}
+                                <span ng-if="subMenu.countName" style="float: right; color: #999;">{{entryStatistics[(subMenu.countName)] || 0}}</span>
+                            </td>
+                        </tr>
+                    </table>
 
-        <!--right menu-->
-        <div class="col-md-2" style="padding-right: 0">
-            <table cellpadding="0" cellspacing="0" class="entry_detail_submenu pull-right">
-                <tr ng-repeat="subMenu in subDetails"
-                    ng-if="(subMenu.isPrivileged&&entry.ownerEmail===user.email) || !subMenu.isPrivileged || user.isAdmin">
-                    <td ng-class="{selected:subMenu.selected}" ng-click="showSelection($index)">
-                        <i class="fa {{subMenu.icon}}" style="font-size: 14px;"></i> &nbsp;{{subMenu.display}}
-                        <span ng-if="subMenu.countName" style="float: right; color: #999;">{{entryStatistics[(subMenu.countName)] || 0}}</span>
-                    </td>
-                </tr>
-            </table>
+                    <div class="pad_top pull-right">
+                        <ice-entry-attachment></ice-entry-attachment>
+                    </div>
 
-            <div class="pad_top pull-right">
-                <ice-entry-attachment></ice-entry-attachment>
-            </div>
-
-            <div class="pad_top pull-right" ng-if="entry.canEdit">
-                <ice-entry-permission entry='entry'></ice-entry-permission>
-            </div>
-
-        </div>
+                    <div class="pad_top pull-right" ng-if="entry.canEdit">
+                        <ice-entry-permission entry='entry'></ice-entry-permission>
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
 </div>

@@ -36,7 +36,7 @@ public class SequenceFeature implements IDataModel {
     @JoinColumn(name = "sequence_id")
     private Sequence sequence;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "feature_id")
     private Feature feature;
 

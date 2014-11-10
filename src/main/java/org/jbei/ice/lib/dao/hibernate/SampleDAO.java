@@ -9,7 +9,6 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.models.Storage;
 
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -40,18 +39,17 @@ public class SampleDAO extends HibernateRepository<Sample> {
 
     public int getSampleCount(Entry entry) {
         Number itemCount = (Number) currentSession().createCriteria(Sample.class)
-                                                    .setProjection(Projections.countDistinct("id"))
-                                                    .add(Restrictions.eq("entry", entry)).uniqueResult();
+                .setProjection(Projections.countDistinct("id"))
+                .add(Restrictions.eq("entry", entry)).uniqueResult();
         return itemCount.intValue();
     }
 
     @SuppressWarnings("unchecked")
     public ArrayList<Sample> getSamplesByEntry(Entry entry) throws DAOException {
-        Criteria criteria = currentSession().createCriteria(Sample.class.getName())
-                                            .add(Restrictions.eq("entry", entry));
-
+        Query query = currentSession().createQuery("from " + Sample.class.getName() + " where entry=:entry");
+        query.setParameter("entry", entry);
         try {
-            return new ArrayList<Sample>(criteria.list());
+            return new ArrayList<Sample>(query.list());
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve sample by entry: " + entry.getId(), e);

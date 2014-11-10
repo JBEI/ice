@@ -6,9 +6,11 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.experiment.Experiment;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * @author Hector Plahar
@@ -38,6 +40,17 @@ public class ExperimentDAO extends HibernateRepository<Experiment> {
             query.setLong("id", entryId);
             Number result = (Number) query.uniqueResult();
             return result.intValue();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    public Experiment getByUrl(String url) throws DAOException {
+        try {
+            Criteria criteria = currentSession().createCriteria(Experiment.class.getName()).add(Restrictions.eq("url",
+                                                                                                                url));
+            return (Experiment) criteria.uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

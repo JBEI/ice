@@ -57,6 +57,36 @@ public class EntryUtil {
     }
 
     public static String entryFieldToValue(Entry entry, EntryField field) {
+        String value = getCommonFieldValues(entry, field);
+        if (value != null)
+            return value;
+
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+
+        switch (type) {
+            case STRAIN:
+                value = getStrainFieldValues((Strain) entry, field);
+                break;
+
+            case PLASMID:
+                value = getPlasmidFieldValues((Plasmid) entry, field);
+                break;
+
+            case ARABIDOPSIS:
+                value = getSeedFieldValues((ArabidopsisSeed) entry, field);
+                break;
+
+            default:
+                value = null;
+        }
+
+        if (value == null)
+            return "";
+
+        return value.trim();
+    }
+
+    protected static String getCommonFieldValues(Entry entry, EntryField field) {
         switch (field) {
             case PI:
                 return entry.getPrincipalInvestigator();
@@ -100,56 +130,78 @@ public class EntryUtil {
             case SELECTION_MARKERS:
                 return entry.getSelectionMarkersAsString();
 
+            default:
+                return null;
+        }
+    }
+
+    protected static String getStrainFieldValues(Strain strain, EntryField field) {
+        switch (field) {
             case PARENTAL_STRAIN:
-                return ((Strain) entry).getHost();
+                return strain.getHost();
 
             case GENOTYPE_OR_PHENOTYPE:
-                return ((Strain) entry).getGenotypePhenotype();
+                return strain.getGenotypePhenotype();
 
             case PLASMIDS:
-                return ((Strain) entry).getPlasmids();
+                return strain.getPlasmids();
 
+            default:
+                return null;
+        }
+    }
+
+    protected static String getPlasmidFieldValues(Plasmid plasmid, EntryField field) {
+        switch (field) {
             case BACKBONE:
-                return ((Plasmid) entry).getBackbone();
+                return plasmid.getBackbone();
 
             case ORIGIN_OF_REPLICATION:
-                return ((Plasmid) entry).getOriginOfReplication();
+                return plasmid.getOriginOfReplication();
 
             case CIRCULAR:
-                return ((Plasmid) entry).getCircular().toString();
+                return plasmid.getCircular().toString();
 
             case PROMOTERS:
-                return ((Plasmid) entry).getPromoters();
+                return plasmid.getPromoters();
 
             case REPLICATES_IN:
-                return ((Plasmid) entry).getReplicatesIn();
+                return plasmid.getReplicatesIn();
+            default:
+                return null;
+        }
+    }
 
+    protected static String getSeedFieldValues(ArabidopsisSeed seed, EntryField field) {
+        switch (field) {
             case HOMOZYGOSITY:
-                return ((ArabidopsisSeed) entry).getHomozygosity();
+                return seed.getHomozygosity();
 
             case ECOTYPE:
-                return ((ArabidopsisSeed) entry).getEcotype();
+                return seed.getEcotype();
 
             case HARVEST_DATE:
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy");
-                Date date = ((ArabidopsisSeed) entry).getHarvestDate();
+                Date date = seed.getHarvestDate();
                 if (date == null)
                     return "";
                 return dateFormat.format(date);
 
             case GENERATION:
-                return ((ArabidopsisSeed) entry).getGeneration().toString();
+                return seed.getGeneration().toString();
 
             case SENT_TO_ABRC:
-                return ((ArabidopsisSeed) entry).isSentToABRC() ? "Yes" : "No";
+                return seed.isSentToABRC() ? "Yes" : "No";
 
             case PLANT_TYPE:
-                return ((ArabidopsisSeed) entry).getPlantType().toString();
+                return seed.getPlantType().toString();
 
             case PARENTS:
-                return ((ArabidopsisSeed) entry).getParents();
+                return seed.getParents();
+
+            default:
+                return null;
         }
-        return "";
     }
 
     public static String getPartNumberPrefix() {

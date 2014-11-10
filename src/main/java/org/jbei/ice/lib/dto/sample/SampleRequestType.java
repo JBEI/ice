@@ -15,9 +15,6 @@ public enum SampleRequestType implements IDataTransferModel {
 
     private String display;
 
-    SampleRequestType() {
-    }
-
     SampleRequestType(String display) {
         this.display = display;
     }

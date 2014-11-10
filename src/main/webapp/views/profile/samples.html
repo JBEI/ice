@@ -1,45 +1,57 @@
-<div class="row pad_top">
-    <table cellspacing="0" class="data_table">
-        <tr data-ng-show='!pendingSampleRequests'>
-            <td colspan="10"><i class="fa fa-fw fa-spin fa-gear"></i> Loading...</td>
-        </tr>
+<div ng-controller="ProfileSamplesController">
+    <!--<div class="row pad_top">-->
+    <!--Show:-->
+    <!--</div>-->
+    <div class="row">
+        <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
+            <tr data-ng-show='!userSamples'>
+                <td colspan="10"><img src="/img/loader-mini.gif"> Loading...</td>
+            </tr>
 
-        <tr data-ng-if='pendingSampleRequests && pendingSampleRequests.length > 0'>
-            <th style="width:28px">
-                <i class="fa"
-                   ng-class="{'fa-square-o':allSelected == false, 'fa-check-square-o': allSelected == true}"
-                   style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>
-                <sup style="font-size: 9px; font-weight: normal; display: inherit"
-                     ng-show="selection.length>0">{{selection.length}}</sup>
-            </th>
-            <th ng-click="sort('type')">
-                <span class="cursor_pointer">Requester</span> <i ng-show="params.sort=='type'"
-                                                                 class="fa"
-                                                                 ng-class="{'fa-caret-down':params.asc==true, 'fa-caret-up':params.asc==false}"></i>
-            </th>
-            <th style="width: 110px">Entry</th>
-            <th data-ng-click="sort('name')" style="width:230px">
-                <span class="cursor_pointer">Type</span> <i ng-show="params.sort=='name'" class="fa"
-                                                            ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
-            </th>
-            <th ng-click="sort('summary')">Requested</th>
-            <th ng-click="sort('summary')">Updated</th>
-        </tr>
-        <tr data-ng-show=" userList.length == 0">
-            <td colspan="10">No user accounts available</td>
-        </tr>
-        <tr data-ng-repeat="request in pendingSampleRequests">
-            <td width="10px">
-                <i class="fa"
-                   ng-class="{'fa-square-o':selection.indexOf(entry.id)==-1, 'fa-check-square-o':selection.indexOf(entry.id)>-1}"
-                   style="color: #999; font-size: 14px;" ng-click="select(user)"></i>
-            </td>
-            <td><a href="/profile/{{request.requester.id}}">{{request.requester.firstName}}
-                {{request.requester.lastName}}</a></td>
-            <td><a href="/entry/{{request.partData.id}}">{{request.partData.partId}}</a></td>
-            <td>{{request.requestType}}</td>
-            <td style="width:160px; white-space:nowrap">{{request.requestTime | date:'MMM d, yyyy'}}</td>
-            <td style="width:160px; white-space:nowrap">{{request.updateTime | date:'MMM d, yyyy'}}</td>
-        </tr>
-    </table>
+            <tr data-ng-if='userSamples && userSamples.requests.length > 0'>
+                <th style="width: 110px">Entry</th>
+                <th data-ng-click="sort('name')" style="width:230px">
+                    <span class="cursor_pointer">Request Type</span>
+                    <i ng-show="params.sort=='name'" class="fa"
+                       ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
+                </th>
+                <th ng-click="sort('summary')">Requested</th>
+                <th ng-click="sort('summary')">Updated</th>
+                <th>Status</th>
+            </tr>
+
+            <tr data-ng-show="userSamples.requests.length=== 0">
+                <td colspan="10">No requested samples available</td>
+            </tr>
+
+            <tr data-ng-repeat="request in userSamples.requests">
+                <td><a href="/entry/{{request.partData.id}}">{{request.partData.partId}}</a></td>
+                <td>
+                    <span ng-if="request.requestType==='LIQUID_CULTURE'"><i
+                            class="fa fa-flask"></i> Liquid Culture</span>
+                    <span ng-if="request.requestType!=='LIQUID_CULTURE'"><i class="fa fa-circle-thin"></i> Streak on Agar Plate</span>
+                </td>
+                <td style="width:160px; white-space:nowrap">{{request.requestTime | date:'short'}}</td>
+                <td style="width:160px; white-space:nowrap">{{request.updateTime | date:'short'}}</td>
+                <td>
+                    <div ng-if="request.status==='REJECTED'"><i class="fa fa-circle text-danger"></i> Rejected</div>
+                    <div ng-if="request.status==='FULFILLED'"><i class="fa fa-circle text-success"></i> Delivered</div>
+                    <div ng-if="request.status==='PENDING'"><i class="fa fa-circle text-warning"></i> Pending</div>
+                    <div ng-if="request.status==='IN_CART'"><i class="fa fa-circle text-info"></i> In Cart</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="row" ng-if='userSamples && userSamples.requests.length > 0'>
+        <div class="col-md-6" style="padding-left: 0">
+            <pagination total-items="userSamples.count" on-select-page="setUserSamplePage(page)" page="currentPage"
+                        max-size="maxSize"
+                        class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+        </div>
+        <div class="col-md-4" style="margin-top: 20px;"><strong class="small">
+            <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
+            userSamples.count)}}</strong>
+        </div>
+    </div>
 </div>

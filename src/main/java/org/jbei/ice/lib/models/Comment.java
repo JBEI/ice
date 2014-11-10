@@ -45,6 +45,10 @@ public class Comment implements IDataModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
 
+    @Column(name = "modification_time")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date modificationTime;
+
     public Comment() {
     }
 
@@ -91,11 +95,22 @@ public class Comment implements IDataModel {
         this.creationTime = creationTime;
     }
 
+    public Date getModificationTime() {
+        return modificationTime;
+    }
+
+    public void setModificationTime(Date modificationTime) {
+        this.modificationTime = modificationTime;
+    }
+
     @Override
     public UserComment toDataTransferObject() {
         UserComment userComment = new UserComment();
         userComment.setId(this.id);
-        userComment.setCommentDate(getCreationTime());
+        userComment.setCommentDate(this.creationTime.getTime());
+        if (modificationTime != null) {
+            userComment.setModified(this.modificationTime.getTime());
+        }
         userComment.setMessage(getBody());
         userComment.setAccountTransfer(getAccount().toDataTransferObject());
         userComment.setEntryId(getEntry().getId());

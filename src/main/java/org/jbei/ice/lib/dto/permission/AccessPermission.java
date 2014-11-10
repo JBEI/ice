@@ -91,7 +91,7 @@ public class AccessPermission implements IDataTransferModel {
     }
 
     public enum Article implements IDataTransferModel {
-        ACCOUNT, GROUP, GLOBAL
+        ACCOUNT, GROUP
     }
 
     @Override

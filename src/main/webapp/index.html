@@ -40,24 +40,26 @@
     <script src="scripts/upload/ice.upload.js"></script>
     <script src="scripts/entry/ice.entry.js"></script>
     <script src="scripts/collection/ice.collection.js"></script>
-
+    <script src="scripts/wor/ice.wor.js"></script>
+    <script src="scripts/admin/ice.admin.js"></script>
 
     <script src="scripts/services.js"></script>
 
     <script src="scripts/search/searchService.js"></script>
     <script src="scripts/upload/uploadService.js"></script>
+    <script src="scripts/wor/worService.js"></script>
 
     <script src="scripts/controllers.js"></script>
     <script src="scripts/search/searchController.js"></script>
     <script src="scripts/upload/uploadController.js"></script>
     <script src="scripts/entry/entryController.js"></script>
     <script src="scripts/collection/collectionController.js"></script>
+    <script src="scripts/wor/worController.js"></script>
+    <script src="scripts/admin/adminController.js"></script>
 
     <script src="scripts/filters.js"></script>
     <script src="scripts/directives.js"></script>
     <!-- GRUNT END -->
-
-    <script src="scripts/bootstrap.js"></script>
 </head>
 
 <body>
@@ -114,7 +116,9 @@
                                         <td align="left" style="vertical-align: top;">
                                             <div>&nbsp; | &nbsp;</div>
                                         </td>
-                                        <td align="left" style="vertical-align: top;"><a href="/api">Help</a></td>
+                                        <td align="left" style="vertical-align: top;">
+                                            <a href="http://public-registry.jbei.org/manual">Help</a>
+                                        </td>
                                         <td align="left" style="vertical-align: top;">
                                             <div ng-if="appVersion">&nbsp; | &nbsp; v{{appVersion}}</div>
                                         </td>

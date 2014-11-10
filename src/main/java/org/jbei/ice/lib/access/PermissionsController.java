@@ -11,6 +11,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.FolderDAO;
+import org.jbei.ice.lib.dao.hibernate.GroupDAO;
 import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -34,37 +35,14 @@ public class PermissionsController {
     private final GroupController groupController;
     private final FolderDAO folderDAO;
     private final PermissionDAO dao;
+    private final GroupDAO groupDAO;
 
     public PermissionsController() {
         accountController = new AccountController();
         groupController = new GroupController();
         folderDAO = DAOFactory.getFolderDAO();
         dao = DAOFactory.getPermissionDAO();
-    }
-
-    /**
-     * Creates a new permission object for groups from the fields in the parameter.
-     * Used mainly by bulk upload since permissions are set at the group level
-     *
-     * @param access information about the access permission
-     * @return saved permission
-     * @throws ControllerException
-     */
-    public Permission recordGroupPermission(AccessPermission access) throws ControllerException {
-        try {
-            Group group = groupController.getGroupById(access.getArticleId());
-            if (group == null)
-                throw new ControllerException("Could retrieve group for permission add");
-
-            Permission permission = new Permission();
-            permission.setGroup(group);
-            permission.setCanRead(access.isCanRead());
-            permission.setCanWrite(access.isCanWrite());
-            return dao.create(permission);
-        } catch (DAOException e) {
-            Logger.error(e);
-            throw new ControllerException(e);
-        }
+        groupDAO = DAOFactory.getGroupDAO();
     }
 
     public Permission addPermission(String userId, AccessPermission access) {
@@ -108,7 +86,7 @@ public class PermissionsController {
                 break;
 
             case GROUP:
-                group = groupController.getGroupById(access.getArticleId());
+                group = groupDAO.get(access.getArticleId());
                 break;
         }
 
@@ -191,20 +169,11 @@ public class PermissionsController {
                 break;
 
             case GROUP:
-                group = groupController.getGroupById(access.getArticleId());
+                group = groupDAO.get(access.getArticleId());
                 break;
         }
 
         dao.removePermission(entry, folder, account, group, access.isCanRead(), access.isCanWrite());
-    }
-
-    public boolean accountHasReadPermission(Account account, Entry entry) {
-        try {
-            return dao.hasPermission(entry, null, account, null, true, false);
-        } catch (DAOException dao) {
-            Logger.error(dao);
-        }
-        return false;
     }
 
     public boolean accountHasReadPermission(Account account, Set<Folder> folders) {
@@ -283,61 +252,9 @@ public class PermissionsController {
         return true;
     }
 
-//    public boolean enableOrDisableFolderPublicAccess(Account account, long folderId, boolean isEnable)
-//            throws ControllerException {
-//        Folder folder = folderDAO.get(folderId);
-//        if (folder == null)
-//            return false;
-//
-//        if (!hasWritePermission(account, folder))
-//            throw new ControllerException(account.getEmail() + " cannot modify folder " + folder.getId());
-//
-//        // propagate permissions
-//        if (folder.isPropagatePermissions()) {
-//            for (Entry folderContent : folder.getContents()) {
-//                if (isEnable)
-//                    enablePublicReadAccess(account, folderContent.getId());
-//                else
-//                    disablePublicReadAccess(account, folderContent.getId());
-//            }
-//        }
-//
-//        AccessPermission access = new AccessPermission();
-//        access.setArticle(AccessPermission.Article.GROUP);
-//        access.setArticleId(groupController.createOrRetrievePublicGroup().getId());
-//        access.setType(AccessPermission.Type.READ_FOLDER);
-//        access.setTypeId(folderId);
-//        if (isEnable)
-//            return addPermission(access, null, folder) != null;
-//        removePermission(access, null, folder);
-//        return true;
-//    }
-
     public Set<Folder> retrievePermissionFolders(Account account) {
         Set<Group> groups = groupController.getAllGroups(account);
         return dao.retrieveFolderPermissions(account, groups);
-    }
-
-    /**
-     * retrieves permissions that have been explicitly set for entry with the
-     * exception of the public group read access. The check for that is a separate
-     * method call
-     *
-     * @param entry entry whose permissions are being checked
-     * @return list of set permissions
-     */
-    public ArrayList<AccessPermission> retrieveSetEntryPermissions(Entry entry) {
-        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
-        Set<Permission> permissions = dao.getEntryPermissions(entry);
-
-        Group publicGroup = groupController.createOrRetrievePublicGroup();
-        for (Permission permission : permissions) {
-            if (permission.getGroup() != null && permission.getGroup() == publicGroup)
-                continue;
-            accessPermissions.add(permission.toDataTransferObject());
-        }
-
-        return accessPermissions;
     }
 
     /**
@@ -410,20 +327,6 @@ public class PermissionsController {
             accessPermissions.add(new AccessPermission(AccessPermission.Article.GROUP, group.getId(),
                                                        AccessPermission.Type.WRITE_FOLDER, folder.getId(),
                                                        group.getLabel()));
-        }
-
-        return accessPermissions;
-    }
-
-    public ArrayList<AccessPermission> getDefaultPermissions(Account account) {
-        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
-        for (Group group : new GroupController().getAllPublicGroupsForAccount(account)) {
-            AccessPermission accessPermission = new AccessPermission();
-            accessPermission.setType(AccessPermission.Type.READ_ENTRY);
-            accessPermission.setArticle(AccessPermission.Article.GROUP);
-            accessPermission.setArticleId(group.getId());
-            accessPermission.setDisplay(group.getLabel());
-            accessPermissions.add(accessPermission);
         }
 
         return accessPermissions;
@@ -542,36 +445,11 @@ public class PermissionsController {
         EntryAuthorization authorization = new EntryAuthorization();
         authorization.expectWrite(userId, entry);
 
-        data.setId(partId);
-
-        Permission permission = new Permission();
-        permission.setEntry(entry);
-        entry.getPermissions().add(permission);
-        Account account = DAOFactory.getAccountDAO().get(access.getArticleId());
-        permission.setAccount(account);
-        permission.setCanRead(access.isCanRead());
-        permission.setCanWrite(access.isCanWrite());
-        return dao.create(permission).toDataTransferObject();
-    }
-
-    public AccessPermission createFolderPermission(String userId, long folderId, AccessPermission accessPermission) {
-        if (accessPermission == null)
+        Permission permission = addPermission(access, entry, null);
+        if (permission == null)
             return null;
 
-        Folder folder = folderDAO.get(folderId);
-        if (folder == null)
-            return null;
-
-        FolderAuthorization authorization = new FolderAuthorization();
-        authorization.expectWrite(userId, folder);
-
-        Permission permission = new Permission();
-        permission.setFolder(folder);
-        Account account = DAOFactory.getAccountDAO().get(accessPermission.getArticleId());
-        permission.setAccount(account);
-        permission.setCanRead(accessPermission.isCanRead());
-        permission.setCanWrite(accessPermission.isCanWrite());
-        return dao.create(permission).toDataTransferObject();
+        return permission.toDataTransferObject();
     }
 
     public void removeEntryPermission(String userId, long partId, long permissionId) {
@@ -613,7 +491,7 @@ public class PermissionsController {
     }
 
     public ArrayList<AccessPermission> getMatchingGroupsOrUsers(String userId, String val, int limit) {
-        // groups has higher priority
+        // groups have higher priority
         Set<Group> groups = groupController.getMatchingGroups(userId, val, limit);
         ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
 
@@ -636,7 +514,7 @@ public class PermissionsController {
 
         // check account match
         Account account = accountController.getByEmail(userId);
-        Set<Account> accounts = DAOFactory.getAccountDAO().getMatchingAccounts(account, val, accountLimit);
+        Set<Account> accounts = DAOFactory.getAccountDAO().getMatchingAccounts(val, accountLimit);
         if (accounts == null)
             return accessPermissions;
 

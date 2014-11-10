@@ -1,0 +1,23 @@
+<div class="modal-header" style="border-bottom: 0">
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <!--<span class="bebas modal-title" style="color: #657B83;font-size: 19px">-->
+    <!--<i class="fa fa-table"></i> &nbsp;Bulk Import File Upload</span>-->
+</div>
+
+<div class="modal-body">
+    <i style="font-size: 65px; float: left; padding-right:10px" class="blue fa fa-question-circle"></i>
+    <strong style="font-size: 24px">Reject bulk upload</strong>
+
+    <div>Rejecting this bulk upload will send it back to the owner
+        <br><br>
+        <span class="small">Include Optional Message</span>
+        <br>
+        <textarea rows="3" cols="70"></textarea></div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-default btn-sm" ng-click="cancel()">Cancel</button>
+    <button ng-if="!modalClose && !processing" type="button" ng-click="rejectUpload()" class="btn btn-sm btn-primary">
+        Reject
+    </button>
+</div>

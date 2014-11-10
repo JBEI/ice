@@ -3,6 +3,7 @@ package org.jbei.ice.services.rest;
 import javax.ws.rs.core.Response;
 
 import org.jbei.ice.lib.account.SessionHandler;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.services.exception.UnauthorizedException;
 
 /**
@@ -26,14 +27,32 @@ public class RestResource {
         return Response.status(status).entity(obj).build();
     }
 
+    protected Response respond(Object object) {
+        if (object == null)
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+
+        return Response.status(Response.Status.OK).entity(object).build();
+    }
+
     protected Response respond(Response.Status status) {
         return Response.status(status).build();
     }
 
-//    protected Response created() {
-////        String href = (String)resource.get("href");
-//        URI uri = URI.create(href);
-//        return Response.created(uri).entity(resource).build();
-//    }
+    protected Response respond(boolean success) {
+        if (success)
+            return Response.status(Response.Status.OK).build();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+    }
 
+    /**
+     * Used to log user actions
+     *
+     * @param userId  unique user identifier
+     * @param message log message
+     */
+    protected void log(String userId, String message) {
+        if (userId == null)
+            userId = "Unknown";
+        Logger.info(userId + ": " + message);
+    }
 }

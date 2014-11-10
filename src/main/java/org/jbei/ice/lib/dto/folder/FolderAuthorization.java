@@ -25,6 +25,11 @@ public class FolderAuthorization extends Authorization<Folder> {
     }
 
     public boolean canRead(String userId, Folder folder) {
+        PermissionsController controller = new PermissionsController();
+
+        if (controller.isPublicVisible(folder))
+            return true;
+
         Account account = getAccount(userId);
         if (account == null)
             return false;
@@ -41,7 +46,6 @@ public class FolderAuthorization extends Authorization<Folder> {
         // now check actual permissions
         Set<Folder> folders = new HashSet<>();
         folders.add(folder);
-        PermissionsController controller = new PermissionsController();
         if (controller.groupHasReadPermission(account.getGroups(), folders)
                 || controller.groupHasWritePermission(account.getGroups(), folders))
             return true;

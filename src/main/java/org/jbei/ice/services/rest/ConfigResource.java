@@ -13,7 +13,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.Setting;
@@ -29,11 +28,17 @@ public class ConfigResource extends RestResource {
 
     private ConfigurationController controller = new ConfigurationController();
 
+    /**
+     * Retrieves list of system settings available
+     *
+     * @param sessionId Session Id for user
+     * @return list of retrieved system settings that can be changed (including those with no values)
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Setting> get(@HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        getUserIdFromSessionHeader(userAgentHeader);
-        return controller.retrieveSystemSettings();
+    public ArrayList<Setting> get(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        return controller.retrieveSystemSettings(userId);
     }
 
     @GET
@@ -41,14 +46,12 @@ public class ConfigResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Setting getVersion(@Context UriInfo uriInfo) {
         String url = uriInfo.getBaseUri().getAuthority();
-        Logger.info(url + " requesting version");
         return controller.getSystemVersion(url);
     }
 
     /**
      * Retrieves the value for the specified config key
      *
-     * @param userAgentHeader
      * @return setting containing the passed key and associated value if found
      */
     @GET

@@ -1,0 +1,87 @@
+<div class="container-fluid">
+    <div class="row entry_general_header_td" style="height: 60px;" ng-init="saving=false">
+        <div class="col-md-10">
+            <table>
+                <tr>
+                    <td>
+                        <h4>
+                            <span style="white-space: nowrap">
+                            <strong style="color: #888;text-transform: uppercase">{{importType}}
+                                <span ng-if="linkedSelection"> + {{linkedSelection}}</span> UPLOAD
+                            </strong>
+
+                            <strong style="white-space: nowrap" class="bulk_import_name"
+                                    ng-click="showBulkUploadRenameModal()">{{bulkUpload.name}}
+                            </strong>
+                            </span>
+
+                            <div class="font-85em">
+                                <small style="opacity: 0.7">
+                                    <b style="color: #555">Last Updated</b>:
+                                    <span ng-show="!saving&&!bulkUpload.lastUpdate"><i class="fa fa-circle-o red"></i> Not saved</span>
+                                    <span ng-if="saving"><i class="fa fa-gear fa-spin alert_color"></i> Saving...</span>
+                                    <span ng-show="saving===false&&bulkUpload.lastUpdate">
+                                        <i class="fa fa-circle-o green"></i> <span
+                                            am-time-ago="bulkUpload.lastUpdate"></span>
+                                    </span>
+                                </small>
+                            </div>
+                        </h4>
+                    </td>
+                    <td style="padding-left: 40px">
+                        <span class="opacity_hover edit_icon font-90em" ng-click="fileUploadModal()">
+                            <i style="font-size: 14px; color: #555" class="fa fa-cloud-upload"></i> File Upload
+                        </span>
+
+                        <span style="font-weight: normal; color: #ccc">&nbsp;|&nbsp;</span>
+
+                        <div class="dropdown display-inline">
+                        <span class="opacity_hover edit_icon font-90em dropdown-toggle">
+                            <i style="font-size: 14px; color: #555" class="fa fa-link"></i> Link To
+                            <span class="caret"></span>
+                        </span>
+                            <ul class="dropdown-menu">
+                                <li class="cursor_pointer font-80em"><a ng-click="addExisting=true">Existing Entry</a>
+                                </li>
+                                <li class="cursor_pointer font-80em" ng-repeat="option in linkOptions">
+                                    <a ng-click="addNewPartLink(option.type)"><i>New {{option.display}}</i></a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <span style="font-weight: normal; color: #ccc">&nbsp;|&nbsp;</span>
+
+                        <span class="opacity_hover edit_icon font-90em">
+                            <i style="font-size: 14px; color: #555" class="fa fa-share-alt"></i> Share
+                        </span>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="col-md-2 pull-right" style="margin-top: 16px" ng-if="!submitting&&bulkUpload">
+            <button type="button" class="btn btn-xs btn-primary"
+                    ng-disabled="!bulkUpload||!bulkUpload.entryIdData||!bulkUpload.entryIdData.length"
+                    ng-click="submitImportForApproval()">
+                <span ng-if="bulkUpload.status==undefined || bulkUpload.status=='IN_PROGRESS'">Submit</span>
+                <span ng-if="bulkUpload.status=='PENDING_APPROVAL'">Approve</span>
+            </button>
+            <button ng-if="bulkUpload.status==undefined || bulkUpload.status=='IN_PROGRESS'"
+                    type="button" class="btn btn-xs btn-default" ng-click="confirmResetFormModal()">
+                Reset
+            </button>
+            <button ng-if="bulkUpload.status=='PENDING_APPROVAL'" type="button" class="btn btn-xs btn-default"
+                    ng-click="confirmRejectUploadModal()">
+                Reject
+            </button>
+        </div>
+
+        <div class="col-md-2 pull-right" style="margin-top: 16px" ng-if="submitting">
+            <i class="fa fa-spin fa-gear blue"></i> <i class="font-95em">Processing...</i>
+        </div>
+    </div>
+</div>
+
+<div class="row" id="wrapper">
+    <div id="dataTable" style="padding-left: 0; overflow: auto; position: fixed; right:0; left: 244px; top: 185px"
+         class="font-90em"></div>
+</div>

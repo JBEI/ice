@@ -10,11 +10,11 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.jbei.ice.lib.access.PermissionsController;
+import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.folder.Collection;
@@ -57,7 +57,7 @@ public class FolderResource extends RestResource {
     @GET
     @Path("/public")
     @Produces(MediaType.APPLICATION_JSON)
-    public FolderWrapper getPublicFolders(
+    public ArrayList<FolderDetails> getPublicFolders(
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         return controller.getPublicFolders();
     }
@@ -91,6 +91,16 @@ public class FolderResource extends RestResource {
         }
     }
 
+    @PUT
+    @Path("/{id}")
+    public Response update(@PathParam("id") long folderId,
+            FolderDetails details,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        FolderDetails resp = controller.update(userId, folderId, details);
+        return super.respond(Response.Status.OK, resp);
+    }
+
     @DELETE
     @Path("/{id}")
     public FolderDetails deleteFolder(@PathParam("id") long folderId,
@@ -114,6 +124,24 @@ public class FolderResource extends RestResource {
         return controller.addEntriesToFolder(userId, data);
     }
 
+    @PUT
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entries")
+    public Response removeEntriesFromFolder(
+            ArrayList<Long> entriesId,
+            @PathParam("id") long folderId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        Type fooType = new TypeToken<ArrayList<Long>>() {
+        }.getType();
+        Gson gson = new GsonBuilder().create();
+        ArrayList<Long> list = gson.fromJson(gson.toJsonTree(entriesId), fooType);
+        if (controller.removeFolderContents(userId, folderId, list))
+            return respond(Response.Status.OK);
+        return respond(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries")
@@ -125,8 +153,15 @@ public class FolderResource extends RestResource {
             @DefaultValue("false") @QueryParam("asc") boolean asc,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
 
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
         ColumnField field = ColumnField.valueOf(sort.toUpperCase());
+
+        if (folderId.equalsIgnoreCase("public")) {
+            // return public entries
+            log(uriInfo.getBaseUri().toString(), "requesting public entries");
+            return controller.getPublicEntries(field, offset, limit, asc);
+        }
+
+        String userId = SessionHandler.getUserIdBySession(userAgentHeader);
 
         try {
             long id = Long.decode(folderId);
@@ -168,6 +203,9 @@ public class FolderResource extends RestResource {
             case "pending":
                 return retriever.getPendingEntries(userId, field, asc, offset, limit);
 
+            case "transferred":
+                return retriever.getTransferredEntries(userId, field, asc, offset, limit);
+
             default:
                 return null;
         }
@@ -176,11 +214,11 @@ public class FolderResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
-    public ArrayList<AccessPermission> getFolderPermissions(
+    public Response getFolderPermissions(
             @PathParam("id") long folderId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return permissionsController.getSetFolderPermissions(userId, folderId);
+        return respond(controller.getPermissions(userId, folderId));
     }
 
     @PUT
@@ -200,7 +238,7 @@ public class FolderResource extends RestResource {
             AccessPermission permission,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return permissionsController.createFolderPermission(userId, folderId, permission);
+        return controller.createFolderPermission(userId, folderId, permission);
     }
 
     @DELETE
@@ -213,5 +251,27 @@ public class FolderResource extends RestResource {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         permissionsController.removeFolderPermission(userId, partId, permissionId);
         return Response.ok().build();
+    }
+
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/permissions/public")
+    public Response enablePublicAccess(@Context UriInfo info, @PathParam("id") long folderId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        if (controller.enablePublicReadAccess(userId, folderId))
+            return respond(Response.Status.OK);
+        return respond(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/permissions/public")
+    public Response disablePublicAccess(@Context UriInfo info, @PathParam("id") long folderId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        if (controller.disablePublicReadAccess(userId, folderId))
+            return respond(Response.Status.OK);
+        return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 }

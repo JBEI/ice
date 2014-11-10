@@ -182,4 +182,37 @@ public class EntryCreator {
         entry = createEntry(account, entry, part.getAccessPermissions());
         return entry.getId();
     }
+
+    public PartData receiveTransferredEntry(PartData part) {
+        // check the record id
+        if (StringUtils.isNotEmpty(part.getRecordId())) {
+            Entry entry = dao.getByRecordId(part.getRecordId());
+            if (entry != null) {
+                part.setRecordId(null); // to trigger a new one
+            }
+        }
+        Entry entry = saveTransferred(part);
+        if (entry == null)
+            return null;
+        part.setId(entry.getId());
+        part.setRecordId(entry.getRecordId());
+        return part;
+    }
+
+    protected Entry saveTransferred(PartData part) {
+        Entry entry = InfoToModelFactory.infoToEntry(part);
+        entry.setVisibility(Visibility.TRANSFERRED.getValue());
+        entry = dao.create(entry);
+
+        // transfer and linked
+        if (part.getLinkedParts() != null) {
+            for (PartData data : part.getLinkedParts()) {
+                Entry linked = saveTransferred(data);
+                entry.getLinkedEntries().add(linked);
+                dao.update(entry);
+            }
+        }
+
+        return entry;
+    }
 }

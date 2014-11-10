@@ -6,11 +6,6 @@ angular.module('ice.collection.controller', [])
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
 
-        // default is personal folder
-//        console.log("CollectionMenuController");
-        console.log("selected collection", $stateParams.collection);
-        $rootScope.$emit("CollectionSelected", $stateParams.collection);
-
         //
         // initialize
         //
@@ -18,7 +13,7 @@ angular.module('ice.collection.controller', [])
         // folders contained in the selected folder (default selected to personal)
         $scope.selectedCollectionFolders = undefined;
         $scope.selectedFolder = $stateParams.collection === undefined ? 'personal' : $stateParams.collection;
-        $rootScope.$broadcast("CollectionSelected", $scope.selectedFolder);
+        $rootScope.$emit("CollectionSelected", $scope.selectedFolder);
 
         // retrieve collections contained in the selectedFolder
         folders.getByType({folderType:$scope.selectedFolder},
@@ -51,14 +46,24 @@ angular.module('ice.collection.controller', [])
             updateCounts();
         });
 
+        // updates the counts for personal collection to indicate items removed/added
+        $scope.updatePersonalCollections = function () {
+            var folder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
+
+            folders.getByType({folderType:folder},
+                function (result) {
+                    if (result) {
+                        $scope.selectedCollectionFolders = result;
+                    }
+                }, function (error) {
+                    console.error(error);
+                });
+        };
+
         // called from collections-menu-details.html when a collection's folder is selected
         // simply changes state to folder and allows the controller for that to handle it
         $scope.selectCollectionFolder = function (folder) {
-//            console.log($scope.selectedCollectionFolders);
-//            console.log("selectCollectionFolder(TODO)", folder, $scope.selectedFolder);
-            $rootScope.$broadcast("CollectionFolderSelected", $scope.selectedFolder);
-//            console.log("/" + folder.type + "/" + folder.id);
-
+            $rootScope.$emit("CollectionFolderSelected", folder);
             // type on server is PUBLIC, PRIVATE, SHARED, UPLOAD
             var type = folder.type.toLowerCase();
             if (type !== "upload")
@@ -68,10 +73,12 @@ angular.module('ice.collection.controller', [])
             $scope.folder = undefined;   // this forces "Loading..." to be shown
         };
 
+        //
         // called when a collection is selected. Collections are pre-defined ['Available', 'Deleted', etc]
         // and some allow folders and when that is selected then the selectCollectionFolder() is called
+        //
         $scope.selectCollection = function (name) {
-            $rootScope.$broadcast("CollectionSelected", name);
+            $rootScope.$emit("CollectionSelected", name);
             $location.path("/folders/" + name);
             $scope.selectedFolder = name;
             $scope.selectedCollectionFolders = undefined;

@@ -879,10 +879,10 @@ ul#indented li a:hover {
 }
 
 .system_collection_user_menu_row {
-    border-top: 1px solid #F2F2F2;
+    border-top: 1px solid #f6f6f6;
     color: #233559;
     line-height: 90%;
-    padding: 8px;
+    padding: 8px 6px 6px 15px;
 }
 
 .user_collection_user_menu_row {
@@ -1049,8 +1049,9 @@ ul#indented li a:hover {
     border: 1px solid #ccc;
     border-top-right-radius: 2px;
     border-bottom-right-radius: 2px;
-    height: 27px;
-    width: 429px;
+    height: 31px;
+    /*width: 429px;*/
+    background-color: #fff
 }
 
 .outline-none {
@@ -1123,9 +1124,9 @@ button.outline-none::-moz-focus-inner {
 }
 
 .quick_search_input {
-    font-size: 0.90em;
+    /*font-size: 0.90em;*/
     width: 407px;
-    padding: 7px;
+    padding: 4px;
     border: 0;
 }
 
@@ -1495,18 +1496,19 @@ table.data_table tr td {
 }
 
 .collections_header {
-    font-size: 0.90em;
+    font-size: 0.85em;
     padding: 4px;
     font-weight: bold;
     /*<!-- 233559 -->*/
     font-family: Helvetica, serif;
-    color: #333;
-    border-bottom: 1px solid #bbb;
+    color: #888;
 }
 
 .ice-button {
     background-color: #f4f4f4;
-    border: 1px solid #BBB;
+    border: 1px solid #CCC;
+    border-top: 1px solid #DDD;
+    border-right: 1px solid #DDD;
     padding: 5px 7px;
     color: #666;
     font-family: Arial, serif;
@@ -1518,7 +1520,7 @@ table.data_table tr td {
 
 .ice-button:hover {
     background-color: #f1f2f3;
-    border: 1px solid #888;
+    border: 1px solid #AAA;
     color: #222;
     font-family: Arial, serif;
     font-size: 0.80em;
@@ -2167,6 +2169,30 @@ td.selected i.font-awesome {
     background-color: #f6f6f6;
 }
 
+.folder_permission_tab_active {
+    font-size: 0.95em;
+    border-left: 1px solid #e1e1e1;
+    padding: 8px;
+    color: #222;
+    font-weight: bold;
+}
+
+.folder_permission_tab_inactive {
+    font-size: 0.95em;
+    color: #999;
+    border-left: 1px solid #e1e1e1;
+    border-bottom: 1px solid #e1e1e1;
+    padding: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    background-color: #f1f1f1;
+}
+
+.folder_permission_tab_inactive:hover {
+    color: #666;
+    background-color: #f6f6f6;
+}
+
 .permission_list {
     font-family: Arial, sans-serif;
     font-size: 0.75em;
@@ -2393,4 +2419,18 @@ td.selected i.font-awesome {
 
 .bulk_import_name:hover {
     background-color: #c1c1c1;
+}
+
+input.no_border {
+    border: 0;
+}
+
+input.no_border:active {
+    border: 0;
+    outline: none
+}
+
+input.no_border:focus {
+    border: 0;
+    outline: none
 }

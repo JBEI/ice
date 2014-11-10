@@ -1,4 +1,6 @@
-<!--hardcoding part number-->
+<!--hard-coding part number-->
+<div class="container-fluid">
+
 <div class="row pad_top">
     <div class="col-md-2 entryLabel">Part ID</div>
     <div class="col-md-10">{{entry.partId}}</div>
@@ -13,7 +15,7 @@
         <i ng-if="!field.updating && field.errorUpdating" class="red fa fa-exclamation-circle"></i>
     </div>
 
-    <div class="col-md-10" ng-mouseover="showEdit=true" ng-mouseout="showEdit=false">
+    <div class="col-md-10" ng-mouseover="showEdit=entry.canEdit" ng-mouseout="showEdit=entry.canEdit&&!showEdit">
         <form ng-submit="quickEditEntry(field)">
             <!--todo : also need different display widgets for different types-->
             <div data-ng-if="!field.edit">{{entry[field.schema].toString()}}
@@ -180,6 +182,18 @@
 
     </div>
 </div>
+
+<div class="row margin-top-10" ng-if="entry.parameters&&entry.parameters.length"
+     ng-repeat="parameter in entry.parameters">
+    <div class="col-md-2 entryLabel">
+        {{parameter.name}}
+    </div>
+
+    <div class="col-md-10">
+        {{parameter.value}}
+    </div>
+</div>
+
 <div class="row margin-top-10" ng-if="entry.linkedParts.length">
     <div class="col-md-12">
         <div class="entry-details-subheader"><strong style="color: #233559;">CONTAINS</strong></div>
@@ -193,6 +207,10 @@
                                class="">{{entry.linkedParts[$index+0].partId}}</a>
                         </div>
                         <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
+                            <!--can break the link if allowed to edit this part-->
+                            <i class="fa fa-unlink red opacity_hover"
+                               ng-click="removeLink(entry, entry.linkedParts[$index+0])"
+                               ng-if="entry.canEdit"></i>
                             <b>{{entry.linkedParts[$index+0].type}} <a
                                     ng-href="/entry/{{entry.linkedParts[$index+0].id}}"
                                     style="color: #000">{{entry.linkedParts[$index+0].name}}</a></b>
@@ -219,6 +237,10 @@
                                class="">{{entry.linkedParts[$index+1].partId}}</a>
                         </div>
                         <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
+                            <!--can break the link if allowed to edit this part-->
+                            <i class="fa fa-unlink red opacity_hover"
+                               ng-click="removeLink(entry, entry.linkedParts[$index+1])"
+                               ng-if="entry.canEdit"></i>
                             <b>{{entry.linkedParts[$index+1].type}} <a
                                     ng-href="/entry/{{entry.linkedParts[$index+1].id}}"
                                     style="color: #000">{{entry.linkedParts[$index+1].name}}</a></b>
@@ -243,7 +265,7 @@
             <strong style="color: #233559;">SEQUENCE</strong>
 
             <!-- menu if no sequence then [Create in VE | Upload File | Paste -->
-            <div class="pull-right" ng-if='!entry.hasSequence'>
+            <div class="pull-right" ng-if='!entry.hasSequence&&entry.canEdit'>
                 <small class="opacity_hover" style="text-decoration: none" ng-click="open()"
                        target="_blank"><i class="fa fa-external-link blue"></i> Create in VectorEditor
                 </small>
@@ -259,8 +281,10 @@
 
             <!--menu if entry sequence exists-->
             <div class="pull-right" ng-if='entry.hasSequence'>
-                <small class="opacity_hover" ng-click="deleteSequence(entry)">Delete</small>
-                <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                <span ng-if="entry.canEdit">
+                    <small class="opacity_hover" ng-click="deleteSequence(entry)">Delete</small>
+                    <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                </span>
                 <small class="opacity_hover" ng-click="open()"><i class="fa fa-external-link blue"></i>
                     Open in VectorEditor
                 </small>
@@ -333,16 +357,15 @@
         </div>
 
         <!--sbol-->
-        <div style="width: 100%; overflow: auto; position: relative; zoom: 1;" ng-if='entry.hasSequence'
-             ng-show="showSBOL">
+        <div style="width: 100%; overflow: auto; position: relative; zoom: 1;" ng-if='entry.hasSequence && showSBOL'>
             <div style="width: 0;">
                 <img height="130px"
-                     ng-src="/download?type=sbol_visual&amp;id={{entry.sbolVisualURL}}&amp;sid={{sessionId}}">
+                     ng-src="/download?sid={{sessionId}}&amp;rid={{entry.recordId}}">
             </div>
         </div>
 
         <div ng-show="entry.hasSequence" style="height: 600px">
-            <span ice-flash></span>
+            <span ice-vector-viewer></span>
         </div>
     </div>
 </div>
@@ -354,4 +377,5 @@
         </div>
         {{entry.longDescription}}
     </div>
+</div>
 </div>

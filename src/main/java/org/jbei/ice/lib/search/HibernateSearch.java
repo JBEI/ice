@@ -100,6 +100,10 @@ public class HibernateSearch {
                                       .matching(Visibility.DRAFT.getValue()).createQuery();
             booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
 
+            Query visibilityQuery2 = qb.keyword().onField("visibility")
+                                       .matching(Visibility.DELETED.getValue()).createQuery();
+            booleanQuery.add(visibilityQuery2, BooleanClause.Occur.MUST_NOT);
+
             // bio-safety level
             if (option != null) {
                 TermContext levelContext = qb.keyword();
@@ -112,8 +116,7 @@ public class HibernateSearch {
         return booleanQuery;
     }
 
-    public SearchResults executeSearchNoTerms(Account account, SearchQuery searchQuery, String projectName,
-            String projectURL) {
+    public SearchResults executeSearchNoTerms(Account account, SearchQuery searchQuery) {
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null || entryTypes.isEmpty()) {
             entryTypes = new ArrayList<>();
@@ -143,6 +146,10 @@ public class HibernateSearch {
         // visibility
         Query visibilityQuery = qb.keyword().onField("visibility").matching(Visibility.DRAFT.getValue()).createQuery();
         booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
+
+        Query visibilityQuery2 = qb.keyword().onField("visibility").matching(Visibility.DELETED.getValue())
+                                   .createQuery();
+        booleanQuery.add(visibilityQuery2, BooleanClause.Occur.MUST_NOT);
 
         // biosafety
         BioSafetyOption option = searchQuery.getBioSafetyOption();
@@ -183,6 +190,10 @@ public class HibernateSearch {
         List result = fullTextQuery.list();
 
         LinkedList<SearchResult> searchResults = new LinkedList<>();
+        String email = null;
+        if (account != null)
+            email = account.getEmail();
+
         for (Object object : result) {
             Entry entry = (Entry) object;
             SearchResult searchResult;
@@ -193,22 +204,18 @@ public class HibernateSearch {
             } else {
                 searchResult = new SearchResult();
                 searchResult.setScore(1f);
-                PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, true);
+                PartData info = ModelToInfoFactory.createTableViewData(email, entry, true);
                 searchResult.setEntryInfo(info);
             }
 
             searchResult.setMaxScore(1f);
-            searchResult.setWebPartnerName(projectName);
-            searchResult.setWebPartnerURL(projectURL);
             searchResults.add(searchResult);
         }
 
         SearchResults results = new SearchResults();
         results.setResultCount(resultCount);
         results.setResults(searchResults);
-        String email = "Anon";
-        if (account != null)
-            email = account.getEmail();
+
         Logger.info(email + ": obtained " + resultCount + " results for empty query");
         return results;
     }
@@ -250,12 +257,13 @@ public class HibernateSearch {
             booleanQuery.add(query, BooleanClause.Occur.SHOULD);
 
             // set visibility
-            org.apache.lucene.search.Query visibilityQuery = qb.keyword()
-                                                               .onField("visibility")
-                                                               .ignoreFieldBridge()
-                                                               .matching(Visibility.DRAFT.getValue())
-                                                               .createQuery();
+            Query visibilityQuery = qb.keyword().onField("visibility").ignoreFieldBridge()
+                                      .matching(Visibility.DRAFT.getValue()).createQuery();
             booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
+
+            Query visibilityQuery2 = qb.keyword().onField("visibility").ignoreFieldBridge()
+                                       .matching(Visibility.DELETED.getValue()).createQuery();
+            booleanQuery.add(visibilityQuery2, BooleanClause.Occur.MUST_NOT);
         }
 
         // wrap Lucene query in a org.hibernate.Query
@@ -265,10 +273,12 @@ public class HibernateSearch {
                 blastResults.keySet()));
 
         Set<String> groupUUIDs = new HashSet<>();
-        try {
-            groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(account);
-        } catch (ControllerException e) {
-            Logger.error(e);
+        if (account != null) {
+            try {
+                groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(account);
+            } catch (ControllerException e) {
+                Logger.error(e);
+            }
         }
 
         String email = account == null ? "" : account.getEmail();
@@ -310,8 +320,7 @@ public class HibernateSearch {
     }
 
     public SearchResults executeSearch(Account account, HashMap<String, BooleanClause.Occur> terms,
-            SearchQuery searchQuery,
-            String projectName, String projectURL, HashMap<String, Float> userBoost) {
+            SearchQuery searchQuery, HashMap<String, Float> userBoost) {
         // types for which we are searching
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null || entryTypes.isEmpty()) {
@@ -347,7 +356,7 @@ public class HibernateSearch {
         }
 
         if (booleanQuery.getClauses().length == 0)
-            return executeSearchNoTerms(account, searchQuery, projectName, projectURL);
+            return executeSearchNoTerms(account, searchQuery);
 
         // wrap Lucene query in a org.hibernate.Query
         org.hibernate.search.FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
@@ -418,8 +427,6 @@ public class HibernateSearch {
             }
 
             searchResult.setMaxScore(maxScore);
-            searchResult.setWebPartnerName(projectName);
-            searchResult.setWebPartnerURL(projectURL);
             searchResults.add(searchResult);
         }
 

@@ -90,27 +90,37 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             templateUrl:'/views/collection-selection.html',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid('main.folder');
+                    return Authentication.isSessionValid();
                 }
             }
         })
         .state('main.web', {
-            url:'web/:partner',
-            templateUrl:'/views/wor/wor-contents.html',
-            controller:'WorContentController',
+            url:'web',
+            templateUrl:'/views/wor/index.html',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid('main.web');
+                    return Authentication.isSessionValid();
                 }
             }
         })
+        .state('main.web.list', {
+            url:'/:partner',
+            templateUrl:'/views/wor/wor-contents.html',
+            controller:'WorContentController'
+        })
+        .state('main.web.entry', {
+            url:'/:partner/entry/:entryId',
+            templateUrl:'/views/wor/entry.html',
+            controller:'WorEntryController'
+        })
+
         .state('main.web_folder', {
             url:'web/:partner/folder/:folderId',
             templateUrl:'/views/wor/wor-folder-contents.html',
             controller:'WorFolderContentController',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid('main.web_folder');
+                    return Authentication.isSessionValid();
                 }
             }
         })
@@ -120,7 +130,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             controller:'SearchController',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid('main.search');
+                    return Authentication.isSessionValid();
                 }
             }
         })
@@ -135,7 +145,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             templateUrl:'/views/entry.html',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid('main.entry');
+                    return Authentication.isSessionValid();
                 }
             }
         })
@@ -152,7 +162,6 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
 //                return '/views/entry/create-' + stateParams.type + '.html';
 //            }
         })
-
         .state('main.profile', {
             url:'profile/:id',
             templateUrl:'/views/profile.html'
@@ -160,18 +169,20 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         .state('main.profile.option', {
             url:'/:option',
             templateUrl:'/views/profile/groups.html',
-            controller:function (sessionValid) {
-                console.log("profile", sessionValid);
+            resolve:{
+                sessionValid:function (Authentication) {
+                    return Authentication.isSessionValid();
+                }
             }
         })
         .state('main.admin', {
             url:'admin',
-            templateUrl:'/views/admin.html',
+            templateUrl:'/scripts/admin/admin.html',
+            controller:'AdminController',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid("main.admin") && Authentication.isAdmin();
+                    return Authentication.isSessionValid() && Authentication.isAdmin();
                 }
-                // TODO : also is admin
             }
         })
         .state('main.admin.option', {
@@ -182,7 +193,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         .state('main.upload', {
             url:'upload/:type',
             controller:'UploadController',
-            templateUrl:'/views/upload/import.html',
+            templateUrl:'/scripts/upload/import.html',
             resolve:{
                 sessionValid:function (Authentication) {
                     return Authentication.isSessionValid('main.upload');
@@ -190,7 +201,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             }
         })
         .state('flash', {
-            url:'/static/swf/:shortHand/:swfName?entryId&sessionId',
+            url:'/static/swf/:shortHand/:swfName?entryId&sessionId&url',
             controller:'FullScreenFlashController',
             templateUrl:'/views/entry/fullscreen-flash.html'
         })

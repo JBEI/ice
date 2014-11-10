@@ -1,0 +1,26 @@
+<div ng-controller="WorEntryCommentController">
+    <div class="row pad_top" ng-if="entryComments.length===0">
+        <div class="col-md-12">
+            <i class="text-muted">No comments available</i>
+        </div>
+    </div>
+
+    <div class="row pad_top">
+        <div class="col-md-12 comment margin-top-20"
+             ng-repeat="comment in (comments = (entryComments | orderBy: 'id':true))">
+            <span class="close pull-left">{{entryComments.length - $index}}</span>
+            <small class="attachment_small_text pull-right">{{comment.commentDate | date:'medium'}}</small>
+            <br><br>
+
+            <div ng-if="!comment.edit">{{comment.message}}</div>
+
+            <br><br>
+
+            <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5"></div>
+            <div class="pull-left"><i>{{comment.accountTransfer.firstName}}
+                {{comment.accountTransfer.lastName}}</i> &nbsp; <i ng-if="comment.modified" class="small opacity_4">Last
+                edited on {{comment.modified | date: 'short'}}</i></div>
+        </div>
+    </div>
+</div>
+

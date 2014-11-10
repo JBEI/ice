@@ -1,63 +1,77 @@
 <div ng-controller="EntryExperimentController">
     <div class="row pad_top" ng-if="entry.canEdit">
-        <button type="button" data-ng-click="addExperiment=true" class="ice-button">
-            <i style="font-size: 14px; color: #007dbc" class="fa fa-magic"></i> Add Experiment
-        </button>
+        <div class="col-sm-12">
+            <button type="button" ng-click="addExperiment=true" class="ice-button">
+                <i style="font-size: 14px; color: #007dbc" class="fa fa-magic"></i> Add Experiment
+            </button>
 
-        <div class="pad-top margin-top-10 panel panel-default" data-ng-show="addExperiment">
-            <form class="panel-body" name="createExperimentForm" data-ng-submit="createExperiment()">
-                <div class="col-md-1 pad-top-5">
-                    <span style="white-space:nowrap">Label</span>
-                </div>
+            <!--<span class="opacity_hover edit_icon font-90em" ng-click="addExperiment=true">-->
+            <!--<i style="font-size: 14px; color: #555" class="fa fa-magic"></i> Add Experiment-->
+            <!--</span>-->
 
-                <div class="col-md-11 pad-top-5">
-                    <input size="35" type="text" class="input_box" placeholder="Brief descriptive label"
-                           ng-model="experiment.name"/>
-                </div>
+            <div class="pad-top margin-top-10 panel panel-default" data-ng-show="addExperiment">
+                <form class="panel-body" name="createExperimentForm" data-ng-submit="createExperiment()">
+                    <div class="col-sm-1 pad-top-5">
+                        <span style="white-space:nowrap">Label</span>
+                    </div>
 
-                <div class="col-md-1 pad-top-5">
-                    <span style="white-space:nowrap">URL <span class="required">*</span> </span>
-                </div>
+                    <div class="col-sm-11 pad-top-5">
+                        <input size="35" type="text" class="input_box" placeholder="Brief descriptive label"
+                               ng-model="experiment.name"/>
+                    </div>
 
-                <div class="col-md-11 pad-top-5">
-                    <input size="35" type="text" ng-class="{'input_box':!urlMissing, 'input_box_error':urlMissing}"
-                           placeholder="Web resource location" ng-model="experiment.url"/>
-                </div>
+                    <div class="col-sm-1 pad-top-5">
+                        <span style="white-space:nowrap">URL <span class="required">*</span> </span>
+                    </div>
 
-                <div class="col-xs-offset-1 col-md-11 pad_top">
-                    <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-                    <button type="button" data-ng-click="addExperiment=false" class="btn btn-default btn-sm">Cancel
-                    </button>
-                </div>
-            </form>
+                    <div class="col-sm-11 pad-top-5">
+                        <input size="35" type="text" ng-class="{'input_box':!urlMissing, 'input_box_error':urlMissing}"
+                               placeholder="Web resource location" ng-model="experiment.url"/>
+                    </div>
+
+                    <div class="col-xs-offset-1 col-sm-11 pad_top">
+                        <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+                        <button type="button" data-ng-click="addExperiment=false" class="btn btn-default btn-sm">Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row pad_top" ng-if="entryExperiments.length===0">
+        <div class="col-sm-12">
+            <i class="text-muted">No experiments available</i>
         </div>
     </div>
 
     <div class="row pad_top" ng-if="entryExperiments.length">
-        <table cellspacing="0" class="table table-condensed table-hover table-striped font-95em">
-            <thead>
-            <tr>
-                <td>&nbsp;</td>
-                <td><b>Link</b></td>
-                <td><b>Added</b></td>
-                <td>&nbsp;</td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="experiment in entryExperiments | orderBy:'created'">
-                <td style="line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"><b>{{$index+1}}</b>
-                </td>
-                <td>
-                    <a ng-if="experiment.label" ng-href="{{experiment.url}}">{{experiment.label}}</a>
-                    <a ng-if="!experiment.label" ng-href="{{experiment.url}}">{{experiment.url}}</a>
-                </td>
-                <!--<td><a ng-href="/profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}-->
-                <!--{{traceSequence.depositor.lastName}}</a></td>-->
-                <td>{{experiment.created | date:'MMM d, y, h:mm a'}}</td>
-                <td style="font-size:14px"><i ng-click="deleteTraceSequenceFile(traceSequence.fileId)"
-                                              class="fa fa-trash-o delete_icon"></i></td>
-            </tr>
-            </tbody>
-        </table>
+        <div class="col-sm-12">
+            <table cellspacing="0" class="table table-condensed table-hover table-striped font-95em">
+                <thead>
+                <tr>
+                    <td>&nbsp;</td>
+                    <td><b>Link</b></td>
+                    <td><b>Added</b></td>
+                    <td>&nbsp;</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="experiment in entryExperiments | orderBy:'created'">
+                    <td style="line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"><b>{{$index+1}}</b>
+                    </td>
+                    <td>
+                        <a ng-if="experiment.label" ng-href="{{experiment.url}}">{{experiment.label}}</a>
+                        <a ng-if="!experiment.label" ng-href="{{experiment.url}}">{{experiment.url}}</a>
+                    </td>
+                    <!--<td><a ng-href="/profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}-->
+                    <!--{{traceSequence.depositor.lastName}}</a></td>-->
+                    <td>{{experiment.created | date:'MMM d, y, h:mm a'}}</td>
+                    <td style="font-size:14px"><i ng-click="deleteTraceSequenceFile(traceSequence.fileId)"
+                                                  class="fa fa-trash-o delete_icon"></i></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

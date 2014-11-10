@@ -5,10 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -27,7 +24,6 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.AuditDAO;
@@ -36,7 +32,6 @@ import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.FolderDAO;
 import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
-import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -48,7 +43,6 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.group.Group;
@@ -92,36 +86,7 @@ public class EntryController {
         auditDAO = DAOFactory.getAuditDAO();
     }
 
-    /**
-     * Retrieve {@link Entry} from the database by name.
-     * <p/>
-     * Throws exception if multiple entries have the same name.
-     *
-     * @param name entry name
-     * @return entry retrieved from the database.
-     * @throws ControllerException
-     * @throws PermissionException
-     */
-    public PartData getByUniqueName(Account account, String name) throws ControllerException, PermissionException {
-        Entry entry = dao.getByUniqueName(name);
-        if (entry == null)
-            return null;
-
-        authorization.expectRead(account.getEmail(), entry);
-
-        PartData info = ModelToInfoFactory.getInfo(entry);
-        boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
-        info.setHasSequence(hasSequence);
-        boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
-        info.setHasOriginalSequence(hasOriginalSequence);
-        return info;
-    }
-
     public FolderDetails retrieveVisibleEntries(String userId, ColumnField field, boolean asc, int start, int limit) {
-        if (userId == null) {
-            return new FolderController().getPublicEntries();
-        }
-
         Set<Entry> results;
         FolderDetails details = new FolderDetails();
         Account account = accountController.getByEmail(userId);
@@ -255,7 +220,7 @@ public class EntryController {
         entry.setModificationTime(Calendar.getInstance().getTime());
         Visibility visibility = EntryUtil.validates(part) ? Visibility.OK : Visibility.DRAFT;
         entry.setVisibility(visibility.getValue());
-        dao.update(entry);
+        entry = dao.update(entry);
 
         return entry.getId();
     }
@@ -303,15 +268,11 @@ public class EntryController {
         entryIds.add(entry.getId());
         if (folders != null) {
             for (Folder folder : folders) {
-                try {
-                    Folder returned = folderController.removeFolderContents(account, folder.getId(), entryIds);
-                    FolderDetails details = new FolderDetails(returned.getId(), returned.getName());
-                    long size = folderDAO.getFolderSize(folder.getId());
-                    details.setCount(size);
-                    folderList.add(details);
-                } catch (ControllerException me) {
-                    Logger.error(me);
-                }
+                folderController.removeFolderContents(account.getEmail(), folder.getId(), entryIds);
+                FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
+                long size = folderDAO.getFolderSize(folder.getId());
+                details.setCount(size);
+                folderList.add(details);
             }
         }
         delete(account, entry, schedule);
@@ -402,90 +363,23 @@ public class EntryController {
         return new ArrayList<>(dao.getEntriesByIdSet(filtered));
     }
 
-    public UserComment addCommentToEntry(Account account, UserComment userComment) throws ControllerException {
-        Entry entry = dao.get(userComment.getEntryId());
-        Comment comment = new Comment(entry, account, userComment.getMessage());
-        comment = commentDAO.create(comment);
-        return comment.toDataTransferObject();
-    }
-
-    // TODO
-//    public PartData retrieveEntryTipDetailsFromURL(long entryId, IRegistryAPI api) throws ControllerException {
-//        try {
-//            PartData info = api.getPublicPart(entryId);
-//            boolean hasSequence = api.hasSequence(info.getRecordId());
-//            info.setHasSequence(hasSequence);
-//            boolean hasOriginalSequence = api.hasUploadedSequence(info.getRecordId());
-//            info.setHasOriginalSequence(hasOriginalSequence);
-//            return info;
-//        } catch (ServiceException se) {
-//            Logger.error(se);
-//            throw new ControllerException(se);
-//        }
-//    }
-
     public PartData retrieveEntryTipDetails(String userId, String id) {
         Entry entry = getEntry(id);
         if (entry == null)
             return null;
 
-        if (!authorization.canRead(userId, entry))
+        if (!permissionsController.isPubliclyVisible(entry) && !authorization.canRead(userId, entry))
             return null;
 
         return ModelToInfoFactory.createTipView(entry);
-    }
-
-    // tODO
-//    public PartData retrieveEntryDetailsFromURL(long entryId, IRegistryAPI api) throws ControllerException {
-//        try {
-//            PartData info = api.getPublicPart(entryId);
-//            boolean hasSequence = api.hasSequence(info.getRecordId());
-//            info.setHasSequence(hasSequence);
-//            boolean hasOriginalSequence = api.hasUploadedSequence(info.getRecordId());
-//            info.setHasOriginalSequence(hasOriginalSequence);
-//
-//            if (hasSequence && info.getSbolVisualURL() != null) {
-//                // retrieve cached pigeon image or generate and cache
-//                String tmpDir = new ConfigurationController()
-//                        .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-//
-//                String hash = Utils.generateUUID();
-//                URI uri = PigeonSBOLv.postToPigeon(info.getSbolVisualURL());
-//                if (uri != null) {
-//                    try {
-//                        IOUtils.copy(uri.toURL().openStream(),
-//                                     new FileOutputStream(tmpDir + File.separatorChar + hash + ".png"));
-//                        info.setSbolVisualURL(hash + ".png");
-//                    } catch (IOException e) {
-//                        Logger.error(e);
-//                    }
-//                }
-//            }
-//
-//            return info;
-//        } catch (ServiceException e) {
-//            Logger.error(e);
-//            throw new ControllerException(e);
-//        }
-//    }
-
-    public void updatePartStatus(Account account, String recordId, String newStatus) throws ControllerException {
-        Entry entry = dao.getByRecordId(recordId);
-        entry.setStatus(newStatus);
-        dao.update(entry);
-
-        if (entry.getLinkedEntries() != null) {
-            for (Entry linkedEntry : entry.getLinkedEntries()) {
-                linkedEntry.setStatus(newStatus);
-                dao.update(entry);
-            }
-        }
     }
 
     public ArrayList<UserComment> retrieveEntryComments(String userId, long partId) {
         Entry entry = dao.get(partId);
         if (entry == null)
             return null;
+
+        authorization.expectRead(userId, entry);
 
         // comments
         ArrayList<Comment> comments = commentDAO.retrieveComments(entry);
@@ -511,6 +405,27 @@ public class EntryController {
         comment.setCreationTime(new Date(System.currentTimeMillis()));
         comment = commentDAO.create(comment);
         return comment.toDataTransferObject();
+    }
+
+    public UserComment updateEntryComment(String userId, long partId, long commentId, UserComment userComment) {
+        Entry entry = dao.get(partId);
+        if (entry == null)
+            return null;
+
+        authorization.canRead(userId, entry);
+        Comment comment = commentDAO.get(commentId);
+        if (comment == null)
+            return createEntryComment(userId, partId, userComment);
+
+        if (comment.getEntry().getId() != partId)
+            return null;
+
+        if (userComment.getMessage() == null || userComment.getMessage().isEmpty())
+            return null;
+
+        comment.setBody(userComment.getMessage());
+        comment.setModificationTime(new Date());
+        return commentDAO.update(comment).toDataTransferObject();
     }
 
     public boolean deleteTraceSequence(String userId, long entryId, long traceId) {
@@ -607,6 +522,20 @@ public class EntryController {
         return true;
     }
 
+    public boolean removeLink(String userId, long partId, long linkedPart) {
+        Entry entry = dao.get(partId);
+        if (entry == null)
+            return false;
+
+        authorization.expectWrite(userId, entry);
+        Entry linkedEntry = dao.get(linkedPart);
+
+        if (!entry.getLinkedEntries().remove(linkedEntry))
+            return false;
+
+        return dao.update(entry) != null;
+    }
+
     protected Entry getEntry(String id) {
         Entry entry = null;
 
@@ -623,62 +552,20 @@ public class EntryController {
 
         // check for global unique id
         if (entry == null)
-            dao.getByRecordId(id);
+            entry = dao.getByRecordId(id);
 
         return entry;
     }
 
-//    public PartData setPermissions(String userId, String id, ArrayList<AccessPermission> permissions) {
-//        Entry entry = getEntry(id);
-//        if (entry == null)
-//            return null;
-//
-//        EntryType type = EntryType.nameToType(entry.getRecordType());
-//        PartData data = new PartData(type);
-//
-//        // TODO :
-//        if (entry == null) {
-//            partId = new EntryCreator().createPart(userId, data);
-//            entry = DAOFactory.getEntryDAO().get(partId);
-//        } else {
-//            EntryAuthorization authorization = new EntryAuthorization();
-//            authorization.expectWrite(userId, entry);
-//            dao.clearPermissions(entry);
-//        }
-//
-//        data.setId(partId);
-//
-//        if (permissions == null)
-//            return data;
-//
-//        for (AccessPermission access : permissions) {
-//            Permission permission = new Permission();
-//            permission.setEntry(entry);
-//            entry.getPermissions().add(permission);
-//            permission.setAccount(account);
-//            permission.setCanRead(access.isCanRead());
-//            permission.setCanWrite(access.isCanWrite());
-//            dao.create(permission);
-//        }
-//
-//        return data;
-//    }
-
     public PartData retrieveEntryDetails(String userId, String id) {
-        EntryType type = EntryType.nameToType(id);
-        if (type != null)
-            return getPartDefaults(userId, type);
-
         Entry entry = getEntry(id);
         if (entry == null)
             return null;
 
-        // user must be able to read
-        authorization.expectRead(userId, entry);
         return retrieveEntryDetails(userId, entry);
     }
 
-    protected PartData getPartDefaults(String userId, EntryType type) {
+    public PartData getPartDefaults(String userId, EntryType type) {
         PartData partData = new PartData(type);
         PreferencesController preferencesController = new PreferencesController();
 
@@ -712,6 +599,10 @@ public class EntryController {
     }
 
     protected PartData retrieveEntryDetails(String userId, Entry entry) {
+        // user must be able to read if not public entry
+        if (!permissionsController.isPubliclyVisible(entry))
+            authorization.expectRead(userId, entry);
+
         PartData partData = ModelToInfoFactory.getInfo(entry);
         boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
 
@@ -723,30 +614,9 @@ public class EntryController {
         partData.setCanEdit(authorization.canWrite(userId, entry));
         partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
 
-        // retrieve cached pigeon image or generate and cache
-        String tmpDir = new ConfigurationController()
-                .getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-        if (hasSequence) {
-            Sequence sequence = sequenceDAO.getByEntry(entry);
-            String hash = sequence.getFwdHash();
-            if (Paths.get(tmpDir, hash + ".png").toFile().exists()) {
-                partData.setSbolVisualURL(hash + ".png");
-            } else {
-                URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
-                if (uri != null) {
-                    try {
-                        IOUtils.copy(uri.toURL().openStream(),
-                                     new FileOutputStream(tmpDir + File.separatorChar + hash + ".png"));
-                        partData.setSbolVisualURL(hash + ".png");
-                    } catch (IOException e) {
-                        Logger.error(e);
-                    }
-                }
-            }
-        }
-
         // create audit event if not owner
-        if (!authorization.getOwner(entry).equalsIgnoreCase(userId)) {
+        // todo : remote access check
+        if (userId != null && !authorization.getOwner(entry).equalsIgnoreCase(userId)) {
             try {
                 Audit audit = new Audit();
                 audit.setAction(AuditType.READ.getAbbrev());
@@ -765,6 +635,9 @@ public class EntryController {
             ArrayList<PartData> newLinks = new ArrayList<>();
             for (PartData link : partData.getLinkedParts()) {
                 Entry linkedEntry = dao.get(link.getId());
+                if (!authorization.canRead(userId, linkedEntry))
+                    continue;
+
                 link = ModelToInfoFactory.createTipView(linkedEntry);
                 Sequence sequence = sequenceDAO.getByEntry(linkedEntry);
                 if (sequence != null) {
@@ -784,7 +657,10 @@ public class EntryController {
             return partData;
 
         for (Entry parent : parents) {
-            EntryType type = EntryType.nameToType(entry.getRecordType());
+            if (!authorization.canRead(userId, parent))
+                continue;
+
+            EntryType type = EntryType.nameToType(parent.getRecordType());
             PartData parentData = new PartData(type);
             parentData.setId(parent.getId());
             parentData.setName(parent.getName());

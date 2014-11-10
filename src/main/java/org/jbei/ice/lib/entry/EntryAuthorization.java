@@ -3,6 +3,7 @@ package org.jbei.ice.lib.entry;
 import java.util.Set;
 
 import org.jbei.ice.lib.access.Authorization;
+import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
@@ -27,8 +28,13 @@ public class EntryAuthorization extends Authorization<Entry> {
     }
 
     public boolean canRead(String userId, Entry entry) {
-
         // super checks for owner or admin
+        if (new PermissionsController().isPubliclyVisible(entry))
+            return true;
+
+        if (userId == null)
+            return false;
+
         if (super.canRead(userId, entry) || super.canWrite(userId, entry))
             return true;
 
@@ -70,6 +76,8 @@ public class EntryAuthorization extends Authorization<Entry> {
 
     @Override
     public boolean canWrite(String userId, Entry entry) {
+        if (userId == null)
+            return false;
 
         // super checks for admin or owner
         if (super.canWrite(userId, entry))

@@ -21,6 +21,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.BulkUploadDAO;
+import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
@@ -51,6 +52,7 @@ import org.apache.commons.lang.StringUtils;
 public class BulkUploadController {
 
     private final BulkUploadDAO dao;
+    private final EntryDAO entryDAO;
     private final BulkUploadAuthorization authorization;
     private final AccountController accountController;
     private final EntryController entryController;
@@ -59,6 +61,7 @@ public class BulkUploadController {
 
     public BulkUploadController() {
         dao = DAOFactory.getBulkUploadDAO();
+        entryDAO = DAOFactory.getEntryDAO();
         authorization = new BulkUploadAuthorization();
         accountController = new AccountController();
         entryController = new EntryController();
@@ -338,39 +341,44 @@ public class BulkUploadController {
      * Submits a bulk import that has been saved. This action is restricted to the owner of the
      * draft or to administrators.
      *
-     * @param account Account of user performing save
+     * @param userId  Account identifier of user performing save
      * @param draftId unique identifier for saved bulk import
      * @return true, if draft was sa
      */
-    public boolean submitBulkImportDraft(Account account, long draftId) throws PermissionException {
+    public BulkUploadInfo submitBulkImportDraft(String userId, long draftId) throws PermissionException {
         // retrieve draft
         BulkUpload draft = dao.get(draftId);
         if (draft == null)
-            return false;
+            return null;
 
         // check permissions
-        authorization.expectWrite(account.getEmail(), draft);
+        authorization.expectWrite(userId, draft);
 
         if (!BulkUploadUtil.validate(draft)) {
             Logger.warn("Attempting to submit a bulk upload draft (" + draftId + ") which does not validate");
-            return false;
+            return null;
         }
 
         draft.setStatus(BulkUploadStatus.PENDING_APPROVAL);
-        draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
-        draft.setName(account.getEmail());
+        draft.setLastUpdateTime(new Date());
+        draft.setName(userId);
 
-        boolean success = dao.update(draft) != null;
-        if (success) {
+        BulkUpload bulkUpload = dao.update(draft);
+        if (bulkUpload != null) {
             // convert entries to pending
-            for (Entry entry : draft.getContents()) {
+            ArrayList<Long> list = dao.getEntryIds(draftId);
+            for (Number l : list) {
+                Entry entry = entryDAO.get(l.longValue());
+                if (entry == null)
+                    continue;
+
                 entry.setVisibility(Visibility.PENDING.getValue());
-                entryController.update(account, entry);
+                entryDAO.update(entry);
 
                 // if linked entries
                 for (Entry linked : entry.getLinkedEntries()) {
                     linked.setVisibility(Visibility.PENDING.getValue());
-                    entryController.update(account, linked);
+                    entryDAO.update(linked);
                 }
             }
 
@@ -378,12 +386,14 @@ public class BulkUploadController {
             if (email != null && !email.isEmpty()) {
                 String subject = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME) + " Bulk Upload Notification";
                 String body = "A bulk upload has been submitted and is pending verification.\n\n";
-                body += "Please go to the following link to verify.\n\n";
-                body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/#page=bulk";
+                body += "Please login to the registry at:\n\n";
+                body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+                body += "\n\nand use the \"Pending Approval\" menu item to approve it\n\nThanks.";
                 Emailer.send(email, subject, body);
             }
+            return bulkUpload.toDataTransferObject();
         }
-        return success;
+        return null;
     }
 
     public boolean revertSubmitted(Account account, long uploadId) throws ControllerException {

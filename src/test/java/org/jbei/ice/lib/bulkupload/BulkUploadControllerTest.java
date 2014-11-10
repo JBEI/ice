@@ -156,7 +156,7 @@ public class BulkUploadControllerTest {
 
         // try to revert. not submitted
         Assert.assertFalse(controller.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
+        Assert.assertNotNull(controller.submitBulkImportDraft(account.getEmail(), autoUpdate.getBulkUploadId()));
         BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull(info);
         Assert.assertTrue(controller.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
@@ -181,7 +181,7 @@ public class BulkUploadControllerTest {
         Assert.assertTrue(autoUpdate.getLastUpdate() != null);
 
         // submit draft
-        Assert.assertTrue(controller.submitBulkImportDraft(account, autoUpdate.getBulkUploadId()));
+        Assert.assertNotNull(controller.submitBulkImportDraft(account.getEmail(), autoUpdate.getBulkUploadId()));
         Assert.assertTrue(controller.approveBulkImport(account, autoUpdate.getBulkUploadId()));
 
         // bulk upload should be deleted

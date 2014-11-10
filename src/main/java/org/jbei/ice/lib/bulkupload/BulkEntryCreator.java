@@ -38,6 +38,7 @@ public class BulkEntryCreator {
     private final AccountController accountController;
     private final EntryController entryController;
     private final BulkUploadAuthorization authorization;
+    private final BulkUploadController controller;
 
     public BulkEntryCreator() {
         dao = DAOFactory.getBulkUploadDAO();
@@ -46,6 +47,7 @@ public class BulkEntryCreator {
         accountController = new AccountController();
         entryController = new EntryController();
         authorization = new BulkUploadAuthorization();
+        controller = new BulkUploadController();
     }
 
     protected BulkUpload createOrRetrieveBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,
@@ -168,22 +170,27 @@ public class BulkEntryCreator {
             return null;
 
         authorization.expectWrite(userId, upload);
-        Date updateTime = new Date(System.currentTimeMillis());
-        upload.setLastUpdateTime(updateTime);
-        upload.setStatus(status);
 
         switch (status) {
             case PENDING_APPROVAL:
             default:
-                ArrayList<Long> list = dao.getEntryIds(id);
-                for (Number l : list) {
+                return controller.submitBulkImportDraft(userId, id);
+
+            // rejected by admin
+            case IN_PROGRESS:
+                ArrayList<Long> entryList = dao.getEntryIds(id);
+                for (Number l : entryList) {
                     Entry entry = entryDAO.get(l.longValue());
-                    if (entry == null)
+                    if (entry == null || entry.getVisibility() != Visibility.PENDING.getValue())
                         continue;
 
-                    entry.setVisibility(Visibility.PENDING.getValue());
+                    entry.setVisibility(Visibility.DRAFT.getValue());
                     entryDAO.update(entry);
                 }
+
+                Date updateTime = new Date(System.currentTimeMillis());
+                upload.setLastUpdateTime(updateTime);
+                upload.setStatus(status);
                 return dao.update(upload).toDataTransferObject();
 
             // approved by an administrator
@@ -316,6 +323,9 @@ public class BulkEntryCreator {
         BulkUploadInfo uploadInfo = draft.toDataTransferObject();
 
         for (PartData datum : data) {
+            if (datum == null)
+                continue;
+
             int index = datum.getIndex();
 
             Entry entry = entryDAO.get(datum.getId());

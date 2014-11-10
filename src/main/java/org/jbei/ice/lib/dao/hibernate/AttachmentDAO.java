@@ -125,7 +125,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
      */
     public File getFile(File attDir, Attachment attachment) throws DAOException {
         File file = new File(attDir + File.separator + attachment.getFileId());
-        if (file.exists()) {
+        if (!file.exists()) {
             throw new DAOException("Attachment file " + file.getAbsolutePath() + " does not exist");
         }
         return file;

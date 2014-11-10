@@ -1,10 +1,8 @@
 package org.jbei.ice.lib.group;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
@@ -41,18 +39,6 @@ public class GroupControllerTest {
     }
 
     @Test
-    public void testGetGroupByUUID() throws Exception {
-        Account account = AccountCreator.createTestAccount("testGetGroupByUUID", false);
-        UserGroup userGroup = new UserGroup();
-        userGroup.setLabel("test Group");
-        userGroup.setDescription("test");
-        userGroup = controller.createGroup(account.getEmail(), userGroup);
-        Assert.assertNotNull(userGroup);
-        Group group = controller.getGroupByUUID(userGroup.getUuid());
-        Assert.assertNotNull(group);
-    }
-
-    @Test
     public void testGetGroupById() throws Exception {
         Account account = AccountCreator.createTestAccount("testGetGroupById", false);
         UserGroup userGroup1 = new UserGroup();
@@ -60,7 +46,7 @@ public class GroupControllerTest {
         userGroup1.setType(GroupType.PRIVATE);
         userGroup1.setLabel("label1");
         long id = controller.createGroup(account.getEmail(), userGroup1).getId();
-        Assert.assertNotNull(controller.getGroupById(id));
+        Assert.assertNotNull(controller.getGroupById(account.getEmail(), id));
     }
 
     @Test
@@ -99,7 +85,7 @@ public class GroupControllerTest {
         g1 = controller.createGroup(account.getEmail(), g1);
         Assert.assertNotNull(g1);
 
-        Group group1 = controller.getGroupById(g1.getId());
+        Group group1 = DAOFactory.getGroupDAO().get(g1.getId());
         account.getGroups().add(group1);
         Assert.assertNotNull(group1);
 
@@ -108,7 +94,7 @@ public class GroupControllerTest {
         g2.setLabel("myg2");
         g2 = controller.createGroup(account.getEmail(), g2);
         Assert.assertNotNull(g2);
-        Group group2 = controller.getGroupById(g2.getId());
+        Group group2 = DAOFactory.getGroupDAO().get(g2.getId());
         Assert.assertNotNull(group2);
         account.getGroups().add(group2);
 
@@ -140,17 +126,6 @@ public class GroupControllerTest {
         // create group
         user = controller.createGroup(a1.getEmail(), user);
         Assert.assertNotNull(user);
-
-        ArrayList<AccountTransfer> infos = new ArrayList<>();
-        infos.add(a2.toDataTransferObject());
-        infos.add(a3.toDataTransferObject());
-
-        infos = controller.setGroupMembers(a1, user, infos);
-        Assert.assertNotNull(infos);
-        Assert.assertTrue(infos.size() == 2);
-        ArrayList<AccountTransfer> list = controller.retrieveGroupMembers(user.getUuid(), false);
-        Assert.assertNotNull(list);
-        Assert.assertEquals(2, list.size());
     }
 
     @Test
@@ -167,13 +142,5 @@ public class GroupControllerTest {
         // create group
         user = controller.createGroup(a1.getEmail(), user);
         Assert.assertNotNull(user);
-
-        ArrayList<AccountTransfer> infos = new ArrayList<>();
-        infos.add(a2.toDataTransferObject());
-        infos.add(a3.toDataTransferObject());
-
-        infos = controller.setGroupMembers(a1, user, infos);
-        Assert.assertNotNull(infos);
-        Assert.assertTrue(infos.size() == 2);
     }
 }

@@ -65,8 +65,11 @@ public class ConfigurationController {
         return config.toDataTransferObject();
     }
 
-    public ArrayList<Setting> retrieveSystemSettings() {
+    public ArrayList<Setting> retrieveSystemSettings(String userId) {
         ArrayList<Setting> settings = new ArrayList<>();
+        if(!new AccountController().isAdministrator(userId))
+            return settings;
+
         for (ConfigurationKey key : ConfigurationKey.values()) {
             Configuration configuration = dao.get(key);
             Setting setting;

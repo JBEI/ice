@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.net;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.jbei.ice.lib.access.RemotePermission;
@@ -12,17 +14,30 @@ import org.jbei.ice.lib.dao.hibernate.RemotePartnerDAO;
 import org.jbei.ice.lib.dao.hibernate.RemotePermissionDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
+import org.jbei.ice.lib.dto.comment.UserComment;
+import org.jbei.ice.lib.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PartStatistics;
+import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
-import org.jbei.ice.lib.dto.folder.FolderWrapper;
 import org.jbei.ice.lib.dto.permission.RemoteAccessPermission;
+import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
+import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
+import org.jbei.ice.lib.executor.IceExecutorService;
+import org.jbei.ice.lib.executor.TransferTask;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.services.rest.RestClient;
 
 import org.apache.commons.lang.StringUtils;
 
 /**
+ * Controller for access remote registries. This registries must be in a web of registries configuration
+ * with them since it requires an api key for communication.
+ *
  * @author Hector Plahar
  */
 public class RemoteAccessController {
@@ -39,44 +54,112 @@ public class RemoteAccessController {
         restClient = RestClient.getInstance();
     }
 
+    /**
+     * Retrieves all folders with status "PUBLIC" on the registry partner with id specified in parameter
+     *
+     * @param partnerId unique (local) identifier for remote partner
+     * @return list of folders returned by the partner that are marked with status "PUBLIC",
+     *         null on exception
+     */
     public ArrayList<FolderDetails> getAvailableFolders(long partnerId) {
         RemotePartner partner = this.remotePartnerDAO.get(partnerId);
         if (partner == null)
             return null;
 
         try {
-            FolderWrapper detail = (FolderWrapper) restClient.get(partner.getUrl(), "/rest/folders/public",
-                                                                  FolderWrapper.class);
-            return detail.getFolders();
+            String restPath = "/rest/folders/public";
+            return (ArrayList) restClient.get(partner.getUrl(), restPath, ArrayList.class);
         } catch (Exception e) {
             Logger.error(e);
+            return null;
         }
-        return null;
     }
 
     public Setting getMasterVersion() {
         String value = new ConfigurationController().getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
-        if(StringUtils.isEmpty(value))
-            return new Setting("version",ConfigurationKey.APPLICATION_VERSION.getDefaultValue());
+        if (StringUtils.isEmpty(value))
+            return new Setting("version", ConfigurationKey.APPLICATION_VERSION.getDefaultValue());
 
         // retrieve version
         return (Setting) restClient.get(value, "/rest/config/version");
     }
 
-    public FolderDetails getPublicEntries(long remoteId) {
+    public PartData getPublicEntry(long remoteId, long entryId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+            return null;
+
+        return (PartData) restClient.get(partner.getUrl(), "/rest/parts/" + entryId, PartData.class);
+    }
+
+    public PartData getPublicEntryTooltip(long remoteId, long entryId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+            return null;
+
+        String path = "/rest/parts/" + entryId + "/tooltip";
+        return (PartData) restClient.get(partner.getUrl(), path, PartData.class);
+    }
+
+    public PartStatistics getPublicEntryStatistics(long remoteId, long entryId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+            return null;
+
+        String path = "/rest/parts/" + entryId + "/statistics";
+        return (PartStatistics) restClient.get(partner.getUrl(), path, PartStatistics.class);
+    }
+
+    public FeaturedDNASequence getPublicEntrySequence(long remoteId, long entryId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+            return null;
+
+        String path = "/rest/parts/" + entryId + "/sequence";
+        return (FeaturedDNASequence) restClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
+    }
+
+    public ArrayList<AttachmentInfo> getPublicEntryAttachments(long remoteId, long entryId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+            return null;
+
+        String path = "/rest/parts/" + entryId + "/attachments";
+        return (ArrayList) restClient.get(partner.getUrl(), path, ArrayList.class);
+    }
+
+    public File getPublicAttachment(long remoteId, String fileId) {
+        String path = "/rest/file/attachment/" + fileId; // todo
+        return null;
+    }
+
+    public WebEntries getPublicEntries(long remoteId, int offset, int limit, String sort, boolean asc) {
         RemotePartner partner = this.remotePartnerDAO.get(remoteId);
         if (partner == null)
             return null;
 
         FolderDetails details;
         try {
-            details = (FolderDetails) restClient.get(partner.getUrl(), "/rest/folders/available/entries",
-                                                     FolderDetails.class);
+            String restPath = "/rest/folders/public/entries";
+            HashMap<String, Object> queryParams = new HashMap<>();
+            queryParams.put("offset", offset);
+            queryParams.put("limit", limit);
+            queryParams.put("asc", asc);
+            queryParams.put("sort", sort);
+            details = (FolderDetails) restClient.get(partner.getUrl(), restPath, FolderDetails.class, queryParams);
         } catch (Exception e) {
             Logger.error(e);
             return null;
         }
-        return details;
+
+        if (details == null)
+            return null;
+
+        WebEntries entries = new WebEntries();
+        entries.setRegistryPartner(partner.toDataTransferObject());
+        entries.setCount(details.getCount());
+        entries.setEntries(details.getEntries());
+        return entries;
     }
 
     public void addPermission(String requester, RemoteAccessPermission permission) {
@@ -123,15 +206,86 @@ public class RemoteAccessController {
         return (AccountTransfer) result;
     }
 
-    public FolderDetails getPublicFolderEntries(long remoteId, long folderId) {
+    public FolderDetails getPublicFolderEntries(long remoteId, long folderId, String sort, boolean asc, int offset,
+            int limit) {
         RemotePartner partner = this.remotePartnerDAO.get(remoteId);
         if (partner == null)
             return null;
 
-        Object result = restClient.get(partner.getUrl(), "/rest/folders/" + folderId + "/entries", FolderDetails.class);
-        if (result == null)
+        try {
+            String restPath = "/rest/folders/" + folderId + "/entries";
+            HashMap<String, Object> queryParams = new HashMap<>();
+            queryParams.put("offset", offset);
+            queryParams.put("limit", limit);
+            queryParams.put("asc", asc);
+            queryParams.put("sort", sort);
+            Object result = restClient.get(partner.getUrl(), restPath, FolderDetails.class, queryParams);
+            if (result == null)
+                return null;
+
+            return (FolderDetails) result;
+        } catch (Exception e) {
+            Logger.error("Error getting public folder entries from \"" + partner.getUrl() + "\": " + e.getMessage());
+            return null;
+        }
+    }
+
+    public ArrayList<PartSample> getRemotePartSamples(long remoteId, long partId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null)
             return null;
 
-        return (FolderDetails) result;
+        String restPath = "/rest/parts/" + partId + "/samples";
+        return (ArrayList) restClient.get(partner.getUrl(), restPath, ArrayList.class);
+    }
+
+    public ArrayList<UserComment> getRemotePartComments(long remoteId, long partId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null)
+            return null;
+
+        String restPath = "/rest/parts/" + partId + "/comments";
+        return (ArrayList) restClient.get(partner.getUrl(), restPath, ArrayList.class);
+    }
+
+    public void transferEntries(String userId, long remoteId, ArrayList<Long> data) {
+        TransferTask task = new TransferTask(userId, remoteId, data);
+        IceExecutorService.getInstance().runTask(task);
+    }
+
+    public FeaturedDNASequence getRemoteSequence(long remoteId, long partId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null)
+            return null;
+
+        try {
+            String restPath = "/rest/parts/" + partId + "/sequence";
+            Object result = restClient.get(partner.getUrl(), restPath, FeaturedDNASequence.class);
+            if (result == null)
+                return null;
+
+            return (FeaturedDNASequence) result;
+        } catch (Exception e) {
+            Logger.error(e.getMessage());
+            return null;
+        }
+    }
+
+    public ArrayList<TraceSequenceAnalysis> getRemoteTraces(long remoteId, long partId) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null)
+            return null;
+
+        try {
+            String restPath = "/rest/parts/" + partId + "/traces";
+            Object result = restClient.get(partner.getUrl(), restPath, ArrayList.class);
+            if (result == null)
+                return null;
+
+            return (ArrayList) result;
+        } catch (Exception e) {
+            Logger.error(e.getMessage());
+            return null;
+        }
     }
 }

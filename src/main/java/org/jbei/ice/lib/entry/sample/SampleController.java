@@ -231,14 +231,31 @@ public class SampleController {
         entryAuthorization.expectRead(userId, entry);
 
         // samples
-        ArrayList<Sample> entrySamples = new SampleController().getSamples(entry);
+        ArrayList<Sample> entrySamples = dao.getSamplesByEntry(entry);
         ArrayList<PartSample> samples = new ArrayList<>();
         if (entrySamples == null)
             return samples;
 
+        boolean inCart = false;
+        if (userId != null) {
+            Account userAccount = DAOFactory.getAccountDAO().getByEmail(userId);
+            inCart = DAOFactory.getRequestDAO().getSampleRequestInCart(userAccount, entry) != null;
+        }
+
         for (Sample sample : entrySamples) {
             // convert sample to info
             Storage storage = sample.getStorage();
+            if (storage == null) {
+                PartSample generic = new PartSample();
+                generic.setType(SampleType.GENERIC);
+                StorageInfo info = new StorageInfo();
+                info.setDisplay(sample.getLabel());
+                generic.setCreationTime(sample.getCreationTime().getTime());
+                generic.setMain(info);
+                samples.add(generic);
+                continue; // sample with no storage
+            }
+
             SampleType type = null;
             StorageInfo well = null;
             StorageInfo tube = null;
@@ -262,6 +279,9 @@ public class SampleController {
                 }
 
                 storage = storage.getParent();
+                if (storage == null)
+                    continue;
+
                 boolean isParent = (type != null && type.isTopLevel());
 
                 if (!isParent && storage.getStorageType() != Storage.StorageType.SCHEME) {
@@ -277,6 +297,7 @@ public class SampleController {
             partSample.setCreationTime(sample.getCreationTime().getTime());
             partSample.setLabel(sample.getLabel());
             partSample.setMain(main);
+            partSample.setInCart(inCart);
 
             Account account = DAOFactory.getAccountDAO().getByEmail(sample.getDepositor());
             if (account != null)

@@ -3,6 +3,7 @@ package org.jbei.ice.lib.dto.search;
 import java.util.LinkedList;
 
 import org.jbei.ice.lib.dto.entry.HasEntryData;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
 
 /**
  * DTO for searches
@@ -18,9 +19,8 @@ public class SearchResult extends HasEntryData {
     private int queryLength;
     private float score;
     private float maxScore;
-    private String webPartnerName;
-    private String webPartnerURL;
     private LinkedList<String> matchDetails;
+    private RegistryPartner partner;
 
     public SearchResult() {
         matchDetails = new LinkedList<>();
@@ -51,22 +51,6 @@ public class SearchResult extends HasEntryData {
         this.eValue = eValue;
     }
 
-    public String getWebPartnerName() {
-        return webPartnerName;
-    }
-
-    public String getWebPartnerURL() {
-        return webPartnerURL;
-    }
-
-    public void setWebPartnerURL(String webPartnerURL) {
-        this.webPartnerURL = webPartnerURL;
-    }
-
-    public void setWebPartnerName(String webPartnerName) {
-        this.webPartnerName = webPartnerName;
-    }
-
     public LinkedList<String> getMatchDetails() {
         return matchDetails;
     }
@@ -85,5 +69,13 @@ public class SearchResult extends HasEntryData {
 
     public void setQueryLength(int queryLength) {
         this.queryLength = queryLength;
+    }
+
+    public RegistryPartner getPartner() {
+        return partner;
+    }
+
+    public void setPartner(RegistryPartner partner) {
+        this.partner = partner;
     }
 }

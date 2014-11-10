@@ -46,11 +46,11 @@ public class InfoToModelFactory {
 
         switch (type) {
             case PLASMID:
-                entry = new Plasmid();
+                entry = setPlasmidFields(info, new Plasmid());
                 break;
 
             case STRAIN:
-                entry = new Strain();
+                entry = setStrainFields(info, new Strain());
                 break;
 
             case ARABIDOPSIS:
@@ -64,21 +64,103 @@ public class InfoToModelFactory {
         }
 
         // common fields
-        entry.setRecordId(UUID.randomUUID().toString());
-        entry.setVersionId(entry.getRecordId());
-        entry.setCreationTime(new Date(System.currentTimeMillis()));
-        entry.setModificationTime(entry.getCreationTime());
+        if (StringUtils.isEmpty(info.getRecordId()))
+            entry.setRecordId(UUID.randomUUID().toString());
+        else
+            entry.setRecordId(info.getRecordId());
 
+        entry.setVersionId(entry.getRecordId());
+        if (info.getCreationTime() == 0)
+            entry.setCreationTime(new Date());
+        else
+            entry.setCreationTime(new Date(info.getCreationTime()));
+
+        entry.setModificationTime(entry.getCreationTime());
         entry = setCommon(entry, info);
         return entry;
     }
 
+    protected static Entry setPlasmidFields(PartData data, Entry entry) {
+        PlasmidData plasmidData = data.getPlasmidData();
+        if (plasmidData == null)
+            return entry;
+
+        Plasmid plasmid = (Plasmid) entry;
+
+        if (plasmidData.getBackbone() != null)
+            plasmid.setBackbone(plasmidData.getBackbone());
+
+        if (plasmidData.getOriginOfReplication() != null)
+            plasmid.setOriginOfReplication(plasmidData.getOriginOfReplication());
+
+        if (plasmidData.getPromoters() != null)
+            plasmid.setPromoters(plasmidData.getPromoters());
+
+        if (plasmidData.getReplicatesIn() != null)
+            plasmid.setReplicatesIn(plasmidData.getReplicatesIn());
+
+        if (plasmidData.getCircular())
+            plasmid.setCircular(plasmidData.getCircular());
+
+        return entry;
+    }
+
+    protected static Entry setStrainFields(PartData data, Entry entry) {
+        Strain strain = (Strain) entry;
+        StrainData strainData = data.getStrainData();
+        if (strainData == null)
+            return entry;
+
+        if (strainData.getHost() != null)
+            strain.setHost(strainData.getHost());
+
+        if (strainData.getGenotypePhenotype() != null)
+            strain.setGenotypePhenotype(strainData.getGenotypePhenotype());
+
+        return entry;
+    }
+
+    protected static Entry setSeedFields(PartData data, Entry entry) {
+        ArabidopsisSeed seed = (ArabidopsisSeed) entry;
+        ArabidopsisSeedData seedData = data.getArabidopsisSeedData();
+        if (seedData == null)
+            return entry;
+
+        if (seedData.getHomozygosity() != null)
+            seed.setHomozygosity(seedData.getHomozygosity());
+
+        seed.setHarvestDate(seedData.getHarvestDate());
+        String ecoType = seedData.getEcotype() == null ? "" : seedData.getEcotype();
+
+        seed.setEcotype(ecoType);
+        String parents = seedData.getSeedParents() == null ? "" : seedData.getSeedParents();
+
+        seed.setParents(parents);
+
+        if (seedData.getGeneration() != null) {
+            Generation generation = Generation.fromString(seedData.getGeneration().name());
+            seed.setGeneration(generation);
+        } else {
+            seed.setGeneration(Generation.UNKNOWN);
+        }
+
+        if (seedData.getPlantType() != null) {
+            PlantType plantType = PlantType.fromString(seedData.getPlantType().name());
+            seed.setPlantType(plantType);
+        } else {
+            seed.setPlantType(PlantType.NULL);
+        }
+        seed.setSentToABRC(seedData.isSentToAbrc());
+        return entry;
+    }
+
     /**
+     * sets the corresponding fields in data only if they are not null
+     *
      * @param data  PartData object to converted to Entry
      * @param entry if null, a new entry is created otherwise entry is used
      * @return converted PartData object
      */
-    // sets the corresponding fields in data only if they are not null
     public static Entry updateEntryField(PartData data, Entry entry) {
         EntryType type = data.getType();
         if (type == null)
@@ -86,74 +168,18 @@ public class InfoToModelFactory {
 
         switch (type) {
             case PLASMID:
-                Plasmid plasmid = (Plasmid) entry;
-                PlasmidData plasmidData = data.getPlasmidData();
-                if (plasmidData == null)
-                    break;
-
-                if (plasmidData.getBackbone() != null)
-                    plasmid.setBackbone(plasmidData.getBackbone());
-
-                if (plasmidData.getOriginOfReplication() != null)
-                    plasmid.setOriginOfReplication(plasmidData.getOriginOfReplication());
-
-                if (plasmidData.getPromoters() != null)
-                    plasmid.setPromoters(plasmidData.getPromoters());
-
-                if (plasmidData.getReplicatesIn() != null)
-                    plasmid.setReplicatesIn(plasmidData.getReplicatesIn());
-
-                if (plasmidData.getCircular())
-                    plasmid.setCircular(plasmidData.getCircular());
+                entry = setPlasmidFields(data, entry);
                 break;
 
             case STRAIN:
-                Strain strain = (Strain) entry;
-                StrainData strainData = data.getStrainData();
-                if (strainData == null)
-                    break;
-
-                if (strainData.getHost() != null)
-                    strain.setHost(strainData.getHost());
-
-                if (strainData.getGenotypePhenotype() != null)
-                    strain.setGenotypePhenotype(strainData.getGenotypePhenotype());
+                entry = setStrainFields(data, entry);
                 break;
 
             case PART:
                 break;
 
             case ARABIDOPSIS:
-                ArabidopsisSeed seed = (ArabidopsisSeed) entry;
-                ArabidopsisSeedData seedData = data.getArabidopsisSeedData();
-                if (seedData == null)
-                    break;
-
-                if (seedData.getHomozygosity() != null)
-                    seed.setHomozygosity(seedData.getHomozygosity());
-
-                seed.setHarvestDate(seedData.getHarvestDate());
-                String ecoType = seedData.getEcotype() == null ? "" : seedData.getEcotype();
-
-                seed.setEcotype(ecoType);
-                String parents = seedData.getSeedParents() == null ? "" : seedData.getSeedParents();
-
-                seed.setParents(parents);
-
-                if (seedData.getGeneration() != null) {
-                    Generation generation = Generation.fromString(seedData.getGeneration().name());
-                    seed.setGeneration(generation);
-                } else {
-                    seed.setGeneration(Generation.UNKNOWN);
-                }
-
-                if (seedData.getPlantType() != null) {
-                    PlantType plantType = PlantType.fromString(seedData.getPlantType().name());
-                    seed.setPlantType(plantType);
-                } else {
-                    seed.setPlantType(PlantType.NULL);
-                }
-                seed.setSentToABRC(seedData.isSentToAbrc());
+                entry = setSeedFields(data, entry);
                 break;
 
             default:
@@ -522,11 +548,13 @@ public class InfoToModelFactory {
                 return seed;
 
             case HARVEST_DATE:
-                try {
-                    Date date = SimpleDateFormat.getDateInstance(DateFormat.SHORT).parse(value);
-                    seed.setHarvestDate(date);
-                } catch (ParseException ia) {
-                    Logger.error(ia);
+                if (value != null && !value.isEmpty()) {
+                    try {
+                        Date date = SimpleDateFormat.getDateInstance(DateFormat.SHORT).parse(value);
+                        seed.setHarvestDate(date);
+                    } catch (ParseException ia) {
+                        Logger.error(ia);
+                    }
                 }
                 return seed;
 

@@ -26,6 +26,9 @@ public class Authorization<T extends IDataModel> {
     }
 
     protected Account getAccount(String userId) {
+        if (userId == null)
+            return null;
+
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         if (account == null)
             throw new IllegalArgumentException("Could not retrieve account information for user " + userId);
@@ -68,9 +71,9 @@ public class Authorization<T extends IDataModel> {
         return owner == null || userId.equalsIgnoreCase(owner);
     }
 
-    public void expectRead(String userId, T object) throws AuthorizationException {
+    public void expectRead(String userId, T object) throws PermissionException {
         if (!canRead(userId, object))
-            throw new AuthorizationException(userId);
+            throw new PermissionException(userId + " does not have access to object " + object);
     }
 
     /**
@@ -88,14 +91,14 @@ public class Authorization<T extends IDataModel> {
         return owner == null || userId.equals(owner);
     }
 
-    public void expectWrite(String userId, T object) throws AuthorizationException {
+    public void expectWrite(String userId, T object) throws PermissionException {
         if (!canWrite(userId, object))
-            throw new AuthorizationException(userId);
+            throw new PermissionException(userId);
     }
 
-    public void expectAdmin(String userId) throws AuthorizationException {
+    public void expectAdmin(String userId) throws PermissionException {
         if (!isAdmin(userId))
-            throw new AuthorizationException(userId + " attempting to access admin restricted action");
+            throw new PermissionException(userId + " attempting to access admin restricted action");
     }
 
     /**

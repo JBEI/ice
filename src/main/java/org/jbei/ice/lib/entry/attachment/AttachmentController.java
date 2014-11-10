@@ -42,6 +42,25 @@ public class AttachmentController {
     }
 
     /**
+     * Retrieves a previously uploaded attachment to an entry by it's unique file identifier
+     * This file identifier is assigned on upload
+     *
+     * @return Attachment file if one is found with the identifier, null otherwise (including if the user making
+     *         the request does not have read permissions on the entry that this attachment is associated with)
+     */
+    public File getAttachmentByFileId(String userId, String fileId) {
+        Attachment attachment = dao.getByFileId(fileId);
+        if (attachment == null)
+            return null;
+
+        entryAuthorization.expectRead(userId, attachment.getEntry());
+
+        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        File attachmentDir = Paths.get(dataDir, attachmentDirName).toFile();
+        return dao.getFile(attachmentDir, attachment);
+    }
+
+    /**
      * Save attachment to the database and the disk. Entry has to be a transferred entry (Visibility of 2)
      * or the account must have write permissions to it
      *
@@ -78,20 +97,16 @@ public class AttachmentController {
     /**
      * Delete the attachment from the database and the disk.
      *
-     * @param attachment
-     * @throws ControllerException
+     * @param account    user account
+     * @param attachment attachment to delete
      * @throws PermissionException
      */
-    public void delete(Account account, Attachment attachment) throws ControllerException, PermissionException {
+    public void delete(Account account, Attachment attachment) throws PermissionException {
         entryAuthorization.expectWrite(account.getEmail(), attachment.getEntry());
 
         String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
         File attachmentDir = Paths.get(dataDir, attachmentDirName).toFile();
-        try {
-            dao.delete(attachmentDir, attachment);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        dao.delete(attachmentDir, attachment);
     }
 
     public boolean delete(String userId, long partId, long attachmentId) {
@@ -113,8 +128,8 @@ public class AttachmentController {
         }
     }
 
-    public void delete(Account account, String fileId) throws ControllerException, PermissionException {
-        Attachment attachment = getAttachmentByFileId(fileId);
+    public void delete(Account account, String fileId) throws PermissionException {
+        Attachment attachment = dao.getByFileId(fileId);
         if (attachment != null)
             delete(account, attachment);
     }
@@ -133,24 +148,6 @@ public class AttachmentController {
         String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
         File attachmentDir = Paths.get(dataDir, attachmentDirName).toFile();
         return dao.getFile(attachmentDir, attachment);
-    }
-
-    /**
-     * Retrieves attachment referenced by unique file id
-     *
-     * @param fileId
-     * @return retrieved file
-     * @throws ControllerException
-     */
-    public Attachment getAttachmentByFileId(String fileId) throws ControllerException {
-        Attachment attachment;
-        try {
-            attachment = dao.getByFileId(fileId);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-
-        return attachment;
     }
 
     public ArrayList<Attachment> getByEntry(String userId, Entry entry) {

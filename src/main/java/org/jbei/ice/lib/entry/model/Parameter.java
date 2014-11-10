@@ -3,9 +3,10 @@ package org.jbei.ice.lib.entry.model;
 import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IDataModel;
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.lib.dto.entry.CustomField;
 
 import org.hibernate.search.annotations.ContainedIn;
+import org.hibernate.search.annotations.Field;
 
 /**
  * Stores key-value information for {@link org.jbei.ice.lib.entry.model.Entry}.
@@ -42,6 +43,7 @@ public class Parameter implements IDataModel {
     private String key;
 
     @Column(name = "value", length = 4095, nullable = false)
+    @Field
     private String value;
 
     public Parameter() {
@@ -81,7 +83,7 @@ public class Parameter implements IDataModel {
     }
 
     @Override
-    public IDataTransferModel toDataTransferObject() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public CustomField toDataTransferObject() {
+        return new CustomField(key, value);
     }
 }

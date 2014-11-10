@@ -1,0 +1,19 @@
+<table cellpadding="0" cellspacing="0" class="entry_attribute pad_top" ng-init="getAttachments()">
+    <tr>
+        <td class="entry_attributes_sub_header" colspan="2">
+            <i class="fa fa-paperclip font-90em"></i>&nbsp;Attachments
+        </td>
+    </tr>
+    <tr ng-hide="(remoteAttachments&&remoteAttachments.length)">
+        <td class="font-85em pad-6"><i style="color: #999">No attachments available</i></td>
+    </tr>
+    <tr ng-repeat="attachment in remoteAttachments">
+        <td class="entry_detail_view_row" ng-click="downloadAttachment(attachment)">
+            <div ng-hide="confirmDelete($index)">
+                <span class="font-90em">{{attachment.filename | fileTruncate:24:false}}</span>
+                <br>
+                <span style="color: #999; font-size: 11px">{{attachment.description || "No description provided"}}</span>
+            </div>
+        </td>
+    </tr>
+</table>

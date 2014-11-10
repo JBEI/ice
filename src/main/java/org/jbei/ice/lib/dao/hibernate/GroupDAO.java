@@ -43,8 +43,6 @@ public class GroupDAO extends HibernateRepository<Group> {
     /**
      * Retrieve {@link Group} object from the database by its id.
      *
-     *
-     *
      * @param id group unique identifier
      * @return Group object.
      * @throws DAOException
@@ -90,7 +88,8 @@ public class GroupDAO extends HibernateRepository<Group> {
                 if (group.getUuid().equals(GroupController.PUBLIC_GROUP_UUID))
                     continue;
 
-                if (group.getType() != GroupType.PUBLIC && (userGroups == null || !userGroups.contains(group)))
+                if (group.getType() != GroupType.PUBLIC && (group
+                        .getOwner() != account) && (userGroups == null || !userGroups.contains(group)))
                     continue;
 
                 matches.add(group);

@@ -1,11 +1,13 @@
 package org.jbei.ice.lib.access;
 
 /**
- * Exception class for {@link org.jbei.ice.lib.dao.hibernate.PermissionDAO}.
+ * Exception thrown when user is authorized to access the application but does not
+ * have the required permission or role to access requested elements
  *
- * @author Timothy Ham, Zinovii Dmytriv
+ * @author Hector Plahar
  */
-public class PermissionException extends Exception {
+public class PermissionException extends RuntimeException {
+
     private static final long serialVersionUID = 1L;
 
     public PermissionException(String message) {

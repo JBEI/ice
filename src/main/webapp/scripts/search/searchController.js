@@ -1,32 +1,55 @@
 'use strict';
 
 angular.module('ice.search.controller', [])
-    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry) {
-        console.log("SearchController", $scope.searchFilters);
-        var sessionId = $cookieStore.get("sessionId");
-        var queryString = $location.search().q;
-        $scope.queryString = queryString;
+    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil) {
+        $scope.$on("RunSearch", function (event, filters) {
+            $scope.searchResults = undefined;
+            $scope.searchFilters = filters;
+            runAdvancedSearch(filters);
+        });
 
-        // param defaults
-        if (!$scope.loadingPage) {
-            $scope.searchFilters.q = queryString;
-            $scope.searchFilters.sort = 'relevance';
-            $scope.searchFilters.asc = false;
-            $scope.searchFilters.limit = 15;
-            $scope.searchFilters.t = ['strain', 'plasmid', 'arabidopsis', 'part'];
-            $scope.searchFilters.b = "BLAST_N";
-            $scope.runUserSearch();
-        }
+        var runAdvancedSearch = function (filters) {
+            $scope.loadingSearchResults = true;
 
-        $scope.setSearchResultPage = function (pageNo) {
-            $scope.loadingPage = true;
-            $scope.searchFilters.offset = (pageNo - 1) * 15;
-            $scope.runUserSearch();
+            console.log(filters);
+
+            Search().runAdvancedSearch({webSearch:filters.webSearch}, filters,
+                function (result) {
+                    $scope.searchResults = result;
+                    $scope.loadingSearchResults = false;
+                },
+                function (error) {
+                    $scope.loadingSearchResults = false;
+                    $scope.searchResults = undefined;
+                    console.log(error);
+                }
+            );
         };
 
-        // TODO : sort
+        var noFilters = (!$scope.searchFilters || Object.keys($scope.searchFilters).length === 0);
+
+        if (noFilters) {
+            $scope.searchFilters = {entryTypes:[], parameters:{}, blastQuery:{}, queryString:""};
+            var queryString = $location.search().q;
+            if (!queryString === undefined) {
+                $scope.searchFilters.queryString = queryString;
+            }
+        }
+
+        // filters run advanced search
+        $scope.searchFilters.parameters.start = 0;
+        $scope.searchFilters.parameters.retrieveCount = 15;
+        $scope.searchFilters.parameters.sortField = "RELEVANCE";
+        runAdvancedSearch($scope.searchFilters);
+
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
         $scope.currentPage = 1;
+
+        $scope.setSearchResultPage = function (pageNo) {
+            $scope.searchFilters.parameters.start = (pageNo - 1) * 15;
+            $scope.currentPage = pageNo;
+            runAdvancedSearch($scope.searchFilters);
+        };
 
         $scope.getType = function (relScore) {
             if (relScore === undefined)
@@ -41,17 +64,43 @@ angular.module('ice.search.controller', [])
             return 'info';
         };
 
-        $scope.tooltipDetails = function(entry) {
+        $scope.tooltipDetails = function (entry) {
             $scope.searchResultToolTip = undefined;
+            var sessionId = $cookieStore.get("sessionId");
+
             Entry(sessionId).tooltip({partId:entry.id},
                 function (result) {
                     $scope.searchResultToolTip = result;
                 }, function (error) {
                     console.error(error);
                 });
+        };
+
+        $scope.goToEntryDetails = function (entry, index) {
+            // this assumes that if the user is able to click on a result then search was successful
+
+            var offset = (($scope.currentPage - 1) * 15) + index;
+
+            EntryContextUtil.setContextCallback(function (offset, callback) {
+                $scope.searchFilters.parameters.start = offset;
+                $scope.searchFilters.parameters.retrieveCount = 1;
+
+//                console.log("next", $scope.searchFilters);
+
+                Search().runAdvancedSearch({webSearch:$scope.searchFilters.webSearch}, $scope.searchFilters,
+                    function (result) {
+                        callback(result.results[0].entryInfo.id);
+                    },
+                    function (error) {
+                        console.log(error);
+                    }
+                );
+            }, $scope.searchResults.resultCount, offset, "/search");
+
+            $location.path("/entry/" + entry.id);
         }
     })
-    .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location, Search) {
+    .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {
         $scope.searchTypes = {all:true, strain:true, plasmid:true, part:true, arabidopsis:true};
 
         $scope.check = function (selection) {
@@ -66,57 +115,86 @@ angular.module('ice.search.controller', [])
             $scope.searchTypes.all = allTrue;
         };
 
-        $scope.search = function (isAdvancedSearch) {
-            $scope.searchResults = undefined;
-            if (isAdvancedSearch) {
-                $scope.loadingSearchResults = true;
-                $location.path('/search');
-                var search = Search();
-                var searchQuery = {};
-                searchQuery.queryString = $scope.queryText;
-                var blastType = $scope.blastSearchType === undefined ? "BLAST_N" : $scope.blastSearchType.toUpperCase();
-                searchQuery.blastQuery = {blastProgram:blastType, sequence:$scope.sequenceText};
-                searchQuery.entryTypes = [];
-                for (var searchType in $scope.searchTypes) {
-                    if ($scope.searchTypes.hasOwnProperty(searchType) && searchType !== 'all') {
-                        if ($scope.searchTypes[searchType])
-                            searchQuery.entryTypes.push(searchType.toUpperCase());
+        var defineQuery = function () {
+            var searchQuery = {entryTypes:[], parameters:{start:0, retrieveCount:15, sortField:"RELEVANCE"}, blastQuery:{}};
+
+            // check search types  : {all: false, strain: true, plasmid: false, part: true, arabidopsis: true}
+            for (var type in $scope.searchTypes) {
+                if ($scope.searchTypes.hasOwnProperty(type) && type !== 'all') {
+                    if ($scope.searchTypes[type]) {
+                        searchQuery.entryTypes.push(type.toUpperCase());
                     }
                 }
+            }
 
-                search.runAdvancedSearch(searchQuery, function (result) {
-                    $scope.searchFilters = searchQuery;
-                    $scope.loadingSearchResults = false;
-                    $scope.searchResults = result;
-                }, function (error) {
-                    $scope.loadingSearchResults = false;
-                    $scope.searchResults = undefined;
-                });
+            // check blast search type
+            if ($scope.blastSearchType) {
+                searchQuery.blastQuery.blastProgram = $scope.blastSearchType;
+            }
+
+            // check "has ..."
+            if ($scope.hasAttachment)
+                searchQuery.parameters.hasAttachment = $scope.hasAttachment;
+
+            if ($scope.hasSample)
+                searchQuery.parameters.hasSample = $scope.hasSample;
+
+            if ($scope.hasSequence)
+                searchQuery.parameters.hasSequence = $scope.hasSequence;
+
+            // bio safety
+            if ($scope.bioSafetyLevelOption) {
+                searchQuery.bioSafetyOption = $scope.bioSafetyLevelOption == "1" ? "LEVEL_ONE" : "LEVEL_TWO";
+            }
+
+            //sequence
+            if ($scope.sequenceText) {
+                searchQuery.blastQuery.sequence = $scope.sequenceText;
+                if (!searchQuery.blastQuery.blastProgram)
+                    searchQuery.blastQuery.blastProgram = "BLAST_N";
+            }
+
+            searchQuery.queryString = $scope.queryText;
+            return searchQuery;
+        };
+
+        $scope.search = function (isWebSearch) {
+            $scope.searchFilters = defineQuery();
+            $scope.searchFilters.webSearch = isWebSearch;
+
+            var searchUrl = "/search";
+            if ($location.path().slice(0, searchUrl.length) != searchUrl) {
+                // triggers search controller which uses searchfilters to perform search
+                $location.path(searchUrl, false);
             } else {
-                $scope.searchFilters.q = $scope.queryText;
-                $scope.searchFilters.s = $scope.sequenceText;
-                $scope.searchFilters.sort = 'relevance';
-                $scope.searchFilters.asc = false;
-                $scope.searchFilters.t = [];
-                $scope.searchFilters.b = $scope.blastSearchType;
-                $scope.searchFilters.hasSample = $scope.hasSample;
-                $scope.searchFilters.hasSequence = $scope.hasSequence;
-                $scope.searchFilters.hasAttachment = $scope.hasAttachment;
-
-                for (var type in $scope.searchTypes) {
-                    if ($scope.searchTypes.hasOwnProperty(type) && type !== 'all') {
-                        if ($scope.searchTypes[type])
-                            $scope.searchFilters.t.push(type);
-                    }
-                }
-
-                $scope.loadingPage = true;
-                $location.path('/search');
-                $location.search('q', $scope.queryText);
-                $scope.runUserSearch();
+                $scope.$broadcast("RunSearch", $scope.searchFilters);
             }
         };
 
+        $scope.isWebSearch = function () {
+            return $scope.searchFilters.webSearch === true;
+        };
+
+        $scope.canReset = function () {
+            if ($scope.queryText || $scope.sequenceText || $scope.hasSample || $scope.hasSequence || $scope.hasAttachment)
+                return true;
+
+            if ($scope.blastSearchType || $scope.bioSafetyLevelOption)
+                return true;
+
+            for (var searchType in $scope.searchTypes) {
+                if ($scope.searchTypes.hasOwnProperty(searchType)) {
+                    if ($scope.searchTypes[searchType] != true)
+                        return true;
+                }
+            }
+
+            return false;
+        };
+
+        //
+        // resets the search filters to the defaults setting
+        //
         $scope.reset = function () {
             $scope.sequenceText = "";
             $scope.queryText = "";

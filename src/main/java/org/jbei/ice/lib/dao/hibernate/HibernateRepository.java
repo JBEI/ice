@@ -3,6 +3,7 @@ package org.jbei.ice.lib.dao.hibernate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dao.IRepository;
@@ -12,11 +13,12 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 
 /**
- * Hibernate Persistence
+ * Parent abstract class for Hibernate Persistence
  *
- * @author Hector Plahar, Zinovii Dmytriv, Timothy Ham
+ * @author Hector Plahar
  */
 
+@SuppressWarnings("unchecked")
 public abstract class HibernateRepository<T extends IDataModel> implements IRepository<T> {
 
     /**
@@ -32,28 +34,28 @@ public abstract class HibernateRepository<T extends IDataModel> implements IRepo
      * Deletes an {@link IDataModel} from the database.
      *
      * @param object model to delete
-     * @throws DAOException on Hibernate Exception or invalid parameter
      */
     public void delete(T object) {
         try {
             currentSession().delete(object);
         } catch (HibernateException e) {
-            throw new DAOException("dbDelete failed!", e);
+            Logger.error(e);
+            throw new DAOException(e);
         }
     }
 
     /**
-     * Updates an existing object in the database
+     * Updates an existing object in the database, if found
      *
      * @param object Object to update
      * @return updated object
-     * @throws DAOException on Hibernate Exception or invalid parameter
      */
     public T update(T object) {
         try {
             currentSession().update(object);
         } catch (HibernateException e) {
-            throw new DAOException("dbDelete failed!", e);
+            Logger.error(e);
+            throw new DAOException(e);
         }
         return object;
     }
@@ -64,18 +66,15 @@ public abstract class HibernateRepository<T extends IDataModel> implements IRepo
      *
      * @param model {@link IDataModel} object to create
      * @return Object created {@link IDataModel} object
-     * @throws DAOException in the event of a problem saving or invalid parameter
      */
     public T create(T model) {
         try {
             currentSession().save(model);
+            return model;
         } catch (HibernateException e) {
-            throw new DAOException("dbSave failed!", e);
-        } catch (Exception e1) {
-            throw new DAOException("Unknown database exception ", e1);
+            Logger.error(e);
+            throw new DAOException(e);
         }
-
-        return model;
     }
 
     /**
@@ -84,18 +83,16 @@ public abstract class HibernateRepository<T extends IDataModel> implements IRepo
      * @param clazz class type for {@link IDataModel}
      * @param id    unique synthetic identifier for {@link IDataModel}
      * @return IModel object from the database.
-     * @throws DAOException
      */
-    @SuppressWarnings("unchecked")
     protected T get(Class<T> clazz, long id) throws DAOException {
         try {
             return (T) currentSession().get(clazz, id);
         } catch (HibernateException e) {
-            throw new DAOException("Could not retrieve " + clazz.getSimpleName() + " with id \"" + id + "\"", e);
+            Logger.error(e);
+            throw new DAOException("Error retrieving " + clazz.getSimpleName() + " with id \"" + id + "\"", e);
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected T getByUUID(Class<T> theClass, String uuid) throws DAOException {
         T result;
         Session session = currentSession();
@@ -106,12 +103,12 @@ public abstract class HibernateRepository<T extends IDataModel> implements IRepo
             result = (T) query.uniqueResult();
 
         } catch (HibernateException e) {
-            throw new DAOException("dbGet failed for " + theClass.getCanonicalName() + " and uuid=" + uuid, e);
+            Logger.error(e);
+            throw new DAOException(e);
         }
         return result;
     }
 
-    @SuppressWarnings("unchecked")
     protected List<T> getAll(Class<T> theClass) throws DAOException {
         Session session = currentSession();
 
@@ -121,7 +118,22 @@ public abstract class HibernateRepository<T extends IDataModel> implements IRepo
             results = new ArrayList<T>(query.list());
             return results;
         } catch (HibernateException he) {
-            throw new DAOException("retrieve all failed for " + theClass.getCanonicalName(), he);
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    protected List<T> getList(Class<T> clazz, int offset, int limit, String sort, boolean asc) {
+        try {
+            String queryString = "from " + clazz.getName() + " order by " + sort;
+            queryString += asc ? " asc" : " desc";
+            Query query = currentSession().createQuery(queryString);
+            query.setFirstResult(offset);
+            query.setMaxResults(limit);
+            return new ArrayList<T>(query.list());
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
         }
     }
 }
