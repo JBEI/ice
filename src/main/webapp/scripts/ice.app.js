@@ -141,7 +141,6 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         })
         .state('main.entry', {
             url:'entry/:id',
-            controller:'EntryController',
             templateUrl:'/views/entry.html',
             resolve:{
                 sessionValid:function (Authentication) {
@@ -157,10 +156,6 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             url:'create/:type',
             controller:'CreateEntryController',
             templateUrl:'/views/entry/create-entry.html'
-            // illustrates using parameter for
-//            templateUrl: function (stateParams) {
-//                return '/views/entry/create-' + stateParams.type + '.html';
-//            }
         })
         .state('main.profile', {
             url:'profile/:id',
@@ -187,7 +182,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         })
         .state('main.admin.option', {
             url:'/:option',
-            templateUrl:'/views/admin/settings.html'
+            templateUrl:'/scripts/admin/settings.html'
 
         })
         .state('main.upload', {
@@ -196,7 +191,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             templateUrl:'/scripts/upload/import.html',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid('main.upload');
+                    return Authentication.isSessionValid();
                 }
             }
         })
@@ -205,6 +200,5 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             controller:'FullScreenFlashController',
             templateUrl:'/views/entry/fullscreen-flash.html'
         })
-        .state("otherwise", { url:'/'})
     ;
 });

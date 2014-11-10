@@ -1,7 +1,7 @@
 <div ng-controller="EntrySampleController">
     <div class="row pad_top" ng-if="entry.canEdit||samples.length>0">
         <div class="col-md-12">
-            <button type="button" class="ice-button" ng-if="entry.canEdit">
+            <button type="button" ng-click="addSample=true" class="ice-button" ng-if="entry.canEdit">
                 <i style="font-size: 14px; color: #007dbc" class="fa fa-plus"></i> Add Sample
             </button>
         <span ng-if="samples && samples.length">
@@ -14,6 +14,26 @@
                 <i style="font-size: 14px;" class="fa fa-ban text-danger"></i> Remove From Cart
             </button>
         </span>
+
+            <div class="pad-top-5" data-ng-show="true" style="margin-left: 50px">
+                <form name="createCommentForm" data-ng-submit="createComment()" class="entry-form">
+                    <textarea class="input_box" data-ng-model="newComment.message" placeholder="Enter comment" rows="6"
+                              cols="70"></textarea>
+
+                    <div ng-if="entrySamples" style="vertical-align: top; padding-bottom: 15px">
+                        <b class="font-90em">Affected Samples</b><br>
+                        <label class="checkbox-inline font-90em" ng-repeat="sample in entrySamples">
+                            <input type="checkbox" ng-model="newComment.sample">{{sample.label}}
+                        </label>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+                        <button type="button" data-ng-click="addComment=false" class="btn btn-default btn-sm">Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
         </div>
     </div>
 
