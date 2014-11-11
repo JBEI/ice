@@ -560,6 +560,14 @@ iceServices.factory('Entry', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            addSample:{
+                method:'POST',
+                responseType:'json',
+                isArray:true,
+                url:'/rest/parts/:partId/samples',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
             traceSequences:{
                 method:'GET',
                 responseType:'json',

@@ -8,7 +8,6 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.StorageDAO;
 import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.utils.Utils;
 
 /**
@@ -29,25 +28,6 @@ public class StorageController {
     public StorageController() {
         dao = DAOFactory.getStorageDAO();
         configurationController = new ConfigurationController();
-    }
-
-    /**
-     * Retrieve {@link Storage} object by its name, index, type and the parent id from the database.
-     *
-     * @param name
-     * @param index
-     * @param type
-     * @param parentId
-     * @return Storage object.
-     * @throws ControllerException
-     */
-    public Storage retrieveStorageBy(String name, String index, StorageType type, long parentId)
-            throws ControllerException {
-        try {
-            return dao.retrieveStorageBy(name, index, type, parentId);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
     }
 
     public Storage retrieveByUUID(String uuid) throws ControllerException {
@@ -163,69 +143,18 @@ public class StorageController {
     }
 
     /**
-     * Retrieve a {@link Storage} object from the database by the bar code from the database.
-     *
-     * @param barcode
-     * @return Storage.
-     * @throws ControllerException
-     */
-    public Storage retrieveStorageTube(String barcode) throws ControllerException {
-        try {
-            return dao.retrieveStorageTube(barcode);
-        } catch (DAOException me) {
-            throw new ControllerException(me);
-        }
-    }
-
-    /**
-     * Update the {@link Storage} object in the database.
-     *
-     * @param storage
-     * @return Saved storage.
-     * @throws ControllerException
-     */
-    public Storage update(Storage storage) throws ControllerException {
-        try {
-            return dao.update(storage);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    /**
      * Save the {@link Storage} object in the database.
      *
      * @param storage
      * @return Saved storage.
-     * @throws ControllerException
      */
-    public Storage save(Storage storage) throws ControllerException {
-        try {
-            if (storage.getUuid() == null || storage.getUuid().isEmpty()) {
-                String uuid = Utils.generateUUID();
-                storage.setUuid(uuid);
-            }
-
-            return dao.create(storage);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+    public Storage save(Storage storage) {
+        if (storage.getUuid() == null || storage.getUuid().isEmpty()) {
+            String uuid = Utils.generateUUID();
+            storage.setUuid(uuid);
         }
-    }
 
-    public Storage getLocation(Storage strainScheme, String[] labels) throws ControllerException {
-        try {
-            return dao.getLocation(strainScheme, labels);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    public Storage get(long id, boolean fetchChildren) throws ControllerException {
-        try {
-            return dao.get(id, fetchChildren);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        return dao.create(storage);
     }
 
     void delete(Storage storage) throws ControllerException {

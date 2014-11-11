@@ -12,9 +12,6 @@ public class Setting implements IDataTransferModel {
     private String key;
     private String value;
 
-    public Setting() {
-    }
-
     public Setting(String key, String value) {
         this.key = key;
         this.value = value;
