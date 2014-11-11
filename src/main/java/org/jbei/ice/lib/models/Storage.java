@@ -65,6 +65,10 @@ public class Storage implements IDataModel {
 
     private static final long serialVersionUID = 1L;
 
+    public enum StorageType {
+        GENERIC, FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, PLATE81, WELL, TUBE, SCHEME
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
@@ -87,7 +91,7 @@ public class Storage implements IDataModel {
 
     @Column(name = "storage_type")
     @Enumerated(EnumType.STRING)
-    private SampleType storageType;
+    private StorageType storageType;
 
     @Column(name = "owner_email", length = 255, nullable = false)
     private String ownerEmail;
@@ -102,14 +106,6 @@ public class Storage implements IDataModel {
 
     public Storage() {
         super();
-    }
-
-    public Storage(String name, String description, SampleType storageType, String ownerEmail, Storage parent) {
-        setName(name);
-        setDescription(description);
-        setStorageType(storageType);
-        setOwnerEmail(ownerEmail);
-        setParent(parent);
     }
 
     public long getId() {
@@ -160,11 +156,11 @@ public class Storage implements IDataModel {
         return uuid;
     }
 
-    public SampleType getStorageType() {
+    public StorageType getStorageType() {
         return storageType;
     }
 
-    public void setStorageType(SampleType storageType) {
+    public void setStorageType(StorageType storageType) {
         this.storageType = storageType;
     }
 
@@ -198,7 +194,7 @@ public class Storage implements IDataModel {
         StorageLocation location = new StorageLocation();
         location.setDisplay(index);
         location.setId(id);
-        location.setType(storageType);
+        location.setType(SampleType.toSampleType(storageType.name()));
         return location;
     }
 }

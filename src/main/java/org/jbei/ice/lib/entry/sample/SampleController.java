@@ -3,8 +3,6 @@ package org.jbei.ice.lib.entry.sample;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jbei.ice.ControllerException;
-import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -40,24 +38,6 @@ public class SampleController {
         entryAuthorization = new EntryAuthorization();
     }
 
-    /**
-     * Delete the {@link Sample} in the database, then rebuild the search index. Also deletes the
-     * associated {@link Storage}, if it is a tube.
-     *
-     * @param sample
-     * @throws ControllerException
-     * @throws PermissionException
-     */
-    public void deleteSample(Account account, Sample sample) throws ControllerException, PermissionException {
-        entryAuthorization.expectWrite(account.getEmail(), sample.getEntry());
-
-        Storage storage = sample.getStorage();
-        dao.delete(sample);
-        if (storage.getStorageType() == SampleType.TUBE) {
-            storageController.delete(storage);
-        }
-    }
-
     public boolean hasSample(Entry entry) {
         return dao.hasSample(entry);
     }
@@ -88,7 +68,7 @@ public class SampleController {
         Storage strainScheme = null;
         List<Storage> schemes = storageDAO.getAllStorageSchemes();
         for (Storage storage : schemes) {
-            if (storage.getStorageType() == SampleType.SCHEME
+            if (storage.getStorageType() == Storage.StorageType.SCHEME
                     && "Strain Storage Matrix Tubes".equals(storage.getName())) {
                 strainScheme = storage;
                 break;
@@ -119,7 +99,8 @@ public class SampleController {
         storage.setName(sampleType.name()); // "Tube"(tube), "Well"(well), "Plate"(plate)
         storage.setIndex(name); // barcode(tube), location-A01(well), plateNumber(plate)
 //                        result.setParent(parent); // todo : parent is scheme
-        storage.setStorageType(sampleType);
+        Storage.StorageType storageType = Storage.StorageType.valueOf(sampleType.name());
+        storage.setStorageType(storageType);
         storage.setOwnerEmail(userId);
         storage.setUuid(Utils.generateUUID());
         return storage;

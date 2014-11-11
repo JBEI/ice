@@ -206,7 +206,8 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * @return Storage object.
      * @throws DAOException
      */
-    public Storage retrieveStorageBy(String name, String index, SampleType type, long parentId) throws DAOException {
+    public Storage retrieveStorageBy(String name, String index, Storage.StorageType type, long parentId)
+            throws DAOException {
         Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName()
