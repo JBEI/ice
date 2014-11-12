@@ -28,13 +28,11 @@ public class SampleController {
 
     private final SampleDAO dao;
     private final StorageDAO storageDAO;
-    private final StorageController storageController;
     private final EntryAuthorization entryAuthorization;
 
     public SampleController() {
         dao = DAOFactory.getSampleDAO();
         storageDAO = DAOFactory.getStorageDAO();
-        storageController = new StorageController();
         entryAuthorization = new EntryAuthorization();
     }
 
@@ -96,9 +94,8 @@ public class SampleController {
 
     protected Storage createStorage(String userId, String name, SampleType sampleType) {
         Storage storage = new Storage();
-        storage.setName(sampleType.name()); // "Tube"(tube), "Well"(well), "Plate"(plate)
-        storage.setIndex(name); // barcode(tube), location-A01(well), plateNumber(plate)
-//                        result.setParent(parent); // todo : parent is scheme
+        storage.setName(sampleType.name());
+        storage.setIndex(name);
         Storage.StorageType storageType = Storage.StorageType.valueOf(sampleType.name());
         storage.setStorageType(storageType);
         storage.setOwnerEmail(userId);
