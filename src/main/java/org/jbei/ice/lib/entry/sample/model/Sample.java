@@ -4,7 +4,7 @@ import java.util.Date;
 import javax.persistence.*;
 
 import org.jbei.ice.lib.dao.IDataModel;
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryBooleanPropertiesBridge;
 import org.jbei.ice.lib.models.Storage;
@@ -143,7 +143,10 @@ public class Sample implements IDataModel {
     }
 
     @Override
-    public IDataTransferModel toDataTransferObject() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public PartSample toDataTransferObject() {
+        PartSample sample = new PartSample();
+        sample.setLabel(label);
+        sample.setCreationTime(creationTime.getTime());
+        return sample;
     }
 }

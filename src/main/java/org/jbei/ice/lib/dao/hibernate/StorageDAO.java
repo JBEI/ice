@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.models.Storage.StorageType;
 import org.jbei.ice.lib.utils.Utils;
 
 import org.hibernate.HibernateException;
@@ -24,19 +24,18 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * Retrieve {@link Storage} object from the database by its id. Optionally, retrieve children at
      * this time.
      *
-     * @param id            unique record identifier
-     * @param fetchChildren True if children are to be fetched.
+     * @param id unique record identifier
      * @return Storage object.
      * @throws DAOException
      */
-    public Storage get(long id, boolean fetchChildren) throws DAOException {
+    public Storage getWithChildren(long id) throws DAOException {
         Storage result;
         Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName() + " where id = :id");
             query.setLong("id", id);
             result = (Storage) query.uniqueResult();
-            if (fetchChildren && result != null) {
+            if (result != null) {
                 result.getChildren().size();
             }
         } catch (HibernateException e) {
@@ -69,7 +68,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * @throws DAOException on exception
      */
     public Storage retrieveStorageTube(String barcode) throws DAOException {
-        List<Storage> results = retrieveStorageByIndex(barcode, StorageType.TUBE);
+        List<Storage> results = retrieveStorageByIndex(barcode, SampleType.TUBE);
 
         if (results == null || results.isEmpty()) {
             return null;
@@ -82,7 +81,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
     }
 
     /**
-     * Retrieve a {@link Storage} object by its index and {@link StorageType} fields.
+     * Retrieve a {@link Storage} object by its index and {@link SampleType} fields.
      *
      * @param index index value
      * @param type  storage type
@@ -90,7 +89,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public List<Storage> retrieveStorageByIndex(String index, StorageType type) throws DAOException {
+    public List<Storage> retrieveStorageByIndex(String index, SampleType type) throws DAOException {
         List<Storage> result = null;
         Session session = currentSession();
         try {
@@ -109,7 +108,6 @@ public class StorageDAO extends HibernateRepository<Storage> {
             throw new DAOException(msg);
         }
         return result;
-
     }
 
     /**
@@ -125,7 +123,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
         try {
             Query query = session.createQuery("from " + Storage.class.getName()
                                                       + " storage where storage.storageType = :storageType");
-            query.setParameter("storageType", StorageType.SCHEME);
+            query.setParameter("storageType", SampleType.SCHEME);
 
             @SuppressWarnings("rawtypes")
             List list = query.list();
@@ -137,24 +135,6 @@ public class StorageDAO extends HibernateRepository<Storage> {
             Logger.error(msg, e);
             throw new DAOException(msg);
         }
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<Storage> getStorageSchemesForEntryType(String uuid) throws DAOException {
-        ArrayList<Storage> result = new ArrayList<>();
-        Session session = currentSession();
-
-        if (uuid == null)
-            return null;
-
-        Storage parent = get(uuid);
-        Query query = session.createQuery("from " + Storage.class.getName()
-                                                  + " storage where storage.parent = :parent AND storage"
-                                                  + ".storageType = " + ":storageType");
-        query.setParameter("parent", parent);
-        query.setParameter("storageType", StorageType.SCHEME);
-        result.addAll(query.list());
         return result;
     }
 
@@ -200,11 +180,8 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * @return Storage object.
      * @throws DAOException
      */
-    private Storage getOrCreateChildLocation(Storage template, String itemLabel, Storage parent)
-            throws DAOException {
-
-        Storage result = retrieveStorageBy(template.getName(), itemLabel,
-                                           template.getStorageType(), parent.getId());
+    private Storage getOrCreateChildLocation(Storage template, String itemLabel, Storage parent) throws DAOException {
+        Storage result = retrieveStorageBy(template.getName(), itemLabel, template.getStorageType(), parent.getId());
 
         if (result == null) {
             result = new Storage();
@@ -220,7 +197,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
     }
 
     /**
-     * Retrieve {@link Storage} object by its name, index, {@link StorageType} and parent id.
+     * Retrieve {@link Storage} object by its name, index, {@link SampleType} and parent id.
      *
      * @param name
      * @param index
@@ -229,22 +206,19 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * @return Storage object.
      * @throws DAOException
      */
-    public Storage retrieveStorageBy(String name, String index, StorageType type, long parentId)
+    public Storage retrieveStorageBy(String name, String index, Storage.StorageType type, long parentId)
             throws DAOException {
         Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName()
-                                                      + " storage where storage.name = :name and storage.index = " +
-                                                      ":index and "
+                                                      + " storage where storage.name = :name and storage.index = "
+                                                      + ":index and "
                                                       + "storage.storageType = :storageType and parent_id = :parentId");
             query.setString("index", index);
             query.setString("name", name);
             query.setParameter("storageType", type);
             query.setLong("parentId", parentId);
-
-            Storage result = (Storage) query.uniqueResult();
-
-            return result;
+            return (Storage) query.uniqueResult();
         } catch (Exception e) {
             String msg = "Could not retrieve storage " + e.toString();
             Logger.error(msg, e);
@@ -252,59 +226,8 @@ public class StorageDAO extends HibernateRepository<Storage> {
         }
     }
 
-    /**
-     * Retrieve the root level {@link Storage} object with the scheme that is used by the given
-     * {@link Storage} object.
-     *
-     * @param storage
-     * @return Root level Storage object.
-     */
-    public static Storage getSchemeContainingParentStorage(Storage storage) {
-        if (storage == null) {
-            return null;
-        }
-        Storage result = null;
-        Storage current = storage;
-        while (true) {
-            if (current.getStorageType() == StorageType.SCHEME) {
-                result = current;
-                break;
-            } else {
-                current = current.getParent();
-                if (current == null) {
-                    break;
-                }
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Retrieve the parent {@link Storage} objects of a given {@link Storage} object, up to, but
-     * excluding the Storage object containing the scheme.
-     * <p/>
-     * Useful for getting all the parents of a Storage object, except the scheme containing root
-     * object.
-     *
-     * @param storage
-     * @return parent storage object.
-     */
-    public static List<Storage> getStoragesUptoScheme(Storage storage) {
-        if (storage == null) {
-            return null;
-        }
-        ArrayList<Storage> result = new ArrayList<Storage>();
-        Storage current = storage;
-        while (current != null && current.getStorageType() != StorageType.SCHEME) {
-            result.add(current);
-            current = current.getParent();
-        }
-        return result;
-    }
-
     @Override
     public Storage get(long id) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return super.get(Storage.class, id);
     }
 }

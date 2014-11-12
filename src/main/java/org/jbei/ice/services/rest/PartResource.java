@@ -377,6 +377,18 @@ public class PartResource extends RestResource {
         return sampleController.retrieveEntrySamples(userId, partId);
     }
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/samples")
+    public ArrayList<PartSample> addSample(@Context UriInfo info, @PathParam("id") long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            PartSample partSample) {
+        String userId = SessionHandler.getUserIdBySession(userAgentHeader);
+        SampleController sampleController = new SampleController();
+        sampleController.createSample(userId, partId, partSample);
+        return sampleController.retrieveEntrySamples(userId, partId);
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/sequence")

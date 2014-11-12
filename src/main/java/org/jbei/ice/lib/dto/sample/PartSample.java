@@ -2,7 +2,7 @@ package org.jbei.ice.lib.dto.sample;
 
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dao.IDataTransferModel;
-import org.jbei.ice.lib.dto.StorageInfo;
+import org.jbei.ice.lib.dto.StorageLocation;
 
 /**
  * Parent class for the different types of samples
@@ -13,10 +13,9 @@ public class PartSample implements IDataTransferModel {
 
     private AccountTransfer depositor;
     private String label;
-    private SampleType type;
     private long creationTime;
     private boolean inCart;
-    private StorageInfo main;
+    private StorageLocation main;
 
     public AccountTransfer getDepositor() {
         return depositor;
@@ -32,14 +31,6 @@ public class PartSample implements IDataTransferModel {
 
     public void setLabel(String label) {
         this.label = label;
-    }
-
-    public SampleType getType() {
-        return type;
-    }
-
-    public void setType(SampleType type) {
-        this.type = type;
     }
 
     public long getCreationTime() {
@@ -58,11 +49,11 @@ public class PartSample implements IDataTransferModel {
         this.inCart = inCart;
     }
 
-    public StorageInfo getMain() {
+    public StorageLocation getMain() {
         return main;
     }
 
-    public void setMain(StorageInfo main) {
+    public void setMain(StorageLocation main) {
         this.main = main;
     }
 }

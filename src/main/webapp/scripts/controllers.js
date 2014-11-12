@@ -821,7 +821,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
         }
     };
 
-//    // search
+    // search
     $scope.runUserSearch = function (filters) {
         $scope.loadingSearchResults = true;
 
