@@ -390,6 +390,14 @@ angular.module('ice.entry.controller', [])
         });
 
         $scope.deleteHistory = function (history) {
-            // todo : delete
+            console.log(history);
+
+            entry.deleteHistory({partId:entryId, historyId:history.id}, function (result) {
+                var idx = $scope.history.indexOf(history);
+                if (idx == -1)
+                    return;
+
+                $scope.history.splice(idx, 1);
+            });
         }
     });

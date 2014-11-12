@@ -319,6 +319,17 @@ public class PartResource extends RestResource {
         return controller.getHistory(userId, partId);
     }
 
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/history/{historyId}")
+    public Response delete(@PathParam("id") long partId,
+            @PathParam("historyId") long historyId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        boolean success = controller.deleteHistory(userId, partId, historyId);
+        return super.respond(success);
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/traces")
