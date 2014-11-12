@@ -477,6 +477,20 @@ public class EntryController {
         return result;
     }
 
+    public boolean deleteHistory(String userId, long entryId, long historyId) {
+        Entry entry = dao.get(entryId);
+        if (entry == null)
+            return false;
+
+        authorization.expectWrite(userId, entry);
+        Audit audit = auditDAO.get(historyId);
+        if (audit == null)
+            return true;
+
+        auditDAO.delete(audit);
+        return true;
+    }
+
     public PartStatistics retrieveEntryStatistics(String userId, long entryId) {
         Entry entry = dao.get(entryId);
         if (entry == null)

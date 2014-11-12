@@ -213,19 +213,17 @@ angular.module('ice.entry.controller', [])
         $scope.createNewSample = function () {
             $scope.newSample.main.type = "PLATE96";
 
-            $scope.newSample.main.child = {
-                display:$scope.newSample.open.cell,
-                type:'WELL',
-                child:{
-                    display:$scope.newSample.open.barcode,
-                    type:'TUBE'
-                }
-            };
-
             // create sample
             entry.addSample({partId:partId}, $scope.newSample, function (result) {
                 $scope.samples = result;
-                $scope.newSample.add = false;
+                $scope.newSample = {
+                    open:{},
+                    depositor:{
+                        id:$scope.user.id,
+                        email:$scope.user.email
+                    },
+                    main:{}
+                };
             }, function (error) {
                 console.error(error);
             });
@@ -254,7 +252,7 @@ angular.module('ice.entry.controller', [])
                 return true;
             }
             return false;
-        }
+        };
 
         // has either well or t
         $scope.hasContent = function (row, col) {
@@ -317,8 +315,8 @@ angular.module('ice.entry.controller', [])
         });
 
         $scope.deleteTraceSequenceFile = function (fileId) {
-            var foundTrace = undefined;
-            var foundIndex = undefined;
+            var foundTrace;
+            var foundIndex;
 
             for (var i = 0; i < $scope.traceSequences.length; i++) {
                 var trace = $scope.traceSequences[i];
@@ -390,6 +388,14 @@ angular.module('ice.entry.controller', [])
         });
 
         $scope.deleteHistory = function (history) {
-            // todo : delete
+            console.log(history);
+
+            entry.deleteHistory({partId:entryId, historyId:history.id}, function (result) {
+                var idx = $scope.history.indexOf(history);
+                if (idx == -1)
+                    return;
+
+                $scope.history.splice(idx, 1);
+            });
         }
     });

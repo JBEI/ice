@@ -8,11 +8,20 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
  */
 public class History implements IDataTransferModel {
 
+    private long id;
     private String action;
     private String userId;
     private boolean localUser;
     private AccountTransfer account;
     private long time;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public String getAction() {
         return action;
