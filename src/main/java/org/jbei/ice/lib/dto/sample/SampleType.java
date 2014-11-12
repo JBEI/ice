@@ -1,19 +1,23 @@
 package org.jbei.ice.lib.dto.sample;
 
 /**
+ * // todo : this needs to be split into locationtype and sampletype to differentiate between the two
+ * // with sample types being top level objects only
+ *
  * @author Hector Plahar
  */
 public enum SampleType {
 
     PLATE96(true),
-    GENERIC(false),
+    GENERIC(true),
     FREEZER(false),
     SHELF(true),
     BOX_INDEXED(false),
     BOX_UNINDEXED(false),
     PLATE81(true),
     WELL(false),
-    TUBE(false);
+    TUBE(false),
+    SCHEME(false);
 
     private boolean topLevel;
 

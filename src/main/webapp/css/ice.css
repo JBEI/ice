@@ -20,7 +20,7 @@ button::-moz-focus-inner {
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: 89px; /* Height of the footer */
+    height: 66px; /* Height of the footer */
     padding: 2px;
 }
 

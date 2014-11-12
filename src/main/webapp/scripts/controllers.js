@@ -720,7 +720,6 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     $scope.appVersion = undefined;
     settings.version({}, function (result) {
-//        console.log(result);
         $rootScope.appVersion = result.value;
     }, function (error) {
         console.log(error);
@@ -822,7 +821,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
         }
     };
 
-//    // search
+    // search
     $scope.runUserSearch = function (filters) {
         $scope.loadingSearchResults = true;
 

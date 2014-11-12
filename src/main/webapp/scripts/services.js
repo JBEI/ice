@@ -457,7 +457,7 @@ iceServices.factory('Attachment', function ($resource) {
 
 iceServices.factory('Entry', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/parts/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId', commentId:'@commentId', linkId:'@linkId'}, {
+        return $resource('/rest/parts/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId', commentId:'@commentId', linkId:'@linkId', historyId:'@historyId'}, {
             query:{
                 method:'GET',
                 responseType:"json",
@@ -560,6 +560,14 @@ iceServices.factory('Entry', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            addSample:{
+                method:'POST',
+                responseType:'json',
+                isArray:true,
+                url:'/rest/parts/:partId/samples',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
             traceSequences:{
                 method:'GET',
                 responseType:'json',
@@ -573,6 +581,13 @@ iceServices.factory('Entry', function ($resource) {
                 responseType:'json',
                 isArray:true,
                 url:'/rest/parts/:partId/history',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            deleteHistory:{
+                method:'DELETE',
+                responseType:'json',
+                url:'/rest/parts/:partId/history/:historyId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 

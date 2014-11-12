@@ -1,9 +1,10 @@
 <div ng-controller="EntrySampleController">
-    <div class="row pad_top" ng-if="entry.canEdit||samples.length>0">
-        <div class="col-md-12">
-            <button type="button" class="ice-button" ng-if="entry.canEdit">
-                <i style="font-size: 14px; color: #007dbc" class="fa fa-plus"></i> Add Sample
-            </button>
+
+<div class="row pad_top" ng-if="entry.canEdit||samples.length>0">
+    <div class="col-md-12">
+        <button type="button" ng-click="newSample.add=true" class="ice-button" ng-if="entry.canEdit">
+            <i style="font-size: 14px; color: #007dbc" class="fa fa-plus"></i> Add Sample
+        </button>
         <span ng-if="samples && samples.length">
             &nbsp;
             <button ng-if="!samples[0].inCart" ng-click="openAddToCart()" type="button" class="ice-button">
@@ -14,156 +15,280 @@
                 <i style="font-size: 14px;" class="fa fa-ban text-danger"></i> Remove From Cart
             </button>
         </span>
+    </div>
+</div>
+
+<div class="row pad_top" style="margin-left: 50px" ng-if="newSample.add">
+    <div class="col-md-12">
+
+        <table class="entry_sample_panel">
+            <tr>
+                <td colspan="{{Plate96Cols.length+1}}">
+                    <strong style="color: #a52a2a">PLATE <input class="input_box" placeholder="Enter plate number"
+                                                                ng-model="newSample.main.display"> </strong>
+                </td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td class="text-center" ng-repeat="col in Plate96Cols"><strong>{{col}}</strong></td>
+            </tr>
+            <tr ng-repeat="row in Plate96Rows">
+                <td><strong>{{row}}</strong>&nbsp;</td>
+                <td ng-repeat="col in Plate96Cols track by $id(col)">
+                    <i class="fa opacity_hover"
+                       ng-class="{'green':hasTube(row,col),
+                       'alert_color':hasWell(row, col)&&!hasTube(row,col),
+                       'fa-circle-thin':!hasContent(row, col),
+                       'fa-circle':hasContent(row, col)}"
+                       style="font-size: 30px"
+                       popover-trigger="manual" popover-toggle="newSample.open.cell === row + (10+col+'').slice(-2)"
+                       ng-click="cellBarcodeClick(row, col)"
+                       popover-placement="bottom" popover-title="Well {{row + (10+col+'').slice(-2)}}"
+                       popover-template="/scripts/entry/sample/barcode-popover.html"></i>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="{{Plate96Cols.length+1}}" class="font-75em">
+                    <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+                    <input class="input_box" ng-model="newSample.label" placeHolder="Enter label">
+                    <br>
+                    <span style="color: #777" my-current-time="format"></span> - <a
+                        ng-href="/profile/{{samp.depositor.id}}">{{user.firstName}} {{user.lastName}}</a>
+                </td>
+            </tr>
+        </table>
+        <div class="pad_top">
+            <button type="submit" class="btn btn-primary btn-sm" ng-click="createNewSample()">Submit</button>
+            <button type="button" class="btn btn-default btn-sm" ng-click="newSample.add=false">Cancel</button>
         </div>
     </div>
+</div>
 
-    <div class="row pad_top" ng-if="samples.length===0">
-        <div class="col-md-12">
-            <i class="text-muted">No samples available</i>
-        </div>
+<div class="row pad_top" ng-if="samples.length===0">
+    <div class="col-md-12">
+        <i class="text-muted">No samples available</i>
+    </div>
+</div>
+
+<div class="row pad_top" ng-repeat="sample in samples" ng-if="samples.length > 0">
+<div class="col-md-12">
+
+<!--widget for plate 96 (should be a directive)-->
+<div class="row" ng-if="sample.main.type==='PLATE96'&&$index % 2 == 0">
+    <div class="col-md-6" ng-if="samples[$index+0]">
+        <table class="entry_sample_panel" ng-init="samp=samples[$index+0]">
+            <tr>
+                <td colspan="{{Plate96Cols.length+1}}">
+                    <strong style="color: #a52a2a">PLATE {{samp.main.display}} </strong>
+                </td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td class="text-center" ng-repeat="col in Plate96Cols">
+                    <strong class="opacity_4">{{col}}</strong>
+                </td>
+            </tr>
+            <tr ng-repeat="row in Plate96Rows">
+                <td><strong class="opacity_4">{{row}}</strong>&nbsp;&nbsp;</td>
+                <td ng-repeat="col in Plate96Cols track by $id(col)">
+                    <i class="fa fa-circle-thin" style="font-size: 30px"
+                       ng-if="row + (10+col+'').slice(-2) !== samp.main.child.display"></i>
+                    <i class="fa fa-circle"
+                       ng-class="{'green':samp.main.child.child, 'alert_color':!samp.main.child.child}"
+                       style="font-size: 30px" ng-if="row + (10+col+'').slice(-2) === samp.main.child.display"
+                       title="{{samp.main.child.child.display}}"></i>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="{{Plate96Cols.length+1}}" class="font-75em">
+                    <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+                    <strong>{{samp.label}}</strong><br>
+                    <span style="color: #777">{{samp.creationTime | date : 'short'}}</span> - <a
+                        ng-href="/profile/{{samp.depositor.id}}">{{samp.depositor.firstName}}
+                    {{samp.depositor.lastName}}</a>
+                </td>
+            </tr>
+        </table>
     </div>
 
-    <div class="row pad_top" ng-repeat="sample in samples" ng-if="samples.length > 0">
-        <div class="col-md-12">
-
-            <!--widget for plate 96 (should be a directive)-->
-            <div class="row" ng-if="sample.type==='PLATE96'&&$index % 2 == 0">
-                <div class="col-md-6" ng-if="samples[$index+0]">
-                    <table class="entry_sample_panel" ng-init="samp=samples[$index+0]">
-                        <tr>
-                            <td colspan="{{Plate96Cols.length+1}}">
-                                <strong style="color: #a52a2a">PLATE {{samp.main.display}} </strong>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>&nbsp;</td>
-                            <td class="text-center" ng-repeat="col in Plate96Cols"><strong>{{col}}</strong></td>
-                        </tr>
-                        <tr ng-repeat="row in Plate96Rows">
-                            <td><strong>{{row}}</strong>&nbsp;</td>
-                            <td ng-repeat="col in Plate96Cols track by $id(col)">
-                                <i class="fa fa-circle-thin opacity_hover" style="font-size: 30px"
-                                   ng-if="row + (10+col+'').slice(-2) !== samp.well.display"></i>
-                                <i class="fa fa-circle" ng-class="{'green':samp.tube, 'alert_color':!samp.tube}"
-                                   style="font-size: 30px" ng-if="row + (10+col+'').slice(-2) === samp.well.display"
-                                   title="{{samp.tube.display}}"></i>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="{{Plate96Cols.length+1}}" class="font-75em">
-                                <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
-                                <strong>{{samp.label}}</strong><br>
-                                <span style="color: #777">{{samp.creationTime | date : 'short'}}</span> - <a
-                                    ng-href="/profile/{{samp.depositor.id}}">{{samp.depositor.firstName}}
-                                {{samp.depositor.lastName}}</a>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div class="col-md-6" ng-if="samples[$index+1]">
-                    <table class="entry_sample_panel" ng-init="rightSamp=samples[$index+1]">
-                        <tr>
-                            <td colspan="{{Plate96Cols.length+1}}">
-                                <strong style="color: #a52a2a">PLATE {{rightSamp.main.display}} </strong>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>&nbsp;</td>
-                            <td class="text-center" ng-repeat="col in Plate96Cols"><strong>{{col}}</strong></td>
-                        </tr>
-                        <tr ng-repeat="row in Plate96Rows">
-                            <td><strong>{{row}}</strong>&nbsp;</td>
-                            <td ng-repeat="col in Plate96Cols track by $id(col)">
-                                <i class="fa fa-circle-thin opacity_hover" style="font-size: 30px"
-                                   ng-if="row + (10+col+'').slice(-2) !== rightSamp.well.display"></i>
-                                <i class="fa fa-circle"
-                                   ng-class="{'green':rightSamp.tube, 'alert_color':!rightSamp.tube}"
-                                   style="font-size: 30px"
-                                   ng-if="row + (10+col+'').slice(-2) === rightSamp.well.display"
-                                   title="{{rightSamp.tube.display}}"></i>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="{{Plate96Cols.length+1}}" class="font-75em">
-                                <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
-                                <strong>{{rightSamp.label}}</strong><br>
-                                <span style="color: #777">{{rightSamp.creationTime | date : 'short'}}</span> - <a
-                                    ng-href="/profile/{{rightSamp.depositor.id}}">{{rightSamp.depositor.firstName}}
-                                {{rightSamp.depositor.lastName}}</a>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-
-            <div class="row col-md-6" ng-if="sample.type==='SHELF'">
-                <table class="entry_sample_panel">
-                    <tr>
-                        <td colspan="4"><strong style="color: #a52a2a;">SHELF {{sample.main.display}} </strong></td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td class="pad-8">
-                            <h3 class="text-center">Box
-                                <small>{{sample.box.display}}</small>
-                            </h3>
-                        </td>
-                        <td class="pad-8">
-                            <h2 class="text-center">Well
-                                <small>{{sample.well.display}}</small>
-                            </h2>
-                        </td>
-                        <td class="pad-8">
-                            <h1>Tube
-                                <small>{{sample.tube.display}}</small>
-                            </h1>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="5" class="font-75em">
-                            <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
-                            <strong>{{sample.label}}</strong><br>
-                            <span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a
-                                ng-href="/profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}
-                            {{sample.depositor.lastName}}</a>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-
-            <div class="row col-md-6" ng-if="sample.type==='GENERIC'">
-                <table class="entry_sample_panel">
-                    <tr>
-                        <td colspan="4"><strong style="color: #a52a2a;">GENERIC </strong></td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td class="pad-8">
-                            &nbsp;
-                        </td>
-                        <td class="pad-8">
-                            <h2 class="text-center">
-                                <i class="fa fa-flask"></i>
-                            </h2>
-                        </td>
-                        <td class="pad-8">
-                            <h1>Tube
-                                <small>{{sample.tube.display}}</small>
-                            </h1>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="4" class="font-75em">
-                            <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
-                            <strong>{{sample.label}}</strong><br>
-                            <span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a
-                                ng-href="/profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}
-                            {{sample.depositor.lastName}}</a>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
+    <div class="col-md-6" ng-if="samples[$index+1]">
+        <table class="entry_sample_panel" ng-init="rightSamp=samples[$index+1]">
+            <tr>
+                <td colspan="{{Plate96Cols.length+1}}">
+                    <strong style="color: #a52a2a">PLATE {{rightSamp.main.display}} </strong>
+                </td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td class="text-center" ng-repeat="col in Plate96Cols">
+                    <strong class="opacity_4">{{col}}</strong>
+                </td>
+            </tr>
+            <tr ng-repeat="row in Plate96Rows">
+                <td><strong class="opacity_4">{{row}}</strong>&nbsp;&nbsp;</td>
+                <td ng-repeat="col in Plate96Cols track by $id(col)">
+                    <i class="fa fa-circle-thin" style="font-size: 30px"
+                       ng-if="row + (10+col+'').slice(-2) !== rightSamp.main.child.display"></i>
+                    <i class="fa fa-circle"
+                       ng-class="{'green':rightSamp.main.child.child, 'alert_color':!rightSamp.main.child.child}"
+                       style="font-size: 30px"
+                       ng-if="row + (10+col+'').slice(-2) === rightSamp.main.child.display"
+                       title="{{rightSamp.main.child.child.display}}"></i>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="{{Plate96Cols.length+1}}" class="font-75em">
+                    <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+                    <strong>{{rightSamp.label}}</strong><br>
+                    <span style="color: #777">{{rightSamp.creationTime | date : 'short'}}</span> - <a
+                        ng-href="/profile/{{rightSamp.depositor.id}}">{{rightSamp.depositor.firstName}}
+                    {{rightSamp.depositor.lastName}}</a>
+                </td>
+            </tr>
+        </table>
     </div>
+</div>
+
+<div class="row" ng-if="sample.main.type==='SHELF'&&$index % 2 == 0">
+    <div class="col-md-6" ng-if="samples[$index+0]">
+        <table class="entry_sample_panel" ng-init="samp=samples[$index+0]">
+            <tr>
+                <td colspan="4"><strong style="color: #a52a2a;">SHELF {{samp.main.display}} </strong></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td class="pad-8">
+                    <h3 class="text-center">Box
+                        <small>{{samp.main.child.display}}</small>
+                    </h3>
+                </td>
+                <td class="pad-8">
+                    <h2 class="text-center">Well
+                        <small>{{samp.main.child.child.display}}</small>
+                    </h2>
+                </td>
+                <td class="pad-8">
+                    <h1>Tube
+                        <small>{{samp.main.child.child.child.display}}</small>
+                    </h1>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5" class="font-75em">
+                    <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+                    <strong>{{samp.label}}</strong><br>
+                    <span style="color: #777">{{samp.creationTime | date : 'short'}}</span> - <a
+                        ng-href="/profile/{{sample.depositor.id}}">{{samp.depositor.firstName}}
+                    {{samp.depositor.lastName}}</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="col-md-6" ng-if="samples[$index+1]">
+        <table class="entry_sample_panel" ng-init="rightSamp=samples[$index+1]">
+            <tr>
+                <td colspan="4"><strong style="color: #a52a2a;">SHELF {{rightSamp.main.display}} </strong></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td class="pad-8">
+                    <h3 class="text-center">Box
+                        <small>{{rightSamp.main.child.display}}</small>
+                    </h3>
+                </td>
+                <td class="pad-8">
+                    <h2 class="text-center">Well
+                        <small>{{rightSamp.main.child.child.display}}</small>
+                    </h2>
+                </td>
+                <td class="pad-8">
+                    <h1>Tube
+                        <small>{{rightSamp.main.child.child.child.display}}</small>
+                    </h1>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5" class="font-75em">
+                    <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+                    <strong>{{rightSamp.label}}</strong><br>
+                    <span style="color: #777">{{rightSamp.creationTime | date : 'short'}}</span> - <a
+                        ng-href="/profile/{{sample.depositor.id}}">{{rightSamp.depositor.firstName}}
+                    {{rightSamp.depositor.lastName}}</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="row" ng-if="sample.main.type==='GENERIC'&&$index % 2 == 0">
+    <div class="col-md-6" ng-if="samples[$index+0]">
+        <table class="entry_sample_panel" ng-init="samp=samples[$index+0]">
+            <tr>
+                <td colspan="4"><strong style="color: #a52a2a;">GENERIC</strong></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td class="pad-8">
+                    &nbsp;
+                </td>
+                <td class="pad-8">
+                    <h2 class="text-center">
+                        <i class="fa fa-flask"></i>
+                    </h2>
+                </td>
+                <td class="pad-8">
+                    <h1>Tube
+                        <small>{{samp.tube.display}}</small>
+                    </h1>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" class="font-75em">
+                    <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+                    <strong>{{samp.label}}</strong><br>
+                    <span style="color: #777">{{samp.creationTime | date : 'short'}}</span> - <a
+                        ng-href="/profile/{{sample.depositor.id}}">{{samp.depositor.firstName}}
+                    {{samp.depositor.lastName}}</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="col-md-6" ng-if="samples[$index+1]">
+        <table class="entry_sample_panel" ng-init="rightSamp=samples[$index+1]">
+            <tr>
+                <td colspan="4"><strong style="color: #a52a2a;">GENERIC</strong></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td class="pad-8">
+                    &nbsp;
+                </td>
+                <td class="pad-8">
+                    <h2 class="text-center">
+                        <i class="fa fa-flask"></i>
+                    </h2>
+                </td>
+                <td class="pad-8">
+                    <h1>Tube
+                        <small>{{rightSamp.tube.display}}</small>
+                    </h1>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" class="font-75em">
+                    <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+                    <strong>{{rightSamp.label}}</strong><br>
+                    <span style="color: #777">{{rightSamp.creationTime | date : 'short'}}</span> - <a
+                        ng-href="/profile/{{sample.depositor.id}}">{{rightSamp.depositor.firstName}}
+                    {{rightSamp.depositor.lastName}}</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+</div>
+</div>
+
 </div>

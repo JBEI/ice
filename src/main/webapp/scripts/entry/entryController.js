@@ -17,12 +17,16 @@ angular.module('ice.entry.controller', [])
             url:"/rest/file/attachment",
             method:'POST',
             removeAfterUpload:true,
-            headers:{"X-ICE-Authentication-SessionId":sid}
+            headers:{
+                "X-ICE-Authentication-SessionId":sid
+            }
         });
 
         uploader.bind('success', function (event, xhr, item, response) {
             response.description = desc;
-            attachment.create({partId:$stateParams.id}, response,
+            attachment.create({
+                    partId:$stateParams.id
+                }, response,
                 function (result) {
                     $scope.attachments.push(result);
                     $scope.cancel();
@@ -40,7 +44,9 @@ angular.module('ice.entry.controller', [])
             $scope.attachmentDescription = undefined;
         };
 
-        attachment.get({partId:$stateParams.id}, function (result) {
+        attachment.get({
+            partId:$stateParams.id
+        }, function (result) {
             $scope.attachments = result;
         });
 
@@ -49,7 +55,10 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.deleteAttachment = function (index, att) {
-            attachment.delete({partId:$stateParams.id, attachmentId:att.id}, function (result) {
+            attachment.delete({
+                partId:$stateParams.id,
+                attachmentId:att.id
+            }, function (result) {
                 confirmObject[index] = false;
                 $scope.attachments.splice(index, 1);
             });
@@ -68,16 +77,22 @@ angular.module('ice.entry.controller', [])
         var entryId = $stateParams.id;
         var entry = Entry($cookieStore.get("sessionId"));
 
-        entry.comments({partId:entryId}, function (result) {
+        entry.comments({
+            partId:entryId
+        }, function (result) {
             $scope.entryComments = result;
         });
 
-        entry.samples({partId:entryId}, function (result) {
+        entry.samples({
+            partId:entryId
+        }, function (result) {
             $scope.entrySamples = result;
         });
 
         $scope.createComment = function () {
-            entry.createComment({partId:entryId}, $scope.newComment, function (result) {
+            entry.createComment({
+                partId:entryId
+            }, $scope.newComment, function (result) {
                 $scope.entryComments.splice(0, 0, result);
                 $scope.addComment = false;
                 $scope.entryStatistics.commentCount = $scope.entryComments.length;
@@ -87,7 +102,10 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.updateComment = function (comment) {
-            entry.updateComment({partId:entryId, commentId:comment.id}, comment, function (result) {
+            entry.updateComment({
+                partId:entryId,
+                commentId:comment.id
+            }, comment, function (result) {
                 if (result) {
                     comment.edit = false;
                     comment.modified = result.modified;
@@ -107,7 +125,9 @@ angular.module('ice.entry.controller', [])
         var partId = $stateParams.id;
 
         // retrieve samples for partId
-        entry.samples({partId:partId}, function (result) {
+        entry.samples({
+            partId:partId
+        }, function (result) {
             $scope.samples = result;
         });
 
@@ -138,7 +158,12 @@ angular.module('ice.entry.controller', [])
             });
 
             modalInstance.result.then(function (selected) {
-                var sampleSelection = {requestType:selected, partData:{id:$scope.entry.id}};
+                var sampleSelection = {
+                    requestType:selected,
+                    partData:{
+                        id:$scope.entry.id
+                    }
+                };
 
                 // add selection to shopping cart
                 samples.addRequestToCart({}, sampleSelection, function (result) {
@@ -149,6 +174,101 @@ angular.module('ice.entry.controller', [])
                 // dismiss callback
             });
         };
+
+        $scope.newSample = {
+            open:{},
+            depositor:{
+                id:$scope.user.id,
+                email:$scope.user.email
+            },
+            main:{}
+        };
+
+        $scope.format = "M/d/yyyy h:mm a";
+        // add sample 96 well plate click
+        $scope.cellBarcodeClick = function (row, col) {
+            var rc = row + (10 + col + '').slice(-2);
+            $scope.newSample.open = {
+                cell:rc
+            };
+        };
+
+        $scope.submitBarcode = function () {
+            $scope.newSample.code = $scope.newSample.open.cell;
+            $scope.newSample.main.child = {
+                display:$scope.newSample.open.cell,
+                type:'WELL'
+            };
+
+            if ($scope.newSample.open.barcode) {
+                $scope.newSample.main.child.child = {
+                    display:$scope.newSample.open.barcode,
+                    type:'TUBE'
+                }
+            }
+
+            $scope.newSample.open = {};
+        };
+
+        $scope.createNewSample = function () {
+            $scope.newSample.main.type = "PLATE96";
+
+            // create sample
+            entry.addSample({partId:partId}, $scope.newSample, function (result) {
+                $scope.samples = result;
+                $scope.newSample = {
+                    open:{},
+                    depositor:{
+                        id:$scope.user.id,
+                        email:$scope.user.email
+                    },
+                    main:{}
+                };
+            }, function (error) {
+                console.error(error);
+            });
+        };
+
+        $scope.hasTube = function (row, col) {
+            return check("TUBE", row, col);
+        };
+
+        $scope.hasWell = function (row, col) {
+            return check("WELL", row, col);
+        };
+
+        var check = function (type, row, col) {
+            var rc = row + (10 + col + '').slice(-2);
+            if ($scope.newSample.code != rc)
+                return false;
+
+            var recurse = $scope.newSample.main;
+            while (recurse != null) {
+                if (recurse.type != type) {
+                    recurse = recurse.child;
+                    continue;
+                }
+
+                return true;
+            }
+            return false;
+        };
+
+        // has either well or t
+        $scope.hasContent = function (row, col) {
+            var rc = row + (10 + col + '').slice(-2);
+            var recurse = $scope.newSample.main;
+            while (recurse != null) {
+                if (recurse.display == rc)
+                    return true;
+
+                recurse = recurse.child;
+            }
+            return false;
+
+//            newSample.open.cell === row + (10+col+'').slice(-2)
+//            "main":{"child":{"display":"C04","type":"WELL","child":{"type":"TUBE"}}}
+        }
     })
     .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, $fileUploader, Entry) {
         var entryId = $stateParams.id;
@@ -156,7 +276,9 @@ angular.module('ice.entry.controller', [])
         var entry = Entry(sid);
         $scope.traceUploadError = undefined;
 
-        entry.traceSequences({partId:entryId}, function (result) {
+        entry.traceSequences({
+            partId:entryId
+        }, function (result) {
             $scope.traceSequences = result;
         });
 
@@ -165,17 +287,23 @@ angular.module('ice.entry.controller', [])
             url:"/rest/parts/" + entryId + "/traces",
             method:'POST',
             removeAfterUpload:true,
-            headers:{"X-ICE-Authentication-SessionId":sid},
+            headers:{
+                "X-ICE-Authentication-SessionId":sid
+            },
             autoUpload:true,
             queueLimit:1, // can only upload 1 file
             formData:[
-                { entryId:entryId}
+                {
+                    entryId:entryId
+                }
             ]
         });
 
         uploader.bind('success', function (event, xhr, item, response) {
             console.log("response", response);
-            entry.traceSequences({partId:entryId}, function (result) {
+            entry.traceSequences({
+                partId:entryId
+            }, function (result) {
                 $scope.traceSequences = result;
                 $scope.showUploadOptions = false;
             });
@@ -187,8 +315,8 @@ angular.module('ice.entry.controller', [])
         });
 
         $scope.deleteTraceSequenceFile = function (fileId) {
-            var foundTrace = undefined;
-            var foundIndex = undefined;
+            var foundTrace;
+            var foundIndex;
 
             for (var i = 0; i < $scope.traceSequences.length; i++) {
                 var trace = $scope.traceSequences[i];
@@ -200,7 +328,10 @@ angular.module('ice.entry.controller', [])
             }
 
             if (foundTrace != undefined) {
-                entry.deleteTraceSequence({partId:entryId, traceId:foundTrace.id}, function (result) {
+                entry.deleteTraceSequence({
+                    partId:entryId,
+                    traceId:foundTrace.id
+                }, function (result) {
                     $scope.traceSequences.splice(foundIndex, 1);
                     $scope.entryStatistics.traceSequenceCount = $scope.traceSequences.length;
                 }, function (error) {
@@ -219,18 +350,24 @@ angular.module('ice.entry.controller', [])
         $scope.experiment = {};
         $scope.addExperiment = false;
 
-        entry.experiments({partId:entryId}, function (result) {
+        entry.experiments({
+            partId:entryId
+        }, function (result) {
             $scope.entryExperiments = result;
         });
 
         $scope.createExperiment = function () {
-            if ($scope.experiment === undefined || $scope.experiment.url === undefined || $scope.experiment.url === ''
-                || $scope.experiment.url.lastIndexOf('http', 0) !== 0) {
+            if ($scope.experiment === undefined ||
+                $scope.experiment.url === undefined ||
+                $scope.experiment.url === '' ||
+                $scope.experiment.url.lastIndexOf('http', 0) !== 0) {
                 $scope.urlMissing = true;
                 return;
             }
 
-            entry.createExperiment({partId:entryId}, $scope.experiment, function (result) {
+            entry.createExperiment({
+                partId:entryId
+            }, $scope.experiment, function (result) {
                 $scope.entryExperiments.splice(0, 0, result);
                 $scope.addExperiment = false;
                 $scope.entryStatistics.experimentalDataCount = $scope.entryExperiments.length;
@@ -244,11 +381,21 @@ angular.module('ice.entry.controller', [])
         var sid = $cookieStore.get("sessionId");
         var entry = Entry(sid);
 
-        entry.history({partId:entryId}, function (result) {
+        entry.history({
+            partId:entryId
+        }, function (result) {
             $scope.history = result;
         });
 
         $scope.deleteHistory = function (history) {
-            // todo : delete
+            console.log(history);
+
+            entry.deleteHistory({partId:entryId, historyId:history.id}, function (result) {
+                var idx = $scope.history.indexOf(history);
+                if (idx == -1)
+                    return;
+
+                $scope.history.splice(idx, 1);
+            });
         }
     });
