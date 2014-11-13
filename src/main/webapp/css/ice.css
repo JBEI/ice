@@ -452,9 +452,9 @@ html, body {
 
 /* style for the number in the menu e.g. Sample  8*/
 .menu_count {
-    color: #999;
+    color: #BBBBBB;
     float: right;
-    font-size: 0.9em;
+    font-size: 0.8em;
 }
 
 .menu-count {
@@ -881,8 +881,8 @@ ul#indented li a:hover {
 .system_collection_user_menu_row {
     border-top: 1px solid #f6f6f6;
     color: #233559;
-    line-height: 90%;
-    padding: 8px 6px 6px 15px;
+    /*line-height: 90%;*/
+    padding: 6px 6px 6px 12px;
 }
 
 .user_collection_user_menu_row {
@@ -895,17 +895,12 @@ ul#indented li a:hover {
 .user_collection_user_menu_row:hover, .system_collection_user_menu_row:hover {
     background-color: #F3F1D9;
     cursor: pointer;
-    color: #70822e;
-    opacity: 1;
 }
 
 .collection_user_menu_row_selected {
     cursor: default;
-    font-weight: bold;
     color: #4D5B76;
-    background-color: #F3F1D9;
-    border-top: 1px solid #EFE9A0;
-    border-bottom: 1px solid #EFE9A0;
+    background-color: #f1f1f1;
 }
 
 .collection_user_menu_row_selected .menu_count {
