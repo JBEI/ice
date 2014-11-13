@@ -1496,10 +1496,11 @@ table.data_table tr td {
 }
 
 .collections_header {
-    font-size: 0.85em;
+    font-size: 0.75em;
     padding: 4px;
     font-weight: bold;
     /*<!-- 233559 -->*/
+    text-transform: uppercase;
     font-family: Helvetica, serif;
     color: #888;
 }
