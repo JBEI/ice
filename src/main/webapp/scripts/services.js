@@ -41,6 +41,7 @@ iceServices.factory('EntryService', function () {
     // fields peculiar to plasmids
     var plasmidFields = [
         {label:"Backbone", schema:'backbone', subSchema:'plasmidData', inputType:'medium'},
+        {label:"Circular", schema:'circular', inputType:'bool', subSchema:'plasmidData'},
         {label:"Origin of Replication", schema:'originOfReplication', inputType:'autoComplete',
             autoCompleteField:'ORIGIN_OF_REPLICATION', subSchema:'plasmidData'},
         {label:"Selection Markers", required:true, schema:'selectionMarkers', inputType:'autoCompleteAdd',

@@ -7,7 +7,7 @@ public class PlasmidData implements IDataTransferModel {
     private String backbone;
     private String originOfReplication;
     private String promoters;
-    private boolean circular;
+    private Boolean circular;
     private String replicatesIn;
 
     public String getBackbone() {
@@ -34,11 +34,11 @@ public class PlasmidData implements IDataTransferModel {
         this.promoters = promoters;
     }
 
-    public boolean getCircular() {
+    public Boolean getCircular() {
         return circular;
     }
 
-    public void setCircular(boolean circular) {
+    public void setCircular(Boolean circular) {
         this.circular = circular;
     }
 

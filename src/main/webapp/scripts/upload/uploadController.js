@@ -189,10 +189,11 @@ angular.module('ice.upload.controller', [])
                     fieldType = UploadUtil.getTypeField($scope.importType, col);
 
                 switch (fieldType) {
-//                    case 'circular':   todo
-//                    case 'sentToAbrc':
-//                        object.type = 'checkbox';
-//                        break;
+
+                    case 'circular':
+                    case 'sentToAbrc':
+                        object.type = 'checkbox';
+                        break;
 
                     case 'status':
                         object.type = 'autocomplete';
@@ -259,8 +260,9 @@ angular.module('ice.upload.controller', [])
 
             // headers for the current selection and initialize first row
             var sheetHeaders = UploadUtil.getSheetHeaders($scope.importType);
-            for (var i = 0; i < sheetHeaders.length; i += 1)
-                sheetData[0][i] = '';
+            for (var i = 0; i < sheetHeaders.length; i += 1) {
+                sheetData[0][i] = null;
+            }
 
             //
             // function to display the header at the specified index. A special case is when a link
