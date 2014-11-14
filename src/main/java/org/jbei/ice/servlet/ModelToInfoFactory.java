@@ -23,6 +23,8 @@ import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.models.TraceSequence;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Factory for converting {@link Entry}s to a {@link org.jbei.ice.lib.dto.entry.PartData}
  * data transfer objects
@@ -192,7 +194,16 @@ public class ModelToInfoFactory {
         // funding sources
         info.setFundingSource(entry.getFundingSource());
         info.setPrincipalInvestigator(entry.getPrincipalInvestigator());
-        info.setPrincipalInvestigatorEmail(entry.getPrincipalInvestigatorEmail());
+        try {
+            if (!StringUtils.isEmpty(entry.getPrincipalInvestigatorEmail())) {
+                Account piAccount = accountController.getByEmail(entry.getPrincipalInvestigatorEmail());
+                info.setPrincipalInvestigator(piAccount.getFullName());
+                info.setPrincipalInvestigatorEmail(piAccount.getEmail());
+                info.setPrincipalInvestigatorId(piAccount.getId());
+            }
+        } catch (Exception e) {
+            Logger.debug(e.getMessage());
+        }
 
         ArrayList<String> links = new ArrayList<>();
         if (entry.getLinks() != null) {

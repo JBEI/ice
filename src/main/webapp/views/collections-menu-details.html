@@ -21,7 +21,7 @@
                  ng-Mouseover="showSubMenu=folder.canEdit" ng-Mouseleave="showSubMenu=false"
                  ng-click="selectCollectionFolder(folder)">
                 <i class="fa fa-folder-o fa-fw"
-                   style="font-size: 12px; color: #a1a0a0; padding-left: 9px"></i> &nbsp;&nbsp;
+                   style="font-size: 12px; color: #a1a0a0; padding-left: 6px"></i>&nbsp;
                 <span class="font-85em" style="font-size: 12px">{{folder.folderName | limitTo:25}}</span>&nbsp;
                 <span ng-show="!showSubMenu" class="menu_count">{{folder.count | number}}</span>
                 <i class="fa fa-times menu_count delete_icon" ng-show="showSubMenu" ng-init="showSubMenu=false"

@@ -40,6 +40,7 @@ import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
+import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
@@ -58,6 +59,7 @@ import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * ABI to manipulate {@link org.jbei.ice.lib.entry.model.Entry}s.
@@ -222,6 +224,21 @@ public class EntryController {
         entry.setVisibility(visibility.getValue());
         entry = dao.update(entry);
 
+        // check pi email
+        String piEmail = entry.getPrincipalInvestigatorEmail();
+        if (StringUtils.isNotEmpty(piEmail)) {
+            Account pi = DAOFactory.getAccountDAO().getByEmail(piEmail);
+            if (pi != null) {
+                // add write permission for the PI (method also checks to see if permission already exists)
+                AccessPermission accessPermission = new AccessPermission();
+                accessPermission.setArticle(AccessPermission.Article.ACCOUNT);
+                accessPermission.setArticleId(pi.getId());
+                accessPermission.setType(AccessPermission.Type.WRITE_ENTRY);
+                accessPermission.setTypeId(entry.getId());
+                permissionsController.addPermission(userId, accessPermission);
+            }
+        }
+
         return entry.getId();
     }
 
@@ -236,7 +253,22 @@ public class EntryController {
         entry.setModificationTime(Calendar.getInstance().getTime());
         if (entry.getVisibility() == null)
             entry.setVisibility(Visibility.OK.getValue());
-        dao.update(entry);
+        entry = dao.update(entry);
+
+        // check pi email
+        String piEmail = entry.getPrincipalInvestigatorEmail();
+        if (StringUtils.isNotEmpty(piEmail)) {
+            Account pi = DAOFactory.getAccountDAO().getByEmail(piEmail);
+            if (pi != null) {
+                // add write permission for the PI (method also checks to see if permission already exists)
+                AccessPermission accessPermission = new AccessPermission();
+                accessPermission.setArticle(AccessPermission.Article.ACCOUNT);
+                accessPermission.setArticleId(pi.getId());
+                accessPermission.setType(AccessPermission.Type.WRITE_ENTRY);
+                accessPermission.setTypeId(entry.getId());
+                permissionsController.addPermission(account.getEmail(), accessPermission);
+            }
+        }
 
         if (scheduleRebuild) {
             ApplicationController.scheduleBlastIndexRebuildTask(true);
@@ -592,6 +624,7 @@ public class EntryController {
             } else {
                 partData.setPrincipalInvestigator(piAccount.getFullName());
                 partData.setPrincipalInvestigatorEmail(piAccount.getEmail());
+                partData.setPrincipalInvestigatorId(piAccount.getId());
             }
         }
 
