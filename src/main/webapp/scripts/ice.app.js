@@ -65,7 +65,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             controller:'CollectionController',
             resolve:{
                 sessionValid:function (Authentication) {
-                    return Authentication.isSessionValid('main');
+                    return Authentication.isSessionValid();
                 }
             }
         })

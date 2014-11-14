@@ -99,7 +99,7 @@ public class InfoToModelFactory {
         if (plasmidData.getReplicatesIn() != null)
             plasmid.setReplicatesIn(plasmidData.getReplicatesIn());
 
-        if (plasmidData.getCircular())
+        if (plasmidData.getCircular() != null)
             plasmid.setCircular(plasmidData.getCircular());
 
         return entry;
