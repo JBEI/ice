@@ -71,7 +71,7 @@
 
     <!--options-->
     <div class="col-md-10" ng-if="field.options">
-        <select ng-focus="field.edit=true" ng-blur="field.edit=false" style="width: 110px" class="pull_down"
+        <select ng-focus="field.edit=true" ng-blur="field.edit=false" class="input_box pull_down"
                 ng-model="activePart[field.schema]" size="1"
                 ng-options="option.text as option.text for option in field.options"></select>
     </div>

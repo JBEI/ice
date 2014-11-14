@@ -7,7 +7,7 @@
     <tr ng-repeat="partner in wor.partners">
         <td ng-class="{collection_user_menu_row_selected:partner.id===selectedPartner}">
             <div class="system_collection_user_menu_row" ng-click="selectPartner(partner)">
-                <i class="fa color_444"
+                <i class="fa color-888"
                    ng-class="{'fa-caret-right':selectedPartner!==partner.id, 'fa-caret-down':selectedPartner===partner.id}"></i>
                 <span class="collection_user_menu">{{partner.name}}</span>
             </div>

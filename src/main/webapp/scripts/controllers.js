@@ -2250,29 +2250,36 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         $scope[type] = val;
     };
 
+    $scope.quickEdit = {};
+
     $scope.quickEditEntry = function (field) {
         // dirty is used to flag that the field's value has been modified to
         // prevent saving unchanged values on blur
 
         field.errorUpdating = false;
-
         if (!field.dirty) {
             return;
-//            field.edit = false;
         }
 
         field.updating = true;
+
+        // update the main entry with quickEdit (which is the model)
+        $scope.entry[field.schema] = $scope.quickEdit[field.schema];
+        if (field.inputType === 'withEmail') {
+            $scope.entry[field.schema + 'Email'] = $scope.quickEdit[field.schema + 'Email'];
+        }
+
+        $scope.entry = EntryService.getTypeData($scope.entry);
 
         entry.update($scope.entry, function (result) {
             field.edit = false;
 
             if (result)
-                $scope.entry = result;
+                $scope.entry = EntryService.convertToUIForm(result);
 
             field.dirty = false;
             field.updating = false;
         }, function (error) {
-            console.error(error);
             field.updating = false;
             field.errorUpdating = true;
         });
