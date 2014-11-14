@@ -6,12 +6,15 @@
     <div class="col-md-10">{{entry.partId}}</div>
 </div>
 
+<!--iterate through fields and show if field has value -->
 <div class="row pad_top" ng-repeat="field in entryFields"
-     ng-if="entry[field.schema]&&entry[field.schema].toString().length!==0">
+     ng-if="entry[field.schema] != null&&entry[field.schema].toString().length!==0">
 
     <div class="col-md-2 entryLabel">
         <span ng-class="{'entryEditLabel':field.edit}">{{field.label}}</span>
         <img ng-if="field.updating && !field.errorUpdating" src="/img/loader-mini.gif">
+
+        <!--show error icon if update failed-->
         <i ng-if="!field.updating && field.errorUpdating" class="red fa fa-exclamation-circle"></i>
     </div>
 
@@ -27,86 +30,108 @@
 
             <!--start field edit section-->
             <!--short input field-->
-            <div class="input-group" ng-if="field.inputType==='short'&&field.edit">
-                <input type="text" ng-model="entry[field.schema]" ng-trim="true" focus
-                       ng-blur="quickEditEntry(field)" ng-change="field.dirty=true"
+            <div class="input-group" ng-if="field.inputType==='short'&&field.edit"
+                 ng-init="quickEdit[field.schema]=entry[field.schema]">
+                <input type="text" ng-model="quickEdit[field.schema]" ng-trim="true" focus
+                       ng-change="field.dirty=true"
                        ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
                        maxlength="125" placeHolder="{{field.placeHolder}}" style="width: 205px;">
 
-                <span class="input-group-addon" ng-click="field.edit=false" style="padding:3px;
-                background-color: #f1f1f1; width: 19px">
-                    <i class="fa fa-times delete_icon"></i>
+                &nbsp;<i ng-if="field.help" class="fa fa-question-circle opacity_hover" tooltip="{{field.help}}"
+                         tooltip-placement="right"></i>
+
+                <span style="padding-top:5px;">
+                    <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Update</a>
+                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
                 </span>
-                &nbsp; <i ng-if="field.help" class="fa fa-question-circle opacity_hover" tooltip="{{field.help}}"
-                          tooltip-placement="right"></i>
             </div>
 
             <!-- short input field with email -->
             <div class="input-group" ng-if="field.inputType==='withEmail'&&field.edit">
-                <input type="text" ng-model="entry[field.schema]" ng-trim="true" focus
-                       ng-blur="quickEditEntry(field)" ng-change="field.dirty=true"
+                <input type="text" ng-model="quickEdit[field.schema]" ng-trim="true" focus
+                       ng-change="field.dirty=true" ng-init="quickEdit[field.schema]=entry[field.schema]"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        maxlength="125" style="width: 205px;">
 
-                <input type="text" ng-model="entry[field.schema+'Email']" ng-trim="true"
-                       ng-blur="quickEditEntry(field)" ng-change="field.dirty=true"
+                <input type="text" ng-model="quickEdit[field.schema+'Email']" ng-trim="true"
+                       ng-change="field.dirty=true"
+                       ng-init="quickEdit[field.schema+'Email']=entry[field.schema+'Email']"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        placeholder="Email if known" style="width: 191px;">
 
-                <span class="input-group-addon" ng-click="field.edit=false" style="padding:3px;
-                    background-color: #f1f1f1; width: 19px">
-                    <i class="fa fa-times delete_icon"></i>
+                <span style="padding-top:5px;">
+                    <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
                 </span>
             </div>
 
             <!--options-->
-            <div class="input-group" ng-if="field.options&&field.edit">
-                <select focus ng-blur="quickEditEntry(field)" style="width: 110px" class="pull_down"
-                        ng-model="entry[field.schema]" size="1" ng-change="field.dirty=true"
+            <div class="input-group" ng-if="field.options&&field.edit"
+                 ng-init="quickEdit[field.schema]=entry[field.schema]">
+                <select focus class="input_box pull_down"
+                        ng-model="quickEdit[field.schema]" size="1" ng-change="field.dirty=true"
                         ng-options="option.value as option.text for option in field.options">
-                    <option value="">Select option</option>
                 </select>
 
-                <span class="input-group-addon" ng-click="field.edit=false" style="padding:3px;
-                    background-color: #f1f1f1; width: 19px">
-                    <i class="fa fa-times delete_icon"></i>
+                <span style="padding-top:5px;">
+                    <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
                 </span>
             </div>
 
             <!--checkbox-->
-            <div ng-if="field.inputType==='bool'&&field.edit">
-                <input type="checkbox" ng-model="entry[field.schema]" ng-focus="field.edit=true"
-                       ng-blur="field.edit=false">
+            <div ng-if="field.inputType==='bool'&&field.edit" ng-init="quickEdit[field.schema]=entry[field.schema]">
+                <input type="checkbox" ng-model="quickEdit[field.schema]" ng-change="field.dirty=true">
+                 <span style="padding-top:5px;">
+                     <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
+                </span>
             </div>
 
             <!--datepicker-->
             <div ng-if="field.inputType==='date'&&field.edit">
-                <div class="input-group">
-                    <input type="text" ng-model="entry[field.schema]" show-button-bar="false" show-weeks="false"
+                <div class="input-group" ng-init="quickEdit[field.schema]=entry[field.schema]">
+                    <input type="text" ng-model="quickEdit[field.schema]" show-button-bar="false" show-weeks="false"
                            datepicker-popup="yyyy-MM-dd" class="input_box_group" maxlength="125" is-open="opened"
                            datepicker-options="dateOptions" close-text="Close" style="width: 205px;" focus
-                           ng-change="field.dirty=true" ng-blur="quickEditEntry(field)">
+                           ng-change="field.dirty=true">
                     <span class="input-group-addon" style="padding:3px; background-color: #f1f1f1;width: 19px">
                         <i class="fa fa-calendar"></i>
                     </span>
                 </div>
+
+                <span style="padding-top:5px;">
+                     <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
+                </span>
             </div>
 
             <!--medium input-->
-            <div ng-if="field.inputType==='medium'&&field.edit">
-                <input type="text" ng-model="entry[field.schema]" maxlength="150" style="width:400px;" focus
+            <div ng-if="field.inputType==='medium'&&field.edit" ng-init="quickEdit[field.schema]=entry[field.schema]">
+                <input type="text" ng-model="quickEdit[field.schema]" maxlength="150" style="width:400px;" focus
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-                       ng-change="field.dirty=true" ng-blur="quickEditEntry(field)">
+                       ng-change="field.dirty=true">
+
+                <span style="padding-top:5px;">
+                     <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
+                </span>
             </div>
 
             <!--autocomplete-->
-            <div ng-if="field.inputType==='autoComplete'&&field.edit">
-                <input type="text" ng-model="entry[field.schema]" maxlength="150" focus
+            <div ng-if="field.inputType==='autoComplete'&&field.edit"
+                 ng-init="quickEdit[field.schema]=entry[field.schema]">
+                <input type="text" ng-model="quickEdit[field.schema]" maxlength="150" focus
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        placeHolder={{field.placeHolder}} style="width:205px;" typeahead-loading="loadingData"
                        typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue"
-                       ng-change="field.dirty=true" ng-blur="quickEditEntry(field)">
+                       ng-change="field.dirty=true">
                 <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
+
+                <span style="padding-top:5px;">
+                     <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
+                </span>
             </div>
 
             <!--add todo : use full edit -->
@@ -146,8 +171,8 @@
                        maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
                        typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
                 <span ng-if="entry[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
-                      ng-click="addLink(field.schema, $index)"><i ng-show="loadingData"
-                                                                  class="fa fa-spinner fa-spin"></i>
+                      ng-click="addLink(field.schema, $index)">
+                    <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
                     <i class="fa fa-plus green opacity_hover"></i>
                 </span>
             </div>
@@ -166,10 +191,10 @@
         </span>
             </div>
 
-            <!--long todo : use full edit-->
-            <div ng-if="field.inputType==='long'&&field.edit">
-                <textarea ng-model="entry[field.schema]" style="width: 640px; height: 50px;" ng-trim="true"
-                          ng-change="field.dirty=true" ng-blur="quickEditEntry(field)" focus
+            <!--long-->
+            <div ng-if="field.inputType==='long'&&field.edit" ng-init="quickEdit[field.schema]=entry[field.schema]">
+                <textarea ng-model="quickEdit[field.schema]" style="width: 640px; height: 50px;" ng-trim="true"
+                          ng-change="field.dirty=true" focus
                           ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"></textarea>
                 <br>
                 <span style="padding-top:5px;">
