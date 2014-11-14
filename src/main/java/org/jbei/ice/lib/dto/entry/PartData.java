@@ -37,6 +37,7 @@ public class PartData implements IDataTransferModel {
     private ArrayList<String> links; // comma separated list of links
     private String principalInvestigator;
     private String principalInvestigatorEmail;
+    private long principalInvestigatorId;
     private ArrayList<String> selectionMarkers;
     private String fundingSource;
     private long basePairCount;
@@ -347,6 +348,14 @@ public class PartData implements IDataTransferModel {
 
     public void setPrincipalInvestigatorEmail(String principalInvestigatorEmail) {
         this.principalInvestigatorEmail = principalInvestigatorEmail;
+    }
+
+    public long getPrincipalInvestigatorId() {
+        return principalInvestigatorId;
+    }
+
+    public void setPrincipalInvestigatorId(long principalInvestigatorId) {
+        this.principalInvestigatorId = principalInvestigatorId;
     }
 
     public ArrayList<AccessPermission> getAccessPermissions() {

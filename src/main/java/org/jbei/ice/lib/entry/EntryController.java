@@ -624,6 +624,7 @@ public class EntryController {
             } else {
                 partData.setPrincipalInvestigator(piAccount.getFullName());
                 partData.setPrincipalInvestigatorEmail(piAccount.getEmail());
+                partData.setPrincipalInvestigatorId(piAccount.getId());
             }
         }
 
