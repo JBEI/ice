@@ -74,8 +74,6 @@ public class AccountControllerTest {
         AccountTransfer transfer = account.toDataTransferObject();
         transfer.setPassword("p455W0rd");
         controller.updatePassword(account.getEmail(), transfer);
-        Assert.assertTrue(controller.isValidPassword(account, "p455W0rd"));
-        Assert.assertFalse(controller.isValidPassword(account, "p455W0rd1"));
     }
 
     @Test
@@ -116,16 +114,6 @@ public class AccountControllerTest {
 
         account = AccountCreator.createTestAccount("testIsAdministratorAdmin", true);
         Assert.assertTrue(controller.isAdministrator(account));
-    }
-
-    @Test
-    public void testIsValidPassword() throws Exception {
-        Account account = AccountCreator.createTestAccount("testIsValidPassword", false);
-        AccountTransfer transfer = account.toDataTransferObject();
-        transfer.setPassword("p455W0rd");
-        controller.updatePassword(account.getEmail(), transfer);
-        Assert.assertTrue(controller.isValidPassword(account, "p455W0rd"));
-        Assert.assertFalse(controller.isValidPassword(account, "p455W0rd1"));
     }
 
     @Test
