@@ -95,8 +95,9 @@
                        ng-if="row + (10+col+'').slice(-2) !== samp.main.child.display"></i>
                     <i class="fa fa-circle"
                        ng-class="{'green':samp.main.child.child, 'alert_color':!samp.main.child.child}"
-                       style="font-size: 30px" ng-if="row + (10+col+'').slice(-2) === samp.main.child.display"
-                       title="{{samp.main.child.child.display}}"></i>
+                       style="font-size: 30px; cursor: default"
+                       ng-if="row + (10+col+'').slice(-2) === samp.main.child.display"
+                       tooltip="{{samp.main.child.child.display}}"></i>
                 </td>
             </tr>
             <tr>
@@ -131,9 +132,9 @@
                        ng-if="row + (10+col+'').slice(-2) !== rightSamp.main.child.display"></i>
                     <i class="fa fa-circle"
                        ng-class="{'green':rightSamp.main.child.child, 'alert_color':!rightSamp.main.child.child}"
-                       style="font-size: 30px"
+                       style="font-size: 30px; cursor: default"
                        ng-if="row + (10+col+'').slice(-2) === rightSamp.main.child.display"
-                       title="{{rightSamp.main.child.child.display}}"></i>
+                       tooltip="{{rightSamp.main.child.child.display}}"></i>
                 </td>
             </tr>
             <tr>
