@@ -1482,6 +1482,7 @@ iceControllers.controller('CreateEntryController',
                     $scope.part = result;
                     $scope.part.bioSafetyLevel = '1';
                     $scope.part.linkedParts = [];
+                    $scope.part.parameters = [];
                     $scope.part.links = [
                         {value:''}
                     ];
@@ -1497,6 +1498,7 @@ iceControllers.controller('CreateEntryController',
                     newPart.selectionMarkers = [];
                     newPart.bioSafetyLevel = '1';
                     newPart.status = 'Complete';
+                    newPart.parameters = [];
 
                     $scope.selectedFields = EntryService.getFieldsForType(type);
                     $scope.part.linkedParts.push(newPart);
@@ -1529,6 +1531,8 @@ iceControllers.controller('CreateEntryController',
             entry.query({partId:$model.id}, function (result) {
                 $scope.activePart = result;
                 $scope.activePart.isExistingPart = true;
+                if (!$scope.activePart.parameters)
+                    $scope.activePart.parameters = [];
                 $scope.addExisting = false;
                 $scope.part.linkedParts.push($scope.activePart);
 
@@ -1666,13 +1670,16 @@ iceControllers.controller('CreateEntryController',
         };
         $scope.today();
 
-//    $scope.showWeeks = true;
-//    $scope.toggleWeeks = function () {
-//        $scope.showWeeks = ! $scope.showWeeks;
-//    };
-
         $scope.clear = function () {
             $scope.dt = null;
+        };
+
+        $scope.addCustomParameter = function () {
+            $scope.activePart.parameters.push({key:'', value:''});
+        };
+
+        $scope.removeCustomParameter = function (index) {
+            $scope.activePart.parameters.splice(index, 1);
         };
 
         $scope.dateOptions = {
