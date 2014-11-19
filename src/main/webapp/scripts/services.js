@@ -244,20 +244,6 @@ iceServices.factory('EntryService', function () {
     }
 });
 
-iceServices.factory('Pigeon', function ($http) {
-    return {
-        fetch:function (script) {
-            $http.post("cidar1.bu.edu:5801/pigeon.php", {"specification":script})
-                .success(function (data, status, headers, config) {
-                    console.log("SUCCESS", data, status);
-                })
-                .error(function (data, status, headers, config) {
-                    console.log("ERROR", data, status);
-                });
-        }
-    }
-});
-
 iceServices.factory('Group', function ($resource, $cookieStore) {
     return function () {
 
