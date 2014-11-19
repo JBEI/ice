@@ -215,6 +215,23 @@ iceServices.factory('EntryService', function () {
 
         validateFields:function (part, fields) {
             return validateFields(part, fields);
+        },
+
+        // converts autocomplete fields from an array string to an array of objects in order to be
+        // able to use ng-model on the ui
+        setAutoCompleteAddFields:function (entry) {
+            var type = entry.type.toLowerCase();
+            var fields = getFieldsForType(type);
+
+            angular.forEach(fields, function (field) {
+                if (field.inputType === 'autoCompleteAdd' || field.inputType === 'add') {
+                    entry[field.schema] = [
+                        {value:''}
+                    ];
+                }
+            });
+
+            return entry;
         }
     }
 });
