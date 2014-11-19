@@ -738,12 +738,12 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     // default list of collections
     $scope.collectionList = [
-        { name:'available', display:'Featured', icon:'fa-certificate', iconOpen:'fa-caret-down', alwaysVisible:true},
+        { name:'available', display:'Featured', icon:'fa-certificate', iconOpen:'fa-sun-o orange', alwaysVisible:true},
         { name:'personal', display:'Personal', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:true},
-        { name:'shared', display:'Shared', icon:'fa-share-alt', iconOpen:'fa-share-alt', alwaysVisible:false},
-        { name:'drafts', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit', alwaysVisible:false},
-        { name:'pending', display:'Pending Approval', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:false},
-        { name:'deleted', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash', alwaysVisible:false}
+        { name:'shared', display:'Shared', icon:'fa-share-alt', iconOpen:'fa-share-alt green', alwaysVisible:false},
+        { name:'drafts', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit blue', alwaysVisible:false},
+        { name:'pending', display:'Pending Approval', icon:'fa-support', iconOpen:'fa-support orange', alwaysVisible:false},
+        { name:'deleted', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash red', alwaysVisible:false}
     ];
 
     // entry items that can be created
