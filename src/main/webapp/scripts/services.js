@@ -219,7 +219,8 @@ iceServices.factory('EntryService', function () {
 
         // converts autocomplete fields from an array string to an array of objects in order to be
         // able to use ng-model on the ui
-        setAutoCompleteAddFields:function (entry) {
+        // also converts entry to form that UI can work with
+        setNewEntryFields:function (entry) {
             var type = entry.type.toLowerCase();
             var fields = getFieldsForType(type);
 
@@ -229,8 +230,15 @@ iceServices.factory('EntryService', function () {
                         {value:''}
                     ];
                 }
+
+                if (field.subSchema && entry[field.subSchema]) {
+                    entry[field.schema] = entry[field.subSchema][field.schema];
+                }
             });
 
+            entry.bioSafetyLevel = '1';
+            entry.status = 'Complete';
+            entry.parameters = [];
             return entry;
         }
     }

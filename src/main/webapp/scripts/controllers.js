@@ -1480,20 +1480,13 @@ iceControllers.controller('CreateEntryController',
             entry.query({partId:type}, function (result) {
                 if (isMain) { // or if !$scope.part
                     $scope.part = result;
-                    $scope.part.bioSafetyLevel = '1';
-                    $scope.part = EntryService.setAutoCompleteAddFields($scope.part);
+                    $scope.part = EntryService.setNewEntryFields($scope.part);
                     $scope.part.linkedParts = [];
-                    $scope.part.parameters = [];
-                    $scope.part.status = 'Complete';
                     $scope.activePart = $scope.part;
                     $scope.selectedFields = EntryService.getFieldsForType($scope.createType);
                 } else {
                     var newPart = result;
-                    newPart = EntryService.setAutoCompleteAddFields(newPart);
-                    newPart.bioSafetyLevel = '1';
-                    newPart.status = 'Complete';
-                    newPart.parameters = [];
-
+                    newPart = EntryService.setNewEntryFields(newPart);
                     $scope.selectedFields = EntryService.getFieldsForType(type);
                     $scope.part.linkedParts.push(newPart);
 

@@ -10,6 +10,7 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PlasmidData;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
@@ -256,5 +257,20 @@ public class EntryUtil {
         }
 
         return true;
+    }
+
+    public static PartData setPartDefaults(PartData partData) {
+        switch (partData.getType()) {
+            case PLASMID:
+                if (partData.getPlasmidData() == null) {
+                    PlasmidData plasmidData = new PlasmidData();
+                    plasmidData.setCircular(true);
+                    partData.setPlasmidData(plasmidData);
+                } else
+                    partData.getPlasmidData().setCircular(true);
+                break;
+        }
+
+        return partData;
     }
 }
