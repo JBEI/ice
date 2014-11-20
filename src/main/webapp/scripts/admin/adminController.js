@@ -34,9 +34,8 @@ angular.module('ice.admin.controller', [])
             // retrieve site wide settings
             var settings = Settings(sessionId);
             settings.get(function (result) {
-                $rootScope.settings = result;
 
-                angular.forEach($rootScope.settings, function (setting) {
+                angular.forEach(result, function (setting) {
                     if (generalSettingKeys.indexOf(setting.key) != -1) {
                         $scope.generalSettings.push({'key':(setting.key.replace(/_/g, ' ')).toLowerCase(), 'value':setting.value, 'editMode':false});
                     }

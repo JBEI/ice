@@ -611,6 +611,14 @@ public class EntryController {
         return retrieveEntryDetails(userId, entry);
     }
 
+    /**
+     * Retrieves and sets the default values for the entry. Some of these values (e.g. PI, and Funding Source)
+     * are set by individual users as part of their personal preferences
+     *
+     * @param userId Unique identifier for user requesting the values.
+     * @param type   entry type
+     * @return PartData object with the retrieve part defaults
+     */
     public PartData getPartDefaults(String userId, EntryType type) {
         PartData partData = new PartData(type);
         PreferencesController preferencesController = new PreferencesController();
@@ -634,6 +642,7 @@ public class EntryController {
             partData.setFundingSource(value);
         }
 
+        // owner and creator details
         Account account = accountController.getByEmail(userId);
         if (account != null) {
             partData.setOwner(account.getFullName());
@@ -642,7 +651,8 @@ public class EntryController {
             partData.setCreatorEmail(partData.getOwnerEmail());
         }
 
-        return partData;
+        // set the entry type defaults
+        return EntryUtil.setPartDefaults(partData);
     }
 
     protected PartData retrieveEntryDetails(String userId, Entry entry) {

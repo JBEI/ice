@@ -243,9 +243,7 @@ public class Entry implements IDataModel {
     private Sequence sequence;
 
     public Entry() {
-//        setStatus("Complete");
         longDescriptionType = "text";
-//        setBioSafetyLevel(1);
     }
 
     public long getId() {
