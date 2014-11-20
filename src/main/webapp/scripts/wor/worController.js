@@ -311,12 +311,22 @@ angular.module('ice.wor.controller', [])
             });
         }
     })
-    .controller('WebOfRegistriesMenuController', function ($scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote) {
+    .controller('WebOfRegistriesMenuController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote, Settings) {
         // retrieve web of registries partners
         $scope.wor = undefined;
         var wor = WebOfRegistries();
         wor.query({approved_only:true}, function (result) {
             $scope.wor = result;
+        });
+
+        // retrieve web of registries setting
+        var sessionId = $cookieStore.get("sessionId");
+        var settings = Settings(sessionId);
+        settings.getSetting({key:"JOIN_WEB_OF_REGISTRIES"}, function (result) {
+            if (!$scope.settings)
+                $scope.settings = {};
+
+            $scope.settings['JOIN_WEB_OF_REGISTRIES'] = (result && result.value === 'yes');
         });
 
         // retrieves public folders for specified registry and re-directs
