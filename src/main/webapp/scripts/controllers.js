@@ -711,21 +711,6 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     // retrieve site wide settings
     var settings = Settings(sessionId);
-//    settings.get(function (result) {
-//        console.log(result);
-//
-//        for (var i = 0; i < result.length; i += 1) {
-//            $rootScope.settings[result[i].key] = result[i].value;
-//        }
-//    });
-
-    $scope.appVersion = undefined;
-    settings.version({}, function (result) {
-        $rootScope.appVersion = result.value;
-    }, function (error) {
-        console.log(error);
-    });
-
     $scope.pageCounts = function (currentPage, resultCount) {
         var maxPageCount = 15;
         var pageNum = ((currentPage - 1) * maxPageCount) + 1;
