@@ -18,10 +18,10 @@
                             <div class="font-85em">
                                 <small style="opacity: 0.7">
                                     <b style="color: #555">Last Updated</b>:
-                                    <span ng-show="!saving&&!bulkUpload.lastUpdate"><i class="fa fa-circle-o red"></i> Not saved</span>
+                                    <span ng-show="!saving&&!bulkUpload.lastUpdate"><i class="fa fa-circle red"></i> Not saved</span>
                                     <span ng-if="saving"><i class="fa fa-gear fa-spin alert_color"></i> Saving...</span>
                                     <span ng-show="saving===false&&bulkUpload.lastUpdate">
-                                        <i class="fa fa-circle-o green"></i> <span
+                                        <i class="fa fa-circle green"></i> <span
                                             am-time-ago="bulkUpload.lastUpdate"></span>
                                     </span>
                                 </small>
@@ -48,12 +48,6 @@
                                 </li>
                             </ul>
                         </div>
-
-                        <span style="font-weight: normal; color: #ccc">&nbsp;|&nbsp;</span>
-
-                        <span class="opacity_hover edit_icon font-90em">
-                            <i style="font-size: 14px; color: #555" class="fa fa-share-alt"></i> Share
-                        </span>
                     </td>
                 </tr>
             </table>

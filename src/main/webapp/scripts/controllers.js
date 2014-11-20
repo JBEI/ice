@@ -711,20 +711,6 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     // retrieve site wide settings
     var settings = Settings(sessionId);
-    settings.get(function (result) {
-
-        for (var i = 0; i < result.length; i += 1) {
-            $rootScope.settings[result[i].key] = result[i].value;
-        }
-    });
-
-    $scope.appVersion = undefined;
-    settings.version({}, function (result) {
-        $rootScope.appVersion = result.value;
-    }, function (error) {
-        console.log(error);
-    });
-
     $scope.pageCounts = function (currentPage, resultCount) {
         var maxPageCount = 15;
         var pageNum = ((currentPage - 1) * maxPageCount) + 1;
@@ -738,12 +724,12 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     // default list of collections
     $scope.collectionList = [
-        { name:'available', display:'Available', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:true},
+        { name:'available', display:'Featured', icon:'fa-certificate', iconOpen:'fa-sun-o orange', alwaysVisible:true},
         { name:'personal', display:'Personal', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:true},
-        { name:'shared', display:'Shared', icon:'fa-share-alt', iconOpen:'fa-share-alt', alwaysVisible:false},
-        { name:'drafts', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit', alwaysVisible:false},
-        { name:'pending', display:'Pending Approval', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:false},
-        { name:'deleted', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash', alwaysVisible:false}
+        { name:'shared', display:'Shared', icon:'fa-share-alt', iconOpen:'fa-share-alt green', alwaysVisible:false},
+        { name:'drafts', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit blue', alwaysVisible:false},
+        { name:'pending', display:'Pending Approval', icon:'fa-support', iconOpen:'fa-support orange', alwaysVisible:false},
+        { name:'deleted', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash red', alwaysVisible:false}
     ];
 
     // entry items that can be created
@@ -1480,24 +1466,13 @@ iceControllers.controller('CreateEntryController',
             entry.query({partId:type}, function (result) {
                 if (isMain) { // or if !$scope.part
                     $scope.part = result;
-                    $scope.part.bioSafetyLevel = '1';
+                    $scope.part = EntryService.setNewEntryFields($scope.part);
                     $scope.part.linkedParts = [];
-                    $scope.part.links = [
-                        {value:''}
-                    ];
-                    $scope.part.selectionMarkers = [
-                        {value:''}
-                    ];
-                    $scope.part.status = 'Complete';
                     $scope.activePart = $scope.part;
                     $scope.selectedFields = EntryService.getFieldsForType($scope.createType);
                 } else {
                     var newPart = result;
-                    newPart.links = [];
-                    newPart.selectionMarkers = [];
-                    newPart.bioSafetyLevel = '1';
-                    newPart.status = 'Complete';
-
+                    newPart = EntryService.setNewEntryFields(newPart);
                     $scope.selectedFields = EntryService.getFieldsForType(type);
                     $scope.part.linkedParts.push(newPart);
 
@@ -1529,6 +1504,8 @@ iceControllers.controller('CreateEntryController',
             entry.query({partId:$model.id}, function (result) {
                 $scope.activePart = result;
                 $scope.activePart.isExistingPart = true;
+                if (!$scope.activePart.parameters)
+                    $scope.activePart.parameters = [];
                 $scope.addExisting = false;
                 $scope.part.linkedParts.push($scope.activePart);
 
@@ -1666,13 +1643,16 @@ iceControllers.controller('CreateEntryController',
         };
         $scope.today();
 
-//    $scope.showWeeks = true;
-//    $scope.toggleWeeks = function () {
-//        $scope.showWeeks = ! $scope.showWeeks;
-//    };
-
         $scope.clear = function () {
             $scope.dt = null;
+        };
+
+        $scope.addCustomParameter = function () {
+            $scope.activePart.parameters.push({key:'', value:''});
+        };
+
+        $scope.removeCustomParameter = function (index) {
+            $scope.activePart.parameters.splice(index, 1);
         };
 
         $scope.dateOptions = {

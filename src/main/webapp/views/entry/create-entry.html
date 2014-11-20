@@ -216,6 +216,31 @@
     </div>
 </div>
 
+<!-- selected entry; selectedFields is an array of objects -->
+<div class="row pad-top-5" ng-if="!activePart.isExistingPart" ng-repeat="parameter in activePart.parameters">
+    <div class="col-md-2 text-right">
+        <span style="white-space:nowrap" ng-class="{'font-bold':field.edit}">
+            <input type="text" ng-trim="true" placeHolder="Name" maxlength="125" class="input_box"
+                   ng-model="activePart.parameters[$index].name">
+        </span>
+    </div>
+
+    <!--short input field-->
+    <div class="col-md-10">
+        <input type="text" ng-model="activePart.parameters[$index].value" ng-trim="true"
+               ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+               maxlength="125" style="width: 400px;" placeHolder="Value">
+        <i class="fa fa-minus delete_icon" ng-click="removeCustomParameter($index)"></i>
+    </div>
+</div>
+
+<div class="row pad_top">
+    <div class="col-md-2 text-right">
+        <i class="fa fa-plus-circle font-14em color-888 opacity_hover" tooltip="Add custom parameter"
+           tooltip-placement="right" ng-click="addCustomParameter()"></i>
+    </div>
+</div>
+
 <!--if existing part is added then this is displayed instead-->
 <div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="activePart.isExistingPart&&selectedFields">
     <div class="col-md-2 entryLabel text-right">

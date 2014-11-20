@@ -330,22 +330,6 @@ public class AccountController {
     }
 
     /**
-     * Check if the given password is valid for the account.
-     *
-     * @param account
-     * @param password
-     * @return True if correct password.
-     * @throws ControllerException
-     */
-    public boolean isValidPassword(Account account, String password) throws ControllerException {
-        if (account == null) {
-            throw new ControllerException("Failed to verify password for null Account!");
-        }
-
-        return account.getPassword().equals(AccountUtils.encryptNewUserPassword(password, account.getSalt()));
-    }
-
-    /**
      * Authenticate a user in the database.
      * <p/>
      * Using the {@link org.jbei.ice.lib.account.authentication.IAuthentication} specified in the settings file,

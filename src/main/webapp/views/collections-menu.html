@@ -16,9 +16,9 @@
             <div class="system_collection_user_menu_row" ng-click='selectCollection(collection.name)'
                  ng-mouseenter="showAddCollection=collection.name==='personal'" ng-mouseleave="showAddCollection=false">
                 <i ng-show="collection.name!==selectedFolder" class="fa fa-fw"
-                   style="font-size: 16px; color: #a1a0a0;" ng-class="collection.icon"></i><i
+                   style="font-size: 15px; color: #d1d0d0;" ng-class="collection.icon"></i><i
                     ng-show="collection.name===selectedFolder" class="fa fa-fw"
-                    style="font-size: 16px; color: #a1a0a0;" ng-class="collection.iconOpen"></i>&nbsp;<span
+                    style="font-size: 15px;" ng-class="collection.iconOpen"></i>&nbsp;<span
                     class="collection_user_menu"
                     ng-class="{collection_menu_selection:collection.name===selectedFolder}">{{collection.display}}</span>
                 <span class="menu_count">

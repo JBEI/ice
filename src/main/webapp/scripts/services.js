@@ -215,20 +215,31 @@ iceServices.factory('EntryService', function () {
 
         validateFields:function (part, fields) {
             return validateFields(part, fields);
-        }
-    }
-});
+        },
 
-iceServices.factory('Pigeon', function ($http) {
-    return {
-        fetch:function (script) {
-            $http.post("cidar1.bu.edu:5801/pigeon.php", {"specification":script})
-                .success(function (data, status, headers, config) {
-                    console.log("SUCCESS", data, status);
-                })
-                .error(function (data, status, headers, config) {
-                    console.log("ERROR", data, status);
-                });
+        // converts autocomplete fields from an array string to an array of objects in order to be
+        // able to use ng-model on the ui
+        // also converts entry to form that UI can work with
+        setNewEntryFields:function (entry) {
+            var type = entry.type.toLowerCase();
+            var fields = getFieldsForType(type);
+
+            angular.forEach(fields, function (field) {
+                if (field.inputType === 'autoCompleteAdd' || field.inputType === 'add') {
+                    entry[field.schema] = [
+                        {value:''}
+                    ];
+                }
+
+                if (field.subSchema && entry[field.subSchema]) {
+                    entry[field.schema] = entry[field.subSchema][field.schema];
+                }
+            });
+
+            entry.bioSafetyLevel = '1';
+            entry.status = 'Complete';
+            entry.parameters = [];
+            return entry;
         }
     }
 });
@@ -386,7 +397,7 @@ iceServices.factory('Message', function ($resource) {
 
 iceServices.factory('Samples', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/samples', {userId:'@userId', requestId:'@requestId'}, {
+        return $resource('/rest/samples', {userId:'@userId', requestId:'@requestId', status:'@status'}, {
             requests:{
                 method:'GET',
                 responseType:'json',

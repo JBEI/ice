@@ -47,19 +47,14 @@ public class WoRController {
      * @return true if partner identified by the id is determined to be a valid
      *         web of registries partner for part transfer based on the status and authentication key
      */
-    public boolean isValidWebPartner(String partnerId, String apiKey) throws ControllerException {
-        try {
-            RemotePartner partner = dao.getByUrl(partnerId);
-            return partner != null && partner.getPartnerStatus() == RemotePartnerStatus.APPROVED
-                    && apiKey != null && apiKey.equalsIgnoreCase(partner.getAuthenticationToken());
-        } catch (DAOException de) {
-            throw new ControllerException(de);
-        }
+    public boolean isValidWebPartner(String partnerId, String apiKey) {
+        RemotePartner partner = dao.getByUrl(partnerId);
+        return partner != null && partner.getPartnerStatus() == RemotePartnerStatus.APPROVED
+                && apiKey != null && apiKey.equalsIgnoreCase(partner.getAuthenticationToken());
     }
 
     public WebOfRegistries getRegistryPartners(boolean approvedOnly) {
-        String value = new ConfigurationController().getPropertyValue(
-                ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
+        String value = new ConfigurationController().getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
         WebOfRegistries webOfRegistries = new WebOfRegistries();
         webOfRegistries.setWebEnabled("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
 
@@ -170,6 +165,14 @@ public class WoRController {
         }
     }
 
+    /**
+     * Adds a web of registries partner using the specificd url and name in the parameter
+     * if another partner does not already exist with the same url
+     *
+     * @param url  url for ICE instance
+     * @param name display name for remote ICE instance
+     * @return created partner
+     */
     private RegistryPartner addRegistryPartner(String url, String name) {
         RemotePartner partner = dao.getByUrl(url);
 
