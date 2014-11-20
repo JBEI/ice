@@ -251,8 +251,11 @@ angular.module('ice.wor.controller', [])
         $scope.wor = undefined;
         $scope.isWorEnabled = false;
         setting.getSetting({}, {key:'JOIN_WEB_OF_REGISTRIES'}, function (result) {
-            console.log(result);
-            $scope.isWorEnabled = result.value === "yes";
+            var joined = result.value === 'yes';
+            $scope.isWorEnabled = joined;
+            if (!$rootScope.settings)
+                $rootScope.settings = {};
+            $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = joined;
         });
 
         var wor = WebOfRegistries();
@@ -266,17 +269,14 @@ angular.module('ice.wor.controller', [])
             var value = $scope.isWorEnabled ? 'no' : 'yes';
             setting.update({}, {key:'JOIN_WEB_OF_REGISTRIES', value:value},
                 function (result) {
-                    $scope.isWorEnabled = result.value === 'yes';
-                    $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = $scope.isWorEnabled ? "yes" : "no";
+                    var joined = result.value === 'yes';
+                    $scope.isWorEnabled = joined;
+                    if (!$rootScope.settings)
+                        $rootScope.settings = {};
+                    $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = joined;
                 }, function (error) {
                     console.error(error);
                 });
-
-//            setting.update({}, newSetting, function (result) {
-//                newSetting.key = visualKey;
-//                newSetting.value = result.value;
-//                newSetting.editMode = false;
-//            });
         };
 
         $scope.newPartner = undefined;
@@ -345,7 +345,7 @@ angular.module('ice.wor.controller', [])
             console.error(error);
         });
     })
-    .controller('WorEntryCommentController', function ($scope, $stateParams, Remote) {
+    .controller('WorEntryCommentController',function ($scope, $stateParams, Remote) {
         // retrieve remote samples
         var remote = Remote();
         $scope.entryComments = undefined;

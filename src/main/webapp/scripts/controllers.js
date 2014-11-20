@@ -711,12 +711,13 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     // retrieve site wide settings
     var settings = Settings(sessionId);
-    settings.get(function (result) {
-
-        for (var i = 0; i < result.length; i += 1) {
-            $rootScope.settings[result[i].key] = result[i].value;
-        }
-    });
+//    settings.get(function (result) {
+//        console.log(result);
+//
+//        for (var i = 0; i < result.length; i += 1) {
+//            $rootScope.settings[result[i].key] = result[i].value;
+//        }
+//    });
 
     $scope.appVersion = undefined;
     settings.version({}, function (result) {
