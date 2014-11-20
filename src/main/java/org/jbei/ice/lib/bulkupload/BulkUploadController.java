@@ -250,7 +250,7 @@ public class BulkUploadController {
     }
 
     /**
-     * Retrieves list of user saved bulk imports
+     * Retrieves list of user saved bulk imports. Only the owner or an administrator can retrieve it
      *
      * @param requesterId   account of requesting user
      * @param userAccountId account identifier for user whose saved drafts are being requested
@@ -262,8 +262,6 @@ public class BulkUploadController {
         ArrayList<BulkUploadInfo> infoArrayList = new ArrayList<>();
 
         for (BulkUpload draft : results) {
-            Account draftAccount = draft.getAccount();
-
             boolean isOwner = userAccountId.equals(requesterId);
             boolean isAdmin = accountController.isAdministrator(requesterId);
             if (!isOwner && !isAdmin)
@@ -303,25 +301,26 @@ public class BulkUploadController {
      * @throws ControllerException
      * @throws PermissionException
      */
-    public BulkUploadInfo deleteDraftById(Account requesting, long draftId)
-            throws ControllerException, PermissionException {
+    public BulkUploadInfo deleteDraftById(String userId, long draftId) throws PermissionException {
         BulkUpload draft = dao.get(draftId);
         if (draft == null)
-            throw new ControllerException("Could not retrieve draft with id \"" + draftId + "\"");
+            return null;
 
         Account draftAccount = draft.getAccount();
-        if (!requesting.equals(draftAccount) && !accountController.isAdministrator(requesting.getEmail()))
+        if (!userId.equals(draftAccount.getEmail()) && !accountController.isAdministrator(userId))
             throw new PermissionException("No permissions to delete draft " + draftId);
 
         // delete all associated entries. for strain with plasmids both are returned
         // todo : use task to speed up process and also check for status
-//        for (Entry entry : draft.getContents()) {
-//            try {
-//                entryController.delete(requesting, entry.getId());
-//            } catch (PermissionException pe) {
-//                Logger.warn("Could not delete entry " + entry.getRecordId() + " for bulk upload " + draftId);
-//            }
-//        }
+
+        ArrayList<Long> entryIds = dao.getEntryIds(draftId);
+        for (long entryId : entryIds) {
+            try {
+                entryController.delete(userId, entryId);
+            } catch (PermissionException pe) {
+                Logger.warn("Could not delete entry " + entryId + " for bulk upload " + draftId);
+            }
+        }
 
         dao.delete(draft);
 

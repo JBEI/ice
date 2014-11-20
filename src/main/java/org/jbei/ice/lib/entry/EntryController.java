@@ -279,17 +279,10 @@ public class EntryController {
      * Delete the entry in the database. Schedule an index rebuild.
      *
      * @param entryId unique identifier for entry to be deleted
-     * @throws ControllerException
      * @throws PermissionException
      */
-    public ArrayList<FolderDetails> delete(Account account, long entryId)
-            throws ControllerException, PermissionException {
-        Entry entry;
-        try {
-            entry = dao.get(entryId);
-        } catch (DAOException de) {
-            throw new ControllerException(de);
-        }
+    public ArrayList<FolderDetails> delete(String userId, long entryId) throws PermissionException {
+        Entry entry = dao.get(entryId);
         boolean schedule = sequenceDAO.hasSequence(entry.getId());
 
         FolderController folderController = new FolderController();
@@ -300,14 +293,14 @@ public class EntryController {
         entryIds.add(entry.getId());
         if (folders != null) {
             for (Folder folder : folders) {
-                folderController.removeFolderContents(account.getEmail(), folder.getId(), entryIds);
+                folderController.removeFolderContents(userId, folder.getId(), entryIds);
                 FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
                 long size = folderDAO.getFolderSize(folder.getId());
                 details.setCount(size);
                 folderList.add(details);
             }
         }
-        delete(account, entry, schedule);
+        delete(userId, entry, schedule);
         return folderList;
     }
 
@@ -316,13 +309,12 @@ public class EntryController {
      * Performs a full deletion of the entry, not just marking it as deleted.
      *
      * @param entry Entry to be deleted
-     * @throws ControllerException
      */
-    protected void fullDelete(Account account, Entry entry, boolean schedule) throws ControllerException {
+    protected void fullDelete(String userId, Entry entry, boolean schedule) {
         if (entry == null)
             return;
 
-        authorization.expectWrite(account.getEmail(), entry);
+        authorization.expectWrite(userId, entry);
 
         if (schedule) {
             Sequence sequence = sequenceDAO.getByEntry(entry);
@@ -344,26 +336,22 @@ public class EntryController {
      * @param scheduleIndexRebuild True if index rebuild is scheduled.
      * @throws ControllerException
      */
-    private void delete(Account account, Entry entry, boolean scheduleIndexRebuild) throws ControllerException {
+    private void delete(String userId, Entry entry, boolean scheduleIndexRebuild) {
         if (entry == null) {
             return;
         }
 
-        authorization.expectWrite(account.getEmail(), entry);
+        authorization.expectWrite(userId, entry);
 
         if (entry.getVisibility() == Visibility.DELETED.getValue()) {
-            fullDelete(account, entry, scheduleIndexRebuild);
+            fullDelete(userId, entry, scheduleIndexRebuild);
             return;
         }
 
         entry.setModificationTime(Calendar.getInstance().getTime());
         entry.setVisibility(Visibility.DELETED.getValue());
 
-        try {
-            dao.update(entry);
-        } catch (DAOException e1) {
-            throw new ControllerException("Failed to save entry deletion", e1);
-        }
+        dao.update(entry);
 
         if (scheduleIndexRebuild) {
             ApplicationController.scheduleBlastIndexRebuildTask(true);
