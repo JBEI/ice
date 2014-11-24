@@ -15,6 +15,10 @@ public class AttachmentInfo implements IDataTransferModel {
     public AttachmentInfo() {
     }
 
+    public AttachmentInfo(String fileName) {
+        this.filename = fileName;
+    }
+
     public long getId() {
         return id;
     }

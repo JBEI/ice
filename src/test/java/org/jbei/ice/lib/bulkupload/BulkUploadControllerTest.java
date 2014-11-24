@@ -89,7 +89,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "plasmid select markers");
         autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.PLASMID);
         Assert.assertNotNull(autoUpdate);
-        BulkUploadInfo info = controller.deleteDraftById(account, autoUpdate.getBulkUploadId());
+        BulkUploadInfo info = controller.deleteDraftById(account.getEmail(), autoUpdate.getBulkUploadId());
         Assert.assertNotNull(info);
         Assert.assertEquals(autoUpdate.getBulkUploadId(), info.getId());
 //        Assert.assertEquals(1, info.getCount());

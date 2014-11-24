@@ -87,7 +87,11 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         Query query = currentSession()
                 .createSQLQuery("select entry_id from bulk_upload_entry where bulk_upload_id = " + importId);
         try {
-            return new ArrayList<Long>(query.list());
+            ArrayList<Long> list = new ArrayList<>();
+            ArrayList<Number> queryList = (ArrayList<Number>) query.list();
+            for (Number number : queryList)
+                list.add(number.longValue());
+            return list;
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException(e);

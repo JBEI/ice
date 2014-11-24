@@ -724,7 +724,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     // default list of collections
     $scope.collectionList = [
-        { name:'available', display:'Featured', icon:'fa-certificate', iconOpen:'fa-sun-o orange', alwaysVisible:true},
+        { name:'available', display:'Featured', icon:'fa-certificate', iconOpen:'fa-certificate orange', alwaysVisible:true},
         { name:'personal', display:'Personal', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:true},
         { name:'shared', display:'Shared', icon:'fa-share-alt', iconOpen:'fa-share-alt green', alwaysVisible:false},
         { name:'drafts', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit blue', alwaysVisible:false},
@@ -955,6 +955,9 @@ iceControllers.controller('CollectionDetailController', function ($scope, $cooki
     };
 
     $scope.deleteCollection = function (folder) {
+        console.log(folder);
+
+        // expected folders that can be deleted have type "PRIVATE" and "UPLOAD"
         folders.delete({folderId:folder.id, type:folder.type}, function (result) {
             var l = $scope.selectedCollectionFolders.length;
             for (var j = 0; j < l; j += 1) {
@@ -1185,7 +1188,6 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
                 groupCount += 1;
         }
 
-        console.log(userCount, groupCount);
         if (userCount == 0)
             return groupCount + (groupCount == 1 ? " group" : " groups");
 

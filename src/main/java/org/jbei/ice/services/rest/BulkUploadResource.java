@@ -225,8 +225,7 @@ public class BulkUploadResource extends RestResource {
 
             EntryType addType = EntryType.valueOf(type.toUpperCase());
             FileBulkUpload bulkUpload = new FileBulkUpload(userId, file.toPath(), addType);
-            // tODO: this returns a string because it is being used to return a message in case of an error
-            String importId = bulkUpload.process();
+            String importId = Long.toString(bulkUpload.process());
             return Response.status(Response.Status.OK).entity(importId).build();
         } catch (Exception e) {
             Logger.error(e);
