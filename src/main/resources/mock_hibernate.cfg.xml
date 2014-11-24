@@ -50,10 +50,7 @@
         <mapping class="org.jbei.ice.lib.models.Feature"/>
         <mapping class="org.jbei.ice.lib.models.SequenceFeature"/>
         <mapping class="org.jbei.ice.lib.models.SequenceFeatureAttribute"/>
-        <mapping class="org.jbei.ice.lib.models.AssemblyRelationship"/>
-        <mapping class="org.jbei.ice.lib.entry.model.EntryAssemblyRelationship"/>
         <mapping class="org.jbei.ice.lib.models.Comment"/>
-        <mapping class="org.jbei.ice.lib.news.News"/>
         <mapping class="org.jbei.ice.lib.account.model.Account"/>
         <mapping class="org.jbei.ice.lib.entry.attachment.Attachment"/>
         <mapping class="org.jbei.ice.lib.entry.sample.model.Sample"/>
@@ -61,7 +58,6 @@
         <mapping class="org.jbei.ice.lib.group.Group"/>
         <mapping class="org.jbei.ice.lib.models.TraceSequence"/>
         <mapping class="org.jbei.ice.lib.models.TraceSequenceAlignment"/>
-        <mapping class="org.jbei.ice.lib.models.Project"/>
         <mapping class="org.jbei.ice.lib.models.Configuration"/>
         <mapping class="org.jbei.ice.lib.models.Storage"/>
         <mapping class="org.jbei.ice.lib.folder.Folder"/>
