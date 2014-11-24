@@ -1188,7 +1188,6 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
                 groupCount += 1;
         }
 
-        console.log(userCount, groupCount);
         if (userCount == 0)
             return groupCount + (groupCount == 1 ? " group" : " groups");
 

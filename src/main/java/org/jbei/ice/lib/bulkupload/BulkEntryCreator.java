@@ -1,15 +1,23 @@
 package org.jbei.ice.lib.bulkupload;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.BulkUploadDAO;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -19,10 +27,17 @@ import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryEditor;
 import org.jbei.ice.lib.entry.EntryUtil;
+import org.jbei.ice.lib.entry.attachment.Attachment;
+import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.servlet.InfoToModelFactory;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -39,6 +54,7 @@ public class BulkEntryCreator {
     private final EntryController entryController;
     private final BulkUploadAuthorization authorization;
     private final BulkUploadController controller;
+    private final AttachmentController attachmentController;
 
     public BulkEntryCreator() {
         dao = DAOFactory.getBulkUploadDAO();
@@ -48,6 +64,7 @@ public class BulkEntryCreator {
         entryController = new EntryController();
         authorization = new BulkUploadAuthorization();
         controller = new BulkUploadController();
+        attachmentController = new AttachmentController();
     }
 
     protected BulkUpload createOrRetrieveBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,
@@ -64,6 +81,18 @@ public class BulkEntryCreator {
             dao.create(draft);
         }
         return draft;
+    }
+
+    public long createBulkUpload(String userId, EntryType entryType) {
+        BulkUpload draft = new BulkUpload();
+        draft.setName("Untitled");
+        Account account = accountController.getByEmail(userId);
+        draft.setAccount(account);
+        draft.setStatus(BulkUploadStatus.IN_PROGRESS);
+        draft.setImportType(entryType.toString());
+        draft.setCreationTime(new Date());
+        draft.setLastUpdateTime(draft.getCreationTime());
+        return dao.create(draft).getId();
     }
 
     public PartData createEntry(String userId, long bulkUploadId, PartData data) {
@@ -305,7 +334,7 @@ public class BulkEntryCreator {
 
         // update bulk upload. even if no new entry was created, entries belonging to it was updated
         if (draft != null) {
-            draft.setLastUpdateTime(new Date(System.currentTimeMillis()));
+            draft.setLastUpdateTime(new Date());
             autoUpdate.setLastUpdate(draft.getLastUpdateTime());
             dao.update(draft);
         }
@@ -341,5 +370,110 @@ public class BulkEntryCreator {
             uploadInfo.getEntryList().add(datum);
         }
         return uploadInfo;
+    }
+
+    public boolean createEntries(String userId, long draftId, List<PartData> data, HashMap<String, InputStream> files) {
+        BulkUpload draft = dao.get(draftId);
+        if (draft == null)
+            return false;
+
+        // check permissions
+        authorization.expectWrite(userId, draft);
+
+        for (PartData datum : data) {
+            if (datum == null)
+                continue;
+
+            Entry entry = InfoToModelFactory.infoToEntry(datum);
+            entry.setVisibility(Visibility.DRAFT.getValue());
+            Account account = accountController.getByEmail(userId);
+            entry.setOwner(account.getFullName());
+            entry.setOwnerEmail(account.getEmail());
+
+            // check if there is any linked parts. create if so (expect a max of 1)
+            if (datum.getLinkedParts() != null && datum.getLinkedParts().size() > 0) {
+                // create linked
+                PartData linked = datum.getLinkedParts().get(0);
+                Entry linkedEntry = InfoToModelFactory.infoToEntry(linked);
+                linkedEntry.setVisibility(Visibility.DRAFT.getValue());
+                linkedEntry.setOwner(account.getFullName());
+                linkedEntry.setOwnerEmail(account.getEmail());
+                linkedEntry = entryDAO.create(linkedEntry);
+
+                linked.setId(linkedEntry.getId());
+                linked.setModificationTime(linkedEntry.getModificationTime().getTime());
+
+                // check for attachments and sequences for linked entry
+                saveFiles(userId, linked, linkedEntry, files);
+
+                // link to main entry in the database
+                entry.getLinkedEntries().add(linkedEntry);
+            }
+
+            entry = entryDAO.create(entry);
+            draft.getContents().add(entry);
+
+            dao.update(draft);
+
+            // save files
+            saveFiles(userId, datum, entry, files);
+        }
+
+        return true;
+    }
+
+    protected void saveFiles(String userId, PartData data, Entry entry, HashMap<String, InputStream> files) {
+        // check sequence
+        try {
+            String sequenceName = data.getSequenceFileName();
+            if (!StringUtils.isBlank(sequenceName)) {
+                String sequenceString = IOUtils.toString(files.get(sequenceName));
+                DNASequence dnaSequence = SequenceController.parse(sequenceString);
+
+                if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
+                    Logger.error("Couldn't parse sequence file " + sequenceName);
+                } else {
+                    Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+                    sequence.setSequenceUser(sequenceString);
+                    sequence.setEntry(entry);
+                    sequence.setFileName(sequenceName);
+                    Sequence result = DAOFactory.getSequenceDAO().saveSequence(sequence);
+                    if (result != null)
+                        ApplicationController.scheduleBlastIndexRebuildTask(true);
+                }
+            }
+        } catch (IOException e) {
+            Logger.error(e);
+        }
+
+        // check attachment
+        try {
+            if (data.getAttachments() != null && !data.getAttachments().isEmpty()) {
+                String attachmentName = data.getAttachments().get(0).getFilename();
+                InputStream attachmentStream = files.get(attachmentName);
+
+                // clear
+                ArrayList<Attachment> attachments = DAOFactory.getAttachmentDAO().getByEntry(entry);
+                if (attachments != null && !attachments.isEmpty()) {
+                    for (Attachment attachment : attachments) {
+                        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+                        File attachmentDir = Paths.get(dataDir, "attachments").toFile();
+                        DAOFactory.getAttachmentDAO().delete(attachmentDir, attachment);
+                    }
+                }
+
+                Attachment attachment = new Attachment();
+                attachment.setEntry(entry);
+                attachment.setDescription("");
+                String fileId = Utils.generateUUID();
+                attachment.setFileId(fileId);
+                attachment.setFileName(attachmentName);
+                String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+                File attachmentDir = Paths.get(dataDir, "attachments").toFile();
+                DAOFactory.getAttachmentDAO().save(attachmentDir, attachment, attachmentStream);
+            }
+        } catch (Exception e) {
+            Logger.error(e);
+        }
     }
 }

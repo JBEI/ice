@@ -24,28 +24,28 @@ public class FileBulkUpload {
         this.addType = addType;
     }
 
-    public String process() throws IOException {
+    public long process() throws IOException {
         String fileName = filePath.toFile().getName();
 
         // process csv
         if (fileName.endsWith(".csv")) {
-            BulkCSVUpload upload = new BulkCSVUpload(addType, account, filePath);
+            BulkCSVUpload upload = new BulkCSVUpload(account, filePath, addType);
             return upload.processUpload();
         }
 
         // process zip
         if (fileName.endsWith(".zip")) {
             BulkZipUpload upload = new BulkZipUpload(account, filePath, addType);
-            return Long.toString(upload.processUpload());
+            return upload.processUpload();
         }
 
         // process sbol
         if (fileName.endsWith(".xml")) {
             BulkFileSBOLUpload upload = new BulkFileSBOLUpload(account, filePath, addType);
-            return Long.toString(upload.processUpload());
+            return upload.processUpload();
         }
 
-        throw new IOException("Unknown file type " + fileName);
+        throw new IOException("Unsupported file type " + fileName);
     }
 
     /**

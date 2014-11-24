@@ -295,10 +295,9 @@ public class BulkUploadController {
      * Deletes a bulk import draft referenced by a unique identifier. only owners of the bulk import
      * or administrators are permitted to delete bulk imports
      *
-     * @param requesting account of user making the request
-     * @param draftId    unique identifier for bulk import
+     * @param userId  account of user making the request
+     * @param draftId unique identifier for bulk import
      * @return deleted bulk import
-     * @throws ControllerException
      * @throws PermissionException
      */
     public BulkUploadInfo deleteDraftById(String userId, long draftId) throws PermissionException {
@@ -331,7 +330,7 @@ public class BulkUploadController {
     }
 
     public BulkUploadAutoUpdate autoUpdateBulkUpload(String userId, BulkUploadAutoUpdate autoUpdate,
-            EntryType addType) throws ControllerException {
+            EntryType addType) {
         BulkEntryCreator creator = new BulkEntryCreator();
         return creator.createOrUpdateEntry(userId, autoUpdate, addType);
     }

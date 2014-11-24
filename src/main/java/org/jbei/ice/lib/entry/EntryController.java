@@ -220,8 +220,8 @@ public class EntryController {
         }
 
         entry.setModificationTime(Calendar.getInstance().getTime());
-        Visibility visibility = EntryUtil.validates(part) ? Visibility.OK : Visibility.DRAFT;
-        entry.setVisibility(visibility.getValue());
+//        Visibility visibility = EntryUtil.validates(part) ? Visibility.OK : Visibility.DRAFT;
+//        entry.setVisibility(visibility.getValue());
         entry = dao.update(entry);
 
         // check pi email
