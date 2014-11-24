@@ -19,6 +19,7 @@ public enum EntryType implements IDataTransferModel {
     }
 
     public static EntryType nameToType(String name) {
+        name = name.trim();
         for (EntryType type : EntryType.values()) {
             if (name.equalsIgnoreCase(type.getName()))
                 return type;

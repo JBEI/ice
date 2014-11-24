@@ -652,7 +652,6 @@ input.cell_input:focus + .cell {
 .system_collection_user_menu_row {
     border-top: 1px solid #f6f6f6;
     color: #233559;
-    /*line-height: 90%;*/
     padding: 6px 6px 6px 12px;
 }
 

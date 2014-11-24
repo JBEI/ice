@@ -423,7 +423,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
 
         try {
-            Query query = currentSession().createQuery("FROM " + Entry.class.getName() + " e WHERE e.id IN (:ids)");
+            Query query = currentSession().createQuery(
+                    "FROM " + Entry.class.getName() + " e WHERE e.id IN (:ids) order by id asc");
             ArrayList<Long> list = new ArrayList<>(ids.size());
             for (Number id : ids) {
                 list.add(id.longValue());

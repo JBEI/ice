@@ -135,6 +135,7 @@ public class FolderController {
             details.setName(info.getName());
             details.setCount(info.getCount());
             details.setId(info.getId());
+            details.setCanEdit(true);
             details.setType(FolderType.UPLOAD);
             folders.add(details);
         }
@@ -228,40 +229,51 @@ public class FolderController {
         return dao.update(folder).toDataTransferObject();
     }
 
+    /**
+     * Deletes either a user folder or bulk upload (which is represented as a folder to the user)
+     *
+     * @param userId   unique identifier for user requesting delete action
+     * @param folderId unique identifier for folder to be deleted
+     * @param type     type of folder to be deleted (either "UPLOAD" or "PRIVATE")
+     * @return delete folder details
+     */
     public FolderDetails delete(String userId, long folderId, FolderType type) {
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        switch (type) {
+            case UPLOAD:
+                BulkUploadController controller = new BulkUploadController();
+                BulkUploadInfo info = controller.deleteDraftById(userId, folderId);
+                if (info == null) {
+                    Logger.error("Could not locate bulk upload id " + folderId + " for deletion");
+                    return null;
+                }
 
-        if (type == FolderType.UPLOAD) {
-            // delete bulk upload
-            BulkUploadController controller = new BulkUploadController();
-            try {
-                BulkUploadInfo info = controller.deleteDraftById(account, folderId);
                 FolderDetails details = new FolderDetails();
                 details.setId(info.getId());
                 return details;
-            } catch (ControllerException | PermissionException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+
+            case PRIVATE:
+                Folder folder = dao.get(folderId);
+                if (folder == null)
+                    return null;
+
+                if (!accountController.isAdministrator(userId) && !folder.getOwnerEmail().equalsIgnoreCase(userId)) {
+                    String errorMsg = userId + ": insufficient permissions to delete folder " + folderId;
+                    Logger.warn(errorMsg);
+                    return null;
+                }
+
+                details = folder.toDataTransferObject();
+                long folderSize = dao.getFolderSize(folderId);
+                details.setCount(folderSize);
+
+                dao.delete(folder);
+                permissionDAO.clearPermissions(folder);
+                return details;
+
+            default:
+                Logger.error("Cannot delete folder of type " + type);
                 return null;
-            }
         }
-
-        Folder folder = dao.get(folderId);
-        if (folder == null)
-            return null;
-
-        if (account.getType() != AccountType.ADMIN && !folder.getOwnerEmail().equalsIgnoreCase(account.getEmail())) {
-            String errorMsg = account.getEmail() + ": insufficient permissions to delete folder " + folderId;
-            Logger.warn(errorMsg);
-            return null;
-        }
-
-        FolderDetails details = folder.toDataTransferObject();
-        long folderSize = dao.getFolderSize(folderId);
-        details.setCount(folderSize);
-
-        dao.delete(folder);
-        permissionDAO.clearPermissions(folder);
-        return details;
     }
 
     public Folder addFolderContents(Account account, long id, ArrayList<Entry> entrys) throws ControllerException {

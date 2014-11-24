@@ -767,10 +767,11 @@ angular.module('ice.upload.controller', [])
                                     // check if there is a linked entry
                                     if (entry.linkedParts && entry.linkedParts.length) {
                                         var linkedPart = entry.linkedParts[0];
+                                        var linkType = linkedPart.type.toLowerCase();
 
                                         // check if there is a linked type and the link on the ui has not been created
                                         if (linkedDataSchema === undefined || linkedDataSchema.length === 0) {
-                                            $scope.addNewPartLink(linkedPart.type.toLowerCase());
+                                            $scope.addNewPartLink(linkType);
                                         }
 
                                         $scope.bulkUpload.linkedEntryIdData.push(linkedPart.id);
@@ -778,12 +779,13 @@ angular.module('ice.upload.controller', [])
                                         // linkedDataSchema is created when addNewPartLink is called
                                         var dataSchemaLength = dataSchema.length;
                                         for (var k = 0; k < linkedDataSchema.length; k += 1) {
-                                            val = linkedPart[linkedDataSchema[k]];
+                                            val = UploadUtil.getEntryValue(linkType, linkedPart, k);
+
                                             if (val === undefined)
                                                 val = '';
 
                                             // currently for attachments only
-                                            if (val instanceof Array && dataSchema[j] === "attachments") {
+                                            if (val instanceof Array && linkedDataSchema[k] === "attachments") {
                                                 if (val.length) {
                                                     val = val[0].filename;
                                                 } else {
