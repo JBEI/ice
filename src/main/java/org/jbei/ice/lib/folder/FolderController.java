@@ -307,6 +307,7 @@ public class FolderController {
             }
 
             ArrayList<Entry> entrys = entryController.getEntriesByIdSet(account, entryIds);
+            // todo : check visibility; allow non 9 only if user owns it or is admin
             folder = dao.addFolderContents(folder, entrys);
             if (folder.isPropagatePermissions()) {
                 try {
@@ -328,9 +329,11 @@ public class FolderController {
         Folder folder = new Folder(folderDetails.getName());
         folder.setOwnerEmail(userId);
         folder.setType(FolderType.PRIVATE);
-        folder.setCreationTime(new Date(System.currentTimeMillis()));
+        folder.setCreationTime(new Date());
         folder = dao.create(folder);
-        return folder.toDataTransferObject();
+        FolderDetails details = folder.toDataTransferObject();
+        details.setCanEdit(true);
+        return details;
     }
 
     public Collection getFolderStats(String userId) {
