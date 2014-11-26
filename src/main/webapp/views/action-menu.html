@@ -73,7 +73,7 @@
     </div>
 
     <div class="btn-group" style="margin-left: 12px">
-        <button type="button" class="btn btn-default btn-sm subMenuTransfer" ng-disabled="editDisabled"
+        <button type="button" class="btn btn-default btn-sm subMenuTransfer" ng-disabled="!canEdit()"
                 ng-click="editEntry()"><i style="font-size: 14px" class="fa fa-edit blue"></i> Edit
         </button>
         <button type="button" class="btn btn-default btn-sm subMenuTransfer" ng-disabled="deleteDisabled"
@@ -83,7 +83,7 @@
 
     <div class="btn-group" style="margin-left: 12px">
         <button type="button" class="btn btn-default btn-sm subMenuTransfer dropdown-toggle"
-                ng-disabled="!entrySelected" ng-click="csvExport()">
+                ng-disabled="addToDisabled" ng-click="csvExport()">
             <i style="font-size: 14px; opacity:0.85;" class="fa fa-download blue"></i>
             CSV Export
         </button>
@@ -114,4 +114,10 @@
             </li>
         </ul>
     </div>
+
+    <!--&lt;!&ndash;feedback&ndash;&gt;-->
+    <!--<div class="btn-group pull-right font-85em" style="width: 120px; margin-left: 20px">-->
+    <!--<alert style="margin-bottom: 0; padding: 4px" type="'success'" close="closeAlert($index)"><b>test</b></alert>-->
+    <!--</div>-->
 </div>
+

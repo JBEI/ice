@@ -1415,6 +1415,14 @@ td.selected i.font-awesome {
     color: #bf984c;
 }
 
+.bg_permission_group {
+    background-color: #bf984c;
+}
+
+.bg_permission_user {
+    background-color: #657B83;
+}
+
 .permission_user {
     color: #657B83;
 }

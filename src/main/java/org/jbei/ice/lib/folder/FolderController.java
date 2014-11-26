@@ -175,6 +175,17 @@ public class FolderController {
         return dao.removeFolderEntries(folder, entryIds) != null;
     }
 
+    /**
+     * Retrieves the folder specified in the parameter and contents
+     *
+     * @param userId
+     * @param folderId
+     * @param sort
+     * @param asc
+     * @param start
+     * @param limit
+     * @return
+     */
     public FolderDetails retrieveFolderContents(String userId, long folderId, ColumnField sort, boolean asc,
             int start, int limit) {
         Folder folder = dao.get(folderId);
@@ -190,8 +201,9 @@ public class FolderController {
         FolderDetails details = folder.toDataTransferObject();
         long folderSize = dao.getFolderSize(folderId);
         details.setCount(folderSize);
+        ArrayList<AccessPermission> permissions = getAndFilterFolderPermissions(userId, folder);
+        details.setAccessPermissions(permissions);
 
-        details.setAccessPermissions(permissionsController.retrieveSetFolderPermission(folder, false));
         details.setPublicReadAccess(permissionsController.isPublicVisible(folder));
         Account owner = accountController.getByEmail(folder.getOwnerEmail());
         if (owner != null)
@@ -203,6 +215,54 @@ public class FolderController {
             details.getEntries().add(info);
         }
         return details;
+    }
+
+    /**
+     * The permission(s) enabling the share for user
+     * is(are) included. If the user is an admin then all the permissions are included, otherwise only those pertaining
+     * to the user are included.
+     * <p>e.g. if a folder F is shared with groups A and B and the user is a non-admin belonging to group B, folder
+     * F will be included in the list of folders returned but will only include permissions for group B
+     *
+     * @param userId
+     * @param folder Folder whose permissions are to be retrieved
+     * @return
+     */
+    protected ArrayList<AccessPermission> getAndFilterFolderPermissions(String userId, Folder folder) {
+        ArrayList<AccessPermission> permissions = permissionsController.retrieveSetFolderPermission(folder, false);
+        if (accountController.isAdministrator(userId)) {
+            return permissions;
+        }
+
+        Account account = accountDAO.getByEmail(userId);
+
+        // filter permissions
+        ArrayList<AccessPermission> filteredPermissions = new ArrayList<>();
+        for (AccessPermission accessPermission : permissions) {
+
+            // account either has direct write permissions
+            if (accessPermission.getArticle() == AccessPermission.Article.ACCOUNT
+                    && accessPermission.getArticleId() == account.getId()) {
+                filteredPermissions.add(accessPermission);
+                continue;
+            }
+
+            if (account.getGroups() == null || account.getGroups().isEmpty())
+                continue;
+
+            // or belongs to a group that has the write permissions
+            if (accessPermission.getArticle() == AccessPermission.Article.GROUP) {
+                Group group = DAOFactory.getGroupDAO().get(accessPermission.getArticleId());
+                if (group == null)
+                    continue;
+
+                if (account.getGroups().contains(group)) {
+                    filteredPermissions.add(accessPermission);
+                }
+            }
+        }
+
+        return filteredPermissions;
     }
 
     public FolderDetails update(String userId, long folderId, FolderDetails details) {
@@ -393,58 +453,25 @@ public class FolderController {
         return accessPermissions;
     }
 
+    /**
+     * Retrieves folders that have been shared with specified user as an individual or as part of a group.
+     *
+     * @param userId User whose shared folders are being retrieved
+     * @return list of folders meeting the shared criteria
+     */
     public ArrayList<FolderDetails> getSharedUserFolders(String userId) {
         Account account = getAccount(userId);
         ArrayList<FolderDetails> folderDetails = new ArrayList<>();
-        // get folders shared with this user. permissions are included if the user has write permissions for folder
         Set<Folder> sharedFolders = permissionsController.retrievePermissionFolders(account);
-        if (sharedFolders != null) {
-            for (Folder folder : sharedFolders) {
-                ArrayList<AccessPermission> permissions = new ArrayList<>();
-                ArrayList<AccessPermission> folderPermissions = permissionsController.retrieveSetFolderPermission(
-                        folder,
-                        false);
-                for (AccessPermission accessPermission : folderPermissions) {
-                    if (!accessPermission.isCanWrite())
-                        continue;
+        if (sharedFolders == null)
+            return null;
 
-                    // account either has direct write permissions
-                    if (accessPermission.getArticle() == AccessPermission.Article.ACCOUNT
-                            && accessPermission.getArticleId() == account.getId()) {
-                        permissions.add(accessPermission);
-                        break;
-                    }
-
-                    if (account.getGroups() == null || account.getGroups().isEmpty())
-                        continue;
-
-                    // or belongs to a group that has the write permissions
-                    if (accessPermission.getArticle() == AccessPermission.Article.GROUP) {
-                        Group group = DAOFactory.getGroupDAO().get(accessPermission.getArticleId());
-                        if (group == null)
-                            continue;
-
-                        if (account.getGroups().contains(group)) {
-                            permissions.add(accessPermission);
-                            break;
-                        }
-                    }
-                }
-
-                FolderDetails details = folder.toDataTransferObject();
-                if (!permissions.isEmpty())
-                    details.setAccessPermissions(permissions);
-
-                details.setType(FolderType.SHARED);
-                long folderSize = dao.getFolderSize(folder.getId());
-                details.setCount(folderSize);
-                Account owner = accountController.getByEmail(folder.getOwnerEmail());
-                if (owner != null) {
-                    details.setOwner(owner.toDataTransferObject());
-                }
-                details.setPropagatePermission(folder.isPropagatePermissions());
-                folderDetails.add(details);
-            }
+        for (Folder folder : sharedFolders) {
+            FolderDetails details = folder.toDataTransferObject();
+            details.setType(FolderType.SHARED);
+            long folderSize = dao.getFolderSize(folder.getId());
+            details.setCount(folderSize);
+            folderDetails.add(details);
         }
 
         return folderDetails;

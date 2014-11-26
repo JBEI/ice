@@ -36,7 +36,6 @@ public class EntryRetriever {
         if (list == null || list.isEmpty() || userId.isEmpty())
             return "";
 
-        StringBuilder builder = new StringBuilder();
         List<Entry> entryList = new LinkedList<>();
 
         for (Number item : list) {

@@ -170,9 +170,16 @@
            ng-class="{'opacity_4':loadingSearchResults}">
         <tr data-ng-show="searchResults.results.length>0">
             <th style="width: 12px">
-                <input type="checkbox" ng-model="allSelected"/>
-                <sup style="font-size: 9px; font-weight: normal"
+
+                <i class="fa cursor_pointer" ng-class="{'fa-square-o':!allSelected, 'fa-check-square-o': allSelected}"
+                   style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>
+                <sup style="font-size: 9px; font-weight: normal; display: inherit"
                      ng-show="selection.length>0">{{selection.length}}</sup>
+
+
+                <!--<input type="checkbox" ng-model="allSelected"/>-->
+                <!--<sup style="font-size: 9px; font-weight: normal"-->
+                <!--ng-show="selection.length>0">{{selection.length}}</sup>-->
             </th>
             <th style="width: 90px">Type</th>
             <th style="width: 90px">Part ID</th>
@@ -235,10 +242,14 @@
            ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
            ng-class="{'opacity_4':loadingSearchResults}">
         <tr ng-show="searchResults.results.length>0">
-            <th style=" width:28px">
-                <input type="checkbox" ng-model="allSelected"/>
-                <sup style="font-size: 9px; font-weight: normal"
-                     ng-show="selection.length>0">{{selection.length}}</sup>
+            <th>
+                <!--<input type="checkbox" ng-model="allSelected"/>-->
+                <!--<sup style="font-size: 9px; font-weight: normal"-->
+                <!--ng-show="selection.length>0">{{selection.length}}</sup>-->
+
+                <!--<i class="fa" ng-class="{'fa-square-o':!allSelected, 'fa-check-square-o': allSelected}"-->
+                <!--style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>-->
+                <i class="fa fa-fw fa-minus-square"></i>
             </th>
             <th style="">
                 Relevance
@@ -246,24 +257,24 @@
             <th style="">
                 Type
             </th>
-            <th style=" width: 110px">
+            <th style="width: 110px">
                 Part ID
             </th>
-            <th style=" width:230px">
+            <th style="width:230px">
                 Name
             </th>
             <th style="">
                 Summary
             </th>
-            <th style=" width:230px">
+            <th style="width:230px">
                 Owner
             </th>
-            <th style=" width:10px">
-                <i class="fa fa-paperclip fa-fw" style="font-size: 14px; "></i></th>
-            <th style=" width:10px">
-                <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
+            <th style="width:30px">
+                <i class="fa fa-paperclip fa-fw" style="font-size: 14px;"></i></th>
+            <th style="width:30px">
+                <i class="fa fa-flask fa-fw" style="font-size: 14px;"></i>
             </th>
-            <th style=" width:10px">
+            <th style="width:30px; text-align:center">
                 <img src="img/dna.png" width="10px" alt="has dna"/></th>
             <th style="width:160px; white-space:nowrap">
                 Created
@@ -278,10 +289,8 @@
         </tr>
         <tr data-ng-repeat="result in searchResults.results">
             <td width="10px">
-                <input type="checkbox" ng-click="select(result.entryInfo)"/>
-                <!--<i class="fa fa-fw"-->
-                <!--ng-class="checkSelectionStyle($index)"-->
-                <!--ng-click="setSelected($index, 1)" style="color: #999; font-size: 14px;"></i>-->
+                <i class="fa fa-fw color-888" ng-click="selectSearchResult(result.entryInfo)"
+                   ng-class="{'fa-square-o':!searchEntrySelected(result.entryInfo), 'fa-check-square-o':searchEntrySelected(result.entryInfo)}"></i>
             </td>
             <td ng-init="val=result.score/result.maxScore*100">
                 <progressbar animate='false' value='val' type='{{getType(val)}}'

@@ -3,7 +3,7 @@
 var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'ui.bootstrap', 'angularFileUpload',
     'vr.directives.slider', 'angularMoment']);
 
-iceControllers.controller('ActionMenuController', function ($scope, $window, $rootScope, $location, $cookieStore, Folders, Entry, WebOfRegistries, Files) {
+iceControllers.controller('ActionMenuController', function ($scope, $window, $rootScope, $location, $cookieStore, Folders, Entry, WebOfRegistries, Files, Selection) {
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
     $scope.entrySelected = false;
 
@@ -17,8 +17,6 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     var sid = $cookieStore.get("sessionId");
     var folders = Folders();
     var entry = Entry(sid);
-    var selectedEntries = [];
-    var selected;
     $scope.selectedFolders = [];
 
     // retrieve personal list of folders user can add or move parts to
@@ -49,22 +47,29 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     };
 
     $scope.addEntriesToFolders = function () {
+        var entries = Selection.getSelectedEntries();
         var updateFolders = [];
+
+        // add entries to folders for update
         angular.forEach($scope.selectedFolders, function (folder) {
-            folder.entries = angular.copy(selectedEntries);
+            folder.entries = angular.copy(entries);
             updateFolders.push(folder);
         });
 
         folders.addEntriesToFolders(updateFolders,
             function (result) {
                 $scope.updatePersonalCollections();
+                Selection.reset();
+            }, function (error) {
+                console.error(error);
             });
     };
 
     $scope.removeEntriesFromFolder = function () {
         // remove selected entries from the current folder
         var entryIds = [];
-        angular.forEach(selectedEntries, function (entry) {
+        var entries = Selection.getSelectedEntries();
+        angular.forEach(entries, function (entry) {
             entryIds.push(entry.id);
         });
 
@@ -86,7 +91,8 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     };
 
     $scope.deleteSelectedEntries = function () {
-        Entry(sid).moveEntriesToTrash(selectedEntries,
+        var entries = Selection.getSelectedEntries();
+        Entry(sid).moveEntriesToTrash(entries,
             function (result) {
                 $scope.$broadcast("RefreshAfterDeletion");
                 $scope.$broadcast("UpdateCollectionCounts");
@@ -96,72 +102,16 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
             })
     };
 
-    $scope.$on("EntrySelection", function (event, data) {
-        selectedEntries = [];
-        selected = data;
-
-        // all selected or some selected
-        $scope.entrySelected = data.all || (data.selected && data.selected.length > 0);
-
-        // is reading it so can add to any
-        if (!$scope.entrySelected) {
-            $scope.addToDisabled = true;
-            $scope.editDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
-        } else {
-            // need read permission but assuming it already exists if can read and select it
-            $scope.addToDisabled = false;
-
-            // can remove if user can edit folder (todo : public folders?)
-            var canRemove = $scope.collectionFolderSelected != undefined && $scope.collectionFolderSelected.canEdit;
-            $scope.removeDisabled = !canRemove;
-
-            // if can canRemove then should be able to also move
-            $scope.moveToDisabled = !canRemove;
-        }
-
-        // can delete if all have canEdit=true
-        var entryType = 'None';
-        if (data.selected) {
-            for (var i = 0; i < data.selected.length; i += 1) {
-                var entry = data.selected[i];
-                $scope.deleteDisabled = !entry.canEdit;
-
-                // to be able to edit, they all must be the same type
-                if (entryType != entry.type) {
-                    // initial value?
-                    if (entryType === 'None')
-                        entryType = entry.type;
-                    else
-                        entryType = undefined;
-                }
-                selectedEntries.push(entry);
-            }
-        }
-
-        $scope.editDisabled = $scope.deleteDisabled || entryType === 'None' || entryType === undefined;
+    $rootScope.$on("EntrySelected", function (event, count) {
+        $scope.addToDisabled = !count;
     });
 
-    $rootScope.$on("EntryRetrieved", function (event, data) {
-        $scope.entry = data;
-        $scope.editDisabled = !data.canEdit;
-        $scope.entrySelected = true;
-        $scope.addToDisabled = false;
-        var isAdmin = $scope.user.accountType === undefined ? false : $scope.user.accountType.toLowerCase() === "admin";
-        $scope.deleteDisabled = ($scope.user.email != $scope.entry.ownerEmail && !isAdmin);
-        selected = {selected:[data]};
-        // only owners or admins can delete
-
-        // can remove if user can edit folder (todo : public folders?)
-        var canRemove = $scope.collectionFolderSelected != undefined && $scope.collectionFolderSelected.canEdit;
-        $scope.removeDisabled = !canRemove;
-
-        // if can canRemove then should be able to also move
-        $scope.moveToDisabled = !canRemove;
-
-        selectedEntries = [data];
-    });
+    $scope.canEdit = function () {
+        return Selection.canEdit();
+    };
 
     // function that handles "edit" click
+    // todo : must handle multiple
     $scope.editEntry = function () {
         $location.path('/entry/edit/' + $scope.entry.id);
         $scope.editDisabled = true;
@@ -177,8 +127,10 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
 
     $scope.transferEntriesToRegistry = function () {
         var selectedIds = [];
-        for (var i = 0; i < selected.selected.length; i += 1) {
-            selectedIds.push(selected.selected[i].id);
+        var entries = Selection.getSelectedEntries();
+
+        for (var i = 0; i < entries.length; i += 1) {
+            selectedIds.push(parseInt(entries[i].id));
         }
 
         angular.forEach($scope.registryPartners.partners, function (partner) {
@@ -194,10 +146,11 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     };
 
     $scope.csvExport = function () {
+        var entries = Selection.getSelectedEntries();
         // if selected.selected
         var selectedIds = [];
-        for (var i = 0; i < selected.selected.length; i += 1) {
-            selectedIds.push(selected.selected[i].id);
+        for (var i = 0; i < entries.length; i += 1) {
+            selectedIds.push(parseInt(entries[i].id));
         }
 
         var files = Files();
@@ -216,10 +169,12 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
 
     $rootScope.$on("CollectionSelected", function (event, data) {
         $scope.collectionSelected = data;
+        Selection.reset();
     });
 
     $rootScope.$on("CollectionFolderSelected", function (event, data) {
         $scope.collectionFolderSelected = data;
+        Selection.reset();
     });
 });
 
@@ -724,12 +679,12 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     // default list of collections
     $scope.collectionList = [
-        { name:'available', display:'Featured', icon:'fa-certificate', iconOpen:'fa-certificate orange', alwaysVisible:true},
-        { name:'personal', display:'Personal', icon:'fa-folder', iconOpen:'fa-folder-open', alwaysVisible:true},
-        { name:'shared', display:'Shared', icon:'fa-share-alt', iconOpen:'fa-share-alt green', alwaysVisible:false},
-        { name:'drafts', display:'Drafts', icon:'fa-edit', iconOpen:'fa-edit blue', alwaysVisible:false},
-        { name:'pending', display:'Pending Approval', icon:'fa-support', iconOpen:'fa-support orange', alwaysVisible:false},
-        { name:'deleted', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash red', alwaysVisible:false}
+        { name:'available', description:'', display:'Featured', icon:'fa-certificate', iconOpen:'fa-certificate orange', alwaysVisible:true},
+        { name:'personal', description:'', display:'Personal', icon:'fa-folder', iconOpen:'fa-folder-open dark_blue', alwaysVisible:true},
+        { name:'shared', description:'Folders & Entries shared with you', display:'Shared', icon:'fa-share-alt', iconOpen:'fa-share-alt green', alwaysVisible:false},
+        { name:'drafts', description:'', display:'Drafts', icon:'fa-pencil', iconOpen:'fa-edit brown', alwaysVisible:false},
+        { name:'pending', description:'', display:'Pending Approval', icon:'fa-support', iconOpen:'fa-support purple', alwaysVisible:false},
+        { name:'deleted', description:'', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash red', alwaysVisible:false}
     ];
 
     // entry items that can be created
@@ -955,7 +910,7 @@ iceControllers.controller('CollectionDetailController', function ($scope, $cooki
     };
 
     $scope.deleteCollection = function (folder) {
-        console.log(folder);
+        console.log("DELETE folder", folder);
 
         // expected folders that can be deleted have type "PRIVATE" and "UPLOAD"
         folders.delete({folderId:folder.id, type:folder.type}, function (result) {
@@ -963,18 +918,11 @@ iceControllers.controller('CollectionDetailController', function ($scope, $cooki
             for (var j = 0; j < l; j += 1) {
                 if ($scope.selectedCollectionFolders[j].id === result.id) {
                     $scope.selectedCollectionFolders.splice(j, 1);
-                    for (var idx = 0; idx < $scope.collectionList.length; idx += 1) {
-                        var collection = $scope.collectionList[idx];
-                        if (folder.type === 'upload' && collection.name === 'bulkUpload') {
-                            collection.count -= folder.count;
-                            break;
-                        } else if (folder.type === 'folders') {
-                        }
-                    }
                     break;
                 }
             }
 
+            // if the deleted folder is one user is currently on, re-direct to personal collection
             if (folder.id == $stateParams.collection) {
                 $location.path("/folders/personal");
             }
@@ -986,7 +934,7 @@ iceControllers.controller('CollectionDetailController', function ($scope, $cooki
 
 // deals with sub collections e.g. /folders/:id
 // retrieves the contents of folders
-iceControllers.controller('CollectionFolderController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, $http, Folders, Entry, EntryContextUtil) {
+iceControllers.controller('CollectionFolderController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, Folders, Entry, EntryContextUtil, Selection) {
     var sessionId = $cookieStore.get("sessionId");
     var folders = Folders();
     var entry = Entry(sessionId);
@@ -1048,7 +996,7 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
         $scope.params.sort = sortType;
         $scope.params.offset = 0;
         $scope.params.asc = !$scope.params.asc;
-        console.log("queryParams", $scope.params);
+//        console.log("queryParams", $scope.params);
         folders.folder($scope.params, function (result) {
             $scope.folder = result;
             $scope.currentPage = 1;
@@ -1078,53 +1026,11 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
     $scope.excludedEntries = [];
 
     $scope.isSelected = function (entry) {
-        if ($scope.allSelected) {
-            return ($scope.excludedEntries.length == 0 || $scope.excludedEntries.indexOf(entry) === -1);
-        }
-
-        return ($scope.selectedEntries.indexOf(entry) !== -1);
+        return Selection.searchEntrySelected(entry);
     };
 
     $scope.select = function (entry) {
-        if ($scope.allSelected) {
-            // check if excluded
-            var excludedIndex = $scope.excludedEntries.indexOf(entry);
-
-            // if in excluded, then select (by removing from excluded)
-            if (excludedIndex > -1)
-                $scope.excludedEntries.splice(excludedIndex, 1);
-            else // else de-selected (by adding to excluded list)
-                $scope.excludedEntries.push(entry);
-
-            if ($scope.excludedEntries.length === $scope.folder.count) {
-                $scope.allSelected = false;
-
-                // clear all excluded
-                while ($scope.excludedEntries.length > 0) {
-                    $scope.excludedEntries.pop();
-                }
-            }
-        } else {
-            // maintain explicit list of selected
-            // check if already selected
-            var i = $scope.selectedEntries.indexOf(entry);
-            if (i === -1)   // not found, add to selectedEntries
-                $scope.selectedEntries.push(entry);
-            else
-                $scope.selectedEntries.splice(i, 1);
-
-            // check if all selected
-            if ($scope.selectedEntries.length === $scope.folder.count) {
-                $scope.allSelected = true;
-                while ($scope.selectedEntries.length > 0) {
-                    $scope.selectedEntries.pop();
-                }
-            }
-        }
-
-        $scope.showAllSelected = $scope.allSelected && $scope.excludedEntries.length === 0;
-        var selected = $scope.allSelected && $scope.excludedEntries.length !== $scope.folder.count;
-        $scope.$emit("EntrySelection", {all:selected, selected:$scope.selectedEntries, folder:$scope.folder});
+        Selection.selectSearchEntry(entry);
     };
 
     $scope.showEntryDetails = function (entry, index) {
@@ -1170,31 +1076,26 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
         });
     };
 
-    // returns human readable text for permissions. meant to be appended to the String "Shared with "
-    // (e.g. "2 users and 3 groups")
-    $scope.getShareText = function (permissions) {
-        if (permissions === undefined || !permissions.length) {
-            return "no one";
-        }
+    $scope.getDisplay = function (permission) {
+        if (permission.article === 'ACCOUNT')
+            return permission.display.replace(/[^A-Z]/g, '');
 
-        var groupCount = 0;
-        var userCount = 0;
+        // group
+        return permission.display;
+    };
 
-        for (var idx = 0; idx < permissions.length; idx += 1) {
-            var permission = permissions[idx];
-            if (permission.article === 'ACCOUNT')
-                userCount += 1;
-            else
-                groupCount += 1;
-        }
+    $scope.shareText = function (permission) {
+        var display = "";
+        if (permission.article === 'GROUP')
+            display = "Members of ";
 
-        if (userCount == 0)
-            return groupCount + (groupCount == 1 ? " group" : " groups");
+        display += permission.display;
 
-        if (groupCount == 0)
-            return userCount + (userCount == 1 ? " user" : " users");
-
-        return (userCount + (userCount == 1 ? " user" : " users")) + " & " + (groupCount + (groupCount == 1 ? " group" : " groups"));
+        if (permission.type.lastIndexOf("WRITE", 0) === 0)
+            display += " can edit";
+        else
+            display += " can read";
+        return display;
     };
 
     $scope.changeFolderType = function (newType) {
@@ -2014,7 +1915,7 @@ iceControllers.controller('FullScreenFlashController', function ($scope, $stateP
     });
 });
 
-iceControllers.controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope, $fileUploader, Entry, Folders, EntryService, EntryContextUtil) {
+iceControllers.controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope, $fileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection) {
     $scope.partIdEditMode = false;
     $scope.showSBOL = true;
     $scope.context = EntryContextUtil.getContext();
@@ -2173,7 +2074,9 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     if (!isNaN($stateParams.id)) {
         entry.query({partId:$stateParams.id},
             function (result) {
-                $rootScope.$broadcast("EntryRetrieved", result);
+                Selection.reset();
+                Selection.selectSearchEntry(result);
+
                 $scope.entry = EntryService.convertToUIForm(result);
                 $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
 
@@ -2267,7 +2170,6 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         });
     };
 
-    var folders = Folders();
     $scope.nextEntryInContext = function () {
         $scope.context.offset += 1;
         $scope.context.callback($scope.context.offset, function (result) {
@@ -2283,6 +2185,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     };
 
     $scope.backTo = function () {
+        Selection.reset();
         $location.path($scope.context.back);
     };
 

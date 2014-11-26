@@ -19,14 +19,21 @@
                             </span>
                             </span>
 
-                            <div>
+                            <div class="no_wrap">
                                 <small class="font-65em" ng-if="folder.created">
                                     {{folder.created | date:'short'}}
                                 </small>
                                 <small ng-if="folder.type==='SHARED'" style="color: #333">
                                     <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
-                                    <i class="fa fa-share-alt" style="color: #ff4500;"
-                                       tooltip="Shared with {{getShareText(folder.accessPermissions)}}"></i>
+
+                                    <span ng-repeat="permission in folder.accessPermissions" style="margin-right: 3px">
+                                        <span class="label" tooltip="{{shareText(permission)}}"
+                                              ng-class="{'bg_permission_group':permission.article==='GROUP', 'bg_permission_user':permission.article==='ACCOUNT'}">
+                                             <i class="fa"
+                                                ng-class="{'fa-group':permission.article==='GROUP', 'fa-user':permission.article==='ACCOUNT'}"></i> {{getDisplay(permission)}}
+                                        </span>
+                                    </span>
+
                                 </small>
                             </div>
                         </h4>
@@ -53,7 +60,7 @@
     <div class="row">
         <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
             <tr data-ng-if='folder && folder.entries.length > 0'>
-                <th style="width:28px">
+                <th>
                     <!--<i class="fa cursor_pointer"-->
                     <!--ng-class="{'fa-square-o':!showAllSelected, 'fa-check-square-o': showAllSelected}"-->
                     <!--style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>-->
@@ -85,13 +92,13 @@
                        ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
                     Status
                 </th>
-                <th style="width:10px">
+                <th style="width:30px">
                     <i class="fa fa-paperclip fa-fw" style="font-size: 14px; "></i>
                 </th>
-                <th style="width:10px">
+                <th style="width:30px">
                     <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
                 </th>
-                <th style="width:10px">
+                <th style="width:30px; text-align:center">
                     <img src="img/dna.png" width="10px" alt="has dna"/>
                 </th>
                 <th ng-click="sort('created')" class="cursor_pointer">
@@ -115,10 +122,9 @@
                     <!--<i class="fa cursor_pointer fa-check-square-o" ng-if="allSelected"-->
                     <!--style="color: #000; font-size: 14px;" ng-click="select(entry)"></i>-->
 
-                    <i class="fa cursor_pointer"
-                       ng-class="{'fa-square-o':!isSelected(entry),
-                       'fa-check-square-o':isSelected(entry)}"
-                       style="color: #999; font-size: 14px;" ng-click="select(entry)"></i>
+                    <i class="fa fa-fw color-888"
+                       ng-class="{'fa-square-o':!isSelected(entry), 'fa-check-square-o':isSelected(entry)}"
+                       style="font-size: 14px;" ng-click="select(entry)"></i>
                 </td>
                 <td>{{entry.type | capitalize}}</td>
                 <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
