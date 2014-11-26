@@ -230,7 +230,7 @@ public class FolderController {
      */
     protected ArrayList<AccessPermission> getAndFilterFolderPermissions(String userId, Folder folder) {
         ArrayList<AccessPermission> permissions = permissionsController.retrieveSetFolderPermission(folder, false);
-        if (accountController.isAdministrator(userId)) {
+        if (accountController.isAdministrator(userId) || folder.getOwnerEmail().equalsIgnoreCase(userId)) {
             return permissions;
         }
 
