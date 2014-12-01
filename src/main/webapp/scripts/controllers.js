@@ -1835,7 +1835,6 @@ iceControllers.controller('EntryPermissionController', function ($rootScope, $sc
     //
     $scope.addRemovePermission = function (permission) {
         permission.selected = !permission.selected;
-
         if (!permission.selected) {
             removePermission(permission.id);
             return;
@@ -2246,6 +2245,7 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
     var panes = $scope.panes = [];
     $scope.folder = folder;
     $scope.userFilterInput = undefined;
+    var folders = Folders();
 
     $scope.activateTab = function (pane) {
         angular.forEach(panes, function (pane) {
@@ -2253,9 +2253,9 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
         });
         pane.selected = true;
         if (pane.title === 'Read')
-            $scope.activePermissions = angular.copy($scope.readPermissions);
+            $scope.activePermissions = $scope.readPermissions;
         else
-            $scope.activePermissions = angular.copy($scope.writePermissions);
+            $scope.activePermissions = $scope.writePermissions;
 
         angular.forEach($scope.users, function (item) {
             for (var i = 0; i < $scope.activePermissions.length; i += 1) {
@@ -2263,6 +2263,24 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
             }
         });
     };
+
+    // retrieve permissions for folder
+    folders.permissions({folderId:folder.id}, function (result) {
+        $scope.readPermissions = [];
+        $scope.writePermissions = [];
+
+        angular.forEach(result, function (item) {
+            if (item.type === 'WRITE_FOLDER')
+                $scope.writePermissions.push(item);
+            else
+                $scope.readPermissions.push(item);
+        });
+
+        $scope.panes.push({title:'Read', count:$scope.readPermissions.length, selected:true});
+        $scope.panes.push({title:'Write', count:$scope.writePermissions.length});
+
+        $scope.activePermissions = $scope.readPermissions;
+    });
 
     this.addPane = function (pane) {
         // activate the first pane that is added
@@ -2285,21 +2303,38 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
     };
 
     var removePermission = function (permissionId) {
-        Folders().removePermission({folderId:folder.id, permissionId:permissionId},
+        folders.removePermission({folderId:folder.id, permissionId:permissionId},
             function (result) {
-                for (var i = 0; i < $scope.activePermissions.length; i += 1) {
-                    if (permissionId != $scope.activePermissions[i].id)
-                        continue;
+                if (!result)
+                    return;
 
-                    $scope.activePermissions.splice(i, 1);
-                    break;
+                // check which pane is selected
+                var pane;
+                if ($scope.panes[0].selected)
+                    pane = $scope.panes[0];
+                else
+                    pane = $scope.panes[1];
+
+                var i = -1;
+
+                for (var idx = 0; idx < $scope.activePermissions.length; idx += 1) {
+                    if (permissionId != $scope.activePermissions[idx].id) {
+                        i = idx;
+                        break;
+                    }
                 }
+
+                if (i == -1)
+                    return;
+
+                $scope.activePermissions.splice(i, 1);
+                pane.count = $scope.activePermissions.length;
             });
     };
 
     $scope.setPropagatePermission = function (folder) {
         folder.propagatePermission = !folder.propagatePermission;
-        Folders().update({folderId:folder.id}, folder, function (result) {
+        folders.update({folderId:folder.id}, folder, function (result) {
 
         }, function (error) {
 
@@ -2313,19 +2348,30 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
             return;
         }
 
-        // add permission (select type based on pane being view - default is read)
-        permission.type = "READ_FOLDER";
-        angular.forEach(panes, function (pane) {
-            if (pane.selected) {
-                permission.type = pane.title.toUpperCase() + "_FOLDER";
+        // add permission
+        var pane;
+        for (var i = 0; i < panes.length; i += 1) {
+            if (panes[i].selected) {
+                permission.type = panes[i].title.toUpperCase() + "_FOLDER";
+                pane = panes[i];
+                break;
             }
-        });
+        }
         permission.typeId = folder.id;
 
-        Folders().addPermission({folderId:folder.id}, permission, function (result) {
+        folders.addPermission({folderId:folder.id}, permission, function (result) {
             // result is the permission object
-            $scope.activePermissions.push(result);
-            permission.permissionId = result.id;
+            if (result.type == 'READ_FOLDER') {
+                $scope.readPermissions.push(result);
+                $scope.activePermissions = $scope.readPermissions;
+            }
+            else {
+                $scope.writePermissions.push(result);
+                $scope.activePermissions = $scope.writePermissions;
+            }
+
+            permission.id = result.id;
+            pane.count = $scope.activePermissions.length;
         });
     };
 
@@ -2345,29 +2391,8 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
         })
     };
 
-    // retrieve permissions for folder
-    Folders().permissions({folderId:folder.id}, function (result) {
-        $scope.readPermissions = [];
-        $scope.writePermissions = [];
-
-        angular.forEach(result, function (item) {
-            if (item.type === 'WRITE_FOLDER')
-                $scope.writePermissions.push(item);
-            else
-                $scope.readPermissions.push(item);
-        });
-
-        $scope.panes.push({title:'Read', count:$scope.readPermissions.length, selected:true});
-        $scope.panes.push({title:'Write', count:$scope.writePermissions.length});
-
-        $scope.activePermissions = angular.copy($scope.readPermissions);
-    });
-
     $scope.deletePermission = function (index, permission) {
-        Folders().removePermission({folderId:folder.id, permissionId:permission.id},
-            function (result) {
-                $scope.activePermissions.splice(index, 1);
-            });
+        removePermission(permission.id);
     };
 
     $scope.filter = function (val) {
