@@ -944,18 +944,17 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
 
     // param defaults
     $scope.params = {'asc':false, 'sort':'created'};
-    var subCollection = $stateParams.collection;   // folder id
+    var subCollection = $stateParams.collection;   // folder id or one of the defined collections (Shared etc)
 
     // retrieve sub folder contents
     if (subCollection !== undefined) {
         $scope.folder = undefined;   // this forces "Loading..." to be shown
         $scope.params.folderId = subCollection;
 
-        // retrieve contents of main folder (e,g, "personal")
+        // retrieve contents of collection (e,g, "personal")
         folders.folder($scope.params, function (result) {
             $scope.loadingPage = false;
             $scope.folder = result;
-//            $rootScope.$emit("CollectionFolderSelected",  $scope.folder);
 
             if (result.folderName) {
                 if ($scope.breadCrumb)
@@ -2069,23 +2068,23 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
 
     $scope.entryFields = undefined;
     $scope.entry = undefined;
+    $scope.notFound = undefined;
 
-    if (!isNaN($stateParams.id)) {
-        entry.query({partId:$stateParams.id},
-            function (result) {
-                Selection.reset();
-                Selection.selectSearchEntry(result);
+    entry.query({partId:$stateParams.id},
+        function (result) {
+            Selection.reset();
+            Selection.selectSearchEntry(result);
 
-                $scope.entry = EntryService.convertToUIForm(result);
-                $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
+            $scope.entry = EntryService.convertToUIForm(result);
+            $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
 
-                entry.statistics({partId:$stateParams.id}, function (stats) {
-                    $scope.entryStatistics = stats;
-                });
-            }, function (error) {
-                console.error(error);
+            entry.statistics({partId:$stateParams.id}, function (stats) {
+                $scope.entryStatistics = stats;
             });
-    }
+        }, function (error) {
+            if (error.status === 404)
+                $scope.notFound = true;
+        });
 
     var menuSubDetails = $scope.subDetails = [
         {url:'/views/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},

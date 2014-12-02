@@ -1,8 +1,17 @@
 <div ng-controller="EntryController">
-    <div class="container-fluid" ng-show="!entry">
+    <div class="container-fluid" ng-show="!entry&&!notFound">
         <div class="row">
             <div class="col-md-12 text-center" style="margin-top: 50px; color: #AAA; font-size: 25px">
                 <i class="fa fa-2x fa-gear fa-spin"></i> <br>Loading Contents
+            </div>
+        </div>
+    </div>
+
+    <div ng-show="!entry&&notFound">
+        <div class="row">
+            <div class="col-md-12 text-center" style="margin-top: 150px; color: #AAA; font-size: 35px">
+                <i class="fa fa-2x fa-warning" style="color: darkred"></i> <br>
+                Specified entry could not be found
             </div>
         </div>
     </div>
