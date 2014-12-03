@@ -35,6 +35,8 @@ import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * @author Hector Plahar
  */
@@ -42,6 +44,7 @@ public class FolderController {
 
     private final FolderDAO dao;
     private final AccountController accountController;
+    private final GroupController groupController;
     private final PermissionDAO permissionDAO;
     private final PermissionsController permissionsController;
     private final BulkUploadController bulkUploadController;
@@ -51,6 +54,7 @@ public class FolderController {
     public FolderController() {
         dao = DAOFactory.getFolderDAO();
         accountController = new AccountController();
+        groupController = new GroupController();
         permissionDAO = DAOFactory.getPermissionDAO();
         permissionsController = new PermissionsController();
         bulkUploadController = new BulkUploadController();
@@ -84,12 +88,13 @@ public class FolderController {
     }
 
     /**
-     * Retrieves folders are share shared publicly
+     * Retrieves folders that are shared shared publicly. Note that this is different from
+     * featured folders that have a type of PUBLIC
      *
      * @return list of public folders on this site
      */
     public ArrayList<FolderDetails> getPublicFolders() {
-        Group publicGroup = new GroupController().createOrRetrievePublicGroup();
+        Group publicGroup = groupController.createOrRetrievePublicGroup();
         Set<Folder> folders = permissionDAO.getFolders(publicGroup);
         ArrayList<FolderDetails> list = new ArrayList<>();
         for (Folder folder : folders) {
@@ -103,6 +108,15 @@ public class FolderController {
         return list;
     }
 
+    /**
+     * Retrieves entries that are made available publicly
+     *
+     * @param sort   order of retrieval for the entries
+     * @param offset start of retrieval
+     * @param limit  maximum number of entries to retrieve
+     * @param asc    whether to retrieve the entries in ascending order
+     * @return wrapper around the retrieved entries
+     */
     public FolderDetails getPublicEntries(ColumnField sort, int offset, int limit, boolean asc) {
         Group publicGroup = new GroupController().createOrRetrievePublicGroup();
         Set<Group> groups = new HashSet<>();
@@ -193,10 +207,7 @@ public class FolderController {
             return null;
 
         // should have permission to read folder (folder should be public, you should be an admin, or owner)
-        if (!authorization.canRead(userId, folder)) {
-            Logger.warn(userId + ": does not have permissions to read folder " + folder.getId());
-            return null;
-        }
+        authorization.expectRead(userId, folder);
 
         FolderDetails details = folder.toDataTransferObject();
         long folderSize = dao.getFolderSize(folderId);
@@ -209,6 +220,7 @@ public class FolderController {
         if (owner != null)
             details.setOwner(owner.toDataTransferObject());
 
+        // retrieve folder contents
         ArrayList<Entry> results = dao.retrieveFolderContents(folderId, sort, asc, start, limit);
         for (Entry entry : results) {
             PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
@@ -224,9 +236,9 @@ public class FolderController {
      * <p>e.g. if a folder F is shared with groups A and B and the user is a non-admin belonging to group B, folder
      * F will be included in the list of folders returned but will only include permissions for group B
      *
-     * @param userId
+     * @param userId identifier for user making request
      * @param folder Folder whose permissions are to be retrieved
-     * @return
+     * @return list of filtered permissions
      */
     protected ArrayList<AccessPermission> getAndFilterFolderPermissions(String userId, Folder folder) {
         ArrayList<AccessPermission> permissions = permissionsController.retrieveSetFolderPermission(folder, false);
@@ -462,7 +474,9 @@ public class FolderController {
     public ArrayList<FolderDetails> getSharedUserFolders(String userId) {
         Account account = getAccount(userId);
         ArrayList<FolderDetails> folderDetails = new ArrayList<>();
-        Set<Folder> sharedFolders = permissionsController.retrievePermissionFolders(account);
+
+        Set<Group> groups = groupController.getAllGroups(account);
+        Set<Folder> sharedFolders = DAOFactory.getPermissionDAO().retrieveFolderPermissions(account, groups);
         if (sharedFolders == null)
             return null;
 
@@ -478,7 +492,6 @@ public class FolderController {
     }
 
     public boolean enablePublicReadAccess(String userId, long folderId) {
-        GroupController groupController = new GroupController();
         AccessPermission permission = new AccessPermission();
         permission.setType(AccessPermission.Type.READ_FOLDER);
         permission.setTypeId(folderId);
@@ -550,30 +563,27 @@ public class FolderController {
     }
 
     /**
-     * "Promote"s a collection into a system collection. This allows it to be categorised under "Collections"
-     * This action is restricted to administrators
+     * "Promote"s a collection into a featured collection. This action is restricted to administrators.
+     * The owner does not have to be an administrator and maintains ownership after being featured
      *
      * @param userId requesting account id
      * @param folder folder to be promoted
-     * @return true if promotion is successful false otherwise
+     * @return true if promotion is successful, false otherwise
      */
     protected FolderDetails promoteFolder(String userId, Folder folder) {
         if (folder.getType() == FolderType.PUBLIC)
             return folder.toDataTransferObject();
 
-        folder.setType(FolderType.PUBLIC);
-        folder.setOwnerEmail("");
-        folder.setModificationTime(new Date(System.currentTimeMillis()));
-        FolderDetails details = dao.update(folder).toDataTransferObject();
+        authorization.expectAdmin(userId);
 
-        // remove all permissions for folder
-        permissionsController.removeAllFolderPermissions(userId, folder.getId());
-        return details;
+        folder.setType(FolderType.PUBLIC);
+        folder.setModificationTime(new Date());
+        return dao.update(folder).toDataTransferObject();
     }
 
     /**
-     * Opposite of FolderController#demoteFolder(org.jbei.ice.lib.account.model.Account, long)
-     * Removes the folder from the system collections menu
+     * Opposite of FolderController#demoteFolder(userId, long)
+     * Removes the folder from being a featured collections
      *
      * @param userId requesting account
      * @param folder to be demoted
@@ -583,25 +593,12 @@ public class FolderController {
         if (folder.getType() != FolderType.PUBLIC)
             return folder.toDataTransferObject();
 
+        authorization.expectAdmin(userId);
+
         folder.setType(FolderType.PRIVATE);
-        folder.setModificationTime(new Date(System.currentTimeMillis()));
-        folder.setOwnerEmail(userId);
+        folder.setModificationTime(new Date());
+        if (StringUtils.isBlank(folder.getOwnerEmail()))
+            folder.setOwnerEmail(userId);
         return dao.update(folder).toDataTransferObject();
     }
-
-//    public boolean setPropagatePermissionForFolder(Account account, long folderId, boolean propagate)
-//            throws ControllerException {
-//        Folder folder = dao.get(folderId);
-//        if (folder == null)
-//            return false;
-//
-//        if (!accountController.isAdministrator(account) &&
-//                !folder.getOwnerEmail().equalsIgnoreCase(account.getEmail()))
-//            return false;
-//
-//        folder.setPropagatePermissions(propagate);
-//        folder.setModificationTime(new Date(System.currentTimeMillis()));
-//        dao.update(folder);
-//        return permissionsController.propagateFolderPermissions(account, folder, propagate);
-//    }
 }

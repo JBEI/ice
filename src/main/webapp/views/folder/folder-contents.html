@@ -1,4 +1,5 @@
 <div class="container-fluid">
+    <!--if subfolder-->
     <div class="row entry_general_header_td" style="height: 60px;" ng-if="folder.type">
         <div class="col-md-12">
             <table>
@@ -7,16 +8,16 @@
                         <h4>
                             <span style="white-space: nowrap">
                                 <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
-                                <strong style="color: #888;text-transform: uppercase;">{{breadCrumb ||
-                                    folder.folderName}}</strong>
+                                <strong><span ng-if="selectedCollection" style="text-transform: uppercase; color: #888"> {{selectedCollection}}</span>
+                                    {{folder.folderName}}</strong>
                                 <span ng-if="folder.publicReadAccess">&nbsp;
-                                <small style="font-size: 12px; position: relative; top: -4px"
-                                       tooltip="Available on web of registries"
-                                       tooltip-placement="right" tooltip-trigger="mouseenter"
-                                       class="label label-info cursor_pointer"><i class="fa fa-globe"></i>
-                                    Public
-                                </small>
-                            </span>
+                                    <small style="font-size: 12px; position: relative; top: -4px"
+                                           tooltip="Available on web of registries"
+                                           tooltip-placement="right" tooltip-trigger="mouseenter"
+                                           class="label label-info cursor_pointer"><i class="fa fa-globe"></i>
+                                        Public
+                                    </small>
+                                </span>
                             </span>
 
                             <div class="no_wrap">
@@ -51,7 +52,8 @@
         <div class="col-md-12 entry_general_header_td">
             <h4>
                 <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
-                <strong style="color: #888;text-transform: uppercase;">{{breadCrumb || folder.folderName}}</strong>
+                <!--if the user refreshes collection page or manually enters the url, selectedCollection is empty-->
+                <strong style="color: #888;text-transform: uppercase;">{{selectedCollection || selectedFolder}}</strong>
                 &nbsp;&nbsp;&nbsp;<span ng-show="folder.id" folder-actions class="font-95em"></span>
             </h4>
         </div>

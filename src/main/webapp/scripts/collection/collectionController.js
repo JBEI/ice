@@ -15,13 +15,15 @@ angular.module('ice.collection.controller', [])
         $scope.selectedFolder = $stateParams.collection === undefined ? 'personal' : $stateParams.collection;
         $rootScope.$emit("CollectionSelected", $scope.selectedFolder);
 
-        // retrieve collections contained in the selectedFolder
-        folders.getByType({folderType:$scope.selectedFolder},
-            function (result) {
-                $scope.selectedCollectionFolders = result;
-            }, function (error) {
-                console.error(error);
-            });
+        // retrieve collections contained in the selectedFolder (only if a collection)
+        if (isNaN($scope.selectedFolder)) {
+            folders.getByType({folderType:$scope.selectedFolder},
+                function (result) {
+                    $scope.selectedCollectionFolders = result;
+                }, function (error) {
+                    console.error(error);
+                });
+        }
 
         // retrieve folder counts
         var updateCounts = function () {
@@ -60,17 +62,19 @@ angular.module('ice.collection.controller', [])
                 });
         };
 
+        //
         // called from collections-menu-details.html when a collection's folder is selected
         // simply changes state to folder and allows the controller for that to handle it
+        //
         $scope.selectCollectionFolder = function (folder) {
-            $rootScope.$emit("CollectionFolderSelected", folder);
             // type on server is PUBLIC, PRIVATE, SHARED, UPLOAD
             var type = folder.type.toLowerCase();
-            if (type !== "upload")
+            if (type !== "upload") {
+                $rootScope.$emit("CollectionFolderSelected", folder);
                 type = "folders";
+            }
 
             $location.path("/" + type + "/" + folder.id);
-            $scope.folder = undefined;   // this forces "Loading..." to be shown
         };
 
         //
@@ -81,10 +85,19 @@ angular.module('ice.collection.controller', [])
             $rootScope.$emit("CollectionSelected", name);
             $location.path("/folders/" + name);
             $scope.selectedFolder = name;
+
+            // name and display differ for "Featured". using this till they are reconciled
+            for (var i = 0; i < $scope.collectionList.length; i += 1) {
+                if ($scope.collectionList[i].name === name) {
+                    $scope.selectedCollection = $scope.collectionList[i].display;
+                    break;
+                }
+            }
+
             $scope.selectedCollectionFolders = undefined;
 
             // retrieve sub folders for selected collection
-            folders.getByType({folderType:$scope.selectedFolder, folderId:name},
+            folders.getByType({folderType:name},
                 function (result) {
                     $scope.selectedCollectionFolders = result;
                 },
