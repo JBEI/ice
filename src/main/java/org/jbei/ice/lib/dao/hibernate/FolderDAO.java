@@ -2,28 +2,21 @@ package org.jbei.ice.lib.dao.hibernate;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
-import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
-import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.shared.ColumnField;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
@@ -72,12 +65,10 @@ public class FolderDAO extends HibernateRepository<Folder> {
      *
      * @param id unique folder identifier
      * @return number of child contents in the folder
-     * @on any exception retrieving the folder or its contents
      */
     public Long getFolderSize(long id) {
         try {
             Criteria criteria = currentSession().createCriteria(Entry.class);
-            criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
             criteria.createAlias("folders", "f");
             criteria.add(Restrictions.eq("f.id", id));
             Number number = (Number) criteria.setProjection(Projections.rowCount()).uniqueResult();
@@ -124,11 +115,10 @@ public class FolderDAO extends HibernateRepository<Folder> {
 
             String ascString = asc ? " asc" : " desc";
             String queryString = "select distinct e from Entry e join e.folders f where f.id = :id "
-                    + "AND e.visibility=:v order by e." + sortString + ascString;
+                    + "order by e." + sortString + ascString;
 
             Query query = session.createQuery(queryString);
             query.setLong("id", folderId);
-            query.setInteger("v", Visibility.OK.getValue());
             query.setFirstResult(start);
             query.setMaxResults(limit);
             List list = query.list();
@@ -144,10 +134,11 @@ public class FolderDAO extends HibernateRepository<Folder> {
         try {
             folder = (Folder) session.get(Folder.class, folder.getId());
             folder.getContents().addAll(entrys);
-            folder.setModificationTime(new Date(System.currentTimeMillis()));
+            folder.setModificationTime(new Date());
             session.saveOrUpdate(folder);
             return folder;
         } catch (HibernateException e) {
+            Logger.error(e);
             throw new DAOException(e);
         }
     }
@@ -171,6 +162,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             query.setParameter("ownerEmail", account.getEmail());
             folders = new ArrayList<Folder>(query.list());
         } catch (HibernateException e) {
+            Logger.error(e);
             throw new DAOException("Failed to retrieve folders!", e);
         }
 
@@ -187,22 +179,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             query.setParameter("type", type);
             folders = new ArrayList<Folder>(query.list());
         } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve folders!", e);
-        }
-
-        return folders;
-    }
-
-    public Set<Folder> getFolders(Account account, FolderType type) {
-        HashSet<Folder> folders;
-        Session session = currentSession();
-        try {
-            String queryString = "from " + Folder.class.getName() + " WHERE type = :type AND ownerEmail = :ownerEmail";
-            Query query = session.createQuery(queryString);
-            query.setParameter("type", type);
-            query.setParameter("ownerEmail", account.getEmail());
-            folders = new HashSet<Folder>(query.list());
-        } catch (HibernateException e) {
+            Logger.error(e);
             throw new DAOException("Failed to retrieve folders!", e);
         }
 
@@ -226,42 +203,5 @@ public class FolderDAO extends HibernateRepository<Folder> {
         }
 
         return folders;
-    }
-
-    @SuppressWarnings("unchecked")
-    public Set<Long> getAllFolderIds() {
-        try {
-            List list = currentSession().createCriteria(Folder.class).setProjection(Projections.property("id")).list();
-            return new HashSet<Long>(list);
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
-    }
-
-    public List<Entry> getSharedWithUserEntries(Account account, Set<Group> accountGroups, int offset, int limit) {
-        // read or write permission criterion
-        Criterion criterion = Restrictions.disjunction()
-                                          .add(Restrictions.eq("canWrite", true))
-                                          .add(Restrictions.eq("canRead", true));
-
-        Criteria criteria = currentSession().createCriteria(Permission.class).add(criterion);
-        criteria.add(Restrictions.disjunction()
-                                 .add(Restrictions.in("group", accountGroups))
-                                 .add(Restrictions.eq("account", account)));
-        criteria.setProjection(Projections.property("entry"));
-        criteria.add(Restrictions.isNotNull("entry"));
-
-        criteria.createAlias("entry", "entry");
-
-        criteria.addOrder(Order.desc("entry.id"));
-        criteria.setMaxResults(limit);
-        criteria.setFirstResult(offset);
-        try {
-            return criteria.list();
-        } catch (HibernateException e) {
-            Logger.error(e);
-            throw new DAOException(e);
-        }
     }
 }

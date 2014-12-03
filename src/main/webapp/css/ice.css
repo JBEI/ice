@@ -55,6 +55,14 @@ html, body {
     color: #285e8e;
 }
 
+.brown {
+    color: #a52a2a;
+}
+
+.purple {
+    color: purple;
+}
+
 .font-95em {
     font-size: 0.95em;
 }
@@ -1162,6 +1170,7 @@ table.data_table tr td {
     color: #0082C0;
     font-size: 0.9em;
     width: 170px;
+    cursor: pointer;
 }
 
 .profile_menu .selected {
@@ -1404,6 +1413,14 @@ td.selected i.font-awesome {
 
 .permission_group {
     color: #bf984c;
+}
+
+.bg_permission_group {
+    background-color: #bf984c;
+}
+
+.bg_permission_user {
+    background-color: #657B83;
 }
 
 .permission_user {

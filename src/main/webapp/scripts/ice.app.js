@@ -86,7 +86,6 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         })
         .state('main.folder', {
             url:'folders/:collection',
-//            controller: 'CollectionFolderController',
             templateUrl:'/views/collection-selection.html',
             resolve:{
                 sessionValid:function (Authentication) {

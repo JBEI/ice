@@ -29,7 +29,7 @@ public class RestResource {
 
     protected Response respond(Object object) {
         if (object == null)
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.status(Response.Status.NOT_FOUND).build();
 
         return Response.status(Response.Status.OK).entity(object).build();
     }

@@ -28,7 +28,6 @@ import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryEditor;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
-import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
@@ -54,7 +53,6 @@ public class BulkEntryCreator {
     private final EntryController entryController;
     private final BulkUploadAuthorization authorization;
     private final BulkUploadController controller;
-    private final AttachmentController attachmentController;
 
     public BulkEntryCreator() {
         dao = DAOFactory.getBulkUploadDAO();
@@ -64,7 +62,6 @@ public class BulkEntryCreator {
         entryController = new EntryController();
         authorization = new BulkUploadAuthorization();
         controller = new BulkUploadController();
-        attachmentController = new AttachmentController();
     }
 
     protected BulkUpload createOrRetrieveBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,

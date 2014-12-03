@@ -252,11 +252,6 @@ public class PermissionsController {
         return true;
     }
 
-    public Set<Folder> retrievePermissionFolders(Account account) {
-        Set<Group> groups = groupController.getAllGroups(account);
-        return dao.retrieveFolderPermissions(account, groups);
-    }
-
     /**
      * retrieves permissions that have been explicitly set for a specified folder with the
      * exception of the public group read access. The check for that is a separate
@@ -340,7 +335,6 @@ public class PermissionsController {
         ArrayList<AccessPermission> permissions = retrieveSetFolderPermission(folder, true);
         if (permissions.isEmpty())
             return true;
-//        boolean isPublic = get
 
         // if propagate, add permissions to entries contained in here  //TODO : inefficient for large entries/perms
         if (prop) {
