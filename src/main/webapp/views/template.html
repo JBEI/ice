@@ -4,14 +4,16 @@
 <div><b style="color: #888">Creator</b>: {{currentTooltip.creator}}</div>
 <div><b style="color: #888">Origin of Replication</b>: {{currentTooltip.originOfReplication}}</div>
 <div><b style="color: #888">Owner</b>: {{currentTooltip.owner}}</div>
-<div><b style="color: #888">Links</b>: {{currentTooltip.links}}</div>
+<div ng-if="currentTooltip.links"><b style="color: #888">Links</b>: {{currentTooltip.links}}</div>
 <div ng-if="currentTooltip.replicatesIn"><b style="color: #888">Replicates In</b>: {{currentTooltip.replicatesIn}}</div>
 <div><b style="color: #888">Status</b>: {{currentTooltip.status | capitalize}}</div>
 <div><b style="color: #888">Bio Safety Level</b>: {{currentTooltip.bioSafetyLevel}}</div>
 <div><b style="color: #888">Promoters</b>: {{currentTooltip.promoters}}</div>
-<div><b style="color: #888">Keywords</b>: {{currentTooltip.keywords}}</div>
-<div><b style="color: #888">References</b>: {{currentTooltip.references}}</div>
+<div ng-if="currentTooltip.keywords"><b style="color: #888">Keywords</b>: {{currentTooltip.keywords}}</div>
+<div ng-if="currentTooltip.references"><b style="color: #888">References</b>: {{currentTooltip.references}}</div>
 <div><b style="color: #888">Funding Source</b>: {{currentTooltip.fundingSource}}</div>
 <div class="no_wrap"><b style="color: #888">Principal Investigator</b>: {{currentTooltip.principalInvestigator}}</div>
-<div><b style="color: #888">Modified</b>: {{currentTooltip.modified}}</div>
-<div><b style="color: #888">IP Information</b>: {{currentTooltip.intellectualProperty}}</div>
+<div><b style="color: #888">Modified</b>: {{currentTooltip.modificationTime | date:'medium'}}</div>
+<div ng-if="currentTooltip.intellectualProperty"><b style="color: #888">IP Information</b>:
+    {{currentTooltip.intellectualProperty}}
+</div>

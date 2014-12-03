@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.search.controller', [])
-    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil) {
+    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil, Selection) {
         $scope.$on("RunSearch", function (event, filters) {
             $scope.searchResults = undefined;
             $scope.searchFilters = filters;
@@ -98,6 +98,17 @@ angular.module('ice.search.controller', [])
             }, $scope.searchResults.resultCount, offset, "/search");
 
             $location.path("/entry/" + entry.id);
+        };
+
+        //
+        // select result entry
+        //
+        $scope.selectSearchResult = function (entry) {
+            Selection.selectSearchEntry(entry);
+        };
+
+        $scope.searchEntrySelected = function (entry) {
+            return Selection.searchEntrySelected(entry);
         }
     })
     .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {

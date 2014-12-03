@@ -11,7 +11,7 @@
            ng-class="{'fa-square-o':!folder.propagatePermission, 'fa-check-square-o':folder.propagatePermission}"></i> Propagate permissions to contained parts
     </span>
     <i class="fa fa-question-circle opacity_hover"
-       tooltip="This applies any permissions that are set below to any parts that are added to the folder"
+       tooltip="Persists permissions set below to any parts that are added to the folder; even after they are removed from the folder"
        tooltip-placement="right"></i>
 
     <br><br>
@@ -51,8 +51,7 @@
 
                     <div style="overflow: auto; max-height: 120px;" class="pad-8">
 
-                        <div ng-if="!filtering && (!accessPermissions || !accessPermissions.length)"
-                             style="opacity: 0.7; padding: 3px 0 3px 0">
+                        <div ng-if="!filtering && !accessPermissions" style="opacity: 0.7; padding: 3px 0 3px 0">
                             <i>No matches found</i>
                         </div>
 
@@ -64,10 +63,9 @@
                             'fa-user permission_user':permission.article==='ACCOUNT'}"></i> {{permission.display}}
                             </span>
                         </div>
-
                     </div>
+
                     <div style="background-color: #f9f9f9; height: 24px">
-                        <!--<strong class="font-75em opacity_hover"><i class="fa fa-square-o"></i> Remote </strong>-->
                         <button type="button" class="btn btn-xs btn-default pull-right"
                                 ng-click="closePermissionOptions()">Close
                         </button>
