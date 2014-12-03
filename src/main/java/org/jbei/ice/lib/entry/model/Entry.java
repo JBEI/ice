@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -24,7 +25,6 @@ import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
-import com.google.common.base.Objects;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.*;
 import org.hibernate.search.annotations.Index;
@@ -500,7 +500,7 @@ public class Entry implements IDataModel {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId(), getRecordId());
+        return Objects.hash(Long.valueOf(getId()), getRecordId());
     }
 
     public Set<Folder> getFolders() {
@@ -537,9 +537,7 @@ public class Entry implements IDataModel {
 
         final Entry other = (Entry) obj;
 
-        return Objects.equal(this.recordId, other.getRecordId())
-                && Objects.equal(this.recordType, other.getRecordType())
-                && Objects.equal(this.getId(), other.getId());
+        return this.recordId.equals(other.getRecordId()) && this.id == other.getId();
     }
 
     public String getFundingSource() {
