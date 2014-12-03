@@ -289,7 +289,7 @@
         </tr>
         <tr data-ng-repeat="result in searchResults.results">
             <td width="10px">
-                <i class="fa fa-fw color-888" ng-click="selectSearchResult(result.entryInfo)"
+                <i class="fa fa-fw color-888 cursor_default" ng-click="selectSearchResult(result.entryInfo)"
                    ng-class="{'fa-square-o':!searchEntrySelected(result.entryInfo), 'fa-check-square-o':searchEntrySelected(result.entryInfo)}"></i>
             </td>
             <td ng-init="val=result.score/result.maxScore*100">
