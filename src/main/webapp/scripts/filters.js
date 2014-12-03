@@ -4,8 +4,17 @@ var iceFilters = angular.module('iceApp.filters', []);
 
 iceFilters.filter('capitalize', function () {
     return function (input) {
-        if (input != null)
-            return input.substring(0, 1).toUpperCase() + input.substring(1).toLowerCase();
+        if (input === undefined)
+            return '';
+
+        var res = '';
+        var inputArr = input.split(" ");
+        for (var i = 0; i < inputArr.length; i += 1) {
+            if (i > 0)
+                res += ' ';
+            res += inputArr[i].substring(0, 1).toUpperCase() + inputArr[i].substring(1).toLowerCase();
+        }
+        return res;
     }
 });
 
