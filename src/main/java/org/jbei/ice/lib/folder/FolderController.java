@@ -192,13 +192,14 @@ public class FolderController {
     /**
      * Retrieves the folder specified in the parameter and contents
      *
-     * @param userId
-     * @param folderId
-     * @param sort
-     * @param asc
-     * @param start
-     * @param limit
-     * @return
+     * @param userId   unique identifier for user making request
+     * @param folderId unique identifier for folder to be retrieved
+     * @param sort     sort order for folder content retrieval
+     * @param asc      sort order for folder content retrieval; ascending if true
+     * @param start    index of first item in retrieval
+     * @param limit    upper limit count of items to be retrieval
+     * @return wrapper around list of folder entries if folder is found, null otherwise
+     * @throws PermissionException if user does not have read permissions on folder
      */
     public FolderDetails retrieveFolderContents(String userId, long folderId, ColumnField sort, boolean asc,
             int start, int limit) {
@@ -382,11 +383,7 @@ public class FolderController {
             // todo : check visibility; allow non 9 only if user owns it or is admin
             folder = dao.addFolderContents(folder, entrys);
             if (folder.isPropagatePermissions()) {
-                try {
-                    permissionsController.propagateFolderPermissions(account, folder, true);
-                } catch (ControllerException e) {
-                    return null;
-                }
+                permissionsController.propagateFolderPermissions(account, folder, true);
             }
 
             details.setCount(dao.getFolderSize(folder.getId()));

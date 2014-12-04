@@ -1,23 +1,45 @@
 'use strict';
 
 angular.module('ice.entry.service', [])
-    .factory('Selection', function ($rootScope) {
+    .factory('Selection', function ($rootScope, $cookieStore) {
         var selectedSearchResults = {};
         var selectedSearchResultsCount = 0;
         var selectedSearchNotificationSent = false;  // send notification when at least one is selected and then none
         var canEdit = false;
+        var canDelete = false;
+        var selectedTypes = {};
+        var userId = $cookieStore.get('userId');
 
         return {
             selectSearchEntry:function (entry) {
+                // todo : this may be a problem when a user selects 3 entries (can edit 2) and deselects the 3rd
+                // todo : that use cannot edit
+
                 canEdit = entry.canEdit;
+                canDelete = entry.ownerEmail === userId;
 
                 if (selectedSearchResults[entry.id]) {
-                    // remove entry
+                    // remove entry id
                     selectedSearchResults[entry.id] = undefined;
                     selectedSearchResultsCount -= 1;
+
+                    // remove type
+                    if (selectedTypes[entry.type] && selectedTypes[entry.type].length) {
+                        var idx = selectedTypes[entry.type].indexOf(entry.id);
+                        selectedTypes[entry.type].splice(idx, 1);
+                        if (selectedTypes[entry.type].length === 0)
+                            delete selectedTypes[entry.type];
+                    }
                 } else {
+
+                    // add entry id
                     selectedSearchResults[entry.id] = entry;
                     selectedSearchResultsCount += 1;
+
+                    // add type
+                    if (!selectedTypes[entry.type])
+                        selectedTypes[entry.type] = [];
+                    selectedTypes[entry.type].push(entry.id);
                 }
 
                 // determine when to send a notification
@@ -55,7 +77,13 @@ angular.module('ice.entry.service', [])
             },
 
             canEdit:function () {
-                return canEdit && selectedSearchResultsCount > 0;
+                var count = 0;
+                for (var k in selectedTypes) if (selectedTypes.hasOwnProperty(k)) ++count;
+                return canEdit && selectedSearchResultsCount > 0 && count == 1;
+            },
+
+            canDelete:function () {
+                return ($rootScope.user.isAdmin || canDelete) && selectedSearchResultsCount > 0;
             },
 
             // resets all selected and send notifications
@@ -64,6 +92,7 @@ angular.module('ice.entry.service', [])
                 selectedSearchResultsCount = 0;
                 selectedSearchNotificationSent = false;
                 canEdit = false;
+                canDelete = false;
                 $rootScope.$emit("EntrySelected", selectedSearchResultsCount);
             }
         }

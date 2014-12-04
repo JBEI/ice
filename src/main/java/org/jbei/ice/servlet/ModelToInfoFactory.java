@@ -299,6 +299,7 @@ public class ModelToInfoFactory {
         view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime().getTime());
         view.setStatus(entry.getStatus());
+        view.setOwnerEmail(entry.getOwnerEmail());
         view.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
 
         if (userId != null)
@@ -307,7 +308,6 @@ public class ModelToInfoFactory {
         // information about the owner and creator
         if (includeOwnerInfo) {
             view.setOwner(entry.getOwner());
-            view.setOwnerEmail(entry.getOwnerEmail());
             view.setOwnerId(getAccountId(entry.getOwnerEmail()));
 
             // creator

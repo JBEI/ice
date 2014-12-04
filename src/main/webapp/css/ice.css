@@ -955,13 +955,12 @@ table.data_table tr td {
 }
 
 .subMenuTransfer[disabled] i {
-    color: #aaa;
+    color: #ccc;
 }
 
 .subMenuTransfer {
     height: 30px;
     color: #393939;
-    font-size: 0.80em;
     text-align: center;
     border-radius: 2px;
     border: 1px solid;
