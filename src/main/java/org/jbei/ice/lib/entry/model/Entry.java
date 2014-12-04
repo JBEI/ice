@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.dao.IDataModel;
@@ -90,7 +88,6 @@ import org.jbei.ice.lib.entry.model.Parameter;
 @Table(name = "entries")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
 @Inheritance(strategy = InheritanceType.JOINED)
-@XmlRootElement
 public class Entry implements IDataModel {
     private static final long serialVersionUID = 1L;
 
@@ -427,7 +424,6 @@ public class Entry implements IDataModel {
         this.references = references;
     }
 
-    @XmlTransient
     public Date getCreationTime() {
         return creationTime;
     }
@@ -436,7 +432,6 @@ public class Entry implements IDataModel {
         this.creationTime = creationTime;
     }
 
-    @XmlTransient
     public Date getModificationTime() {
         if (modificationTime == null)
             return creationTime;
@@ -500,7 +495,7 @@ public class Entry implements IDataModel {
 
     @Override
     public int hashCode() {
-        return Objects.hash(Long.valueOf(getId()), getRecordId());
+        return Objects.hash(id, getRecordId());
     }
 
     public Set<Folder> getFolders() {
