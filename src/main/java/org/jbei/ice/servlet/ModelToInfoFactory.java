@@ -197,9 +197,12 @@ public class ModelToInfoFactory {
         try {
             if (!StringUtils.isEmpty(entry.getPrincipalInvestigatorEmail())) {
                 Account piAccount = accountController.getByEmail(entry.getPrincipalInvestigatorEmail());
-                info.setPrincipalInvestigator(piAccount.getFullName());
-                info.setPrincipalInvestigatorEmail(piAccount.getEmail());
-                info.setPrincipalInvestigatorId(piAccount.getId());
+                if (piAccount != null) {
+                    info.setPrincipalInvestigator(piAccount.getFullName());
+                    info.setPrincipalInvestigatorEmail(piAccount.getEmail());
+                    info.setPrincipalInvestigatorId(piAccount.getId());
+                } else
+                    info.setPrincipalInvestigatorEmail(entry.getPrincipalInvestigatorEmail());
             }
         } catch (Exception e) {
             Logger.debug(e.getMessage());
