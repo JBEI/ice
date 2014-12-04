@@ -121,40 +121,18 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
         var upload = Upload(sid);
 
         if (selectedEntries.length > 1) {
-            console.log(selectedEntries);
+            var type;
+            for (type in Selection.getSelectedTypes()) {
+                break;
+            }
 
             // first create bulk upload
-//            upload.create({type:$scope.importType}, function (result) {
-//                $scope.bulkUpload.id = result.id;
-//                $scope.bulkUpload.lastUpdate = result.lastUpdate;
-//                $scope.bulkUpload.name = result.name;
-//                //                            $location.path("/upload/" + result.id, false);
-//
-//                // then update the list
-//                upload.updateList({importId:$scope.bulkUpload.id}, {entryList:entryList}, function (success) {
-//                    for (var j = 0; j < success.entryList.length; j += 1) {
-//                        var part = success.entryList[j];
-//
-//                        $scope.bulkUpload.entryIdData[part.index] = part.id;
-//                        if (part.linkedParts && part.linkedParts.length) {
-//                            var linkedId = part.linkedParts[0].id;
-//                            if (linkedId) {
-//                                $scope.bulkUpload.linkedEntryIdData[part.index] = linkedId;
-//                            }
-//                        }
-//                    }
-//                    $scope.saving = false;
-//                }, function (error) {
-//                    console.error(error);
-//                    $scope.saving = false;
-//                });
-//
-//
-//            }, function (error) {
-//                console.error("error creating bulk upload", error);
-//            });
-
-
+            upload.create({name:"Bulk Edit", type:type, entryList:selectedEntries}, function (result) {
+                console.log(result);
+                $location.path("/upload/" + result.id);
+            }, function (error) {
+                console.error("error creating bulk upload", error);
+            });
         } else {
             $location.path('/entry/edit/' + selectedEntries()[0].id);
         }

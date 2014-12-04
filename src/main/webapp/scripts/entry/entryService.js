@@ -76,6 +76,10 @@ angular.module('ice.entry.service', [])
                 return selected;
             },
 
+            getSelectedTypes:function () {
+                return selectedTypes;
+            },
+
             canEdit:function () {
                 var count = 0;
                 for (var k in selectedTypes) if (selectedTypes.hasOwnProperty(k)) ++count;
