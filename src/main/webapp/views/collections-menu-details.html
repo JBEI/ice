@@ -20,8 +20,14 @@
                  ng-hide="folder.deleteRequested" ng-click="selectCollectionFolder(folder)"
                  ng-Mouseover="showSubMenu=folder.canEdit" ng-Mouseleave="showSubMenu=false">
 
-                <i class="fa fa-folder-o fa-fw"
-                   style="font-size: 12px; color: #515050; padding-left: 6px"></i>&nbsp;
+                <i class="fa fa-folder-o fa-fw" ng-if="folder.type!=='SHARED'"
+                   style="color: #515050; padding-left: 7px"></i>&nbsp;
+
+                <span class="fa-stack" style="font-size: 8px;" ng-if="folder.type==='SHARED'">
+                  <i class="fa fa-folder fa-stack-2x" style="color: #999;"></i>
+                  <i class="fa fa-user fa-stack-1x" style="margin-left: 2px; color: #f1f1f1"></i>
+                </span>
+
                 <span class="font-85em" style="font-size: 12px">{{folder.folderName | limitTo:25}}</span>&nbsp;
                 <span ng-show="!showSubMenu" class="menu_count">{{folder.count | number}}</span>
 
