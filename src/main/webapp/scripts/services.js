@@ -793,12 +793,10 @@ iceServices.factory('Authentication',
             },
 
             isAdmin:function () {
-                // todo
-//                console.log($rootScope.user);
-//                 if(!$rootScope.user || !$rootScope.user.isAdmin) {
-//                     $location.path("/");
-//                     return false;
-//                 }
+                if (!$rootScope.user || !$rootScope.user.isAdmin) {
+                    $location.path("/folders/personal");
+                    return false;
+                }
                 return true;
             },
 
