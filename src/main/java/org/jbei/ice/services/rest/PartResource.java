@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -94,14 +95,19 @@ public class PartResource extends RestResource {
             @PathParam("id") String id,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = SessionHandler.getUserIdBySession(sessionId);
-        log(userId, "retrieving details for " + id);
-        EntryType type = EntryType.nameToType(id);
-        PartData data;
-        if (type != null)
-            data = controller.getPartDefaults(userId, type);
-        else
-            data = controller.retrieveEntryDetails(userId, id);
-        return super.respond(data);
+        try {
+            log(userId, "retrieving details for " + id);
+            EntryType type = EntryType.nameToType(id);
+            PartData data;
+            if (type != null)
+                data = controller.getPartDefaults(userId, type);
+            else
+                data = controller.retrieveEntryDetails(userId, id);
+            return super.respond(data);
+        } catch (PermissionException pe) {
+            // todo : have a generic error entity returned
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
     }
 
     /**

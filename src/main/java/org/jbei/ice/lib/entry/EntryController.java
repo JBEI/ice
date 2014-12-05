@@ -17,7 +17,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.jbei.ice.ApplicationController;
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
@@ -334,7 +333,6 @@ public class EntryController {
      *
      * @param entry                entry to deleted
      * @param scheduleIndexRebuild True if index rebuild is scheduled.
-     * @throws ControllerException
      */
     private void delete(String userId, Entry entry, boolean scheduleIndexRebuild) {
         if (entry == null) {

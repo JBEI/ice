@@ -2081,6 +2081,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     $scope.entryFields = undefined;
     $scope.entry = undefined;
     $scope.notFound = undefined;
+    $scope.noAccess = undefined;
 
     entry.query({partId:$stateParams.id},
         function (result) {
@@ -2096,6 +2097,8 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         }, function (error) {
             if (error.status === 404)
                 $scope.notFound = true;
+            else if (error.status === 403)
+                $scope.noAccess = true;
         });
 
     var menuSubDetails = $scope.subDetails = [
