@@ -15,6 +15,7 @@ public class StorageLocation implements IDataTransferModel {
     private String display;
     private SampleType type;
     private StorageLocation child;
+    private String name;
 
     public long getId() {
         return id;
@@ -46,5 +47,13 @@ public class StorageLocation implements IDataTransferModel {
 
     public void setChild(StorageLocation child) {
         this.child = child;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

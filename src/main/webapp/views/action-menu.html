@@ -3,7 +3,14 @@
         <div class="btn-group" dropdown>
             <button type="button" ng-disabled="addToDisabled" ng-click="retrieveUserFolders()"
                     class="btn btn-default btn-sm subMenuTransfer dropdown-toggle">
-                <i style="font-size: 14px;" class="fa fa-plus blue"></i> Add To <span class="caret"></span>
+                <!--<i style="font-size: 14px;" class="fa fa-plus blue"></i>-->
+
+                <span class="fa-stack" style="font-size: 8px;">
+                  <i class="fa fa-folder fa-stack-2x blue"></i>
+                  <i class="fa fa-plus fa-stack-1x" style="color: #f5f5f5;"></i>
+                </span>
+
+                Add To <span class="caret"></span>
             </button>
             <span class="dropdown-menu color-888" ng-if="!userFolders">
                 <i class="fa fa-fw fa-spin fa-spinner"></i> Loading...
@@ -36,7 +43,12 @@
         <!--option to remove from folder-->
         <button type="button" ng-disabled="removeDisabled" ng-click="removeEntriesFromFolder()"
                 class="btn btn-default btn-sm subMenuTransfer">
-            <i style="font-size: 14px;" class="fa fa-minus"></i> Remove
+            <!--<i style="font-size: 14px;" class="fa fa-minus"></i>-->
+            <span class="fa-stack" style="font-size: 8px;">
+              <i class="fa fa-folder fa-stack-2x red"></i>
+              <i class="fa fa-minus fa-stack-1x" style="color: #f5f5f5;"></i>
+            </span>
+            Remove
         </button>
 
         <div class="btn-group" dropdown>
@@ -76,7 +88,7 @@
         <button type="button" class="btn btn-default btn-sm subMenuTransfer" ng-disabled="!canEdit()"
                 ng-click="editEntry()"><i style="font-size: 14px" class="fa fa-edit blue"></i> Edit
         </button>
-        <button type="button" class="btn btn-default btn-sm subMenuTransfer" ng-disabled="deleteDisabled"
+        <button type="button" class="btn btn-default btn-sm subMenuTransfer" ng-disabled="!canDelete()"
                 ng-click="deleteSelectedEntries()"><i style="font-size: 14px" class="fa fa-trash-o red"></i> Delete
         </button>
     </div>

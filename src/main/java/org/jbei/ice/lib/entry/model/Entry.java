@@ -5,10 +5,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.*;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.dao.IDataModel;
@@ -24,7 +23,6 @@ import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
-import com.google.common.base.Objects;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.*;
 import org.hibernate.search.annotations.Index;
@@ -90,7 +88,6 @@ import org.jbei.ice.lib.entry.model.Parameter;
 @Table(name = "entries")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
 @Inheritance(strategy = InheritanceType.JOINED)
-@XmlRootElement
 public class Entry implements IDataModel {
     private static final long serialVersionUID = 1L;
 
@@ -427,7 +424,6 @@ public class Entry implements IDataModel {
         this.references = references;
     }
 
-    @XmlTransient
     public Date getCreationTime() {
         return creationTime;
     }
@@ -436,7 +432,6 @@ public class Entry implements IDataModel {
         this.creationTime = creationTime;
     }
 
-    @XmlTransient
     public Date getModificationTime() {
         if (modificationTime == null)
             return creationTime;
@@ -500,7 +495,7 @@ public class Entry implements IDataModel {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId(), getRecordId());
+        return Objects.hash(id, getRecordId());
     }
 
     public Set<Folder> getFolders() {
@@ -537,9 +532,7 @@ public class Entry implements IDataModel {
 
         final Entry other = (Entry) obj;
 
-        return Objects.equal(this.recordId, other.getRecordId())
-                && Objects.equal(this.recordType, other.getRecordType())
-                && Objects.equal(this.getId(), other.getId());
+        return this.recordId.equals(other.getRecordId()) && this.id == other.getId();
     }
 
     public String getFundingSource() {

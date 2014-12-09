@@ -13,14 +13,12 @@ import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
-import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.models.TraceSequence;
 
 import org.apache.commons.lang.StringUtils;
@@ -197,9 +195,12 @@ public class ModelToInfoFactory {
         try {
             if (!StringUtils.isEmpty(entry.getPrincipalInvestigatorEmail())) {
                 Account piAccount = accountController.getByEmail(entry.getPrincipalInvestigatorEmail());
-                info.setPrincipalInvestigator(piAccount.getFullName());
-                info.setPrincipalInvestigatorEmail(piAccount.getEmail());
-                info.setPrincipalInvestigatorId(piAccount.getId());
+                if (piAccount != null) {
+                    info.setPrincipalInvestigator(piAccount.getFullName());
+                    info.setPrincipalInvestigatorEmail(piAccount.getEmail());
+                    info.setPrincipalInvestigatorId(piAccount.getId());
+                } else
+                    info.setPrincipalInvestigatorEmail(entry.getPrincipalInvestigatorEmail());
             }
         } catch (Exception e) {
             Logger.debug(e.getMessage());
@@ -299,6 +300,7 @@ public class ModelToInfoFactory {
         view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime().getTime());
         view.setStatus(entry.getStatus());
+        view.setOwnerEmail(entry.getOwnerEmail());
         view.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
 
         if (userId != null)
@@ -307,7 +309,6 @@ public class ModelToInfoFactory {
         // information about the owner and creator
         if (includeOwnerInfo) {
             view.setOwner(entry.getOwner());
-            view.setOwnerEmail(entry.getOwnerEmail());
             view.setOwnerId(getAccountId(entry.getOwnerEmail()));
 
             // creator
@@ -317,13 +318,11 @@ public class ModelToInfoFactory {
         }
 
         // attachments
-        AttachmentController attachmentController = new AttachmentController();
-        boolean hasAttachment = attachmentController.hasAttachment(entry);
+        boolean hasAttachment = DAOFactory.getAttachmentDAO().hasAttachment(entry);
         view.setHasAttachment(hasAttachment);
 
         // has sample
-        SampleController sampleController = new SampleController();
-        view.setHasSample(sampleController.hasSample(entry));
+        view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));
 
         // has sequence
         SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();

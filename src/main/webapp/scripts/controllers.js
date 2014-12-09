@@ -3,7 +3,7 @@
 var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'ui.bootstrap', 'angularFileUpload',
     'vr.directives.slider', 'angularMoment']);
 
-iceControllers.controller('ActionMenuController', function ($scope, $window, $rootScope, $location, $cookieStore, Folders, Entry, WebOfRegistries, Files, Selection) {
+iceControllers.controller('ActionMenuController', function ($scope, $window, $rootScope, $location, $cookieStore, Folders, Entry, WebOfRegistries, Files, Selection, Upload) {
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
     $scope.entrySelected = false;
 
@@ -12,6 +12,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
         function (event, toState, toParams, fromState, fromParams) {
             $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
             $scope.entrySelected = false;
+            Selection.reset();
         });
 
     var sid = $cookieStore.get("sessionId");
@@ -110,10 +111,31 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
         return Selection.canEdit();
     };
 
+    $scope.canDelete = function () {
+        return Selection.canDelete();
+    };
+
     // function that handles "edit" click
-    // todo : must handle multiple
     $scope.editEntry = function () {
-        $location.path('/entry/edit/' + $scope.entry.id);
+        var selectedEntries = Selection.getSelectedEntries();
+        var upload = Upload(sid);
+
+        if (selectedEntries.length > 1) {
+            var type;
+            for (type in Selection.getSelectedTypes()) {
+                break;
+            }
+
+            // first create bulk upload
+            upload.create({name:"Bulk Edit", type:type, entryList:selectedEntries}, function (result) {
+                console.log(result);
+                $location.path("/upload/" + result.id);
+            }, function (error) {
+                console.error("error creating bulk upload", error);
+            });
+        } else {
+            $location.path('/entry/edit/' + selectedEntries()[0].id);
+        }
         $scope.editDisabled = true;
     };
 
@@ -2059,6 +2081,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     $scope.entryFields = undefined;
     $scope.entry = undefined;
     $scope.notFound = undefined;
+    $scope.noAccess = undefined;
 
     entry.query({partId:$stateParams.id},
         function (result) {
@@ -2074,6 +2097,8 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         }, function (error) {
             if (error.status === 404)
                 $scope.notFound = true;
+            else if (error.status === 403)
+                $scope.noAccess = true;
         });
 
     var menuSubDetails = $scope.subDetails = [

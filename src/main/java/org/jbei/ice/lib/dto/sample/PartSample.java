@@ -11,11 +11,20 @@ import org.jbei.ice.lib.dto.StorageLocation;
  */
 public class PartSample implements IDataTransferModel {
 
+    private long id;
     private AccountTransfer depositor;
     private String label;
     private long creationTime;
     private boolean inCart;
-    private StorageLocation main;
+    private StorageLocation location;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
 
     public AccountTransfer getDepositor() {
         return depositor;
@@ -49,11 +58,11 @@ public class PartSample implements IDataTransferModel {
         this.inCart = inCart;
     }
 
-    public StorageLocation getMain() {
-        return main;
+    public StorageLocation getLocation() {
+        return location;
     }
 
-    public void setMain(StorageLocation main) {
-        this.main = main;
+    public void setLocation(StorageLocation location) {
+        this.location = location;
     }
 }

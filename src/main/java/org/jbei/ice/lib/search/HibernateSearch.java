@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -272,14 +271,11 @@ public class HibernateSearch {
         fullTextQuery.enableFullTextFilter("blastFilter").setParameter("recordIds", new HashSet<>(
                 blastResults.keySet()));
 
-        Set<String> groupUUIDs = new HashSet<>();
+        Set<String> groupUUIDs;
         if (account != null) {
-            try {
-                groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(account);
-            } catch (ControllerException e) {
-                Logger.error(e);
-            }
-        }
+            groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(account);
+        } else
+            groupUUIDs = new HashSet<>();
 
         String email = account == null ? "" : account.getEmail();
         fullTextQuery.enableFullTextFilter("security")
@@ -464,12 +460,7 @@ public class HibernateSearch {
             return;
         }
 
-        Set<String> groupUUIDs = new HashSet<>();
-        try {
-            groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(account);
-        } catch (ControllerException e) {
-            Logger.error(e);
-        }
+        Set<String> groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(account);
         String email = account == null ? "" : account.getEmail();
         fullTextQuery.enableFullTextFilter("security")
                      .setParameter("account", email)

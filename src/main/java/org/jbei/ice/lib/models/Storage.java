@@ -66,7 +66,7 @@ public class Storage implements IDataModel {
     private static final long serialVersionUID = 1L;
 
     public enum StorageType {
-        GENERIC, FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, PLATE81, WELL, TUBE, SCHEME
+        GENERIC, ADDGENE, FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, PLATE81, WELL, TUBE, SCHEME
     }
 
     @Id
@@ -195,6 +195,7 @@ public class Storage implements IDataModel {
         location.setDisplay(index);
         location.setId(id);
         location.setType(SampleType.toSampleType(storageType.name()));
+        location.setName(name);
         return location;
     }
 }

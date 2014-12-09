@@ -74,11 +74,25 @@ public class BulkUploadController {
         BulkUpload upload = new BulkUpload();
         upload.setName(StringUtils.isEmpty(info.getName()) ? "untitled" : info.getName());
         upload.setAccount(account);
-        upload.setCreationTime(new Date(System.currentTimeMillis()));
+        upload.setCreationTime(new Date());
         upload.setLastUpdateTime(upload.getCreationTime());
         upload.setStatus(BulkUploadStatus.IN_PROGRESS);
         upload.setImportType(info.getType());
-        return dao.create(upload).toDataTransferObject();
+        upload = dao.create(upload);
+
+        if (info.getEntryList() != null) {
+            for (PartData data : info.getEntryList()) {
+                Entry entry = entryDAO.get(data.getId());
+                // todo if entry is in another bulk upload, then update (line 95) will fail
+                if (entry == null)
+                    continue;
+
+                upload.getContents().add(entry);
+            }
+        }
+
+        dao.update(upload);
+        return upload.toDataTransferObject();
     }
 
     /**

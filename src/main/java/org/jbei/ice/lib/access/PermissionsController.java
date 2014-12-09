@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -327,7 +326,7 @@ public class PermissionsController {
         return accessPermissions;
     }
 
-    public boolean propagateFolderPermissions(Account account, Folder folder, boolean prop) throws ControllerException {
+    public boolean propagateFolderPermissions(Account account, Folder folder, boolean prop) {
         if (!accountController.isAdministrator(account) && !account.getEmail().equalsIgnoreCase(folder.getOwnerEmail()))
             return false;
 
@@ -363,7 +362,7 @@ public class PermissionsController {
      *                    if one exists
      * @param partId      unique identifier for the part. If a part with this identifier is not located,
      *                    then one is created
-     * @param permissions list of permissions to set for the part. Null or empy list will clear all permissions
+     * @param permissions list of permissions to set for the part. Null or empty list will clear all permissions
      * @return part whose permissions have been set. At a minimum it contains the unique identifier for the part
      */
     public PartData setEntryPermissions(String userId, long partId, ArrayList<AccessPermission> permissions) {

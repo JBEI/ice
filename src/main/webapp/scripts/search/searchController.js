@@ -11,8 +11,6 @@ angular.module('ice.search.controller', [])
         var runAdvancedSearch = function (filters) {
             $scope.loadingSearchResults = true;
 
-            console.log(filters);
-
             Search().runAdvancedSearch({webSearch:filters.webSearch}, filters,
                 function (result) {
                     $scope.searchResults = result;
@@ -84,8 +82,6 @@ angular.module('ice.search.controller', [])
             EntryContextUtil.setContextCallback(function (offset, callback) {
                 $scope.searchFilters.parameters.start = offset;
                 $scope.searchFilters.parameters.retrieveCount = 1;
-
-//                console.log("next", $scope.searchFilters);
 
                 Search().runAdvancedSearch({webSearch:$scope.searchFilters.webSearch}, $scope.searchFilters,
                     function (result) {
