@@ -13,7 +13,6 @@ import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
-import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Link;
@@ -319,8 +318,7 @@ public class ModelToInfoFactory {
         }
 
         // attachments
-        AttachmentController attachmentController = new AttachmentController();
-        boolean hasAttachment = attachmentController.hasAttachment(entry);
+        boolean hasAttachment = DAOFactory.getAttachmentDAO().hasAttachment(entry);
         view.setHasAttachment(hasAttachment);
 
         // has sample

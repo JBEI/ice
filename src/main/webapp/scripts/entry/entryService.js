@@ -112,11 +112,14 @@ angular.module('ice.entry.service', [])
             return result;
         };
 
+        //
         // commons fields to all the different types of parts supported by the system
+        // inputType of "withEmail" uses attribute "bothRequired" to indicate that the email portion is required
+        //
         var partFields = [
             {label:"Name", required:true, schema:'name', placeHolder:'e.g. JBEI-0001', inputType:'short'},
             {label:"Alias", schema:'alias', inputType:'short'},
-            {label:"Principal Investigator", required:true, schema:'principalInvestigator', inputType:'withEmail', bothRequired:'false'},
+            {label:"Principal Investigator", required:true, schema:'principalInvestigator', inputType:'withEmail', bothRequired:false},
             {label:"Funding Source", schema:'fundingSource', inputType:'short'},
             {label:"Status", schema:'status', options:[
                 {value:"Complete", text:"Complete"},
@@ -128,7 +131,7 @@ angular.module('ice.entry.service', [])
                 {value:"1", text:"Level 1"},
                 {value:"2", text:"Level 2"}
             ]},
-            {label:"Creator", required:true, schema:'creator', inputType:'withEmail', bothRequired:'true'},
+            {label:"Creator", required:true, schema:'creator', inputType:'withEmail', bothRequired:true},
             {label:"Keywords", schema:'keywords', inputType:'medium'},
             {label:"Links", schema:'links', inputType:'add'},
             {label:"Summary", required:true, schema:'shortDescription', inputType:'long'},
@@ -237,6 +240,9 @@ angular.module('ice.entry.service', [])
                         }
                     }
                 } else {
+                    if (field.bothRequired) {
+                        field.withEmailInvalid = (part[field.schema + 'Email'] === undefined || part[field.schema + 'Email'] === '');
+                    }
                     field.invalid = (part[field.schema] === undefined || part[field.schema] === '');
                 }
 
