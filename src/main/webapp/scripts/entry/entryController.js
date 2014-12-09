@@ -181,7 +181,7 @@ angular.module('ice.entry.controller', [])
                 id:$scope.user.id,
                 email:$scope.user.email
             },
-            main:{}
+            location:{}
         };
 
         $scope.format = "M/d/yyyy h:mm a";
@@ -193,15 +193,26 @@ angular.module('ice.entry.controller', [])
             };
         };
 
+        $scope.delete = function (sample) {
+            entry.deleteSample({partId:partId, sampleId:sample.id}, function (result) {
+                console.log(result);
+                var idx = $scope.samples.indexOf(sample);
+                $scope.samples.splice(idx, 1);
+                console.log("deleted", sample, idx);
+            }, function (error) {
+                console.log(error);
+            });
+        };
+
         $scope.submitBarcode = function () {
             $scope.newSample.code = $scope.newSample.open.cell;
-            $scope.newSample.main.child = {
+            $scope.newSample.location.child = {
                 display:$scope.newSample.open.cell,
                 type:'WELL'
             };
 
             if ($scope.newSample.open.barcode) {
-                $scope.newSample.main.child.child = {
+                $scope.newSample.location.child.child = {
                     display:$scope.newSample.open.barcode,
                     type:'TUBE'
                 }
@@ -211,8 +222,6 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.createNewSample = function () {
-            $scope.newSample.main.type = "PLATE96";
-
             // create sample
             entry.addSample({partId:partId}, $scope.newSample, function (result) {
                 $scope.samples = result;
@@ -222,7 +231,7 @@ angular.module('ice.entry.controller', [])
                         id:$scope.user.id,
                         email:$scope.user.email
                     },
-                    main:{}
+                    location:{}
                 };
             }, function (error) {
                 console.error(error);
@@ -242,7 +251,7 @@ angular.module('ice.entry.controller', [])
             if ($scope.newSample.code != rc)
                 return false;
 
-            var recurse = $scope.newSample.main;
+            var recurse = $scope.newSample.location;
             while (recurse != null) {
                 if (recurse.type != type) {
                     recurse = recurse.child;
@@ -257,7 +266,7 @@ angular.module('ice.entry.controller', [])
         // has either well or t
         $scope.hasContent = function (row, col) {
             var rc = row + (10 + col + '').slice(-2);
-            var recurse = $scope.newSample.main;
+            var recurse = $scope.newSample.location;
             while (recurse != null) {
                 if (recurse.display == rc)
                     return true;
@@ -265,9 +274,6 @@ angular.module('ice.entry.controller', [])
                 recurse = recurse.child;
             }
             return false;
-
-//            newSample.open.cell === row + (10+col+'').slice(-2)
-//            "main":{"child":{"display":"C04","type":"WELL","child":{"type":"TUBE"}}}
         }
     })
     .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, $fileUploader, Entry) {

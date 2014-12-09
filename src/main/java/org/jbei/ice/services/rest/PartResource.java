@@ -59,6 +59,7 @@ public class PartResource extends RestResource {
     private AttachmentController attachmentController = new AttachmentController();
     private SequenceController sequenceController = new SequenceController();
     private ExperimentController experimentController = new ExperimentController();
+    private SampleController sampleController = new SampleController();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -390,7 +391,6 @@ public class PartResource extends RestResource {
     public ArrayList<PartSample> getSamples(@Context UriInfo info, @PathParam("id") long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = SessionHandler.getUserIdBySession(userAgentHeader);
-        SampleController sampleController = new SampleController();
         return sampleController.retrieveEntrySamples(userId, partId);
     }
 
@@ -401,9 +401,19 @@ public class PartResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
             PartSample partSample) {
         String userId = SessionHandler.getUserIdBySession(userAgentHeader);
-        SampleController sampleController = new SampleController();
         sampleController.createSample(userId, partId, partSample);
         return sampleController.retrieveEntrySamples(userId, partId);
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/samples/{sampleId}")
+    public Response deleteSample(@Context UriInfo info, @PathParam("id") long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            @PathParam("sampleId") long sampleId) {
+        String userId = SessionHandler.getUserIdBySession(userAgentHeader);
+        boolean success = sampleController.delete(userId, partId, sampleId);
+        return super.respond(success);
     }
 
     @GET
@@ -416,24 +426,11 @@ public class PartResource extends RestResource {
             userAgentHeader = sessionId;
 
         String userId = SessionHandler.getUserIdBySession(userAgentHeader);
-        FeaturedDNASequence sequence = new SequenceController().retrievePartSequence(userId, partId);
+        FeaturedDNASequence sequence = sequenceController.retrievePartSequence(userId, partId);
         if (sequence == null)
             return Response.status(Response.Status.NO_CONTENT).build();
         return Response.status(Response.Status.OK).entity(sequence).build();
     }
-
-//    @GET
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Path("/{id}/sequence/visual")
-//    public String getVisual(@PathParam("id") long partId,
-//            @QueryParam("sid") String sessionId,
-//            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-//        if (StringUtils.isEmpty(userAgentHeader))
-//            userAgentHeader = sessionId;
-//
-//        String userId = getUserIdFromSessionHeader(userAgentHeader);
-//        return new SequenceController().retrievePartSequence(userId, partId);
-//    }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)

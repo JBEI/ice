@@ -9,6 +9,7 @@ package org.jbei.ice.lib.dto.sample;
 public enum SampleType {
 
     PLATE96(true),
+    ADDGENE(true),
     GENERIC(true),
     FREEZER(false),
     SHELF(true),

@@ -1,15 +1,18 @@
 package org.jbei.ice.services.rest;
 
 import java.util.ArrayList;
+import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.sample.UserSamples;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
+import org.jbei.ice.lib.entry.sample.SampleController;
 
 /**
  * REST Resource for samples
@@ -20,6 +23,7 @@ import org.jbei.ice.lib.entry.sample.RequestRetriever;
 public class SampleResource extends RestResource {
 
     private RequestRetriever requestRetriever = new RequestRetriever();
+    private SampleController sampleController = new SampleController();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -112,5 +116,16 @@ public class SampleResource extends RestResource {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         log(userId, "add sample request to cart for " + request.getPartData().getId());
         return requestRetriever.placeSampleInCart(userId, request);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/storage/{type}")
+    public Response getSampleStorageType(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            @DefaultValue("IN_CART") @QueryParam("type") String type) {
+        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        List<StorageLocation> locations = sampleController.getStorageLocations(userId, type);
+        return respond(locations);
     }
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.SampleDAO;
 import org.jbei.ice.lib.dao.hibernate.StorageDAO;
@@ -34,10 +35,6 @@ public class SampleController {
         dao = DAOFactory.getSampleDAO();
         storageDAO = DAOFactory.getStorageDAO();
         entryAuthorization = new EntryAuthorization();
-    }
-
-    public boolean hasSample(Entry entry) {
-        return dao.hasSample(entry);
     }
 
     // mainly used by the api to create a strain sample record
@@ -116,29 +113,37 @@ public class SampleController {
         sample.setEntry(entry);
 
         String depositor = partSample.getDepositor().getEmail();
-        StorageLocation mainLocation = partSample.getMain();
+        StorageLocation mainLocation = partSample.getLocation();
 
         // check and create the storage locations
         if (mainLocation != null) {
-            Storage currentStorage = storageDAO.get(mainLocation.getId());
-            if (currentStorage == null) {
-                currentStorage = createStorage(userId, mainLocation.getDisplay(), mainLocation.getType());
-                currentStorage = storageDAO.create(currentStorage);
+            Storage currentStorage;
+            switch (mainLocation.getType()) {
+                case ADDGENE:
+                    currentStorage = createStorage(depositor, mainLocation.getDisplay(), mainLocation.getType());
+                    currentStorage = storageDAO.create(currentStorage);
+                    break;
+
+                default:
+                    currentStorage = storageDAO.get(mainLocation.getId());
+                    if (currentStorage == null) {
+                        currentStorage = createStorage(userId, mainLocation.getDisplay(), mainLocation.getType());
+                        currentStorage = storageDAO.create(currentStorage);
+                    }
+
+                    while (mainLocation.getChild() != null) {
+                        StorageLocation child = mainLocation.getChild();
+                        Storage childStorage = storageDAO.get(child.getId());
+                        if (childStorage == null) {
+                            childStorage = createStorage(depositor, child.getDisplay(), child.getType());
+                            childStorage.setParent(currentStorage);
+                            childStorage = storageDAO.create(childStorage);
+                        }
+
+                        currentStorage = childStorage;
+                        mainLocation = child;
+                    }
             }
-
-            while (mainLocation.getChild() != null) {
-                StorageLocation child = mainLocation.getChild();
-                Storage childStorage = storageDAO.get(child.getId());
-                if (childStorage == null) {
-                    childStorage = createStorage(depositor, child.getDisplay(), child.getType());
-                    childStorage.setParent(currentStorage);
-                    childStorage = storageDAO.create(childStorage);
-                }
-
-                currentStorage = childStorage;
-                mainLocation = child;
-            }
-
             sample.setStorage(currentStorage);
         }
 
@@ -174,7 +179,7 @@ public class SampleController {
                 StorageLocation location = new StorageLocation();
                 location.setType(SampleType.GENERIC);
                 location.setDisplay(sample.getLabel());
-                generic.setMain(location);
+                generic.setLocation(location);
                 samples.add(generic);
                 continue;
             }
@@ -194,9 +199,10 @@ public class SampleController {
 
             // get specific sample type and details about it
             PartSample partSample = new PartSample();
+            partSample.setId(sample.getId());
             partSample.setCreationTime(sample.getCreationTime().getTime());
             partSample.setLabel(sample.getLabel());
-            partSample.setMain(storageLocation);
+            partSample.setLocation(storageLocation);
             partSample.setInCart(inCart);
 
             Account account = DAOFactory.getAccountDAO().getByEmail(sample.getDepositor());
@@ -212,5 +218,34 @@ public class SampleController {
         }
 
         return samples;
+    }
+
+    public boolean delete(String userId, long partId, long sampleId) {
+        Sample sample = dao.get(sampleId);
+        if (sample == null)
+            return true;
+
+        Entry entry = sample.getEntry();
+        if (entry == null || partId != entry.getId())
+            return false;
+
+        entryAuthorization.expectWrite(userId, entry);
+
+        try {
+            dao.delete(sample);
+            return true;
+        } catch (DAOException de) {
+            return false;
+        }
+    }
+
+    public List<StorageLocation> getStorageLocations(String userId, String entryType) {
+        List<Storage> storages = DAOFactory.getStorageDAO().getAllStorageSchemes();
+        ArrayList<StorageLocation> locations = new ArrayList<>();
+        for (Storage storage : storages) {
+            locations.add(storage.toDataTransferObject());
+        }
+
+        return locations;
     }
 }

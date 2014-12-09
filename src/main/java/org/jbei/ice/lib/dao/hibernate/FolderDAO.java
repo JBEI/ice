@@ -50,7 +50,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
                     it.remove();
             }
 
-            folder.setModificationTime(new Date(System.currentTimeMillis()));
+            folder.setModificationTime(new Date());
             session.saveOrUpdate(folder);
             return folder;
         } catch (HibernateException he) {

@@ -156,7 +156,7 @@ iceServices.factory('Message', function ($resource) {
 
 iceServices.factory('Samples', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/samples', {userId:'@userId', requestId:'@requestId', status:'@status'}, {
+        return $resource('/rest/samples', {userId:'@userId', requestId:'@requestId', status:'@status', type:'@type'}, {
             requests:{
                 method:'GET',
                 responseType:'json',
@@ -196,6 +196,14 @@ iceServices.factory('Samples', function ($resource) {
                 isArray:true,
                 url:"/rest/samples/requests",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            getStorageType:{
+                method:'GET',
+                responseType:'json',
+                isArray:true,
+                url:"/rest/samples/storage/:type",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             }
         })
     }
@@ -228,7 +236,7 @@ iceServices.factory('Attachment', function ($resource) {
 
 iceServices.factory('Entry', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/parts/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId', commentId:'@commentId', linkId:'@linkId', historyId:'@historyId'}, {
+        return $resource('/rest/parts/', {partId:'@id', traceId:'@traceId', permissionId:'@permissionId', commentId:'@commentId', sampleId:'@sampleId', linkId:'@linkId', historyId:'@historyId'}, {
             query:{
                 method:'GET',
                 responseType:"json",
@@ -336,6 +344,13 @@ iceServices.factory('Entry', function ($resource) {
                 responseType:'json',
                 isArray:true,
                 url:'/rest/parts/:partId/samples',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            deleteSample:{
+                method:'DELETE',
+                responseType:'json',
+                url:'/rest/parts/:partId/samples/:sampleId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
@@ -792,12 +807,14 @@ iceServices.factory('Authentication',
                     });
             },
 
-            isAdmin:function () {
-                if (!$rootScope.user || !$rootScope.user.isAdmin) {
-                    $location.path("/folders/personal");
-                    return false;
-                }
-                return true;
+            // todo : use a parameter in isSessionValid to check
+            isAdmin:function (User) {
+                this.isSessionValid().then(function (result) {
+                    if (!result || !result.data || !result.data.isAdmin) {
+                        $location.path("/folders/personal");
+                        return false;
+                    }
+                });
             },
 
             // logs out user by invalidating the session id

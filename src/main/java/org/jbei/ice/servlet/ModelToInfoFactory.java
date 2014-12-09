@@ -20,7 +20,6 @@ import org.jbei.ice.lib.entry.model.Link;
 import org.jbei.ice.lib.entry.model.Parameter;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.models.TraceSequence;
 
 import org.apache.commons.lang.StringUtils;
@@ -325,8 +324,7 @@ public class ModelToInfoFactory {
         view.setHasAttachment(hasAttachment);
 
         // has sample
-        SampleController sampleController = new SampleController();
-        view.setHasSample(sampleController.hasSample(entry));
+        view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));
 
         // has sequence
         SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
