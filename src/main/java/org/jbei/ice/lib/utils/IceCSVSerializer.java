@@ -8,9 +8,7 @@ import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.EntryUtil;
-import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.sample.SampleController;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -46,9 +44,6 @@ public class IceCSVSerializer {
         stringBuilder.append("Has Samples").append(",");
         stringBuilder.append("Has Sequence").append("\n");
 
-        SampleController sampleController = new SampleController();
-        AttachmentController attachmentController = new AttachmentController();
-
         for (EntryField field : fields) {
             String value = EntryUtil.entryFieldToValue(entry, field);
             stringBuilder.append(escapeCSVValue(value)).append(",");
@@ -63,8 +58,8 @@ public class IceCSVSerializer {
 //                            stringBuilder.append(",");
 //                    }
 
-        stringBuilder.append(attachmentController.hasAttachment(entry) ? "Yes" : "No").append(",");
-        stringBuilder.append((sampleController.hasSample(entry)) ? "Yes" : "No").append(",");
+        stringBuilder.append(DAOFactory.getAttachmentDAO().hasAttachment(entry) ? "Yes" : "No").append(",");
+        stringBuilder.append((DAOFactory.getSampleDAO().hasSample(entry)) ? "Yes" : "No").append(",");
         stringBuilder.append((DAOFactory.getSequenceDAO().hasSequence(entry.getId())) ? "Yes" : "No").append("\n");
 
         // todo : add option for samples

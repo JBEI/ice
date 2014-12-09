@@ -101,8 +101,9 @@
                ng-change="field.invalid=false" maxlength="125" style="width: 205px;">
 
         <input type="text" ng-model="activePart[field.schema+'Email']" ng-trim="true" ng-focus="field.edit=true"
-               ng-blur="field.edit=false" ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-               ng-change="field.invalid=false" placeholder="Email if known" style="width: 191px;">
+               ng-blur="field.edit=false"
+               ng-class="{'input_box':!field.withEmailInvalid, 'input_box_error':field.withEmailInvalid}"
+               ng-change="field.withEmailInvalid=false" placeholder="Email if known" style="width: 191px;">
     </div>
 
     <!--options-->

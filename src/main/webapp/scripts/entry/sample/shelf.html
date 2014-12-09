@@ -1,0 +1,49 @@
+<table class="entry_sample_panel">
+    <tr>
+        <td colspan="4"><strong style="color: #a52a2a;">SHELF {{sample.location.display}}</strong></td>
+    </tr>
+    <tr>
+        <!--<td>&nbsp;</td>-->
+        <td class="pad-8">
+            <h2 class="text-center">Box<br>
+                <small class="no_wrap">{{sample.location.child.display || "&nbsp;"}}</small>
+            </h2>
+        </td>
+    </tr>
+    <tr>
+        <td class="pad-8">
+            <h2 class="text-center">Well<br>
+                <small class="no_wrap">{{sample.location.child.child.display || "&nbsp;"}}</small>
+            </h2>
+        </td>
+    </tr>
+    <tr>
+        <td class="pad-8">
+            <h2 class="text-center">Tube<br>
+                <small class="no_wrap">{{sample.location.child.child.child.display || "&nbsp;"}}</small>
+            </h2>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="5" class="small">
+            <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+            <strong>{{sample.label}}</strong><br>
+            <span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a
+                ng-href="/profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}
+            {{sample.depositor.lastName}}</a>
+
+            <div class="display-inline pull-right" ng-if="canDelete() && sample.deleteRequested">
+                <i class="fa fa-exclamation-triangle alert_color fa-fw"></i>
+                <b style="color:#CC3333">Delete?</b>
+
+                <button stop-event="click" class="btn btn-xs btn-primary" ng-click="delete()">Yes</button>
+                <button stop-event="click" class="btn btn-xs btn-default" ng-click="sample.deleteRequested=false">No
+                </button>
+            </div>
+
+            <div class="pull-right" style="font-size: 14px;" ng-if="canDelete() && !sample.deleteRequested">
+                <i class="fa fa-fw delete_icon fa-trash-o" ng-click="sample.deleteRequested=true"></i>
+            </div>
+        </td>
+    </tr>
+</table>

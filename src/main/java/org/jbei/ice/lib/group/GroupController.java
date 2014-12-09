@@ -35,9 +35,9 @@ public class GroupController {
     /**
      * Can access a group if you are an admin or the owner of that group
      *
-     * @param userId
-     * @param id
-     * @return
+     * @param userId user identifier; typically email
+     * @param id     unique identifier for group
+     * @return group referenced by id if it exists and user has access to it
      */
     public UserGroup getGroupById(String userId, long id) {
         Group group = dao.get(id);
@@ -98,7 +98,7 @@ public class GroupController {
         return userGroups;
     }
 
-    public Set<String> retrieveAccountGroupUUIDs(Account account) throws ControllerException {
+    public Set<String> retrieveAccountGroupUUIDs(Account account) {
         Set<String> uuids = new HashSet<>();
         if (account != null) {
             for (Group group : account.getGroups()) {
