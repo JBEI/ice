@@ -77,6 +77,9 @@ public class FolderControllerTest {
 
     @Test
     public void testRetrieveFolderContents() throws Exception {
+        // test with null id
+        controller.retrieveFolderContents(null, 0, ColumnField.PART_ID, false, 0, 10);
+
         Account account = AccountCreator.createTestAccount("testRetrieveFolderContents", false);
         String userId = account.getEmail();
 
