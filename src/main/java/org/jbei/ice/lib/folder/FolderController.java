@@ -192,7 +192,7 @@ public class FolderController {
     /**
      * Retrieves the folder specified in the parameter and contents
      *
-     * @param userId   unique identifier for user making request
+     * @param userId   unique identifier for user making request. If null, folder must have public read privs
      * @param folderId unique identifier for folder to be retrieved
      * @param sort     sort order for folder content retrieval
      * @param asc      sort order for folder content retrieval; ascending if true
@@ -213,8 +213,11 @@ public class FolderController {
         FolderDetails details = folder.toDataTransferObject();
         long folderSize = dao.getFolderSize(folderId);
         details.setCount(folderSize);
-        ArrayList<AccessPermission> permissions = getAndFilterFolderPermissions(userId, folder);
-        details.setAccessPermissions(permissions);
+
+        if (userId != null) {
+            ArrayList<AccessPermission> permissions = getAndFilterFolderPermissions(userId, folder);
+            details.setAccessPermissions(permissions);
+        }
 
         details.setPublicReadAccess(permissionsController.isPublicVisible(folder));
         Account owner = accountController.getByEmail(folder.getOwnerEmail());
