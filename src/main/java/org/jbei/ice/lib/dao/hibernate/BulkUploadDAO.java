@@ -15,7 +15,6 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 
 /**
@@ -42,15 +41,6 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
             Logger.error(he);
             throw new DAOException(he);
         }
-    }
-
-    public int getUploadEntryCount(long id) throws DAOException {
-        Number number = (Number) currentSession().createCriteria(BulkUpload.class)
-                .setProjection(Projections.countDistinct("id"))
-                .add(Restrictions.eq("id", id))
-                .uniqueResult();
-
-        return number.intValue();
     }
 
     @SuppressWarnings("unchecked")
