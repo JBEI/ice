@@ -76,7 +76,11 @@ public class BulkUploadController {
         upload.setAccount(account);
         upload.setCreationTime(new Date());
         upload.setLastUpdateTime(upload.getCreationTime());
-        upload.setStatus(BulkUploadStatus.IN_PROGRESS);
+        if (info.getStatus() == BulkUploadStatus.BULK_EDIT)
+            upload.setStatus(BulkUploadStatus.BULK_EDIT);
+        else
+            upload.setStatus(BulkUploadStatus.IN_PROGRESS);
+
         upload.setImportType(info.getType());
         upload = dao.create(upload);
 

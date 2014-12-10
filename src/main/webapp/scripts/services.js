@@ -808,7 +808,7 @@ iceServices.factory('Authentication',
             },
 
             // todo : use a parameter in isSessionValid to check
-            isAdmin:function (User) {
+            isAdmin:function () {
                 this.isSessionValid().then(function (result) {
                     if (!result || !result.data || !result.data.isAdmin) {
                         $location.path("/folders/personal");

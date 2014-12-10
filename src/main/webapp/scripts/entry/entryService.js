@@ -87,7 +87,7 @@ angular.module('ice.entry.service', [])
             },
 
             canDelete:function () {
-                return ($rootScope.user.isAdmin || canDelete) && selectedSearchResultsCount > 0;
+                return (($rootScope.user && $rootScope.user.isAdmin) || canDelete) && selectedSearchResultsCount > 0;
             },
 
             // resets all selected and send notifications

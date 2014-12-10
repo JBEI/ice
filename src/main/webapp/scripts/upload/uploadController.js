@@ -591,10 +591,10 @@ angular.module('ice.upload.controller', [])
                 var requiresApproval = $scope.bulkUpload.status && $scope.bulkUpload.status == 'PENDING_APPROVAL';
 
                 // validate the contents;
-                var tmp = {id:$scope.bulkUpload.id};
+                var tmp = {id:$scope.bulkUpload.id, status:$scope.bulkUpload.status};
                 if (requiresApproval)
                     tmp.status = 'APPROVED';
-                else
+                else if ($scope.bulkUpload.status != "BULK_EDIT")
                     tmp.status = 'PENDING_APPROVAL';
                 $scope.requestError = undefined;
 
