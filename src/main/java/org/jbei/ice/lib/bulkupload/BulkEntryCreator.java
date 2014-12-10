@@ -225,6 +225,11 @@ public class BulkEntryCreator {
                 if (new BulkUploadController().approveBulkImport(account, id))
                     return upload.toDataTransferObject();
                 return null;
+
+            case BULK_EDIT:
+                upload.getContents().clear();
+                dao.delete(upload);
+                return upload.toDataTransferObject();
         }
     }
 

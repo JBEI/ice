@@ -277,15 +277,10 @@ public class AccountController {
         return dao.getByEmail(email);
     }
 
-    public long getAccountId(String email) throws ControllerException {
-        Account account;
-        try {
-            account = dao.getByEmail(email);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+    public long getAccountId(String email) {
+        Account account = dao.getByEmail(email);
         if (account == null)
-            throw new ControllerException("Could not retrieve account for " + email);
+            throw new IllegalArgumentException("No account found with email " + email);
         return account.getId();
     }
 
