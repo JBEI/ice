@@ -127,7 +127,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
             }
 
             // first create bulk upload
-            upload.create({name:"Bulk Edit", type:type, entryList:selectedEntries}, function (result) {
+            upload.create({name:"Bulk Edit", type:type, status:'BULK_EDIT', entryList:selectedEntries}, function (result) {
                 console.log(result);
                 $location.path("/upload/" + result.id);
             }, function (error) {
