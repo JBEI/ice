@@ -1,86 +1,83 @@
 <div ng-controller="ProfileEntryController">
+    <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
+        <tr data-ng-if='folder && folder.entries.length > 0'>
+            <th ng-click="sort('type')" class="cursor_pointer">
+                <i ng-show="params.sort=='type'" style="font-size: 14px" class="fa opacity_4"
+                   ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
+                Type
+            </th>
+            <th ng-click="sort('part_id')" class="cursor_pointer">
+                <i ng-show="params.sort=='part_id'" style="font-size: 14px" class="fa opacity_4"
+                   ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
+                Part ID
+            </th>
+            <th data-ng-click="sort('name')" class="cursor_pointer">
+                <i ng-show="params.sort=='name'" style="font-size: 14px" class="fa opacity_4"
+                   ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
+                Name
+            </th>
+            <th ng-click="sort('summary')" class="cursor_pointer">
+                <i ng-show="params.sort=='summary'" style="font-size: 14px" class="fa opacity_4"
+                   ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
+                Summary
+            </th>
+            <th ng-click="sort('status')" class="cursor_pointer">
+                <i ng-show="params.sort=='status'" style="font-size: 14px" class="fa opacity_4"
+                   ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
+                Status
+            </th>
+            <th style="width:30px">
+                <i class="fa fa-paperclip fa-fw" style="font-size: 14px; "></i>
+            </th>
+            <th style="width:30px">
+                <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
+            </th>
+            <th style="width:30px; text-align: center">
+                <img src="img/dna.png" width="10px" alt="has dna"/>
+            </th>
+            <th ng-click="sort('created')" class="cursor_pointer">
+                <i ng-show="params.sort=='created'" style="font-size: 14px" class="fa opacity_4"
+                   ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
+                Created
+            </th>
+        </tr>
 
-    <div class="row">
-        <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
-            <tr data-ng-if='folder && folder.entries.length > 0'>
-                <th ng-click="sort('type')" class="cursor_pointer">
-                    <i ng-show="params.sort=='type'" style="font-size: 14px" class="fa opacity_4"
-                       ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
-                    Type
-                </th>
-                <th ng-click="sort('part_id')" class="cursor_pointer">
-                    <i ng-show="params.sort=='part_id'" style="font-size: 14px" class="fa opacity_4"
-                       ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
-                    Part ID
-                </th>
-                <th data-ng-click="sort('name')" class="cursor_pointer">
-                    <i ng-show="params.sort=='name'" style="font-size: 14px" class="fa opacity_4"
-                       ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
-                    Name
-                </th>
-                <th ng-click="sort('summary')" class="cursor_pointer">
-                    <i ng-show="params.sort=='summary'" style="font-size: 14px" class="fa opacity_4"
-                       ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
-                    Summary
-                </th>
-                <th ng-click="sort('status')" class="cursor_pointer">
-                    <i ng-show="params.sort=='status'" style="font-size: 14px" class="fa opacity_4"
-                       ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
-                    Status
-                </th>
-                <th style="width:10px">
-                    <i class="fa fa-paperclip fa-fw" style="font-size: 14px; "></i>
-                </th>
-                <th style="width:10px">
-                    <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
-                </th>
-                <th style="width:10px">
-                    <img src="img/dna.png" width="10px" alt="has dna"/>
-                </th>
-                <th ng-click="sort('created')" class="cursor_pointer">
-                    <i ng-show="params.sort=='created'" style="font-size: 14px" class="fa opacity_4"
-                       ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
-                    Created
-                </th>
-            </tr>
+        <tr data-ng-show='!folder'>
+            <td colspan="10">
+                <img alt="Loading..." src="/img/loader-mini.gif"/>
+                Loading...
+            </td>
+        </tr>
+        <tr data-ng-show="folder.entries.length == 0">
+            <td colspan="10">No entries available</td>
+        </tr>
+        <tr data-ng-repeat="entry in folder.entries">
+            <td>{{entry.type | capitalize}}</td>
+            <td><a ng-href="/entry/{{entry.id}}" class="cell_mouseover form-group"
+                   popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
+                   popover-template="/views/template.html" popover-title="{{entry.partId}}"
+                   popover-placement="right">{{entry.partId}}</a>
+            </td>
+            <td>
+                <div title="{{entry.name}}" class="ellipsis" style="width: 120px">{{entry.name}}</div>
+            </td>
+            <td>
+                <div title="{{entry.shortDescription}}"
+                     style="width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    {{entry.shortDescription}}
+                </div>
+            </td>
+            <td style="width:80px; white-space:nowrap">{{entry.status | capitalize}}</td>
+            <td><i ng-show="{{entry.hasAttachment}}" class="fa fa-paperclip fa-fw"
+                   style="color: #555; font-size: 14px;"></i></td>
+            <td><i ng-show="{{entry.hasSample}}" class="fa fa-flask fa-fw"
+                   style="color: #555; font-size: 14px;"></i></td>
+            <td><img ng-show="{{entry.hasSequence}}" src="img/dna.png" width="10px"/></td>
+            <td style="width:160px; white-space:nowrap">{{entry.creationTime | date:'MMM d, yyyy'}}</td>
+        </tr>
+    </table>
 
-            <tr data-ng-show='!folder'>
-                <td colspan="10">
-                    <img alt="Loading..." src="/img/loader-mini.gif"/>
-                    Loading...
-                </td>
-            </tr>
-            <tr data-ng-show="folder.entries.length == 0">
-                <td colspan="10">No entries available</td>
-            </tr>
-            <tr data-ng-repeat="entry in folder.entries">
-                <td>{{entry.type | capitalize}}</td>
-                <td><a ng-href="/entry/{{entry.id}}" class="cell_mouseover form-group"
-                       popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                       popover-template="/views/template.html" popover-title="{{entry.partId}}"
-                       popover-placement="right">{{entry.partId}}</a>
-                </td>
-                <td>
-                    <div title="{{entry.name}}" class="ellipsis" style="width: 150px">{{entry.name}}</div>
-                </td>
-                <td>
-                    <div title="{{entry.shortDescription}}"
-                         style="width: 500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                        {{entry.shortDescription}}
-                    </div>
-                </td>
-                <td style="width:80px; white-space:nowrap">{{entry.status | capitalize}}</td>
-                <td><i ng-show="{{entry.hasAttachment}}" class="fa fa-paperclip fa-fw"
-                       style="color: #555; font-size: 14px;"></i></td>
-                <td><i ng-show="{{entry.hasSample}}" class="fa fa-flask fa-fw"
-                       style="color: #555; font-size: 14px;"></i></td>
-                <td><img ng-show="{{entry.hasSequence}}" src="img/dna.png" width="10px"/></td>
-                <td style="width:160px; white-space:nowrap">{{entry.creationTime | date:'MMM d, yyyy'}}</td>
-            </tr>
-        </table>
-    </div>
-
-    <div class="row" ng-if="folder && folder.entries.length > 0">
+    <div ng-if="folder && folder.entries.length > 0">
         <div class="col-md-6" style="padding-left: 0">
             <pagination total-items="folder.count" on-select-page="setUserEntriesPage(page)" page="currentPage"
                         max-size="maxSize"

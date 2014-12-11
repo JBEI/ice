@@ -1,11 +1,11 @@
-<div class="row pad_top">
+<div class="pad_top">
     <tabset>
         <tab heading="Entry Defaults">
             <alert type="'info'" style="margin-bottom: 15px; margin-top: 10px; width: 600px">
                 <i style="font-size: 18px" class="fa fa-info-circle"></i> Enter default values for new entries.
             </alert>
 
-            <div class="row pad_top" ng-repeat="preference in preferenceEntryDefaults">
+            <div class="pad_top" ng-repeat="preference in preferenceEntryDefaults">
                 <div class="col-md-2 entryLabel">
                     <span ng-class="{'entryEditLabel':field.edit}">{{preference.display}}</span>
                 </div>
@@ -49,7 +49,7 @@
                 result for that field.
             </alert>
 
-            <div class="row pad_top" ng-repeat="searchPreference in searchPreferenceDefaults">
+            <div class="pad_top" ng-repeat="searchPreference in searchPreferenceDefaults">
                 <div class="col-md-2 entryLabel">
                     <span ng-class="{'entryEditLabel':searchPreference.active}">{{searchPreference.display}}</span>
                 </div>
