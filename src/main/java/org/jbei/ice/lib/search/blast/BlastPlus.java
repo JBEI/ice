@@ -255,6 +255,7 @@ public class BlastPlus {
         } catch (OverlappingFileLockException l) {
             Logger.warn("Could not obtain lock file for blast at " + blastFolder.toString());
         } catch (IOException eio) {
+            FileUtils.deleteQuietly(lockFile);
             throw new BlastException(eio);
         }
         FileUtils.deleteQuietly(lockFile);
