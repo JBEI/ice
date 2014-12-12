@@ -24,8 +24,8 @@
                             <tr ng-repeat="menuOption in profileMenuOptions"
                                 ng-if="menuOption.open || (profile.email === user.email)">
                                 <td ng-class="{selected:menuOption.selected}" ng-click="showSelection($index)">
-                                    <i class="fa {{menuOption.icon}}" style="font-size: 14px;"></i>
-                                    {{menuOption.display}}
+                                    <i class="fa fa-fw {{menuOption.icon}}" tooltip-placement="left"
+                                       tooltip="{{menuOption.display}}" style="font-size: 18px;"></i>
                                 </td>
                             </tr>
                         </table>

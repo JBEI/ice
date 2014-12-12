@@ -1,5 +1,5 @@
 <div ng-controller="WebOfRegistriesController" ng-init="showAddRegistryForm=false">
-    <div class="row pad_top">
+    <div class="pad_top">
         <button type="button" class="ice-button" ng-click="enableDisableWor()">
             <span ng-if="isWorEnabled">Disable</span>
             <span ng-if="!isWorEnabled">Enable</span>
@@ -41,8 +41,8 @@
         </div>
     </div>
 
-    <div class="row pad_top" ng-init="getPartners(true)" ng-if="isWorEnabled && wor && wor.partners.length">
-        <table cellspacing="0" class="table table-condensed table-hover table-striped font-95em">
+    <div class="pad_top" ng-init="getPartners(true)" ng-if="isWorEnabled && wor && wor.partners.length">
+        <table cellspacing="0" class="table table-hover font-95em">
             <thead>
             <tr>
                 <td>&nbsp;</td>

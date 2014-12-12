@@ -34,7 +34,6 @@
                                                 ng-class="{'fa-group':permission.article==='GROUP', 'fa-user':permission.article==='ACCOUNT'}"></i> {{getDisplay(permission)}}
                                         </span>
                                     </span>
-
                                 </small>
                             </div>
                         </h4>
@@ -50,18 +49,27 @@
     <!--collections like 'personal', 'available' do not have a folderName-->
     <div class="row" ng-if="!folder.type">
         <div class="col-md-12 entry_general_header_td">
-            <h4>
-                <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
-                <!--if the user refreshes collection page or manually enters the url, selectedCollection is empty-->
-                <strong style="color: #888;text-transform: uppercase;">{{selectedCollection || selectedFolder}}</strong>
-                &nbsp;&nbsp;&nbsp;<span ng-show="folder.id" folder-actions class="font-95em"></span>
+            <h4><img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
+                <strong style="color: #888;text-transform: uppercase;">{{selectedFolder}}</strong>
+                <!--<br><small class="font-65em">Folder Description</small>-->
             </h4>
         </div>
     </div>
 
     <div class="row">
-        <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
-            <tr data-ng-if='folder && folder.entries.length > 0'>
+        <div class="pad_top" data-ng-show='!folder'>
+            <img alt="Loading..." src="/img/loader-mini.gif"/> Loading...
+        </div>
+
+        <div class="pad_top" ng-show="folder && folder.entries.length == 0">
+            No entries for selection
+        </div>
+
+        <table ng-if='folder && folder.entries.length > 0' cellspacing="0"
+               class="table table-bordered table-responsive table-hover font-95em"
+               ng-class="{'opacity_4':loadingPage}">
+            <thead>
+            <tr>
                 <th>
                     <!--<i class="fa cursor_pointer"-->
                     <!--ng-class="{'fa-square-o':!showAllSelected, 'fa-check-square-o': showAllSelected}"-->
@@ -101,7 +109,7 @@
                     <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
                 </th>
                 <th style="width:30px; text-align:center">
-                    <img src="img/dna.png" width="10px" alt="has dna"/>
+                    <img src="img/dna.svg" height="16px" alt="has dna"/>
                 </th>
                 <th ng-click="sort('created')" class="cursor_pointer">
                     <i ng-show="params.sort=='created'" style="font-size: 14px" class="fa opacity_4"
@@ -109,16 +117,9 @@
                     Created
                 </th>
             </tr>
+            </thead>
 
-            <tr data-ng-show='!folder'>
-                <td colspan="10">
-                    <img alt="Loading..." src="/img/loader-mini.gif"/>
-                    Loading...
-                </td>
-            </tr>
-            <tr data-ng-show="folder.entries.length == 0">
-                <td colspan="10">No entries for selection</td>
-            </tr>
+            <tbody>
             <tr data-ng-repeat="entry in folder.entries">
                 <td width="10px">
                     <!--<i class="fa cursor_pointer fa-check-square-o" ng-if="allSelected"-->
@@ -131,8 +132,7 @@
                 <td>{{entry.type | capitalize}}</td>
                 <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                       popover-template="/views/template.html" popover-title="{{entry.partId}}"
-                       popover-placement="right">{{entry.partId}}</a>
+                       popover-template="/views/template.html" popover-placement="right">{{entry.partId}}</a>
                 </td>
                 <td>
                     <div title="{{entry.name}}" class="ellipsis" style="width: 150px">{{entry.name}}</div>
@@ -148,9 +148,12 @@
                        style="color: #555; font-size: 14px;"></i></td>
                 <td><i ng-show="{{entry.hasSample}}" class="fa fa-flask fa-fw"
                        style="color: #555; font-size: 14px;"></i></td>
-                <td><img ng-show="{{entry.hasSequence}}" src="img/dna.png" width="10px"/></td>
+                <td style="width:30px; text-align:center">
+                    <img ng-show="{{entry.hasSequence}}" src="img/dna.svg" height="16px"/>
+                </td>
                 <td style="width:160px; white-space:nowrap">{{entry.creationTime | date:'MMM d, yyyy'}}</td>
             </tr>
+            </tbody>
         </table>
     </div>
     <div class="row" ng-if="folder && folder.entries.length > 0">

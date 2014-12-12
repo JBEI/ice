@@ -1,5 +1,7 @@
 <div ng-controller="ProfileEntryController">
-    <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
+    <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
+           ng-class="{'opacity_4':loadingPage}">
+        <thead>
         <tr data-ng-if='folder && folder.entries.length > 0'>
             <th ng-click="sort('type')" class="cursor_pointer">
                 <i ng-show="params.sort=='type'" style="font-size: 14px" class="fa opacity_4"
@@ -51,6 +53,8 @@
         <tr data-ng-show="folder.entries.length == 0">
             <td colspan="10">No entries available</td>
         </tr>
+        </thead>
+        <tbody>
         <tr data-ng-repeat="entry in folder.entries">
             <td>{{entry.type | capitalize}}</td>
             <td><a ng-href="/entry/{{entry.id}}" class="cell_mouseover form-group"
@@ -75,6 +79,7 @@
             <td><img ng-show="{{entry.hasSequence}}" src="img/dna.png" width="10px"/></td>
             <td style="width:160px; white-space:nowrap">{{entry.creationTime | date:'MMM d, yyyy'}}</td>
         </tr>
+        </tbody>
     </table>
 
     <div ng-if="folder && folder.entries.length > 0">

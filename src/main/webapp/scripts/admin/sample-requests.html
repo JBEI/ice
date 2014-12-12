@@ -1,5 +1,5 @@
 <div ng-controller="AdminSampleRequestController">
-    <div class="row pad_top">
+    <div class="pad_top">
         <span class="dropdown">
             Show <select ng-model="hstep" ng-options="opt for opt in selectOptions"></select>
 
@@ -23,21 +23,22 @@
         </span>
     </div>
 
-    <div class="row pad_top">
-        <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
-            <tr data-ng-show='!sampleRequests'>
-                <td colspan="11"><img src="/img/loader-mini.gif"> Loading...</td>
-            </tr>
-            <tr data-ng-if='sampleRequests && sampleRequests.requests.length > 0'>
+    <div class="pad_top">
+        <div ng-if='!sampleRequests'><img src="/img/loader-mini.gif"> Loading...</div>
+
+        <table cellspacing="0" ng-if='sampleRequests && sampleRequests.requests.length > 0'
+               class="table table-bordered table-responsive table-hover font-95em" ng-class="{'opacity_4':loadingPage}">
+            <thead>
+            <tr>
                 <th>&nbsp;</th>
                 <th>
                     <span class="cursor_pointer">Requester</span>
                     <i ng-show="params.sort=='account.firstName'" class="fa"
                        ng-class="{'fa-caret-down':params.asc==true, 'fa-caret-up':params.asc==false}"></i>
                 </th>
-                <th style="width: 170px">Entry Name</th>
-                <th style="width: 110px">Selection Markers</th>
-                <th style="width:50px">
+                <th style="width: 170px;">Entry Name</th>
+                <th>Selection Markers</th>
+                <th style="width:50px;">
                     <span class="cursor_pointer">Type</span>
                     <i ng-show="params.sort=='name'" class="fa"
                        ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
@@ -45,25 +46,30 @@
                 <th ng-click="sort('requested')">Requested</th>
                 <th ng-click="sort('updated')">Updated</th>
                 <th style="width: 100px" ng-click="sort('status')">Status</th>
-                <th></th>
+                <th>Action</th>
             </tr>
+            </thead>
+            <tbody>
             <tr data-ng-show="sampleRequests.requests.length === 0">
                 <td colspan="11">No sample requests available</td>
             </tr>
             <tr data-ng-repeat="request in sampleRequests.requests">
-                <td style="line-height:1; opacity:0.3; text-shadow:0 1px 0 #fff;"><b>{{indexStart + $index+1 |
-                    number}}</b></td>
+                <td style="width: 30px; line-height:1; opacity:0.3; text-shadow:0 1px 0 #fff;">
+                    <b class="no_wrap">{{indexStart + $index+1 | number}}</b>
+                </td>
                 <td><a ng-href="/profile/{{request.requester.id}}" class="no_wrap">{{request.requester.firstName}}
                     {{request.requester.lastName}}</a></td>
                 <td><a ng-href="/entry/{{request.partData.id}}">{{request.partData.name}}</a></td>
                 <td>
                     <small>{{request.partData.selectionMarkers.toString()}}</small>
                 </td>
-                <td>
-                    <span ng-if="request.requestType==='LIQUID_CULTURE'"><i tooltip="Liquid Culture"
-                                                                            class="fa fa-flask"></i></span>
-                    <span ng-if="request.requestType!=='LIQUID_CULTURE'"><i title="Streak on Agar Plate"
-                                                                            class="fa fa-circle-o"></i></span>
+                <td style="text-align: center">
+                    <span ng-if="request.requestType==='LIQUID_CULTURE'">
+                        <i tooltip="Liquid Culture" class="fa fa-flask cursor_default"></i>
+                    </span>
+                    <span ng-if="request.requestType!=='LIQUID_CULTURE'">
+                        <i tooltip="Streak on Agar Plate" class="fa fa-circle-o cursor_default"></i>
+                    </span>
                 </td>
                 <td style="width:160px; white-space:nowrap">{{request.requestTime | date:'medium'}}</td>
                 <td style="width:160px; white-space:nowrap">{{request.updateTime | date:'medium'}}</td>
@@ -73,7 +79,7 @@
                     <div ng-if="request.status==='PENDING'"><i class="fa fa-circle text-warning"></i> Pending</div>
                     <div ng-if="request.status==='IN_CART'"><i class="fa fa-circle text-info"></i> In Cart</div>
                 </td>
-                <td style="width: 134px">
+                <td style="width: 70px">
                     <div ng-if="request.status==='PENDING'">
                         <button class="btn btn-primary btn-xs" ng-click="updateStatus(request, 'FULFILLED')"
                                 title="Fulfill">
@@ -86,10 +92,11 @@
                     </div>
                 </td>
             </tr>
+            </tbody>
         </table>
     </div>
 
-    <div class="row" ng-if='sampleRequests && sampleRequests.requests.length > 0'>
+    <div ng-if='sampleRequests && sampleRequests.requests.length > 0'>
         <div class="col-md-6" style="padding-left: 0">
             <pagination total-items="sampleRequests.count" on-select-page="setSamplePage(page)" page="currentPage"
                         max-size="maxSize"

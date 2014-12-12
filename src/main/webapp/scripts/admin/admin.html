@@ -5,24 +5,29 @@
             <h4 style="text-transform: uppercase;"><strong style="color: #888;">Administration</strong>
                 <strong style="text-transform: capitalize;">{{selectedDisplay}}</strong><br>
                 <small class="font-65em">With great power...</small>
-
-                <span class="pull-right cursor_pointer" style="position:absolute;right:0" ng-click="hide=!hide"
-                      ng-init="hide=false">
-                    <i class="fa" ng-class="{'fa-caret-left':hide, 'fa-caret-right':!hide}"></i>
-                </span>
             </h4>
         </div>
     </div>
 
     <div class="row">
-        <div ng-class="{'col-md-10':!hide, 'col-md-12':hide}">
-            <ng-include src="adminOptionSelection"></ng-include>
-        </div>
-        <div class="col-md-2" style="padding-right: 0" ng-if="!hide">
-            <table class="profile_menu pull-right" cellpadding="0" cellspacing="0">
-                <tr ng-repeat="menuOption in profileMenuOptions">
-                    <td ng-class="{selected:menuOption.selected}" ng-click="showSelection($index)">
-                        <i class="fa {{menuOption.icon}}" style="font-size: 14px; margin-right: 10px;"></i>{{menuOption.display}}
+        <div class="col-md-12" style="padding-right: 0; padding-left: 0">
+            <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td style="vertical-align: top">
+                        <ng-include src="adminOptionSelection"></ng-include>
+                    </td>
+                    <td style="width: 10px">
+                        &nbsp;
+                    </td>
+                    <td style="vertical-align: top" class="pull-right">
+                        <table class="profile_menu pull-right" cellpadding="0" cellspacing="0">
+                            <tr ng-repeat="menuOption in profileMenuOptions">
+                                <td ng-class="{selected:menuOption.selected}" ng-click="showSelection($index)">
+                                    <i class="fa fa-fw {{menuOption.icon}}" tooltip-placement="left"
+                                       tooltip="{{menuOption.display}}" style="font-size: 18px;"></i>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
                 </tr>
             </table>

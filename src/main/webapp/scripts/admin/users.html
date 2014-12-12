@@ -1,11 +1,11 @@
 <div ng-controller="AdminUserController">
-    <div class="row pad_top">
+    <div class="pad_top">
         <button type="button" ng-click="showCreateProfile=true" class="ice-button">
             <i style="font-size: 14px" class="blue fa fa-user"></i> Create Account
         </button>
     </div>
 
-    <div class="row margin-top-10 panel panel-default font-95em" ng-show="showCreateProfile">
+    <div class="margin-top-10 panel panel-default font-95em" ng-show="showCreateProfile">
         <form class="panel-body" role="form" ng-submit="createProfile()">
             <div class="col-md-2 pad-top-5 text-right">
                 <span style="white-space:nowrap">First name <span class="required">*</span> </span>
@@ -58,62 +58,51 @@
         </form>
     </div>
 
-    <div class="row pad_top">
-        <table width="100%" cellspacing="0" cellpadding="0">
-            <tr>
-                <td>
-                    <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
-                        <tr data-ng-show='!userList'>
-                            <td colspan="10">Loading...</td>
-                        </tr>
-
-                        <tr data-ng-if='userList && userList.users.length > 0'>
-                            <th ng-click="sort('type')" style="width: 85px">
-                                <span class="cursor_pointer">FirstName</span> <i ng-show="params.sort=='type'"
-                                                                                 class="fa"
-                                                                                 ng-class="{'fa-caret-down':params.asc==true, 'fa-caret-up':params.asc==false}"></i>
-                            </th>
-                            <th style="width: 110px">LastName</th>
-                            <th data-ng-click="sort('name')" style="width:230px">
-                                <span class="cursor_pointer">Email</span> <i ng-show="params.sort=='name'" class="fa"
-                                                                             ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
-                            </th>
-                            <th ng-click="sort('summary')">AccountType</th>
-                            <th ng-click="sort('status')">
-                                <span class="cursor_pointer"># Entries</span> <i ng-show="params.sort=='status'"
-                                                                                 class="fa"
-                                                                                 ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
-                            </th>
-                            <th ng-click="sort('summary')">Registered</th>
-                            <th ng-click="sort('summary')">Last Login</th>
-                        </tr>
-                        <tr data-ng-show=" userList.users.length == 0">
-                            <td colspan="10">No user accounts available</td>
-                        </tr>
-                        <tr data-ng-repeat="user in userList.users">
-                            <td class="white-space:nowrap">{{user.firstName}}</td>
-                            <td class="no_wrap">{{user.lastName}}</td>
-                            <td><a ng-href="/profile/{{user.id}}">{{user.email}}</a></td>
-                            <td style="width:160px; white-space:nowrap" ng-if="user.isAdmin">
-                                <small class="label label-danger"
-                                       style="font-size: 12px; position: relative; top: -4px">{{user.accountType |
-                                    capitalize}}
-                                </small>
-                            </td>
-                            <td style="width:160px; white-space:nowrap" ng-if="!user.isAdmin">{{user.accountType ||
-                                "Normal" | capitalize}}
-                            </td>
-                            <td style="width:90px; white-space:nowrap">{{user.userEntryCount | number}}</td>
-                            <td style="width:160px; white-space:nowrap">{{user.registerDate | date:'MMM d, yyyy'}}</td>
-                            <td style="width:160px; white-space:nowrap">{{user.lastLogin | date:'MMM d, yyyy'}}</td>
-                        </tr>
-                    </table>
-                </td>
+    <div class="pad_top">
+        <table cellspacing="0" class="table table-hover font-95em"
+               ng-class="{'opacity_4':loadingPage}">
+            <thead>
+            <tr data-ng-show='!userList'>
+                <td colspan="10">Loading...</td>
             </tr>
+
+            <tr data-ng-if='userList && userList.users.length > 0'>
+                <th ng-click="sort('type')" style="width: 85px">
+                    <span class="cursor_pointer">Name</span>
+                </th>
+                <th ng-click="sort('summary')">AccountType</th>
+                <th ng-click="sort('status')">
+                    <span class="cursor_pointer"># Entries</span>
+                </th>
+                <th ng-click="sort('summary')">Registered</th>
+                <th ng-click="sort('summary')">Last Login</th>
+            </tr>
+            <tr data-ng-show=" userList.users.length == 0">
+                <td colspan="10">No user accounts available</td>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="user in userList.users">
+                <td class="no_wrap">{{user.firstName}} {{user.lastName}} (<a ng-href="/profile/{{user.id}}">{{user.email}}</a>)
+                </td>
+                <td style="width:160px; white-space:nowrap" ng-if="user.isAdmin">
+                    <small class="label label-danger"
+                           style="font-size: 12px; position: relative; top: -4px">{{user.accountType |
+                        capitalize}}
+                    </small>
+                </td>
+                <td style="width:160px; white-space:nowrap" ng-if="!user.isAdmin">{{user.accountType ||
+                    "Normal" | capitalize}}
+                </td>
+                <td style="width:90px; white-space:nowrap">{{user.userEntryCount | number}}</td>
+                <td style="width:160px; white-space:nowrap">{{user.registerDate | date:'MMM d, yyyy'}}</td>
+                <td style="width:160px; white-space:nowrap">{{user.lastLogin | date:'MMM d, yyyy'}}</td>
+            </tr>
+            </tbody>
         </table>
     </div>
 
-    <div class="row" ng-if="userList && userList.users.length > 0">
+    <div ng-if="userList && userList.users.length > 0">
         <div class="col-md-5" style="padding-left: 0">
             <pagination total-items="userList.resultCount" on-select-page="setUserListPage(page)" page="currentPage"
                         max-size="maxSize"
