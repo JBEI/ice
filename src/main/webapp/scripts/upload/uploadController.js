@@ -277,7 +277,21 @@ angular.module('ice.upload.controller', [])
             };
 
             var getColWidth = function (index) {
-                return 150;
+                var fieldType;
+
+                if (linkedImportType) {
+                    var newIndex = index - sheetHeaders.length;
+                    fieldType = UploadUtil.getTypeField(linkedImportType, newIndex);
+                } else
+                    fieldType = UploadUtil.getTypeField($scope.importType, index);
+
+                switch (fieldType) {
+                    case "circular":
+                        return 60;
+
+                    default:
+                        return 150;
+                }
             };
 
             var calculateSize = function () {
