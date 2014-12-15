@@ -165,6 +165,7 @@ public class FolderResource extends RestResource {
 
         try {
             long id = Long.decode(folderId);
+            Logger.info("Retrieving folder " + id + " entries");
             return controller.retrieveFolderContents(userId, id, field, asc, offset, limit);
         } catch (NumberFormatException nfe) {
         }
