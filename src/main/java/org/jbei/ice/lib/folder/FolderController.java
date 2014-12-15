@@ -217,6 +217,8 @@ public class FolderController {
         if (userId != null) {
             ArrayList<AccessPermission> permissions = getAndFilterFolderPermissions(userId, folder);
             details.setAccessPermissions(permissions);
+            boolean canEdit = permissionsController.hasWritePermission(userId, folder);
+            details.setCanEdit(canEdit);
         }
 
         details.setPublicReadAccess(permissionsController.isPublicVisible(folder));
