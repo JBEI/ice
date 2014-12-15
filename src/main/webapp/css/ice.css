@@ -1132,14 +1132,13 @@ a:hover {
 .profile_menu {
     color: #cecece;
     cursor: pointer;
-    margin-top: 10px;
 }
 
 .profile_menu .selected {
     color: #233559;
     border-left: 0;
     font-weight: bold;
-    background-color: #fff; /* F3F1D9; */
+    background-color: #fff;
     border-bottom: 1px solid #e5e5e5;
     border-top: 1px solid #e5e5e5;
 }
