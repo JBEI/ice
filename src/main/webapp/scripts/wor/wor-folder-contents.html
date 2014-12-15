@@ -19,14 +19,8 @@
     <div class="row">
         <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
                ng-class="{'opacity_4':loadingPage}">
+            <thead>
             <tr data-ng-if='selectedPartnerFolder.entries'>
-                <th style="width:28px">
-                    <i class="fa"
-                       ng-class="{'fa-square-o':allSelected == false, 'fa-check-square-o': allSelected == true}"
-                       style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>
-                    <sup style="font-size: 9px; font-weight: normal; display: inherit"
-                         ng-show="selection.length>0">{{selection.length}}</sup>
-                </th>
                 <th ng-click="sort('type')" class="cursor_pointer">
                     <i ng-show="params.sort=='type'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-sort-down':params.asc==false, 'fa-sort-up':params.asc==true}"></i>
@@ -82,12 +76,9 @@
             <tr data-ng-show="selectedPartnerFolder.entries.length == 0">
                 <td colspan="10">No entries for selection</td>
             </tr>
+            </thead>
+            <tbody>
             <tr data-ng-repeat="entry in selectedPartnerFolder.entries | orderBy:'creationTime':true">
-                <td width="10px">
-                    <i class="fa" ng-class="{'fa-square-o':selection.indexOf(entry.id)==-1||selection===undefined,
-                       'fa-check-square-o':selection.indexOf(entry.id)>-1}"
-                       style="color: #999; font-size: 14px;" ng-click="select(entry)"></i>
-                </td>
                 <td>{{entry.type | capitalize}}</td>
                 <td><a ng-click="getRemoteEntryDetails(selectedPartner.id, entry.id, $index)"
                        class="cell_mouseover form-group"
@@ -112,6 +103,7 @@
                 <td><img ng-show="{{entry.hasSequence}}" src="img/dna.png" width="10px"/></td>
                 <td style="width:160px; white-space:nowrap">{{entry.creationTime | date:'MMM d, yyyy'}}</td>
             </tr>
+            </tbody>
         </table>
     </div>
     <div class="row" ng-if="selectedPartnerFolder&&selectedPartnerFolder.entries.length > 0">
