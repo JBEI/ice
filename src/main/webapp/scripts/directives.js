@@ -3,7 +3,6 @@
 /* Directives */
 var iceDirectives = angular.module('iceApp.directives', []);
 
-
 iceDirectives.directive("iceSearchInput", function () {
     return {
 //        scope: {
@@ -28,8 +27,7 @@ iceDirectives.directive('focus', function ($timeout, $rootScope) {
 iceDirectives.directive("addSequence", function () {
     return {
         restrict:"AE",
-        templateUrl:"/views/entry/sequence/add-sequence.html"
-//        controller:"AddSequenceController"
+        templateUrl:"/scripts/entry/sequence/add-sequence.html"
     }
 });
 
@@ -58,7 +56,7 @@ iceDirectives.directive("iceEntryAttachment", function () {
 iceDirectives.directive("iceRemoteEntryAttachment", function () {
     return {
         restrict:"E",
-        templateUrl:"/views/wor/entry/attachment.html"
+        templateUrl:"/scripts/wor/entry/attachment.html"
     }
 });
 
@@ -131,7 +129,7 @@ iceDirectives.directive('myTabs', function () {
                 panes.push(pane);
             };
         },
-        templateUrl:'/views/entry/tabs.html'
+        templateUrl:'/scripts/entry/tabs.html'
     };
 })
     .directive('myPane', function () {
@@ -145,7 +143,7 @@ iceDirectives.directive('myTabs', function () {
             link:function (scope, element, attrs, tabsCtrl) {
                 tabsCtrl.addPane(scope);
             },
-            templateUrl:'/views/entry/pane.html'
+            templateUrl:'/scripts/entry/pane.html'
         };
     });
 
@@ -160,7 +158,7 @@ iceDirectives.directive("iceCollectionContents", function () {
 iceDirectives.directive("ice-wor-contents", function () {
     return {
         restrict:"AE",
-        templateUrl:"/views/wor/wor-contents.html",
+        templateUrl:"/scripts/wor/wor-contents.html",
         controller:"WorContentController"
     }
 });
@@ -201,7 +199,7 @@ iceDirectives.directive("ice.menu.collections.details", function () {
 iceDirectives.directive("ice.menu.wor", function () {
     return {
         restrict:"E",
-        templateUrl:"/views/wor/web-of-registries-menu.html",
+        templateUrl:"/scripts/wor/web-of-registries-menu.html",
         controller:"WebOfRegistriesMenuController"
     }
 });
@@ -209,7 +207,7 @@ iceDirectives.directive("ice.menu.wor", function () {
 iceDirectives.directive("ice.menu.wor.details", function () {
     return {
         restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
-        templateUrl:"/views/wor/web-of-registries-menu-details.html",
+        templateUrl:"/scripts/wor/web-of-registries-menu-details.html",
         controller:"WebOfRegistriesDetailController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)

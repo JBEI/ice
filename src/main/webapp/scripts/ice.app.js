@@ -95,7 +95,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         })
         .state('main.web', {
             url:'web',
-            templateUrl:'/views/wor/index.html',
+            templateUrl:'/scripts/wor/index.html',
             resolve:{
                 sessionValid:function (Authentication) {
                     return Authentication.isSessionValid();
@@ -104,18 +104,18 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         })
         .state('main.web.list', {
             url:'/:partner',
-            templateUrl:'/views/wor/wor-contents.html',
+            templateUrl:'/scripts/wor/wor-contents.html',
             controller:'WorContentController'
         })
         .state('main.web.entry', {
             url:'/:partner/entry/:entryId',
-            templateUrl:'/views/wor/entry.html',
+            templateUrl:'/scripts/wor/entry.html',
             controller:'WorEntryController'
         })
 
         .state('main.web_folder', {
             url:'web/:partner/folder/:folderId',
-            templateUrl:'/views/wor/wor-folder-contents.html',
+            templateUrl:'/scripts/wor/wor-folder-contents.html',
             controller:'WorFolderContentController',
             resolve:{
                 sessionValid:function (Authentication) {
@@ -136,7 +136,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         .state('main.edit', {
             url:'entry/edit/:id',
             controller:'EditEntryController',
-            templateUrl:'/views/entry/edit.html'
+            templateUrl:'/scripts/entry/edit.html'
         })
         .state('main.entry', {
             url:'entry/:id',
@@ -149,12 +149,12 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         })
         .state('main.entry.option', {
             url:'/:option',
-            templateUrl:'/views/entry/sequence-analysis.html'
+            templateUrl:'/scripts/entry/sequence-analysis.html'
         })
         .state('main.create', {
             url:'create/:type',
             controller:'CreateEntryController',
-            templateUrl:'/views/entry/create-entry.html'
+            templateUrl:'/scripts/entry/create-entry.html'
         })
         .state('main.profile', {
             url:'profile/:id',
@@ -196,7 +196,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         .state('flash', {
             url:'/static/swf/:shortHand/:swfName?entryId&sessionId&url',
             controller:'FullScreenFlashController',
-            templateUrl:'/views/entry/fullscreen-flash.html'
+            templateUrl:'/scripts/entry/fullscreen-flash.html'
         })
     ;
 });
