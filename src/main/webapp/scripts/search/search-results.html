@@ -30,6 +30,7 @@
     <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
            ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
            ng-class="{'opacity_4':loadingSearchResults}">
+        <thead>
         <tr ng-show="searchResults.results.length>0">
             <th style="">
                 Relevance
@@ -54,6 +55,9 @@
             </th>
             <th style=" width:10px">
                 <i class="fa fa-paperclip fa-fw" style="font-size: 14px; "></i></th>
+            <th style="width:10px">
+                <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
+            </th>
             <th style=" width:10px">
                 <img src="img/dna.png" width="10px" alt="has dna"/></th>
             <th style="width:160px; white-space:nowrap">
@@ -67,6 +71,8 @@
         <tr data-ng-show="searchResults.results.length == 0">
             <td colspan="11">No results found for your query</td>
         </tr>
+        </thead>
+        <tbody>
         <tr data-ng-repeat="result in searchResults.results">
             <td ng-init="val=result.score/result.maxScore*100">
                 <progressbar animate='false' value='val' type='{{getType(val)}}'
@@ -92,20 +98,23 @@
             <td>
                 <div style="width:150px">{{result.entryInfo.owner}}</div>
             </td>
-            <td>
-                <div><a ng-href="{{result.partner.url}}" target="_blank">{{result.partner.name}}</a></div>
-            </td>
+            <td class="no_wrap"><a ng-href="https://{{result.partner.url}}/entry/{{result.entryInfo.id}}"
+                                   target="_blank">{{result.partner.name}}</a></td>
             <td><i ng-show="{{result.entryInfo.hasAttachment}}" class="fa fa-paperclip fa-fw"
+                   style="color: #555; font-size: 14px;"></i></td>
+            <td><i ng-show="{{result.entryInfo.hasSample}}" class="fa fa-flask fa-fw"
                    style="color: #555; font-size: 14px;"></i></td>
             <td><img ng-show="{{result.entryInfo.hasSequence}}" src="img/dna.png" width="10px"/></td>
             <td style="width:160px; white-space:nowrap">{{result.entryInfo.creationTime | date:'MMM d, yyyy'}}</td>
         </tr>
+        </tbody>
     </table>
 
     <!--TODO blast results-->
     <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
            ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
            ng-class="{'opacity_4':loadingSearchResults}">
+        <thead>
         <tr data-ng-show="searchResults.results.length>0">
             <th style="width: 90px">Type</th>
             <th style="width: 90px">Part ID</th>
@@ -122,6 +131,8 @@
         <tr data-ng-show="searchResults.results.length == 0">
             <td colspan="11">No results found for your query</td>
         </tr>
+        </thead>
+        <tbody>
         <tr data-ng-repeat-start="result in searchResults.results">
             <td>
                 <input type="checkbox" ng-click="select(result.entryInfo)"/>
@@ -162,8 +173,8 @@
                 <pre>{{result.matchDetails | json}}</pre>
             </td>
         </tr>
+        </tbody>
     </table>
-
 </div>
 
 <div class="row" ng-if="!isWebSearch()">
@@ -177,7 +188,6 @@
                    style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>
                 <sup style="font-size: 9px; font-weight: normal; display: inherit"
                      ng-show="selection.length>0">{{selection.length}}</sup>
-
 
                 <!--<input type="checkbox" ng-model="allSelected"/>-->
                 <!--<sup style="font-size: 9px; font-weight: normal"-->
