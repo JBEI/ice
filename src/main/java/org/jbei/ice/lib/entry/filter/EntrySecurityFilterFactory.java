@@ -57,9 +57,12 @@ public class EntrySecurityFilterFactory {
         @Override
         public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
             OpenBitSet bitSet = new OpenBitSet(reader.maxDoc());
-            TermDocs docs = reader.termDocs(new Term("canRead", accountId));
-            while (docs.next()) {
-                bitSet.set(docs.doc());
+            TermDocs docs;
+            if (accountId != null) {
+                docs = reader.termDocs(new Term("canRead", accountId));
+                while (docs.next()) {
+                    bitSet.set(docs.doc());
+                }
             }
 
             if (uuids != null) {
