@@ -115,7 +115,7 @@ angular.module('ice.entry.controller', [])
             })
         }
     })
-    .controller('EntrySampleController', function ($rootScope, $scope, $modal, $cookieStore, $stateParams, Entry, Samples) {
+    .controller('EntrySampleController', function ($location, $rootScope, $scope, $modal, $cookieStore, $stateParams, Entry, Samples) {
         $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
         $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
@@ -150,6 +150,27 @@ angular.module('ice.entry.controller', [])
 
             // assuming not found
             $scope.samples[0].inCart = false;
+        };
+
+        $scope.isAddGene = function (samples) {
+            if (!samples || !samples.length)
+                return false;
+
+            for (var i = 0; i < samples.length; i += 1) {
+                if (samples[i].location.type == 'ADDGENE')
+                    return true;
+            }
+
+            return false;
+        };
+
+        $scope.reguestFromAddGene = function (samples) {
+            for (var i = 0; i < samples.length; i += 1) {
+                if (samples[i].location.type == 'ADDGENE') {
+                    window.open("https://www.addgene.org/" + samples[i].location.display, "_blank");
+                    return;
+                }
+            }
         };
 
         $scope.openAddToCart = function () {

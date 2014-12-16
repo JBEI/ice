@@ -7,6 +7,7 @@
             </button>
         <span ng-if="samples && samples.length">
             &nbsp;
+            <span ng-if="!isAddGene(samples)">
             <button ng-if="!samples[0].inCart" ng-click="openAddToCart()" type="button" class="ice-button">
                 <i style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Add to Cart
             </button>
@@ -14,6 +15,12 @@
                     type="button" class="ice-button">
                 <i style="font-size: 14px;" class="fa fa-ban text-danger"></i> Remove From Cart
             </button>
+                </span>
+            <span ng-if="isAddGene(samples)">
+            <button ng-click="reguestFromAddGene(samples)" type="button" class="ice-button">
+                <i style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Request from Addgene
+            </button>
+            </span>
         </span>
         </div>
     </div>
