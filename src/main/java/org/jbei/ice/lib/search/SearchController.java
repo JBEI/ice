@@ -64,7 +64,7 @@ public class SearchController {
 
         // limit to 50
         query.getParameters().setRetrieveCount(50);
-        query.getParameters().setStart(1);
+        query.getParameters().setStart(0);
 
         LinkedList<SearchResult> resultsList = new LinkedList<>();
         long total = 0;
@@ -117,7 +117,7 @@ public class SearchController {
      * @return wrapper around the list of search results
      */
     public SearchResults runLocalSearch(String userId, SearchQuery query) {
-        String queryString = query.getQueryString();
+        String queryString = query.getQueryString().toLowerCase();
         Account account = null;
         if (userId != null)
             account = DAOFactory.getAccountDAO().getByEmail(userId);
