@@ -116,9 +116,6 @@ angular.module('ice.entry.controller', [])
         }
     })
     .controller('EntrySampleController', function ($location, $rootScope, $scope, $modal, $cookieStore, $stateParams, Entry, Samples) {
-        $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-        $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
-
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
         var samples = Samples(sessionId);
