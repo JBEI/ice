@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container-fluid" xmlns="http://www.w3.org/1999/html">
     <div class="row" style="margin-top: 80px">
         <div class="col-md-6">
             <div class=" pull-right">
@@ -16,11 +16,12 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="text"
+                    <input type="text" ng-disabled="login.processing"
                            ng-class="{'login_input':!login.emailError, 'login_input_error':login.emailError}"
                            placeholder="Username" ng-model="login.email" ng-change="login.emailError=undefined"/>
+                    <img src="img/loader-mini.gif" ng-if="login.processing">
                     <br>
-                    <input type="password"
+                    <input type="password" ng-disabled="login.processing"
                            ng-class="{'login_input':!login.passwordError, 'login_input_error':login.passwordError}"
                            placeholder="Password" ng-model="login.password" ng-change="login.passwordError=undefined"/>
                 </div>
@@ -31,7 +32,8 @@
                     </label>
                 </div>
 
-                <button type="submit" class="btn btn-sm btn-primary"><strong>Sign in</strong>
+                <button type="submit" class="btn btn-sm btn-primary" ng-disabled="login.processing">
+                    <strong>Sign in</strong>
                 </button>
                 <button type="button" ng-if="canCreateAccount" ng-click="goToRegister()"
                         class="btn btn-default btn-sm">Create account

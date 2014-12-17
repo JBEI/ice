@@ -6,7 +6,7 @@
     </div>
 
     <div class="row" ng-init="predicate='lastUpdate'">
-        <table cellspacing="0" class="data_table">
+        <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em">
             <tr data-ng-show='contents && contents.length > 0'>
                 <th style="width: 110px; cursor: pointer" ng-click="predicate = 'name'; reverse=!reverse">
                     Name
@@ -32,6 +32,6 @@
                 <td>{{upload.created}}</td>
                 <td>{{upload.lastUpdate}}</td>
             </tr>
-            </table>
+        </table>
     </div>
 </div>

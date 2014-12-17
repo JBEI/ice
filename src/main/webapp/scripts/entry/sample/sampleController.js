@@ -6,7 +6,7 @@ angular.module('ice.entry.sample.controller', [])
         $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
         $scope.canDelete = function () {
-            return $rootScope.user && $rootScope.user.isAdmin;
+            return !$scope.remote && $rootScope.user && $rootScope.user.isAdmin;
         }
     });
 

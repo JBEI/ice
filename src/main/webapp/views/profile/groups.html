@@ -1,12 +1,12 @@
 <div ng-controller="ProfileGroupsController">
-    <div class="row pad_top">
+    <div class="pad_top">
         <button type="button" ng-click="showCreateGroup=true" class="ice-button">
             <i style="font-size: 14px" class="blue fa fa-group"></i>
             <i style="vertical-align: sub; font-size: 8px;" class="fa fa-plus"></i>&nbsp; Create Group
         </button>
     </div>
 
-    <div class="row margin-top-10 panel panel-default" ng-if="showCreateGroup" style="background-color: #ededed">
+    <div class="margin-top-10 panel panel-default" ng-if="showCreateGroup" style="background-color: #ededed">
         <form class="panel-body" ng-submit="createGroup(groupName, groupDescription)">
             <div class="col-md-4 pad-top-5 form-group">
                 <input type="text" class="login_input" placeholder="Group Name" size="35" maxlength="35"
@@ -67,14 +67,14 @@
         </form>
     </div>
 
-    <div class="row" ng-if="myGroups.length">
+    <div ng-if="myGroups.length">
         <div class="general_sub_header">Groups you created</div>
         <div ng-repeat="group in myGroups | orderBy:'id'">
 
             <table class="table striped table-hover margin-top-10">
                 <tr ng-if="group.edit">
                     <td>
-                        <div class="row margin-top-10 panel panel-default" style="background-color: #ededed">
+                        <div class="margin-top-10 panel panel-default" style="background-color: #ededed">
                             <div class="col-md-4 pad-top-5 form-group">
                                 <div class="pull-left display-inline">
                                     <input type="text" class="login_input" placeholder="Group Name" size="35"
@@ -178,7 +178,7 @@
         </div>
     </div>
 
-    <div class="row" ng-if="groupsIBelong.length">
+    <div ng-if="groupsIBelong.length">
         <div class="general_sub_header">Groups you belong to</div>
         <table class="table striped table-hover">
             <tr ng-repeat="group in groupsIBelong | orderBy:'id'">

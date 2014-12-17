@@ -1,0 +1,53 @@
+<div ng-controller="WorEntrySamplesController">
+    <div class="row pad_top" ng-if="samples.length===0">
+        <div class="col-md-12">
+            <i class="text-muted">No samples available</i>
+        </div>
+    </div>
+
+    <div class="row pad_top" ng-repeat="sample in samples track by $index" ng-if="samples.length > 0">
+        <div class="col-md-12">
+
+            <!--widget for plate 96 -->
+            <div class="row" ng-if="$index % 2 == 0">
+
+                <!--left sample-->
+                <div class="col-md-6" ng-if="samples[$index+0].location.type==='PLATE96'&&samples[$index+0]">
+                    <ice-plate96 remote="true" sample="samples[$index+0]"></ice-plate96>
+                </div>
+
+                <!--right sample-->
+                <div class="col-md-6" ng-if="samples[$index+1].location.type==='PLATE96'&&samples[$index+1]">
+                    <ice-plate96 remote="true" sample="samples[$index+1]"></ice-plate96>
+                </div>
+
+                <!--widget for shelf-->
+                <div class="col-md-6" ng-if="samples[$index+0].location.type==='SHELF'&&samples[$index+0]">
+                    <ice-shelf remote="true" sample="samples[$index+0]"></ice-shelf>
+                </div>
+
+                <div class="col-md-6" ng-if="samples[$index+1].location.type==='SHELF'&&samples[$index+1]">
+                    <ice-shelf remote="true" sample="samples[$index+1]"></ice-shelf>
+                </div>
+
+                <!--widget for addgene-->
+                <div class="col-md-6" ng-if="samples[$index+0].location.type==='ADDGENE'&&samples[$index+0]">
+                    <ice-addgene remote="true" sample="samples[$index+0]"></ice-addgene>
+                </div>
+
+                <div class="col-md-6" ng-if="samples[$index+1].location.type==='ADDGENE'&&samples[$index+1]">
+                    <ice-addgene remote="true" sample="samples[$index+1]"></ice-addgene>
+                </div>
+
+                <!--widget for generic-->
+                <div class="col-md-6" ng-if="samples[$index+0].location.type==='GENERIC'&&samples[$index+0]">
+                    <ice-generic remote="true" sample="samples[$index+0]"></ice-generic>
+                </div>
+
+                <div class="col-md-6" ng-if="samples[$index+1].location.type==='GENERIC'&&samples[$index+1]">
+                    <ice-generic remote="true" sample="samples[$index+1]"></ice-generic>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

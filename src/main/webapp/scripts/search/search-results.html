@@ -27,9 +27,10 @@
 
 <div class="row" ng-if="isWebSearch()">
     <!--non-blast results remote search results-->
-    <table cellspacing="0" class="data_table"
+    <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
            ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
            ng-class="{'opacity_4':loadingSearchResults}">
+        <thead>
         <tr ng-show="searchResults.results.length>0">
             <th style="">
                 Relevance
@@ -54,8 +55,12 @@
             </th>
             <th style=" width:10px">
                 <i class="fa fa-paperclip fa-fw" style="font-size: 14px; "></i></th>
-            <th style=" width:10px">
-                <img src="img/dna.png" width="10px" alt="has dna"/></th>
+            <th style="width:10px">
+                <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
+            </th>
+            <th style="width:30px; text-align:center">
+                <img src="img/dna.svg" height="16px" alt="has dna"/>
+            </th>
             <th style="width:160px; white-space:nowrap">
                 Created
             </th>
@@ -67,15 +72,16 @@
         <tr data-ng-show="searchResults.results.length == 0">
             <td colspan="11">No results found for your query</td>
         </tr>
+        </thead>
+        <tbody>
         <tr data-ng-repeat="result in searchResults.results">
             <td ng-init="val=result.score/result.maxScore*100">
-                <progressbar animate='false' value='val' type='{{getType(val)}}'
-                             style="margin-bottom: 0"></progressbar>
+                <progressbar animate='false' value='val' type='{{getType(val)}}' style="margin-bottom: 0"></progressbar>
             </td>
             <td>{{result.entryInfo.type | capitalize}}</td>
             <td><a ng-href='/web/{{result.partner.id}}/entry/{{result.entryInfo.id}}' class="cell_mouseover form-group"
-                   popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result.entryInfo)"
-                   popover-template="/views/search/tooltip.html" popover-title="{{result.entryInfo.partId}}"
+                   popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result)"
+                   popover-template="/scripts/search/tooltip.html" popover-title="{{result.entryInfo.partId}}"
                    popover-placement="right">{{result.entryInfo.partId}}</a>
             </td>
             <td>
@@ -92,19 +98,25 @@
             <td>
                 <div style="width:150px">{{result.entryInfo.owner}}</div>
             </td>
-            <td>
-                <div><a ng-href="{{result.partner.url}}" target="_blank">{{result.partner.name}}</a></div>
-            </td>
+            <td class="no_wrap"><a ng-href="https://{{result.partner.url}}/entry/{{result.entryInfo.id}}"
+                                   target="_blank">{{result.partner.name}}</a></td>
             <td><i ng-show="{{result.entryInfo.hasAttachment}}" class="fa fa-paperclip fa-fw"
                    style="color: #555; font-size: 14px;"></i></td>
-            <td><img ng-show="{{result.entryInfo.hasSequence}}" src="img/dna.png" width="10px"/></td>
+            <td><i ng-show="{{result.entryInfo.hasSample}}" class="fa fa-flask fa-fw"
+                   style="color: #555; font-size: 14px;"></i></td>
+            <td style="width:30px; text-align:center">
+                <img ng-show="{{result.entryInfo.hasSequence}}" src="img/dna.svg" height="16px" alt="has dna"/>
+            </td>
             <td style="width:160px; white-space:nowrap">{{result.entryInfo.creationTime | date:'MMM d, yyyy'}}</td>
         </tr>
+        </tbody>
     </table>
 
     <!--TODO blast results-->
-    <table cellspacing="0" class="data_table" ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
+    <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
+           ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
            ng-class="{'opacity_4':loadingSearchResults}">
+        <thead>
         <tr data-ng-show="searchResults.results.length>0">
             <th style="width: 90px">Type</th>
             <th style="width: 90px">Part ID</th>
@@ -121,6 +133,8 @@
         <tr data-ng-show="searchResults.results.length == 0">
             <td colspan="11">No results found for your query</td>
         </tr>
+        </thead>
+        <tbody>
         <tr data-ng-repeat-start="result in searchResults.results">
             <td>
                 <input type="checkbox" ng-click="select(result.entryInfo)"/>
@@ -131,7 +145,7 @@
             <td>{{result.entryInfo.type | capitalize}}</td>
             <td><a ng-href='/entry/{{result.entryInfo.id}}'
                    popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                   popover-template="/views/search/tooltip.html"
+                   popover-template="/scripts/search/tooltip.html"
                    popover-title="{{result.entryInfo.partId}}"
                    popover-placement="right">{{result.entryInfo.partId}}</a>
             </td>
@@ -161,21 +175,19 @@
                 <pre>{{result.matchDetails | json}}</pre>
             </td>
         </tr>
+        </tbody>
     </table>
-
 </div>
 
 <div class="row" ng-if="!isWebSearch()">
-    <table cellspacing="0" class="data_table" ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
+    <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
+           ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
            ng-class="{'opacity_4':loadingSearchResults}">
         <tr data-ng-show="searchResults.results.length>0">
             <th style="width: 12px">
 
-                <i class="fa cursor_pointer" ng-class="{'fa-square-o':!allSelected, 'fa-check-square-o': allSelected}"
-                   style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>
-                <sup style="font-size: 9px; font-weight: normal; display: inherit"
-                     ng-show="selection.length>0">{{selection.length}}</sup>
-
+                <!--<i class="fa cursor_pointer" ng-class="{'fa-square-o':!allSelected, 'fa-check-square-o': allSelected}"-->
+                <!--style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>-->
 
                 <!--<input type="checkbox" ng-model="allSelected"/>-->
                 <!--<sup style="font-size: 9px; font-weight: normal"-->
@@ -206,7 +218,7 @@
             <td>{{result.entryInfo.type | capitalize}}</td>
             <td><a ng-href='/entry/{{result.entryInfo.id}}'
                    popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                   popover-template="/views/search/tooltip.html"
+                   popover-template="/scripts/search/tooltip.html"
                    popover-title="{{result.entryInfo.partId}}"
                    popover-placement="right">{{result.entryInfo.partId}}</a>
             </td>
@@ -238,9 +250,16 @@
         </tr>
     </table>
 
-    <table cellspacing="0" class="data_table"
+    <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
            ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
            ng-class="{'opacity_4':loadingSearchResults}">
+        <thead>
+        <tr data-ng-show='!searchResults'>
+            <td colspan="11"><img src="/img/loader-mini.gif"> Loading...</td>
+        </tr>
+        <tr data-ng-show="searchResults.results.length == 0">
+            <td colspan="11">No results found for your query</td>
+        </tr>
         <tr ng-show="searchResults.results.length>0">
             <th>
                 <!--<input type="checkbox" ng-model="allSelected"/>-->
@@ -249,7 +268,7 @@
 
                 <!--<i class="fa" ng-class="{'fa-square-o':!allSelected, 'fa-check-square-o': allSelected}"-->
                 <!--style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>-->
-                <i class="fa fa-fw fa-minus-square"></i>
+                <!--<i class="fa fa-fw fa-minus-square"></i>-->
             </th>
             <th style="">
                 Relevance
@@ -280,13 +299,8 @@
                 Created
             </th>
         </tr>
-
-        <tr data-ng-show='!searchResults'>
-            <td colspan="11"><img src="/img/loader-mini.gif"> Loading...</td>
-        </tr>
-        <tr data-ng-show="searchResults.results.length == 0">
-            <td colspan="11">No results found for your query</td>
-        </tr>
+        </thead>
+        <tbody>
         <tr data-ng-repeat="result in searchResults.results">
             <td width="10px">
                 <i class="fa fa-fw color-888 cursor_default" ng-click="selectSearchResult(result.entryInfo)"
@@ -299,7 +313,7 @@
             <td>{{result.entryInfo.type | capitalize}}</td>
             <td><a ng-click="goToEntryDetails(result.entryInfo, $index)" class="cell_mouseover form-group"
                    popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                   popover-template="/views/search/tooltip.html" popover-title="{{result.entryInfo.partId}}"
+                   popover-template="/scripts/search/tooltip.html"
                    popover-placement="right">{{result.entryInfo.partId}}</a>
             </td>
             <td>
@@ -325,6 +339,7 @@
             <td><img ng-show="{{result.entryInfo.hasSequence}}" src="img/dna.png" width="10px"/></td>
             <td style="width:160px; white-space:nowrap">{{result.entryInfo.creationTime | date:'MMM d, yyyy'}}</td>
         </tr>
+        </tbody>
     </table>
 </div>
 

@@ -277,7 +277,21 @@ angular.module('ice.upload.controller', [])
             };
 
             var getColWidth = function (index) {
-                return 150;
+                var fieldType;
+
+                if (linkedImportType) {
+                    var newIndex = index - sheetHeaders.length;
+                    fieldType = UploadUtil.getTypeField(linkedImportType, newIndex);
+                } else
+                    fieldType = UploadUtil.getTypeField($scope.importType, index);
+
+                switch (fieldType) {
+                    case "circular":
+                        return 60;
+
+                    default:
+                        return 150;
+                }
             };
 
             var calculateSize = function () {
@@ -467,8 +481,9 @@ angular.module('ice.upload.controller', [])
                     // set property for linked object and add it to link
                     var newIndex = col - sheetHeaders.length;
                     // todo : same treatment as object above
-                    var linkedObject = {id:linkedEntryIdDataIndex, type:$scope.linkedSelection.toUpperCase()};
-                    linkedObject[linkedDataSchema[newIndex]] = value;
+                    var linkedObject = {id:linkedEntryIdDataIndex, type:$scope.linkedSelection.toUpperCase(), strainData:{}, plasmidData:{}, arabidopsisSeedData:{}};
+                    linkedObject = UploadUtil.setDataValue($scope.linkedSelection.toUpperCase(), newIndex, linkedObject, value);
+//                    linkedObject[linkedDataSchema[newIndex]] = value;
                     object.linkedParts = [linkedObject];
                 } else {
                     object = UploadUtil.setDataValue($scope.importType.toUpperCase(), col, object, value);

@@ -1,0 +1,32 @@
+<div class="font-90em">
+    <div><b style="color: #888">Alias</b>: {{searchResultToolTip.alias}}</div>
+    <div><b style="color: #888">Selection Markers</b>: {{searchResultToolTip.selectionMarkers.toString()}}</div>
+    <div ng-if="searchResultToolTip.backbone"><b style="color: #888">Backbone</b>: {{searchResultToolTip.backbone}}
+    </div>
+    <div><b style="color: #888">Creator</b>: {{searchResultToolTip.creator}}</div>
+    <div ng-if="searchResultToolTip.originOfReplication"><b style="color: #888">Origin of Replication</b>:
+        {{searchResultToolTip.originOfReplication}}
+    </div>
+    <div><b style="color: #888">Owner</b>: {{searchResultToolTip.owner}}</div>
+    <div ng-if="searchResultToolTip.links"><b style="color: #888">Links</b>: {{searchResultToolTip.links}}</div>
+    <div ng-if="searchResultToolTip.replicatesIn"><b style="color: #888">Replicates In</b>:
+        {{searchResultToolTip.replicatesIn}}
+    </div>
+    <div><b style="color: #888">Status</b>: {{searchResultToolTip.status | capitalize}}</div>
+    <div><b style="color: #888">Bio Safety Level</b>: {{searchResultToolTip.bioSafetyLevel}}</div>
+    <div ng-if="searchResultToolTip.promoters"><b style="color: #888">Promoters</b>: {{searchResultToolTip.promoters}}
+    </div>
+    <div ng-if="searchResultToolTip.keywords"><b style="color: #888">Keywords</b>: {{searchResultToolTip.keywords}}
+    </div>
+    <div ng-if="searchResultToolTip.references"><b style="color: #888">References</b>:
+        {{searchResultToolTip.references}}
+    </div>
+    <div><b style="color: #888">Funding Source</b>: {{searchResultToolTip.fundingSource}}</div>
+    <div class="no_wrap"><b style="color: #888">Principal Investigator</b>:
+        {{searchResultToolTip.principalInvestigator}}
+    </div>
+    <div><b style="color: #888">Modified</b>: {{searchResultToolTip.modificationTime | date:'medium'}}</div>
+    <div ng-if="searchResultToolTip.intellectualProperty"><b style="color: #888">IP Information</b>:
+        {{searchResultToolTip.intellectualProperty}}
+    </div>
+</div>

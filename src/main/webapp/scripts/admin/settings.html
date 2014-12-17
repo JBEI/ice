@@ -1,4 +1,4 @@
-<div class="row pad_top">
+<div class="pad_top">
     <button type="button" ng-click="rebuildLuceneIndex()" class="ice-button">
         <i style="font-size: 14px" class="blue fa fa-refresh"></i> Rebuild Indexes
     </button>
@@ -9,10 +9,10 @@
 </div>
 
 <!--settings are retrieved by the main controller since they are used throughout the site-->
-<div class="row pad_top" ng-init="getSetting()">
+<div class="pad_top" ng-init="getSetting()">
     <tabset>
         <tab heading="General Settings">
-            <div class="row pad_top" ng-repeat="setting in generalSettings">
+            <div class="pad_top" ng-repeat="setting in generalSettings">
                 <div class="col-md-3 entryLabel text-right">
                     <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">{{setting.key}}</span>
                 </div>
@@ -38,7 +38,7 @@
         </tab>
 
         <tab heading="Email Settings">
-            <div class="row pad_top" ng-repeat="setting in emailSettings">
+            <div class="pad_top" ng-repeat="setting in emailSettings">
                 <div class="col-md-3 entryLabel text-right">
                     <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">{{setting.key}}</span>
                 </div>
