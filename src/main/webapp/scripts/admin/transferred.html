@@ -1,5 +1,5 @@
 <div ng-controller="AdminTransferredEntriesController">
-    <div class="row pad_top">
+    <div class="pad_top">
         <button type="button" ng-click="acceptEntries()" class="ice-button">
             <i style="font-size: 14px" class="blue fa fa-check"></i> Accept
         </button>
@@ -9,8 +9,9 @@
         </button>
     </div>
 
-    <div class="row pad_top">
-        <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
+    <div class="pad_top">
+        <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
+               ng-class="{'opacity_4':loadingPage}">
             <tr data-ng-if='transferredEntries && transferredEntries.entries.length > 0'>
                 <th style="width:28px">
                     <i class="fa"
@@ -61,14 +62,14 @@
             </tr>
 
             <tr data-ng-show='!transferredEntries'>
-                <td colspan="10">
+                <td>
                     <img alt="Loading..." src="/img/loader-mini.gif"/>
                     Loading...
                 </td>
             </tr>
 
             <tr data-ng-show="transferredEntries.entries.length == 0">
-                <td colspan="10">No entries available</td>
+                <td>No entries available</td>
             </tr>
 
             <tr data-ng-repeat="entry in transferredEntries.entries">

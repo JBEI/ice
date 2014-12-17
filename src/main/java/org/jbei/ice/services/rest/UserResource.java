@@ -11,7 +11,6 @@ import javax.ws.rs.core.UriInfo;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.PreferencesController;
-import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.AccountResults;
@@ -171,23 +170,15 @@ public class UserResource extends RestResource {
         return controller.updateAccount(user, userId, transfer);
     }
 
-    // reset or validate password (also include current session id for validation pending new method)
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/password")
-    public AccountTransfer resetPassword(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
-            AccountTransfer transfer) {
-        String userId = SessionHandler.getUserIdBySession(sessionId);
-        if (transfer.getPassword() != null && userId != null) {
-            return controller.authenticate(transfer);
-        }
-
-        // reset
-        AccountTransfer newUpdate = controller.resetPassword(userId, transfer.getEmail());
-        if (newUpdate == null)
-            return transfer;
-        return newUpdate;
+    public Response resetPassword(@Context UriInfo info, AccountTransfer transfer) {
+        boolean success = controller.resetPassword(transfer.getEmail());
+        if (!success)
+            return super.respond(Response.Status.NOT_FOUND);
+        return super.respond(Response.Status.OK);
     }
 
     @PUT

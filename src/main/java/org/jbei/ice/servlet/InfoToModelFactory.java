@@ -197,10 +197,14 @@ public class InfoToModelFactory {
         if (info.getName() != null)
             entry.setName(info.getName());
 
-        Set<SelectionMarker> markers = getSelectionMarkers(info.getSelectionMarkers(), entry);
-        entry.setSelectionMarkers(markers);
+        if (info.getSelectionMarkers() != null) {
+            Set<SelectionMarker> markers = getSelectionMarkers(info.getSelectionMarkers(), entry);
+            entry.setSelectionMarkers(markers);
+        }
 
-        entry.setReferences(info.getReferences());
+        if (info.getReferences() != null)
+            entry.setReferences(info.getReferences());
+
         if (StringUtils.isBlank(entry.getPartNumber()))
             entry.setPartNumber(info.getPartId());
 
@@ -311,7 +315,8 @@ public class InfoToModelFactory {
                 marker.setEntry(entry);
                 markers.add(marker);
             }
-        }
+        } else
+            return null;
 
         return markers;
     }

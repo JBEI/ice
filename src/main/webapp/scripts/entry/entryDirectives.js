@@ -5,7 +5,8 @@ angular.module('ice.entry.directives', [])
         return {
             scope:{
                 sample:"=",
-                delete:"&onDelete"
+                delete:"&onDelete",
+                remote:"="
             },
 
             restrict:"E",
@@ -17,7 +18,8 @@ angular.module('ice.entry.directives', [])
         return {
             scope:{
                 sample:"=",
-                delete:"&onDelete"
+                delete:"&onDelete",
+                remote:"="
             },
 
             restrict:"E",
@@ -29,7 +31,8 @@ angular.module('ice.entry.directives', [])
         return {
             scope:{
                 sample:"=",
-                delete:"&onDelete"
+                delete:"&onDelete",
+                remote:"="
             },
 
             restrict:"E",
@@ -41,7 +44,8 @@ angular.module('ice.entry.directives', [])
         return {
             scope:{
                 sample:"=",
-                delete:"&onDelete"
+                delete:"&onDelete",
+                remote:"="
             },
 
             restrict:"E",

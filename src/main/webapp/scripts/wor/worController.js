@@ -115,12 +115,23 @@ angular.module('ice.wor.controller', [])
 
         $scope.getRemoteEntryDetails = function (partnerId, entryId, index) {
             var position = (($scope.currentPage - 1) * $scope.itemsPerPage) + index;
-            var contextObject = {partner:partnerId, count:$scope.selectedPartnerFolder.count, position:position, params:$scope.folderPageParams, limit:1};
-            WorService.setContextObject(contextObject);
+            var url = "/web/" + partnerId;
+            if ($scope.folderPageParams && $scope.folderPageParams.folderId)
+                url += "/folder/" + $scope.folderPageParams.folderId;
+
+            WorService.setContextCallback(function (offset, callback) {
+                $scope.folderPageParams.offset = offset;
+                $scope.folderPageParams.limit = 1;
+
+                Remote().getFolderEntries($scope.folderPageParams, function (result) {
+                    callback(result.entries[0].id);
+                });
+            }, $scope.selectedPartnerFolder.count, position, url);
+
             $location.path("/web/" + partnerId + "/entry/" + entryId, true);
         };
     })
-    .controller('WorEntryController', function ($scope, $window, WebOfRegistries, $stateParams, EntryService, WorService, Remote) {
+    .controller('WorEntryController', function ($location, $scope, $window, WebOfRegistries, $stateParams, EntryService, WorService, Remote) {
         var web = WebOfRegistries();
         $scope.notFound = undefined;
         $scope.remoteEntry = undefined;
@@ -156,44 +167,30 @@ angular.module('ice.wor.controller', [])
         //
         $scope.context = WorService.getContext();
 
-        var getNextInContext = function () {
-            $scope.context.params.limit = 1;
-
-            Remote().getFolderEntries($scope.context.params, function (result) {
-                if (!result.entries)
-                    return;
-
-                var entryId = result.entries[0].id;
-                console.log(entryId);
-                retrieveEntry(entryId);
-
-                $scope.loadingPage = false;
-            }, function (error) {
-                console.error(error);
-                $scope.remoteRetrieveError = true;
-                $scope.loadingPage = false;
+        // get previous entry
+        $scope.prevEntryInContext = function () {
+            $scope.context.offset -= 1;
+            $scope.context.callback($scope.context.offset, function (result) {
+                retrieveEntry(result);
             });
         };
 
-        // get previous entry
-        $scope.prevEntryInContext = function () {
-            $scope.context.position -= 1;
-            $scope.context.params.offset = $scope.context.position;
-            getNextInContext();
+        $scope.nextEntryInContext = function () {
+            $scope.context.offset += 1;
+            $scope.context.callback($scope.context.offset, function (result) {
+                retrieveEntry(result);
+            });
         };
 
-        $scope.nextEntryInContext = function () {
-            $scope.context.position += 1;
-            $scope.context.params.offset = $scope.context.position;
-            getNextInContext();
+        $scope.backTo = function () {
+            $location.path($scope.context.back);
         };
 
         var menuSubDetails = $scope.subDetails = [
-            {url:'/views/wor/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
-            {id:'sequences', url:'/views/wor/entry/sequence-analysis.html', display:'Sequence Analysis', isPrivileged:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
-            {id:'comments', url:'/views/wor/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
-            {id:'samples', url:'/views/wor/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'}
-//            {id:'experiments', url:'/views/entry/experiments.html', display:'Experimental Data', isPrivileged:false, countName:'experimentalDataCount', icon:'fa-magic'}
+            {url:'/scripts/wor/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
+            {id:'sequences', url:'/scripts/wor/entry/sequence-analysis.html', display:'Sequence Analysis', isPrivileged:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
+            {id:'comments', url:'/scripts/wor/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
+            {id:'samples', url:'/scripts/wor/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'}
         ];
 
         $scope.showSelection = function (index) {
@@ -259,11 +256,9 @@ angular.module('ice.wor.controller', [])
         });
 
         var wor = WebOfRegistries();
-//    $scope.getPartners = function(approveOnly) {
         wor.query({approved_only:false}, function (result) {
             $scope.wor = result;
         });
-//    };
 
         $scope.enableDisableWor = function () {
             var value = $scope.isWorEnabled ? 'no' : 'yes';
@@ -342,8 +337,6 @@ angular.module('ice.wor.controller', [])
         }
     })
     .controller('WorEntrySamplesController', function ($scope, $stateParams, Remote) {
-        $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-        $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
         // retrieve remote samples
         var remote = Remote();
@@ -374,6 +367,6 @@ angular.module('ice.wor.controller', [])
             $scope.traceSequences = result;
         }, function (error) {
             console.error(error);
+            $scope.traceSequences = undefined;
         });
-    })
-;
+    });

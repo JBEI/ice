@@ -898,45 +898,9 @@ a:hover {
     background-color: #6C95C9;
 }
 
-.data_table {
-    background-color: #fff;
-    width: 100%;
-    font-size: 13px;
-    font-family: arial, sans-serif, helvetica, serif;
-    border-bottom: 1px solid #e6e6e6;
-}
-
-table.data_table th {
-    padding: 5px;
-    background-color: #fff;
-    border-top: 1px solid #aaa;
-    border-bottom: 1px solid #aaa;
-    border-left: 1px solid #e6e6e6;
-    white-space: nowrap;
-}
-
-table.data_table th:hover {
-    color: #444;
-}
-
 .form_textarea {
     height: 50px;
     width: 640px;
-}
-
-table.data_table tr:nth-child(odd) {
-    background-color: #f6f6f6;
-}
-
-table.data_table tr:nth-child(even) {
-    background-color: #fff;
-}
-
-table.data_table tr td {
-    padding: 6px;
-    border-top: 1px solid #e6e6e6;
-    border-left: 1px solid #e6e6e6;
-    height: 34px;
 }
 
 .subMenuCreateNew {
@@ -1166,9 +1130,7 @@ table.data_table tr td {
 }
 
 .profile_menu {
-    color: #0082C0;
-    font-size: 0.9em;
-    width: 170px;
+    color: #cecece;
     cursor: pointer;
 }
 
@@ -1176,10 +1138,7 @@ table.data_table tr td {
     color: #233559;
     border-left: 0;
     font-weight: bold;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    background-color: #fff; /* F3F1D9; */
-    border-right: 1px solid #e5e5e5;
+    background-color: #fff;
     border-bottom: 1px solid #e5e5e5;
     border-top: 1px solid #e5e5e5;
 }
@@ -1188,14 +1147,18 @@ table.data_table tr td {
     color: #777;
 }
 
-td.selected i.font-awesome {
-    color: #5a4545;
+.profile_menu td:hover {
+    color: #233559;
 }
 
 .profile_menu td {
     padding: 8px;
     border-left: 1px solid #e5e5e5;
     background-color: #efefef;
+}
+
+td.selected i.font-awesome {
+    color: #5a4545;
 }
 
 .entry_detail_submenu .selected {
@@ -1221,13 +1184,6 @@ td.selected i.font-awesome {
 
 .entry_detail_submenu:hover {
     cursor: pointer;
-}
-
-.profile_menu td:hover {
-    background-color: #fff;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    color: #233559;
 }
 
 .entry_detail_submenu td:hover {

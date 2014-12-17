@@ -40,6 +40,7 @@ public class SampleController {
     // mainly used by the api to create a strain sample record
     public Sample createStrainSample(Account account, String recordId, String rack, String location, String barcode,
             String label, String strainNamePrefix) {
+
         entryAuthorization.expectAdmin(account.getEmail());
 
         // check if there is an existing sample with barcode
@@ -124,6 +125,10 @@ public class SampleController {
                     currentStorage = storageDAO.create(currentStorage);
                     break;
 
+                case PLATE96:
+                    currentStorage = createPlate96Location(mainLocation);
+                    break;
+
                 default:
                     currentStorage = storageDAO.get(mainLocation.getId());
                     if (currentStorage == null) {
@@ -149,6 +154,19 @@ public class SampleController {
 
         sample = dao.create(sample);
         return sample.toDataTransferObject();
+    }
+
+    /**
+     * Creates location records for a sample contained in a 96 well plate
+     * Provides support for 2-D barcoded systems
+     */
+    protected Storage createPlate96Location(StorageLocation location) {
+//        String name = entry.getName();
+//        if (strainNamePrefix != null && name != null && !name.startsWith(strainNamePrefix)) {
+//            new EntryEditor().updateWithNextStrainName(strainNamePrefix, entry);
+//        }
+//        return sample;
+        return null;
     }
 
     public ArrayList<PartSample> retrieveEntrySamples(String userId, long entryId) {
@@ -180,6 +198,7 @@ public class SampleController {
                 location.setType(SampleType.GENERIC);
                 location.setDisplay(sample.getLabel());
                 generic.setLocation(location);
+                generic = setAccountInfo(generic, sample.getDepositor());
                 samples.add(generic);
                 continue;
             }
@@ -204,20 +223,23 @@ public class SampleController {
             partSample.setLabel(sample.getLabel());
             partSample.setLocation(storageLocation);
             partSample.setInCart(inCart);
-
-            Account account = DAOFactory.getAccountDAO().getByEmail(sample.getDepositor());
-            if (account != null)
-                partSample.setDepositor(account.toDataTransferObject());
-            else {
-                AccountTransfer accountTransfer = new AccountTransfer();
-                accountTransfer.setEmail(sample.getDepositor());
-                partSample.setDepositor(accountTransfer);
-            }
-
+            partSample = setAccountInfo(partSample, sample.getDepositor());
             samples.add(partSample);
         }
 
         return samples;
+    }
+
+    protected PartSample setAccountInfo(PartSample partSample, String email) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(email);
+        if (account != null)
+            partSample.setDepositor(account.toDataTransferObject());
+        else {
+            AccountTransfer accountTransfer = new AccountTransfer();
+            accountTransfer.setEmail(email);
+            partSample.setDepositor(accountTransfer);
+        }
+        return partSample;
     }
 
     public boolean delete(String userId, long partId, long sampleId) {

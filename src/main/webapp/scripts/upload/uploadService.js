@@ -112,8 +112,12 @@ angular.module('ice.upload.service', [])
             },
 
             setDataValue:function (type, index, object, value) {
-
                 var dataSchema = this.getDataSchema(type);
+                if (dataSchema[index] == "links") {
+                    object[dataSchema[index]] = [value];
+                    return object;
+                }
+
                 if (index < 15) {
                     object[dataSchema[index]] = value;
                     return object;

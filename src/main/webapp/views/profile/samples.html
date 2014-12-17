@@ -2,8 +2,9 @@
     <!--<div class="row pad_top">-->
     <!--Show:-->
     <!--</div>-->
-    <div class="row">
-        <table cellspacing="0" class="data_table" ng-class="{'opacity_4':loadingPage}">
+    <div>
+        <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
+               ng-class="{'opacity_4':loadingPage}">
             <tr data-ng-show='!userSamples'>
                 <td colspan="10"><img src="/img/loader-mini.gif"> Loading...</td>
             </tr>
@@ -43,7 +44,7 @@
         </table>
     </div>
 
-    <div class="row" ng-if='userSamples && userSamples.requests.length > 0'>
+    <div ng-if='userSamples && userSamples.requests.length > 0'>
         <div class="col-md-6" style="padding-left: 0">
             <pagination total-items="userSamples.count" on-select-page="setUserSamplePage(page)" page="currentPage"
                         max-size="maxSize"

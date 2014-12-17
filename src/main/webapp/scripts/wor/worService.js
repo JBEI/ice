@@ -82,7 +82,7 @@ angular.module('ice.wor.service', [])
     })
     .factory('WorService', function () {
         var selectedPartner = undefined;
-        var context = undefined;
+        var context;
 
         return {
             setSelectedPartner:function (partner) {
@@ -93,8 +93,12 @@ angular.module('ice.wor.service', [])
                 return selectedPartner;
             },
 
-            setContextObject:function (obj) {
-                context = obj;
+            setContextCallback:function (callback, available, offset, back) {
+                context = {};
+                context.callback = callback;
+                context.available = available;
+                context.offset = offset;
+                context.back = back;
             },
 
             getContext:function () {

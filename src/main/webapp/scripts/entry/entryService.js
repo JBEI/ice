@@ -6,12 +6,13 @@ angular.module('ice.entry.service', [])
         var selectedSearchResultsCount = 0;
         var selectedSearchNotificationSent = false;  // send notification when at least one is selected and then none
         var canEdit = false;
+        var allSelection;
         var canDelete = false;
         var selectedTypes = {};
         var userId = $cookieStore.get('userId');
 
         return {
-            selectSearchEntry:function (entry) {
+            selectEntry:function (entry) {
                 // todo : this may be a problem when a user selects 3 entries (can edit 2) and deselects the 3rd
                 // todo : that use cannot edit
 
@@ -62,6 +63,15 @@ angular.module('ice.entry.service', [])
                 }
             },
 
+            hasSelection:function () {
+                return (allSelection && allSelection.all) || selectedSearchResultsCount > 0;
+            },
+
+            setAllSelection:function (all) {
+                console.log("set all", all);
+                allSelection = all;
+            },
+
             searchEntrySelected:function (entry) {
                 return selectedSearchResults[entry.id] != undefined;
             },
@@ -82,6 +92,7 @@ angular.module('ice.entry.service', [])
 
             canEdit:function () {
                 var count = 0;
+                // selectedTypes is the type of entries selected
                 for (var k in selectedTypes) if (selectedTypes.hasOwnProperty(k)) ++count;
                 return canEdit && selectedSearchResultsCount > 0 && count == 1;
             },
@@ -93,6 +104,7 @@ angular.module('ice.entry.service', [])
             // resets all selected and send notifications
             reset:function () {
                 selectedSearchResults = {};
+                selectedTypes = {};
                 selectedSearchResultsCount = 0;
                 selectedSearchNotificationSent = false;
                 canEdit = false;
