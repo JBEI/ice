@@ -82,26 +82,26 @@ public class AccountController {
     }
 
     /**
-     * Changes user's password
+     * Reset a user's password
      *
-     * @param email       optional unique account identifier for user making request. If valid and an administrator
-     *                    then the newly created password is also sent
-     * @param targetEmail email address of user account to be changeds
+     * @param targetEmail email address of user account to be changed
+     * @return true if the user account is found with email specified in the parameter and password for it is
+     *         successfully reset, false otherwise
      */
-    public AccountTransfer resetPassword(String email, String targetEmail) {
+    public boolean resetPassword(String targetEmail) {
         Account account = getByEmail(targetEmail);
         if (account == null)
-            throw new IllegalArgumentException("Cannot retrieve account for " + targetEmail);
+            return false;
 
-        String newPassword = Utils.generateUUID().substring(24);
-        String encryptedNewPassword = AccountUtils.encryptNewUserPassword(newPassword, account.getSalt());
-        account.setPassword(encryptedNewPassword);
+        try {
+            String newPassword = Utils.generateUUID().substring(24);
+            String encryptedNewPassword = AccountUtils.encryptNewUserPassword(newPassword, account.getSalt());
+            account.setPassword(encryptedNewPassword);
 
-        account = dao.update(account);
-        AccountTransfer transfer = account.toDataTransferObject();
-        transfer.setPassword(newPassword);
+            account = dao.update(account);
+            AccountTransfer transfer = account.toDataTransferObject();
+            transfer.setPassword(newPassword);
 
-        if (email == null || !isAdministrator(email)) {
             String url = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
             String projectName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
             if (StringUtils.isEmpty(projectName))
@@ -110,8 +110,6 @@ public class AccountController {
             String name = account.getFirstName();
             if (StringUtils.isBlank(name)) {
                 name = account.getLastName();
-                if (StringUtils.isBlank(name))
-                    name = email;
             }
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, MMM d, yyyy 'at' HH:mm aaa, z");
@@ -127,9 +125,11 @@ public class AccountController {
                    .append("\n\nThank you.");
 
             Emailer.send(account.getEmail(), subject, builder.toString());
-            return null;
+        } catch (Exception ex) {
+            Logger.error(ex);
+            return false;
         }
-        return transfer;
+        return true;
     }
 
     /**

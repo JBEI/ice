@@ -64,7 +64,7 @@ public class AccountControllerTest {
     public void testResetPassword() throws Exception {
         Account account = AccountCreator.createTestAccount("testResetPassword", false);
         String oldPassword = account.getPassword();
-        controller.resetPassword(null, account.getEmail());
+        Assert.assertTrue(controller.resetPassword(account.getEmail()));
         Assert.assertFalse(oldPassword.equalsIgnoreCase(account.getPassword()));
     }
 
