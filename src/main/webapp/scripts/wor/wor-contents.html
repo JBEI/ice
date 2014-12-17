@@ -47,14 +47,14 @@
                    ng-class="{'fa-sort-down':queryParams.asc==false, 'fa-sort-up':queryParams.asc==true}"></i>
                 Status
             </th>
-            <th style="width:10px">
-                <i class="fa fa-paperclip fa-fw" style="font-size: 14px; "></i>
+            <th style="width:30px">
+                <i class="fa fa-paperclip fa-fw" style="font-size: 14px"></i>
             </th>
-            <th style="width:10px">
-                <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
+            <th style="width:30px">
+                <i class="fa fa-flask fa-fw" style="font-size: 14px"></i>
             </th>
-            <th style="width:10px">
-                <img src="img/dna.png" width="10px" alt="has dna"/>
+            <th style="width:30px; text-align:center">
+                <img src="img/dna.svg" height="16px" alt="has dna"/>
             </th>
             <th ng-click="sort('created')" class="cursor_pointer">
                 <i ng-show="queryParams.sort=='created'" style="font-size: 14px" class="fa opacity_4"
@@ -91,8 +91,8 @@
                 <div title="{{entry.name}}" class="ellipsis" style="width: 150px">{{entry.name}}</div>
             </td>
             <td>
-                <div title="{{entry.shortDescription}}"
-                     style="width: 500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <div tooltip="{{entry.shortDescription}}"
+                     style="width: 420px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                     {{entry.shortDescription}}
                 </div>
             </td>
@@ -101,8 +101,10 @@
                    style="color: #555; font-size: 14px;"></i></td>
             <td><i ng-show="{{entry.hasSample}}" class="fa fa-flask fa-fw"
                    style="color: #555; font-size: 14px;"></i></td>
-            <td><img ng-show="{{entry.hasSequence}}" src="img/dna.png" width="10px"/></td>
-            <td style="width:160px; white-space:nowrap">{{entry.creationTime | date:'MMM d, yyyy'}}</td>
+            <td style="width:30px; text-align:center">
+                <img ng-show="{{entry.hasSequence}}" src="img/dna.svg" height="16px"/>
+            </td>
+            <td style="width:150px; white-space:nowrap">{{entry.creationTime | date:'MMM d, yyyy'}}</td>
         </tr>
         </tbody>
     </table>

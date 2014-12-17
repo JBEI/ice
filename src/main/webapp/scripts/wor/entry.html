@@ -19,7 +19,8 @@
     <div class="row entry_general_header_td" style="height: 60px;">
 
         <div ng-class="{'col-md-12':!context, 'col-md-10':context}" ng-if="remoteEntry">
-            <i ng-if="context" class="pull-left fa fa-arrow-circle-left entry_go_back cursor_pointer" title="Back"></i>
+            <i ng-if="context" ng-click="backTo()"
+               class="pull-left fa fa-arrow-circle-left entry_go_back cursor_pointer" title="Back"></i>
             <h4>
                 <i class="fa fa-globe text-info"></i> <strong style="color: #888;">{{remoteEntry.type}}</strong>
                 <strong>{{remoteEntry.name}}</strong>
@@ -41,7 +42,7 @@
             <button type="button" class="btn btn-link outline-none" ng-disabled="context.position===0"
                     ng-click="prevEntryInContext()">
                 <i class="fa fa-arrow-left context_nav_pager"></i></button>
-            <strong class="font-90em">{{context.position+1 | number}} / {{context.count | number}}</strong>
+            <strong class="font-90em">{{context.offset+1 | number}} / {{context.available | number}}</strong>
             <button type="button" class="btn btn-link outline-none" ng-disabled="context.position===context.count-1"
                     ng-click="nextEntryInContext()">
                 <i class="fa fa-arrow-right context_nav_pager"></i></button>

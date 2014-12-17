@@ -41,7 +41,7 @@
         </div>
 
         <!--option to remove from folder-->
-        <button type="button" ng-disabled="removeDisabled" ng-click="removeEntriesFromFolder()"
+        <button type="button" ng-disabled="!canMoveFromFolder()" ng-click="removeEntriesFromFolder()"
                 class="btn btn-default btn-sm subMenuTransfer">
             <!--<i style="font-size: 14px;" class="fa fa-minus"></i>-->
             <span class="fa-stack" style="font-size: 8px;">
@@ -52,7 +52,7 @@
         </button>
 
         <div class="btn-group" dropdown>
-            <button type="button" ng-disabled="moveToDisabled" ng-click="retrieveUserFolders()"
+            <button type="button" ng-disabled="!canMoveFromFolder()" ng-click="retrieveUserFolders()"
                     class="btn btn-default btn-sm subMenuTransfer dropdown-toggle">
                 <i style="font-size: 14px;" class="fa fa-arrows blue"></i> Move To <span class="caret"></span>
             </button>

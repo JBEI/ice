@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.search.controller', [])
-    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil, Selection) {
+    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil, Selection, WebOfRegistries) {
         $scope.$on("RunSearch", function (event, filters) {
             $scope.searchResults = undefined;
             $scope.searchFilters = filters;
@@ -74,6 +74,16 @@ angular.module('ice.search.controller', [])
                 });
         };
 
+        $scope.remoteTooltipDetails = function (result) {
+            $scope.searchResultToolTip = undefined;
+            WebOfRegistries().getToolTip({partnerId:result.partner.id, entryId:result.entryInfo.id},
+                function (result) {
+                    $scope.searchResultToolTip = result;
+                }, function (error) {
+                    console.error(error);
+                });
+        };
+
         $scope.goToEntryDetails = function (entry, index) {
             // this assumes that if the user is able to click on a result then search was successful
 
@@ -100,7 +110,7 @@ angular.module('ice.search.controller', [])
         // select result entry
         //
         $scope.selectSearchResult = function (entry) {
-            Selection.selectSearchEntry(entry);
+            Selection.selectEntry(entry);
         };
 
         $scope.searchEntrySelected = function (entry) {

@@ -58,8 +58,9 @@
             <th style="width:10px">
                 <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
             </th>
-            <th style=" width:10px">
-                <img src="img/dna.png" width="10px" alt="has dna"/></th>
+            <th style="width:30px; text-align:center">
+                <img src="img/dna.svg" height="16px" alt="has dna"/>
+            </th>
             <th style="width:160px; white-space:nowrap">
                 Created
             </th>
@@ -75,13 +76,12 @@
         <tbody>
         <tr data-ng-repeat="result in searchResults.results">
             <td ng-init="val=result.score/result.maxScore*100">
-                <progressbar animate='false' value='val' type='{{getType(val)}}'
-                             style="margin-bottom: 0"></progressbar>
+                <progressbar animate='false' value='val' type='{{getType(val)}}' style="margin-bottom: 0"></progressbar>
             </td>
             <td>{{result.entryInfo.type | capitalize}}</td>
             <td><a ng-href='/web/{{result.partner.id}}/entry/{{result.entryInfo.id}}' class="cell_mouseover form-group"
-                   popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result.entryInfo)"
-                   popover-template="/views/search/tooltip.html" popover-title="{{result.entryInfo.partId}}"
+                   popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result)"
+                   popover-template="/scripts/search/tooltip.html" popover-title="{{result.entryInfo.partId}}"
                    popover-placement="right">{{result.entryInfo.partId}}</a>
             </td>
             <td>
@@ -104,7 +104,9 @@
                    style="color: #555; font-size: 14px;"></i></td>
             <td><i ng-show="{{result.entryInfo.hasSample}}" class="fa fa-flask fa-fw"
                    style="color: #555; font-size: 14px;"></i></td>
-            <td><img ng-show="{{result.entryInfo.hasSequence}}" src="img/dna.png" width="10px"/></td>
+            <td style="width:30px; text-align:center">
+                <img ng-show="{{result.entryInfo.hasSequence}}" src="img/dna.svg" height="16px" alt="has dna"/>
+            </td>
             <td style="width:160px; white-space:nowrap">{{result.entryInfo.creationTime | date:'MMM d, yyyy'}}</td>
         </tr>
         </tbody>
@@ -143,7 +145,7 @@
             <td>{{result.entryInfo.type | capitalize}}</td>
             <td><a ng-href='/entry/{{result.entryInfo.id}}'
                    popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                   popover-template="/views/search/tooltip.html"
+                   popover-template="/scripts/search/tooltip.html"
                    popover-title="{{result.entryInfo.partId}}"
                    popover-placement="right">{{result.entryInfo.partId}}</a>
             </td>
@@ -184,10 +186,8 @@
         <tr data-ng-show="searchResults.results.length>0">
             <th style="width: 12px">
 
-                <i class="fa cursor_pointer" ng-class="{'fa-square-o':!allSelected, 'fa-check-square-o': allSelected}"
-                   style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>
-                <sup style="font-size: 9px; font-weight: normal; display: inherit"
-                     ng-show="selection.length>0">{{selection.length}}</sup>
+                <!--<i class="fa cursor_pointer" ng-class="{'fa-square-o':!allSelected, 'fa-check-square-o': allSelected}"-->
+                <!--style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>-->
 
                 <!--<input type="checkbox" ng-model="allSelected"/>-->
                 <!--<sup style="font-size: 9px; font-weight: normal"-->
@@ -218,7 +218,7 @@
             <td>{{result.entryInfo.type | capitalize}}</td>
             <td><a ng-href='/entry/{{result.entryInfo.id}}'
                    popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                   popover-template="/views/search/tooltip.html"
+                   popover-template="/scripts/search/tooltip.html"
                    popover-title="{{result.entryInfo.partId}}"
                    popover-placement="right">{{result.entryInfo.partId}}</a>
             </td>
@@ -268,7 +268,7 @@
 
                 <!--<i class="fa" ng-class="{'fa-square-o':!allSelected, 'fa-check-square-o': allSelected}"-->
                 <!--style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>-->
-                <i class="fa fa-fw fa-minus-square"></i>
+                <!--<i class="fa fa-fw fa-minus-square"></i>-->
             </th>
             <th style="">
                 Relevance

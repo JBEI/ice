@@ -2,7 +2,7 @@
 
 angular.module('ice.collection.controller', [])
     // controller for <ice.menu.collections> directive
-    .controller('CollectionMenuController', function ($cookieStore, $scope, $modal, $rootScope, $location, $stateParams, Folders) {
+    .controller('CollectionMenuController', function ($cookieStore, $scope, $modal, $rootScope, $location, $stateParams, Folders, FolderSelection) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
 
@@ -13,7 +13,7 @@ angular.module('ice.collection.controller', [])
         // folders contained in the selected folder (default selected to personal)
         $scope.selectedCollectionFolders = undefined;
         $scope.selectedFolder = $stateParams.collection === undefined ? 'personal' : $stateParams.collection;
-        $rootScope.$emit("CollectionSelected", $scope.selectedFolder);
+        FolderSelection.selectCollection($scope.selectedFolder);
 
         // retrieve collections contained in the selectedFolder (only if a collection)
         if (isNaN($scope.selectedFolder)) {
@@ -70,7 +70,7 @@ angular.module('ice.collection.controller', [])
             // type on server is PUBLIC, PRIVATE, SHARED, UPLOAD
             var type = folder.type.toLowerCase();
             if (type !== "upload") {
-                $rootScope.$emit("CollectionFolderSelected", folder);
+                FolderSelection.selectFolder(folder);
                 type = "folders";
             }
 
@@ -82,7 +82,7 @@ angular.module('ice.collection.controller', [])
         // and some allow folders and when that is selected then the selectCollectionFolder() is called
         //
         $scope.selectCollection = function (name) {
-            $rootScope.$emit("CollectionSelected", name);
+            FolderSelection.selectCollection(name);
             $location.path("/folders/" + name);
             $scope.selectedFolder = name;
 
