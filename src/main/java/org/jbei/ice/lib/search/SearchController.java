@@ -112,12 +112,17 @@ public class SearchController {
     /**
      * Executes search using parameters specified in the query.
      *
-     * @param userId
-     * @param query
+     * @param userId unique user identifier making the request. This can be null if the request is via web of
+     *               registries
+     * @param query  wrapper around search query
      * @return wrapper around the list of search results
      */
     public SearchResults runLocalSearch(String userId, SearchQuery query) {
-        String queryString = query.getQueryString().toLowerCase();
+        String queryString;
+        if (query.getQueryString() != null)
+            queryString = query.getQueryString().toLowerCase();
+        else
+            queryString = query.getQueryString();
         Account account = null;
         if (userId != null)
             account = DAOFactory.getAccountDAO().getByEmail(userId);
