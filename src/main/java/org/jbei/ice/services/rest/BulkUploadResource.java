@@ -225,6 +225,7 @@ public class BulkUploadResource extends RestResource {
 
             EntryType addType = EntryType.valueOf(type.toUpperCase());
             FileBulkUpload bulkUpload = new FileBulkUpload(userId, file.toPath(), addType);
+            // converted to string because there is no messagebodywriter for json for long
             String importId = Long.toString(bulkUpload.process());
             return Response.status(Response.Status.OK).entity(importId).build();
         } catch (Exception e) {

@@ -121,6 +121,9 @@ angular.module('ice.entry.controller', [])
         var samples = Samples(sessionId);
         var partId = $stateParams.id;
 
+        $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+        $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+
         // retrieve samples for partId
         entry.samples({
             partId:partId
