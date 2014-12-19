@@ -9,9 +9,11 @@ import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.utils.Utils;
 
-import org.hibernate.HibernateException;
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
 /**
  * Manager to manipulate {@link Storage} objects in the database.
@@ -19,44 +21,6 @@ import org.hibernate.Session;
  * @author Timothy Ham, Hector Plahar
  */
 public class StorageDAO extends HibernateRepository<Storage> {
-
-    /**
-     * Retrieve {@link Storage} object from the database by its id. Optionally, retrieve children at
-     * this time.
-     *
-     * @param id unique record identifier
-     * @return Storage object.
-     * @throws DAOException
-     */
-    public Storage getWithChildren(long id) throws DAOException {
-        Storage result;
-        Session session = currentSession();
-        try {
-            Query query = session.createQuery("from " + Storage.class.getName() + " where id = :id");
-            query.setLong("id", id);
-            result = (Storage) query.uniqueResult();
-            if (result != null) {
-                result.getChildren().size();
-            }
-        } catch (HibernateException e) {
-            String msg = "Could not get location by id: " + id + " " + e.toString();
-            Logger.error(msg, e);
-            throw new DAOException(msg);
-        }
-
-        return result;
-    }
-
-    /**
-     * Retrieve {@link Storage} object by its uuid.
-     *
-     * @param uuid universally unique identifier
-     * @return Storage object.
-     * @throws DAOException
-     */
-    public Storage get(String uuid) throws DAOException {
-        return super.getByUUID(Storage.class, uuid);
-    }
 
     /**
      * Retrieves {@link Storage} object representing a tube. The 2D barcode for a tube is unique
@@ -229,5 +193,14 @@ public class StorageDAO extends HibernateRepository<Storage> {
     @Override
     public Storage get(long id) {
         return super.get(Storage.class, id);
+    }
+
+    public boolean storageExists(String index, Storage.StorageType type) {
+        Criteria criteria = currentSession().createCriteria(Storage.class.getName())
+                .setProjection(Projections.countDistinct("id"))
+                .add(Restrictions.eq("index", index))
+                .add(Restrictions.eq("storageType", type));
+        Number number = (Number) criteria.uniqueResult();
+        return number.intValue() > 0;
     }
 }

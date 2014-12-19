@@ -118,11 +118,7 @@ public class SearchController {
      * @return wrapper around the list of search results
      */
     public SearchResults runLocalSearch(String userId, SearchQuery query) {
-        String queryString;
-        if (query.getQueryString() != null)
-            queryString = query.getQueryString().toLowerCase();
-        else
-            queryString = query.getQueryString();
+        String queryString = query.getQueryString();
         Account account = null;
         if (userId != null)
             account = DAOFactory.getAccountDAO().getByEmail(userId);

@@ -126,17 +126,11 @@ public class FileResource extends RestResource {
             @QueryParam("sid") String sid,
             @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         try {
-//            if (StringUtils.isEmpty(sessionId))
-//                sessionId = sid;
-
-//            String userId = getUserIdFromSessionHeader(sessionId);
             RemoteAccessController controller = new RemoteAccessController();
             File file = controller.getPublicAttachment(partnerId, fileId);
-//            File file = attachmentController.getAttachmentByFileId(userId, fileId);
             if (file == null)
                 return respond(Response.Status.NOT_FOUND);
 
-//            String name = DAOFactory.getAttachmentDAO().getByFileId(fileId).getFileName();
             Response.ResponseBuilder response = Response.ok(file);
             response.header("Content-Disposition", "attachment; filename=\"remoteAttachment\"");
             return response.build();
@@ -294,8 +288,7 @@ public class FileResource extends RestResource {
     @Path("csv")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response downloadCSV(@HeaderParam("X-ICE-Authentication-SessionId") String sessionId,
-            ArrayList<Long> list) {
+    public Response downloadCSV(@HeaderParam("X-ICE-Authentication-SessionId") String sessionId, ArrayList<Long> list) {
         String userId = super.getUserIdFromSessionHeader(sessionId);
         EntryRetriever retriever = new EntryRetriever();
 

@@ -279,11 +279,12 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
             $scope.user.processing = false;
             return;
         }
+
         User().resetPassword({}, $scope.user, function (success) {
-            console.log(success);
             $scope.user.processing = false;
             $scope.user.processed = true;
         }, function (error) {
+            console.error(error);
             $scope.user.error = true;
             $scope.user.processing = false;
         });
