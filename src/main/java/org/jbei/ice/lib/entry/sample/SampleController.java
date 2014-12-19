@@ -38,9 +38,21 @@ public class SampleController {
     }
 
     // mainly used by the api to create a strain sample record
+
+    /**
+     * @param account          account of user creating the record
+     * @param recordId         unique identifier for entry
+     * @param rack             plate Identifier e.g. 1000
+     * @param location         eg. A13
+     * @param barcode          tube barcode
+     * @param label            label for sample
+     * @param strainNamePrefix if the name of the entry does not start with this prefix, then it is renamed
+     * @return created sample
+     */
     public Sample createStrainSample(Account account, String recordId, String rack, String location, String barcode,
             String label, String strainNamePrefix) {
 
+        // restricted to admins
         entryAuthorization.expectAdmin(account.getEmail());
 
         // check if there is an existing sample with barcode
@@ -58,6 +70,7 @@ public class SampleController {
         if (entry == null)
             return null;
 
+        // e.g. creating new strain sample [000000000399, G06, 1069929762, JBx_029667 backup 2] for entry "34015"
         Logger.info("Creating new strain sample [" + rack + ", " + location + ", " + barcode + ", " + label
                             + "] for entry \"" + entry.getId());
         // TODO : this is a hack till we migrate to a single strain default
@@ -126,7 +139,7 @@ public class SampleController {
                     break;
 
                 case PLATE96:
-                    currentStorage = createPlate96Location(mainLocation);
+                    currentStorage = createPlate96Location(depositor, mainLocation);
                     break;
 
                 default:
@@ -149,24 +162,92 @@ public class SampleController {
                         mainLocation = child;
                     }
             }
+            if (currentStorage == null)
+                return null;
+
             sample.setStorage(currentStorage);
         }
 
+        // create sample. If main location is null then sample is created without location
         sample = dao.create(sample);
+//        String name = entry.getName();
+//        if (strainNamePrefix != null && name != null && !name.startsWith(strainNamePrefix)) {
+//            new EntryEditor().updateWithNextStrainName(strainNamePrefix, entry);
+//        }
         return sample.toDataTransferObject();
     }
 
     /**
      * Creates location records for a sample contained in a 96 well plate
-     * Provides support for 2-D barcoded systems
+     * Provides support for 2-D barcoded systems. Validates the storage hierarchy before creating.
      */
-    protected Storage createPlate96Location(StorageLocation location) {
-//        String name = entry.getName();
-//        if (strainNamePrefix != null && name != null && !name.startsWith(strainNamePrefix)) {
-//            new EntryEditor().updateWithNextStrainName(strainNamePrefix, entry);
-//        }
-//        return sample;
-        return null;
+    protected Storage createPlate96Location(String sampleDepositor, StorageLocation mainLocation) {
+        // validate: expected format is [PLATE96, WELL, (optional - TUBE)]
+        StorageLocation well = mainLocation.getChild();
+        StorageLocation tube = null;
+        if (well != null) {
+            tube = well.getChild();
+            if (tube != null) {
+                // just check the barcode
+                String barcode = tube.getDisplay();
+                Storage existing = storageDAO.retrieveStorageTube(barcode);
+                if (existing != null) {
+                    ArrayList<Sample> samples = dao.getSamplesByStorage(existing);
+                    if (samples != null && !samples.isEmpty()) {
+                        Logger.error("Barcode \"" + barcode + "\" already has a sample associated with it");
+                        return null;
+                    }
+                }
+            }
+        }
+
+        if (storageDAO.storageExists(mainLocation.getDisplay(), Storage.StorageType.PLATE96)) {
+            if (well == null)
+                return null;
+
+            if (storageDAO.storageExists(well.getDisplay(), Storage.StorageType.WELL)) {
+                // if well has no tube then duplicate
+                if (tube == null) {
+                    Logger.error("Plate " + mainLocation.getDisplay()
+                                         + " already has a well storage at " + well.getDisplay());
+                    return null;
+                }
+
+                // check tube
+                // check if there is an existing sample with barcode
+                String barcode = tube.getDisplay();
+                Storage existing = storageDAO.retrieveStorageTube(barcode);
+                if (existing != null) {
+                    ArrayList<Sample> samples = dao.getSamplesByStorage(existing);
+                    if (samples != null && !samples.isEmpty()) {
+                        Logger.error("Barcode \"" + barcode + "\" already has a sample associated with it");
+                        return null;
+                    }
+                }
+            }
+        }
+
+        // create storage locations
+        Storage currentStorage = storageDAO.get(mainLocation.getId());
+        if (currentStorage == null) {
+            currentStorage = createStorage(sampleDepositor, mainLocation.getDisplay(), mainLocation.getType());
+            currentStorage = storageDAO.create(currentStorage);
+        }
+
+        while (mainLocation.getChild() != null) {
+            StorageLocation child = mainLocation.getChild();
+            Storage childStorage = storageDAO.get(child.getId());
+            if (childStorage == null) {
+                childStorage = createStorage(sampleDepositor, child.getDisplay(), child.getType());
+                childStorage.setParent(currentStorage);
+                childStorage = storageDAO.create(childStorage);
+            }
+
+            currentStorage = childStorage;
+            mainLocation = child;
+        }
+
+        return currentStorage;
     }
 
     public ArrayList<PartSample> retrieveEntrySamples(String userId, long entryId) {
