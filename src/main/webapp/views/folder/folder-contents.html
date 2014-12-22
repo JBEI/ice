@@ -153,12 +153,12 @@
                     </div>
                 </td>
                 <td style="width:80px; white-space:nowrap">{{entry.status | capitalize}}</td>
-                <td><i ng-show="{{entry.hasAttachment}}" class="fa fa-paperclip fa-fw"
+                <td><i ng-show="entry.hasAttachment" class="fa fa-paperclip fa-fw"
                        style="color: #555; font-size: 14px;"></i></td>
-                <td><i ng-show="{{entry.hasSample}}" class="fa fa-flask fa-fw"
+                <td><i ng-show="entry.hasSample" class="fa fa-flask fa-fw"
                        style="color: #555; font-size: 14px;"></i></td>
                 <td style="width:30px; text-align:center">
-                    <img ng-show="{{entry.hasSequence}}" src="img/dna.svg" height="16px"/>
+                    <img ng-show="entry.hasSequence" src="img/dna.svg" height="16px"/>
                 </td>
                 <td style="width:160px; white-space:nowrap">{{entry.creationTime | date:'MMM d, yyyy'}}</td>
             </tr>
