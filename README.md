@@ -12,7 +12,7 @@ You can try out the software and use our tools on our [Public Registry](http://p
 <b>Links</b>
 
 [ICE Google Group](http://groups.google.com/group/gd-ice)
-<br>[Continuous Build system](http://registry-test.jbei.org:8111): The WAR files are automatically created here. Login as guest and click on "Artifacts" for the Master branch to obtain the latest production version. 
+<br>[Releases](https://github.com/JBEI/ice/releases): Download the war file associated with the latest release
 <br>[REST API WADL] (https://public-registry.jbei.org/rest/application.wadl)
 <br>[Pre-packaged installation for your local machine](http://public-registry.jbei.org/site/packages): Please note that this is intended for convenient evaluation of ICE and not to be used in a production environment.
 
