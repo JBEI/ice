@@ -954,6 +954,7 @@ angular.module('ice.upload.controller', [])
         };
 
         var sessionId = $cookieStore.get("sessionId");
+        var service = Upload(sessionId);
 
         // init
         var panes = $scope.panes = [];
@@ -964,20 +965,22 @@ angular.module('ice.upload.controller', [])
 
         // if upload.id exists, then retrieve the permissions for the upload
         if (upload.id) {
-            Upload(sessionId).getPermissions({importId: upload.id}, function (result) {
+            service.getPermissions({importId: upload.id}, function (result) {
                 angular.forEach(result, function (item) {
-                    if (item.type === 'WRITE_FOLDER')
+                    if (item.type == 'WRITE_UPLOAD')
                         $scope.writePermissions.push(item);
-                    else
+                    else if (item.type == 'READ_UPLOAD')
                         $scope.readPermissions.push(item);
                 });
+
+                $scope.panes.push({title: 'Read', count: $scope.readPermissions.length, selected: true});
+                $scope.panes.push({title: 'Write', count: $scope.writePermissions.length});
+                $scope.activePermissions = $scope.readPermissions;
+
             }, function (error) {
                 console.error(error);
             });
         }
-        $scope.panes.push({title: 'Read', count: $scope.readPermissions.length, selected: true});
-        $scope.panes.push({title: 'Write', count: $scope.writePermissions.length});
-        $scope.activePermissions = $scope.readPermissions;
 
         $scope.activateTab = function (pane) {
             angular.forEach(panes, function (pane) {
@@ -996,13 +999,6 @@ angular.module('ice.upload.controller', [])
             });
         };
 
-        //this.addPane = function (pane) {
-        //    // activate the first pane that is added
-        //    if (panes.length == 0)
-        //        $scope.activateTab(pane);
-        //    panes.push(pane);
-        //};
-
         $scope.closeModal = function () {
             $modalInstance.close('cancel'); // todo : pass object to inform if folder is shared or cleared
         };
@@ -1017,33 +1013,34 @@ angular.module('ice.upload.controller', [])
         };
 
         var removePermission = function (permissionId) {
-            //folders.removePermission({folderId:folder.id, permissionId:permissionId},
-            //    function (result) {
-            //        if (!result)
-            //            return;
-            //
-            //        // check which pane is selected
-            //        var pane;
-            //        if ($scope.panes[0].selected)
-            //            pane = $scope.panes[0];
-            //        else
-            //            pane = $scope.panes[1];
-            //
-            //        var i = -1;
-            //
-            //        for (var idx = 0; idx < $scope.activePermissions.length; idx += 1) {
-            //            if (permissionId != $scope.activePermissions[idx].id) {
-            //                i = idx;
-            //                break;
-            //            }
-            //        }
-            //
-            //        if (i == -1)
-            //            return;
-            //
-            //        $scope.activePermissions.splice(i, 1);
-            //        pane.count = $scope.activePermissions.length;
-            //    });
+            service.removePermission({importId: $scope.upload.id, pId: permissionId},
+                function (result) {
+                    if (!result)
+                        return;
+                    // check which pane is selected
+                    var pane;
+                    if ($scope.panes[0].selected)
+                        pane = $scope.panes[0];
+                    else
+                        pane = $scope.panes[1];
+
+                    var i = -1;
+
+                    for (var idx = 0; idx < $scope.activePermissions.length; idx += 1) {
+                        if (permissionId == $scope.activePermissions[idx].id) {
+                            i = idx;
+                            break;
+                        }
+                    }
+
+                    if (i == -1)
+                        return;
+
+                    $scope.activePermissions.splice(i, 1);
+                    pane.count = $scope.activePermissions.length;
+                }, function (error) {
+
+                });
         };
 
         $scope.addRemovePermission = function (permission) {
@@ -1057,26 +1054,35 @@ angular.module('ice.upload.controller', [])
             var pane;
             for (var i = 0; i < panes.length; i += 1) {
                 if (panes[i].selected) {
-                    permission.type = panes[i].title.toUpperCase() + "_FOLDER";
+                    permission.type = panes[i].title.toUpperCase() + "_UPLOAD";
                     pane = panes[i];
                     break;
                 }
             }
 
-            //folders.addPermission({folderId:folder.id}, permission, function (result) {
-            //    // result is the permission object
-            //    if (result.type == 'READ_FOLDER') {
-            //        $scope.readPermissions.push(result);
-            //        $scope.activePermissions = $scope.readPermissions;
-            //    }
-            //    else {
-            //        $scope.writePermissions.push(result);
-            //        $scope.activePermissions = $scope.writePermissions;
-            //    }
-            //
-            //    permission.id = result.id;
-            //    pane.count = $scope.activePermissions.length;
-            //});
+            // todo : if no upload identified
+            service.addPermission({importId: $scope.upload.id},
+                permission,
+                function (result) {
+                    if (!result) {
+                        console.error("Permission creation error");
+                        return;
+                    }
+
+                    console.log(result);
+                    if (result.type == 'READ_UPLOAD') {
+                        $scope.readPermissions.push(result);
+                        $scope.activePermissions = $scope.readPermissions;
+                    } else if (result.type == 'WRITE_UPLOAD') {
+                        $scope.writePermissions.push(result);
+                        $scope.activePermissions = $scope.writePermissions;
+                    }
+                    permission.id = result.id;
+                    pane.count = $scope.activePermissions.length;
+                },
+                function (error) {
+                    console.error(error);
+                });
         };
 
         $scope.enablePublicRead = function (folder) {

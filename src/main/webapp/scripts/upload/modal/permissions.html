@@ -5,7 +5,6 @@
 </div>
 
 <div class="modal-body">
-    {{upload}}
     <table cellpadding="0" cellspacing="0" style="width: 560px">
         <tr>
             <td>
@@ -77,19 +76,19 @@
         <tr>
             <td class="pad_top"></td>
         </tr>
-        <tr>
-            <td class="permission_footer" ng-if="!folder.publicReadAccess">
-                <div class="permission_footer_link" ng-click="enablePublicRead(folder)"><i class="fa fa-globe"></i>
-                    Enable Public Read Access
-                </div>
-            </td>
+        <!--<tr>-->
+        <!--<td class="permission_footer" ng-if="!folder.publicReadAccess">-->
+        <!--<div class="permission_footer_link" ng-click="enablePublicRead(folder)"><i class="fa fa-globe"></i>-->
+        <!--Enable Public Read Access-->
+        <!--</div>-->
+        <!--</td>-->
 
-            <td class="permission_footer" ng-if="folder.publicReadAccess"
-                style="border-left: 0; background-color: #f9f9f9">
-                <div class="permission_footer_link" ng-click="disablePublicRead(folder)">
-                    <i class="fa fa-globe blue"></i> Disable Public Read Access
-                </div>
-            </td>
-        </tr>
+        <!--<td class="permission_footer" ng-if="folder.publicReadAccess"-->
+        <!--style="border-left: 0; background-color: #f9f9f9">-->
+        <!--<div class="permission_footer_link" ng-click="disablePublicRead(folder)">-->
+        <!--<i class="fa fa-globe blue"></i> Disable Public Read Access-->
+        <!--</div>-->
+        <!--</td>-->
+        <!--</tr>-->
     </table>
 </div>

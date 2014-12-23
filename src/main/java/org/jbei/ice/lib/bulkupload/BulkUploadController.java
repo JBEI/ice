@@ -243,22 +243,6 @@ public class BulkUploadController {
     }
 
     /**
-     * Retrieves list of parts that are intended to be edited in bulk. User must
-     * have write permissions on all parts
-     *
-     * @param account user account making request. Should have write permissions on all accounts
-     * @param partIds unique part identifiers
-     * @return list of retrieved part data wrapped in the bulk upload data transfer object
-     * @throws ControllerException
-     */
-    public BulkUploadInfo getPartsForBulkEdit(Account account, ArrayList<Long> partIds) throws ControllerException {
-        ArrayList<Entry> parts = entryController.getEntriesByIdSet(account, partIds);
-        BulkUploadInfo bulkUploadInfo = new BulkUploadInfo();
-        bulkUploadInfo.getEntryList().addAll(convertParts(account, parts));
-        return bulkUploadInfo;
-    }
-
-    /**
      * Retrieves list of user saved bulk imports. Only the owner or an administrator can retrieve it
      *
      * @param requesterId   account of requesting user
@@ -587,22 +571,39 @@ public class BulkUploadController {
         return permissions;
     }
 
-    public boolean addPermission(String userId, long uploadId, AccessPermission access) {
+    /**
+     * Adds specified access permission to the bulk upload.
+     *
+     * @param userId   unique identifier of user making the request. Must be an admin or owner of the upload
+     * @param uploadId unique identifier for bulk upload
+     * @param access   details about the permission to the added
+     * @return added permission with identifier that can be used to remove/delete the permission
+     * @throws java.lang.IllegalArgumentException if the upload cannot be located using its identifier
+     */
+    public AccessPermission addPermission(String userId, long uploadId, AccessPermission access) {
         BulkUpload upload = dao.get(uploadId);
         if (upload == null)
-            return false;
+            throw new IllegalArgumentException("Could not locate bulk upload with id " + uploadId);
 
         access.setTypeId(uploadId);
         Permission permission = new PermissionsController().addPermission(userId, access);
         upload.getPermissions().add(permission);
         dao.update(upload);
-        return true;
+        return permission.toDataTransferObject();
     }
 
+    /**
+     * Removes specified permission from bulk upload
+     * @param userId unique identifier of user making the request. Must be an admin or owner of the bulk upload
+     * @param uploadId unique identifier for bulk upload
+     * @param permissionId unique identifier for permission that has been previously added to upload
+     * @return true if deletion is successful
+     * @throws java.lang.IllegalArgumentException if upload or permission cannot be located by their identifiers
+     */
     public boolean deletePermission(String userId, long uploadId, long permissionId) {
         BulkUpload upload = dao.get(uploadId);
         if (upload == null)
-            return false;
+            throw new IllegalArgumentException("Could not locate bulk upload with id " + uploadId);
 
         authorization.expectWrite(userId, upload);
         Permission toDelete = null;
@@ -617,7 +618,7 @@ public class BulkUploadController {
         }
 
         if (toDelete == null)
-            return false;
+            throw new IllegalArgumentException("Could not locate permission for deletion");
 
         upload.getPermissions().remove(toDelete);
         return dao.update(upload) != null;

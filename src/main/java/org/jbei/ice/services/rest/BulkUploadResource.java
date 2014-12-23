@@ -87,16 +87,18 @@ public class BulkUploadResource extends RestResource {
                                   @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
                                   AccessPermission accessPermission) {
         String userId = getUserIdFromSessionHeader(sessionId);
-        controller.addPermission(userId, id, accessPermission);
-        return super.respond(true);
+        AccessPermission permission = controller.addPermission(userId, id, accessPermission);
+        return super.respond(permission);
     }
 
     @DELETE
-    @Path("/{id}/permission/{pid}")
+    @Path("/{id}/permissions/{pid}")
     public Response removePermission(@PathParam("id") long id,
                                      @PathParam("pid") long permissionId,
                                      @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
-        return super.respond(true);
+        String userId = getUserIdFromSessionHeader(sessionId);
+        boolean success = controller.deletePermission(userId, id, permissionId);
+        return super.respond(success);
     }
 
     @POST

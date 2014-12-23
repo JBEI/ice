@@ -444,7 +444,7 @@ iceServices.factory('Entry', function ($resource) {
 
 iceServices.factory('Upload', function ($resource) {
     return function (sessionId) {
-        return $resource('/rest/upload/:importId', {importId:'@id', type:'@type', entryId:'@entryId'}, {
+        return $resource('/rest/upload/:importId', {importId: '@id', type: '@type', entryId: '@entryId', pId: '@pId'}, {
             get:{
                 method:'GET',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
@@ -507,6 +507,18 @@ iceServices.factory('Upload', function ($resource) {
                 method: 'GET',
                 url: 'rest/upload/:importId/permissions',
                 isArray: true,
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
+            },
+
+            addPermission: {
+                method: 'POST',
+                url: 'rest/upload/:importId/permissions',
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
+            },
+
+            removePermission: {
+                method: 'DELETE',
+                url: 'rest/upload/:importId/permissions/:pId',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             }
         });
