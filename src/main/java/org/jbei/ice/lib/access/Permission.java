@@ -1,25 +1,17 @@
 package org.jbei.ice.lib.access;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-
+import org.hibernate.search.annotations.Analyze;
+import org.hibernate.search.annotations.ClassBridge;
+import org.hibernate.search.annotations.ContainedIn;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.bulkupload.BulkUpload;
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
 
-import org.hibernate.search.annotations.Analyze;
-import org.hibernate.search.annotations.ClassBridge;
-import org.hibernate.search.annotations.ContainedIn;
+import javax.persistence.*;
 
 /**
  * Permission object for storing permissions related to either folders or entries
@@ -62,6 +54,10 @@ public class Permission implements IDataModel {
     @JoinColumn(name = "folder_id")
     private Folder folder;
 
+    @ManyToOne
+    @JoinColumn(name = "upload_id")
+    private BulkUpload upload;
+
     public long getId() {
         return id;
     }
@@ -80,6 +76,14 @@ public class Permission implements IDataModel {
 
     public void setGroup(Group group) {
         this.group = group;
+    }
+
+    public BulkUpload getUpload() {
+        return upload;
+    }
+
+    public void setUpload(BulkUpload upload) {
+        this.upload = upload;
     }
 
     public boolean isCanRead() {
@@ -137,6 +141,9 @@ public class Permission implements IDataModel {
         } else if (getFolder() != null) {
             type = isCanWrite() ? AccessPermission.Type.WRITE_FOLDER : AccessPermission.Type.READ_FOLDER;
             id = getFolder().getId();
+        } else if (upload != null) {
+            type = isCanWrite() ? AccessPermission.Type.WRITE_UPLOAD : AccessPermission.Type.READ_UPLOAD;
+            id = upload.getId();
         }
         access.setType(type);
         access.setTypeId(id);

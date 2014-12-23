@@ -1,15 +1,7 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.access.PermissionException;
@@ -24,11 +16,7 @@ import org.jbei.ice.lib.dao.hibernate.BulkUploadDAO;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.SequenceInfo;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachment;
@@ -41,8 +29,11 @@ import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
  * Controller for dealing with bulk imports (including drafts)
@@ -252,22 +243,6 @@ public class BulkUploadController {
     }
 
     /**
-     * Retrieves list of parts that are intended to be edited in bulk. User must
-     * have write permissions on all parts
-     *
-     * @param account user account making request. Should have write permissions on all accounts
-     * @param partIds unique part identifiers
-     * @return list of retrieved part data wrapped in the bulk upload data transfer object
-     * @throws ControllerException
-     */
-    public BulkUploadInfo getPartsForBulkEdit(Account account, ArrayList<Long> partIds) throws ControllerException {
-        ArrayList<Entry> parts = entryController.getEntriesByIdSet(account, partIds);
-        BulkUploadInfo bulkUploadInfo = new BulkUploadInfo();
-        bulkUploadInfo.getEntryList().addAll(convertParts(account, parts));
-        return bulkUploadInfo;
-    }
-
-    /**
      * Retrieves list of user saved bulk imports. Only the owner or an administrator can retrieve it
      *
      * @param requesterId   account of requesting user
@@ -348,7 +323,7 @@ public class BulkUploadController {
     }
 
     public BulkUploadAutoUpdate autoUpdateBulkUpload(String userId, BulkUploadAutoUpdate autoUpdate,
-            EntryType addType) {
+                                                     EntryType addType) {
         BulkEntryCreator creator = new BulkEntryCreator();
         return creator.createOrUpdateEntry(userId, autoUpdate, addType);
     }
@@ -416,7 +391,7 @@ public class BulkUploadController {
         boolean isAdmin = accountController.isAdministrator(account.getEmail());
         if (!isAdmin) {
             Logger.warn(account.getEmail() + " attempting to revert submitted bulk upload "
-                                + uploadId + " without admin privs");
+                    + uploadId + " without admin privs");
             return false;
         }
 
@@ -492,7 +467,7 @@ public class BulkUploadController {
     }
 
     public SequenceInfo addSequence(String userId, long bulkUploadId, long entryId, String sequenceString,
-            String fileName) {
+                                    String fileName) {
         BulkUpload upload = dao.get(bulkUploadId);
         if (upload == null)
             return null;
@@ -521,7 +496,7 @@ public class BulkUploadController {
     }
 
     public AttachmentInfo addAttachment(String userId, long bulkUploadId, long entryId, InputStream fileInputStream,
-            String fileName) {
+                                        String fileName) {
         BulkUpload upload = dao.get(bulkUploadId);
         if (upload == null)
             return null;
@@ -536,7 +511,7 @@ public class BulkUploadController {
 
         String fileId = Utils.generateUUID();
         File attachmentFile = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
-                                        AttachmentController.attachmentDirName, fileId).toFile();
+                AttachmentController.attachmentDirName, fileId).toFile();
 
         try {
             FileUtils.copyInputStreamToFile(fileInputStream, attachmentFile);
@@ -578,5 +553,74 @@ public class BulkUploadController {
         }
 
         return true;
+    }
+
+    public List<AccessPermission> getUploadPermissions(String userId, long uploadId) {
+        List<AccessPermission> permissions = new ArrayList<>();
+        BulkUpload upload = dao.get(uploadId);
+        if (upload == null)
+            return permissions;
+
+        authorization.expectWrite(userId, upload);
+
+        if (upload.getPermissions() != null) {
+            for (Permission permission : upload.getPermissions())
+                permissions.add(permission.toDataTransferObject());
+        }
+
+        return permissions;
+    }
+
+    /**
+     * Adds specified access permission to the bulk upload.
+     *
+     * @param userId   unique identifier of user making the request. Must be an admin or owner of the upload
+     * @param uploadId unique identifier for bulk upload
+     * @param access   details about the permission to the added
+     * @return added permission with identifier that can be used to remove/delete the permission
+     * @throws java.lang.IllegalArgumentException if the upload cannot be located using its identifier
+     */
+    public AccessPermission addPermission(String userId, long uploadId, AccessPermission access) {
+        BulkUpload upload = dao.get(uploadId);
+        if (upload == null)
+            throw new IllegalArgumentException("Could not locate bulk upload with id " + uploadId);
+
+        access.setTypeId(uploadId);
+        Permission permission = new PermissionsController().addPermission(userId, access);
+        upload.getPermissions().add(permission);
+        dao.update(upload);
+        return permission.toDataTransferObject();
+    }
+
+    /**
+     * Removes specified permission from bulk upload
+     * @param userId unique identifier of user making the request. Must be an admin or owner of the bulk upload
+     * @param uploadId unique identifier for bulk upload
+     * @param permissionId unique identifier for permission that has been previously added to upload
+     * @return true if deletion is successful
+     * @throws java.lang.IllegalArgumentException if upload or permission cannot be located by their identifiers
+     */
+    public boolean deletePermission(String userId, long uploadId, long permissionId) {
+        BulkUpload upload = dao.get(uploadId);
+        if (upload == null)
+            throw new IllegalArgumentException("Could not locate bulk upload with id " + uploadId);
+
+        authorization.expectWrite(userId, upload);
+        Permission toDelete = null;
+
+        if (upload.getPermissions() != null) {
+            for (Permission permission : upload.getPermissions()) {
+                if (permission.getId() == permissionId) {
+                    toDelete = permission;
+                    break;
+                }
+            }
+        }
+
+        if (toDelete == null)
+            throw new IllegalArgumentException("Could not locate permission for deletion");
+
+        upload.getPermissions().remove(toDelete);
+        return dao.update(upload) != null;
     }
 }

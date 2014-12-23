@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.entry;
 
-import java.util.Set;
-
 import org.jbei.ice.lib.access.Authorization;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.model.Account;
@@ -12,6 +10,8 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
+
+import java.util.Set;
 
 /**
  * @author Hector Plahar
@@ -86,7 +86,7 @@ public class EntryAuthorization extends Authorization<Entry> {
         Account account = getAccount(userId);
 
         // check write accounts for entry
-        if (permissionDAO.hasPermission(entry, null, account, null, false, true))
+        if (permissionDAO.hasPermission(entry, null, null, account, null, false, true))
             return true;
 
         // get groups for account

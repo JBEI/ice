@@ -1,11 +1,9 @@
 package org.jbei.ice.lib.access;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.bulkupload.BulkUpload;
+import org.jbei.ice.lib.bulkupload.BulkUploadAuthorization;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -22,6 +20,10 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Controller for permissions
@@ -52,7 +54,7 @@ public class PermissionsController {
 
             EntryAuthorization authorization = new EntryAuthorization();
             authorization.expectWrite(userId, entry);
-            return addPermission(access, entry, null);
+            return addPermission(access, entry, null, null);
         }
 
         if (access.isFolder()) {
@@ -65,16 +67,26 @@ public class PermissionsController {
             // propagate permissions
             if (folder.isPropagatePermissions()) {
                 for (Entry folderContent : folder.getContents()) {
-                    addPermission(access, folderContent, null);
+                    addPermission(access, folderContent, null, null);
                 }
             }
-            return addPermission(access, null, folder);
+            return addPermission(access, null, folder, null);
+        }
+
+        // if bulk upload
+        if (access.isUpload()) {
+            BulkUpload upload = DAOFactory.getBulkUploadDAO().get(access.getTypeId());
+            if (upload == null)
+                throw new IllegalArgumentException("Cannot find upload " + access.getId());
+            BulkUploadAuthorization uploadAuthorization = new BulkUploadAuthorization();
+            uploadAuthorization.expectWrite(userId, upload);
+            return addPermission(access, null, null, upload);
         }
 
         return null;
     }
 
-    protected Permission addPermission(AccessPermission access, Entry entry, Folder folder) {
+    protected Permission addPermission(AccessPermission access, Entry entry, Folder folder, BulkUpload upload) {
         // account or group
         Account account = null;
         Group group = null;
@@ -90,8 +102,8 @@ public class PermissionsController {
         }
 
         // does the permissions already exists
-        if (dao.hasPermission(entry, folder, account, group, access.isCanRead(), access.isCanWrite())) {
-            return dao.retrievePermission(entry, folder, account, group, access.isCanRead(), access.isCanWrite());
+        if (dao.hasPermission(entry, folder, upload, account, group, access.isCanRead(), access.isCanWrite())) {
+            return dao.retrievePermission(entry, folder, upload, account, group, access.isCanRead(), access.isCanWrite());
         }
 
         // add the permission if not
@@ -101,6 +113,7 @@ public class PermissionsController {
             entry.getPermissions().add(permission);
         permission.setGroup(group);
         permission.setFolder(folder);
+        permission.setUpload(upload);
         permission.setAccount(account);
         permission.setCanRead(access.isCanRead());
         permission.setCanWrite(access.isCanWrite());
@@ -139,9 +152,11 @@ public class PermissionsController {
             authorization.expectWrite(userId, entry);
 
             // remove permission from entry
-            removePermission(access, entry, null);
+            removePermission(access, entry, null, null);
+            return;
+        }
 
-        } else if (access.isFolder()) {
+        if (access.isFolder()) {
             Folder folder = folderDAO.get(access.getTypeId());
             FolderAuthorization folderAuthorization = new FolderAuthorization();
             folderAuthorization.expectWrite(userId, folder);
@@ -149,15 +164,25 @@ public class PermissionsController {
             // if folder is to be propagated, add removing permission from contained entries
             if (folder.isPropagatePermissions()) {
                 for (Entry folderContent : folder.getContents()) {
-                    removePermission(access, folderContent, null);
+                    removePermission(access, folderContent, null, null);
                 }
             }
             // remove permission from folder
-            removePermission(access, null, folder);
+            removePermission(access, null, folder, null);
+            return;
+        }
+
+        if (access.isUpload()) {
+            BulkUpload upload = DAOFactory.getBulkUploadDAO().get(access.getTypeId());
+            if (upload == null)
+                throw new IllegalArgumentException("Could not retrieve upload " + access.getTypeId());
+            BulkUploadAuthorization uploadAuthorization = new BulkUploadAuthorization();
+            uploadAuthorization.expectWrite(userId, upload);
+            removePermission(access, null, null, upload);
         }
     }
 
-    private void removePermission(AccessPermission access, Entry entry, Folder folder) {
+    private void removePermission(AccessPermission access, Entry entry, Folder folder, BulkUpload upload) {
         // account or group
         Account account = null;
         Group group = null;
@@ -172,7 +197,7 @@ public class PermissionsController {
                 break;
         }
 
-        dao.removePermission(entry, folder, account, group, access.isCanRead(), access.isCanWrite());
+        dao.removePermission(entry, folder, upload, account, group, access.isCanRead(), access.isCanWrite());
     }
 
     public boolean accountHasReadPermission(Account account, Set<Folder> folders) {
@@ -293,16 +318,16 @@ public class PermissionsController {
         Set<Account> readAccounts = dao.retrieveAccountPermissions(folder, false, true);
         for (Account readAccount : readAccounts) {
             accessPermissions.add(new AccessPermission(AccessPermission.Article.ACCOUNT, readAccount.getId(),
-                                                       AccessPermission.Type.READ_FOLDER, folder.getId(),
-                                                       readAccount.getFullName()));
+                    AccessPermission.Type.READ_FOLDER, folder.getId(),
+                    readAccount.getFullName()));
         }
 
         // write accounts
         Set<Account> writeAccounts = dao.retrieveAccountPermissions(folder, true, false);
         for (Account writeAccount : writeAccounts) {
             accessPermissions.add(new AccessPermission(AccessPermission.Article.ACCOUNT, writeAccount.getId(),
-                                                       AccessPermission.Type.WRITE_FOLDER, folder.getId(),
-                                                       writeAccount.getFullName()));
+                    AccessPermission.Type.WRITE_FOLDER, folder.getId(),
+                    writeAccount.getFullName()));
         }
 
         // read groups
@@ -311,16 +336,16 @@ public class PermissionsController {
             if (!includePublic && group.getUuid().equalsIgnoreCase(GroupController.PUBLIC_GROUP_UUID))
                 continue;
             accessPermissions.add(new AccessPermission(AccessPermission.Article.GROUP, group.getId(),
-                                                       AccessPermission.Type.READ_FOLDER, folder.getId(),
-                                                       group.getLabel()));
+                    AccessPermission.Type.READ_FOLDER, folder.getId(),
+                    group.getLabel()));
         }
 
         // write groups
         Set<Group> writeGroups = dao.retrieveGroupPermissions(folder, true, false);
         for (Group group : writeGroups) {
             accessPermissions.add(new AccessPermission(AccessPermission.Article.GROUP, group.getId(),
-                                                       AccessPermission.Type.WRITE_FOLDER, folder.getId(),
-                                                       group.getLabel()));
+                    AccessPermission.Type.WRITE_FOLDER, folder.getId(),
+                    group.getLabel()));
         }
 
         return accessPermissions;
@@ -339,14 +364,14 @@ public class PermissionsController {
         if (prop) {
             for (Entry entry : folder.getContents()) {
                 for (AccessPermission accessPermission : permissions) {
-                    addPermission(accessPermission, entry, null);
+                    addPermission(accessPermission, entry, null, null);
                 }
             }
         } else {
             // else remove permissions
             for (Entry entry : folder.getContents()) {
                 for (AccessPermission accessPermission : permissions) {
-                    removePermission(accessPermission, entry, null);
+                    removePermission(accessPermission, entry, null, null);
                 }
             }
         }
@@ -438,7 +463,7 @@ public class PermissionsController {
         EntryAuthorization authorization = new EntryAuthorization();
         authorization.expectWrite(userId, entry);
 
-        Permission permission = addPermission(access, entry, null);
+        Permission permission = addPermission(access, entry, null, null);
         if (permission == null)
             return null;
 

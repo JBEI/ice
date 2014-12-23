@@ -37,11 +37,19 @@ angular.module('ice.admin.controller', [])
 
                 angular.forEach(result, function (setting) {
                     if (generalSettingKeys.indexOf(setting.key) != -1) {
-                        $scope.generalSettings.push({'key':(setting.key.replace(/_/g, ' ')).toLowerCase(), 'value':setting.value, 'editMode':false});
+                        $scope.generalSettings.push({
+                            'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
+                            'value': setting.value,
+                            'editMode': false
+                        });
                     }
 
                     if (emailSettingKeys.indexOf(setting.key) != -1) {
-                        $scope.emailSettings.push({'key':(setting.key.replace(/_/g, ' ')).toLowerCase(), 'value':setting.value, 'editMode':false});
+                        $scope.emailSettings.push({
+                            'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
+                            'value': setting.value,
+                            'editMode': false
+                        });
                     }
                 });
             });
@@ -54,8 +62,14 @@ angular.module('ice.admin.controller', [])
             {id:'web', url:'/scripts/admin/wor.html', display:'Web of Registries', selected:false, icon:'fa-globe'},
             {id:'users', url:'/scripts/admin/users.html', display:'Users', selected:false, icon:'fa-user'},
             {id:'groups', url:'/scripts/admin/groups.html', display:'Groups', selected:false, icon:'fa-group'},
-            {id:'transferred', url:'/scripts/admin/transferred.html', display:'Transferred Entries', selected:false, icon:'fa-list'},
-            {id:'samples', url:'/scripts/admin/sample-requests.html', display:'Sample Requests', selected:false, icon:'fa-shopping-cart'}
+            {
+                id: 'transferred', url: '/scripts/admin/transferred.html', display: 'Transferred Entries',
+                selected: false, icon: 'fa-list'
+            },
+            {
+                id: 'samples', url: '/scripts/admin/sample-requests.html', display: 'Sample Requests', selected: false,
+                icon: 'fa-shopping-cart'
+            }
         ];
 
         $scope.showSelection = function (index) {
@@ -118,15 +132,34 @@ angular.module('ice.admin.controller', [])
             });
         };
     })
-    .controller('AdminTransferredEntriesController', function ($rootScope, $location, $scope, Folders) {
+    .controller('AdminTransferredEntriesController', function ($rootScope, $filter, $location, $scope, Folders) {
+        $scope.maxSize = 5;
+        $scope.currentPage = 1;
+        var params = {folderId: 'transferred'};
+
         // get all entries that are transferred
         $scope.transferredEntries = undefined;
-        Folders().folder({folderId:'transferred'}, function (result) {
-            console.log(result);
+        Folders().folder(params, function (result) {
             $scope.transferredEntries = result;
         }, function (error) {
             console.error(error);
         });
+
+        $scope.setPage = function (pageNo) {
+            if (pageNo == undefined || isNaN(pageNo))
+                pageNo = 1;
+
+            $scope.loadingPage = true;
+            params.offset = (pageNo - 1) * 15;
+            Folders().folder(params, function (result) {
+                $scope.transferredEntries = result;
+                $scope.loadingPage = false;
+            }, function (error) {
+                console.error(error);
+                $scope.transferredEntries = undefined;
+                $scope.loadingPage = false;
+            })
+        };
 
         $scope.acceptEntries = function () {
         };
@@ -141,6 +174,15 @@ angular.module('ice.admin.controller', [])
             $rootScope.collectionContext = $scope.params;
             $location.path("/entry/" + entry.id);
         };
+
+        $scope.pageCounts = function (currentPage, resultCount) {
+            var maxPageCount = 15;
+            var pageNum = ((currentPage - 1) * maxPageCount) + 1;
+
+            // number on this page
+            var pageCount = (currentPage * maxPageCount) > resultCount ? resultCount : (currentPage * maxPageCount);
+            return pageNum + " - " + $filter('number')(pageCount) + " of " + $filter('number')(resultCount);
+        };
     })
     .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, Samples) {
         $rootScope.error = undefined;
@@ -149,7 +191,7 @@ angular.module('ice.admin.controller', [])
         var samples = Samples($cookieStore.get("sessionId"));
         $scope.maxSize = 5;
         $scope.currentPage = 1;
-        $scope.params = {sort:'requested', asc:false};
+        $scope.params = {sort: 'requested', asc: false};
 
         var requestSamples = function () {
             $scope.loadingPage = true;
@@ -183,7 +225,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.updateStatus = function (request, newStatus) {
-            samples.update({requestId:request.id, status:newStatus}, function (result) {
+            samples.update({requestId: request.id, status: newStatus}, function (result) {
                 if (result === undefined || result.id != request.id)
                     return;
 
@@ -213,10 +255,13 @@ angular.module('ice.admin.controller', [])
         $scope.newProfile = undefined;
 
         var user = User($cookieStore.get("sessionId"));
+        var getUsers = function () {
+            user.list(function (result) {
+                $scope.userList = result;
+            });
+        };
 
-        user.list(function (result) {
-            $scope.userList = result;
-        });
+        getUsers();
 
         $scope.setUserListPage = function (pageNo) {
             if (pageNo == undefined || isNaN(pageNo))
@@ -224,13 +269,18 @@ angular.module('ice.admin.controller', [])
 
             $scope.loadingPage = true;
             var offset = (pageNo - 1) * 15;
-            user.list({offset:offset}, function (result) {
+            user.list({offset: offset}, function (result) {
                 $scope.userList = result;
                 $scope.loadingPage = false;
             });
         };
 
         $scope.createProfile = function () {
-            console.log($scope.newProfile);  // todo
+            user.createUser($scope.newProfile, function (result) {
+                $scope.showCreateProfile = false;
+                getUsers();
+            }, function (error) {
+
+            })
         }
     });

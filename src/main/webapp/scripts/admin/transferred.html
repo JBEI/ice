@@ -1,10 +1,10 @@
 <div ng-controller="AdminTransferredEntriesController">
     <div class="pad_top">
-        <button type="button" ng-click="acceptEntries()" class="ice-button">
+        <button type="button" ng-click="acceptEntries()" class="ice-button" ng-disabled="true">
             <i style="font-size: 14px" class="blue fa fa-check"></i> Accept
         </button>
         &nbsp;
-        <button type="button" ng-click="rejectEntries()" class="ice-button">
+        <button type="button" ng-click="rejectEntries()" class="ice-button" ng-disabled="true">
             <i style="font-size: 14px" class="red fa fa-ban"></i> Reject
         </button>
     </div>
@@ -12,6 +12,7 @@
     <div class="pad_top">
         <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
                ng-class="{'opacity_4':loadingPage}">
+            <thead>
             <tr data-ng-if='transferredEntries && transferredEntries.entries.length > 0'>
                 <th style="width:28px">
                     <i class="fa"
@@ -51,8 +52,8 @@
                 <th style="width:10px">
                     <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
                 </th>
-                <th style="width:10px">
-                    <img src="img/dna.png" width="10px" alt="has dna"/>
+                <th style="text-align: center">
+                    <img src="img/dna.svg" height="16px" alt="has dna"/>
                 </th>
                 <th ng-click="sort('created')" class="cursor_pointer">
                     <i ng-show="params.sort=='created'" style="font-size: 14px" class="fa opacity_4"
@@ -71,7 +72,9 @@
             <tr data-ng-show="transferredEntries.entries.length == 0">
                 <td>No entries available</td>
             </tr>
+            </thead>
 
+            <tbody>
             <tr data-ng-repeat="entry in transferredEntries.entries">
                 <td width="10px">
                     <i class="fa"
@@ -94,14 +97,29 @@
                     </div>
                 </td>
                 <td style="width:80px; white-space:nowrap">{{entry.status | capitalize}}</td>
-                <td><i ng-show="{{entry.hasAttachment}}" class="fa fa-paperclip fa-fw"
+                <td><i ng-show="entry.hasAttachment" class="fa fa-paperclip fa-fw"
                        style="color: #555; font-size: 14px;"></i></td>
-                <td><i ng-show="{{entry.hasSample}}" class="fa fa-flask fa-fw"
+                <td><i ng-show="entry.hasSample" class="fa fa-flask fa-fw"
                        style="color: #555; font-size: 14px;"></i></td>
-                <td><img ng-show="{{entry.hasSequence}}" src="img/dna.png" width="10px"/></td>
+                <td style="text-align: center"><img ng-show="entry.hasSequence" src="img/dna.svg" height="16px"/>
+                </td>
                 <td style="width:160px; white-space:nowrap">{{entry.creationTime | date:'MMM d, yyyy'}}</td>
             </tr>
+            </tbody>
         </table>
+    </div>
 
+    <div class="row" ng-if="transferredEntries && transferredEntries.entries.length > 0">
+        <div class="col-md-5" style="padding-left: 0">
+            <pagination total-items="transferredEntries.count" on-select-page="setPage(page)" page="currentPage"
+                        max-size="maxSize"
+                        class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+        </div>
+        <div class="col-md-7" style="margin-top: 25px;">
+            <strong class="small">
+                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
+                transferredEntries.count)}}
+            </strong>
+        </div>
     </div>
 </div>
