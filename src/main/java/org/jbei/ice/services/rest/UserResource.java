@@ -1,13 +1,5 @@
 package org.jbei.ice.services.rest;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.PreferencesController;
@@ -24,6 +16,14 @@ import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * REST Resource for users
@@ -197,9 +197,7 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response createNewUser(AccountTransfer accountTransfer) {
         accountTransfer = controller.createNewAccount(accountTransfer, true);
-        if (accountTransfer == null)
-            return super.respond(Response.Status.INTERNAL_SERVER_ERROR);
-        return super.respond(Response.Status.OK, accountTransfer);
+        return super.respond(accountTransfer);
     }
 
     @GET

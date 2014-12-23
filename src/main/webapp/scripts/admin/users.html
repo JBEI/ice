@@ -96,7 +96,8 @@
                 </td>
                 <td style="width:90px; white-space:nowrap">{{user.userEntryCount | number}}</td>
                 <td style="width:160px; white-space:nowrap">{{user.registerDate | date:'MMM d, yyyy'}}</td>
-                <td style="width:160px; white-space:nowrap">{{user.lastLogin | date:'MMM d, yyyy'}}</td>
+                <td style="width:160px; white-space:nowrap"><span ng-show="user.lastLogin">{{user.lastLogin | date:'MMM d, yyyy'}}</span>
+                </td>
             </tr>
             </tbody>
         </table>

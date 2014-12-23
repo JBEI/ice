@@ -255,10 +255,13 @@ angular.module('ice.admin.controller', [])
         $scope.newProfile = undefined;
 
         var user = User($cookieStore.get("sessionId"));
+        var getUsers = function () {
+            user.list(function (result) {
+                $scope.userList = result;
+            });
+        };
 
-        user.list(function (result) {
-            $scope.userList = result;
-        });
+        getUsers();
 
         $scope.setUserListPage = function (pageNo) {
             if (pageNo == undefined || isNaN(pageNo))
@@ -273,6 +276,11 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.createProfile = function () {
-            console.log($scope.newProfile);  // todo
+            user.createUser($scope.newProfile, function (result) {
+                $scope.showCreateProfile = false;
+                getUsers();
+            }, function (error) {
+
+            })
         }
     });
