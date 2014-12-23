@@ -63,11 +63,11 @@ public class AccessPermission implements IDataTransferModel {
     }
 
     public boolean isCanRead() {
-        return type == Type.READ_ENTRY || type == Type.READ_FOLDER;
+        return type == Type.READ_ENTRY || type == Type.READ_FOLDER || type == Type.READ_UPLOAD;
     }
 
     public boolean isCanWrite() {
-        return type == Type.WRITE_ENTRY || type == Type.WRITE_FOLDER;
+        return type == Type.WRITE_ENTRY || type == Type.WRITE_FOLDER || type == Type.WRITE_UPLOAD;
     }
 
     public boolean isEntry() {
@@ -76,6 +76,10 @@ public class AccessPermission implements IDataTransferModel {
 
     public boolean isFolder() {
         return type == Type.READ_FOLDER || type == Type.WRITE_FOLDER;
+    }
+
+    public boolean isUpload() {
+        return type == Type.WRITE_ENTRY || type == Type.READ_UPLOAD;
     }
 
     public long getId() {
@@ -87,7 +91,7 @@ public class AccessPermission implements IDataTransferModel {
     }
 
     public enum Type implements IDataTransferModel {
-        READ_ENTRY, WRITE_ENTRY, READ_FOLDER, WRITE_FOLDER
+        READ_ENTRY, WRITE_ENTRY, READ_FOLDER, WRITE_FOLDER, READ_UPLOAD, WRITE_UPLOAD
     }
 
     public enum Article implements IDataTransferModel {

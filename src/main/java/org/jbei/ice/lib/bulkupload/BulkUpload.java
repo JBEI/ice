@@ -1,17 +1,17 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import javax.persistence.*;
-
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.entry.model.Entry;
+
+import javax.persistence.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Saved draft of bulk imports. Encapsulates a list of {@link Entry}s that are created and updated
@@ -54,14 +54,14 @@ public class BulkUpload implements IDataModel {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "bulk_upload_entry",
-               joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
-               inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
+            joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
     private Set<Entry> contents = new HashSet<>();
 
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.REMOVE, CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(name = "bulk_upload_preferences",
-               joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
-               inverseJoinColumns = {@JoinColumn(name = "preference_id", nullable = false)})
+            joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "preference_id", nullable = false)})
     private Set<Preference> preferences = new HashSet<>();
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE})

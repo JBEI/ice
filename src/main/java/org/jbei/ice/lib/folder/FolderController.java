@@ -1,12 +1,6 @@
 package org.jbei.ice.lib.folder;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.access.PermissionException;
@@ -35,7 +29,7 @@ import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.*;
 
 /**
  * @author Hector Plahar
@@ -553,7 +547,7 @@ public class FolderController {
         GroupController groupController = new GroupController();
         Group publicGroup = groupController.createOrRetrievePublicGroup();
 
-        permissionDAO.removePermission(null, folder, null, publicGroup, true, false);
+        permissionDAO.removePermission(null, folder, null, null, publicGroup, true, false);
         return true;
     }
 

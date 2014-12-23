@@ -501,6 +501,13 @@ iceServices.factory('Upload', function ($resource) {
                 method:'DELETE',
                 url:'rest/upload/:importId/entry/:entryId/attachment',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            getPermissions: {
+                method: 'GET',
+                url: 'rest/upload/:importId/permissions',
+                isArray: true,
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
             }
         });
     }

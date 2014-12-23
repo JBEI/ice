@@ -1,17 +1,5 @@
 package org.jbei.ice.lib.dao.hibernate;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.jbei.ice.lib.access.Permission;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.folder.Folder;
-import org.jbei.ice.lib.group.Group;
-
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -19,6 +7,18 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.jbei.ice.lib.access.Permission;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.bulkupload.BulkUpload;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.folder.Folder;
+import org.jbei.ice.lib.group.Group;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * {@link Permission} data accessor Object
@@ -27,7 +27,7 @@ import org.hibernate.criterion.Restrictions;
  */
 public class PermissionDAO extends HibernateRepository<Permission> {
 
-    public boolean hasPermission(Entry entry, Folder folder, Account account, Group group, boolean canRead,
+    public boolean hasPermission(Entry entry, Folder folder, BulkUpload upload, Account account, Group group, boolean canRead,
             boolean canWrite) {
         try {
             Session session = currentSession();
@@ -44,6 +44,11 @@ public class PermissionDAO extends HibernateRepository<Permission> {
                 criteria.add(Restrictions.isNull("folder"));
             else
                 criteria.add(Restrictions.eq("folder", folder));
+
+            if (upload == null)
+                criteria.add(Restrictions.isNull("upload"));
+            else
+                criteria.add(Restrictions.eq("upload", upload));
 
             if (account == null)
                 criteria.add(Restrictions.isNull("account"));
@@ -102,10 +107,10 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
-    public Permission retrievePermission(Entry entry, Folder folder, Account account, Group group, boolean canRead,
+    public Permission retrievePermission(Entry entry, Folder folder, BulkUpload upload, Account account, Group group, boolean canRead,
             boolean canWrite) {
         try {
-            Criteria criteria = createPermissionCriteria(entry, folder, account, group, canRead, canWrite);
+            Criteria criteria = createPermissionCriteria(entry, folder, upload, account, group, canRead, canWrite);
             return (Permission) criteria.uniqueResult();
         } catch (HibernateException e) {
             Logger.error(e);
@@ -113,7 +118,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
-    protected Criteria createPermissionCriteria(Entry entry, Folder folder, Account account, Group group,
+    protected Criteria createPermissionCriteria(Entry entry, Folder folder, BulkUpload upload, Account account, Group group,
             boolean canRead, boolean canWrite) {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Permission.class)
@@ -130,6 +135,11 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         else
             criteria.add(Restrictions.eq("folder", folder));
 
+        if (upload == null)
+            criteria.add(Restrictions.isNull("upload"));
+        else
+            criteria.add(Restrictions.eq("upload", upload));
+
         if (account == null)
             criteria.add(Restrictions.isNull("account"));
         else
@@ -142,9 +152,9 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         return criteria;
     }
 
-    public void removePermission(Entry entry, Folder folder, Account account, Group group, boolean canRead,
+    public void removePermission(Entry entry, Folder folder, BulkUpload upload, Account account, Group group, boolean canRead,
             boolean canWrite) {
-        Criteria criteria = createPermissionCriteria(entry, folder, account, group, canRead, canWrite);
+        Criteria criteria = createPermissionCriteria(entry, folder, upload, account, group, canRead, canWrite);
         List list = criteria.list();
         if (list == null || list.isEmpty())
             return;

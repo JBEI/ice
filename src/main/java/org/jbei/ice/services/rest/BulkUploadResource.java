@@ -1,16 +1,9 @@
 package org.jbei.ice.services.rest;
 
-import java.io.File;
-import java.io.InputStream;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.AuthorizationException;
 import org.jbei.ice.lib.bulkupload.BulkEntryCreator;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
@@ -22,14 +15,22 @@ import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
+import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.exception.UnexpectedException;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -44,10 +45,10 @@ public class BulkUploadResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     public BulkUploadInfo read(@Context UriInfo info, @PathParam("id") long id,
-            @DefaultValue("0") @QueryParam("offset") int offset,
-            @DefaultValue("50") @QueryParam("limit") int limit,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+                               @DefaultValue("0") @QueryParam("offset") int offset,
+                               @DefaultValue("50") @QueryParam("limit") int limit,
+                               @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
 
         try {
             Logger.info(userId + ": retrieving bulk import with id \"" + id + "\" [" + offset + ", " + limit + "]");
@@ -57,15 +58,56 @@ public class BulkUploadResource extends RestResource {
         }
     }
 
+    /**
+     * Retrieves permissions associated with an upload
+     *
+     * @param sessionId unique session identifier for the user making request
+     * @param id        unique identifier for the upload
+     * @return retrieved permissions for specified upload if user has required permissions
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/permissions")
+    public Response getUploadPermissions(@PathParam("id") long id,
+                                         @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        List<AccessPermission> permissionList = controller.getUploadPermissions(userId, id);
+        return super.respond(permissionList);
+    }
+
+    /**
+     * Add upload permission
+     *
+     * @param sessionId unique session identifier for the user making request
+     * @param id        unique identifier for the upload
+     */
+    @POST
+    @Path("/{id}/permissions")
+    public Response addPermission(@PathParam("id") long id,
+                                  @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+                                  AccessPermission accessPermission) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        controller.addPermission(userId, id, accessPermission);
+        return super.respond(true);
+    }
+
+    @DELETE
+    @Path("/{id}/permission/{pid}")
+    public Response removePermission(@PathParam("id") long id,
+                                     @PathParam("pid") long permissionId,
+                                     @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        return super.respond(true);
+    }
+
     @POST
     @Path("/{id}/sequence")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public Response uploadSequenceFile(@PathParam("id") long uploadId,
-            @FormDataParam("file") InputStream fileInputStream,
-            @FormDataParam("entryId") long entryId,
-            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                                       @FormDataParam("file") InputStream fileInputStream,
+                                       @FormDataParam("entryId") long entryId,
+                                       @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
+                                       @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         try {
             String fileName = contentDispositionHeader.getFileName();
             String userId = super.getUserIdFromSessionHeader(sessionId);
@@ -85,16 +127,16 @@ public class BulkUploadResource extends RestResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public Response uploadAttachmentFile(@PathParam("id") long uploadId,
-            @FormDataParam("file") InputStream fileInputStream,
-            @FormDataParam("entryId") long entryId,
-            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                                         @FormDataParam("file") InputStream fileInputStream,
+                                         @FormDataParam("entryId") long entryId,
+                                         @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
+                                         @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         try {
             String fileName = contentDispositionHeader.getFileName();
             String userId = super.getUserIdFromSessionHeader(sessionId);
             String sequence = IOUtils.toString(fileInputStream);
             AttachmentInfo attachmentInfo = controller.addAttachment(userId, uploadId, entryId, fileInputStream,
-                                                                     fileName);
+                    fileName);
             if (attachmentInfo == null)
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             return Response.status(Response.Status.OK).entity(attachmentInfo).build();
@@ -113,7 +155,7 @@ public class BulkUploadResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     public BulkUploadInfo updateList(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
-            @PathParam("id") long id, BulkUploadInfo info) {
+                                     @PathParam("id") long id, BulkUploadInfo info) {
         String userId = getUserIdFromSessionHeader(sessionId);
         return creator.createOrUpdateEntries(userId, id, info.getEntryList());
     }
@@ -121,9 +163,9 @@ public class BulkUploadResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pending")
-    public Response getPendingUploads(@HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+    public Response getPendingUploads(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         try {
-            String userId = getUserIdFromSessionHeader(userAgentHeader);
+            String userId = getUserIdFromSessionHeader(sessionId);
             HashMap<String, ArrayList<BulkUploadInfo>> pending = controller.getPendingImports(userId);
             return Response.status(Response.Status.OK).entity(pending).build();
         } catch (AuthorizationException ae) {
@@ -135,7 +177,7 @@ public class BulkUploadResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/name")
     public Response updateName(@PathParam("id") long id, BulkUploadInfo info,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+                               @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
         Logger.info(userId + ": updating bulk upload name for " + info.getId() + " with value " + info.getName());
         BulkUploadInfo result = creator.renameBulkUpload(userId, id, info.getName());
@@ -163,10 +205,10 @@ public class BulkUploadResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entry")
     public PartData createEntry(@PathParam("id") long uploadId,
-            PartData data,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+                                PartData data,
+                                @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         try {
-            String userId = getUserIdFromSessionHeader(userAgentHeader);
+            String userId = getUserIdFromSessionHeader(sessionId);
             Logger.info(userId + ": adding entry to upload \"" + uploadId + "\"");
             return creator.createEntry(userId, uploadId, data);
         } catch (Exception e) {
@@ -178,11 +220,11 @@ public class BulkUploadResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entry/{entryId}")
     public PartData updateEntry(@PathParam("id") long uploadId,
-            @PathParam("entryId") long entryId,
-            PartData data,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+                                @PathParam("entryId") long entryId,
+                                PartData data,
+                                @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         try {
-            String userId = getUserIdFromSessionHeader(userAgentHeader);
+            String userId = getUserIdFromSessionHeader(sessionId);
             Logger.info(userId + ": updating entry \"" + entryId + "\" for upload \"" + uploadId + "\"");
             return creator.updateEntry(userId, uploadId, entryId, data);
         } catch (Exception e) {
@@ -194,7 +236,7 @@ public class BulkUploadResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     public BulkUploadInfo create(BulkUploadInfo info,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+                                 @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
         Logger.info(userId + ": creating bulk upload draft");
         return controller.create(userId, info);
@@ -213,14 +255,14 @@ public class BulkUploadResource extends RestResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public Response post(@FormDataParam("file") InputStream fileInputStream,
-            @FormDataParam("type") String type,
-            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                         @FormDataParam("type") String type,
+                         @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
+                         @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         try {
             String userId = getUserIdFromSessionHeader(sessionId);
             String fileName = userId + "-" + contentDispositionHeader.getFileName();
             File file = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
-                                  "bulk-import", fileName).toFile();
+                    "bulk-import", fileName).toFile();
             FileUtils.copyInputStreamToFile(fileInputStream, file);
 
             EntryType addType = EntryType.valueOf(type.toUpperCase());
@@ -238,10 +280,10 @@ public class BulkUploadResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entry/{entryId}/sequence")
     public Response deleteEntrySequence(@PathParam("id") long uploadId,
-            @PathParam("entryId") long entryId,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+                                        @PathParam("entryId") long entryId,
+                                        @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         try {
-            String userId = getUserIdFromSessionHeader(userAgentHeader);
+            String userId = getUserIdFromSessionHeader(sessionId);
             if (new SequenceController().deleteSequence(userId, entryId))
                 return Response.ok().build();
             return Response.serverError().build();
@@ -255,10 +297,10 @@ public class BulkUploadResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entry/{entryId}/attachment")
     public Response deleteEntryAttachment(@PathParam("id") long uploadId,
-            @PathParam("entryId") long entryId,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+                                          @PathParam("entryId") long entryId,
+                                          @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         try {
-            String userId = getUserIdFromSessionHeader(userAgentHeader);
+            String userId = getUserIdFromSessionHeader(sessionId);
             if (controller.deleteAttachment(userId, uploadId, entryId))
                 return Response.ok().build();
             return Response.serverError().build();

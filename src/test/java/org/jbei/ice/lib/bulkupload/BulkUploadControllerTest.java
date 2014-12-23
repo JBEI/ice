@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -10,14 +8,17 @@ import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.StatusType;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -197,5 +198,66 @@ public class BulkUploadControllerTest {
         Assert.assertEquals("test", entry.getPrincipalInvestigator());
         Assert.assertEquals("JBEI", entry.getFundingSource());
         Assert.assertEquals("JBEI-0001", entry.getName());
+    }
+
+    @Test
+    public void testAddPermission() throws Exception {
+        Account account = AccountCreator.createTestAccount("testAddPermission", false);
+        BulkUploadInfo info = new BulkUploadInfo();
+        info.setAccount(account.toDataTransferObject());
+        info.setType(EntryType.PART.toString());
+        BulkUploadInfo uploadInfo = controller.create(account.getEmail(), info);
+        Assert.assertNotNull(uploadInfo);
+
+        Account accountFriend = AccountCreator.createTestAccount("testAddPermission2", false);
+        long id = uploadInfo.getId();
+        AccessPermission permission = new AccessPermission();
+        permission.setArticle(AccessPermission.Article.ACCOUNT);
+        permission.setArticleId(accountFriend.getId());
+        permission.setType(AccessPermission.Type.READ_UPLOAD);
+        permission.setTypeId(id);
+
+        controller.addPermission(account.getEmail(), id, permission);
+
+        List<AccessPermission> permissions = controller.getUploadPermissions(account.getEmail(), id);
+        Assert.assertNotNull(permissions);
+        Assert.assertTrue(permissions.size() == 1);
+
+        AccessPermission returnedPermission = permissions.get(0);
+        Assert.assertEquals(returnedPermission.getArticle(), AccessPermission.Article.ACCOUNT);
+        Assert.assertEquals(returnedPermission.getArticleId(), accountFriend.getId());
+        Assert.assertEquals(returnedPermission.getType(), AccessPermission.Type.READ_UPLOAD);
+        Assert.assertEquals(returnedPermission.getTypeId(), id);
+    }
+
+    @Test
+    public void testDeletePermission() throws Exception {
+        Account account = AccountCreator.createTestAccount("testDeletePermission", false);
+        BulkUploadInfo info = new BulkUploadInfo();
+        info.setAccount(account.toDataTransferObject());
+        info.setType(EntryType.PART.toString());
+        BulkUploadInfo uploadInfo = controller.create(account.getEmail(), info);
+        Assert.assertNotNull(uploadInfo);
+
+        Account accountFriend = AccountCreator.createTestAccount("testDeletePermission2", false);
+        long id = uploadInfo.getId();
+        AccessPermission permission = new AccessPermission();
+        permission.setArticle(AccessPermission.Article.ACCOUNT);
+        permission.setArticleId(accountFriend.getId());
+        permission.setType(AccessPermission.Type.READ_UPLOAD);
+        permission.setTypeId(id);
+
+        controller.addPermission(account.getEmail(), id, permission);
+
+        List<AccessPermission> permissions = controller.getUploadPermissions(account.getEmail(), id);
+        Assert.assertNotNull(permissions);
+        Assert.assertTrue(permissions.size() == 1);
+
+        //delete
+        AccessPermission returnedPermission = permissions.get(0);
+        Assert.assertTrue(controller.deletePermission(account.getEmail(), id, returnedPermission.getId()));
+
+        permissions = controller.getUploadPermissions(account.getEmail(), id);
+        Assert.assertTrue(permissions.isEmpty());
     }
 }

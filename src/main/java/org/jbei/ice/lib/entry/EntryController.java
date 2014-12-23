@@ -1,21 +1,7 @@
 package org.jbei.ice.lib.entry;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
@@ -25,19 +11,11 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.AuditDAO;
-import org.jbei.ice.lib.dao.hibernate.CommentDAO;
-import org.jbei.ice.lib.dao.hibernate.EntryDAO;
-import org.jbei.ice.lib.dao.hibernate.FolderDAO;
-import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
-import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
+import org.jbei.ice.lib.dao.hibernate.*;
 import org.jbei.ice.lib.dto.History;
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.comment.UserComment;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.PartStatistics;
-import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
@@ -47,18 +25,16 @@ import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.models.Audit;
-import org.jbei.ice.lib.models.AuditType;
-import org.jbei.ice.lib.models.Comment;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.models.*;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import java.io.*;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * ABI to manipulate {@link org.jbei.ice.lib.entry.model.Entry}s.
@@ -145,7 +121,7 @@ public class EntryController {
     }
 
     public List<PartData> getEntriesSharedWithUser(String userId, ColumnField field, boolean asc, int start,
-            int limit) {
+                                                   int limit) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         Set<Group> accountGroups = new HashSet<>(account.getGroups());
         GroupController controller = new GroupController();
@@ -162,7 +138,7 @@ public class EntryController {
     }
 
     public List<PartData> retrieveOwnerEntries(String userId, String ownerEmail,
-            ColumnField sort, boolean asc, int start, int limit) {
+                                               ColumnField sort, boolean asc, int start, int limit) {
         List<Entry> entries;
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
@@ -219,8 +195,11 @@ public class EntryController {
         }
 
         entry.setModificationTime(Calendar.getInstance().getTime());
-//        Visibility visibility = EntryUtil.validates(part) ? Visibility.OK : Visibility.DRAFT;
-//        entry.setVisibility(visibility.getValue());
+        if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
+            List<EntryField> invalidFields = EntryUtil.validates(part);
+            if (invalidFields.isEmpty())
+                entry.setVisibility(Visibility.OK.getValue());
+        }
         entry = dao.update(entry);
 
         // check pi email
@@ -743,7 +722,7 @@ public class EntryController {
                             }
 
                             boolean parsed = parseTraceSequence(userId, entry, zipEntry.getName(),
-                                                                byteArrayOutputStream.toByteArray());
+                                    byteArrayOutputStream.toByteArray());
                             if (!parsed) {
                                 String errMsg = ("Could not parse \"" + zipEntry.getName()
                                         + "\". Only Fasta, GenBank & ABI files are supported.");
