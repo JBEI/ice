@@ -1,15 +1,7 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
@@ -36,8 +28,11 @@ import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.servlet.InfoToModelFactory;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
  * Creates entries for bulk uploads
@@ -316,7 +311,7 @@ public class BulkEntryCreator {
                 if (otherEntry.getVisibility() == null || otherEntry.getVisibility() != Visibility.DRAFT.getValue())
                     otherEntry.setVisibility(Visibility.DRAFT.getValue());
 
-                entryController.update(account, otherEntry);
+                entryController.update(userId, otherEntry);
             }
 
             if ((entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
@@ -332,7 +327,7 @@ public class BulkEntryCreator {
             editor.setStrainPlasmids(account, strain, strain.getPlasmids());
         }
 
-        entryController.update(account, entry);
+        entryController.update(userId, entry);
 
         // update bulk upload. even if no new entry was created, entries belonging to it was updated
         if (draft != null) {

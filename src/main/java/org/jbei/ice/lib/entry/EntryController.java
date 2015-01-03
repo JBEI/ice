@@ -220,12 +220,12 @@ public class EntryController {
         return entry.getId();
     }
 
-    public void update(Account account, Entry entry) {
+    public void update(String userId, Entry entry) {
         if (entry == null) {
             return;
         }
 
-        authorization.expectWrite(account.getEmail(), entry);
+        authorization.expectWrite(userId, entry);
         boolean scheduleRebuild = sequenceDAO.hasSequence(entry.getId());
 
         entry.setModificationTime(Calendar.getInstance().getTime());
@@ -244,7 +244,7 @@ public class EntryController {
                 accessPermission.setArticleId(pi.getId());
                 accessPermission.setType(AccessPermission.Type.WRITE_ENTRY);
                 accessPermission.setTypeId(entry.getId());
-                permissionsController.addPermission(account.getEmail(), accessPermission);
+                permissionsController.addPermission(userId, accessPermission);
             }
         }
 
