@@ -1252,9 +1252,12 @@ iceControllers.controller('EditEntryController',
 
         var sid = $cookieStore.get("sessionId");
         var entry = Entry(sid);
+        var partLinks;
         $scope.entry = undefined;
+
         entry.query({partId:$stateParams.id}, function (result) {
             $scope.entry = EntryService.convertToUIForm(result);
+            partLinks = angular.copy($scope.entry.linkedParts);
             $scope.entry.linkedParts = [];
 
             // todo : this is used in other places and should be in a service
@@ -1398,13 +1401,14 @@ iceControllers.controller('EditEntryController',
             $scope.entry.links = EntryService.toStringArray($scope.entry.links);
             $scope.entry.selectionMarkers = EntryService.toStringArray($scope.entry.selectionMarkers);
 
-            for (var i = 0; i < $scope.entry.linkedParts.length; i += 1) {
-                $scope.entry.linkedParts[i].links = EntryService.toStringArray($scope.entry.linkedParts[i].links);
-                $scope.entry.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.entry.linkedParts[i].selectionMarkers);
-            }
+            //for (var i = 0; i < $scope.entry.linkedParts.length; i += 1) {
+            //    $scope.entry.linkedParts[i].links = EntryService.toStringArray($scope.entry.linkedParts[i].links);
+            //    $scope.entry.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.entry.linkedParts[i].selectionMarkers);
+            //}
 
             // convert the part to a form the server can work with
             $scope.entry = EntryService.getTypeData($scope.entry);
+            $scope.entry.linkedParts = partLinks;
 
             entry.update({partId:$scope.entry.id}, $scope.entry, function (result) {
                 $location.path("/entry/" + result.id);
