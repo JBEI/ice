@@ -462,9 +462,9 @@ public class BulkUploadController {
                 }
             }
 
-            entryController.update(account, entry);
+            entryController.update(account.getEmail(), entry);
             if (plasmid != null)
-                entryController.update(account, plasmid);
+                entryController.update(account.getEmail(), plasmid);
         }
 
         // when done approving, delete the bulk upload record but not the entries associated with it.
