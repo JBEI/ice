@@ -150,7 +150,7 @@ public class BulkUploadController {
      * @throws PermissionException
      */
     public BulkUploadInfo retrieveById(String userId, long id, int start, int limit)
-            throws ControllerException, PermissionException {
+            throws PermissionException {
         BulkUpload draft = dao.get(id);
         if (draft == null)
             return null;
@@ -212,8 +212,7 @@ public class BulkUploadController {
         return info;
     }
 
-    protected ArrayList<PartData> convertParts(Account account, List<Entry> contents)
-            throws ControllerException {
+    protected ArrayList<PartData> convertParts(Account account, List<Entry> contents) {
         ArrayList<PartData> addList = new ArrayList<>();
         SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
 
@@ -428,6 +427,19 @@ public class BulkUploadController {
             return false;
         }
 
+        // get permissions for bulk upload and set it to the individual entries
+        PermissionsController permissionsController = new PermissionsController();
+        ArrayList<AccessPermission> permissions = new ArrayList<>();
+        for (Permission permission : bulkUpload.getPermissions()) {
+            AccessPermission accessPermission = permission.toDataTransferObject();
+            // read or write access
+            if (accessPermission.getType() == AccessPermission.Type.READ_UPLOAD)
+                accessPermission.setType(AccessPermission.Type.READ_ENTRY);
+            else
+                accessPermission.setType(AccessPermission.Type.WRITE_ENTRY);
+            permissions.add(accessPermission);
+        }
+
         // go through passed contents
         // TODO : this needs to go into a task that auto updates
         for (Entry entry : bulkUpload.getContents()) {
@@ -439,19 +451,14 @@ public class BulkUploadController {
                 plasmid.setVisibility(Visibility.OK.getValue());
             }
 
-            PermissionsController permissionsController = new PermissionsController();
             // set permissions
-            for (Permission permission : bulkUpload.getPermissions()) {
-                // add permission for entry
-                AccessPermission access = new AccessPermission();
-                access.setType(AccessPermission.Type.READ_ENTRY);
-                access.setTypeId(entry.getId());
-                access.setArticleId(permission.getGroup().getId());
-                access.setArticle(AccessPermission.Article.GROUP);
-                permissionsController.addPermission(account.getEmail(), access);
+            for (AccessPermission accessPermission : permissions) {
+                accessPermission.setTypeId(entry.getId());
+
+                permissionsController.addPermission(account.getEmail(), accessPermission);
                 if (plasmid != null) {
-                    access.setTypeId(plasmid.getId());
-                    permissionsController.addPermission(account.getEmail(), access);
+                    accessPermission.setTypeId(plasmid.getId());
+                    permissionsController.addPermission(account.getEmail(), accessPermission);
                 }
             }
 
