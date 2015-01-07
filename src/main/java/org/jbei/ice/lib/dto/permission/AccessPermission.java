@@ -79,7 +79,7 @@ public class AccessPermission implements IDataTransferModel {
     }
 
     public boolean isUpload() {
-        return type == Type.WRITE_ENTRY || type == Type.READ_UPLOAD;
+        return type == Type.READ_UPLOAD || type == Type.WRITE_UPLOAD;
     }
 
     public long getId() {
