@@ -60,7 +60,7 @@ public class BulkEntryCreator {
     }
 
     protected BulkUpload createOrRetrieveBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,
-            EntryType addType) {
+                                                    EntryType addType) {
         BulkUpload draft = dao.get(autoUpdate.getBulkUploadId());
         if (draft == null) {
             draft = new BulkUpload();
@@ -132,8 +132,9 @@ public class BulkEntryCreator {
         BulkUpload upload = dao.get(bulkUploadId);
         authorization.expectWrite(userId, upload);
 
-        // todo : check that entry is a part of upload and they are of the same type
         Entry entry = entryDAO.get(id);
+        if (upload.getStatus() != BulkUploadStatus.BULK_EDIT)
+            entry.setVisibility(Visibility.DRAFT.getValue());
         data = doUpdate(userId, entry, data);
         if (data == null)
             return null;
@@ -148,8 +149,7 @@ public class BulkEntryCreator {
             return null;
 
         entry = InfoToModelFactory.updateEntryField(data, entry);
-        entry.setVisibility(Visibility.DRAFT.getValue());
-        entry.setModificationTime(new Date(System.currentTimeMillis()));
+        entry.setModificationTime(new Date());
         entry = entryDAO.update(entry);
 
         data.setModificationTime(entry.getModificationTime().getTime());
@@ -217,7 +217,7 @@ public class BulkEntryCreator {
             // approved by an administrator
             case APPROVED:
                 Account account = accountController.getByEmail(userId);
-                if (new BulkUploadController().approveBulkImport(account, id))
+                if (new BulkUploadController().approveBulkImport(userId, id))
                     return upload.toDataTransferObject();
                 return null;
 
@@ -236,9 +236,8 @@ public class BulkEntryCreator {
      * @param id     unique identifier referencing the bulk upload
      * @param name   name to assign to the bulk upload
      * @return data transfer object for the bulk upload.
-     *         returns null if no
-     * @throws org.jbei.ice.lib.access.AuthorizationException
-     *          is user performing action doesn't have privileges
+     * returns null if no
+     * @throws org.jbei.ice.lib.access.AuthorizationException is user performing action doesn't have privileges
      */
     public BulkUploadInfo renameBulkUpload(String userId, long id, String name) {
         BulkUpload upload = dao.get(id);
@@ -262,10 +261,10 @@ public class BulkEntryCreator {
      * @param autoUpdate wrapper for information used to create entry
      * @param addType    type of entry being created
      * @return updated wrapper for information used to create entry. Will contain additional information
-     *         such as the unique identifier for the part, if one was created
+     * such as the unique identifier for the part, if one was created
      */
     public BulkUploadAutoUpdate createOrUpdateEntry(String userId, BulkUploadAutoUpdate autoUpdate,
-            EntryType addType) {
+                                                    EntryType addType) {
         Account account = accountController.getByEmail(userId);
         BulkUpload draft = null;
 
@@ -355,9 +354,11 @@ public class BulkEntryCreator {
             int index = datum.getIndex();
 
             Entry entry = entryDAO.get(datum.getId());
-            if (entry != null)
+            if (entry != null) {
+                if (draft.getStatus() != BulkUploadStatus.BULK_EDIT)
+                    entry.setVisibility(Visibility.DRAFT.getValue());
                 datum = doUpdate(userId, entry, datum);
-            else
+            } else
                 datum = createEntryForUpload(userId, datum, draft);
 
             if (datum == null)

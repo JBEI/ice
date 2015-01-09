@@ -146,11 +146,9 @@ public class BulkUploadController {
      * @param userId identifier for account of user requesting
      * @param id     unique identifier for bulk import
      * @return data transfer object with the retrieved bulk import data and associated entries
-     * @throws ControllerException
      * @throws PermissionException
      */
-    public BulkUploadInfo retrieveById(String userId, long id, int start, int limit)
-            throws PermissionException {
+    public BulkUploadInfo retrieveById(String userId, long id, int start, int limit) throws PermissionException {
         BulkUpload draft = dao.get(id);
         if (draft == null)
             return null;
@@ -413,9 +411,9 @@ public class BulkUploadController {
         return true;
     }
 
-    public boolean approveBulkImport(Account account, long id) {
+    public boolean approveBulkImport(String userId, long id) {
         // only admins allowed
-        if (!accountController.isAdministrator(account.getEmail())) {
+        if (!accountController.isAdministrator(userId)) {
             Logger.warn("Only administrators can approve bulk imports");
             return false;
         }
@@ -455,16 +453,16 @@ public class BulkUploadController {
             for (AccessPermission accessPermission : permissions) {
                 accessPermission.setTypeId(entry.getId());
 
-                permissionsController.addPermission(account.getEmail(), accessPermission);
+                permissionsController.addPermission(userId, accessPermission);
                 if (plasmid != null) {
                     accessPermission.setTypeId(plasmid.getId());
-                    permissionsController.addPermission(account.getEmail(), accessPermission);
+                    permissionsController.addPermission(userId, accessPermission);
                 }
             }
 
-            entryController.update(account.getEmail(), entry);
+            entryController.update(userId, entry);
             if (plasmid != null)
-                entryController.update(account.getEmail(), plasmid);
+                entryController.update(userId, plasmid);
         }
 
         // when done approving, delete the bulk upload record but not the entries associated with it.
