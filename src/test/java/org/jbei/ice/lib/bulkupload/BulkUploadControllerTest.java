@@ -183,7 +183,7 @@ public class BulkUploadControllerTest {
 
         // submit draft
         Assert.assertNotNull(controller.submitBulkImportDraft(account.getEmail(), autoUpdate.getBulkUploadId()));
-        Assert.assertTrue(controller.approveBulkImport(account, autoUpdate.getBulkUploadId()));
+        Assert.assertTrue(controller.approveBulkImport(account.getEmail(), autoUpdate.getBulkUploadId()));
 
         // bulk upload should be deleted
         BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);

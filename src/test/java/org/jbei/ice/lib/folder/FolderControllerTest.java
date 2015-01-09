@@ -1,9 +1,5 @@
 package org.jbei.ice.lib.folder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.access.PermissionsController;
@@ -17,11 +13,14 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
-
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * @author Hector Plahar
@@ -97,12 +96,15 @@ public class FolderControllerTest {
             Strain strain = TestEntryCreator.createTestStrain(account);
             Assert.assertNotNull(strain);
             parts.put(strain.getPartNumber(), strain);
+            folder.getEntries().add(strain.toDataTransferObject());
         }
         Assert.assertEquals(size, parts.size());
 
         // add to folder
-        Folder added = controller.addFolderContents(account, folder.getId(), new ArrayList<>(parts.values()));
-        Assert.assertNotNull(added);
+        ArrayList<FolderDetails> foldersToAdd = new ArrayList<>();
+        foldersToAdd.add(folder);
+        foldersToAdd = controller.addEntriesToFolder(account.getEmail(), foldersToAdd);
+        Assert.assertNotNull(foldersToAdd);
 
         // keep track to find duplicates
         HashSet<Long> set = new HashSet<>();

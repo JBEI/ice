@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.folder;
 
 import org.apache.commons.lang.StringUtils;
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
@@ -346,17 +345,6 @@ public class FolderController {
                 Logger.error("Cannot delete folder of type " + type);
                 return null;
         }
-    }
-
-    public Folder addFolderContents(Account account, long id, ArrayList<Entry> entrys) throws ControllerException {
-        Folder folder = dao.get(id);
-        if (folder == null)
-            throw new ControllerException("Could not retrieve folder with id " + id);
-        folder = dao.addFolderContents(folder, entrys);
-        if (folder.isPropagatePermissions()) {
-            permissionsController.propagateFolderPermissions(account, folder, true);
-        }
-        return folder;
     }
 
     // expects the same entries to be added
