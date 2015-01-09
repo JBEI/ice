@@ -195,7 +195,7 @@ public class FolderController {
      * @throws PermissionException if user does not have read permissions on folder
      */
     public FolderDetails retrieveFolderContents(String userId, long folderId, ColumnField sort, boolean asc,
-            int start, int limit) {
+                                                int start, int limit) {
         Folder folder = dao.get(folderId);
         if (folder == null)
             return null;
@@ -294,6 +294,8 @@ public class FolderController {
             folder.setName(details.getName());
 
         if (details.isPropagatePermission() != folder.isPropagatePermissions()) {
+            Account account = accountDAO.getByEmail(userId);
+            permissionsController.propagateFolderPermissions(account, folder, details.isPropagatePermission());
             folder.setPropagatePermissions(details.isPropagatePermission());
         }
 
@@ -492,7 +494,6 @@ public class FolderController {
         if (folder == null)
             return null;
 
-        FolderAuthorization authorization = new FolderAuthorization();
         authorization.expectWrite(userId, folder);
 
         Permission permission = new Permission();
@@ -522,6 +523,11 @@ public class FolderController {
             dao.update(folder);
         }
 
+        // propagate permission
+        if (folder.isPropagatePermissions()) {
+            Account userAccount = accountDAO.getByEmail(userId);
+            permissionsController.propagateFolderPermissions(userAccount, folder, true);
+        }
         return created;
     }
 
@@ -536,6 +542,11 @@ public class FolderController {
         Group publicGroup = groupController.createOrRetrievePublicGroup();
 
         permissionDAO.removePermission(null, folder, null, null, publicGroup, true, false);
+        if (folder.isPropagatePermissions()) {
+            for (Entry folderContent : folder.getContents()) {
+                permissionsController.disablePublicReadAccess(userId, folderContent.getId());
+            }
+        }
         return true;
     }
 

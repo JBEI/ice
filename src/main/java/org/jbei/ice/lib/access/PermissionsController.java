@@ -120,28 +120,6 @@ public class PermissionsController {
         return dao.create(permission);
     }
 
-    /**
-     * Removes permissions that are associated with folder. This is typically for
-     * folders that are shared as public folders
-     *
-     * @param userId   user id. typically an administrator
-     * @param folderId unique identifier for folder whose permissions are to be removed
-     */
-    public void removeAllFolderPermissions(String userId, long folderId) {
-        Folder folder = folderDAO.get(folderId);
-        if (folder == null) {
-            Logger.warn("Could not find folder with id " + folderId + " for permission removal");
-            return;
-        }
-
-        if (!hasWritePermission(userId, folder)) {
-            Logger.error(userId + " not allowed to modify folder " + folderId);
-            return;
-        }
-
-        dao.clearPermissions(folder);
-    }
-
     public void removePermission(String userId, AccessPermission access) {
         if (access.isEntry()) {
             Entry entry = DAOFactory.getEntryDAO().get(access.getTypeId());
@@ -277,33 +255,6 @@ public class PermissionsController {
     }
 
     /**
-     * retrieves permissions that have been explicitly set for a specified folder with the
-     * exception of the public group read access. The check for that is a separate
-     * method call
-     *
-     * @param folderId unique identifier for folder whose permissions are being checked
-     * @return list of set permissions
-     */
-    public ArrayList<AccessPermission> getSetFolderPermissions(String userId, long folderId) {
-        Folder folder = DAOFactory.getFolderDAO().get(folderId);
-        if (folder == null)
-            return null;
-
-        FolderAuthorization folderAuthorization = new FolderAuthorization();
-        if (!folderAuthorization.canWrite(userId, folder))
-            throw new AuthorizationException("User does not have permission to access folder permissions");
-
-        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
-        Set<Permission> permissions = dao.getFolderPermissions(folder);
-
-        for (Permission permission : permissions) {
-            accessPermissions.add(permission.toDataTransferObject());
-        }
-
-        return accessPermissions;
-    }
-
-    /**
      * Retrieves permissions that have been explicitly set for the folders with the exception
      * of the public read permission if specified in the parameter. The call for that is a separate method
      *
@@ -351,7 +302,15 @@ public class PermissionsController {
         return accessPermissions;
     }
 
-    public boolean propagateFolderPermissions(Account account, Folder folder, boolean prop) {
+    /**
+     * Propagates the permissions for the folder to the contained entries
+     *
+     * @param account account of user requesting action that led to this call
+     * @param folder  folder user permissions are being propagated
+     * @param add     true if folder is to be added, false otherwise
+     * @return true if action permission was propagated successfully
+     */
+    public boolean propagateFolderPermissions(Account account, Folder folder, boolean add) {
         if (!accountController.isAdministrator(account) && !account.getEmail().equalsIgnoreCase(folder.getOwnerEmail()))
             return false;
 
@@ -361,7 +320,7 @@ public class PermissionsController {
             return true;
 
         // if propagate, add permissions to entries contained in here  //TODO : inefficient for large entries/perms
-        if (prop) {
+        if (add) {
             for (Entry entry : folder.getContents()) {
                 for (AccessPermission accessPermission : permissions) {
                     addPermission(accessPermission, entry, null, null);
@@ -458,8 +417,6 @@ public class PermissionsController {
             return null;
 
         Entry entry = DAOFactory.getEntryDAO().get(partId);
-        EntryType type = EntryType.nameToType(entry.getRecordType());
-        PartData data = new PartData(type);
         EntryAuthorization authorization = new EntryAuthorization();
         authorization.expectWrite(userId, entry);
 
@@ -531,7 +488,6 @@ public class PermissionsController {
             return accessPermissions;
 
         // check account match
-        Account account = accountController.getByEmail(userId);
         Set<Account> accounts = DAOFactory.getAccountDAO().getMatchingAccounts(val, accountLimit);
         if (accounts == null)
             return accessPermissions;
