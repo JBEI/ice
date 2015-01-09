@@ -1,31 +1,12 @@
 package org.jbei.ice.lib.search.blast;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
-import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
-import java.nio.charset.Charset;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.biojava.bio.seq.DNATools;
+import org.biojava.bio.seq.RNATools;
+import org.biojava.bio.symbol.IllegalSymbolException;
+import org.biojava.bio.symbol.SymbolList;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -40,13 +21,14 @@ import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.biojava.bio.seq.DNATools;
-import org.biojava.bio.seq.RNATools;
-import org.biojava.bio.symbol.IllegalSymbolException;
-import org.biojava.bio.symbol.SymbolList;
+import java.io.*;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
+import java.nio.charset.Charset;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Blast Search functionality for BLAST+
@@ -135,8 +117,8 @@ public class BlastPlus {
         return info;
     }
 
-    private static HashMap<String, SearchResult> processBlastOutput(String blastOutput, int queryLength) {
-        HashMap<String, SearchResult> hashMap = new HashMap<>();
+    private static LinkedHashMap<String, SearchResult> processBlastOutput(String blastOutput, int queryLength) {
+        LinkedHashMap<String, SearchResult> hashMap = new LinkedHashMap<>();
 
         ArrayList<String> lines = new ArrayList<>(Arrays.asList(blastOutput.split("\n")));
 
@@ -281,6 +263,9 @@ public class BlastPlus {
         try {
             Path queryFilePath = Files.write(Files.createTempFile("query-", ".seq"), query.getBytes());
             Path subjectFilePath = Files.write(Files.createTempFile("subject-", ".seq"), subject.getBytes());
+            if (queryFilePath == null || subjectFilePath == null)
+                throw new BlastException("Subject or query is null");
+
             StringBuilder command = new StringBuilder();
             String blastN = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
                     + BlastProgram.BLAST_N.getName();
