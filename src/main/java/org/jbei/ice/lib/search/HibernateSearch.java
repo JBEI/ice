@@ -162,7 +162,7 @@ public class HibernateSearch {
 
         // check if there is also a blast search
         final HashMap<String, SearchResult> blastResults;
-        if (searchQuery.getBlastQuery() != null) {
+        if (searchQuery.getBlastQuery() != null && searchQuery.getBlastQuery().getSequence() != null) {
             try {
                 blastResults = BlastPlus.runBlast(account, searchQuery.getBlastQuery());
 
@@ -363,7 +363,7 @@ public class HibernateSearch {
 
         // check if there is also a blast search
         final HashMap<String, SearchResult> blastResults;
-        if (searchQuery.getBlastQuery() != null) {
+        if (searchQuery.getBlastQuery() != null && searchQuery.getBlastQuery().getSequence() != null) {
             try {
                 blastResults = BlastPlus.runBlast(account, searchQuery.getBlastQuery());
 
