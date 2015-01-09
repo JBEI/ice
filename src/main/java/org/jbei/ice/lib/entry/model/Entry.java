@@ -1,20 +1,13 @@
 package org.jbei.ice.lib.entry.model;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import javax.persistence.*;
-
+import org.hibernate.annotations.Type;
+import org.hibernate.search.annotations.*;
+import org.hibernate.search.annotations.Index;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.attachment.Attachment;
-import org.jbei.ice.lib.entry.filter.BlastFilterFactory;
 import org.jbei.ice.lib.entry.filter.EntryHasFilterFactory;
 import org.jbei.ice.lib.entry.filter.EntrySecurityFilterFactory;
 import org.jbei.ice.lib.entry.sample.model.Sample;
@@ -23,9 +16,8 @@ import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
-import org.hibernate.annotations.Type;
-import org.hibernate.search.annotations.*;
-import org.hibernate.search.annotations.Index;
+import javax.persistence.*;
+import java.util.*;
 
 import org.jbei.ice.lib.entry.model.Parameter;
 
@@ -82,7 +74,6 @@ import org.jbei.ice.lib.entry.model.Parameter;
 @Indexed(index = "Entry")
 @FullTextFilterDefs({
                             @FullTextFilterDef(name = "security", impl = EntrySecurityFilterFactory.class),
-                            @FullTextFilterDef(name = "blastFilter", impl = BlastFilterFactory.class),
                             @FullTextFilterDef(name = "boolean", impl = EntryHasFilterFactory.class)
                     })
 @Table(name = "entries")

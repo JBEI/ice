@@ -100,12 +100,12 @@
             </td>
             <td class="no_wrap"><a ng-href="https://{{result.partner.url}}/entry/{{result.entryInfo.id}}"
                                    target="_blank">{{result.partner.name}}</a></td>
-            <td><i ng-show="{{result.entryInfo.hasAttachment}}" class="fa fa-paperclip fa-fw"
+            <td><i ng-show="result.entryInfo.hasAttachment" class="fa fa-paperclip fa-fw"
                    style="color: #555; font-size: 14px;"></i></td>
-            <td><i ng-show="{{result.entryInfo.hasSample}}" class="fa fa-flask fa-fw"
+            <td><i ng-show="result.entryInfo.hasSample" class="fa fa-flask fa-fw"
                    style="color: #555; font-size: 14px;"></i></td>
             <td style="width:30px; text-align:center">
-                <img ng-show="{{result.entryInfo.hasSequence}}" src="img/dna.svg" height="16px" alt="has dna"/>
+                <img ng-show="result.entryInfo.hasSequence" src="img/dna.svg" height="16px" alt="has dna"/>
             </td>
             <td style="width:160px; white-space:nowrap">{{result.entryInfo.creationTime | date:'MMM d, yyyy'}}</td>
         </tr>
@@ -183,6 +183,7 @@
     <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
            ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
            ng-class="{'opacity_4':loadingSearchResults}">
+        <thead>
         <tr data-ng-show="searchResults.results.length>0">
             <th style="width: 12px">
 
@@ -208,6 +209,8 @@
         <tr data-ng-show="searchResults.results.length == 0">
             <td colspan="11">No results found for your query</td>
         </tr>
+        </thead>
+        <tbody>
         <tr data-ng-repeat-start="result in searchResults.results">
             <td>
                 <input type="checkbox" ng-click="select(result.entryInfo)"/>
@@ -248,6 +251,7 @@
                 <pre>{{result.matchDetails | json}}</pre>
             </td>
         </tr>
+        </tbody>
     </table>
 
     <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
@@ -332,11 +336,11 @@
                         ng-href="/profile/{{result.entryInfo.ownerId}}">{{result.entryInfo.owner}}</a>
                 </div>
             </td>
-            <td><i ng-show="{{result.entryInfo.hasAttachment}}" class="fa fa-paperclip fa-fw"
+            <td><i ng-show="result.entryInfo.hasAttachment" class="fa fa-paperclip fa-fw"
                    style="color: #555; font-size: 14px;"></i></td>
-            <td><i ng-show="{{result.entryInfo.hasSample}}" class="fa fa-flask fa-fw"
+            <td><i ng-show="result.entryInfo.hasSample" class="fa fa-flask fa-fw"
                    style="color: #555; font-size: 14px;"></i></td>
-            <td><img ng-show="{{result.entryInfo.hasSequence}}" src="img/dna.png" width="10px"/></td>
+            <td><img ng-show="result.entryInfo.hasSequence" src="img/dna.png" width="10px"/></td>
             <td style="width:160px; white-space:nowrap">{{result.entryInfo.creationTime | date:'MMM d, yyyy'}}</td>
         </tr>
         </tbody>
