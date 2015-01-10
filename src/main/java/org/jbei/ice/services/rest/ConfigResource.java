@@ -1,24 +1,16 @@
 package org.jbei.ice.services.rest;
 
-import java.util.ArrayList;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
+import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.dto.Setting;
+import org.jbei.ice.lib.dto.search.IndexType;
+import org.jbei.ice.lib.search.SearchController;
+
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.config.ConfigurationController;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dto.Setting;
-import org.jbei.ice.lib.dto.search.IndexType;
-import org.jbei.ice.lib.search.SearchController;
-import org.jbei.ice.services.exception.UnauthorizedException;
+import java.util.ArrayList;
 
 /**
  * @author Hector Plahar
@@ -27,6 +19,7 @@ import org.jbei.ice.services.exception.UnauthorizedException;
 public class ConfigResource extends RestResource {
 
     private ConfigurationController controller = new ConfigurationController();
+    private SearchController searchController = new SearchController();
 
     /**
      * Retrieves list of system settings available
@@ -61,29 +54,20 @@ public class ConfigResource extends RestResource {
         return controller.getPropertyValue(key);
     }
 
-
     @PUT
     @Path("/lucene")
     public Response buildLuceneIndex(@HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        if (account == null)
-            throw new UnauthorizedException();
-
-        if (!new SearchController().rebuildIndexes(account, IndexType.LUCENE))
-            return Response.serverError().build();
-        return Response.ok().build();
+        boolean success = searchController.rebuildIndexes(userId, IndexType.LUCENE);
+        return super.respond(success);
     }
 
     @PUT
     @Path("/blast")
-    public void buildBlastIndex(@HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+    public Response buildBlastIndex(@HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        if (account == null)
-            return;
-
-        new SearchController().rebuildIndexes(account, IndexType.BLAST);
+        boolean success = searchController.rebuildIndexes(userId, IndexType.BLAST);
+        return super.respond(success);
     }
 
     @PUT

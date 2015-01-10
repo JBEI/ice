@@ -1,13 +1,13 @@
 package org.jbei.ice.lib.dto.search;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.ColumnField;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -32,6 +32,10 @@ public class SearchQuery implements IDataTransferModel {
 
     public boolean hasBlastQuery() {
         return blastQuery != null && blastQuery.getSequence() != null && !blastQuery.getSequence().isEmpty();
+    }
+
+    public boolean hasFilter() {
+        return parameters != null && (parameters.getHasAttachment() || parameters.getHasSample() || parameters.getHasSequence() || bioSafetyOption != null);
     }
 
     public String getQueryString() {

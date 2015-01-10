@@ -1,9 +1,5 @@
 package org.jbei.ice.lib.group;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
@@ -17,6 +13,10 @@ import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class GroupController {
 
@@ -98,10 +98,12 @@ public class GroupController {
         return userGroups;
     }
 
-    public Set<String> retrieveAccountGroupUUIDs(Account account) {
+    public Set<String> retrieveAccountGroupUUIDs(String userId) {
+        Account account = accountController.getByEmail(userId);
         Set<String> uuids = new HashSet<>();
         if (account != null) {
-            for (Group group : account.getGroups()) {
+            Set<Group> groups = dao.retrieveMemberGroups(account);
+            for (Group group : groups) {
                 uuids.add(group.getUuid());
             }
         }

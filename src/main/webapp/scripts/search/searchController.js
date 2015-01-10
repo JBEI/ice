@@ -5,6 +5,7 @@ angular.module('ice.search.controller', [])
         $scope.$on("RunSearch", function (event, filters) {
             $scope.searchResults = undefined;
             $scope.searchFilters = filters;
+            $scope.currentPage = 1;
             runAdvancedSearch(filters);
         });
 
@@ -29,7 +30,7 @@ angular.module('ice.search.controller', [])
         if (noFilters) {
             $scope.searchFilters = {entryTypes:[], parameters:{}, blastQuery:{}, queryString:""};
             var queryString = $location.search().q;
-            if (!queryString === undefined) {
+            if (queryString !== undefined) {
                 $scope.searchFilters.queryString = queryString;
             }
         }
