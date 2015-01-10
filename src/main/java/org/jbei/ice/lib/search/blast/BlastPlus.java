@@ -7,7 +7,6 @@ import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.RNATools;
 import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.bio.symbol.SymbolList;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -42,7 +41,7 @@ public class BlastPlus {
     private static final String DELIMITER = ",";
     private static final String LOCK_FILE_NAME = "write.lock";
 
-    public static HashMap<String, SearchResult> runBlast(Account account, BlastQuery query) throws BlastException {
+    public static HashMap<String, SearchResult> runBlast(String userId, BlastQuery query) throws BlastException {
         try {
             String command = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
                     + query.getBlastProgram().getName();
@@ -68,12 +67,11 @@ public class BlastPlus {
                     return processBlastOutput(reader.toString(), query.getSequence().length());
 
                 case 1:
-                    Logger.error(account.getEmail() + ": Error in query sequence(s) or BLAST options: "
-                                         + error.toString());
+                    Logger.error(userId + ": Error in query sequence(s) or BLAST options: " + error.toString());
                     break;
 
                 case 2:
-                    Logger.error(account.getEmail() + ": Error in BLAST database: " + error.toString());
+                    Logger.error(userId + ": Error in BLAST database: " + error.toString());
                     break;
 
                 default:

@@ -1,25 +1,11 @@
 package org.jbei.ice.lib.search;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
-import org.jbei.ice.lib.account.AccountType;
-import org.jbei.ice.lib.account.PreferencesController;
-import org.jbei.ice.lib.account.model.Account;
+import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.search.BooleanClause;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dto.search.BlastProgram;
-import org.jbei.ice.lib.dto.search.IndexType;
-import org.jbei.ice.lib.dto.search.SearchBoostField;
-import org.jbei.ice.lib.dto.search.SearchQuery;
-import org.jbei.ice.lib.dto.search.SearchResult;
-import org.jbei.ice.lib.dto.search.SearchResults;
+import org.jbei.ice.lib.dto.search.*;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.executor.IceExecutorService;
@@ -28,8 +14,7 @@ import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.services.rest.RestClient;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.search.BooleanClause;
+import java.util.*;
 
 /**
  * Controller for running searches on the ice platform
@@ -75,7 +60,7 @@ public class SearchController {
 
             try {
                 SearchResults results = (SearchResults) client.post(partner.getUrl(), "/rest/search", query,
-                                                                    SearchResults.class);
+                        SearchResults.class);
                 if (results == null)
                     continue;
 
@@ -119,55 +104,68 @@ public class SearchController {
      */
     public SearchResults runLocalSearch(String userId, SearchQuery query) {
         String queryString = query.getQueryString();
-        Account account = null;
-        if (userId != null)
-            account = DAOFactory.getAccountDAO().getByEmail(userId);
+        HashMap<String, SearchResult> blastResults = null;
 
-        // blast query only
-        if (query.hasBlastQuery() && (queryString == null || queryString.isEmpty())) {
+        // check if there is a blast result and run first
+        if (query.hasBlastQuery()) {
             if (query.getBlastQuery().getBlastProgram() == null)
                 query.getBlastQuery().setBlastProgram(BlastProgram.BLAST_N);
 
             try {
-                HashMap<String, SearchResult> results = BlastPlus.runBlast(account, query.getBlastQuery());
-                if (results.isEmpty())
-                    return new SearchResults();
-                return HibernateSearch.getInstance().runSearchFilter(account, results, query);
+                blastResults = BlastPlus.runBlast(userId, query.getBlastQuery());
             } catch (BlastException e) {
                 return null;
             }
         }
 
+        // if no other search query or filter and there are blast results (not null) then return the blast results
+        if (StringUtils.isEmpty(queryString) && blastResults != null && !query.hasFilter()) {
+            if (blastResults.isEmpty())
+                return new SearchResults();
+            int start = query.getParameters().getStart();
+            int count = query.getParameters().getRetrieveCount();
+            return HibernateSearch.getInstance().filterBlastResults(userId, start, count, blastResults);
+        }
+
         // text query (may also include blast)
         // no filter type indicates a term or phrase query
         HibernateSearch hibernateSearch = HibernateSearch.getInstance();
-        List<SearchBoostField> boostFields = Arrays.asList(SearchBoostField.values());
-        HashMap<String, String> results = new PreferencesController().retrieveUserPreferenceList(account, boostFields);
+        //        List<SearchBoostField> boostFields = Arrays.asList(SearchBoostField.values());
+//        HashMap<String, String> results = new PreferencesController().retrieveUserPreferenceList(account, boostFields);
         HashMap<String, Float> mapping = new HashMap<>();
-        for (Map.Entry<String, String> entry : results.entrySet()) {
-            try {
-                String field = SearchBoostField.valueOf(entry.getKey()).getField();
-                mapping.put(field, Float.valueOf(entry.getValue()));
-            } catch (IllegalArgumentException nfe) {
-                Logger.warn(nfe.getMessage());
-            }
-        }
+//        for (Map.Entry<String, String> entry : results.entrySet()) {
+//            try {
+//                String field = SearchBoostField.valueOf(entry.getKey()).getField();
+//                mapping.put(field, Float.valueOf(entry.getValue()));
+//            } catch (IllegalArgumentException nfe) {
+//                Logger.warn(nfe.getMessage());
+//            }
+//        }
 
         if (!StringUtils.isEmpty(queryString)) {
             HashMap<String, BooleanClause.Occur> terms = parseQueryString(queryString);
-            return hibernateSearch.executeSearch(account, terms, query, mapping);
+            return hibernateSearch.executeSearch(userId, terms, query, mapping, blastResults);
         } else {
-            return hibernateSearch.executeSearchNoTerms(account, query);
+            return hibernateSearch.executeSearchNoTerms(userId, blastResults, query);
         }
+
     }
 
-    public boolean rebuildIndexes(Account account, IndexType type) {
-        if (account.getType() != AccountType.ADMIN) {
-            Logger.warn(account.getEmail() + " attempting to rebuild search index " + type + " without admin privs");
+    /**
+     * Rebuilds the search indices. Admin privileges required
+     *
+     * @param userId unique identifier for user making request
+     * @param type   type of search index to rebuild
+     * @return true is index rebuild is started successfully, false otherwise
+     */
+    public boolean rebuildIndexes(String userId, IndexType type) {
+        AccountController accountController = new AccountController();
+        if (!accountController.isAdministrator(userId)) {
+            Logger.warn(userId + " attempting to rebuild search index " + type + " without admin privs");
             return false;
         }
 
-        Logger.info(account.getEmail() + ": rebuilding search index " + type);
+        Logger.info(userId + ": rebuilding search index " + type);
         if (type == IndexType.LUCENE)
             IceExecutorService.getInstance().runTask(new RebuildLuceneIndexTask());
         else if (type == IndexType.BLAST) {
@@ -182,6 +180,15 @@ public class SearchController {
         return true;
     }
 
+    /**
+     * Parses the query string checking for terms and phrases. A quote is used to indicate
+     * the boundaries of a phrase
+     * <p>e.g. <code>"quick brown" fox "jumped"</code> is parsed into two phrases and one term
+     *
+     * @param queryString query string to be parsed for phrases and terms
+     * @return a mapping of the phrases and terms to clauses that indicate how the matches should appear
+     * in the document. Phrases must appear in the result document
+     */
     HashMap<String, BooleanClause.Occur> parseQueryString(String queryString) {
         HashMap<String, BooleanClause.Occur> terms = new HashMap<>();
 
