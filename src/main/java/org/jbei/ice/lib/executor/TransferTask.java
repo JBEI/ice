@@ -1,12 +1,14 @@
 package org.jbei.ice.lib.executor;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.net.RemoteTransfer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Task for transferring parts to a another registry
@@ -32,6 +34,7 @@ public class TransferTask extends Task {
             return;
 
         Logger.info(userId + ": requesting transfer of " + entries.size() + " entries to " + remoteId);
-        transfer.transferEntries(remoteId, entries);
+        List<PartData> dataList = transfer.getPartsForTransfer(entries);
+        transfer.transferEntries(remoteId, dataList);
     }
 }

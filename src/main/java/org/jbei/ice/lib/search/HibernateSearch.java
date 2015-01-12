@@ -434,12 +434,19 @@ public class HibernateSearch {
      * @param fullTextQuery search fulltextquery for which filter is enabled
      */
     protected void checkEnableSecurityFilter(String userId, FullTextQuery fullTextQuery) {
-        AccountController accountController = new AccountController();
-        if (accountController.isAdministrator(userId)) {
-            return;
+        Set<String> groupUUIDs;
+
+        if (StringUtils.isEmpty(userId)) {
+            groupUUIDs = new HashSet<>();
+            groupUUIDs.add(GroupController.PUBLIC_GROUP_UUID);
+        } else {
+            AccountController accountController = new AccountController();
+            if (accountController.isAdministrator(userId)) {
+                return;
+            }
+            groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(userId);
         }
 
-        Set<String> groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(userId);
         fullTextQuery.enableFullTextFilter("security")
                 .setParameter("account", userId)
                 .setParameter("groupUUids", groupUUIDs);
