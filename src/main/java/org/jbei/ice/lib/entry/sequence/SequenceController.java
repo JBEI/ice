@@ -1,16 +1,7 @@
 package org.jbei.ice.lib.entry.sequence;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionException;
@@ -30,29 +21,21 @@ import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.FastaFormatter;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.FormatterException;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.IFormatter;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.SBOLFormatter;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
-import org.jbei.ice.lib.models.AnnotationLocation;
-import org.jbei.ice.lib.models.Feature;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.SequenceFeature;
+import org.jbei.ice.lib.models.*;
 import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
-import org.jbei.ice.lib.models.SequenceFeatureAttribute;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
-import org.jbei.ice.lib.vo.DNAFeature;
-import org.jbei.ice.lib.vo.DNAFeatureLocation;
-import org.jbei.ice.lib.vo.DNAFeatureNote;
-import org.jbei.ice.lib.vo.DNASequence;
-import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.lib.vo.*;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 
 /**
  * ABI to manipulate {@link Sequence}s.
@@ -142,10 +125,6 @@ public class SequenceController {
         Sequence result = dao.saveSequence(sequence);
         ApplicationController.scheduleBlastIndexRebuildTask(true);
         return result;
-    }
-
-    public boolean setSequence(String userId, String recordId, FeaturedDNASequence featuredDNASequence) {
-        return false;
     }
 
     public FeaturedDNASequence updateSequence(String userId, long entryId, FeaturedDNASequence featuredDNASequence) {

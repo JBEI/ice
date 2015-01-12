@@ -112,7 +112,7 @@ public class SearchController {
                 query.getBlastQuery().setBlastProgram(BlastProgram.BLAST_N);
 
             try {
-                blastResults = BlastPlus.runBlast(userId, query.getBlastQuery());
+                blastResults = BlastPlus.runBlast(query.getBlastQuery());
             } catch (BlastException e) {
                 return null;
             }

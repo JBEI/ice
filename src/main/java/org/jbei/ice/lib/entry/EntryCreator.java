@@ -1,11 +1,10 @@
 package org.jbei.ice.lib.entry;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
@@ -21,7 +20,8 @@ import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  * @author Hector Plahar
@@ -188,9 +188,11 @@ public class EntryCreator {
         if (StringUtils.isNotEmpty(part.getRecordId())) {
             Entry entry = dao.getByRecordId(part.getRecordId());
             if (entry != null) {
-                part.setRecordId(null); // to trigger a new one
+                Logger.warn("Transferred entry's record id \"" + part.getRecordId() + "\" conflicts with existing");
+                return null;
             }
         }
+
         Entry entry = saveTransferred(part);
         if (entry == null)
             return null;
