@@ -1,14 +1,8 @@
 package org.jbei.ice.services.rest;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -22,9 +16,14 @@ import org.jbei.ice.lib.folder.FolderContentRetriever;
 import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.shared.ColumnField;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -172,7 +171,7 @@ public class FolderResource extends RestResource {
 
         EntryController entryController = new EntryController();
         FolderDetails details = new FolderDetails();
-        Logger.info("Retrieving " + folderId + " entries");
+        log(userId, "retrieving " + folderId + " entries");
 
         switch (folderId) {
             case "personal":
