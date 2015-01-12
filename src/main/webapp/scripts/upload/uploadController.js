@@ -182,14 +182,13 @@ angular.module('ice.upload.controller', [])
                 var object = {};
                 var fieldType;
 
-                if (linkedImportType) {
+                if (linkedImportType && col >= sheetHeaders.length) {
                     var newIndex = col - sheetHeaders.length;
                     fieldType = UploadUtil.getTypeField(linkedImportType, newIndex);
                 } else
                     fieldType = UploadUtil.getTypeField($scope.importType, col);
 
                 switch (fieldType) {
-
                     case 'circular':
                     case 'sentToAbrc':
                         object.type = 'checkbox';
@@ -410,7 +409,7 @@ angular.module('ice.upload.controller', [])
                 });
             };
 
-            // bulk create or update from autofill or paste
+            // bulk create or update from auto-fill or paste
             var bulkCreateOrUpdate = function (change) {
                 $scope.saving = true;
 
