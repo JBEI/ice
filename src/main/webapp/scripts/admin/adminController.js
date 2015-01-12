@@ -58,10 +58,16 @@ angular.module('ice.admin.controller', [])
         var menuOption = $stateParams.option;
 
         var menuOptions = $scope.profileMenuOptions = [
-            {url:'/scripts/admin/settings.html', display:'Settings', selected:true, icon:'fa-cogs'},
-            {id:'web', url:'/scripts/admin/wor.html', display:'Web of Registries', selected:false, icon:'fa-globe'},
-            {id:'users', url:'/scripts/admin/users.html', display:'Users', selected:false, icon:'fa-user'},
-            {id:'groups', url:'/scripts/admin/groups.html', display:'Groups', selected:false, icon:'fa-group'},
+            {url: '/scripts/admin/settings.html', display: 'Settings', selected: true, icon: 'fa-cogs'},
+            {
+                id: 'web',
+                url: '/scripts/admin/wor.html',
+                display: 'Web of Registries',
+                selected: false,
+                icon: 'fa-globe'
+            },
+            {id: 'users', url: '/scripts/admin/users.html', display: 'Users', selected: false, icon: 'fa-user'},
+            {id: 'groups', url: '/scripts/admin/groups.html', display: 'Groups', selected: false, icon: 'fa-group'},
             {
                 id: 'transferred', url: '/scripts/admin/transferred.html', display: 'Transferred Entries',
                 selected: false, icon: 'fa-list'
@@ -132,7 +138,7 @@ angular.module('ice.admin.controller', [])
             });
         };
     })
-    .controller('AdminTransferredEntriesController', function ($rootScope, $filter, $location, $scope, Folders) {
+    .controller('AdminTransferredEntriesController', function ($rootScope, $cookieStore, $filter, $location, $scope, Folders, Entry) {
         $scope.maxSize = 5;
         $scope.currentPage = 1;
         var params = {folderId: 'transferred'};
@@ -168,11 +174,21 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.showEntryDetails = function (entry, index) {
-            if (!$scope.params.offset) {
-                $scope.params.offset = index;
+            if (!params.offset) {
+                params.offset = index;
             }
-            $rootScope.collectionContext = $scope.params;
+            $rootScope.collectionContext = params;
             $location.path("/entry/" + entry.id);
+        };
+
+        $scope.transferredTooltip = function (entry) {
+            $scope.tooltip = undefined;
+            Entry($cookieStore.get("sessionId")).tooltip({partId: entry.id},
+                function (result) {
+                    $scope.tooltip = result;
+                }, function (error) {
+                    console.error(error);
+                });
         };
 
         $scope.pageCounts = function (currentPage, resultCount) {

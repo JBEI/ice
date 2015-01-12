@@ -83,8 +83,8 @@
                 </td>
                 <td>{{entry.type | capitalize}}</td>
                 <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
-                       popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                       popover-template="/views/template.html" popover-title="{{entry.partId}}"
+                       popover-trigger="mouseenter" ng-mouseover="transferredTooltip(entry)"
+                       popover-template="/scripts/admin/transferred-tooltip.html" popover-title="{{entry.partId}}"
                        popover-placement="right">{{entry.partId}}</a>
                 </td>
                 <td>
