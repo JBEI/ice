@@ -1,0 +1,25 @@
+<div class="font-90em">
+    <div><b style="color: #888">Alias</b>: {{tooltip.alias}}</div>
+    <div><b style="color: #888">Selection Markers</b>: {{tooltip.selectionMarkers.toString()}}</div>
+    <div ng-if="tooltip.backbone"><b style="color: #888">Backbone</b>: {{tooltip.backbone}}</div>
+    <div><b style="color: #888">Creator</b>: {{tooltip.creator}}</div>
+    <div ng-if="tooltip.originOfReplication"><b style="color: #888">Origin of Replication</b>:
+        {{tooltip.originOfReplication}}
+    </div>
+    <div><b style="color: #888">Owner</b>: {{tooltip.owner}}</div>
+    <div ng-if="tooltip.links"><b style="color: #888">Links</b>: {{tooltip.links}}</div>
+    <div ng-if="tooltip.replicatesIn"><b style="color: #888">Replicates In</b>: {{tooltip.replicatesIn}}
+    </div>
+    <div><b style="color: #888">Status</b>: {{tooltip.status | capitalize}}</div>
+    <div><b style="color: #888">Bio Safety Level</b>: {{tooltip.bioSafetyLevel}}</div>
+    <div ng-if="tooltip.promoters"><b style="color: #888">Promoters</b>: {{tooltip.promoters}}</div>
+    <div ng-if="tooltip.keywords"><b style="color: #888">Keywords</b>: {{tooltip.keywords}}</div>
+    <div ng-if="tooltip.references"><b style="color: #888">References</b>: {{tooltip.references}}</div>
+    <div><b style="color: #888">Funding Source</b>: {{tooltip.fundingSource}}</div>
+    <div class="no_wrap"><b style="color: #888">Principal Investigator</b>: {{tooltip.principalInvestigator}}
+    </div>
+    <div><b style="color: #888">Modified</b>: {{tooltip.modificationTime | date:'medium'}}</div>
+    <div ng-if="tooltip.intellectualProperty"><b style="color: #888">IP Information</b>:
+        {{tooltip.intellectualProperty}}
+    </div>
+</div>
