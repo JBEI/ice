@@ -1,12 +1,6 @@
 package org.jbei.ice.lib.account;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.authentication.AuthenticationException;
 import org.jbei.ice.lib.account.authentication.IAuthentication;
@@ -26,7 +20,8 @@ import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 
-import org.apache.commons.lang.StringUtils;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * ABI to manipulate {@link Account} objects.
@@ -318,7 +313,7 @@ public class AccountController {
      */
     public boolean isAdministrator(String userId) {
         if (StringUtils.isEmpty(userId))
-            throw new IllegalArgumentException("Null or empty userId");
+            return false;
 
         Account account = this.getByEmail(userId);
         return account != null && account.getType() == AccountType.ADMIN;
