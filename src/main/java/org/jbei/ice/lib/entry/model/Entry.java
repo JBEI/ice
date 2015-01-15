@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.entry.model;
 
+import org.apache.solr.analysis.LowerCaseFilterFactory;
+import org.apache.solr.analysis.StandardTokenizerFactory;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.*;
 import org.hibernate.search.annotations.Index;
@@ -76,6 +78,11 @@ import org.jbei.ice.lib.entry.model.Parameter;
                             @FullTextFilterDef(name = "security", impl = EntrySecurityFilterFactory.class),
                             @FullTextFilterDef(name = "boolean", impl = EntryHasFilterFactory.class)
                     })
+@AnalyzerDef(name = "customanalyzer",
+        tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
+        filters = {
+                @TokenFilterDef(factory = LowerCaseFilterFactory.class),
+        })
 @Table(name = "entries")
 @SequenceGenerator(name = "sequence", sequenceName = "entries_id_seq", allocationSize = 1)
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -123,7 +130,8 @@ public class Entry implements IDataModel {
     private String name;
 
     @Column(name = "part_number", length = 127)
-    @Field(boost = @Boost(2f), store = Store.YES, analyze = Analyze.NO)
+    @Analyzer(definition = "customanalyzer")
+    @Field(boost = @Boost(2f), store = Store.YES)
     private String partNumber;
 
     @Column(name = "keywords", length = 127)
