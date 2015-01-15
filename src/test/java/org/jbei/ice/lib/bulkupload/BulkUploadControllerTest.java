@@ -247,7 +247,7 @@ public class BulkUploadControllerTest {
         permission.setType(AccessPermission.Type.READ_UPLOAD);
         permission.setTypeId(id);
 
-        controller.addPermission(account.getEmail(), id, permission);
+        permission = controller.addPermission(account.getEmail(), id, permission);
 
         List<AccessPermission> permissions = controller.getUploadPermissions(account.getEmail(), id);
         Assert.assertNotNull(permissions);
@@ -259,5 +259,8 @@ public class BulkUploadControllerTest {
 
         permissions = controller.getUploadPermissions(account.getEmail(), id);
         Assert.assertTrue(permissions.isEmpty());
+
+        // check that the permission record has been deleted
+        Assert.assertNull(DAOFactory.getPermissionDAO().get(permission.getId()));
     }
 }
