@@ -626,6 +626,7 @@ public class BulkUploadController {
             throw new IllegalArgumentException("Could not locate permission for deletion");
 
         upload.getPermissions().remove(toDelete);
+        DAOFactory.getPermissionDAO().delete(toDelete);
         return dao.update(upload) != null;
     }
 }
