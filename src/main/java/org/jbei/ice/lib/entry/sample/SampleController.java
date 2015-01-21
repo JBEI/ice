@@ -1,8 +1,5 @@
 package org.jbei.ice.lib.entry.sample;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -19,6 +16,9 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * ABI to manipulate {@link Sample}s.
@@ -50,7 +50,7 @@ public class SampleController {
      * @return created sample
      */
     public Sample createStrainSample(Account account, String recordId, String rack, String location, String barcode,
-            String label, String strainNamePrefix) {
+                                     String label, String strainNamePrefix) {
 
         // restricted to admins
         entryAuthorization.expectAdmin(account.getEmail());
@@ -72,7 +72,7 @@ public class SampleController {
 
         // e.g. creating new strain sample [000000000399, G06, 1069929762, JBx_029667 backup 2] for entry "34015"
         Logger.info("Creating new strain sample [" + rack + ", " + location + ", " + barcode + ", " + label
-                            + "] for entry \"" + entry.getId());
+                + "] for entry \"" + entry.getId());
         // TODO : this is a hack till we migrate to a single strain default
         Storage strainScheme = null;
         List<Storage> schemes = storageDAO.getAllStorageSchemes();
@@ -209,7 +209,7 @@ public class SampleController {
                 // if well has no tube then duplicate
                 if (tube == null) {
                     Logger.error("Plate " + mainLocation.getDisplay()
-                                         + " already has a well storage at " + well.getDisplay());
+                            + " already has a well storage at " + well.getDisplay());
                     return null;
                 }
 
@@ -350,5 +350,18 @@ public class SampleController {
         }
 
         return locations;
+    }
+
+    public ArrayList<PartSample> getSamplesByBarcode(String userId, String barcode) {
+        Storage storage = storageDAO.retrieveStorageTube(barcode);
+        if (storage == null)
+            return null;
+
+        List<Sample> samples = dao.getSamplesByStorage(storage);
+        ArrayList<PartSample> partSamples = new ArrayList<>();
+        for (Sample sample : samples) {
+            partSamples.add(sample.toDataTransferObject());
+        }
+        return partSamples;
     }
 }
