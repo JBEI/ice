@@ -1,18 +1,6 @@
 package org.jbei.ice.services.rest;
 
-import java.util.Arrays;
-import java.util.List;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -20,6 +8,12 @@ import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.lib.shared.ColumnField;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * REST resource for searching. Supports keyword search with query params for filtering and
@@ -47,6 +41,10 @@ public class SearchResource extends RestResource {
             @DefaultValue("false") @QueryParam("webSearch") boolean searchWeb,
             SearchQuery query) {
         String userId = SessionHandler.getUserIdBySession(sessionHeader);
+        if (StringUtils.isEmpty(userId) && !searchWeb) {
+            return super.respond(Response.Status.FORBIDDEN);
+        }
+
         try {
             SearchResults results = controller.runSearch(userId, query, searchWeb);
             return super.respond(Response.Status.OK, results);
@@ -71,7 +69,7 @@ public class SearchResource extends RestResource {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public SearchResults search(
+    public Response search(
             @QueryParam("q") String queryString,
             @DefaultValue("false") @QueryParam("webSearch") boolean searchWeb,
             @DefaultValue("0") @QueryParam("offset") int offset,
@@ -80,6 +78,10 @@ public class SearchResource extends RestResource {
             @DefaultValue("false") @QueryParam("asc") boolean asc,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = SessionHandler.getUserIdBySession(sessionId);
+        if (StringUtils.isEmpty(userId) && !searchWeb) {
+            return super.respond(Response.Status.FORBIDDEN);
+        }
+
         log(userId, "query \'" + queryString + '\'');
         SearchQuery query = new SearchQuery();
         query.setQueryString(queryString);
@@ -91,6 +93,6 @@ public class SearchResource extends RestResource {
 
         List<EntryType> types = Arrays.asList(EntryType.values());
         query.setEntryTypes(types);
-        return controller.runSearch(userId, query, searchWeb);
+        return super.respond(controller.runSearch(userId, query, searchWeb));
     }
 }
