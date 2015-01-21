@@ -34,12 +34,12 @@ public class RemoteTransfer {
      * @return List of Part Data objects obtained using the list for transfer
      */
     public List<PartData> getPartsForTransfer(ArrayList<Long> entryIds) {
-        HashSet<Long> transferred = new HashSet<>();
-        HashSet<Long> toTransfer = new HashSet<>(entryIds); // for searching entries to be transferred
-        List<PartData> result = new LinkedList<>();
+        HashSet<Long> forTransfer = new HashSet<>(entryIds); // for searching entries to be transferred
+        HashMap<Long, PartData> toTransfer = new LinkedHashMap<>();
 
         for (long entryId : entryIds) {
-            if (transferred.contains(entryId))
+            // already being transferred; skip
+            if (toTransfer.containsKey(entryId))
                 continue;
 
             Entry entry = entryDAO.get(entryId);
@@ -50,21 +50,31 @@ public class RemoteTransfer {
             PartData data = ModelToInfoFactory.getInfo(entry);
 
             // check if the linked entries (if any) is in the list of entries to be transferred
-            if (data.getLinkedParts() != null) {
+            if (data.getLinkedParts() != null && !data.getLinkedParts().isEmpty()) {
                 Iterator<PartData> iterator = data.getLinkedParts().iterator();
                 while (iterator.hasNext()) {
                     PartData linkedData = iterator.next();
-                    if (!toTransfer.contains(linkedData.getId())) {
+
+                    // make sure linked entry is among list to be transferred
+                    if (!forTransfer.contains(linkedData.getId())) {
                         iterator.remove();
                         continue;
                     }
-                    transferred.add(linkedData.getId());
+
+                    // check if linked entry has already been transferred
+                    if (toTransfer.containsKey(linkedData.getId())) {
+                        // then remove from list of entries to be transferred as it will be transferred as
+                        // part of this entry
+                        if (toTransfer.remove(linkedData.getId()) == null)
+                            Logger.warn("Entry " + linkedData.getId() + " being transferred twice");
+                    }
                 }
             }
 
-            result.add(data);
+            toTransfer.put(data.getId(), data);
+
         }
-        return result;
+        return new LinkedList<>(toTransfer.values());
     }
 
     /**
@@ -90,7 +100,6 @@ public class RemoteTransfer {
                     continue;
                 }
 
-                data = (PartData) object;
                 performTransfer(partner, data);
             } catch (Exception e) {
                 exceptionCount += 1;

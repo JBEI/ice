@@ -1,18 +1,19 @@
 package org.jbei.ice.services.rest;
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.StorageLocation;
+import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.sample.UserSamples;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
 import org.jbei.ice.lib.entry.sample.SampleController;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * REST Resource for samples
@@ -24,6 +25,19 @@ public class SampleResource extends RestResource {
 
     private RequestRetriever requestRetriever = new RequestRetriever();
     private SampleController sampleController = new SampleController();
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{token}")
+    public Response getSampleByToken(@PathParam("token") String token) {
+        try {
+            ArrayList<PartSample> result = sampleController.getSamplesByBarcode(null, token);
+            return super.respond(result);
+        } catch (Exception e) {
+            Logger.error(e);
+            return super.respond(false);
+        }
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
