@@ -565,15 +565,24 @@ public class EntryController {
         if (entry == null)
             entry = dao.getByRecordId(id);
 
+        // get by unique name
+        if (entry == null)
+            return dao.getByUniqueName(id);
+
         return entry;
     }
 
     public PartData retrieveEntryDetails(String userId, String id) {
-        Entry entry = getEntry(id);
-        if (entry == null)
-            return null;
+        try {
+            Entry entry = getEntry(id);
+            if (entry == null)
+                return null;
 
-        return retrieveEntryDetails(userId, entry);
+            return retrieveEntryDetails(userId, entry);
+        } catch (Exception e) {
+            Logger.error(e);
+            return null;
+        }
     }
 
     /**
