@@ -126,7 +126,12 @@ public class SampleController {
         Sample sample = SampleCreator.createSampleObject(partSample.getLabel(), userId, "");
         sample.setEntry(entry);
 
-        String depositor = partSample.getDepositor().getEmail();
+        String depositor;
+        if (partSample.getDepositor() == null) {
+            depositor = userId;
+        } else {
+            depositor = partSample.getDepositor().getEmail();
+        }
         StorageLocation mainLocation = partSample.getLocation();
 
         // check and create the storage locations

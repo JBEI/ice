@@ -1,18 +1,12 @@
 package org.jbei.ice.services.rest;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Type;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Set;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.SessionHandler;
@@ -20,12 +14,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.comment.UserComment;
-import org.jbei.ice.lib.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.dto.entry.AutoCompleteField;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.PartStatistics;
-import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
+import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.entry.EntryController;
@@ -39,13 +28,18 @@ import org.jbei.ice.lib.experiment.Study;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Type;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * @author Hector Plahar
@@ -401,6 +395,7 @@ public class PartResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
             PartSample partSample) {
         String userId = SessionHandler.getUserIdBySession(userAgentHeader);
+        log(userId, "creating sample for part " + partId);
         sampleController.createSample(userId, partId, partSample);
         return sampleController.retrieveEntrySamples(userId, partId);
     }
