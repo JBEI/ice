@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.dto.entry;
 
-import java.util.Date;
-
 import org.jbei.ice.lib.dao.IDataTransferModel;
 
 public class ArabidopsisSeedData implements IDataTransferModel {
@@ -10,7 +8,7 @@ public class ArabidopsisSeedData implements IDataTransferModel {
 
     private String homozygosity;
     private String ecotype;
-    private Date harvestDate;
+    private long harvestDate;
     private String seedParents;
     private Generation generation;
     private PlantType plantType;
@@ -33,11 +31,11 @@ public class ArabidopsisSeedData implements IDataTransferModel {
         this.ecotype = ecotype;
     }
 
-    public Date getHarvestDate() {
+    public long getHarvestDate() {
         return harvestDate;
     }
 
-    public void setHarvestDate(Date harvestDate) {
+    public void setHarvestDate(long harvestDate) {
         this.harvestDate = harvestDate;
     }
 

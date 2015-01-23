@@ -106,7 +106,7 @@ public class InfoToModelFactory {
         if (seedData.getHomozygosity() != null)
             seed.setHomozygosity(seedData.getHomozygosity());
 
-        seed.setHarvestDate(seedData.getHarvestDate());
+        seed.setHarvestDate(new Date(seedData.getHarvestDate()));
         String ecoType = seedData.getEcotype() == null ? "" : seedData.getEcotype();
 
         seed.setEcotype(ecoType);

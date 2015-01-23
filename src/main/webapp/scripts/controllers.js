@@ -1555,6 +1555,9 @@ iceControllers.controller('CreateEntryController',
             var canSubmit = EntryService.validateFields($scope.part, $scope.selectedFields);
             $scope.part.type = $scope.part.type.toUpperCase();
 
+            if ($scope.part.harvestDate)
+                $scope.part.harvestDate = new Date($scope.part.harvestDate).getTime();
+
             // validate contained parts, if any
             if ($scope.part.linkedParts && $scope.part.linkedParts.length) {
                 for (var idx = 0; idx < $scope.part.linkedParts.length; idx += 1) {
