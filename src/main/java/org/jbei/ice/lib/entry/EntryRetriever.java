@@ -1,11 +1,5 @@
 package org.jbei.ice.lib.entry;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
@@ -18,6 +12,8 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.utils.IceCSVSerializer;
+
+import java.util.*;
 
 /**
  * @author Hector Plahar
@@ -209,25 +205,4 @@ public class EntryRetriever {
         authorization.expectRead(userId, entry);
         return entry;
     }
-
-//    public PartData getPartByRecordId(Account account, String recordId) throws ControllerException {
-//        Entry entry;
-//
-//        try {
-//            entry = dao.getByRecordId(recordId);
-//            if (entry == null)
-//                return null;
-//        } catch (DAOException e) {
-//            throw new ControllerException(e);
-//        }
-//
-////        authorization.expectRead(account.getEmail(), entry);
-//
-//        PartData info = ModelToInfoFactory.getInfo(entry);
-//        boolean hasSequence = DAOFactory.getSequenceDAO().hasSequence(entry.getId());
-//        info.setHasSequence(hasSequence);
-//        boolean hasOriginalSequence = DAOFactory.getSequenceDAO().hasOriginalSequence(entry.getId());
-//        info.setHasOriginalSequence(hasOriginalSequence);
-//        return info;
-//    }
 }

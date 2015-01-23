@@ -21,7 +21,8 @@
 <div class="col-md-10" ng-mouseover="showEdit=entry.canEdit" ng-mouseout="showEdit=entry.canEdit&&!showEdit">
     <form ng-submit="quickEditEntry(field)">
         <!--todo : also need different display widgets for different types-->
-        <div ng-if="!field.edit&&field.inputType!=='withEmail'">{{entry[field.schema].toString()}}
+        <div ng-if="!field.edit&&field.inputType!=='withEmail'&&field.inputType!=='date'">
+            {{entry[field.schema].toString()}}
                 <span ng-click="field.edit=true">
                     <i ng-show="showEdit&&field.canEdit!=false" class="fa fa-pencil edit_icon"
                        style="margin-left: 5px;"></i>
@@ -34,6 +35,14 @@
                 ({{entry[field.schema+'Email']}})</a>
             <span ng-if="!entry[field.schema+'Id']">{{entry[field.schema]}} <span ng-if="entry[field.schema+'Email']">({{entry[field.schema+'Email']}})</span></span>
                         <span ng-click="field.edit=true">
+                    <i ng-show="showEdit&&field.canEdit!=false" class="fa fa-pencil edit_icon"
+                       style="margin-left: 5px;"></i>
+                </span>
+        </div>
+
+        <!--display for dates. The expectation is that all dates are longs-->
+        <div ng-if="!field.edit&&field.inputType==='date'">{{entry[field.schema] | date:'fullDate' }}
+                <span ng-click="field.edit=true">
                     <i ng-show="showEdit&&field.canEdit!=false" class="fa fa-pencil edit_icon"
                        style="margin-left: 5px;"></i>
                 </span>
@@ -100,7 +109,7 @@
         </div>
 
         <!--datepicker-->
-        <div ng-if="field.inputType==='date'&&field.edit">
+        <div ng-if="field.inputType==='date'&&field.edit">date
             <div class="input-group" ng-init="quickEdit[field.schema]=entry[field.schema]">
                 <input type="text" ng-model="quickEdit[field.schema]" show-button-bar="false" show-weeks="false"
                        datepicker-popup="yyyy-MM-dd" class="input_box_group" maxlength="125" is-open="opened"

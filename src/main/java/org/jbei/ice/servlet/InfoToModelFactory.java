@@ -1,37 +1,17 @@
 package org.jbei.ice.servlet;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.dto.entry.ArabidopsisSeedData;
-import org.jbei.ice.lib.dto.entry.CustomField;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.Generation;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.PlantType;
-import org.jbei.ice.lib.dto.entry.PlasmidData;
-import org.jbei.ice.lib.dto.entry.StrainData;
-import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Link;
-import org.jbei.ice.lib.entry.model.Parameter;
-import org.jbei.ice.lib.entry.model.Part;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.dto.entry.*;
+import org.jbei.ice.lib.entry.model.*;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 
-import org.apache.commons.lang.StringUtils;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Factory object for converting data transfer objects to model objects
@@ -46,15 +26,15 @@ public class InfoToModelFactory {
 
         switch (type) {
             case PLASMID:
-                entry = setPlasmidFields(info, new Plasmid());
+                entry = setPlasmidFields(info.getPlasmidData(), new Plasmid());
                 break;
 
             case STRAIN:
-                entry = setStrainFields(info, new Strain());
+                entry = setStrainFields(info.getStrainData(), new Strain());
                 break;
 
             case ARABIDOPSIS:
-                entry = new ArabidopsisSeed();
+                entry = setSeedFields(info.getArabidopsisSeedData(), new ArabidopsisSeed());
                 break;
 
             case PART:
@@ -80,8 +60,7 @@ public class InfoToModelFactory {
         return entry;
     }
 
-    protected static Entry setPlasmidFields(PartData data, Entry entry) {
-        PlasmidData plasmidData = data.getPlasmidData();
+    protected static Entry setPlasmidFields(PlasmidData plasmidData, Entry entry) {
         if (plasmidData == null)
             return entry;
 
@@ -105,9 +84,8 @@ public class InfoToModelFactory {
         return entry;
     }
 
-    protected static Entry setStrainFields(PartData data, Entry entry) {
+    protected static Entry setStrainFields(StrainData strainData, Entry entry) {
         Strain strain = (Strain) entry;
-        StrainData strainData = data.getStrainData();
         if (strainData == null)
             return entry;
 
@@ -120,16 +98,15 @@ public class InfoToModelFactory {
         return entry;
     }
 
-    protected static Entry setSeedFields(PartData data, Entry entry) {
+    protected static Entry setSeedFields(ArabidopsisSeedData seedData, Entry entry) {
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
-        ArabidopsisSeedData seedData = data.getArabidopsisSeedData();
         if (seedData == null)
             return entry;
 
         if (seedData.getHomozygosity() != null)
             seed.setHomozygosity(seedData.getHomozygosity());
 
-        seed.setHarvestDate(seedData.getHarvestDate());
+        seed.setHarvestDate(new Date(seedData.getHarvestDate()));
         String ecoType = seedData.getEcotype() == null ? "" : seedData.getEcotype();
 
         seed.setEcotype(ecoType);
@@ -168,18 +145,18 @@ public class InfoToModelFactory {
 
         switch (type) {
             case PLASMID:
-                entry = setPlasmidFields(data, entry);
+                entry = setPlasmidFields(data.getPlasmidData(), entry);
                 break;
 
             case STRAIN:
-                entry = setStrainFields(data, entry);
+                entry = setStrainFields(data.getStrainData(), entry);
                 break;
 
             case PART:
                 break;
 
             case ARABIDOPSIS:
-                entry = setSeedFields(data, entry);
+                entry = setSeedFields(data.getArabidopsisSeedData(), entry);
                 break;
 
             default:

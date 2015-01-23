@@ -1,8 +1,6 @@
 package org.jbei.ice.servlet;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
@@ -13,15 +11,11 @@ import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
-import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Link;
-import org.jbei.ice.lib.entry.model.Parameter;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.model.*;
 import org.jbei.ice.lib.models.TraceSequence;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Factory for converting {@link Entry}s to a {@link org.jbei.ice.lib.dto.entry.PartData}
@@ -125,7 +119,7 @@ public class ModelToInfoFactory {
         data.setHomozygosity(seed.getHomozygosity());
         data.setEcotype(seed.getEcotype());
         data.setSeedParents(seed.getParents());
-        data.setHarvestDate(seed.getHarvestDate());
+        data.setHarvestDate(seed.getHarvestDate().getTime());
         boolean isSent = !(seed.isSentToABRC() == null || !seed.isSentToABRC());
         data.setSentToAbrc(isSent);
         return data;
@@ -358,7 +352,7 @@ public class ModelToInfoFactory {
                 seedData.setHomozygosity(seed.getHomozygosity());
                 seedData.setEcotype(seed.getEcotype());
                 seedData.setSeedParents(seed.getParents());
-                seedData.setHarvestDate(seed.getHarvestDate());
+                seedData.setHarvestDate(seed.getHarvestDate().getTime());
                 part.setArabidopsisSeedData(seedData);
                 break;
 
