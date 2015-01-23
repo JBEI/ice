@@ -1,6 +1,16 @@
 package org.jbei.ice.lib.entry;
 
 
+import org.apache.commons.lang.StringUtils;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.*;
+import org.jbei.ice.lib.entry.model.*;
+import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.lib.utils.Utils;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -8,27 +18,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.dto.entry.ArabidopsisSeedData;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.Generation;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.PlantType;
-import org.jbei.ice.lib.dto.entry.PlasmidData;
-import org.jbei.ice.lib.dto.entry.StrainData;
-import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Part;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.lib.shared.BioSafetyOption;
-import org.jbei.ice.lib.utils.Utils;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Utility class for operating on entries
@@ -354,7 +343,7 @@ public class EntryUtil {
                 if (value != null && !value.isEmpty()) {
                     try {
                         Date date = SimpleDateFormat.getDateInstance(DateFormat.SHORT).parse(value);
-                        seedData.setHarvestDate(date);
+                        seedData.setHarvestDate(date.getTime());
                     } catch (ParseException ia) {
                         Logger.error(ia);
                     }
