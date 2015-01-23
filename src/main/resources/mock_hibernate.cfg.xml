@@ -36,7 +36,6 @@
         <property name="hibernate.search.default.directory_provider">
             org.hibernate.search.store.impl.RAMDirectoryProvider
         </property>
-        <property name="hibernate.search.default.indexBase">index</property>
 
         <!-- mapping files -->
         <mapping class="org.jbei.ice.lib.entry.model.Entry"/>
