@@ -119,7 +119,8 @@ public class ModelToInfoFactory {
         data.setHomozygosity(seed.getHomozygosity());
         data.setEcotype(seed.getEcotype());
         data.setSeedParents(seed.getParents());
-        data.setHarvestDate(seed.getHarvestDate().getTime());
+        if (seed.getHarvestDate() != null)
+            data.setHarvestDate(seed.getHarvestDate().getTime());
         boolean isSent = !(seed.isSentToABRC() == null || !seed.isSentToABRC());
         data.setSentToAbrc(isSent);
         return data;
@@ -352,7 +353,8 @@ public class ModelToInfoFactory {
                 seedData.setHomozygosity(seed.getHomozygosity());
                 seedData.setEcotype(seed.getEcotype());
                 seedData.setSeedParents(seed.getParents());
-                seedData.setHarvestDate(seed.getHarvestDate().getTime());
+                if (seed.getHarvestDate() != null)
+                    seedData.setHarvestDate(seed.getHarvestDate().getTime());
                 part.setArabidopsisSeedData(seedData);
                 break;
 
