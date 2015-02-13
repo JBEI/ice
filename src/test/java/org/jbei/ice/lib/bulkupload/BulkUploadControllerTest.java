@@ -7,7 +7,7 @@ import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.shared.BioSafetyOption;
@@ -166,38 +166,59 @@ public class BulkUploadControllerTest {
     @Test
     public void testApproveBulkImport() throws Exception {
         Account account = AccountCreator.createTestAccount("testApproveBulkImport", true);
-        BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
-        autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
-        autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
-        autoUpdate.getKeyValue().put(EntryField.PI, "test");
-        autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "select");
-        autoUpdate.getKeyValue().put(EntryField.FUNDING_SOURCE, "JBEI");
-        autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
-        autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
 
-        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.PLASMID);
-        Assert.assertNotNull(autoUpdate);
-        Assert.assertTrue(autoUpdate.getEntryId() > 0);
-        Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
-        Assert.assertTrue(autoUpdate.getLastUpdate() != null);
+        //
+        // test strain with plasmid
+        //
+        // create bulk upload draft
+        String userId = account.getEmail();
+        BulkUploadInfo testInfo = new BulkUploadInfo();
+        testInfo.setName("testing");
+        testInfo.setType(EntryType.STRAIN.getName());
+        testInfo = controller.create(userId, testInfo);
+        Assert.assertNotNull(testInfo);
 
-        // submit draft
-        Assert.assertNotNull(controller.submitBulkImportDraft(account.getEmail(), autoUpdate.getBulkUploadId()));
-        Assert.assertTrue(controller.approveBulkImport(account.getEmail(), autoUpdate.getBulkUploadId()));
+        // create entry for upload
+        BulkEntryCreator creator = new BulkEntryCreator();
+        PartData strainData = new PartData(EntryType.STRAIN);
+        strainData.setName("testStrain");
+        ArrayList<String> selectionMarkers = new ArrayList<>();
+        selectionMarkers.add("Spectinomycin");
+        strainData.setSelectionMarkers(selectionMarkers);
+        strainData.setBioSafetyLevel(1);
+        strainData.setStatus("Complete");
+        strainData.setShortDescription("testing bulk upload");
+        strainData.setCreator(account.getFullName());
+        strainData.setCreatorEmail(account.getEmail());
+        strainData.setPrincipalInvestigator("PI");
 
-        // bulk upload should be deleted
-        BulkUploadInfo info = controller.retrieveById(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
-        Assert.assertNull(info);
+        PartData plasmidData = new PartData(EntryType.PLASMID);
+        plasmidData.setName("testPlasmid");
+        selectionMarkers.clear();
+        selectionMarkers.add("Spectinomycin");
+        plasmidData.setSelectionMarkers(selectionMarkers);
+        plasmidData.setBioSafetyLevel(1);
+//        plasmidData.setStatus("In Progress");
+        plasmidData.setShortDescription("testing bulk upload with strain with plasmid");
+        plasmidData.setCreator(account.getFullName());
+        plasmidData.setCreatorEmail(account.getEmail());
+        plasmidData.setPrincipalInvestigator("PI");
 
-        // entry must still exist and have a visibility of OK
-        Entry entry = DAOFactory.getEntryDAO().get(autoUpdate.getEntryId());
-        Assert.assertNotNull(entry);
-        Assert.assertEquals(Visibility.OK.getValue(), entry.getVisibility().intValue());
+        strainData.getLinkedParts().add(plasmidData);
 
-        // check the set values of the entry (particularly the preferences)
-        Assert.assertEquals("test", entry.getPrincipalInvestigator());
-        Assert.assertEquals("JBEI", entry.getFundingSource());
-        Assert.assertEquals("JBEI-0001", entry.getName());
+        PartData returnStrainData = creator.createEntry(userId, testInfo.getId(), strainData);
+        Assert.assertNotNull(returnStrainData);
+
+        // submit bulk upload
+        //should fail validation because plasmidData status is not set
+        Assert.assertNull(controller.submitBulkImportDraft(userId, testInfo.getId()));
+
+        plasmidData.setStatus("In Progress");
+        plasmidData = creator.updateEntry(userId, testInfo.getId(), returnStrainData.getLinkedParts().get(0).getId(), plasmidData);
+        Assert.assertNotNull(plasmidData);
+        testInfo = controller.submitBulkImportDraft(userId, testInfo.getId());
+        Assert.assertNotNull(testInfo);
+        Assert.assertEquals(testInfo.getStatus(), BulkUploadStatus.PENDING_APPROVAL);
     }
 
     @Test
