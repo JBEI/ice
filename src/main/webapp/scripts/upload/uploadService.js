@@ -99,7 +99,6 @@ angular.module('ice.upload.service', [])
             },
 
             // converts the index (which depends on type) of the schema to the specific rest resource name
-            // todo : if index > length (or linkedType is valid)
             indexToRestResource: function (type, index) {
                 var schema = this.getDataSchema(type);
                 if (index == schema.indexOf('sequenceFileName'))
@@ -169,6 +168,7 @@ angular.module('ice.upload.service', [])
                         return entry.strainData[dataSchema[index]];
 
                     case "plasmid":
+                        //console.log(entry);
                         // 6 custom fields
                         if (index >= 21)
                             return entry[this.getDataSchema("part")[index - 6]];

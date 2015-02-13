@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.upload.controller', [])
-    .controller('UploadController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource, $stateParams, $fileUploader, $http, Upload, UploadUtil, EntryService) {
+    .controller('UploadController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource, $stateParams, $fileUploader, $http, Upload, UploadUtil) {
         var sid = $cookieStore.get("sessionId");
         var upload = Upload(sid);
         var sheetData = [
@@ -96,7 +96,22 @@ angular.module('ice.upload.controller', [])
         //
         $scope.onFileSelect = function (files, row, col) {
             var id = $scope.bulkUpload.id;
-            var url = "/rest/upload/" + id + "/" + UploadUtil.indexToRestResource($scope.importType, col);
+            var url = "/rest/upload/" + id + "/";
+            var formDataType;
+            var actualEntryId;
+
+            // check if there is a link
+            if ($scope.linkedSelection) {
+                var sheetHeaders = UploadUtil.getSheetHeaders($scope.importType);
+                var index = col - sheetHeaders.length;
+                url += UploadUtil.indexToRestResource($scope.importType, index);
+                formDataType = $scope.linkedSelection;
+                actualEntryId = $scope.bulkUpload.linkedEntryIdData[row];
+            } else {
+                url += UploadUtil.indexToRestResource($scope.importType, col);
+                formDataType = $scope.importType;
+                actualEntryId = $scope.bulkUpload.entryIdData[row];
+            }
 
             var item = {
                 method: 'POST',
@@ -104,7 +119,7 @@ angular.module('ice.upload.controller', [])
                 file: files[0],
                 alias: "file",
                 formData: [
-                    {entryType: $scope.importType, entryId: $scope.bulkUpload.entryIdData[row]}
+                    {entryType: formDataType, entryId: actualEntryId}
                 ],
                 headers: {"X-ICE-Authentication-SessionId": sid}
             };
@@ -157,7 +172,7 @@ angular.module('ice.upload.controller', [])
                     + '<input type="file" class="upload" /></span>');
 
                     $up.on("change", function (event) {
-                        console.log("change", event);
+                        //console.log("change", event);
                         angular.element(this).scope().onFileSelect(this.getElementsByTagName("input")[0].files, row, col);
                     });
 

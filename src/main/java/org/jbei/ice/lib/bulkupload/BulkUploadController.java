@@ -189,25 +189,41 @@ public class BulkUploadController {
 
         List<Entry> list = dao.retrieveDraftEntries(id, offset, limit);
         for (Entry entry : list) {
-            PartData partData = ModelToInfoFactory.getInfo(entry);
-            if (sequenceDAO.hasSequence(entry.getId())) {
-                partData.setHasSequence(true);
-                String name = sequenceDAO.getSequenceFilename(entry);
-                partData.setSequenceFileName(name);
+            PartData partData = setFileData(userId, entry, ModelToInfoFactory.getInfo(entry));
+
+            // check if any links and convert
+            if (!entry.getLinkedEntries().isEmpty()) {
+                Entry linked = (Entry) entry.getLinkedEntries().toArray()[0];
+                PartData linkedData = partData.getLinkedParts().remove(0);
+                linkedData = setFileData(userId, linked, linkedData);
+                partData.getLinkedParts().add(linkedData);
             }
 
-            // check attachment
-            if (attachmentController.hasAttachment(entry)) {
-                partData.setHasAttachment(true);
-                partData.setAttachments(attachmentController.getByEntry(userId, entry.getId()));
-            }
-
-            // trace sequences
             info.getEntryList().add(partData);
         }
 
         info.setCount(dao.retrieveSavedDraftCount(id));
         return info;
+    }
+
+    protected PartData setFileData(String userId, Entry entry, PartData partData) {
+        SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
+
+        if (sequenceDAO.hasSequence(entry.getId())) {
+            partData.setHasSequence(true);
+            String name = sequenceDAO.getSequenceFilename(entry);
+            partData.setSequenceFileName(name);
+        }
+
+        // check attachment
+        if (attachmentController.hasAttachment(entry)) {
+            partData.setHasAttachment(true);
+            partData.setAttachments(attachmentController.getByEntry(userId, entry.getId()));
+        }
+
+        // todo: trace sequences
+
+        return partData;
     }
 
     protected ArrayList<PartData> convertParts(Account account, List<Entry> contents) {
@@ -478,12 +494,7 @@ public class BulkUploadController {
             return null;
 
         authorization.expectWrite(userId, upload);
-        Entry entry = dao.getUploadEntry(bulkUploadId, entryId);
-        // todo : enforcing that entry must exist
-        if (entry == null) {
-            Logger.error("Could not find entry with id " + entryId + " in bulk upload " + bulkUploadId);
-            return null;
-        }
+        Entry entry = entryDAO.get(entryId);
 
         // parse actual sequence
         DNASequence dnaSequence = SequenceController.parse(sequenceString);
@@ -507,12 +518,6 @@ public class BulkUploadController {
             return null;
 
         authorization.expectWrite(userId, upload);
-        Entry entry = dao.getUploadEntry(bulkUploadId, entryId);
-        // todo : enforcing that entry must exist
-        if (entry == null) {
-            Logger.error("Could not find entry with id " + entryId + " in bulk upload " + bulkUploadId);
-            return null;
-        }
 
         String fileId = Utils.generateUUID();
         File attachmentFile = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
@@ -538,12 +543,9 @@ public class BulkUploadController {
             return false;
 
         authorization.expectWrite(userId, upload);
-        Entry entry = dao.getUploadEntry(bulkUploadId, entryId);
-        // todo : enforcing that entry must exist
-        if (entry == null) {
-            Logger.error("Could not find entry with id " + entryId + " in bulk upload " + bulkUploadId);
+        Entry entry = entryDAO.get(entryId);
+        if (entry == null)
             return false;
-        }
 
         List<Attachment> attachments = DAOFactory.getAttachmentDAO().getByEntry(entry);
 
@@ -599,8 +601,9 @@ public class BulkUploadController {
 
     /**
      * Removes specified permission from bulk upload
-     * @param userId unique identifier of user making the request. Must be an admin or owner of the bulk upload
-     * @param uploadId unique identifier for bulk upload
+     *
+     * @param userId       unique identifier of user making the request. Must be an admin or owner of the bulk upload
+     * @param uploadId     unique identifier for bulk upload
      * @param permissionId unique identifier for permission that has been previously added to upload
      * @return true if deletion is successful
      * @throws java.lang.IllegalArgumentException if upload or permission cannot be located by their identifiers
