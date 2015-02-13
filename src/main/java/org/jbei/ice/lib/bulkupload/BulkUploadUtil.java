@@ -1,15 +1,12 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.util.Date;
-
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.StatusType;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Utility class for Bulk Import
@@ -27,50 +24,40 @@ public class BulkUploadUtil {
      */
     public static boolean validate(BulkUpload bulkUpload) {
         for (Entry entry : bulkUpload.getContents()) {
-            boolean isValid;
+            if (!validateHelper(entry))
+                return false;
 
-            EntryType type = EntryType.nameToType(entry.getRecordType());
-            switch (type) {
-                case STRAIN:
-                    isValid = validateStrain((Strain) entry);
-                    break;
-
-                case PLASMID:
-                    isValid = validatePlasmid((Plasmid) entry);
-                    break;
-
-                case PART:
-                    isValid = validateCommonFields(entry);
-                    break;
-
-                case ARABIDOPSIS:
-                    isValid = validateCommonFields(entry);
-                    break;
-
-                // unknown type
-                default:
+            for (Entry linked : entry.getLinkedEntries()) {
+                if (!validateHelper(linked))
                     return false;
             }
-            if (!isValid)
-                return false;
         }
         return true;
     }
 
-    /**
-     * Creates new BulkUpload object populated with default values and of type specified in the param
-     * Note that this is not saved in the database, It is the responsibility of the callee to save it.
-     *
-     * @return BulkUpload object
-     */
-    public static BulkUpload createNewBulkUpload(EntryType addType) {
-        BulkUpload upload = new BulkUpload();
-        upload.setName("Untitled");
-        upload.setStatus(BulkUploadStatus.IN_PROGRESS);
-        upload.setImportType(addType.toString());
-        upload.setCreationTime(new Date(System.currentTimeMillis()));
-        upload.setLastUpdateTime(upload.getCreationTime());
-        return upload;
+    protected static boolean validateHelper(Entry entry) {
+        boolean isValid = false;
+
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+        switch (type) {
+            case STRAIN:
+                isValid = validateStrain((Strain) entry);
+                break;
+
+            case PLASMID:
+                isValid = validatePlasmid((Plasmid) entry);
+                break;
+
+            case PART:
+                isValid = validateCommonFields(entry);
+                break;
+
+            case ARABIDOPSIS:
+                isValid = validateCommonFields(entry);
+                break;
+        }
+
+        return isValid;
     }
 
     /**
@@ -81,17 +68,11 @@ public class BulkUploadUtil {
      * @return true if strain validates, false otherwise
      */
     private static boolean validateStrain(Strain strain) {
-        if (!validateCommonFields(strain))
-            return false;
-
-        return (!strain.getSelectionMarkers().isEmpty());
+        return validateCommonFields(strain) && (!strain.getSelectionMarkers().isEmpty());
     }
 
     private static boolean validatePlasmid(Plasmid plasmid) {
-        if (!validateCommonFields(plasmid))
-            return false;
-
-        return (!plasmid.getSelectionMarkers().isEmpty());
+        return validateCommonFields(plasmid) && (!plasmid.getSelectionMarkers().isEmpty());
     }
 
     /**

@@ -198,7 +198,7 @@ public class BulkUploadControllerTest {
         selectionMarkers.add("Spectinomycin");
         plasmidData.setSelectionMarkers(selectionMarkers);
         plasmidData.setBioSafetyLevel(1);
-        plasmidData.setStatus("In Progress");
+//        plasmidData.setStatus("In Progress");
         plasmidData.setShortDescription("testing bulk upload with strain with plasmid");
         plasmidData.setCreator(account.getFullName());
         plasmidData.setCreatorEmail(account.getEmail());
@@ -210,13 +210,15 @@ public class BulkUploadControllerTest {
         Assert.assertNotNull(returnStrainData);
 
         // submit bulk upload
+        //should fail validation because plasmidData status is not set
+        Assert.assertNull(controller.submitBulkImportDraft(userId, testInfo.getId()));
+
+        plasmidData.setStatus("In Progress");
+        plasmidData = creator.updateEntry(userId, testInfo.getId(), returnStrainData.getLinkedParts().get(0).getId(), plasmidData);
+        Assert.assertNotNull(plasmidData);
         testInfo = controller.submitBulkImportDraft(userId, testInfo.getId());
         Assert.assertNotNull(testInfo);
         Assert.assertEquals(testInfo.getStatus(), BulkUploadStatus.PENDING_APPROVAL);
-
-        // check the entries to ensure they have not been modified
-        testInfo = controller.getBulkImport(userId, testInfo.getId(), 0, 1);
-        Assert.assertNotNull(testInfo);
     }
 
     @Test
