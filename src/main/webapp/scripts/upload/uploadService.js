@@ -59,7 +59,7 @@ angular.module('ice.upload.service', [])
             'plantType', 'generation', 'sentToAbrc'));
 
         return {
-            getDataSchema:function (type) {
+            getDataSchema: function (type) {
                 switch (type.toLowerCase()) {
                     case "strain":
                         return strainSchema;
@@ -77,12 +77,12 @@ angular.module('ice.upload.service', [])
             },
 
             // returns field for the specified type at specified index
-            getTypeField:function (type, index) {
+            getTypeField: function (type, index) {
                 return this.getDataSchema(type)[index];
             },
 
             // returns array of headers for specified type
-            getSheetHeaders:function (type) {
+            getSheetHeaders: function (type) {
                 switch (type.toLowerCase()) {
                     case "strain":
                         return strainHeaders;
@@ -100,7 +100,7 @@ angular.module('ice.upload.service', [])
 
             // converts the index (which depends on type) of the schema to the specific rest resource name
             // todo : if index > length (or linkedType is valid)
-            indexToRestResource:function (type, index) {
+            indexToRestResource: function (type, index) {
                 var schema = this.getDataSchema(type);
                 if (index == schema.indexOf('sequenceFileName'))
                     return 'sequence';
@@ -111,7 +111,7 @@ angular.module('ice.upload.service', [])
                 return 'attachment';
             },
 
-            setDataValue:function (type, index, object, value) {
+            setDataValue: function (type, index, object, value) {
                 var dataSchema = this.getDataSchema(type);
                 if (dataSchema[index] == "links") {
                     object[dataSchema[index]] = [value];
@@ -151,7 +151,7 @@ angular.module('ice.upload.service', [])
             // retrieves the value to be displayed in the spreadsheet from the entry object retrieved from the
             // server side. sort of acts as a mapping to handle the case of "strainData" etc
             // with selection markers being the exception
-            getEntryValue:function (type, entry, index) {
+            getEntryValue: function (type, entry, index) {
                 var dataSchema = this.getDataSchema(type);
 
                 if (index < 15 || dataSchema[index] == "selectionMarkers") {
@@ -163,12 +163,21 @@ angular.module('ice.upload.service', [])
 
                 switch (type.toLowerCase()) {
                     case "strain":
+                        // 3 custom fields
+                        if (index >= 18)
+                            return entry[this.getDataSchema("part")[index - 3]];
                         return entry.strainData[dataSchema[index]];
 
                     case "plasmid":
+                        // 6 custom fields
+                        if (index >= 21)
+                            return entry[this.getDataSchema("part")[index - 6]];
                         return entry.plasmidData[dataSchema[index]];
 
                     case "arabidopsis":
+                        // 7 custom fields
+                        if (index >= 22)
+                            return entry[this.getDataSchema("part")[index - 7]];
                         return entry.arabidopsisSeedData[dataSchema[index]];
 
                     case "part":
