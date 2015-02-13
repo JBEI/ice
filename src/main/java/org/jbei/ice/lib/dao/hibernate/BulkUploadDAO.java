@@ -1,9 +1,8 @@
 package org.jbei.ice.lib.dao.hibernate;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.BulkUpload;
 import org.jbei.ice.lib.bulkupload.BulkUploadStatus;
@@ -12,10 +11,9 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.entry.model.Entry;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Hibernate Data accessor object for retrieving {@link org.jbei.ice.lib.bulkupload.BulkUpload} objects
@@ -121,17 +119,6 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         }
 
         return results;
-    }
-
-    // retrieves entries that are expected to be a part of this bulk upload.
-    public Entry getUploadEntry(long bulkUpload, long entryId) throws DAOException {
-        Entry entry = (Entry) currentSession().get(Entry.class, entryId);
-        Object object = currentSession().createCriteria(BulkUpload.class)
-                .add(Restrictions.eq("id", bulkUpload))
-                .createCriteria("contents", "entry").add(Restrictions.eq("id", entryId)).uniqueResult();
-        if (object != null)
-            return entry;
-        return null;
     }
 
     @Override
