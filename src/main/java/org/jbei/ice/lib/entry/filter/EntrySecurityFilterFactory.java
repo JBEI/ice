@@ -1,18 +1,19 @@
 package org.jbei.ice.lib.entry.filter;
 
-import java.io.IOException;
-import java.util.HashSet;
-
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReaderContext;
+import org.apache.lucene.index.DocsEnum;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.search.DocIdSet;
 import org.apache.lucene.search.Filter;
+import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.OpenBitSet;
 import org.hibernate.search.annotations.Factory;
 import org.hibernate.search.annotations.Key;
 import org.hibernate.search.filter.FilterKey;
 import org.hibernate.search.filter.StandardFilterKey;
+
+import java.io.IOException;
+import java.util.HashSet;
 
 /**
  * @author Hector Plahar
@@ -55,21 +56,28 @@ public class EntrySecurityFilterFactory {
         }
 
         @Override
-        public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
-            OpenBitSet bitSet = new OpenBitSet(reader.maxDoc());
-            TermDocs docs;
+        public DocIdSet getDocIdSet(AtomicReaderContext context, Bits acceptDocs) throws IOException {
+            OpenBitSet bitSet = new OpenBitSet(context.reader().maxDoc());
+            DocsEnum docs;
+
             if (accountId != null) {
-                docs = reader.termDocs(new Term("canRead", accountId));
-                while (docs.next()) {
-                    bitSet.set(docs.doc());
+                docs = context.reader().termDocsEnum(new Term("canRead", accountId));
+                if (docs != null) {
+                    int doc;
+                    while ((doc = docs.nextDoc()) != DocsEnum.NO_MORE_DOCS) {
+                        bitSet.set(doc);
+                    }
                 }
             }
 
             if (uuids != null) {
                 for (String uuid : uuids) {
-                    docs = reader.termDocs(new Term("canRead", uuid));
-                    while (docs.next()) {
-                        bitSet.set(docs.doc());
+                    docs = context.reader().termDocsEnum(new Term("canRead", uuid));
+                    if (docs != null) {
+                        int doc;
+                        while ((doc = docs.nextDoc()) != DocsEnum.NO_MORE_DOCS) {
+                            bitSet.set(doc);
+                        }
                     }
                 }
             }
