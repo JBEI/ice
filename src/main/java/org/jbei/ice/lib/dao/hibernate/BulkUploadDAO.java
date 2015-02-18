@@ -3,8 +3,6 @@ package org.jbei.ice.lib.dao.hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.BulkUpload;
 import org.jbei.ice.lib.bulkupload.BulkUploadStatus;
@@ -35,21 +33,12 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
                                                       + "status != :status");
             query.setParameter("account", account);
             query.setParameter("status", BulkUploadStatus.PENDING_APPROVAL);
-            result = new ArrayList<BulkUpload>(query.list());
+            result = new ArrayList<>(query.list());
             return result;
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
         }
-    }
-
-    public int getUploadEntryCount(long id) throws DAOException {
-        Number number = (Number) currentSession().createCriteria(BulkUpload.class)
-                .setProjection(Projections.countDistinct("id"))
-                .add(Restrictions.eq("id", id))
-                .uniqueResult();
-
-        return number.intValue();
     }
 
     @SuppressWarnings("unchecked")
@@ -60,7 +49,7 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         try {
             Query query = session.createQuery("from " + BulkUpload.class.getName() + " where status = :status");
             query.setParameter("status", status);
-            result = new ArrayList<BulkUpload>(query.list());
+            result = new ArrayList<>(query.list());
             return result;
         } catch (HibernateException he) {
             Logger.error(he);
