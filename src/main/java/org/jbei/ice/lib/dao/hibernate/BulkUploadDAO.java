@@ -33,7 +33,7 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
                                                       + "status != :status");
             query.setParameter("account", account);
             query.setParameter("status", BulkUploadStatus.PENDING_APPROVAL);
-            result = new ArrayList<BulkUpload>(query.list());
+            result = new ArrayList<>(query.list());
             return result;
         } catch (HibernateException he) {
             Logger.error(he);
@@ -49,7 +49,7 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         try {
             Query query = session.createQuery("from " + BulkUpload.class.getName() + " where status = :status");
             query.setParameter("status", status);
-            result = new ArrayList<BulkUpload>(query.list());
+            result = new ArrayList<>(query.list());
             return result;
         } catch (HibernateException he) {
             Logger.error(he);

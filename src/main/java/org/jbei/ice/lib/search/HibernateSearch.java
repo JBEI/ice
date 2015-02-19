@@ -2,10 +2,11 @@ package org.jbei.ice.lib.search;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.AtomicReaderContext;
+import org.apache.lucene.index.DocsEnum;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TermDocs;
 import org.apache.lucene.search.*;
+import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.OpenBitSet;
 import org.hibernate.Session;
 import org.hibernate.search.FullTextQuery;
@@ -13,7 +14,6 @@ import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hibernate.search.query.dsl.TermContext;
-import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -72,7 +72,7 @@ public class HibernateSearch {
                         continue;
                     query = qb.keyword().wildcard().onField(field).matching(term).createQuery();
                 } else
-                    query = qb.keyword().fuzzy().withThreshold(0.8f).onField(field).ignoreFieldBridge().matching(
+                    query = qb.keyword().fuzzy().withEditDistanceUpTo(1).onField(field).ignoreFieldBridge().matching(
                             term).createQuery();
 
                 Float boost = userBoost.get(field);
@@ -216,13 +216,14 @@ public class HibernateSearch {
         Query query = qb.keyword().onField("visibility").matching(Visibility.OK.getValue()).createQuery();
         FilteredQuery filteredQuery = new FilteredQuery(query, new Filter() {
             @Override
-            public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
-                OpenBitSet bitSet = new OpenBitSet(reader.maxDoc());
-                TermDocs docs;
+            public DocIdSet getDocIdSet(AtomicReaderContext context, Bits acceptDocs) throws IOException {
+                OpenBitSet bitSet = new OpenBitSet(context.reader().maxDoc());
+                DocsEnum docs;
                 for (String id : blastResults.keySet()) {
-                    docs = reader.termDocs(new Term("id", id));
-                    while (docs.next()) {
-                        bitSet.set(docs.doc());
+                    docs = context.reader().termDocsEnum(new Term("id", id));
+                    int doc;
+                    while ((doc = docs.nextDoc()) != DocsEnum.NO_MORE_DOCS) {
+                        bitSet.set(doc);
                     }
                 }
                 return bitSet;
@@ -233,7 +234,7 @@ public class HibernateSearch {
         FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(filteredQuery, Entry.class);
 
         // enable security filter if an admin
-        checkEnableSecurityFilter(userId, fullTextQuery);
+        fullTextQuery = checkEnableSecurityFilter(userId, fullTextQuery);
 
         // execute search
         fullTextQuery.setProjection("id");
@@ -338,7 +339,7 @@ public class HibernateSearch {
         fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
 
         // enable security filter if needed
-        checkEnableSecurityFilter(userId, fullTextQuery);
+        fullTextQuery = checkEnableSecurityFilter(userId, fullTextQuery);
 
         // check sample
         checkEnableHasAttribute(fullTextQuery, searchQuery.getParameters());
@@ -392,10 +393,10 @@ public class HibernateSearch {
                 return new Sort(new SortField(SortField.FIELD_SCORE.getField(), SortField.FIELD_SCORE.getType(), asc));
 
             case TYPE:
-                return new Sort(new SortField("recordType", SortField.STRING, asc));
+                return new Sort(new SortField("recordType", SortField.Type.STRING, asc));
 
             case CREATED:
-                return new Sort(new SortField("creationTime", SortField.STRING, asc));
+                return new Sort(new SortField("creationTime", SortField.Type.STRING, asc));
         }
     }
 
@@ -411,13 +412,14 @@ public class HibernateSearch {
         Query query = qb.keyword().onField("visibility").matching(Visibility.OK.getValue()).createQuery();
         FilteredQuery filteredQuery = new FilteredQuery(query, new Filter() {
             @Override
-            public DocIdSet getDocIdSet(IndexReader reader) throws IOException {
-                OpenBitSet bitSet = new OpenBitSet(reader.maxDoc());
-                TermDocs docs;
+            public DocIdSet getDocIdSet(AtomicReaderContext context, Bits acceptDocs) throws IOException {
+                OpenBitSet bitSet = new OpenBitSet(context.reader().maxDoc());
+                DocsEnum docs;
                 for (String id : blastResults.keySet()) {
-                    docs = reader.termDocs(new Term("id", id));
-                    while (docs.next()) {
-                        bitSet.set(docs.doc());
+                    docs = context.reader().termDocsEnum(new Term("id", id));
+                    int doc;
+                    while ((doc = docs.nextDoc()) != DocsEnum.NO_MORE_DOCS) {
+                        bitSet.set(doc);
                     }
                 }
                 return bitSet;
@@ -429,27 +431,27 @@ public class HibernateSearch {
 
     /**
      * Enables the security filter if the account does not have administrative privileges
-     *
-     * @param userId        identifier for account which is checked for administrative privs
+     *  @param userId        identifier for account which is checked for administrative privs
      * @param fullTextQuery search fulltextquery for which filter is enabled
      */
-    protected void checkEnableSecurityFilter(String userId, FullTextQuery fullTextQuery) {
+    protected FullTextQuery checkEnableSecurityFilter(String userId, FullTextQuery fullTextQuery) {
         Set<String> groupUUIDs;
 
         if (StringUtils.isEmpty(userId)) {
             groupUUIDs = new HashSet<>();
             groupUUIDs.add(GroupController.PUBLIC_GROUP_UUID);
         } else {
-            AccountController accountController = new AccountController();
-            if (accountController.isAdministrator(userId)) {
-                return;
-            }
+//            AccountController accountController = new AccountController();
+//            if (accountController.isAdministrator(userId)) {
+//                return fullTextQuery;
+//            }
             groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(userId);
         }
 
         fullTextQuery.enableFullTextFilter("security")
                 .setParameter("account", userId)
                 .setParameter("groupUUids", groupUUIDs);
+        return fullTextQuery;
     }
 
     protected void checkEnableHasAttribute(FullTextQuery fullTextQuery, SearchQuery.Parameters parameters) {

@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.entry.model;
 
-import org.apache.solr.analysis.LowerCaseFilterFactory;
-import org.apache.solr.analysis.StandardTokenizerFactory;
+import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
+import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.*;
 import org.hibernate.search.annotations.Index;
@@ -75,8 +75,8 @@ import org.jbei.ice.lib.entry.model.Parameter;
 @Entity
 @Indexed(index = "Entry")
 @FullTextFilterDefs({
-                            @FullTextFilterDef(name = "security", impl = EntrySecurityFilterFactory.class),
-                            @FullTextFilterDef(name = "boolean", impl = EntryHasFilterFactory.class)
+        @FullTextFilterDef(name = "security", impl = EntrySecurityFilterFactory.class, cache = FilterCacheModeType.INSTANCE_ONLY),
+        @FullTextFilterDef(name = "boolean", impl = EntryHasFilterFactory.class, cache = FilterCacheModeType.INSTANCE_ONLY)
                     })
 @AnalyzerDef(name = "customanalyzer",
         tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),

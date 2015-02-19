@@ -392,11 +392,12 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
     public ArrayList<PartSample> addSample(@Context UriInfo info, @PathParam("id") long partId,
+                                           @QueryParam("strainNamePrefix") String strainNamePrefix,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
             PartSample partSample) {
         String userId = SessionHandler.getUserIdBySession(userAgentHeader);
         log(userId, "creating sample for part " + partId);
-        sampleController.createSample(userId, partId, partSample);
+        sampleController.createSample(userId, partId, partSample, strainNamePrefix);
         return sampleController.retrieveEntrySamples(userId, partId);
     }
 
