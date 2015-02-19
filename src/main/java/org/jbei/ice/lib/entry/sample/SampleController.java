@@ -114,7 +114,7 @@ public class SampleController {
         return storage;
     }
 
-    public PartSample createSample(String userId, long entryId, PartSample partSample) {
+    public PartSample createSample(String userId, long entryId, PartSample partSample, String strainNamePrefix) {
         Entry entry = DAOFactory.getEntryDAO().get(entryId);
         if (entry == null) {
             Logger.error("Could not retrieve entry with id " + entryId + ". Skipping sample creation");
@@ -175,10 +175,10 @@ public class SampleController {
 
         // create sample. If main location is null then sample is created without location
         sample = dao.create(sample);
-//        String name = entry.getName();
-//        if (strainNamePrefix != null && name != null && !name.startsWith(strainNamePrefix)) {
-//            new EntryEditor().updateWithNextStrainName(strainNamePrefix, entry);
-//        }
+        String name = entry.getName();
+        if (strainNamePrefix != null && name != null && !name.startsWith(strainNamePrefix)) {
+            new EntryEditor().updateWithNextStrainName(strainNamePrefix, entry);
+        }
         return sample.toDataTransferObject();
     }
 
