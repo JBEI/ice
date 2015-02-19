@@ -130,6 +130,7 @@ public class EntryCreator {
             return; // either group or account required
 
         permission.setEntry(entry);
+        entry.getPermissions().add(permission); // triggers the permission class bridge
         permission.setCanRead(true);
         permissionDAO.create(permission);
     }
@@ -138,6 +139,7 @@ public class EntryCreator {
         Permission permission = new Permission();
         permission.setCanWrite(true);
         permission.setEntry(entry);
+        entry.getPermissions().add(permission); // triggers the permission class bridge
         permission.setAccount(account);
         permissionDAO.create(permission);
     }
