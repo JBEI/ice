@@ -8,7 +8,7 @@
                         <h4>
                             <span style="white-space: nowrap">
                                 <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
-                                <strong><span ng-if="selectedCollection" style="text-transform: uppercase; color: #888"> {{selectedCollection}}</span>
+                                <strong><span style="text-transform: uppercase; color: #888"> {{selectedCollection || folder.type}}</span>
                                     {{folder.folderName}}</strong>
                                 <span ng-if="folder.publicReadAccess">&nbsp;
                                     <small style="font-size: 12px; position: relative; top: -4px"
@@ -21,6 +21,11 @@
                             </span>
 
                             <div class="no_wrap">
+                                <small class="font-65em" ng-if="folder.type==='SHARED'">
+                                    Shared by <a ng-href="/profile/{{folder.owner.id}}">{{folder.owner.firstName}}
+                                    {{folder.owner.lastName}}</a>
+                                    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+                                </small>
                                 <small class="font-65em" ng-if="folder.created">
                                     {{folder.created | date:'short'}}
                                 </small>
