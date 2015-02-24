@@ -1,29 +1,5 @@
 package org.jbei.ice.lib.dao.hibernate;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import org.jbei.ice.lib.access.Permission;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.entry.EntryUtil;
-import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Link;
-import org.jbei.ice.lib.entry.model.Part;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.lib.shared.ColumnField;
-
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -32,6 +8,19 @@ import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.jbei.ice.lib.access.Permission;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.entry.EntryUtil;
+import org.jbei.ice.lib.entry.model.*;
+import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.shared.ColumnField;
+
+import java.util.*;
 
 /**
  * DAO to manipulate {@link Entry} objects in the database.
@@ -72,7 +61,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             Query query = session.createSQLQuery(queryString);
             if (limit > 0)
                 query.setMaxResults(limit);
-            return new HashSet<String>(query.list());
+            return new HashSet<>(query.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -107,7 +96,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             if (limit > 0)
                 query.setMaxResults(limit);
 
-            return new HashSet<Entry>(query.list());
+            return new HashSet<>(query.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

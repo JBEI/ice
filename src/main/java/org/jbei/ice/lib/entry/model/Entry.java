@@ -77,7 +77,7 @@ import org.jbei.ice.lib.entry.model.Parameter;
 @FullTextFilterDefs({
         @FullTextFilterDef(name = "security", impl = EntrySecurityFilterFactory.class, cache = FilterCacheModeType.INSTANCE_ONLY),
         @FullTextFilterDef(name = "boolean", impl = EntryHasFilterFactory.class, cache = FilterCacheModeType.INSTANCE_ONLY)
-                    })
+})
 @AnalyzerDef(name = "customanalyzer",
         tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
         filters = {
@@ -214,7 +214,7 @@ public class Entry implements IDataModel {
     private final List<Parameter> parameters = new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, mappedBy = "entry",
-               orphanRemoval = true, fetch = FetchType.EAGER)
+            orphanRemoval = true, fetch = FetchType.EAGER)
     @IndexedEmbedded(depth = 1)
     private final Set<Permission> permissions = new HashSet<>();
 
@@ -223,7 +223,7 @@ public class Entry implements IDataModel {
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
     @JoinTable(name = "entry_entry", joinColumns = {@JoinColumn(name = "entry_id", nullable = false)},
-               inverseJoinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)})
+            inverseJoinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)})
     private Set<Entry> linkedEntries = new HashSet<>();
 
     @OneToMany(orphanRemoval = true, fetch = FetchType.LAZY, mappedBy = "entry")
@@ -353,22 +353,6 @@ public class Entry implements IDataModel {
 
     public Set<Link> getLinks() {
         return links;
-    }
-
-    /**
-     * String representation of {@link Link}s.
-     *
-     * @return Comma separated list of links.
-     */
-    public String getLinksAsString() {
-        String result;
-        ArrayList<String> links = new ArrayList<>();
-        for (Link link : this.links) {
-            links.add(link.getLink());
-        }
-        result = org.jbei.ice.lib.utils.Utils.join(", ", links);
-
-        return result;
     }
 
     public void setLinks(Set<Link> inputLinks) {

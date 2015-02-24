@@ -85,6 +85,22 @@ public class EntryUtil {
         return value.trim();
     }
 
+    /**
+     * String representation of {@link org.jbei.ice.lib.entry.model.Link}s.
+     *
+     * @return Comma separated list of links.
+     */
+    public static String getLinksAsString(Set<Link> links) {
+        String result;
+        ArrayList<String> linksStr = new ArrayList<>();
+        for (Link link : links) {
+            linksStr.add(link.getLink());
+        }
+        result = org.jbei.ice.lib.utils.Utils.join(", ", linksStr);
+
+        return result;
+    }
+
     protected static String getCommonFieldValues(Entry entry, EntryField field) {
         switch (field) {
             case PI:
@@ -121,7 +137,7 @@ public class EntryUtil {
                 return entry.getReferences();
 
             case LINKS:
-                return entry.getLinksAsString();
+                return getLinksAsString(entry.getLinks());
 
             case STATUS:
                 return entry.getStatus();
