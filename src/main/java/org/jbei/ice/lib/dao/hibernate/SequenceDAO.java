@@ -1,12 +1,11 @@
 package org.jbei.ice.lib.dao.hibernate;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dto.entry.Visibility;
@@ -18,12 +17,12 @@ import org.jbei.ice.lib.models.SequenceFeature;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Manipulate {@link Sequence} and associated objects in the database.
@@ -262,7 +261,7 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
                                    .add(Restrictions.isNull("visibility"))
                                    .add(Restrictions.ne("ownerEmail", "system")));
 
-            return new LinkedHashSet<Sequence>(criteria.list());
+            return new LinkedHashSet<>(criteria.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
