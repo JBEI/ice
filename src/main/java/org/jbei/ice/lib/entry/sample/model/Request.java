@@ -1,8 +1,5 @@
 package org.jbei.ice.lib.entry.sample.model;
 
-import java.util.Date;
-import javax.persistence.*;
-
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -12,6 +9,9 @@ import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.sample.SampleRequestType;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.Entry;
+
+import javax.persistence.*;
+import java.util.Date;
 
 /**
  * Storage data model for sample requests
@@ -48,6 +48,9 @@ public class Request implements IDataModel {
     @Column(name = "request_type")
     @Enumerated(value = EnumType.STRING)
     private SampleRequestType type;
+
+    @Column(name = "growth_temp")
+    private int growthTemperature;
 
     @Column(name = "request_status")
     @Enumerated(value = EnumType.STRING)
@@ -97,6 +100,10 @@ public class Request implements IDataModel {
         this.status = requestStatus;
     }
 
+    public void setGrowthTemperature(int growthTemperature) {
+        this.growthTemperature = growthTemperature;
+    }
+
     public Entry getEntry() {
         return entry;
     }
@@ -111,6 +118,7 @@ public class Request implements IDataModel {
         sampleRequest.setId(getId());
         sampleRequest.setRequestType(getType());
         sampleRequest.setStatus(getStatus());
+        sampleRequest.setGrowthTemperature(growthTemperature);
         EntryType type = EntryType.nameToType(entry.getRecordType());
         PartData data = new PartData(type);
         data.setId(entry.getId());

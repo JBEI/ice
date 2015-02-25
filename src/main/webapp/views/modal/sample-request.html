@@ -19,6 +19,17 @@
             Agar Plate
         </label>
     </div>
+
+    <br>
+
+    <strong style="font-size: 16px">Requested Growth Temp &deg;C</strong>
+
+    <div style="padding-left: 40px">
+        <select class="input_box pull_down ng-pristine ng-valid"
+                ng-model="sampleTemp" size="1"
+                ng-options="option.value as option.text for option in tempRange">
+        </select>
+    </div>
 </div>
 
 <div class="modal-footer">
