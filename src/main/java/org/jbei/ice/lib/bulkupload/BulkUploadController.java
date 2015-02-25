@@ -23,6 +23,8 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
@@ -73,6 +75,19 @@ public class BulkUploadController {
             upload.setStatus(BulkUploadStatus.IN_PROGRESS);
 
         upload.setImportType(info.getType());
+
+        // set default permissions
+        GroupController groupController = new GroupController();
+        ArrayList<Group> publicGroups = groupController.getAllPublicGroupsForAccount(account);
+        for (Group group : publicGroups) {
+            Permission permission = new Permission();
+            permission.setCanRead(true);
+            permission.setUpload(upload);
+            permission.setGroup(group);
+            permission = DAOFactory.getPermissionDAO().create(permission);
+            upload.getPermissions().add(permission);
+        }
+
         upload = dao.create(upload);
 
         if (info.getEntryList() != null) {
@@ -165,7 +180,7 @@ public class BulkUploadController {
         }
         BulkUploadInfo draftInfo = draft.toDataTransferObject();
         draftInfo.setCount(size);
-        EntryType type = EntryType.nameToType(draft.getImportType().split("\\s+")[0]);
+//        EntryType type = EntryType.nameToType(draft.getImportType().split("\\s+")[0]);
 
         // retrieve the entries associated with the bulk import
         List<Entry> contents = dao.retrieveDraftEntries(id, start, limit);
@@ -182,7 +197,6 @@ public class BulkUploadController {
 
         Account account = accountController.getByEmail(userId);
         authorization.expectRead(account.getEmail(), draft);
-        SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
 
         // retrieve the entries associated with the bulk import
         BulkUploadInfo info = draft.toDataTransferObject();

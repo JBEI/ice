@@ -308,11 +308,9 @@ angular.module('ice.wor.controller', [])
     })
     .controller('WebOfRegistriesMenuController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote, Settings) {
         // retrieve web of registries partners
-        $scope.wor = undefined;
-        var wor = WebOfRegistries();
-        wor.query({approved_only:true}, function (result) {
-            $scope.wor = result;
-        });
+        $scope.wor = WebOfRegistries().query({approved_only: true});
+        $scope.selectedPartner = $stateParams.partner;
+        $scope.selectedPartnerFolders = Remote().publicFolders({id: $scope.selectedPartner});
 
         // retrieve web of registries setting
         var sessionId = $cookieStore.get("sessionId");

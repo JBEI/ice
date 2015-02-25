@@ -14,6 +14,7 @@ import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hibernate.search.query.dsl.TermContext;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -441,10 +442,10 @@ public class HibernateSearch {
             groupUUIDs = new HashSet<>();
             groupUUIDs.add(GroupController.PUBLIC_GROUP_UUID);
         } else {
-//            AccountController accountController = new AccountController();
-//            if (accountController.isAdministrator(userId)) {
-//                return fullTextQuery;
-//            }
+            AccountController accountController = new AccountController();
+            if (accountController.isAdministrator(userId)) {
+                return fullTextQuery;
+            }
             groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(userId);
         }
 
