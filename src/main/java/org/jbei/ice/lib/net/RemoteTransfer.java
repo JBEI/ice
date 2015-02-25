@@ -46,7 +46,6 @@ public class RemoteTransfer {
             if (entry == null)
                 continue;
 
-            // put to "/parts/
             PartData data = ModelToInfoFactory.getInfo(entry);
 
             // check if the linked entries (if any) is in the list of entries to be transferred
@@ -78,10 +77,12 @@ public class RemoteTransfer {
     }
 
     /**
-     * Performs the transfer of the entry objects to the remote partner specified
+     * Performs the transfer of the entry objects to the remote partner specified.
+     * It is the responsibility of the destination to ensure that the hierarchical reln is reconstructed
      *
      * @param remoteId unique identifier for remote partner the parts are to be transferred to
-     * @param entries  list of entries to be transferred
+     * @param entries  list of entries to be transferred. Note that the entries contain the linked
+     *                 entries as well and these may or may not already exist on the recipient
      */
     public void transferEntries(long remoteId, List<PartData> entries) {
         RemotePartner partner = this.remotePartnerDAO.get(remoteId);
