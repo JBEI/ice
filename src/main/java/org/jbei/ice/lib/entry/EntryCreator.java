@@ -215,7 +215,10 @@ public class EntryCreator {
         // transfer and linked
         if (part.getLinkedParts() != null) {
             for (PartData data : part.getLinkedParts()) {
-                Entry linked = saveTransferred(data);
+                // check if linked already exists before creating
+                Entry linked = dao.getByRecordId(data.getRecordId());
+                if (linked == null)
+                    linked = saveTransferred(data);
                 entry.getLinkedEntries().add(linked);
                 dao.update(entry);
             }

@@ -4,6 +4,7 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.entry.EntryCreator;
+import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.junit.Assert;
@@ -21,6 +22,17 @@ public class TestEntryCreator {
         strain.setName("sTrain");
         strain = (Strain) new EntryCreator().createEntry(account, strain, null);
         return strain;
+    }
+
+    public static Plasmid createTestPlasmid(Account account) throws Exception {
+        Plasmid plasmid = new Plasmid();
+        plasmid.setBackbone("plasmid backone");
+        plasmid.setOriginOfReplication("None");
+        plasmid.setBioSafetyLevel(1);
+        plasmid.setShortDescription("plasmid description");
+        plasmid.setName("pLasmid");
+        plasmid = (Plasmid) new EntryCreator().createEntry(account, plasmid, null);
+        return plasmid;
     }
 
     public static Strain createTestAccountAndStrain(String userId) throws Exception {
@@ -41,4 +53,6 @@ public class TestEntryCreator {
         data.setBioSafetyLevel(1);
         return new EntryCreator().createPart(userId, data);
     }
+
+
 }

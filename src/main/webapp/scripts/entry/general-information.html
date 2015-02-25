@@ -253,7 +253,7 @@
                         </div>
                         <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
                             <!--can break the link if allowed to edit this part-->
-                            <i class="fa fa-unlink red opacity_hover"
+                            <i class="fa fa-unlink red opacity_hover" tooltip="Remove link"
                                ng-click="removeLink(entry, entry.linkedParts[$index+0])"
                                ng-if="entry.canEdit"></i>
                             <b>{{entry.linkedParts[$index+0].type}} <a
@@ -283,7 +283,7 @@
                         </div>
                         <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
                             <!--can break the link if allowed to edit this part-->
-                            <i class="fa fa-unlink red opacity_hover"
+                            <i class="fa fa-unlink red opacity_hover" tooltip="Remove link"
                                ng-click="removeLink(entry, entry.linkedParts[$index+1])"
                                ng-if="entry.canEdit"></i>
                             <b>{{entry.linkedParts[$index+1].type}} <a
