@@ -1144,3 +1144,7 @@ input.no_border:focus {
     border: 0;
     outline: none
 }
+
+.modal-backdrop {
+    bottom: 0;
+}
