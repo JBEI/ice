@@ -1,11 +1,12 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.util.ArrayList;
-import java.util.Date;
-
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.permission.AccessPermission;
+
+import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Data transfer model for bulk upload
@@ -23,9 +24,11 @@ public class BulkUploadInfo implements IDataTransferModel {
     private AccountTransfer account;
     private BulkUploadStatus status;
     private ArrayList<PartData> entryList;
+    private ArrayList<AccessPermission> permissions;
 
     public BulkUploadInfo() {
         entryList = new ArrayList<>();
+        permissions = new ArrayList<>();
     }
 
     public long getId() {
@@ -94,6 +97,10 @@ public class BulkUploadInfo implements IDataTransferModel {
 
     public void setStatus(BulkUploadStatus status) {
         this.status = status;
+    }
+
+    public ArrayList<AccessPermission> getPermissions() {
+        return this.permissions;
     }
 
 }

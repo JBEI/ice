@@ -6,14 +6,14 @@
         </td>
     </tr>
     <tr ng-repeat="partner in wor.partners">
-        <td ng-class="{collection_user_menu_row_selected:partner.id===selectedPartner}">
-            <div class="system_collection_user_menu_row" ng-click="selectPartner(partner)">
+        <td ng-class="{collection_user_menu_row_selected:partner.id==selectedPartner}">
+            <div class="collection-menu" ng-click="selectPartner(partner)">
                 <i class="fa color-888"
-                   ng-class="{'fa-caret-right':selectedPartner!==partner.id, 'fa-caret-down':selectedPartner===partner.id}"></i>
+                   ng-class="{'fa-caret-right':selectedPartner!=partner.id, 'fa-caret-down':selectedPartner==partner.id}"></i>
                 <span class="collection_user_menu">{{partner.name}}</span>
             </div>
 
-            <ice.menu.wor.details ng-show="selectedPartner===partner.id"></ice.menu.wor.details>
+            <ice.menu.wor.details ng-show="selectedPartner==partner.id"></ice.menu.wor.details>
         </td>
     </tr>
 </table>

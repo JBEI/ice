@@ -66,8 +66,8 @@ public class BulkUpload implements IDataModel {
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE})
     @JoinTable(name = "bulk_upload_permissions",
-               joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
-               inverseJoinColumns = {@JoinColumn(name = "permission_id", nullable = false)})
+            joinColumns = {@JoinColumn(name = "bulk_upload_id", nullable = false)},
+            inverseJoinColumns = {@JoinColumn(name = "permission_id", nullable = false)})
     private Set<Permission> permissions = new HashSet<>();
 
 
@@ -158,6 +158,12 @@ public class BulkUpload implements IDataModel {
         bulkUploadInfo.setAccount(accountTransfer);
 
         bulkUploadInfo.setType(getImportType());
+
+        if (permissions != null) {
+            for (Permission permission : permissions) {
+                bulkUploadInfo.getPermissions().add(permission.toDataTransferObject());
+            }
+        }
         return bulkUploadInfo;
     }
 }

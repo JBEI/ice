@@ -1,29 +1,5 @@
 package org.jbei.ice.lib.dao.hibernate;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-
-import org.jbei.ice.lib.access.Permission;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.entry.EntryUtil;
-import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Link;
-import org.jbei.ice.lib.entry.model.Part;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.models.SelectionMarker;
-import org.jbei.ice.lib.shared.ColumnField;
-
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -32,6 +8,19 @@ import org.hibernate.criterion.Junction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.jbei.ice.lib.access.Permission;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.entry.EntryUtil;
+import org.jbei.ice.lib.entry.model.*;
+import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.models.SelectionMarker;
+import org.jbei.ice.lib.shared.ColumnField;
+
+import java.util.*;
 
 /**
  * DAO to manipulate {@link Entry} objects in the database.
@@ -72,7 +61,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             Query query = session.createSQLQuery(queryString);
             if (limit > 0)
                 query.setMaxResults(limit);
-            return new HashSet<String>(query.list());
+            return new HashSet<>(query.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -89,7 +78,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             if (limit > 0)
                 query.setMaxResults(limit);
 
-            return new HashSet<String>(query.list());
+            return new HashSet<>(query.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -107,7 +96,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             if (limit > 0)
                 query.setMaxResults(limit);
 
-            return new HashSet<Entry>(query.list());
+            return new HashSet<>(query.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -234,7 +223,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             query.setFirstResult(start);
             query.setMaxResults(count);
             List list = query.list();
-            return new LinkedHashSet<Entry>(list);
+            return new LinkedHashSet<>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -298,6 +287,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public List<Entry> sharedWithUserEntries(Account requester, Set<Group> groups, ColumnField sort,
             boolean asc, int start, int limit) throws DAOException {
         try {
@@ -316,7 +306,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             query.setFirstResult(start);
             query.setMaxResults(limit);
             List list = query.list();
-            return new ArrayList<Entry>(list);
+            return new ArrayList<>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -353,7 +343,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         entryCriteria.setFirstResult(start);
         entryCriteria.setMaxResults(limit);
         entryCriteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        return new LinkedList<Entry>(entryCriteria.list());
+        return new LinkedList<>(entryCriteria.list());
     }
 
     /**
@@ -391,7 +381,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             }
             query.setParameterList("ids", list);
             List result = query.list();
-            return new LinkedList<Entry>(result);
+            return new LinkedList<>(result);
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve entries!", e);
@@ -443,7 +433,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
 
         @SuppressWarnings("unchecked")
-        ArrayList<Object> tempList = new ArrayList<Object>(results);
+        ArrayList<Object> tempList = new ArrayList<>(results);
         for (int i = 0; i < results.size(); i += 1) {
             String name = (String) tempList.get(i);
             String[] split = name.split(prefix);
@@ -464,6 +454,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         throw new DAOException("Could not parse any of the retrieved strain names");
     }
 
+    @SuppressWarnings("unchecked")
     public List<Entry> getByVisibility(String ownerEmail, Visibility visibility, ColumnField field, boolean asc,
             int start, int limit) throws DAOException {
         try {
@@ -482,7 +473,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             query.setMaxResults(limit);
             query.setFirstResult(start);
             List list = query.list();
-            return new LinkedList<Entry>(list);
+            return new LinkedList<>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -545,7 +536,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             query.setMaxResults(limit);
             query.setFirstResult(start);
             List list = query.list();
-            return new LinkedList<Entry>(list);
+            return new LinkedList<>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -596,7 +587,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             query.setMaxResults(limit);
             query.setFirstResult(start);
             List list = query.list();
-            return new LinkedHashSet<Entry>(list);
+            return new LinkedHashSet<>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -694,6 +685,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * links are stored in a join table in the form [entry_id, linked_entry_id] which is used
      * to represent a parent child reln. This method returns the parents in the reln
      */
+    @SuppressWarnings("unchecked")
     public List<Entry> getParents(long entryId) throws DAOException {
         String sql = "select entry_id from entry_entry where linked_entry_id=" + entryId;
         List list = currentSession().createSQLQuery(sql).list();

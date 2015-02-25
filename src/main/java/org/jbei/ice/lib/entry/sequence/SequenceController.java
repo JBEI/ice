@@ -77,19 +77,18 @@ public class SequenceController {
 
     // either or both recordId and entryType has to have a value
     public SequenceInfo parseSequence(String userId, String recordId, String entryType, String sequenceString,
-            String name) {
+                                      String name) {
         EntryType type = EntryType.nameToType(entryType);
-        EntryRetriever retriever = new EntryRetriever();
-        EntryCreator creator = new EntryCreator();
 
         Entry entry;
         if (StringUtils.isBlank(recordId)) {
+            EntryCreator creator = new EntryCreator();
             Account account = DAOFactory.getAccountDAO().getByEmail(userId);
             entry = EntryUtil.createEntryFromType(type, account.getFullName(), account.getEmail());
             entry.setVisibility(Visibility.DRAFT.getValue());
             entry = creator.createEntry(account, entry, null);
         } else {
-            entry = retriever.getByRecordId(userId, recordId);
+            entry = DAOFactory.getEntryDAO().getByRecordId(recordId);
             if (entry == null)
                 return null;
         }
@@ -102,7 +101,7 @@ public class SequenceController {
         Sequence sequence = dnaSequenceToSequence(dnaSequence);
         sequence.setSequenceUser(sequenceString);
         sequence.setEntry(entry);
-        if (name != null)
+        if (!StringUtils.isBlank(name))
             sequence.setFileName(name);
 
         Sequence result = dao.saveSequence(sequence);
@@ -398,13 +397,13 @@ public class SequenceController {
                     }
 
                     Feature feature = new Feature(dnaFeature.getName(), dnaFeature.getIdentifier(), featureSequence, 0,
-                                                  dnaFeature.getType());
+                            dnaFeature.getType());
                     if (dnaFeature.getLocations() != null && !dnaFeature.getLocations().isEmpty())
                         feature.setUri(dnaFeature.getLocations().get(0).getUri());
 
                     SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature,
-                                                                          dnaFeature.getStrand(), dnaFeature.getName(),
-                                                                          dnaFeature.getType(), annotationType);
+                            dnaFeature.getStrand(), dnaFeature.getName(),
+                            dnaFeature.getType(), annotationType);
                     sequenceFeature.setUri(dnaFeature.getUri());
 
                     for (DNAFeatureLocation location : locations) {

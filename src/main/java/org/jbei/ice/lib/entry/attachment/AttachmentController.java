@@ -1,10 +1,6 @@
 package org.jbei.ice.lib.entry.attachment;
 
-import java.io.File;
-import java.io.InputStream;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.model.Account;
@@ -20,7 +16,10 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
-import org.apache.commons.lang.StringUtils;
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 
 /**
  * ABI to manipulate {@link Attachment}s.
@@ -132,22 +131,6 @@ public class AttachmentController {
         Attachment attachment = dao.getByFileId(fileId);
         if (attachment != null)
             delete(account, attachment);
-    }
-
-    /**
-     * Retrieve the file associated with the {@link Attachment}.
-     *
-     * @param attachment
-     * @return file associated with the Attachment.
-     * @throws ControllerException
-     * @throws PermissionException
-     */
-    public File getFile(Account account, Attachment attachment) throws ControllerException, PermissionException {
-        entryAuthorization.expectRead(account.getEmail(), attachment.getEntry());
-
-        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-        File attachmentDir = Paths.get(dataDir, attachmentDirName).toFile();
-        return dao.getFile(attachmentDir, attachment);
     }
 
     public ArrayList<Attachment> getByEntry(String userId, Entry entry) {
