@@ -18,6 +18,7 @@ public class SampleRequest implements IDataTransferModel {
     private SampleRequestStatus status;
     private long requestTime;
     private long updateTime;
+    private int growthTemperature;
 
     public SampleRequest() {
     }
@@ -76,5 +77,13 @@ public class SampleRequest implements IDataTransferModel {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public int getGrowthTemperature() {
+        return growthTemperature;
+    }
+
+    public void setGrowthTemperature(int growthTemperature) {
+        this.growthTemperature = growthTemperature;
     }
 }

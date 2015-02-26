@@ -1,9 +1,10 @@
 package org.jbei.ice.lib.dao.hibernate;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
@@ -11,11 +12,9 @@ import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Request;
 
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Data accessor object for Sample Request objects
@@ -113,7 +112,7 @@ public class RequestDAO extends HibernateRepository<Request> {
         query.setFirstResult(start);
 
         try {
-            return new ArrayList<Request>(query.list());
+            return new ArrayList<>(query.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -138,7 +137,7 @@ public class RequestDAO extends HibernateRepository<Request> {
         query.setFirstResult(start);
 
         try {
-            return new ArrayList<Request>(query.list());
+            return new ArrayList<>(query.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

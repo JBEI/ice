@@ -13,19 +13,19 @@ angular.module('ice.entry.controller', [])
         });
 
         var uploader = $scope.uploader = $fileUploader.create({
-            scope:$scope, // to automatically update the html. Default: $rootScope
-            url:"/rest/file/attachment",
-            method:'POST',
-            removeAfterUpload:true,
-            headers:{
-                "X-ICE-Authentication-SessionId":sid
+            scope: $scope, // to automatically update the html. Default: $rootScope
+            url: "/rest/file/attachment",
+            method: 'POST',
+            removeAfterUpload: true,
+            headers: {
+                "X-ICE-Authentication-SessionId": sid
             }
         });
 
         uploader.bind('success', function (event, xhr, item, response) {
             response.description = desc;
             attachment.create({
-                    partId:$stateParams.id
+                    partId: $stateParams.id
                 }, response,
                 function (result) {
                     $scope.attachments.push(result);
@@ -45,7 +45,7 @@ angular.module('ice.entry.controller', [])
         };
 
         attachment.get({
-            partId:$stateParams.id
+            partId: $stateParams.id
         }, function (result) {
             $scope.attachments = result;
         });
@@ -56,8 +56,8 @@ angular.module('ice.entry.controller', [])
 
         $scope.deleteAttachment = function (index, att) {
             attachment.delete({
-                partId:$stateParams.id,
-                attachmentId:att.id
+                partId: $stateParams.id,
+                attachmentId: att.id
             }, function (result) {
                 confirmObject[index] = false;
                 $scope.attachments.splice(index, 1);
@@ -78,20 +78,20 @@ angular.module('ice.entry.controller', [])
         var entry = Entry($cookieStore.get("sessionId"));
 
         entry.comments({
-            partId:entryId
+            partId: entryId
         }, function (result) {
             $scope.entryComments = result;
         });
 
         entry.samples({
-            partId:entryId
+            partId: entryId
         }, function (result) {
             $scope.entrySamples = result;
         });
 
         $scope.createComment = function () {
             entry.createComment({
-                partId:entryId
+                partId: entryId
             }, $scope.newComment, function (result) {
                 $scope.entryComments.splice(0, 0, result);
                 $scope.addComment = false;
@@ -103,8 +103,8 @@ angular.module('ice.entry.controller', [])
 
         $scope.updateComment = function (comment) {
             entry.updateComment({
-                partId:entryId,
-                commentId:comment.id
+                partId: entryId,
+                commentId: comment.id
             }, comment, function (result) {
                 if (result) {
                     comment.edit = false;
@@ -126,7 +126,7 @@ angular.module('ice.entry.controller', [])
 
         // retrieve samples for partId
         entry.samples({
-            partId:partId
+            partId: partId
         }, function (result) {
             $scope.samples = result;
         });
@@ -164,7 +164,7 @@ angular.module('ice.entry.controller', [])
             return false;
         };
 
-        $scope.reguestFromAddGene = function (samples) {
+        $scope.requestFromAddGene = function (samples) {
             for (var i = 0; i < samples.length; i += 1) {
                 if (samples[i].location.type == 'ADDGENE') {
                     window.open("https://www.addgene.org/" + samples[i].location.display, "_blank");
@@ -173,36 +173,40 @@ angular.module('ice.entry.controller', [])
             }
         };
 
-        $scope.openAddToCart = function () {
+        $scope.openAddToCart = function (entryId) {
             var modalInstance = $modal.open({
-                templateUrl:'/views/modal/sample-request.html'
-            });
+                templateUrl: '/views/modal/sample-request.html',
+                controller: function ($scope) {
+                    $scope.tempRange = [{value: 30}, {value: 37}];
+                    $scope.sampleTemp = $scope.tempRange[0];
 
-            modalInstance.result.then(function (selected) {
-                var sampleSelection = {
-                    requestType:selected,
-                    partData:{
-                        id:$scope.entry.id
+                    $scope.addSampleToCart = function (type, tmp) {
+                        var sampleSelection = {
+                            requestType: type,
+                            growthTemperature: tmp.value,
+                            partData: {
+                                id: entryId
+                            }
+                        };
+
+                        // add selection to shopping cart
+                        samples.addRequestToCart({}, sampleSelection, function (result) {
+                            $rootScope.$emit("SamplesInCart", result);
+                            setInCart(result);
+                            modalInstance.close('');
+                        });
                     }
-                };
-
-                // add selection to shopping cart
-                samples.addRequestToCart({}, sampleSelection, function (result) {
-                    $scope.$emit("SamplesInCart", result);
-                    setInCart(result);
-                });
-            }, function () {
-                // dismiss callback
+                }
             });
         };
 
         $scope.newSample = {
-            open:{},
-            depositor:{
-                id:$scope.user.id,
-                email:$scope.user.email
+            open: {},
+            depositor: {
+                id: $scope.user.id,
+                email: $scope.user.email
             },
-            location:{}
+            location: {}
         };
 
         $scope.format = "M/d/yyyy h:mm a";
@@ -210,12 +214,12 @@ angular.module('ice.entry.controller', [])
         $scope.cellBarcodeClick = function (row, col) {
             var rc = row + (10 + col + '').slice(-2);
             $scope.newSample.open = {
-                cell:rc
+                cell: rc
             };
         };
 
         $scope.delete = function (sample) {
-            entry.deleteSample({partId:partId, sampleId:sample.id}, function (result) {
+            entry.deleteSample({partId: partId, sampleId: sample.id}, function (result) {
                 console.log(result);
                 var idx = $scope.samples.indexOf(sample);
                 $scope.samples.splice(idx, 1);
@@ -228,14 +232,14 @@ angular.module('ice.entry.controller', [])
         $scope.submitBarcode = function () {
             $scope.newSample.code = $scope.newSample.open.cell;
             $scope.newSample.location.child = {
-                display:$scope.newSample.open.cell,
-                type:'WELL'
+                display: $scope.newSample.open.cell,
+                type: 'WELL'
             };
 
             if ($scope.newSample.open.barcode) {
                 $scope.newSample.location.child.child = {
-                    display:$scope.newSample.open.barcode,
-                    type:'TUBE'
+                    display: $scope.newSample.open.barcode,
+                    type: 'TUBE'
                 }
             }
 
@@ -244,15 +248,15 @@ angular.module('ice.entry.controller', [])
 
         $scope.createNewSample = function () {
             // create sample
-            entry.addSample({partId:partId}, $scope.newSample, function (result) {
+            entry.addSample({partId: partId}, $scope.newSample, function (result) {
                 $scope.samples = result;
                 $scope.newSample = {
-                    open:{},
-                    depositor:{
-                        id:$scope.user.id,
-                        email:$scope.user.email
+                    open: {},
+                    depositor: {
+                        id: $scope.user.id,
+                        email: $scope.user.email
                     },
-                    location:{}
+                    location: {}
                 };
             }, function (error) {
                 console.error(error);
@@ -304,24 +308,24 @@ angular.module('ice.entry.controller', [])
         $scope.traceUploadError = undefined;
 
         entry.traceSequences({
-            partId:entryId
+            partId: entryId
         }, function (result) {
             $scope.traceSequences = result;
         });
 
         var uploader = $scope.traceSequenceUploader = $fileUploader.create({
-            scope:$scope, // to automatically update the html. Default: $rootScope
-            url:"/rest/parts/" + entryId + "/traces",
-            method:'POST',
-            removeAfterUpload:true,
-            headers:{
-                "X-ICE-Authentication-SessionId":sid
+            scope: $scope, // to automatically update the html. Default: $rootScope
+            url: "/rest/parts/" + entryId + "/traces",
+            method: 'POST',
+            removeAfterUpload: true,
+            headers: {
+                "X-ICE-Authentication-SessionId": sid
             },
-            autoUpload:true,
-            queueLimit:1, // can only upload 1 file
-            formData:[
+            autoUpload: true,
+            queueLimit: 1, // can only upload 1 file
+            formData: [
                 {
-                    entryId:entryId
+                    entryId: entryId
                 }
             ]
         });
@@ -329,7 +333,7 @@ angular.module('ice.entry.controller', [])
         uploader.bind('success', function (event, xhr, item, response) {
             console.log("response", response);
             entry.traceSequences({
-                partId:entryId
+                partId: entryId
             }, function (result) {
                 $scope.traceSequences = result;
                 $scope.showUploadOptions = false;
@@ -356,8 +360,8 @@ angular.module('ice.entry.controller', [])
 
             if (foundTrace != undefined) {
                 entry.deleteTraceSequence({
-                    partId:entryId,
-                    traceId:foundTrace.id
+                    partId: entryId,
+                    traceId: foundTrace.id
                 }, function (result) {
                     $scope.traceSequences.splice(foundIndex, 1);
                     $scope.entryStatistics.traceSequenceCount = $scope.traceSequences.length;
@@ -378,7 +382,7 @@ angular.module('ice.entry.controller', [])
         $scope.addExperiment = false;
 
         entry.experiments({
-            partId:entryId
+            partId: entryId
         }, function (result) {
             $scope.entryExperiments = result;
         });
@@ -393,7 +397,7 @@ angular.module('ice.entry.controller', [])
             }
 
             entry.createExperiment({
-                partId:entryId
+                partId: entryId
             }, $scope.experiment, function (result) {
                 $scope.entryExperiments.splice(0, 0, result);
                 $scope.addExperiment = false;
@@ -409,7 +413,7 @@ angular.module('ice.entry.controller', [])
         var entry = Entry(sid);
 
         entry.history({
-            partId:entryId
+            partId: entryId
         }, function (result) {
             $scope.history = result;
         });
@@ -417,7 +421,7 @@ angular.module('ice.entry.controller', [])
         $scope.deleteHistory = function (history) {
             console.log(history);
 
-            entry.deleteHistory({partId:entryId, historyId:history.id}, function (result) {
+            entry.deleteHistory({partId: entryId, historyId: history.id}, function (result) {
                 var idx = $scope.history.indexOf(history);
                 if (idx == -1)
                     return;

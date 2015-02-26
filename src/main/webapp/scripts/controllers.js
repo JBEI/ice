@@ -823,7 +823,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
         );
     };
 
-    $scope.$on('SamplesInCart', function (event, data) {
+    $rootScope.$on('SamplesInCart', function (event, data) {
         $scope.shoppingCartContents = data;
     });
 

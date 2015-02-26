@@ -1,9 +1,5 @@
 package org.jbei.ice.lib.entry.sample;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
@@ -21,6 +17,10 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Request;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Handler for sample requests
@@ -58,6 +58,7 @@ public class RequestRetriever {
 
             Request request = new Request();
             request.setAccount(account);
+            request.setGrowthTemperature(sampleRequest.getGrowthTemperature());
             request.setEntry(entry);
             if (sampleRequest.getRequestType() == null)
                 sampleRequest.setRequestType(SampleRequestType.LIQUID_CULTURE);

@@ -19,11 +19,22 @@
             Agar Plate
         </label>
     </div>
+
+    <br>
+
+    <strong style="font-size: 16px">Requested Growth Temp &deg;C</strong>
+
+    <div style="padding-left: 40px">
+        <select class="input_box pull_down"
+                ng-model="sampleTemp" ng-options="option.value for option in tempRange">
+        </select>
+    </div>
 </div>
 
 <div class="modal-footer">
     <button class="btn btn-default btn-sm" ng-click="$dismiss('cancel')">Cancel</button>
-    <button type="button" ng-click="$close(sampleType)" ng-disabled="!sampleType" class="btn btn-sm btn-primary"
+    <button type="button" ng-click="addSampleToCart(sampleType, sampleTemp, entry.id)" ng-disabled="!sampleType"
+            class="btn btn-sm btn-primary"
             style="font-weight: bold">Add to Cart
     </button>
 </div>
