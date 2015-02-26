@@ -216,7 +216,6 @@ public class BulkEntryCreator {
 
             // approved by an administrator
             case APPROVED:
-                Account account = accountController.getByEmail(userId);
                 if (new BulkUploadController().approveBulkImport(userId, id))
                     return upload.toDataTransferObject();
                 return null;
