@@ -43,6 +43,7 @@
                     <i ng-show="params.sort=='name'" class="fa"
                        ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
                 </th>
+                <th>Temp.</th>
                 <th ng-click="sort('requested')">Requested</th>
                 <th ng-click="sort('updated')">Updated</th>
                 <th style="width: 100px" ng-click="sort('status')">Status</th>
@@ -69,6 +70,10 @@
                     </span>
                     <span ng-if="request.requestType!=='LIQUID_CULTURE'">
                         <i tooltip="Streak on Agar Plate" class="fa fa-circle-o cursor_default"></i>
+                    </span>
+                </td>
+                <td> <span ng-if="request.growthTemperature">
+                    {{request.growthTemperature}} &deg;C
                     </span>
                 </td>
                 <td style="width:160px; white-space:nowrap">{{request.requestTime | date:'medium'}}</td>

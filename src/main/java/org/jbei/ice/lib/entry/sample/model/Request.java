@@ -50,7 +50,7 @@ public class Request implements IDataModel {
     private SampleRequestType type;
 
     @Column(name = "growth_temp")
-    private int growthTemperature;
+    private Integer growthTemperature;
 
     @Column(name = "request_status")
     @Enumerated(value = EnumType.STRING)
@@ -118,6 +118,7 @@ public class Request implements IDataModel {
         sampleRequest.setId(getId());
         sampleRequest.setRequestType(getType());
         sampleRequest.setStatus(getStatus());
+        if (growthTemperature != null)
         sampleRequest.setGrowthTemperature(growthTemperature);
         EntryType type = EntryType.nameToType(entry.getRecordType());
         PartData data = new PartData(type);
