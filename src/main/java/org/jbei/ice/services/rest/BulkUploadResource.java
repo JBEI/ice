@@ -136,7 +136,6 @@ public class BulkUploadResource extends RestResource {
         try {
             String fileName = contentDispositionHeader.getFileName();
             String userId = super.getUserIdFromSessionHeader(sessionId);
-            String sequence = IOUtils.toString(fileInputStream);
             AttachmentInfo attachmentInfo = controller.addAttachment(userId, uploadId, entryId, fileInputStream,
                     fileName);
             if (attachmentInfo == null)
