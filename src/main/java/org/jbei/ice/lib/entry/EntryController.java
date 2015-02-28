@@ -64,6 +64,8 @@ public class EntryController {
     }
 
     public FolderDetails retrieveVisibleEntries(String userId, ColumnField field, boolean asc, int start, int limit) {
+        long tStart = System.currentTimeMillis();
+
         Set<Entry> results;
         FolderDetails details = new FolderDetails();
         Account account = accountController.getByEmail(userId);
@@ -85,6 +87,7 @@ public class EntryController {
             details.getEntries().add(info);
         }
 
+        Logger.info((System.currentTimeMillis() - tStart) + "ms");
         return details;
     }
 

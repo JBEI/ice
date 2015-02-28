@@ -11,7 +11,9 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.folder.Collection;
+import org.jbei.ice.lib.folder.FolderContent;
 import org.jbei.ice.lib.folder.FolderContentRetriever;
 import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.shared.ColumnField;
@@ -113,14 +115,14 @@ public class FolderResource extends RestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<FolderDetails> addEntriesToFolders(ArrayList<FolderDetails> list,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        Type fooType = new TypeToken<ArrayList<FolderDetails>>() {
-        }.getType();
-        Gson gson = new GsonBuilder().create();
-        ArrayList<FolderDetails> data = gson.fromJson(gson.toJsonTree(list), fooType);
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return controller.addEntriesToFolder(userId, data);
+    @Path("/transfer")
+    public Response addSelectedEntriesToFolder(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+            EntrySelection entrySelection) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        FolderContent folderContent = new FolderContent();
+        List<FolderDetails> result = folderContent.addEntrySelection(userId, entrySelection);
+        return super.respond(result);
     }
 
     @PUT

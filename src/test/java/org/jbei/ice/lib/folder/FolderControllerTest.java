@@ -21,6 +21,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -92,18 +93,20 @@ public class FolderControllerTest {
 
         // create 100 test strains
         HashMap<String, Entry> parts = new HashMap<>();
+        List<Long> entryList = new ArrayList<>();
         for (int i = 0; i < size; i += 1) {
             Strain strain = TestEntryCreator.createTestStrain(account);
             Assert.assertNotNull(strain);
             parts.put(strain.getPartNumber(), strain);
-            folder.getEntries().add(strain.toDataTransferObject());
+            entryList.add(strain.getId());
         }
         Assert.assertEquals(size, parts.size());
 
         // add to folder
-        ArrayList<FolderDetails> foldersToAdd = new ArrayList<>();
+        List<FolderDetails> foldersToAdd = new ArrayList<>();
         foldersToAdd.add(folder);
-        foldersToAdd = controller.addEntriesToFolder(account.getEmail(), foldersToAdd);
+        FolderContent folderContent = new FolderContent();
+        foldersToAdd = folderContent.addEntriesToFolders(account.getEmail(), entryList, foldersToAdd);
         Assert.assertNotNull(foldersToAdd);
 
         // keep track to find duplicates

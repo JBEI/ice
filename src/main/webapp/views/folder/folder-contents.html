@@ -75,18 +75,21 @@
                ng-class="{'opacity_4':loadingPage}">
             <thead>
             <tr>
+                <!--selection toggle-->
                 <th class="dropdown" style="padding:0; vertical-align: middle; text-align: center">
-                    <!--<span class="dropdown-toggle" tooltip='Select'>-->
-                    <!--<i class="fa cursor_default" ng-class="selectAllClass()" ng-click="selectAll()" stop-event="click"></i>-->
-                    <!--<span class="caret cursor_pointer"></span>-->
-                    <!--</span>-->
-                    <!--<ul class="dropdown-menu" style="min-width: 100px">-->
-                    <!--<li class="font-75em cursor_pointer" ng-click="setType('all')"><a>All</a></li>-->
-                    <!--<li ng-repeat="choice in items" ng-click="setType(choice.type)" class="font-75em cursor_pointer">-->
-                    <!--<a>{{choice.type | capitalize}}</a>-->
-                    <!--</li>-->
-                    <!--<li class="font-75em cursor_pointer" ng-click="setType()"><a>None</a></li>-->
-                    <!--</ul>-->
+                    <span class="dropdown-toggle">
+                    <i class="fa cursor_default" ng-class="selectAllClass()" ng-click="selectAll()"
+                       stop-event="click"></i>
+                    <span class="caret cursor_pointer"></span>
+                    </span>
+                    <ul class="dropdown-menu" style="min-width: 100px">
+                        <li class="font-75em cursor_pointer" ng-click="setType('all')"><a>All</a></li>
+                        <li ng-repeat="choice in items" ng-click="setType(choice.type)"
+                            class="font-75em cursor_pointer">
+                            <a>{{choice.type | capitalize}}</a>
+                        </li>
+                        <li class="font-75em cursor_pointer" ng-click="setType()"><a>None</a></li>
+                    </ul>
 
                     <!--<sup style="font-size: 9px; font-weight: normal; display: inherit"-->
                     <!--ng-show="selection.length>0">{{selection.length}}</sup>-->

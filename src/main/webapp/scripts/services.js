@@ -685,9 +685,10 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             },
 
-            addEntriesToFolders:{
+            addSelectionToFolders: {
                 method:'POST',
                 isArray:true,
+                url: '/rest/folders/transfer',
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             },
 

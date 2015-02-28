@@ -1,10 +1,11 @@
 package org.jbei.ice.lib.dao.hibernate;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
@@ -13,18 +14,17 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.shared.ColumnField;
 
-import org.hibernate.Criteria;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Manipulate {@link org.jbei.ice.lib.folder.Folder} objects in the database.
  *
  * @author Hector Plahar
  */
+@SuppressWarnings("unchecked")
 public class FolderDAO extends HibernateRepository<Folder> {
 
     /**
@@ -79,6 +79,13 @@ public class FolderDAO extends HibernateRepository<Folder> {
         }
     }
 
+    public List<Long> getFolderContentIds(long folderId) {
+        return currentSession().createCriteria(Folder.class)
+                .add(Restrictions.eq("id", folderId))
+                .createAlias("contents", "contents")
+                .setProjection(Projections.property("contents.id")).list();
+    }
+
     @SuppressWarnings("unchecked")
     public ArrayList<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit) {
         Session session = currentSession();
@@ -122,14 +129,14 @@ public class FolderDAO extends HibernateRepository<Folder> {
             query.setFirstResult(start);
             query.setMaxResults(limit);
             List list = query.list();
-            return new ArrayList<Entry>(list);
+            return new ArrayList<>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
         }
     }
 
-    public Folder addFolderContents(Folder folder, ArrayList<Entry> entrys) {
+    public Folder addFolderContents(Folder folder, List<Entry> entrys) {
         Session session = currentSession();
         try {
             folder = (Folder) session.get(Folder.class, folder.getId());
@@ -160,7 +167,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             Query query = session.createQuery(queryString);
 
             query.setParameter("ownerEmail", account.getEmail());
-            folders = new ArrayList<Folder>(query.list());
+            folders = new ArrayList<>(query.list());
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve folders!", e);
@@ -177,7 +184,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             String queryString = "from " + Folder.class.getName() + " WHERE type = :type";
             Query query = session.createQuery(queryString);
             query.setParameter("type", type);
-            folders = new ArrayList<Folder>(query.list());
+            folders = new ArrayList<>(query.list());
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve folders!", e);

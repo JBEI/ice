@@ -3,7 +3,7 @@
 var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'ui.bootstrap', 'angularFileUpload',
     'vr.directives.slider', 'angularMoment']);
 
-iceControllers.controller('ActionMenuController', function ($scope, $window, $rootScope, $location, $cookieStore, Folders, Entry, WebOfRegistries, Files, Selection, Upload, FolderSelection) {
+iceControllers.controller('ActionMenuController', function ($stateParams, $scope, $window, $rootScope, $location, $cookieStore, Folders, Entry, WebOfRegistries, Files, Selection, Upload, FolderSelection) {
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
     $scope.entrySelected = false;
 
@@ -25,7 +25,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
         $scope.userFolders = undefined;
         $scope.selectedFolders = [];
 
-        folders.getByType({folderType:"personal"}, function (data) {
+        folders.getByType({folderType: "personal"}, function (data) {
             if (data.length)
                 $scope.userFolders = data;
         });
@@ -48,22 +48,33 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
     };
 
     $scope.addEntriesToFolders = function () {
-        var entries = Selection.getSelectedEntries();
-        var updateFolders = [];
+        var folderSelected = FolderSelection.getSelectedFolder();
 
-        // add entries to folders for update
-        angular.forEach($scope.selectedFolders, function (folder) {
-            folder.entries = angular.copy(entries);
-            updateFolders.push(folder);
+        if (!folderSelected)
+            folderSelected = $stateParams.collection;
+        else
+            folderSelected = folderSelected.id;
+
+        var entrySelection = {
+            all: Selection.getSelection().type == 'ALL',
+            folderId: folderSelected,
+            selectionType: 'FOLDER',
+            entryType: Selection.getSelection().type,
+            entries: [],
+            destination: angular.copy($scope.selectedFolders)
+        };
+
+        var selectedEntriesObjectArray = Selection.getSelectedEntries();
+        for (var i = 0; i < selectedEntriesObjectArray.length; i += 1) {
+            entrySelection.entries.push(selectedEntriesObjectArray[i].id);
+        }
+
+        console.log(entrySelection);
+        folders.addSelectionToFolders({}, entrySelection, function (result) {
+            // result contains list of destination folders
+            $scope.updatePersonalCollections();
+            Selection.reset();
         });
-
-        folders.addEntriesToFolders(updateFolders,
-            function (result) {
-                $scope.updatePersonalCollections();
-                Selection.reset();
-            }, function (error) {
-                console.error(error);
-            });
     };
 
     $scope.removeEntriesFromFolder = function () {
@@ -74,7 +85,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
             entryIds.push(entry.id);
         });
 
-        folders.removeEntriesFromFolder({folderId:$scope.collectionFolderSelected.id}, entryIds,
+        folders.removeEntriesFromFolder({folderId: $scope.collectionFolderSelected.id}, entryIds,
             function (result) {
                 if (result) {
                     $scope.$broadcast("RefreshAfterDeletion");
@@ -141,7 +152,12 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
             }
 
             // first create bulk upload
-            upload.create({name:"Bulk Edit", type:type, status:'BULK_EDIT', entryList:selectedEntries}, function (result) {
+            upload.create({
+                name: "Bulk Edit",
+                type: type,
+                status: 'BULK_EDIT',
+                entryList: selectedEntries
+            }, function (result) {
                 console.log(result);
                 $location.path("/upload/" + result.id);
             }, function (error) {
@@ -171,7 +187,7 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
 
         angular.forEach($scope.registryPartners.partners, function (partner) {
             if (partner.selected) {
-                WebOfRegistries().transferEntries({partnerId:partner.id}, selectedIds,
+                WebOfRegistries().transferEntries({partnerId: partner.id}, selectedIds,
                     function (result) {
 
                     }, function (error) {
@@ -217,7 +233,13 @@ iceControllers.controller('ActionMenuController', function ($scope, $window, $ro
 iceControllers.controller('RegisterController', function ($scope, $resource, $location, User) {
     $scope.errMsg = undefined;
     $scope.registerSuccess = undefined;
-    $scope.newUser = {firstName:undefined, lastName:undefined, institution:undefined, email:undefined, about:undefined};
+    $scope.newUser = {
+        firstName: undefined,
+        lastName: undefined,
+        institution: undefined,
+        email: undefined,
+        about: undefined
+    };
 
     $scope.submit = function () {
         var validates = true;
@@ -318,7 +340,7 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
     var group = Group();
 
     // init: retrieve groups user belongs to and created
-    user.getGroups({userId:profileId}, function (result) {
+    user.getGroups({userId: profileId}, function (result) {
         angular.forEach(result, function (item) {
             if (item.ownerEmail && item.ownerEmail === $rootScope.user.email)
                 $scope.myGroups.push(item);
@@ -331,7 +353,7 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
 
     $scope.switchToEditMode = function (selectedGroup) {
         selectedGroup.edit = true;
-        group.members({groupId:selectedGroup.id}, function (result) {
+        group.members({groupId: selectedGroup.id}, function (result) {
             selectedGroup.members = result;
         }, function (error) {
             console.error(error);
@@ -354,7 +376,7 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
         }
 
         $scope.filtering = true;
-        user.filter({limit:10, val:val},
+        user.filter({limit: 10, val: val},
             function (result) {
                 $scope.userMatches = result;
                 $scope.filtering = false;
@@ -383,8 +405,8 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
     };
 
     $scope.createGroup = function (groupName, groupDescription) {
-        $scope.newGroup = {label:groupName, description:groupDescription, members:$scope.selectedUsers};
-        user.createGroup({userId:profileId}, $scope.newGroup, function (result) {
+        $scope.newGroup = {label: groupName, description: groupDescription, members: $scope.selectedUsers};
+        user.createGroup({userId: profileId}, $scope.newGroup, function (result) {
             $scope.myGroups.splice(0, 0, result);
             $scope.showCreateGroup = false;
         }, function (error) {
@@ -393,7 +415,7 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
     };
 
     $scope.updateGroup = function (selectedGroup) {
-        group.update({groupId:selectedGroup.id}, selectedGroup, function (result) {
+        group.update({groupId: selectedGroup.id}, selectedGroup, function (result) {
             selectedGroup.memberCount = selectedGroup.members.length;
             selectedGroup.edit = false;
         }, function (error) {
@@ -409,7 +431,7 @@ iceControllers.controller('ProfileEntryController', function ($scope, $location,
     var user = User($cookieStore.get("sessionId"));
     var profileId = $stateParams.id;
     $location.path("/profile/" + profileId + "/entries", false);
-    var params = {userId:profileId};
+    var params = {userId: profileId};
 
     user.getEntries(params, function (result) {
         $scope.folder = result;
@@ -453,7 +475,7 @@ iceControllers.controller('ProfileSamplesController', function ($scope, $cookieS
 
     var user = User($cookieStore.get("sessionId"));
     var profileId = $stateParams.id;
-    user.samples({userId:profileId},
+    user.samples({userId: profileId},
         function (result) {
             $scope.userSamples = result;
         }, function (error) {
@@ -466,7 +488,7 @@ iceControllers.controller('ProfileSamplesController', function ($scope, $cookieS
 
         $scope.loadingPage = true;
         $scope.offset = (pageNo - 1) * 15;
-        user.samples({offset:$scope.offset}, {userId:profileId},
+        user.samples({offset: $scope.offset}, {userId: profileId},
             function (result) {
                 $scope.userSamples = result;
                 $scope.loadingPage = false;
@@ -485,21 +507,21 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
     $scope.passwordChangeAllowed = false;
 
     // get settings
-    Settings().getSetting({key:'PASSWORD_CHANGE_ALLOWED'}, function (result) {
+    Settings().getSetting({key: 'PASSWORD_CHANGE_ALLOWED'}, function (result) {
         $scope.passwordChangeAllowed = (result.value == 'yes');
     });
 
     $scope.preferenceEntryDefaults = [
-        {display:"Principal Investigator", id:"PRINCIPAL_INVESTIGATOR", help:"Enter Email or Name"},
-        {display:"Funding Source", id:"FUNDING_SOURCE"}
+        {display: "Principal Investigator", id: "PRINCIPAL_INVESTIGATOR", help: "Enter Email or Name"},
+        {display: "Funding Source", id: "FUNDING_SOURCE"}
     ];
     $scope.searchPreferenceDefaults = [
-        {display:"Alias", id:"alias"},
-        {display:"Backbone", id:"backbone"},
-        {display:"Keywords", id:"keywords"},
-        {display:"Name", id:"name"},
-        {display:"Part ID", id:"partId"},
-        {display:"Summary", id:"summary"}
+        {display: "Alias", id: "alias"},
+        {display: "Backbone", id: "backbone"},
+        {display: "Keywords", id: "keywords"},
+        {display: "Name", id: "name"},
+        {display: "Part ID", id: "partId"},
+        {display: "Summary", id: "summary"}
     ];
 
     $scope.handleSliderChange = function (model) {
@@ -535,19 +557,44 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
             return;
         }
 
-        user.updatePreference({userId:profileId, value:$scope.preferences[pref.id]}, {preferenceKey:pref.id},
+        user.updatePreference({userId: profileId, value: $scope.preferences[pref.id]}, {preferenceKey: pref.id},
             function (result) {
                 pref.edit = false;
             });
     };
 
     var menuOptions = $scope.profileMenuOptions = [
-        {url:'/views/profile/profile-information.html', display:'Profile', selected:true, icon:'fa-user', open:true},
-        {id:'prefs', url:'/views/profile/preferences.html', display:'Preferences', selected:false, icon:'fa-cog'},
-        {id:'groups', url:'/views/profile/groups.html', display:'Groups', selected:false, icon:'fa-group'},
-        {id:'messages', url:'/views/profile/messages.html', display:'Messages', selected:false, icon:'fa-envelope-o'},
-        {id:'samples', url:'/views/profile/samples.html', display:'Samples', selected:false, icon:'fa-shopping-cart'},
-        {id:'entries', url:'/views/profile/entries.html', display:'Entries', selected:false, icon:'fa-th-list', open:true}
+        {
+            url: '/views/profile/profile-information.html',
+            display: 'Profile',
+            selected: true,
+            icon: 'fa-user',
+            open: true
+        },
+        {id: 'prefs', url: '/views/profile/preferences.html', display: 'Preferences', selected: false, icon: 'fa-cog'},
+        {id: 'groups', url: '/views/profile/groups.html', display: 'Groups', selected: false, icon: 'fa-group'},
+        {
+            id: 'messages',
+            url: '/views/profile/messages.html',
+            display: 'Messages',
+            selected: false,
+            icon: 'fa-envelope-o'
+        },
+        {
+            id: 'samples',
+            url: '/views/profile/samples.html',
+            display: 'Samples',
+            selected: false,
+            icon: 'fa-shopping-cart'
+        },
+        {
+            id: 'entries',
+            url: '/views/profile/entries.html',
+            display: 'Entries',
+            selected: false,
+            icon: 'fa-th-list',
+            open: true
+        }
     ];
 
     $scope.showSelection = function (index) {
@@ -592,9 +639,9 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
     }
 
     // retrieve profile information from server
-    user.query({userId:profileId}, function (result) {
+    user.query({userId: profileId}, function (result) {
         $scope.profile = result;
-        user.getPreferences({userId:profileId}, function (prefs) {
+        user.getPreferences({userId: profileId}, function (prefs) {
             $scope.profile.preferences = prefs;
             if (prefs.preferences == undefined)
                 return;
@@ -661,7 +708,7 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
 //            }
 
         user.changePassword({},
-            {email:userId, password:pass.new},
+            {email: userId, password: pass.new},
             function (success) {
                 console.log("password change", success);
                 if (!success) {
@@ -679,7 +726,7 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
     };
 
     $scope.updateProfile = function () {
-        user.update({userId:profileId}, $scope.editProfile, function (result) {
+        user.update({userId: profileId}, $scope.editProfile, function (result) {
             $scope.profile = result;
             $scope.editClick(false, false, false);
         });
@@ -721,20 +768,62 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
     // default list of collections
     $scope.collectionList = [
-        { name:'available', description:'', display:'Featured', icon:'fa-certificate', iconOpen:'fa-certificate orange', alwaysVisible:true},
-        { name:'personal', description:'', display:'Personal', icon:'fa-folder', iconOpen:'fa-folder-open dark_blue', alwaysVisible:true},
-        { name:'shared', description:'Folders & Entries shared with you', display:'Shared', icon:'fa-share-alt', iconOpen:'fa-share-alt green', alwaysVisible:false},
-        { name:'drafts', description:'', display:'Drafts', icon:'fa-pencil', iconOpen:'fa-edit brown', alwaysVisible:false},
-        { name:'pending', description:'', display:'Pending Approval', icon:'fa-support', iconOpen:'fa-support purple', alwaysVisible:false},
-        { name:'deleted', description:'', display:'Deleted', icon:'fa-trash-o', iconOpen:'fa-trash red', alwaysVisible:false}
+        {
+            name: 'available',
+            description: '',
+            display: 'Featured',
+            icon: 'fa-certificate',
+            iconOpen: 'fa-certificate orange',
+            alwaysVisible: true
+        },
+        {
+            name: 'personal',
+            description: '',
+            display: 'Personal',
+            icon: 'fa-folder',
+            iconOpen: 'fa-folder-open dark_blue',
+            alwaysVisible: true
+        },
+        {
+            name: 'shared',
+            description: 'Folders & Entries shared with you',
+            display: 'Shared',
+            icon: 'fa-share-alt',
+            iconOpen: 'fa-share-alt green',
+            alwaysVisible: false
+        },
+        {
+            name: 'drafts',
+            description: '',
+            display: 'Drafts',
+            icon: 'fa-pencil',
+            iconOpen: 'fa-edit brown',
+            alwaysVisible: false
+        },
+        {
+            name: 'pending',
+            description: '',
+            display: 'Pending Approval',
+            icon: 'fa-support',
+            iconOpen: 'fa-support purple',
+            alwaysVisible: false
+        },
+        {
+            name: 'deleted',
+            description: '',
+            display: 'Deleted',
+            icon: 'fa-trash-o',
+            iconOpen: 'fa-trash red',
+            alwaysVisible: false
+        }
     ];
 
     // entry items that can be created
     $scope.items = [
-        {name:"Plasmid", type:"plasmid"},
-        {name:"Strain", type:"strain"},
-        {name:"Part", type:"part"},
-        {name:"Arabidopsis Seed", type:"arabidopsis"}
+        {name: "Plasmid", type: "plasmid"},
+        {name: "Strain", type: "strain"},
+        {name: "Part", type: "part"},
+        {name: "Arabidopsis Seed", type: "arabidopsis"}
     ];
 
     if ($location.path() === "/") {
@@ -756,7 +845,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
     // selected entries
     $scope.selection = [];
     $scope.shoppingCartContents = [];
-    samples.userRequests({status:'IN_CART'}, {userId:$rootScope.user.id}, function (result) {
+    samples.userRequests({status: 'IN_CART'}, {userId: $rootScope.user.id}, function (result) {
         $scope.shoppingCartContents = result.requests;
     });
 
@@ -769,7 +858,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
         for (var idx = 0; idx < $scope.shoppingCartContents.length; idx += 1)
             contentIds.push($scope.shoppingCartContents[idx].id);
 
-        samples.submitRequests({status:'PENDING'}, contentIds, function (result) {
+        samples.submitRequests({status: 'PENDING'}, contentIds, function (result) {
             $scope.shoppingCartContents = [];
             $scope.openShoppingCart = false;
         }, function (error) {
@@ -791,7 +880,7 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
 
         if (content) {
             var contentId = content.id;
-            samples.removeRequestFromCart({requestId:contentId}, function (result) {
+            samples.removeRequestFromCart({requestId: contentId}, function (result) {
                 var idx = $scope.shoppingCartContents.indexOf(content);
                 if (idx >= 0) {
                     $scope.shoppingCartContents.splice(idx, 1);
@@ -916,18 +1005,18 @@ iceControllers.controller('CollectionController', function ($scope, $state, $fil
             results.push(width);
 
             html += "<td><hr style=\"background-color: " + defColor + "; border: 0px; width: "
-                + width + "px; height: 10px\"></hr></td>";
+            + width + "px; height: 10px\"></hr></td>";
 
             // mark stripe
             prevStart = (fillStart - prevStart) + stripeBlockLength;
             html += "<td><hr style=\"background-color: " + stripColor + "; border: 0px; width: "
-                + stripeBlockLength + "px; height: 10px\"></hr></td>";
+            + stripeBlockLength + "px; height: 10px\"></hr></td>";
             fillEnd = fillStart + stripeBlockLength;
         }
 
         if (fillEnd < 100) {
             html += "<td><hr style=\"background-color: " + defColor + "; border: 0px; width: "
-                + (100 - fillEnd) + "px; height: 10px\"></hr></td>";
+            + (100 - fillEnd) + "px; height: 10px\"></hr></td>";
         }
 
         html += "</tr></table>";
@@ -943,7 +1032,7 @@ iceControllers.controller('CollectionDetailController', function ($scope, $cooki
     var folders = Folders();
 
     $scope.createCollection = function () {
-        var details = {folderName:$scope.newCollectionName};
+        var details = {folderName: $scope.newCollectionName};
         folders.create(details, function (result) {
             $scope.selectedCollectionFolders.splice(0, 0, result);
             $scope.newCollectionName = "";
@@ -955,7 +1044,7 @@ iceControllers.controller('CollectionDetailController', function ($scope, $cooki
         console.log("DELETE folder", folder);
 
         // expected folders that can be deleted have type "PRIVATE" and "UPLOAD"
-        folders.delete({folderId:folder.id, type:folder.type}, function (result) {
+        folders.delete({folderId: folder.id, type: folder.type}, function (result) {
             var l = $scope.selectedCollectionFolders.length;
             for (var j = 0; j < l; j += 1) {
                 if ($scope.selectedCollectionFolders[j].id === result.id) {
@@ -982,7 +1071,7 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
     var entry = Entry(sessionId);
 
     // param defaults
-    $scope.params = {'asc':false, 'sort':'created'};
+    $scope.params = {'asc': false, 'sort': 'created'};
     var subCollection = $stateParams.collection;   // folder id or one of the defined collections (Shared etc)
 
     // retrieve folder contents. all folders are redirected to /folder/{id} which triggers this
@@ -1033,17 +1122,14 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
         });
     };
 
-    var allSelection = {all:false};
+    var allSelection = {all: false};
 
     $scope.selectAllClass = function () {
         if (allSelection.all)
             return 'fa-check-square-o';
 
         for (var k in allSelection) {
-            if (!allSelection.hasOwnProperty(k))
-                continue;
-
-            if (k === "all")
+            if (!allSelection.hasOwnProperty(k) || k === "all")
                 continue;
 
             if (allSelection[k])
@@ -1069,11 +1155,15 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
         }
 
         allSelection[type] = true;
+        Selection.setTypeSelection(type);
     };
 
     $scope.selectAll = function () {
         allSelection.all = !allSelection.all;
-        Selection.setAllSelection(allSelection);
+        if (allSelection.all)
+            Selection.setTypeSelection('all');
+        else
+            Selection.setTypeSelection('none');
     };
 
     $scope.isSelected = function (entry) {
@@ -1120,7 +1210,7 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
 
     $scope.tooltipDetails = function (e) {
         $scope.currentTooltip = undefined;
-        entry.tooltip({partId:e.id},
+        entry.tooltip({partId: e.id},
             function (result) {
                 $scope.currentTooltip = result;
             }, function (error) {
@@ -1131,11 +1221,11 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
     // opens a modal that presents user with options to share selected folder
     $scope.openFolderShareSettings = function () {
         var modalInstance = $modal.open({
-            templateUrl:'/views/modal/folder-permissions.html',
-            controller:"FolderPermissionsController",
-            backdrop:"static",
-            resolve:{
-                folder:function () {
+            templateUrl: '/views/modal/folder-permissions.html',
+            controller: "FolderPermissionsController",
+            backdrop: "static",
+            resolve: {
+                folder: function () {
                     return $scope.folder;
                 }
             }
@@ -1165,8 +1255,8 @@ iceControllers.controller('CollectionFolderController', function ($rootScope, $s
     };
 
     $scope.changeFolderType = function (newType) {
-        var tmp = {id:$scope.folder.id, type:newType};
-        folders.update({id:tmp.id}, tmp, function (result) {
+        var tmp = {id: $scope.folder.id, type: newType};
+        folders.update({id: tmp.id}, tmp, function (result) {
             $scope.folder.type = result.type;
             if (newType === 'PUBLIC')
                 $location.path('/folders/available');
@@ -1236,14 +1326,14 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
     $scope.canChangePassword = false;
     $scope.errMsg = undefined;
 
-    Settings().getSetting({key:'NEW_REGISTRATION_ALLOWED'}, function (result) {
+    Settings().getSetting({key: 'NEW_REGISTRATION_ALLOWED'}, function (result) {
         $scope.canCreateAccount = (result !== undefined && result.key === 'NEW_REGISTRATION_ALLOWED'
-            && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
+        && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
     });
 
-    Settings().getSetting({key:'PASSWORD_CHANGE_ALLOWED'}, function (result) {
+    Settings().getSetting({key: 'PASSWORD_CHANGE_ALLOWED'}, function (result) {
         $scope.canChangePassword = (result !== undefined && result.key === 'PASSWORD_CHANGE_ALLOWED'
-            && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
+        && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
     });
 });
 
@@ -1255,7 +1345,7 @@ iceControllers.controller('EditEntryController',
         var partLinks;
         $scope.entry = undefined;
 
-        entry.query({partId:$stateParams.id}, function (result) {
+        entry.query({partId: $stateParams.id}, function (result) {
             $scope.entry = EntryService.convertToUIForm(result);
             partLinks = angular.copy($scope.entry.linkedParts);
             $scope.entry.linkedParts = [];
@@ -1266,7 +1356,7 @@ iceControllers.controller('EditEntryController',
             if (arrayLength) {
                 var tmp = [];
                 for (var i = 0; i < arrayLength; i++) {
-                    tmp.push({value:result.selectionMarkers[i]});
+                    tmp.push({value: result.selectionMarkers[i]});
                 }
                 angular.copy(tmp, $scope.entry.selectionMarkers);
             } else {
@@ -1281,7 +1371,7 @@ iceControllers.controller('EditEntryController',
             if (linkLength) {
                 var tmpLinkObjectArray = [];
                 for (var j = 0; j < linkLength; j++) {
-                    tmpLinkObjectArray.push({value:result.links[j]});
+                    tmpLinkObjectArray.push({value: result.links[j]});
                 }
                 angular.copy(tmpLinkObjectArray, $scope.entry.links);
             } else {
@@ -1304,31 +1394,31 @@ iceControllers.controller('EditEntryController',
 
         $scope.getLocation = function (inputField, val) {   // todo : move to service
             return $http.get('/rest/parts/autocomplete', {
-                headers:{'X-ICE-Authentication-SessionId':sid},
-                params:{
-                    val:val,
-                    field:inputField
+                headers: {'X-ICE-Authentication-SessionId': sid},
+                params: {
+                    val: val,
+                    field: inputField
                 }
             }).then(function (res) {
-                    return res.data;
-                });
+                return res.data;
+            });
         };
 
         // difference between this and getLocation() is getLocation() returns a list of strings
         // and this returns a list of objects
         $scope.getEntriesByPartNumber = function (val) {
             return $http.get('/rest/parts/autocomplete/partid', {
-                headers:{'X-ICE-Authentication-SessionId':sid},
-                params:{
-                    token:val
+                headers: {'X-ICE-Authentication-SessionId': sid},
+                params: {
+                    token: val
                 }
             }).then(function (res) {
-                    return res.data;
-                });
+                return res.data;
+            });
         };
 
         $scope.addExistingPartLink = function ($item, $model, $label) {
-            entry.query({partId:$model.id}, function (result) {
+            entry.query({partId: $model.id}, function (result) {
                 $scope.activePart = result;
 
                 // convert selection markers from array of strings to array of objects for the ui
@@ -1336,7 +1426,7 @@ iceControllers.controller('EditEntryController',
                 if (arrayLength) {
                     var tmp = [];
                     for (var i = 0; i < arrayLength; i++) {
-                        tmp.push({value:result.selectionMarkers[i]});
+                        tmp.push({value: result.selectionMarkers[i]});
                     }
                     angular.copy(tmp, $scope.activePart.selectionMarkers);
                 } else {
@@ -1351,7 +1441,7 @@ iceControllers.controller('EditEntryController',
                 if (linkLength) {
                     var tmpLinkObjectArray = [];
                     for (var j = 0; j < linkLength; j++) {
-                        tmpLinkObjectArray.push({value:result.links[j]});
+                        tmpLinkObjectArray.push({value: result.links[j]});
                     }
                     angular.copy(tmpLinkObjectArray, $scope.activePart.links);
                 } else {
@@ -1388,7 +1478,7 @@ iceControllers.controller('EditEntryController',
             }
 
             if (!canSubmit) {
-                $("body").animate({scrollTop:130}, "slow");
+                $("body").animate({scrollTop: 130}, "slow");
                 return;
             }
 
@@ -1410,7 +1500,7 @@ iceControllers.controller('EditEntryController',
             $scope.entry = EntryService.getTypeData($scope.entry);
             $scope.entry.linkedParts = partLinks;
 
-            entry.update({partId:$scope.entry.id}, $scope.entry, function (result) {
+            entry.update({partId: $scope.entry.id}, $scope.entry, function (result) {
                 $location.path("/entry/" + result.id);
             });
         };
@@ -1440,7 +1530,7 @@ iceControllers.controller('CreateEntryController',
 
         // retrieves the defaults for the specified type. Note that $scope.part is the main part
         var getPartDefaults = function (type, isMain) {
-            entry.query({partId:type}, function (result) {
+            entry.query({partId: type}, function (result) {
                 if (isMain) { // or if !$scope.part
                     $scope.part = result;
                     $scope.part = EntryService.setNewEntryFields($scope.part);
@@ -1465,7 +1555,7 @@ iceControllers.controller('CreateEntryController',
         getPartDefaults($scope.createType, true);
 
         $scope.addLink = function (schema) {
-            $scope.part[schema].push({value:''});
+            $scope.part[schema].push({value: ''});
         };
 
         $scope.removeLink = function (schema, index) {
@@ -1478,7 +1568,7 @@ iceControllers.controller('CreateEntryController',
         };
 
         $scope.addExistingPartLink = function ($item, $model, $label) {
-            entry.query({partId:$model.id}, function (result) {
+            entry.query({partId: $model.id}, function (result) {
                 $scope.activePart = result;
                 $scope.activePart.isExistingPart = true;
                 if (!$scope.activePart.parameters)
@@ -1534,14 +1624,14 @@ iceControllers.controller('CreateEntryController',
 
         $scope.getLocation = function (inputField, val) {
             return $http.get('/rest/parts/autocomplete', {
-                headers:{'X-ICE-Authentication-SessionId':sid},
-                params:{
-                    val:val,
-                    field:inputField
+                headers: {'X-ICE-Authentication-SessionId': sid},
+                params: {
+                    val: val,
+                    field: inputField
                 }
             }).then(function (res) {
-                    return res.data;
-                });
+                return res.data;
+            });
         };
 
         $scope.nameMissing = false;
@@ -1572,7 +1662,7 @@ iceControllers.controller('CreateEntryController',
             }
 
             if (!canSubmit) {
-                $("body").animate({scrollTop:130}, "slow");
+                $("body").animate({scrollTop: 130}, "slow");
                 return;
             }
 
@@ -1590,7 +1680,7 @@ iceControllers.controller('CreateEntryController',
 
             // create or update the part depending on whether there is a current part id
             if ($scope.part.id) {
-                entry.update({partId:$scope.part.id}, $scope.part, function (result) {
+                entry.update({partId: $scope.part.id}, $scope.part, function (result) {
                     $location.path('/entry/' + result.id);
                 });
             } else {
@@ -1608,13 +1698,13 @@ iceControllers.controller('CreateEntryController',
 
         $scope.getEntriesByPartNumber = function (val) {
             return $http.get('/rest/parts/autocomplete/partid', {
-                headers:{'X-ICE-Authentication-SessionId':sid},
-                params:{
-                    token:val
+                headers: {'X-ICE-Authentication-SessionId': sid},
+                params: {
+                    token: val
                 }
             }).then(function (res) {
-                    return res.data;
-                });
+                return res.data;
+            });
         };
 
         // for the date picker TODO : make it a directive ???
@@ -1628,7 +1718,7 @@ iceControllers.controller('CreateEntryController',
         };
 
         $scope.addCustomParameter = function () {
-            $scope.activePart.parameters.push({key:'', value:''});
+            $scope.activePart.parameters.push({key: '', value: ''});
         };
 
         $scope.removeCustomParameter = function (index) {
@@ -1636,8 +1726,8 @@ iceControllers.controller('CreateEntryController',
         };
 
         $scope.dateOptions = {
-            'year-format':"'yy'",
-            'starting-day':1
+            'year-format': "'yy'",
+            'starting-day': 1
         };
 
         $scope.cancelEntryCreate = function () {
@@ -1646,14 +1736,14 @@ iceControllers.controller('CreateEntryController',
 
         // file upload
         var uploader = $scope.sequenceFileUpload = $fileUploader.create({
-            scope:$scope, // to automatically update the html. Default: $rootScope
-            url:"/rest/file/sequence",
-            method:'POST',
+            scope: $scope, // to automatically update the html. Default: $rootScope
+            url: "/rest/file/sequence",
+            method: 'POST',
 //        formData:[{entryType:type}],
-            removeAfterUpload:true,
-            headers:{"X-ICE-Authentication-SessionId":sid},
-            autoUpload:true,
-            queueLimit:1 // can only upload 1 file
+            removeAfterUpload: true,
+            headers: {"X-ICE-Authentication-SessionId": sid},
+            autoUpload: true,
+            queueLimit: 1 // can only upload 1 file
         });
 
         $scope.uploadFile = function () {
@@ -1673,9 +1763,9 @@ iceControllers.controller('CreateEntryController',
         uploader.bind('beforeupload', function (event, item) {
             var entryTypeForm;
             if ($scope.active === 'main')
-                entryTypeForm = {entryType:$scope.part.type.toUpperCase()};
+                entryTypeForm = {entryType: $scope.part.type.toUpperCase()};
             else
-                entryTypeForm = {entryType:$scope.part.linkedParts[$scope.active].type};
+                entryTypeForm = {entryType: $scope.part.linkedParts[$scope.active].type};
             item.formData.push(entryTypeForm);
         });
 
@@ -1718,18 +1808,18 @@ iceControllers.controller('SequenceFileUploadController', function ($scope, $coo
     $scope.headerText = paste ? "Paste Sequence" : "Upload Sequence file";
 
     var uploader = $scope.sequenceFileUpload = $fileUploader.create({
-        scope:$scope, // to automatically update the html. Default: $rootScope
-        url:"/rest/file/sequence",
-        method:'POST',
-        formData:[
+        scope: $scope, // to automatically update the html. Default: $rootScope
+        url: "/rest/file/sequence",
+        method: 'POST',
+        formData: [
             {
-                entryType:type
+                entryType: type
             }
         ],
 //        removeAfterUpload: true,
-        headers:{"X-ICE-Authentication-SessionId":sid},
+        headers: {"X-ICE-Authentication-SessionId": sid},
 //        autoUpload: true
-        queueLimit:1 // can only upload 1 file
+        queueLimit: 1 // can only upload 1 file
     });
 
     $scope.cancel = function () {
@@ -1832,7 +1922,7 @@ iceControllers.controller('EntryPermissionController', function ($rootScope, $sc
     };
 
     // retrieve permissions
-    entry.permissions({partId:$scope.entry.id}, function (result) {
+    entry.permissions({partId: $scope.entry.id}, function (result) {
         $scope.readPermissions = [];
         $scope.writePermissions = [];
 
@@ -1843,8 +1933,8 @@ iceControllers.controller('EntryPermissionController', function ($rootScope, $sc
                 $scope.readPermissions.push(item);
         });
 
-        $scope.panes.push({title:'Read', count:$scope.readPermissions.length, selected:true});
-        $scope.panes.push({title:'Write', count:$scope.writePermissions.length});
+        $scope.panes.push({title: 'Read', count: $scope.readPermissions.length, selected: true});
+        $scope.panes.push({title: 'Write', count: $scope.writePermissions.length});
 
         $scope.activePermissions = $scope.readPermissions;
     });
@@ -1857,7 +1947,7 @@ iceControllers.controller('EntryPermissionController', function ($rootScope, $sc
         }
 
         $scope.filtering = true;
-        Permission().filterUsersAndGroups({limit:10, val:val},
+        Permission().filterUsersAndGroups({limit: 10, val: val},
             function (result) {
                 $scope.accessPermissions = result;
                 $scope.filtering = false;
@@ -1876,7 +1966,7 @@ iceControllers.controller('EntryPermissionController', function ($rootScope, $sc
     };
 
     var removePermission = function (permissionId) {
-        entry.removePermission({partId:$scope.entry.id, permissionId:permissionId},
+        entry.removePermission({partId: $scope.entry.id, permissionId: permissionId},
             function (result) {
                 if (!result)
                     return;
@@ -1927,7 +2017,7 @@ iceControllers.controller('EntryPermissionController', function ($rootScope, $sc
 
         permission.typeId = $scope.entry.id;
 
-        entry.addPermission({partId:$scope.entry.id}, permission, function (result) {
+        entry.addPermission({partId: $scope.entry.id}, permission, function (result) {
             // result is the permission object
             $scope.entry.id = result.typeId;
             if (result.type == 'READ_ENTRY') {
@@ -1950,7 +2040,7 @@ iceControllers.controller('EntryPermissionController', function ($rootScope, $sc
     };
 
     $scope.disablePublicRead = function (e) {
-        entry.disablePublicRead({partId:e.id}, function (result) {
+        entry.disablePublicRead({partId: e.id}, function (result) {
             $scope.entry.publicRead = false;
         })
     };
@@ -2017,7 +2107,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
 
     $scope.processPastedSequence = function (event, part) {
         var sequenceString = event.originalEvent.clipboardData.getData('text/plain');
-        entry.addSequenceAsString({partId:part.id}, {sequence:sequenceString}, function (result) {
+        entry.addSequenceAsString({partId: part.id}, {sequence: sequenceString}, function (result) {
             part.hasSequence = true;
         }, function (error) {
             console.log("error", error);
@@ -2026,13 +2116,13 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
 
     $scope.deleteSequence = function (part) {
         var modalInstance = $modal.open({
-            templateUrl:'/views/modal/delete-sequence-confirmation.html',
-            controller:function ($scope, $modalInstance) {
+            templateUrl: '/views/modal/delete-sequence-confirmation.html',
+            controller: function ($scope, $modalInstance) {
                 $scope.toDelete = part;
                 $scope.processingDelete = undefined;
                 $scope.delete = function () {
                     $scope.processingDelete = true;
-                    entry.deleteSequence({partId:part.id}, function (result) {
+                    entry.deleteSequence({partId: part.id}, function (result) {
                         $scope.processingDelete = false;
                         $modalInstance.close(part);
                     }, function (error) {
@@ -2040,7 +2130,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
                     })
                 }
             },
-            backdrop:"static"
+            backdrop: "static"
         });
 
         modalInstance.result.then(function (part) {
@@ -2055,20 +2145,20 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     $scope.addLink = function (part) {
 
         var modalInstance = $modal.open({
-            templateUrl:'/views/modal/add-link-modal.html',
-            controller:function ($scope, $http, $modalInstance, $cookieStore) {
+            templateUrl: '/views/modal/add-link-modal.html',
+            controller: function ($scope, $http, $modalInstance, $cookieStore) {
                 $scope.mainEntry = part;
                 var sessionId = $cookieStore.get("sessionId");
                 var originalLinks = angular.copy($scope.mainEntry.linkedParts);
                 $scope.getEntriesByPartNumber = function (val) {
                     return $http.get('/rest/parts/autocomplete/partid', {
-                        headers:{'X-ICE-Authentication-SessionId':sessionId},
-                        params:{
-                            token:val
+                        headers: {'X-ICE-Authentication-SessionId': sessionId},
+                        params: {
+                            token: val
                         }
                     }).then(function (res) {
-                            return res.data;
-                        });
+                        return res.data;
+                    });
                 };
 
                 $scope.addExistingPartLink = function ($item, $model, $label) {
@@ -2098,7 +2188,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
 
                 $scope.processLinkAdd = function () {
                     entry.update($scope.mainEntry, function (result) {
-                        entry.query({partId:result.id}, function (result) {
+                        entry.query({partId: result.id}, function (result) {
                             $modalInstance.close(result);
                         }, function (error) {
                             console.error(error);
@@ -2113,7 +2203,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
                     $modalInstance.close();
                 }
             },
-            backdrop:"static"
+            backdrop: "static"
         });
 
         modalInstance.result.then(function (entry) {
@@ -2125,17 +2215,17 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     };
 
     var partDefaults = {
-        type:$scope.createType,
-        links:[
+        type: $scope.createType,
+        links: [
             {}
         ],
-        selectionMarkers:[
+        selectionMarkers: [
             {}
         ],
-        bioSafetyLevel:'1',
-        status:'Complete',
-        creator:$scope.user.firstName + ' ' + $scope.user.lastName,
-        creatorEmail:$scope.user.email
+        bioSafetyLevel: '1',
+        status: 'Complete',
+        creator: $scope.user.firstName + ' ' + $scope.user.lastName,
+        creatorEmail: $scope.user.email
     };
 
     $scope.part = angular.copy(partDefaults);
@@ -2149,7 +2239,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     $scope.notFound = undefined;
     $scope.noAccess = undefined;
 
-    entry.query({partId:$stateParams.id},
+    entry.query({partId: $stateParams.id},
         function (result) {
             Selection.reset();
             Selection.selectEntry(result);
@@ -2157,7 +2247,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
             $scope.entry = EntryService.convertToUIForm(result);
             $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
 
-            entry.statistics({partId:$stateParams.id}, function (stats) {
+            entry.statistics({partId: $stateParams.id}, function (stats) {
                 $scope.entryStatistics = stats;
             });
         }, function (error) {
@@ -2168,12 +2258,52 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
         });
 
     var menuSubDetails = $scope.subDetails = [
-        {url:'/scripts/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
-        {id:'sequences', url:'/scripts/entry/sequence-analysis.html', display:'Sequence Analysis', isPrivileged:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
-        {id:'comments', url:'/scripts/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
-        {id:'samples', url:'/scripts/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'},
-        {id:'history', url:'/scripts/entry/history.html', display:'History', isPrivileged:true, countName:'historyCount', icon:'fa-history'},
-        {id:'experiments', url:'/scripts/entry/experiments.html', display:'Experimental Data', isPrivileged:false, countName:'experimentalDataCount', icon:'fa-magic'}
+        {
+            url: '/scripts/entry/general-information.html',
+            display: 'General Information',
+            isPrivileged: false,
+            icon: 'fa-exclamation-circle'
+        },
+        {
+            id: 'sequences',
+            url: '/scripts/entry/sequence-analysis.html',
+            display: 'Sequence Analysis',
+            isPrivileged: false,
+            countName: 'traceSequenceCount',
+            icon: 'fa-search-plus'
+        },
+        {
+            id: 'comments',
+            url: '/scripts/entry/comments.html',
+            display: 'Comments',
+            isPrivileged: false,
+            countName: 'commentCount',
+            icon: 'fa-comments-o'
+        },
+        {
+            id: 'samples',
+            url: '/scripts/entry/samples.html',
+            display: 'Samples',
+            isPrivileged: false,
+            countName: 'sampleCount',
+            icon: 'fa-flask'
+        },
+        {
+            id: 'history',
+            url: '/scripts/entry/history.html',
+            display: 'History',
+            isPrivileged: true,
+            countName: 'historyCount',
+            icon: 'fa-history'
+        },
+        {
+            id: 'experiments',
+            url: '/scripts/entry/experiments.html',
+            display: 'Experimental Data',
+            isPrivileged: false,
+            countName: 'experimentalDataCount',
+            icon: 'fa-magic'
+        }
     ];
 
     $scope.showSelection = function (index) {
@@ -2270,7 +2400,7 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     };
 
     $scope.removeLink = function (mainEntry, linkedEntry) {
-        entry.removeLink({partId:mainEntry.id, linkId:linkedEntry.id}, function (result) {
+        entry.removeLink({partId: mainEntry.id, linkId: linkedEntry.id}, function (result) {
             var idx = mainEntry.linkedParts.indexOf(linkedEntry);
             if (idx != -1) {
                 mainEntry.linkedParts.splice(idx, 1);
@@ -2282,13 +2412,13 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
 
     // file upload
     var uploader = $scope.sequenceFileUpload = $fileUploader.create({
-        scope:$scope, // to automatically update the html. Default: $rootScope
-        url:"/rest/file/sequence",
-        method:'POST',
-        removeAfterUpload:true,
-        headers:{"X-ICE-Authentication-SessionId":sessionId},
-        autoUpload:true,
-        queueLimit:1 // can only upload 1 file
+        scope: $scope, // to automatically update the html. Default: $rootScope
+        url: "/rest/file/sequence",
+        method: 'POST',
+        removeAfterUpload: true,
+        headers: {"X-ICE-Authentication-SessionId": sessionId},
+        autoUpload: true,
+        queueLimit: 1 // can only upload 1 file
     });
 
     uploader.bind('progress', function (event, item, progress) {
@@ -2310,8 +2440,8 @@ iceControllers.controller('EntryController', function ($scope, $stateParams, $co
     });
 
     uploader.bind('beforeupload', function (event, item) {
-        item.formData.push({entryType:$scope.entry.type});
-        item.formData.push({entryRecordId:$scope.entry.recordId});
+        item.formData.push({entryType: $scope.entry.type});
+        item.formData.push({entryRecordId: $scope.entry.recordId});
     });
 
     uploader.bind('error', function (event, xhr, item, response) {
@@ -2346,7 +2476,7 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
     };
 
     // retrieve permissions for folder
-    folders.permissions({folderId:folder.id}, function (result) {
+    folders.permissions({folderId: folder.id}, function (result) {
         $scope.readPermissions = [];
         $scope.writePermissions = [];
 
@@ -2357,8 +2487,8 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
                 $scope.readPermissions.push(item);
         });
 
-        $scope.panes.push({title:'Read', count:$scope.readPermissions.length, selected:true});
-        $scope.panes.push({title:'Write', count:$scope.writePermissions.length});
+        $scope.panes.push({title: 'Read', count: $scope.readPermissions.length, selected: true});
+        $scope.panes.push({title: 'Write', count: $scope.writePermissions.length});
 
         $scope.activePermissions = $scope.readPermissions;
     });
@@ -2384,7 +2514,7 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
     };
 
     var removePermission = function (permissionId) {
-        folders.removePermission({folderId:folder.id, permissionId:permissionId},
+        folders.removePermission({folderId: folder.id, permissionId: permissionId},
             function (result) {
                 if (!result)
                     return;
@@ -2415,7 +2545,7 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
 
     $scope.setPropagatePermission = function (folder) {
         folder.propagatePermission = !folder.propagatePermission;
-        folders.update({folderId:folder.id}, folder, function (result) {
+        folders.update({folderId: folder.id}, folder, function (result) {
 
         }, function (error) {
 
@@ -2440,7 +2570,7 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
         }
         permission.typeId = folder.id;
 
-        folders.addPermission({folderId:folder.id}, permission, function (result) {
+        folders.addPermission({folderId: folder.id}, permission, function (result) {
             // result is the permission object
             if (result.type == 'READ_FOLDER') {
                 $scope.readPermissions.push(result);
@@ -2457,7 +2587,7 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
     };
 
     $scope.enablePublicRead = function (folder) {
-        Folders().enablePublicReadAccess({id:folder.id}, function (result) {
+        Folders().enablePublicReadAccess({id: folder.id}, function (result) {
             folder.publicReadAccess = true;
         }, function (error) {
 
@@ -2465,7 +2595,7 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
     };
 
     $scope.disablePublicRead = function (folder) {
-        Folders().disablePublicReadAccess({folderId:folder.id}, function (result) {
+        Folders().disablePublicReadAccess({folderId: folder.id}, function (result) {
             folder.publicReadAccess = false;
         }, function (error) {
 
@@ -2483,7 +2613,7 @@ iceControllers.controller('FolderPermissionsController', function ($scope, $moda
         }
 
         $scope.filtering = true;
-        Permission().filterUsersAndGroups({limit:10, val:val},
+        Permission().filterUsersAndGroups({limit: 10, val: val},
             function (result) {
                 $scope.accessPermissions = result;
                 $scope.filtering = false;

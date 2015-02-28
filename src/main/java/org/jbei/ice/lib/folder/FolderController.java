@@ -349,38 +349,6 @@ public class FolderController {
         }
     }
 
-    // expects the same entries to be added
-    public ArrayList<FolderDetails> addEntriesToFolder(String userId, ArrayList<FolderDetails> folders) {
-        EntryController entryController = new EntryController();
-        Account account = accountDAO.getByEmail(userId);
-
-        ArrayList<Long> entryIds = null;
-
-        for (FolderDetails details : folders) {
-            Folder folder = dao.get(details.getId());
-            if (folder == null)
-                return null;
-
-            if (entryIds == null) {
-                entryIds = new ArrayList<>();
-                for (PartData datum : details.getEntries()) {
-                    entryIds.add(datum.getId());
-                }
-            }
-
-            ArrayList<Entry> entrys = entryController.getEntriesByIdSet(account, entryIds);
-            // todo : check visibility; allow non 9 only if user owns it or is admin
-            folder = dao.addFolderContents(folder, entrys);
-            if (folder.isPropagatePermissions()) {
-                permissionsController.propagateFolderPermissions(account, folder, true);
-            }
-
-            details.setCount(dao.getFolderSize(folder.getId()));
-        }
-
-        return folders;
-    }
-
     public FolderDetails createPersonalFolder(String userId, FolderDetails folderDetails) {
         if (folderDetails.getName() == null)
             return null;

@@ -2,11 +2,11 @@
 
 angular.module('ice.entry.service', [])
     .factory('Selection', function ($rootScope, $cookieStore) {
-        var selectedSearchResults = {};
+        var selectedEntries = {};
         var selectedSearchResultsCount = 0;
         var selectedSearchNotificationSent = false;  // send notification when at least one is selected and then none
         var canEdit = false;
-        var allSelection;
+        var allSelection = {};
         var canDelete = false;
         var selectedTypes = {};
         var userId = $cookieStore.get('userId');
@@ -19,9 +19,9 @@ angular.module('ice.entry.service', [])
                 canEdit = entry.canEdit;
                 canDelete = entry.ownerEmail === userId;
 
-                if (selectedSearchResults[entry.id]) {
+                if (selectedEntries[entry.id]) {
                     // remove entry id
-                    selectedSearchResults[entry.id] = undefined;
+                    selectedEntries[entry.id] = undefined;
                     selectedSearchResultsCount -= 1;
 
                     // remove type
@@ -34,7 +34,7 @@ angular.module('ice.entry.service', [])
                 } else {
 
                     // add entry id
-                    selectedSearchResults[entry.id] = entry;
+                    selectedEntries[entry.id] = entry;
                     selectedSearchResultsCount += 1;
 
                     // add type
@@ -64,22 +64,27 @@ angular.module('ice.entry.service', [])
             },
 
             hasSelection:function () {
-                return (allSelection && allSelection.all) || selectedSearchResultsCount > 0;
+                return (allSelection.type && allSelection.type != 'NONE') || selectedSearchResultsCount > 0;
             },
 
-            setAllSelection:function (all) {
-                console.log("set all", all);
-                allSelection = all;
+            setTypeSelection: function (type) {
+                // selects a specific type of entry from the list e.g. all plasmids
+                allSelection.type = type.toUpperCase();
+                var count = 0;
+                if (allSelection.type != 'NONE')
+                    count = 1;
+                //var count
+                $rootScope.$emit("EntrySelected", count);
             },
 
             searchEntrySelected:function (entry) {
-                return selectedSearchResults[entry.id] != undefined;
+                return selectedEntries[entry.id] != undefined;
             },
 
             getSelectedEntries:function () {
                 var selected = [];
-                for (var k in selectedSearchResults) {
-                    if (selectedSearchResults.hasOwnProperty(k) && selectedSearchResults[k]) {
+                for (var k in selectedEntries) {
+                    if (selectedEntries.hasOwnProperty(k) && selectedEntries[k]) {
                         selected.push({id:k});
                     }
                 }
@@ -88,6 +93,10 @@ angular.module('ice.entry.service', [])
 
             getSelectedTypes:function () {
                 return selectedTypes;
+            },
+
+            getSelection: function () {
+                return allSelection;
             },
 
             canEdit:function () {
@@ -103,7 +112,7 @@ angular.module('ice.entry.service', [])
 
             // resets all selected and send notifications
             reset:function () {
-                selectedSearchResults = {};
+                selectedEntries = {};
                 selectedTypes = {};
                 selectedSearchResultsCount = 0;
                 selectedSearchNotificationSent = false;
