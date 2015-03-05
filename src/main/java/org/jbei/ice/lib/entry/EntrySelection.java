@@ -8,7 +8,8 @@ import org.jbei.ice.lib.dto.search.SearchQuery;
 import java.util.ArrayList;
 
 /**
- * Represents entry selection in a specific context (e.g. select all plasmids from a search result)
+ * Represents entry selection in a specific context and by type
+ * (e.g. select all plasmids from a search result)
  *
  * @author Hector Plahar
  */
