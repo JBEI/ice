@@ -22,7 +22,6 @@ import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.folder.Folder;
-import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.models.*;
@@ -64,6 +63,8 @@ public class EntryController {
     }
 
     public FolderDetails retrieveVisibleEntries(String userId, ColumnField field, boolean asc, int start, int limit) {
+        long tStart = System.currentTimeMillis();
+
         Set<Entry> results;
         FolderDetails details = new FolderDetails();
         Account account = accountController.getByEmail(userId);
@@ -85,6 +86,7 @@ public class EntryController {
             details.getEntries().add(info);
         }
 
+        Logger.info((System.currentTimeMillis() - tStart) + "ms");
         return details;
     }
 
@@ -263,15 +265,12 @@ public class EntryController {
         Entry entry = dao.get(entryId);
         boolean schedule = sequenceDAO.hasSequence(entry.getId());
 
-        FolderController folderController = new FolderController();
         ArrayList<FolderDetails> folderList = new ArrayList<>();
         FolderDAO folderDAO = DAOFactory.getFolderDAO();
         List<Folder> folders = folderDAO.getFoldersByEntry(entry);
-        ArrayList<Long> entryIds = new ArrayList<>();
-        entryIds.add(entry.getId());
         if (folders != null) {
             for (Folder folder : folders) {
-                folderController.removeFolderContents(userId, folder.getId(), entryIds);
+                folder.getContents().remove(entry);
                 FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
                 long size = folderDAO.getFolderSize(folder.getId());
                 details.setCount(size);

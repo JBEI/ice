@@ -5,6 +5,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.access.Permission;
@@ -12,6 +13,7 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.BulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
@@ -25,15 +27,16 @@ import java.util.Set;
  *
  * @author Hector Plahar
  */
+@SuppressWarnings("unchecked")
 public class PermissionDAO extends HibernateRepository<Permission> {
 
     public boolean hasPermission(Entry entry, Folder folder, BulkUpload upload, Account account, Group group, boolean canRead,
-            boolean canWrite) {
+                                 boolean canWrite) {
         try {
             Session session = currentSession();
             Criteria criteria = session.createCriteria(Permission.class)
-                                       .add(Restrictions.eq("canWrite", canWrite))
-                                       .add(Restrictions.eq("canRead", canRead));
+                    .add(Restrictions.eq("canWrite", canWrite))
+                    .add(Restrictions.eq("canRead", canRead));
 
             if (group == null)
                 criteria.add(Restrictions.isNull("group"));
@@ -71,12 +74,12 @@ public class PermissionDAO extends HibernateRepository<Permission> {
 
     // to avoid ambiguous call name clashes when collections are null
     public boolean hasPermissionMulti(Entry entry, Set<Folder> folders, Account account, Set<Group> groups,
-            boolean canRead, boolean canWrite) {
+                                      boolean canRead, boolean canWrite) {
         try {
             Session session = currentSession();
             Criteria criteria = session.createCriteria(Permission.class)
-                                       .add(Restrictions.eq("canWrite", canWrite))
-                                       .add(Restrictions.eq("canRead", canRead));
+                    .add(Restrictions.eq("canWrite", canWrite))
+                    .add(Restrictions.eq("canRead", canRead));
 
             if (groups == null || groups.isEmpty())
                 criteria.add(Restrictions.isNull("group"));
@@ -108,7 +111,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
     }
 
     public Permission retrievePermission(Entry entry, Folder folder, BulkUpload upload, Account account, Group group, boolean canRead,
-            boolean canWrite) {
+                                         boolean canWrite) {
         try {
             Criteria criteria = createPermissionCriteria(entry, folder, upload, account, group, canRead, canWrite);
             return (Permission) criteria.uniqueResult();
@@ -119,11 +122,11 @@ public class PermissionDAO extends HibernateRepository<Permission> {
     }
 
     protected Criteria createPermissionCriteria(Entry entry, Folder folder, BulkUpload upload, Account account, Group group,
-            boolean canRead, boolean canWrite) {
+                                                boolean canRead, boolean canWrite) {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Permission.class)
-                                   .add(Restrictions.eq("canWrite", canWrite))
-                                   .add(Restrictions.eq("canRead", canRead));
+                .add(Restrictions.eq("canWrite", canWrite))
+                .add(Restrictions.eq("canRead", canRead));
 
         if (group == null)
             criteria.add(Restrictions.isNull("group"));
@@ -153,7 +156,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
     }
 
     public void removePermission(Entry entry, Folder folder, BulkUpload upload, Account account, Group group, boolean canRead,
-            boolean canWrite) {
+                                 boolean canWrite) {
         Criteria criteria = createPermissionCriteria(entry, folder, upload, account, group, canRead, canWrite);
         List list = criteria.list();
         if (list == null || list.isEmpty())
@@ -172,8 +175,9 @@ public class PermissionDAO extends HibernateRepository<Permission> {
 
     public Set<Permission> getEntryPermissions(Entry entry) {
         try {
-            return new HashSet<Permission>(currentSession().createCriteria(Permission.class)
-                                                   .add(Restrictions.eq("entry", entry)).list());
+            Criteria criteria = currentSession().createCriteria(Permission.class)
+                    .add(Restrictions.eq("entry", entry));
+            return new HashSet<>(criteria.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -182,8 +186,9 @@ public class PermissionDAO extends HibernateRepository<Permission> {
 
     public Set<Permission> getFolderPermissions(Folder folder) throws DAOException {
         try {
-            return new HashSet<Permission>(currentSession().createCriteria(Permission.class)
-                                                   .add(Restrictions.eq("folder", folder)).list());
+            Criteria criteria = currentSession().createCriteria(Permission.class)
+                    .add(Restrictions.eq("folder", folder));
+            return new HashSet<>(criteria.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -194,14 +199,14 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         Session session = currentSession();
         try {
             List list = session.createCriteria(Permission.class)
-                               .add(Restrictions.eq("canWrite", canWrite))
-                               .add(Restrictions.eq("canRead", canRead))
-                               .add(Restrictions.eq("folder", folder))
-                               .setProjection(Projections.property("account"))
-                               .add(Restrictions.isNotNull("account"))
-                               .list();
+                    .add(Restrictions.eq("canWrite", canWrite))
+                    .add(Restrictions.eq("canRead", canRead))
+                    .add(Restrictions.eq("folder", folder))
+                    .setProjection(Projections.property("account"))
+                    .add(Restrictions.isNotNull("account"))
+                    .list();
 
-            return new HashSet<Account>(list);
+            return new HashSet<>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -220,13 +225,13 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         Session session = currentSession();
         try {
             List list = session.createCriteria(Permission.class)
-                               .add(Restrictions.eq("folder", folder))
-                               .add(Restrictions.eq("canWrite", canWrite))
-                               .add(Restrictions.eq("canRead", canRead))
-                               .setProjection(Projections.property("group"))
-                               .add(Restrictions.isNotNull("group"))
-                               .list();
-            return new HashSet<Group>(list);
+                    .add(Restrictions.eq("folder", folder))
+                    .add(Restrictions.eq("canWrite", canWrite))
+                    .add(Restrictions.eq("canRead", canRead))
+                    .setProjection(Projections.property("group"))
+                    .add(Restrictions.isNotNull("group"))
+                    .list();
+            return new HashSet<>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -272,20 +277,20 @@ public class PermissionDAO extends HibernateRepository<Permission> {
     public Set<Folder> retrieveFolderPermissions(Account account, Set<Group> accountGroups) throws DAOException {
         // can read or can write
         Criterion criterion = Restrictions.disjunction()
-                                          .add(Restrictions.eq("canWrite", true))
-                                          .add(Restrictions.eq("canRead", true));
+                .add(Restrictions.eq("canWrite", true))
+                .add(Restrictions.eq("canRead", true));
         Session session = currentSession();
         try {
             List list = session.createCriteria(Permission.class)
-                               .add(Restrictions.isNull("entry"))
-                               .add(Restrictions.disjunction()
-                                                .add(Restrictions.in("group", accountGroups))
-                                                .add(Restrictions.eq("account", account)))
-                               .add(criterion)
-                               .setProjection(Projections.property("folder"))
-                               .add(Restrictions.isNotNull("folder"))
-                               .list();
-            return new HashSet<Folder>(list);
+                    .add(Restrictions.isNull("entry"))
+                    .add(Restrictions.disjunction()
+                            .add(Restrictions.in("group", accountGroups))
+                            .add(Restrictions.eq("account", account)))
+                    .add(criterion)
+                    .setProjection(Projections.property("folder"))
+                    .add(Restrictions.isNotNull("folder"))
+                    .list();
+            return new HashSet<>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -294,22 +299,49 @@ public class PermissionDAO extends HibernateRepository<Permission> {
 
     public Set<Folder> getFolders(Group group) {
         Criterion criterion = Restrictions.disjunction()
-                                          .add(Restrictions.eq("canWrite", true))
-                                          .add(Restrictions.eq("canRead", true));
+                .add(Restrictions.eq("canWrite", true))
+                .add(Restrictions.eq("canRead", true));
         Session session = currentSession();
         try {
             List list = session.createCriteria(Permission.class)
-                               .add(Restrictions.isNull("entry"))
-                               .add(Restrictions.eq("group", group))
-                               .add(criterion)
-                               .add(Restrictions.isNotNull("folder"))
-                               .setProjection(Projections.property("folder"))
-                               .list();
-            return new HashSet<Folder>(list);
+                    .add(Restrictions.isNull("entry"))
+                    .add(Restrictions.eq("group", group))
+                    .add(criterion)
+                    .add(Restrictions.isNotNull("folder"))
+                    .setProjection(Projections.property("folder"))
+                    .list();
+            return new HashSet<>(list);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
         }
+    }
+
+    /**
+     * Filters the given list, removing those that the specified account does not have read privileges on
+     *
+     * @return filtered list such that specified account have read privileges on entries contained in it
+     */
+    public List<Long> getCanReadEntries(Account account, List<Long> entries) {
+        Criteria criteria = currentSession().createCriteria(Permission.class);
+        Set<Group> groups = account.getGroups();
+        Disjunction disjunction = Restrictions.disjunction();
+        disjunction.add(Restrictions.eq("account", account));
+        if (!groups.isEmpty())
+            disjunction.add(Restrictions.in("group", groups));
+
+
+        List list = criteria.createAlias("entry", "entry")
+                .add(Restrictions.in("entry.id", entries))
+                .add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()))
+                .add(disjunction)
+                .add(Restrictions.disjunction()
+                        .add(Restrictions.eq("canWrite", true))
+                        .add(Restrictions.eq("canRead", true)))
+                .setProjection(Projections.property("entry.id"))
+                .list();
+
+        return list;
     }
 
     @Override

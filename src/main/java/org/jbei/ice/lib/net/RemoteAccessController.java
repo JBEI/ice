@@ -1,10 +1,6 @@
 package org.jbei.ice.lib.net;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
-
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.access.RemotePermission;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -26,13 +22,17 @@ import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
+import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.executor.TransferTask;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.services.rest.RestClient;
 
-import org.apache.commons.lang.StringUtils;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * Controller for access remote registries. This registries must be in a web of registries configuration
@@ -248,8 +248,8 @@ public class RemoteAccessController {
         return (ArrayList) restClient.get(partner.getUrl(), restPath, ArrayList.class);
     }
 
-    public void transferEntries(String userId, long remoteId, ArrayList<Long> data) {
-        TransferTask task = new TransferTask(userId, remoteId, data);
+    public void transferEntries(String userId, long remoteId, EntrySelection selection) {
+        TransferTask task = new TransferTask(userId, remoteId, selection);
         IceExecutorService.getInstance().runTask(task);
     }
 

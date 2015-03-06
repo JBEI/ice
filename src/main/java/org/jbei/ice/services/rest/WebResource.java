@@ -1,26 +1,22 @@
 package org.jbei.ice.services.rest;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
+import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.net.RemoteAccessController;
 import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.util.ArrayList;
 
 /**
  * @author Hector Plahar
@@ -77,14 +73,10 @@ public class WebResource extends RestResource {
     @Path("/{id}/transfer")
     public Response transferEntries(
             @PathParam("id") long remoteId,
-            ArrayList<Long> list,
+            EntrySelection entrySelection,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = super.getUserIdFromSessionHeader(sessionId);
-        Type fooType = new TypeToken<ArrayList<Long>>() {
-        }.getType();
-        Gson gson = new GsonBuilder().create();
-        ArrayList<Long> data = gson.fromJson(gson.toJsonTree(list), fooType);
-        remoteAccessController.transferEntries(userId, remoteId, data);
+        remoteAccessController.transferEntries(userId, remoteId, entrySelection);
         return super.respond(Response.Status.OK);
     }
 
