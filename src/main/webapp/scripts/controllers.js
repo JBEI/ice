@@ -75,6 +75,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
         for (var i = 0; i < selectedEntriesObjectArray.length; i += 1) {
             entrySelection.entries.push(selectedEntriesObjectArray[i].id);
         }
+        return entrySelection;
     };
 
     $scope.addEntriesToFolders = function () {
