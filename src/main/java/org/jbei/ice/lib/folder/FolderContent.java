@@ -6,10 +6,10 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.FolderDAO;
 import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
-import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.entry.EntryAuthorization;
+import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.model.Entry;
 
@@ -28,34 +28,9 @@ public class FolderContent {
     private FolderAuthorization folderAuthorization = new FolderAuthorization();
 
     public List<FolderDetails> addEntrySelection(String userId, EntrySelection entryLocation) {
-        List<FolderDetails> destination = entryLocation.getDestination();
-        boolean all = entryLocation.isAll();
-        EntryType entryType = entryLocation.getEntryType();
-
-        switch (entryLocation.getSelectionType()) {
-            default:
-            case FOLDER:
-                long folderId = Long.decode(entryLocation.getFolderId());
-                return addFolderEntries(userId, folderId, all, entryType, destination);
-
-//            case SEARCH:
-//                break;
-//
-//            case COLLECTION:
-//                break;
-        }
-    }
-
-    protected List<FolderDetails> addFolderEntries(String userId, long folderId, boolean all,
-                                                   EntryType type, List<FolderDetails> destination) {
-        Folder folder = folderDAO.get(folderId);
-        folderAuthorization.expectRead(userId, folder);
-
-        List<Long> entries;
-//        if(all)
-        entries = folderDAO.getFolderContentIds(folderId);
-        return addEntriesToFolders(userId, entries, destination);
-
+        EntryRetriever retriever = new EntryRetriever();
+        List<Long> entries = retriever.getEntriesFromSelectionContext(userId, entryLocation);
+        return addEntriesToFolders(userId, entries, entryLocation.getDestination());
     }
 
     /**

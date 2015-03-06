@@ -5,9 +5,10 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.entry.EntryRetriever;
+import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.net.RemoteTransfer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,12 +20,12 @@ public class TransferTask extends Task {
 
     private final String userId;
     private final long remoteId;
-    private final ArrayList<Long> entries;
+    private final EntrySelection entrySelection;
 
-    public TransferTask(String userId, long remoteId, ArrayList<Long> entries) {
+    public TransferTask(String userId, long remoteId, EntrySelection entrySelection) {
         this.userId = userId;
         this.remoteId = remoteId;
-        this.entries = new ArrayList<>(entries);
+        this.entrySelection = entrySelection;
     }
 
     public void execute() {
@@ -33,6 +34,8 @@ public class TransferTask extends Task {
         if (account.getType() != AccountType.ADMIN)
             return;
 
+        EntryRetriever retriever = new EntryRetriever();
+        List<Long> entries = retriever.getEntriesFromSelectionContext(account.getEmail(), entrySelection);
         Logger.info(userId + ": requesting transfer of " + entries.size() + " entries to " + remoteId);
         List<PartData> dataList = transfer.getPartsForTransfer(entries);
         transfer.transferEntries(remoteId, dataList);

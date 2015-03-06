@@ -6,9 +6,10 @@ import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.utils.IceCSVSerializer;
@@ -188,21 +189,46 @@ public class EntryRetriever {
         return dao.getEntrySummary(id);
     }
 
-    /**
-     * Retrieve {@link org.jbei.ice.lib.entry.model.Entry} from the database by recordId (uuid).
-     *
-     * @param recordId universally unique identifier that was assigned to entry on create
-     * @return entry retrieved from the database.
-     */
-    public Entry getByRecordId(String userId, String recordId) {
-        Entry entry = getEntry(recordId);
-        if (entry == null)
-            return null;
+    public List<Long> getEntriesFromSelectionContext(String userId, EntrySelection context) {
+        boolean all = context.isAll();
+        EntryType entryType = context.getEntryType();
 
-        if (entry.getVisibility() == Visibility.TRANSFERRED.getValue())
-            return entry;
+        switch (context.getSelectionType()) {
+            default:
+            case FOLDER:
+                long folderId = Long.decode(context.getFolderId());
+                return getFolderEntries(userId, folderId, all, entryType);
 
-        authorization.expectRead(userId, entry);
-        return entry;
+//            case SEARCH:
+//                break;
+//
+            case COLLECTION:
+                return getCollectionEntries(userId, context.getFolderId(), all, entryType);
+        }
+
+    }
+
+    protected List<Long> getCollectionEntries(String userId, String collection, boolean all, EntryType type) {
+        List<Long> entries = null;
+
+        switch (collection.toLowerCase()) {
+            case "personal":
+                if (all)
+                    type = null;
+                entries = dao.getOwnerEntryIds(userId, type);
+        }
+
+        return entries;
+    }
+
+    // todo : folder controller
+    protected List<Long> getFolderEntries(String userId, long folderId, boolean all, EntryType type) {
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);
+        FolderAuthorization folderAuthorization = new FolderAuthorization();
+        folderAuthorization.expectRead(userId, folder);
+
+        if (all)
+            type = null;
+        return DAOFactory.getFolderDAO().getFolderContentIds(folderId, type);
     }
 }

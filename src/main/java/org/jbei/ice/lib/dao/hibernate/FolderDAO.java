@@ -9,6 +9,7 @@ import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
@@ -79,11 +80,22 @@ public class FolderDAO extends HibernateRepository<Folder> {
         }
     }
 
-    public List<Long> getFolderContentIds(long folderId) {
-        return currentSession().createCriteria(Folder.class)
+    /**
+     * Retrieves the ids of any entries that are contained in the specified folder; optionally filtered by entry type
+     *
+     * @param folderId unique folder identifier
+     * @param type     optional filter for entries. If null, all entries will be retrieved
+     * @return List of entry ids found in the folder with the filter applied if applicable
+     */
+    public List<Long> getFolderContentIds(long folderId, EntryType type) {
+        Criteria criteria = currentSession().createCriteria(Folder.class)
                 .add(Restrictions.eq("id", folderId))
-                .createAlias("contents", "contents")
-                .setProjection(Projections.property("contents.id")).list();
+                .createAlias("contents", "entry");
+
+        if (type != null) {
+            criteria.add(Restrictions.eq("entry.recordType", type.getName()));
+        }
+        return criteria.setProjection(Projections.property("entry.id")).list();
     }
 
     @SuppressWarnings("unchecked")
