@@ -39,7 +39,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
         return super.get(Folder.class, id);
     }
 
-    public Folder removeFolderEntries(Folder folder, ArrayList<Long> entries) {
+    public Folder removeFolderEntries(Folder folder, List<Long> entries) {
         Session session = currentSession();
         try {
             folder = (Folder) session.get(Folder.class, folder.getId());

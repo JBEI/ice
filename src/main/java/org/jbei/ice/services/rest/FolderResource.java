@@ -1,8 +1,5 @@
 package org.jbei.ice.services.rest;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -23,7 +20,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,15 +126,11 @@ public class FolderResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries")
     public Response removeEntriesFromFolder(
-            ArrayList<Long> entriesId,
+            EntrySelection entrySelection,
             @PathParam("id") long folderId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
-        Type fooType = new TypeToken<ArrayList<Long>>() {
-        }.getType();
-        Gson gson = new GsonBuilder().create();
-        ArrayList<Long> list = gson.fromJson(gson.toJsonTree(entriesId), fooType);
-        if (controller.removeFolderContents(userId, folderId, list))
+        if (controller.removeFolderContents(userId, folderId, entrySelection))
             return respond(Response.Status.OK);
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }

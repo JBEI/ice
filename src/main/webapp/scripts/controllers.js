@@ -81,25 +81,23 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
     $scope.addEntriesToFolders = function () {
         var entrySelection = getEntrySelection();
         folders.addSelectionToFolders({}, entrySelection, function (updatedFolders) {
-            // result contains list of destination folders
-            $scope.updatePersonalCollections();
-            Selection.reset();
+            if (updatedFolders) {
+                // result contains list of destination folders
+                $scope.updatePersonalCollections();
+                Selection.reset();
+            }
         });
     };
 
     $scope.removeEntriesFromFolder = function () {
         // remove selected entries from the current folder
-        var entryIds = [];
-        var entries = Selection.getSelectedEntries();
-        angular.forEach(entries, function (entry) {
-            entryIds.push(entry.id);
-        });
-
-        folders.removeEntriesFromFolder({folderId: $scope.collectionFolderSelected.id}, entryIds,
+        folders.removeEntriesFromFolder({folderId: $scope.collectionFolderSelected.id}, getEntrySelection(),
             function (result) {
                 if (result) {
-                    $scope.$broadcast("RefreshAfterDeletion");
+                    $scope.$broadcast("RefreshAfterDeletion");  // todo
                     $scope.$broadcast("UpdateCollectionCounts");
+                    $scope.updatePersonalCollections();
+                    Selection.reset();
                 }
             }, function (error) {
                 console.error(error);

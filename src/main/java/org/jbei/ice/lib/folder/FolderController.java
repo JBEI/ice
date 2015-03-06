@@ -22,6 +22,8 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntryRetriever;
+import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
@@ -170,7 +172,7 @@ public class FolderController {
         return folders;
     }
 
-    public boolean removeFolderContents(String userId, long folderId, ArrayList<Long> entryIds) {
+    public boolean removeFolderContents(String userId, long folderId, EntrySelection selection) {
         boolean isAdministrator = accountController.isAdministrator(userId);
         Folder folder = dao.get(folderId);
 
@@ -179,6 +181,8 @@ public class FolderController {
             throw new PermissionException(errMsg);
         }
 
+        EntryRetriever retriever = new EntryRetriever();
+        List<Long> entryIds = retriever.getEntriesFromSelectionContext(userId, selection);
         return dao.removeFolderEntries(folder, entryIds) != null;
     }
 
