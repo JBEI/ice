@@ -41,10 +41,6 @@ public class SearchResource extends RestResource {
             @DefaultValue("false") @QueryParam("webSearch") boolean searchWeb,
             SearchQuery query) {
         String userId = SessionHandler.getUserIdBySession(sessionHeader);
-        if (StringUtils.isEmpty(userId) && !searchWeb) {
-            return super.respond(Response.Status.FORBIDDEN);
-        }
-
         try {
             SearchResults results = controller.runSearch(userId, query, searchWeb);
             return super.respond(Response.Status.OK, results);
