@@ -4,10 +4,7 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Junction;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.*;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -408,51 +405,21 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     public synchronized void generateNextStrainNameForEntry(Entry entry, String prefix) throws DAOException {
-        Session session = currentSession();
-        String queryString = "select name from entries where (LEFT(name, 6)) in (";
-        for (int i = 0; i < 10; i += 1) {
-            if (i != 0)
-                queryString += ", ";
-            queryString += ("\'" + prefix + i + "\'");
+        Criteria criteria = currentSession().createCriteria(Entry.class)
+                .add(Restrictions.like("name", prefix + "1", MatchMode.START));
+        criteria.addOrder(Order.desc("name"));
+        criteria.setMaxResults(1);
+        List list = criteria.list();
+        int next = 0;
+        if (!list.isEmpty()) {
+            Entry resultEntry = (Entry) list.get(0);
+            String name = resultEntry.getName();
+            next = Integer.decode(name.split(prefix)[1]);
         }
-        queryString += ") ORDER by name DESC";
-        Query query = session.createSQLQuery(queryString);
-        query.setMaxResults(5);
-        List results;
-        try {
-            results = query.list();
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
-
-        if (results.isEmpty()) {
-            String name = prefix + "0001";
-            entry.setName(name);
-            session.update(entry);
-            return;
-        }
-
-        @SuppressWarnings("unchecked")
-        ArrayList<Object> tempList = new ArrayList<>(results);
-        for (int i = 0; i < results.size(); i += 1) {
-            String name = (String) tempList.get(i);
-            String[] split = name.split(prefix);
-            if (split.length != 2)
-                continue;
-
-            try {
-                int value = Integer.valueOf(split[1]);
-                value += 1;
-                entry.setName(prefix + String.format("%0" + 4 + "d", value));
-                session.update(entry);
-                return;
-            } catch (NumberFormatException nfe) {
-                Logger.warn(nfe.getMessage());
-            }
-        }
-
-        throw new DAOException("Could not parse any of the retrieved strain names");
+        next += 1;
+        String nextName = prefix + next;
+        entry.setName(nextName);
+        currentSession().update(entry);
     }
 
     @SuppressWarnings("unchecked")
