@@ -107,11 +107,11 @@ angular.module('ice.entry.service', [])
                 var count = 0;
                 // selectedTypes is the type of entries selected
                 for (var k in selectedTypes) if (selectedTypes.hasOwnProperty(k)) ++count;
-                return canEdit && selectedSearchResultsCount > 0 && count == 1;
+                return !this.allSelected() && canEdit && selectedSearchResultsCount > 0 && count == 1;
             },
 
             canDelete: function () {
-                return (($rootScope.user && $rootScope.user.isAdmin) || canDelete) && selectedSearchResultsCount > 0;
+                return !this.allSelected() && (($rootScope.user && $rootScope.user.isAdmin) || canDelete) && selectedSearchResultsCount > 0;
             },
 
             // determines if an entry has been selected
