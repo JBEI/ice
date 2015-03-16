@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * Rest API for interacting with Bulk upload resources
+ *
  * @author Hector Plahar
  */
 @Path("/upload")
