@@ -25,14 +25,8 @@ http://nicolasgallagher.com/micro-clearfix-hack/
     content: " ";
     display: table;
 }
-
-.pika-single:after {
-    clear: both
-}
-
-.pika-single {
-    *zoom: 1
-}
+.pika-single:after { clear: both }
+.pika-single { *zoom: 1 }
 
 .pika-single.is-hidden {
     display: none;
@@ -40,7 +34,7 @@ http://nicolasgallagher.com/micro-clearfix-hack/
 
 .pika-single.is-bound {
     position: absolute;
-    box-shadow: 0 5px 15px -5px rgba(0, 0, 0, .5);
+    box-shadow: 0 5px 15px -5px rgba(0,0,0,.5);
 }
 
 .pika-lendar {
@@ -67,7 +61,6 @@ http://nicolasgallagher.com/micro-clearfix-hack/
     font-weight: bold;
     background-color: #fff;
 }
-
 .pika-title select {
     cursor: pointer;
     position: absolute;

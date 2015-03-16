@@ -1,4 +1,4 @@
-<table cellpadding="0" cellspacing="0" class="entry_attribute" ng-init="showAttachmentInput=false" ng-file-drop
+<table cellpadding="0" cellspacing="0" class="entry_attribute" ng-init="showAttachmentInput=false"
        ng-controller="EntryAttachmentController">
     <tr>
         <td class="entry_attributes_sub_header" colspan="2">
@@ -12,7 +12,7 @@
     <tr ng-show="showAttachmentInput">
         <td style="background-color: #f1f1f1; padding: 5px;">
             <form ng-submit="uploader.uploadAll()">
-                <input type="file" ng-file-select class="font-70em" style="width: 170px">
+                <input type="file" nv-file-select uploader="uploader" class="font-70em" style="width: 170px">
 
                 <input type="text" style="width: 170px" ng-model="attachmentDescription" class="font-75em"
                        placeholder="Optional file description">

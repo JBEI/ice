@@ -12,12 +12,11 @@
 
 <!--file upload-->
 <span ng-if="!isPaste && !processingFile">
-                <div class="margin-top-20"><input ng-file-select type="file"/></div>
-                <div style="height: 7px; background-color: #f9f9f9;">
-                    <div class="progress-bar" role="progressbar"
-                         ng-style="{ 'width': sequenceFileUpload.progress + '%' }"></div>
-                </div>
-            </span>
+    <div class="margin-top-20"><input nv-file-select/></div>
+    <div style="height: 7px; background-color: #f9f9f9;">
+        <div class="progress-bar" role="progressbar" ng-style="{ 'width': sequenceFileUpload.progress + '%' }"></div>
+    </div>
+</span>
 
 <span ng-if="processingFile">
                 <i class="fa fa-spinner fa-gear"></i> Processing file {{processingFile}}

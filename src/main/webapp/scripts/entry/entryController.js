@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.entry.controller', [])
-    .controller('EntryAttachmentController', function ($scope, $window, $cookieStore, $stateParams, $fileUploader, Attachment) {
+    .controller('EntryAttachmentController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Attachment) {
 
         // create a uploader with options
         var sid = $cookieStore.get("sessionId");
@@ -12,7 +12,7 @@ angular.module('ice.entry.controller', [])
             desc = $scope.attachmentDescription;
         });
 
-        var uploader = $scope.uploader = $fileUploader.create({
+        var uploader = $scope.uploader = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "/rest/file/attachment",
             method: 'POST',
@@ -22,7 +22,7 @@ angular.module('ice.entry.controller', [])
             }
         });
 
-        uploader.bind('success', function (event, xhr, item, response) {
+        uploader.onSuccessItem = function (item, response, status, headers) {
             response.description = desc;
             attachment.create({
                     partId: $stateParams.id
@@ -31,11 +31,7 @@ angular.module('ice.entry.controller', [])
                     $scope.attachments.push(result);
                     $scope.cancel();
                 });
-        });
-
-        uploader.bind('error', function (event, xhr, item, response) {
-            console.error('Error', xhr, item, response);
-        });
+        };
 
         $scope.cancel = function () {
             $scope.uploader.cancelAll();
@@ -301,7 +297,7 @@ angular.module('ice.entry.controller', [])
             return false;
         }
     })
-    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, $fileUploader, Entry) {
+    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Entry) {
         var entryId = $stateParams.id;
         var sid = $cookieStore.get("sessionId");
         var entry = Entry(sid);
@@ -313,7 +309,7 @@ angular.module('ice.entry.controller', [])
             $scope.traceSequences = result;
         });
 
-        var uploader = $scope.traceSequenceUploader = $fileUploader.create({
+        var uploader = $scope.traceSequenceUploader = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "/rest/parts/" + entryId + "/traces",
             method: 'POST',
@@ -330,7 +326,7 @@ angular.module('ice.entry.controller', [])
             ]
         });
 
-        uploader.bind('success', function (event, xhr, item, response) {
+        uploader.onSuccessItem = function (item, response, status, headers) {
             console.log("response", response);
             entry.traceSequences({
                 partId: entryId
@@ -338,12 +334,11 @@ angular.module('ice.entry.controller', [])
                 $scope.traceSequences = result;
                 $scope.showUploadOptions = false;
             });
-        });
+        };
 
-        uploader.bind('error', function (event, xhr, item, response) {
-            console.error('Error', xhr, item, response);
+        uploader.onSuccessItem = function (item, response, status, headers) {
             $scope.traceUploadError = true;
-        });
+        };
 
         $scope.deleteTraceSequenceFile = function (fileId) {
             var foundTrace;
@@ -613,7 +608,7 @@ angular.module('ice.entry.controller', [])
 
     .
     controller('CreateEntryController',
-    function ($http, $scope, $modal, $rootScope, $fileUploader, $location, $stateParams, $cookieStore, Entry, EntryService) {
+    function ($http, $scope, $modal, $rootScope, FileUploader, $location, $stateParams, $cookieStore, Entry, EntryService) {
         $scope.createType = $stateParams.type;
         $scope.showMain = true;
 
@@ -829,7 +824,7 @@ angular.module('ice.entry.controller', [])
         };
 
         // file upload
-        var uploader = $scope.sequenceFileUpload = $fileUploader.create({
+        var uploader = $scope.sequenceFileUpload = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "/rest/file/sequence",
             method: 'POST',
@@ -849,29 +844,28 @@ angular.module('ice.entry.controller', [])
         };
 
         // REGISTER HANDLERS
-        uploader.bind('afteraddingfile', function (event, item) {
-            console.info('After adding a file', item);
+        uploader.onAfterAddingAll = function (item) {
             $scope.serverError = false;
-        });
+        };
 
-        uploader.bind('beforeupload', function (event, item) {
+        uploader.onBeforeUploadItem = function (item) {
             var entryTypeForm;
             if ($scope.active === 'main')
                 entryTypeForm = {entryType: $scope.part.type.toUpperCase()};
             else
                 entryTypeForm = {entryType: $scope.part.linkedParts[$scope.active].type};
             item.formData.push(entryTypeForm);
-        });
+        };
 
-        uploader.bind('progress', function (event, item, progress) {
+        uploader.onProgressItem = function (item, progress) {
             if (progress != "100")  // isUploading is always true until it returns
                 return;
 
             // upload complete. have processing
             $scope.processingFile = item.file.name;
-        });
+        };
 
-        uploader.bind('success', function (event, xhr, item, response) {
+        uploader.onSuccessItem = function (item, response, status, headers) {
             if ($scope.active === undefined || isNaN($scope.active)) {
                 // set main entry id
                 $scope.part.id = response.entryId;
@@ -883,26 +877,26 @@ angular.module('ice.entry.controller', [])
             }
 
             $scope.activePart.hasSequence = true;
-        });
+        };
 
-        uploader.bind('error', function (event, xhr, item, response) {
+        uploader.onErrorItem = function (item, response, status, headers) {
             item.remove();
             $scope.serverError = true;
-        });
+        };
 
-        uploader.bind('completeall', function (event, items) {
+        uploader.onCompleteAll = function () {
             $scope.processingFile = undefined;
-        });
+        };
     })
 
     .
-    controller('SequenceFileUploadController', function ($scope, $cookieStore, $modal, $modalInstance, $fileUploader, type, paste) {
+    controller('SequenceFileUploadController', function ($scope, $cookieStore, $modal, $modalInstance, FileUploader, type, paste) {
         console.log("SequenceFileUploadController");
         var sid = $cookieStore.get("sessionId");
         $scope.isPaste = paste;
         $scope.headerText = paste ? "Paste Sequence" : "Upload Sequence file";
 
-        var uploader = $scope.sequenceFileUpload = $fileUploader.create({
+        var uploader = $scope.sequenceFileUpload = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "/rest/file/sequence",
             method: 'POST',
@@ -930,15 +924,14 @@ angular.module('ice.entry.controller', [])
         };
 
         // REGISTER HANDLERS
-        uploader.bind('afteraddingfile', function (event, item) {
+        uploader.onAfterAddingFile = function (item) {
             $scope.$emit("FileAdd", item);
-        });
+        };
 
-        uploader.bind('error', function (event, xhr, item, response) {
-            console.info('Error', xhr, item, response);
+        uploader.onErrorItem = function (item, response, status, headers) {
             item.remove();
             $scope.serverError = true;
-        });
+        };
     }).controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group, filterFilter, Permission) {
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
@@ -1105,7 +1098,7 @@ angular.module('ice.entry.controller', [])
         };
     })
 
-    .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope, $fileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection) {
+    .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope, FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
@@ -1435,7 +1428,7 @@ angular.module('ice.entry.controller', [])
         };
 
         // file upload
-        var uploader = $scope.sequenceFileUpload = $fileUploader.create({
+        var uploader = $scope.sequenceFileUpload = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "/rest/file/sequence",
             method: 'POST',
@@ -1445,7 +1438,7 @@ angular.module('ice.entry.controller', [])
             queueLimit: 1 // can only upload 1 file
         });
 
-        uploader.bind('progress', function (event, item, progress) {
+        uploader.onProgressItem = function (event, item, progress) {
             $scope.serverError = undefined;
 
             if (progress != "100")  // isUploading is always true until it returns
@@ -1453,25 +1446,23 @@ angular.module('ice.entry.controller', [])
 
             // upload complete. have processing
             $scope.processingFile = item.file.name;
-        });
+        };
 
-        uploader.bind('success', function (event, xhr, item, response) {
+        uploader.onSuccessItem = function (item, response, status, header) {
             $scope.entry.hasSequence = true;
-        });
+        };
 
-        uploader.bind('completeall', function (event, items) {
+        uploader.onCompleteAll = function () {
             $scope.processingFile = undefined;
-        });
+        };
 
-        uploader.bind('beforeupload', function (event, item) {
+        uploader.onBeforeUploadItem = function (event, item) {
             item.formData.push({entryType: $scope.entry.type});
             item.formData.push({entryRecordId: $scope.entry.recordId});
-        });
+        };
 
-        uploader.bind('error', function (event, xhr, item, response) {
-            console.info('Error', xhr, item, response);
-//        item.remove();
+        uploader.onErrorItem = function (item, response, status, headers) {
             $scope.serverError = true;
-        });
+        };
     });
 
