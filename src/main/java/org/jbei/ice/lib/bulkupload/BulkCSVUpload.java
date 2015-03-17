@@ -1,15 +1,9 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
+import au.com.bytecode.opencsv.CSVParser;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
@@ -17,10 +11,11 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.entry.EntryUtil;
 
-import au.com.bytecode.opencsv.CSVParser;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.LineIterator;
-import org.apache.commons.lang.StringUtils;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * Helper class for dealing with bulk CSV uploads
@@ -106,10 +101,6 @@ public class BulkCSVUpload {
             }
         }
         return null;
-    }
-
-    protected boolean isValidHeader(EntryField field) {
-        return (field != null && headerFields.contains(field));
     }
 
     EntryType detectSubType(String field) {

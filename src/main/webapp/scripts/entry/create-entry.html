@@ -122,9 +122,7 @@
     <!--date picker-->
     <div class="col-md-10" ng-if="field.inputType==='date'">
         <div class="input-group">
-            <input type="text" ng-model="activePart[field.schema]" show-button-bar="false" show-weeks="false"
-                   datepicker-popup="yyyy-MM-dd" class="input_box_group" maxlength="125" is-open="opened"
-                   datepicker-options="dateOptions" close-text="Close" style="width: 205px;"
+            <input type="text" ng-model="activePart[field.schema]" placeholder="mm/dd/yyyy" style="width: 205px;"
                    ng-focus="field.edit=true" ng-blur="field.edit=false">
             <span class="input-group-addon" style="padding:3px; background-color: #f1f1f1;width: 19px">
                 <i class="fa fa-calendar"></i>
