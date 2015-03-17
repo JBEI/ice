@@ -18,7 +18,7 @@ import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryEditor;
-import org.jbei.ice.lib.entry.EntryUtil;
+import org.jbei.ice.lib.entry.EntryFactory;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Strain;
@@ -279,10 +279,16 @@ public class BulkEntryCreator {
 
         // if entry is null, create entry
         if (entry == null) {
-            entry = EntryUtil.createEntryFromType(autoUpdate.getType(), account.getFullName(), account.getEmail());
+            entry = EntryFactory.buildEntry(autoUpdate.getType());
             if (entry == null)
                 return null;
 
+            String name = account.getFullName();
+            String email = account.getEmail();
+            entry.setOwner(name);
+            entry.setOwnerEmail(email);
+            entry.setCreator(name);
+            entry.setCreatorEmail(email);
             entry = creator.createEntry(account, entry, null);
 
             autoUpdate.setEntryId(entry.getId());

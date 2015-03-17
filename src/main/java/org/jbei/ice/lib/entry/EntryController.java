@@ -354,11 +354,6 @@ public class EntryController {
         return result;
     }
 
-    public ArrayList<Entry> getEntriesByIdSet(Account account, ArrayList<Long> queryResultIds) {
-        List<Long> filtered = this.filterEntriesByPermission(account, queryResultIds);
-        return new ArrayList<>(dao.getEntriesByIdSet(filtered));
-    }
-
     public PartData retrieveEntryTipDetails(String userId, String id) {
         Entry entry = getEntry(id);
         if (entry == null)

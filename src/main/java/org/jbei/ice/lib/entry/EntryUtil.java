@@ -26,35 +26,6 @@ import java.util.Set;
  */
 public class EntryUtil {
 
-    public static Entry createEntryFromType(EntryType type, String name, String email) {
-        Entry entry;
-
-        switch (type) {
-            case PLASMID:
-                entry = new Plasmid();
-                break;
-
-            case STRAIN:
-                entry = new Strain();
-                break;
-
-            case ARABIDOPSIS:
-                entry = new ArabidopsisSeed();
-                break;
-
-            default:
-            case PART:
-                entry = new Part();
-                break;
-        }
-
-        entry.setOwner(name);
-        entry.setOwnerEmail(email);
-        entry.setCreator(name);
-        entry.setCreatorEmail(email);
-        return entry;
-    }
-
     public static String entryFieldToValue(Entry entry, EntryField field) {
         String value = getCommonFieldValues(entry, field);
         if (value != null)

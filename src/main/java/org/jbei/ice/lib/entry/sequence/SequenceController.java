@@ -17,8 +17,8 @@ import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryCreator;
+import org.jbei.ice.lib.entry.EntryFactory;
 import org.jbei.ice.lib.entry.EntryRetriever;
-import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
@@ -84,7 +84,14 @@ public class SequenceController {
         if (StringUtils.isBlank(recordId)) {
             EntryCreator creator = new EntryCreator();
             Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-            entry = EntryUtil.createEntryFromType(type, account.getFullName(), account.getEmail());
+
+            entry = EntryFactory.buildEntry(type);
+            String entryName = account.getFullName();
+            String entryEmail = account.getEmail();
+            entry.setOwner(entryName);
+            entry.setOwnerEmail(entryEmail);
+            entry.setCreator(entryName);
+            entry.setCreatorEmail(entryEmail);
             entry.setVisibility(Visibility.DRAFT.getValue());
             entry = creator.createEntry(account, entry, null);
         } else {
