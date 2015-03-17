@@ -20,4 +20,4 @@ You can try out the software and use our tools on our [Public Registry](http://p
 
 [The VectorEditor project](https://github.com/JBEI/vectoreditor/) is used in ICE to display and edit sequences. It also contains other modules such as sequence checker.
 
-[![Build Status](https://travis-ci.org/JBEI/ice.svg?branch=dev)](https://travis-ci.org/JBEI/ice)
+[![Build Status](https://travis-ci.org/JBEI/ice.svg?branch=master)](https://travis-ci.org/JBEI/ice)
