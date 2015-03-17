@@ -1,10 +1,10 @@
 package org.jbei.ice.services.rest;
 
-import javax.ws.rs.core.Response;
-
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.services.exception.UnauthorizedException;
+
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 /**
  * Parent class for all rest resource objects
@@ -16,7 +16,7 @@ public class RestResource {
     protected String getUserIdFromSessionHeader(String sessionHeader) {
         String userId = SessionHandler.getUserIdBySession(sessionHeader);
         if (userId == null)
-            throw new UnauthorizedException();
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         return userId;
     }
 

@@ -334,26 +334,6 @@ public class EntryController {
         }
     }
 
-    /**
-     * Filter {@link Entry} id's for display.
-     * <p/>
-     * Given a List of entry id's, keep only id's that user has read access to.
-     *
-     * @param account user account
-     * @param ids     list of entry ids
-     * @return List of Entry ids.
-     */
-    List<Long> filterEntriesByPermission(Account account, List<Long> ids) {
-        ArrayList<Long> result = new ArrayList<>();
-        for (Long id : ids) {
-            Entry entry = dao.get(id);
-            if (authorization.canRead(account.getEmail(), entry)) {
-                result.add(id);
-            }
-        }
-        return result;
-    }
-
     public PartData retrieveEntryTipDetails(String userId, String id) {
         Entry entry = getEntry(id);
         if (entry == null)
