@@ -9,14 +9,17 @@ import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.access.Permission;
+import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.BulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.group.GroupController;
 
 import java.util.HashSet;
 import java.util.List;
@@ -323,22 +326,21 @@ public class PermissionDAO extends HibernateRepository<Permission> {
      * @return filtered list such that specified account have read privileges on entries contained in it
      */
     public List<Long> getCanReadEntries(Account account, List<Long> entries) {
-        Criteria criteria = currentSession().createCriteria(Permission.class);
+        if(account.getType() == AccountType.ADMIN){
+            return entries;
+        }
+
         Set<Group> groups = account.getGroups();
-        Disjunction disjunction = Restrictions.disjunction();
-        disjunction.add(Restrictions.eq("account", account));
-        if (!groups.isEmpty())
-            disjunction.add(Restrictions.in("group", groups));
+        groups.add(new GroupController().createOrRetrievePublicGroup());
 
-
+        Criteria criteria = currentSession().createCriteria(Permission.class);
         List list = criteria.createAlias("entry", "entry")
                 .add(Restrictions.in("entry.id", entries))
-                .add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()))
-                .add(disjunction)
                 .add(Restrictions.disjunction()
-                        .add(Restrictions.eq("canWrite", true))
-                        .add(Restrictions.eq("canRead", true)))
+                        .add(Restrictions.eq("account", account))
+                        .add(Restrictions.in("group", groups)))
                 .setProjection(Projections.property("entry.id"))
+                .setProjection(Projections.groupProperty("entry.id"))
                 .list();
 
         return list;
