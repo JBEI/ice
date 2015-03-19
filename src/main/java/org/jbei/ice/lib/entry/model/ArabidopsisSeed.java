@@ -1,26 +1,18 @@
 package org.jbei.ice.lib.entry.model;
 
-import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.Generation;
-import org.jbei.ice.lib.dto.entry.PlantType;
-
 import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.Indexed;
+import org.jbei.ice.lib.dto.entry.*;
+
+import javax.persistence.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Store Arabidopsis Seed specific fields.
- * <p/>
+ * <p>
  * <ul>
  * <li><b>homozygosity: </b></li>
  * <li><b>ecotype: </b></li>
@@ -136,5 +128,24 @@ public class ArabidopsisSeed extends Entry {
     public void setSentToABRC(Boolean sentToABRC) {
         if (sentToABRC != null)
             this.sentToABRC = sentToABRC;
+    }
+
+    @Override
+    public PartData toDataTransferObject() {
+        PartData data = super.toDataTransferObject();
+        ArabidopsisSeedData seedData = new ArabidopsisSeedData();
+        seedData.setEcotype(this.ecotype);
+        seedData.setGeneration(this.generation);
+        if (this.harvestDate != null) {
+            DateFormat format = new SimpleDateFormat("MM/dd/YYYY");
+            String dateFormat = format.format(this.harvestDate);
+            seedData.setHarvestDate(dateFormat);
+        }
+        seedData.setHomozygosity(this.homozygosity);
+        seedData.setSeedParents(this.parents);
+        seedData.setPlantType(this.plantType);
+        seedData.setSentToAbrc(this.sentToABRC);
+        data.setArabidopsisSeedData(seedData);
+        return data;
     }
 }

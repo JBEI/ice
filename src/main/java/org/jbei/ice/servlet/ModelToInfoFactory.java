@@ -34,7 +34,8 @@ public class ModelToInfoFactory {
         if (type == null)
             return null;
 
-        PartData part = getCommon(type, entry);
+        PartData partData = new PartData(type);
+        PartData part = getCommon(partData, entry);
 
         switch (type) {
             case PLASMID:
@@ -154,8 +155,7 @@ public class ModelToInfoFactory {
         return data;
     }
 
-    private static PartData getCommon(EntryType type, Entry entry) {
-        PartData info = new PartData(type);
+    public static PartData getCommon(PartData info, Entry entry) {
         info.setId(entry.getId());
         info.setRecordId(entry.getRecordId());
         info.setPartId(entry.getPartNumber());
