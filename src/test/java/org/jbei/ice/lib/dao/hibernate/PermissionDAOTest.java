@@ -13,9 +13,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by oge on 3/20/15.
- */
 public class PermissionDAOTest {
     Account adminAccount, regularAccount;
     PermissionDAO dao;
@@ -31,10 +28,10 @@ public class PermissionDAOTest {
         dao = new PermissionDAO();
     }
 
-    public List<Long> makePrivateEntryIds() throws Exception{
+    public List<Long> makePrivateEntryIds(Account ownerAccount) throws Exception{
         List<Long> entryIds = new ArrayList<>(3);
         for (int i = 0; i < 3; i++) {
-            Strain strain = TestEntryCreator.createTestStrain(regularAccount);
+            Strain strain = TestEntryCreator.createTestStrain(ownerAccount);
             entryIds.add(strain.getId());
         }
         return entryIds;
@@ -47,13 +44,13 @@ public class PermissionDAOTest {
 
     @Test
     public void testAdminCanReadEverything() throws Exception {
-        List<Long> entryIds = makePrivateEntryIds();
+        List<Long> entryIds = makePrivateEntryIds(regularAccount);
         Assert.assertArrayEquals(entryIds.toArray(), dao.getCanReadEntries(adminAccount, entryIds).toArray());
     }
 
     @Test
     public void testNonAdminCantReadWithoutPermissions() throws Exception {
-        List<Long> entryIds = makePrivateEntryIds();
+        List<Long> entryIds = makePrivateEntryIds(adminAccount);
         Assert.assertArrayEquals(new Object[0], dao.getCanReadEntries(regularAccount, entryIds).toArray());
     }
 }
