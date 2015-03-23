@@ -325,20 +325,20 @@ public class PermissionDAO extends HibernateRepository<Permission> {
     public List<Long> getCanReadEntries(Account account, List<Long> entries) {
         Criteria criteria = currentSession().createCriteria(Permission.class);
         Set<Group> groups = account.getGroups();
-        Disjunction disjunction = Restrictions.disjunction();
-        disjunction.add(Restrictions.eq("account", account));
-        if (!groups.isEmpty())
+
+        if (!groups.isEmpty()) {
+            Disjunction disjunction = Restrictions.disjunction();
+            disjunction.add(Restrictions.eq("account", account));
             disjunction.add(Restrictions.in("group", groups));
+            criteria.add(disjunction);
+        } else {
+            criteria.add(Restrictions.eq("account", account));
+        }
 
-
-        List list = criteria.createAlias("entry", "entry")
+        criteria.createAlias("entry", "entry")
                 .add(Restrictions.in("entry.id", entries))
-                .add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()))
-                .add(disjunction)
-                .add(Restrictions.disjunction()
-                        .add(Restrictions.eq("canWrite", true))
-                        .add(Restrictions.eq("canRead", true)))
-                .setProjection(Projections.property("entry.id"))
+                .add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()));
+        List list = criteria.setProjection(Projections.distinct(Projections.property("entry.id")))
                 .list();
 
         return list;
