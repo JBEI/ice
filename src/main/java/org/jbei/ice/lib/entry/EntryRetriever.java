@@ -1,27 +1,20 @@
 package org.jbei.ice.lib.entry;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.lib.utils.IceCSVSerializer;
 
 import java.util.*;
@@ -244,45 +237,14 @@ public class EntryRetriever {
                 entries = dao.getOwnerEntryIds(userId, type);
                 break;
             case "shared":
-                List<Entry> es = dao.sharedWithUserEntries(account,
-                                                    accountGroups,
-                                                    ColumnField.CREATED,
-                                                    true,
-                                                    0,
-                                                    (int) dao.getAllEntryCount());
-                entries = new ArrayList<>();
-                for(Entry e : es){
-                    entries.add(e.getId());
-                }
+                entries = dao.sharedWithUserEntryIds(userId);
                 break;
             case "available":
-                entries = getVisibleEntries(account.getType() == AccountType.ADMIN);
+                entries = dao.getVisibleEntryIds(account.getType() == AccountType.ADMIN);
                 break;
         }
 
         return entries;
-    }
-
-    protected List<Long> getVisibleEntries(boolean admin) {
-        try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            Query query;
-
-            if (admin){
-                query = session.createQuery("SELECT e.id FROM Entry e WHERE (visibility IS NULL OR visibility = " +
-                    Visibility.OK.getValue() + " OR visibility = " + Visibility.PENDING.getValue() + ")");
-            }else{
-                query = session.createQuery("SELECT DISTINCT e.id FROM Entry e, Permission p" +
-                        " WHERE p.group = :group AND e = p.entry AND e.visibility = :v");
-                query.setParameter("group", new GroupController().createOrRetrievePublicGroup());
-                query.setParameter("v", Visibility.OK.getValue());
-            }
-
-            return query.list();
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new RuntimeException(he);
-        }
     }
 
     // todo : folder controller
