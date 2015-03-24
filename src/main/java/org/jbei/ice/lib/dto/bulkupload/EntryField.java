@@ -14,7 +14,7 @@ public enum EntryField implements IDataTransferModel {
     PI_EMAIL("Principal Investigator Email", false),
     FUNDING_SOURCE("Funding Source", false),
     IP("Intellectual Property", false),
-    BIOSAFETY_LEVEL("BioSafety Level", true),
+    BIO_SAFETY_LEVEL("BioSafety Level", true),
     NAME("Name", true),
     ALIAS("Alias", false),
     KEYWORDS("Keywords", false),

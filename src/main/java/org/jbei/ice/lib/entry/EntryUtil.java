@@ -83,7 +83,7 @@ public class EntryUtil {
             case IP:
                 return entry.getIntellectualProperty();
 
-            case BIOSAFETY_LEVEL:
+            case BIO_SAFETY_LEVEL:
                 return entry.getBioSafetyLevel().toString();
 
             case NAME:
@@ -228,7 +228,7 @@ public class EntryUtil {
                     invalidFields.add(EntryField.NAME);
 
                 if (partData.getBioSafetyLevel() == null)
-                    invalidFields.add(EntryField.BIOSAFETY_LEVEL);
+                    invalidFields.add(EntryField.BIO_SAFETY_LEVEL);
 
                 if (StringUtils.isEmpty(partData.getStatus()))
                     invalidFields.add(EntryField.STATUS);
@@ -385,7 +385,7 @@ public class EntryUtil {
                 data.setIntellectualProperty(value);
                 break;
 
-            case BIOSAFETY_LEVEL:
+            case BIO_SAFETY_LEVEL:
                 Integer level = BioSafetyOption.intValue(value);
                 if (level == null) {
                     if (value.contains("1"))

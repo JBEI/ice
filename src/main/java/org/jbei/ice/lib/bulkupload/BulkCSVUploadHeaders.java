@@ -1,10 +1,10 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Headers for each of the entry add types for bulk csv upload
@@ -43,7 +43,7 @@ public class BulkCSVUploadHeaders {
         list.add(EntryField.PI_EMAIL);
         list.add(EntryField.FUNDING_SOURCE);
         list.add(EntryField.IP);
-        list.add(EntryField.BIOSAFETY_LEVEL);
+        list.add(EntryField.BIO_SAFETY_LEVEL);
         list.add(EntryField.NAME);
         list.add(EntryField.ALIAS);
         list.add(EntryField.KEYWORDS);

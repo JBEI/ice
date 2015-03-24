@@ -108,31 +108,31 @@ public class PartResource extends RestResource {
     /**
      * Retrieves a comma separated value representation of the part referenced by the path parameter identifier
      */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}/csv")
-    public Response getCSV(
-            @PathParam("id") String id,
-            @QueryParam("sid") String sid,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
-        if (StringUtils.isEmpty(sessionId))
-            sessionId = sid;
-
-        String userId = getUserIdFromSessionHeader(sessionId);
-        log(userId, "retrieving part csv");
-        String csv = retriever.getAsCSV(userId, id);
-        if (csv != null) {
-            String name = retriever.getPartNumber(userId, id);
-            if (name == null)
-                name = "entry.csv";
-            else
-                name += ".csv";
-            Response.ResponseBuilder response = Response.ok(csv);
-            response.header("Content-Disposition", "attachment; filename=\"" + name + "\"");
-            return response.build();
-        }
-        return Response.status(Response.Status.NOT_FOUND).build();
-    }
+//    @GET
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Path("/{id}/csv")
+//    public Response getCSV(
+//            @PathParam("id") String id,
+//            @QueryParam("sid") String sid,
+//            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+//        if (StringUtils.isEmpty(sessionId))
+//            sessionId = sid;
+//
+//        String userId = getUserIdFromSessionHeader(sessionId);
+//        log(userId, "retrieving part csv");
+//        String csv = null; // retriever.getAsCSV(userId, id);
+//        if (csv != null) {
+//            String name = retriever.getPartNumber(userId, id);
+//            if (name == null)
+//                name = "entry.csv";
+//            else
+//                name += ".csv";
+//            Response.ResponseBuilder response = Response.ok(csv);
+//            response.header("Content-Disposition", "attachment; filename=\"" + name + "\"");
+//            return response.build();
+//        }
+//        return Response.status(Response.Status.NOT_FOUND).build();
+//    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

@@ -199,6 +199,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
         });
     };
 
+    // todo : getSelection should return the selection object that matches EntrySelection
     $scope.csvExport = function () {
         var entries = Selection.getSelectedEntries();
         // if selected.selected
@@ -207,13 +208,16 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
             selectedIds.push(parseInt(entries[i].id));
         }
 
+        var selection = Selection.getSelection();
+        selection.entries = selectedIds;
         var files = Files();
 
         // retrieve from server
-        files.getCSV(selectedIds,
+        files.getCSV(selection,
             function (result) {
                 if (result && result.value) {
                     $window.open("/rest/file/tmp/" + result.value, "_self");
+                    Selection.reset();
                 }
 
             }, function (error) {

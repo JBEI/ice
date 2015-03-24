@@ -49,7 +49,7 @@ public class BulkUploadControllerTest {
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.STRAIN);
         autoUpdate.getKeyValue().put(EntryField.NAME, "strainPlasmid");
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "strainPlasmidSummary");
-        autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, "Level 2");
+        autoUpdate.getKeyValue().put(EntryField.BIO_SAFETY_LEVEL, "Level 2");
         autoUpdate.getKeyValue().put(EntryField.STATUS, "In Progress");
         autoUpdate.getKeyValue().put(EntryField.PI, "Principal Investigator");
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "strain summary");
@@ -145,7 +145,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
         autoUpdate.getKeyValue().put(EntryField.PI, "test");
         autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
-        autoUpdate.getKeyValue().put(EntryField.BIOSAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
+        autoUpdate.getKeyValue().put(EntryField.BIO_SAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
 
         autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.ARABIDOPSIS);
         Assert.assertNotNull(autoUpdate);

@@ -12,9 +12,11 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.utils.IceCSVSerializer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Hector Plahar
@@ -27,32 +29,6 @@ public class EntryRetriever {
     public EntryRetriever() {
         this.dao = DAOFactory.getEntryDAO();
         authorization = new EntryAuthorization();
-    }
-
-    public String getListAsCSV(String userId, ArrayList<Long> list) {  // todo : use a file for large lists
-        if (list == null || list.isEmpty() || userId.isEmpty())
-            return "";
-
-        List<Entry> entryList = new LinkedList<>();
-
-        for (Number item : list) {
-            Entry entry = this.dao.get(item.longValue());
-            if (entry == null || !authorization.canRead(userId, entry))
-                continue;
-
-            entryList.add(entry);
-        }
-
-        return IceCSVSerializer.serializeList(entryList);
-    }
-
-    public String getAsCSV(String userId, String id) {
-        Entry entry = getEntry(id);
-        if (entry == null)
-            return null;
-
-        authorization.expectRead(userId, entry);
-        return IceCSVSerializer.serialize(entry);
     }
 
     public String getPartNumber(String userId, String id) {

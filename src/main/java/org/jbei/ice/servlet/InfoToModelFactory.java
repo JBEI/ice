@@ -362,7 +362,7 @@ public class InfoToModelFactory {
                     plasmid.setIntellectualProperty(value);
                 break;
 
-            case BIOSAFETY_LEVEL:
+            case BIO_SAFETY_LEVEL:
                 Integer level = BioSafetyOption.intValue(value);
                 if (level == null) {
                     if (value.contains("1"))

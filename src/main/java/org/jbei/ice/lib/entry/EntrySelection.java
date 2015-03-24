@@ -15,13 +15,18 @@ import java.util.ArrayList;
  */
 public class EntrySelection implements IDataTransferModel {
 
-    private boolean all;                        // all entries in context selected
-    private EntryType entryType;                // type of entry selected. It is superseded by the all parameter.
-    private EntrySelectionType selectionType;   // context selection type
-    private SearchQuery searchQuery;            // search query if selection type is "SEARCH"
+    private boolean all;                            // all entries in context selected
+    private EntryType entryType;                    // type of entry selected. It is superseded by the all parameter.
+    private EntrySelectionType selectionType;       // context selection type
+    private SearchQuery searchQuery;                // search query if selection type is "SEARCH"
     private ArrayList<FolderDetails> destination;   // destination for entry selection
-    private String folderId;                    // personal, available, shared, drafts, pending, actual folderId
-    private ArrayList<Long> entries;            // if no context, then ad hoc selection
+    private String folderId;                        // personal, available, shared, drafts, pending, actual folderId
+    private ArrayList<Long> entries;                // if no context, then ad hoc selection
+
+    public EntrySelection() {
+        entries = new ArrayList<>();
+        destination = new ArrayList<>();
+    }
 
     public boolean isAll() {
         return all;
