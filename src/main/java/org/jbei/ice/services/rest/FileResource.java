@@ -79,6 +79,9 @@ public class FileResource extends RestResource {
             return super.respond(Response.Status.NOT_FOUND);
 
         Response.ResponseBuilder response = Response.ok(tmpFile);
+        if (tmpFile.getName().endsWith(".csv")) {
+            response.header("Content-Type", "text/csv; name=\"" + tmpFile.getName() + "\"");
+        }
         response.header("Content-Disposition", "attachment; filename=\"" + tmpFile.getName() + "\"");
         return response.build();
     }
