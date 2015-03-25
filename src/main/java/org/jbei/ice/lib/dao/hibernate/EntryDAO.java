@@ -312,11 +312,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    public List<Long> sharedWithUserEntryIds(String userId){
-        Account account = new AccountDAO().getByEmail(userId);
+    public List<Long> sharedWithUserEntryIds(Account account, Group everybodyGroup){
         Set<Group> groups = new HashSet<>(account.getGroups());
-        GroupController controller = new GroupController();
-        Group everybodyGroup = controller.createOrRetrievePublicGroup();
         groups.add(everybodyGroup);
 
         try {
@@ -327,7 +324,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             Query query = session.createQuery(queryString);
             query.setParameterList("groups", groups);
             query.setParameter("v", Visibility.OK.getValue());
-            query.setParameter("oe", userId);
+            query.setParameter("oe", account.getEmail());
             List list = query.list();
             return new ArrayList<>(list);
         } catch (HibernateException he) {

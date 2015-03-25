@@ -4,7 +4,6 @@ import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -223,12 +222,8 @@ public class EntryRetriever {
 
     protected List<Long> getCollectionEntries(String userId, String collection, boolean all, EntryType type) {
         List<Long> entries = null;
-        Account account = new AccountDAO().getByEmail(userId);
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
-        Set<Group> accountGroups = new HashSet<>(account.getGroups());
-        GroupController controller = new GroupController();
-        Group everybodyGroup = controller.createOrRetrievePublicGroup();
-        accountGroups.add(everybodyGroup);
 
         switch (collection.toLowerCase()) {
             case "personal":
@@ -237,7 +232,9 @@ public class EntryRetriever {
                 entries = dao.getOwnerEntryIds(userId, type);
                 break;
             case "shared":
-                entries = dao.sharedWithUserEntryIds(userId);
+                GroupController controller  = new GroupController();
+                Group everybodyGroup        = controller.createOrRetrievePublicGroup();
+                entries                     = dao.sharedWithUserEntryIds(account, everybodyGroup);
                 break;
             case "available":
                 entries = dao.getVisibleEntryIds(account.getType() == AccountType.ADMIN);
