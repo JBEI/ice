@@ -174,9 +174,9 @@ public class EntryRetriever {
         switch (context.getSelectionType()) {
             default:
             case FOLDER:
-                if(!context.getEntries().isEmpty()){
+                if (!context.getEntries().isEmpty()) {
                     return context.getEntries();
-                }else{
+                } else {
                     long folderId = Long.decode(context.getFolderId());
                     return getFolderEntries(userId, folderId, all, entryType);
                 }
@@ -185,9 +185,9 @@ public class EntryRetriever {
                 break;
 
             case COLLECTION:
-                if(!context.getEntries().isEmpty()){
+                if (!context.getEntries().isEmpty()) {
                     return context.getEntries();
-                }else {
+                } else {
                     return getCollectionEntries(userId, context.getFolderId(), all, entryType);
                 }
         }
@@ -208,9 +208,9 @@ public class EntryRetriever {
                 entries = dao.getOwnerEntryIds(userId, type);
                 break;
             case "shared":
-                GroupController controller  = new GroupController();
-                Group everybodyGroup        = controller.createOrRetrievePublicGroup();
-                entries                     = dao.sharedWithUserEntryIds(account, everybodyGroup);
+                GroupController controller = new GroupController();
+                Group everybodyGroup = controller.createOrRetrievePublicGroup();
+                entries = dao.sharedWithUserEntryIds(account, everybodyGroup);
                 break;
             case "available":
                 entries = dao.getVisibleEntryIds(account.getType() == AccountType.ADMIN);

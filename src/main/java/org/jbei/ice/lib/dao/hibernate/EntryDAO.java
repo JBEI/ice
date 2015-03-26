@@ -312,7 +312,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    public List<Long> sharedWithUserEntryIds(Account account, Group everybodyGroup){
+    public List<Long> sharedWithUserEntryIds(Account account, Group everybodyGroup) {
         Set<Group> groups = new HashSet<>(account.getGroups());
         groups.add(everybodyGroup);
 
@@ -549,10 +549,10 @@ public class EntryDAO extends HibernateRepository<Entry> {
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             Query query;
 
-            if (admin){
+            if (admin) {
                 query = session.createQuery("SELECT e.id FROM Entry e WHERE (visibility IS NULL OR visibility = " +
                         Visibility.OK.getValue() + " OR visibility = " + Visibility.PENDING.getValue() + ")");
-            }else{
+            } else {
                 query = session.createQuery("SELECT DISTINCT e.id FROM Entry e, Permission p" +
                         " WHERE p.group = :group AND e = p.entry AND e.visibility = :v");
                 query.setParameter("group", new GroupController().createOrRetrievePublicGroup());
@@ -723,6 +723,4 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 .uniqueResult();
         return itemCount.intValue();
     }
-
-
 }

@@ -28,7 +28,7 @@ public class PermissionDAOTest {
         dao = new PermissionDAO();
     }
 
-    public List<Long> makePrivateEntryIds(Account ownerAccount) throws Exception{
+    public List<Long> makePrivateEntryIds(Account ownerAccount) throws Exception {
         List<Long> entryIds = new ArrayList<>(3);
         for (int i = 0; i < 3; i++) {
             Strain strain = TestEntryCreator.createTestStrain(ownerAccount);
@@ -43,14 +43,8 @@ public class PermissionDAOTest {
     }
 
     @Test
-    public void testAdminCanReadEverything() throws Exception {
-        List<Long> entryIds = makePrivateEntryIds(regularAccount);
-        Assert.assertArrayEquals(entryIds.toArray(), dao.getCanReadEntries(adminAccount, entryIds).toArray());
-    }
-
-    @Test
     public void testNonAdminCantReadWithoutPermissions() throws Exception {
         List<Long> entryIds = makePrivateEntryIds(adminAccount);
-        Assert.assertArrayEquals(new Object[0], dao.getCanReadEntries(regularAccount, entryIds).toArray());
+        Assert.assertArrayEquals(new Object[0], dao.getCanReadEntries(regularAccount, regularAccount.getGroups(), entryIds).toArray());
     }
 }

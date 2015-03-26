@@ -13,7 +13,7 @@ angular.module('ice.entry.service', [])
 
         return {
             selectEntry: function (entry) {
-                if (this.isSelected(entry)){
+                if (this.isSelected(entry)) {
                     return;
                 }
 

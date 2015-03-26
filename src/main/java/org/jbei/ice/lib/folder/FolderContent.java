@@ -12,6 +12,8 @@ import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.group.GroupController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +51,9 @@ public class FolderContent {
     protected List<FolderDetails> addEntriesToFolders(String userId, List<Long> entries, List<FolderDetails> folders) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
-        entries = DAOFactory.getPermissionDAO().getCanReadEntries(account, entries);
+        Set<Group> accountGroups = new GroupController().getAllGroups(account);
+        if (!folderAuthorization.isAdmin(userId))
+            entries = DAOFactory.getPermissionDAO().getCanReadEntries(account, accountGroups, entries);
 
         if (entries.isEmpty())
             return new ArrayList<>();

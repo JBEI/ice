@@ -320,11 +320,13 @@ public class PermissionDAO extends HibernateRepository<Permission> {
     /**
      * Filters the given list, removing those that the specified account does not have read privileges on
      *
+     * @param account account to filter entries by
+     * @param groups  groups that this account belongs to
+     * @param entries list of entry ids to filter
      * @return filtered list such that specified account have read privileges on entries contained in it
      */
-    public List<Long> getCanReadEntries(Account account, List<Long> entries) {
+    public List<Long> getCanReadEntries(Account account, Set<Group> groups, List<Long> entries) {
         Criteria criteria = currentSession().createCriteria(Permission.class);
-        Set<Group> groups = account.getGroups();
 
         if (!groups.isEmpty()) {
             Disjunction disjunction = Restrictions.disjunction();
@@ -338,10 +340,10 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         criteria.createAlias("entry", "entry")
                 .add(Restrictions.in("entry.id", entries))
                 .add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()));
-        List list = criteria.setProjection(Projections.distinct(Projections.property("entry.id")))
-                .list();
 
-        return list;
+        return criteria.setProjection(
+                Projections.distinct(Projections.property("entry.id")))
+                .list();
     }
 
     @Override

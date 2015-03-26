@@ -10,9 +10,12 @@ import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.group.GroupController;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -43,7 +46,14 @@ public class EntriesAsCSV {
         // ad-hoc entry selection takes precedence over other types of selection
         if (!selection.getEntries().isEmpty()) {
             PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
-            List<Long> entries = permissionDAO.getCanReadEntries(account, selection.getEntries());
+            GroupController controller = new GroupController();
+            Set<Group> accountGroups = controller.getAllGroups(account);
+            List<Long> entries = selection.getEntries();
+            EntryAuthorization authorization = new EntryAuthorization();
+
+            if (!authorization.isAdmin(userId))
+                entries = permissionDAO.getCanReadEntries(account, accountGroups, entries);
+
             return writeList(entries);
         }
 
