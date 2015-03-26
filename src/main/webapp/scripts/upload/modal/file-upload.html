@@ -23,7 +23,7 @@
         {{uploadError}}
     </div>
 
-    <input ng-if="!processing && !modalClose" type="file" nv-file-select class="font-90em">
+    <input ng-if="!processing && !modalClose" type="file" nv-file-select uploader="importUploader" class="font-90em">
 
     <div style="height: 12px; width: 100%" ng-if="!processing && !modalClose">
         <div class="progress-bar" role="progressbar" ng-style="{ 'width': importUploader.progress + '%' }"></div>

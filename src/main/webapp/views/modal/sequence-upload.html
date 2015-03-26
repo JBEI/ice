@@ -14,7 +14,7 @@
     </alert>
 
     <span ng-if="!isPaste">
-        <div class="margin-top-20"><input nv-file-select type="file"/></div>
+        <div class="margin-top-20"><input nv-file-select uploader="sequenceFileUpload" type="file"/></div>
         <div style="height: 7px; background-color: #f9f9f9;">
             <div class="progress-bar" role="progressbar" ng-style="{ 'width': sequenceFileUpload.progress + '%' }"></div>
         </div>
