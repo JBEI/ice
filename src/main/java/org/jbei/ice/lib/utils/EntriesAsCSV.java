@@ -6,16 +6,13 @@ import org.jbei.ice.lib.bulkupload.BulkCSVUploadHeaders;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
-import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.entry.EntryAuthorization;
+import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.group.GroupController;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -42,23 +39,9 @@ public class EntriesAsCSV {
 
     public final boolean setSelectedEntries(String userId, EntrySelection selection) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-
-        // ad-hoc entry selection takes precedence over other types of selection
-        if (!selection.getEntries().isEmpty()) {
-            PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
-            GroupController controller = new GroupController();
-            Set<Group> accountGroups = controller.getAllGroups(account);
-            List<Long> entries = selection.getEntries();
-            EntryAuthorization authorization = new EntryAuthorization();
-
-            if (!authorization.isAdmin(userId))
-                entries = permissionDAO.getCanReadEntries(account, accountGroups, entries);
-
-            return writeList(entries);
-        }
-
-        // other selection types not supported yet
-        return false;
+        EntryRetriever retriever = new EntryRetriever();
+        List<Long> entries = retriever.getEntriesFromSelectionContext(account.getEmail(), selection);
+        return writeList(entries);
     }
 
     private boolean writeList(List<Long> entries) {
