@@ -539,6 +539,7 @@ angular.module('ice.entry.controller', [])
                 }
 
                 $scope.activePart.isExistingPart = true;
+                $scope.activePart.fields = EntryService.getFieldsForType($scope.activePart.type);
                 $scope.addExisting = false;
                 $scope.entry.linkedParts.push($scope.activePart);
 
@@ -602,13 +603,11 @@ angular.module('ice.entry.controller', [])
                 $scope.activePart = $scope.entry;
             else
                 $scope.activePart = $scope.entry.linkedParts[index];
-            $scope.selectedFields = EntryService.getFieldsForType($scope.activePart.type);
+            $scope.activePart.fields = EntryService.getFieldsForType($scope.activePart.type);
         };
     })
-
-    .
-    controller('CreateEntryController',
-    function ($http, $scope, $modal, $rootScope, FileUploader, $location, $stateParams, $cookieStore, Entry, EntryService) {
+    .controller('CreateEntryController', function ($http, $scope, $modal, $rootScope, FileUploader, $location,
+                                                   $stateParams, $cookieStore, Entry, EntryService) {
         $scope.createType = $stateParams.type;
         $scope.showMain = true;
 
@@ -625,11 +624,11 @@ angular.module('ice.entry.controller', [])
                     $scope.part = EntryService.setNewEntryFields($scope.part);
                     $scope.part.linkedParts = [];
                     $scope.activePart = $scope.part;
-                    $scope.selectedFields = EntryService.getFieldsForType($scope.createType);
+                    $scope.part.fields = EntryService.getFieldsForType($scope.createType);
                 } else {
                     var newPart = result;
                     newPart = EntryService.setNewEntryFields(newPart);
-                    $scope.selectedFields = EntryService.getFieldsForType(type);
+                    newPart.fields = EntryService.getFieldsForType(type);
                     $scope.part.linkedParts.push(newPart);
 
                     $scope.colLength = 11 - $scope.part.linkedParts.length;
@@ -641,6 +640,7 @@ angular.module('ice.entry.controller', [])
             });
         };
 
+        // init : get defaults for main entry
         getPartDefaults($scope.createType, true);
 
         $scope.addLink = function (schema) {
@@ -649,7 +649,6 @@ angular.module('ice.entry.controller', [])
 
         $scope.removeLink = function (schema, index) {
             $scope.part[schema].splice(index, 1);
-//            $scope.colLength = 11 - $scope.part.linkedParts.length;
         };
 
         $scope.addNewPartLink = function (type) {
@@ -663,6 +662,7 @@ angular.module('ice.entry.controller', [])
                 if (!$scope.activePart.parameters)
                     $scope.activePart.parameters = [];
                 $scope.addExisting = false;
+                $scope.activePart.fields = EntryService.getFieldsForType($scope.activePart.type);
                 $scope.part.linkedParts.push($scope.activePart);
 
                 $scope.colLength = 11 - $scope.part.linkedParts.length;
@@ -708,7 +708,7 @@ angular.module('ice.entry.controller', [])
                 $scope.activePart = $scope.part;
             else
                 $scope.activePart = $scope.part.linkedParts[index];
-            $scope.selectedFields = EntryService.getFieldsForType($scope.activePart.type);
+            //$scope.selectedFields = EntryService.getFieldsForType($scope.activePart.type);
         };
 
         $scope.getLocation = function (inputField, val) {
@@ -723,25 +723,34 @@ angular.module('ice.entry.controller', [])
             });
         };
 
-        $scope.nameMissing = false;
-        $scope.creatorMissing = false;
-        $scope.creatorEmailMissing = false;
-        $scope.principalInvestigatorMissing = false;
-        $scope.summaryMissing = false;
-
         $scope.submitPart = function () {
+            var errorTabActive = false;
+
             // validate main part
-            var canSubmit = EntryService.validateFields($scope.part, $scope.selectedFields);
+            var canSubmit = EntryService.validateFields($scope.part, $scope.part.fields);
+            if (!canSubmit) {
+                $scope.setActive('main');
+                errorTabActive = true;
+            }
             $scope.part.type = $scope.part.type.toUpperCase();
 
             // validate contained parts, if any
             if ($scope.part.linkedParts && $scope.part.linkedParts.length) {
                 for (var idx = 0; idx < $scope.part.linkedParts.length; idx += 1) {
-                    var canSubmitLinked = EntryService.validateFields($scope.part.linkedParts[idx], $scope.selectedFields);
+                    var linkedPart = $scope.part.linkedParts[idx];
+
+                    // do not attempt to validate existing part
+                    if (linkedPart.isExistingPart)
+                        continue;
+
+                    //$scope.selectedFields = EntryService.getFieldsForType(linkedPart.type);
+
+                    var canSubmitLinked = EntryService.validateFields(linkedPart, linkedPart.fields);
                     if (!canSubmitLinked) {
-                        // show icon in tab
-                        // todo
-                        console.log("linked entry at idx " + idx + " is not valid");
+                        if (!errorTabActive) {
+                            $scope.setActive(idx);
+                            errorTabActive = true;
+                        }
                         canSubmit = canSubmitLinked;
                     }
                 }
@@ -1409,7 +1418,6 @@ angular.module('ice.entry.controller', [])
 
         $scope.backTo = function () {
             Selection.reset();
-            console.log($scope.context.back);
             $location.path($scope.context.back);
         };
 

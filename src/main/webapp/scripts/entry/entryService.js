@@ -316,7 +316,7 @@ angular.module('ice.entry.service', [])
         var validateFields = function (part, fields) {
             var canSubmit = true;
 
-            // main type
+            // for each field in the part, check if it validates (only fields that are required)
             angular.forEach(fields, function (field) {
                 if (!field.required)
                     return;
@@ -333,6 +333,7 @@ angular.module('ice.entry.service', [])
                     }
                 } else {
                     if (field.bothRequired) {
+                        // check email portion
                         field.withEmailInvalid = (part[field.schema + 'Email'] === undefined || part[field.schema + 'Email'] === '');
                     }
                     field.invalid = (part[field.schema] === undefined || part[field.schema] === '');
@@ -342,6 +343,10 @@ angular.module('ice.entry.service', [])
                     canSubmit = !field.invalid;
                 }
             });
+
+            if (!canSubmit) {
+                part.fields = fields;
+            }
             return canSubmit;
         };
 
@@ -425,13 +430,19 @@ angular.module('ice.entry.service', [])
                         entry[field.schema] = [
                             {value: ''}
                         ];
+                        return;
                     }
 
                     if (field.subSchema && entry[field.subSchema]) {
                         entry[field.schema] = entry[field.subSchema][field.schema];
+                        return;
                     }
+
+                    if (!entry.hasOwnProperty([field.schema]))
+                        entry[field.schema] = undefined;
                 });
 
+                // new entry field defaults
                 entry.bioSafetyLevel = '1';
                 entry.status = 'Complete';
                 entry.parameters = [];

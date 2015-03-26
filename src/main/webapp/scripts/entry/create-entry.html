@@ -1,154 +1,166 @@
 <form name="createPartForm" data-ng-submit="submitPart()" class="entry-form" ng-controller="CreateEntryController">
 
-<div class="container-fluid" ng-init="part.creatorEmail=user.email">
+    <div class="container-fluid" ng-init="part.creatorEmail=user.email">
 
-<!--header-->
-<div class="row entry_general_header_td" style="height: 60px">
-    <div class="col-md-12">
-        <table>
-            <tr>
-                <td>
-                    <h4>
+        <!--header-->
+        <div class="row entry_general_header_td" style="height: 60px">
+            <div class="col-md-12">
+                <table>
+                    <tr>
+                        <td>
+                            <h4>
                         <span style="white-space: nowrap">
                             <strong ng-hide="part.name" class="color-888">CREATE NEW</strong>
                             <strong ng-class="{'color-888':part.name}">{{createType.toUpperCase()}}</strong>
                             <strong ng-show="part.name">{{part.name}}</strong>
                         </span>
-                        <br>
-                        <small style="white-space: nowrap" class="font-65em"><span my-current-time="format"></span> -
-                            <a ng-href="/profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a>
-                        </small>
-                    </h4>
-                </td>
-                <td style="padding-left: 25px">
-                    <div class="dropdown">
+                                <br>
+                                <small style="white-space: nowrap" class="font-65em"><span
+                                        my-current-time="format"></span> -
+                                    <a ng-href="/profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a>
+                                </small>
+                            </h4>
+                        </td>
+                        <td style="padding-left: 25px">
+                            <div class="dropdown">
                         <span class="opacity_hover dropdown-toggle"><i class="fa fa-link"></i> Link To
                             <span class="caret"></span>
                         </span>
-                        <ul class="dropdown-menu">
-                            <li class="cursor_pointer font-80em"><a ng-click="addExisting=true">Existing Entry</a></li>
-                            <li class="cursor_pointer font-80em" ng-repeat="option in linkOptions">
-                                <a ng-click="addNewPartLink(option.type)"><i>New {{option.display}}</i></a>
-                            </li>
-                        </ul>
-                    </div>
-                </td>
-                <td ng-show="addExisting" style="padding-left: 12px">
-                    <div class="input-group">
-                        <input type="text" ng-class="{'input_box_group':true, 'input_box_error':false}"
-                               ng-model="addExistingPartNumber"
-                               placeHolder="Enter Part Number" style="width: 205px;"
-                               typeahead-loading="loadingAddExistingData"
-                               typeahead="result as result.partId for result in getEntriesByPartNumber($viewValue) | filter:{partId:$viewValue}"
-                               typeahead-editable="true"
-                               typeahead-on-select="addExistingPartLink($item, $model, $label)">
+                                <ul class="dropdown-menu">
+                                    <li class="cursor_pointer font-80em"><a ng-click="addExisting=true">Existing
+                                        Entry</a></li>
+                                    <li class="cursor_pointer font-80em" ng-repeat="option in linkOptions">
+                                        <a ng-click="addNewPartLink(option.type)"><i>New {{option.display}}</i></a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                        <td ng-show="addExisting" style="padding-left: 12px">
+                            <div class="input-group">
+                                <input type="text" ng-class="{'input_box_group':true, 'input_box_error':false}"
+                                       ng-model="addExistingPartNumber"
+                                       placeHolder="Enter Part Number" style="width: 205px;"
+                                       typeahead-loading="loadingAddExistingData"
+                                       typeahead="result as result.partId for result in getEntriesByPartNumber($viewValue) | filter:{partId:$viewValue}"
+                                       typeahead-editable="true"
+                                       typeahead-on-select="addExistingPartLink($item, $model, $label)">
                         <span class="input-group-addon" data-ng-click="addExisting=false" style="padding:3px;
                         background-color: #f1f1f1;width: 19px">
                             <i class="fa fa-times delete_icon"></i>
                         </span>
-                        <i ng-show="loadingAddExistingData" class="fa fa-spinner fa-spin"></i>
-                    </div>
-                </td>
-            </tr>
-        </table>
-    </div>
-</div>
+                                <i ng-show="loadingAddExistingData" class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
 
-<!--tabs created when someone clicks on link--  -->
-<div class="row" ng-if="part.linkedParts.length" style="margin-bottom: 14px; height: 23px; border-top: 1px solid #eee">
-    <div class="cursor_pointer col-md-1" style="padding-right: 4px; padding-left: 4px;"
-         ng-click="setActive('main')"
-         ng-class="{new_entry_tab_inactive:active!=='main', new_entry_tab_active:active==='main'}">
-        <strong class="fluid_no_wrap small">{{part.name || 'Main Entry'}}</strong>
-        <span class="pull-right" style="">&nbsp;</span>
-    </div>
-    <div ng-repeat="linkedPart in part.linkedParts" class="col-md-1" ng-click="setActive($index)"
-         ng-class="{new_entry_tab_inactive:active!==$index, new_entry_tab_active:active===$index}"
-         style="padding-right:3px; padding-left: 6px">
-        <small class="fluid_no_wrap">{{linkedPart.name || 'Linked ' + linkedPart.type | capitalize}}</small>
+        <!--tabs created when someone clicks on link--  -->
+        <div class="row" ng-if="part.linkedParts.length"
+             style="margin-bottom: 14px; height: 23px; border-top: 1px solid #eee">
+            <div class="cursor_pointer col-md-1" style="padding-right: 4px; padding-left: 4px;"
+                 ng-click="setActive('main')"
+                 ng-class="{new_entry_tab_inactive:active!=='main', new_entry_tab_active:active==='main'}">
+                <strong class="fluid_no_wrap small">{{part.name || 'Main Entry'}}</strong>
+                <span class="pull-right" style="">&nbsp;</span>
+            </div>
+            <div ng-repeat="linkedPart in part.linkedParts" class="col-md-1" ng-click="setActive($index)"
+                 ng-class="{new_entry_tab_inactive:active!==$index, new_entry_tab_active:active===$index}"
+                 style="padding-right:3px; padding-left: 6px">
+                <small class="fluid_no_wrap"><i style="font-weight: 300" class="fa fa-link"></i> {{linkedPart.name ||
+                    linkedPart.type | capitalize}}
+                </small>
         <span ng-click="deleteNewPartLink(linkedPart)" class="pull-right opacity_hover opacity_4" stop-event="click">
             <i class="fa fa-times delete_icon font-70em"></i>
         </span>
-    </div>
+            </div>
 
-    <div class="col-md-{{colLength}}" style="border-left: 1px solid #eee; background-color: #f7f7f7; height: 23px">
-        &nbsp;
-    </div>
-</div>
+            <div class="col-md-{{colLength}}"
+                 style="border-left: 1px solid #eee; background-color: #f7f7f7; height: 23px">
+                &nbsp;
+            </div>
+        </div>
 
-<!-- selected entry; selectedFields is an array of objects -->
-<div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="!activePart.isExistingPart">
-    <div class="col-md-2 text-right">
+        <!--START OF NEW PART-->
+        <div ng-if="!activePart.isExistingPart">
+            <!-- show form for selected new entry -->
+            <div class="row pad-top-5" ng-repeat="field in activePart.fields">
+                <div class="col-md-2 text-right">
         <span style="white-space:nowrap" ng-class="{'font-bold':field.edit}">{{field.label}}
             <span ng-if="field.required" class="required">*</span>
         </span>
-    </div>
+                </div>
 
-    <!--short input field-->
-    <div class="col-md-10" ng-if="field.inputType==='short'">
-        <input type="text" ng-model="activePart[field.schema]" ng-trim="true" ng-focus="field.edit=true"
-               ng-blur="field.edit=false" ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-               ng-change="field.invalid=false" maxlength="125" placeHolder="{{field.placeHolder}}"
-               style="width: 205px;">
-        <i ng-if="field.help" class="fa fa-question-circle opacity_hover" tooltip="{{field.help}}"
-           tooltip-placement="right"></i>
-    </div>
+                <!--short input field-->
+                <div class="col-md-10" ng-if="field.inputType==='short'">
+                    <input type="text" ng-model="activePart[field.schema]" ng-trim="true" ng-focus="field.edit=true"
+                           ng-blur="field.edit=false"
+                           ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                           ng-change="field.invalid=false" maxlength="125" placeHolder="{{field.placeHolder}}"
+                           style="width: 205px;">
+                    <i ng-if="field.help" class="fa fa-question-circle opacity_hover" tooltip="{{field.help}}"
+                       tooltip-placement="right"></i>
+                </div>
 
-    <!-- short input field with email -->
-    <div class="col-md-10" ng-if="field.inputType==='withEmail'">
-        <input type="text" ng-model="activePart[field.schema]" ng-trim="true" ng-focus="field.edit=true"
-               ng-blur="field.edit=false" ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-               ng-change="field.invalid=false" maxlength="125" style="width: 205px;">
+                <!-- short input field with email -->
+                <div class="col-md-10" ng-if="field.inputType==='withEmail'">
+                    <input type="text" ng-model="activePart[field.schema]" ng-trim="true" ng-focus="field.edit=true"
+                           ng-blur="field.edit=false"
+                           ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                           ng-change="field.invalid=false" maxlength="125" style="width: 205px;">
 
-        <input type="text" ng-model="activePart[field.schema+'Email']" ng-trim="true" ng-focus="field.edit=true"
-               ng-blur="field.edit=false"
-               ng-class="{'input_box':!field.withEmailInvalid, 'input_box_error':field.withEmailInvalid}"
-               ng-change="field.withEmailInvalid=false" placeholder="Email if known" style="width: 191px;">
-    </div>
+                    <input type="text" ng-model="activePart[field.schema+'Email']" ng-trim="true"
+                           ng-focus="field.edit=true"
+                           ng-blur="field.edit=false"
+                           ng-class="{'input_box':!field.withEmailInvalid, 'input_box_error':field.withEmailInvalid}"
+                           ng-change="field.withEmailInvalid=false" placeholder="Email if known" style="width: 191px;">
+                </div>
 
-    <!--options-->
-    <div class="col-md-10" ng-if="field.options">
-        <select ng-focus="field.edit=true" ng-blur="field.edit=false" class="input_box pull_down"
-                ng-model="activePart[field.schema]" size="1"
-                ng-options="option.value as option.text for option in field.options"></select>
-    </div>
+                <!--options-->
+                <div class="col-md-10" ng-if="field.options">
+                    <select ng-focus="field.edit=true" ng-blur="field.edit=false" class="input_box pull_down"
+                            ng-model="activePart[field.schema]" size="1"
+                            ng-options="option.value as option.text for option in field.options"></select>
+                </div>
 
-    <!--checkbox-->
-    <div class="col-md-10" ng-if="field.inputType==='bool'">
-        <input type="checkbox" ng-model="activePart[field.schema]" ng-focus="field.edit=true"
-               ng-blur="field.edit=false">
-    </div>
+                <!--checkbox-->
+                <div class="col-md-10" ng-if="field.inputType==='bool'">
+                    <input type="checkbox" ng-model="activePart[field.schema]" ng-focus="field.edit=true"
+                           ng-blur="field.edit=false">
+                </div>
 
-    <!--date picker-->
-    <div class="col-md-10" ng-if="field.inputType==='date'">
-        <div class="input-group">
-            <input type="text" ng-model="activePart[field.schema]" placeholder="mm/dd/yyyy" style="width: 205px;"
-                   ng-focus="field.edit=true" ng-blur="field.edit=false">
+                <!--date picker-->
+                <div class="col-md-10" ng-if="field.inputType==='date'">
+                    <div class="input-group">
+                        <input type="text" ng-model="activePart[field.schema]" placeholder="mm/dd/yyyy"
+                               style="width: 205px;"
+                               ng-focus="field.edit=true" ng-blur="field.edit=false">
             <span class="input-group-addon" style="padding:3px; background-color: #f1f1f1;width: 19px">
                 <i class="fa fa-calendar"></i>
             </span>
-        </div>
-    </div>
+                    </div>
+                </div>
 
-    <!--medium input-->
-    <div class="col-md-10" ng-if="field.inputType==='medium'">
-        <input type="text" ng-model="activePart[field.schema]" maxlength="150" style="width:400px;"
-               ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-               ng-change="field.invalid=false" ng-focus="field.edit=true" ng-blur="field.edit=false">
-    </div>
+                <!--medium input-->
+                <div class="col-md-10" ng-if="field.inputType==='medium'">
+                    <input type="text" ng-model="activePart[field.schema]" maxlength="150" style="width:400px;"
+                           ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                           ng-change="field.invalid=false" ng-focus="field.edit=true" ng-blur="field.edit=false">
+                </div>
 
-    <!--auto complete-->
-    <div class="col-md-10" ng-if="field.inputType==='autoComplete'">
-        <input type="text" ng-model="activePart[field.schema]" maxlength="150"
-               ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-               placeHolder={{field.placeHolder}} style="width:205px;" typeahead-loading="loadingData"
-               typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue"
-               ng-change="field.invalid=false" ng-focus="field.edit=true" ng-blur="field.edit=false">
-        <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
-    </div>
+                <!--auto complete-->
+                <div class="col-md-10" ng-if="field.inputType==='autoComplete'">
+                    <input type="text" ng-model="activePart[field.schema]" maxlength="150"
+                           ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                           placeHolder={{field.placeHolder}} style="width:205px;" typeahead-loading="loadingData"
+                           typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue"
+                           ng-change="field.invalid=false" ng-focus="field.edit=true" ng-blur="field.edit=false">
+                    <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
+                </div>
 
-    <!--add-->
-    <div class="col-md-10" ng-if="field.inputType==='add'">
+                <!--add-->
+                <div class="col-md-10" ng-if="field.inputType==='add'">
         <span ng-repeat="link in activePart[field.schema] track by $index">
             <div ng-if="!$index">
                 <input ng-model="activePart[field.schema][$index].value" type="text" maxlength="125"
@@ -173,10 +185,10 @@
                 <i class="fa fa-plus green opacity_hover" ng-click="addLink(field.schema, $index)"></i>
             </div>
         </span>
-    </div>
+                </div>
 
-    <!-- autocompleteAdd -->
-    <div class="col-md-10" ng-if="field.inputType==='autoCompleteAdd'">
+                <!-- autocompleteAdd -->
+                <div class="col-md-10" ng-if="field.inputType==='autoCompleteAdd'">
         <span ng-repeat="link in activePart[field.schema] track by $index">
             <div ng-if="!$index">
                 <input ng-model="link.value" type="text" typeahead-loading="loadingData"
@@ -205,79 +217,71 @@
                 <i class="fa fa-plus green opacity_hover" ng-click="addLink(field.schema, $index)"></i>
             </div>
         </span>
-    </div>
+                </div>
 
-    <!--long-->
-    <div class="col-md-10" ng-if="field.inputType==='long'">
+                <!--long-->
+                <div class="col-md-10" ng-if="field.inputType==='long'">
         <textarea ng-model="activePart[field.schema]" style="width: 640px; height: 50px;" ng-trim="true"
                   ng-focus="field.edit=true" ng-blur="field.edit=false" ng-change="field.invalid=false"
                   ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"></textarea>
-    </div>
-</div>
+                </div>
+            </div>
 
-<!-- selected entry; selectedFields is an array of objects -->
-<div class="row pad-top-5" ng-if="!activePart.isExistingPart" ng-repeat="parameter in activePart.parameters">
-    <div class="col-md-2 text-right">
+            <!-- custom parameters input for selected new entry -->
+            <div class="row pad-top-5" ng-repeat="parameter in activePart.parameters">
+                <div class="col-md-2 text-right">
         <span style="white-space:nowrap" ng-class="{'font-bold':field.edit}">
             <input type="text" ng-trim="true" placeHolder="Name" maxlength="125" class="input_box"
                    ng-model="activePart.parameters[$index].name">
         </span>
-    </div>
+                </div>
 
-    <!--short input field-->
-    <div class="col-md-10">
-        <input type="text" ng-model="activePart.parameters[$index].value" ng-trim="true"
-               ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-               maxlength="125" style="width: 400px;" placeHolder="Value">
-        <i class="fa fa-minus delete_icon" ng-click="removeCustomParameter($index)"></i>
-    </div>
-</div>
-
-<div class="row pad_top">
-    <div class="col-md-2 text-right">
-        <i class="fa fa-plus-circle font-14em color-888 opacity_hover" tooltip="Add custom parameter"
-           tooltip-placement="right" ng-click="addCustomParameter()"></i>
-    </div>
-</div>
-
-<!--if existing part is added then this is displayed instead-->
-<div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="activePart.isExistingPart&&selectedFields">
-    <div class="col-md-2 entryLabel text-right">
-        <span ng-class="{'entryEditLabel':field.edit}">{{field.label}}</span>
-    </div>
-    <div class="col-md-10">
-        <div>{{activePart[field.schema]}}</div>
-    </div>
-</div>
-
-<!--sequence and notes -->
-<div class="row pad-top-5" ng-if="selectedFields">
-    <div class="col-md-12">
-        <div class="entry-details-subheader">
-            <strong style="color: #233559">SEQUENCE</strong>
-
-            <div class="pull-right">
-                <small class="opacity_hover" ng-click="isPaste=false">
-                    <i style="font-size:14px" class="fa fa-upload"></i> Upload File
-                </small>
-                <span style="font-weight: normal; color: #ccc">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-                <small class="opacity_hover" ng-click="isPaste=true">
-                    <i style="font-size:14px" class="fa fa-paste"></i> Paste Sequence
-                </small>
+                <!--short input field-->
+                <div class="col-md-10">
+                    <input type="text" ng-model="activePart.parameters[$index].value" ng-trim="true"
+                           ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                           maxlength="125" style="width: 400px;" placeHolder="Value">
+                    <i class="fa fa-minus delete_icon" ng-click="removeCustomParameter($index)"></i>
+                </div>
             </div>
-        </div>
 
-        <div class="margin-top-10 font-95em" ng-hide="activePart.hasSequence">
-            <alert type="'info'" style="margin-bottom: 10px; margin-top: 10px">
-                <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Supported file formats are
-                Genbank, Fasta and SBOL
-            </alert>
+            <!-- add custom parameter action icon -->
+            <div class="row pad_top">
+                <div class="col-md-2 text-right">
+                    <i class="fa fa-plus-circle font-14em color-888 opacity_hover" tooltip="Add custom parameter"
+                       tooltip-placement="right" ng-click="addCustomParameter()"></i>
+                </div>
+            </div>
 
-            <alert type="'danger'" style="margin-bottom: 10px" ng-if="serverError">
-                <i style="font-size: 18px" class="fa fa-exclamation-triangle pull-left"></i> Error parsing file
-            </alert>
+            <!--sequence and notes -->
+            <div class="row pad-top-5">
+                <div class="col-md-12">
+                    <div class="entry-details-subheader">
+                        <strong style="color: #233559">SEQUENCE</strong>
 
-            <!--file upload-->
+                        <div class="pull-right">
+                            <small class="opacity_hover" ng-click="isPaste=false">
+                                <i style="font-size:14px" class="fa fa-upload"></i> Upload File
+                            </small>
+                            <span style="font-weight: normal; color: #ccc">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                            <small class="opacity_hover" ng-click="isPaste=true">
+                                <i style="font-size:14px" class="fa fa-paste"></i> Paste Sequence
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="margin-top-10 font-95em" ng-hide="activePart.hasSequence">
+                        <alert type="'info'" style="margin-bottom: 10px; margin-top: 10px">
+                            <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Supported file formats
+                            are Genbank, Fasta and SBOL
+                        </alert>
+
+                        <alert type="'danger'" style="margin-bottom: 10px" ng-if="serverError">
+                            <i style="font-size: 18px" class="fa fa-exclamation-triangle pull-left"></i> Error parsing
+                            file
+                        </alert>
+
+                        <!--file upload-->
             <span ng-if="!isPaste && !processingFile">
                 <div class="margin-top-20"><input nv-file-select type="file" uploader="sequenceFileUpload"/></div>
                 <div style="height: 7px; background-color: #f9f9f9;">
@@ -290,48 +294,76 @@
                 <i class="fa fa-spinner fa-gear"></i> Processing file {{processingFile}}
             </span>
 
-            <!--sequence paste-->
+                        <!--sequence paste-->
             <textarea ng-show="isPaste===true &&!processingFile" ng-model="pastedSequence" class="input_box"
                       placeholder="Paste sequence" rows="14" style="width: 100%; height: 100%;"></textarea>
+                    </div>
+
+                    <div class="margin-top-10" ng-if="activePart.hasSequence" style="height: 600px">
+                        <ice-vector-viewer entryId="{{activePart.id}}"></ice-vector-viewer>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--END NEW PART-->
+
+        <!--START EXISTING PART-->
+        <div ng-if="activePart.isExistingPart">
+            <!-- if existing part is added then this is displayed instead-->
+            <div class="row pad-top-5" ng-repeat="field in activePart.fields"
+                 ng-if="activePart[field.schema] != null&&activePart[field.schema].toString().length!==0">
+                <div class="col-md-2 entryLabel text-right">
+                    <span ng-class="{'entryEditLabel':field.edit}">{{field.label}}</span>
+                </div>
+                <div class="col-md-10">
+                    <div>{{activePart[field.schema]}}</div>
+                </div>
+            </div>
+
+            <!--sequence display-->
+            <div class="row pad-top-5" ng-if="activePart.hasSequence">
+                <div class="col-md-12">
+                    <div class="entry-details-subheader">
+                        <strong style="color: #233559">SEQUENCE</strong>
+                    </div>
+
+                    <div class="margin-top-10" style="height: 600px">
+                        <ice-vector-viewer entryId="{{activePart.id}}"></ice-vector-viewer>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!--END EXISTING PART-->
+
+        <div class="row pad-top-5" ng-if="activePart.fields">
+            <div class="col-md-12">
+                <div class="entry-details-subheader">
+                    <strong style="color: #233559">NOTES</strong>
+                </div>
+            </div>
         </div>
 
-        <div class="margin-top-10" ng-if="activePart.hasSequence" style="height: 600px">
-            <ice-vector-viewer entryId="{{activePart.id}}"></ice-vector-viewer>
+        <div class="row pad-top-5" ng-if="activePart.fields">
+            <div class="col-md-2" ng-if="!activePart.isExistingPart"></div>
+            <div class="col-md-10" ng-if="!activePart.isExistingPart">
+                <textarea class="entry_add_notes_input" ng-model="activePart.longDescription"></textarea>
+            </div>
+            <div class="col-md-12" ng-if="activePart.isExistingPart">
+                {{activePart.longDescription}}
+            </div>
         </div>
-    </div>
-</div>
 
-<div class="row pad-top-5" ng-if="selectedFields">
-    <div class="col-md-12">
-        <div class="entry-details-subheader">
-            <strong style="color: #233559">NOTES</strong>
+        <!--submit buttons-->
+        <div class="row pad-top-5" ng-if="activePart.fields">
+            <div class="col-md-2"></div>
+
+            <div class="col-md-10">
+                <button type="submit" class="btn btn-primary font-85em">Submit</button>
+                <button type="button" class="btn btn-default font-85em" ng-click="cancelEntryCreate()">Cancel</button>
+            </div>
         </div>
+
     </div>
-</div>
-
-<div class="row pad-top-5" ng-if="selectedFields">
-    <div class="col-md-2" ng-if="!activePart.isExistingPart"></div>
-    <div class="col-md-10" ng-if="!activePart.isExistingPart">
-        <textarea class="entry_add_notes_input" ng-model="activePart.longDescription"></textarea>
-    </div>
-    <div class="col-md-12" ng-if="activePart.isExistingPart">
-        {{activePart.longDescription}}
-    </div>
-</div>
-
-
-<!--submit buttons-->
-<div class="row pad-top-5" ng-if="selectedFields">
-    <div class="col-md-2"></div>
-
-    <div class="col-md-10">
-        <button type="submit" class="btn btn-primary font-85em">Submit</button>
-        <button type="button" class="btn btn-default font-85em" ng-click="cancelEntryCreate()">Cancel</button>
-    </div>
-</div>
-
-<!--// container-->
-
-</div>
 
 </form>
