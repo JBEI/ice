@@ -13,6 +13,10 @@ angular.module('ice.entry.service', [])
 
         return {
             selectEntry: function (entry) {
+                if (this.isSelected(entry)){
+                    return;
+                }
+
                 // todo : this may be a problem when a user selects 3 entries (can edit 2) and deselects the 3rd
                 // todo : that use cannot edit
 

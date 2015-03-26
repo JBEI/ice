@@ -14,6 +14,7 @@ import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.model.*;
 import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.shared.ColumnField;
 
@@ -311,6 +312,27 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
+    public List<Long> sharedWithUserEntryIds(Account account, Group everybodyGroup){
+        Set<Group> groups = new HashSet<>(account.getGroups());
+        groups.add(everybodyGroup);
+
+        try {
+            Session session = currentSession();
+            String queryString = "SELECT DISTINCT e.id FROM Entry e, Permission p WHERE p.group IN (:groups) "
+                    + " AND e.ownerEmail <> :oe AND e = p.entry AND e.visibility = :v";
+
+            Query query = session.createQuery(queryString);
+            query.setParameterList("groups", groups);
+            query.setParameter("v", Visibility.OK.getValue());
+            query.setParameter("oe", account.getEmail());
+            List list = query.list();
+            return new ArrayList<>(list);
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
     // checks permission (does not include pending entries)
     @SuppressWarnings("unchecked")
     public List<Entry> retrieveUserEntries(Account requestor, String user, Set<Group> groups,
@@ -522,6 +544,28 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 .list();
     }
 
+    public List<Long> getVisibleEntryIds(boolean admin) {
+        try {
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Query query;
+
+            if (admin){
+                query = session.createQuery("SELECT e.id FROM Entry e WHERE (visibility IS NULL OR visibility = " +
+                        Visibility.OK.getValue() + " OR visibility = " + Visibility.PENDING.getValue() + ")");
+            }else{
+                query = session.createQuery("SELECT DISTINCT e.id FROM Entry e, Permission p" +
+                        " WHERE p.group = :group AND e = p.entry AND e.visibility = :v");
+                query.setParameter("group", new GroupController().createOrRetrievePublicGroup());
+                query.setParameter("v", Visibility.OK.getValue());
+            }
+
+            return query.list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new RuntimeException(he);
+        }
+    }
+
     public Set<Entry> retrieveAllEntries(ColumnField sort, boolean asc, int start, int limit)
             throws DAOException {
         try {
@@ -679,4 +723,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 .uniqueResult();
         return itemCount.intValue();
     }
+
+
 }

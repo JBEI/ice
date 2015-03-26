@@ -1,6 +1,8 @@
 package org.jbei.ice.lib.entry;
 
 import org.jbei.ice.lib.access.Permission;
+import org.jbei.ice.lib.account.AccountType;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
@@ -172,26 +174,47 @@ public class EntryRetriever {
         switch (context.getSelectionType()) {
             default:
             case FOLDER:
-                long folderId = Long.decode(context.getFolderId());
-                return getFolderEntries(userId, folderId, all, entryType);
+                if(!context.getEntries().isEmpty()){
+                    return context.getEntries();
+                }else{
+                    long folderId = Long.decode(context.getFolderId());
+                    return getFolderEntries(userId, folderId, all, entryType);
+                }
 
-//            case SEARCH:
-//                break;
-//
+            case SEARCH:
+                break;
+
             case COLLECTION:
-                return getCollectionEntries(userId, context.getFolderId(), all, entryType);
+                if(!context.getEntries().isEmpty()){
+                    return context.getEntries();
+                }else {
+                    return getCollectionEntries(userId, context.getFolderId(), all, entryType);
+                }
         }
+
+        return null;
 
     }
 
     protected List<Long> getCollectionEntries(String userId, String collection, boolean all, EntryType type) {
         List<Long> entries = null;
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+
 
         switch (collection.toLowerCase()) {
             case "personal":
                 if (all)
                     type = null;
                 entries = dao.getOwnerEntryIds(userId, type);
+                break;
+            case "shared":
+                GroupController controller  = new GroupController();
+                Group everybodyGroup        = controller.createOrRetrievePublicGroup();
+                entries                     = dao.sharedWithUserEntryIds(account, everybodyGroup);
+                break;
+            case "available":
+                entries = dao.getVisibleEntryIds(account.getType() == AccountType.ADMIN);
+                break;
         }
 
         return entries;

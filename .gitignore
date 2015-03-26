@@ -3,5 +3,5 @@ target/
 .*
 war/
 *.class
-
-
+data/
+ice.iml

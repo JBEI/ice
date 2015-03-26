@@ -86,7 +86,6 @@ public class EntryController {
             details.getEntries().add(info);
         }
 
-        Logger.info((System.currentTimeMillis() - tStart) + "ms");
         return details;
     }
 
