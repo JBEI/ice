@@ -199,17 +199,9 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
         });
     };
 
-    // todo : getSelection should return the selection object that matches EntrySelection
+    // todo : getEntrySelection() should be moved to Selection
     $scope.csvExport = function () {
-        var entries = Selection.getSelectedEntries();
-        // if selected.selected
-        var selectedIds = [];
-        for (var i = 0; i < entries.length; i += 1) {
-            selectedIds.push(parseInt(entries[i].id));
-        }
-
-        var selection = Selection.getSelection();
-        selection.entries = selectedIds;
+        var selection = getEntrySelection();
         var files = Files();
 
         // retrieve from server

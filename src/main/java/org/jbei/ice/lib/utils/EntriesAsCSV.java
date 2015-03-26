@@ -18,10 +18,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Representation of a list of entries as a CSV file
@@ -57,29 +54,37 @@ public class EntriesAsCSV {
 
             // get the headers for the final output
             if (type != null && !entryTypes.contains(type)) {
+                List<EntryField> newFields = new ArrayList<>();
                 entryTypes.add(type);
                 switch (type) {
                     case ARABIDOPSIS:
-                        BulkCSVUploadHeaders.addArabidopsisSeedHeaders(fields);
+                        BulkCSVUploadHeaders.addArabidopsisSeedHeaders(newFields);
                         break;
 
                     case STRAIN:
-                        BulkCSVUploadHeaders.addStrainHeaders(fields);
+                        BulkCSVUploadHeaders.addStrainHeaders(newFields);
                         break;
 
                     case PLASMID:
-                        BulkCSVUploadHeaders.addPlasmidHeaders(fields);
+                        BulkCSVUploadHeaders.addPlasmidHeaders(newFields);
                         break;
+                }
+
+                for (EntryField newField : newFields) {
+                    if (!fields.contains(newField))
+                        fields.add(newField);
                 }
             }
 
             final int fieldSize = fields.size();
             String[] line = new String[fieldSize + 1];
             line[0] = entry.getPartNumber();
-            for (int i = 0; i < fieldSize; i += 1) {
-                EntryField field = fields.get(i);
+            int i = 0;
+            for (EntryField field : fields) {
                 line[i + 1] = EntryUtil.entryFieldToValue(entry, field);
+                i += 1;
             }
+
             lines.add(line);
         }
 
@@ -96,13 +101,19 @@ public class EntriesAsCSV {
             return false;
         }
 
+        final int fieldSize = fields.size();
+
         try (CSVWriter writer = new CSVWriter(fileWriter)) {
             // get headers
-            String[] headers = new String[fields.size() + 1];
+            String[] headers = new String[fieldSize + 1];
             headers[0] = "Part ID";
-            for (int i = 0; i < fields.size(); i += 1) {
-                headers[i + 1] = fields.get(i).getLabel();
+
+            int i = 0;
+            for (EntryField field : fields) {
+                headers[i + 1] = field.getLabel();
+                i += 1;
             }
+
             writer.writeNext(headers);
 
             // write contents
