@@ -533,15 +533,26 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
+    /**
+     * Retrieves list of entry ids whose owner email column matches the specified ownerEmail parameter,
+     * with a visibility of <pre>OK</pre> or <pre>PENDING</pre> and if not null, matches the type
+     *
+     * @param ownerEmail value of owner email column that desired entries must match
+     * @param type       option entry type parameter
+     * @return list of ids for all matching entries
+     */
     public List<Long> getOwnerEntryIds(String ownerEmail, EntryType type) {
         Criteria criteria = currentSession().createCriteria(Entry.class)
                 .add(Restrictions.eq("ownerEmail", ownerEmail));
 
+        criteria.add(Restrictions.disjunction()
+                .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
+                .add(Restrictions.eq("visibility", Visibility.PENDING.getValue())));
+
         if (type != null)
             criteria.add(Restrictions.eq("recordType", type.getName()));
 
-        return criteria.setProjection(Projections.id())
-                .list();
+        return criteria.setProjection(Projections.id()).list();
     }
 
     public List<Long> getVisibleEntryIds(boolean admin) {
