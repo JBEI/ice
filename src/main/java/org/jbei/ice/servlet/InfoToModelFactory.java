@@ -43,6 +43,9 @@ public class InfoToModelFactory {
                 break;
         }
 
+        if (entry == null)
+            return null;
+
         // common fields
         if (StringUtils.isEmpty(info.getRecordId()))
             entry.setRecordId(UUID.randomUUID().toString());
@@ -106,9 +109,18 @@ public class InfoToModelFactory {
         if (seedData.getHomozygosity() != null)
             seed.setHomozygosity(seedData.getHomozygosity());
 
-        seed.setHarvestDate(new Date(seedData.getHarvestDate()));
-        String ecoType = seedData.getEcotype() == null ? "" : seedData.getEcotype();
+        if (StringUtils.isNotEmpty(seedData.getHarvestDate())) {
+            DateFormat format = new SimpleDateFormat("MM/dd/YYYY");
+            try {
+                Date date = format.parse(seedData.getHarvestDate());
+                seed.setHarvestDate(date);
+            } catch (ParseException e) {
+                Logger.error("Could not parse date " + seedData.getHarvestDate());
+                return null;
+            }
+        }
 
+        String ecoType = seedData.getEcotype() == null ? "" : seedData.getEcotype();
         seed.setEcotype(ecoType);
         String parents = seedData.getSeedParents() == null ? "" : seedData.getSeedParents();
 
@@ -501,8 +513,8 @@ public class InfoToModelFactory {
 
             case CIRCULAR:
                 plasmid.setCircular("yes".equalsIgnoreCase(value)
-                                            || "true".equalsIgnoreCase(value)
-                                            || "circular".equalsIgnoreCase(value));
+                        || "true".equalsIgnoreCase(value)
+                        || "circular".equalsIgnoreCase(value));
                 return plasmid;
 
             case ORIGIN_OF_REPLICATION:

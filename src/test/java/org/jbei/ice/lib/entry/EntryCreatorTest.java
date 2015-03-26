@@ -80,6 +80,7 @@ public class EntryCreatorTest {
         ArabidopsisSeedData seedData = new ArabidopsisSeedData();
         seedData.setGeneration(Generation.F3);
         seedData.setPlantType(PlantType.OTHER);
+        seedData.setHarvestDate("01/02/2014");
         seed.setBioSafetyLevel(2);
         seed.setArabidopsisSeedData(seedData);
 
