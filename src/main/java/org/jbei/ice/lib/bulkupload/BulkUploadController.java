@@ -371,8 +371,8 @@ public class BulkUploadController {
 
         // check permissions
         authorization.expectWrite(userId, draft);
-
-        if (!BulkUploadUtil.validate(draft)) {
+        BulkUploadValidation validation = new BulkUploadValidation(draft);
+        if (!validation.isValid()) {
             Logger.warn("Attempting to submit a bulk upload draft (" + draftId + ") which does not validate");
             return null;
         }
