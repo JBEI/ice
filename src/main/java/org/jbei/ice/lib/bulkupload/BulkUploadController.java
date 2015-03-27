@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.bulkupload;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.access.PermissionException;
@@ -427,16 +428,14 @@ public class BulkUploadController {
             return false;
         }
 
-        String previousOwner = upload.getName();
-        Account prevOwnerAccount = accountController.getByEmail(previousOwner);
-        if (prevOwnerAccount == null)
+        if (upload.getStatus() != BulkUploadStatus.PENDING_APPROVAL)
             return false;
 
         upload.setStatus(BulkUploadStatus.IN_PROGRESS);
-        upload.setName("Returned Upload");
+        String newName = StringUtils.isEmpty(upload.getName()) ? "Returned upload" : upload.getName() + "(Returned)";
+        upload.setName(newName);
         upload.setLastUpdateTime(new Date());
         dao.update(upload);
-
         return true;
     }
 
