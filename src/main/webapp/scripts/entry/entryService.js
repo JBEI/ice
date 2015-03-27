@@ -163,7 +163,7 @@ angular.module('ice.entry.service', [])
         // inputType of "withEmail" uses attribute "bothRequired" to indicate that the email portion is required
         //
         var partFields = [
-            {label: "Name", required: true, schema: 'name', placeHolder: 'e.g. JBEI-0001', inputType: 'short'},
+            {label: "Name", required: true, schema: 'name', inputType: 'short'},
             {label: "Alias", schema: 'alias', inputType: 'short'},
             {
                 label: "Principal Investigator",
