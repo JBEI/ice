@@ -10,8 +10,10 @@
                                 <span ng-if="linkedSelection"> + {{linkedSelection}}</span> UPLOAD
                             </strong>
 
-                            <strong style="white-space: nowrap" class="bulk_import_name"
-                                    ng-click="showBulkUploadRenameModal()">{{bulkUpload.name}}
+                            <strong style="white-space: nowrap" class="bulk_import_name" tooltip="Click to rename"
+                                    ng-click="showBulkUploadRenameModal()">
+                                <span ng-if="bulkUpload.name">{{bulkUpload.name}}</span>
+                                <i ng-if="!bulkUpload.name">Untitled upload</i>
                             </strong>
                             </span>
 

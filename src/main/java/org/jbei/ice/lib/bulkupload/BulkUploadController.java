@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.bulkupload;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.access.PermissionException;
@@ -65,7 +64,7 @@ public class BulkUploadController {
     public BulkUploadInfo create(String userId, BulkUploadInfo info) {
         Account account = accountController.getByEmail(userId);
         BulkUpload upload = new BulkUpload();
-        upload.setName(StringUtils.isEmpty(info.getName()) ? "untitled" : info.getName());
+        upload.setName(info.getName());
         upload.setAccount(account);
         upload.setCreationTime(new Date());
         upload.setLastUpdateTime(upload.getCreationTime());

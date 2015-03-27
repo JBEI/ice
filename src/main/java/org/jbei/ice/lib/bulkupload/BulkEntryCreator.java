@@ -64,7 +64,6 @@ public class BulkEntryCreator {
         BulkUpload draft = dao.get(autoUpdate.getBulkUploadId());
         if (draft == null) {
             draft = new BulkUpload();
-            draft.setName("Untitled");
             draft.setAccount(account);
             draft.setStatus(BulkUploadStatus.IN_PROGRESS);
             draft.setImportType(addType.toString());
@@ -77,7 +76,6 @@ public class BulkEntryCreator {
 
     public long createBulkUpload(String userId, EntryType entryType) {
         BulkUpload draft = new BulkUpload();
-        draft.setName("Untitled");
         Account account = accountController.getByEmail(userId);
         draft.setAccount(account);
         draft.setStatus(BulkUploadStatus.IN_PROGRESS);

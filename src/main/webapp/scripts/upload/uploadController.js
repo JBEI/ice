@@ -14,7 +14,6 @@ angular.module('ice.upload.controller', [])
         $scope.bulkUpload = {};
         $scope.bulkUpload.entryIdData = []; // maintains the ids of the main entrys (row indexed)
         $scope.bulkUpload.linkedEntryIdData = []; // maintains the ids of the linked entry
-        $scope.bulkUpload.name = "untitled";
         $scope.uploadNameEditMode = false;
         var linkedHeaders = undefined;
         var linkedDataSchema = undefined;
@@ -707,7 +706,6 @@ angular.module('ice.upload.controller', [])
                     // update name on the server if a bulk upload has already been created
                     if ($scope.bulkUpload.id) {
                         var tmp = {id: $scope.bulkUpload.id, name: newName};
-                        console.log($scope.bulkUpload, tmp);
                         Upload(sid).rename({importId: $scope.bulkUpload.id}, tmp, function (result) {
                             $scope.bulkUpload.name = result.name;
                             $scope.bulkUpload.lastUpdate = result.lastUpdate;
