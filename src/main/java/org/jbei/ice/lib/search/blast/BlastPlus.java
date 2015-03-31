@@ -43,7 +43,7 @@ public class BlastPlus {
 
     public static HashMap<String, SearchResult> runBlast(BlastQuery query) throws BlastException {
         try {
-            String command = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
+            String command = System.getProperty("BLAST_INSTALL_DIR") + File.separator
                     + query.getBlastProgram().getName();
             String blastDb = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), BLAST_DB_FOLDER,
                                        BLAST_DB_NAME).toString();
@@ -196,7 +196,7 @@ public class BlastPlus {
     }
 
     public static void rebuildDatabase(boolean force) throws BlastException {
-        Path blastDir = Paths.get(Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR));
+        Path blastDir = Paths.get(System.getProperty("BLAST_INSTALL_DIR"));
         if (!Files.exists(blastDir))
             throw new BlastException("Could not locate Blast installation in " + blastDir.toAbsolutePath().toString());
 
@@ -265,8 +265,7 @@ public class BlastPlus {
                 throw new BlastException("Subject or query is null");
 
             StringBuilder command = new StringBuilder();
-            String blastN = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
-                    + BlastProgram.BLAST_N.getName();
+            String blastN = BlastProgram.BLAST_N.getName();
             command.append(blastN)
                    .append(" -query ")
                    .append(queryFilePath.toString())
