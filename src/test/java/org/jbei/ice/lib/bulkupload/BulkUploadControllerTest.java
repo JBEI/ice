@@ -146,6 +146,7 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.PI, "test");
         autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
         autoUpdate.getKeyValue().put(EntryField.BIO_SAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
+        autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "test");
 
         autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.ARABIDOPSIS);
         Assert.assertNotNull(autoUpdate);

@@ -4,7 +4,8 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
-
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.junit.Assert;
 
 /**
@@ -17,8 +18,8 @@ public class AccountCreator {
 
     public static Account createTestAccount(String testName, boolean admin) throws Exception {
         String email = testName + "@TESTER";
-        AccountController accountController = new AccountController();
-        Account account = accountController.getByEmail(email);
+        AccountDAO dao = DAOFactory.getAccountDAO();
+        Account account = dao.getByEmail(email);
         if (account != null)
             throw new Exception("duplicate account");
 
@@ -26,15 +27,15 @@ public class AccountCreator {
         accountTransfer.setFirstName("TEST_FNAME");
         accountTransfer.setLastName("TEST");
         accountTransfer.setEmail(email);
-        accountTransfer = accountController.createNewAccount(accountTransfer, false);
+        accountTransfer = new AccountController().createNewAccount(accountTransfer, false);
 
         Assert.assertNotNull(accountTransfer.getPassword());
-        account = accountController.getByEmail(email);
+        account = dao.getByEmail(email);
         Assert.assertNotNull(account);
 
         if (admin) {
             account.setType(AccountType.ADMIN);
-            accountController.save(account);
+            dao.update(account);
         }
         return account;
     }

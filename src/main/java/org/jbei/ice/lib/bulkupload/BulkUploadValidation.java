@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
@@ -48,7 +49,7 @@ public class BulkUploadValidation {
      * otherwise returns an empty list
      */
     public Set<EntryField> getFailedFields() {
-        return this.failedFields;
+        return new HashSet<>(this.failedFields);
     }
 
     /**
@@ -56,7 +57,7 @@ public class BulkUploadValidation {
      * Validation is required on the business logic side as a result of the ability to save drafts
      */
     private void validate() {
-        ArrayList<Long> contentIds = DAOFactory.getBulkUploadDAO().getEntryIds(this.upload.getId());
+        ArrayList<Long> contentIds = DAOFactory.getBulkUploadDAO().getEntryIds(this.upload);
         for (long contentId : contentIds) {
             Entry entry = DAOFactory.getEntryDAO().get(contentId);
             validateEntry(entry);
@@ -69,6 +70,11 @@ public class BulkUploadValidation {
             return;
 
         validateCommonFields(entry);
+        if (entry.getLinkedEntries() != null) {
+            for (Entry linked : entry.getLinkedEntries()) {
+                validateEntry(linked);
+            }
+        }
 
         switch (type) {
             case STRAIN:
@@ -80,7 +86,7 @@ public class BulkUploadValidation {
                 break;
 
             case ARABIDOPSIS:
-                validateCommonFields(entry);
+                validateSeedFields((ArabidopsisSeed) entry);
                 break;
         }
     }
@@ -92,7 +98,7 @@ public class BulkUploadValidation {
      * @param strain strain entry to validate
      */
     private void validateStrain(Strain strain) {
-        if (!strain.getSelectionMarkers().isEmpty())
+        if (strain.getSelectionMarkers().isEmpty())
             failedFields.add(EntryField.SELECTION_MARKERS);
     }
 
@@ -101,18 +107,22 @@ public class BulkUploadValidation {
      * existing list of invalid
      */
     private void validatePlasmid(Plasmid plasmid) {
-        if (!plasmid.getSelectionMarkers().isEmpty())
+        if (plasmid.getSelectionMarkers().isEmpty())
+            failedFields.add(EntryField.SELECTION_MARKERS);
+    }
+
+    private void validateSeedFields(ArabidopsisSeed arabidopsisSeed) {
+        if (arabidopsisSeed.getSelectionMarkers().isEmpty())
             failedFields.add(EntryField.SELECTION_MARKERS);
     }
 
     /**
      * validates fields that are common to all entries (e.g. BioSafety Level)
+     * Any fields that fail validation are added to the set of failed validation fields
      *
      * @param entry entry whose common fields are being validated
-     * @return the list of fields that did not validate if validation did not complete successfully;
-     * an empty list otherwise
      */
-    private Set<EntryField> validateCommonFields(Entry entry) {
+    private void validateCommonFields(Entry entry) {
         if (!BioSafetyOption.isValidOption(entry.getBioSafetyLevel()))
             failedFields.add(EntryField.BIO_SAFETY_LEVEL);
 
@@ -128,13 +138,10 @@ public class BulkUploadValidation {
         if (StringUtils.isBlank(entry.getCreatorEmail()))
             failedFields.add(EntryField.CREATOR_EMAIL);
 
-        // principal investigator is required and that should create at least one funding source
         if (StringUtils.isBlank(entry.getPrincipalInvestigator()))
             failedFields.add(EntryField.PI);
 
-        if (!StringUtils.isBlank(entry.getShortDescription()))
+        if (StringUtils.isBlank(entry.getShortDescription()))
             failedFields.add(EntryField.SUMMARY);
-
-        return failedFields;
     }
 }

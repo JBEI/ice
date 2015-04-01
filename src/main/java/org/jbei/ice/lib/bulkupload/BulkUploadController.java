@@ -332,12 +332,12 @@ public class BulkUploadController {
         // delete all associated entries. for strain with plasmids both are returned
         // todo : use task to speed up process and also check for status
 
-        ArrayList<Long> entryIds = dao.getEntryIds(draftId);
+        ArrayList<Long> entryIds = dao.getEntryIds(draft);
         for (long entryId : entryIds) {
             try {
                 entryController.delete(userId, entryId);
             } catch (PermissionException pe) {
-                Logger.warn("Could not delete entry " + entryId + " for bulk upload " + draftId);
+                Logger.warn(userId + " does not have permission to delete" + entryId + " for bulk upload " + draftId);
             }
         }
 
@@ -374,6 +374,7 @@ public class BulkUploadController {
         BulkUploadValidation validation = new BulkUploadValidation(draft);
         if (!validation.isValid()) {
             Logger.warn("Attempting to submit a bulk upload draft (" + draftId + ") which does not validate");
+            Logger.warn("Invalid Fields for (" + draftId + "): " + StringUtils.join(validation.getFailedFields().iterator(), ","));
             return null;
         }
 
@@ -384,7 +385,7 @@ public class BulkUploadController {
         BulkUpload bulkUpload = dao.update(draft);
         if (bulkUpload != null) {
             // convert entries to pending
-            ArrayList<Long> list = dao.getEntryIds(draftId);
+            ArrayList<Long> list = dao.getEntryIds(bulkUpload);
             for (Number l : list) {
                 Entry entry = entryDAO.get(l.longValue());
                 if (entry == null)
