@@ -114,6 +114,16 @@ public class RestResource {
         return userId;
     }
 
+    /**
+     * Create a {@link Response} object from an entity object.
+     *
+     * @param status
+     *            HTTP status code
+     * @param obj
+     *            entity in response
+     * @return a Response object for the resource request, uses 500 error response if entity is
+     *         {@code null}
+     */
     protected Response respond(final Response.Status status, final Object obj) {
         if (obj == null) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -122,6 +132,13 @@ public class RestResource {
         return Response.status(status).entity(obj).build();
     }
 
+    /**
+     * Create a {@link Response} object from an entity object.
+     *
+     * @param object
+     *            entity in response
+     * @return a 404 NOT FOUND if object is {@code null}, else a 200 OK response with the entity
+     */
     protected Response respond(final Object object) {
         if (object == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
@@ -130,10 +147,24 @@ public class RestResource {
         return Response.status(Response.Status.OK).entity(object).build();
     }
 
+    /**
+     * Create an empty {@link Response} object.
+     *
+     * @param status
+     *            HTTP status code to use on the Response
+     * @return a Response object for the resource request
+     */
     protected Response respond(final Response.Status status) {
         return Response.status(status).build();
     }
 
+    /**
+     * Create an empty {@link Response} object.
+     *
+     * @param success
+     *            success/failure flag
+     * @return a 200 OK response if success is {@code true}, otherwise a 500 error response
+     */
     protected Response respond(final boolean success) {
         if (success) {
             return Response.status(Response.Status.OK).build();
@@ -149,10 +180,8 @@ public class RestResource {
      * @param message
      *            log message
      */
-    protected void log(String userId, final String message) {
-        if (userId == null) {
-            userId = "Unknown";
-        }
-        Logger.info(userId + ": " + message);
+    protected void log(final String userId, final String message) {
+        final String who = (userId == null) ? "Unknown" : userId;
+        Logger.info(who + ": " + message);
     }
 }
