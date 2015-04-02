@@ -197,7 +197,7 @@ public class BulkEntryCreator {
 
             // rejected by admin
             case IN_PROGRESS:
-                ArrayList<Long> entryList = dao.getEntryIds(id);
+                ArrayList<Long> entryList = dao.getEntryIds(upload);
                 for (Number l : entryList) {
                     Entry entry = entryDAO.get(l.longValue());
                     if (entry == null || entry.getVisibility() != Visibility.PENDING.getValue())
@@ -260,8 +260,7 @@ public class BulkEntryCreator {
      * @return updated wrapper for information used to create entry. Will contain additional information
      * such as the unique identifier for the part, if one was created
      */
-    public BulkUploadAutoUpdate createOrUpdateEntry(String userId, BulkUploadAutoUpdate autoUpdate,
-                                                    EntryType addType) {
+    public BulkUploadAutoUpdate createOrUpdateEntry(String userId, BulkUploadAutoUpdate autoUpdate, EntryType addType) {
         Account account = accountController.getByEmail(userId);
         BulkUpload draft = null;
 

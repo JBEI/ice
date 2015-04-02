@@ -92,7 +92,7 @@ public class Authorization<T extends IDataModel> {
 
     public void expectWrite(String userId, T object) throws PermissionException {
         if (!canWrite(userId, object))
-            throw new PermissionException(userId);
+            throw new PermissionException(userId + " is lacking write permissions");
     }
 
     public void expectAdmin(String userId) throws PermissionException {

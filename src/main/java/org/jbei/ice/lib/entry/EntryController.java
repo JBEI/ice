@@ -63,8 +63,6 @@ public class EntryController {
     }
 
     public FolderDetails retrieveVisibleEntries(String userId, ColumnField field, boolean asc, int start, int limit) {
-        long tStart = System.currentTimeMillis();
-
         Set<Entry> results;
         FolderDetails details = new FolderDetails();
         Account account = accountController.getByEmail(userId);
@@ -258,13 +256,12 @@ public class EntryController {
      * Delete the entry in the database. Schedule an index rebuild.
      *
      * @param entryId unique identifier for entry to be deleted
-     * @throws PermissionException
+     * @throws PermissionException if user does not have the appropriate write permissions to delete entry
      */
-    public ArrayList<FolderDetails> delete(String userId, long entryId) throws PermissionException {
+    public void delete(String userId, long entryId) throws PermissionException {
         Entry entry = dao.get(entryId);
         boolean schedule = sequenceDAO.hasSequence(entry.getId());
 
-        ArrayList<FolderDetails> folderList = new ArrayList<>();
         FolderDAO folderDAO = DAOFactory.getFolderDAO();
         List<Folder> folders = folderDAO.getFoldersByEntry(entry);
         if (folders != null) {
@@ -273,11 +270,9 @@ public class EntryController {
                 FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
                 long size = folderDAO.getFolderSize(folder.getId());
                 details.setCount(size);
-                folderList.add(details);
             }
         }
         delete(userId, entry, schedule);
-        return folderList;
     }
 
     /**
