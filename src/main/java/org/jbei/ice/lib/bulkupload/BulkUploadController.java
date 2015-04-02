@@ -92,7 +92,7 @@ public class BulkUploadController {
         if (info.getEntryList() != null) {
             for (PartData data : info.getEntryList()) {
                 Entry entry = entryDAO.get(data.getId());
-                // todo if entry is in another bulk upload, then update (line 95) will fail
+                // todo if entry is in another bulk upload, then update will fail
                 if (entry == null)
                     continue;
 
@@ -159,6 +159,8 @@ public class BulkUploadController {
      *
      * @param userId identifier for account of user requesting
      * @param id     unique identifier for bulk import
+     * @param offset offset for upload entries (start)
+     * @param limit  maximum number of entries to return with the upload
      * @return data transfer object with the retrieved bulk import data and associated entries
      * @throws PermissionException
      */
@@ -210,35 +212,6 @@ public class BulkUploadController {
         // todo: trace sequences
 
         return partData;
-    }
-
-    protected ArrayList<PartData> convertParts(Account account, List<Entry> contents) {
-        ArrayList<PartData> addList = new ArrayList<>();
-        SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
-
-        for (Entry entry : contents) {
-            ArrayList<Attachment> attachments = attachmentController.getByEntry(account.getEmail(), entry);
-            boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
-            boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
-            PartData info = ModelToInfoFactory.getInfo(entry);
-            ArrayList<AttachmentInfo> attachmentInfos = ModelToInfoFactory.getAttachments(attachments);
-            info.setAttachments(attachmentInfos);
-            info.setHasAttachment(!attachmentInfos.isEmpty());
-            info.setHasSequence(hasSequence);
-            info.setHasOriginalSequence(hasOriginalSequence);
-
-            // retrieve permission
-            Set<Permission> entryPermissions = entry.getPermissions();
-            if (entryPermissions != null && !entryPermissions.isEmpty()) {
-                for (Permission permission : entryPermissions) {
-                    info.getAccessPermissions().add(permission.toDataTransferObject());
-                }
-            }
-
-            addList.add(info);
-        }
-
-        return addList;
     }
 
     /**

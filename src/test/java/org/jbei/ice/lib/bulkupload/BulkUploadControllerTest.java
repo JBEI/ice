@@ -40,6 +40,18 @@ public class BulkUploadControllerTest {
     }
 
     @Test
+    public void testCreate() throws Exception {
+        Account account = AccountCreator.createTestAccount("testBulkUploadCreate", false);
+
+        BulkUploadInfo info = new BulkUploadInfo();
+        info.setName("testCreateName");
+        info.setType(EntryType.PLASMID.getName());
+        info.setAccount(account.toDataTransferObject());
+        info = controller.create(account.getEmail(), info);
+        Assert.assertNotNull(info);
+    }
+
+    @Test
     public void testGetBulkImport() throws Exception {
         Account account = AccountCreator.createTestAccount("testGetBulkImport", false);
         BulkEntryCreator creator = new BulkEntryCreator();
