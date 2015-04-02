@@ -127,6 +127,11 @@
             <artifactId>libSBOLj</artifactId>
             <version>0.7.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.jbei.informatics</groupId>
+            <artifactId>rest-util</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
     <build>
         <outputDirectory>target</outputDirectory>
