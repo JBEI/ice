@@ -17,14 +17,11 @@ public class DAOFactory {
     private static FolderDAO folderDAO;
     private static GroupDAO groupDAO;
     private static MessageDAO messageDAO;
-    private static NewsDAO newsDAO;
     private static PermissionDAO permissionDAO;
     private static PreferencesDAO preferencesDAO;
-    private static ProjectDAO projectDAO;
     private static RemotePartnerDAO remotePartnerDAO;
     private static RequestDAO requestDAO;
     private static SampleDAO sampleDAO;
-    private static SearchDAO searchDAO;
     private static SequenceDAO sequenceDAO;
     private static StorageDAO storageDAO;
     private static TraceSequenceDAO traceSequenceDAO;
@@ -98,12 +95,6 @@ public class DAOFactory {
         return messageDAO;
     }
 
-    public static NewsDAO getNewsDAO() {
-        if (newsDAO == null)
-            newsDAO = new NewsDAO();
-        return newsDAO;
-    }
-
     public static PermissionDAO getPermissionDAO() {
         if (permissionDAO == null)
             permissionDAO = new PermissionDAO();
@@ -114,12 +105,6 @@ public class DAOFactory {
         if (preferencesDAO == null)
             preferencesDAO = new PreferencesDAO();
         return preferencesDAO;
-    }
-
-    public static ProjectDAO getProjectDAO() {
-        if (projectDAO == null)
-            projectDAO = new ProjectDAO();
-        return projectDAO;
     }
 
     public static RemotePartnerDAO getRemotePartnerDAO() {
@@ -138,12 +123,6 @@ public class DAOFactory {
         if (sampleDAO == null)
             sampleDAO = new SampleDAO();
         return sampleDAO;
-    }
-
-    public static SearchDAO getSearchDAO() {
-        if (searchDAO == null)
-            searchDAO = new SearchDAO();
-        return searchDAO;
     }
 
     public static SequenceDAO getSequenceDAO() {

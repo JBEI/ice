@@ -1,14 +1,15 @@
 package org.jbei.ice.lib.entry.model;
 
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PlasmidData;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-
-import org.jbei.ice.lib.dto.entry.EntryType;
-
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
 
 /**
  * Store Plasmid specific fields.
@@ -95,5 +96,18 @@ public class Plasmid extends Entry {
 
     public void setReplicatesIn(String replicatesIn) {
         this.replicatesIn = replicatesIn;
+    }
+
+    @Override
+    public PartData toDataTransferObject() {
+        PartData data = super.toDataTransferObject();
+        PlasmidData plasmidData = new PlasmidData();
+        plasmidData.setBackbone(this.backbone);
+        plasmidData.setCircular(this.circular);
+        plasmidData.setOriginOfReplication(this.originOfReplication);
+        plasmidData.setPromoters(this.promoters);
+        plasmidData.setReplicatesIn(this.replicatesIn);
+        data.setPlasmidData(plasmidData);
+        return data;
     }
 }

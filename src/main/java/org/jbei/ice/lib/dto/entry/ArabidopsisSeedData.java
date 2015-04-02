@@ -8,7 +8,7 @@ public class ArabidopsisSeedData implements IDataTransferModel {
 
     private String homozygosity;
     private String ecotype;
-    private long harvestDate;
+    private String harvestDate;
     private String seedParents;
     private Generation generation;
     private PlantType plantType;
@@ -31,11 +31,11 @@ public class ArabidopsisSeedData implements IDataTransferModel {
         this.ecotype = ecotype;
     }
 
-    public long getHarvestDate() {
+    public String getHarvestDate() {
         return harvestDate;
     }
 
-    public void setHarvestDate(long harvestDate) {
+    public void setHarvestDate(String harvestDate) {
         this.harvestDate = harvestDate;
     }
 

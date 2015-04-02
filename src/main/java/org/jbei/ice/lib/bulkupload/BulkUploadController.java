@@ -10,7 +10,6 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.BulkUploadDAO;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
@@ -62,10 +61,19 @@ public class BulkUploadController {
         sequenceController = new SequenceController();
     }
 
+    /**
+     * Creates a new bulk upload. If upload type is not bulk edit, then the status is set to in progress.
+     * Default permissions consisting of read permissions for the public groups that the requesting user is
+     * a part of are added
+     *
+     * @param userId identifier for user making request
+     * @param info   bulk upload data
+     * @return created upload
+     */
     public BulkUploadInfo create(String userId, BulkUploadInfo info) {
         Account account = accountController.getByEmail(userId);
         BulkUpload upload = new BulkUpload();
-        upload.setName(StringUtils.isEmpty(info.getName()) ? "untitled" : info.getName());
+        upload.setName(info.getName());
         upload.setAccount(account);
         upload.setCreationTime(new Date());
         upload.setLastUpdateTime(upload.getCreationTime());
@@ -93,7 +101,7 @@ public class BulkUploadController {
         if (info.getEntryList() != null) {
             for (PartData data : info.getEntryList()) {
                 Entry entry = entryDAO.get(data.getId());
-                // todo if entry is in another bulk upload, then update (line 95) will fail
+                // todo if entry is in another bulk upload, then update will fail
                 if (entry == null)
                     continue;
 
@@ -160,36 +168,11 @@ public class BulkUploadController {
      *
      * @param userId identifier for account of user requesting
      * @param id     unique identifier for bulk import
+     * @param offset offset for upload entries (start)
+     * @param limit  maximum number of entries to return with the upload
      * @return data transfer object with the retrieved bulk import data and associated entries
      * @throws PermissionException
      */
-    public BulkUploadInfo retrieveById(String userId, long id, int start, int limit) throws PermissionException {
-        BulkUpload draft = dao.get(id);
-        if (draft == null)
-            return null;
-
-        Account account = accountController.getByEmail(userId);
-        authorization.expectRead(userId, draft);
-
-        // convert bulk import db object to data transfer object
-        int size = 0;
-        try {
-            size = dao.retrieveSavedDraftCount(id);
-        } catch (DAOException e) {
-            Logger.error(e);
-        }
-        BulkUploadInfo draftInfo = draft.toDataTransferObject();
-        draftInfo.setCount(size);
-//        EntryType type = EntryType.nameToType(draft.getImportType().split("\\s+")[0]);
-
-        // retrieve the entries associated with the bulk import
-        List<Entry> contents = dao.retrieveDraftEntries(id, start, limit);
-
-        // convert
-        draftInfo.getEntryList().addAll(convertParts(account, contents));
-        return draftInfo;
-    }
-
     public BulkUploadInfo getBulkImport(String userId, long id, int offset, int limit) {
         BulkUpload draft = dao.get(id);
         if (draft == null)
@@ -238,35 +221,6 @@ public class BulkUploadController {
         // todo: trace sequences
 
         return partData;
-    }
-
-    protected ArrayList<PartData> convertParts(Account account, List<Entry> contents) {
-        ArrayList<PartData> addList = new ArrayList<>();
-        SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
-
-        for (Entry entry : contents) {
-            ArrayList<Attachment> attachments = attachmentController.getByEntry(account.getEmail(), entry);
-            boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
-            boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
-            PartData info = ModelToInfoFactory.getInfo(entry);
-            ArrayList<AttachmentInfo> attachmentInfos = ModelToInfoFactory.getAttachments(attachments);
-            info.setAttachments(attachmentInfos);
-            info.setHasAttachment(!attachmentInfos.isEmpty());
-            info.setHasSequence(hasSequence);
-            info.setHasOriginalSequence(hasOriginalSequence);
-
-            // retrieve permission
-            Set<Permission> entryPermissions = entry.getPermissions();
-            if (entryPermissions != null && !entryPermissions.isEmpty()) {
-                for (Permission permission : entryPermissions) {
-                    info.getAccessPermissions().add(permission.toDataTransferObject());
-                }
-            }
-
-            addList.add(info);
-        }
-
-        return addList;
     }
 
     /**
@@ -332,12 +286,12 @@ public class BulkUploadController {
         // delete all associated entries. for strain with plasmids both are returned
         // todo : use task to speed up process and also check for status
 
-        ArrayList<Long> entryIds = dao.getEntryIds(draftId);
+        ArrayList<Long> entryIds = dao.getEntryIds(draft);
         for (long entryId : entryIds) {
             try {
                 entryController.delete(userId, entryId);
             } catch (PermissionException pe) {
-                Logger.warn("Could not delete entry " + entryId + " for bulk upload " + draftId);
+                Logger.warn(userId + " does not have permission to delete" + entryId + " for bulk upload " + draftId);
             }
         }
 
@@ -371,9 +325,10 @@ public class BulkUploadController {
 
         // check permissions
         authorization.expectWrite(userId, draft);
-
-        if (!BulkUploadUtil.validate(draft)) {
+        BulkUploadValidation validation = new BulkUploadValidation(draft);
+        if (!validation.isValid()) {
             Logger.warn("Attempting to submit a bulk upload draft (" + draftId + ") which does not validate");
+            Logger.warn("Invalid Fields for (" + draftId + "): " + StringUtils.join(validation.getFailedFields().iterator(), ","));
             return null;
         }
 
@@ -384,7 +339,7 @@ public class BulkUploadController {
         BulkUpload bulkUpload = dao.update(draft);
         if (bulkUpload != null) {
             // convert entries to pending
-            ArrayList<Long> list = dao.getEntryIds(draftId);
+            ArrayList<Long> list = dao.getEntryIds(bulkUpload);
             for (Number l : list) {
                 Entry entry = entryDAO.get(l.longValue());
                 if (entry == null)
@@ -428,16 +383,14 @@ public class BulkUploadController {
             return false;
         }
 
-        String previousOwner = upload.getName();
-        Account prevOwnerAccount = accountController.getByEmail(previousOwner);
-        if (prevOwnerAccount == null)
+        if (upload.getStatus() != BulkUploadStatus.PENDING_APPROVAL)
             return false;
 
         upload.setStatus(BulkUploadStatus.IN_PROGRESS);
-        upload.setName("Returned Upload");
+        String newName = StringUtils.isEmpty(upload.getName()) ? "Returned upload" : upload.getName() + "(Returned)";
+        upload.setName(newName);
         upload.setLastUpdateTime(new Date());
         dao.update(upload);
-
         return true;
     }
 

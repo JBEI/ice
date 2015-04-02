@@ -1,14 +1,5 @@
 package org.jbei.ice.services.rest;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -17,14 +8,20 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.folder.Collection;
+import org.jbei.ice.lib.folder.FolderContent;
 import org.jbei.ice.lib.folder.FolderContentRetriever;
 import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.shared.ColumnField;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -114,14 +111,14 @@ public class FolderResource extends RestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<FolderDetails> addEntriesToFolders(ArrayList<FolderDetails> list,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        Type fooType = new TypeToken<ArrayList<FolderDetails>>() {
-        }.getType();
-        Gson gson = new GsonBuilder().create();
-        ArrayList<FolderDetails> data = gson.fromJson(gson.toJsonTree(list), fooType);
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return controller.addEntriesToFolder(userId, data);
+    @Path("/transfer")
+    public Response addSelectedEntriesToFolder(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+            EntrySelection entrySelection) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        FolderContent folderContent = new FolderContent();
+        List<FolderDetails> result = folderContent.addEntrySelection(userId, entrySelection);
+        return super.respond(result);
     }
 
     @PUT
@@ -129,15 +126,11 @@ public class FolderResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries")
     public Response removeEntriesFromFolder(
-            ArrayList<Long> entriesId,
+            EntrySelection entrySelection,
             @PathParam("id") long folderId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
-        Type fooType = new TypeToken<ArrayList<Long>>() {
-        }.getType();
-        Gson gson = new GsonBuilder().create();
-        ArrayList<Long> list = gson.fromJson(gson.toJsonTree(entriesId), fooType);
-        if (controller.removeFolderContents(userId, folderId, list))
+        if (controller.removeFolderContents(userId, folderId, entrySelection))
             return respond(Response.Status.OK);
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
@@ -172,7 +165,7 @@ public class FolderResource extends RestResource {
 
         EntryController entryController = new EntryController();
         FolderDetails details = new FolderDetails();
-        Logger.info("Retrieving " + folderId + " entries");
+        log(userId, "retrieving " + folderId + " entries");
 
         switch (folderId) {
             case "personal":

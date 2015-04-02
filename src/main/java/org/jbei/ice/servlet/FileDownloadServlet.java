@@ -1,15 +1,6 @@
 package org.jbei.ice.servlet;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Paths;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.apache.commons.io.IOUtils;
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -20,7 +11,15 @@ import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.Utils;
 
-import org.apache.commons.io.IOUtils;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Paths;
 
 /**
  * Servlet for serving the different kinds of files
@@ -34,7 +33,6 @@ public class FileDownloadServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String remote = request.getParameter("remote");
         String sid = request.getParameter("sid");
         String entryId = request.getParameter("rid");
 

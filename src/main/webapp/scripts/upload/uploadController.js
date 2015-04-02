@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.upload.controller', [])
-    .controller('UploadController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource, $stateParams, $fileUploader, $http, Upload, UploadUtil) {
+    .controller('UploadController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource, $stateParams, FileUploader, $http, Upload, UploadUtil) {
         var sid = $cookieStore.get("sessionId");
         var upload = Upload(sid);
         var sheetData = [
@@ -14,7 +14,6 @@ angular.module('ice.upload.controller', [])
         $scope.bulkUpload = {};
         $scope.bulkUpload.entryIdData = []; // maintains the ids of the main entrys (row indexed)
         $scope.bulkUpload.linkedEntryIdData = []; // maintains the ids of the linked entry
-        $scope.bulkUpload.name = "untitled";
         $scope.uploadNameEditMode = false;
         var linkedHeaders = undefined;
         var linkedDataSchema = undefined;
@@ -267,6 +266,11 @@ angular.module('ice.upload.controller', [])
                         object.readOnly = true;  // file cells are readonly. all data is set programmatically
                         object.copyable = false; // file cells cannot be copied
                         break;
+
+                    case "harvestDate":
+                        object.type = "date";
+                        object.dateFormat = "MM/DD/YYYY";
+                        object.correctFormat = true;
                 }
 
                 return object;
@@ -702,7 +706,6 @@ angular.module('ice.upload.controller', [])
                     // update name on the server if a bulk upload has already been created
                     if ($scope.bulkUpload.id) {
                         var tmp = {id: $scope.bulkUpload.id, name: newName};
-                        console.log($scope.bulkUpload, tmp);
                         Upload(sid).rename({importId: $scope.bulkUpload.id}, tmp, function (result) {
                             $scope.bulkUpload.name = result.name;
                             $scope.bulkUpload.lastUpdate = result.lastUpdate;
@@ -889,11 +892,11 @@ angular.module('ice.upload.controller', [])
             $modalInstance.dismiss('cancel');
         };
     })
-    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, $modalInstance, $fileUploader, addType, linkedAddType) {
+    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, $modalInstance, FileUploader, addType, linkedAddType) {
         var sid = $cookieStore.get("sessionId");
         $scope.addType = addType;
 
-        var uploader = $scope.importUploader = $fileUploader.create({
+        var uploader = $scope.importUploader = new FileUploader({
 //        scope: $scope, // to automatically update the html. Default: $rootScope
             url: "/rest/upload/file",
             method: 'POST',
@@ -904,8 +907,7 @@ angular.module('ice.upload.controller', [])
             ]
         });
 
-        uploader.bind('success', function (event, xhr, item, response) {
-            var info = response;
+        uploader.onSuccessItem = function (item, response, status, headers) {
             console.log("success", response);
             $scope.modalClose = "Close";
             $scope.processing = false;
@@ -916,18 +918,16 @@ angular.module('ice.upload.controller', [])
             } else {
                 $scope.uploadError = response;
             }
-        });
+        };
 
-        uploader.bind('error', function (event, xhr, item, response) {
-            console.info('Error', xhr, item, response);
+        uploader.onErrorItem = function (item, response, status, headers) {
             $scope.uploadError = response;
             $scope.processing = false;
-        });
+        };
 
-        uploader.bind('complete', function (event, xhr, item, response) {
-            console.info('Complete', xhr, item, response);
+        uploader.onCompleteItem = function (item, response, status, headers) {
             $scope.processing = false;
-        });
+        };
 
         $scope.ok = function () {
             $modalInstance.close($scope.selected.item);
@@ -941,20 +941,13 @@ angular.module('ice.upload.controller', [])
             uploader.uploadAll();
         };
 
-        // example of event binding
-        uploader.bind('afteraddingfile', function (event, item) {
-            console.info('After adding a file', item);
-//        item.upload();
-        });
-
-        uploader.bind('progress', function (event, item, progress) {
-            console.info('progress', item, progress);
+        uploader.onProgressItem = function (event, item, progress) {
             if (progress !== '100')
                 return;
 
             $scope.processing = true;
             item.remove();
-        });
+        };
 
         $scope.downloadCSVTemplate = function () {
             var url = "/rest/file/upload/" + $scope.addType;

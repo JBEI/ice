@@ -60,12 +60,17 @@ public class EntryCreatorTest {
         strainData.setGenotypePhenotype("genPhen");
         strainData.setHost("host");
         strain.setStrainData(strainData);
+        strain.setOwner("Tester");
+        strain.setOwnerEmail("tester");
+        strain.setCreator(strain.getOwner());
+        strain.setCreatorEmail(strain.getOwnerEmail());
 
         strain.setBioSafetyLevel(1);
 
         long id = creator.createPart(userId, strain);
         Strain entry = (Strain) DAOFactory.getEntryDAO().get(id);
         Assert.assertNotNull(entry);
+        Assert.assertEquals(entry.getOwnerEmail(), strain.getOwnerEmail());
 
         Assert.assertEquals(strainData.getGenotypePhenotype(), entry.getGenotypePhenotype());
         Assert.assertEquals(strainData.getHost(), entry.getHost());
@@ -75,6 +80,7 @@ public class EntryCreatorTest {
         ArabidopsisSeedData seedData = new ArabidopsisSeedData();
         seedData.setGeneration(Generation.F3);
         seedData.setPlantType(PlantType.OTHER);
+        seedData.setHarvestDate("01/02/2014");
         seed.setBioSafetyLevel(2);
         seed.setArabidopsisSeedData(seedData);
 

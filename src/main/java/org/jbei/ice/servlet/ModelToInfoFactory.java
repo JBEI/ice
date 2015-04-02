@@ -14,6 +14,8 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.model.*;
 import org.jbei.ice.lib.models.TraceSequence;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +34,8 @@ public class ModelToInfoFactory {
         if (type == null)
             return null;
 
-        PartData part = getCommon(type, entry);
+        PartData partData = new PartData(type);
+        PartData part = getCommon(partData, entry);
 
         switch (type) {
             case PLASMID:
@@ -119,8 +122,11 @@ public class ModelToInfoFactory {
         data.setHomozygosity(seed.getHomozygosity());
         data.setEcotype(seed.getEcotype());
         data.setSeedParents(seed.getParents());
-        if (seed.getHarvestDate() != null)
-            data.setHarvestDate(seed.getHarvestDate().getTime());
+        if (seed.getHarvestDate() != null) {
+            DateFormat format = new SimpleDateFormat("MM/dd/YYYY");
+            String dateFormat = format.format(seed.getHarvestDate());
+            data.setHarvestDate(dateFormat);
+        }
         boolean isSent = !(seed.isSentToABRC() == null || !seed.isSentToABRC());
         data.setSentToAbrc(isSent);
         return data;
@@ -149,8 +155,7 @@ public class ModelToInfoFactory {
         return data;
     }
 
-    private static PartData getCommon(EntryType type, Entry entry) {
-        PartData info = new PartData(type);
+    public static PartData getCommon(PartData info, Entry entry) {
         info.setId(entry.getId());
         info.setRecordId(entry.getRecordId());
         info.setPartId(entry.getPartNumber());
@@ -353,8 +358,11 @@ public class ModelToInfoFactory {
                 seedData.setHomozygosity(seed.getHomozygosity());
                 seedData.setEcotype(seed.getEcotype());
                 seedData.setSeedParents(seed.getParents());
-                if (seed.getHarvestDate() != null)
-                    seedData.setHarvestDate(seed.getHarvestDate().getTime());
+                if (seed.getHarvestDate() != null) {
+                    DateFormat format = new SimpleDateFormat("MM/dd/YYYY");
+                    String dateFormat = format.format(seed.getHarvestDate());
+                    seedData.setHarvestDate(dateFormat);
+                }
                 part.setArabidopsisSeedData(seedData);
                 break;
 

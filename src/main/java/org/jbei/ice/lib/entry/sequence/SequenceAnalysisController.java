@@ -1,8 +1,6 @@
 package org.jbei.ice.lib.entry.sequence;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -30,10 +28,8 @@ import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
-import org.jbei.ice.lib.utils.SerializationUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.DNASequence;
-import org.jbei.ice.lib.vo.SequenceTraceFile;
 
 /**
  * ABI to manipulate DNA sequence trace analysis
@@ -208,41 +204,6 @@ public class SequenceAnalysisController {
     public File getFile(TraceSequence traceSequence) throws ControllerException {
         return Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName,
                          traceSequence.getFileId()).toFile();
-    }
-
-    /**
-     * Retrieve the {@link SequenceTraceFile} value object of the given TraceSequence.
-     *
-     * @param traceSequence
-     * @return SequenceTraceFile object
-     * @throws ControllerException
-     */
-    public SequenceTraceFile getSequenceTraceFile(TraceSequence traceSequence) throws ControllerException {
-        if (traceSequence == null) {
-            return null;
-        }
-
-        String base64Data;
-        File file = getFile(traceSequence);
-        byte[] bytes;
-
-        try (FileInputStream fileStream = new FileInputStream(file)) {
-            bytes = new byte[(int) (file.length())];
-            fileStream.read(bytes);
-        } catch (IOException e) {
-            throw new ControllerException(e);
-        }
-
-        base64Data = SerializationUtils.serializeBytesToBase64String(bytes);
-        SequenceTraceFile result = new SequenceTraceFile();
-
-        result.setDepositorEmail(traceSequence.getDepositor());
-        result.setFileId(traceSequence.getFileId());
-        result.setFileName(traceSequence.getFilename());
-        result.setTimeStamp(new Date());
-        result.setBase64Data(base64Data);
-
-        return result;
     }
 
     /**

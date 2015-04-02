@@ -7,6 +7,7 @@ import org.hibernate.search.annotations.*;
 import org.hibernate.search.annotations.Index;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.attachment.Attachment;
@@ -552,7 +553,7 @@ public class Entry implements IDataModel {
 
     @Override
     public PartData toDataTransferObject() {
-        return ModelToInfoFactory.getInfo(this);
+        return ModelToInfoFactory.getCommon(new PartData(EntryType.nameToType(this.getRecordType())), this);
     }
 
     public String getPrincipalInvestigatorEmail() {

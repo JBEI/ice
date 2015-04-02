@@ -1,19 +1,24 @@
 package org.jbei.ice.lib.entry;
 
 import org.jbei.ice.lib.access.Permission;
+import org.jbei.ice.lib.account.AccountType;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.utils.IceCSVSerializer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Hector Plahar
@@ -26,32 +31,6 @@ public class EntryRetriever {
     public EntryRetriever() {
         this.dao = DAOFactory.getEntryDAO();
         authorization = new EntryAuthorization();
-    }
-
-    public String getListAsCSV(String userId, ArrayList<Long> list) {  // todo : use a file for large lists
-        if (list == null || list.isEmpty() || userId.isEmpty())
-            return "";
-
-        List<Entry> entryList = new LinkedList<>();
-
-        for (Number item : list) {
-            Entry entry = this.dao.get(item.longValue());
-            if (entry == null || !authorization.canRead(userId, entry))
-                continue;
-
-            entryList.add(entry);
-        }
-
-        return IceCSVSerializer.serializeList(entryList);
-    }
-
-    public String getAsCSV(String userId, String id) {
-        Entry entry = getEntry(id);
-        if (entry == null)
-            return null;
-
-        authorization.expectRead(userId, entry);
-        return IceCSVSerializer.serialize(entry);
     }
 
     public String getPartNumber(String userId, String id) {
@@ -188,21 +167,67 @@ public class EntryRetriever {
         return dao.getEntrySummary(id);
     }
 
-    /**
-     * Retrieve {@link org.jbei.ice.lib.entry.model.Entry} from the database by recordId (uuid).
-     *
-     * @param recordId universally unique identifier that was assigned to entry on create
-     * @return entry retrieved from the database.
-     */
-    public Entry getByRecordId(String userId, String recordId) {
-        Entry entry = getEntry(recordId);
-        if (entry == null)
-            return null;
+    public List<Long> getEntriesFromSelectionContext(String userId, EntrySelection context) {
+        boolean all = context.isAll();
+        EntryType entryType = context.getEntryType();
 
-        if (entry.getVisibility() == Visibility.TRANSFERRED.getValue())
-            return entry;
+        switch (context.getSelectionType()) {
+            default:
+            case FOLDER:
+                if (!context.getEntries().isEmpty()) {
+                    return context.getEntries();
+                } else {
+                    long folderId = Long.decode(context.getFolderId());
+                    return getFolderEntries(userId, folderId, all, entryType);
+                }
 
-        authorization.expectRead(userId, entry);
-        return entry;
+            case SEARCH:
+                break;
+
+            case COLLECTION:
+                if (!context.getEntries().isEmpty()) {
+                    return context.getEntries();
+                } else {
+                    return getCollectionEntries(userId, context.getFolderId(), all, entryType);
+                }
+        }
+
+        return null;
+
+    }
+
+    protected List<Long> getCollectionEntries(String userId, String collection, boolean all, EntryType type) {
+        List<Long> entries = null;
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+
+
+        switch (collection.toLowerCase()) {
+            case "personal":
+                if (all)
+                    type = null;
+                entries = dao.getOwnerEntryIds(userId, type);
+                break;
+            case "shared":
+                GroupController controller = new GroupController();
+                Group everybodyGroup = controller.createOrRetrievePublicGroup();
+                entries = dao.sharedWithUserEntryIds(account, everybodyGroup);
+                break;
+            case "available":
+                entries = dao.getVisibleEntryIds(account.getType() == AccountType.ADMIN);
+                break;
+        }
+
+        return entries;
+    }
+
+    // todo : folder controller
+    protected List<Long> getFolderEntries(String userId, long folderId, boolean all, EntryType type) {
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);
+        FolderAuthorization folderAuthorization = new FolderAuthorization();
+        folderAuthorization.expectRead(userId, folder);
+
+        if (all)
+            type = null;
+        return DAOFactory.getFolderDAO().getFolderContentIds(folderId, type);
     }
 }

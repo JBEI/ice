@@ -2,7 +2,6 @@ package org.jbei.ice.lib.entry;
 
 
 import org.apache.commons.lang.StringUtils;
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.*;
@@ -11,8 +10,6 @@ import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.utils.Utils;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,35 +22,6 @@ import java.util.Set;
  * @author Hector Plahar
  */
 public class EntryUtil {
-
-    public static Entry createEntryFromType(EntryType type, String name, String email) {
-        Entry entry;
-
-        switch (type) {
-            case PLASMID:
-                entry = new Plasmid();
-                break;
-
-            case STRAIN:
-                entry = new Strain();
-                break;
-
-            case ARABIDOPSIS:
-                entry = new ArabidopsisSeed();
-                break;
-
-            default:
-            case PART:
-                entry = new Part();
-                break;
-        }
-
-        entry.setOwner(name);
-        entry.setOwnerEmail(email);
-        entry.setCreator(name);
-        entry.setCreatorEmail(email);
-        return entry;
-    }
 
     public static String entryFieldToValue(Entry entry, EntryField field) {
         String value = getCommonFieldValues(entry, field);
@@ -115,7 +83,7 @@ public class EntryUtil {
             case IP:
                 return entry.getIntellectualProperty();
 
-            case BIOSAFETY_LEVEL:
+            case BIO_SAFETY_LEVEL:
                 return entry.getBioSafetyLevel().toString();
 
             case NAME:
@@ -260,7 +228,7 @@ public class EntryUtil {
                     invalidFields.add(EntryField.NAME);
 
                 if (partData.getBioSafetyLevel() == null)
-                    invalidFields.add(EntryField.BIOSAFETY_LEVEL);
+                    invalidFields.add(EntryField.BIO_SAFETY_LEVEL);
 
                 if (StringUtils.isEmpty(partData.getStatus()))
                     invalidFields.add(EntryField.STATUS);
@@ -342,7 +310,7 @@ public class EntryUtil {
     }
 
     private static ArabidopsisSeedData setSeedDataFromField(ArabidopsisSeedData seedData, String value,
-            EntryField field) {
+                                                            EntryField field) {
         if (seedData == null)
             seedData = new ArabidopsisSeedData();
 
@@ -357,12 +325,7 @@ public class EntryUtil {
 
             case HARVEST_DATE:
                 if (value != null && !value.isEmpty()) {
-                    try {
-                        Date date = SimpleDateFormat.getDateInstance(DateFormat.SHORT).parse(value);
-                        seedData.setHarvestDate(date.getTime());
-                    } catch (ParseException ia) {
-                        Logger.error(ia);
-                    }
+                    seedData.setHarvestDate(value);
                 }
                 break;
 
@@ -422,7 +385,7 @@ public class EntryUtil {
                 data.setIntellectualProperty(value);
                 break;
 
-            case BIOSAFETY_LEVEL:
+            case BIO_SAFETY_LEVEL:
                 Integer level = BioSafetyOption.intValue(value);
                 if (level == null) {
                     if (value.contains("1"))

@@ -22,7 +22,6 @@ import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.folder.Folder;
-import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.models.*;
@@ -257,29 +256,23 @@ public class EntryController {
      * Delete the entry in the database. Schedule an index rebuild.
      *
      * @param entryId unique identifier for entry to be deleted
-     * @throws PermissionException
+     * @throws PermissionException if user does not have the appropriate write permissions to delete entry
      */
-    public ArrayList<FolderDetails> delete(String userId, long entryId) throws PermissionException {
+    public void delete(String userId, long entryId) throws PermissionException {
         Entry entry = dao.get(entryId);
         boolean schedule = sequenceDAO.hasSequence(entry.getId());
 
-        FolderController folderController = new FolderController();
-        ArrayList<FolderDetails> folderList = new ArrayList<>();
         FolderDAO folderDAO = DAOFactory.getFolderDAO();
         List<Folder> folders = folderDAO.getFoldersByEntry(entry);
-        ArrayList<Long> entryIds = new ArrayList<>();
-        entryIds.add(entry.getId());
         if (folders != null) {
             for (Folder folder : folders) {
-                folderController.removeFolderContents(userId, folder.getId(), entryIds);
+                folder.getContents().remove(entry);
                 FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
                 long size = folderDAO.getFolderSize(folder.getId());
                 details.setCount(size);
-                folderList.add(details);
             }
         }
         delete(userId, entry, schedule);
-        return folderList;
     }
 
     /**
@@ -333,31 +326,6 @@ public class EntryController {
         if (scheduleIndexRebuild) {
             ApplicationController.scheduleBlastIndexRebuildTask(true);
         }
-    }
-
-    /**
-     * Filter {@link Entry} id's for display.
-     * <p/>
-     * Given a List of entry id's, keep only id's that user has read access to.
-     *
-     * @param account user account
-     * @param ids     list of entry ids
-     * @return List of Entry ids.
-     */
-    List<Long> filterEntriesByPermission(Account account, List<Long> ids) {
-        ArrayList<Long> result = new ArrayList<>();
-        for (Long id : ids) {
-            Entry entry = dao.get(id);
-            if (authorization.canRead(account.getEmail(), entry)) {
-                result.add(id);
-            }
-        }
-        return result;
-    }
-
-    public ArrayList<Entry> getEntriesByIdSet(Account account, ArrayList<Long> queryResultIds) {
-        List<Long> filtered = this.filterEntriesByPermission(account, queryResultIds);
-        return new ArrayList<>(dao.getEntriesByIdSet(filtered));
     }
 
     public PartData retrieveEntryTipDetails(String userId, String id) {

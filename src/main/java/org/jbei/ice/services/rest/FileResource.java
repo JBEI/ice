@@ -1,28 +1,10 @@
 package org.jbei.ice.services.rest;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URI;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.UUID;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
-
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -32,7 +14,7 @@ import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
-import org.jbei.ice.lib.entry.EntryRetriever;
+import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
@@ -42,13 +24,16 @@ import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.net.RemoteAccessController;
+import org.jbei.ice.lib.utils.EntriesAsCSV;
 import org.jbei.ice.lib.utils.Utils;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.*;
+import java.net.URI;
+import java.nio.file.Paths;
 
 /**
  * @author Hector Plahar
@@ -64,14 +49,14 @@ public class FileResource extends RestResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public Response post(@FormDataParam("file") InputStream fileInputStream,
-            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                         @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
+                         @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         try {
             getUserIdFromSessionHeader(sessionId);
             String fileName = contentDispositionHeader.getFileName();
             String fileId = Utils.generateUUID();
             File attachmentFile = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
-                                            AttachmentController.attachmentDirName, fileId).toFile();
+                    AttachmentController.attachmentDirName, fileId).toFile();
             FileUtils.copyInputStreamToFile(fileInputStream, attachmentFile);
             AttachmentInfo info = new AttachmentInfo();
             info.setFileId(fileId);
@@ -83,6 +68,9 @@ public class FileResource extends RestResource {
         }
     }
 
+    /**
+     * Retrieves a temp file by fileId
+     */
     @GET
     @Path("tmp/{fileId}")
     public Response getTmpFile(@PathParam("fileId") String fileId) {
@@ -91,6 +79,9 @@ public class FileResource extends RestResource {
             return super.respond(Response.Status.NOT_FOUND);
 
         Response.ResponseBuilder response = Response.ok(tmpFile);
+        if (tmpFile.getName().endsWith(".csv")) {
+            response.header("Content-Type", "text/csv; name=\"" + tmpFile.getName() + "\"");
+        }
         response.header("Content-Disposition", "attachment; filename=\"" + tmpFile.getName() + "\"");
         return response.build();
     }
@@ -98,8 +89,8 @@ public class FileResource extends RestResource {
     @GET
     @Path("attachment/{fileId}")
     public Response getAttachment(@PathParam("fileId") String fileId,
-            @QueryParam("sid") String sid,
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                                  @QueryParam("sid") String sid,
+                                  @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         try {
             if (StringUtils.isEmpty(sessionId))
                 sessionId = sid;
@@ -122,9 +113,9 @@ public class FileResource extends RestResource {
     @GET
     @Path("remote/{id}/attachment/{fileId}")
     public Response getRemoteAttachment(@PathParam("id") long partnerId,
-            @PathParam("fileId") String fileId,
-            @QueryParam("sid") String sid,
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                                        @PathParam("fileId") String fileId,
+                                        @QueryParam("sid") String sid,
+                                        @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         try {
             RemoteAccessController controller = new RemoteAccessController();
             File file = controller.getPublicAttachment(partnerId, fileId);
@@ -194,8 +185,8 @@ public class FileResource extends RestResource {
     @GET
     @Path("trace/{fileId}")
     public Response getTraceSequenceFile(@PathParam("fileId") String fileId,
-            @QueryParam("sid") String sid,
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                                         @QueryParam("sid") String sid,
+                                         @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         try {
             SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
             TraceSequence traceSequence = sequenceAnalysisController.getTraceSequenceByFileId(fileId);
@@ -216,7 +207,7 @@ public class FileResource extends RestResource {
     @Produces("image/png")
     @Path("sbolVisual/{rid}")
     public Response getSBOLVisual(@PathParam("rid") String recordId,
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                                  @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         try {
             String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
             Entry entry = DAOFactory.getEntryDAO().getByRecordId(recordId);
@@ -235,7 +226,7 @@ public class FileResource extends RestResource {
                 URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
                 if (uri != null) {
                     IOUtils.copy(uri.toURL().openStream(),
-                                 new FileOutputStream(tmpDir + File.separatorChar + hash + ".png"));
+                            new FileOutputStream(tmpDir + File.separatorChar + hash + ".png"));
                     fileId = (hash + ".png");
                     File file = Paths.get(tmpDir, fileId).toFile();
 
@@ -257,10 +248,10 @@ public class FileResource extends RestResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public Response uploadSequence(@FormDataParam("file") InputStream fileInputStream,
-            @FormDataParam("entryRecordId") String recordId,
-            @FormDataParam("entryType") String entryType,
-            @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                                   @FormDataParam("entryRecordId") String recordId,
+                                   @FormDataParam("entryType") String entryType,
+                                   @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
+                                   @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         try {
             if (entryType == null)
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -269,7 +260,7 @@ public class FileResource extends RestResource {
             String userId = SessionHandler.getUserIdBySession(sessionId);
             String sequence = IOUtils.toString(fileInputStream);
             SequenceInfo sequenceInfo = sequenceController.parseSequence(userId, recordId, entryType, sequence,
-                                                                         fileName);
+                    fileName);
             if (sequenceInfo == null)
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             return Response.status(Response.Status.OK).entity(sequenceInfo).build();
@@ -288,23 +279,18 @@ public class FileResource extends RestResource {
     @Path("csv")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response downloadCSV(@HeaderParam("X-ICE-Authentication-SessionId") String sessionId, ArrayList<Long> list) {
+    public Response downloadCSV(
+            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId,
+            EntrySelection selection) {
         String userId = super.getUserIdFromSessionHeader(sessionId);
-        EntryRetriever retriever = new EntryRetriever();
+        EntriesAsCSV entriesAsCSV = new EntriesAsCSV();
+        boolean success = entriesAsCSV.setSelectedEntries(userId, selection);
+        if (!success)
+            return super.respond(false);
 
-        final String csv = retriever.getListAsCSV(userId, list);
-        String name = UUID.randomUUID().toString() + ".csv";
-
-        if (csv != null) {
-            String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-            File file = Paths.get(tmpDir, name).toFile();
-            try {
-                FileUtils.writeStringToFile(file, csv);
-                return super.respond(Response.Status.OK, new Setting("key", name));
-            } catch (Exception e) {
-                return respond(Response.Status.INTERNAL_SERVER_ERROR);
-            }
-        }
-        return respond(Response.Status.INTERNAL_SERVER_ERROR);
+        File file = entriesAsCSV.getFilePath().toFile();
+        if (file.exists())
+            return Response.ok(new Setting("key", file.getName())).build();
+        return respond(false);
     }
 }

@@ -56,8 +56,12 @@ public class EntryCreator {
         }
         entry.setCreationTime(Calendar.getInstance().getTime());
         entry.setModificationTime(entry.getCreationTime());
-        entry.setOwner(account.getFullName());
-        entry.setOwnerEmail(account.getEmail());
+
+        if (StringUtils.isEmpty(entry.getOwner()))
+            entry.setOwner(account.getFullName());
+
+        if (StringUtils.isEmpty(entry.getOwnerEmail()))
+            entry.setOwnerEmail(account.getEmail());
 
         if (entry.getSelectionMarkers() != null) {
             for (SelectionMarker selectionMarker : entry.getSelectionMarkers()) {

@@ -18,7 +18,6 @@ import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.services.exception.UnexpectedException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -33,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * Rest API for interacting with Bulk upload resources
+ *
  * @author Hector Plahar
  */
 @Path("/upload")
@@ -205,32 +206,33 @@ public class BulkUploadResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entry")
-    public PartData createEntry(@PathParam("id") long uploadId,
+    public Response createEntry(@PathParam("id") long uploadId,
                                 PartData data,
                                 @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         try {
             String userId = getUserIdFromSessionHeader(sessionId);
             Logger.info(userId + ": adding entry to upload \"" + uploadId + "\"");
-            return creator.createEntry(userId, uploadId, data);
+            PartData result = creator.createEntry(userId, uploadId, data);
+            return respond(result);
         } catch (Exception e) {
-            throw new UnexpectedException(e.getMessage());
+            return super.respond(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entry/{entryId}")
-    public PartData updateEntry(@PathParam("id") long uploadId,
+    public Response updateEntry(@PathParam("id") long uploadId,
                                 @PathParam("entryId") long entryId,
                                 PartData data,
                                 @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         try {
             String userId = getUserIdFromSessionHeader(sessionId);
             Logger.info(userId + ": updating entry \"" + entryId + "\" for upload \"" + uploadId + "\"");
-            return creator.updateEntry(userId, uploadId, entryId, data);
+            PartData result = creator.updateEntry(userId, uploadId, entryId, data);
+            return respond(result);
         } catch (Exception e) {
-            Logger.error(e);
-            throw new UnexpectedException(e.getMessage());
+            return super.respond(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -289,8 +291,7 @@ public class BulkUploadResource extends RestResource {
                 return Response.ok().build();
             return Response.serverError().build();
         } catch (Exception e) {
-            Logger.error(e);
-            throw new UnexpectedException(e.getMessage());
+            return super.respond(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 
@@ -306,8 +307,7 @@ public class BulkUploadResource extends RestResource {
                 return Response.ok().build();
             return Response.serverError().build();
         } catch (Exception e) {
-            Logger.error(e);
-            throw new UnexpectedException(e.getMessage());
+            return super.respond(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 }

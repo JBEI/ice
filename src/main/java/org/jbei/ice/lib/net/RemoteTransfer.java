@@ -33,7 +33,7 @@ public class RemoteTransfer {
      * @param entryIds list of ids for entries that are to be transferred
      * @return List of Part Data objects obtained using the list for transfer
      */
-    public List<PartData> getPartsForTransfer(ArrayList<Long> entryIds) {
+    public List<PartData> getPartsForTransfer(List<Long> entryIds) {
         HashSet<Long> forTransfer = new HashSet<>(entryIds); // for searching entries to be transferred
         HashMap<Long, PartData> toTransfer = new LinkedHashMap<>();
 

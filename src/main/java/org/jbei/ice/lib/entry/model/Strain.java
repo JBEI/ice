@@ -1,15 +1,16 @@
 package org.jbei.ice.lib.entry.model;
 
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.Indexed;
+import org.hibernate.search.annotations.Store;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.StrainData;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-
-import org.jbei.ice.lib.dto.entry.EntryType;
-
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
-import org.hibernate.search.annotations.Store;
 
 /**
  * Store Strain specific fields.
@@ -69,5 +70,15 @@ public class Strain extends Entry {
 
     public void setPlasmids(String plasmids) {
         this.plasmids = plasmids;
+    }
+
+    @Override
+    public PartData toDataTransferObject() {
+        PartData data = super.toDataTransferObject();
+        StrainData strainData = new StrainData();
+        strainData.setGenotypePhenotype(genotypePhenotype);
+        strainData.setHost(host);
+        data.setStrainData(strainData);
+        return data;
     }
 }

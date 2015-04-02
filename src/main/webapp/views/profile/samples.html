@@ -16,6 +16,7 @@
                     <i ng-show="params.sort=='name'" class="fa"
                        ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
                 </th>
+                <th>Growth Temp.</th>
                 <th ng-click="sort('summary')">Requested</th>
                 <th ng-click="sort('summary')">Updated</th>
                 <th>Status</th>
@@ -31,6 +32,9 @@
                     <span ng-if="request.requestType==='LIQUID_CULTURE'"><i
                             class="fa fa-flask"></i> Liquid Culture</span>
                     <span ng-if="request.requestType!=='LIQUID_CULTURE'"><i class="fa fa-circle-thin"></i> Streak on Agar Plate</span>
+                </td>
+                <td>
+                    {{request.growthTemperature}} &deg;C
                 </td>
                 <td style="width:160px; white-space:nowrap">{{request.requestTime | date:'short'}}</td>
                 <td style="width:160px; white-space:nowrap">{{request.updateTime | date:'short'}}</td>

@@ -3,7 +3,6 @@ package org.jbei.ice.lib.access;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.ICanReadCallback;
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dao.IRepository;
@@ -93,29 +92,11 @@ public class Authorization<T extends IDataModel> {
 
     public void expectWrite(String userId, T object) throws PermissionException {
         if (!canWrite(userId, object))
-            throw new PermissionException(userId);
+            throw new PermissionException(userId + " is lacking write permissions");
     }
 
     public void expectAdmin(String userId) throws PermissionException {
         if (!isAdmin(userId))
             throw new PermissionException(userId + " attempting to access admin restricted action");
-    }
-
-    /**
-     * Authorization callback to determine if user specified is
-     * permitted to read the object
-     */
-    public class AuthorizationCallback implements ICanReadCallback<T> {
-
-        private final String userId;
-
-        public AuthorizationCallback(String userId) {
-            this.userId = userId;
-        }
-
-        @Override
-        public boolean canRead(T object) {
-            return Authorization.this.canRead(userId, object);
-        }
     }
 }
