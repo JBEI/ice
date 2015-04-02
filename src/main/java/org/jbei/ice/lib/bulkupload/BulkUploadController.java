@@ -61,6 +61,15 @@ public class BulkUploadController {
         sequenceController = new SequenceController();
     }
 
+    /**
+     * Creates a new bulk upload. If upload type is not bulk edit, then the status is set to in progress.
+     * Default permissions consisting of read permissions for the public groups that the requesting user is
+     * a part of are added
+     *
+     * @param userId identifier for user making request
+     * @param info   bulk upload data
+     * @return created upload
+     */
     public BulkUploadInfo create(String userId, BulkUploadInfo info) {
         Account account = accountController.getByEmail(userId);
         BulkUpload upload = new BulkUpload();
