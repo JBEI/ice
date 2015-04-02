@@ -64,7 +64,7 @@ public class RestResource {
 
     private static final HmacAuthorizor AUTHORIZOR = new HmacAuthorizor(TABLE);
 
-    @HeaderParam(value = "X-ICE-Authentication-SessionId")
+    @HeaderParam(value = AUTHENTICATION_PARAM_NAME)
     private String sessionId;
 
     @HeaderParam(value = "Authorization")

@@ -20,18 +20,18 @@ public class AccessTokenResource extends RestResource {
     private final AccountController accountController = new AccountController();
 
     /**
-     * Creates a new access token for the user referenced in the parameter, after
-     * the credentials (username and password) are validated. If one already exists, it is
-     * invalidated
+     * Creates a new access token for the user referenced in the parameter, after the credentials
+     * (username and password) are validated. If one already exists, it is invalidated
      *
-     * @param transfer wraps username and password
+     * @param transfer
+     *            wraps username and password
      * @return account information including a valid session id if credentials validate
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response create(AccountTransfer transfer) {
-        AccountTransfer info = accountController.authenticate(transfer);
+    public Response create(final AccountTransfer transfer) {
+        final AccountTransfer info = accountController.authenticate(transfer);
         if (info == null) {
             Logger.warn("Authentication failed for user " + transfer.getEmail());
             return respond(Response.Status.UNAUTHORIZED);
@@ -42,20 +42,20 @@ public class AccessTokenResource extends RestResource {
     }
 
     /**
-     * Invalidates the specified session information.
-     *
-     * @param sessionId session identifier to invalidates
+     * Invalidates the current session information.
      */
     @DELETE
-    public void deleteToken(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
-        getUserIdFromSessionHeader(sessionId);
+    public void deleteToken() {
+        // ensure the user is valid
+        getUserId();
         accountController.invalidate(sessionId);
     }
 
     /**
      * Retrieve account information for user referenced by session id
      *
-     * @param sessionId unique session identifier for logged in user
+     * @param sessionId
+     *            unique session identifier for logged in user
      * @return account information for session if session is valid, null otherwise
      */
     @GET
