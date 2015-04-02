@@ -63,26 +63,17 @@ public class BulkEntryCreator {
                                                     EntryType addType) {
         BulkUpload draft = dao.get(autoUpdate.getBulkUploadId());
         if (draft == null) {
-            draft = new BulkUpload();
-            draft.setAccount(account);
-            draft.setStatus(BulkUploadStatus.IN_PROGRESS);
-            draft.setImportType(addType.toString());
-            draft.setCreationTime(new Date(System.currentTimeMillis()));
-            draft.setLastUpdateTime(draft.getCreationTime());
-            dao.create(draft);
+            long id = createBulkUpload(account.getEmail(), addType);
+            draft = dao.get(id);
         }
         return draft;
     }
 
     public long createBulkUpload(String userId, EntryType entryType) {
-        BulkUpload draft = new BulkUpload();
-        Account account = accountController.getByEmail(userId);
-        draft.setAccount(account);
-        draft.setStatus(BulkUploadStatus.IN_PROGRESS);
-        draft.setImportType(entryType.toString());
-        draft.setCreationTime(new Date());
-        draft.setLastUpdateTime(draft.getCreationTime());
-        return dao.create(draft).getId();
+        BulkUploadInfo info = new BulkUploadInfo();
+        info.setStatus(BulkUploadStatus.IN_PROGRESS);
+        info.setType(entryType.getName());
+        return controller.create(userId, info).getId();
     }
 
     public PartData createEntry(String userId, long bulkUploadId, PartData data) {
@@ -93,6 +84,9 @@ public class BulkEntryCreator {
 
     protected PartData createEntryForUpload(String userId, PartData data, BulkUpload upload) {
         Entry entry = InfoToModelFactory.infoToEntry(data);
+        if (entry == null)
+            return null;
+
         entry.setVisibility(Visibility.DRAFT.getValue());
         Account account = accountController.getByEmail(userId);
         entry.setOwner(account.getFullName());
@@ -103,18 +97,20 @@ public class BulkEntryCreator {
             // create linked
             PartData linked = data.getLinkedParts().get(0);
             Entry linkedEntry = InfoToModelFactory.infoToEntry(linked);
-            linkedEntry.setVisibility(Visibility.DRAFT.getValue());
-            linkedEntry.setOwner(account.getFullName());
-            linkedEntry.setOwnerEmail(account.getEmail());
-            linkedEntry = entryDAO.create(linkedEntry);
+            if (linkedEntry != null) {
+                linkedEntry.setVisibility(Visibility.DRAFT.getValue());
+                linkedEntry.setOwner(account.getFullName());
+                linkedEntry.setOwnerEmail(account.getEmail());
+                linkedEntry = entryDAO.create(linkedEntry);
 
-            linked.setId(linkedEntry.getId());
-            linked.setModificationTime(linkedEntry.getModificationTime().getTime());
-            data.getLinkedParts().clear();
-            data.getLinkedParts().add(linked);
+                linked.setId(linkedEntry.getId());
+                linked.setModificationTime(linkedEntry.getModificationTime().getTime());
+                data.getLinkedParts().clear();
+                data.getLinkedParts().add(linked);
 
-            // link to main entry in the database
-            entry.getLinkedEntries().add(linkedEntry);
+                // link to main entry in the database
+                entry.getLinkedEntries().add(linkedEntry);
+            }
         }
 
         entry = entryDAO.create(entry);
@@ -147,9 +143,11 @@ public class BulkEntryCreator {
             return null;
 
         entry = InfoToModelFactory.updateEntryField(data, entry);
+        if (entry == null)
+            return null;
+
         entry.setModificationTime(new Date());
         entry = entryDAO.update(entry);
-
         data.setModificationTime(entry.getModificationTime().getTime());
 
         // check if there is any linked parts. update if so (expect a max of 1)
@@ -159,8 +157,7 @@ public class BulkEntryCreator {
         // retrieve the entry (this is the only time you can create another entry on update)
         PartData linkedPartData = data.getLinkedParts().get(0); // bulk upload can only link 1
         Entry linkedEntry = entryDAO.get(linkedPartData.getId());
-        if (linkedEntry == null) {
-            linkedEntry = InfoToModelFactory.infoToEntry(linkedPartData);
+        if (linkedEntry == null && (linkedEntry = InfoToModelFactory.infoToEntry(linkedPartData)) != null) {
             linkedEntry.setVisibility(Visibility.DRAFT.getValue());
             Account account = accountController.getByEmail(userId);
             linkedEntry.setOwner(account.getFullName());
@@ -385,6 +382,9 @@ public class BulkEntryCreator {
                 continue;
 
             Entry entry = InfoToModelFactory.infoToEntry(datum);
+            if (entry == null)
+                continue;
+
             entry.setVisibility(Visibility.DRAFT.getValue());
             Account account = accountController.getByEmail(userId);
             entry.setOwner(account.getFullName());
@@ -395,19 +395,21 @@ public class BulkEntryCreator {
                 // create linked
                 PartData linked = datum.getLinkedParts().get(0);
                 Entry linkedEntry = InfoToModelFactory.infoToEntry(linked);
-                linkedEntry.setVisibility(Visibility.DRAFT.getValue());
-                linkedEntry.setOwner(account.getFullName());
-                linkedEntry.setOwnerEmail(account.getEmail());
-                linkedEntry = entryDAO.create(linkedEntry);
+                if (linkedEntry != null) {
+                    linkedEntry.setVisibility(Visibility.DRAFT.getValue());
+                    linkedEntry.setOwner(account.getFullName());
+                    linkedEntry.setOwnerEmail(account.getEmail());
+                    linkedEntry = entryDAO.create(linkedEntry);
 
-                linked.setId(linkedEntry.getId());
-                linked.setModificationTime(linkedEntry.getModificationTime().getTime());
+                    linked.setId(linkedEntry.getId());
+                    linked.setModificationTime(linkedEntry.getModificationTime().getTime());
 
-                // check for attachments and sequences for linked entry
-                saveFiles(userId, linked, linkedEntry, files);
+                    // check for attachments and sequences for linked entry
+                    saveFiles(linked, linkedEntry, files);
 
-                // link to main entry in the database
-                entry.getLinkedEntries().add(linkedEntry);
+                    // link to main entry in the database
+                    entry.getLinkedEntries().add(linkedEntry);
+                }
             }
 
             entry = entryDAO.create(entry);
@@ -416,13 +418,13 @@ public class BulkEntryCreator {
             dao.update(draft);
 
             // save files
-            saveFiles(userId, datum, entry, files);
+            saveFiles(datum, entry, files);
         }
 
         return true;
     }
 
-    protected void saveFiles(String userId, PartData data, Entry entry, HashMap<String, InputStream> files) {
+    protected void saveFiles(PartData data, Entry entry, HashMap<String, InputStream> files) {
         // check sequence
         try {
             String sequenceName = data.getSequenceFileName();
