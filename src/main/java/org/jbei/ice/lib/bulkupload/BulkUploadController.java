@@ -10,7 +10,6 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.BulkUploadDAO;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
@@ -163,33 +162,6 @@ public class BulkUploadController {
      * @return data transfer object with the retrieved bulk import data and associated entries
      * @throws PermissionException
      */
-    public BulkUploadInfo retrieveById(String userId, long id, int start, int limit) throws PermissionException {
-        BulkUpload draft = dao.get(id);
-        if (draft == null)
-            return null;
-
-        Account account = accountController.getByEmail(userId);
-        authorization.expectRead(userId, draft);
-
-        // convert bulk import db object to data transfer object
-        int size = 0;
-        try {
-            size = dao.retrieveSavedDraftCount(id);
-        } catch (DAOException e) {
-            Logger.error(e);
-        }
-        BulkUploadInfo draftInfo = draft.toDataTransferObject();
-        draftInfo.setCount(size);
-//        EntryType type = EntryType.nameToType(draft.getImportType().split("\\s+")[0]);
-
-        // retrieve the entries associated with the bulk import
-        List<Entry> contents = dao.retrieveDraftEntries(id, start, limit);
-
-        // convert
-        draftInfo.getEntryList().addAll(convertParts(account, contents));
-        return draftInfo;
-    }
-
     public BulkUploadInfo getBulkImport(String userId, long id, int offset, int limit) {
         BulkUpload draft = dao.get(id);
         if (draft == null)

@@ -5,16 +5,15 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.BulkUpload;
 import org.jbei.ice.lib.bulkupload.BulkUploadStatus;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.entry.model.Entry;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -60,12 +59,12 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
     }
 
     public int retrieveSavedDraftCount(long draftId) throws DAOException {
-        Session session = currentSession();
-
         try {
-            Query query = session
-                    .createSQLQuery("select count(*) from bulk_upload_entry where bulk_upload_id = " + draftId);
-            return ((Number) query.uniqueResult()).intValue();
+            Number number = (Number) currentSession().createCriteria(BulkUpload.class).add(Restrictions.eq("id", draftId))
+                    .createAlias("contents", "entry")
+                    .setProjection(Projections.countDistinct("entry.id"))
+                    .uniqueResult();
+            return number.intValue();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -76,6 +75,7 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
     public ArrayList<Long> getEntryIds(BulkUpload upload) throws DAOException {
         try {
             Criteria criteria = currentSession().createCriteria(BulkUpload.class)
+                    .add(Restrictions.eq("id", upload.getId()))
                     .createAlias("contents", "entry")
                     .setProjection(Projections.property("entry.id"));
             return new ArrayList<>(criteria.list());
@@ -87,37 +87,12 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
 
     @SuppressWarnings("unchecked")
     public List<Entry> retrieveDraftEntries(long id, int start, int limit) throws DAOException {
-        Query query = currentSession()
-                .createSQLQuery("select entry_id from bulk_upload_entry where bulk_upload_id = " + id
-                        + " limit " + limit + " offset " + start);
-        List list = query.list();
-
-        try {
-            List<Entry> result = DAOFactory.getEntryDAO().getEntriesByIdSet(list);
-            if (result != null && result.size() > 0)
-                return new ArrayList<>(result);
-        } catch (Exception e) {
-            Logger.error(e);
-            throw new DAOException(e);
-        }
-
-        BulkUpload bulkUpload = super.get(BulkUpload.class, id);
-        Iterator<Entry> iterator = bulkUpload.getContents().iterator();
-        int i = -1;
-        ArrayList<Entry> results = new ArrayList<>();
-        while (iterator.hasNext()) {
-            i += 1;
-            if (i < start)
-                continue;
-
-            if (results.size() == limit)
-                return results;
-
-            Entry next = iterator.next();
-            results.add(next);
-        }
-
-        return results;
+        Query query = currentSession().createQuery("select b.contents as entry from " + BulkUpload.class.getName()
+                + " b where b.id=" + id);
+        query.setFirstResult(start);
+        query.setMaxResults(limit);
+        List l = query.list();
+        return new ArrayList<>(l);
     }
 
     @Override
