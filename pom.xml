@@ -174,34 +174,6 @@
             </testResource>
         </testResources>
         <plugins>
-<!--
-	      <plugin>
-		<artifactId>jdeb</artifactId>
-		<groupId>org.vafer</groupId>
-		<version>1.4</version>
-		<executions>
-		  <execution>
-		    <phase>package</phase>
-		    <goals>
-		      <goal>jdeb</goal>
-		    </goals>
-		    <configuration>
-		      <signPackage>false</signPackage>
-		      <dataSet>
-			<data>
-			  <src>${project.build.directory}/${project.build.finalName}.war</src>
-			  <type>file</type>
-			  <mapper>
-			    <type>perm</type>
-			    <prefix>/usr/share/jdeb/lib</prefix>
-			  </mapper>
-			</data>
-		      </dataSet>
-		    </configuration>
-		  </execution>
-		</executions>
-	      </plugin>
--->
             <plugin>
                 <inherited>true</inherited>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -229,6 +201,18 @@
                 <version>2.9.1</version>
                 <configuration>
                 </configuration>
+            </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-war-plugin</artifactId>
+              <version>2.6</version>
+              <configuration>
+                <webResources>
+                  <resource>
+                    <directory>src/main/resources/aws</directory>
+                  </resource>
+                </webResources>
+              </configuration>
             </plugin>
         </plugins>
     </build>
