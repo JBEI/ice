@@ -98,6 +98,33 @@ public class RestResource {
     }
 
     /**
+     * Extract the User ID from a query parameter value or header values in the resource request.
+     *
+     * @param sessionId
+     *            a session ID sent via query parameters
+     * @return a string User ID
+     * @throws WebApplicationException
+     *             for unauthorized access
+     */
+    protected String getUserId(final String sessionId) {
+        final Authorization auth;
+        if (userId != null) {
+            // we've already looked up the userId
+            return userId;
+        } else if ((userId = SessionHandler.getUserIdBySession(sessionId)) != null) {
+            // try to get user from a session ID, continue to Authorization if fails
+        } else if ((auth = AUTHORIZOR.validate(request)).isValid()) {
+            userId = auth.getUserId();
+            // TODO validation of meaningful userId
+            // e.g. "admin" account on EDD won't mean anything to ICE
+        }
+        if (userId == null) {
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+        }
+        return userId;
+    }
+
+    /**
      * @param sessionHeader
      *            not used
      * @return the UserId of the user matching the session value
