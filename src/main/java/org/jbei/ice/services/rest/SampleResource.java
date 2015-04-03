@@ -1,5 +1,20 @@
 package org.jbei.ice.services.rest;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.sample.PartSample;
@@ -8,12 +23,6 @@ import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.sample.UserSamples;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
 import org.jbei.ice.lib.entry.sample.SampleController;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * REST Resource for samples
@@ -26,120 +35,154 @@ public class SampleResource extends RestResource {
     private RequestRetriever requestRetriever = new RequestRetriever();
     private SampleController sampleController = new SampleController();
 
+    /**
+     * @param token
+     * @return Response with matching part sample
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{token}")
-    public Response getSampleByToken(@PathParam("token") String token) {
+    public Response getSampleByToken(@PathParam("token") final String token) {
         try {
-            ArrayList<PartSample> result = sampleController.getSamplesByBarcode(null, token);
+            final ArrayList<PartSample> result = sampleController.getSamplesByBarcode(null, token);
             return super.respond(result);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             Logger.error(e);
             return super.respond(false);
         }
     }
 
+    /**
+     * @param offset
+     * @param limit
+     * @param sort
+     * @param asc
+     * @param filter
+     * @param status
+     * @return Response with matching samples
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/requests")
-    public Response getRequests(
-            @DefaultValue("0") @QueryParam("offset") int offset,
-            @DefaultValue("15") @QueryParam("limit") int limit,
-            @DefaultValue("requested") @QueryParam("sort") String sort,
-            @DefaultValue("false") @QueryParam("asc") boolean asc,
-            @QueryParam("filter") String filter,
-            @QueryParam("status") SampleRequestStatus status,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+    public Response getRequests(@DefaultValue("0") @QueryParam("offset") final int offset,
+            @DefaultValue("15") @QueryParam("limit") final int limit,
+            @DefaultValue("requested") @QueryParam("sort") final String sort,
+            @DefaultValue("false") @QueryParam("asc") final boolean asc,
+            @QueryParam("filter") final String filter,
+            @QueryParam("status") final SampleRequestStatus status) {
+        final String userId = getUserId();
         Logger.info(userId + ": retrieving sample requests");
-        UserSamples samples = requestRetriever.getRequests(userId, offset, limit, sort, asc, status, filter);
+        final UserSamples samples = requestRetriever.getRequests(userId, offset, limit, sort, asc,
+                status, filter);
         return super.respond(Response.Status.OK, samples);
     }
 
     /**
-     * Sets the status of sample requests. Must have admin privs to set the sample for others
-     * This is intended for requesting samples
+     * Sets the status of sample requests. Must have admin privs to set the sample for others This
+     * is intended for requesting samples
      *
-     * @param sessionId session identifier
+     * @param status
+     * @param requestIds
+     * @return Response success or failure
      */
     @PUT
     @Path("/requests")
-    public Response setRequestStatus(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
-            @QueryParam("status") SampleRequestStatus status,
-            ArrayList<Long> requestIds) {
-        String userId = getUserIdFromSessionHeader(sessionId);
+    public Response setRequestStatus(@QueryParam("status") final SampleRequestStatus status,
+            final ArrayList<Long> requestIds) {
+        final String userId = getUserId();
         try {
-            if (requestIds == null || requestIds.isEmpty())
+            if (requestIds == null || requestIds.isEmpty()) {
                 return super.respond(Response.Status.OK);
+            }
 
-            ArrayList<Long> sampleRequestIds = new ArrayList<>();
-            for (Number number : requestIds)
+            final ArrayList<Long> sampleRequestIds = new ArrayList<>();
+            for (final Number number : requestIds) {
                 sampleRequestIds.add(number.longValue());
+            }
 
-            boolean success = requestRetriever.setRequestsStatus(userId, sampleRequestIds, status);
+            final boolean success = requestRetriever.setRequestsStatus(userId, sampleRequestIds,
+                    status);
             return super.respond(success);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             Logger.error(e);
             return super.respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
 
+    /**
+     * @param requestId
+     * @return Response with the removed sample
+     */
     @DELETE
     @Path("/requests/{id}")
-    public Response deleteSampleRequest(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
-            @PathParam("id") long requestId) {
-        String userId = getUserIdFromSessionHeader(sessionId);
+    public Response deleteSampleRequest(@PathParam("id") final long requestId) {
+        final String userId = getUserId();
         return respond(Response.Status.OK, requestRetriever.removeSampleFromCart(userId, requestId));
     }
 
+    /**
+     * @param requestId
+     * @param status
+     * @return Response with the updated sample request
+     */
     @PUT
     @Path("/requests/{id}")
-    public Response updateSampleRequest(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
-            @PathParam("id") long requestId,
-            @QueryParam("status") SampleRequestStatus status) {
-        String userId = getUserIdFromSessionHeader(sessionId);
-        SampleRequest request = requestRetriever.updateStatus(userId, requestId, status);
+    public Response updateSampleRequest(@PathParam("id") final long requestId,
+            @QueryParam("status") final SampleRequestStatus status) {
+        final String userId = getUserId();
+        final SampleRequest request = requestRetriever.updateStatus(userId, requestId, status);
         return respond(Response.Status.OK, request);
     }
 
+    /**
+     * @param offset
+     * @param limit
+     * @param sort
+     * @param asc
+     * @param uid
+     * @param status
+     * @return response with the matching sample requests
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/requests/{userId}")
-    public Response getUserRequests(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-            @DefaultValue("0") @QueryParam("offset") int offset,
-            @DefaultValue("15") @QueryParam("limit") int limit,
-            @DefaultValue("requested") @QueryParam("sort") String sort,
-            @DefaultValue("false") @QueryParam("asc") boolean asc,
-            @PathParam("userId") long uid,
-            @DefaultValue("IN_CART") @QueryParam("status") SampleRequestStatus status) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+    public Response getUserRequests(@DefaultValue("0") @QueryParam("offset") final int offset,
+            @DefaultValue("15") @QueryParam("limit") final int limit,
+            @DefaultValue("requested") @QueryParam("sort") final String sort,
+            @DefaultValue("false") @QueryParam("asc") final boolean asc,
+            @PathParam("userId") final long uid,
+            @DefaultValue("IN_CART") @QueryParam("status") final SampleRequestStatus status) {
+        final String userId = getUserId();
         Logger.info(userId + ": retrieving sample requests for user");
-        UserSamples userSamples = requestRetriever.getUserSamples(userId, status, offset, limit, sort, asc);
+        final UserSamples userSamples = requestRetriever.getUserSamples(userId, status, offset,
+                limit, sort, asc);
         return super.respond(Response.Status.OK, userSamples);
     }
 
+    /**
+     * @param request
+     * @return Response with the added sample requests
+     */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/requests")
-    public ArrayList<SampleRequest> addRequest(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-            SampleRequest request) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+    public ArrayList<SampleRequest> addRequest(final SampleRequest request) {
+        final String userId = getUserId();
         log(userId, "add sample request to cart for " + request.getPartData().getId());
         return requestRetriever.placeSampleInCart(userId, request);
     }
 
+    /**
+     * @param type
+     * @return Response with the current sample requests
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/storage/{type}")
     public Response getSampleStorageType(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-            @DefaultValue("IN_CART") @QueryParam("type") String type) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
-        List<StorageLocation> locations = sampleController.getStorageLocations(userId, type);
+            @DefaultValue("IN_CART") @QueryParam("type") final String type) {
+        final String userId = getUserId();
+        final List<StorageLocation> locations = sampleController.getStorageLocations(userId, type);
         return respond(locations);
     }
 }
