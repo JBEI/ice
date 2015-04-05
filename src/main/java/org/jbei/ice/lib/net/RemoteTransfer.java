@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.net;
 
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
@@ -7,6 +8,8 @@ import org.jbei.ice.lib.dao.hibernate.RemotePartnerDAO;
 import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.services.rest.RestClient;
 import org.jbei.ice.servlet.ModelToInfoFactory;
@@ -130,7 +133,20 @@ public class RemoteTransfer {
         if (sequenceDAO.hasSequence(data.getId())) {
             Entry entry = entryDAO.get(data.getId());
             Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
-            client.postSequenceFile(url, data.getRecordId(), data.getType(), sequence.getSequenceUser());
+            SequenceController controller = new SequenceController();
+            GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
+            genbankFormatter.setCircular(true);
+            String sequenceString;
+            try {
+                sequenceString = controller.compose(sequence, genbankFormatter);
+            } catch (Exception e) {
+                Logger.error(e);
+                sequenceString = sequence.getSequenceUser();
+            }
+            if (StringUtils.isEmpty(sequenceString))
+                sequenceString = sequence.getSequence();
+
+            client.postSequenceFile(url, data.getRecordId(), data.getType(), sequenceString);
         }
 
         // todo : check main entry for attachments
