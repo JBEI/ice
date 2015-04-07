@@ -18,6 +18,7 @@ import org.jbei.auth.hmac.HmacAuthorizor;
 import org.jbei.auth.hmac.HmacSignatureFactory;
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -32,8 +33,14 @@ public class RestResource {
     private static final KeyTable TABLE = new KeyTable() {
 
         // keys stored in /var/lib/tomcat6/data/rest-auth by default
-        private final File directory = Paths.get(
-                Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), "rest-auth").toFile();
+        private final File directory;
+        {
+            // need to force-create a transaction to get the DATA_DIRECTORY config value
+            HibernateUtil.beginTransaction();
+            directory = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
+                    "rest-auth").toFile();
+            HibernateUtil.commitTransaction();
+        }
 
         @Override
         public Key getKey(final String keyId) {
