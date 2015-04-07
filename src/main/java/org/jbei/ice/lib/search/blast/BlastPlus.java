@@ -265,7 +265,8 @@ public class BlastPlus {
                 throw new BlastException("Subject or query is null");
 
             StringBuilder command = new StringBuilder();
-            String blastN = BlastProgram.BLAST_N.getName();
+            String blastN = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
+                + BlastProgram.BLAST_N.getName();
             command.append(blastN)
                    .append(" -query ")
                    .append(queryFilePath.toString())
