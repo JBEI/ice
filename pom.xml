@@ -17,6 +17,11 @@
             <id>Sonatype OSS Snapshot Repository</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
+        <repository>
+            <id>jbei-repo</id>
+            <name>JBEI Maven Repository</name>
+            <url>https://repo.jbei.org/artifactory/repo/</url>
+        </repository>
     </repositories>
     <dependencies>
         <dependency>
