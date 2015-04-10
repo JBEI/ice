@@ -45,7 +45,7 @@ Set Up
 
 3. Create a Postgresql development database
 
-4. Start Jetty and point ICE to your development database by substituting in the correct parameters
+4. Start Jetty and point ICE to your development database by substituting in the correct parameters. ICE uses ``/var/lib`` for storing its indexes so you'll probably need to be a superuser to run the application.
 
 ::
 
