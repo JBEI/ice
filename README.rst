@@ -6,6 +6,8 @@ software for biological parts developed by the `Joint
 BioEnergy Institute <http://www.jbei.org/>`__. It is a Web application used by laboratories to track and search their
 constructs.
 
+ICE is distributed under the Modified BSD license. See LICENSE.txt and LIBRARY_LICENSES.txt for details.
+
 You can try out the software at our `Public
 Registry <http://public-registry.jbei.org>`__.
 
@@ -27,7 +29,7 @@ To set up a development environment for ICE you will need to install:
 * `Java JDK 7 <http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html>`__
 * `Maven <https://maven.apache.org/download.cgi>`__  ≥ 3.0
 
-If you use a Debian-link OS, the following command will install all the requirements
+If you use a Debian-like operating system, the following command will install all the requirements
 
 ::
 
