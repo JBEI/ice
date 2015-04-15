@@ -51,7 +51,7 @@ Set Up
 
 ::
 
-  sudo mvn jetty:run -DRDS_HOSTNAME=localhost -DRDS_PORT=5432 -DRDS_DB_NAME=regdb -DRDS_USERNAME=tomcat6 -DRDS_PASSWORD=tomcat6
+  sudo mvn jetty:run -DRDS_HOSTNAME=localhost -DRDS_PORT=5432 -DRDS_DB_NAME=regdb -DRDS_USERNAME=tomcat -DRDS_PASSWORD=<password>
 
 5. Point your browser to https://localhost:8443/ to access the application
 
