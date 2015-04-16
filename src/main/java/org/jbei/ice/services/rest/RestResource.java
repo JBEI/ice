@@ -1,26 +1,14 @@
 package org.jbei.ice.services.rest;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.nio.file.Paths;
-import java.security.Key;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
-import org.jbei.auth.Authorization;
-import org.jbei.auth.KeyTable;
-import org.jbei.auth.hmac.HmacAuthorizor;
-import org.jbei.auth.hmac.HmacSignatureFactory;
+import org.jbei.auth.hmac.HmacSignature;
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.utils.Utils;
 
 /**
  * Parent class for all rest resource objects
@@ -90,21 +78,7 @@ public class RestResource {
      *             for unauthorized access
      */
     protected String getUserId() {
-        final Authorization auth;
-        if (userId != null) {
-            // we've already looked up the userId
-            return userId;
-        } else if ((auth = AUTHORIZOR.validate(request)).isValid()) {
-            userId = auth.getUserId();
-            // TODO validation of meaningful userId
-            // e.g. "admin" account on EDD won't mean anything to ICE
-        } else if (sessionId != null) {
-            userId = SessionHandler.getUserIdBySession(sessionId);
-        }
-        if (userId == null) {
-            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-        }
-        return userId;
+        return getUserId(sessionId);
     }
 
     /**
@@ -117,16 +91,22 @@ public class RestResource {
      *             for unauthorized access
      */
     protected String getUserId(final String sessionId) {
-        final Authorization auth;
         if (userId != null) {
             // we've already looked up the userId
             return userId;
         } else if ((userId = SessionHandler.getUserIdBySession(sessionId)) != null) {
             // try to get user from a session ID, continue to Authorization if fails
-        } else if ((auth = AUTHORIZOR.validate(request)).isValid()) {
-            userId = auth.getUserId();
-            // TODO validation of meaningful userId
-            // e.g. "admin" account on EDD won't mean anything to ICE
+        } else {
+            final Object hmac = request.getAttribute(AuthenticationInterceptor.HMAC_SIGNATURE);
+            final Object valid = request.getAttribute(AuthenticationInterceptor.EXPECTED_SIGNATURE);
+            if (hmac != null && hmac instanceof HmacSignature) {
+                final HmacSignature generated = (HmacSignature) hmac;
+                if (generated.generateSignature().equals(valid)) {
+                    // TODO validation of meaningful userId
+                    // e.g. "admin" account on EDD won't mean anything to ICE
+                    userId = generated.getUserId();
+                }
+            }
         }
         if (userId == null) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
