@@ -34,10 +34,11 @@
                 <New class="org.mortbay.jetty.security.SslSocketConnector">
                     <Set name="Port">8443</Set>
                     <Set name="maxIdleTime">30000</Set>
-                    <Set name="keystore"><SystemProperty name="jetty.home" default="."/>/.keystore
-                    </Set>
+                    <Set name="keystore"><SystemProperty name="jetty.home" default="."/>/.keystore</Set>
                     <Set name="password">changeit</Set>
                     <Set name="keyPassword">changeit</Set>
+                    <Set name="truststore"><SystemProperty name="jetty.home" default="."/>/.keystore</Set>
+                    <Set name="trustPassword">changeit</Set>
                 </New>
 
             </Item>
