@@ -17,7 +17,7 @@
     </appender>
 
     <logger name="org.jbei.ice" level="DEBUG"/>
-    <logger name="org.jbei.auth" level="DEBUG">
+    <logger name="org.jbei.auth" level="DEBUG" additivity="false">
         <appender-ref ref="STDOUT"/>
     </logger>
 
