@@ -79,7 +79,7 @@ public class UserResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/autocomplete")
-    public ArrayList<AccountTransfer> getAutoCompleteForAvailableAccounts(
+    public List<AccountTransfer> getAutoCompleteForAvailableAccounts(
             @QueryParam("val") final String val,
             @DefaultValue("8") @QueryParam("limit") final int limit) {
         final String userId = getUserId();
