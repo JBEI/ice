@@ -115,10 +115,13 @@ public class AuthenticationInterceptor implements ContainerRequestFilter, Reader
         } else {
             final UriInfo uriInfo = requestContext.getUriInfo();
             final MultivaluedMap<String, String> params = uriInfo.getQueryParameters(false);
-            final HmacSignature sig = AUTHORIZOR.initSignature(hmac, requestContext.getMethod(),
-                    requestContext.getHeaderString("Host"), uriInfo.getPath(), params);
+            final String method = requestContext.getMethod();
+            final String host = requestContext.getHeaderString("Host");
+            final String path = uriInfo.getAbsolutePath().getPath(); // uriInfo path is relative
+            final HmacSignature sig = AUTHORIZOR.initSignature(hmac, method, host, path, params);
             requestContext.setProperty(HMAC_SIGNATURE, sig);
             requestContext.setProperty(EXPECTED_SIGNATURE, parts[3]);
+
         }
     }
 
