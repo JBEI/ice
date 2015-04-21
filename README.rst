@@ -37,26 +37,26 @@ If you use a Debian-like operating system, the following command will install al
 
 Set Up
 ~~~~~~
-#. Checkout the code and enter the repository
+1. Checkout the code and enter the repository
 
 ::
 
   git checkout https://github.com/JBEI/ice.git
   cd ice
 
-#. Since the application requires an SSL certificate, generate one that the Jetty Web server can use this command. When prompted for a password, enter **changeit**
+2. Since the application requires an SSL certificate, generate one that the Jetty Web server can use this command. When prompted for a password, enter **changeit**
 
 ::
 
   keytool -genkey -alias tomcat -keyalg RSA -keystore ./.keystore
 
-#. Start Jetty
+3. Start Jetty
 
 ::
 
   mvn jetty:run
 
-#. Point your browser to https://localhost:8443/ to access the application
+4. Point your browser to https://localhost:8443/ to access the application
 
 Links
 -----
