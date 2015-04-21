@@ -22,6 +22,11 @@ public class HibernateUtil {
     private HibernateUtil() {
     }
 
+    private static String BASE_FILE = "hibernate.cfg.xml";
+    private static String MOCK_FILE = "mock.cfg.xml";
+    private static String AWS_FILE = "aws.cfg.xml";
+    private static String DEFAULT_FILE = "default.cfg.xml";
+
     /**
      * Open a new {@link Session} from the sessionFactory.
      * This needs to be closed when done with
@@ -67,21 +72,24 @@ public class HibernateUtil {
     private static synchronized void initialize(Type type) {
         if (sessionFactory == null) { // initialize only when there is no previous sessionFactory
             Logger.info("Initializing session factory for type " + type.name());
-            Configuration configuration;
+            Configuration configuration = new Configuration().configure(BASE_FILE);
             try {
                 if (type == Type.MOCK) {
-                    configuration = new Configuration().configure("mock_hibernate.cfg.xml");
+                    configuration.configure(MOCK_FILE);
                 } else {
-                    // Create the SessionFactory from hibernate.cfg.xml
-                    configuration = new Configuration().configure("hibernate.cfg.xml");
+                    String environment = System.getProperty("environment");
+
+                    if (environment != null && environment.equals("aws")){
+                        configuration.configure(AWS_FILE);
+                    }else{
+                        configuration.configure(DEFAULT_FILE);
+                    }
                 }
 
                 ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
                         configuration.getProperties()).build();
                 sessionFactory = configuration.buildSessionFactory(serviceRegistry);
             } catch (Throwable e) {
-                String msg = "Could not initialize hibernate!!!";
-//                Logger.error(msg, e);
                 e.printStackTrace();
                 throw new RuntimeException(e);
             }
