@@ -33,27 +33,31 @@ If you use a Debian-like operating system, the following command will install al
 
 ::
 
-  sudo apt-get install ncbi-blast+ default-jdk maven postgresql
+  sudo apt-get install ncbi-blast+ default-jdk maven
 
 
 Set Up
 ~~~~~~
-1. Checkout the code and enter the repository
-2. Since the application requires an SSL certificate, generate one that the Jetty Web server can use this command. When prompted for a password, enter **changeit**
+#. Checkout the code and enter the repository
+
+::
+
+  git checkout https://github.com/JBEI/ice.git
+  cd ice
+
+#. Since the application requires an SSL certificate, generate one that the Jetty Web server can use this command. When prompted for a password, enter **changeit**
 
 ::
 
   keytool -genkey -alias tomcat -keyalg RSA -keystore ./.keystore
 
-3. Create a Postgresql development database
-
-4. Start Jetty and point ICE to your development database by substituting in the correct parameters. ICE uses ``/var/lib`` for storing its indexes so you'll probably need to be a superuser to run the application.
+#. Start Jetty
 
 ::
 
-  sudo mvn jetty:run -DRDS_HOSTNAME=localhost -DRDS_PORT=5432 -DRDS_DB_NAME=regdb -DRDS_USERNAME=tomcat -DRDS_PASSWORD=<password>
+  mvn jetty:run
 
-5. Point your browser to https://localhost:8443/ to access the application
+#. Point your browser to https://localhost:8443/ to access the application
 
 Links
 -----
