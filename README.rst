@@ -25,7 +25,6 @@ Requirements
 To set up a development environment for ICE you will need to install:
 
 * `BLAST+ <http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download>`__ ≥ 2.2.28
-* `PostgreSQL <http://www.postgresql.org/download/>`__ ≥ 9.3
 * `Java JDK 7 <http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html>`__
 * `Maven <https://maven.apache.org/download.cgi>`__  ≥ 3.0
 
