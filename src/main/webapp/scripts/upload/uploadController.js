@@ -69,7 +69,7 @@ angular.module('ice.upload.controller', [])
                 if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
                     sheetData[row][col] = response.filename;
                 } else {
-                    console.log("error");
+                    console.log("Error uploading document");
                 }
             };
 
