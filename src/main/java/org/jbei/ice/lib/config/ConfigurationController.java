@@ -1,8 +1,5 @@
 package org.jbei.ice.lib.config;
 
-import java.util.ArrayList;
-
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -11,6 +8,8 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.models.Configuration;
 import org.jbei.ice.lib.net.RemoteAccessController;
+
+import java.util.ArrayList;
 
 /**
  * @author Hector Plahar
@@ -36,19 +35,6 @@ public class ConfigurationController {
         } catch (Exception e) {
             return new Setting("version", version);
         }
-    }
-
-    public String retrieveDatabaseVersion() throws ControllerException {
-        Configuration configuration = dao.get(ConfigurationKey.DATABASE_SCHEMA_VERSION);
-        if (configuration == null)
-            return null;
-        return configuration.getValue();
-    }
-
-    public void updateDatabaseVersion(String newVersion) throws ControllerException {
-        Configuration configuration = dao.get(ConfigurationKey.DATABASE_SCHEMA_VERSION);
-        configuration.setValue(newVersion);
-        dao.create(configuration);
     }
 
     public String getPropertyValue(ConfigurationKey key) {
