@@ -1,9 +1,5 @@
 package org.jbei.ice.lib.net;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.UUID;
-
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -17,6 +13,10 @@ import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.rest.RestClient;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * Controller for Web of Registries functionality
@@ -70,99 +70,6 @@ public class WoRController {
 
         webOfRegistries.setPartners(registryPartners);
         return webOfRegistries;
-    }
-
-    // serves the dual purpose of :
-    // please add me as a partner to your list with token
-    // add accepted; use this as the authorization token
-    public boolean addRemoteWebPartner(RegistryPartner request) {
-        Logger.info("Adding remote partner [" + request.toString() + "]");
-
-        String myURL = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
-        if (request.getUrl().equalsIgnoreCase(myURL))
-            return false;
-
-        // request should contain api key for use to contact third party
-        RemotePartner partner = dao.getByUrl(request.getUrl());
-        if (partner != null) {
-            if (request.getApiKey() == null) {
-                Logger.error("Attempting to add partner (" + request.getUrl() + ") that already exists");
-                return false;
-            }
-
-            // just update the authorization token
-            partner.setApiKey(request.getApiKey());
-            partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
-            dao.update(partner);
-            return true;
-        }
-
-        // check for api key
-        if (request.getApiKey() == null) {
-            Logger.error("No api key found for " + request.toString());
-            return false;
-        }
-
-        // todo : contact request.getUrl() at /rest/accesstoken to validate api key
-
-        // save in db with status pending approval
-        partner = new RemotePartner();
-        partner.setName(request.getName());
-        partner.setUrl(request.getUrl());
-        partner.setApiKey(request.getApiKey());
-        partner.setAdded(new Date());
-        partner.setPartnerStatus(RemotePartnerStatus.PENDING_APPROVAL);
-        partner.setAuthenticationToken(Utils.generateToken());
-        dao.create(partner);
-        return true;
-    }
-
-    /**
-     * Adds the registry instance specified by the url to the list of existing partners (if not already in there)
-     *
-     * @param userId  id of user performing action (must have admin privs)
-     * @param partner registry partner object that contains unique uniform resource identifier for the registry
-     * @return add partner ofr
-     */
-    public RegistryPartner addWebPartner(String userId, RegistryPartner partner) {
-        boolean isAdmin = new AccountController().isAdministrator(userId);
-        if (!isAdmin || partner.getUrl() == null)
-            return null;
-
-        // todo check if partner already exists
-        RemotePartner remotePartner = dao.getByUrl(partner.getUrl());
-        if (remotePartner != null) {
-            return null;
-        }
-
-        Logger.info("Adding partner [" + partner.getUrl() + "]");
-
-        String myURL = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
-        String myName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
-
-        RegistryPartner thisPartner = new RegistryPartner();
-        thisPartner.setUrl(myURL);
-        thisPartner.setName(myName);
-        String apiKey = Utils.generateToken();
-        thisPartner.setApiKey(apiKey);  // key to use in contacting this instance
-
-        // send notice to remote for key
-        RestClient client = RestClient.getInstance();
-        try {
-            client.post(partner.getUrl(), "/rest/web/partner/remote", thisPartner, RegistryPartner.class);
-
-            // save
-            remotePartner = new RemotePartner();
-            remotePartner.setName(partner.getName());
-            remotePartner.setUrl(partner.getUrl());
-            remotePartner.setPartnerStatus(RemotePartnerStatus.PENDING);
-            remotePartner.setAuthenticationToken(apiKey);
-            remotePartner.setAdded(new Date());
-            return dao.create(remotePartner).toDataTransferObject();
-        } catch (Exception e) {
-            Logger.error(e);
-            return null;
-        }
     }
 
     /**

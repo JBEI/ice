@@ -5,9 +5,9 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebEntries;
-import org.jbei.ice.lib.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.net.RemoteAccessController;
+import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
@@ -31,20 +31,29 @@ public class WebResource extends RestResource {
      * Retrieves information on other ice instances that is in a web of registries
      * configuration with this instance; also know as registry partners
      *
-     * @param approvedOnly    if true, only instances that have been approved are returned; defaults to true
-     * @param userAgentHeader session if for user
+     * @param approvedOnly    if true (default), only instances that have been approved are returned
+     * @param userAgentHeader session id for user logged in user
      * @return wrapper around the list of registry partners
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public WebOfRegistries query(
+    public Response query(
             @DefaultValue("true") @QueryParam("approved_only") boolean approvedOnly,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
-        return controller.getRegistryPartners(approvedOnly);
+        getUserIdFromSessionHeader(userAgentHeader);
+        return super.respond(controller.getRegistryPartners(approvedOnly));
     }
 
-    // get public entries
+    /**
+     * @param uriInfo
+     * @param partnerId
+     * @param offset
+     * @param limit
+     * @param sort
+     * @param asc
+     * @param sessionId
+     * @return
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries")
@@ -65,7 +74,7 @@ public class WebResource extends RestResource {
     public ArrayList<AttachmentInfo> getAttachments(@PathParam("id") long partnerId,
             @PathParam("entryId") long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-//        String userId = getUserIdFromSessionHeader(userAgentHeader);
+        getUserIdFromSessionHeader(userAgentHeader);
         return remoteAccessController.getPublicEntryAttachments(partnerId, partId);
     }
 
@@ -130,7 +139,8 @@ public class WebResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
             RegistryPartner partner) {
         String userId = getUserIdFromSessionHeader(sessionId);
-        RegistryPartner registryPartner = controller.addWebPartner(userId, partner);
+        RemoteContact contactRemote = new RemoteContact();
+        RegistryPartner registryPartner = contactRemote.addWebPartner(userId, partner);
         return respond(Response.Status.OK, registryPartner);
     }
 
@@ -147,7 +157,8 @@ public class WebResource extends RestResource {
     @POST
     @Path("/partner/remote")
     public Response remoteWebPartnerRequest(RegistryPartner partner) {
-        if (controller.addRemoteWebPartner(partner))
+        RemoteContact remoteContact = new RemoteContact();
+        if (remoteContact.handleRemoteAddRequest(partner))
             return respond(Response.Status.OK);
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
