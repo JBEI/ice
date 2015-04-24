@@ -1461,7 +1461,7 @@ angular.module('ice.entry.controller', [])
             $scope.processingFile = undefined;
         };
 
-        uploader.onBeforeUploadItem = function (event, item) {
+        uploader.onBeforeUploadItem = function (item) {
             item.formData.push({entryType: $scope.entry.type});
             item.formData.push({entryRecordId: $scope.entry.recordId});
         };

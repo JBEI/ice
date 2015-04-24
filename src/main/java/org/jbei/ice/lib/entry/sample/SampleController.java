@@ -81,6 +81,10 @@ public class SampleController {
                     currentStorage = createPlate96Location(depositor, mainLocation);
                     break;
 
+                case SHELF:
+                    currentStorage = createShelfStorage(depositor, mainLocation);
+                    break;
+
                 default:
                     currentStorage = storageDAO.get(mainLocation.getId());
                     if (currentStorage == null) {
@@ -184,6 +188,40 @@ public class SampleController {
 
             currentStorage = childStorage;
             mainLocation = child;
+        }
+
+        return currentStorage;
+    }
+
+    protected Storage createShelfStorage(String depositor, StorageLocation shelf) {
+        // expecting [SHELF, BOX, WELL, TUBE]. ultimately the children of the main location
+        try {
+            StorageLocation box = shelf.getChild();
+            StorageLocation well = box.getChild();
+            well.getChild();
+        } catch (Exception e) {
+            return null;
+        }
+
+        // should contain type and therefore allow for general hierarchy and more intelligence
+        // where it checks if the location is already taken
+
+        // create storage locations
+        Storage currentStorage = createStorage(depositor, shelf.getDisplay(), shelf.getType());
+        currentStorage = storageDAO.create(currentStorage);
+
+        StorageLocation currentLocation = shelf;
+        while (currentLocation.getChild() != null) {
+            StorageLocation child = currentLocation.getChild();
+            Storage childStorage = storageDAO.get(child.getId());
+            if (childStorage == null) {
+                childStorage = createStorage(depositor, child.getDisplay(), child.getType());
+                childStorage.setParent(currentStorage);
+                childStorage = storageDAO.create(childStorage);
+            }
+
+            currentStorage = childStorage;
+            currentLocation = child;
         }
 
         return currentStorage;

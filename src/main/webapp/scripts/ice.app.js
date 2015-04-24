@@ -198,5 +198,11 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
             controller:'FullScreenFlashController',
             templateUrl:'/scripts/entry/fullscreen-flash.html'
         })
+        .state('redirect', {
+            url: '/page=collections;id=:id',
+            controller: function ($stateParams, $location) {
+                $location.path("/folders/" + $stateParams.id);
+            }
+        })
     ;
 });
