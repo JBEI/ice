@@ -46,8 +46,7 @@
             <thead>
             <tr>
                 <td>&nbsp;</td>
-                <td><b>Partner Name</b></td>
-                <td><b>URL</b></td>
+                <td><b>Partner</b></td>
                 <td><b>Added</b></td>
                 <td><b>Status</b></td>
                 <td>&nbsp;</td>
@@ -58,10 +57,10 @@
                 <td style="line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;">
                     <b>{{$index+1}}</b>
                 </td>
-                <td><a class="cursor_pointer">{{partner.name}}</a></td>
-                <td><a target="_blank" ng-href="https://{{partner.url}}">{{partner.url}}</a> <i
-                        class="fa fa-external-link font-85em"></i></td>
+                <td><a target="_blank" ng-href="https://{{partner.url}}">{{partner.name}}</a>
+                    <b class="small color-888">{{partner.url}}</b></td>
                 <td>{{partner.addTime | date:'MMM d, y, h:mm a'}}</td>
+                <!--lastContactTime-->
                 <td>{{partner.status | capitalize}}</td>
                 <td style="font-size:14px">
                     <span tooltip="Delete" style="padding: 2px 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);"><i

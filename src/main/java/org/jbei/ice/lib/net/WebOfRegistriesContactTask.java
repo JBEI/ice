@@ -1,11 +1,11 @@
 package org.jbei.ice.lib.net;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.executor.Task;
 import org.jbei.ice.lib.utils.Utils;
+
+import java.util.ArrayList;
 
 /**
  * Task to contact other registry instances that are in the web of registries
