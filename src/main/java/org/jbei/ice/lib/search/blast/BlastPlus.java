@@ -2,6 +2,7 @@ package org.jbei.ice.lib.search.blast;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.RNATools;
@@ -9,6 +10,7 @@ import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.bio.symbol.SymbolList;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -26,7 +28,10 @@ import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -46,7 +51,11 @@ public class BlastPlus {
             String command = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
                     + query.getBlastProgram().getName();
             String blastDb = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), BLAST_DB_FOLDER,
-                                       BLAST_DB_NAME).toString();
+                    BLAST_DB_NAME).toString();
+            if (!Files.exists(Paths.get(blastDb))) {
+                return new HashMap<>();
+            }
+
             String blastCommand = (command + " -db " + blastDb);
             Logger.info("Blast: " + blastCommand);
             Process process = Runtime.getRuntime().exec(blastCommand);
@@ -196,20 +205,28 @@ public class BlastPlus {
     }
 
     public static void rebuildDatabase(boolean force) throws BlastException {
-        Path blastDir = Paths.get(Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR));
+        String blastInstallDir = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR);
+        if (StringUtils.isEmpty(blastInstallDir)) {
+            Logger.warn("Blast install directory not available. Aborting blast rebuild");
+            return;
+        }
+
+        Path blastDir = Paths.get(blastInstallDir);
         if (!Files.exists(blastDir))
-            throw new BlastException("Could not locate Blast installation in " + blastDir.toAbsolutePath().toString());
+            throw new BlastException("Could not locate Blast installation in " + blastInstallDir);
 
         String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
         final Path blastFolder = Paths.get(dataDir, BLAST_DB_FOLDER);
         File lockFile = Paths.get(blastFolder.toString(), LOCK_FILE_NAME).toFile();
         if (lockFile.exists()) {
             if (lockFile.lastModified() <= (System.currentTimeMillis() - (1000 * 60 * 60 * 24)))
-                lockFile.delete();
-            else {
-                Logger.info("Blast db locked (lockfile - " + lockFile.getAbsolutePath() + "). Rebuild aborted!");
-                return;
-            }
+                if (!lockFile.delete()) {
+                    Logger.warn("Could not delete outdated blast lockfile. Delete the following file manually: "
+                            + lockFile.getAbsolutePath());
+                } else {
+                    Logger.info("Blast db locked (lockfile - " + lockFile.getAbsolutePath() + "). Rebuild aborted!");
+                    return;
+                }
         }
 
         try {
@@ -247,7 +264,7 @@ public class BlastPlus {
 
     /**
      * Run the bl2seq program on multiple subjects.
-     * <p/>
+     * <p>
      * This method requires disk space write temporary files. It tries to clean up after itself.
      *
      * @param query   reference sequence.
@@ -268,11 +285,11 @@ public class BlastPlus {
             String blastN = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
                 + BlastProgram.BLAST_N.getName();
             command.append(blastN)
-                   .append(" -query ")
-                   .append(queryFilePath.toString())
-                   .append(" -subject ")
-                   .append(subjectFilePath.toString())
-                   .append(" -dust no");
+                    .append(" -query ")
+                    .append(queryFilePath.toString())
+                    .append(" -subject ")
+                    .append(subjectFilePath.toString())
+                    .append(" -dust no");
 
             Logger.info("Blast-2-seq query: " + command.toString());
             result = runSimpleExternalProgram(command.toString());
@@ -314,7 +331,7 @@ public class BlastPlus {
 
     /**
      * Build the blast database.
-     * <p/>
+     * <p>
      * <p/>First dump the sequences from the sql database into a fasta file, than create the blast
      * database by calling formatBlastDb.
      *
@@ -343,7 +360,7 @@ public class BlastPlus {
         }
 
         try (BufferedWriter write = Files.newBufferedWriter(newFastaFile, Charset.defaultCharset(),
-                                                            StandardOpenOption.CREATE_NEW)) {
+                StandardOpenOption.CREATE_NEW)) {
             writeBigFastaFile(write);
         } catch (IOException ioe) {
             throw new BlastException(ioe);
@@ -409,9 +426,14 @@ public class BlastPlus {
      * @throws BlastException
      */
     private static void writeBigFastaFile(BufferedWriter writer) throws BlastException {
-        Set<Sequence> sequencesList;
-        sequencesList = DAOFactory.getSequenceDAO().getAllSequences();
-        for (Sequence sequence : sequencesList) {
+        SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
+        long count = sequenceDAO.getSequenceCount();
+        if (count <= 0)
+            return;
+
+        int offset = 0;
+        while (offset < count) {
+            Sequence sequence = sequenceDAO.getSequence(offset++);
             long id = sequence.getEntry().getId();
 //            boolean circular = false;
 //            if (sequence.getEntry() instanceof Plasmid) {
@@ -430,7 +452,8 @@ public class BlastPlus {
                         symL = RNATools.createRNA(sequence.getSequence().trim());
                     } catch (IllegalSymbolException e2) {
                         // skip this sequence
-                        Logger.debug("invalid characters in sequence for " + sequence.getEntry().getRecordId());
+                        Logger.debug("Invalid characters in sequence for " + sequence.getEntry().getId()
+                                + ". Skipped for indexing");
                         Logger.debug(e2.toString());
                         continue;
                     }
