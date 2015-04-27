@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -244,24 +243,53 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
     }
 
     /**
-     * Retrieve all {@link Sequence} objects in the database.
+     * Enables retrieving sequences in the database without loading everything memory
+     * <p>
+     * Expected usage is
+     * <code>
+     *     long count = getSequenceCount();
+     *     int offset = 0;
+     *     while( offset < count ) {
+     *         Sequence sequence = dao.getSequence(offset);
+     *         // do something with sequence
+     *     }
+     * </code>
      *
-     * @return ArrayList of Sequence objects.
+     * @return Sequence at the specified offset
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public Set<Sequence> getAllSequences() {
+    public Sequence getSequence(int offset) throws DAOException {
         Session session = currentSession();
         try {
             Criteria criteria = session.createCriteria(Sequence.class);
 
             Criteria entryC = criteria.createCriteria("entry", "entry");
             entryC.add(Restrictions.disjunction()
-                                   .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
-                                   .add(Restrictions.isNull("visibility"))
-                                   .add(Restrictions.ne("ownerEmail", "system")));
+                    .add(Restrictions.eq("visibility", Visibility.OK.getValue())));
+            criteria.setFirstResult(offset);
+            criteria.setMaxResults(1);
+            return (Sequence) criteria.uniqueResult();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
 
-            return new LinkedHashSet<>(criteria.list());
+    /**
+     * @return number of sequences available for all valid (visibility=9) entry object
+     */
+    public int getSequenceCount() {
+        Session session = currentSession();
+        try {
+            Criteria criteria = session.createCriteria(Sequence.class);
+
+            Criteria entryC = criteria.createCriteria("entry", "entry");
+            entryC.add(Restrictions.disjunction()
+                    .add(Restrictions.eq("visibility", Visibility.OK.getValue())));
+            criteria.setProjection(Projections.count("id"));
+            Number number = (Number) criteria.uniqueResult();
+            return number.intValue();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
