@@ -8,9 +8,6 @@ import org.apache.lucene.search.Filter;
 import org.apache.lucene.util.Bits;
 import org.apache.lucene.util.OpenBitSet;
 import org.hibernate.search.annotations.Factory;
-import org.hibernate.search.annotations.Key;
-import org.hibernate.search.filter.FilterKey;
-import org.hibernate.search.filter.StandardFilterKey;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -31,13 +28,6 @@ public class EntrySecurityFilterFactory {
     // injected
     public void setGroupUUids(HashSet<String> groupUUids) {
         this.groupUUids = groupUUids;
-    }
-
-    @Key
-    public FilterKey getKey() {
-        StandardFilterKey key = new StandardFilterKey();
-        key.addParameter(accountId);
-        return key;
     }
 
     @Factory
