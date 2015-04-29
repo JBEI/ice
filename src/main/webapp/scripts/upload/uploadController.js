@@ -578,10 +578,24 @@ angular.module('ice.upload.controller', [])
                 height: heightFunction,
                 afterChange: afterChange,
                 manualColumnResize: true,
-                columnSorting: true
+                columnSorting: true,
+                contextMenu: true,
+                afterRemoveRow: function(row, _) {
+                    upload.deleteEntry({importId: $scope.bulkUpload.id, entryId: $scope.bulkUpload.entryIdData[row]});
+                }
             };
 
             $dataTable.handsontable(options);
+            var ht = $dataTable.handsontable('getInstance');
+            ht.updateSettings({
+                contextMenu: {
+                    items: {
+                        "remove_row": {
+                            name: 'Remove row'
+                        }
+                    }
+                }
+            });
             $scope.spreadSheet = $dataTable.data('handsontable');
 
             $scope.fileUploadModal = function () {

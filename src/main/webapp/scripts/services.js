@@ -473,6 +473,12 @@ iceServices.factory('Upload', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            deleteEntry: {
+                method:'DELETE',
+                url:'/rest/upload/:importId/entry/:entryId',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
             rename:{
                 method:'PUT',
                 url:'/rest/upload/:importId/name',

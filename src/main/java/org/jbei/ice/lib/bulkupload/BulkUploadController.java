@@ -529,6 +529,19 @@ public class BulkUploadController {
         return true;
     }
 
+    public boolean deleteEntry(String userId, long uploadId, long entryId) {
+        try {
+            BulkUpload upload = dao.get(uploadId);
+            Entry entry = new EntryDAO().get(entryId);
+            authorization.expectWrite(userId, upload);
+            upload.getContents().remove(entry);
+            return true;
+        } catch (Exception e) {
+            Logger.error(e);
+            return false;
+        }
+    }
+
     public List<AccessPermission> getUploadPermissions(String userId, long uploadId) {
         List<AccessPermission> permissions = new ArrayList<>();
         BulkUpload upload = dao.get(uploadId);

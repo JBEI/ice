@@ -279,6 +279,23 @@ public class BulkUploadResource extends RestResource {
         }
     }
 
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entry/{entryId}")
+    public Response deleteEntry(@PathParam("id") long uploadId,
+                                @PathParam("entryId") long entryId,
+                                @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        try {
+            String userId = getUserIdFromSessionHeader(sessionId);
+            if (controller.deleteEntry(userId, uploadId, entryId))
+                return Response.ok().build();
+            return Response.serverError().build();
+        } catch (Exception e) {
+            return super.respond(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entry/{entryId}/sequence")
