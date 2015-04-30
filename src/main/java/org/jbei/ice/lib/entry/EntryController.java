@@ -67,7 +67,7 @@ public class EntryController {
         FolderDetails details = new FolderDetails();
         Account account = accountController.getByEmail(userId);
 
-        if (accountController.isAdministrator(account)) {
+        if (authorization.isAdmin(userId)) {
             // no filters
             results = dao.retrieveAllEntries(field, asc, start, limit);
         } else {
@@ -99,7 +99,7 @@ public class EntryController {
         if (account == null)
             return -1;
 
-        if (accountController.isAdministrator(account)) {
+        if (authorization.isAdmin(userId)) {
             return dao.getAllEntryCount();
         }
 
@@ -141,7 +141,7 @@ public class EntryController {
         List<Entry> entries;
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
-        if (accountController.isAdministrator(account) || account.getEmail().equals(ownerEmail)) {
+        if (authorization.isAdmin(userId) || account.getEmail().equals(ownerEmail)) {
             entries = dao.retrieveOwnerEntries(ownerEmail, sort, asc, start, limit);
         } else {
             Set<Group> accountGroups = new HashSet<>(account.getGroups());
@@ -162,7 +162,7 @@ public class EntryController {
 
     public long getNumberOfOwnerEntries(String requesterUserEmail, String ownerEmail) {
         Account account = DAOFactory.getAccountDAO().getByEmail(requesterUserEmail);
-        if (accountController.isAdministrator(account) || account.getEmail().equals(ownerEmail)) {
+        if (authorization.isAdmin(requesterUserEmail) || account.getEmail().equals(ownerEmail)) {
             return dao.ownerEntryCount(ownerEmail);
         }
 

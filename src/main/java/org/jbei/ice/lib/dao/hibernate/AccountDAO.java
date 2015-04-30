@@ -1,17 +1,16 @@
 package org.jbei.ice.lib.dao.hibernate;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOException;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * DAO to manipulate {@link Account} objects in the database.
@@ -55,10 +54,13 @@ public class AccountDAO extends HibernateRepository<Account> {
      * Retrieve an {@link Account} by the email field.
      *
      * @param email unique email identifier for account
-     * @return Account
+     * @return Account record referenced by email or null if email is null
      */
     public Account getByEmail(String email) {
         Account account = null;
+        if (email == null)
+            return null;
+
         Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Account.class.getName() + " where LOWER(email) = :email");

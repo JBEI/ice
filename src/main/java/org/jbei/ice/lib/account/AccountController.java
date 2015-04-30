@@ -279,13 +279,20 @@ public class AccountController {
         return account.getId();
     }
 
-    public Account getAccountBySessionKey(String sessionKey) {
+    public AccountTransfer getAccountBySessionKey(String sessionKey) {
         String userId = SessionHandler.getUserIdBySession(sessionKey);
         if (userId == null) {
             Logger.warn("Could not retrieve user id for session " + sessionKey);
             return null;
         }
-        return dao.getByEmail(userId);
+        Account account = dao.getByEmail(userId);
+        if (account == null)
+            return null;
+
+        AccountTransfer transfer = account.toDataTransferObject();
+        transfer.setSessionId(sessionKey);
+        transfer.setAdmin(isAdministrator(userId));
+        return transfer;
     }
 
     /**
@@ -299,10 +306,6 @@ public class AccountController {
         if (account.getSalt() == null || account.getSalt().isEmpty())
             account.setSalt(Utils.generateSaltForUserAccount());
         return dao.create(account);
-    }
-
-    public boolean isAdministrator(Account account) {
-        return isAdministrator(account.getEmail());
     }
 
     /**
@@ -413,16 +416,6 @@ public class AccountController {
     }
 
     /**
-     * See if the given sessionKey is still authenticated with the system.
-     *
-     * @param sessionKey unique session identifier
-     * @return True if sessionKey is still authenticated (active) to the system.
-     */
-    public static boolean isAuthenticated(String sessionKey) {
-        return SessionHandler.isValidSession(sessionKey);
-    }
-
-    /**
      * De-authenticate the given sessionKey. The user is logged out from the system.
      *
      * @param sessionKey unique session identifier
@@ -441,7 +434,6 @@ public class AccountController {
     }
 
     public ArrayList<AccountTransfer> getMatchingAccounts(String userId, String query, int limit) {
-        Account account = getByEmail(userId);
         Set<Account> matches = dao.getMatchingAccounts(query, limit);
         ArrayList<AccountTransfer> result = new ArrayList<>();
         for (Account match : matches) {
