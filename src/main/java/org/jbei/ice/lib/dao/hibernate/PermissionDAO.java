@@ -8,6 +8,7 @@ import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.BulkUpload;
@@ -327,19 +328,19 @@ public class PermissionDAO extends HibernateRepository<Permission> {
      */
     public List<Long> getCanReadEntries(Account account, Set<Group> groups, List<Long> entries) {
         Criteria criteria = currentSession().createCriteria(Permission.class);
+        Disjunction disjunction = Restrictions.disjunction();
+        disjunction.add(Restrictions.eq("account", account));
+        disjunction.add(Restrictions.eq("entry.ownerEmail", account.getEmail()));
 
         if (!groups.isEmpty()) {
-            Disjunction disjunction = Restrictions.disjunction();
-            disjunction.add(Restrictions.eq("account", account));
             disjunction.add(Restrictions.in("group", groups));
-            criteria.add(disjunction);
-        } else {
-            criteria.add(Restrictions.eq("account", account));
         }
 
-        criteria.createAlias("entry", "entry")
+        criteria.createAlias("entry", "entry", JoinType.LEFT_OUTER_JOIN)
                 .add(Restrictions.in("entry.id", entries))
                 .add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()));
+
+        criteria.add(disjunction);
 
         return criteria.setProjection(
                 Projections.distinct(Projections.property("entry.id")))
