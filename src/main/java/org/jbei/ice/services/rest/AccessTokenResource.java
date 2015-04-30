@@ -1,19 +1,12 @@
 package org.jbei.ice.services.rest;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 /**
  * API for access tokens (also session id for the user interface)
@@ -53,7 +46,7 @@ public class AccessTokenResource extends RestResource {
      * @param sessionId session identifier to invalidates
      */
     @DELETE
-    public void deleteToken(@HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+    public void deleteToken(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
         getUserIdFromSessionHeader(sessionId);
         accountController.invalidate(sessionId);
     }
@@ -66,18 +59,8 @@ public class AccessTokenResource extends RestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public AccountTransfer get(@HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
-        if (AccountController.isAuthenticated(sessionId)) {
-            Account account = accountController.getAccountBySessionKey(sessionId);
-            if (account == null)
-                return null;
-
-            AccountTransfer transfer = account.toDataTransferObject();
-            transfer.setSessionId(sessionId);
-            transfer.setAdmin(accountController.isAdministrator(account));
-            return transfer;
-        }
-
-        return null;
+    public Response get(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
+        AccountTransfer transfer = accountController.getAccountBySessionKey(sessionId);
+        return super.respond(transfer);
     }
 }

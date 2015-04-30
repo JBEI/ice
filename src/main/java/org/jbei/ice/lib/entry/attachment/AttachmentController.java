@@ -59,6 +59,15 @@ public class AttachmentController {
         return dao.getFile(attachmentDir, attachment);
     }
 
+    public String getFileName(String userId, String fileId) {
+        Attachment attachment = dao.getByFileId(fileId);
+        if (attachment == null)
+            return null;
+
+        entryAuthorization.expectRead(userId, attachment.getEntry());
+        return dao.getByFileId(fileId).getFileName();
+    }
+
     /**
      * Save attachment to the database and the disk. Entry has to be a transferred entry (Visibility of 2)
      * or the account must have write permissions to it

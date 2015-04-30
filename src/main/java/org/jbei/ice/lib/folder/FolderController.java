@@ -298,8 +298,7 @@ public class FolderController {
             folder.setName(details.getName());
 
         if (details.isPropagatePermission() != folder.isPropagatePermissions()) {
-            Account account = accountDAO.getByEmail(userId);
-            permissionsController.propagateFolderPermissions(account, folder, details.isPropagatePermission());
+            permissionsController.propagateFolderPermissions(userId, folder, details.isPropagatePermission());
             folder.setPropagatePermissions(details.isPropagatePermission());
         }
 
@@ -497,8 +496,7 @@ public class FolderController {
 
         // propagate permission
         if (folder.isPropagatePermissions()) {
-            Account userAccount = accountDAO.getByEmail(userId);
-            permissionsController.propagateFolderPermissions(userAccount, folder, true);
+            permissionsController.propagateFolderPermissions(userId, folder, true);
         }
         return created;
     }
