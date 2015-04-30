@@ -335,6 +335,18 @@ angular.module('ice.upload.controller', [])
 
             $window.on('resize', calculateSize);
 
+            var isRowEmpty = function(rowData){
+                for(var col = 0; col < rowData.length; col++){
+                    var content = rowData[col];
+
+                    if (typeof content === "string" && content.trim()){
+                        return false;
+                    }
+                }
+
+                return true;
+            };
+
             //
             // called by the callback handler when a user edits a cell or a number of cells
             // and a save to the server is required
@@ -351,11 +363,9 @@ angular.module('ice.upload.controller', [])
                     upload.create({type: $scope.importType})
                         .$promise
                         .then(function (result) {
-//                            console.log("created new bulk upload", result);
                             $scope.bulkUpload.id = result.id;
                             $scope.bulkUpload.lastUpdate = result.lastUpdate;
                             $scope.bulkUpload.name = result.name;
-//                            $location.path("/upload/" + result.id, false);
 
                             // then create entry and associate with draft
                             createEntry(result.id, object, row);
@@ -365,6 +375,11 @@ angular.module('ice.upload.controller', [])
                     if (!object['id']) {
                         // create new entry for existing upload
                         createEntry($scope.bulkUpload.id, object, row);
+                    } else if(isRowEmpty(sheetData[row])) {
+                        upload.deleteEntry({
+                            importId: $scope.bulkUpload.id,
+                            entryId: $scope.bulkUpload.entryIdData[row]
+                        }, null, function(){$scope.saving = false;});
                     } else {
                         // update entry for existing upload
                         upload.updateEntry({importId: $scope.bulkUpload.id, entryId: object.id}, object,
@@ -379,7 +394,6 @@ angular.module('ice.upload.controller', [])
                                 if (updatedEntry.linkedParts && updatedEntry.linkedParts.length) {
                                     var linkedId = updatedEntry.linkedParts[0].id;
                                     if (linkedId) {
-//                                console.log("created link");
                                         $scope.bulkUpload.linkedEntryIdData[row] = linkedId;
                                     }
                                 }
@@ -513,7 +527,6 @@ angular.module('ice.upload.controller', [])
                         arabidopsisSeedData: {}
                     };
                     linkedObject = UploadUtil.setDataValue($scope.linkedSelection.toUpperCase(), newIndex, linkedObject, value);
-//                    linkedObject[linkedDataSchema[newIndex]] = value;
                     object.linkedParts = [linkedObject];
                 } else {
                     object = UploadUtil.setDataValue($scope.importType.toUpperCase(), col, object, value);
@@ -530,13 +543,11 @@ angular.module('ice.upload.controller', [])
                         if (createdEntry.linkedParts && createdEntry.linkedParts.length) {
                             var linkedId = createdEntry.linkedParts[0].id;
                             if (linkedId) {
-//                                console.log("created link");
                                 $scope.bulkUpload.linkedEntryIdData[row] = linkedId;
                             }
                         }
 
                         $scope.saving = false;
-//                        console.log("created entry", $scope.bulkUpload);
                     },
                     function (error) {
                         console.error(error);
