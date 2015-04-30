@@ -79,7 +79,7 @@ public class GroupController {
         Account requester = accountController.getByEmail(userIdString);
         Account account = accountController.get(userId);
         // TODO : account authorization
-        if (!accountController.isAdministrator(requester) && !account.equals(requester))
+        if (!accountController.isAdministrator(userIdString) && !account.equals(requester))
             return null;
 
         Set<Group> result = dao.retrieveMemberGroups(account);
@@ -316,7 +316,7 @@ public class GroupController {
         Account account = accountController.getByEmail(userId);
         Set<AccountTransfer> accounts = new HashSet<>();
 
-        if (accountController.isAdministrator(account)) {
+        if (accountController.isAdministrator(userId)) {
             return accountController.retrieveAccounts(userId, offset, limit, sort, asc);
         } else {
             Set<Group> groups = getAllGroups(account);

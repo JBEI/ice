@@ -13,6 +13,9 @@ import javax.ws.rs.core.Response;
  */
 public class RestResource {
 
+    protected final String AUTHENTICATION_PARAM_NAME = "X-ICE-Authentication-SessionId";
+    protected final String WOR_PARTNER_TOKEN = "X-ICE-WOR-Token";
+
     protected String getUserIdFromSessionHeader(String sessionHeader) {
         String userId = SessionHandler.getUserIdBySession(sessionHeader);
         if (userId == null)
