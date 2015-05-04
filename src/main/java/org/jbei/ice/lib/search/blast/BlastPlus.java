@@ -232,7 +232,12 @@ public class BlastPlus {
         try {
             if (!Files.exists(blastFolder)) {
                 Logger.info("Blast folder (" + blastFolder.toString() + ") does not exist. Creating...");
-                Files.createDirectories(blastFolder);
+                try {
+                    Files.createDirectories(blastFolder);
+                } catch (Exception e) {
+                    Logger.warn("Could not create blast folder. Create it manually or all blast runs will fail");
+                    return;
+                }
             }
 
             if (!force && blastDatabaseExists()) {
