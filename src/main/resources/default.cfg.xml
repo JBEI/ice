@@ -5,9 +5,10 @@
 
 <hibernate-configuration>
     <session-factory>
-        <property name="hibernate.connection.url">jdbc:hsqldb:mem:ice</property>
+        <property name="hibernate.connection.url">jdbc:hsqldb:file:db/hsqldb</property>
         <property name="hibernate.connection.driver_class">org.hsqldb.jdbcDriver</property>
-        <property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
+        <property name="hibernate.connection.username">sa</property>
+        <property name="hibernate.connection.password">password</property>
 
         <property name="hibernate.search.default.indexBase">./data/lucene-data</property>
     </session-factory>
