@@ -1,9 +1,10 @@
 package org.jbei.ice.lib.dao.hibernate;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
@@ -30,20 +31,25 @@ public class AccountDAO extends HibernateRepository<Account> {
         return super.get(Account.class, id);
     }
 
+    /**
+     * Retrieves accounts whose firstName, lastName, or email fields match the specified token up to the specified limit
+     *
+     * @param token filter for the account fields
+     * @param limit maximum number of matching accounts to return; 0 to return all
+     * @return list of matching accounts
+     */
     @SuppressWarnings("unchecked")
     public Set<Account> getMatchingAccounts(String token, int limit) {
-        Session session = currentSession();
         try {
-            token = token.toUpperCase();
-            String queryString = "from " + Account.class.getName()
-                    + " where (UPPER(firstName) like '%" + token
-                    + "%') OR (UPPER(lastName) like '%" + token
-                    + "%') OR (UPPER(email) like '%" + token + "%')";
-            Query query = session.createQuery(queryString);
-            if (limit > 0)
-                query.setMaxResults(limit);
+            Criteria criteria = currentSession().createCriteria(Account.class)
+                    .add(Restrictions.disjunction()
+                            .add(Restrictions.ilike("firstName", token, MatchMode.ANYWHERE))
+                            .add(Restrictions.ilike("lastName", token, MatchMode.ANYWHERE))
+                            .add(Restrictions.ilike("email", token, MatchMode.ANYWHERE)));
 
-            return new HashSet<Account>(query.list());
+            if (limit > 0)
+                criteria.setMaxResults(limit);
+            return new HashSet<>(criteria.list());
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException(e);
@@ -57,24 +63,17 @@ public class AccountDAO extends HibernateRepository<Account> {
      * @return Account record referenced by email or null if email is null
      */
     public Account getByEmail(String email) {
-        Account account = null;
         if (email == null)
             return null;
 
-        Session session = currentSession();
         try {
-            Query query = session.createQuery("from " + Account.class.getName() + " where LOWER(email) = :email");
-            query.setParameter("email", email.toLowerCase());
-            Object result = query.uniqueResult();
-
-            if (result != null) {
-                account = (Account) result;
-            }
+            return (Account) currentSession().createCriteria(Account.class)
+                    .add(Restrictions.eq("email", email).ignoreCase())
+                    .uniqueResult();
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve Account by email: " + email, e);
         }
-        return account;
     }
 
     @SuppressWarnings("unchecked")
