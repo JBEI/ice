@@ -52,7 +52,7 @@ public class BlastPlus {
                     + query.getBlastProgram().getName();
             String blastDb = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), BLAST_DB_FOLDER,
                     BLAST_DB_NAME).toString();
-            if (!Files.exists(Paths.get(blastDb))) {
+            if (!Files.exists(Paths.get(blastDb + ".nsq"))) {
                 return new HashMap<>();
             }
 

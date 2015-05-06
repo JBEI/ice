@@ -1,19 +1,22 @@
 package org.jbei.ice.lib.dto.folder;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.jbei.ice.lib.access.Authorization;
 import org.jbei.ice.lib.access.PermissionsController;
-import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.folder.Folder;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
+ * Authorization specific to folder objects
+ *
  * @author Hector Plahar
  */
 public class FolderAuthorization extends Authorization<Folder> {
+
+    private final PermissionsController controller = new PermissionsController();
 
     public FolderAuthorization() {
         super(DAOFactory.getFolderDAO());
@@ -25,8 +28,6 @@ public class FolderAuthorization extends Authorization<Folder> {
     }
 
     public boolean canRead(String userId, Folder folder) {
-        PermissionsController controller = new PermissionsController();
-
         if (controller.isPublicVisible(folder))
             return true;
 
@@ -37,10 +38,7 @@ public class FolderAuthorization extends Authorization<Folder> {
         if (folder.getType() == FolderType.PUBLIC)
             return true;
 
-        if (account.getType() == AccountType.ADMIN)
-            return true;
-
-        if (userId.equals(folder.getOwnerEmail()))
+        if (super.canRead(userId, folder))
             return true;
 
         // now check actual permissions
@@ -51,6 +49,21 @@ public class FolderAuthorization extends Authorization<Folder> {
             return true;
 
         return controller.accountHasReadPermission(account, folders)
+                || controller.accountHasWritePermission(account, folders);
+    }
+
+    public boolean canWrite(String userId, Folder folder) {
+        Account account = getAccount(userId);
+        if (account == null)
+            return false;
+
+        if (super.canWrite(userId, folder))
+            return true;
+
+        // now check actual permissions
+        Set<Folder> folders = new HashSet<>();
+        folders.add(folder);
+        return controller.groupHasWritePermission(account.getGroups(), folders)
                 || controller.accountHasWritePermission(account, folders);
     }
 }
