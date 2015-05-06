@@ -61,6 +61,8 @@ public class AccessTokenResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response get(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
         AccountTransfer transfer = accountController.getAccountBySessionKey(sessionId);
+        if (transfer == null)
+            return super.respond(Response.Status.UNAUTHORIZED);
         return super.respond(transfer);
     }
 }

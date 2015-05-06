@@ -822,8 +822,9 @@ iceServices.factory('Authentication',
                             $cookieStore.remove('userId');
                             $cookieStore.remove('sessionId');
 
-                            if ($location.path() !== '/login')
+                            if ($location.path() !== '/login') {
                                 $cookies.loginDestination = $location.path();
+                            }
                             $location.path('/login');
                         }
                     });
