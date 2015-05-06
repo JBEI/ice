@@ -290,22 +290,37 @@ public class EntryDAO extends HibernateRepository<Entry> {
     public List<Entry> sharedWithUserEntries(Account requester, Set<Group> groups, ColumnField sort,
                                              boolean asc, int start, int limit) throws DAOException {
         try {
+            List entryList = currentSession().createCriteria(Permission.class)
+                    .add(Restrictions.disjunction()
+                            .add(Restrictions.in("group", groups))
+                            .add(Restrictions.eq("account", requester)))
+                    .createAlias("entry", "entry")
+                    .add(Restrictions.isNotNull("entry"))
+                    .add(Restrictions.ne("entry.ownerEmail", requester.getEmail()))
+                    .setProjection(Projections.property("entry.id"))
+                    .list();
 
-            Session session = currentSession();
+            List folderIdList = currentSession().createCriteria(Permission.class)
+                    .add(Restrictions.disjunction()
+                            .add(Restrictions.in("group", groups))
+                            .add(Restrictions.eq("account", requester)))
+                    .createAlias("folder", "folder")
+                    .createAlias("folder.contents", "content")
+                    .add(Restrictions.isNotNull("folder"))
+                    .add(Restrictions.ne("folder.ownerEmail", requester.getEmail()))
+                    .setProjection(Projections.property("content.id"))
+                    .list();
+
+            entryList.addAll(folderIdList);
+            if (entryList.isEmpty())
+                return new ArrayList<>();
+
             String fieldName = columnFieldToString(sort);
-            String ascString = asc ? " asc" : " desc";
-            String queryString = "SELECT DISTINCT e FROM Entry e, Permission p WHERE p.group IN (:groups) "
-                    + " AND e.ownerEmail <> :oe AND e = p.entry AND e.visibility = :v ORDER BY e." + fieldName +
-                    ascString;
-
-            Query query = session.createQuery(queryString);
-            query.setParameterList("groups", groups);
-            query.setParameter("v", Visibility.OK.getValue());
-            query.setParameter("oe", requester.getEmail());
-            query.setFirstResult(start);
-            query.setMaxResults(limit);
-            List list = query.list();
-            return new ArrayList<>(list);
+            Criteria criteria = currentSession().createCriteria(Entry.class).add(Restrictions.in("id", entryList));
+            criteria.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
+            criteria.setFirstResult(start);
+            criteria.setMaxResults(limit);
+            return new ArrayList<>(criteria.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
