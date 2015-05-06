@@ -25,7 +25,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
         $scope.userFolders = undefined;
         $scope.selectedFolders = [];
 
-        folders.getByType({folderType: "personal"}, function (data) {
+        folders.getByType({folderType: "personal", canEdit: "true"}, function (data) {
             if (data.length)
                 $scope.userFolders = data;
         });
