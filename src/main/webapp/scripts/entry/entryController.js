@@ -414,8 +414,6 @@ angular.module('ice.entry.controller', [])
         });
 
         $scope.deleteHistory = function (history) {
-            console.log(history);
-
             entry.deleteHistory({partId: entryId, historyId: history.id}, function (result) {
                 var idx = $scope.history.indexOf(history);
                 if (idx == -1)

@@ -222,6 +222,9 @@ public class HibernateSearch {
                 DocsEnum docs;
                 for (String id : blastResults.keySet()) {
                     docs = context.reader().termDocsEnum(new Term("id", id));
+                    if (docs == null)
+                        continue;
+
                     int doc;
                     while ((doc = docs.nextDoc()) != DocsEnum.NO_MORE_DOCS) {
                         bitSet.set(doc);
@@ -418,6 +421,9 @@ public class HibernateSearch {
                 DocsEnum docs;
                 for (String id : blastResults.keySet()) {
                     docs = context.reader().termDocsEnum(new Term("id", id));
+                    if (docs == null)
+                        continue;
+
                     int doc;
                     while ((doc = docs.nextDoc()) != DocsEnum.NO_MORE_DOCS) {
                         bitSet.set(doc);
@@ -432,7 +438,8 @@ public class HibernateSearch {
 
     /**
      * Enables the security filter if the account does not have administrative privileges
-     *  @param userId        identifier for account which is checked for administrative privs
+     *
+     * @param userId        identifier for account which is checked for administrative privs
      * @param fullTextQuery search fulltextquery for which filter is enabled
      */
     protected FullTextQuery checkEnableSecurityFilter(String userId, FullTextQuery fullTextQuery) {

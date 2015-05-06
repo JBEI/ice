@@ -4,8 +4,10 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
@@ -13,12 +15,10 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
+import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.shared.ColumnField;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Manipulate {@link org.jbei.ice.lib.folder.Folder} objects in the database.
@@ -222,5 +222,31 @@ public class FolderDAO extends HibernateRepository<Folder> {
         }
 
         return folders;
+    }
+
+    /**
+     * Retrieves folders that the specified account owns, or has write privileges on based on the permissions
+     *
+     * @param account
+     * @return
+     * @throws DAOException
+     */
+    public List<Folder> getCanEditFolders(Account account, Set<Group> accountGroups) throws DAOException {
+        List resultList = currentSession().createCriteria(Permission.class)
+                .add(Restrictions.disjunction()
+                        .add(Restrictions.eq("account", account))
+                        .add(Restrictions.in("group", accountGroups)))
+                .add(Restrictions.eq("canWrite", true))
+                .add(Restrictions.isNotNull("folder"))
+                .setProjection(Projections.property("folder.id"))
+                .list();
+
+        Disjunction disjunction = Restrictions.or(Restrictions.eq("ownerEmail", account.getEmail()));
+        if (!resultList.isEmpty()) {
+            disjunction.add(Restrictions.in("id", resultList));
+        }
+
+        Criteria criteria = currentSession().createCriteria(Folder.class).add(disjunction);
+        return criteria.list();
     }
 }

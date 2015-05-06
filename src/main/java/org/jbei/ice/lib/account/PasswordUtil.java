@@ -1,16 +1,15 @@
 package org.jbei.ice.lib.account;
 
+import org.jbei.ice.lib.utils.UtilityException;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.xml.bind.DatatypeConverter;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.util.UUID;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-
-import org.jbei.ice.lib.utils.UtilityException;
-
-import org.apache.commons.codec.binary.Hex;
 
 /**
  * Utility class for handling account passwords
@@ -32,7 +31,7 @@ public class PasswordUtil {
         try {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             byte[] hash = keyFactory.generateSecret(spec).getEncoded();
-            return Hex.encodeHexString(hash);
+            return DatatypeConverter.printHexBinary(hash);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             throw new UtilityException(e);
         }
@@ -42,7 +41,7 @@ public class PasswordUtil {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[SALT_BYTE_SIZE];
         random.nextBytes(salt);
-        return Hex.encodeHexString(salt);
+        return DatatypeConverter.printHexBinary(salt);
     }
 
     public static String generateTemporaryPassword() {

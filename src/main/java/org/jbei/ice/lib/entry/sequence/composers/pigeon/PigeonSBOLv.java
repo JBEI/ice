@@ -1,26 +1,21 @@
 package org.jbei.ice.lib.entry.sequence.composers.pigeon;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-
+import com.google.gson.Gson;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.SBOLVisitor;
 import org.jbei.ice.lib.models.Sequence;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.sbolstandard.core.DnaComponent;
 import org.sbolstandard.core.SequenceAnnotation;
 import org.sbolstandard.core.StrandType;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Sends post request to pigeon to generate SBOLv
@@ -30,9 +25,7 @@ import org.sbolstandard.core.StrandType;
 public class PigeonSBOLv {
 
     private static final String NEWLINE = System.getProperty("line.separator");
-    private static final String mPigeonImageIdentifier = "Weyekin output image";
-    private static final String PIGEON_URL = "http://cidar1.bu.edu:5801/pigeon1.php";
-    private static final String PIGEON_URL2 = "http://cidar1.bu.edu:5801/pigeon.php";
+    private static final String PIGEON_URL = "http://cidar1.bu.edu:5801/dev/perch2.php";
     private static final HashMap<String, String> map = new HashMap<>();
 
     static {
@@ -121,12 +114,7 @@ public class PigeonSBOLv {
         }
 
         sb.append("# Arcs").append(NEWLINE);
-        long start = System.currentTimeMillis();
-        try {
-            return postToPigeon(sb.toString());
-        } finally {
-            Logger.info("Pigeon: " + (System.currentTimeMillis() - start) + "ms for " + sequence.getEntry().getId());
-        }
+        return postToPigeon(sb.toString());
     }
 
     public static String generatePigeonScript(Sequence sequence) {
@@ -184,48 +172,86 @@ public class PigeonSBOLv {
     }
 
     public static URI postToPigeon(String pigeonScript) {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        HttpPost httpPost = new HttpPost(PIGEON_URL);
-        List<NameValuePair> attributes = new ArrayList<>();
-        attributes.add(new BasicNameValuePair("desc", pigeonScript));
-        String pigeonResponseString = null;
-
         try {
-            httpPost.setEntity(new UrlEncodedFormEntity(attributes));
-            HttpResponse response = httpClient.execute(httpPost);
+            URL obj = new URL(PIGEON_URL);
+            HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
-            // response entity
-            EntityUtils.consume(response.getEntity());
-        } catch (Exception ex) {
-            return null;
-        } finally {
-            httpPost.releaseConnection();
-        }
+            //add reuqest header
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+            String urlParameters = "specification=" + pigeonScript;
 
-        try {
-            httpPost.setURI(new URI(PIGEON_URL2));
-            HttpResponse response = httpClient.execute(httpPost);
-            pigeonResponseString = EntityUtils.toString(response.getEntity());
-        } catch (RuntimeException re) {
-            throw re;
-        } catch (Exception ce) {
-            return null;
-        } finally {
-            httpPost.releaseConnection();
-        }
+            // Send post request
+            con.setDoOutput(true);
+            DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+            wr.writeBytes(urlParameters);
+            wr.flush();
+            wr.close();
 
-        String[] split = pigeonResponseString.split("\n");
-        for (String s : split) {
-            if (s.contains(mPigeonImageIdentifier)) {
-                String parsed = "http://cidar1.bu.edu:5801/"
-                        + s.substring(s.indexOf("img src =") + 9, s.indexOf("alt =") - 2);
-                try {
-                    return new URI(parsed);
-                } catch (URISyntaxException e) {
-                    return null;
-                }
+//            int responseCode = con.getResponseCode();
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(con.getInputStream()));
+            String inputLine;
+            StringBuilder response = new StringBuilder();
+
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
             }
+            in.close();
+
+            //print result
+            String responseString = response.toString();
+            PigeonImage image = new Gson().fromJson(responseString, PigeonImage.class);
+            if (image.statusCode == 0 && "OK".equalsIgnoreCase(image.statusMessage)) {
+                return new URI(image.getFileURL());
+            } else
+                Logger.error("Pigeon returned response of " + image.getStatusMessage());
+        } catch (Exception e) {
+            Logger.error(e);
         }
         return null;
+    }
+
+    /**
+     * Object representation of the json return for the pigeon image
+     */
+    private static class PigeonImage {
+        private int statusCode;
+        private String statusMessage;
+        private String fileURL;
+        private String pigeonCode;
+
+        public String getPigeonCode() {
+            return pigeonCode;
+        }
+
+        public void setPigeonCode(String pigeonCode) {
+            this.pigeonCode = pigeonCode;
+        }
+
+        public int getStatusCode() {
+            return statusCode;
+        }
+
+        public void setStatusCode(int statusCode) {
+            this.statusCode = statusCode;
+        }
+
+        public String getStatusMessage() {
+            return statusMessage;
+        }
+
+        public void setStatusMessage(String statusMessage) {
+            this.statusMessage = statusMessage;
+        }
+
+        public String getFileURL() {
+            return fileURL;
+        }
+
+        public void setFileURL(String fileURL) {
+            this.fileURL = fileURL;
+        }
     }
 }

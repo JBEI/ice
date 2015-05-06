@@ -819,11 +819,14 @@ iceServices.factory('Authentication',
                     })
                     .error(function (data, status) {
                         if (status === 401) {
-                            if ($location.path() !== '/login')
+                            $cookieStore.remove('userId');
+                            $cookieStore.remove('sessionId');
+
+                            if ($location.path() !== '/login') {
                                 $cookies.loginDestination = $location.path();
+                            }
                             $location.path('/login');
                         }
-                        console.log("ERROR", data);
                     });
             },
 

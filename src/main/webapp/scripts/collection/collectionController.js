@@ -349,7 +349,7 @@ angular.module('ice.collection.controller', [])
                 display: 'Shared',
                 icon: 'fa-share-alt',
                 iconOpen: 'fa-share-alt green',
-                alwaysVisible: false
+                alwaysVisible: true
             },
             {
                 name: 'drafts',
