@@ -13,7 +13,7 @@ public enum ConfigurationKey implements IDataTransferModel {
     APPLICATION_VERSION("4.0.0"),
     DATABASE_SCHEMA_VERSION(""),
     TEMPORARY_DIRECTORY("/tmp"),
-    DATA_DIRECTORY("/var/lib/ice-registry/blast-data"),
+    DATA_DIRECTORY(""),
 
     SITE_SECRET("Site Secret"),
     // deprecated. use the user account salt instead.
