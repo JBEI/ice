@@ -1,10 +1,9 @@
 <div class="modal-header" style="border-bottom: 0">
     <button type="button" class="close" ng-click="cancelAddLink()">&times;</button>
-    <h4><b>Link Entry</b></h4>
+    <h3><i style="color: #ff4500" class="fa fa-link"></i>&nbsp; <b>Link Entry</b></h3>
 </div>
 
 <div class="modal-body">
-    <i style="font-size: 45px; float: left; padding-right:10px; color: #ff4500" class="fa fa-link"></i>
 
     <input type="text" class="input_box"
            ng-model="addExistingPartNumber"
@@ -14,24 +13,27 @@
            typeahead-editable="true"
            typeahead-on-select="addExistingPartLink($item, $model, $label)"/>
 
-    <br clear="all">
+    <br><br clear="all">
 
-    <div class="panel panel-primary font-90em" style="width: 252px; margin-left: 27px"
-         ng-if="mainEntry.linkedParts.length">
-        <div class="panel-body" style="width: 250px">
-            <ul style="margin-left: -30px;">
-                <li ng-repeat="link in mainEntry.linkedParts" class="no_wrap">{{link.partId}} - ({{link.type}}
-                    {{link.name}}) <i class="fa fa-times delete_icon" ng-click="removeExistingPartLink(link)"></i></li>
-            </ul>
-        </div>
+    <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
+        <b class="ng-binding">Added Links</b>
     </div>
+
+    <table class="table table-hover table-condensed">
+        <tr ng-repeat="link in mainEntry.linkedParts" class="no_wrap">
+            <td><b class="small color-888 ng-binding">{{link.type}}</b> {{link.partId}}</td>
+            <td>{{link.name}})</td>
+            <td><i class="fa fa-unlink red opacity_hover" tooltip="Remove link"
+                   ng-click="removeExistingPartLink(link)"></i></td>
+        </tr>
+    </table>
 </div>
 
 <div class="modal-footer">
     <div ng-if="!processing">
         <button class="btn btn-default btn-sm" ng-click="cancelAddLink()">Cancel</button>
         <button type="button" ng-disabled="mainEntry.linkedParts.length===0" ng-click="processLinkAdd()"
-                class="btn btn-sm btn-primary">Add
+                class="btn btn-sm btn-primary">Save
         </button>
     </div>
 
