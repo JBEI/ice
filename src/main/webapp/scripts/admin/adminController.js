@@ -138,18 +138,25 @@ angular.module('ice.admin.controller', [])
             });
         };
     })
-    .controller('AdminTransferredEntriesController', function ($rootScope, $cookieStore, $filter, $location, $scope, Folders, Entry) {
+    .controller('AdminTransferredEntriesController', function ($rootScope, $cookieStore, $filter, $location, $scope, Folders, Entry, Util) {
         $scope.maxSize = 5;
         $scope.currentPage = 1;
+        $scope.selectedTransferredEntries = [];
+
         var params = {folderId: 'transferred'};
 
         // get all entries that are transferred
         $scope.transferredEntries = undefined;
-        Folders().folder(params, function (result) {
-            $scope.transferredEntries = result;
-        }, function (error) {
-            console.error(error);
-        });
+
+        var getTransferredEntries = function () {
+            Folders().folder(params, function (result) {
+                $scope.transferredEntries = result;
+                $scope.selectedTransferredEntries = [];
+            }, function (error) {
+                console.error(error);
+            });
+        };
+        getTransferredEntries();
 
         $scope.setPage = function (pageNo) {
             if (pageNo == undefined || isNaN(pageNo))
@@ -168,9 +175,30 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.acceptEntries = function () {
+            var successHandler = function (result) {
+                getTransferredEntries();
+            };
+
+            Util.update("/rest/parts", $scope.selectedTransferredEntries, {visibility: "OK"}, successHandler);
         };
 
         $scope.rejectEntries = function () {
+            var successHandler = function (result) {
+                getTransferredEntries();
+            };
+
+            Util.update("/rest/parts", $scope.selectedTransferredEntries, {visibility: "DELETED"}, successHandler);
+        };
+
+        $scope.selectTransferredEntry = function (entry) {
+            var index = $scope.selectedTransferredEntries.indexOf(entry.id);
+            if (index != -1) {
+                $scope.selectedTransferredEntries.splice(index, 1);
+                return;
+            }
+
+            // add to selected
+            $scope.selectedTransferredEntries.push(entry.id);
         };
 
         $scope.showEntryDetails = function (entry, index) {
