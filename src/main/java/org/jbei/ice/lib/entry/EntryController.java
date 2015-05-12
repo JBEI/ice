@@ -173,6 +173,50 @@ public class EntryController {
         return dao.ownerEntryCount(account, ownerEmail, accountGroups);
     }
 
+    /**
+     * Determines if the two entries can be linked
+     *
+     * @param entry parent in link hierarchy
+     * @param link  child in link hierarchy
+     * @return true if the two entries can be linked in the hierarchy specified
+     */
+    private boolean canLink(Entry entry, Entry link) {
+        if (entry == null || link == null || entry.getId() == link.getId())
+            return false;
+
+        if (link.getLinkedEntries().contains(entry))
+            return false;
+
+        EntryType linkedType = EntryType.nameToType(link.getRecordType());
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+        if (type == null || linkedType == null)
+            return false;
+
+        switch (type) {
+            case PLASMID:
+                if (linkedType != type && linkedType != EntryType.PART)
+                    return false;
+                break;
+
+            case PART:
+                if (linkedType != type)
+                    return false;
+                break;
+
+            case STRAIN:
+                if (linkedType != type && linkedType != EntryType.PLASMID && linkedType != EntryType.PART)
+                    return false;
+                break;
+
+            case ARABIDOPSIS:
+                if (linkedType != type && linkedType != EntryType.PART)
+                    return false;
+                break;
+        }
+
+        return true;
+    }
+
     public long updatePart(String userId, long partId, PartData part) {
         Entry existing = dao.get(partId);
         authorization.expectWrite(userId, existing);
@@ -182,12 +226,14 @@ public class EntryController {
         if (part.getLinkedParts() != null && part.getLinkedParts().size() > 0) {
             for (PartData data : part.getLinkedParts()) {
                 Entry linked = dao.getByPartNumber(data.getPartId());
-                if (linked == null)
-                    continue;
 
+                // check permissions on link
                 if (!authorization.canRead(userId, linked)) {
                     continue;
                 }
+
+                if (!canLink(entry, linked))
+                    continue;
 
                 entry.getLinkedEntries().add(linked);
             }

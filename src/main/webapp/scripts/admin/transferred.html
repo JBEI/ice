@@ -1,10 +1,12 @@
 <div ng-controller="AdminTransferredEntriesController">
     <div class="pad_top">
-        <button type="button" ng-click="acceptEntries()" class="ice-button" ng-disabled="true">
+        <button type="button" ng-click="acceptEntries()" class="ice-button"
+                ng-disabled="selectedTransferredEntries.length == 0">
             <i style="font-size: 14px" class="blue fa fa-check"></i> Accept
         </button>
         &nbsp;
-        <button type="button" ng-click="rejectEntries()" class="ice-button" ng-disabled="true">
+        <button type="button" ng-click="rejectEntries()" class="ice-button"
+                ng-disabled="selectedTransferredEntries.length == 0">
             <i style="font-size: 14px" class="red fa fa-ban"></i> Reject
         </button>
     </div>
@@ -15,11 +17,11 @@
             <thead>
             <tr data-ng-if='transferredEntries && transferredEntries.entries.length > 0'>
                 <th style="width:28px">
-                    <i class="fa"
-                       ng-class="{'fa-square-o':allSelected == false, 'fa-check-square-o': allSelected == true}"
-                       style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>
+                    <!--<i class="fa"-->
+                    <!--ng-class="{'fa-square-o':allSelected == false, 'fa-check-square-o': allSelected == true}"-->
+                    <!--style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>-->
                     <sup style="font-size: 9px; font-weight: normal; display: inherit"
-                         ng-show="selection.length>0">{{selection.length}}</sup>
+                         ng-show="selectedTransferredEntries.length>0">{{selectedTransferredEntries.length}}</sup>
                 </th>
                 <th ng-click="sort('type')" class="cursor_pointer">
                     <i ng-show="params.sort=='type'" style="font-size: 14px" class="fa opacity_4"
@@ -77,9 +79,9 @@
             <tbody>
             <tr data-ng-repeat="entry in transferredEntries.entries">
                 <td width="10px">
-                    <i class="fa"
-                       ng-class="{'fa-square-o':selection.indexOf(entry.id)==-1 || selection===undefined, 'fa-check-square-o':selection.indexOf(entry.id)>-1}"
-                       style="color: #999; font-size: 14px;" ng-click="select(entry)"></i>
+                    <i class="fa fa-fw"
+                       ng-class="{'fa-square-o':selectedTransferredEntries.indexOf(entry.id)==-1 || selection===undefined, 'fa-check-square-o':selectedTransferredEntries.indexOf(entry.id)>-1}"
+                       style="color: #999; font-size: 14px;" ng-click="selectTransferredEntry(entry)"></i>
                 </td>
                 <td>{{entry.type | capitalize}}</td>
                 <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
