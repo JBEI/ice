@@ -153,7 +153,7 @@ public class InfoToModelFactory {
     public static Entry updateEntryField(PartData data, Entry entry) {
         EntryType type = data.getType();
         if (type == null)
-            return null;
+            return entry;
 
         switch (type) {
             case PLASMID:
@@ -170,9 +170,6 @@ public class InfoToModelFactory {
             case ARABIDOPSIS:
                 entry = setSeedFields(data.getArabidopsisSeedData(), entry);
                 break;
-
-            default:
-                return null;
         }
 
         entry = setCommon(entry, data);

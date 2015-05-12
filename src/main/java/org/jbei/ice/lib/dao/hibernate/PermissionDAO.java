@@ -347,6 +347,35 @@ public class PermissionDAO extends HibernateRepository<Permission> {
                 .list();
     }
 
+    /**
+     * Determines if the specified account has write privileges on the entries passed on the parameter
+     *
+     * @param account user account
+     * @param groups  groups that the account belongs to
+     * @param entries list of entry Ids to check
+     * @return true if the user has write privileges on <b>all</b> the entries specified in the parameter
+     */
+    public boolean canWrite(Account account, Set<Group> groups, List<Long> entries) {
+        Criteria criteria = currentSession().createCriteria(Permission.class);
+        Disjunction disjunction = Restrictions.disjunction();
+        disjunction.add(Restrictions.and(Restrictions.eq("account", account), Restrictions.eq("canWrite", true)));
+        disjunction.add(Restrictions.eq("entry.ownerEmail", account.getEmail()));
+
+        if (!groups.isEmpty()) {
+            disjunction.add(Restrictions.and(Restrictions.in("group", groups), Restrictions.eq("canWrite", true)));
+        }
+
+        criteria.createAlias("entry", "entry", JoinType.LEFT_OUTER_JOIN)
+                .add(Restrictions.in("entry.id", entries))
+                .add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()));
+
+        criteria.add(disjunction);
+        criteria.setProjection(Projections.distinct(Projections.property("entry.id")));
+
+        Number number = (Number) criteria.setProjection(Projections.rowCount()).uniqueResult();
+        return number.intValue() == entries.size();
+    }
+
     @Override
     public Permission get(long id) {
         return super.get(Permission.class, id);
