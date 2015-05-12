@@ -252,7 +252,7 @@ iceServices.factory('Entry', function ($resource) {
             },
 
             create:{
-                method:'PUT',
+                method: 'POST',
                 responseType:'json',
                 url:'/rest/parts',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
@@ -437,6 +437,13 @@ iceServices.factory('Entry', function ($resource) {
                 method:'DELETE',
                 url:'/rest/parts/:partId/links/:linkId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
+            updateEntryList: {
+                method: 'POST',
+                responseType: 'json',
+                url: '/rest/parts',
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
             }
         });
     }

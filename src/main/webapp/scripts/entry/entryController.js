@@ -1210,6 +1210,7 @@ angular.module('ice.entry.controller', [])
                     $scope.processLinkAdd = function () {
                         entry.update($scope.mainEntry, function (result) {
                             entry.query({partId: result.id}, function (result) {
+                                $scope.mainEntry.linkedParts = result.linkedParts;
                                 $modalInstance.close(result);
                             }, function (error) {
                                 console.error(error);

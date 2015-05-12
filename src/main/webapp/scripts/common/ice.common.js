@@ -13,5 +13,6 @@ angular.module('ice.dependencies', ['ngRoute',
     'ice.entry',
     'ice.collection',
     'ice.wor',
-    'ice.admin'
+    'ice.admin',
+    'ice.common.service'
 ]);
