@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.account.authentication;
 
-import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountUtils;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -22,8 +21,7 @@ public class LocalAuthentication implements IAuthentication {
         if (userId == null || password == null)
             throw new AuthenticationException("Invalid username and password");
 
-        AccountController controller = new AccountController();
-        Account account = controller.getByEmail(userId);
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         if (account == null || !isValidPassword(account, password))
             return null;
         return account.getEmail();
