@@ -1,18 +1,18 @@
 package org.jbei.ice.lib.net;
 
-import java.util.Date;
-import javax.persistence.*;
-
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 
+import javax.persistence.*;
+import java.util.Date;
+
 /**
- * Stores information about partners that this registry is involved with in web of registries configuration.
+ * Represents a remote entity that this ice instance knows about
+ * and could potentially communicate with or allow communications from
  * <br>Field Descriptions:
  * <ul>
- * <li><code>NAME</code>: Name of the registry partner for display purposes. If a partner exists with the
- * specified name, the url is used</li>
+ * <li><code>NAME</code>: Name of the remote instance for display purposes.</li>
  * <li><code>URL</code>: Unique resource locator for the partner. This is used together with the api key to verify
  * access</li>
  * <li><code>STATUS</code>: {@link RemotePartnerStatus} that is used to indicated whether a partner is blocked
@@ -21,9 +21,9 @@ import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
  * to blocked partners are also not permitted</li>
  * <li><code>API_KEY</code>: This is a globally unique identifier received from a partner and used
  * for all communications with that partner.</li>
- * <li><code>AUTHENTICATION_TOKEN</code>: This is an <code>API_KEY</code> generated on this system
- * and send to other partner. That partner then includes the authentication token as the api key
- * for all requests to this server.</li>
+ * <li><code>AUTHENTICATION_TOKEN</code>: This is an encrypted <code>API_KEY</code> generated on this system
+ * and sent to other partner. The token that the partner receives is the unencrypted <code>API_KEY</code> which the
+ * partner then includes for all requests to this server.</li>
  * <li><code>ADD_TIME</code>: Time partner was added</li>
  * <li><code>LAST_CONTACT_TIME</code>: Last time contact was made with partner</li>
  * <li><code>FETCHED</code>: Number of parts that this system has fetched from partner</li>
@@ -55,6 +55,9 @@ public class RemotePartner implements IDataModel {
 
     @Column(name = "api_key")
     private String apiKey;
+
+    @Column(name = "salt")
+    private String salt;
 
     @Column(name = "authentication_token")
     private String authenticationToken;
@@ -149,6 +152,14 @@ public class RemotePartner implements IDataModel {
         this.authenticationToken = authenticationToken;
     }
 
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
+    }
+
     @Override
     public RegistryPartner toDataTransferObject() {
         RegistryPartner registryPartner = new RegistryPartner();
@@ -163,7 +174,6 @@ public class RemotePartner implements IDataModel {
                                           ? RemotePartnerStatus.APPROVED.name() : getPartnerStatus().name());
         registryPartner.setSent(getSent());
         registryPartner.setFetched(getFetched());
-        registryPartner.setApiKey(getApiKey());
         return registryPartner;
     }
 }

@@ -1,5 +1,6 @@
 package org.jbei.ice.services.rest;
 
+import org.hsqldb.lib.StringUtil;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
@@ -41,18 +42,19 @@ public class WebResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response query(
             @DefaultValue("true") @QueryParam("approved_only") boolean approvedOnly,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+            @HeaderParam(AUTHENTICATION_PARAM_NAME) String userAgentHeader) {
         getUserIdFromSessionHeader(userAgentHeader);
         return super.respond(controller.getRegistryPartners(approvedOnly));
     }
 
     /**
      * Retrieves entries for specified partner using the specified paging parameters
+     *
      * @param partnerId unique identifier for registry partner whose entries are being retrieved
-     * @param offset  record retrieve offset paging parameter
-     * @param limit maximum number of entries to retrieve
-     * @param sort field to sort on
-     * @param asc sort order
+     * @param offset    record retrieve offset paging parameter
+     * @param limit     maximum number of entries to retrieve
+     * @param sort      field to sort on
+     * @param asc       sort order
      * @param sessionId unique identifier for user making request
      * @return <code>OK</code> HTTP status with the list of entries wrapped in a result object
      */
@@ -65,7 +67,7 @@ public class WebResource extends RestResource {
             @DefaultValue("15") @QueryParam("limit") int limit,
             @DefaultValue("created") @QueryParam("sort") String sort,
             @DefaultValue("false") @QueryParam("asc") boolean asc,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
         WebEntries result = remoteEntries.getPublicEntries(userId, partnerId, offset, limit, sort, asc);
         return super.respond(Response.Status.OK, result);
@@ -77,7 +79,7 @@ public class WebResource extends RestResource {
     public ArrayList<AttachmentInfo> getAttachments(
             @PathParam("id") long partnerId,
             @PathParam("entryId") long partId,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+            @HeaderParam(AUTHENTICATION_PARAM_NAME) String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         return remoteEntries.getEntryAttachments(userId, partnerId, partId);
     }
@@ -87,7 +89,7 @@ public class WebResource extends RestResource {
     public Response transferEntries(
             @PathParam("id") long remoteId,
             EntrySelection entrySelection,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
         String userId = super.getUserIdFromSessionHeader(sessionId);
         remoteEntries.transferEntries(userId, remoteId, entrySelection);
         return super.respond(Response.Status.OK);
@@ -99,7 +101,7 @@ public class WebResource extends RestResource {
     public Response getWebEntry(@Context UriInfo uriInfo,
                                 @PathParam("id") long partnerId,
                                 @PathParam("entryId") long entryId,
-                                @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+                                @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
         String userId = super.getUserIdFromSessionHeader(sessionId);
         PartData result = remoteEntries.getPublicEntry(userId, partnerId, entryId);
         return super.respond(Response.Status.OK, result);
@@ -111,7 +113,7 @@ public class WebResource extends RestResource {
     public Response getWebEntryTooltip(@Context UriInfo uriInfo,
                                        @PathParam("id") long partnerId,
                                        @PathParam("entryId") long entryId,
-                                       @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+                                       @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
         String userId = super.getUserIdFromSessionHeader(sessionId);
         PartData result = remoteEntries.getPublicEntryTooltip(userId, partnerId, entryId);
         return super.respond(Response.Status.OK, result);
@@ -122,7 +124,7 @@ public class WebResource extends RestResource {
     @Path("/{id}/entries/{entryId}/statistics")
     public Response getStatistics(@PathParam("id") long partnerId,
                                   @PathParam("entryId") long entryId,
-                                  @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+                                  @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
         String userId = super.getUserIdFromSessionHeader(sessionId);
         PartStatistics statistics = remoteEntries.getPublicEntryStatistics(userId, partnerId, entryId);
         return super.respond(statistics);
@@ -134,7 +136,7 @@ public class WebResource extends RestResource {
     public Response getWebEntrySequence(@Context UriInfo uriInfo,
                                         @PathParam("id") long partnerId,
                                         @PathParam("entryId") long entryId,
-                                        @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+                                        @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
         String userId = super.getUserIdFromSessionHeader(sessionId);
         FeaturedDNASequence result = remoteEntries.getPublicEntrySequence(userId, partnerId, entryId);
         return super.respond(Response.Status.OK, result);
@@ -144,7 +146,7 @@ public class WebResource extends RestResource {
     @Path("/partner")
     // admin function
     public Response addWebPartner(@Context UriInfo info,
-                                  @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+                                  @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
                                   RegistryPartner partner) {
         String userId = getUserIdFromSessionHeader(sessionId);
         RemoteContact contactRemote = new RemoteContact();
@@ -156,7 +158,7 @@ public class WebResource extends RestResource {
     @Path("/partner/{id}")
     public Response getWebPartner(@Context UriInfo info,
                                   @PathParam("id") long partnerId,
-                                  @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+                                  @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
         RegistryPartner partner = controller.getWebPartner(userId, partnerId);
         return super.respond(Response.Status.OK, partner);
@@ -166,16 +168,34 @@ public class WebResource extends RestResource {
     @Path("/partner/remote")
     public Response remoteWebPartnerRequest(RegistryPartner partner) {
         RemoteContact remoteContact = new RemoteContact();
-        if (remoteContact.handleRemoteAddRequest(partner))
-            return respond(Response.Status.OK);
-        return respond(Response.Status.INTERNAL_SERVER_ERROR);
+        return super.respond(remoteContact.handleRemoteAddRequest(partner));
+    }
+
+    @DELETE
+    @Path("/partner/remote")
+    public Response remoteWebPartnerRemoveRequest(
+            @HeaderParam(WOR_PARTNER_TOKEN) String worToken,
+            @QueryParam("url") String url) {
+        RemoteContact remoteContact = new RemoteContact();
+        return super.respond(remoteContact.handleRemoteRemoveRequest(worToken, url));
+    }
+
+    @GET
+    @Path("/partners")
+    public Response getWebPartners(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
+                                   @HeaderParam(WOR_PARTNER_TOKEN) String worToken,
+                                   @QueryParam("url") String url) {
+        if (StringUtil.isEmpty(sessionId))
+            return super.respond(controller.getWebPartners(worToken, url));
+        String userId = getUserIdFromSessionHeader(sessionId);
+        return super.respond(controller.getWebPartners(userId));
     }
 
     @PUT
     @Path("/partner/{url}")
     public Response updateWebPartner(
             @PathParam("url") String url, RegistryPartner partner,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
         if (controller.updateWebPartner(userId, url, partner))
             return respond(Response.Status.OK);
@@ -186,7 +206,7 @@ public class WebResource extends RestResource {
     @Path("/partner/{url}")
     public Response removeWebPartner(
             @PathParam("url") String url,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
         if (controller.removeWebPartner(userId, url))
             return respond(Response.Status.OK);

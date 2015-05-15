@@ -12,7 +12,7 @@ import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.net.RemotePartner;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
-import org.jbei.ice.services.rest.RestClient;
+import org.jbei.ice.services.rest.IceRestClient;
 
 import java.util.*;
 
@@ -38,8 +38,8 @@ public class SearchController {
      * @return list of search results
      */
     public SearchResults runWebSearch(SearchQuery query) {
-        RestClient client = RestClient.getInstance();
-        ArrayList<RemotePartner> partners = DAOFactory.getRemotePartnerDAO().retrieveRegistryPartners();
+        IceRestClient client = IceRestClient.getInstance();
+        List<RemotePartner> partners = DAOFactory.getRemotePartnerDAO().getRegistryPartners();
 
         if (partners == null)
             return null;

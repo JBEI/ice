@@ -499,7 +499,7 @@ public class SequenceController {
                     name = entry.getName() + ".txt";
                     break;
             }
-        } catch (ControllerException e) {
+        } catch (Exception e) {
             Logger.error("Failed to generate genbank file for download!", e);
             return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
         }

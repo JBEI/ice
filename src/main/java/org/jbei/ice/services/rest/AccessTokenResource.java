@@ -3,6 +3,7 @@ package org.jbei.ice.services.rest;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.net.WoRController;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -64,5 +65,16 @@ public class AccessTokenResource extends RestResource {
         if (transfer == null)
             return super.respond(Response.Status.UNAUTHORIZED);
         return super.respond(transfer);
+    }
+
+    /**
+     * Validates web of registries access token (api key)
+     */
+    @GET
+    @Path("/web")
+    public Response getWebPartner(@HeaderParam(WOR_PARTNER_TOKEN) String token,
+                                  @QueryParam("url") String url) {
+        WoRController controller = new WoRController();
+        return super.respond(controller.getRegistryPartner(token, url));
     }
 }

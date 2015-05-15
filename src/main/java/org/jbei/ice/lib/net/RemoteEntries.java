@@ -16,7 +16,7 @@ import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.executor.TransferTask;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
-import org.jbei.ice.services.rest.RestClient;
+import org.jbei.ice.services.rest.IceRestClient;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -31,11 +31,11 @@ import java.util.HashMap;
 public class RemoteEntries {
 
     private final RemotePartnerDAO remotePartnerDAO;
-    private final RestClient restClient;
+    private final IceRestClient iceRestClient;
 
     public RemoteEntries() {
         this.remotePartnerDAO = DAOFactory.getRemotePartnerDAO();
-        this.restClient = RestClient.getInstance();
+        this.iceRestClient = IceRestClient.getInstance();
     }
 
     /**
@@ -71,7 +71,7 @@ public class RemoteEntries {
             queryParams.put("limit", limit);
             queryParams.put("asc", asc);
             queryParams.put("sort", sort);
-            details = (FolderDetails) restClient.get(partner.getUrl(), restPath, FolderDetails.class, queryParams);
+            details = (FolderDetails) iceRestClient.get(partner.getUrl(), restPath, FolderDetails.class, queryParams);
             if (details == null)
                 return null;
         } catch (Exception e) {
@@ -96,7 +96,7 @@ public class RemoteEntries {
             return null;
 
         String path = "/rest/parts/" + entryId + "/attachments";
-        return (ArrayList) restClient.get(partner.getUrl(), path, ArrayList.class);
+        return (ArrayList) iceRestClient.get(partner.getUrl(), path, ArrayList.class);
     }
 
     public FeaturedDNASequence getEntrySequence(String userId, long remoteId, long entryId) {
@@ -108,7 +108,7 @@ public class RemoteEntries {
             return null;
 
         String path = "/rest/parts/" + entryId + "/sequence";
-        return (FeaturedDNASequence) restClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
+        return (FeaturedDNASequence) iceRestClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
     }
 
     public void transferEntries(String userId, long remoteId, EntrySelection selection) {
@@ -124,7 +124,7 @@ public class RemoteEntries {
         if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
             return null;
 
-        return (PartData) restClient.get(partner.getUrl(), "/rest/parts/" + entryId, PartData.class);
+        return (PartData) iceRestClient.get(partner.getUrl(), "/rest/parts/" + entryId, PartData.class);
     }
 
     public PartData getPublicEntryTooltip(String userId, long remoteId, long entryId) {
@@ -136,7 +136,7 @@ public class RemoteEntries {
             return null;
 
         String path = "/rest/parts/" + entryId + "/tooltip";
-        return (PartData) restClient.get(partner.getUrl(), path, PartData.class);
+        return (PartData) iceRestClient.get(partner.getUrl(), path, PartData.class);
     }
 
     public PartStatistics getPublicEntryStatistics(String userId, long remoteId, long entryId) {
@@ -148,7 +148,7 @@ public class RemoteEntries {
             return null;
 
         String path = "/rest/parts/" + entryId + "/statistics";
-        return (PartStatistics) restClient.get(partner.getUrl(), path, PartStatistics.class);
+        return (PartStatistics) iceRestClient.get(partner.getUrl(), path, PartStatistics.class);
     }
 
     public FeaturedDNASequence getPublicEntrySequence(String userId, long remoteId, long entryId) {
@@ -160,7 +160,7 @@ public class RemoteEntries {
             return null;
 
         String path = "/rest/parts/" + entryId + "/sequence";
-        return (FeaturedDNASequence) restClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
+        return (FeaturedDNASequence) iceRestClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
     }
 
     public File getPublicAttachment(String userId, long remoteId, String fileId) {
