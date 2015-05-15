@@ -10,7 +10,6 @@ import java.security.spec.KeySpec;
 
 /**
  *
- *
  * @author Hector Plahar
  */
 public class TokenHash {

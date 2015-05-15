@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.dto.entry;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
+
+import java.util.ArrayList;
 
 public class PartData implements IDataTransferModel {
 
@@ -42,6 +42,7 @@ public class PartData implements IDataTransferModel {
     private String fundingSource;
     private long basePairCount;
     private long featureCount;
+    private long viewCount;
 
     private boolean hasAttachment;
     private boolean hasSample;
@@ -428,6 +429,14 @@ public class PartData implements IDataTransferModel {
 
     public long getFeatureCount() {
         return featureCount;
+    }
+
+    public long getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(long viewCount) {
+        this.viewCount = viewCount;
     }
 
     public void setFeatureCount(long featureCount) {

@@ -136,7 +136,7 @@ public class EntryController {
         return data;
     }
 
-    public List<PartData> retrieveOwnerEntries(String userId, String ownerEmail,
+    public List<PartData> retrieveOwnerEntries(String userId, String ownerEmail, boolean includeCounts,
                                                ColumnField sort, boolean asc, int start, int limit) {
         List<Entry> entries;
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
@@ -155,6 +155,9 @@ public class EntryController {
         ArrayList<PartData> data = new ArrayList<>();
         for (Entry entry : entries) {
             PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
+            if (includeCounts) {
+                info.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
+            }
             data.add(info);
         }
         return data;
