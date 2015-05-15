@@ -7,7 +7,6 @@ import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.junit.After;
@@ -64,7 +63,7 @@ public class RemoteTransferTest {
         ids.add(strain2.getId());
 
         List<PartData> data = transfer.getPartsForTransfer(ids);
-        EntryCreator creator = new EntryCreator();
+        TransferredParts parts = new TransferredParts();
 
         Assert.assertEquals(data.size(), 2);
         for (PartData datum : data) {
@@ -73,7 +72,7 @@ public class RemoteTransferTest {
 
             // transfer
             datum.setRecordId("");
-            PartData transferred = creator.receiveTransferredEntry(datum);
+            PartData transferred = parts.receiveTransferredEntry(datum);
             Assert.assertNotNull(transferred);
         }
     }
