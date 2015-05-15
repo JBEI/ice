@@ -7,7 +7,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.util.UUID;
 
 /**
  *
@@ -43,10 +42,6 @@ public class TokenHash {
         byte[] salt = new byte[SALT_BYTE_SIZE];
         random.nextBytes(salt);
         return DatatypeConverter.printBase64Binary(salt);
-    }
-
-    public String generateTemporaryPassword() {
-        return UUID.randomUUID().toString().substring(24);
     }
 
     public String generateRandomToken() {
