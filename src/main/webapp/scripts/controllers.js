@@ -422,7 +422,7 @@ iceControllers.controller('ProfileGroupsController', function ($rootScope, $scop
     }
 });
 
-iceControllers.controller('ProfileEntryController', function ($scope, $location, $cookieStore, $stateParams, User) {
+iceControllers.controller('ProfileEntryController', function ($scope, $location, $cookieStore, $stateParams, User, Entry) {
     $scope.maxSize = 5;
     $scope.currentPage = 1;
 
@@ -446,6 +446,18 @@ iceControllers.controller('ProfileEntryController', function ($scope, $location,
         }, function (error) {
             console.error(error);
         });
+    };
+
+    $scope.tooltipDetails = function (entry) {
+        $scope.currentTooltip = undefined;
+        var sessionId = $cookieStore.get("sessionId");
+
+        Entry(sessionId).tooltip({partId: entry.id},
+            function (result) {
+                $scope.currentTooltip = result;
+            }, function (error) {
+                console.error(error);
+            });
     };
 
     $scope.setUserEntriesPage = function (pageNo) {
