@@ -16,6 +16,8 @@ public enum ConfigurationKey implements IDataTransferModel {
     DATA_DIRECTORY("./data/blast-data"),
 
     SITE_SECRET("Site Secret"),
+    // Use the user account salt instead.
+    SECRET_KEY("o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+"),
     BULK_UPLOAD_APPROVER_EMAIL(""), //TODO this should be a role
     ADMIN_EMAIL(""), // ditto
     SMTP_HOST(""),
