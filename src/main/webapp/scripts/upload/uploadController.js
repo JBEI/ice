@@ -131,8 +131,6 @@ angular.module('ice.upload.controller', [])
             var entryId = $scope.bulkUpload.entryIdData[row];
             var id = $scope.bulkUpload.id;
 
-            console.log(id);
-
             if (UploadUtil.indexToRestResource($scope.importType, col) === "attachment") {
                 Upload(sid).deleteAttachment({importId: id, entryId: entryId},
                     function (success) {
@@ -168,7 +166,7 @@ angular.module('ice.upload.controller', [])
                     $(td).empty().append(value).append("&nbsp;").append($del);
                 } else {
                     var $up = $('<span class="fileUpload"><i class="fa fa-upload opacity_hover opacity_4"></i> Upload '
-                    + '<input type="file" class="upload" /></span>');
+                        + '<input type="file" class="upload" /></span>');
 
                     $up.on("change", function (event) {
                         //console.log("change", event);
@@ -314,32 +312,26 @@ angular.module('ice.upload.controller', [])
 
             var calculateSize = function () {
                 var offset = $dataTable.offset();
-                availableWidth = $window.width() - offset.left + $window.scrollLeft();
+                if (($window.height() - offset.top + $window.scrollTop()) === availableHeight)
+                    return;
                 availableHeight = $window.height() - offset.top + $window.scrollTop();
                 $dataTable.handsontable('render');
-            };
-
-            var widthFunction = function () {
-                if (availableWidth === void 0) {
-                    calculateSize();
-                }
-                return availableWidth;
             };
 
             var heightFunction = function () {
                 if (availableHeight === void 0) {
                     calculateSize();
                 }
-                return availableHeight - 87;
+                return availableHeight - 67;
             };
 
             $window.on('resize', calculateSize);
 
-            var isRowEmpty = function(rowData){
-                for(var col = 0; col < rowData.length; col++){
+            var isRowEmpty = function (rowData) {
+                for (var col = 0; col < rowData.length; col++) {
                     var content = rowData[col];
 
-                    if (typeof content === "string" && content.trim()){
+                    if (typeof content === "string" && content.trim()) {
                         return false;
                     }
                 }
@@ -375,11 +367,13 @@ angular.module('ice.upload.controller', [])
                     if (!object['id']) {
                         // create new entry for existing upload
                         createEntry($scope.bulkUpload.id, object, row);
-                    } else if(isRowEmpty(sheetData[row])) {
+                    } else if (isRowEmpty(sheetData[row])) {
                         upload.deleteEntry({
                             importId: $scope.bulkUpload.id,
                             entryId: $scope.bulkUpload.entryIdData[row]
-                        }, null, function(){$scope.saving = false;});
+                        }, null, function () {
+                            $scope.saving = false;
+                        });
                     } else {
                         // update entry for existing upload
                         upload.updateEntry({importId: $scope.bulkUpload.id, entryId: object.id}, object,
@@ -585,13 +579,13 @@ angular.module('ice.upload.controller', [])
                 autoWrapRow: true,
                 autoWrapCol: true,
                 cells: getCellProperties,
-                width: widthFunction,
+                //width: widthFunction,
                 height: heightFunction,
                 afterChange: afterChange,
                 manualColumnResize: true,
-                columnSorting: true,
+                columnSorting: false,
                 contextMenu: true,
-                afterRemoveRow: function(row, _) {
+                afterRemoveRow: function (row) {
                     upload.deleteEntry({importId: $scope.bulkUpload.id, entryId: $scope.bulkUpload.entryIdData[row]});
                 }
             };
@@ -887,6 +881,7 @@ angular.module('ice.upload.controller', [])
                             if ($scope.uploadEntries.length < result.count) {
                                 loop(start + result.entryList.length);
                             }
+                            $("#dataTable").handsontable('render');
                         });
                 }
             });
