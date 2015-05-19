@@ -169,7 +169,7 @@ public class FolderResource extends RestResource {
 
         switch (folderId) {
             case "personal":
-                List<PartData> entries = entryController.retrieveOwnerEntries(userId, userId, false, field,
+                List<PartData> entries = entryController.retrieveOwnerEntries(userId, userId, field,
                         asc, offset, limit);
                 long count = entryController.getNumberOfOwnerEntries(userId, userId);
                 details.getEntries().addAll(entries);

@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.net;
 
-import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.RemotePartnerDAO;
@@ -46,13 +45,7 @@ public class RemoteEntries {
      */
     private boolean hasRemoteAccessEnabled() {
         String value = Utils.getConfigValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
-        if (StringUtils.isEmpty(value))
-            return false;
-
-        if (!"yes".equalsIgnoreCase(value) && !"true".equalsIgnoreCase(value))
-            return false;
-
-        return true;
+        return ("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
     }
 
     public WebEntries getPublicEntries(String userId, long remoteId, int offset, int limit, String sort, boolean asc) {

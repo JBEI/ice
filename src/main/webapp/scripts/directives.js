@@ -10,7 +10,7 @@ iceDirectives.directive("iceSearchInput", function () {
 //            runUserSearch:"&"
 //        },
         restrict:"E",
-        templateUrl:"scripts/search/search-input.html",
+        templateUrl: "/scripts/search/search-input.html",
         controller:"SearchInputController"
     }
 });

@@ -429,18 +429,19 @@ iceControllers.controller('ProfileEntryController', function ($scope, $location,
     var user = User($cookieStore.get("sessionId"));
     var profileId = $stateParams.id;
     $location.path("/profile/" + profileId + "/entries", false);
-    var params = {userId: profileId};
+    $scope.params = {userId: profileId, sort: "created", asc: false};
 
-    user.getEntries(params, function (result) {
+    user.getEntries($scope.params, function (result) {
         $scope.folder = result;
     });
 
     $scope.sort = function (sortType) {
         $scope.folder = null;
-        params.sort = sortType;
-        params.offset = 0;
-        params.asc = !params.asc;
-        user.getEntries(params, function (result) {
+        // only change if switching to different sort
+        $scope.params.asc = $scope.params.sort === sortType ? !$scope.params.asc : false;
+        $scope.params.sort = sortType;
+        $scope.params.offset = 0;
+        user.getEntries($scope.params, function (result) {
             $scope.folder = result;
             $scope.currentPage = 1;
         }, function (error) {
@@ -466,8 +467,8 @@ iceControllers.controller('ProfileEntryController', function ($scope, $location,
 
         console.log(pageNo);
         $scope.loadingPage = true;
-        params.offset = (pageNo - 1) * 15;
-        user.getEntries(params, function (result) {
+        $scope.params.offset = (pageNo - 1) * 15;
+        user.getEntries($scope.params, function (result) {
             console.log("result", result);
             $scope.folder = result;
             $scope.loadingPage = false;

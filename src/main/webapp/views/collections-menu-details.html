@@ -1,53 +1,45 @@
 <!-- details (sub folders) of a selected folder -->
-<table cellspacing="0" cellpadding="0" width="219px" style="margin-left: 5px;">
-    <tr ng-show="hideAddCollection===false" ng-init="hideAddCollection=true">
-        <td>
-            <form ng-submit="createCollection()">
-                <div class="input-group">
-                    <input type="text" class="input_box" placeholder="Enter collection name" maxlength="35"
-                           style="width: 200px;" ng-model="newCollectionName">
+<div style="margin-left: 3px" ng-show="hideAddCollection===false" ng-init="hideAddCollection=true">
+    <form ng-submit="createCollection()">
+        <div class="input-group" style="font-weight: normal">
+            <input type="text" class="input_box" placeholder="Enter collection name" maxlength="35"
+                   style="width: 190px;" ng-model="newCollectionName">
                     <span class="input-group-addon" style="padding:0; background-color: #f1f1f1; width: 19px;">
                         <i ng-click="hideAddCollection=true" class="fa fa-times delete_icon"></i>
                     </span>
-                </div>
-            </form>
-        </td>
-    </tr>
+        </div>
+    </form>
+</div>
 
-    <tr data-ng-repeat="folder in selectedCollectionFolders">
-        <td>
-            <div class="collection-menu" style="background-color: #f9f9f9"
-                 ng-hide="folder.deleteRequested" ng-click="selectCollectionFolder(folder)"
-                 ng-Mouseover="showSubMenu=folder.canEdit" ng-Mouseleave="showSubMenu=false">
+<div data-ng-repeat="folder in selectedCollectionFolders">
+    <div class="collection-menu" style="background-color: #f9f9f9; margin-left: 5px;"
+         ng-hide="folder.deleteRequested" ng-click="selectCollectionFolder(folder)"
+         ng-Mouseover="showSubMenu=folder.canEdit" ng-Mouseleave="showSubMenu=false">
 
-                <i class="fa fa-folder-o fa-fw" ng-if="folder.type!=='SHARED'"
-                   style="color: #515050; padding-left: 7px"></i>&nbsp;
+        <i class="fa fa-folder-o fa-fw" ng-if="folder.type!=='SHARED'"
+           style="color: #515050; padding-left: 8px"></i>&nbsp;
 
-                <span class="fa-stack" style="font-size: 8px;" ng-if="folder.type==='SHARED'">
-                  <i class="fa fa-folder fa-stack-2x" style="color: #999;"></i>
-                  <i class="fa fa-user fa-stack-1x" style="margin-left: 2px; color: #f1f1f1"></i>
-                </span>
+        <span class="fa-stack" style="font-size: 8px;" ng-if="folder.type==='SHARED'">
+          <i class="fa fa-folder fa-stack-2x" style="color: #999;"></i>
+          <i class="fa fa-user fa-stack-1x" style="margin-left: 2px; color: #f1f1f1"></i>
+        </span>
+        <span ng-if="folder.folderName" style="font-size: 12px">{{folder.folderName | limitTo:25}}</span>&nbsp;
+        <i ng-if="!folder.folderName" class="color-888" style="font-size: 12px">Untitled</i>&nbsp;
+        <span ng-show="!showSubMenu" class="menu_count">{{folder.count | number}}</span>
 
-                <span class="font-85em" style="font-size: 12px">{{folder.folderName | limitTo:25}}</span>&nbsp;
-                <span ng-show="!showSubMenu" class="menu_count">{{folder.count | number}}</span>
+        <!--submenu options-->
+        <span ng-show="showSubMenu" ng-init="showSubMenu=false" class="menu_count" style="font-size: 14px">
+            <i class="fa fa-times delete_icon" tooltip="Delete"
+               ng-click="folder.deleteRequested=true" stop-event="click"></i>
+        </span>
+    </div>
 
-                <!--submenu options-->
-                <span ng-show="showSubMenu" ng-init="showSubMenu=false" class="menu_count" style="font-size: 14px;">
-                    <i class="fa fa-times delete_icon" tooltip="Delete"
-                       ng-click="folder.deleteRequested=true" stop-event="click"></i>
-                </span>
-            </div>
-
-            <div style="border-top: 1px solid #F2F2F2; color: #233559; line-height: 90%; padding: 4px;
+    <div style="border-top: 1px solid #F2F2F2; color: #233559; line-height: 90%; padding: 4px;
             background-color: #f9f9f9" ng-show="folder.deleteRequested">
-                <i class="fa fa-exclamation-triangle alert_color fa-fw" style="font-size: 12px"></i>
-                <b class="font-85em" style="color:#CC3333">Permanently delete?</b>
+        <i class="fa fa-exclamation-triangle alert_color fa-fw" style="font-size: 12px"></i>
+        <b class="font-85em" style="color:#CC3333">Permanently delete?</b>
 
-                <button stop-event="click" class="btn btn-xs btn-primary" ng-click="deleteCollection(folder)">Yes
-                </button>
-                <button stop-event="click" class="btn btn-xs btn-default" ng-click="folder.deleteRequested=false">No
-                </button>
-            </div>
-        </td>
-    </tr>
-</table>
+        <button stop-event="click" class="btn btn-xs btn-primary" ng-click="deleteCollection(folder)">Yes</button>
+        <button stop-event="click" class="btn btn-xs btn-default" ng-click="folder.deleteRequested=false">No</button>
+    </div>
+</div>

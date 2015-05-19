@@ -126,7 +126,7 @@ public class UserResource extends RestResource {
         ColumnField field = ColumnField.valueOf(sort.toUpperCase());
 
         Account requestAccount = DAOFactory.getAccountDAO().get(userId);
-        List<PartData> entries = entryController.retrieveOwnerEntries(userIdString, requestAccount.getEmail(), true, field,
+        List<PartData> entries = entryController.retrieveOwnerEntries(userIdString, requestAccount.getEmail(), field,
                                                                       asc, offset, limit);
         long count = entryController.getNumberOfOwnerEntries(userIdString, requestAccount.getEmail());
         FolderDetails details = new FolderDetails();

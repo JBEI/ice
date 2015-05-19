@@ -16,6 +16,7 @@ import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hibernate.search.query.dsl.TermContext;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -374,6 +375,7 @@ public class HibernateSearch {
                 if (info == null)
                     continue;
                 // for bulk edit
+                info.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
                 searchResult.setEntryInfo(info);
             }
 

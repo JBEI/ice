@@ -6,6 +6,11 @@ angular.module('ice.collection.controller', [])
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
 
+        $rootScope.$on('$stateChangeStart',
+            function (event, toState, toParams, fromState, fromParams) {
+                console.log(toState, toParams, fromState, fromParams);
+            });
+
         //
         // initialize
         //
@@ -176,9 +181,13 @@ angular.module('ice.collection.controller', [])
 
         $scope.sort = function (sortType) {
             $scope.folder = null;
-            $scope.params.sort = sortType;
             $scope.params.offset = 0;
-            $scope.params.asc = !$scope.params.asc;
+            if ($scope.params.sort == sortType)
+                $scope.params.asc = !$scope.params.asc;
+            else
+                $scope.params.asc = false;
+
+            $scope.params.sort = sortType;
 
             folders.folder($scope.params, function (result) {
                 $scope.folder = result;
@@ -297,15 +306,11 @@ angular.module('ice.collection.controller', [])
         }
     })
     // also the main controller
-    .controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope, Folders, Settings, sessionValid, Search, Samples) {
+    .controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope, Folders, Settings, Search, Samples) {
         // todo : set on all
         var searchUrl = "/search";
         if ($location.path().slice(0, searchUrl.length) != searchUrl) {
             $location.search('q', null);
-        }
-
-        if (sessionValid === undefined || sessionValid.data.sessionId === undefined) {
-            return;
         }
 
         var sessionId = $cookieStore.get("sessionId");
@@ -313,7 +318,6 @@ angular.module('ice.collection.controller', [])
         $rootScope.settings = {};
 
         // retrieve site wide settings
-        var settings = Settings(sessionId);
         $scope.pageCounts = function (currentPage, resultCount) {
             var maxPageCount = 15;
             var pageNum = ((currentPage - 1) * maxPageCount) + 1;
@@ -332,7 +336,7 @@ angular.module('ice.collection.controller', [])
                 description: '',
                 display: 'Featured',
                 icon: 'fa-certificate',
-                iconOpen: 'fa-certificate orange',
+                iconOpen: 'fa-certificate dark-orange',
                 alwaysVisible: true
             },
             {
@@ -356,15 +360,15 @@ angular.module('ice.collection.controller', [])
                 description: '',
                 display: 'Drafts',
                 icon: 'fa-pencil',
-                iconOpen: 'fa-edit brown',
+                iconOpen: 'fa-pencil brown',
                 alwaysVisible: false
             },
             {
                 name: 'pending',
                 description: '',
                 display: 'Pending Approval',
-                icon: 'fa-support',
-                iconOpen: 'fa-support purple',
+                icon: 'fa-moon-o',
+                iconOpen: 'fa-moon-o purple',
                 alwaysVisible: false
             },
             {
@@ -564,18 +568,18 @@ angular.module('ice.collection.controller', [])
                 results.push(width);
 
                 html += "<td><hr style=\"background-color: " + defColor + "; border: 0px; width: "
-                + width + "px; height: 10px\"></hr></td>";
+                    + width + "px; height: 10px\"></hr></td>";
 
                 // mark stripe
                 prevStart = (fillStart - prevStart) + stripeBlockLength;
                 html += "<td><hr style=\"background-color: " + stripColor + "; border: 0px; width: "
-                + stripeBlockLength + "px; height: 10px\"></hr></td>";
+                    + stripeBlockLength + "px; height: 10px\"></hr></td>";
                 fillEnd = fillStart + stripeBlockLength;
             }
 
             if (fillEnd < 100) {
                 html += "<td><hr style=\"background-color: " + defColor + "; border: 0px; width: "
-                + (100 - fillEnd) + "px; height: 10px\"></hr></td>";
+                    + (100 - fillEnd) + "px; height: 10px\"></hr></td>";
             }
 
             html += "</tr></table>";
