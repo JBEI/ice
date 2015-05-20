@@ -3,10 +3,10 @@
 
     <div class="sidebarLinks">
 
-        <div class="sideBarHeader collections_header">Collections</div>
+        <div class="collections_header">Collections</div>
 
         <div ng-repeat="collection in collectionList" ng-if="collection.count||collection.alwaysVisible">
-            <div ng-class="{collection_user_menu_row_selected:collection.display.toLowerCase()===selectedFolder}"
+            <div ng-class="{'collection_user_menu_row_selected':collection.name.toLowerCase()===selectedFolder}"
                  ng-init="showAddCollection=false">
 
                 <div class="collection-menu" ng-click='selectCollection(collection.name)'
@@ -21,14 +21,14 @@
 
                     <span ng-show="collection.name===selectedFolder">
                         <i class="fa fa-fw" style="font-size: 17px" ng-class="collection.iconOpen"></i>
-                        <b>{{collection.display}}</b>
-                        </span>
+                        <span style="font-weight: 600">{{collection.display}}</span>
+                    </span>
 
                     <span class="menu_count">
                         <span ng-hide="showAddCollection">{{(collection.count | number) || 0}}</span>
                         <!--shown only for personal collection-->
                         <i ng-show="showAddCollection" ng-click="hideAddCollection=!hideAddCollection"
-                           class="fa fa-plus edit_icon" style="font-size: 14px">
+                           class="fa fa-plus edit_icon" style="font-size: 17px">
                         </i>
                     </span>
                 </div>

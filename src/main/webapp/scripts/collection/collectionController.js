@@ -341,7 +341,7 @@ angular.module('ice.collection.controller', [])
             },
             {
                 name: 'personal',
-                description: '',
+                description: 'Personal entries',
                 display: 'Personal',
                 icon: 'fa-folder',
                 iconOpen: 'fa-folder-open dark_blue',
@@ -357,7 +357,7 @@ angular.module('ice.collection.controller', [])
             },
             {
                 name: 'drafts',
-                description: '',
+                description: 'Entries from bulk upload still in progress',
                 display: 'Drafts',
                 icon: 'fa-pencil',
                 iconOpen: 'fa-pencil brown',
@@ -365,7 +365,7 @@ angular.module('ice.collection.controller', [])
             },
             {
                 name: 'pending',
-                description: '',
+                description: 'Entries from bulk upload waiting approval',
                 display: 'Pending Approval',
                 icon: 'fa-moon-o',
                 iconOpen: 'fa-moon-o purple',
@@ -373,7 +373,7 @@ angular.module('ice.collection.controller', [])
             },
             {
                 name: 'deleted',
-                description: '',
+                description: 'Deleted Entries',
                 display: 'Deleted',
                 icon: 'fa-trash-o',
                 iconOpen: 'fa-trash red',

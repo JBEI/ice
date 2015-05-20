@@ -12,19 +12,27 @@
 </div>
 
 <div data-ng-repeat="folder in selectedCollectionFolders">
-    <div class="collection-menu" style="background-color: #f9f9f9; margin-left: 5px;"
+    <div class="collection-menu-sub-folder"
          ng-hide="folder.deleteRequested" ng-click="selectCollectionFolder(folder)"
          ng-Mouseover="showSubMenu=folder.canEdit" ng-Mouseleave="showSubMenu=false">
 
-        <i class="fa fa-folder-o fa-fw" ng-if="folder.type!=='SHARED'"
-           style="color: #515050; padding-left: 8px"></i>&nbsp;
-
-        <span class="fa-stack" style="font-size: 8px;" ng-if="folder.type==='SHARED'">
-          <i class="fa fa-folder fa-stack-2x" style="color: #999;"></i>
-          <i class="fa fa-user fa-stack-1x" style="margin-left: 2px; color: #f1f1f1"></i>
+        <span ng-if="folder.type==='PRIVATE'||folder.type==='PUBLIC'">
+            <i class="fa fa-folder-o fa-fw"
+               style="color: #4D5B76; opacity: 0.3; padding-left: 8px; font-size: 12px;"></i>&nbsp;
         </span>
-        <span ng-if="folder.folderName" style="font-size: 12px">{{folder.folderName | limitTo:25}}</span>&nbsp;
-        <i ng-if="!folder.folderName" class="color-888" style="font-size: 12px">Untitled</i>&nbsp;
+
+        <span ng-if="folder.type==='UPLOAD'">
+            <i class="fa fa-table fa-fw"
+               style="color: #4D5B76; opacity: 0.3; padding-left: 8px; font-size: 12px;"></i>&nbsp;
+        </span>
+
+        <span class="fa-stack" style="margin-left: 7px; font-size: 8px;" ng-if="folder.type==='SHARED'">
+            <i class="fa fa-folder fa-stack-2x" style="color: #999;"></i>
+             <i class="fa fa-user fa-stack-1x" style="margin-left: 2px; color: #f1f1f1"></i>  &nbsp;
+        </span>
+
+        <span ng-if="folder.folderName" style="font-size: 12px;" title="{{folder.folderName}}">{{folder.folderName | truncate:22}}</span>&nbsp;
+        <i ng-if="!folder.folderName" class="color-888" style="font-size: 13px">Untitled</i>&nbsp;
         <span ng-show="!showSubMenu" class="menu_count">{{folder.count | number}}</span>
 
         <!--submenu options-->
