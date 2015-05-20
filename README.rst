@@ -58,6 +58,14 @@ Set Up
 
 4. Point your browser to https://localhost:8443/ to access the application
 
+Testing
+~~~~~~~
+To run the unit test suite
+
+::
+
+  mvn test
+
 Links
 -----
 

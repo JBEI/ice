@@ -3,6 +3,7 @@
         "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 
+<!-- Used on AWS servers -->
 <hibernate-configuration>
     <session-factory>
         <property name="hibernate.connection.url">jdbc:postgresql://${RDS_HOSTNAME}:${RDS_PORT}/${RDS_DB_NAME}</property>
