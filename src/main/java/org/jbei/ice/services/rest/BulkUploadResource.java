@@ -5,7 +5,10 @@ import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.AuthorizationException;
-import org.jbei.ice.lib.bulkupload.*;
+import org.jbei.ice.lib.bulkupload.BulkEntryCreator;
+import org.jbei.ice.lib.bulkupload.BulkUploadController;
+import org.jbei.ice.lib.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
@@ -70,8 +73,7 @@ public class BulkUploadResource extends RestResource {
             @DefaultValue("8") @QueryParam("limit") int limit,
             @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         String userId = getUserIdFromSessionHeader(sessionId);
-        PartNumbers partNumbers = new PartNumbers();
-        ArrayList<String> results = partNumbers.getMatchingPartNumbers(userId, uploadType, token, limit);
+        ArrayList<String> results = controller.getMatchingPartNumbersForLinks(uploadType, token, limit);
         return super.respond(results);
     }
 

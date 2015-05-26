@@ -85,17 +85,16 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     @SuppressWarnings("unchecked")
-    public Set<Entry> getMatchingEntryPartNumbers(String token, int limit) throws DAOException {
+    public Set<Entry> getMatchingEntryPartNumbers(String token, int limit, Set<String> include) throws DAOException {
         try {
-            token = token.toUpperCase();
-            String qString = "select distinct entry from " + Entry.class.getName()
-                    + " entry where UPPER(entry.partNumber) "
-                    + "like '%" + token + "%'";
-            Query query = currentSession().createQuery(qString);
+            Criteria criteria = currentSession().createCriteria(Entry.class)
+                    .add(Restrictions.ilike("partNumber", token, MatchMode.ANYWHERE));
             if (limit > 0)
-                query.setMaxResults(limit);
-
-            return new HashSet<>(query.list());
+                criteria.setMaxResults(limit);
+            if (include != null && !include.isEmpty()) {
+                criteria.add(Restrictions.in("recordType", include));
+            }
+            return new HashSet<>(criteria.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

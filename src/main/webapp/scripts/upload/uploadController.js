@@ -1,7 +1,8 @@
 'use strict';
 
 angular.module('ice.upload.controller', [])
-    .controller('UploadController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource, $stateParams, FileUploader, $http, Upload, UploadUtil) {
+    .controller('UploadController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource,
+                                              $stateParams, FileUploader, $http, Upload, UploadUtil) {
         var sid = $cookieStore.get("sessionId");
         var upload = Upload(sid);
         var sheetData = [
@@ -31,9 +32,20 @@ angular.module('ice.upload.controller', [])
         $scope.addNewPartLink = function (type) {
             linkedImportType = type;
             $scope.linkedSelection = type.charAt(0).toUpperCase() + type.substring(1);
-            var ht = $("#dataTable").handsontable('getInstance');
+            var ht = angular.element('#dataTable').handsontable('getInstance');
             linkedHeaders = UploadUtil.getSheetHeaders(type);
             linkedDataSchema = UploadUtil.getDataSchema(type);
+            ht.alter('insert_col', undefined, linkedHeaders.length);
+        };
+
+        //
+        // add a part_id column to enable linking to existing entries
+        //
+        $scope.addExistingPart = function () {
+            linkedImportType = $scope.linkedSelection = "Existing";
+            var ht = angular.element('#dataTable').handsontable('getInstance');
+            linkedHeaders = ["Part Number"];
+            linkedDataSchema = ["partId"];
             ht.alter('insert_col', undefined, linkedHeaders.length);
         };
 
@@ -199,12 +211,34 @@ angular.module('ice.upload.controller', [])
                 var fieldType;
 
                 if (linkedImportType && col >= sheetHeaders.length) {
-                    var newIndex = col - sheetHeaders.length;
-                    fieldType = UploadUtil.getTypeField(linkedImportType, newIndex);
+                    if (linkedImportType === "Existing")
+                        fieldType = "partNumber";
+                    else {
+                        var newIndex = col - sheetHeaders.length;
+                        fieldType = UploadUtil.getTypeField(linkedImportType, newIndex);
+                    }
                 } else
                     fieldType = UploadUtil.getTypeField($scope.importType, col);
 
                 switch (fieldType) {
+                    case 'partNumber':
+                        object.type = 'autocomplete';
+                        object.strict = true;
+                        object.source = function (query, process) {
+                            $http.get('/rest/upload/partNumbers', {
+                                headers: {'X-ICE-Authentication-SessionId': sid},
+                                params: {
+                                    token: query
+                                    // field: field
+                                    // type:
+                                }
+                            }).then(function (res) {
+                                console.log(res, process);
+                                return process(res.data);
+                            });
+                        };
+                        break;
+
                     case 'circular':
                     case 'sentToAbrc':
                         object.type = 'checkbox';
@@ -215,7 +249,7 @@ angular.module('ice.upload.controller', [])
                         object.source = ['Complete', 'In Progress', 'Planned', ''];
                         object.allowInvalid = false;
                         object.validator = function (value, callback) {
-                            callback(value == 'Complete' || value == 'In Progress' || value == 'Planned' || value == '');
+                            callback(object.source.indexOf(value) != -1);
                         };
                         break;
 
@@ -223,7 +257,7 @@ angular.module('ice.upload.controller', [])
                         object.type = 'autocomplete';
                         object.source = ['1', '2', ''];
                         object.validator = function (value, callback) {
-                            callback(value == 1 || value == 2);
+                            callback(object.source.indexOf(value) != -1);
                         };
                         object.allowInvalid = false;
                         break;
@@ -316,8 +350,6 @@ angular.module('ice.upload.controller', [])
 
             var calculateSize = function () {
                 var offset = $dataTable.offset();
-                if (($window.height() - offset.top + $window.scrollTop()) === availableHeight)
-                    return;
                 availableHeight = $window.height() - offset.top + $window.scrollTop();
                 $dataTable.handsontable('render');
             };
@@ -396,7 +428,8 @@ angular.module('ice.upload.controller', [])
                                     }
                                 }
                                 $scope.saving = false;
-                                callback();
+                                if (callback)
+                                    callback();
                             },
                             function (error) {
                                 // todo : this should revert the change in the ui and display a message
@@ -525,7 +558,11 @@ angular.module('ice.upload.controller', [])
                         plasmidData: {},
                         arabidopsisSeedData: {}
                     };
-                    linkedObject = UploadUtil.setDataValue($scope.linkedSelection.toUpperCase(), newIndex, linkedObject, value);
+
+                    if ($scope.linkedSelection.toUpperCase() == "EXISTING")
+                        linkedObject.partId = value;
+                    else
+                        linkedObject = UploadUtil.setDataValue($scope.linkedSelection.toUpperCase(), newIndex, linkedObject, value);
                     object.linkedParts = [linkedObject];
                 } else {
                     object = UploadUtil.setDataValue($scope.importType.toUpperCase(), col, object, value);
@@ -547,7 +584,8 @@ angular.module('ice.upload.controller', [])
                         }
 
                         $scope.saving = false;
-                        callback();
+                        if (callback)
+                            callback();
                     },
                     function (error) {
                         console.error(error);
@@ -579,7 +617,7 @@ angular.module('ice.upload.controller', [])
                 colHeaders: getSheetHeaders,
                 rowHeaders: true, // use default of 1, 2, 3 for row headers
                 colWidths: getColWidth,
-                stretchH: 'all',
+                //stretchH: 'all',
                 minSpareRows: 1,
                 enterMoves: {row: 0, col: 1}, // move right on enter instead of down
                 autoWrapRow: true,
@@ -829,7 +867,6 @@ angular.module('ice.upload.controller', [])
                                     // display [for each field in the object]
                                     for (var j = 0; j < dataSchema.length; j += 1) {
                                         var val = UploadUtil.getEntryValue($scope.importType, entry, j);
-//                                        entry[dataSchema[j]];
                                         if (val === undefined)
                                             val = '';
 
@@ -853,7 +890,10 @@ angular.module('ice.upload.controller', [])
 
                                         // check if there is a linked type and the link on the ui has not been created
                                         if (linkedDataSchema === undefined || linkedDataSchema.length === 0) {
-                                            $scope.addNewPartLink(linkType);
+                                            if (linkedPart.visible === "OK")
+                                                $scope.addExistingPart();
+                                            else
+                                                $scope.addNewPartLink(linkType);
                                         }
 
                                         $scope.bulkUpload.linkedEntryIdData.push(linkedPart.id);
@@ -861,17 +901,21 @@ angular.module('ice.upload.controller', [])
                                         // linkedDataSchema is created when addNewPartLink is called
                                         var dataSchemaLength = dataSchema.length;
                                         for (var k = 0; k < linkedDataSchema.length; k += 1) {
-                                            val = UploadUtil.getEntryValue(linkType, linkedPart, k);
+                                            if ($scope.linkedSelection.toLowerCase() === "existing") {
+                                                val = linkedPart.partId;
+                                            } else {
+                                                val = UploadUtil.getEntryValue(linkType, linkedPart, k);
 
-                                            if (val === undefined)
-                                                val = '';
+                                                if (val === undefined)
+                                                    val = '';
 
-                                            // currently for attachments only
-                                            if (val instanceof Array && linkedDataSchema[k] === "attachments") {
-                                                if (val.length) {
-                                                    val = val[0].filename;
-                                                } else {
-                                                    val = ""
+                                                // currently for attachments only
+                                                if (val instanceof Array && linkedDataSchema[k] === "attachments") {
+                                                    if (val.length) {
+                                                        val = val[0].filename;
+                                                    } else {
+                                                        val = ""
+                                                    }
                                                 }
                                             }
 
@@ -887,7 +931,7 @@ angular.module('ice.upload.controller', [])
                             if ($scope.uploadEntries.length < result.count) {
                                 loop(start + result.entryList.length);
                             }
-                            $("#dataTable").handsontable('render');
+                            angular.element("#dataTable").handsontable('render');
                         });
                 }
             });

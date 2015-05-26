@@ -612,4 +612,32 @@ public class BulkUploadController {
         DAOFactory.getPermissionDAO().delete(toDelete);
         return dao.update(upload) != null;
     }
+
+    /**
+     * Retrieves part numbers that match the token passed in the parameter, that are compatible with the type
+     * in the parameter. Two entry types are compatible if they can be associated with specific entries (as descendants)
+     * in a hierarchical relationship
+     *
+     * @param type  type of entry the part numbers must be compatible with
+     * @param token part number token to match
+     * @param limit maximum number of matches to return
+     * @return list of part numbers that can be linked to the type of entry
+     */
+    public ArrayList<String> getMatchingPartNumbersForLinks(EntryType type, String token, int limit) {
+        ArrayList<String> dataList = new ArrayList<>();
+        if (token == null)
+            return dataList;
+
+        Set<String> compatibleTypes = new HashSet<>();
+        compatibleTypes.add(type.getName());
+        compatibleTypes.add(EntryType.PART.getName());
+        if (type == EntryType.STRAIN)
+            compatibleTypes.add(EntryType.PLASMID.getName());
+
+        token = token.replaceAll("'", "");
+        for (Entry entry : DAOFactory.getEntryDAO().getMatchingEntryPartNumbers(token, limit, compatibleTypes)) {
+            dataList.add(entry.getPartNumber());
+        }
+        return dataList;
+    }
 }
