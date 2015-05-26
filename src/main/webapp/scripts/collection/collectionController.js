@@ -8,7 +8,7 @@ angular.module('ice.collection.controller', [])
 
         $rootScope.$on('$stateChangeStart',
             function (event, toState, toParams, fromState, fromParams) {
-                console.log(toState, toParams, fromState, fromParams);
+                //console.log(toState, toParams, fromState, fromParams);
             });
 
         //
@@ -621,7 +621,61 @@ angular.module('ice.collection.controller', [])
                 console.error(error);
             });
         }
-    });
+    })
+    .controller('CollectionEntryListController', function ($scope, Selection, $filter) {
+        //console.log($scope.sort('type'));
+
+        $scope.params = {'asc': false, 'sort': 'created'};
+
+        // paging
+        $scope.currentPage = 1;
+        $scope.maxSize = 5;  // number of clickable pages to show in pagination
+
+        $scope.pageCounts = function (currentPage, resultCount) {
+            var maxPageCount = 15;
+            var pageNum = ((currentPage - 1) * maxPageCount) + 1;
+
+            // number on this page
+            var pageCount = (currentPage * maxPageCount) > resultCount ? resultCount : (currentPage * maxPageCount);
+            return pageNum + " - " + $filter('number')(pageCount) + " of " + $filter('number')(resultCount);
+        };
+
+        $scope.selectAllClass = function () {
+            if (Selection.allSelected())
+                return 'fa-check-square-o';
+
+            if (Selection.hasSelection())
+                return 'fa-minus-square';
+            return 'fa-square-o';
+        };
+
+        $scope.setType = function (type) {
+            Selection.setTypeSelection(type);
+        };
+
+        $scope.selectAll = function () {
+            if (Selection.allSelected())
+                Selection.setTypeSelection('none');
+            else
+                Selection.setTypeSelection('all');
+        };
+
+        $scope.isSelected = function (entry) {
+            if (Selection.isSelected(entry))
+                return true;
+
+            return Selection.searchEntrySelected(entry);
+        };
+
+        $scope.select = function (entry) {
+            Selection.selectEntry(entry);
+        };
+
+        $scope.sortColumn = function (type) {
+            $scope.sort(type);
+        }
+    })
+;
 
 
 

@@ -1,12 +1,15 @@
 'use strict';
 
 angular.module('ice.collection.directives', [])
-    .directive('entryList', function () {
+    .directive('iceEntryList', function () {
         return {
-            scope: {},
+            scope: {
+                folder: '=',
+                sort: '&'
+            },
 
-            restrict: "E",
+            restrict: "AE",
             templateUrl: "/scripts/collection/entryList.html",
-            controller: "EntryListController"
+            controller: "CollectionEntryListController"
         }
     });
