@@ -7,12 +7,10 @@ import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.RemotePartnerDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.executor.IceExecutorService;
-import org.jbei.ice.lib.models.Configuration;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.rest.IceRestClient;
 
@@ -112,24 +110,15 @@ public class WoRController {
     }
 
     /**
-     * Enables or disables web of registries (WoR) functionality and contacts the node master (if this
-     * system is not it) with request to join the web of registries.
-     * <p>
-     * If enabling web of registries, a task is started in a separate thread to contact each of the
-     * registries in the WoR configuration for authentication keys and to provide them with the same
-     * when making requests to this server
+     * Runs the web of registries task for contacting the appropriate partners to enable or disable
+     * web of registries functionality
      *
      * @param enable if true, enables WoR; disables it otherwise
-     * @return configuration setting for web of registries or null in the event of an exception
      */
-    public Setting setEnable(boolean enable) {
-        ConfigurationController controller = new ConfigurationController();
-        Configuration configuration = controller.setPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES, Boolean.toString(enable));
-        Setting setting = configuration.toDataTransferObject();
-
-        WebOfRegistriesTask contactTask = new WebOfRegistriesTask("url", enable);
+    public void setEnable(boolean enable) {
+        String thisUrl = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+        WebOfRegistriesTask contactTask = new WebOfRegistriesTask(thisUrl, enable);
         IceExecutorService.getInstance().runTask(contactTask);
-        return setting;
     }
 
     public RegistryPartner getWebPartner(String userId, long partnerId) {

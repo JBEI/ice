@@ -92,14 +92,15 @@ public class ConfigurationController {
         if (key == null)
             return null;
 
+        Configuration configuration = setPropertyValue(key, setting.getValue());
+
         // check if the setting being updated is related to the web of registries
         if (key == ConfigurationKey.JOIN_WEB_OF_REGISTRIES) {
             WoRController woRController = new WoRController();
             boolean enable = "yes".equalsIgnoreCase(setting.getValue()) || "true".equalsIgnoreCase(setting.getValue());
-            return woRController.setEnable(enable);
+            woRController.setEnable(enable);
         }
 
-        Configuration configuration = setPropertyValue(key, setting.getValue());
         return configuration.toDataTransferObject();
     }
 

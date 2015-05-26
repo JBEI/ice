@@ -15,7 +15,6 @@ public enum ConfigurationKey implements IDataTransferModel {
     TEMPORARY_DIRECTORY("/tmp"),
     DATA_DIRECTORY("data"),
 
-    SITE_SECRET("Site Secret"),
     // deprecated. use the user account salt instead.
     SECRET_KEY("o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+"),
     BULK_UPLOAD_APPROVER_EMAIL(""), //TODO this should be a role
@@ -35,7 +34,7 @@ public enum ConfigurationKey implements IDataTransferModel {
     PASSWORD_CHANGE_ALLOWED("YES"),
     PROFILE_EDIT_ALLOWED("YES"),
     JOIN_WEB_OF_REGISTRIES("NO"),
-    WEB_OF_REGISTRIES_MASTER("registry-test.jbei.org");
+    WEB_OF_REGISTRIES_MASTER("registry.jbei.org");
 
     private String defaultValue;
 
