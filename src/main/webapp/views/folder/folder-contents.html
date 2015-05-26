@@ -164,10 +164,10 @@
                 </td>
                 <td style="vertical-align: middle; width:100px; white-space:nowrap">
                     <span class="label" ng-class="{
-                    'ice-label-success':entry.status=='Complete',
-                    'label-default': entry.status=='In Progress',
-                    'ice-label-danger': entry.status=='Abandoned',
-                    'ice-label-info': entry.status=='Planned'}">{{entry.status | capitalize}}
+                    'ice-label-success':entry.status.toUpperCase()=='COMPLETE',
+                    'label-default': entry.status.toUpperCase()=='In Progress'.toUpperCase(),
+                    'ice-label-danger': entry.status.toUpperCase()=='Abandoned'.toUpperCase(),
+                    'ice-label-info': entry.status.toUpperCase()=='Planned'.toUpperCase()}">{{entry.status | capitalize}}
                     </span>
                 </td>
                 <td style="vertical-align: middle;">
