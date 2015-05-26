@@ -5,10 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.AuthorizationException;
-import org.jbei.ice.lib.bulkupload.BulkEntryCreator;
-import org.jbei.ice.lib.bulkupload.BulkUploadController;
-import org.jbei.ice.lib.bulkupload.BulkUploadInfo;
-import org.jbei.ice.lib.bulkupload.FileBulkUpload;
+import org.jbei.ice.lib.bulkupload.*;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
@@ -57,6 +54,25 @@ public class BulkUploadResource extends RestResource {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Retrieves matching part numbers to be linked to entries in a bulk upload
+     *
+     * @return list of matching part numbers based on passed parameters
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/partNumbers")
+    public Response getPartNumbersForUpload(
+            @QueryParam("type") EntryType uploadType,
+            @QueryParam("token") String token,
+            @DefaultValue("8") @QueryParam("limit") int limit,
+            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        PartNumbers partNumbers = new PartNumbers();
+        ArrayList<String> results = partNumbers.getMatchingPartNumbers(userId, uploadType, token, limit);
+        return super.respond(results);
     }
 
     /**
