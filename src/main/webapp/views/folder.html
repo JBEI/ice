@@ -1,21 +1,25 @@
-<div style="vertical-align: top;" class="content-secondary">
+<div class="content-menu">
     <ice.menu.collections></ice.menu.collections>
     <br>
     <ice.menu.wor></ice.menu.wor>
 </div>
 
-<div class="content-primary">
-    <!-- very top of header. Account and logout links -->
-    <div style="background-color: #f1f1f1; padding:6px">
+<div class="navbar-fixed-top" style="background-color: #fff">
 
-        <!-- table for search, menu, and profile and other options (e.g. logout) -->
-        <ice-search-input></ice-search-input>
+    <a href="/folders/personal"><img class="cursor_pointer" src="/img/logo.png" alt="ICE" height="84px"></a>
 
-        <!-- links -->
-        <div style="position: absolute; top: 12px; right: 10px">
-            <div style="display: inline-block; vertical-align: top;">
-                <a ng-href="/profile/{{user.id}}">{{user.email}}</a>
-            </div>
+    <div style="position: fixed; top: 0; right: 0; left: 260px; background-color: #fff">
+        <!-- very top of header. Account and logout links -->
+        <div style="background-color: #f1f1f1; padding:6px">
+
+            <!-- table for search, menu, and profile and other options (e.g. logout) -->
+            <ice-search-input></ice-search-input>
+
+            <!-- links -->
+            <div style="position: absolute; top: 12px; right: 10px">
+                <div style="display: inline-block; vertical-align: top;">
+                    <a ng-href="/profile/{{user.id}}">{{user.email}}</a>
+                </div>
 
             <span class="form-group" ng-if="false">&nbsp;
                 <button style="background: transparent; border: none !important;" title=""
@@ -43,46 +47,49 @@
                 <a href="/admin" style="color: #ff4500;" class="opacity_hover"><i
                         class="fa fa-sliders" style="font-size: 20px"></i></a>
             </span>
-            &nbsp;
+                &nbsp;
             <span class="cursor_pointer opacity_hover">
                 <i class="fa fa-sign-out" style="font-size: 20px" tooltip="Logout"
                    tooltip-placement="bottom"
                    data-ng-click="logout()"></i>
             </span>
-            &nbsp;&nbsp;&nbsp;
-            <!-- end table for search, menu, and profile and other options (logout)  -->
-        </div>
-    </div>
-
-    <div class="btn-toolbar" style="margin-top: 20px;">
-        <!-- sub menu [Create Entry, Add To, etc] -->
-        <div class="btn-group">
-            <button type="button" class="subMenuCreateNew btn-sm dropdown-toggle"
-                    style="font-size: 13px"
-                    ng-click="createType='create'">Create Entry <span class="caret"></span>
-            </button>
-
-            <button type="button" style="padding: 5px 5px"
-                    class="btn-xs subMenuCreateNew dropdown-toggle"
-                    title="Bulk Import" ng-click="createType='upload'">
-                <i class="fa fa-table" style="font-size: 14px"></i>
-            </button>
-
-            <ul class="dropdown-menu">
-                <li ng-repeat="choice in items">
-                    <a ng-href="/{{createType}}/{{choice.type}}" class="cursor_pointer">
-                        <i ng-if="createType==='upload'"
-                           class="opacity_4 color_444 fa fa-fw fa-table"></i> {{choice.name}}</a>
-                </li>
-            </ul>
+                &nbsp;&nbsp;&nbsp;
+                <!-- end table for search, menu, and profile and other options (logout)  -->
+            </div>
         </div>
 
-        <ice-action-menu></ice-action-menu>
+        <div class="btn-toolbar" style="margin-top: 20px;">
+            <!-- sub menu [Create Entry, Add To, etc] -->
+            <div class="btn-group">
+                <button type="button" class="subMenuCreateNew btn-sm dropdown-toggle"
+                        style="font-size: 13px"
+                        ng-click="createType='create'">Create Entry <span class="caret"></span>
+                </button>
 
+                <button type="button" style="padding: 5px 5px"
+                        class="btn-xs subMenuCreateNew dropdown-toggle"
+                        title="Bulk Import" ng-click="createType='upload'">
+                    <i class="fa fa-table" style="font-size: 14px"></i>
+                </button>
+
+                <ul class="dropdown-menu">
+                    <li ng-repeat="choice in items">
+                        <a ng-href="/{{createType}}/{{choice.type}}" class="cursor_pointer">
+                            <i ng-if="createType==='upload'"
+                               class="opacity_4 color_444 fa fa-fw fa-table"></i> {{choice.name}}</a>
+                    </li>
+                </ul>
+            </div>
+
+            <ice-action-menu></ice-action-menu>
+
+        </div>
+
+        <!-- space -->
+        <div style="height: 25px"></div>
     </div>
+</div>
 
-    <!-- space -->
-    <div style="height: 25px"></div>
-
+<div id="content">
     <div ui-view autoscroll="false"></div>
 </div>
