@@ -1,7 +1,8 @@
 'use strict';
 
 angular.module('ice.search.controller', [])
-    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil, Selection, WebOfRegistries) {
+    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil,
+                                              Selection, WebOfRegistries) {
         $scope.$on("RunSearch", function (event, filters) {
             $scope.searchResults = undefined;
             $scope.searchFilters = filters;
@@ -12,7 +13,7 @@ angular.module('ice.search.controller', [])
         var runAdvancedSearch = function (filters) {
             $scope.loadingSearchResults = true;
 
-            Search().runAdvancedSearch({webSearch:filters.webSearch}, filters,
+            Search().runAdvancedSearch({webSearch: filters.webSearch}, filters,
                 function (result) {
                     $scope.searchResults = result;
                     $scope.loadingSearchResults = false;
@@ -25,30 +26,35 @@ angular.module('ice.search.controller', [])
             );
         };
 
-        var noFilters = (!$scope.searchFilters || Object.keys($scope.searchFilters).length === 0);
-
-        if (noFilters) {
-            $scope.searchFilters = {entryTypes:[], parameters:{}, blastQuery:{}, queryString:""};
-            var queryString = $location.search().q;
-            if (queryString !== undefined) {
-                $scope.searchFilters.queryString = queryString;
-            }
-        }
-
-        // filters run advanced search
-        $scope.searchFilters.parameters.start = 0;
-        $scope.searchFilters.parameters.retrieveCount = 15;
-        $scope.searchFilters.parameters.sortField = "RELEVANCE";
-        runAdvancedSearch($scope.searchFilters);
-
-        $scope.maxSize = 5;  // number of clickable pages to show in pagination
-        $scope.currentPage = 1;
-
         $scope.setSearchResultPage = function (pageNo) {
             $scope.searchFilters.parameters.start = (pageNo - 1) * 15;
             $scope.currentPage = pageNo;
             runAdvancedSearch($scope.searchFilters);
         };
+
+        var noFilters = (!$scope.searchFilters || Object.keys($scope.searchFilters).length === 0);
+
+        if (noFilters) {
+            $scope.searchFilters = {entryTypes: [], parameters: {}, blastQuery: {}, queryString: ""};
+            var queryString = $location.search().q;
+
+            if (queryString !== undefined) {
+                $scope.searchFilters.queryString = queryString;
+            }
+        }
+
+        var context = EntryContextUtil.getContext();
+        if (context) {
+            var pageNum = (Math.floor(context.offset / 15)) + 1;
+            $scope.setSearchResultPage(pageNum);
+        } else {
+            $scope.searchFilters.parameters.start = 0;
+            $scope.searchFilters.parameters.retrieveCount = 15;
+            $scope.searchFilters.parameters.sortField = "RELEVANCE";
+            $scope.setSearchResultPage(1);
+        }
+
+        $scope.maxSize = 5;  // number of clickable pages to show in pagination
 
         $scope.getType = function (relScore) {
             if (relScore === undefined)
@@ -67,7 +73,7 @@ angular.module('ice.search.controller', [])
             $scope.searchResultToolTip = undefined;
             var sessionId = $cookieStore.get("sessionId");
 
-            Entry(sessionId).tooltip({partId:entry.id},
+            Entry(sessionId).tooltip({partId: entry.id},
                 function (result) {
                     $scope.searchResultToolTip = result;
                 }, function (error) {
@@ -77,7 +83,7 @@ angular.module('ice.search.controller', [])
 
         $scope.remoteTooltipDetails = function (result) {
             $scope.searchResultToolTip = undefined;
-            WebOfRegistries().getToolTip({partnerId:result.partner.id, entryId:result.entryInfo.id},
+            WebOfRegistries().getToolTip({partnerId: result.partner.id, entryId: result.entryInfo.id},
                 function (result) {
                     $scope.searchResultToolTip = result;
                 }, function (error) {
@@ -86,23 +92,21 @@ angular.module('ice.search.controller', [])
         };
 
         $scope.goToEntryDetails = function (entry, index) {
-            // this assumes that if the user is able to click on a result then search was successful
+            if (!$scope.searchFilters.parameters) {
+                $scope.searchFilters.parameters = {start: index}
+            }
 
             var offset = (($scope.currentPage - 1) * 15) + index;
-
             EntryContextUtil.setContextCallback(function (offset, callback) {
                 $scope.searchFilters.parameters.start = offset;
                 $scope.searchFilters.parameters.retrieveCount = 1;
 
-                Search().runAdvancedSearch({webSearch:$scope.searchFilters.webSearch}, $scope.searchFilters,
+                Search().runAdvancedSearch({webSearch: $scope.searchFilters.webSearch}, $scope.searchFilters,
                     function (result) {
                         callback(result.results[0].entryInfo.id);
-                    },
-                    function (error) {
-                        console.log(error);
                     }
                 );
-            }, $scope.searchResults.resultCount, offset, "/search");
+            }, $scope.searchResults.resultCount, offset, "/search", $scope.searchResults.sortField);
 
             $location.path("/entry/" + entry.id);
         };
@@ -118,8 +122,8 @@ angular.module('ice.search.controller', [])
             return Selection.searchEntrySelected(entry);
         }
     })
-    .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {
-        $scope.searchTypes = {all:true, strain:true, plasmid:true, part:true, arabidopsis:true};
+    .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location, Search) {
+        $scope.searchTypes = {all: true, strain: true, plasmid: true, part: true, arabidopsis: true};
 
         $scope.check = function (selection) {
             var allTrue = true;
@@ -134,7 +138,11 @@ angular.module('ice.search.controller', [])
         };
 
         var defineQuery = function () {
-            var searchQuery = {entryTypes:[], parameters:{start:0, retrieveCount:15, sortField:"RELEVANCE"}, blastQuery:{}};
+            var searchQuery = {
+                entryTypes: [],
+                parameters: {start: 0, retrieveCount: 15, sortField: "RELEVANCE"},
+                blastQuery: {}
+            };
 
             // check search types  : {all: false, strain: true, plasmid: false, part: true, arabidopsis: true}
             for (var type in $scope.searchTypes) {
@@ -227,5 +235,34 @@ angular.module('ice.search.controller', [])
                     $scope.searchTypes[searchType] = true;
                 }
             }
+        };
+
+        $scope.sortResults = function (sortType) {
+            sortType = sortType.toUpperCase();
+
+            if (!$scope.searchFilters.parameters) {
+                $scope.searchFilters.parameters = {sortAscending: false};
+            } else {
+                if (sortType === $scope.searchFilters.parameters.sortField) {
+                    $scope.searchFilters.parameters.sortAscending = !$scope.searchFilters.parameters.sortAscending;
+                } else
+                    $scope.searchFilters.parameters.sortAscending = false;
+            }
+
+            $scope.searchFilters.parameters.sortField = sortType;
+            $scope.searchFilters.parameters.start = 0;
+            $scope.loadingSearchResults = true;
+
+            Search().runAdvancedSearch({webSearch: $scope.searchFilters.webSearch}, $scope.searchFilters,
+                function (result) {
+                    $scope.searchResults = result;
+                    $scope.loadingSearchResults = false;
+                },
+                function (error) {
+                    $scope.loadingSearchResults = false;
+                    $scope.searchResults = undefined;
+                    console.log(error);
+                }
+            );
         };
     });
