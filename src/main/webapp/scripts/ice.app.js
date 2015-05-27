@@ -21,35 +21,6 @@ iceApp.run(function (Authentication, $rootScope) {
     $rootScope.logout = function () {
         Authentication.logout();
     };
-
-//    $rootScope.$on('$stateChangeStart',
-//        function (event, toState, toParams, fromState, fromParams) {
-//            if (toState.name === 'logout' || toState.name === "login")
-//                return;
-//
-//            var sid = $cookieStore.get("sessionId");
-//            if (sid === undefined) {
-//                console.log("sid undefined");
-//                $rootScope.user = undefined;
-//                $location.path('/login');
-//                return;
-//            }
-//
-//            Authentication.isSessionValid(sid)
-//                .success(function (data) {
-//                    if (data.length == 0) {
-//                        console.log(data);
-//                        console.log("session invalid");
-//                        // clear all stored information
-//                        $rootScope.user = undefined;
-//                        $location.path('/login');
-//                    }
-//
-//                    $rootScope.user = data;
-//                })
-//                .error(function (data) {
-//                });
-//        })
 });
 
 iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {

@@ -26,6 +26,7 @@ import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.experiment.ExperimentController;
 import org.jbei.ice.lib.experiment.Study;
+import org.jbei.ice.lib.net.TransferredParts;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
@@ -445,9 +446,9 @@ public class PartResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response transfer(PartData partData) {
-        EntryCreator creator = new EntryCreator();
-        PartData response = creator.receiveTransferredEntry(partData);
-        return super.respond(Response.Status.OK, response);
+        TransferredParts transferredParts = new TransferredParts();
+        PartData response = transferredParts.receiveTransferredEntry(partData);
+        return super.respond(response);
     }
 
     @PUT

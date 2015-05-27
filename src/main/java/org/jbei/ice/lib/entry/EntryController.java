@@ -131,6 +131,7 @@ public class EntryController {
         ArrayList<PartData> data = new ArrayList<>();
         for (Entry entry : entries) {
             PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
+            info.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
             data.add(info);
         }
         return data;
@@ -155,6 +156,7 @@ public class EntryController {
         ArrayList<PartData> data = new ArrayList<>();
         for (Entry entry : entries) {
             PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
+            info.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
             data.add(info);
         }
         return data;

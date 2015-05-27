@@ -3,6 +3,7 @@
         "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 
+<!-- Used when running tests -->
 <hibernate-configuration>
     <session-factory>
         <property name="hibernate.connection.url">jdbc:hsqldb:mem:ice</property>

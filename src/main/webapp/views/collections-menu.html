@@ -1,37 +1,35 @@
-<table cellspacing="0" cellpadding="0" width="224px">
-    <tr>
-        <td style="padding: 10px">
-            <a href="/folders/personal"><img class="cursor_pointer" src="/img/logo.png" alt="ICE" height="84px"></a>
-        </td>
-    </tr>
-    <tr>
-        <td>&nbsp;</td>
-    </tr>
-    <tr>
-        <td class="collections_header">
-            Collections
-        </td>
-    </tr>
-    <tr ng-repeat="collection in collectionList" ng-if="collection.count||collection.alwaysVisible">
-        <td ng-class="{collection_user_menu_row_selected:collection.display.toLowerCase()===selectedFolder}"
-            ng-init="showAddCollection=false">
+<div class="collections_header">Collections</div>
+
+<div style="border-top: 1px solid #f6f6f6; border-bottom: 1px solid #f6f6f6">
+
+    <div ng-repeat="collection in collectionList" ng-if="collection.count||collection.alwaysVisible">
+        <div ng-class="{'collection_user_menu_row_selected':collection.name.toLowerCase()===selectedFolder}"
+             ng-init="showAddCollection=false">
+
             <div class="collection-menu" ng-click='selectCollection(collection.name)'
-                 ng-mouseenter="showAddCollection=collection.name==='personal'" ng-mouseleave="showAddCollection=false">
-                <i ng-show="collection.name!==selectedFolder" class="fa fa-fw"
-                   style="font-size: 15px; color: #d1d0d0;" ng-class="collection.icon"></i><i
-                    ng-show="collection.name===selectedFolder" class="fa fa-fw"
-                    style="font-size: 15px;" ng-class="collection.iconOpen"></i>&nbsp;<span
-                    class="font-90em"
-                    ng-class="{collection_menu_selection:collection.name===selectedFolder}">{{collection.display}}</span>
-                <span class="menu_count">
-                    <span ng-hide="showAddCollection">{{(collection.count | number) || 0}}</span>
-                    <!--shown only for personal collection-->
-                    <i ng-show="showAddCollection" ng-click="hideAddCollection=!hideAddCollection" stop-event="click"
-                       class="fa fa-plus edit_icon" style="font-size: 14px"></i>
-                </span>
-            </div>
+                 ng-mouseenter="showAddCollection=collection.name==='personal'"
+                 ng-mouseleave="showAddCollection=false">
+
+            <span ng-show="collection.name!==selectedFolder">
+            <i class="fa fa-fw" style="font-size: 17px; color: #d1d0d0;" ng-class="collection.icon"></i>
+                {{collection.display}}
+            </span>
+
+            <span ng-show="collection.name===selectedFolder">
+                <i class="fa fa-fw" style="font-size: 17px" ng-class="collection.iconOpen"></i>
+                <span style="font-weight: 600">{{collection.display}}</span>
+            </span>
+
+            <span class="menu_count">
+                <span ng-hide="showAddCollection">{{(collection.count | number) || 0}}</span>
+                <!--shown only for personal collection-->
+                <i ng-show="showAddCollection" ng-click="hideAddCollection=!hideAddCollection"
+                   class="fa fa-plus edit_icon" style="font-size: 17px">
+                </i>
+            </span>
+        </div>
 
             <ice.menu.collections.details ng-show="selectedFolder===collection.name"></ice.menu.collections.details>
-        </td>
-    </tr>
-</table>
+    </div>
+</div>
+</div>

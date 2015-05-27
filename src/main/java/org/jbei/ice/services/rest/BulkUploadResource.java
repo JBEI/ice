@@ -60,6 +60,24 @@ public class BulkUploadResource extends RestResource {
     }
 
     /**
+     * Retrieves matching part numbers to be linked to entries in a bulk upload
+     *
+     * @return list of matching part numbers based on passed parameters
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/partNumbers")
+    public Response getPartNumbersForUpload(
+            @QueryParam("type") EntryType uploadType,
+            @QueryParam("token") String token,
+            @DefaultValue("8") @QueryParam("limit") int limit,
+            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        ArrayList<String> results = controller.getMatchingPartNumbersForLinks(uploadType, token, limit);
+        return super.respond(results);
+    }
+
+    /**
      * Retrieves permissions associated with an upload
      *
      * @param sessionId unique session identifier for the user making request

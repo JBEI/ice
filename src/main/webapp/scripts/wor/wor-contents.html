@@ -9,57 +9,48 @@
     </div>
 </div>
 
-
 <div class="row">
-    <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
+    <table cellspacing="0"
+           class="table table-responsive table-condensed table-hover table-striped font-95em table-border-bottom"
            ng-class="{'opacity_4':loadingPage}">
         <thead>
         <tr data-ng-if='webResults&&webResults.entries.length>0'>
-            <!--<th style="width:28px">-->
-            <!--<i class="fa"-->
-            <!--ng-class="{'fa-square-o':allSelected == false, 'fa-check-square-o': allSelected == true}"-->
-            <!--style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>-->
-            <!--<sup style="font-size: 9px; font-weight: normal; display: inherit"-->
-            <!--ng-show="selection.length>0">{{selection.length}}</sup>-->
-            <!--</th>-->
             <th ng-click="sort('type')" class="cursor_pointer">
-                <i ng-show="queryParams.sort=='type'" style="font-size: 14px" class="fa opacity_4"
-                   ng-class="{'fa-sort-down':queryParams.asc==false, 'fa-sort-up':queryParams.asc==true}"></i>
-                Type
+                <span style="font-size: 12px; text-transform: uppercase">TYPE</span>
+                <i ng-if="queryParams.sort!=='type'" class="sortable fa fa-angle-down"></i>
+                <i ng-show="queryParams.sort=='type'" style="font-size: 14px;" class="fa opacity_4"
+                   ng-class="{'fa-angle-down':queryParams.asc==false, 'fa-angle-up':queryParams.asc==true}"></i>
             </th>
-            <th ng-click="sort('part_id')" class="cursor_pointer">
+            <th ng-click="sort('part_id')" class="cursor_pointer"
+                style="font-size: 12px; text-transform: uppercase">
+                <span style="font-size: 12px; text-transform: uppercase">Part ID</span>
+                <i ng-if="queryParams.sort!=='part_id'" class="sortable fa fa-angle-down"></i>
                 <i ng-show="queryParams.sort=='part_id'" style="font-size: 14px" class="fa opacity_4"
-                   ng-class="{'fa-sort-down':queryParams.asc==false, 'fa-sort-up':queryParams.asc==true}"></i>
-                Part ID
+                   ng-class="{'fa-angle-down':queryParams.asc==false, 'fa-angle-up':queryParams.asc==true}"></i>
             </th>
-            <th data-ng-click="sort('name')" class="cursor_pointer">
+            <th data-ng-click="sort('name')" class="cursor_pointer"
+                style="font-size: 12px; text-transform: uppercase">
+                <span style="font-size: 12px; text-transform: uppercase">Name</span>
+                <i ng-if="queryParams.sort!=='name'" class="sortable fa fa-angle-down"></i>
                 <i ng-show="queryParams.sort=='name'" style="font-size: 14px" class="fa opacity_4"
-                   ng-class="{'fa-sort-down':queryParams.asc==false, 'fa-sort-up':queryParams.asc==true}"></i>
-                Name
-            </th>
-            <th ng-click="sort('summary')" class="cursor_pointer">
-                <i ng-show="queryParams.sort=='summary'" style="font-size: 14px" class="fa opacity_4"
-                   ng-class="{'fa-sort-down':queryParams.asc==false, 'fa-sort-up':queryParams.asc==true}"></i>
-                Summary
+                   ng-class="{'fa-angle-down':queryParams.asc==false, 'fa-angle-up':queryParams.asc==true}"></i>
             </th>
             <th ng-click="sort('status')" class="cursor_pointer">
+                <span style="font-size: 11px; text-transform: uppercase">Status</span>
+                <i ng-if="queryParams.sort!=='status'" class="sortable fa fa-angle-down"></i>
                 <i ng-show="queryParams.sort=='status'" style="font-size: 14px" class="fa opacity_4"
-                   ng-class="{'fa-sort-down':queryParams.asc==false, 'fa-sort-up':queryParams.asc==true}"></i>
-                Status
+                   ng-class="{'fa-angle-down':queryParams.asc==false, 'fa-angle-up':queryParams.asc==true}"></i>
             </th>
-            <th style="width:30px">
-                <i class="fa fa-paperclip fa-fw" style="font-size: 14px"></i>
-            </th>
-            <th style="width:30px">
-                <i class="fa fa-flask fa-fw" style="font-size: 14px"></i>
-            </th>
-            <th style="width:30px; text-align:center">
-                <img src="img/dna.svg" height="16px" alt="has dna"/>
+            <th style="width:100px;">
+                <i class="fa fa-paperclip fa-fw" style="font-size: 14px;"></i>
+                <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
+                <img src="img/dna.svg" width="15px" alt="has dna"/>
             </th>
             <th ng-click="sort('created')" class="cursor_pointer">
+                <span style="font-size: 11px; text-transform: uppercase">Created</span>
                 <i ng-show="queryParams.sort=='created'" style="font-size: 14px" class="fa opacity_4"
-                   ng-class="{'fa-sort-down':queryParams.asc==false, 'fa-sort-up':queryParams.asc==true}"></i>
-                Created
+                   ng-class="{'fa-angle-down':queryParams.asc==false, 'fa-angle-up':queryParams.asc==true}"></i>
+                <i ng-if="queryParams.sort!=='created'" class="sortable fa fa-angle-down"></i>
             </th>
         </tr>
 
@@ -75,36 +66,44 @@
         </thead>
         <tbody>
         <tr data-ng-repeat="entry in webResults.entries">
-            <!--<td width="10px">-->
-            <!--<i class="fa" ng-class="{'fa-square-o':selection.indexOf(entry.id)==-1||selection===undefined,-->
-            <!--'fa-check-square-o':selection.indexOf(entry.id)>-1}"-->
-            <!--style="color: #999; font-size: 14px;" ng-click="select(entry)"></i>-->
-            <!--</td>-->
-            <td>{{entry.type | capitalize}}</td>
+            <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
+                {{entry.type | uppercase}}
+            </td>
             <td><a ng-href="/web/{{webResults.registryPartner.id}}/entry/{{entry.id}}"
                    ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
                    popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                   popover-template="/views/template.html" popover-title="{{entry.partId}}"
+                   popover-template="/views/template.html"
                    popover-placement="right">{{entry.partId}}</a>
             </td>
             <td>
-                <div title="{{entry.name}}" class="ellipsis" style="width: 150px">{{entry.name}}</div>
-            </td>
-            <td>
-                <div tooltip="{{entry.shortDescription}}"
-                     style="width: 420px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <div title="{{entry.name}}" class="ellipsis" style="width: 350px">{{entry.name}}</div>
+                <div title="{{entry.shortDescription}}" class="small"
+                     style="opacity: 0.6; width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                     {{entry.shortDescription}}
                 </div>
             </td>
-            <td style="width:80px; white-space:nowrap">{{entry.status | capitalize}}</td>
-            <td><i ng-show="{{entry.hasAttachment}}" class="fa fa-paperclip fa-fw"
-                   style="color: #555; font-size: 14px;"></i></td>
-            <td><i ng-show="{{entry.hasSample}}" class="fa fa-flask fa-fw"
-                   style="color: #555; font-size: 14px;"></i></td>
-            <td style="width:30px; text-align:center">
-                <img ng-show="{{entry.hasSequence}}" src="img/dna.svg" height="16px"/>
+            <td style="vertical-align: middle; width:100px; white-space:nowrap">
+                <span class="label" ng-class="{
+                'ice-label-success':entry.status.toUpperCase()=='COMPLETE',
+                'label-default': entry.status.toUpperCase()=='In Progress'.toUpperCase(),
+                'ice-label-danger': entry.status.toUpperCase()=='Abandoned'.toUpperCase(),
+                'ice-label-info': entry.status.toUpperCase()=='Planned'.toUpperCase()}">{{entry.status | capitalize}}
+                </span>
             </td>
-            <td style="width:150px; white-space:nowrap">{{entry.creationTime | date:'MMM d, yyyy'}}</td>
+            <td style="vertical-align: middle;">
+                <i ng-show="entry.hasAttachment" class="fa fa-paperclip fa-fw"
+                   style="color: #555; font-size: 14px;"></i>
+                <i ng-show="!entry.hasAttachment" class="fa fa-square fa-fw"
+                   style="opacity: 0; font-size: 14px;"></i>
+                <i ng-show="entry.hasSample" class="fa fa-flask fa-fw"
+                   style="color: #555; font-size: 14px;"></i>
+                <i ng-show="!entry.hasSample" class="fa fa-square fa-fw"
+                   style="opacity: 0; font-size: 14px;"></i>
+                <img ng-show="entry.hasSequence" src="img/dna.svg" width="15px"/>
+            </td>
+            <td style="width:130px; white-space:nowrap; vertical-align: middle;">
+                {{entry.creationTime | date:'MMM d, yyyy'}}
+            </td>
         </tr>
         </tbody>
     </table>

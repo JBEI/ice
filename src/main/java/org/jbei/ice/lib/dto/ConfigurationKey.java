@@ -13,9 +13,8 @@ public enum ConfigurationKey implements IDataTransferModel {
     APPLICATION_VERSION("4.0.0"),
     DATABASE_SCHEMA_VERSION(""),
     TEMPORARY_DIRECTORY("/tmp"),
-    DATA_DIRECTORY("/var/lib/ice-registry/blast-data"),
+    DATA_DIRECTORY("data"),
 
-    SITE_SECRET("Site Secret"),
     // deprecated. use the user account salt instead.
     SECRET_KEY("o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+"),
     BULK_UPLOAD_APPROVER_EMAIL(""), //TODO this should be a role

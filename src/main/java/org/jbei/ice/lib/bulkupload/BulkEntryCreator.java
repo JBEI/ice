@@ -92,24 +92,35 @@ public class BulkEntryCreator {
         entry.setOwner(account.getFullName());
         entry.setOwnerEmail(account.getEmail());
 
-        // check if there is any linked parts. create if so (expect a max of 1)
+        // check if there is any linked parts.
         if (data.getLinkedParts() != null && data.getLinkedParts().size() > 0) {
-            // create linked
             PartData linked = data.getLinkedParts().get(0);
-            Entry linkedEntry = InfoToModelFactory.infoToEntry(linked);
-            if (linkedEntry != null) {
-                linkedEntry.setVisibility(Visibility.DRAFT.getValue());
-                linkedEntry.setOwner(account.getFullName());
-                linkedEntry.setOwnerEmail(account.getEmail());
-                linkedEntry = entryDAO.create(linkedEntry);
 
-                linked.setId(linkedEntry.getId());
-                linked.setModificationTime(linkedEntry.getModificationTime().getTime());
-                data.getLinkedParts().clear();
-                data.getLinkedParts().add(linked);
+            // check if linking to existing
+            if (StringUtils.isEmpty(linked.getPartId())) {
+                // create new
 
-                // link to main entry in the database
-                entry.getLinkedEntries().add(linkedEntry);
+                Entry linkedEntry = InfoToModelFactory.infoToEntry(linked);
+                if (linkedEntry != null) {
+                    linkedEntry.setVisibility(Visibility.DRAFT.getValue());
+                    linkedEntry.setOwner(account.getFullName());
+                    linkedEntry.setOwnerEmail(account.getEmail());
+                    linkedEntry = entryDAO.create(linkedEntry);
+
+                    linked.setId(linkedEntry.getId());
+                    linked.setModificationTime(linkedEntry.getModificationTime().getTime());
+                    data.getLinkedParts().clear();
+                    data.getLinkedParts().add(linked);
+
+                    // link to main entry in the database
+                    entry.getLinkedEntries().add(linkedEntry);
+                }
+            } else {
+                // link existing
+                Entry linkedEntry = entryDAO.getByPartNumber(linked.getPartId());
+                if (!entry.getLinkedEntries().contains(linkedEntry)) {
+                    entry.getLinkedEntries().add(linkedEntry);
+                }
             }
         }
 
@@ -157,6 +168,11 @@ public class BulkEntryCreator {
         // retrieve the entry (this is the only time you can create another entry on update)
         PartData linkedPartData = data.getLinkedParts().get(0); // bulk upload can only link 1
         Entry linkedEntry = entryDAO.get(linkedPartData.getId());
+        if (linkedEntry == null && !StringUtils.isEmpty(linkedPartData.getPartId())) {
+            // try partId
+            linkedEntry = entryDAO.getByPartNumber(linkedPartData.getPartId());
+        }
+
         if (linkedEntry == null && (linkedEntry = InfoToModelFactory.infoToEntry(linkedPartData)) != null) {
             linkedEntry.setVisibility(Visibility.DRAFT.getValue());
             Account account = accountController.getByEmail(userId);

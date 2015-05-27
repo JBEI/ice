@@ -22,7 +22,7 @@ import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.executor.TransferTask;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
-import org.jbei.ice.services.rest.RestClient;
+import org.jbei.ice.services.rest.IceRestClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,13 +39,13 @@ public class RemoteAccessController {
     private final RemotePermissionDAO dao;
     private final WoRController webController;
     private final RemotePartnerDAO remotePartnerDAO;
-    private final RestClient restClient;
+    private final IceRestClient iceRestClient;
 
     public RemoteAccessController() {
         this.dao = DAOFactory.getRemotePermissionDAO();
         this.remotePartnerDAO = DAOFactory.getRemotePartnerDAO();
         webController = new WoRController();
-        restClient = RestClient.getInstance();
+        iceRestClient = IceRestClient.getInstance();
     }
 
     /**
@@ -63,7 +63,7 @@ public class RemoteAccessController {
 
         try {
             String restPath = "/rest/folders/public";
-            return (ArrayList) restClient.get(partner.getUrl(), restPath, ArrayList.class);
+            return (ArrayList) iceRestClient.get(partner.getUrl(), restPath, ArrayList.class);
         } catch (Exception e) {
             Logger.error(e);
             return null;
@@ -76,7 +76,7 @@ public class RemoteAccessController {
             return new Setting("version", ConfigurationKey.APPLICATION_VERSION.getDefaultValue());
 
         // retrieve version
-        return (Setting) restClient.get(value, "/rest/config/version");
+        return (Setting) iceRestClient.get(value, "/rest/config/version");
     }
 
     public void addPermission(String requester, RemoteAccessPermission permission) {
@@ -87,7 +87,7 @@ public class RemoteAccessController {
             String url = partner.getUrl();
 
             try {
-                Object result = restClient.get(url, "/rest/users/" + permission.getUserId(), AccountTransfer.class);
+                Object result = iceRestClient.get(url, "/rest/users/" + permission.getUserId(), AccountTransfer.class);
                 if (result == null)
                     continue;
 
@@ -116,7 +116,7 @@ public class RemoteAccessController {
         if (partner == null)
             return null;
 
-        Object result = restClient.get(partner.getUrl(), "/rest/users/" + email, AccountTransfer.class);
+        Object result = iceRestClient.get(partner.getUrl(), "/rest/users/" + email, AccountTransfer.class);
         if (result == null)
             return null;
 
@@ -136,7 +136,7 @@ public class RemoteAccessController {
             queryParams.put("limit", limit);
             queryParams.put("asc", asc);
             queryParams.put("sort", sort);
-            Object result = restClient.get(partner.getUrl(), restPath, FolderDetails.class, queryParams);
+            Object result = iceRestClient.get(partner.getUrl(), restPath, FolderDetails.class, queryParams);
             if (result == null)
                 return null;
 
@@ -153,7 +153,7 @@ public class RemoteAccessController {
             return null;
 
         String restPath = "/rest/parts/" + partId + "/samples";
-        return (ArrayList) restClient.get(partner.getUrl(), restPath, ArrayList.class);
+        return (ArrayList) iceRestClient.get(partner.getUrl(), restPath, ArrayList.class);
     }
 
     public ArrayList<UserComment> getRemotePartComments(long remoteId, long partId) {
@@ -162,7 +162,7 @@ public class RemoteAccessController {
             return null;
 
         String restPath = "/rest/parts/" + partId + "/comments";
-        return (ArrayList) restClient.get(partner.getUrl(), restPath, ArrayList.class);
+        return (ArrayList) iceRestClient.get(partner.getUrl(), restPath, ArrayList.class);
     }
 
     public void transferEntries(String userId, long remoteId, EntrySelection selection) {
@@ -177,7 +177,7 @@ public class RemoteAccessController {
 
         try {
             String restPath = "/rest/parts/" + partId + "/sequence";
-            Object result = restClient.get(partner.getUrl(), restPath, FeaturedDNASequence.class);
+            Object result = iceRestClient.get(partner.getUrl(), restPath, FeaturedDNASequence.class);
             if (result == null)
                 return null;
 
@@ -195,7 +195,7 @@ public class RemoteAccessController {
 
         try {
             String restPath = "/rest/parts/" + partId + "/traces";
-            Object result = restClient.get(partner.getUrl(), restPath, ArrayList.class);
+            Object result = iceRestClient.get(partner.getUrl(), restPath, ArrayList.class);
             if (result == null)
                 return null;
 
