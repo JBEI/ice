@@ -89,7 +89,7 @@ public class SearchQuery implements IDataTransferModel {
 
         public Parameters() {
             start = 0;
-            retrieveCount = 30;
+            retrieveCount = 15;
             sortField = ColumnField.RELEVANCE;
             sortAscending = false;
         }

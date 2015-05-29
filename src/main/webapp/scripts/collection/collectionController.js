@@ -2,7 +2,7 @@
 
 angular.module('ice.collection.controller', [])
     // controller for <ice.menu.collections> directive
-    .controller('CollectionMenuController', function ($cookieStore, $scope, $modal, $rootScope, $location, $stateParams, Folders, FolderSelection) {
+    .controller('CollectionMenuController', function ($cookieStore, $scope, $modal, $rootScope, $location, $stateParams, Folders, FolderSelection, EntryContextUtil) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
 
@@ -73,6 +73,7 @@ angular.module('ice.collection.controller', [])
         //
         $scope.selectCollectionFolder = function (folder) {
             // type on server is PUBLIC, PRIVATE, SHARED, UPLOAD
+            EntryContextUtil.resetContext();
             var type = folder.type.toLowerCase();
             if (type !== "upload") {
                 FolderSelection.selectFolder(folder);
@@ -87,6 +88,7 @@ angular.module('ice.collection.controller', [])
         // and some allow folders and when that is selected then the selectCollectionFolder() is called
         //
         $scope.selectCollection = function (name) {
+            EntryContextUtil.resetContext();
             FolderSelection.selectCollection(name);
             $location.path("/folders/" + name);
             $scope.selectedFolder = name;
@@ -139,27 +141,6 @@ angular.module('ice.collection.controller', [])
         var folders = Folders();
         var entry = Entry(sessionId);
 
-        // param defaults
-        $scope.params = {'asc': false, 'sort': 'created'};
-        var subCollection = $stateParams.collection;   // folder id or one of the defined collections (Shared etc)
-
-        // retrieve folder contents. all folders are redirected to /folder/{id} which triggers this
-        if (subCollection !== undefined) {
-            $scope.folder = undefined;
-            $scope.params.folderId = subCollection;
-
-            // retrieve contents of collection (e,g, "personal")
-            folders.folder($scope.params, function (result) {
-                $scope.loadingPage = false;
-                $scope.folder = result;
-                $scope.params.count = $scope.folder.count;
-            });
-        }
-
-        // paging
-        $scope.currentPage = 1;
-        $scope.maxSize = 5;  // number of clickable pages to show in pagination
-
         $scope.setPage = function (pageNo) {
             if (pageNo == undefined || isNaN(pageNo))
                 pageNo = 1;
@@ -172,8 +153,42 @@ angular.module('ice.collection.controller', [])
             folders.folder($scope.params, function (result) {
                 $scope.folder = result;
                 $scope.loadingPage = false;
+                $scope.currentPage = pageNo;
             });
         };
+
+        //
+        // init
+        //
+        $scope.params = {'asc': false, 'sort': 'created'};
+        var subCollection = $stateParams.collection;   // folder id or one of the defined collections (Shared etc)
+
+        // retrieve folder contents. all folders are redirected to /folder/{id} which triggers this
+        if (subCollection !== undefined) {
+            $scope.folder = undefined;
+            $scope.params.folderId = subCollection;
+
+            var context = EntryContextUtil.getContext();
+            if (context) {
+                var pageNum = (Math.floor(context.offset / 15)) + 1;
+                $scope.params.sort = context.sort;
+                $scope.setPage(pageNum);
+            } else {
+                // retrieve contents of collection (e,g, "personal")
+                folders.folder($scope.params, function (result) {
+                    $scope.loadingPage = false;
+                    $scope.folder = result;
+                    $scope.params.count = $scope.folder.count;
+                });
+            }
+        }
+        //
+        // end init
+        //
+
+        // paging
+        $scope.currentPage = 1;
+        $scope.maxSize = 5;  // number of clickable pages to show in pagination
 
         $scope.$on("RefreshAfterDeletion", function (event, data) {
             $scope.setPage(1);
@@ -240,7 +255,7 @@ angular.module('ice.collection.controller', [])
                     function (result) {
                         callback(result.entries[0].id);
                     });
-            }, $scope.params.count, offset, "/folders/" + $scope.params.folderId);
+            }, $scope.params.count, offset, "/folders/" + $scope.params.folderId, $scope.params.sort);
 
             $location.path("/entry/" + entry.id);
         };

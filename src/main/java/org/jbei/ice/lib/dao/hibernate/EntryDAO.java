@@ -243,9 +243,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 .add(Restrictions.eq("canRead", true)));
 
         Criteria entryCriteria = criteria.createCriteria("entry");
-        entryCriteria.add(Restrictions.disjunction()
-                .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
-                .add(Restrictions.isNull("visibility")));
+        entryCriteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
 
         entryCriteria.setProjection(Projections.countDistinct("id"));
         Number rowCount = (Number) entryCriteria.uniqueResult();
@@ -385,12 +383,16 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @throws DAOException
      */
     public long getAllEntryCount() throws DAOException {
-        Session session = currentSession();
-        Criteria criteria = session.createCriteria(Entry.class.getName());
-        criteria.add(Restrictions.disjunction()
-                .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
-                .add(Restrictions.isNull("visibility")));
-        return (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
+        try {
+            Session session = currentSession();
+            Criteria criteria = session.createCriteria(Entry.class.getName());
+            criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
+            criteria.setProjection(Projections.countDistinct("id"));
+            Number number = (Number) criteria.uniqueResult();
+            return number.longValue();
+        } catch (HibernateException he) {
+            throw new DAOException(he);
+        }
     }
 
     /**
@@ -625,16 +627,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
                     break;
             }
 
-            Session session = currentSession();
-            String orderSuffix = (" ORDER BY e." + fieldName + " " + (asc ? "ASC" : "DESC"));
-            String queryString = "from " + Entry.class.getName() + " e where (visibility is null or visibility = "
-                    + Visibility.OK.getValue() + " OR visibility = "
-                    + Visibility.PENDING.getValue() + ")" + orderSuffix;
-            Query query = session.createQuery(queryString);
-            query.setMaxResults(limit);
-            query.setFirstResult(start);
-            List list = query.list();
-            return new LinkedHashSet<>(list);
+            Criteria criteria = currentSession().createCriteria(Entry.class)
+                    .add(Restrictions.eq("visibility", Visibility.OK.getValue()));
+            criteria.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
+            criteria.setMaxResults(limit);
+            criteria.setFirstResult(start);
+            return new HashSet<>(criteria.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -642,7 +640,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     // does not check permissions (includes pending entries)
-
     public long ownerEntryCount(String ownerEmail) throws DAOException {
         Session session = currentSession();
         try {
