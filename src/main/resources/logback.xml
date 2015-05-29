@@ -3,7 +3,7 @@
     <property name="LOG_PATH" value="/tmp"/>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>${LOG_PATH}/gd-ice.log</file>
+        <file>${LOG_PATH}/ice.log</file>
 
         <encoder>
             <pattern>%date %level %msg%n</pattern>

@@ -11,7 +11,7 @@ import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.services.rest.RestClient;
+import org.jbei.ice.services.rest.IceRestClient;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
 import java.util.*;
@@ -92,7 +92,7 @@ public class RemoteTransfer {
         if (partner == null)
             return;
 
-        RestClient client = RestClient.getInstance();
+        IceRestClient client = IceRestClient.getInstance();
         int exceptionCount = 0;
         String url = partner.getUrl();
 
@@ -127,7 +127,7 @@ public class RemoteTransfer {
     protected void performTransfer(RemotePartner partner, PartData data) {
         SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
         String url = partner.getUrl();
-        RestClient client = RestClient.getInstance();
+        IceRestClient client = IceRestClient.getInstance();
 
         // check main entry for sequence
         if (sequenceDAO.hasSequence(data.getId())) {

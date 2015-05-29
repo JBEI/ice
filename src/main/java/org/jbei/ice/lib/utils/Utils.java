@@ -1,5 +1,10 @@
 package org.jbei.ice.lib.utils;
 
+import org.apache.commons.lang.RandomStringUtils;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -11,12 +16,6 @@ import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.UUID;
-
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationController;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-
-import org.apache.commons.lang.RandomStringUtils;
 
 /**
  * General utility methods.
@@ -157,13 +156,5 @@ public class Utils {
         if (value != null)
             return value;
         return key.getDefaultValue();
-    }
-
-    public static boolean canRegister() {
-        String value = getConfigValue(ConfigurationKey.NEW_REGISTRATION_ALLOWED);
-        if (value == null)
-            return false;
-
-        return value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("true");
     }
 }

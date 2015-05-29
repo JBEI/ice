@@ -480,6 +480,12 @@ iceServices.factory('Upload', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            deleteEntry: {
+                method:'DELETE',
+                url:'/rest/upload/:importId/entry/:entryId',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
             rename:{
                 method:'PUT',
                 url:'/rest/upload/:importId/name',
@@ -870,12 +876,17 @@ iceServices.factory('EntryContextUtil', function () {
             return context;
         },
 
-        setContextCallback:function (callback, available, offset, back) {
+        resetContext: function () {
+            context = undefined;
+        },
+
+        setContextCallback: function (callback, available, offset, back, sort) {
             context = {};
             context.callback = callback;
             context.available = available;
             context.offset = offset;
             context.back = back;
+            context.sort = sort;
         }
     }
 });

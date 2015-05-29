@@ -8,6 +8,7 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.models.Configuration;
 import org.jbei.ice.lib.net.RemoteAccessController;
+import org.jbei.ice.lib.net.WoRController;
 
 import java.util.ArrayList;
 
@@ -25,7 +26,7 @@ public class ConfigurationController {
     public Setting getSystemVersion(String url) {
         String version = getPropertyValue(ConfigurationKey.APPLICATION_VERSION);
 
-        if(url.equalsIgnoreCase(getPropertyValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER))) {
+        if (url.equalsIgnoreCase(getPropertyValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER))) {
             return new Setting("version", version);
         }
 
@@ -53,7 +54,7 @@ public class ConfigurationController {
 
     public ArrayList<Setting> retrieveSystemSettings(String userId) {
         ArrayList<Setting> settings = new ArrayList<>();
-        if(!new AccountController().isAdministrator(userId))
+        if (!new AccountController().isAdministrator(userId))
             return settings;
 
         for (ConfigurationKey key : ConfigurationKey.values()) {
@@ -92,6 +93,14 @@ public class ConfigurationController {
             return null;
 
         Configuration configuration = setPropertyValue(key, setting.getValue());
+
+        // check if the setting being updated is related to the web of registries
+        if (key == ConfigurationKey.JOIN_WEB_OF_REGISTRIES) {
+            WoRController woRController = new WoRController();
+            boolean enable = "yes".equalsIgnoreCase(setting.getValue()) || "true".equalsIgnoreCase(setting.getValue());
+            woRController.setEnable(enable);
+        }
+
         return configuration.toDataTransferObject();
     }
 

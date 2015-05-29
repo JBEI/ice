@@ -1102,10 +1102,12 @@ angular.module('ice.entry.controller', [])
         };
     })
 
-    .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope, FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection) {
+    .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope,
+                                             FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
+
         $scope.isFileUpload = false;
 
         var sessionId = $cookieStore.get("sessionId");

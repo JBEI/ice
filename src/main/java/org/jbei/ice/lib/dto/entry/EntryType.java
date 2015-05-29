@@ -1,8 +1,6 @@
 package org.jbei.ice.lib.dto.entry;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
-
-public enum EntryType implements IDataTransferModel {
+public enum EntryType {
 
     STRAIN("Strain", "strain"),
     PLASMID("Plasmid", "plasmid"),
@@ -11,7 +9,6 @@ public enum EntryType implements IDataTransferModel {
 
     private String name;
     private String display;
-    public static final long serialVersionUID = 1l;
 
     EntryType(String display, String name) {
         this.display = display;

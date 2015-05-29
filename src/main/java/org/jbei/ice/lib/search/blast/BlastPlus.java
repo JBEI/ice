@@ -232,7 +232,12 @@ public class BlastPlus {
         try {
             if (!Files.exists(blastFolder)) {
                 Logger.info("Blast folder (" + blastFolder.toString() + ") does not exist. Creating...");
-                Files.createDirectories(blastFolder);
+                try {
+                    Files.createDirectories(blastFolder);
+                } catch (Exception e) {
+                    Logger.warn("Could not create blast folder. Create it manually or all blast runs will fail");
+                    return;
+                }
             }
 
             if (!force && blastDatabaseExists()) {
@@ -283,7 +288,7 @@ public class BlastPlus {
 
             StringBuilder command = new StringBuilder();
             String blastN = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
-                    + BlastProgram.BLAST_N.getName();
+                + BlastProgram.BLAST_N.getName();
             command.append(blastN)
                     .append(" -query ")
                     .append(queryFilePath.toString())

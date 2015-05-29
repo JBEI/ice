@@ -112,6 +112,7 @@ angular.module('ice.upload.service', [])
 
             setDataValue: function (type, index, object, value) {
                 var dataSchema = this.getDataSchema(type);
+                // links is an array
                 if (dataSchema[index] == "links") {
                     object[dataSchema[index]] = [value];
                     return object;
@@ -122,13 +123,13 @@ angular.module('ice.upload.service', [])
                     return object;
                 }
 
+                // selection marker is an array
                 if (dataSchema[index] == "selectionMarkers") {
                     object[dataSchema[index]] = [value];
                     return object;
                 }
 
                 // index is greater than 15 so it is one of the specialized types (strain, plasmid, seed)
-                // note that this method does not take links into account
                 switch (type.toLowerCase()) {
                     case "strain":
                         object.strainData[dataSchema[index]] = value;

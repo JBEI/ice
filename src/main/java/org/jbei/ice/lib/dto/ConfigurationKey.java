@@ -15,7 +15,6 @@ public enum ConfigurationKey implements IDataTransferModel {
     TEMPORARY_DIRECTORY("/tmp"),
     DATA_DIRECTORY("data"),
 
-    SITE_SECRET("Site Secret"),
     // deprecated. use the user account salt instead.
     SECRET_KEY("o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+"),
     BULK_UPLOAD_APPROVER_EMAIL(""), //TODO this should be a role
@@ -29,7 +28,7 @@ public enum ConfigurationKey implements IDataTransferModel {
     PART_NUMBER_DIGITAL_SUFFIX("000001"),
     PART_NUMBER_DELIMITER("_"),
 
-    BLAST_INSTALL_DIR(""),
+    BLAST_INSTALL_DIR("/usr/bin"),
 
     NEW_REGISTRATION_ALLOWED("NO"),
     PASSWORD_CHANGE_ALLOWED("YES"),

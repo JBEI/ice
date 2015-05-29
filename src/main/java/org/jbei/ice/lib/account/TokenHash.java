@@ -1,7 +1,5 @@
 package org.jbei.ice.lib.account;
 
-import org.jbei.ice.lib.utils.UtilityException;
-
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.xml.bind.DatatypeConverter;
@@ -9,20 +7,21 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
-import java.util.UUID;
 
 /**
- * Utility class for handling account passwords
  *
  * @author Hector Plahar
  */
-public class PasswordUtil {
+public class TokenHash {
 
     private static final int HASH_BYTE_SIZE = 160;
     private static final int SALT_BYTE_SIZE = 32;
     private static final int PBKDF2_ITERATIONS = 20000;
 
-    public static String encryptPassword(String password, String salt) throws UtilityException {
+    public TokenHash() {
+    }
+
+    public String encryptPassword(String password, String salt) {
         if (password == null || password.trim().isEmpty() || salt == null || salt.trim().isEmpty())
             throw new NullPointerException("Password and/or salt cannot be empty");
 
@@ -31,20 +30,23 @@ public class PasswordUtil {
         try {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
             byte[] hash = keyFactory.generateSecret(spec).getEncoded();
-            return DatatypeConverter.printHexBinary(hash);
+            return DatatypeConverter.printBase64Binary(hash);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            throw new UtilityException(e);
+            return null;
         }
     }
 
-    public static String generateSalt() {
+    public String generateSalt() {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[SALT_BYTE_SIZE];
         random.nextBytes(salt);
-        return DatatypeConverter.printHexBinary(salt);
+        return DatatypeConverter.printBase64Binary(salt);
     }
 
-    public static String generateTemporaryPassword() {
-        return UUID.randomUUID().toString().substring(24);
+    public String generateRandomToken() {
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[256];
+        random.nextBytes(salt);
+        return DatatypeConverter.printBase64Binary(salt);
     }
 }

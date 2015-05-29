@@ -60,6 +60,24 @@ public class BulkUploadResource extends RestResource {
     }
 
     /**
+     * Retrieves matching part numbers to be linked to entries in a bulk upload
+     *
+     * @return list of matching part numbers based on passed parameters
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/partNumbers")
+    public Response getPartNumbersForUpload(
+            @QueryParam("type") EntryType uploadType,
+            @QueryParam("token") String token,
+            @DefaultValue("8") @QueryParam("limit") int limit,
+            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        ArrayList<String> results = controller.getMatchingPartNumbersForLinks(uploadType, token, limit);
+        return super.respond(results);
+    }
+
+    /**
      * Retrieves permissions associated with an upload
      *
      * @param sessionId unique session identifier for the user making request
@@ -276,6 +294,23 @@ public class BulkUploadResource extends RestResource {
         } catch (Exception e) {
             Logger.error(e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
+    }
+
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entry/{entryId}")
+    public Response deleteEntry(@PathParam("id") long uploadId,
+                                @PathParam("entryId") long entryId,
+                                @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        try {
+            String userId = getUserIdFromSessionHeader(sessionId);
+            if (controller.deleteEntry(userId, uploadId, entryId))
+                return Response.ok().build();
+            return Response.serverError().build();
+        } catch (Exception e) {
+            return super.respond(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
 

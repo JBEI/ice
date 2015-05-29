@@ -9,23 +9,13 @@ button::-moz-focus-inner {
 
 #container {
     min-height: 100%;
-    position: relative;
 }
 
 #body {
     padding-bottom: 89px; /*Height of the footer*/
 }
 
-#footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 66px; /* Height of the footer */
-    padding: 2px;
-}
-
 html, body {
-    height: 100%;
     margin: 0;
 }
 
@@ -47,6 +37,10 @@ html, body {
 
 .orange {
     color: orange;
+}
+
+.dark-orange {
+    color: #ee7600;
 }
 
 .dark_blue {
@@ -273,7 +267,8 @@ html, body {
     color: #BBBBBB;
     float: right;
     font-size: 0.8em;
-    margin-top: 3px;
+    vertical-align: middle;
+    margin-right: 8px;
 }
 
 a.cell_mouseover:hover {
@@ -331,24 +326,35 @@ a.cell_mouseover:hover {
 }
 
 .collection-menu {
-    border-top: 1px solid #f6f6f6;
+    /*border-top: 1px solid #f6f6f6;*/
     color: #233559;
-    padding: 6px 6px 6px 12px;
+    padding: 8px 5px 8px 8px;
+}
+
+.collection-menu-sub-folder {
+    background-color: #fafafa;
+    margin-left: 7px;
+    padding: 6px 6px 6px 10px;
+    color: #4D5B76;
+    border-bottom: 1px solid #f3f6f3;
+    cursor: pointer;
 }
 
 .collection-menu:hover {
     background-color: #f4f4f4;
+    /*color: #212121;*/
     cursor: pointer;
 }
 
 .collection_user_menu_row_selected {
     color: #4D5B76;
-    background-color: #f1f1f1;
+    background-color: #F0F0F0;
 }
 
 .collection_user_menu_row_selected .menu_count {
-    color: #4D5B76;
-    margin-top: 3px
+    color: #333;
+    margin-top: 3px;
+    font-weight: 500 !important;
 }
 
 .entry_detail_view_row {
@@ -592,7 +598,7 @@ a:hover {
 .collections_header {
     font-size: 0.75em;
     padding: 4px;
-    font-weight: bold;
+    font-weight: 700 !important;
     /*<!-- 233559 -->*/
     text-transform: uppercase;
     font-family: Helvetica, serif;
@@ -1042,7 +1048,6 @@ td.selected i.font-awesome {
 }
 
 .new_entry_tab_active {
-    background-color: #f4f4f4;
     border-left: 1px solid #eee;
     height: 23px;
     background: linear-gradient(to bottom, #FFFFFF, #f9f9f9) repeat scroll 0 0 transparent;
@@ -1147,4 +1152,69 @@ input.no_border:focus {
 
 .modal-backdrop {
     bottom: 0;
+}
+
+.ice-label-success {
+    background-color: #468847;
+}
+
+.ice-label-danger {
+    background-color: #d9534f;
+}
+
+.ice-label-warning {
+    background-color: #eb8a06;
+}
+
+.ice-label-info {
+    background-color: #3a87ad;
+}
+
+th i.sortable {
+    opacity: 0;
+}
+
+th:hover i.sortable {
+    opacity: 0.2;
+}
+
+.content-menu {
+    z-index: 999;
+    border: 0;
+    /*display: none;*/
+    text-align: left;
+    position: fixed;
+    top: 100px;
+    left: 2px;
+    bottom: 63px;
+    margin: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 240px;
+    /*border-right: 1px solid #e0e0e0;*/
+}
+
+#content {
+    margin-top: 123px;
+    margin-left: 260px;
+}
+
+.content-primary {
+    position: absolute;
+    right: 0;
+    left: 250px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#header {
+    position: fixed;
+    top: 0;
+    margin: 0;
+    right: 0;
+    left: 0;
+}
+
+.table-border-bottom {
+    border-bottom: 1px solid #ddd;
 }

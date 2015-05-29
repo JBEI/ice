@@ -3,7 +3,7 @@ package org.jbei.ice.lib.dto.web;
 import org.jbei.ice.lib.dao.IDataTransferModel;
 
 /**
- * Remote Web of Registries partner
+ * Data transfer model for {@link org.jbei.ice.lib.net.RemotePartner}
  *
  * @author Hector Plahar
  */

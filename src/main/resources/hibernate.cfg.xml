@@ -3,18 +3,10 @@
         "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 
+<!-- This configuration file is always used -->
 <hibernate-configuration>
 
     <session-factory>
-
-        <!-- Database connection settings -->
-        <property name="hibernate.connection.url">jdbc:hsqldb:file:data/hsqldb</property>
-        <property name="hibernate.connection.driver_class">org.hsqldb.jdbc.JDBCDriver</property>
-        <property name="hibernate.connection.username">sa</property>
-        <property name="hibernate.connection.password">password</property>
-        <!-- SQL dialect: use the correct one for your database -->
-        <property name="hibernate.dialect">org.hibernate.dialect.HSQLDialect</property>
-
         <!-- JDBC connection pool (using c3p0) -->
         <property name="hibernate.c3p0.min_size">5</property>
         <property name="hibernate.c3p0.max_size">20</property>
@@ -49,7 +41,6 @@
         <property name="hibernate.search.default.directory_provider">
             org.hibernate.search.store.impl.FSDirectoryProvider
         </property>
-        <property name="hibernate.search.default.indexBase">data/index</property>
 
         <!-- mapping files -->
         <mapping class="org.jbei.ice.lib.entry.model.Entry"/>
