@@ -5,6 +5,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.access.Permission;
@@ -12,6 +13,7 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;
@@ -29,9 +31,9 @@ import java.util.*;
 public class FolderDAO extends HibernateRepository<Folder> {
 
     /**
-     * Retrieves stored folder by identifier
+     * Retrieves stored folder by locally unique identifier
      *
-     * @param id unique identifier for folder
+     * @param id locally unique identifier for folder
      * @return retrieved folder
      * @throws DAOException
      */
@@ -39,6 +41,14 @@ public class FolderDAO extends HibernateRepository<Folder> {
         return super.get(Folder.class, id);
     }
 
+    /**
+     * Removes entries with the which have the unique identifier in the list of entries
+     * from the specified folder, if it is contained in it
+     *
+     * @param folder  folder to remove entries from
+     * @param entries unique identifiers for list of entries to remove from the folder
+     * @return folder whose entries where removed
+     */
     public Folder removeFolderEntries(Folder folder, List<Long> entries) {
         Session session = currentSession();
         try {
@@ -62,7 +72,8 @@ public class FolderDAO extends HibernateRepository<Folder> {
 
     /**
      * Retrieves the count of the number of contents in the folder.
-     * If the folder contains other folders, then it returns the number of sub-folders
+     * Currently, it is assumed that the contents of folders are only entries. The entries
+     * that are counted are those that have a visibility of "OK"
      *
      * @param id unique folder identifier
      * @return number of child contents in the folder
@@ -70,6 +81,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
     public Long getFolderSize(long id) {
         try {
             Criteria criteria = currentSession().createCriteria(Entry.class);
+            criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
             criteria.createAlias("folders", "f");
             criteria.add(Restrictions.eq("f.id", id));
             Number number = (Number) criteria.setProjection(Projections.rowCount()).uniqueResult();
@@ -85,12 +97,14 @@ public class FolderDAO extends HibernateRepository<Folder> {
      *
      * @param folderId unique folder identifier
      * @param type     optional filter for entries. If null, all entries will be retrieved
-     * @return List of entry ids found in the folder with the filter applied if applicable
+     * @return List of entry ids found in the folder with the filter applied if applicable and which have
+     * a visibility of "OK"
      */
     public List<Long> getFolderContentIds(long folderId, EntryType type) {
         Criteria criteria = currentSession().createCriteria(Folder.class)
                 .add(Restrictions.eq("id", folderId))
-                .createAlias("contents", "entry");
+                .createAlias("contents", "entry")
+                .add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()));
 
         if (type != null) {
             criteria.add(Restrictions.eq("entry.recordType", type.getName()));
@@ -171,38 +185,27 @@ public class FolderDAO extends HibernateRepository<Folder> {
      */
     @SuppressWarnings("unchecked")
     public List<Folder> getFoldersByOwner(Account account) {
-        ArrayList<Folder> folders;
-        Session session = currentSession();
         try {
-            String queryString = "from " + Folder.class.getName()
-                    + " WHERE ownerEmail = :ownerEmail order by creationTime desc";
-            Query query = session.createQuery(queryString);
-
-            query.setParameter("ownerEmail", account.getEmail());
-            folders = new ArrayList<>(query.list());
+            Criteria criteria = currentSession().createCriteria(Folder.class)
+                    .add(Restrictions.eq("ownerEmail", account.getEmail()));
+            criteria.addOrder(Order.desc("creationTime"));
+            return criteria.list();
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve folders!", e);
         }
-
-        return folders;
     }
 
     @SuppressWarnings("unchecked")
     public List<Folder> getFoldersByType(FolderType type) {
-        ArrayList<Folder> folders;
-        Session session = currentSession();
         try {
-            String queryString = "from " + Folder.class.getName() + " WHERE type = :type";
-            Query query = session.createQuery(queryString);
-            query.setParameter("type", type);
-            folders = new ArrayList<>(query.list());
+            return currentSession().createCriteria(Folder.class)
+                    .add(Restrictions.eq("type", type))
+                    .list();
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve folders!", e);
         }
-
-        return folders;
     }
 
     @SuppressWarnings({"unchecked"})
