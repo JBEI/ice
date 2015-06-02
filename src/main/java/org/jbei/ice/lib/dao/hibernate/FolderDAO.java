@@ -2,7 +2,6 @@ package org.jbei.ice.lib.dao.hibernate;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
@@ -20,7 +19,10 @@ import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.shared.ColumnField;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Manipulate {@link org.jbei.ice.lib.folder.Folder} objects in the database.
@@ -198,30 +200,12 @@ public class FolderDAO extends HibernateRepository<Folder> {
         }
     }
 
-    @SuppressWarnings({"unchecked"})
-    public List<Folder> getFoldersByEntry(Entry entry) {
-        ArrayList<Folder> folders = new ArrayList<>();
-        Session session = currentSession();
-
-        try {
-            String hql = "select distinct folder from " + Folder.class.getName()
-                    + " folder join folder.contents contents where :entry in contents";
-            Query query = session.createQuery(hql);
-            query.setParameter("entry", entry);
-            folders.addAll(query.list());
-        } catch (HibernateException e) {
-            Logger.error(e);
-            throw new DAOException("Failed to retrieve folders!", e);
-        }
-
-        return folders;
-    }
-
     /**
      * Retrieves folders that the specified account owns, or has write privileges on based on the permissions
      *
-     * @param account
-     * @return
+     * @param account       account that is expected to have write privileges on the folders that are returned
+     * @param accountGroups groups that account belongs to that is expected to have write privileges
+     * @return list of folders that the account or groups that the account belongs to has write privileges on
      * @throws DAOException
      */
     public List<Folder> getCanEditFolders(Account account, Set<Group> accountGroups) throws DAOException {

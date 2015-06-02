@@ -3,7 +3,6 @@ package org.jbei.ice.lib.entry;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.ApplicationController;
-import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.PreferencesController;
@@ -21,7 +20,6 @@ import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.models.*;
@@ -112,11 +110,7 @@ public class EntryController {
 
     public long getNumberOfEntriesSharedWithUser(String userId) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        Set<Group> accountGroups = new HashSet<>(account.getGroups());
-        GroupController controller = new GroupController();
-        Group everybodyGroup = controller.createOrRetrievePublicGroup();
-        accountGroups.add(everybodyGroup);
-        return dao.sharedEntryCount(account, accountGroups);
+        return dao.sharedEntryCount(account, account.getGroups());
     }
 
     public List<PartData> getEntriesSharedWithUser(String userId, ColumnField field, boolean asc, int start,
@@ -296,82 +290,6 @@ public class EntryController {
         }
 
         if (scheduleRebuild) {
-            ApplicationController.scheduleBlastIndexRebuildTask(true);
-        }
-    }
-
-    /**
-     * Delete the entry in the database. Schedule an index rebuild.
-     *
-     * @param entryId unique identifier for entry to be deleted
-     * @throws PermissionException if user does not have the appropriate write permissions to delete entry
-     */
-    public void delete(String userId, long entryId) throws PermissionException {
-        Entry entry = dao.get(entryId);
-        boolean schedule = sequenceDAO.hasSequence(entry.getId());
-
-        FolderDAO folderDAO = DAOFactory.getFolderDAO();
-        List<Folder> folders = folderDAO.getFoldersByEntry(entry);
-        if (folders != null) {
-            for (Folder folder : folders) {
-                folder.getContents().remove(entry);
-                FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
-                long size = folderDAO.getFolderSize(folder.getId());
-                details.setCount(size);
-            }
-        }
-        delete(userId, entry, schedule);
-    }
-
-    /**
-     * Experimental. Do not use
-     * Performs a full deletion of the entry, not just marking it as deleted.
-     *
-     * @param entry Entry to be deleted
-     */
-    protected void fullDelete(String userId, Entry entry, boolean schedule) {
-        if (entry == null)
-            return;
-
-        authorization.expectWrite(userId, entry);
-
-        if (schedule) {
-            Sequence sequence = sequenceDAO.getByEntry(entry);
-            if (sequence != null) {
-                sequenceDAO.delete(sequence);
-            }
-        }
-        DAOFactory.getPermissionDAO().clearPermissions(entry);
-        dao.fullDelete(entry);
-        if (schedule) {
-            ApplicationController.scheduleBlastIndexRebuildTask(true);
-        }
-    }
-
-    /**
-     * Delete the entry in the database. Optionally schedule an index rebuild.
-     *
-     * @param entry                entry to deleted
-     * @param scheduleIndexRebuild True if index rebuild is scheduled.
-     */
-    private void delete(String userId, Entry entry, boolean scheduleIndexRebuild) {
-        if (entry == null) {
-            return;
-        }
-
-        authorization.expectWrite(userId, entry);
-
-        if (entry.getVisibility() == Visibility.DELETED.getValue()) {
-            fullDelete(userId, entry, scheduleIndexRebuild);
-            return;
-        }
-
-        entry.setModificationTime(Calendar.getInstance().getTime());
-        entry.setVisibility(Visibility.DELETED.getValue());
-
-        dao.update(entry);
-
-        if (scheduleIndexRebuild) {
             ApplicationController.scheduleBlastIndexRebuildTask(true);
         }
     }
@@ -557,10 +475,7 @@ public class EntryController {
         authorization.expectWrite(userId, entry);
         Entry linkedEntry = dao.get(linkedPart);
 
-        if (!entry.getLinkedEntries().remove(linkedEntry))
-            return false;
-
-        return dao.update(entry) != null;
+        return entry.getLinkedEntries().remove(linkedEntry) && dao.update(entry) != null;
     }
 
     protected Entry getEntry(String id) {
@@ -651,6 +566,8 @@ public class EntryController {
             authorization.expectRead(userId, entry);
 
         PartData partData = ModelToInfoFactory.getInfo(entry);
+        if (partData == null)
+            return null;
         boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
 
         partData.setHasSequence(hasSequence);

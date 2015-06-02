@@ -22,6 +22,7 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.models.Sequence;
@@ -283,19 +284,8 @@ public class BulkUploadController {
         if (!userId.equals(draftAccount.getEmail()) && !accountController.isAdministrator(userId))
             throw new PermissionException("No permissions to delete draft " + draftId);
 
-        // delete all associated entries. for strain with plasmids both are returned
-        // todo : use task to speed up process and also check for status
-
-        ArrayList<Long> entryIds = dao.getEntryIds(draft);
-        for (long entryId : entryIds) {
-            try {
-                entryController.delete(userId, entryId);
-            } catch (PermissionException pe) {
-                Logger.warn(userId + " does not have permission to delete" + entryId + " for bulk upload " + draftId);
-            }
-        }
-
-        dao.delete(draft);
+        BulkUploadDeleteTask task = new BulkUploadDeleteTask(userId, draftId);
+        IceExecutorService.getInstance().runTask(task);
 
         BulkUploadInfo draftInfo = draft.toDataTransferObject();
         AccountTransfer accountTransfer = draft.getAccount().toDataTransferObject();

@@ -12,10 +12,9 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.EntryUtil;
-import org.jbei.ice.lib.entry.model.*;
+import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.shared.ColumnField;
 
 import java.util.*;
@@ -67,24 +66,22 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public Set<String> getMatchingPlasmidPartNumbers(String token, int limit) throws DAOException {
         try {
-            token = token.toUpperCase();
-            String qString = "select distinct plasmid.partNumber from Plasmid plasmid where UPPER(plasmid.partNumber) "
-                    + "like '%" + token + "%'";
-            Query query = currentSession().createQuery(qString);
-            if (limit > 0)
-                query.setMaxResults(limit);
+            Criteria criteria = currentSession().createCriteria(Entry.class)
+                    .add(Restrictions.ilike("partNumber", token, MatchMode.ANYWHERE))
+                    .add(Restrictions.eq("recordType", EntryType.PLASMID.getName()));
 
-            return new HashSet<>(query.list());
+            criteria.setProjection(Projections.distinct(Projections.property("partNumber")));
+            if (limit > 0)
+                criteria.setMaxResults(limit);
+            return new HashSet<>(criteria.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
         }
     }
 
-    @SuppressWarnings("unchecked")
     public Set<Entry> getMatchingEntryPartNumbers(String token, int limit, Set<String> include) throws DAOException {
         try {
             Criteria criteria = currentSession().createCriteria(Entry.class)
@@ -100,7 +97,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
             throw new DAOException(he);
         }
     }
-
 
     /**
      * Retrieve an {@link Entry} object from the database by id.
@@ -231,49 +227,62 @@ public class EntryDAO extends HibernateRepository<Entry> {
     public long visibleEntryCount(Account account, Set<Group> groups) throws DAOException {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Permission.class);
+        criteria.createAlias("entry", "entry");
 
         // expect everyone to at least belong to the everyone group so groups should never be empty
         Junction disjunction = Restrictions.disjunction().add(Restrictions.in("group", groups));
-        if (account != null)
+        if (account != null) {
             disjunction.add(Restrictions.eq("account", account));
 
+            // add entries account owns
+            disjunction.add(Restrictions.eq("entry.ownerEmail", account.getEmail()));
+        }
+
         criteria.add(disjunction);
-        criteria.add(Restrictions.disjunction()
-                .add(Restrictions.eq("canWrite", true))
-                .add(Restrictions.eq("canRead", true)));
-
-        Criteria entryCriteria = criteria.createCriteria("entry");
-        entryCriteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
-
-        entryCriteria.setProjection(Projections.countDistinct("id"));
-        Number rowCount = (Number) entryCriteria.uniqueResult();
+        criteria.add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()));
+        criteria.setProjection(Projections.countDistinct("entry.id"));
+        Number rowCount = (Number) criteria.uniqueResult();
         return rowCount.longValue();
     }
 
-    // calculated as "available - userowned"
+    /**
+     * Creates and returns a Criteria for the exclusive use of methods that are retrieving
+     * entries that are shared with users
+     *
+     * @param account       account for user the entries are being shared with
+     * @param accountGroups groups that account belongs to
+     * @return criteria object for {@link Permission}
+     */
+    private Criteria getSharedWithUserCriteria(Account account, Set<Group> accountGroups) {
+        Criteria criteria = currentSession().createCriteria(Permission.class);
+
+        // expect everyone to at least belong to the everyone group so groups should never be empty
+        Disjunction disjunction = Restrictions.disjunction();
+        disjunction.add(Restrictions.in("group", accountGroups));
+
+        // explicit share
+        disjunction.add(Restrictions.eq("account", account));
+
+        // not a bulk upload permission
+        criteria.add(Restrictions.isNotNull("entry"));
+
+        criteria.createAlias("entry", "entry")
+                .add(Restrictions.ne("entry.ownerEmail", account.getEmail()));
+        criteria.add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()));
+        return criteria;
+    }
+
+    /**
+     * An entry is shared if requester has explicit read or write permissions of belongs
+     * to a group that have explicit read or write permissions
+     *
+     * @param requester     account that entries are shared with
+     * @param accountGroups groups that account belongs to
+     * @return number of entries that have been shared with user
+     */
     public long sharedEntryCount(Account requester, Set<Group> accountGroups) throws DAOException {
         try {
-            Session session = currentSession();
-            Criteria criteria = session.createCriteria(Permission.class);
-
-            // user owned
-            criteria.setProjection(Projections.property("entry"));
-
-            // expect everyone to at least belong to the everyone group so groups should never be empty
-            criteria.add(Restrictions.disjunction()
-                    .add(Restrictions.in("group", accountGroups)));
-//                                     .add(Restrictions.eq("account", requester)));
-
-            // should be able to either read or write
-            criteria.add(Restrictions.disjunction()
-                    .add(Restrictions.eq("canWrite", true))
-                    .add(Restrictions.eq("canRead", true)));
-
-            Criteria entryCriteria = criteria.createCriteria("entry");
-            entryCriteria.add(Restrictions.disjunction()
-                    .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
-                    .add(Restrictions.isNull("visibility")));
-            entryCriteria.add(Restrictions.ne("ownerEmail", requester.getEmail()));
+            Criteria criteria = getSharedWithUserCriteria(requester, accountGroups);
             criteria.setProjection(Projections.rowCount());
             Number rowCount = (Number) criteria.uniqueResult();
             return rowCount.longValue();
@@ -283,37 +292,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
+    // retrieves list of entries based on the paging parameters and the different ways entries can be shared
     @SuppressWarnings("unchecked")
-    public List<Entry> sharedWithUserEntries(Account requester, Set<Group> groups, ColumnField sort,
+    public List<Entry> sharedWithUserEntries(Account requester, Set<Group> accountGroups, ColumnField sort,
                                              boolean asc, int start, int limit) throws DAOException {
         try {
-            List entryList = currentSession().createCriteria(Permission.class)
-                    .add(Restrictions.disjunction()
-                            .add(Restrictions.in("group", groups))
-                            .add(Restrictions.eq("account", requester)))
-                    .createAlias("entry", "entry")
-                    .add(Restrictions.isNotNull("entry"))
-                    .add(Restrictions.ne("entry.ownerEmail", requester.getEmail()))
-                    .setProjection(Projections.property("entry.id"))
-                    .list();
-
-            List folderIdList = currentSession().createCriteria(Permission.class)
-                    .add(Restrictions.disjunction()
-                            .add(Restrictions.in("group", groups))
-                            .add(Restrictions.eq("account", requester)))
-                    .createAlias("folder", "folder")
-                    .createAlias("folder.contents", "content")
-                    .add(Restrictions.isNotNull("folder"))
-                    .add(Restrictions.ne("folder.ownerEmail", requester.getEmail()))
-                    .setProjection(Projections.property("content.id"))
-                    .list();
-
-            entryList.addAll(folderIdList);
-            if (entryList.isEmpty())
-                return new ArrayList<>();
-
-            String fieldName = columnFieldToString(sort);
-            Criteria criteria = currentSession().createCriteria(Entry.class).add(Restrictions.in("id", entryList));
+            Criteria criteria = getSharedWithUserCriteria(requester, accountGroups);
+            criteria.setProjection(Projections.property("entry"));
+            String fieldName = sort == ColumnField.CREATED ? "entry.id" : columnFieldToString(sort);
             criteria.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
             criteria.setFirstResult(start);
             criteria.setMaxResults(limit);
@@ -324,58 +310,53 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    public List<Long> sharedWithUserEntryIds(Account account, Group everybodyGroup) {
-        Set<Group> groups = new HashSet<>(account.getGroups());
-        groups.add(everybodyGroup);
-
+    public List<Long> sharedWithUserEntryIds(Account account, Set<Group> groups) {
         try {
-            Session session = currentSession();
-            String queryString = "SELECT DISTINCT e.id FROM Entry e, Permission p WHERE p.group IN (:groups) "
-                    + " AND e.ownerEmail <> :oe AND e = p.entry AND e.visibility = :v";
-
-            Query query = session.createQuery(queryString);
-            query.setParameterList("groups", groups);
-            query.setParameter("v", Visibility.OK.getValue());
-            query.setParameter("oe", account.getEmail());
-            List list = query.list();
-            return new ArrayList<>(list);
+            Criteria criteria = getSharedWithUserCriteria(account, groups);
+            criteria.setProjection(Projections.distinct(Projections.property("entry.id")));
+            return criteria.list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
         }
     }
 
-    // checks permission (does not include pending entries)
+    /**
+     * Retrieves the entries for the specified owner, that the requester has read access to
+     *
+     * @param requester       account for user making request
+     * @param owner           user id of entries' owner
+     * @param requesterGroups groups that the requester is a member of. Used to check access permissions
+     * @param sortField       field for sort
+     * @param asc             sort order
+     * @param start           index to start retrieving records from
+     * @param limit           maximum number of entries to retrieve
+     * @return list of entries matching specified criteria
+     * @throws DAOException
+     */
     @SuppressWarnings("unchecked")
-    public List<Entry> retrieveUserEntries(Account requestor, String user, Set<Group> groups,
-                                           ColumnField sortField, boolean asc, int start, int limit) throws DAOException {
-        Session session = currentSession();
-        Criteria criteria = session.createCriteria(Permission.class);
+    public List<Entry> retrieveUserEntries(Account requester, String owner, Set<Group> requesterGroups,
+                                           ColumnField sortField, boolean asc, int start, int limit)
+            throws DAOException {
+        Criteria criteria = currentSession().createCriteria(Permission.class);
         criteria.setProjection(Projections.property("entry"));
 
         // expect everyone to at least belong to the everyone group so groups should never be empty
-        Junction disjunction = Restrictions.disjunction().add(Restrictions.in("group", groups));
-        disjunction.add(Restrictions.eq("account", requestor));
+        Junction disjunction = Restrictions.disjunction().add(Restrictions.in("group", requesterGroups));
+        disjunction.add(Restrictions.eq("account", requester));
 
         criteria.add(disjunction);
-        criteria.add(Restrictions.disjunction()
-                .add(Restrictions.eq("canWrite", true))
-                .add(Restrictions.eq("canRead", true)));
-
-        Criteria entryCriteria = criteria.createCriteria("entry");
-        entryCriteria.add(Restrictions.disjunction()
-                .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
-                .add(Restrictions.isNull("visibility")));
-        entryCriteria.add(Restrictions.eq("ownerEmail", user));
+        criteria.createAlias("entry", "entry");
+        criteria.add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()));
+        criteria.add(Restrictions.eq("entry.ownerEmail", owner));
 
         // sort
-        String fieldName = columnFieldToString(sortField);
-
-        entryCriteria.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
-        entryCriteria.setFirstResult(start);
-        entryCriteria.setMaxResults(limit);
-        entryCriteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-        return new LinkedList<>(entryCriteria.list());
+        String fieldName = sortField == ColumnField.CREATED ? "entry.id" : columnFieldToString(sortField);
+        criteria.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
+        criteria.setFirstResult(start);
+        criteria.setMaxResults(limit);
+        criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        return criteria.list();
     }
 
     /**
@@ -526,23 +507,30 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    // does not check permission (includes pending entries)
-    @SuppressWarnings("unchecked")
+    /**
+     * Retrieves entries owned by account with specified email and with visibility of "pending" or "ok"
+     *
+     * @param ownerEmail email for account whose entries are to be retrieved
+     * @param sort       field to sort results on
+     * @param asc        sort order
+     * @param start      start of retrieve
+     * @param limit      maximum number of records to retrieve from
+     * @return list of matching entries
+     * @throws DAOException
+     */
     public List<Entry> retrieveOwnerEntries(String ownerEmail, ColumnField sort, boolean asc, int start, int limit)
             throws DAOException {
         try {
             String fieldName = columnFieldToString(sort);
-            Session session = currentSession();
-            String orderSuffix = (" ORDER BY e." + fieldName + " " + (asc ? "ASC" : "DESC"));
-            String queryString = "from " + Entry.class.getName() + " e where owner_email = :oe "
-                    + "AND (visibility is null or visibility = " + Visibility.OK.getValue() + " OR visibility = "
-                    + Visibility.PENDING.getValue() + ")" + orderSuffix;
-            Query query = session.createQuery(queryString);
-            query.setParameter("oe", ownerEmail);
-            query.setMaxResults(limit);
-            query.setFirstResult(start);
-            List list = query.list();
-            return new LinkedList<>(list);
+            Criteria criteria = currentSession().createCriteria(Entry.class)
+                    .add(Restrictions.disjunction()
+                            .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
+                            .add(Restrictions.eq("visibility", Visibility.PENDING.getValue())));
+            criteria.add(Restrictions.eq("ownerEmail", ownerEmail));
+            criteria.setMaxResults(limit);
+            criteria.setFirstResult(start);
+            criteria.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
+            return criteria.list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -593,40 +581,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    public Set<Entry> retrieveAllEntries(ColumnField sort, boolean asc, int start, int limit)
-            throws DAOException {
+    public Set<Entry> retrieveAllEntries(ColumnField sort, boolean asc, int start, int limit) throws DAOException {
         try {
             if (sort == null)
                 sort = ColumnField.CREATED;
 
-            String fieldName;
-            switch (sort) {
-                case TYPE:
-                    fieldName = "recordType";
-                    break;
-
-                case STATUS:
-                    fieldName = "status";
-                    break;
-
-                case NAME:
-                    fieldName = "name";
-                    break;
-
-                case PART_ID:
-                    fieldName = "partNumber";
-                    break;
-
-                case SUMMARY:
-                    fieldName = "shortDescription";
-                    break;
-
-                case CREATED:
-                default:
-                    fieldName = "creationTime";
-                    break;
-            }
-
+            String fieldName = columnFieldToString(sort);
             Criteria criteria = currentSession().createCriteria(Entry.class)
                     .add(Restrictions.eq("visibility", Visibility.OK.getValue()));
             criteria.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
@@ -647,8 +607,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
                     .add(Restrictions.eq("ownerEmail", ownerEmail));
             criteria.add(Restrictions.disjunction()
                     .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
-                    .add(Restrictions.eq("visibility", Visibility.PENDING.getValue()))
-                    .add(Restrictions.isNull("visibility")));
+                    .add(Restrictions.eq("visibility", Visibility.PENDING.getValue())));
             criteria.setProjection(Projections.rowCount());
             Number rowCount = (Number) criteria.uniqueResult();
             return rowCount.longValue();
@@ -690,39 +649,10 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
     // experimental. do not use
     public void fullDelete(Entry entry) throws DAOException {
-        // delete from sub class (plasmid, strain, seed)
-        Class<? extends Entry> clazz;
-
-        if (entry.getRecordType().equalsIgnoreCase(EntryType.PLASMID.toString())) {
-            clazz = Plasmid.class;
-        } else if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString())) {
-            clazz = Strain.class;
-        } else if (entry.getRecordType().equalsIgnoreCase(EntryType.PART.toString())) {
-            clazz = Part.class;
-        } else if (entry.getRecordType().equalsIgnoreCase(EntryType.ARABIDOPSIS.toString())) {
-            clazz = ArabidopsisSeed.class;
-        } else
-            throw new DAOException("Unrecognized entry type");
-
         // delete from bulk upload entry
         String hql = "delete from bulk_upload_entry where entry_id=" + entry.getId();
         currentSession().createSQLQuery(hql).executeUpdate();
-
-        hql = "delete from " + clazz.getName() + " where entries_id=:entry";
-        currentSession().createQuery(hql).setParameter("entry", entry.getId()).executeUpdate();
-
-        // delete from links
-        hql = "delete from " + Link.class.getName() + " where entry=:entry";
-        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
-
-        // delete from selection markers
-        hql = "delete from " + SelectionMarker.class.getName() + " where entry=:entry";
-        currentSession().createQuery(hql).setParameter("entry", entry).executeUpdate();
-
-        // finally delete actual entry
         delete(entry);
-
-        currentSession().clear();
     }
 
     /**
@@ -731,9 +661,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
      */
     @SuppressWarnings("unchecked")
     public List<Entry> getParents(long entryId) throws DAOException {
-        String sql = "select entry_id from entry_entry where linked_entry_id=" + entryId;
-        List list = currentSession().createSQLQuery(sql).list();
-        return getEntriesByIdSet(list);
+        return currentSession().createCriteria(Entry.class)
+                .createAlias("linkedEntries", "link")
+                .add(Restrictions.eq("link.id", entryId)).list();
     }
 
     public int getDeletedCount(String ownerUserId) {
