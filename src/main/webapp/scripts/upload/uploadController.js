@@ -122,8 +122,8 @@ angular.module('ice.upload.controller', [])
                     if ($scope.linkedSelection) {
                         var sheetHeaders = UploadUtil.getSheetHeaders($scope.importType);
                         var index = col - sheetHeaders.length;
-                        url += UploadUtil.indexToRestResource($scope.importType, index);
                         formDataType = $scope.linkedSelection;
+                        url += UploadUtil.indexToRestResource(formDataType, index);
                         actualEntryId = $scope.bulkUpload.linkedEntryIdData[row];
                     } else {
                         url += UploadUtil.indexToRestResource($scope.importType, col);
