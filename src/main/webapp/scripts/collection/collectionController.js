@@ -376,7 +376,7 @@ angular.module('ice.collection.controller', [])
                 display: 'Drafts',
                 icon: 'fa-pencil',
                 iconOpen: 'fa-pencil brown',
-                alwaysVisible: false
+                alwaysVisible: true
             },
             {
                 name: 'pending',
