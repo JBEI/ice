@@ -112,17 +112,9 @@ public class FolderDAO extends HibernateRepository<Folder> {
         return criteria.setProjection(Projections.property("entry.id")).list();
     }
 
-    @SuppressWarnings("unchecked")
-    public ArrayList<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit) {
-        Session session = currentSession();
-
+    public List<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit) {
         try {
-            Folder folder = get(folderId);
-            if (folder == null)
-                throw new DAOException("Could not locate folder with id " + folderId);
-
             String sortString;
-
             switch (sort) {
                 default:
                 case CREATED:
@@ -145,17 +137,15 @@ public class FolderDAO extends HibernateRepository<Folder> {
                     sortString = "recordType";
                     break;
             }
+            Criteria criteria = currentSession().createCriteria(Entry.class);
+            criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
+            criteria.createAlias("folders", "folder");
+            criteria.add(Restrictions.eq("folder.id", folderId));
 
-            String ascString = asc ? " asc" : " desc";
-            String queryString = "select distinct e from Entry e join e.folders f where f.id = :id "
-                    + "order by e." + sortString + ascString;
-
-            Query query = session.createQuery(queryString);
-            query.setLong("id", folderId);
-            query.setFirstResult(start);
-            query.setMaxResults(limit);
-            List list = query.list();
-            return new ArrayList<>(list);
+            criteria.addOrder(asc ? Order.asc(sortString) : Order.desc(sortString));
+            criteria.setMaxResults(limit);
+            criteria.setFirstResult(start);
+            return criteria.list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
