@@ -405,16 +405,18 @@
         </table>
     </div>
 
-    <div class="row" data-ng-if='searchResults && searchResults.results.length > 0'>
+    <div class="row" data-ng-if='searchResults && searchResults.results.length > 0' style="margin-top: -15px">
         <div class="col-md-5" style="padding-left: 0">
-            <pagination total-items="searchResults.resultCount" ng-change="setSearchResultPage(page)"
-                        ng-model="currentPage" max-size="maxSize"
-                        class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+            <pagination total-items="searchResults.resultCount" ng-change="searchResultPageChanged()"
+                        ng-model="params.currentPage" max-size="maxSize"
+                        class="pagination-sm" items-per-page="15" boundary-links="true">
+            </pagination>
         </div>
         <div class="col-md-7" style="margin: 22px 0;">
             <strong class="small">
-                <i ng-show="loadingSearchResults" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
-                searchResults.resultCount)}}</strong>
+                <i ng-show="loadingSearchResults" class="fa fa-spin fa-gear opacity_4"></i>
+                {{pageCounts(params.currentPage, searchResults.resultCount)}}
+            </strong>
         </div>
     </div>
 </div>
