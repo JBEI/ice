@@ -152,6 +152,8 @@ angular.module('ice.collection.controller', [])
 
             folders.folder($scope.params, function (result) {
                 $scope.folder = result;
+                if (result.canEdit)
+                    $scope.folderNameTooltip = "Click to rename";
                 $scope.loadingPage = false;
                 $scope.currentPage = pageNo;
             });
@@ -178,6 +180,8 @@ angular.module('ice.collection.controller', [])
                 folders.folder($scope.params, function (result) {
                     $scope.loadingPage = false;
                     $scope.folder = result;
+                    if (result.canEdit)
+                        $scope.folderNameTooltip = "Click to rename";
                     $scope.params.count = $scope.folder.count;
                 });
             }
@@ -206,6 +210,8 @@ angular.module('ice.collection.controller', [])
 
             folders.folder($scope.params, function (result) {
                 $scope.folder = result;
+                if (result.canEdit)
+                    $scope.folderNameTooltip = "Click to rename";
                 $scope.currentPage = 1;
             });
         };
@@ -322,10 +328,33 @@ angular.module('ice.collection.controller', [])
             });
         };
 
-        $scope.showFolderRenameModal = function() {
-            //var modalInstance = $modal.open({
-            //
-            //})
+        $scope.showFolderRenameModal = function () {
+            if (!$scope.folder.canEdit)
+                return;
+
+            var modalInstance = $modal.open({
+                templateUrl: 'views/folder/modal/rename-folder.html',
+                controller: function ($scope, $modalInstance, folderName) {
+                    $scope.newFolderName = folderName;
+                },
+                backdrop: 'static',
+                resolve: {
+                    folderName: function () {
+                        return $scope.folder.folderName;
+                    }
+                },
+                size: 'sm'
+            });
+
+            modalInstance.result.then(function (newName) {
+                if (newName === $scope.folder.folderName)
+                    return;
+
+                var tmp = {id: $scope.folder.id, folderName: newName};
+                folders.update({id: tmp.id}, tmp, function (result) {
+                    $scope.folder.folderName = result.folderName;
+                })
+            })
         }
     })
     // also the main controller

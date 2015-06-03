@@ -10,7 +10,7 @@
                                 <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
                                 <strong>
                                     <span style="text-transform: uppercase; color: #888">{{selectedCollection || folder.type}}</span>
-                                    <span class="folder_name" tooltip="Click to rename"
+                                    <span ng-class="{folder_name:folder.canEdit}" tooltip={{folderNameTooltip}}
                                           ng-click="showFolderRenameModal()">
                                         {{folder.folderName}}
                                     </span>
