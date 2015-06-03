@@ -7,17 +7,19 @@
         </div>
         <div class="col-xs-6">
             <br><img src="img/logo.png"><br><br>
-            <alert type="'danger'" style="width: 250px; padding: 8px" ng-if="errMsg">
+
+            <div class="alert alert-danger" style="width: 250px; padding: 8px" ng-if="errMsg">
                 <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
                 <span class="font-90em">{{errMsg}}</span>
-            </alert>
+            </div>
 
-            <alert type="'success'" style="width: 303px; padding: 8px" ng-if="registerSuccess">
+            <
+            <div class="alert alert-success" style="width: 303px; padding: 8px" ng-if="registerSuccess">
                 <i class="fa fa-info-circle font-14em"></i> Your new account has been created.
                 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Please check your email for login
                 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;credentials.
                 <br><br>&nbsp;&nbsp;<i class="fa fa-arrow-left"></i> <a href="/login">Back to login page</a>
-            </alert>
+            </div>
 
             <div ng-if="!registerSuccess">
                 <h5><b style="color: #777">Create New Account</b></h5>

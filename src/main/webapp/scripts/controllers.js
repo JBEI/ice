@@ -449,6 +449,8 @@ iceControllers.controller('ProfileEntryController', function ($scope, $location,
         });
     };
 
+    $scope.profileEntryPopupTemplate = "/views/folder/template.html";
+
     $scope.tooltipDetails = function (entry) {
         $scope.currentTooltip = undefined;
         var sessionId = $cookieStore.get("sessionId");

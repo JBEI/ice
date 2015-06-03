@@ -9,14 +9,14 @@
 
     <div class="row pad_top font-90em" ng-if="showUploadOptions&&entry.canEdit">
         <div class="col-md-12">
-            <alert type="'info'" style="margin-bottom: 10px">
+            <div class="alert alert-info" style="margin-bottom: 10px">
                 <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Upload Fasta, GenBank, or ABI
                 formats (optionally in a zip file)
-            </alert>
+            </div>
 
-            <alert type="'danger'" style="margin-bottom: 10px" ng-if="traceUploadError==true">
+            <div class="alert alert-danger" style="margin-bottom: 10px" ng-if="traceUploadError==true">
                 <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Error processing file
-            </alert>
+            </div>
 
             <!--file upload-->
             <input nv-file-select type="file" uploader="traceSequenceUploader"/>

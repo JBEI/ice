@@ -35,10 +35,10 @@
                 <sup class="count-badge">8</sup>
             </span>
             <span class="cursor_pointer" ng-click="hidePopovers(false)"
-                  ng-if="shoppingCartContents.length" popover-toggle="openShoppingCart"
-                  popover-trigger="manual"
+                  ng-if="shoppingCartContents.length" popover-enable="openShoppingCart"
+                  popover-trigger="click"
                   popover-placement="bottom" popover-title="Samples Cart"
-                  popover-template="/views/shopping-cart-template.html">
+                  popover-template="shoppingCartTemplate">
                 &nbsp;
                 <i class="fa fa-shopping-cart" style="font-size: 16px"></i>
                 <sup class="count-badge">{{shoppingCartContents.length}}</sup>
@@ -60,8 +60,8 @@
 
         <div class="btn-toolbar" style="margin-top: 20px;">
             <!-- sub menu [Create Entry, Add To, etc] -->
-            <div class="btn-group">
-                <button type="button" class="subMenuCreateNew btn-sm dropdown-toggle"
+            <div class="btn-group" dropdown>
+                <button type="button" class="subMenuCreateNew btn-sm" dropdown-toggle
                         style="font-size: 13px"
                         ng-click="createType='create'">Create Entry <span class="caret"></span>
                 </button>

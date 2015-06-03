@@ -460,6 +460,7 @@ angular.module('ice.collection.controller', [])
         // selected entries
         $scope.selection = [];
         $scope.shoppingCartContents = [];
+        $scope.openShoppingCart = true;
         samples.userRequests({status: 'IN_CART'}, {userId: $rootScope.user.id}, function (result) {
             $scope.shoppingCartContents = result.requests;
         });
@@ -480,6 +481,8 @@ angular.module('ice.collection.controller', [])
                 console.error(error);
             })
         };
+
+        $scope.shoppingCartTemplate = "/views/shopping-cart-template.html";
 
         // remove sample request
         $scope.removeFromCart = function (content, entry) {

@@ -271,15 +271,15 @@
                     </div>
 
                     <div class="margin-top-10 font-95em" ng-hide="activePart.hasSequence">
-                        <alert type="'info'" style="margin-bottom: 10px; margin-top: 10px">
+                        <div class="alert alert-info" style="margin-bottom: 10px; margin-top: 10px">
                             <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Supported file formats
                             are Genbank, Fasta and SBOL
-                        </alert>
+                        </div>
 
-                        <alert type="'danger'" style="margin-bottom: 10px" ng-if="serverError">
+                        <div class="alert alert-danger" style="margin-bottom: 10px" ng-if="serverError">
                             <i style="font-size: 18px" class="fa fa-exclamation-triangle pull-left"></i> Error parsing
                             file
-                        </alert>
+                        </div>
 
                         <!--file upload-->
             <span ng-if="!isPaste && !processingFile">

@@ -95,7 +95,7 @@
                 <td><a ng-href='/web/{{result.partner.id}}/entry/{{result.entryInfo.id}}'
                        class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result)"
-                       popover-template="/scripts/search/tooltip.html"
+                       popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -113,10 +113,6 @@
                 <td class="no_wrap"><a ng-href="https://{{result.partner.url}}/entry/{{result.entryInfo.id}}"
                                        target="_blank">{{result.partner.name}}</a></td>
                 <td style="vertical-align: middle">
-                    <!--<i ng-show="result.entryInfo.hasAttachment" class="fa fa-paperclip fa-fw"-->
-                    <!--style="color: #555; font-size: 14px;"></i>-->
-                    <!--<i ng-show="!result.entryInfo.hasAttachment" class="fa fa-square fa-fw"-->
-                    <!--style="opacity: 0; font-size: 14px;"></i>-->
                     <i ng-show="result.entryInfo.hasSample" class="fa fa-flask fa-fw"
                        style="color: #555; font-size: 14px;"></i>
                     <i ng-show="!result.entryInfo.hasSample" class="fa fa-square fa-fw"
@@ -185,7 +181,7 @@
                 <td><a ng-href='/web/{{result.partner.id}}/entry/{{result.entryInfo.id}}'
                        class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result)"
-                       popover-template="/scripts/search/tooltip.html"
+                       popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -271,7 +267,7 @@
                 </td>
                 <td><a ng-click="goToEntryDetails(result.entryInfo, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                       popover-template="/scripts/search/tooltip.html"
+                       popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -374,7 +370,7 @@
                 </td>
                 <td><a ng-click="goToEntryDetails(result.entryInfo, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                       popover-template="/scripts/search/tooltip.html"
+                       popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -397,10 +393,6 @@
                     </div>
                 </td>
                 <td style="vertical-align: middle">
-                    <!--<i ng-show="result.entryInfo.hasAttachment" class="fa fa-paperclip fa-fw"-->
-                    <!--style="color: #555; font-size: 14px;"></i>-->
-                    <!--<i ng-show="!result.entryInfo.hasAttachment" class="fa fa-square fa-fw"-->
-                    <!--style="opacity: 0; font-size: 14px;"></i>-->
                     <i ng-show="result.entryInfo.hasSample" class="fa fa-flask fa-fw"
                        style="color: #555; font-size: 14px;"></i>
                     <i ng-show="!result.entryInfo.hasSample" class="fa fa-square fa-fw"

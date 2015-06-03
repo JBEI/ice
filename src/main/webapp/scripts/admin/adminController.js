@@ -209,6 +209,8 @@ angular.module('ice.admin.controller', [])
             $location.path("/entry/" + entry.id);
         };
 
+        $scope.tranferredPopupTooltip = "/scripts/admin/transferred-tooltip.html";
+
         $scope.transferredTooltip = function (entry) {
             $scope.tooltip = undefined;
             Entry($cookieStore.get("sessionId")).tooltip({partId: entry.id},

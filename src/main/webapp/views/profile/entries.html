@@ -58,7 +58,7 @@
             </td>
             <td><a ng-href="/entry/{{entry.id}}" class="cell_mouseover form-group"
                    popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                   popover-template="/views/template.html" popover-placement="right">{{entry.partId}}</a>
+                   popover-template="profileEntryPopupTemplate" popover-placement="right">{{entry.partId}}</a>
             </td>
             <td>
                 <div title="{{entry.name}}" class="ellipsis" style="width: 350px">{{entry.name}}</div>
