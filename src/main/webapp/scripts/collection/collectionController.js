@@ -270,6 +270,8 @@ angular.module('ice.collection.controller', [])
                 });
         };
 
+        $scope.folderPopupTemplateUrl = "/views/folder/template.html";
+
         // opens a modal that presents user with options to share selected folder
         $scope.openFolderShareSettings = function () {
             var modalInstance = $modal.open({
@@ -318,6 +320,12 @@ angular.module('ice.collection.controller', [])
             }, function (error) {
                 console.error(error);
             });
+        };
+
+        $scope.showFolderRenameModal = function() {
+            //var modalInstance = $modal.open({
+            //
+            //})
         }
     })
     // also the main controller

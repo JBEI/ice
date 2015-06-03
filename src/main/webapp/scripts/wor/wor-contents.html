@@ -111,7 +111,7 @@
 
 <div class="row" ng-if="webResults && webResults.entries.length > 0">
     <div class="col-md-5" style="padding-left: 0">
-        <pagination total-items="webResults.count" on-select-page="setPage(page)" page="currentPage"
+        <pagination total-items="webResults.count" ng-change="setPage(page)" ng-model="currentPage"
                     max-size="maxSize" class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
     </div>
     <div class="col-md-7" style="margin-top: 25px;">

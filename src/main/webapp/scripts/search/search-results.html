@@ -415,8 +415,8 @@
 
     <div class="row" data-ng-if='searchResults && searchResults.results.length > 0'>
         <div class="col-md-5" style="padding-left: 0">
-            <pagination total-items="searchResults.resultCount" on-select-page="setSearchResultPage(page)"
-                        page="currentPage" max-size="maxSize"
+            <pagination total-items="searchResults.resultCount" ng-change="setSearchResultPage(page)"
+                        ng-model="currentPage" max-size="maxSize"
                         class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>
         <div class="col-md-7" style="margin: 22px 0;">

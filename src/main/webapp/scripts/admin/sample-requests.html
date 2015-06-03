@@ -103,7 +103,7 @@
 
     <div ng-if='sampleRequests && sampleRequests.requests.length > 0'>
         <div class="col-md-6" style="padding-left: 0">
-            <pagination total-items="sampleRequests.count" on-select-page="setSamplePage(page)" page="currentPage"
+            <pagination total-items="sampleRequests.count" ng-change="setSamplePage(page)" ng-model="currentPage"
                         max-size="maxSize"
                         class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>

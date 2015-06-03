@@ -113,7 +113,7 @@
 
     <div class="row" ng-if="transferredEntries && transferredEntries.entries.length > 0">
         <div class="col-md-5" style="padding-left: 0">
-            <pagination total-items="transferredEntries.count" on-select-page="setPage(page)" page="currentPage"
+            <pagination total-items="transferredEntries.count" ng-change="setPage(page)" ng-model="currentPage"
                         max-size="maxSize"
                         class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>

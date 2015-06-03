@@ -1128,11 +1128,11 @@ td.selected i.font-awesome {
     filter: alpha(opacity=0);
 }
 
-.bulk_import_name {
+.folder_name {
     cursor: pointer;
 }
 
-.bulk_import_name:hover {
+.folder_name:hover {
     background-color: #c1c1c1;
 }
 
