@@ -78,9 +78,11 @@ public class BulkUploadController {
         upload.setAccount(account);
         upload.setCreationTime(new Date());
         upload.setLastUpdateTime(upload.getCreationTime());
-        if (info.getStatus() == BulkUploadStatus.BULK_EDIT)
+        if (info.getStatus() == BulkUploadStatus.BULK_EDIT) {
+            // only one instance of bulk edit is allowed to remain
+            clearBulkEdits(userId);
             upload.setStatus(BulkUploadStatus.BULK_EDIT);
-        else
+        } else
             upload.setStatus(BulkUploadStatus.IN_PROGRESS);
 
         upload.setImportType(info.getType());
@@ -112,6 +114,28 @@ public class BulkUploadController {
 
         dao.update(upload);
         return upload.toDataTransferObject();
+    }
+
+    /**
+     * Removes any bulk edits belonging to the specified user
+     *
+     * @param userId unique identifier for user whose bulk edits are to be removed
+     */
+    protected void clearBulkEdits(String userId) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        if (account == null)
+            return;
+
+        List<BulkUpload> userEdits = dao.retrieveByAccount(account);
+        if (userEdits == null || userEdits.isEmpty())
+            return;
+
+        for (BulkUpload upload : userEdits) {
+            if (upload.getStatus() != BulkUploadStatus.BULK_EDIT)
+                continue;
+            upload.getContents().clear();
+            dao.delete(upload);
+        }
     }
 
     /**
