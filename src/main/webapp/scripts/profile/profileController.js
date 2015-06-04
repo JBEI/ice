@@ -297,8 +297,7 @@ angular.module('ice.profile.controller', [])
     })
     .controller('ProfileSamplesController', function ($scope, $cookieStore, $location, $stateParams, User) {
         $scope.maxSize = 15;
-        $scope.currentPage = 1;
-
+        $scope.params = {currentPage: 1};
         $scope.pendingSampleRequests = undefined;
 
         var user = User($cookieStore.get("sessionId"));
@@ -310,12 +309,9 @@ angular.module('ice.profile.controller', [])
                 console.error(error);
             });
 
-        $scope.setUserSamplePage = function (pageNo) {
-            if (pageNo == undefined || isNaN(pageNo))
-                pageNo = 1;
-
+        $scope.profileSamplesPageChanged = function () {
             $scope.loadingPage = true;
-            $scope.offset = (pageNo - 1) * 15;
+            $scope.offset = ($scope.params.currentPage - 1) * 15;
             user.samples({offset: $scope.offset}, {userId: profileId},
                 function (result) {
                     $scope.userSamples = result;
