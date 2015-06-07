@@ -58,7 +58,7 @@ public class RemoteAccessController {
      *         null on exception
      */
     @SuppressWarnings("unchecked")
-    public ArrayList<FolderDetails> getAvailableFolders(long partnerId) {
+    public List<FolderDetails> getAvailableFolders(long partnerId) {
         RemotePartner partner = this.remotePartnerDAO.get(partnerId);
         if (partner == null)
             return null;

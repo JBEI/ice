@@ -40,7 +40,7 @@ public class RemoteAccessResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/available")
-    public ArrayList<FolderDetails> readRemoteUser(@PathParam("id") long remoteId) {
+    public List<FolderDetails> readRemoteUser(@PathParam("id") long remoteId) {
         return controller.getAvailableFolders(remoteId);
     }
 
