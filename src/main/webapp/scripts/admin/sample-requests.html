@@ -24,7 +24,7 @@
     </div>
 
     <div class="pad_top">
-        <div ng-if='!sampleRequests'><img src="/img/loader-mini.gif"> Loading...</div>
+        <div ng-if='!sampleRequests'><img src="img/loader-mini.gif"> Loading...</div>
 
         <table cellspacing="0" ng-if='sampleRequests && sampleRequests.requests.length > 0'
                class="table table-bordered table-responsive table-hover font-95em" ng-class="{'opacity_4':loadingPage}">
@@ -58,9 +58,9 @@
                 <td style="width: 30px; line-height:1; opacity:0.3; text-shadow:0 1px 0 #fff;">
                     <b class="no_wrap">{{indexStart + $index+1 | number}}</b>
                 </td>
-                <td><a ng-href="/profile/{{request.requester.id}}" class="no_wrap">{{request.requester.firstName}}
+                <td><a ng-href="profile/{{request.requester.id}}" class="no_wrap">{{request.requester.firstName}}
                     {{request.requester.lastName}}</a></td>
-                <td><a ng-href="/entry/{{request.partData.id}}">{{request.partData.name}}</a></td>
+                <td><a ng-href="entry/{{request.partData.id}}">{{request.partData.name}}</a></td>
                 <td>
                     <small>{{request.partData.selectionMarkers.toString()}}</small>
                 </td>

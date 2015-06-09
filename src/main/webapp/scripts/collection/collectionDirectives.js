@@ -9,7 +9,7 @@ angular.module('ice.collection.directives', [])
             },
 
             restrict: "AE",
-            templateUrl: "/scripts/collection/entryList.html",
+            templateUrl: "scripts/collection/entryList.html",
             controller: "CollectionEntryListController"
         }
     });

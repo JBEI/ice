@@ -129,7 +129,7 @@ angular.module('ice.wor.controller', [])
                 });
             }, $scope.selectedPartnerFolder.count, position, url);
 
-            $location.path("/web/" + partnerId + "/entry/" + entryId, true);
+            $location.path("web/" + partnerId + "/entry/" + entryId, true);
         };
     })
     .controller('WorEntryController', function ($location, $scope, $window, WebOfRegistries, $stateParams, EntryService, WorService, Remote) {
@@ -188,10 +188,10 @@ angular.module('ice.wor.controller', [])
         };
 
         var menuSubDetails = $scope.subDetails = [
-            {url:'/scripts/wor/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
-            {id:'sequences', url:'/scripts/wor/entry/sequence-analysis.html', display:'Sequence Analysis', isPrivileged:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
-            {id:'comments', url:'/scripts/wor/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
-            {id:'samples', url:'/scripts/wor/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'}
+            {url:'scripts/wor/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
+            {id:'sequences', url:'scripts/wor/entry/sequence-analysis.html', display:'Sequence Analysis', isPrivileged:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
+            {id:'comments', url:'scripts/wor/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
+            {id:'samples', url:'scripts/wor/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'}
         ];
 
         $scope.showSelection = function (index) {
@@ -235,7 +235,7 @@ angular.module('ice.wor.controller', [])
         };
 
         $scope.downloadRemoteAttachment = function (attachment) {
-            $window.open("/rest/file/remote/" + $stateParams.partner + "/attachment/" + attachment.fileId, "_self");
+            $window.open("rest/file/remote/" + $stateParams.partner + "/attachment/" + attachment.fileId, "_self");
         };
     })
     .controller('WebOfRegistriesDetailController', function ($scope, $cookieStore, $location, $stateParams) {
@@ -310,7 +310,7 @@ angular.module('ice.wor.controller', [])
         };
 
         $scope.selectPartner = function (partner) {
-            $location.path("/web/" + partner.id);
+            $location.path("web/" + partner.id);
             $scope.selectedPartner = partner.id;
             var remote = Remote();
             remote.publicFolders({id: partner.id}, function (result) {
@@ -335,7 +335,7 @@ angular.module('ice.wor.controller', [])
 
         // retrieves public folders for specified registry and re-directs
         $scope.selectPartner = function (partner) {
-            $location.path("/web/" + partner.id);
+            $location.path("web/" + partner.id);
             $scope.selectedPartner = partner.id;
             var remote = Remote();
             remote.publicFolders({id: partner.id}, function (result) {

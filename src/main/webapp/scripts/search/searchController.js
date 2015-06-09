@@ -108,7 +108,7 @@ angular.module('ice.search.controller', [])
                 );
             }, $scope.searchResults.resultCount, offset, "/search", $scope.searchResults.sortField);
 
-            $location.path("/entry/" + entry.id);
+            $location.path("entry/" + entry.id);
         };
 
         //

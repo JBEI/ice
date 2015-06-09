@@ -6,7 +6,7 @@ angular.module('ice.search.service', [])
 
             var sessionId = $cookieStore.get("sessionId");
 
-            return $resource('/rest/search', {}, {
+            return $resource('rest/search', {}, {
                 runSearch:{
                     method:'GET',
                     responseType:"json",

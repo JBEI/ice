@@ -10,7 +10,7 @@
                     <strong>{{selectedPartnerFolder.folderName}}</strong>
                 </span>
 
-                <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
+                <img alt="Loading..." ng-if="loadingPage" src="img/loader-mini.gif"/>
                 &nbsp;&nbsp;&nbsp;<span ng-show="folder.id" folder-actions class="font-95em"></span>
             </h4>
         </div>
@@ -63,7 +63,7 @@
 
             <tr data-ng-show='!selectedPartnerFolder&&!remoteRetrieveError'>
                 <td colspan="10">
-                    <img alt="Loading..." src="/img/loader-mini.gif"/>
+                    <img alt="Loading..." src="img/loader-mini.gif"/>
                     Loading...
                 </td>
             </tr>
@@ -84,7 +84,7 @@
                 <td><a ng-click="getRemoteEntryDetails(selectedPartner.id, entry.id, $index)"
                        class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                       popover-template="/views/template.html"
+                       popover-template="views/template.html"
                        popover-placement="right">{{entry.partId}}</a>
                 </td>
                 <td>

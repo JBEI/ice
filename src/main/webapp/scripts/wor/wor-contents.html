@@ -3,7 +3,7 @@
         <h4>
             <strong style="color: #888;text-transform: uppercase;">
                 <i class="fa fa-fw fa-globe"></i> {{webResults.registryPartner.name}}</strong>
-            <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
+            <img alt="Loading..." ng-if="loadingPage" src="img/loader-mini.gif"/>
             &nbsp;&nbsp;&nbsp;<span ng-show="folder.id" folder-actions class="font-95em"></span>
         </h4>
     </div>
@@ -56,7 +56,7 @@
 
         <tr data-ng-show='!webResults'>
             <td colspan="10">
-                <img alt="Loading..." src="/img/loader-mini.gif"/>
+                <img alt="Loading..." src="img/loader-mini.gif"/>
                 Loading...
             </td>
         </tr>
@@ -69,10 +69,10 @@
             <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
                 {{entry.type | uppercase}}
             </td>
-            <td><a ng-href="/web/{{webResults.registryPartner.id}}/entry/{{entry.id}}"
+            <td><a ng-href="web/{{webResults.registryPartner.id}}/entry/{{entry.id}}"
                    ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
                    popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                   popover-template="/views/template.html"
+                   popover-template="views/template.html"
                    popover-placement="right">{{entry.partId}}</a>
             </td>
             <td>

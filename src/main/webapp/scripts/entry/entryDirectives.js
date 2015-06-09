@@ -23,7 +23,7 @@ angular.module('ice.entry.directives', [])
             },
 
             restrict:"E",
-            templateUrl: "/scripts/entry/sample/shelf.html",
+            templateUrl: "scripts/entry/sample/shelf.html",
             controller:"DisplaySampleController"
         }
     })

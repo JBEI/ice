@@ -58,22 +58,22 @@ angular.module('ice.admin.controller', [])
         var menuOption = $stateParams.option;
 
         var menuOptions = $scope.profileMenuOptions = [
-            {url: '/scripts/admin/settings.html', display: 'Settings', selected: true, icon: 'fa-cogs'},
+            {url: 'scripts/admin/settings.html', display: 'Settings', selected: true, icon: 'fa-cogs'},
             {
                 id: 'web',
-                url: '/scripts/admin/wor.html',
+                url: 'scripts/admin/wor.html',
                 display: 'Web of Registries',
                 selected: false,
                 icon: 'fa-globe'
             },
-            {id: 'users', url: '/scripts/admin/users.html', display: 'Users', selected: false, icon: 'fa-user'},
-            {id: 'groups', url: '/scripts/admin/groups.html', display: 'Groups', selected: false, icon: 'fa-group'},
+            {id: 'users', url: 'scripts/admin/users.html', display: 'Users', selected: false, icon: 'fa-user'},
+            {id: 'groups', url: 'scripts/admin/groups.html', display: 'Groups', selected: false, icon: 'fa-group'},
             {
-                id: 'transferred', url: '/scripts/admin/transferred.html', display: 'Transferred Entries',
+                id: 'transferred', url: 'scripts/admin/transferred.html', display: 'Transferred Entries',
                 selected: false, icon: 'fa-list'
             },
             {
-                id: 'samples', url: '/scripts/admin/sample-requests.html', display: 'Sample Requests', selected: false,
+                id: 'samples', url: 'scripts/admin/sample-requests.html', display: 'Sample Requests', selected: false,
                 icon: 'fa-shopping-cart'
             }
         ];
@@ -87,9 +87,9 @@ angular.module('ice.admin.controller', [])
             $scope.adminOptionSelection = menuOptions[index].url;
             $scope.selectedDisplay = menuOptions[index].display;
             if (menuOptions[index].id) {
-                $location.path("/admin/" + menuOptions[index].id);
+                $location.path("admin/" + menuOptions[index].id);
             } else {
-                $location.path("/admin");
+                $location.path("admin");
             }
         };
 
@@ -179,7 +179,7 @@ angular.module('ice.admin.controller', [])
                 getTransferredEntries();
             };
 
-            Util.update("/rest/parts", $scope.selectedTransferredEntries, {visibility: "OK"}, successHandler);
+            Util.update("rest/parts", $scope.selectedTransferredEntries, {visibility: "OK"}, successHandler);
         };
 
         $scope.rejectEntries = function () {
@@ -187,7 +187,7 @@ angular.module('ice.admin.controller', [])
                 getTransferredEntries();
             };
 
-            Util.update("/rest/parts", $scope.selectedTransferredEntries, {visibility: "DELETED"}, successHandler);
+            Util.update("rest/parts", $scope.selectedTransferredEntries, {visibility: "DELETED"}, successHandler);
         };
 
         $scope.selectTransferredEntry = function (entry) {
@@ -206,7 +206,7 @@ angular.module('ice.admin.controller', [])
                 params.offset = index;
             }
             $rootScope.collectionContext = params;
-            $location.path("/entry/" + entry.id);
+            $location.path("entry/" + entry.id);
         };
 
         $scope.transferredTooltip = function (entry) {

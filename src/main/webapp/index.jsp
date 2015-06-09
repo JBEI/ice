@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" data-ng-app="iceApp">
 <head>
-    <base href="/">
+    <base href="<%=request.getContextPath()%>/">
 
     <meta charset="utf-8">
     <title>ICE - Inventory of Composable Elements</title>

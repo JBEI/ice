@@ -60,7 +60,7 @@
                         <input class="input_box" ng-model="newSample.label" placeHolder="Enter description">
                         <br>
                         <span style="color: #777"><span my-current-time="format"></span></span> - <a
-                            ng-href="/profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a>
+                            ng-href="profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a>
                     </td>
                 </tr>
             </table>
@@ -86,7 +86,7 @@
                            popover-trigger="manual" popover-toggle="newSample.open.cell === row + (10+col+'').slice(-2)"
                            ng-click="cellBarcodeClick(row, col)"
                            popover-placement="bottom" popover-title="Well {{row + (10+col+'').slice(-2)}}"
-                           popover-template="/scripts/entry/sample/barcode-popover.html"></i>
+                           popover-template="scripts/entry/sample/barcode-popover.html"></i>
                     </td>
                 </tr>
                 <tr>
@@ -95,7 +95,7 @@
                         <input class="input_box" ng-model="newSample.label" placeHolder="Enter label">
                         <br>
                         <span style="color: #777" my-current-time="format"></span> - <a
-                            ng-href="/profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a>
+                            ng-href="profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a>
                     </td>
                 </tr>
             </table>
@@ -136,7 +136,7 @@
                         <input class="input_box" ng-model="newSample.label" placeHolder="Enter description">
                         <br>
                         <span style="color: #777"><span my-current-time="format"></span></span> - <a
-                            ng-href="/profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a>
+                            ng-href="profile/{{user.id}}">{{user.firstName}} {{user.lastName}}</a>
                     </td>
                 </tr>
             </table>

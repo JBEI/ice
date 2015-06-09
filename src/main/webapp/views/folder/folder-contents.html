@@ -7,7 +7,7 @@
                     <td>
                         <h4>
                             <span style="white-space: nowrap">
-                                <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
+                                <img alt="Loading..." ng-if="loadingPage" src="img/loader-mini.gif"/>
                                 <strong><span style="text-transform: uppercase; color: #888"> {{selectedCollection || folder.type}}</span>
                                     {{folder.folderName}}</strong>
                                 <span ng-if="folder.publicReadAccess">&nbsp;
@@ -22,7 +22,7 @@
 
                             <div class="no_wrap">
                                 <small class="font-65em" ng-if="folder.type==='SHARED'">
-                                    Shared by <a ng-href="/profile/{{folder.owner.id}}">{{folder.owner.firstName}}
+                                    Shared by <a ng-href="profile/{{folder.owner.id}}">{{folder.owner.firstName}}
                                     {{folder.owner.lastName}}</a>
                                     <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
                                 </small>
@@ -54,7 +54,7 @@
     <!--collections like 'personal', 'available' do not have a folderName-->
     <div class="row" ng-if="!folder.type">
         <div class="col-md-12 entry_general_header_td">
-            <h4><img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
+            <h4><img alt="Loading..." ng-if="loadingPage" src="img/loader-mini.gif"/>
                 <strong style="color: #888;text-transform: uppercase;">{{selectedFolder}}</strong>
                 <!--<br><small class="font-65em">Folder Description</small>-->
             </h4>
@@ -63,7 +63,7 @@
 
     <div class="row">
         <div class="pad_top" data-ng-show='!folder'>
-            <img alt="Loading..." src="/img/loader-mini.gif"/> Loading...
+            <img alt="Loading..." src="img/loader-mini.gif"/> Loading...
         </div>
 
         <div class="pad_top" ng-show="folder && folder.entries.length == 0">
@@ -150,7 +150,7 @@
                 </td>
                 <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                       popover-template="/views/template.html" popover-placement="right">{{entry.partId}}</a>
+                       popover-template="views/template.html" popover-placement="right">{{entry.partId}}</a>
                 </td>
                 <td>
                     <div title="{{entry.name}}" class="ellipsis" style="width: 350px">{{entry.name}}</div>

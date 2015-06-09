@@ -83,7 +83,7 @@
             </thead>
             <tbody>
             <tr data-ng-repeat="user in userList.users">
-                <td class="no_wrap">{{user.firstName}} {{user.lastName}} (<a ng-href="/profile/{{user.id}}">{{user.email}}</a>)
+                <td class="no_wrap">{{user.firstName}} {{user.lastName}} (<a ng-href="profile/{{user.id}}">{{user.email}}</a>)
                 </td>
                 <td style="width:160px; white-space:nowrap" ng-if="user.isAdmin">
                     <small class="label label-danger"

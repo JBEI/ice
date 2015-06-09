@@ -80,7 +80,7 @@ angular.module('ice.collection.controller', [])
                 type = "folders";
             }
 
-            $location.path("/" + type + "/" + folder.id);
+            $location.path("" + type + "/" + folder.id);
         };
 
         //
@@ -90,7 +90,7 @@ angular.module('ice.collection.controller', [])
         $scope.selectCollection = function (name) {
             EntryContextUtil.resetContext();
             FolderSelection.selectCollection(name);
-            $location.path("/folders/" + name);
+            $location.path("folders/" + name);
             $scope.selectedFolder = name;
 
             // name and display differ for "Featured". using this till they are reconciled
@@ -257,7 +257,7 @@ angular.module('ice.collection.controller', [])
                     });
             }, $scope.params.count, offset, "/folders/" + $scope.params.folderId, $scope.params.sort);
 
-            $location.path("/entry/" + entry.id);
+            $location.path("entry/" + entry.id);
         };
 
         $scope.tooltipDetails = function (e) {
@@ -273,7 +273,7 @@ angular.module('ice.collection.controller', [])
         // opens a modal that presents user with options to share selected folder
         $scope.openFolderShareSettings = function () {
             var modalInstance = $modal.open({
-                templateUrl: '/views/modal/folder-permissions.html',
+                templateUrl: 'views/modal/folder-permissions.html',
                 controller: "FolderPermissionsController",
                 backdrop: "static",
                 resolve: {
@@ -406,7 +406,7 @@ angular.module('ice.collection.controller', [])
 
         if ($location.path() === "/") {
             // change state
-            $location.path("/folders/personal");
+            $location.path("folders/personal");
 //        // a bit of a hack. the folders are a child state so when
 //        // url/folder/personal is accessed, this code is still executed (stateParams do not help here)
 //        // so that causes personal folder to be retrieved twice
@@ -630,7 +630,7 @@ angular.module('ice.collection.controller', [])
 
                 // if the deleted folder is one user is currently on, re-direct to personal collection
                 if (folder.id == $stateParams.collection) {
-                    $location.path("/folders/personal");
+                    $location.path("folders/personal");
                 }
             }, function (error) {
                 console.error(error);

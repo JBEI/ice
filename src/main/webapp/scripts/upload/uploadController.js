@@ -114,7 +114,7 @@ angular.module('ice.upload.controller', [])
                 var uploadFile = function () {
                     var id = $scope.bulkUpload.id;
                     var file = files[0];
-                    var url = "/rest/upload/" + id + "/";
+                    var url = "rest/upload/" + id + "/";
                     var formDataType;
                     var actualEntryId;
 
@@ -195,7 +195,7 @@ angular.module('ice.upload.controller', [])
             };
 
             var autoComplete = function (field, query, process) {
-                $http.get('/rest/parts/autocomplete', {
+                $http.get('rest/parts/autocomplete', {
                     headers: {'X-ICE-Authentication-SessionId': sid},
                     params: {
                         val: query,
@@ -225,7 +225,7 @@ angular.module('ice.upload.controller', [])
                         object.type = 'autocomplete';
                         object.strict = true;
                         object.source = function (query, process) {
-                            $http.get('/rest/upload/partNumbers', {
+                            $http.get('rest/upload/partNumbers', {
                                 headers: {'X-ICE-Authentication-SessionId': sid},
                                 params: {
                                     token: query
@@ -513,7 +513,7 @@ angular.module('ice.upload.controller', [])
                         $scope.bulkUpload.id = result.id;
                         $scope.bulkUpload.lastUpdate = result.lastUpdate;
                         $scope.bulkUpload.name = result.name;
-                        //                            $location.path("/upload/" + result.id, false);
+                        //                            $location.path("upload/" + result.id, false);
 
                         // then update the list
                         updateEntryList(objects);
@@ -967,7 +967,7 @@ angular.module('ice.upload.controller', [])
         $scope.addType = addType;
 
         var uploader = $scope.importUploader = new FileUploader({
-            url: "/rest/upload/file",
+            url: "rest/upload/file",
             method: 'POST',
             headers: {"X-ICE-Authentication-SessionId": sid},
             formData: [
@@ -982,7 +982,7 @@ angular.module('ice.upload.controller', [])
 //
             if (!isNaN(response)) {
                 $modalInstance.close();
-                $location.path("/upload/" + response);
+                $location.path("upload/" + response);
             } else {
                 $scope.uploadError = response;
             }
@@ -1018,7 +1018,7 @@ angular.module('ice.upload.controller', [])
         };
 
         $scope.downloadCSVTemplate = function () {
-            var url = "/rest/file/upload/" + $scope.addType;
+            var url = "rest/file/upload/" + $scope.addType;
             if (linkedAddType)
                 url += "?link=" + linkedAddType;
             $window.open(url, "_self");

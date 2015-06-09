@@ -116,7 +116,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
             function (result) {
                 $scope.$broadcast("RefreshAfterDeletion");
                 $scope.$broadcast("UpdateCollectionCounts");
-                $location.path("/folders/personal")
+                $location.path("folders/personal")
             }, function (error) {
                 console.log(error);
             })
@@ -167,7 +167,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
                 entryList: selectedEntries
             }, function (result) {
                 console.log(result);
-                $location.path("/upload/" + result.id);
+                $location.path("upload/" + result.id);
             }, function (error) {
                 console.error("error creating bulk upload", error);
             });
@@ -208,7 +208,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
         files.getCSV(selection,
             function (result) {
                 if (result && result.value) {
-                    $window.open("/rest/file/tmp/" + result.value, "_self");
+                    $window.open("rest/file/tmp/" + result.value, "_self");
                     Selection.reset();
                 }
 
@@ -284,7 +284,7 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
     };
 
     $scope.cancel = function () {
-        $location.path("/login");
+        $location.path("login");
     }
 });
 
@@ -311,14 +311,14 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
     };
 
     $scope.redirectToLogin = function () {
-        $location.path("/login");
+        $location.path("login");
     }
 });
 
 iceControllers.controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
     var message = Message($cookieStore.get('sessionId'));
     var profileId = $stateParams.id;
-    $location.path("/profile/" + profileId + "/messages", false);
+    $location.path("profile/" + profileId + "/messages", false);
     message.query(function (result) {
         $scope.messages = result;
     });
@@ -326,7 +326,7 @@ iceControllers.controller('MessageController', function ($scope, $location, $coo
 
 iceControllers.controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, User, Group) {
     var profileId = $stateParams.id;
-    $location.path("/profile/" + profileId + "/groups", false);
+    $location.path("profile/" + profileId + "/groups", false);
     $scope.selectedUsers = [];
     $scope.selectedRemoteUsers = [];
     $scope.myGroups = [];
@@ -428,7 +428,7 @@ iceControllers.controller('ProfileEntryController', function ($scope, $location,
 
     var user = User($cookieStore.get("sessionId"));
     var profileId = $stateParams.id;
-    $location.path("/profile/" + profileId + "/entries", false);
+    $location.path("profile/" + profileId + "/entries", false);
     $scope.params = {userId: profileId, sort: "created", asc: false};
 
     user.getEntries($scope.params, function (result) {
@@ -576,31 +576,31 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
 
     var menuOptions = $scope.profileMenuOptions = [
         {
-            url: '/views/profile/profile-information.html',
+            url: 'views/profile/profile-information.html',
             display: 'Profile',
             selected: true,
             icon: 'fa-user',
             open: true
         },
-        {id: 'prefs', url: '/views/profile/preferences.html', display: 'Preferences', selected: false, icon: 'fa-cog'},
-        {id: 'groups', url: '/views/profile/groups.html', display: 'Groups', selected: false, icon: 'fa-group'},
+        {id: 'prefs', url: 'views/profile/preferences.html', display: 'Preferences', selected: false, icon: 'fa-cog'},
+        {id: 'groups', url: 'views/profile/groups.html', display: 'Groups', selected: false, icon: 'fa-group'},
         {
             id: 'messages',
-            url: '/views/profile/messages.html',
+            url: 'views/profile/messages.html',
             display: 'Messages',
             selected: false,
             icon: 'fa-envelope-o'
         },
         {
             id: 'samples',
-            url: '/views/profile/samples.html',
+            url: 'views/profile/samples.html',
             display: 'Samples',
             selected: false,
             icon: 'fa-shopping-cart'
         },
         {
             id: 'entries',
-            url: '/views/profile/entries.html',
+            url: 'views/profile/entries.html',
             display: 'Entries',
             selected: false,
             icon: 'fa-th-list',
@@ -623,9 +623,9 @@ iceControllers.controller('ProfileController', function ($scope, $location, $coo
         selectedOption.selected = true;
         $scope.profileOptionSelection = menuOptions[index].url;
         if (selectedOption.id) {
-            $location.path("/profile/" + profileId + "/" + selectedOption.id);
+            $location.path("profile/" + profileId + "/" + selectedOption.id);
         } else {
-            $location.path("/profile/" + profileId);
+            $location.path("profile/" + profileId);
         }
     };
 
@@ -798,7 +798,7 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
     };
 
     $scope.goToRegister = function () {
-        $location.path("/register");
+        $location.path("register");
     };
 
     $scope.canCreateAccount = false;
