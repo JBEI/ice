@@ -1,5 +1,6 @@
 package org.jbei.ice.services.rest;
 
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.sample.PartSample;
@@ -48,11 +49,19 @@ public class SampleResource extends RestResource {
             @DefaultValue("requested") @QueryParam("sort") String sort,
             @DefaultValue("false") @QueryParam("asc") boolean asc,
             @QueryParam("filter") String filter,
-            @QueryParam("status") SampleRequestStatus status,
+            @QueryParam("status") String status,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         Logger.info(userId + ": retrieving sample requests");
-        UserSamples samples = requestRetriever.getRequests(userId, offset, limit, sort, asc, status, filter);
+        SampleRequestStatus requestStatus = null;
+        if (!StringUtils.isEmpty(status)) {
+            try {
+                requestStatus = SampleRequestStatus.valueOf(status);
+            } catch (Exception e) {
+                requestStatus = null;
+            }
+        }
+        UserSamples samples = requestRetriever.getRequests(userId, offset, limit, sort, asc, requestStatus, filter);
         return super.respond(Response.Status.OK, samples);
     }
 
@@ -88,7 +97,7 @@ public class SampleResource extends RestResource {
     @DELETE
     @Path("/requests/{id}")
     public Response deleteSampleRequest(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
-            @PathParam("id") long requestId) {
+                                        @PathParam("id") long requestId) {
         String userId = getUserIdFromSessionHeader(sessionId);
         return respond(Response.Status.OK, requestRetriever.removeSampleFromCart(userId, requestId));
     }
