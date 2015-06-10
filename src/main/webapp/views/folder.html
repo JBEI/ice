@@ -60,15 +60,15 @@
 
         <div class="btn-toolbar" style="margin-top: 20px;">
             <!-- sub menu [Create Entry, Add To, etc] -->
-            <div class="btn-group" dropdown>
-                <button type="button" class="subMenuCreateNew btn-sm" dropdown-toggle
+            <div class="btn-group" dropdown is-open="createEntry.isOpen">
+                <button type="button" class="subMenuCreateNew btn-sm"
                         style="font-size: 13px"
-                        ng-click="createType='create'">Create Entry <span class="caret"></span>
+                        ng-click="toggleUploadDropdown($event, 'create')">Create Entry <span class="caret"></span>
                 </button>
 
                 <button type="button" style="padding: 5px 5px"
-                        class="btn-xs subMenuCreateNew dropdown-toggle" dropdown-toggle
-                        title="Bulk Import" ng-click="createType='upload'">
+                        class="btn-xs subMenuCreateNew"
+                        title="Bulk Import" ng-click="toggleUploadDropdown($event, 'upload')">
                     <i class="fa fa-table" style="font-size: 14px"></i>
                 </button>
 

@@ -461,6 +461,21 @@ angular.module('ice.collection.controller', [])
             $scope.openShoppingCart = !hide;
         };
 
+        $scope.createEntry = {
+            isOpen: false
+        };
+
+        $scope.toggleUploadDropdown = function ($event, createType) {
+            $event.preventDefault();
+            $event.stopPropagation();
+            if ($scope.createType === createType) {
+                $scope.createEntry.isOpen = !$scope.createEntry.isOpen;
+            } else {
+                $scope.createType = createType;
+                $scope.createEntry.isOpen = true;
+            }
+        };
+
         $scope.submitShoppingCart = function () {
             var contentIds = [];
             for (var idx = 0; idx < $scope.shoppingCartContents.length; idx += 1)
