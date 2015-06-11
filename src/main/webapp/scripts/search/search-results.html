@@ -67,7 +67,7 @@
                 </th>
                 <th ng-click="sortResults('created')" class="cursor_pointer" style="width: 120px">
                     <span style="font-size: 11px; text-transform: uppercase">Created</span>
-                    <i ng-show="searchFilters.parameters.sortField=='CREATED'" style="font-size: 14px"
+                    <i ng-show="searchFilters.parameters.sortField==='CREATED'" style="font-size: 14px"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                     <i ng-if="searchFilters.parameters.sortField!=='CREATED'" class="sortable fa fa-angle-down"></i>
@@ -315,7 +315,7 @@
                     <!--ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>-->
                 </th>
                 <th ng-click="sortResults('TYPE')" class="cursor_pointer">
-                    <span style="font-size: 12px; text-transform: uppercase">TYPE</span>
+                    <span style="font-size: 12px">TYPE</span>
                     <i ng-if="searchFilters.parameters.sortField!=='TYPE'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='TYPE'" style="font-size: 14px;"
                        class="fa opacity_4"
@@ -345,10 +345,10 @@
                 </th>
                 <th ng-click="sortResults('created')" class="cursor_pointer">
                     <span style="font-size: 11px; text-transform: uppercase">Created</span>
-                    <i ng-show="searchFilters.parameters.sortField=='created'" style="font-size: 14px"
+                    <i ng-show="searchFilters.parameters.sortField==='CREATED'" style="font-size: 14px"
                        class="fa opacity_4"
-                       ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
-                    <i ng-if="searchFilters.parameters.sortField!=='created'" class="sortable fa fa-angle-down"></i>
+                       ng-class="{'fa-angle-down':!searchFilters.parameters.sortAscending, 'fa-angle-up':searchFilters.parameters.sortAscending}"></i>
+                    <i ng-if="searchFilters.parameters.sortField!=='CREATED'" class="sortable fa fa-angle-down"></i>
                 </th>
             </tr>
             </thead>
