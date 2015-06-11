@@ -68,7 +68,7 @@ public class HibernateSearch {
                 Query query;
 
                 if (occur == BooleanClause.Occur.MUST)
-                    query = qb.phrase().onField(field).sentence(term).createQuery();
+                    query = qb.phrase().withSlop(3).onField(field).sentence(term).createQuery();
                 else if (term.contains("*")) {
                     if (!field.equals("name"))
                         continue;
@@ -97,7 +97,7 @@ public class HibernateSearch {
             // bio-safety level
             if (option != null) {
                 TermContext levelContext = qb.keyword();
-                org.apache.lucene.search.Query biosafetyQuery =
+                Query biosafetyQuery =
                         levelContext.onField("bioSafetyLevel").ignoreFieldBridge()
                                 .matching(option.getValue()).createQuery();
                 booleanQuery.add(biosafetyQuery, BooleanClause.Occur.MUST);
@@ -282,11 +282,11 @@ public class HibernateSearch {
                                        SearchQuery searchQuery, HashMap<String, Float> userBoost,
                                        HashMap<String, SearchResult> blastResults) {
         // types for which we are searching. default is all
-        ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
-        if (entryTypes == null || entryTypes.isEmpty()) {
-            entryTypes = new ArrayList<>();
-            entryTypes.addAll(Arrays.asList(EntryType.values()));
-        }
+//        ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
+//        if (entryTypes == null || entryTypes.isEmpty()) {
+//            entryTypes = new ArrayList<>();
+//            entryTypes.addAll(Arrays.asList(EntryType.values()));
+//        }
 
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         int resultCount;
@@ -294,15 +294,15 @@ public class HibernateSearch {
         BooleanQuery booleanQuery = new BooleanQuery();
 
         // get classes for search
-        Class<?>[] classes = new Class<?>[EntryType.values().length];
+//        Class<?>[] classes = new Class<?>[EntryType.values().length];
         HashSet<String> fields = new HashSet<>();
-        fields.addAll(SearchFieldFactory.getCommonFields());
+//        fields.addAll(SearchFieldFactory.getCommonFields());
 
-        for (int i = 0; i < entryTypes.size(); i += 1) {
-            EntryType type = entryTypes.get(i);
-            classes[i] = SearchFieldFactory.entryClass(type);
-            fields.addAll(SearchFieldFactory.entryFields(type));
-        }
+//        for (int i = 0; i < entryTypes.size(); i += 1) {
+//            EntryType type = entryTypes.get(i);
+//            classes[i] = SearchFieldFactory.entryClass(type);
+        fields.addAll(SearchFieldFactory.entryFields(searchQuery.getEntryTypes()));
+//        }
 
         // generate queries for terms filtering stop words
         for (Map.Entry<String, BooleanClause.Occur> entry : terms.entrySet()) {
@@ -323,11 +323,11 @@ public class HibernateSearch {
             return executeSearchNoTerms(userId, blastResults, searchQuery);
 
         // wrap Lucene query in a org.hibernate.Query
-        FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
+        FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery);
 
         // get max score
-        fullTextQuery.setFirstResult(0); //start from the "start"th element
-        fullTextQuery.setMaxResults(1);  //return count elements
+        fullTextQuery.setFirstResult(0);
+        fullTextQuery.setMaxResults(1);
         fullTextQuery.setProjection(FullTextQuery.SCORE);
         List result = fullTextQuery.list();
         float maxScore = -1f;
@@ -348,6 +348,13 @@ public class HibernateSearch {
 
         // check sample
         checkEnableHasAttribute(fullTextQuery, searchQuery.getParameters());
+
+        // check enable filter for type
+        List<EntryType> entryTypes = searchQuery.getEntryTypes();
+        if (entryTypes != null && entryTypes.size() != EntryType.values().length) {
+            fullTextQuery.enableFullTextFilter("type")
+                    .setParameter("types", entryTypes);
+        }
 
         // set paging params
         fullTextQuery.setFirstResult(searchQuery.getParameters().getStart());
@@ -374,7 +381,6 @@ public class HibernateSearch {
                 PartData info = ModelToInfoFactory.createTableViewData(userId, entry, true);
                 if (info == null)
                     continue;
-                // for bulk edit
                 info.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
                 searchResult.setEntryInfo(info);
             }
@@ -400,6 +406,9 @@ public class HibernateSearch {
 
             case TYPE:
                 return new Sort(new SortField("recordType", SortField.Type.STRING, asc));
+
+            case PART_ID:
+                return new Sort(new SortField("partNumber", SortField.Type.STRING, asc));
 
             case CREATED:
                 return new Sort(new SortField("creationTime", SortField.Type.STRING, asc));
