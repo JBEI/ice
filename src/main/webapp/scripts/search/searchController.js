@@ -205,6 +205,16 @@ angular.module('ice.search.controller', [])
             return $scope.searchFilters.webSearch === true;
         };
 
+        $scope.advancedMenu = {
+            isOpen: false
+        };
+
+        $scope.toggleAdvancedMenuDropdown = function ($event) {
+            $event.preventDefault();
+            $event.stopPropagation();
+            $scope.advancedMenu.isOpen = !$scope.advancedMenu.isOpen;
+        };
+
         $scope.canReset = function () {
             if ($scope.queryText || $scope.sequenceText || $scope.hasSample || $scope.hasSequence || $scope.hasAttachment)
                 return true;
@@ -242,6 +252,7 @@ angular.module('ice.search.controller', [])
         };
 
         $scope.sortResults = function (sortType) {
+            console.log("sort", sortType);
             sortType = sortType.toUpperCase();
 
             if (!$scope.searchFilters.parameters) {
@@ -256,17 +267,6 @@ angular.module('ice.search.controller', [])
             $scope.searchFilters.parameters.sortField = sortType;
             $scope.searchFilters.parameters.start = 0;
             $scope.loadingSearchResults = true;
-
-            Search().runAdvancedSearch({webSearch: $scope.searchFilters.webSearch}, $scope.searchFilters,
-                function (result) {
-                    $scope.searchResults = result;
-                    $scope.loadingSearchResults = false;
-                },
-                function (error) {
-                    $scope.loadingSearchResults = false;
-                    $scope.searchResults = undefined;
-                    console.log(error);
-                }
-            );
+            $scope.$broadcast("RunSearch", $scope.searchFilters);
         };
     });

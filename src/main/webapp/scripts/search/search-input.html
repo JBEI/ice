@@ -1,8 +1,9 @@
 <form ng-submit="search(false)">
-    <table cellpadding="0" cellspacing="0" class="dropdown" style="white-space: nowrap;">
+    <table cellpadding="0" cellspacing="0"
+           style="white-space: nowrap;">
         <tr>
-            <td class="quick_search">
-                <i class="fa fa-fw fa-search opacity_hover"
+            <td class="quick_search dropdown" dropdown is-open="advancedMenu.isOpen">
+                <i class="fa fa-fw fa-search"
                    style="padding: 4px 1px 4px 5px; background-color: #fff; color: #aaa; font-size: 16px"></i>
 
                 <i class="fa fa-times-circle opacity_hover" ng-click="reset()" title="Reset Search" ng-show="canReset()"
@@ -10,8 +11,8 @@
 
                 <input type="search" class="quick_search_input" ng-model="queryText" placeholder="Search">
 
-                <i class="fa fa-caret-down dropdown-toggle opacity_hover"
-                   style="padding: 9px 5px 4px 5px; color: #999; height: 32px; background-color: #ededed;"></i>
+                <i class="fa fa-caret-down opacity_hover" ng-click="toggleAdvancedMenuDropdown($event)"
+                   style="padding: 9px 5px 4px 5px; color: #999; height: 33px; background-color: #ededed;"></i>
 
                 <!--<i class="fa fa-search cursor_pointer blue"-->
                 <!--style="padding: 4px 9px 4px 5px; background-color: #fff; font-size: 19px"></i>-->
