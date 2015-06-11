@@ -1232,3 +1232,10 @@ th:hover i.sortable {
     opacity: 1;
     cursor: pointer;
 }
+
+.search-indicator {
+    padding: 4px 1px 4px 5px;
+    background-color: #fff;
+    color: #aaa;
+    font-size: 16px
+}
