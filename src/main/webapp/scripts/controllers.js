@@ -840,7 +840,7 @@ iceControllers.controller('GenericTabsController', function ($scope, $cookieStor
 iceControllers.controller('FullScreenFlashController', function ($scope, $stateParams, $sce) {
     $scope.sessionId = $stateParams.sessionId;
     $scope.entryId = $stateParams.entryId;
-    $scope.vectorEditor = $sce.trustAsHtml('<object type="application/x-shockwave-flash" data="/swf/ve/VectorEditor.swf?entryId=' + $scope.entryId + '&sessionId=' + $scope.sessionId + '" id="vectoreditor" width="100%" height="' + ($(window).height() - 100) + 'px"><param name="wmode" value="opaque" /></object>');
+    $scope.vectorEditor = $sce.trustAsHtml('<object type="application/x-shockwave-flash" data="swf/ve/VectorEditor.swf?entryId=' + $scope.entryId + '&sessionId=' + $scope.sessionId + '" id="vectoreditor" width="100%" height="' + ($(window).height() - 100) + 'px"><param name="wmode" value="opaque" /></object>');
 
     $(window).resize(function () {
         var height = $(this).height();

@@ -229,7 +229,7 @@ iceDirectives.directive("iceVectorViewer", function ($cookieStore) {
         var entryId;
 
         function generateObject() {
-            element.html('<object id="VectorViewer" width="100%" height="100%" data="/swf/vv/VectorViewer.swf?entryId='
+            element.html('<object id="VectorViewer" width="100%" height="100%" data="swf/vv/VectorViewer.swf?entryId='
                 + entryId + '&amp;sessionId=' + sid + '"> \
                               </object>');
         }
@@ -261,7 +261,7 @@ iceDirectives.directive("iceRemoteFlash", function ($cookieStore) {
         var entryId, url;
 
         function generateObject() {
-            element.html('<object id="VectorViewer" width="100%" height="100%" data="/swf/vv/VectorViewer.swf?entryId='
+            element.html('<object id="VectorViewer" width="100%" height="100%" data="swf/vv/VectorViewer.swf?entryId='
                 + entryId + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
                     </object>');
         }
@@ -287,11 +287,11 @@ iceDirectives.directive("iceSequenceChecker", function ($cookieStore) {
 
         function generateObject() {
             if (!url) {
-                element.html('<object id="SequenceChecker" width="100%" height="100%" data="/swf/sc/SequenceChecker.swf?entryId='
+                element.html('<object id="SequenceChecker" width="100%" height="100%" data="swf/sc/SequenceChecker.swf?entryId='
                     + id + '&amp;sessionId=' + sid + '"> \
                     </object>');
             } else {
-                element.html('<object id="SequenceChecker" width="100%" height="100%" data="/swf/sc/SequenceChecker.swf?entryId='
+                element.html('<object id="SequenceChecker" width="100%" height="100%" data="swf/sc/SequenceChecker.swf?entryId='
                     + id + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
                     </object>');
             }

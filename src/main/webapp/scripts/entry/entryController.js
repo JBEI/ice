@@ -1112,7 +1112,7 @@ angular.module('ice.entry.controller', [])
         $scope.sessionId = sessionId;
 
         $scope.open = function () {
-            window.open('/static/swf/ve/VectorEditor?entryId=' + $scope.entry.id + '&sessionId=' + sessionId);
+            window.open('static/swf/ve/VectorEditor?entryId=' + $scope.entry.id + '&sessionId=' + sessionId);
         };
 
         $scope.sequenceUpload = function (type) {
