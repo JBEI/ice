@@ -281,28 +281,15 @@ public class HibernateSearch {
     public SearchResults executeSearch(String userId, HashMap<String, BooleanClause.Occur> terms,
                                        SearchQuery searchQuery, HashMap<String, Float> userBoost,
                                        HashMap<String, SearchResult> blastResults) {
-        // types for which we are searching. default is all
-//        ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
-//        if (entryTypes == null || entryTypes.isEmpty()) {
-//            entryTypes = new ArrayList<>();
-//            entryTypes.addAll(Arrays.asList(EntryType.values()));
-//        }
-
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         int resultCount;
         FullTextSession fullTextSession = Search.getFullTextSession(session);
         BooleanQuery booleanQuery = new BooleanQuery();
 
         // get classes for search
-//        Class<?>[] classes = new Class<?>[EntryType.values().length];
         HashSet<String> fields = new HashSet<>();
-//        fields.addAll(SearchFieldFactory.getCommonFields());
-
-//        for (int i = 0; i < entryTypes.size(); i += 1) {
-//            EntryType type = entryTypes.get(i);
-//            classes[i] = SearchFieldFactory.entryClass(type);
         fields.addAll(SearchFieldFactory.entryFields(searchQuery.getEntryTypes()));
-//        }
+        Class<?>[] classes = SearchFieldFactory.classesForTypes(searchQuery.getEntryTypes());
 
         // generate queries for terms filtering stop words
         for (Map.Entry<String, BooleanClause.Occur> entry : terms.entrySet()) {
@@ -323,7 +310,7 @@ public class HibernateSearch {
             return executeSearchNoTerms(userId, blastResults, searchQuery);
 
         // wrap Lucene query in a org.hibernate.Query
-        FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery);
+        FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
 
         // get max score
         fullTextQuery.setFirstResult(0);
@@ -348,13 +335,6 @@ public class HibernateSearch {
 
         // check sample
         checkEnableHasAttribute(fullTextQuery, searchQuery.getParameters());
-
-        // check enable filter for type
-        List<EntryType> entryTypes = searchQuery.getEntryTypes();
-        if (entryTypes != null && entryTypes.size() != EntryType.values().length) {
-            fullTextQuery.enableFullTextFilter("type")
-                    .setParameter("types", entryTypes);
-        }
 
         // set paging params
         fullTextQuery.setFirstResult(searchQuery.getParameters().getStart());
