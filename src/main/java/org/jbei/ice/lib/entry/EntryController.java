@@ -5,6 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -385,9 +386,30 @@ public class EntryController {
             return null;
 
         authorization.expectRead(userId, entry);
-
         List<TraceSequence> sequences = DAOFactory.getTraceSequenceDAO().getByEntry(entry);
-        return ModelToInfoFactory.getSequenceAnalysis(sequences);
+
+        ArrayList<TraceSequenceAnalysis> analysisArrayList = new ArrayList<>();
+        if (sequences == null)
+            return analysisArrayList;
+
+        AccountController accountController = new AccountController();
+
+        for (TraceSequence traceSequence : sequences) {
+            TraceSequenceAnalysis analysis = traceSequence.toDataTransferObject();
+            AccountTransfer accountTransfer = new AccountTransfer();
+
+            Account account = accountController.getByEmail(traceSequence.getDepositor());
+            if (account != null) {
+                accountTransfer.setFirstName(account.getFirstName());
+                accountTransfer.setLastName(account.getLastName());
+                accountTransfer.setId(account.getId());
+            }
+
+            analysis.setDepositor(accountTransfer);
+            analysisArrayList.add(analysis);
+        }
+
+        return analysisArrayList;
     }
 
     public ArrayList<History> getHistory(String userId, long entryId) {

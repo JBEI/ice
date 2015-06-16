@@ -2,7 +2,6 @@ package org.jbei.ice.servlet;
 
 import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -12,7 +11,6 @@ import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.model.*;
-import org.jbei.ice.lib.models.TraceSequence;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -69,36 +67,6 @@ public class ModelToInfoFactory {
             info.setId(attachment.getId());
             info.setFileId(attachment.getFileId());
             infos.add(info);
-        }
-
-        return infos;
-    }
-
-    public static ArrayList<TraceSequenceAnalysis> getSequenceAnalysis(List<TraceSequence> sequences) {
-        ArrayList<TraceSequenceAnalysis> infos = new ArrayList<>();
-        if (sequences == null)
-            return infos;
-
-        AccountController accountController = new AccountController();
-        for (TraceSequence sequence : sequences) {
-            TraceSequenceAnalysis info = new TraceSequenceAnalysis();
-            info.setId(sequence.getId());
-            info.setCreated(sequence.getCreationTime());
-            info.setFilename(sequence.getFilename());
-            info.setSequence(sequence.getSequence());
-            if (sequence.getTraceSequenceAlignment() != null) {
-                info.setTraceSequenceAlignment(sequence.getTraceSequenceAlignment().toDataTransferObject());
-            }
-            AccountTransfer accountTransfer = new AccountTransfer();
-            Account account = accountController.getByEmail(sequence.getDepositor());
-            if (account != null) {
-                accountTransfer.setFirstName(account.getFirstName());
-                accountTransfer.setLastName(account.getLastName());
-                accountTransfer.setId(account.getId());
-            }
-            info.setDepositor(accountTransfer);
-            infos.add(info);
-            info.setFileId(sequence.getFileId());
         }
 
         return infos;
