@@ -316,7 +316,7 @@ angular.module('ice.entry.controller', [])
             $scope.traceSequences = result;
         });
 
-        var uploader = $scope.traceSequenceUploader = new FileUploader({
+        $scope.traceSequenceUploader = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "/rest/parts/" + entryId + "/traces",
             method: 'POST',
@@ -333,17 +333,22 @@ angular.module('ice.entry.controller', [])
             ]
         });
 
-        uploader.onSuccessItem = function (item, response, status, headers) {
-            console.log("response", response);
+        $scope.traceSequenceUploader.onSuccessItem = function (item, response, status, headers) {
+            if (status != "200") {
+                $scope.traceUploadError = true;
+                return;
+            }
+
             entry.traceSequences({
                 partId: entryId
             }, function (result) {
                 $scope.traceSequences = result;
                 $scope.showUploadOptions = false;
+                $scope.traceUploadError = false;
             });
         };
 
-        uploader.onSuccessItem = function (item, response, status, headers) {
+        $scope.traceSequenceUploader.onErrorItem = function (item, response, status, headers) {
             $scope.traceUploadError = true;
         };
 
