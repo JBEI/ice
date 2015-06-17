@@ -767,7 +767,7 @@ angular.module('ice.entry.controller', [])
             }
 
             if (!canSubmit) {
-                $("body").animate({scrollTop: 130}, "slow");
+                $("body").animate({scrollTop: 0}, "slow");
                 return;
             }
 
