@@ -10,26 +10,26 @@
                  ng-mouseenter="showAddCollection=collection.name==='personal'"
                  ng-mouseleave="showAddCollection=false">
 
-            <span ng-show="collection.name!==selectedFolder">
-            <i class="fa fa-fw" style="font-size: 17px; color: #d1d0d0;" ng-class="collection.icon"></i>
-                {{collection.display}}
-            </span>
+                <span ng-show="collection.name!==selectedFolder">
+                <i class="fa fa-fw" style="font-size: 17px; color: #d1d0d0;" ng-class="collection.icon"></i>
+                    {{collection.display}}
+                </span>
 
-            <span ng-show="collection.name===selectedFolder">
-                <i class="fa fa-fw" style="font-size: 17px" ng-class="collection.iconOpen"></i>
-                <span style="font-weight: 600">{{collection.display}}</span>
-            </span>
+                <span ng-show="collection.name===selectedFolder">
+                    <i class="fa fa-fw" style="font-size: 17px" ng-class="collection.iconOpen"></i>
+                    <span style="font-weight: 600">{{collection.display}}</span>
+                </span>
 
-            <span class="menu_count">
-                <span ng-hide="showAddCollection">{{(collection.count | number) || 0}}</span>
-                <!--shown only for personal collection-->
-                <i ng-show="showAddCollection" ng-click="hideAddCollection=!hideAddCollection"
-                   class="fa fa-plus edit_icon" style="font-size: 17px">
-                </i>
-            </span>
-        </div>
+                <span class="menu_count">
+                    <span ng-hide="showAddCollection">{{(collection.count | number) || 0}}</span>
+                    <!--shown only for personal collection-->
+                    <i ng-show="showAddCollection" ng-click="hideAddCollection=!hideAddCollection"
+                       class="fa fa-plus edit_icon" style="font-size: 17px">
+                    </i>
+                </span>
+            </div>
 
             <ice.menu.collections.details ng-show="selectedFolder===collection.name"></ice.menu.collections.details>
+        </div>
     </div>
-</div>
 </div>
