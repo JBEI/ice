@@ -20,7 +20,8 @@
     <div ng-if="currentTooltip.fundingSource"><b style="color: #4d4f53">Funding Source</b>:
         {{currentTooltip.fundingSource}}
     </div>
-    <div class="no_wrap"><b style="color: #4d4f53">Principal Investigator</b>: {{currentTooltip.principalInvestigator}}
+    <div class="no_wrap"><b style="color: #4d4f53">Principal Investigator</b>: {{currentTooltip.principalInvestigator |
+        truncate:22}}
     </div>
     <div><b style="color: #4d4f53">Modified</b>: {{currentTooltip.modificationTime | date:'medium'}}</div>
     <div ng-if="currentTooltip.intellectualProperty"><b style="color: #4d4f53">IP Information</b>:
