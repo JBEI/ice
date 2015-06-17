@@ -20,10 +20,6 @@ public enum BioSafetyOption implements IDataTransferModel {
         this.value = value;
     }
 
-    public String getDisplayName() {
-        return this.displayName;
-    }
-
     @Override
     public String toString() {
         return this.displayName;
@@ -33,23 +29,20 @@ public enum BioSafetyOption implements IDataTransferModel {
         return this.value;
     }
 
+    public int getIntValue() {
+        return Integer.valueOf(this.value);
+    }
+
     public static boolean isValidOption(Integer integer) {
         if (integer == null)
             return false;
 
         for (BioSafetyOption option : BioSafetyOption.values()) {
-            if (integer.intValue() == intValue(option.toString()).intValue())
+            Integer intValue = intValue(option.toString());
+            if (intValue != null && integer.intValue() == intValue)
                 return true;
         }
         return false;
-    }
-
-    public static BioSafetyOption enumValue(Integer i) {
-        for (BioSafetyOption option : BioSafetyOption.values()) {
-            if (Integer.valueOf(option.value).intValue() == i.intValue())
-                return option;
-        }
-        return null;
     }
 
     public static Integer intValue(String value) {
