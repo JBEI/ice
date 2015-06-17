@@ -333,9 +333,13 @@
                 <small class="opacity_hover" ng-click="open()"><i class="fa fa-external-link blue"></i>
                     Open in VectorEditor
                 </small>
+
                 <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-                <small class="dropdown opacity_hover">
-                    <span class="dropdown-toggle">Download <span class="caret"></span></span>
+
+                <small class="btn-group" dropdown>
+
+                    <div dropdown-toggle class="dropdown-toggle opacity_hover">Download <span class="caret"></span>
+                    </div>
                     <ul class="dropdown-menu">
                         <li class="cursor_pointer font-80em" ng-if="entry.hasOriginalSequence">
                             <a ng-href="/rest/file/{{entry.id}}/sequence/original?sid={{sessionId}}" target="_self">Original</a>
@@ -360,6 +364,7 @@
                         </li>
                     </ul>
                 </small>
+
                 <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
 
                 <small class="opacity_hover" ng-click="sbolShowHide()">
