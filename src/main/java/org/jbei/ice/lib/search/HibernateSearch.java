@@ -141,8 +141,8 @@ public class HibernateSearch {
         BioSafetyOption option = searchQuery.getBioSafetyOption();
         if (option != null) {
             TermContext bslContext = qb.keyword();
-            org.apache.lucene.search.Query biosafetyQuery =
-                    bslContext.onField("bioSafetyLevel").ignoreFieldBridge().matching(option.getValue()).createQuery();
+            Query biosafetyQuery =
+                    bslContext.onField("bioSafetyLevel").ignoreFieldBridge().matching(option.getIntValue()).createQuery();
             booleanQuery.add(biosafetyQuery, BooleanClause.Occur.MUST);
         }
 
