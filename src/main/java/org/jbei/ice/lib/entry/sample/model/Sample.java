@@ -1,22 +1,21 @@
 package org.jbei.ice.lib.entry.sample.model;
 
-import java.util.Date;
-import javax.persistence.*;
-
+import org.hibernate.annotations.Type;
+import org.hibernate.search.annotations.ContainedIn;
+import org.hibernate.search.annotations.Field;
+import org.hibernate.search.annotations.FieldBridge;
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryBooleanPropertiesBridge;
 import org.jbei.ice.lib.models.Storage;
 
-import org.hibernate.annotations.Type;
-import org.hibernate.search.annotations.ContainedIn;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.FieldBridge;
+import javax.persistence.*;
+import java.util.Date;
 
 /**
  * Store Sample information.
- * <p/>
+ * <p>
  * Each sample is a uniquely identified (via UUIDv4) object representing a physical sample. Storage
  * locations are handled by {@link org.jbei.ice.lib.models.Storage} objects.
  *
@@ -146,6 +145,8 @@ public class Sample implements IDataModel {
     public PartSample toDataTransferObject() {
         PartSample sample = new PartSample();
         sample.setLabel(label);
+        if (entry != null)
+            sample.setPartId(entry.getId());
         sample.setCreationTime(creationTime.getTime());
         return sample;
     }

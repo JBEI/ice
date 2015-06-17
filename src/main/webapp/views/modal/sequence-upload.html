@@ -4,14 +4,14 @@
 </div>
 
 <div class="modal-body">
-    <alert type="'info'" style="margin-bottom: 10px">
+    <div class="alert alert-info" style="margin-bottom: 10px">
         <i style="font-size: 22px" class="fa fa-info-circle pull-left"></i> Genbank, Fasta and SBOL files
         are supported
-    </alert>
+    </div>
 
-    <alert type="'danger'" style="margin-bottom: 10px" ng-if="serverError">
+    <div class="alert alert-danger" style="margin-bottom: 10px" ng-if="serverError">
         <i style="font-size: 20px" class="fa fa-exclamation-triangle pull-left"></i> Error parsing file
-    </alert>
+    </div>
 
     <span ng-if="!isPaste">
         <div class="margin-top-20"><input nv-file-select uploader="sequenceFileUpload" type="file"/></div>

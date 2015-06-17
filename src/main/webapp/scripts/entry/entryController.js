@@ -206,6 +206,13 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.format = "M/d/yyyy h:mm a";
+        $scope.newSampleTemplate = "/scripts/entry/sample/barcode-popover.html";
+        $scope.enablePopup = function (row, col) {
+            console.log("enable", row, col);
+            console.log($scope.newSample.open.cell === row + (10 + col + '').slice(-2));
+            return $scope.newSample.open.cell === row + (10 + col + '').slice(-2);
+        };
+
         // add sample 96 well plate click
         $scope.cellBarcodeClick = function (row, col) {
             var rc = row + (10 + col + '').slice(-2);
@@ -309,7 +316,7 @@ angular.module('ice.entry.controller', [])
             $scope.traceSequences = result;
         });
 
-        var uploader = $scope.traceSequenceUploader = new FileUploader({
+        $scope.traceSequenceUploader = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "rest/parts/" + entryId + "/traces",
             method: 'POST',
@@ -326,17 +333,22 @@ angular.module('ice.entry.controller', [])
             ]
         });
 
-        uploader.onSuccessItem = function (item, response, status, headers) {
-            console.log("response", response);
+        $scope.traceSequenceUploader.onSuccessItem = function (item, response, status, headers) {
+            if (status != "200") {
+                $scope.traceUploadError = true;
+                return;
+            }
+
             entry.traceSequences({
                 partId: entryId
             }, function (result) {
                 $scope.traceSequences = result;
                 $scope.showUploadOptions = false;
+                $scope.traceUploadError = false;
             });
         };
 
-        uploader.onSuccessItem = function (item, response, status, headers) {
+        $scope.traceSequenceUploader.onErrorItem = function (item, response, status, headers) {
             $scope.traceUploadError = true;
         };
 
@@ -754,7 +766,7 @@ angular.module('ice.entry.controller', [])
             }
 
             if (!canSubmit) {
-                $("body").animate({scrollTop: 130}, "slow");
+                $("body").animate({scrollTop: 0}, "slow");
                 return;
             }
 

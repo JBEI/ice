@@ -5,7 +5,7 @@
 </div>
 
 <div class="modal-body">
-    <alert type="'info'" style="padding: 8px">
+    <div class="alert alert-info" style="padding: 8px">
         <i style="font-size:60px; float: left;padding-right:10px; color: #3a87ad" class="fa fa-info-circle"></i>
         <span class="font-90em">Supported file formats for bulk upload are:
             <ul style="margin-left: 62px">
@@ -17,7 +17,7 @@
                 <li><b>SBOL XML</b></li>
             </ul>
         </span>
-    </alert>
+    </div>
 
     <div ng-if="uploadError" class="alert alert-danger font-95em"><i class="fa fa-exclamation-triangle"></i>
         {{uploadError}}

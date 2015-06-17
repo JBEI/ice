@@ -105,7 +105,7 @@
 
     <div ng-if="userList && userList.users.length > 0">
         <div class="col-md-5" style="padding-left: 0">
-            <pagination total-items="userList.resultCount" on-select-page="setUserListPage(page)" page="currentPage"
+            <pagination total-items="userList.resultCount" ng-change="setUserListPage(page)" ng-model="currentPage"
                         max-size="maxSize"
                         class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>

@@ -119,7 +119,7 @@ public class Request implements IDataModel {
         sampleRequest.setRequestType(getType());
         sampleRequest.setStatus(getStatus());
         if (growthTemperature != null)
-        sampleRequest.setGrowthTemperature(growthTemperature);
+            sampleRequest.setGrowthTemperature(growthTemperature);
         EntryType type = EntryType.nameToType(entry.getRecordType());
         PartData data = new PartData(type);
         data.setId(entry.getId());

@@ -86,7 +86,7 @@
                 <td>{{entry.type | capitalize}}</td>
                 <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="transferredTooltip(entry)"
-                       popover-template="scripts/admin/transferred-tooltip.html" popover-title="{{entry.partId}}"
+                       popover-template="tranferredPopupTooltip" popover-title="{{entry.partId}}"
                        popover-placement="right">{{entry.partId}}</a>
                 </td>
                 <td>
@@ -113,7 +113,7 @@
 
     <div class="row" ng-if="transferredEntries && transferredEntries.entries.length > 0">
         <div class="col-md-5" style="padding-left: 0">
-            <pagination total-items="transferredEntries.count" on-select-page="setPage(page)" page="currentPage"
+            <pagination total-items="transferredEntries.count" ng-change="setPage(page)" ng-model="currentPage"
                         max-size="maxSize"
                         class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>

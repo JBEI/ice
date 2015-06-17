@@ -7,9 +7,14 @@
                     <td>
                         <h4>
                             <span style="white-space: nowrap">
-                                <img alt="Loading..." ng-if="loadingPage" src="img/loader-mini.gif"/>
-                                <strong><span style="text-transform: uppercase; color: #888"> {{selectedCollection || folder.type}}</span>
-                                    {{folder.folderName}}</strong>
+                                <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
+                                <strong>
+                                    <span style="text-transform: uppercase; color: #888">{{selectedCollection || folder.type}}</span>
+                                    <span ng-class="{folder_name:folder.canEdit}" tooltip={{folderNameTooltip}}
+                                          ng-click="showFolderRenameModal()">
+                                        {{folder.folderName}}
+                                    </span>
+                                </strong>
                                 <span ng-if="folder.publicReadAccess">&nbsp;
                                     <small style="font-size: 12px; position: relative; top: -4px"
                                            tooltip="Available on web of registries"
@@ -70,7 +75,7 @@
             No entries available for selection
         </div>
 
-        <table ng-if="folder && folder.entries" cellspacing="0"
+        <table ng-if="folder && folder.entries && folder.entries.length" cellspacing="0"
                class="table table-responsive table-border-bottom table-hover table-condensed table-striped font-95em"
                ng-class="{'opacity_4':loadingPage}">
             <thead>
@@ -122,7 +127,6 @@
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                 </th>
                 <th style="width:100px;">
-                    <i class="fa fa-paperclip fa-fw" style="font-size: 14px;"></i>
                     <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
                     <img src="img/dna.svg" width="15px" alt="has dna"/>
                 </th>
@@ -150,7 +154,7 @@
                 </td>
                 <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                       popover-template="views/template.html" popover-placement="right">{{entry.partId}}</a>
+                       popover-template="folderPopupTemplateUrl" popover-placement="right">{{entry.partId}}</a>
                 </td>
                 <td>
                     <div title="{{entry.name}}" class="ellipsis" style="width: 350px">{{entry.name}}</div>
@@ -160,7 +164,12 @@
                     </div>
                 </td>
                 <td style="vertical-align: middle">
-                    <small ng-if="entry.viewCount" style="opacity: 0.4">{{entry.viewCount}} views</small>
+                    <small style="opacity: 0.4">
+                        <ng-pluralize count="entry.viewCount"
+                                      when="{'0': '',
+                                  '1': '1 view',
+                                  'other':'{} views'}"></ng-pluralize>
+                    </small>
                 </td>
                 <td style="vertical-align: middle; width:100px; white-space:nowrap">
                     <span class="label" ng-class="{
@@ -171,10 +180,6 @@
                     </span>
                 </td>
                 <td style="vertical-align: middle;">
-                    <i ng-show="entry.hasAttachment" class="fa fa-paperclip fa-fw"
-                       style="color: #555; font-size: 14px;"></i>
-                    <i ng-show="!entry.hasAttachment" class="fa fa-square fa-fw"
-                       style="opacity: 0; font-size: 14px;"></i>
                     <i ng-show="entry.hasSample" class="fa fa-flask fa-fw"
                        style="color: #555; font-size: 14px;"></i>
                     <i ng-show="!entry.hasSample" class="fa fa-square fa-fw"
@@ -188,14 +193,15 @@
             </tbody>
         </table>
     </div>
-    <div class="row" ng-if="folder && folder.entries.length > 0">
+    <div class="row" ng-if="folder && folder.entries.length > 0" style="margin-top: -15px">
         <div class="col-md-5" style="padding-left: 0">
-            <pagination total-items="folder.count" on-select-page="setPage(page)" page="currentPage" max-size="maxSize"
-                        class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+            <pagination total-items="folder.count" ng-change="folderPageChange()" ng-model="params.currentPage"
+                        max-size="maxSize" class="pagination-sm" items-per-page="15" boundary-links="true">
+            </pagination>
         </div>
         <div class="col-md-7" style="margin-top: 25px;">
             <strong class="small">
-                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
+                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(params.currentPage,
                 folder.count)}}
             </strong>
         </div>
