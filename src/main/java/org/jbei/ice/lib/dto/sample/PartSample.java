@@ -17,6 +17,7 @@ public class PartSample implements IDataTransferModel {
     private long creationTime;
     private boolean inCart;
     private StorageLocation location;
+    private long partId;
 
     public long getId() {
         return id;
@@ -64,5 +65,13 @@ public class PartSample implements IDataTransferModel {
 
     public void setLocation(StorageLocation location) {
         this.location = location;
+    }
+
+    public long getPartId() {
+        return partId;
+    }
+
+    public void setPartId(long partId) {
+        this.partId = partId;
     }
 }

@@ -209,6 +209,8 @@ angular.module('ice.admin.controller', [])
             $location.path("/entry/" + entry.id);
         };
 
+        $scope.tranferredPopupTooltip = "/scripts/admin/transferred-tooltip.html";
+
         $scope.transferredTooltip = function (entry) {
             $scope.tooltip = undefined;
             Entry($cookieStore.get("sessionId")).tooltip({partId: entry.id},
@@ -230,14 +232,14 @@ angular.module('ice.admin.controller', [])
     })
     .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, Samples) {
         $rootScope.error = undefined;
-        $scope.selectOptions = ['PENDING', 'FULFILLED', 'REJECTED'];
+
+        $scope.selectOptions = ['ALL', 'PENDING', 'FULFILLED', 'REJECTED'];
 
         var samples = Samples($cookieStore.get("sessionId"));
         $scope.maxSize = 5;
-        $scope.currentPage = 1;
-        $scope.params = {sort: 'requested', asc: false};
+        $scope.params = {sort: 'requested', asc: false, currentPage: 1, status: 'ALL'};
 
-        var requestSamples = function () {
+        $scope.requestSamples = function () {
             $scope.loadingPage = true;
             samples.requests($scope.params, function (result) {
                 $scope.sampleRequests = result;
@@ -253,19 +255,15 @@ angular.module('ice.admin.controller', [])
         };
 
         // initial sample request (uses default paging values)
-        requestSamples();
+        $scope.requestSamples();
 
-        $scope.setSamplePage = function (pageNo) {
-            if (pageNo == undefined || isNaN(pageNo))
-                pageNo = 1;
-
-            $scope.currentPage = pageNo;
-            $scope.params.offset = (pageNo - 1) * 15;
+        $scope.sampleRequestPageChanged = function () {
+            $scope.params.offset = ($scope.params.currentPage - 1) * 15;
             if ($scope.filter) {
                 $scope.params.filter = $scope.filter;
             }
 
-            requestSamples();
+            $scope.requestSamples();
         };
 
         $scope.updateStatus = function (request, newStatus) {
@@ -275,22 +273,25 @@ angular.module('ice.admin.controller', [])
 
                 var i = $scope.sampleRequests.requests.indexOf(request);
                 if (i != -1) {
-                    $scope.sampleRequests.requests[i] = result;
+                    $scope.sampleRequests.requests[i].status = result.status;
                 }
             }, function (error) {
 
             });
         };
 
-        $scope.filterSampleRecords = function () {
-            $scope.loadingPage = true;
-            // initial sample request (uses default paging values)
-            $scope.params.filter = $scope.filter;
-            requestSamples();
-        };
-
         $scope.sort = function (field) {
-            console.log("sort", field);
+            if ($scope.loadingPage)
+                return;
+
+            $scope.loadingPage = true;
+            if ($scope.params.sort === field)
+                $scope.params.asc = !$scope.params.asc;
+            else
+                $scope.params.asc = false;
+
+            $scope.params.sort = field;
+            requestSamples();
         };
     })
     .controller('AdminUserController', function ($rootScope, $scope, $stateParams, $cookieStore, User) {

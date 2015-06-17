@@ -3,6 +3,7 @@ package org.jbei.ice.lib.bulkupload;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.ApplicationController;
+import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -125,6 +126,20 @@ public class BulkEntryCreator {
         }
 
         entry = entryDAO.create(entry);
+
+        // check for pi
+        String piEmail = entry.getPrincipalInvestigatorEmail();
+        if (StringUtils.isNotEmpty(piEmail)) {
+            Account pi = DAOFactory.getAccountDAO().getByEmail(piEmail);
+            if (pi != null) {
+                // add write permission for the PI
+                addWritePermission(pi, entry);
+            }
+        }
+
+        // add write permissions for owner
+        addWritePermission(account, entry);
+
         upload.getContents().add(entry);
 
         dao.update(upload);
@@ -385,6 +400,15 @@ public class BulkEntryCreator {
         return uploadInfo;
     }
 
+    protected void addWritePermission(Account account, Entry entry) {
+        Permission permission = new Permission();
+        permission.setCanWrite(true);
+        permission.setEntry(entry);
+        entry.getPermissions().add(permission); // triggers the permission class bridge
+        permission.setAccount(account);
+        DAOFactory.getPermissionDAO().create(permission);
+    }
+
     public boolean createEntries(String userId, long draftId, List<PartData> data, HashMap<String, InputStream> files) {
         BulkUpload draft = dao.get(draftId);
         if (draft == null)
@@ -420,6 +444,8 @@ public class BulkEntryCreator {
                     linked.setId(linkedEntry.getId());
                     linked.setModificationTime(linkedEntry.getModificationTime().getTime());
 
+                    addWritePermission(account, linkedEntry);
+
                     // check for attachments and sequences for linked entry
                     saveFiles(linked, linkedEntry, files);
 
@@ -429,6 +455,19 @@ public class BulkEntryCreator {
             }
 
             entry = entryDAO.create(entry);
+            // check for pi
+            String piEmail = entry.getPrincipalInvestigatorEmail();
+            if (StringUtils.isNotEmpty(piEmail)) {
+                Account pi = DAOFactory.getAccountDAO().getByEmail(piEmail);
+                if (pi != null) {
+                    // add write permission for the PI
+                    addWritePermission(pi, entry);
+                }
+            }
+
+            // add write permissions for owner
+            addWritePermission(account, entry);
+
             draft.getContents().add(entry);
 
             dao.update(draft);

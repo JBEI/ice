@@ -29,8 +29,8 @@
         <div class="col-md-12" ng-init="newSample.location.type=undefined">
             <b class="strong">Storage Type</b>
 
-            <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-default dropdown-toggle">
+            <div class="btn-group" dropdown>
+                <button type="button" class="btn btn-sm btn-default" dropdown-toggle>
                     Select <span class="caret"></span>
                 </button>
                 <ul class="dropdown-menu">
@@ -83,10 +83,10 @@
                        'alert_color':hasWell(row, col)&&!hasTube(row,col), 'fa-circle-thin':!hasContent(row, col),
                        'fa-circle':hasContent(row, col)}"
                            style="font-size: 30px"
-                           popover-trigger="manual" popover-toggle="newSample.open.cell === row + (10+col+'').slice(-2)"
+                           popover-trigger="manual" popover-enable="newSample.open.cell === row + (10+col+'').slice(-2)"
                            ng-click="cellBarcodeClick(row, col)"
                            popover-placement="bottom" popover-title="Well {{row + (10+col+'').slice(-2)}}"
-                           popover-template="/scripts/entry/sample/barcode-popover.html"></i>
+                           popover-template="newSampleTemplate"></i>
                     </td>
                 </tr>
                 <tr>

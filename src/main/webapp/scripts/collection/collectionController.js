@@ -141,27 +141,26 @@ angular.module('ice.collection.controller', [])
         var folders = Folders();
         var entry = Entry(sessionId);
 
-        $scope.setPage = function (pageNo) {
-            if (pageNo == undefined || isNaN(pageNo))
-                pageNo = 1;
-
-            $scope.loadingPage = true;
-            if ($scope.params.folderId === undefined)
-                $scope.params.folderId = 'personal';
-            $scope.params.offset = (pageNo - 1) * 15;
-
-            folders.folder($scope.params, function (result) {
-                $scope.folder = result;
-                $scope.loadingPage = false;
-                $scope.currentPage = pageNo;
-            });
-        };
-
         //
         // init
         //
-        $scope.params = {'asc': false, 'sort': 'created'};
+        $scope.params = {'asc': false, 'sort': 'created', currentPage: 1};
+        $scope.maxSize = 5;  // number of clickable pages to show in pagination
         var subCollection = $stateParams.collection;   // folder id or one of the defined collections (Shared etc)
+
+        $scope.folderPageChange = function () {
+            $scope.loadingPage = true;
+            if ($scope.params.folderId === undefined)
+                $scope.params.folderId = 'personal';
+            $scope.params.offset = ($scope.params.currentPage - 1) * 15;
+
+            folders.folder($scope.params, function (result) {
+                $scope.folder = result;
+                if (result.canEdit)
+                    $scope.folderNameTooltip = "Click to rename";
+                $scope.loadingPage = false;
+            });
+        };
 
         // retrieve folder contents. all folders are redirected to /folder/{id} which triggers this
         if (subCollection !== undefined) {
@@ -172,26 +171,23 @@ angular.module('ice.collection.controller', [])
             if (context) {
                 var pageNum = (Math.floor(context.offset / 15)) + 1;
                 $scope.params.sort = context.sort;
-                $scope.setPage(pageNum);
+                $scope.params.currentPage = pageNum;
+                $scope.folderPageChange();
             } else {
                 // retrieve contents of collection (e,g, "personal")
                 folders.folder($scope.params, function (result) {
                     $scope.loadingPage = false;
                     $scope.folder = result;
+                    if (result.canEdit)
+                        $scope.folderNameTooltip = "Click to rename";
                     $scope.params.count = $scope.folder.count;
                 });
             }
         }
-        //
-        // end init
-        //
-
-        // paging
-        $scope.currentPage = 1;
-        $scope.maxSize = 5;  // number of clickable pages to show in pagination
 
         $scope.$on("RefreshAfterDeletion", function (event, data) {
-            $scope.setPage(1);
+            $scope.params.currentPage = 1;
+            $scope.folderPageChange();
         });
 
         $scope.sort = function (sortType) {
@@ -206,7 +202,9 @@ angular.module('ice.collection.controller', [])
 
             folders.folder($scope.params, function (result) {
                 $scope.folder = result;
-                $scope.currentPage = 1;
+                if (result.canEdit)
+                    $scope.folderNameTooltip = "Click to rename";
+                $scope.params.currentPage = 1;
             });
         };
 
@@ -246,7 +244,7 @@ angular.module('ice.collection.controller', [])
                 $scope.params.offset = index;
             }
 
-            var offset = (($scope.currentPage - 1) * 15) + index;
+            var offset = (($scope.params.currentPage - 1) * 15) + index;
             EntryContextUtil.setContextCallback(function (offset, callback) {
                 $scope.params.offset = offset;
                 $scope.params.limit = 1;
@@ -269,6 +267,8 @@ angular.module('ice.collection.controller', [])
                     console.error(error);
                 });
         };
+
+        $scope.folderPopupTemplateUrl = "/views/folder/template.html";
 
         // opens a modal that presents user with options to share selected folder
         $scope.openFolderShareSettings = function () {
@@ -318,6 +318,35 @@ angular.module('ice.collection.controller', [])
             }, function (error) {
                 console.error(error);
             });
+        };
+
+        $scope.showFolderRenameModal = function () {
+            if (!$scope.folder.canEdit)
+                return;
+
+            var modalInstance = $modal.open({
+                templateUrl: 'views/folder/modal/rename-folder.html',
+                controller: function ($scope, $modalInstance, folderName) {
+                    $scope.newFolderName = folderName;
+                },
+                backdrop: 'static',
+                resolve: {
+                    folderName: function () {
+                        return $scope.folder.folderName;
+                    }
+                },
+                size: 'sm'
+            });
+
+            modalInstance.result.then(function (newName) {
+                if (newName === $scope.folder.folderName)
+                    return;
+
+                var tmp = {id: $scope.folder.id, folderName: newName};
+                folders.update({id: tmp.id}, tmp, function (result) {
+                    $scope.folder.folderName = result.folderName;
+                })
+            })
         }
     })
     // also the main controller
@@ -376,7 +405,7 @@ angular.module('ice.collection.controller', [])
                 display: 'Drafts',
                 icon: 'fa-pencil',
                 iconOpen: 'fa-pencil brown',
-                alwaysVisible: false
+                alwaysVisible: true
             },
             {
                 name: 'pending',
@@ -423,12 +452,28 @@ angular.module('ice.collection.controller', [])
         // selected entries
         $scope.selection = [];
         $scope.shoppingCartContents = [];
+        $scope.openShoppingCart = true;
         samples.userRequests({status: 'IN_CART'}, {userId: $rootScope.user.id}, function (result) {
             $scope.shoppingCartContents = result.requests;
         });
 
         $scope.hidePopovers = function (hide) {
             $scope.openShoppingCart = !hide;
+        };
+
+        $scope.createEntry = {
+            isOpen: false
+        };
+
+        $scope.toggleUploadDropdown = function ($event, createType) {
+            $event.preventDefault();
+            $event.stopPropagation();
+            if ($scope.createType === createType) {
+                $scope.createEntry.isOpen = !$scope.createEntry.isOpen;
+            } else {
+                $scope.createType = createType;
+                $scope.createEntry.isOpen = true;
+            }
         };
 
         $scope.submitShoppingCart = function () {
@@ -443,6 +488,8 @@ angular.module('ice.collection.controller', [])
                 console.error(error);
             })
         };
+
+        $scope.shoppingCartTemplate = "/views/shopping-cart-template.html";
 
         // remove sample request
         $scope.removeFromCart = function (content, entry) {
@@ -635,59 +682,6 @@ angular.module('ice.collection.controller', [])
             }, function (error) {
                 console.error(error);
             });
-        }
-    })
-    .controller('CollectionEntryListController', function ($scope, Selection, $filter) {
-        //console.log($scope.sort('type'));
-
-        $scope.params = {'asc': false, 'sort': 'created'};
-
-        // paging
-        $scope.currentPage = 1;
-        $scope.maxSize = 5;  // number of clickable pages to show in pagination
-
-        $scope.pageCounts = function (currentPage, resultCount) {
-            var maxPageCount = 15;
-            var pageNum = ((currentPage - 1) * maxPageCount) + 1;
-
-            // number on this page
-            var pageCount = (currentPage * maxPageCount) > resultCount ? resultCount : (currentPage * maxPageCount);
-            return pageNum + " - " + $filter('number')(pageCount) + " of " + $filter('number')(resultCount);
-        };
-
-        $scope.selectAllClass = function () {
-            if (Selection.allSelected())
-                return 'fa-check-square-o';
-
-            if (Selection.hasSelection())
-                return 'fa-minus-square';
-            return 'fa-square-o';
-        };
-
-        $scope.setType = function (type) {
-            Selection.setTypeSelection(type);
-        };
-
-        $scope.selectAll = function () {
-            if (Selection.allSelected())
-                Selection.setTypeSelection('none');
-            else
-                Selection.setTypeSelection('all');
-        };
-
-        $scope.isSelected = function (entry) {
-            if (Selection.isSelected(entry))
-                return true;
-
-            return Selection.searchEntrySelected(entry);
-        };
-
-        $scope.select = function (entry) {
-            Selection.selectEntry(entry);
-        };
-
-        $scope.sortColumn = function (type) {
-            $scope.sort(type);
         }
     })
 ;

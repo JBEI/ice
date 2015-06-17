@@ -122,8 +122,8 @@ angular.module('ice.upload.controller', [])
                     if ($scope.linkedSelection) {
                         var sheetHeaders = UploadUtil.getSheetHeaders($scope.importType);
                         var index = col - sheetHeaders.length;
-                        url += UploadUtil.indexToRestResource($scope.importType, index);
                         formDataType = $scope.linkedSelection;
+                        url += UploadUtil.indexToRestResource(formDataType, index);
                         actualEntryId = $scope.bulkUpload.linkedEntryIdData[row];
                     } else {
                         url += UploadUtil.indexToRestResource($scope.importType, col);
@@ -228,9 +228,9 @@ angular.module('ice.upload.controller', [])
                             $http.get('/rest/upload/partNumbers', {
                                 headers: {'X-ICE-Authentication-SessionId': sid},
                                 params: {
-                                    token: query
+                                    token: query,
                                     // field: field
-                                    // type:
+                                    type: $scope.importType.toUpperCase()
                                 }
                             }).then(function (res) {
                                 console.log(res, process);

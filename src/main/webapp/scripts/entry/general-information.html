@@ -333,9 +333,13 @@
                 <small class="opacity_hover" ng-click="open()"><i class="fa fa-external-link blue"></i>
                     Open in VectorEditor
                 </small>
+
                 <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-                <small class="dropdown opacity_hover">
-                    <span class="dropdown-toggle">Download <span class="caret"></span></span>
+
+                <small class="btn-group" dropdown>
+
+                    <div dropdown-toggle class="dropdown-toggle opacity_hover">Download <span class="caret"></span>
+                    </div>
                     <ul class="dropdown-menu">
                         <li class="cursor_pointer font-80em" ng-if="entry.hasOriginalSequence">
                             <a ng-href="/rest/file/{{entry.id}}/sequence/original?sid={{sessionId}}" target="_self">Original</a>
@@ -360,6 +364,7 @@
                         </li>
                     </ul>
                 </small>
+
                 <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
 
                 <small class="opacity_hover" ng-click="sbolShowHide()">
@@ -375,14 +380,14 @@
 
             <!--file upload-->
             <span ng-show="isFileUpload">
-                <alert type="'info'" style="margin-bottom: 10px; margin-top: 10px" class="font-90em">
+                <div class="alert alert-info font-90em" style="margin-bottom: 10px; margin-top: 10px">
                     <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Supported file formats are
                     Genbank, Fasta and SBOL
-                </alert>
+                </div>
 
-                <alert type="'danger'" style="margin-bottom: 10px" ng-if="serverError" class="font-90em">
+                <div class="alert alert-danger font-90em" style="margin-bottom: 10px" ng-if="serverError">
                     <i style="font-size: 18px" class="fa fa-exclamation-triangle pull-left"></i> Error parsing file
-                </alert>
+                </div>
 
                 <div class="margin-top-20 font-90em"><input nv-file-select uploader="sequenceFileUpload" type="file"/></div>
                 <div style="height: 7px; background-color: #f9f9f9;" class="font-90em">

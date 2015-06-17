@@ -67,7 +67,7 @@
                 </th>
                 <th ng-click="sortResults('created')" class="cursor_pointer" style="width: 120px">
                     <span style="font-size: 11px; text-transform: uppercase">Created</span>
-                    <i ng-show="searchFilters.parameters.sortField=='CREATED'" style="font-size: 14px"
+                    <i ng-show="searchFilters.parameters.sortField==='CREATED'" style="font-size: 14px"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                     <i ng-if="searchFilters.parameters.sortField!=='CREATED'" class="sortable fa fa-angle-down"></i>
@@ -95,7 +95,7 @@
                 <td><a ng-href='/web/{{result.partner.id}}/entry/{{result.entryInfo.id}}'
                        class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result)"
-                       popover-template="/scripts/search/tooltip.html"
+                       popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -113,10 +113,6 @@
                 <td class="no_wrap"><a ng-href="https://{{result.partner.url}}/entry/{{result.entryInfo.id}}"
                                        target="_blank">{{result.partner.name}}</a></td>
                 <td style="vertical-align: middle">
-                    <!--<i ng-show="result.entryInfo.hasAttachment" class="fa fa-paperclip fa-fw"-->
-                    <!--style="color: #555; font-size: 14px;"></i>-->
-                    <!--<i ng-show="!result.entryInfo.hasAttachment" class="fa fa-square fa-fw"-->
-                    <!--style="opacity: 0; font-size: 14px;"></i>-->
                     <i ng-show="result.entryInfo.hasSample" class="fa fa-flask fa-fw"
                        style="color: #555; font-size: 14px;"></i>
                     <i ng-show="!result.entryInfo.hasSample" class="fa fa-square fa-fw"
@@ -185,7 +181,7 @@
                 <td><a ng-href='/web/{{result.partner.id}}/entry/{{result.entryInfo.id}}'
                        class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result)"
-                       popover-template="/scripts/search/tooltip.html"
+                       popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -271,7 +267,7 @@
                 </td>
                 <td><a ng-click="goToEntryDetails(result.entryInfo, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                       popover-template="/scripts/search/tooltip.html"
+                       popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -319,7 +315,7 @@
                     <!--ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>-->
                 </th>
                 <th ng-click="sortResults('TYPE')" class="cursor_pointer">
-                    <span style="font-size: 12px; text-transform: uppercase">TYPE</span>
+                    <span style="font-size: 12px">TYPE</span>
                     <i ng-if="searchFilters.parameters.sortField!=='TYPE'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='TYPE'" style="font-size: 14px;"
                        class="fa opacity_4"
@@ -349,10 +345,10 @@
                 </th>
                 <th ng-click="sortResults('created')" class="cursor_pointer">
                     <span style="font-size: 11px; text-transform: uppercase">Created</span>
-                    <i ng-show="searchFilters.parameters.sortField=='created'" style="font-size: 14px"
+                    <i ng-show="searchFilters.parameters.sortField==='CREATED'" style="font-size: 14px"
                        class="fa opacity_4"
-                       ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
-                    <i ng-if="searchFilters.parameters.sortField!=='created'" class="sortable fa fa-angle-down"></i>
+                       ng-class="{'fa-angle-down':!searchFilters.parameters.sortAscending, 'fa-angle-up':searchFilters.parameters.sortAscending}"></i>
+                    <i ng-if="searchFilters.parameters.sortField!=='CREATED'" class="sortable fa fa-angle-down"></i>
                 </th>
             </tr>
             </thead>
@@ -374,7 +370,7 @@
                 </td>
                 <td><a ng-click="goToEntryDetails(result.entryInfo, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                       popover-template="/scripts/search/tooltip.html"
+                       popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -387,8 +383,11 @@
                     </div>
                 </td>
                 <td style="vertical-align: middle">
-                    <small ng-if="result.entryInfo.viewCount" style="opacity: 0.4">{{result.entryInfo.viewCount}}
-                        views
+                    <small style="opacity: 0.4">
+                        <ng-pluralize count="result.entryInfo.viewCount"
+                                      when="{'0': '',
+                                  '1': '1 view',
+                                  'other':'{} views'}"></ng-pluralize>
                     </small>
                 </td>
                 <td>
@@ -397,10 +396,6 @@
                     </div>
                 </td>
                 <td style="vertical-align: middle">
-                    <!--<i ng-show="result.entryInfo.hasAttachment" class="fa fa-paperclip fa-fw"-->
-                    <!--style="color: #555; font-size: 14px;"></i>-->
-                    <!--<i ng-show="!result.entryInfo.hasAttachment" class="fa fa-square fa-fw"-->
-                    <!--style="opacity: 0; font-size: 14px;"></i>-->
                     <i ng-show="result.entryInfo.hasSample" class="fa fa-flask fa-fw"
                        style="color: #555; font-size: 14px;"></i>
                     <i ng-show="!result.entryInfo.hasSample" class="fa fa-square fa-fw"
@@ -413,16 +408,18 @@
         </table>
     </div>
 
-    <div class="row" data-ng-if='searchResults && searchResults.results.length > 0'>
+    <div class="row" data-ng-if='searchResults && searchResults.results.length > 0' style="margin-top: -15px">
         <div class="col-md-5" style="padding-left: 0">
-            <pagination total-items="searchResults.resultCount" on-select-page="setSearchResultPage(page)"
-                        page="currentPage" max-size="maxSize"
-                        class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+            <pagination total-items="searchResults.resultCount" ng-change="searchResultPageChanged()"
+                        ng-model="params.currentPage" max-size="maxSize"
+                        class="pagination-sm" items-per-page="15" boundary-links="true">
+            </pagination>
         </div>
         <div class="col-md-7" style="margin: 22px 0;">
             <strong class="small">
-                <i ng-show="loadingSearchResults" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
-                searchResults.resultCount)}}</strong>
+                <i ng-show="loadingSearchResults" class="fa fa-spin fa-gear opacity_4"></i>
+                {{pageCounts(params.currentPage, searchResults.resultCount)}}
+            </strong>
         </div>
     </div>
 </div>

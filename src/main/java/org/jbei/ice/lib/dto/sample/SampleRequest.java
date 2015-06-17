@@ -4,6 +4,9 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.entry.PartData;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Data transfer object for sample requests
  *
@@ -19,6 +22,7 @@ public class SampleRequest implements IDataTransferModel {
     private long requestTime;
     private long updateTime;
     private int growthTemperature;
+    private List<PartSample> location;
 
     public SampleRequest() {
     }
@@ -85,5 +89,13 @@ public class SampleRequest implements IDataTransferModel {
 
     public void setGrowthTemperature(int growthTemperature) {
         this.growthTemperature = growthTemperature;
+    }
+
+    public List<PartSample> getLocation() {
+        return location;
+    }
+
+    public void setLocation(List<PartSample> location) {
+        this.location = new ArrayList<>(location);
     }
 }

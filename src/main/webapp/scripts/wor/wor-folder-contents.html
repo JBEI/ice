@@ -49,7 +49,6 @@
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                 </th>
                 <th style="width:100px;">
-                    <i class="fa fa-paperclip fa-fw" style="font-size: 14px;"></i>
                     <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
                     <img src="img/dna.svg" width="15px" alt="has dna"/>
                 </th>
@@ -84,7 +83,7 @@
                 <td><a ng-click="getRemoteEntryDetails(selectedPartner.id, entry.id, $index)"
                        class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                       popover-template="/views/template.html"
+                       popover-template="worFolderContentsPopoverTemplate"
                        popover-placement="right">{{entry.partId}}</a>
                 </td>
                 <td>
@@ -103,10 +102,6 @@
                     </span>
                 </td>
                 <td style="vertical-align: middle;">
-                    <i ng-show="entry.hasAttachment" class="fa fa-paperclip fa-fw"
-                       style="color: #555; font-size: 14px;"></i>
-                    <i ng-show="!entry.hasAttachment" class="fa fa-square fa-fw"
-                       style="opacity: 0; font-size: 14px;"></i>
                     <i ng-show="entry.hasSample" class="fa fa-flask fa-fw"
                        style="color: #555; font-size: 14px;"></i>
                     <i ng-show="!entry.hasSample" class="fa fa-square fa-fw"
@@ -122,12 +117,13 @@
     </div>
     <div class="row" ng-if="selectedPartnerFolder&&selectedPartnerFolder.entries.length > 0">
         <div class="col-md-5" style="padding-left: 0">
-            <pagination total-items="selectedPartnerFolder.count" on-select-page="setPage(page)" page="currentPage"
+            <pagination total-items="selectedPartnerFolder.count" ng-change="worFolderContentPageChange()"
+                        ng-model="params.currentPage"
                         max-size="maxSize" class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>
         <div class="col-md-7" style="margin-top: 25px;">
             <strong class="small">
-                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
+                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(params.currentPage,
                 selectedPartnerFolder.count)}}
             </strong>
         </div>

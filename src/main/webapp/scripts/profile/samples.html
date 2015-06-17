@@ -1,0 +1,64 @@
+<div ng-controller="ProfileSamplesController">
+    <div ng-if="!userSamples">
+        <img src="/img/loader-mini.gif"> Loading...
+    </div>
+
+    <div ng-if="userSamples.requests.length=== 0">
+        No requested samples available
+    </div>
+
+    <table cellspacing="0"
+           class="table table-responsive table-hover table-condensed table-striped table-border-bottom font-95em"
+           ng-class="{'opacity_4':loadingPage}">
+        <thead>
+        <tr data-ng-if='userSamples && userSamples.requests.length > 0'>
+            <th style="width: 110px">Entry</th>
+            <th data-ng-click="sort('name')" style="width:230px">
+                <span class="cursor_pointer">Request Type</span>
+                <i ng-show="params.sort=='name'" class="fa"
+                   ng-class="{'fa-caret-down':params.asc==false, 'fa-caret-up':params.asc==true}"></i>
+            </th>
+            <th>Growth Temp.</th>
+            <th ng-click="sort('summary')">Requested</th>
+            <th ng-click="sort('summary')">Updated</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr data-ng-repeat="request in userSamples.requests">
+            <td><a href="/entry/{{request.partData.id}}">{{request.partData.partId}}</a></td>
+            <td>
+                <span ng-if="request.requestType==='LIQUID_CULTURE'"><i
+                        class="fa fa-flask"></i> Liquid Culture</span>
+                <span ng-if="request.requestType!=='LIQUID_CULTURE'"><i class="fa fa-circle-thin"></i> Streak on Agar Plate</span>
+            </td>
+            <td>
+                {{request.growthTemperature}} &deg;C
+            </td>
+            <td style="width:160px; white-space:nowrap">{{request.requestTime | date:'short'}}</td>
+            <td style="width:160px; white-space:nowrap">{{request.updateTime | date:'short'}}</td>
+            <td style="vertical-align: middle; width:100px; white-space:nowrap">
+                <span class="label" ng-class="{
+                    'ice-label-success':request.status==='FULFILLED',
+                    'label-default': request.status==='PENDING',
+                    'ice-label-danger': request.status==='REJECTED',
+                    'ice-label-info': request.status==='IN_CART'}">{{request.status | capitalize}}
+                </span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div ng-if='userSamples && userSamples.requests.length > 0' style="margin-top: -15px">
+        <div class="col-md-6" style="padding-left: 0">
+            <pagination total-items="userSamples.count" ng-change="profileSamplesPageChanged()"
+                        ng-model="params.currentPage"
+                        max-size="maxSize" class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+        </div>
+        <div class="col-md-4" style="margin-top: 25px;"><strong class="small">
+            <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(params.currentPage,
+            userSamples.count)}}</strong>
+        </div>
+    </div>
+</div>

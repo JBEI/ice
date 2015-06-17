@@ -9,10 +9,7 @@ import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.RequestDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.sample.SampleRequest;
-import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
-import org.jbei.ice.lib.dto.sample.SampleRequestType;
-import org.jbei.ice.lib.dto.sample.UserSamples;
+import org.jbei.ice.lib.dto.sample.*;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Request;
 import org.jbei.ice.lib.utils.Emailer;
@@ -52,7 +49,7 @@ public class RequestRetriever {
 
         // check if sample is already in cart with status of "IN CART"
         try {
-            ArrayList<Request> requests = dao.getSampleRequestByStatus(account, entry, SampleRequestStatus.IN_CART);
+            List<Request> requests = dao.getSampleRequestByStatus(account, entry, SampleRequestStatus.IN_CART);
             if (requests != null && !requests.isEmpty())
                 return getSampleRequestsInCart(account);
 
@@ -87,7 +84,7 @@ public class RequestRetriever {
     }
 
     public UserSamples getUserSamples(String userId, SampleRequestStatus status, int start, int limit, String sort,
-            boolean asc) {
+                                      boolean asc) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         UserSamples samples = new UserSamples();
         int count = dao.getCount(account);
@@ -102,7 +99,7 @@ public class RequestRetriever {
     }
 
     public UserSamples getRequests(String userId, int start, int limit, String sort, boolean asc,
-            SampleRequestStatus status, String filter) {
+                                   SampleRequestStatus status, String filter) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         if (account.getType() != AccountType.ADMIN)
             return getUserSamples(userId, null, start, limit, sort, asc);
@@ -112,10 +109,15 @@ public class RequestRetriever {
         samples.setCount(count);
 
         List<Request> results = dao.get(start, limit, sort, asc, status, filter);
+        SampleController sampleController = new SampleController();
 
         for (Request request : results) {
-            samples.getRequests().add(request.toDataTransferObject());
+            SampleRequest sampleRequest = request.toDataTransferObject();
+            ArrayList<PartSample> location = sampleController.retrieveEntrySamples(userId, request.getEntry().getId());
+            sampleRequest.setLocation(location);
+            samples.getRequests().add(sampleRequest);
         }
+
         return samples;
     }
 
