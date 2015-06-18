@@ -68,10 +68,10 @@
                 </td>
                 <td>
                     <span ng-if="request.requestType==='LIQUID_CULTURE'">
-                        <i tooltip="Liquid Culture" class="fa fa-flask cursor_default"></i> Liquid Culture
+                        <i class="fa fa-flask cursor_default"></i> Liquid Culture
                     </span>
                     <span ng-if="request.requestType!=='LIQUID_CULTURE'">
-                        <i tooltip="Streak on Agar Plate" class="fa fa-circle-o cursor_default"></i> Streak on Agar Plate
+                        <i class="fa fa-circle-o cursor_default"></i> Streak on Agar Plate
                     </span>
 
                     <div class="small" ng-if="request.growthTemperature">
@@ -123,8 +123,10 @@
                 </td>
                 <td style="width: 80px; vertical-align: middle">
                     <div ng-if="request.status==='PENDING'">
-                        <i class="fa fa-check font-14em green action" ng-click="updateStatus(request, 'FULFILLED')"></i>
-                        <i class="fa fa-ban font-14em red action" ng-click="updateStatus(request, 'REJECTED')"></i>
+                        <i tooltip="Fulfilled" class="fa fa-check font-14em green action"
+                           ng-click="updateStatus(request, 'FULFILLED')"></i>
+                        <i tooltip="Reject" lass="fa fa-ban font-14em red action"
+                           ng-click="updateStatus(request, 'REJECTED')"></i>
                     </div>
                 </td>
                 <td>
