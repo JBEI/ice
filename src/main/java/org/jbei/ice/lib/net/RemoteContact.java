@@ -187,7 +187,7 @@ public final class RemoteContact {
 
         HashMap<String, Object> queryParams = new HashMap<>();
         queryParams.put("url", myURL);
-        RegistryPartner response = (RegistryPartner) restClient.get(registryPartner.getUrl(), "/accesstoken/web",
+        RegistryPartner response = restClient.get(registryPartner.getUrl(), "/accesstoken/web",
                 RegistryPartner.class, queryParams);
         if (response == null) { // todo : should retry up to a certain number of times
             Logger.error("Could not validate request");
