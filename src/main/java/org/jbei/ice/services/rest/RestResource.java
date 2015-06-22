@@ -1,14 +1,26 @@
 package org.jbei.ice.services.rest;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.nio.file.Paths;
+import java.security.Key;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
+import org.jbei.auth.KeyTable;
+import org.jbei.auth.hmac.HmacAuthorizor;
 import org.jbei.auth.hmac.HmacSignature;
+import org.jbei.auth.hmac.HmacSignatureFactory;
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.utils.Utils;
 
 /**
  * Parent class for all rest resource objects

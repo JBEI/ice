@@ -45,7 +45,7 @@ public class AccessTokenResource extends RestResource {
      * Invalidates the current session information.
      */
     @DELETE
-    public void deleteToken() {
+    public void deleteToken(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
         // ensure the user is valid
         getUserId();
         accountController.invalidate(sessionId);

@@ -43,6 +43,7 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.net.RemoteAccessController;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.utils.EntriesAsCSV;
 import org.jbei.ice.lib.utils.Utils;
@@ -141,8 +142,9 @@ public class FileResource extends RestResource {
     public Response getRemoteAttachment(@PathParam("id") final long partnerId,
             @PathParam("fileId") final String fileId) {
         try {
-            final RemoteAccessController controller = new RemoteAccessController();
-            final File file = controller.getPublicAttachment(partnerId, fileId);
+        	final RemoteEntries entries = new RemoteEntries();
+            final String userId = getUserId();
+            final File file = entries.getPublicAttachment(userId, partnerId, fileId);
             if (file == null) {
                 return respond(Response.Status.NOT_FOUND);
             }

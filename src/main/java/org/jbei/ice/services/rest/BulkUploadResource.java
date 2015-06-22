@@ -88,9 +88,8 @@ public class BulkUploadResource extends RestResource {
     public Response getPartNumbersForUpload(
             @QueryParam("type") EntryType uploadType,
             @QueryParam("token") String token,
-            @DefaultValue("8") @QueryParam("limit") int limit,
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
-        String userId = getUserIdFromSessionHeader(sessionId);
+            @DefaultValue("8") @QueryParam("limit") int limit) {
+        String userId = getUserId();
         ArrayList<String> results = controller.getMatchingPartNumbersForLinks(uploadType, token, limit);
         return super.respond(results);
     }

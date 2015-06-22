@@ -344,7 +344,7 @@ public class AccountController {
      * @param sessionKey
      * @return Account object matching a session key, or {@code null}
      */
-    public Account getAccountBySessionKey(final String sessionKey) {
+    public AccountTransfer getAccountBySessionKey(final String sessionKey) {
         final String userId = SessionHandler.getUserIdBySession(sessionKey);
         if (userId == null) {
             Logger.warn("Could not retrieve user id for session " + sessionKey);

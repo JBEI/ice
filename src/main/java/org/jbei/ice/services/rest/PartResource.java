@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -43,6 +44,7 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.entry.Entries;
@@ -662,10 +664,9 @@ public class PartResource extends RestResource {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateEntries(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
-                                  @QueryParam(value = "visibility") Visibility visibility,
+    public Response updateEntries(@QueryParam(value = "visibility") Visibility visibility,
                                   List<Long> entryIds) {
-        String userId = getUserIdFromSessionHeader(sessionId);
+        String userId = getUserId();
         log(userId, "updating visibility of " + entryIds.size() + " entries to " + visibility);
         Entries entries = new Entries();
         List<Long> arrayList = new ArrayList<>();
