@@ -66,15 +66,16 @@
 
 <div class=" margin-top-10 panel panel-default" ng-if="showChangePassword">
     <div class="panel-body">
-        <alert type="'danger'" style="width: 435px; padding: 8px" ng-if="changePasswordError">
+        <div class="alert alert-danger" style="width: 435px; padding: 8px" ng-if="changePasswordError">
             <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
             <span class="font-90em">{{changePasswordError}}</span>
-        </alert>
+        </div>
 
-        <alert type="'info'" style="width: 435px; padding: 8px" ng-if="passwordChangeSuccess&&!changePasswordError">
+        <div class="alert alert-info" style="width: 435px; padding: 8px"
+             ng-if="passwordChangeSuccess&&!changePasswordError">
             <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
             <span class="font-90em">Password successfully changed</span>
-        </alert>
+        </div>
 
         <form class="font-95em" role="form" ng-submit="updatePassword()"
               ng-if="!passwordChangeSuccess&&!changePasswordError">

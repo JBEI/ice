@@ -224,7 +224,7 @@ public class FolderController {
             details.setOwner(owner.toDataTransferObject());
 
         // retrieve folder contents
-        ArrayList<Entry> results = dao.retrieveFolderContents(folderId, sort, asc, start, limit);
+        List<Entry> results = dao.retrieveFolderContents(folderId, sort, asc, start, limit);
         for (Entry entry : results) {
             PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
             details.getEntries().add(info);

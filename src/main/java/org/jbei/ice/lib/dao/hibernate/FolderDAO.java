@@ -2,7 +2,6 @@ package org.jbei.ice.lib.dao.hibernate;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
@@ -20,7 +19,10 @@ import org.jbei.ice.lib.folder.Folder;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.shared.ColumnField;
 
-import java.util.*;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Manipulate {@link org.jbei.ice.lib.folder.Folder} objects in the database.
@@ -112,17 +114,9 @@ public class FolderDAO extends HibernateRepository<Folder> {
         return criteria.setProjection(Projections.property("entry.id")).list();
     }
 
-    @SuppressWarnings("unchecked")
-    public ArrayList<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit) {
-        Session session = currentSession();
-
+    public List<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit) {
         try {
-            Folder folder = get(folderId);
-            if (folder == null)
-                throw new DAOException("Could not locate folder with id " + folderId);
-
             String sortString;
-
             switch (sort) {
                 default:
                 case CREATED:
@@ -145,17 +139,15 @@ public class FolderDAO extends HibernateRepository<Folder> {
                     sortString = "recordType";
                     break;
             }
+            Criteria criteria = currentSession().createCriteria(Entry.class);
+            criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
+            criteria.createAlias("folders", "folder");
+            criteria.add(Restrictions.eq("folder.id", folderId));
 
-            String ascString = asc ? " asc" : " desc";
-            String queryString = "select distinct e from Entry e join e.folders f where f.id = :id "
-                    + "order by e." + sortString + ascString;
-
-            Query query = session.createQuery(queryString);
-            query.setLong("id", folderId);
-            query.setFirstResult(start);
-            query.setMaxResults(limit);
-            List list = query.list();
-            return new ArrayList<>(list);
+            criteria.addOrder(asc ? Order.asc(sortString) : Order.desc(sortString));
+            criteria.setMaxResults(limit);
+            criteria.setFirstResult(start);
+            return criteria.list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -208,30 +200,12 @@ public class FolderDAO extends HibernateRepository<Folder> {
         }
     }
 
-    @SuppressWarnings({"unchecked"})
-    public List<Folder> getFoldersByEntry(Entry entry) {
-        ArrayList<Folder> folders = new ArrayList<>();
-        Session session = currentSession();
-
-        try {
-            String hql = "select distinct folder from " + Folder.class.getName()
-                    + " folder join folder.contents contents where :entry in contents";
-            Query query = session.createQuery(hql);
-            query.setParameter("entry", entry);
-            folders.addAll(query.list());
-        } catch (HibernateException e) {
-            Logger.error(e);
-            throw new DAOException("Failed to retrieve folders!", e);
-        }
-
-        return folders;
-    }
-
     /**
      * Retrieves folders that the specified account owns, or has write privileges on based on the permissions
      *
-     * @param account
-     * @return
+     * @param account       account that is expected to have write privileges on the folders that are returned
+     * @param accountGroups groups that account belongs to that is expected to have write privileges
+     * @return list of folders that the account or groups that the account belongs to has write privileges on
      * @throws DAOException
      */
     public List<Folder> getCanEditFolders(Account account, Set<Group> accountGroups) throws DAOException {

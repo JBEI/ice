@@ -53,7 +53,7 @@
                 <br><br>
 
                 <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5"></div>
-                <div class="pull-left"><a ng-href="/profile/{{comment.accountTransfer.id}}">{{comment.accountTransfer.firstName}}
+                <div class="pull-left"><a ng-href="profile/{{comment.accountTransfer.id}}">{{comment.accountTransfer.firstName}}
                     {{comment.accountTransfer.lastName}}</a> &nbsp; <i ng-if="comment.modified" class="small opacity_4">Last
                     edited on {{comment.modified | date: 'short'}}</i></div>
                 <span ng-if="user.email===comment.accountTransfer.email||user.isAdmin"></span>

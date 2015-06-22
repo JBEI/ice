@@ -6,7 +6,7 @@
 
 <div class="navbar-fixed-top" style="background-color: #fff">
 
-    <a href="/folders/personal"><img class="cursor_pointer" src="/img/logo.png" alt="ICE" height="84px"></a>
+    <a href="folders/personal"><img class="cursor_pointer" src="img/logo.png" alt="ICE" height="84px"></a>
 
     <div style="position: fixed; top: 0; right: 0; left: 260px; background-color: #fff">
         <!-- very top of header. Account and logout links -->
@@ -18,13 +18,13 @@
             <!-- links -->
             <div style="position: absolute; top: 12px; right: 10px">
                 <div style="display: inline-block; vertical-align: top;">
-                    <a ng-href="/profile/{{user.id}}">{{user.email}}</a>
+                    <a ng-href="profile/{{user.id}}">{{user.email}}</a>
                 </div>
 
             <span class="form-group" ng-if="false">&nbsp;
                 <button style="background: transparent; border: none !important;" title=""
                         data-placement="bottom" data-content="contents"
-                        data-template="/views/popover.html" data-trigger="focus" bs-popover>
+                        data-template="views/popover.html" data-trigger="focus" bs-popover>
                     <i class="fa fa-bell" style="font-size: 16px"></i><sup
                         class="count-badge">4</sup>
                 </button>
@@ -35,16 +35,16 @@
                 <sup class="count-badge">8</sup>
             </span>
             <span class="cursor_pointer" ng-click="hidePopovers(false)"
-                  ng-if="shoppingCartContents.length" popover-toggle="openShoppingCart"
-                  popover-trigger="manual"
+                  ng-if="shoppingCartContents.length" popover-enable="openShoppingCart"
+                  popover-trigger="click"
                   popover-placement="bottom" popover-title="Samples Cart"
-                  popover-template="/views/shopping-cart-template.html">
+                  popover-template="shoppingCartTemplate">
                 &nbsp;
                 <i class="fa fa-shopping-cart" style="font-size: 16px"></i>
                 <sup class="count-badge">{{shoppingCartContents.length}}</sup>
             </span>
             <span class="cursor_pointer" ng-if="user.isAdmin">&nbsp;
-                <a href="/admin" style="color: #ff4500;" class="opacity_hover"><i
+                <a href="admin" style="color: #ff4500;" class="opacity_hover"><i
                         class="fa fa-sliders" style="font-size: 20px"></i></a>
             </span>
                 &nbsp;
@@ -60,21 +60,21 @@
 
         <div class="btn-toolbar" style="margin-top: 20px;">
             <!-- sub menu [Create Entry, Add To, etc] -->
-            <div class="btn-group">
-                <button type="button" class="subMenuCreateNew btn-sm dropdown-toggle"
+            <div class="btn-group" dropdown is-open="createEntry.isOpen">
+                <button type="button" class="subMenuCreateNew btn-sm"
                         style="font-size: 13px"
-                        ng-click="createType='create'">Create Entry <span class="caret"></span>
+                        ng-click="toggleUploadDropdown($event, 'create')">Create Entry <span class="caret"></span>
                 </button>
 
                 <button type="button" style="padding: 5px 5px"
-                        class="btn-xs subMenuCreateNew dropdown-toggle"
-                        title="Bulk Import" ng-click="createType='upload'">
+                        class="btn-xs subMenuCreateNew"
+                        title="Bulk Import" ng-click="toggleUploadDropdown($event, 'upload')">
                     <i class="fa fa-table" style="font-size: 14px"></i>
                 </button>
 
                 <ul class="dropdown-menu">
                     <li ng-repeat="choice in items">
-                        <a ng-href="/{{createType}}/{{choice.type}}" class="cursor_pointer">
+                        <a ng-href="{{createType}}/{{choice.type}}" class="cursor_pointer">
                             <i ng-if="createType==='upload'"
                                class="opacity_4 color_444 fa fa-fw fa-table"></i> {{choice.name}}</a>
                     </li>

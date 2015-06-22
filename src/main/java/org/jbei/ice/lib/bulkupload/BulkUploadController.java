@@ -22,6 +22,7 @@ import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.models.Sequence;
@@ -77,9 +78,11 @@ public class BulkUploadController {
         upload.setAccount(account);
         upload.setCreationTime(new Date());
         upload.setLastUpdateTime(upload.getCreationTime());
-        if (info.getStatus() == BulkUploadStatus.BULK_EDIT)
+        if (info.getStatus() == BulkUploadStatus.BULK_EDIT) {
+            // only one instance of bulk edit is allowed to remain
+            clearBulkEdits(userId);
             upload.setStatus(BulkUploadStatus.BULK_EDIT);
-        else
+        } else
             upload.setStatus(BulkUploadStatus.IN_PROGRESS);
 
         upload.setImportType(info.getType());
@@ -111,6 +114,28 @@ public class BulkUploadController {
 
         dao.update(upload);
         return upload.toDataTransferObject();
+    }
+
+    /**
+     * Removes any bulk edits belonging to the specified user
+     *
+     * @param userId unique identifier for user whose bulk edits are to be removed
+     */
+    protected void clearBulkEdits(String userId) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        if (account == null)
+            return;
+
+        List<BulkUpload> userEdits = dao.retrieveByAccount(account);
+        if (userEdits == null || userEdits.isEmpty())
+            return;
+
+        for (BulkUpload upload : userEdits) {
+            if (upload.getStatus() != BulkUploadStatus.BULK_EDIT)
+                continue;
+            upload.getContents().clear();
+            dao.delete(upload);
+        }
     }
 
     /**
@@ -283,19 +308,8 @@ public class BulkUploadController {
         if (!userId.equals(draftAccount.getEmail()) && !accountController.isAdministrator(userId))
             throw new PermissionException("No permissions to delete draft " + draftId);
 
-        // delete all associated entries. for strain with plasmids both are returned
-        // todo : use task to speed up process and also check for status
-
-        ArrayList<Long> entryIds = dao.getEntryIds(draft);
-        for (long entryId : entryIds) {
-            try {
-                entryController.delete(userId, entryId);
-            } catch (PermissionException pe) {
-                Logger.warn(userId + " does not have permission to delete" + entryId + " for bulk upload " + draftId);
-            }
-        }
-
-        dao.delete(draft);
+        BulkUploadDeleteTask task = new BulkUploadDeleteTask(userId, draftId);
+        IceExecutorService.getInstance().runTask(task);
 
         BulkUploadInfo draftInfo = draft.toDataTransferObject();
         AccountTransfer accountTransfer = draft.getAccount().toDataTransferObject();

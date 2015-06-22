@@ -3,10 +3,14 @@
 angular.module('ice.search.controller', [])
     .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil,
                                               Selection, WebOfRegistries) {
+
+        $scope.params = {'asc': false, 'sort': 'created', currentPage: 1};
+        $scope.maxSize = 5;  // number of clickable pages to show in pagination
+
         $scope.$on("RunSearch", function (event, filters) {
             $scope.searchResults = undefined;
             $scope.searchFilters = filters;
-            $scope.currentPage = 1;
+            $scope.params.currentPage = 1;
             runAdvancedSearch(filters);
         });
 
@@ -26,9 +30,8 @@ angular.module('ice.search.controller', [])
             );
         };
 
-        $scope.setSearchResultPage = function (pageNo) {
-            $scope.searchFilters.parameters.start = (pageNo - 1) * 15;
-            $scope.currentPage = pageNo;
+        $scope.searchResultPageChanged = function () {
+            $scope.searchFilters.parameters.start = ($scope.params.currentPage - 1) * 15;
             runAdvancedSearch($scope.searchFilters);
         };
 
@@ -45,16 +48,15 @@ angular.module('ice.search.controller', [])
 
         var context = EntryContextUtil.getContext();
         if (context) {
-            var pageNum = (Math.floor(context.offset / 15)) + 1;
-            $scope.setSearchResultPage(pageNum);
+            $scope.params.currentPage = (Math.floor(context.offset / 15)) + 1;
+            $scope.searchResultPageChanged();
         } else {
             $scope.searchFilters.parameters.start = 0;
             $scope.searchFilters.parameters.retrieveCount = 15;
             $scope.searchFilters.parameters.sortField = "RELEVANCE";
-            $scope.setSearchResultPage(1);
+            $scope.params.currentPage = 1;
+            runAdvancedSearch($scope.searchFilters);
         }
-
-        $scope.maxSize = 5;  // number of clickable pages to show in pagination
 
         $scope.getType = function (relScore) {
             if (relScore === undefined)
@@ -68,6 +70,8 @@ angular.module('ice.search.controller', [])
                 return 'danger';
             return 'info';
         };
+
+        $scope.searchResultPopupTemplate = "/scripts/search/tooltip.html";
 
         $scope.tooltipDetails = function (entry) {
             $scope.searchResultToolTip = undefined;
@@ -96,7 +100,7 @@ angular.module('ice.search.controller', [])
                 $scope.searchFilters.parameters = {start: index}
             }
 
-            var offset = (($scope.currentPage - 1) * 15) + index;
+            var offset = (($scope.params.currentPage - 1) * 15) + index;
             EntryContextUtil.setContextCallback(function (offset, callback) {
                 $scope.searchFilters.parameters.start = offset;
                 $scope.searchFilters.parameters.retrieveCount = 1;
@@ -108,7 +112,7 @@ angular.module('ice.search.controller', [])
                 );
             }, $scope.searchResults.resultCount, offset, "/search", $scope.searchResults.sortField);
 
-            $location.path("/entry/" + entry.id);
+            $location.path("entry/" + entry.id);
         };
 
         //
@@ -201,6 +205,16 @@ angular.module('ice.search.controller', [])
             return $scope.searchFilters.webSearch === true;
         };
 
+        $scope.advancedMenu = {
+            isOpen: false
+        };
+
+        $scope.toggleAdvancedMenuDropdown = function ($event) {
+            $event.preventDefault();
+            $event.stopPropagation();
+            $scope.advancedMenu.isOpen = !$scope.advancedMenu.isOpen;
+        };
+
         $scope.canReset = function () {
             if ($scope.queryText || $scope.sequenceText || $scope.hasSample || $scope.hasSequence || $scope.hasAttachment)
                 return true;
@@ -238,6 +252,7 @@ angular.module('ice.search.controller', [])
         };
 
         $scope.sortResults = function (sortType) {
+            console.log("sort", sortType);
             sortType = sortType.toUpperCase();
 
             if (!$scope.searchFilters.parameters) {
@@ -252,17 +267,6 @@ angular.module('ice.search.controller', [])
             $scope.searchFilters.parameters.sortField = sortType;
             $scope.searchFilters.parameters.start = 0;
             $scope.loadingSearchResults = true;
-
-            Search().runAdvancedSearch({webSearch: $scope.searchFilters.webSearch}, $scope.searchFilters,
-                function (result) {
-                    $scope.searchResults = result;
-                    $scope.loadingSearchResults = false;
-                },
-                function (error) {
-                    $scope.loadingSearchResults = false;
-                    $scope.searchResults = undefined;
-                    console.log(error);
-                }
-            );
+            $scope.$broadcast("RunSearch", $scope.searchFilters);
         };
     });

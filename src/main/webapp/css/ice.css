@@ -1128,11 +1128,11 @@ td.selected i.font-awesome {
     filter: alpha(opacity=0);
 }
 
-.bulk_import_name {
+.folder_name {
     cursor: pointer;
 }
 
-.bulk_import_name:hover {
+.folder_name:hover {
     background-color: #c1c1c1;
 }
 
@@ -1217,4 +1217,25 @@ th:hover i.sortable {
 
 .table-border-bottom {
     border-bottom: 1px solid #ddd;
+}
+
+.highlight-row-icons i.action {
+    visibility: hidden;
+}
+
+.highlight-row-icons:hover i.action {
+    visibility: visible;
+    opacity: 0.4;
+}
+
+.highlight-row-icons:hover i.action:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.search-indicator {
+    padding: 4px 1px 4px 5px;
+    background-color: #fff;
+    color: #aaa;
+    font-size: 16px
 }

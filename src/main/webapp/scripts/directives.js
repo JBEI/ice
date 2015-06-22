@@ -10,7 +10,7 @@ iceDirectives.directive("iceSearchInput", function () {
 //            runUserSearch:"&"
 //        },
         restrict:"E",
-        templateUrl: "/scripts/search/search-input.html",
+        templateUrl: "scripts/search/search-input.html",
         controller:"SearchInputController"
     }
 });
@@ -27,21 +27,21 @@ iceDirectives.directive('focus', function ($timeout, $rootScope) {
 iceDirectives.directive("addSequence", function () {
     return {
         restrict:"AE",
-        templateUrl:"/scripts/entry/sequence/add-sequence.html"
+        templateUrl:"scripts/entry/sequence/add-sequence.html"
     }
 });
 
 iceDirectives.directive("folderActions", function () {
     return {
         restrict:"AE",
-        templateUrl:"/views/folder/folder-actions.html"
+        templateUrl:"views/folder/folder-actions.html"
     }
 });
 
 iceDirectives.directive("iceActionMenu", function () {
     return {
         restrict:"E",
-        templateUrl:"/views/action-menu.html",
+        templateUrl:"views/action-menu.html",
         controller:"ActionMenuController"
     }
 });
@@ -49,14 +49,14 @@ iceDirectives.directive("iceActionMenu", function () {
 iceDirectives.directive("iceEntryAttachment", function () {
     return {
         restrict:"E",
-        templateUrl:"/views/entry-attachment.html"
+        templateUrl:"views/entry-attachment.html"
     }
 });
 
 iceDirectives.directive("iceRemoteEntryAttachment", function () {
     return {
         restrict:"E",
-        templateUrl:"/scripts/wor/entry/attachment.html"
+        templateUrl:"scripts/wor/entry/attachment.html"
     }
 });
 
@@ -66,7 +66,7 @@ iceDirectives.directive("iceEntryPermission", function () {
         scope:{
             entry:'='
         },
-        templateUrl:"/views/entry-permission.html",
+        templateUrl:"views/entry-permission.html",
         controller:'EntryPermissionController'
     }
 });
@@ -76,7 +76,7 @@ iceDirectives.directive("tabs", function () {
         restrict:'E',
         transclude:true,
         controller:"GenericTabsController",
-        templateUrl:"/views/tabs.html"
+        templateUrl:"views/tabs.html"
     }
 });
 
@@ -92,7 +92,7 @@ iceDirectives.directive("pane", function () {
         link:function (scope, element, attrs, permCtrl) {
             permCtrl.addPane(scope);
         },
-        templateUrl:"/views/generic-pane.html"
+        templateUrl:"views/generic-pane.html"
     }
 });
 
@@ -129,7 +129,7 @@ iceDirectives.directive('myTabs', function () {
                 panes.push(pane);
             };
         },
-        templateUrl:'/scripts/entry/tabs.html'
+        templateUrl:'scripts/entry/tabs.html'
     };
 })
     .directive('myPane', function () {
@@ -143,14 +143,14 @@ iceDirectives.directive('myTabs', function () {
             link:function (scope, element, attrs, tabsCtrl) {
                 tabsCtrl.addPane(scope);
             },
-            templateUrl:'/scripts/entry/pane.html'
+            templateUrl:'scripts/entry/pane.html'
         };
     });
 
 iceDirectives.directive("iceCollectionContents", function () {
     return {
         restrict:"AE",
-        templateUrl:"/views/folder/folder-contents.html",
+        templateUrl:"views/folder/folder-contents.html",
         controller:"CollectionFolderController"
     }
 });
@@ -158,7 +158,7 @@ iceDirectives.directive("iceCollectionContents", function () {
 iceDirectives.directive("ice-wor-contents", function () {
     return {
         restrict:"AE",
-        templateUrl:"/scripts/wor/wor-contents.html",
+        templateUrl:"scripts/wor/wor-contents.html",
         controller:"WorContentController"
     }
 });
@@ -169,14 +169,14 @@ iceDirectives.directive("iceBulkUploadContents", function () {
             contents:"="
         },
         restrict:"AE",
-        templateUrl:"/views/bulk-upload-contents.html"
+        templateUrl:"views/bulk-upload-contents.html"
     }
 });
 
 iceDirectives.directive("ice.menu.collections", function () {
     return {
         restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
-        templateUrl:"/views/collections-menu.html",
+        templateUrl:"views/collections-menu.html",
         controller:"CollectionMenuController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)
@@ -187,7 +187,7 @@ iceDirectives.directive("ice.menu.collections", function () {
 iceDirectives.directive("ice.menu.collections.details", function () {
     return {
         restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
-        templateUrl:"/views/collections-menu-details.html",
+        templateUrl:"views/collections-menu-details.html",
         controller:"CollectionDetailController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)
@@ -199,7 +199,7 @@ iceDirectives.directive("ice.menu.collections.details", function () {
 iceDirectives.directive("ice.menu.wor", function () {
     return {
         restrict:"E",
-        templateUrl:"/scripts/wor/web-of-registries-menu.html",
+        templateUrl:"scripts/wor/web-of-registries-menu.html",
         controller:"WebOfRegistriesMenuController"
     }
 });
@@ -207,7 +207,7 @@ iceDirectives.directive("ice.menu.wor", function () {
 iceDirectives.directive("ice.menu.wor.details", function () {
     return {
         restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
-        templateUrl:"/scripts/wor/web-of-registries-menu-details.html",
+        templateUrl:"scripts/wor/web-of-registries-menu-details.html",
         controller:"WebOfRegistriesDetailController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)
@@ -219,7 +219,7 @@ iceDirectives.directive("ice.menu.wor.details", function () {
 iceDirectives.directive("ice.menu.tags", function () {
     return {
         restrict:"E",
-        templateUrl:"/views/tags-menu.html"
+        templateUrl:"views/tags-menu.html"
     }
 });
 
@@ -229,7 +229,7 @@ iceDirectives.directive("iceVectorViewer", function ($cookieStore) {
         var entryId;
 
         function generateObject() {
-            element.html('<object id="VectorViewer" width="100%" height="100%" data="/swf/vv/VectorViewer.swf?entryId='
+            element.html('<object id="VectorViewer" width="100%" height="100%" data="swf/vv/VectorViewer.swf?entryId='
                 + entryId + '&amp;sessionId=' + sid + '"> \
                               </object>');
         }
@@ -261,7 +261,7 @@ iceDirectives.directive("iceRemoteFlash", function ($cookieStore) {
         var entryId, url;
 
         function generateObject() {
-            element.html('<object id="VectorViewer" width="100%" height="100%" data="/swf/vv/VectorViewer.swf?entryId='
+            element.html('<object id="VectorViewer" width="100%" height="100%" data="swf/vv/VectorViewer.swf?entryId='
                 + entryId + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
                     </object>');
         }
@@ -287,11 +287,11 @@ iceDirectives.directive("iceSequenceChecker", function ($cookieStore) {
 
         function generateObject() {
             if (!url) {
-                element.html('<object id="SequenceChecker" width="100%" height="100%" data="/swf/sc/SequenceChecker.swf?entryId='
+                element.html('<object id="SequenceChecker" width="100%" height="100%" data="swf/sc/SequenceChecker.swf?entryId='
                     + id + '&amp;sessionId=' + sid + '"> \
                     </object>');
             } else {
-                element.html('<object id="SequenceChecker" width="100%" height="100%" data="/swf/sc/SequenceChecker.swf?entryId='
+                element.html('<object id="SequenceChecker" width="100%" height="100%" data="swf/sc/SequenceChecker.swf?entryId='
                     + id + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
                     </object>');
             }

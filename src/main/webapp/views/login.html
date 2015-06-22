@@ -2,17 +2,18 @@
     <div class="row" style="margin-top: 80px">
         <div class="col-md-6">
             <div class=" pull-right">
-                <ng-include src="'/views/institution.html'"></ng-include>
+                <ng-include src="'views/institution.html'"></ng-include>
             </div>
         </div>
         <div class="col-md-6">
             <form name="loginForm" data-ng-submit="submit()">
                 <div class="form-group">
                     <br><img src="img/logo.png"><br><br>
-                    <alert type="'danger'" style="width: 250px; padding: 8px" ng-if="errMsg">
+
+                    <div class="alert alert-danger" style="width: 250px; padding: 8px" ng-if="errMsg">
                         <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
                         <span class="font-90em">Login failed. Please try again.</span>
-                    </alert>
+                    </div>
                 </div>
 
                 <div class="form-group">

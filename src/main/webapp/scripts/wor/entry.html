@@ -25,7 +25,7 @@
                 <i class="fa fa-globe text-info"></i> <strong style="color: #888;">{{remoteEntry.type}}</strong>
                 <strong>{{remoteEntry.name}}</strong>
                 <span ng-repeat="parent in remoteEntry.parents">
-                &nbsp;<a ng-href="/web/{{currentPartner.id}}/entry/{{parent.id}}" tooltip="{{parent.name}}"
+                &nbsp;<a ng-href="web/{{currentPartner.id}}/entry/{{parent.id}}" tooltip="{{parent.name}}"
                          tooltip-placement="right" tooltip-trigger="mouseenter"
                          style="font-size: 12px; color: white; position: relative; top: -4px"
                          class="small label label-default cursor_pointer"><b class="font-90em">{{parent.type |

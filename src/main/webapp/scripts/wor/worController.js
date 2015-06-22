@@ -6,7 +6,7 @@ angular.module('ice.wor.controller', [])
         $scope.selectedPartner = $stateParams.partner;
         $scope.loadingPage = true;
         var wor = WebOfRegistries();
-        $scope.queryParams = {limit: 15, offset: 0, sort: 'created', partnerId: $stateParams.partner};
+        $scope.queryParams = {limit: 15, offset: 0, sort: 'created', partnerId: $stateParams.partner, currentPage: 1};
         $scope.webResults = undefined;
 
         // init: retrieve first page of all public entries
@@ -20,15 +20,12 @@ angular.module('ice.wor.controller', [])
             WorService.setSelectedPartner(undefined);
         });
 
-        $scope.currentPage = 1;
         $scope.maxSize = 5;
+        $scope.worContentsPopoverTemplate = "views/folder/template.html";
 
-        $scope.setPage = function (pageNo) {
-            if (pageNo == undefined || isNaN(pageNo))
-                pageNo = 1;
-
+        $scope.worContentsPageChange = function () {
             $scope.loadingPage = true;
-            $scope.queryParams.offset = (pageNo - 1) * 15;
+            $scope.queryParams.offset = ($scope.queryParams.currentPage - 1) * 15;
 
             wor.getPublicEntries($scope.queryParams, function (result) {
                 $scope.webResults = result;
@@ -50,7 +47,7 @@ angular.module('ice.wor.controller', [])
             wor.getPublicEntries($scope.queryParams, function (result) {
                 $scope.loadingPage = false;
                 $scope.webResults = result;
-                $scope.currentPage = 1;
+                $scope.queryParams.currentPage = 1;
             }, function (error) {
                 console.log(error);
                 $scope.webResults = null;
@@ -72,14 +69,13 @@ angular.module('ice.wor.controller', [])
         else
             id = $stateParams.folderId;
 
-        $scope.currentPage = 1;
         $scope.maxSize = 5;
         $scope.itemsPerPage = 15;
 
-        $scope.folderPageParams = {folderId: id, id: $stateParams.partner, offset: 0};
+        $scope.params = {folderId: id, id: $stateParams.partner, offset: 0, currentPage: 1};
 
         var getRemoteFolderEntries = function () {
-            Remote().getFolderEntries($scope.folderPageParams, function (result) {
+            Remote().getFolderEntries($scope.params, function (result) {
                 $scope.selectedPartnerFolder = result;
                 $scope.selectedPartner = WorService.getSelectedPartner();
                 if ($scope.selectedPartner == undefined) {
@@ -98,15 +94,13 @@ angular.module('ice.wor.controller', [])
         // init
         getRemoteFolderEntries();
 
-        $scope.setPage = function (pageNo) {
-            if (pageNo == undefined || isNaN(pageNo))
-                pageNo = 1;
-
+        $scope.worFolderContentPageChange = function () {
             $scope.loadingPage = true;
-            $scope.currentPage = pageNo;
-            $scope.folderPageParams.offset = (pageNo - 1) * 15;
+            $scope.params.offset = ($scope.params.currentPage - 1) * 15;
             getRemoteFolderEntries();
         };
+
+        $scope.worFolderContentsPopoverTemplate = "views/folder/template.html";
 
         $scope.tooltipDetails = function (entry) {
             WebOfRegistries().getToolTip({partnerId: $stateParams.partner, entryId: entry.id}, function (result) {
@@ -117,19 +111,19 @@ angular.module('ice.wor.controller', [])
         $scope.getRemoteEntryDetails = function (partnerId, entryId, index) {
             var position = (($scope.currentPage - 1) * $scope.itemsPerPage) + index;
             var url = "/web/" + partnerId;
-            if ($scope.folderPageParams && $scope.folderPageParams.folderId)
-                url += "/folder/" + $scope.folderPageParams.folderId;
+            if ($scope.params && $scope.params.folderId)
+                url += "/folder/" + $scope.params.folderId;
 
             WorService.setContextCallback(function (offset, callback) {
-                $scope.folderPageParams.offset = offset;
-                $scope.folderPageParams.limit = 1;
+                $scope.params.offset = offset;
+                $scope.params.limit = 1;
 
-                Remote().getFolderEntries($scope.folderPageParams, function (result) {
+                Remote().getFolderEntries($scope.params, function (result) {
                     callback(result.entries[0].id);
                 });
             }, $scope.selectedPartnerFolder.count, position, url);
 
-            $location.path("/web/" + partnerId + "/entry/" + entryId, true);
+            $location.path("web/" + partnerId + "/entry/" + entryId, true);
         };
     })
     .controller('WorEntryController', function ($location, $scope, $window, WebOfRegistries, $stateParams, EntryService, WorService, Remote) {
@@ -188,10 +182,10 @@ angular.module('ice.wor.controller', [])
         };
 
         var menuSubDetails = $scope.subDetails = [
-            {url:'/scripts/wor/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
-            {id:'sequences', url:'/scripts/wor/entry/sequence-analysis.html', display:'Sequence Analysis', isPrivileged:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
-            {id:'comments', url:'/scripts/wor/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
-            {id:'samples', url:'/scripts/wor/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'}
+            {url:'scripts/wor/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
+            {id:'sequences', url:'scripts/wor/entry/sequence-analysis.html', display:'Sequence Analysis', isPrivileged:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
+            {id:'comments', url:'scripts/wor/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
+            {id:'samples', url:'scripts/wor/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'}
         ];
 
         $scope.showSelection = function (index) {
@@ -235,7 +229,7 @@ angular.module('ice.wor.controller', [])
         };
 
         $scope.downloadRemoteAttachment = function (attachment) {
-            $window.open("/rest/file/remote/" + $stateParams.partner + "/attachment/" + attachment.fileId, "_self");
+            $window.open("rest/file/remote/" + $stateParams.partner + "/attachment/" + attachment.fileId, "_self");
         };
     })
     .controller('WebOfRegistriesDetailController', function ($scope, $cookieStore, $location, $stateParams) {
@@ -310,7 +304,7 @@ angular.module('ice.wor.controller', [])
         };
 
         $scope.selectPartner = function (partner) {
-            $location.path("/web/" + partner.id);
+            $location.path("web/" + partner.id);
             $scope.selectedPartner = partner.id;
             var remote = Remote();
             remote.publicFolders({id: partner.id}, function (result) {
@@ -335,7 +329,7 @@ angular.module('ice.wor.controller', [])
 
         // retrieves public folders for specified registry and re-directs
         $scope.selectPartner = function (partner) {
-            $location.path("/web/" + partner.id);
+            $location.path("web/" + partner.id);
             $scope.selectedPartner = partner.id;
             var remote = Remote();
             remote.publicFolders({id: partner.id}, function (result) {

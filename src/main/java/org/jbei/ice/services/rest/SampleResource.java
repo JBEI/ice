@@ -15,6 +15,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.sample.PartSample;
@@ -72,6 +73,14 @@ public class SampleResource extends RestResource {
             @QueryParam("status") final SampleRequestStatus status) {
         final String userId = getUserId();
         Logger.info(userId + ": retrieving sample requests");
+        SampleRequestStatus requestStatus = null;
+        if (!StringUtils.isEmpty(status)) {
+            try {
+                requestStatus = SampleRequestStatus.valueOf(status);
+            } catch (Exception e) {
+                requestStatus = null;
+            }
+        }
         final UserSamples samples = requestRetriever.getRequests(userId, offset, limit, sort, asc,
                 status, filter);
         return super.respond(Response.Status.OK, samples);

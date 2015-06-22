@@ -64,7 +64,7 @@
                         <a ng-if="experiment.label" ng-href="{{experiment.url}}">{{experiment.label}}</a>
                         <a ng-if="!experiment.label" ng-href="{{experiment.url}}">{{experiment.url}}</a>
                     </td>
-                    <!--<td><a ng-href="/profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}-->
+                    <!--<td><a ng-href="profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}-->
                     <!--{{traceSequence.depositor.lastName}}</a></td>-->
                     <td>{{experiment.created | date:'MMM d, y, h:mm a'}}</td>
                     <td style="font-size:14px"><i ng-click="deleteTraceSequenceFile(traceSequence.fileId)"

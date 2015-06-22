@@ -1,15 +1,18 @@
 package org.jbei.ice.lib.search.filter;
 
-import java.util.HashSet;
-
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.model.ArabidopsisSeed;
-import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Part;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.model.Strain;
 
+import java.util.HashSet;
+import java.util.List;
+
 /**
+ * Maintains information about the particular fields for the entry types (not exactly a factory in that regard)
+ * and also the class types for hibernate search
+ *
  * @author Hector Plahar
  */
 public class SearchFieldFactory {
@@ -56,42 +59,54 @@ public class SearchFieldFactory {
         seedFields.add("plantType");
     }
 
-    public static HashSet<String> getCommonFields() {
-        return new HashSet<>(commonFields);
+    public static HashSet<String> entryFields(List<EntryType> types) {
+        HashSet<String> fields = new HashSet<>();
+
+        for (EntryType type : types) {
+            switch (type) {
+                case STRAIN:
+                    fields.addAll(strainFields);
+                    break;
+
+                case PLASMID:
+                    fields.addAll(plasmidFields);
+                    break;
+
+                case ARABIDOPSIS:
+                    fields.addAll(seedFields);
+                    break;
+            }
+        }
+
+        fields.addAll(commonFields);
+        return fields;
     }
 
-    public static HashSet<String> entryFields(EntryType type) {
-        switch (type) {
-            case STRAIN:
-                return new HashSet<>(strainFields);
+    public static Class<?>[] classesForTypes(List<EntryType> types) {
+        if (types == null || types.isEmpty())
+            return new Class<?>[0];
 
-            case PLASMID:
-                return new HashSet<>(plasmidFields);
+        Class<?>[] classes = new Class<?>[types.size()];
 
-            case ARABIDOPSIS:
-                return new HashSet<>(seedFields);
+        for (int i = 0; i < types.size(); i += 1) {
+            switch (types.get(i)) {
+                case STRAIN:
+                    classes[i] = Strain.class;
+                    break;
 
-            default:
-                return new HashSet<>(commonFields);
+                case PLASMID:
+                    classes[i] = Plasmid.class;
+                    break;
+
+                case ARABIDOPSIS:
+                    classes[i] = ArabidopsisSeed.class;
+                    break;
+
+                case PART:
+                    classes[i] = Part.class;
+                    break;
+            }
         }
-    }
-
-    public static Class<?> entryClass(EntryType type) {
-        switch (type) {
-            case STRAIN:
-                return Strain.class;
-
-            case PLASMID:
-                return Plasmid.class;
-
-            case ARABIDOPSIS:
-                return ArabidopsisSeed.class;
-
-            case PART:
-                return Part.class;
-
-            default:
-                return Entry.class;
-        }
+        return classes;
     }
 }

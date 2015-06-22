@@ -26,12 +26,12 @@ import org.jbei.ice.lib.entry.model.Parameter;
 
 /**
  * Entry class is the most important class in gd-ice. Other record types extend this class.
- * <p/>
+ * <p>
  * Entry class represent the unique handle for each record in the system. It provides the common fields, such as the
  * recordId (uuid), timestamps, owner and creator information, etc.
- * <p/>
+ * <p>
  * Description of Entry fields:
- * <p/>
+ * <p>
  * <ul> <li><b>id:</b> database id of an entry.</li> <li><b>recordId:</b> 36 character globally unique identifier.
  * Implemented as UUIDv4.</li> <li><b>versionId:</b> 36 character globally unique identifier.</li>
  * <li><b>recordType:</b> The type of record. Currently there are plasmids, strains, arabidopsis seeds, and parts.
@@ -127,11 +127,10 @@ public class Entry implements IDataModel {
     private String alias;
 
     @Column(name = "name", length = 127)
-    @Field(store = Store.YES, boost = @Boost(2f))
+    @Field(store = Store.YES, boost = @Boost(4f))
     private String name;
 
     @Column(name = "part_number", length = 127)
-    @Analyzer(definition = "customanalyzer")
     @Field(boost = @Boost(2f), store = Store.YES)
     private String partNumber;
 

@@ -1,14 +1,13 @@
 package org.jbei.ice.lib.models;
 
-import java.util.Date;
-import javax.persistence.*;
-import javax.xml.bind.annotation.XmlTransient;
-
+import org.hibernate.annotations.Type;
 import org.jbei.ice.lib.dao.IDataModel;
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.entry.model.Entry;
 
-import org.hibernate.annotations.Type;
+import javax.persistence.*;
+import javax.xml.bind.annotation.XmlTransient;
+import java.util.Date;
 
 /**
  * Store sequence trace file information.
@@ -52,18 +51,6 @@ public class TraceSequence implements IDataModel {
     private TraceSequenceAlignment traceSequenceAlignment;
 
     public TraceSequence() {
-    }
-
-    public TraceSequence(Entry entry, String fileId, String filename, String depositor,
-            String sequence) {
-        super();
-
-        this.entry = entry;
-        this.fileId = fileId;
-        this.filename = filename;
-        this.depositor = depositor;
-        this.sequence = sequence;
-        creationTime = new Date();
     }
 
     public TraceSequence(Entry entry, String fileId, String filename, String depositor,
@@ -143,7 +130,17 @@ public class TraceSequence implements IDataModel {
     }
 
     @Override
-    public IDataTransferModel toDataTransferObject() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public TraceSequenceAnalysis toDataTransferObject() {
+        TraceSequenceAnalysis info = new TraceSequenceAnalysis();
+        info.setId(this.getId());
+        info.setCreated(this.getCreationTime());
+        info.setFilename(this.getFilename());
+        info.setSequence(this.getSequence());
+        if (this.getTraceSequenceAlignment() != null) {
+            info.setTraceSequenceAlignment(this.getTraceSequenceAlignment().toDataTransferObject());
+        }
+
+        info.setFileId(this.getFileId());
+        return info;
     }
 }

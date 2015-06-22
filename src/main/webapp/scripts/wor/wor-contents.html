@@ -3,7 +3,7 @@
         <h4>
             <strong style="color: #888;text-transform: uppercase;">
                 <i class="fa fa-fw fa-globe"></i> {{webResults.registryPartner.name}}</strong>
-            <img alt="Loading..." ng-if="loadingPage" src="/img/loader-mini.gif"/>
+            <img alt="Loading..." ng-if="loadingPage" src="img/loader-mini.gif"/>
             &nbsp;&nbsp;&nbsp;<span ng-show="folder.id" folder-actions class="font-95em"></span>
         </h4>
     </div>
@@ -42,7 +42,6 @@
                    ng-class="{'fa-angle-down':queryParams.asc==false, 'fa-angle-up':queryParams.asc==true}"></i>
             </th>
             <th style="width:100px;">
-                <i class="fa fa-paperclip fa-fw" style="font-size: 14px;"></i>
                 <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
                 <img src="img/dna.svg" width="15px" alt="has dna"/>
             </th>
@@ -56,7 +55,7 @@
 
         <tr data-ng-show='!webResults'>
             <td colspan="10">
-                <img alt="Loading..." src="/img/loader-mini.gif"/>
+                <img alt="Loading..." src="img/loader-mini.gif"/>
                 Loading...
             </td>
         </tr>
@@ -69,10 +68,10 @@
             <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
                 {{entry.type | uppercase}}
             </td>
-            <td><a ng-href="/web/{{webResults.registryPartner.id}}/entry/{{entry.id}}"
+            <td><a ng-href="web/{{webResults.registryPartner.id}}/entry/{{entry.id}}"
                    ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
                    popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                   popover-template="/views/template.html"
+                   popover-template="worContentsPopoverTemplate"
                    popover-placement="right">{{entry.partId}}</a>
             </td>
             <td>
@@ -91,10 +90,6 @@
                 </span>
             </td>
             <td style="vertical-align: middle;">
-                <i ng-show="entry.hasAttachment" class="fa fa-paperclip fa-fw"
-                   style="color: #555; font-size: 14px;"></i>
-                <i ng-show="!entry.hasAttachment" class="fa fa-square fa-fw"
-                   style="opacity: 0; font-size: 14px;"></i>
                 <i ng-show="entry.hasSample" class="fa fa-flask fa-fw"
                    style="color: #555; font-size: 14px;"></i>
                 <i ng-show="!entry.hasSample" class="fa fa-square fa-fw"
@@ -111,12 +106,13 @@
 
 <div class="row" ng-if="webResults && webResults.entries.length > 0">
     <div class="col-md-5" style="padding-left: 0">
-        <pagination total-items="webResults.count" on-select-page="setPage(page)" page="currentPage"
+        <pagination total-items="webResults.count" ng-change="worContentsPageChange()"
+                    ng-model="queryParams.currentPage"
                     max-size="maxSize" class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
     </div>
     <div class="col-md-7" style="margin-top: 25px;">
         <strong class="small">
-            <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
+            <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(queryParams.currentPage,
             webResults.count)}}
         </strong>
     </div>

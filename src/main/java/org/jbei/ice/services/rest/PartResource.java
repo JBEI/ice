@@ -266,7 +266,7 @@ public class PartResource extends RestResource {
             @PathParam("id") final long partId, @PathParam("permissionId") final long permissionId) {
         final String userId = getUserId();
         permissionsController.removeEntryPermission(userId, partId, permissionId);
-        return Response.ok().build();
+        return super.respond(true);
     }
 
     /**

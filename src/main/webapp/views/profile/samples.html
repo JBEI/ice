@@ -6,7 +6,7 @@
         <table cellspacing="0" class="table table-bordered table-responsive table-hover font-95em"
                ng-class="{'opacity_4':loadingPage}">
             <tr data-ng-show='!userSamples'>
-                <td colspan="10"><img src="/img/loader-mini.gif"> Loading...</td>
+                <td colspan="10"><img src="img/loader-mini.gif"> Loading...</td>
             </tr>
 
             <tr data-ng-if='userSamples && userSamples.requests.length > 0'>
@@ -27,7 +27,7 @@
             </tr>
 
             <tr data-ng-repeat="request in userSamples.requests">
-                <td><a href="/entry/{{request.partData.id}}">{{request.partData.partId}}</a></td>
+                <td><a href="entry/{{request.partData.id}}">{{request.partData.partId}}</a></td>
                 <td>
                     <span ng-if="request.requestType==='LIQUID_CULTURE'"><i
                             class="fa fa-flask"></i> Liquid Culture</span>

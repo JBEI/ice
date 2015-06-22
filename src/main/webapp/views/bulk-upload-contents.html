@@ -26,7 +26,7 @@
             </tr>
 
             <tr ng-repeat="upload in contents | orderBy:predicate:reverse">
-                <td><a ng-href="/upload/{{upload.id}}">{{upload.name}}</a></td>
+                <td><a ng-href="upload/{{upload.id}}">{{upload.name}}</a></td>
                 <td>{{upload.type}}</td>
                 <td>{{upload.count}}</td>
                 <td>{{upload.created}}</td>
