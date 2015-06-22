@@ -378,10 +378,11 @@ public class BulkUploadResource extends RestResource {
                                 @PathParam("entryId") long entryId) {
         try {
             final String userId = getUserId();
-            if (controller.deleteEntry(userId, uploadId, entryId))
+            if (controller.deleteEntry(userId, uploadId, entryId)) {
                 return Response.ok().build();
+            }
             return Response.serverError().build();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             return super.respond(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }

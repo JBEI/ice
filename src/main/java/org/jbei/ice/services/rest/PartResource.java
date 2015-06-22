@@ -463,21 +463,18 @@ public class PartResource extends RestResource {
     }
 
     /**
-     * @param info
      * @param partId
      * @return samples on the part
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
-    public List<PartSample> getSamples(@Context final UriInfo info,
-            @PathParam("id") final long partId) {
+    public List<PartSample> getSamples(@PathParam("id") final long partId) {
         final String userId = getUserId();
         return sampleController.retrieveEntrySamples(userId, partId);
     }
 
     /**
-     * @param info
      * @param partId
      * @param strainNamePrefix
      * @param partSample
@@ -486,8 +483,7 @@ public class PartResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
-    public List<PartSample> addSample(@Context final UriInfo info,
-            @PathParam("id") final long partId,
+    public List<PartSample> addSample(@PathParam("id") final long partId,
             @QueryParam("strainNamePrefix") final String strainNamePrefix,
             final PartSample partSample) {
         final String userId = getUserId();
@@ -497,7 +493,6 @@ public class PartResource extends RestResource {
     }
 
     /**
-     * @param info
      * @param partId
      * @param sampleId
      * @return Response for success or failure
@@ -505,7 +500,7 @@ public class PartResource extends RestResource {
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples/{sampleId}")
-    public Response deleteSample(@Context final UriInfo info, @PathParam("id") final long partId,
+    public Response deleteSample(@PathParam("id") final long partId,
             @PathParam("sampleId") final long sampleId) {
         final String userId = getUserId();
         final boolean success = sampleController.delete(userId, partId, sampleId);
