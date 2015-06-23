@@ -5,7 +5,7 @@ angular.module('ice.profile.controller', [])
         var user = User($cookieStore.get("sessionId"));
         var profileId = $stateParams.id;
 
-        $location.path("/profile/" + profileId + "/entries", false);
+        $location.path("profile/" + profileId + "/entries", false);
         $scope.maxSize = 5;
         $scope.params = {userId: profileId, sort: "created", asc: false, currentPage: 1};
 
@@ -171,9 +171,9 @@ angular.module('ice.profile.controller', [])
             selectedOption.selected = true;
             $scope.profileOptionSelection = menuOptions[index].url;
             if (selectedOption.id) {
-                $location.path("/profile/" + profileId + "/" + selectedOption.id);
+                $location.path("profile/" + profileId + "/" + selectedOption.id);
             } else {
-                $location.path("/profile/" + profileId);
+                $location.path("profile/" + profileId);
             }
         };
 
@@ -324,7 +324,7 @@ angular.module('ice.profile.controller', [])
     })
     .controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, User, Group) {
         var profileId = $stateParams.id;
-        $location.path("/profile/" + profileId + "/groups", false);
+        $location.path("profile/" + profileId + "/groups", false);
         $scope.selectedUsers = [];
         $scope.selectedRemoteUsers = [];
         $scope.myGroups = [];
