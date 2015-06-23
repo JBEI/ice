@@ -1,6 +1,8 @@
 <div class="font-90em">
-    <div><b style="color: #4d4f53">Alias</b>: {{currentTooltip.alias}}</div>
-    <div><b style="color: #4d4f53">Selection Markers</b>: {{currentTooltip.selectionMarkers.toString()}}</div>
+    <div ng-if="currentTooltip.alias"><b style="color: #4d4f53">Alias</b>: {{currentTooltip.alias}}</div>
+    <div ng-if="currentTooltip.selectionMarkers"><b style="color: #4d4f53">Selection Markers</b>:
+        {{currentTooltip.selectionMarkers.toString()}}
+    </div>
     <div ng-if="currentTooltip.backbone"><b style="color: #4d4f53">Backbone</b>: {{currentTooltip.backbone}}</div>
     <div><b style="color: #4d4f53">Creator</b>: {{currentTooltip.creator}}</div>
     <div ng-if="currentTooltip.originOfReplication"><b style="color: #4d4f53">Origin of Replication</b>:
@@ -15,8 +17,11 @@
     <div ng-if="currentTooltip.promoters"><b style="color: #4d4f53">Promoters</b>: {{currentTooltip.promoters}}</div>
     <div ng-if="currentTooltip.keywords"><b style="color: #4d4f53">Keywords</b>: {{currentTooltip.keywords}}</div>
     <div ng-if="currentTooltip.references"><b style="color: #4d4f53">References</b>: {{currentTooltip.references}}</div>
-    <div><b style="color: #4d4f53">Funding Source</b>: {{currentTooltip.fundingSource}}</div>
-    <div class="no_wrap"><b style="color: #4d4f53">Principal Investigator</b>: {{currentTooltip.principalInvestigator}}
+    <div ng-if="currentTooltip.fundingSource"><b style="color: #4d4f53">Funding Source</b>:
+        {{currentTooltip.fundingSource}}
+    </div>
+    <div class="no_wrap"><b style="color: #4d4f53">Principal Investigator</b>: {{currentTooltip.principalInvestigator |
+        truncate:22}}
     </div>
     <div><b style="color: #4d4f53">Modified</b>: {{currentTooltip.modificationTime | date:'medium'}}</div>
     <div ng-if="currentTooltip.intellectualProperty"><b style="color: #4d4f53">IP Information</b>:

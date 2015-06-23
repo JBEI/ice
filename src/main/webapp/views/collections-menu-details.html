@@ -3,10 +3,10 @@
     <form ng-submit="createCollection()">
         <div class="input-group" style="font-weight: normal">
             <input type="text" class="input_box" placeholder="Enter collection name" maxlength="35"
-                   style="width: 190px;" ng-model="newCollectionName">
-                    <span class="input-group-addon" style="padding:0; background-color: #f1f1f1; width: 19px;">
-                        <i ng-click="hideAddCollection=true" class="fa fa-times delete_icon"></i>
-                    </span>
+                   style="width: 220px;" ng-model="newCollectionName">
+                <span class="input-group-addon" style="padding:0; background-color: #f1f1f1; width: 19px;">
+                    <i ng-click="hideAddCollection=true" class="fa fa-times delete_icon"></i>
+                </span>
         </div>
     </form>
 </div>
@@ -31,7 +31,7 @@
              <i class="fa fa-user fa-stack-1x" style="margin-left: 2px; color: #f1f1f1"></i>  &nbsp;
         </span>
 
-        <span ng-if="folder.folderName" style="font-size: 12px;" title="{{folder.folderName}}">{{folder.folderName | truncate:25}}</span>&nbsp;
+        <span ng-if="folder.folderName" style="font-size: 12px;" title="{{folder.folderName}}">{{folder.folderName | truncate:22}}</span>&nbsp;
         <i ng-if="!folder.folderName" class="color-888" style="font-size: 13px">Untitled</i>&nbsp;
         <span ng-show="!showSubMenu" class="menu_count">{{folder.count | number}}</span>
 

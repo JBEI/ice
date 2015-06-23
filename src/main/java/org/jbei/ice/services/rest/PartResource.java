@@ -195,7 +195,7 @@ public class PartResource extends RestResource {
                                      @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = getUserIdFromSessionHeader(userAgentHeader);
         permissionsController.removeEntryPermission(userId, partId, permissionId);
-        return Response.ok().build();
+        return super.respond(true);
     }
 
     @GET

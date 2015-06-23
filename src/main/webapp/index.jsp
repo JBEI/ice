@@ -8,7 +8,7 @@
     <link href="css/font-awesome.min.css" rel="stylesheet">
 
     <link href="css/ice.css" rel="stylesheet">
-    <script src="scripts/lib/jquery/jquery-1.11.0.min.js"></script>
+    <script src="scripts/lib/jquery/jquery-1.11.3.min.js"></script>
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
     <script src="scripts/lib/angular/angular.min.js"></script>
@@ -18,9 +18,8 @@
     <script src="scripts/lib/angular/angular-animate.min.js"></script>
     <script src="scripts/lib/angular/angular-touch.min.js"></script>
 
-    <script src="scripts/lib/angular-ui/angular-ui.js"></script>
-    <script src="scripts/lib/angular-ui/angular-ui-router.min.js"></script>
-    <script src="scripts/lib/angular-ui/ui-bootstrap-tpls-0.10.0.js"></script>
+    <script src="scripts/lib/angular-ui/angular-ui-router.min-0.2.15.js"></script>
+    <script src="scripts/lib/angular-ui/ui-bootstrap-tpls-0.13.0.min.js"></script>
 
     <script src="scripts/lib/angular-file-upload/angular-file-upload.min.js"></script>
 
@@ -64,9 +63,14 @@
     <script src="scripts/collection/collectionDirectives.js"></script>
     <script src="scripts/wor/worController.js"></script>
     <script src="scripts/admin/adminController.js"></script>
+    <script src="scripts/admin/adminDirectives.js"></script>
 
     <script src="scripts/filters.js"></script>
     <script src="scripts/directives.js"></script>
+
+    <script src="scripts/profile/ice.profile.js"></script>
+    <script src="scripts/profile/profileController.js"></script>
+    <script src="scripts/profile/profileService.js"></script>
 
     <!-- GRUNT END -->
 </head>
@@ -134,7 +138,7 @@
                                             <a href="http://public-registry.jbei.org/manual">Help</a>
                                         </td>
                                         <td align="left" style="vertical-align: top;">
-                                            <div>&nbsp; | &nbsp; <span class="label label-primary">v4.2.0</span></div>
+                                            <div>&nbsp; | &nbsp; <span class="label label-primary">v4.2.2</span></div>
                                         </td>
                                     </tr>
                                 </table>

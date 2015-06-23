@@ -26,12 +26,12 @@ import org.jbei.ice.lib.entry.model.Parameter;
 
 /**
  * Entry class is the most important class in gd-ice. Other record types extend this class.
- * <p/>
+ * <p>
  * Entry class represent the unique handle for each record in the system. It provides the common fields, such as the
  * recordId (uuid), timestamps, owner and creator information, etc.
- * <p/>
+ * <p>
  * Description of Entry fields:
- * <p/>
+ * <p>
  * <ul> <li><b>id:</b> database id of an entry.</li> <li><b>recordId:</b> 36 character globally unique identifier.
  * Implemented as UUIDv4.</li> <li><b>versionId:</b> 36 character globally unique identifier.</li>
  * <li><b>recordType:</b> The type of record. Currently there are plasmids, strains, arabidopsis seeds, and parts.
@@ -127,11 +127,10 @@ public class Entry implements IDataModel {
     private String alias;
 
     @Column(name = "name", length = 127)
-    @Field(store = Store.YES, boost = @Boost(2f))
+    @Field(store = Store.YES, boost = @Boost(4f))
     private String name;
 
     @Column(name = "part_number", length = 127)
-    @Analyzer(definition = "customanalyzer")
     @Field(boost = @Boost(2f), store = Store.YES)
     private String partNumber;
 
@@ -202,27 +201,27 @@ public class Entry implements IDataModel {
     @Field(store = Store.YES, analyze = Analyze.NO)
     private String principalInvestigatorEmail;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.LAZY)
     @IndexedEmbedded(depth = 1)
     private Set<SelectionMarker> selectionMarkers = new LinkedHashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.LAZY)
     @IndexedEmbedded(depth = 1)
     private final Set<Link> links = new LinkedHashSet<>();
 
-    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(cascade = {CascadeType.ALL}, mappedBy = "entry", orphanRemoval = true, fetch = FetchType.LAZY)
     @IndexedEmbedded(depth = 1)
     private final List<Parameter> parameters = new ArrayList<>();
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, mappedBy = "entry",
-            orphanRemoval = true, fetch = FetchType.EAGER)
+            orphanRemoval = true, fetch = FetchType.LAZY)
     @IndexedEmbedded(depth = 1)
     private final Set<Permission> permissions = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "contents")
     private Set<Folder> folders = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE})
     @JoinTable(name = "entry_entry", joinColumns = {@JoinColumn(name = "entry_id", nullable = false)},
             inverseJoinColumns = {@JoinColumn(name = "linked_entry_id", nullable = false)})
     private Set<Entry> linkedEntries = new HashSet<>();

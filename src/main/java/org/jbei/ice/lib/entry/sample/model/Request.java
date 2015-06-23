@@ -29,7 +29,7 @@ public class Request implements IDataModel {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
-    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "accounts_id", nullable = false)
     private Account account;
 
@@ -41,7 +41,7 @@ public class Request implements IDataModel {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entry_id", nullable = false)
     private Entry entry;
 
@@ -119,7 +119,7 @@ public class Request implements IDataModel {
         sampleRequest.setRequestType(getType());
         sampleRequest.setStatus(getStatus());
         if (growthTemperature != null)
-        sampleRequest.setGrowthTemperature(growthTemperature);
+            sampleRequest.setGrowthTemperature(growthTemperature);
         EntryType type = EntryType.nameToType(entry.getRecordType());
         PartData data = new PartData(type);
         data.setId(entry.getId());

@@ -129,11 +129,11 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         })
         .state('main.profile', {
             url:'profile/:id',
-            templateUrl:'views/profile.html'
+            templateUrl: 'scripts/profile/profile.html'
         })
         .state('main.profile.option', {
             url:'/:option',
-            templateUrl:'views/profile/groups.html',
+            templateUrl: 'scripts/profile/groups.html',
             resolve:{
                 sessionValid:function (Authentication) {
                     return Authentication.isSessionValid();

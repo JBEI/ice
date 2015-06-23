@@ -228,9 +228,9 @@ angular.module('ice.upload.controller', [])
                             $http.get('rest/upload/partNumbers', {
                                 headers: {'X-ICE-Authentication-SessionId': sid},
                                 params: {
-                                    token: query
+                                    token: query,
                                     // field: field
-                                    // type:
+                                    type: $scope.importType.toUpperCase()
                                 }
                             }).then(function (res) {
                                 console.log(res, process);

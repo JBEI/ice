@@ -59,12 +59,13 @@ iceServices.factory('User', function ($resource) {
                 responseType:"json",
                 url:"rest/users/:userId",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+
             },
 
-            list:{
-                method:'GET',
-                responseType:'json',
-                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            list: {
+                method: 'GET',
+                responseType: 'json',
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             filter:{
@@ -218,11 +219,11 @@ iceServices.factory('Attachment', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
-            get:{
-                method:'GET',
-                responseType:"json",
-                isArray:true,
-                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            get: {
+                method: 'GET',
+                responseType: "json",
+                isArray: true,
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             delete:{
@@ -251,7 +252,7 @@ iceServices.factory('Entry', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
-            create:{
+            create: {
                 method: 'POST',
                 responseType:'json',
                 url:'rest/parts',
@@ -437,6 +438,7 @@ iceServices.factory('Entry', function ($resource) {
                 method:'DELETE',
                 url:'rest/parts/:partId/links/:linkId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
+
             },
 
             updateEntryList: {
@@ -457,9 +459,9 @@ iceServices.factory('Upload', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
-            create:{
-                method:'PUT',
-                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            create: {
+                method: 'PUT',
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             updateStatus:{
@@ -492,28 +494,28 @@ iceServices.factory('Upload', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
-            fileUpload:{
-                method:'POST',
-                url:'rest/upload/file',
-                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            fileUpload: {
+                method: 'POST',
+                url: 'rest/upload/file',
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
-            updateList:{
-                method:'PUT',
-                url:'rest/upload/:importId',
-                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            updateList: {
+                method: 'PUT',
+                url: 'rest/upload/:importId',
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
-            deleteSequence:{
-                method:'DELETE',
-                url:'rest/upload/:importId/entry/:entryId/sequence',
-                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            deleteSequence: {
+                method: 'DELETE',
+                url: 'rest/upload/:importId/entry/:entryId/sequence',
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
-            deleteAttachment:{
-                method:'DELETE',
-                url:'rest/upload/:importId/entry/:entryId/attachment',
-                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            deleteAttachment: {
+                method: 'DELETE',
+                url: 'rest/upload/:importId/entry/:entryId/attachment',
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             getPermissions: {
@@ -559,26 +561,26 @@ iceServices.factory('Settings', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
-            update:{
-                method:'PUT',
-                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            update: {
+                method: 'PUT',
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
-            rebuildLucene:{
-                method:'PUT',
-                url:'rest/config/lucene',
-                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            rebuildLucene: {
+                method: 'PUT',
+                url: '/rest/config/lucene',
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
-            rebuildBlast:{
-                method:'PUT',
-                url:'rest/config/blast',
-                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            rebuildBlast: {
+                method: 'PUT',
+                url: '/rest/config/blast',
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
-            version:{
-                method:'GET',
-                url:'rest/config/version'
+            version: {
+                method: 'GET',
+                url: '/rest/config/version'
             }
         });
     }
@@ -685,15 +687,15 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
 
             // get all counts (todo: instead of hard coding the folder types on the ui,
             // have this method also return the names)
-            query:{
-                method:'GET',
-                responseType:"json",
-                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            query: {
+                method: 'GET',
+                responseType: "json",
+                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
             },
 
-            create:{
-                method:'PUT',
-                headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
+            create: {
+                method: 'PUT',
+                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
             },
 
             addSelectionToFolders: {
@@ -782,9 +784,9 @@ iceServices.factory('Authentication',
     function ($resource, $cookieStore, $http, $rootScope, $location, $cookies, AccessToken) {
         return {
             // logs in user to ice
-            login:function (username, password) {
+            login: function (username, password) {
                 var token = AccessToken();
-                token.createToken({}, {email:username, password:password},
+                token.createToken({}, {email: username, password: password},
                     function (success) {
                         if (success && success.sessionId) {
                             $rootScope.user = success;
@@ -806,7 +808,7 @@ iceServices.factory('Authentication',
             },
 
             // checks if the session is valid
-            isSessionValid:function () {
+            isSessionValid: function () {
 //                console.log("check for valid session", who);
                 var sid = $cookieStore.get('sessionId');
                 if (sid === undefined) {
@@ -842,7 +844,7 @@ iceServices.factory('Authentication',
             },
 
             // todo : use a parameter in isSessionValid to check
-            isAdmin:function () {
+            isAdmin: function () {
                 this.isSessionValid().then(function (result) {
                     if (!result || !result.data || !result.data.isAdmin) {
                         $location.path("folders/personal");
@@ -852,7 +854,7 @@ iceServices.factory('Authentication',
             },
 
             // logs out user by invalidating the session id
-            logout:function () {
+            logout: function () {
                 var sid = $cookieStore.get("sessionId");
                 return $http.delete('rest/accesstoken', {headers:{'X-ICE-Authentication-SessionId':sid}}).
                     success(function () {
@@ -870,7 +872,7 @@ iceServices.factory('EntryContextUtil', function () {
     var context;
 
     return {
-        getContext:function () {
+        getContext: function () {
             return context;
         },
 

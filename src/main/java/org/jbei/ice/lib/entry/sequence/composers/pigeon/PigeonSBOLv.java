@@ -161,9 +161,7 @@ public class PigeonSBOLv {
                 sb.append(NEWLINE);
             }
         } else {
-            Iterator<SequenceAnnotation> it = component.getAnnotations().iterator();
-            while (it.hasNext()) {
-                SequenceAnnotation sa = it.next();
+            for (SequenceAnnotation sa : component.getAnnotations()) {
                 sb.append(toPigeon(sa.getSubComponent(), sa.getStrand()));
             }
         }
@@ -176,7 +174,7 @@ public class PigeonSBOLv {
             URL obj = new URL(PIGEON_URL);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
-            //add reuqest header
+            //add request header
             con.setRequestMethod("POST");
             con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
             String urlParameters = "specification=" + pigeonScript;
@@ -190,11 +188,10 @@ public class PigeonSBOLv {
 
 //            int responseCode = con.getResponseCode();
 
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(con.getInputStream()));
-            String inputLine;
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
             StringBuilder response = new StringBuilder();
 
+            String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
             }
