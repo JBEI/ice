@@ -73,14 +73,6 @@ public class SampleResource extends RestResource {
             @QueryParam("status") final SampleRequestStatus status) {
         final String userId = getUserId();
         Logger.info(userId + ": retrieving sample requests");
-        SampleRequestStatus requestStatus = null;
-        if (!StringUtils.isEmpty(status)) {
-            try {
-                requestStatus = SampleRequestStatus.valueOf(status);
-            } catch (Exception e) {
-                requestStatus = null;
-            }
-        }
         final UserSamples samples = requestRetriever.getRequests(userId, offset, limit, sort, asc,
                 status, filter);
         return super.respond(Response.Status.OK, samples);

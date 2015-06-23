@@ -84,7 +84,7 @@ public class RemoteAccessResource extends RestResource {
     public Response getSequenceTraces(@PathParam("id") long remoteId,
             @PathParam("entryId") long partId) {
         List<TraceSequenceAnalysis> traces = controller.getRemoteTraces(remoteId, partId);
-        if (traces == null)
+        if (traces == null) {
             return Response.status(Response.Status.NO_CONTENT).build();
         }
         return Response.status(Response.Status.OK).entity(traces).build();
@@ -120,8 +120,7 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/parts/{partId}/samples")
     public Response getRemotePartSamples(@PathParam("id") long remoteId,
-            @PathParam("partId") long partId,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+            @PathParam("partId") long partId) {
         List<PartSample> result = controller.getRemotePartSamples(remoteId, partId);
         return super.respond(result);
     }
@@ -135,8 +134,7 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/parts/{partId}/comments")
     public Response getRemotePartComments(@PathParam("id") long remoteId,
-            @PathParam("partId") long partId,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+            @PathParam("partId") long partId) {
         List<UserComment> result = controller.getRemotePartComments(remoteId, partId);
         return super.respond(result);
     }
