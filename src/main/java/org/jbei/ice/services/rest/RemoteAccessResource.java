@@ -1,6 +1,7 @@
 package org.jbei.ice.services.rest;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -38,7 +39,7 @@ public class RemoteAccessResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/available")
-    public ArrayList<FolderDetails> readRemoteUser(@PathParam("id") final long remoteId) {
+    public List<FolderDetails> readRemoteUser(@PathParam("id") long remoteId) {
         return controller.getAvailableFolders(remoteId);
     }
 
@@ -80,11 +81,10 @@ public class RemoteAccessResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/parts/{entryId}/traces")
-    public Response getSequenceTraces(@PathParam("id") final long remoteId,
-            @PathParam("entryId") final long partId) {
-        final ArrayList<TraceSequenceAnalysis> traces = controller
-                .getRemoteTraces(remoteId, partId);
-        if (traces == null) {
+    public Response getSequenceTraces(@PathParam("id") long remoteId,
+            @PathParam("entryId") long partId) {
+        List<TraceSequenceAnalysis> traces = controller.getRemoteTraces(remoteId, partId);
+        if (traces == null)
             return Response.status(Response.Status.NO_CONTENT).build();
         }
         return Response.status(Response.Status.OK).entity(traces).build();
@@ -119,9 +119,10 @@ public class RemoteAccessResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/parts/{partId}/samples")
-    public Response getRemotePartSamples(@PathParam("id") final long remoteId,
-            @PathParam("partId") final long partId) {
-        final ArrayList<PartSample> result = controller.getRemotePartSamples(remoteId, partId);
+    public Response getRemotePartSamples(@PathParam("id") long remoteId,
+            @PathParam("partId") long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        List<PartSample> result = controller.getRemotePartSamples(remoteId, partId);
         return super.respond(result);
     }
 
@@ -133,9 +134,10 @@ public class RemoteAccessResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/parts/{partId}/comments")
-    public Response getRemotePartComments(@PathParam("id") final long remoteId,
-            @PathParam("partId") final long partId) {
-        final ArrayList<UserComment> result = controller.getRemotePartComments(remoteId, partId);
+    public Response getRemotePartComments(@PathParam("id") long remoteId,
+            @PathParam("partId") long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        List<UserComment> result = controller.getRemotePartComments(remoteId, partId);
         return super.respond(result);
     }
 }
