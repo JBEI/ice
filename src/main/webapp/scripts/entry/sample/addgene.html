@@ -23,7 +23,7 @@
             <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
             <strong>{{sample.label}}</strong><br>
             <span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a
-                ng-href="/profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}
+                ng-href="profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}
             {{sample.depositor.lastName}}</a>
 
             <div class="display-inline pull-right" ng-if="canDelete() && sample.deleteRequested">

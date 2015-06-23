@@ -14,7 +14,7 @@ angular.module('ice.entry.controller', [])
 
         var uploader = $scope.uploader = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
-            url: "/rest/file/attachment",
+            url: "rest/file/attachment",
             method: 'POST',
             removeAfterUpload: true,
             headers: {
@@ -47,7 +47,7 @@ angular.module('ice.entry.controller', [])
         });
 
         $scope.downloadAttachment = function (attachment) {
-            $window.open("/rest/file/attachment/" + attachment.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
+            $window.open("rest/file/attachment/" + attachment.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
         };
 
         $scope.deleteAttachment = function (index, att) {
@@ -171,7 +171,7 @@ angular.module('ice.entry.controller', [])
 
         $scope.openAddToCart = function (entryId) {
             var modalInstance = $modal.open({
-                templateUrl: '/views/modal/sample-request.html',
+                templateUrl: 'views/modal/sample-request.html',
                 controller: function ($scope) {
                     $scope.tempRange = [{value: 30}, {value: 37}];
                     $scope.sampleTemp = $scope.tempRange[0];
@@ -318,7 +318,7 @@ angular.module('ice.entry.controller', [])
 
         $scope.traceSequenceUploader = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
-            url: "/rest/parts/" + entryId + "/traces",
+            url: "rest/parts/" + entryId + "/traces",
             method: 'POST',
             removeAfterUpload: true,
             headers: {
@@ -379,7 +379,7 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.downloadTraceFile = function (trace) {
-            $window.open("/rest/file/trace/" + trace.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
+            $window.open("rest/file/trace/" + trace.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
         };
     })
     .controller('EntryExperimentController', function ($scope, $cookieStore, $stateParams, Entry) {
@@ -487,11 +487,11 @@ angular.module('ice.entry.controller', [])
         });
 
         $scope.cancelEdit = function () {
-            $location.path("/entry/" + $stateParams.id);
+            $location.path("entry/" + $stateParams.id);
         };
 
         $scope.getLocation = function (inputField, val) {   // todo : move to service
-            return $http.get('/rest/parts/autocomplete', {
+            return $http.get('rest/parts/autocomplete', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
                     val: val,
@@ -505,7 +505,7 @@ angular.module('ice.entry.controller', [])
         // difference between this and getLocation() is getLocation() returns a list of strings
         // and this returns a list of objects
         $scope.getEntriesByPartNumber = function (val) {
-            return $http.get('/rest/parts/autocomplete/partid', {
+            return $http.get('rest/parts/autocomplete/partid', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
                     token: val
@@ -600,7 +600,7 @@ angular.module('ice.entry.controller', [])
             $scope.entry.linkedParts = partLinks;
 
             entry.update({partId: $scope.entry.id}, $scope.entry, function (result) {
-                $location.path("/entry/" + result.id);
+                $location.path("entry/" + result.id);
             });
         };
 
@@ -718,11 +718,10 @@ angular.module('ice.entry.controller', [])
                 $scope.activePart = $scope.part;
             else
                 $scope.activePart = $scope.part.linkedParts[index];
-            //$scope.selectedFields = EntryService.getFieldsForType($scope.activePart.type);
         };
 
         $scope.getLocation = function (inputField, val) {
-            return $http.get('/rest/parts/autocomplete', {
+            return $http.get('rest/parts/autocomplete', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
                     val: val,
@@ -802,7 +801,7 @@ angular.module('ice.entry.controller', [])
         $scope.format = 'MMM d, yyyy h:mm:ss a';
 
         $scope.getEntriesByPartNumber = function (val) {
-            return $http.get('/rest/parts/autocomplete/partid', {
+            return $http.get('rest/parts/autocomplete/partid', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
                     token: val
@@ -836,15 +835,14 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.cancelEntryCreate = function () {
-            $location.path("/folders/personal");
+            $location.path("folders/personal");
         };
 
         // file upload
         var uploader = $scope.sequenceFileUpload = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
-            url: "/rest/file/sequence",
+            url: "rest/file/sequence",
             method: 'POST',
-//        formData:[{entryType:type}],
             removeAfterUpload: true,
             headers: {"X-ICE-Authentication-SessionId": sid},
             autoUpload: true,
@@ -914,7 +912,7 @@ angular.module('ice.entry.controller', [])
 
         var uploader = $scope.sequenceFileUpload = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
-            url: "/rest/file/sequence",
+            url: "rest/file/sequence",
             method: 'POST',
             formData: [
                 {
@@ -1126,7 +1124,7 @@ angular.module('ice.entry.controller', [])
         $scope.sessionId = sessionId;
 
         $scope.open = function () {
-            window.open('/static/swf/ve/VectorEditor?entryId=' + $scope.entry.id + '&sessionId=' + sessionId);
+            window.open('static/swf/ve/VectorEditor?entryId=' + $scope.entry.id + '&sessionId=' + sessionId);
         };
 
         $scope.sequenceUpload = function (type) {
@@ -1151,7 +1149,7 @@ angular.module('ice.entry.controller', [])
 
         $scope.deleteSequence = function (part) {
             var modalInstance = $modal.open({
-                templateUrl: '/views/modal/delete-sequence-confirmation.html',
+                templateUrl: 'views/modal/delete-sequence-confirmation.html',
                 controller: function ($scope, $modalInstance) {
                     $scope.toDelete = part;
                     $scope.processingDelete = undefined;
@@ -1180,13 +1178,13 @@ angular.module('ice.entry.controller', [])
         $scope.addLink = function (part) {
 
             var modalInstance = $modal.open({
-                templateUrl: '/views/modal/add-link-modal.html',
+                templateUrl: 'views/modal/add-link-modal.html',
                 controller: function ($scope, $http, $modalInstance, $cookieStore) {
                     $scope.mainEntry = part;
                     var sessionId = $cookieStore.get("sessionId");
                     var originalLinks = angular.copy($scope.mainEntry.linkedParts);
                     $scope.getEntriesByPartNumber = function (val) {
-                        return $http.get('/rest/parts/autocomplete/partid', {
+                        return $http.get('rest/parts/autocomplete/partid', {
                             headers: {'X-ICE-Authentication-SessionId': sessionId},
                             params: {
                                 token: val
@@ -1295,14 +1293,14 @@ angular.module('ice.entry.controller', [])
 
         var menuSubDetails = $scope.subDetails = [
             {
-                url: '/scripts/entry/general-information.html',
+                url: 'scripts/entry/general-information.html',
                 display: 'General Information',
                 isPrivileged: false,
                 icon: 'fa-exclamation-circle'
             },
             {
                 id: 'sequences',
-                url: '/scripts/entry/sequence-analysis.html',
+                url: 'scripts/entry/sequence-analysis.html',
                 display: 'Sequence Analysis',
                 isPrivileged: false,
                 countName: 'traceSequenceCount',
@@ -1310,7 +1308,7 @@ angular.module('ice.entry.controller', [])
             },
             {
                 id: 'comments',
-                url: '/scripts/entry/comments.html',
+                url: 'scripts/entry/comments.html',
                 display: 'Comments',
                 isPrivileged: false,
                 countName: 'commentCount',
@@ -1318,7 +1316,7 @@ angular.module('ice.entry.controller', [])
             },
             {
                 id: 'samples',
-                url: '/scripts/entry/samples.html',
+                url: 'scripts/entry/samples.html',
                 display: 'Samples',
                 isPrivileged: false,
                 countName: 'sampleCount',
@@ -1326,7 +1324,7 @@ angular.module('ice.entry.controller', [])
             },
             {
                 id: 'history',
-                url: '/scripts/entry/history.html',
+                url: 'scripts/entry/history.html',
                 display: 'History',
                 isPrivileged: true,
                 countName: 'historyCount',
@@ -1334,7 +1332,7 @@ angular.module('ice.entry.controller', [])
             },
             {
                 id: 'experiments',
-                url: '/scripts/entry/experiments.html',
+                url: 'scripts/entry/experiments.html',
                 display: 'Experimental Data',
                 isPrivileged: false,
                 countName: 'experimentalDataCount',
@@ -1349,9 +1347,9 @@ angular.module('ice.entry.controller', [])
             menuSubDetails[index].selected = true;
             $scope.selection = menuSubDetails[index].url;
             if (menuSubDetails[index].id) {
-                $location.path("/entry/" + $stateParams.id + "/" + menuSubDetails[index].id);
+                $location.path("entry/" + $stateParams.id + "/" + menuSubDetails[index].id);
             } else {
-                $location.path("/entry/" + $stateParams.id);
+                $location.path("entry/" + $stateParams.id);
             }
         };
 
@@ -1418,14 +1416,14 @@ angular.module('ice.entry.controller', [])
         $scope.nextEntryInContext = function () {
             $scope.context.offset += 1;
             $scope.context.callback($scope.context.offset, function (result) {
-                $location.path("/entry/" + result);
+                $location.path("entry/" + result);
             });
         };
 
         $scope.prevEntryInContext = function () {
             $scope.context.offset -= 1;
             $scope.context.callback($scope.context.offset, function (result) {
-                $location.path("/entry/" + result);
+                $location.path("entry/" + result);
             });
         };
 
@@ -1448,7 +1446,7 @@ angular.module('ice.entry.controller', [])
         // file upload
         var uploader = $scope.sequenceFileUpload = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
-            url: "/rest/file/sequence",
+            url: "rest/file/sequence",
             method: 'POST',
             removeAfterUpload: true,
             headers: {"X-ICE-Authentication-SessionId": sessionId},

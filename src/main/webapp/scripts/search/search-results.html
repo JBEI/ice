@@ -5,7 +5,7 @@
                 <strong style="color: #888;">
                     <i class="fa fa-fw fa-search" style="color: #444"></i> LOCAL RESULTS
                 </strong>
-                <img ng-if="loadingSearchResults" src="/img/loader-mini.gif">
+                <img ng-if="loadingSearchResults" src="img/loader-mini.gif">
 
                 <small class="edit_icon font-70em pad_left" ng-click="search(true)">
                     <i style="color: #555" class="fa fa-globe"></i> Search other registries
@@ -16,7 +16,7 @@
                 <strong style="color: #888">
                     <i class="fa fa-fw fa-globe" style="color: #444"></i> WEB OF REGISTRIES RESULTS
                 </strong>
-                <img ng-if="loadingSearchResults" src="/img/loader-mini.gif">
+                <img ng-if="loadingSearchResults" src="img/loader-mini.gif">
 
                 <small class="edit_icon font-70em pad_left" ng-click="search()">
                     <i style="color: #555" class="fa fa-search"></i> Search locally
@@ -75,7 +75,7 @@
             </tr>
 
             <tr data-ng-show='!searchResults'>
-                <td colspan="11"><img src="/img/loader-mini.gif"> Loading...</td>
+                <td colspan="11"><img src="img/loader-mini.gif"> Loading...</td>
             </tr>
             <tr data-ng-show="searchResults.results.length == 0">
                 <td colspan="11">No results found for your query</td>
@@ -92,7 +92,7 @@
                 <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
                     {{result.entryInfo.type | capitalize}}
                 </td>
-                <td><a ng-href='/web/{{result.partner.id}}/entry/{{result.entryInfo.id}}'
+                <td><a ng-href="web/{{result.partner.id}}/entry/{{result.entryInfo.id}}"
                        class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result)"
                        popover-template="searchResultPopupTemplate"
@@ -178,7 +178,7 @@
                 <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
                     {{result.entryInfo.type | uppercase}}
                 </td>
-                <td><a ng-href='/web/{{result.partner.id}}/entry/{{result.entryInfo.id}}'
+                <td><a ng-href="web/{{result.partner.id}}/entry/{{result.entryInfo.id}}"
                        class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result)"
                        popover-template="searchResultPopupTemplate"
@@ -300,7 +300,7 @@
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
             <tr data-ng-show='!searchResults'>
-                <td colspan="11"><img src="/img/loader-mini.gif"> Loading...</td>
+                <td colspan="11"><img src="img/loader-mini.gif"> Loading...</td>
             </tr>
             <tr data-ng-show="searchResults.results.length == 0">
                 <td colspan="11">No results found for your query</td>
@@ -392,7 +392,7 @@
                 </td>
                 <td>
                     <div>
-                        <a ng-href="/profile/{{result.entryInfo.ownerId}}">{{result.entryInfo.owner}}</a>
+                        <a ng-href="profile/{{result.entryInfo.ownerId}}">{{result.entryInfo.owner}}</a>
                     </div>
                 </td>
                 <td style="vertical-align: middle">

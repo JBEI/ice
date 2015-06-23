@@ -12,7 +12,7 @@
 
 <div class="col-md-2 entryLabel">
     <span ng-class="{'entryEditLabel':field.edit}">{{field.label}}</span>
-    <img ng-if="field.updating && !field.errorUpdating" src="/img/loader-mini.gif">
+    <img ng-if="field.updating && !field.errorUpdating" src="img/loader-mini.gif">
 
     <!--show error icon if update failed-->
     <i ng-if="!field.updating && field.errorUpdating" class="red fa fa-exclamation-circle"></i>
@@ -31,7 +31,7 @@
 
         <!-- short input field with email -->
         <div class="input-group" ng-if="field.inputType==='withEmail'&&!field.edit">
-            <a ng-href="/profile/{{entry[field.schema+'Id']}}" ng-if="entry[field.schema+'Id']">{{entry[field.schema]}}
+            <a ng-href="profile/{{entry[field.schema+'Id']}}" ng-if="entry[field.schema+'Id']">{{entry[field.schema]}}
                 ({{entry[field.schema+'Email']}})</a>
             <span ng-if="!entry[field.schema+'Id']">{{entry[field.schema]}} <span ng-if="entry[field.schema+'Email']">({{entry[field.schema+'Email']}})</span></span>
                         <span ng-click="field.edit=true">
@@ -248,7 +248,7 @@
                 <div class="col-md-6" ng-if="entry.linkedParts[$index+0]">
                     <div class="contained-part">
                         <div class="pull-right font-90em" style="padding: .75em .5em;">
-                            <a ng-href="/entry/{{entry.linkedParts[$index+0].id}}"
+                            <a ng-href="entry/{{entry.linkedParts[$index+0].id}}"
                                class="">{{entry.linkedParts[$index+0].partId}}</a>
                         </div>
                         <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
@@ -257,7 +257,7 @@
                                ng-click="removeLink(entry, entry.linkedParts[$index+0])"
                                ng-if="entry.canEdit"></i>
                             <b>{{entry.linkedParts[$index+0].type}} <a
-                                    ng-href="/entry/{{entry.linkedParts[$index+0].id}}"
+                                    ng-href="entry/{{entry.linkedParts[$index+0].id}}"
                                     style="color: #000">{{entry.linkedParts[$index+0].name}}</a></b>
                         </div>
 
@@ -278,7 +278,7 @@
                 <div class="col-md-6" ng-if="entry.linkedParts[$index+1]">
                     <div class="contained-part">
                         <div class="pull-right font-90em" style="padding: .75em .5em;">
-                            <a ng-href="/entry/{{entry.linkedParts[$index+1].id}}"
+                            <a ng-href="entry/{{entry.linkedParts[$index+1].id}}"
                                class="">{{entry.linkedParts[$index+1].partId}}</a>
                         </div>
                         <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
@@ -287,7 +287,7 @@
                                ng-click="removeLink(entry, entry.linkedParts[$index+1])"
                                ng-if="entry.canEdit"></i>
                             <b>{{entry.linkedParts[$index+1].type}} <a
-                                    ng-href="/entry/{{entry.linkedParts[$index+1].id}}"
+                                    ng-href="entry/{{entry.linkedParts[$index+1].id}}"
                                     style="color: #000">{{entry.linkedParts[$index+1].name}}</a></b>
                         </div>
 
@@ -342,24 +342,24 @@
                     </div>
                     <ul class="dropdown-menu">
                         <li class="cursor_pointer font-80em" ng-if="entry.hasOriginalSequence">
-                            <a ng-href="/rest/file/{{entry.id}}/sequence/original?sid={{sessionId}}" target="_self">Original</a>
+                            <a ng-href="rest/file/{{entry.id}}/sequence/original?sid={{sessionId}}" target="_self">Original</a>
                         </li>
                         <li class="cursor_pointer font-80em">
-                            <a ng-href="/rest/file/{{entry.id}}/sequence/genbank?sid={{sessionId}}" target="_self"><i>Genbank</i></a>
+                            <a ng-href="rest/file/{{entry.id}}/sequence/genbank?sid={{sessionId}}" target="_self"><i>Genbank</i></a>
                         </li>
                         <li class="cursor_pointer font-80em">
-                            <a ng-href="/rest/file/{{entry.id}}/sequence/fasta?sid={{sessionId}}" target="_self"><i>FASTA</i></a>
+                            <a ng-href="rest/file/{{entry.id}}/sequence/fasta?sid={{sessionId}}" target="_self"><i>FASTA</i></a>
                         </li>
                         <li class="cursor_pointer font-80em">
-                            <a ng-href="/rest/file/{{entry.id}}/sequence/sbol?sid={{sessionId}}"
+                            <a ng-href="rest/file/{{entry.id}}/sequence/sbol?sid={{sessionId}}"
                                target="_self"><i>SBOL</i></a>
                         </li>
                         <li class="cursor_pointer font-80em">
-                            <a ng-href="/rest/file/{{entry.id}}/sequence/pigeonI?sid={{sessionId}}" target="_self"><i>Pigeon
+                            <a ng-href="rest/file/{{entry.id}}/sequence/pigeonI?sid={{sessionId}}" target="_self"><i>Pigeon
                                 Image</i></a>
                         </li>
                         <li class="cursor_pointer font-80em">
-                            <a ng-href="/rest/file/{{entry.id}}/sequence/pigeonS?sid={{sessionId}}" target="_self"><i>Pigeon
+                            <a ng-href="rest/file/{{entry.id}}/sequence/pigeonS?sid={{sessionId}}" target="_self"><i>Pigeon
                                 Script</i></a>
                         </li>
                     </ul>
@@ -410,7 +410,7 @@
         <div style="width: 100%; overflow: auto; position: relative; zoom: 1;" ng-if='entry.hasSequence && showSBOL'>
             <div style="width: 0;">
                 <img height="130px"
-                     ng-src="/download?sid={{sessionId}}&amp;rid={{entry.recordId}}">
+                     ng-src="download?sid={{sessionId}}&amp;rid={{entry.recordId}}">
             </div>
         </div>
 

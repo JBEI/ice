@@ -25,7 +25,7 @@
                     <td><a class="cursor_pointer"
                            ng-click="downloadTraceFile(traceSequence)">{{traceSequence.filename}}</a>
                     </td>
-                    <td><a ng-href="/profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}
+                    <td><a ng-href="profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}
                         {{traceSequence.depositor.lastName}}</a></td>
                     <td>{{traceSequence.created | date:'MMM d, y, h:mm a'}}</td>
                     <td style="font-size:14px" ng-if="entry.canEdit">

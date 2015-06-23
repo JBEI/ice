@@ -26,7 +26,7 @@
     </div>
 
     <div class="pad_top">
-        <div ng-if='!sampleRequests'><img src="/img/loader-mini.gif"> Loading...</div>
+        <div ng-if='!sampleRequests'><img src="img/loader-mini.gif"> Loading...</div>
 
         <table cellspacing="0" ng-if='sampleRequests && sampleRequests.requests.length > 0'
                class="table table-responsive table-condensed table-striped table-hover table-border-bottom font-95em"
@@ -62,7 +62,7 @@
                 <!--<b class="no_wrap">{{indexStart + $index+1 | number}}</b>-->
                 <!--</td>-->
 
-                <td><a ng-href="/entry/{{request.partData.id}}">{{request.partData.name}}</a>
+                <td><a ng-href="entry/{{request.partData.id}}">{{request.partData.name}}</a>
                     <br>
                     <small>{{request.partData.selectionMarkers.toString()}}</small>
                 </td>
@@ -131,7 +131,7 @@
                 </td>
                 <td>
                     {{request.requestTime | date:'MMM dd, yyyy hh:mm a'}} <br>
-                    <a ng-href="/profile/{{request.requester.id}}" class="no_wrap small">{{request.requester.firstName}}
+                    <a ng-href="profile/{{request.requester.id}}" class="no_wrap small">{{request.requester.firstName}}
                         {{request.requester.lastName}}
                     </a>
                 </td>

@@ -116,7 +116,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
             function (result) {
                 $scope.$broadcast("RefreshAfterDeletion");
                 $scope.$broadcast("UpdateCollectionCounts");
-                $location.path("/folders/personal")
+                $location.path("folders/personal")
             }, function (error) {
                 console.log(error);
             })
@@ -167,7 +167,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
                 entryList: selectedEntries
             }, function (result) {
                 console.log(result);
-                $location.path("/upload/" + result.id);
+                $location.path("upload/" + result.id);
             }, function (error) {
                 console.error("error creating bulk upload", error);
             });
@@ -208,7 +208,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
         files.getCSV(selection,
             function (result) {
                 if (result && result.value) {
-                    $window.open("/rest/file/tmp/" + result.value, "_self");
+                    $window.open("rest/file/tmp/" + result.value, "_self");
                     Selection.reset();
                 }
 
@@ -284,7 +284,7 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
     };
 
     $scope.cancel = function () {
-        $location.path("/login");
+        $location.path("login");
     }
 });
 
@@ -311,14 +311,14 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
     };
 
     $scope.redirectToLogin = function () {
-        $location.path("/login");
+        $location.path("login");
     }
 });
 
 iceControllers.controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
     var message = Message($cookieStore.get('sessionId'));
     var profileId = $stateParams.id;
-    $location.path("/profile/" + profileId + "/messages", false);
+    $location.path("profile/" + profileId + "/messages", false);
     message.query(function (result) {
         $scope.messages = result;
     });
@@ -374,7 +374,7 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
     };
 
     $scope.goToRegister = function () {
-        $location.path("/register");
+        $location.path("register");
     };
 
     $scope.canCreateAccount = false;
@@ -416,7 +416,7 @@ iceControllers.controller('GenericTabsController', function ($scope, $cookieStor
 iceControllers.controller('FullScreenFlashController', function ($scope, $stateParams, $sce) {
     $scope.sessionId = $stateParams.sessionId;
     $scope.entryId = $stateParams.entryId;
-    $scope.vectorEditor = $sce.trustAsHtml('<object type="application/x-shockwave-flash" data="/swf/ve/VectorEditor.swf?entryId=' + $scope.entryId + '&sessionId=' + $scope.sessionId + '" id="vectoreditor" width="100%" height="' + ($(window).height() - 100) + 'px"><param name="wmode" value="opaque" /></object>');
+    $scope.vectorEditor = $sce.trustAsHtml('<object type="application/x-shockwave-flash" data="swf/ve/VectorEditor.swf?entryId=' + $scope.entryId + '&sessionId=' + $scope.sessionId + '" id="vectoreditor" width="100%" height="' + ($(window).height() - 100) + 'px"><param name="wmode" value="opaque" /></object>');
 
     $(window).resize(function () {
         var height = $(this).height();

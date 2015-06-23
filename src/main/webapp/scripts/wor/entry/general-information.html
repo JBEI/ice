@@ -8,7 +8,7 @@
 
     <div class="col-md-2 entryLabel">
         <span ng-class="{'entryEditLabel':field.edit}">{{field.label}}</span>
-        <img ng-if="field.updating && !field.errorUpdating" src="/img/loader-mini.gif">
+        <img ng-if="field.updating && !field.errorUpdating" src="img/loader-mini.gif">
         <i ng-if="!field.updating && field.errorUpdating" class="red fa fa-exclamation-circle"></i>
     </div>
 
@@ -26,12 +26,12 @@
                 <div class="col-md-6" ng-if="remoteEntry.linkedParts[$index+0]">
                     <div class="contained-part">
                         <div class="pull-right font-90em" style="padding: .75em .5em;">
-                            <a ng-href="/web/{{currentPartner.id}}/entry/{{remoteEntry.linkedParts[$index+0].id}}"
+                            <a ng-href="web/{{currentPartner.id}}/entry/{{remoteEntry.linkedParts[$index+0].id}}"
                                class="">{{remoteEntry.linkedParts[$index+0].partId}}</a>
                         </div>
                         <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
                             <b>{{remoteEntry.linkedParts[$index+0].type}} <a
-                                    ng-href="/web/{{currentPartner.id}}/entry/{{remoteEntry.linkedParts[$index+0].id}}"
+                                    ng-href="web/{{currentPartner.id}}/entry/{{remoteEntry.linkedParts[$index+0].id}}"
                                     style="color: #000">{{remoteEntry.linkedParts[$index+0].name}}</a></b>
                         </div>
 
@@ -52,12 +52,12 @@
                 <div class="col-md-6" ng-if="remoteEntry.linkedParts[$index+1]">
                     <div class="contained-part">
                         <div class="pull-right font-90em" style="padding: .75em .5em;">
-                            <a ng-href="/web/{{currentPartner.id}}/entry/{{remoteEntry.linkedParts[$index+1].id}}"
+                            <a ng-href="web/{{currentPartner.id}}/entry/{{remoteEntry.linkedParts[$index+1].id}}"
                                class="">{{remoteEntry.linkedParts[$index+1].partId}}</a>
                         </div>
                         <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
                             <b>{{remoteEntry.linkedParts[$index+1].type}} <a
-                                    ng-href="/web/{{currentPartner.id}}/entry/{{remoteEntry.linkedParts[$index+1].id}}"
+                                    ng-href="web/{{currentPartner.id}}/entry/{{remoteEntry.linkedParts[$index+1].id}}"
                                     style="color: #000">{{remoteEntry.linkedParts[$index+1].name}}</a></b>
                         </div>
 
@@ -93,28 +93,28 @@
             <!--<span class="dropdown-toggle">Download <span class="caret"></span></span>-->
             <!--<ul class="dropdown-menu">-->
             <!--<li class="cursor_pointer font-80em" ng-if="remoteEntry.hasOriginalSequence">-->
-            <!--<a ng-href="/rest/file/{{remoteEntry.id}}/sequence/original?sid={{sessionId}}"-->
+            <!--<a ng-href="rest/file/{{remoteEntry.id}}/sequence/original?sid={{sessionId}}"-->
             <!--target="_self">Original</a>-->
             <!--</li>-->
             <!--<li class="cursor_pointer font-80em">-->
-            <!--<a ng-href="/rest/file/{{remoteEntry.id}}/sequence/genbank?sid={{sessionId}}"-->
+            <!--<a ng-href="rest/file/{{remoteEntry.id}}/sequence/genbank?sid={{sessionId}}"-->
             <!--target="_self"><i>Genbank</i></a>-->
             <!--</li>-->
             <!--<li class="cursor_pointer font-80em">-->
-            <!--<a ng-href="/rest/file/{{remoteEntry.id}}/sequence/fasta?sid={{sessionId}}"-->
+            <!--<a ng-href="rest/file/{{remoteEntry.id}}/sequence/fasta?sid={{sessionId}}"-->
             <!--target="_self"><i>FASTA</i></a>-->
             <!--</li>-->
             <!--<li class="cursor_pointer font-80em">-->
-            <!--<a ng-href="/rest/file/{{remoteEntry.id}}/sequence/sbol?sid={{sessionId}}"-->
+            <!--<a ng-href="rest/file/{{remoteEntry.id}}/sequence/sbol?sid={{sessionId}}"-->
             <!--target="_self"><i>SBOL</i></a>-->
             <!--</li>-->
             <!--<li class="cursor_pointer font-80em">-->
-            <!--<a ng-href="/rest/file/{{remoteEntry.id}}/sequence/pigeonI?sid={{sessionId}}"-->
+            <!--<a ng-href="rest/file/{{remoteEntry.id}}/sequence/pigeonI?sid={{sessionId}}"-->
             <!--target="_self"><i>Pigeon-->
             <!--Image</i></a>-->
             <!--</li>-->
             <!--<li class="cursor_pointer font-80em">-->
-            <!--<a ng-href="/rest/file/{{remoteEntry.id}}/sequence/pigeonS?sid={{sessionId}}"-->
+            <!--<a ng-href="rest/file/{{remoteEntry.id}}/sequence/pigeonS?sid={{sessionId}}"-->
             <!--target="_self"><i>Pigeon-->
             <!--Script</i></a>-->
             <!--</li>-->
@@ -138,7 +138,7 @@
         <!--ng-show="showSBOL">-->
         <!--<div style="width: 0;">-->
         <!--<img height="130px"-->
-        <!--ng-src="/download?type=sbol_visual&amp;id={{remoteEntry.sbolVisualURL}}&amp;sid={{sessionId}}">-->
+        <!--ng-src="download?type=sbol_visual&amp;id={{remoteEntry.sbolVisualURL}}&amp;sid={{sessionId}}">-->
         <!--</div>-->
         <!--</div>-->
 
