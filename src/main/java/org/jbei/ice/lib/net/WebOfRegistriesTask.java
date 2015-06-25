@@ -75,13 +75,13 @@ public class WebOfRegistriesTask extends Task {
     // contacts the master node for other ice instances
     protected RegistryPartner requestToJoin(String masterUrl, RegistryPartner partner) {
         IceRestClient restClient = IceRestClient.getInstance();
-        return (RegistryPartner) restClient.post(masterUrl, "/rest/web/partner/remote", partner, RegistryPartner.class);
+        return restClient.post(masterUrl, "/rest/web/partner/remote", partner, RegistryPartner.class);
     }
 
     @SuppressWarnings("unchecked")
     protected List<RegistryPartner> getWebOfRegistryPartners(String url) {
         IceRestClient restClient = IceRestClient.getInstance();
-        return (ArrayList) restClient.get(url, "/rest/web/partners", ArrayList.class);
+        return restClient.get(url, "/rest/web/partners", ArrayList.class);
     }
 
     /**

@@ -1,6 +1,7 @@
 package org.jbei.ice.services.rest;
 
 import org.hsqldb.lib.StringUtil;
+
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
@@ -17,7 +18,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.ArrayList;
+
+import java.util.List;
 
 /**
  * Resource for web of registries requests
@@ -76,7 +78,7 @@ public class WebResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}/attachments")
-    public ArrayList<AttachmentInfo> getAttachments(
+    public List<AttachmentInfo> getAttachments(
             @PathParam("id") long partnerId,
             @PathParam("entryId") long partId,
             @HeaderParam(AUTHENTICATION_PARAM_NAME) String userAgentHeader) {
