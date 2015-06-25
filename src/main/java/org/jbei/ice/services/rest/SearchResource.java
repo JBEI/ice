@@ -1,7 +1,6 @@
 package org.jbei.ice.services.rest;
 
-import org.apache.commons.lang.StringUtils;
-import org.jbei.ice.lib.account.SessionHandler;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.search.SearchQuery;
@@ -16,8 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * REST resource for searching. Supports keyword search with query params for filtering and
- * advanced search
+ * REST resource for searching. Supports keyword search with query params for filtering and advanced
+ * search
  *
  * @author Hector Plahar
  */
@@ -27,24 +26,26 @@ public class SearchResource extends RestResource {
     private SearchController controller = new SearchController();
 
     /**
-     * Advanced Search. The use of post is mostly for the sequence string for
-     * blast which can get very long and results in a 413 status code if
-     * sent via GET
+     * Advanced Search. The use of post is mostly for the sequence string for blast which can get
+     * very long and results in a 413 status code if sent via GET
+     *
+     * @param searchWeb
+     *            whether to perform a web of registry search or not
+     * @param query
+     *            parameters to the search
      *
      * @return results of the search
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response search(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionHeader,
-            @DefaultValue("false") @QueryParam("webSearch") boolean searchWeb,
-            SearchQuery query) {
-        String userId = SessionHandler.getUserIdBySession(sessionHeader);
+    public Response search(@DefaultValue("false") @QueryParam("webSearch") final boolean searchWeb,
+            final SearchQuery query) {
+        final String userId = getUserId();
         try {
-            SearchResults results = controller.runSearch(userId, query, searchWeb);
+            final SearchResults results = controller.runSearch(userId, query, searchWeb);
             return super.respond(Response.Status.OK, results);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             Logger.error(e);
             return super.respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
@@ -53,41 +54,44 @@ public class SearchResource extends RestResource {
     /**
      * Keyword search
      *
-     * @param queryString keywords to search on
-     * @param searchWeb   whether to perform a web of registry search or not
-     * @param offset      result start
-     * @param limit       result count upper limit
-     * @param sort        result sort
-     * @param asc         true if return results in ascending order, false otherwise
-     * @param sessionId   user unique session identifier
+     * @param queryString
+     *            keywords to search on
+     * @param searchWeb
+     *            whether to perform a web of registry search or not
+     * @param offset
+     *            result start
+     * @param limit
+     *            result count upper limit
+     * @param sort
+     *            result sort
+     * @param asc
+     *            true if return results in ascending order, false otherwise
      * @return wrapper around list of search results conforming to query params
      */
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response search(
-            @QueryParam("q") String queryString,
-            @DefaultValue("false") @QueryParam("webSearch") boolean searchWeb,
-            @DefaultValue("0") @QueryParam("offset") int offset,
-            @DefaultValue("15") @QueryParam("limit") int limit,
-            @DefaultValue("relevance") @QueryParam("sort") String sort,
-            @DefaultValue("false") @QueryParam("asc") boolean asc,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
-        String userId = SessionHandler.getUserIdBySession(sessionId);
+    public Response search(@QueryParam("q") final String queryString,
+            @DefaultValue("false") @QueryParam("webSearch") final boolean searchWeb,
+            @DefaultValue("0") @QueryParam("offset") final int offset,
+            @DefaultValue("15") @QueryParam("limit") final int limit,
+            @DefaultValue("relevance") @QueryParam("sort") final String sort,
+            @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+        final String userId = getUserId();
         if (StringUtils.isEmpty(userId) && !searchWeb) {
             return super.respond(Response.Status.FORBIDDEN);
         }
 
         log(userId, "query \'" + queryString + '\'');
-        SearchQuery query = new SearchQuery();
+        final SearchQuery query = new SearchQuery();
         query.setQueryString(queryString);
-        SearchQuery.Parameters parameters = query.getParameters();
+        final SearchQuery.Parameters parameters = query.getParameters();
         parameters.setRetrieveCount(limit);
         parameters.setStart(offset);
         parameters.setSortAscending(asc);
         parameters.setSortField(ColumnField.valueOf(sort.toUpperCase()));
 
-        List<EntryType> types = Arrays.asList(EntryType.values());
+        final List<EntryType> types = Arrays.asList(EntryType.values());
         query.setEntryTypes(types);
         return super.respond(controller.runSearch(userId, query, searchWeb));
     }

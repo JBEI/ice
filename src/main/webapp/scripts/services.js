@@ -59,7 +59,6 @@ iceServices.factory('User', function ($resource) {
                 responseType:"json",
                 url:"rest/users/:userId",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
-
             },
 
             list: {
@@ -568,19 +567,19 @@ iceServices.factory('Settings', function ($resource) {
 
             rebuildLucene: {
                 method: 'PUT',
-                url: '/rest/config/lucene',
+                url: 'rest/config/lucene',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             rebuildBlast: {
                 method: 'PUT',
-                url: '/rest/config/blast',
+                url: 'rest/config/blast',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             version: {
                 method: 'GET',
-                url: '/rest/config/version'
+                url: 'rest/config/version'
             }
         });
     }

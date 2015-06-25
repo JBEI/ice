@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.entry.sequence;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionException;

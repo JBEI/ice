@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.entry.attachment;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.model.Account;

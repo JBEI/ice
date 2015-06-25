@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.utils;
 
-import au.com.bytecode.opencsv.CSVWriter;
+import com.opencsv.CSVWriter;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.bulkupload.BulkCSVUploadHeaders;
 import org.jbei.ice.lib.common.logging.Logger;

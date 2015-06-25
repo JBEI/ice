@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.net;
 
-import org.apache.commons.lang.StringUtils;
-
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.RemotePermission;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.common.logging.Logger;

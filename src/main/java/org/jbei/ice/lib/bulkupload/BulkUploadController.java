@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.bulkupload;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.access.PermissionException;

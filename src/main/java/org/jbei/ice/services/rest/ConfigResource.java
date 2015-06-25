@@ -24,57 +24,71 @@ public class ConfigResource extends RestResource {
     /**
      * Retrieves list of system settings available
      *
-     * @param sessionId Session Id for user
-     * @return list of retrieved system settings that can be changed (including those with no values)
+     * @return list of retrieved system settings that can be changed (including those with no
+     * values)
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Setting> get(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
-        String userId = getUserIdFromSessionHeader(sessionId);
+    public ArrayList<Setting> get() {
+        final String userId = getUserId();
         return controller.retrieveSystemSettings(userId);
     }
 
+    /**
+     * @param uriInfo
+     * @return the version setting of this ICE instance
+     */
     @GET
     @Path("/version")
     @Produces(MediaType.APPLICATION_JSON)
-    public Setting getVersion(@Context UriInfo uriInfo) {
-        String url = uriInfo.getBaseUri().getAuthority();
+    public Setting getVersion(@Context final UriInfo uriInfo) {
+        final String url = uriInfo.getBaseUri().getAuthority();
         return controller.getSystemVersion(url);
     }
 
     /**
      * Retrieves the value for the specified config key
      *
+     * @param key config key
      * @return setting containing the passed key and associated value if found
      */
     @GET
     @Path("/{key}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Setting getConfig(@PathParam("key") String key) {
+    public Setting getConfig(@PathParam("key") final String key) {
         return controller.getPropertyValue(key);
     }
 
+    /**
+     * @return Response specifying success or failure of re-index
+     */
     @PUT
     @Path("/lucene")
-    public Response buildLuceneIndex(@HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
-        boolean success = searchController.rebuildIndexes(userId, IndexType.LUCENE);
+    public Response buildLuceneIndex() {
+        final String userId = getUserId();
+        final boolean success = searchController.rebuildIndexes(userId, IndexType.LUCENE);
         return super.respond(success);
     }
 
+    /**
+     * @return Response specifying success or failure of re-index
+     */
     @PUT
     @Path("/blast")
-    public Response buildBlastIndex(@HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
-        boolean success = searchController.rebuildIndexes(userId, IndexType.BLAST);
+    public Response buildBlastIndex() {
+        final String userId = getUserId();
+        final boolean success = searchController.rebuildIndexes(userId, IndexType.BLAST);
         return super.respond(success);
     }
 
+    /**
+     * @param setting a config value to update
+     * @return the updated config key:value
+     */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public Setting update(@HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-            Setting setting) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+    public Setting update(final Setting setting) {
+        final String userId = getUserId();
         return controller.updateSetting(userId, setting);
     }
 }
