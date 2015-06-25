@@ -61,7 +61,7 @@ angular.module('ice.profile.controller', [])
 
         // get settings
         Settings().getSetting({key: 'PASSWORD_CHANGE_ALLOWED'}, function (result) {
-            $scope.passwordChangeAllowed = (result.value == 'yes');
+            $scope.passwordChangeAllowed = (result.value.toLowerCase() === 'yes');
         });
 
         $scope.preferenceEntryDefaults = [
