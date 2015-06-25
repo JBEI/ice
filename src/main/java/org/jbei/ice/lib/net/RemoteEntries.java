@@ -20,6 +20,7 @@ import org.jbei.ice.services.rest.IceRestClient;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Entries that are on other registry instances other than this instance.
@@ -64,7 +65,7 @@ public class RemoteEntries {
             queryParams.put("limit", limit);
             queryParams.put("asc", asc);
             queryParams.put("sort", sort);
-            details = (FolderDetails) iceRestClient.get(partner.getUrl(), restPath, FolderDetails.class, queryParams);
+            details = iceRestClient.get(partner.getUrl(), restPath, FolderDetails.class, queryParams);
             if (details == null)
                 return null;
         } catch (Exception e) {
@@ -80,7 +81,7 @@ public class RemoteEntries {
     }
 
     @SuppressWarnings("unchecked")
-    public ArrayList<AttachmentInfo> getEntryAttachments(String userId, long remoteId, long entryId) {
+    public List<AttachmentInfo> getEntryAttachments(String userId, long remoteId, long entryId) {
         if (!hasRemoteAccessEnabled())
             return null;
 
@@ -89,7 +90,7 @@ public class RemoteEntries {
             return null;
 
         String path = "/rest/parts/" + entryId + "/attachments";
-        return (ArrayList) iceRestClient.get(partner.getUrl(), path, ArrayList.class);
+        return iceRestClient.get(partner.getUrl(), path, ArrayList.class);
     }
 
     public FeaturedDNASequence getEntrySequence(String userId, long remoteId, long entryId) {
@@ -101,7 +102,7 @@ public class RemoteEntries {
             return null;
 
         String path = "/rest/parts/" + entryId + "/sequence";
-        return (FeaturedDNASequence) iceRestClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
+        return iceRestClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
     }
 
     public void transferEntries(String userId, long remoteId, EntrySelection selection) {
@@ -117,7 +118,7 @@ public class RemoteEntries {
         if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
             return null;
 
-        return (PartData) iceRestClient.get(partner.getUrl(), "/rest/parts/" + entryId, PartData.class);
+        return iceRestClient.get(partner.getUrl(), "/rest/parts/" + entryId, PartData.class);
     }
 
     public PartData getPublicEntryTooltip(String userId, long remoteId, long entryId) {
@@ -129,7 +130,7 @@ public class RemoteEntries {
             return null;
 
         String path = "/rest/parts/" + entryId + "/tooltip";
-        return (PartData) iceRestClient.get(partner.getUrl(), path, PartData.class);
+        return iceRestClient.get(partner.getUrl(), path, PartData.class);
     }
 
     public PartStatistics getPublicEntryStatistics(String userId, long remoteId, long entryId) {
@@ -141,7 +142,7 @@ public class RemoteEntries {
             return null;
 
         String path = "/rest/parts/" + entryId + "/statistics";
-        return (PartStatistics) iceRestClient.get(partner.getUrl(), path, PartStatistics.class);
+        return iceRestClient.get(partner.getUrl(), path, PartStatistics.class);
     }
 
     public FeaturedDNASequence getPublicEntrySequence(String userId, long remoteId, long entryId) {
@@ -153,7 +154,7 @@ public class RemoteEntries {
             return null;
 
         String path = "/rest/parts/" + entryId + "/sequence";
-        return (FeaturedDNASequence) iceRestClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
+        return iceRestClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
     }
 
     public File getPublicAttachment(String userId, long remoteId, String fileId) {

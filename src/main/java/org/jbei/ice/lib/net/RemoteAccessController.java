@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.net;
 
 import org.apache.commons.lang.StringUtils;
+
 import org.jbei.ice.lib.access.RemotePermission;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -26,6 +27,7 @@ import org.jbei.ice.services.rest.IceRestClient;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -56,14 +58,14 @@ public class RemoteAccessController {
      *         null on exception
      */
     @SuppressWarnings("unchecked")
-    public ArrayList<FolderDetails> getAvailableFolders(long partnerId) {
+    public List<FolderDetails> getAvailableFolders(long partnerId) {
         RemotePartner partner = this.remotePartnerDAO.get(partnerId);
         if (partner == null)
             return null;
 
         try {
             String restPath = "/rest/folders/public";
-            return (ArrayList) iceRestClient.get(partner.getUrl(), restPath, ArrayList.class);
+            return iceRestClient.get(partner.getUrl(), restPath, ArrayList.class);
         } catch (Exception e) {
             Logger.error(e);
             return null;
@@ -76,7 +78,7 @@ public class RemoteAccessController {
             return new Setting("version", ConfigurationKey.APPLICATION_VERSION.getDefaultValue());
 
         // retrieve version
-        return (Setting) iceRestClient.get(value, "/rest/config/version");
+        return iceRestClient.get(value, "/rest/config/version", Setting.class);
     }
 
     public void addPermission(String requester, RemoteAccessPermission permission) {
@@ -116,11 +118,11 @@ public class RemoteAccessController {
         if (partner == null)
             return null;
 
-        Object result = iceRestClient.get(partner.getUrl(), "/rest/users/" + email, AccountTransfer.class);
+        AccountTransfer result = iceRestClient.get(partner.getUrl(), "/rest/users/" + email, AccountTransfer.class);
         if (result == null)
             return null;
 
-        return (AccountTransfer) result;
+        return result;
     }
 
     public FolderDetails getPublicFolderEntries(long remoteId, long folderId, String sort, boolean asc, int offset,
@@ -136,33 +138,33 @@ public class RemoteAccessController {
             queryParams.put("limit", limit);
             queryParams.put("asc", asc);
             queryParams.put("sort", sort);
-            Object result = iceRestClient.get(partner.getUrl(), restPath, FolderDetails.class, queryParams);
+            FolderDetails result = iceRestClient.get(partner.getUrl(), restPath, FolderDetails.class, queryParams);
             if (result == null)
                 return null;
 
-            return (FolderDetails) result;
+            return result;
         } catch (Exception e) {
             Logger.error("Error getting public folder entries from \"" + partner.getUrl() + "\": " + e.getMessage());
             return null;
         }
     }
 
-    public ArrayList<PartSample> getRemotePartSamples(long remoteId, long partId) {
+    public List<PartSample> getRemotePartSamples(long remoteId, long partId) {
         RemotePartner partner = this.remotePartnerDAO.get(remoteId);
         if (partner == null)
             return null;
 
         String restPath = "/rest/parts/" + partId + "/samples";
-        return (ArrayList) iceRestClient.get(partner.getUrl(), restPath, ArrayList.class);
+        return iceRestClient.get(partner.getUrl(), restPath, ArrayList.class);
     }
 
-    public ArrayList<UserComment> getRemotePartComments(long remoteId, long partId) {
+    public List<UserComment> getRemotePartComments(long remoteId, long partId) {
         RemotePartner partner = this.remotePartnerDAO.get(remoteId);
         if (partner == null)
             return null;
 
         String restPath = "/rest/parts/" + partId + "/comments";
-        return (ArrayList) iceRestClient.get(partner.getUrl(), restPath, ArrayList.class);
+        return iceRestClient.get(partner.getUrl(), restPath, ArrayList.class);
     }
 
     public void transferEntries(String userId, long remoteId, EntrySelection selection) {
@@ -188,18 +190,18 @@ public class RemoteAccessController {
         }
     }
 
-    public ArrayList<TraceSequenceAnalysis> getRemoteTraces(long remoteId, long partId) {
+    public List<TraceSequenceAnalysis> getRemoteTraces(long remoteId, long partId) {
         RemotePartner partner = this.remotePartnerDAO.get(remoteId);
         if (partner == null)
             return null;
 
         try {
             String restPath = "/rest/parts/" + partId + "/traces";
-            Object result = iceRestClient.get(partner.getUrl(), restPath, ArrayList.class);
+            ArrayList<TraceSequenceAnalysis> result = iceRestClient.get(partner.getUrl(), restPath, ArrayList.class);
             if (result == null)
                 return null;
 
-            return (ArrayList) result;
+            return result;
         } catch (Exception e) {
             Logger.error(e.getMessage());
             return null;
