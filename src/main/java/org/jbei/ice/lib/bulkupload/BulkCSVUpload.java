@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.bulkupload;
 
-import au.com.bytecode.opencsv.CSVParser;
+import com.opencsv.CSVParser;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang.StringUtils;
