@@ -237,7 +237,7 @@ angular.module('ice.wor.controller', [])
 
         $scope.selectRemotePartnerFolder = function (folder) {
             $scope.partnerId = $stateParams.partner;
-            $location.path('/web/' + $stateParams.partner + "/folder/" + folder.id);
+            $location.path('web/' + $stateParams.partner + "/folder/" + folder.id);
         };
     })
     .controller('WebOfRegistriesController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote, Settings) {

@@ -206,7 +206,7 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.format = "M/d/yyyy h:mm a";
-        $scope.newSampleTemplate = "/scripts/entry/sample/barcode-popover.html";
+        $scope.newSampleTemplate = "scripts/entry/sample/barcode-popover.html";
         $scope.enablePopup = function (row, col) {
             console.log("enable", row, col);
             console.log($scope.newSample.open.cell === row + (10 + col + '').slice(-2));
