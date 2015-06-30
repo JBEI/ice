@@ -1,12 +1,10 @@
 package org.jbei.ice.lib.parsers;
 
-import org.jbei.ice.lib.vo.DNASequence;
-
 import org.biojava.bio.BioException;
 import org.biojava.bio.seq.DNATools;
-import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.bio.symbol.SimpleSymbolList;
 import org.biojava.bio.symbol.SymbolList;
+import org.jbei.ice.lib.vo.DNASequence;
 
 /**
  * Parser to handle file with simply nucleotide sequences. Technically these files are not FASTA
@@ -18,12 +16,6 @@ public class PlainParser extends AbstractParser {
     private static final String PLAIN_PARSER = "Plain";
 
     @Override
-    public Boolean hasErrors() {
-        // This parser cannot succeed with errors, so always return false, or fail.
-        return false;
-    }
-
-    @Override
     public DNASequence parse(String textSequence) throws InvalidFormatParserException {
         textSequence = cleanSequence(textSequence);
 
@@ -31,8 +23,6 @@ public class PlainParser extends AbstractParser {
         try {
             sl = new SimpleSymbolList(DNATools.getDNA().getTokenization("token"), textSequence
                     .replaceAll("\\s+", "").replaceAll("[\\.|~]", "-").replaceAll("[0-9]", ""));
-        } catch (IllegalSymbolException e) {
-            throw new InvalidFormatParserException("Couldn't parse Plain sequence!", e);
         } catch (BioException e) {
             throw new InvalidFormatParserException("Couldn't parse Plain sequence!", e);
         }
