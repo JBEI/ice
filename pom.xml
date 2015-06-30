@@ -9,11 +9,6 @@
     <description>Inventory of Composable Elements (ICE) for Synthetic Biology</description>
     <repositories>
         <repository>
-            <id>biojava-maven-repo</id>
-            <name>BioJava repository</name>
-            <url>http://www.biojava.org/download/maven/</url>
-        </repository>
-        <repository>
             <id>Sonatype OSS Snapshot Repository</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
@@ -105,7 +100,7 @@
         <dependency>
             <groupId>org.biojava</groupId>
             <artifactId>core</artifactId>
-            <version>1.8.5</version>
+            <version>1.9.2</version>
         </dependency>
         <dependency>
             <groupId>org.sbolstandard</groupId>
