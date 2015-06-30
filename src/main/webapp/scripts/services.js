@@ -567,13 +567,13 @@ iceServices.factory('Settings', function ($resource) {
 
             rebuildLucene: {
                 method: 'PUT',
-                url: 'rest/config/lucene',
+                url: '/rest/config/lucene',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             rebuildBlast: {
                 method: 'PUT',
-                url: 'rest/config/blast',
+                url: '/rest/config/blast',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 

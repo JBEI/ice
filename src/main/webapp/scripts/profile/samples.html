@@ -1,6 +1,6 @@
 <div ng-controller="ProfileSamplesController">
     <div ng-if="!userSamples">
-        <img src="/img/loader-mini.gif"> Loading...
+        <img src="img/loader-mini.gif"> Loading...
     </div>
 
     <div ng-if="userSamples.requests.length=== 0">
@@ -27,7 +27,7 @@
 
         <tbody>
         <tr data-ng-repeat="request in userSamples.requests">
-            <td><a href="/entry/{{request.partData.id}}">{{request.partData.partId}}</a></td>
+            <td><a href="entry/{{request.partData.id}}">{{request.partData.partId}}</a></td>
             <td>
                 <span ng-if="request.requestType==='LIQUID_CULTURE'"><i
                         class="fa fa-flask"></i> Liquid Culture</span>
