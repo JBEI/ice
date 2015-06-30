@@ -1,13 +1,5 @@
 package org.jbei.ice.lib.entry.sequence;
 
-import java.io.File;
-import java.io.InputStream;
-import java.nio.file.Paths;
-import java.util.Date;
-import java.util.List;
-
-import org.jbei.ice.ControllerException;
-import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -31,6 +23,12 @@ import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.DNASequence;
 
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.Date;
+import java.util.List;
+
 /**
  * ABI to manipulate DNA sequence trace analysis
  *
@@ -50,7 +48,7 @@ public class SequenceAnalysisController {
 
     /**
      * Create a new {@link TraceSequence} record and associated with the {@link Entry} entry.
-     * <p/>
+     * <p>
      * Creates a database record and write the inputStream to disk.
      *
      * @param entry
@@ -64,7 +62,7 @@ public class SequenceAnalysisController {
      * @throws ControllerException
      */
     public TraceSequence importTraceSequence(Entry entry, String filename, String depositor, String sequence,
-            String uuid, Date date, InputStream inputStream) {
+                                             String uuid, Date date, InputStream inputStream) {
         if (entry == null) {
             throw new IllegalArgumentException("Failed to save trace sequence with null entry!");
         }
@@ -85,7 +83,7 @@ public class SequenceAnalysisController {
 
     /**
      * Create a new {@link TraceSequence} record and associated with the {@link Entry} entry.
-     * <p/>
+     * <p>
      * Unlike importTraceSequence this method auto generates uuid and timestamp.
      *
      * @param entry
@@ -96,7 +94,7 @@ public class SequenceAnalysisController {
      * @return Saved traceSequence
      */
     public TraceSequence uploadTraceSequence(Entry entry, String filename, String depositor,
-            String sequence, InputStream inputStream) {
+                                             String sequence, InputStream inputStream) {
         return importTraceSequence(entry, filename, depositor, sequence, Utils.generateUUID(), new Date(), inputStream);
     }
 
@@ -104,13 +102,10 @@ public class SequenceAnalysisController {
      * Remove a {@link TraceSequence} from the database and disk.
      *
      * @param traceSequence
-     * @throws ControllerException
-     * @throws PermissionException
      */
-    public void removeTraceSequence(Account account, TraceSequence traceSequence) throws ControllerException,
-            PermissionException {
+    public void removeTraceSequence(Account account, TraceSequence traceSequence) {
         if (traceSequence == null) {
-            throw new ControllerException("Failed to delete null Trace Sequence!");
+            throw new IllegalArgumentException("Failed to delete null Trace Sequence!");
         }
 
         entryAuthorization.expectWrite(account.getEmail(), traceSequence.getEntry());
@@ -124,11 +119,10 @@ public class SequenceAnalysisController {
      *
      * @param entry
      * @return Retrieved TraceSequence
-     * @throws ControllerException
      */
-    public List<TraceSequence> getTraceSequences(Entry entry) throws ControllerException {
+    public List<TraceSequence> getTraceSequences(Entry entry) {
         if (entry == null) {
-            throw new ControllerException("Failed to get trace sequences for null entry!");
+            throw new IllegalArgumentException("Failed to get trace sequences for null entry!");
         }
 
         List<TraceSequence> traces;
@@ -160,7 +154,7 @@ public class SequenceAnalysisController {
         return traces;
     }
 
-    public TraceSequence getTraceSequenceByFileId(String fileId) throws ControllerException {
+    public TraceSequence getTraceSequenceByFileId(String fileId) {
         return traceDao.getByFileId(fileId);
     }
 
@@ -199,11 +193,10 @@ public class SequenceAnalysisController {
      *
      * @param traceSequence
      * @return {@link File} object.
-     * @throws ControllerException
      */
-    public File getFile(TraceSequence traceSequence) throws ControllerException {
+    public File getFile(TraceSequence traceSequence) {
         return Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), tracesDirName,
-                         traceSequence.getFileId()).toFile();
+                traceSequence.getFileId()).toFile();
     }
 
     /**
@@ -290,13 +283,13 @@ public class SequenceAnalysisController {
 
                     if (traceSequenceAlignment == null) {
                         traceSequenceAlignment = new TraceSequenceAlignment(traceSequence,
-                                                                            maxBl2SeqResult.getScore(), strand,
-                                                                            queryStart, queryEnd,
-                                                                            subjectStart, subjectEnd,
-                                                                            maxBl2SeqResult.getQuerySequence(),
-                                                                            maxBl2SeqResult.getSubjectSequence(),
-                                                                            sequence.getFwdHash(),
-                                                                            new Date());
+                                maxBl2SeqResult.getScore(), strand,
+                                queryStart, queryEnd,
+                                subjectStart, subjectEnd,
+                                maxBl2SeqResult.getQuerySequence(),
+                                maxBl2SeqResult.getSubjectSequence(),
+                                sequence.getFwdHash(),
+                                new Date());
 
                         traceSequence.setTraceSequenceAlignment(traceSequenceAlignment);
                     } else {
@@ -323,15 +316,14 @@ public class SequenceAnalysisController {
     /**
      * Calculate sequence alignments between the sequence associated with an {@link Entry} entry
      * with all the {@link TraceSequence}s associated with that entry.
-     * <p/>
+     * <p>
      * Calls buildOrReplaceAlignment on each TraceSequence.
      *
      * @param entry
-     * @throws ControllerException
      */
-    public void rebuildAllAlignments(Entry entry) throws ControllerException {
+    public void rebuildAllAlignments(Entry entry) {
         if (entry == null) {
-            throw new ControllerException("Failed to rebuild alignment for null entry!");
+            throw new IllegalArgumentException("Failed to rebuild alignment for null entry!");
         }
 
         Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);

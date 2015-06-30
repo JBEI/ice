@@ -1,17 +1,6 @@
 package org.jbei.ice.services.rest;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.nio.file.Paths;
-import java.security.Key;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.auth.KeyTable;
 import org.jbei.auth.hmac.HmacAuthorizor;
 import org.jbei.auth.hmac.HmacSignature;
@@ -21,6 +10,17 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.nio.file.Paths;
+import java.security.Key;
 
 /**
  * Parent class for all rest resource objects
@@ -53,7 +53,7 @@ public class RestResource {
                 // collect all lines in the file to a buffer
                 final StringBuilder encoded = new StringBuilder();
                 try (final FileReader reader = new FileReader(keyFile);
-                        final BufferedReader buffered = new BufferedReader(reader);) {
+                     final BufferedReader buffered = new BufferedReader(reader);) {
                     String line;
                     while ((line = buffered.readLine()) != null) {
                         encoded.append(line);
@@ -80,14 +80,11 @@ public class RestResource {
     @Context
     private HttpServletRequest request;
 
-    private String userId = null;
-
     /**
      * Extract the User ID from header values in the resource request.
      *
      * @return a string User ID
-     * @throws WebApplicationException
-     *             for unauthorized access
+     * @throws WebApplicationException for unauthorized access
      */
     protected String getUserId() {
         return getUserId(sessionId);
@@ -96,62 +93,38 @@ public class RestResource {
     /**
      * Extract the User ID from a query parameter value or header values in the resource request.
      *
-     * @param sessionId
-     *            a session ID sent via query parameters
+     * @param sessionId a session ID sent via query parameters
      * @return a string User ID
-     * @throws WebApplicationException
-     *             for unauthorized access
+     * @throws WebApplicationException for unauthorized access
      */
     protected String getUserId(final String sessionId) {
-        if (userId != null) {
-            // we've already looked up the userId
+        String userId = SessionHandler.getUserIdBySession(sessionId);
+        if (!StringUtils.isEmpty(userId))
             return userId;
-        } else if ((userId = SessionHandler.getUserIdBySession(sessionId)) != null) {
-            // try to get user from a session ID, continue to Authorization if fails
-        } else {
-            final Object hmac = request.getAttribute(AuthenticationInterceptor.HMAC_SIGNATURE);
-            final Object valid = request.getAttribute(AuthenticationInterceptor.EXPECTED_SIGNATURE);
-            if (hmac != null && hmac instanceof HmacSignature) {
-                final HmacSignature generated = (HmacSignature) hmac;
-                if (generated.generateSignature().equals(valid)) {
-                    // TODO validation of meaningful userId
-                    // e.g. "admin" account on EDD won't mean anything to ICE
-                    userId = generated.getUserId();
-                }
+
+        final Object hmac = request.getAttribute(AuthenticationInterceptor.HMAC_SIGNATURE);
+        final Object valid = request.getAttribute(AuthenticationInterceptor.EXPECTED_SIGNATURE);
+        if (hmac != null && hmac instanceof HmacSignature) {
+            final HmacSignature generated = (HmacSignature) hmac;
+            if (generated.generateSignature().equals(valid)) {
+                // TODO validation of meaningful userId
+                // e.g. "admin" account on EDD won't mean anything to ICE
+                userId = generated.getUserId();
             }
         }
-        if (userId == null) {
-            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-        }
-        return userId;
-    }
 
-    /**
-     * @param sessionHeader
-     *            not used
-     * @return the UserId of the user matching the session value
-     * @throws WebApplicationException
-     *             if there is no valid UserId
-     * @deprecated use {@link #getUserId()} instead
-     */
-    @Deprecated
-    protected String getUserIdFromSessionHeader(final String sessionHeader) {
-        final String userId = SessionHandler.getUserIdBySession(sessionId);
-        if (userId == null) {
+        if (userId == null)
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-        }
         return userId;
     }
 
     /**
      * Create a {@link Response} object from an entity object.
      *
-     * @param status
-     *            HTTP status code
-     * @param obj
-     *            entity in response
+     * @param status HTTP status code
+     * @param obj    entity in response
      * @return a Response object for the resource request, uses 500 error response if entity is
-     *         {@code null}
+     * {@code null}
      */
     protected Response respond(final Response.Status status, final Object obj) {
         if (obj == null) {
@@ -164,8 +137,7 @@ public class RestResource {
     /**
      * Create a {@link Response} object from an entity object.
      *
-     * @param object
-     *            entity in response
+     * @param object entity in response
      * @return a 404 NOT FOUND if object is {@code null}, else a 200 OK response with the entity
      */
     protected Response respond(final Object object) {
@@ -179,8 +151,7 @@ public class RestResource {
     /**
      * Create an empty {@link Response} object.
      *
-     * @param status
-     *            HTTP status code to use on the Response
+     * @param status HTTP status code to use on the Response
      * @return a Response object for the resource request
      */
     protected Response respond(final Response.Status status) {
@@ -190,8 +161,7 @@ public class RestResource {
     /**
      * Create an empty {@link Response} object.
      *
-     * @param success
-     *            success/failure flag
+     * @param success success/failure flag
      * @return a 200 OK response if success is {@code true}, otherwise a 500 error response
      */
     protected Response respond(final boolean success) {
@@ -204,10 +174,8 @@ public class RestResource {
     /**
      * Used to log user actions
      *
-     * @param userId
-     *            unique user identifier
-     * @param message
-     *            log message
+     * @param userId  unique user identifier
+     * @param message log message
      */
     protected void log(final String userId, final String message) {
         final String who = (userId == null) ? "Unknown" : userId;

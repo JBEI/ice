@@ -3,8 +3,6 @@ package org.jbei.ice.lib.entry.sequence;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.ApplicationController;
-import org.jbei.ice.ControllerException;
-import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -194,10 +192,8 @@ public class SequenceController {
      * Delete the {@link Sequence} in the database, then rebuild the search index.
      *
      * @param sequence
-     * @throws ControllerException
-     * @throws PermissionException
      */
-    public void delete(Account account, Sequence sequence) throws ControllerException, PermissionException {
+    public void delete(Account account, Sequence sequence) {
         authorization.expectWrite(account.getEmail(), sequence.getEntry());
         String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         dao.deleteSequence(sequence, tmpDir);
@@ -234,14 +230,13 @@ public class SequenceController {
      * @param sequence
      * @param formatter
      * @return Text of a formatted sequence.
-     * @throws ControllerException
      */
-    public String compose(Sequence sequence, IFormatter formatter) throws ControllerException {
+    public String compose(Sequence sequence, IFormatter formatter) {
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         try {
             formatter.format(sequence, byteStream);
         } catch (FormatterException | IOException e) {
-            throw new ControllerException(e);
+            Logger.error(e);
         }
         return byteStream.toString();
     }

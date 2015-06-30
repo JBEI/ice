@@ -1,16 +1,14 @@
 package org.jbei.ice.lib.common.logging;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import javax.mail.MessagingException;
-
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
-
 import org.slf4j.LoggerFactory;
+
+import javax.mail.MessagingException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * Logger for ICE.
@@ -50,7 +48,7 @@ public class Logger {
     }
 
     private static void sendEmail(String message, Throwable e) {
-        if (e instanceof MessagingException || e instanceof ControllerException || e instanceof DAOException || true) {
+        if (e instanceof MessagingException || e instanceof DAOException || true) {
             // if error is "Can't send email", there is no need to try to send email
             return;
         }

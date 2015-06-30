@@ -1,14 +1,13 @@
 package org.jbei.ice.lib.account;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.authentication.AuthenticationException;
 import org.jbei.ice.lib.account.authentication.IAuthentication;
 import org.jbei.ice.lib.account.authentication.LocalAuthentication;
+import org.jbei.ice.lib.account.authentication.UserIdAuthentication;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.jbei.ice.lib.dao.hibernate.AccountPreferencesDAO;
@@ -24,7 +23,7 @@ import java.util.*;
 
 /**
  * ABI to manipulate {@link Account} objects.
- * <p/>
+ * <p>
  * This class contains methods that wrap {@link org.jbei.ice.lib.dao.hibernate.AccountDAO} to
  * manipulate {@link Account} objects.
  *
@@ -53,7 +52,7 @@ public class AccountController {
      * @return updated account object
      */
     public AccountTransfer updateAccount(final String requester, final long userId,
-            final AccountTransfer transfer) {
+                                         final AccountTransfer transfer) {
         final Account account = dao.get(userId);
         if (!account.getEmail().equalsIgnoreCase(requester) && !isAdministrator(requester)) {
             return null;
@@ -82,8 +81,7 @@ public class AccountController {
     /**
      * Retrieve account from the database by database id.
      *
-     * @param id
-     *            Database id of account
+     * @param id Database id of account
      * @return Account for the id
      */
     public Account get(final long id) {
@@ -93,10 +91,9 @@ public class AccountController {
     /**
      * Reset a user's password
      *
-     * @param targetEmail
-     *            email address of user account to be changed
+     * @param targetEmail email address of user account to be changed
      * @return true if the user account is found with email specified in the parameter and password
-     *         for it is successfully reset, false otherwise
+     * for it is successfully reset, false otherwise
      */
     public boolean resetPassword(final String targetEmail) {
         Account account = getByEmail(targetEmail);
@@ -181,8 +178,7 @@ public class AccountController {
      * validates the account dto to ensure that the fields required (especially by the database) are
      * present
      *
-     * @param accountTransfer
-     *            account dto for validation
+     * @param accountTransfer account dto for validation
      */
     private boolean validateRequiredAccountFields(final AccountTransfer accountTransfer) {
         if (accountTransfer.getFirstName() == null
@@ -205,10 +201,8 @@ public class AccountController {
      * Creates a new account using the parameters passed. A random password is initially generated ,
      * encrypted and assigned to the account
      *
-     * @param info
-     *            contains information needed to create account
-     * @param sendEmail
-     *            whether to send account information (including password by email)
+     * @param info      contains information needed to create account
+     * @param sendEmail whether to send account information (including password by email)
      * @return generated password
      */
     public AccountTransfer createNewAccount(final AccountTransfer info, final boolean sendEmail) {
@@ -310,8 +304,7 @@ public class AccountController {
     /**
      * Retrieve {@link Account} by user id.
      *
-     * @param email
-     *            unique identifier for account, typically email
+     * @param email unique identifier for account, typically email
      * @return {@link Account}
      */
     public Account getByEmail(final String email) {
@@ -319,11 +312,9 @@ public class AccountController {
     }
 
     /**
-     * @param email
-     *            an account identifier (usually email)
+     * @param email an account identifier (usually email)
      * @return database identifier of account matching account identifier (email)
-     * @throws IllegalArgumentException
-     *             for an invalid account identifier
+     * @throws IllegalArgumentException for an invalid account identifier
      */
     public long getAccountId(final String email) {
         final Account account = dao.getByEmail(email);
@@ -378,8 +369,7 @@ public class AccountController {
     /**
      * Check in the database if an account is a moderator.
      *
-     * @param userId
-     *            unique account identifier for user
+     * @param userId unique account identifier for user
      * @return True, if the account is a moderator.
      */
     public boolean isAdministrator(final String userId) {
@@ -393,18 +383,17 @@ public class AccountController {
 
     /**
      * Authenticate a user in the database.
-     * <p/>
+     * <p>
      * Using the {@link org.jbei.ice.lib.account.authentication.IAuthentication} specified in the
      * settings file, authenticate the user, and return the sessionData
      *
      * @param login
      * @param password
-     * @param ip
-     *            IP Address of the user.
+     * @param ip       IP Address of the user.
      * @return the account identifier (email) on a successful login, otherwise {@code null}
      */
     public String authenticate(final String login, final String password, final String ip) {
-        final IAuthentication authentication = getAuthenticationBackend();
+        final IAuthentication authentication = new UserIdAuthentication();
         String email;
 
         try {
@@ -472,13 +461,12 @@ public class AccountController {
 
     /**
      * Authenticate a user in the database.
-     * <p/>
+     * <p>
      * Using the {@link org.jbei.ice.lib.account.authentication.IAuthentication} specified in the
      * settings file, authenticate the user, and return the sessionData
      *
-     * @param transfer
-     *            user information containing the email and password to be used for authentication
-     *            If the sessionId field is set, it may or may not be used as the user's session id
+     * @param transfer user information containing the email and password to be used for authentication
+     *                 If the sessionId field is set, it may or may not be used as the user's session id
      * @return {@link AccountTransfer}
      */
     public AccountTransfer authenticate(final AccountTransfer transfer) {
@@ -505,8 +493,7 @@ public class AccountController {
     /**
      * See if the given sessionKey is still authenticated with the system.
      *
-     * @param sessionKey
-     *            unique session identifier
+     * @param sessionKey unique session identifier
      * @return True if sessionKey is still authenticated (active) to the system.
      */
     public static boolean isAuthenticated(final String sessionKey) {
@@ -516,8 +503,7 @@ public class AccountController {
     /**
      * De-authenticate the given sessionKey. The user is logged out from the system.
      *
-     * @param sessionKey
-     *            unique session identifier
+     * @param sessionKey unique session identifier
      */
     public void invalidate(final String sessionKey) {
         SessionHandler.invalidateSession(sessionKey);
@@ -539,7 +525,7 @@ public class AccountController {
      * @return accounts matching the query
      */
     public List<AccountTransfer> getMatchingAccounts(final String userId, final String query,
-            final int limit) {
+                                                     final int limit) {
         // TODO account object is never used?
         getByEmail(userId);
         final Set<Account> matches = dao.getMatchingAccounts(query, limit);
@@ -563,7 +549,7 @@ public class AccountController {
      * @return window of results to all accounts
      */
     public AccountResults retrieveAccounts(final String userId, final int start, final int limit,
-            final String sort, final boolean asc) {
+                                           final String sort, final boolean asc) {
         if (!isAdministrator(userId)) {
             Logger.warn(userId
                     + " attempting to retrieve all user accounts without admin privileges");
@@ -593,23 +579,18 @@ public class AccountController {
     /**
      * @param id
      * @param email
-     * @throws ControllerException
      */
-    public void removeMemberFromGroup(final long id, final String email) throws ControllerException {
+    public void removeMemberFromGroup(final long id, final String email) {
         final Account account = getByEmail(email);
         if (account == null) {
-            throw new ControllerException("Could not find account " + email);
+            throw new IllegalArgumentException("Could not find account " + email);
         }
 
         final Group group = DAOFactory.getGroupDAO().get(id);
         if (group == null) {
-            throw new ControllerException("Could not find group " + id);
+            throw new IllegalArgumentException("Could not find group " + id);
         }
         account.getGroups().remove(group);
-        try {
-            dao.update(account);
-        } catch (final DAOException e) {
-            throw new ControllerException(e);
-        }
+        dao.update(account);
     }
 }
