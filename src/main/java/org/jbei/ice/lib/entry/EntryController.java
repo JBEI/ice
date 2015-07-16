@@ -18,8 +18,10 @@ import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
@@ -334,8 +336,21 @@ public class EntryController {
         comment.setAccount(account);
         comment.setEntry(entry);
         comment.setBody(newComment.getMessage());
-        comment.setCreationTime(new Date(System.currentTimeMillis()));
+        comment.setCreationTime(new Date());
         comment = commentDAO.create(comment);
+
+        if (newComment.getSamples() != null) {
+            SampleDAO sampleDAO = DAOFactory.getSampleDAO();
+            for (PartSample partSample : newComment.getSamples()) {
+                Sample sample = sampleDAO.get(partSample.getId());
+                if (sample == null)
+                    continue;
+                comment.getSamples().add(sample);
+                sample.getComments().add(comment);
+            }
+        }
+
+        comment = commentDAO.update(comment);
         return comment.toDataTransferObject();
     }
 
