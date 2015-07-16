@@ -84,7 +84,6 @@
                        'alert_color':hasWell(row, col)&&!hasTube(row,col), 'fa-circle-thin':!hasContent(row, col),
                        'fa-circle':hasContent(row, col)}"
                            style="font-size: 30px"
-                           popover-trigger="manual" popover-enable="newSample.open.cell === row + (10+col+'').slice(-2)"
                            ng-click="cellBarcodeClick(row, col)"
                            popover-placement="bottom" popover-title="Well {{row + (10+col+'').slice(-2)}}"
                            popover-template="newSampleTemplate"></i>
