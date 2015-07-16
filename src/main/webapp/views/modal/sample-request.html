@@ -5,6 +5,11 @@
 </div>
 
 <div class="modal-body">
+    <div class="alert alert-warning" role="alert" ng-if="hasComments()">
+        There are 1 or more comments about this sample. Please make sure to review them by clicking on the comments tab,
+        before adding to cart.
+    </div>
+
     <strong style="font-size: 16px">Select sample type</strong>
 
     <div class="radio" style="padding-left: 40px">

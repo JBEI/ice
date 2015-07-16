@@ -1,15 +1,17 @@
 package org.jbei.ice.lib.models;
 
-import java.util.Calendar;
-import java.util.Date;
-import javax.persistence.*;
-
+import org.hibernate.annotations.Type;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.sample.model.Sample;
 
-import org.hibernate.annotations.Type;
+import javax.persistence.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Store comments about an {@link org.jbei.ice.lib.entry.model.Entry} object, with the associated {@link org.jbei.ice
@@ -48,6 +50,12 @@ public class Comment implements IDataModel {
     @Column(name = "modification_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date modificationTime;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "comment_sample", joinColumns = @JoinColumn(name = "comment_id"),
+            inverseJoinColumns = @JoinColumn(name = "sample_id"))
+
+    private Set<Sample> samples = new HashSet<>();
 
     public Comment() {
     }
@@ -103,6 +111,10 @@ public class Comment implements IDataModel {
         this.modificationTime = modificationTime;
     }
 
+    public Set<Sample> getSamples() {
+        return samples;
+    }
+
     @Override
     public UserComment toDataTransferObject() {
         UserComment userComment = new UserComment();
@@ -114,6 +126,11 @@ public class Comment implements IDataModel {
         userComment.setMessage(getBody());
         userComment.setAccountTransfer(getAccount().toDataTransferObject());
         userComment.setEntryId(getEntry().getId());
+        if (this.samples != null) {
+            for (Sample sample : this.samples) {
+                userComment.getSamples().add(sample.toDataTransferObject());
+            }
+        }
         return userComment;
     }
 }

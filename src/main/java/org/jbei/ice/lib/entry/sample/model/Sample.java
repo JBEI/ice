@@ -8,10 +8,13 @@ import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.EntryBooleanPropertiesBridge;
+import org.jbei.ice.lib.models.Comment;
 import org.jbei.ice.lib.models.Storage;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Store Sample information.
@@ -65,6 +68,9 @@ public class Sample implements IDataModel {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "location_id")
     private Storage storage;
+
+    @ManyToMany(mappedBy = "samples", fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Comment> comments = new HashSet<>();
 
     public Sample() {
     }
@@ -139,6 +145,10 @@ public class Sample implements IDataModel {
 
     public void setStorage(Storage locationNew) {
         storage = locationNew;
+    }
+
+    public Set<Comment> getComments() {
+        return comments;
     }
 
     @Override

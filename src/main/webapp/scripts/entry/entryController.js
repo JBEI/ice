@@ -72,6 +72,7 @@ angular.module('ice.entry.controller', [])
     .controller('EntryCommentController', function ($scope, $cookieStore, $stateParams, Entry) {
         var entryId = $stateParams.id;
         var entry = Entry($cookieStore.get("sessionId"));
+        $scope.newComment = {samples: []};
 
         entry.comments({
             partId: entryId
@@ -109,6 +110,19 @@ angular.module('ice.entry.controller', [])
             }, function (error) {
                 console.error(error);
             })
+        };
+
+        /**
+         * Add or remove sample to comment. If sample is already a part of the comment, it is removed,
+         * if not, it is added
+         * @param sample sample to add or remove
+         */
+        $scope.addRemoveSample = function (sample) {
+            var idx = $scope.newComment.samples.indexOf(sample);
+            if (idx == -1)
+                $scope.newComment.samples.push(sample);
+            else
+                $scope.newComment.samples.splice(idx, 1);
         }
     })
     .controller('EntrySampleController', function ($location, $rootScope, $scope, $modal, $cookieStore, $stateParams, Entry, Samples) {
@@ -169,12 +183,21 @@ angular.module('ice.entry.controller', [])
             }
         };
 
-        $scope.openAddToCart = function (entryId) {
+        $scope.openAddToCart = function (entryId, samples) {
             var modalInstance = $modal.open({
                 templateUrl: 'views/modal/sample-request.html',
-                controller: function ($scope) {
+                controller: function ($scope, samples) {
+                    $scope.samples = samples;
                     $scope.tempRange = [{value: 30}, {value: 37}];
                     $scope.sampleTemp = $scope.tempRange[0];
+
+                    $scope.hasComments = function () {
+                        for (var i = 0; i < $scope.samples.length; i += 1) {
+                            if ($scope.samples[i].comments.length)
+                                return true;
+                        }
+                        return false;
+                    };
 
                     $scope.addSampleToCart = function (type, tmp) {
                         var sampleSelection = {
@@ -191,6 +214,11 @@ angular.module('ice.entry.controller', [])
                             setInCart(result);
                             modalInstance.close('');
                         });
+                    }
+                },
+                resolve: {
+                    samples: function () {
+                        return samples;
                     }
                 }
             });
