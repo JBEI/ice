@@ -49,7 +49,7 @@ public class CustomFieldsTest {
         CustomField created = strain.getParameters().get(0).toDataTransferObject();
         Assert.assertEquals(created.getName(), field.getName());
         Assert.assertEquals(created.getValue(), field.getValue());
-        Assert.assertEquals(created.getPartId(), id);
+        Assert.assertEquals(created.getId(), id);
     }
 
     @Test
@@ -64,7 +64,7 @@ public class CustomFieldsTest {
         CustomField created = fields.getField(userId, id);
         Assert.assertEquals(created.getName(), field.getName());
         Assert.assertEquals(created.getValue(), field.getValue());
-        Assert.assertEquals(created.getPartId(), id);
+        Assert.assertEquals(created.getId(), id);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class CustomFieldsTest {
         CustomField created = fields.getField(userId, id);
         Assert.assertEquals(created.getName(), field.getName());
         Assert.assertEquals(created.getValue(), field.getValue());
-        Assert.assertEquals(created.getPartId(), id);
+        Assert.assertEquals(created.getId(), id);
 
         // check what is associated with entry
         strain = (Strain) DAOFactory.getEntryDAO().get(strain.getId());
@@ -96,7 +96,7 @@ public class CustomFieldsTest {
         created = strain.getParameters().get(0).toDataTransferObject();
         Assert.assertEquals(created.getName(), field.getName());
         Assert.assertEquals(created.getValue(), field.getValue());
-        Assert.assertEquals(created.getPartId(), id);
+        Assert.assertEquals(created.getId(), id);
     }
 
     @Test
@@ -140,7 +140,7 @@ public class CustomFieldsTest {
         CustomField created = strain.getParameters().get(0).toDataTransferObject();
         Assert.assertEquals(created.getName(), field.getName());
         Assert.assertEquals(created.getValue(), field.getValue());
-        Assert.assertEquals(created.getPartId(), id);
+        Assert.assertEquals(created.getId(), id);
 
         // delete custom field
         Assert.assertTrue(fields.deleteField(userId, id));
