@@ -51,6 +51,7 @@ public class CustomFieldResource extends RestResource {
         return super.respond(false);
     }
 
+    @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response get(
@@ -60,6 +61,7 @@ public class CustomFieldResource extends RestResource {
         return super.respond(fields.getField(userId, id));
     }
 
+    @GET
     // todo : paging params
     @Produces(MediaType.APPLICATION_JSON)
     public Response list(
@@ -70,6 +72,7 @@ public class CustomFieldResource extends RestResource {
         return super.respond(result);
     }
 
+    @PUT
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)

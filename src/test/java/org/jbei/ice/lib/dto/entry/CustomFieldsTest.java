@@ -69,7 +69,7 @@ public class CustomFieldsTest {
 
     @Test
     public void testUpdateField() throws Exception {
-        Account account = AccountCreator.createTestAccount("testGetField", false);
+        Account account = AccountCreator.createTestAccount("testUpdateField", false);
         Assert.assertNotNull(account);
         final String userId = account.getEmail();
         Strain strain = TestEntryCreator.createTestStrain(account);
