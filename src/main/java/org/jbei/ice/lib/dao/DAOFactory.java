@@ -28,6 +28,7 @@ public class DAOFactory {
     private static AuditDAO auditDAO;
     private static RemotePermissionDAO remotePermissionDAO;
     private static ExperimentDAO experimentDAO;
+    private static ParameterDAO parameterDAO;
 
     public static AccountDAO getAccountDAO() {
         if (accountDAO == null)
@@ -153,5 +154,11 @@ public class DAOFactory {
         if (experimentDAO == null)
             experimentDAO = new ExperimentDAO();
         return experimentDAO;
+    }
+
+    public static ParameterDAO getParameterDAO() {
+        if (parameterDAO == null)
+            parameterDAO = new ParameterDAO();
+        return parameterDAO;
     }
 }

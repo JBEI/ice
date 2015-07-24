@@ -4,7 +4,9 @@ import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 /**
  * Parent class for all rest resource objects
@@ -15,6 +17,9 @@ public class RestResource {
 
     protected final String AUTHENTICATION_PARAM_NAME = "X-ICE-Authentication-SessionId";
     protected final String WOR_PARTNER_TOKEN = "X-ICE-WOR-Token";
+
+    @Context
+    protected UriInfo uriInfo;
 
     protected String getUserIdFromSessionHeader(String sessionHeader) {
         String userId = SessionHandler.getUserIdBySession(sessionHeader);

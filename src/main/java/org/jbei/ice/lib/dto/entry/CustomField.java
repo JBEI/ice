@@ -9,15 +9,27 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
  */
 public class CustomField implements IDataTransferModel {
 
+    private long id;
+    private long partId;
     private String name;
     private String value;
 
     public CustomField() {
     }
 
-    public CustomField(String name, String value) {
+    public CustomField(long id, long partId, String name, String value) {
+        this.id = id;
         this.name = name;
         this.value = value;
+        this.partId = partId;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -34,5 +46,13 @@ public class CustomField implements IDataTransferModel {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public long getPartId() {
+        return partId;
+    }
+
+    public void setPartId(long partId) {
+        this.partId = partId;
     }
 }

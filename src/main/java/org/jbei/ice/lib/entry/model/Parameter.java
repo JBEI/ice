@@ -1,12 +1,11 @@
 package org.jbei.ice.lib.entry.model;
 
-import javax.persistence.*;
-
+import org.hibernate.search.annotations.ContainedIn;
+import org.hibernate.search.annotations.Field;
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dto.entry.CustomField;
 
-import org.hibernate.search.annotations.ContainedIn;
-import org.hibernate.search.annotations.Field;
+import javax.persistence.*;
 
 /**
  * Stores key-value information for {@link org.jbei.ice.lib.entry.model.Entry}.
@@ -84,6 +83,6 @@ public class Parameter implements IDataModel {
 
     @Override
     public CustomField toDataTransferObject() {
-        return new CustomField(key, value);
+        return new CustomField(this.id, entry.getId(), key, value);
     }
 }
