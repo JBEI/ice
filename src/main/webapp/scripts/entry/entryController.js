@@ -128,7 +128,6 @@ angular.module('ice.entry.controller', [])
     .controller('EntrySampleController', function ($location, $rootScope, $scope, $modal, $cookieStore, $stateParams, Entry, Samples) {
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
-        var samples = Samples(sessionId);
         var partId = $stateParams.id;
 
         $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
@@ -209,7 +208,7 @@ angular.module('ice.entry.controller', [])
                         };
 
                         // add selection to shopping cart
-                        samples.addRequestToCart({}, sampleSelection, function (result) {
+                        Samples(sessionId).addRequestToCart({}, sampleSelection, function (result) {
                             $rootScope.$emit("SamplesInCart", result);
                             setInCart(result);
                             modalInstance.close('');
