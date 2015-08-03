@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.dto.entry;
 
-import java.util.Date;
-
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dao.IDataTransferModel;
+
+import java.util.Date;
 
 public class TraceSequenceAnalysis implements IDataTransferModel {
 
@@ -13,6 +13,7 @@ public class TraceSequenceAnalysis implements IDataTransferModel {
     private long created;
     private String fileId;
     private String sequence;
+    private boolean canEdit;
     private TraceSequenceAlignmentInfo traceSequenceAlignment;
 
     public TraceSequenceAnalysis() {
@@ -76,5 +77,13 @@ public class TraceSequenceAnalysis implements IDataTransferModel {
 
     public void setSequence(String sequence) {
         this.sequence = sequence;
+    }
+
+    public boolean isCanEdit() {
+        return canEdit;
+    }
+
+    public void setCanEdit(boolean canEdit) {
+        this.canEdit = canEdit;
     }
 }
