@@ -53,6 +53,4 @@ public class TestEntryCreator {
         data.setBioSafetyLevel(1);
         return new EntryCreator().createPart(userId, data);
     }
-
-
 }
