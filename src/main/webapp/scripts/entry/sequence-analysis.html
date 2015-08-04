@@ -1,13 +1,13 @@
 <div ng-controller="TraceSequenceController">
     <div class="row pad_top">
-        <div class="col-md-12" ng-show="entry.canEdit">
+        <div class="col-md-12">
             <button type="button" class="ice-button" ng-click="showUploadOptions=true">
                 <i style="font-size: 14px" class="fa fa-upload blue"></i> Add File
             </button>
         </div>
     </div>
 
-    <div class="row pad_top font-90em" ng-if="showUploadOptions&&entry.canEdit">
+    <div class="row pad_top font-90em" ng-if="showUploadOptions">
         <div class="col-md-12">
             <div class="alert alert-info" style="margin-bottom: 10px">
                 <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Upload Fasta, GenBank, or ABI
@@ -57,9 +57,10 @@
                     <td><a ng-href="profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}
                         {{traceSequence.depositor.lastName}}</a></td>
                     <td>{{traceSequence.created | date:'MMM d, y, h:mm a'}}</td>
-                    <td style="font-size:14px" ng-if="entry.canEdit">
-                        <i ng-click="deleteTraceSequenceFile(traceSequence.fileId)"
-                           class="fa fa-trash-o delete_icon"></i></td>
+                    <td style="font-size:14px">
+                        <i ng-click="deleteTraceSequenceFile(traceSequence.fileId)" ng-show="traceSequence.canEdit"
+                           class="fa fa-trash-o delete_icon"></i>
+                    </td>
                 </tr>
                 </tbody>
             </table>
