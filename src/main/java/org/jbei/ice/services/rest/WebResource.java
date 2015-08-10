@@ -1,6 +1,6 @@
 package org.jbei.ice.services.rest;
 
-import org.hsqldb.lib.StringUtil;
+import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
@@ -185,7 +185,7 @@ public class WebResource extends RestResource {
     public Response getWebPartners(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
                                    @HeaderParam(WOR_PARTNER_TOKEN) String worToken,
                                    @QueryParam("url") String url) {
-        if (StringUtil.isEmpty(sessionId))
+        if (StringUtils.isEmpty(sessionId))
             return super.respond(controller.getWebPartners(worToken, url));
         String userId = getUserIdFromSessionHeader(sessionId);
         return super.respond(controller.getWebPartners(userId));
