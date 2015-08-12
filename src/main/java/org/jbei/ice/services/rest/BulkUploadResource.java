@@ -25,6 +25,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public class BulkUploadResource extends RestResource {
             @QueryParam("token") String token,
             @DefaultValue("8") @QueryParam("limit") int limit,
             @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
-        String userId = getUserIdFromSessionHeader(sessionId);
+        getUserIdFromSessionHeader(sessionId);
         ArrayList<String> results = controller.getMatchingPartNumbersForLinks(uploadType, token, limit);
         return super.respond(results);
     }
@@ -291,12 +292,11 @@ public class BulkUploadResource extends RestResource {
             // converted to string because there is no messagebodywriter for json for long
             String importId = Long.toString(bulkUpload.process());
             return Response.status(Response.Status.OK).entity(importId).build();
-        } catch (Exception e) {
+        } catch (IOException e) {
             Logger.error(e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
-
 
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
