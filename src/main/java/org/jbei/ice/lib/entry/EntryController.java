@@ -18,8 +18,10 @@ import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
@@ -334,8 +336,21 @@ public class EntryController {
         comment.setAccount(account);
         comment.setEntry(entry);
         comment.setBody(newComment.getMessage());
-        comment.setCreationTime(new Date(System.currentTimeMillis()));
+        comment.setCreationTime(new Date());
         comment = commentDAO.create(comment);
+
+        if (newComment.getSamples() != null) {
+            SampleDAO sampleDAO = DAOFactory.getSampleDAO();
+            for (PartSample partSample : newComment.getSamples()) {
+                Sample sample = sampleDAO.get(partSample.getId());
+                if (sample == null)
+                    continue;
+                comment.getSamples().add(sample);
+                sample.getComments().add(comment);
+            }
+        }
+
+        comment = commentDAO.update(comment);
         return comment.toDataTransferObject();
     }
 
@@ -365,14 +380,13 @@ public class EntryController {
         if (entry == null)
             return false;
 
-        Account account = accountController.getByEmail(userId);
         TraceSequenceDAO traceSequenceDAO = DAOFactory.getTraceSequenceDAO();
         TraceSequence traceSequence = traceSequenceDAO.get(traceId);
-        if (traceSequence == null)
+        if (traceSequence == null || !canEdit(userId, traceSequence.getDepositor(), entry))
             return false;
 
         try {
-            new SequenceAnalysisController().removeTraceSequence(account, traceSequence);
+            new SequenceAnalysisController().removeTraceSequence(traceSequence);
         } catch (Exception e) {
             Logger.error(e);
             return false;
@@ -398,10 +412,15 @@ public class EntryController {
             TraceSequenceAnalysis analysis = traceSequence.toDataTransferObject();
             AccountTransfer accountTransfer = new AccountTransfer();
 
+            String depositor = traceSequence.getDepositor();
+            boolean canEdit = canEdit(userId, depositor, entry);
+            analysis.setCanEdit(canEdit);
+
             Account account = accountController.getByEmail(traceSequence.getDepositor());
             if (account != null) {
                 accountTransfer.setFirstName(account.getFirstName());
                 accountTransfer.setLastName(account.getLastName());
+                accountTransfer.setEmail(account.getEmail());
                 accountTransfer.setId(account.getId());
             }
 
@@ -410,6 +429,10 @@ public class EntryController {
         }
 
         return analysisArrayList;
+    }
+
+    protected boolean canEdit(String userId, String depositor, Entry entry) {
+        return userId.equalsIgnoreCase(depositor) || authorization.canWrite(userId, entry);
     }
 
     public ArrayList<History> getHistory(String userId, long entryId) {
@@ -465,6 +488,14 @@ public class EntryController {
         return statistics;
     }
 
+    /**
+     * Moves the specified list of entries to the deleted folder
+     *
+     * @param userId unique identifier for user making the request. Must have write access privileges on the
+     *               entries in the list
+     * @param list   unique identifiers for entries
+     * @return true or false if operation succeeds on all listed entries or not
+     */
     public boolean moveEntriesToTrash(String userId, ArrayList<PartData> list) {
         List<Entry> toTrash = new LinkedList<>();
         for (PartData data : list) {
@@ -661,7 +692,7 @@ public class EntryController {
         if (entry == null)
             return false;
 
-        authorization.expectWrite(userId, entry);
+        authorization.expectRead(userId, entry);
 
         FileInputStream inputStream;
         try {

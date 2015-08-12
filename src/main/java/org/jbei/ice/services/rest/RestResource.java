@@ -37,6 +37,7 @@ public class RestResource {
 
         // keys stored in /var/lib/tomcat6/data/rest-auth by default
         private final File directory;
+
         {
             // need to force-create a transaction to get the DATA_DIRECTORY config value
             HibernateUtil.beginTransaction();

@@ -2,6 +2,9 @@ package org.jbei.ice.lib.dto.comment;
 
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.lib.dto.sample.PartSample;
+
+import java.util.ArrayList;
 
 /**
  * DTO for {@link org.jbei.ice.lib.models.Comment}. Comments are tied to specific entries
@@ -17,12 +20,10 @@ public class UserComment implements IDataTransferModel {
     private long commentDate;
     private long modified;
     private long entryId;
+    private ArrayList<PartSample> samples;
 
     public UserComment() {
-    }
-
-    public UserComment(String message) {
-        this.message = message;
+        this.samples = new ArrayList<>();
     }
 
     public AccountTransfer getAccountTransfer() {
@@ -71,5 +72,13 @@ public class UserComment implements IDataTransferModel {
 
     public void setModified(long modified) {
         this.modified = modified;
+    }
+
+    public ArrayList<PartSample> getSamples() {
+        return samples;
+    }
+
+    public void setSamples(ArrayList<PartSample> samples) {
+        this.samples = samples;
     }
 }

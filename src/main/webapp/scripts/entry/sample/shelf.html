@@ -1,6 +1,8 @@
 <table class="entry_sample_panel">
     <tr>
-        <td colspan="4"><strong style="color: #a52a2a;">SHELF {{sample.location.display}}</strong></td>
+        <td colspan="4">
+            <strong style="color: #a52a2a;">SHELF {{sample.location.display}}</strong>
+        </td>
     </tr>
     <tr>
         <!--<td>&nbsp;</td>-->
@@ -17,7 +19,7 @@
             </h2>
         </td>
     </tr>
-    <tr>
+    <tr ng-if="sample.location.child.child.child.display">
         <td class="pad-8">
             <h2 class="text-center">Tube<br>
                 <small class="no_wrap">{{sample.location.child.child.child.display || "&nbsp;"}}</small>
@@ -27,8 +29,10 @@
     <tr>
         <td colspan="5" class="small">
             <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+            <i class="fa fa-warning dark-orange font-14em" ng-if="sample.comments.length"
+               tooltip="1 or more comments available"></i>
             <strong>{{sample.label}}</strong><br>
-            <span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a
+            &nbsp;<span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a
                 ng-href="profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}
             {{sample.depositor.lastName}}</a>
 

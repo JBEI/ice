@@ -42,6 +42,19 @@ import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.utils.Utils;
 
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 /**
  * Rest API for interacting with Bulk upload resources
  *
@@ -88,7 +101,8 @@ public class BulkUploadResource extends RestResource {
     public Response getPartNumbersForUpload(
             @QueryParam("type") EntryType uploadType,
             @QueryParam("token") String token,
-            @DefaultValue("8") @QueryParam("limit") int limit) {
+            @DefaultValue("8") @QueryParam("limit") int limit,
+            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         String userId = getUserId();
         ArrayList<String> results = controller.getMatchingPartNumbersForLinks(uploadType, token, limit);
         return super.respond(results);
@@ -363,13 +377,12 @@ public class BulkUploadResource extends RestResource {
             // converted to string because there is no messagebodywriter for json for long
             final String importId = Long.toString(bulkUpload.process());
             return Response.status(Response.Status.OK).entity(importId).build();
-        } catch (final Exception e) {
+        } catch (IOException e) {
             Logger.error(e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
                     .build();
         }
     }
-
 
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)

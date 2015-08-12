@@ -330,7 +330,8 @@ public class EntryUtil {
                 break;
 
             case GENERATION:
-                seedData.setGeneration(Generation.valueOf(value));
+                if (!StringUtils.isEmpty(value))
+                    seedData.setGeneration(Generation.fromString(value));
                 break;
 
             case SENT_TO_ABRC:
@@ -338,7 +339,8 @@ public class EntryUtil {
                 break;
 
             case PLANT_TYPE:
-                seedData.setPlantType(PlantType.valueOf(value));
+                if (!StringUtils.isEmpty(value))
+                    seedData.setPlantType(PlantType.fromString(value));
                 break;
 
             case PARENTS:

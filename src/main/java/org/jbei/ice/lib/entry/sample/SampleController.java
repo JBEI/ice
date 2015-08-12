@@ -8,12 +8,14 @@ import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.SampleDAO;
 import org.jbei.ice.lib.dao.hibernate.StorageDAO;
 import org.jbei.ice.lib.dto.StorageLocation;
+import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryEditor;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.model.Sample;
+import org.jbei.ice.lib.models.Comment;
 import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -282,6 +284,16 @@ public class SampleController {
             partSample.setLocation(storageLocation);
             partSample.setInCart(inCart);
             partSample = setAccountInfo(partSample, sample.getDepositor());
+
+            if (sample.getComments() != null) {
+                for (Comment comment : sample.getComments()) {
+                    UserComment userComment = new UserComment();
+                    userComment.setId(comment.getId());
+                    userComment.setMessage(comment.getBody());
+                    partSample.getComments().add(userComment);
+                }
+            }
+
             samples.add(partSample);
         }
 

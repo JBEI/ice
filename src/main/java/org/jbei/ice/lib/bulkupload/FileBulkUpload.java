@@ -1,11 +1,11 @@
 package org.jbei.ice.lib.bulkupload;
 
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryType;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-
-import org.jbei.ice.lib.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.dto.entry.EntryType;
 
 /**
  * Processes bulk uploads. Supported file formats are "csv", "zip" and "xml", with the latter being for SBOL
@@ -47,6 +47,16 @@ public class FileBulkUpload {
 
         throw new IOException("Unsupported file type " + fileName);
     }
+
+//    protected final BulkCSVUpload getUploadType(String userId, Path csvFilePath, EntryType addType) {
+//        switch (addType) {
+//            default:
+//                return new BulkCSVUpload(userId, csvFilePath, addType);
+//
+//            case ARABIDOPSIS:
+//                return new ArabidopsisSeedUpload(userId, csvFilePath);
+//        }
+//    }
 
     /**
      * Creates a CSV template for download based on the the type of entries

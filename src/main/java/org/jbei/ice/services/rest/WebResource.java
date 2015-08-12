@@ -1,6 +1,5 @@
 package org.jbei.ice.services.rest;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.DELETE;
@@ -18,8 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.hsqldb.lib.StringUtil;
-
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
@@ -223,7 +221,7 @@ public class WebResource extends RestResource {
     public Response getWebPartners(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
                                    @HeaderParam(WOR_PARTNER_TOKEN) String worToken,
                                    @QueryParam("url") String url) {
-        if (!StringUtil.isEmpty(worToken))
+        if (StringUtils.isEmpty(sessionId))
             return super.respond(controller.getWebPartners(worToken, url));
         final String userId = getUserId();
         return super.respond(controller.getWebPartners(userId));

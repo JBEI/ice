@@ -8,7 +8,8 @@
         <span ng-if="samples && samples.length">
             &nbsp;
             <span ng-if="!isAddGene(samples)">
-            <button ng-if="!samples[0].inCart" ng-click="openAddToCart(entry.id)" type="button" class="ice-button">
+            <button ng-if="!samples[0].inCart" ng-click="openAddToCart(entry.id, samples)" type="button"
+                    class="ice-button">
                 <i style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Add to Cart
             </button>
             <button ng-if="samples[0].inCart" ng-click="removeFromCart(null, entry);samples[0].inCart=false"
@@ -83,7 +84,6 @@
                        'alert_color':hasWell(row, col)&&!hasTube(row,col), 'fa-circle-thin':!hasContent(row, col),
                        'fa-circle':hasContent(row, col)}"
                            style="font-size: 30px"
-                           popover-trigger="manual" popover-enable="newSample.open.cell === row + (10+col+'').slice(-2)"
                            ng-click="cellBarcodeClick(row, col)"
                            popover-placement="bottom" popover-title="Well {{row + (10+col+'').slice(-2)}}"
                            popover-template="newSampleTemplate"></i>

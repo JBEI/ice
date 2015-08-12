@@ -85,12 +85,13 @@ public class BulkZipUpload {
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(csvFile.getBytes())) {
 
             // retrieve the partData and validates
-            List<PartData> updates = csvUpload.getBulkUploadDataFromFile(inputStream);
+            List<PartWithSample> updates = csvUpload.getBulkUploadDataFromFile(inputStream);
 
             // validate files to ensure that for each partData with a file, that the file is available
-            for (PartData data : updates) {
+            for (PartWithSample partWithSample : updates) {
 
                 // check sequences
+                PartData data = partWithSample.getPartData();
                 String sequenceFile = data.getSequenceFileName();
                 if (StringUtils.isNotBlank(sequenceFile) && files.get(sequenceFile) == null)
                     throw new Exception("Sequence file \"" + sequenceFile + "\" not found in the zip archive");
