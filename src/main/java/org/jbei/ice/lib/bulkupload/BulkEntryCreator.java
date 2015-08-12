@@ -16,6 +16,7 @@ import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryEditor;
@@ -23,6 +24,7 @@ import org.jbei.ice.lib.entry.EntryFactory;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.lib.entry.sample.SampleController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.Utils;
@@ -409,19 +411,24 @@ public class BulkEntryCreator {
         DAOFactory.getPermissionDAO().create(permission);
     }
 
-    public boolean createEntries(String userId, long draftId, List<PartData> data, HashMap<String, InputStream> files) {
+    public boolean createEntries(String userId, long draftId, List<PartWithSample> data, HashMap<String, InputStream> files) {
         BulkUpload draft = dao.get(draftId);
         if (draft == null)
             return false;
 
         // check permissions
         authorization.expectWrite(userId, draft);
+        SampleController sampleController = new SampleController();
 
-        for (PartData datum : data) {
-            if (datum == null)
+        for (PartWithSample partWithSample : data) {
+            if (partWithSample == null)
                 continue;
 
-            Entry entry = InfoToModelFactory.infoToEntry(datum);
+            PartData partData = partWithSample.getPartData();
+            if (partData == null)
+                continue;
+
+            Entry entry = InfoToModelFactory.infoToEntry(partData);
             if (entry == null)
                 continue;
 
@@ -431,9 +438,9 @@ public class BulkEntryCreator {
             entry.setOwnerEmail(account.getEmail());
 
             // check if there is any linked parts. create if so (expect a max of 1)
-            if (datum.getLinkedParts() != null && datum.getLinkedParts().size() > 0) {
+            if (partData.getLinkedParts() != null && partData.getLinkedParts().size() > 0) {
                 // create linked
-                PartData linked = datum.getLinkedParts().get(0);
+                PartData linked = partData.getLinkedParts().get(0);
                 Entry linkedEntry = InfoToModelFactory.infoToEntry(linked);
                 if (linkedEntry != null) {
                     linkedEntry.setVisibility(Visibility.DRAFT.getValue());
@@ -473,7 +480,14 @@ public class BulkEntryCreator {
             dao.update(draft);
 
             // save files
-            saveFiles(datum, entry, files);
+            saveFiles(partData, entry, files);
+
+            // save sample, if available
+            PartSample partSample = partWithSample.getPartSample();
+            if (partSample == null)
+                continue;
+
+            sampleController.createSample(userId, entry.getId(), partSample, null);
         }
 
         return true;

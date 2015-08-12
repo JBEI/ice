@@ -2,15 +2,11 @@ package org.jbei.ice.lib.bulkupload;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 /**
  * @author Hector Plahar
@@ -28,6 +24,30 @@ public class BulkEntryCreatorTest {
     public void setUp() throws Exception {
         HibernateUtil.beginTransaction();
         creator = new BulkEntryCreator();
+    }
+
+    @Test
+    public void testCreateBulkUpload() throws Exception {
+        Account account = AccountCreator.createTestAccount("testCreateBulkUpload", false);
+        long id = creator.createBulkUpload(account.getEmail(), EntryType.PLASMID);
+        Assert.assertTrue(id > 0);
+        BulkUpload bulkUpload = DAOFactory.getBulkUploadDAO().get(id);
+        Assert.assertNotNull(bulkUpload);
+        Assert.assertEquals(BulkUploadStatus.IN_PROGRESS, bulkUpload.getStatus());
+        Assert.assertEquals(account.getEmail(), bulkUpload.getAccount().getEmail());
+    }
+
+    @Test
+    public void testCreateEntry() throws Exception {
+        Account account = AccountCreator.createTestAccount("testCreateEntry", false);
+        long uploadId = creator.createBulkUpload(account.getEmail(), EntryType.PLASMID);
+        PartData partData = new PartData(EntryType.PLASMID);
+        partData.setShortDescription("test summary");
+        partData.setName("plasmid");
+        partData.setBioSafetyLevel(1);
+
+        partData = creator.createEntry(account.getEmail(), uploadId, partData);
+        Assert.assertNotNull(partData);
     }
 
     @Test

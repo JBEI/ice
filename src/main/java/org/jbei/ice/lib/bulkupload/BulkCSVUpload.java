@@ -1,21 +1,28 @@
 package org.jbei.ice.lib.bulkupload;
 
-import au.com.bytecode.opencsv.CSVParser;
+import com.opencsv.CSVParser;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.bulkupload.SampleField;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.sample.PartSample;
+import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.lib.entry.EntryUtil;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Helper class for dealing with bulk CSV uploads
@@ -49,7 +56,7 @@ public class BulkCSVUpload {
      */
     public final long processUpload() throws IOException {
         try (FileInputStream inputStream = new FileInputStream(csvFilePath.toFile())) {
-            List<PartData> updates = getBulkUploadDataFromFile(inputStream);
+            List<PartWithSample> updates = getBulkUploadDataFromFile(inputStream);
 
             // create actual entries
             BulkEntryCreator creator = new BulkEntryCreator();
@@ -68,41 +75,6 @@ public class BulkCSVUpload {
         }
     }
 
-    protected String validate(List<BulkUploadAutoUpdate> updates) {
-        for (BulkUploadAutoUpdate update : updates) {
-            ArrayList<EntryField> toValidate = new ArrayList<>(requiredFields);
-
-            for (Map.Entry<EntryField, String> entry : update.getKeyValue().entrySet()) {
-                EntryField entryField = entry.getKey();
-                String value = entry.getValue();
-
-                if (!requiredFields.contains(entryField))
-                    continue;
-
-                toValidate.remove(entryField);
-
-                if (StringUtils.isBlank(value)) {
-                    return "Error: \"" + entryField.toString() + "\" is a required field.";
-                }
-            }
-
-            if (!toValidate.isEmpty()) {
-                StringBuilder builder = new StringBuilder();
-                builder.append("Error: File is missing the following required fields [");
-                int i = 0;
-                for (EntryField field : toValidate) {
-                    if (i > 0)
-                        builder.append(",");
-                    builder.append(field.toString());
-                    i += 1;
-                }
-                builder.append("]");
-                return builder.toString();
-            }
-        }
-        return null;
-    }
-
     EntryType detectSubType(String field) {
         String[] fieldNames = field.split("\\s+");
         return EntryType.nameToType(fieldNames[0]);
@@ -117,7 +89,7 @@ public class BulkCSVUpload {
             throw new IOException("Unknown field [" + fieldStr + "] for upload [" + addType.getDisplay() + "]");
         }
 
-        return new HeaderValue(true, field);
+        return new EntryHeaderValue(true, field);
     }
 
     /**
@@ -138,7 +110,15 @@ public class BulkCSVUpload {
             EntryField field = EntryField.fromString(fieldStr);
             if (field != null) {
                 // field header maps as is to EntryField which indicates it is not a sub Type
-                HeaderValue headerValue = new HeaderValue(false, field);
+                HeaderValue headerValue = new EntryHeaderValue(false, field);
+                headers.put(i, headerValue);
+                continue;
+            }
+
+            // check if sample field
+            SampleField sampleField = SampleField.fromString(fieldStr);
+            if (sampleField != null) {
+                HeaderValue headerValue = new SampleHeaderValue(sampleField);
                 headers.put(i, headerValue);
                 continue;
             }
@@ -160,12 +140,15 @@ public class BulkCSVUpload {
             headers.put(i, headerValue);
         }
 
+        if (headers.size() != headerArray.length) {
+            throw new IOException("Header size and input header array length differ");
+        }
         return headers;
     }
 
     // NOTE: this also validates the part data (with the exception of the actual files)
-    List<PartData> getBulkUploadDataFromFile(InputStream inputStream) throws IOException {
-        List<PartData> partDataList = new LinkedList<>();
+    List<PartWithSample> getBulkUploadDataFromFile(InputStream inputStream) throws IOException {
+        List<PartWithSample> partDataList = new LinkedList<>();
 
         // initialize parser to null; when not-null in the loop below, then the header has been parsed
         CSVParser parser = null;
@@ -198,54 +181,69 @@ public class BulkCSVUpload {
                 if (StringUtils.isBlank(line) || line.replaceAll(",", "").trim().isEmpty())
                     continue;
 
+                // at this point we must have headers since that should be the first item in the file
                 if (headers == null)
                     throw new IOException("Could not parse file headers");
 
                 // parser != null; process line contents with available headers
                 String[] valuesArray = parser.parseLine(line);
                 PartData partData = new PartData(addType);
+                PartSample partSample = null;
 
                 if (subType != null) {
                     partData.getLinkedParts().add(new PartData(subType));
                 }
 
+                // for each column
                 for (int i = 0; i < valuesArray.length; i += 1) {
                     HeaderValue headerForColumn = headers.get(i);
-                    EntryField field = headerForColumn.getEntryField();
-                    PartData data;
-                    String value = valuesArray[i];
-                    boolean isSubType = headerForColumn.isSubType();
 
-                    if (isSubType)
-                        data = partData.getLinkedParts().get(0);
-                    else
-                        data = partData;
+                    if (headerForColumn.isSampleField()) {
+                        // todo : move to another method
+                        if (partSample == null)
+                            partSample = new PartSample();
+                        setPartSampleData(((SampleHeaderValue) headerForColumn).getSampleField(),
+                                partSample, valuesArray[i]);
 
-                    switch (field) {
-                        case ATT_FILENAME:
-                            ArrayList<AttachmentInfo> attachments = data.getAttachments();
-                            if (attachments == null) {
-                                attachments = new ArrayList<>();
-                            }
-                            attachments.clear();
-                            attachments.add(new AttachmentInfo(value));
-                            break;
+                    } else {
+                        EntryHeaderValue entryHeaderValue = (EntryHeaderValue) headerForColumn;
+                        EntryField field = entryHeaderValue.getEntryField();
+                        PartData data;
+                        String value = valuesArray[i];
+                        boolean isSubType = entryHeaderValue.isSubType();
 
-                        case SEQ_FILENAME:
-                            data.setSequenceFileName(value);
-                            break;
+                        if (isSubType)
+                            data = partData.getLinkedParts().get(0);
+                        else
+                            data = partData;
 
-                        case SEQ_TRACE_FILES:
-                            // todo
-                            break;
+                        // get the data for the field
+                        switch (field) {
+                            case ATT_FILENAME:
+                                ArrayList<AttachmentInfo> attachments = data.getAttachments();
+                                if (attachments == null) {
+                                    attachments = new ArrayList<>();
+                                }
+                                attachments.clear();
+                                attachments.add(new AttachmentInfo(value));
+                                break;
 
-                        default:
-                            partData = EntryUtil.setPartDataFromField(partData, value, field, isSubType);
+                            case SEQ_FILENAME:
+                                data.setSequenceFileName(value);
+                                break;
+
+                            case SEQ_TRACE_FILES:
+                                // todo
+                                break;
+
+                            default:
+                                partData = EntryUtil.setPartDataFromField(partData, value, field, isSubType);
+                        }
                     }
                 }
 
                 // validate
-                List<EntryField> fields = EntryUtil.validates(partData);
+                List<EntryField> fields = validate(partData);
                 if (!fields.isEmpty()) {
                     StringBuilder fieldsString = new StringBuilder();
                     for (EntryField field : fields) {
@@ -255,7 +253,8 @@ public class BulkCSVUpload {
                 }
 
                 partData.setIndex(index);
-                partDataList.add(partData);
+                PartWithSample partWithSample = new PartWithSample(partSample, partData);
+                partDataList.add(partWithSample);
                 index += 1;
             }
         } finally {
@@ -263,5 +262,38 @@ public class BulkCSVUpload {
         }
 
         return partDataList;
+    }
+
+    protected List<EntryField> validate(PartData partData) {
+        return EntryUtil.validates(partData);
+    }
+
+    protected void setPartSampleData(SampleField sampleField, PartSample partSample, String data) {
+        switch (sampleField) {
+            case LABEL:
+                partSample.setLabel(data);
+                break;
+
+            case SHELF:
+                StorageLocation storageLocation = new StorageLocation();
+                storageLocation.setType(SampleType.SHELF);
+                storageLocation.setDisplay(data);
+                partSample.setLocation(storageLocation);
+                break;
+
+            case BOX:
+                StorageLocation childLocation = new StorageLocation();
+                childLocation.setDisplay(data);
+                childLocation.setType(SampleType.BOX_INDEXED);
+                partSample.getLocation().setChild(childLocation);
+                break;
+
+            case WELL:
+                StorageLocation grandChildLocation = new StorageLocation();
+                grandChildLocation.setType(SampleType.WELL);
+                grandChildLocation.setDisplay(data);
+                partSample.getLocation().getChild().setChild(grandChildLocation);
+                break;
+        }
     }
 }

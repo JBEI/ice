@@ -125,7 +125,7 @@ angular.module('ice.entry.controller', [])
                 $scope.newComment.samples.splice(idx, 1);
         }
     })
-    .controller('EntrySampleController', function ($location, $rootScope, $scope, $modal, $cookieStore, $stateParams, Entry) {
+    .controller('EntrySampleController', function ($location, $rootScope, $scope, $modal, $cookieStore, $stateParams, Entry, Samples) {
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
         var partId = $stateParams.id;
@@ -208,7 +208,7 @@ angular.module('ice.entry.controller', [])
                         };
 
                         // add selection to shopping cart
-                        samples.addRequestToCart({}, sampleSelection, function (result) {
+                        Samples(sessionId).addRequestToCart({}, sampleSelection, function (result) {
                             $rootScope.$emit("SamplesInCart", result);
                             setInCart(result);
                             modalInstance.close('');
