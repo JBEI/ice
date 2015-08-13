@@ -286,6 +286,7 @@ public class SampleService {
             partSample.setLocation(storageLocation);
             partSample.setInCart(inCart);
             partSample = setAccountInfo(partSample, sample.getDepositor());
+            partSample.setCanEdit(sampleAuthorization.canWrite(userId, sample));
 
             if (sample.getComments() != null) {
                 for (Comment comment : sample.getComments()) {
