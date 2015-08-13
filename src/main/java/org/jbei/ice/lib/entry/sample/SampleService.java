@@ -23,20 +23,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ABI to manipulate {@link Sample}s.
+ * Service for dealing with {@link Sample}s
  *
- * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
+ * @author Hector Plahar
  */
-public class SampleController {
+public class SampleService {
 
     private final SampleDAO dao;
     private final StorageDAO storageDAO;
     private final EntryAuthorization entryAuthorization;
+    private final SampleAuthorization sampleAuthorization;
 
-    public SampleController() {
+    public SampleService() {
         dao = DAOFactory.getSampleDAO();
         storageDAO = DAOFactory.getStorageDAO();
         entryAuthorization = new EntryAuthorization();
+        sampleAuthorization = new SampleAuthorization();
     }
 
     protected Storage createStorage(String userId, String name, SampleType sampleType) {
@@ -312,6 +314,14 @@ public class SampleController {
         return partSample;
     }
 
+    /**
+     * Deletes specified sample for entry and all associated storage locations
+     *
+     * @param userId   unique identifier for user performing action
+     * @param partId   unique identifier for part that is associated with this sample
+     * @param sampleId unique identifier for sample being deleted
+     * @return true is deletion successful, false otherwise
+     */
     public boolean delete(String userId, long partId, long sampleId) {
         Sample sample = dao.get(sampleId);
         if (sample == null)
@@ -321,9 +331,16 @@ public class SampleController {
         if (entry == null || partId != entry.getId())
             return false;
 
-        entryAuthorization.expectWrite(userId, entry);
+        sampleAuthorization.expectWrite(userId, sample);
 
         try {
+            Storage storage = sample.getStorage();
+            while (storage != null) {
+                DAOFactory.getStorageDAO().delete(storage);
+                storage = storage.getParent();
+            }
+
+            sample.setStorage(null);
             dao.delete(sample);
             return true;
         } catch (DAOException de) {
@@ -349,6 +366,13 @@ public class SampleController {
         List<Sample> samples = dao.getSamplesByStorage(storage);
         ArrayList<PartSample> partSamples = new ArrayList<>();
         for (Sample sample : samples) {
+            Entry entry = sample.getEntry();
+            if (entry == null)
+                continue;
+
+            if (!entryAuthorization.canRead(userId, entry))
+                continue;
+
             partSamples.add(sample.toDataTransferObject());
         }
         return partSamples;

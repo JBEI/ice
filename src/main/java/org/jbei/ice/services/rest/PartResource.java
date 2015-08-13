@@ -22,7 +22,7 @@ import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.experiment.ExperimentController;
 import org.jbei.ice.lib.experiment.Study;
@@ -56,7 +56,7 @@ public class PartResource extends RestResource {
     private AttachmentController attachmentController = new AttachmentController();
     private SequenceController sequenceController = new SequenceController();
     private ExperimentController experimentController = new ExperimentController();
-    private SampleController sampleController = new SampleController();
+    private SampleService sampleService = new SampleService();
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -354,7 +354,7 @@ public class PartResource extends RestResource {
     public ArrayList<PartSample> getSamples(@Context UriInfo info, @PathParam("id") long partId,
                                             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         String userId = SessionHandler.getUserIdBySession(userAgentHeader);
-        return sampleController.retrieveEntrySamples(userId, partId);
+        return sampleService.retrieveEntrySamples(userId, partId);
     }
 
     @POST
@@ -366,8 +366,8 @@ public class PartResource extends RestResource {
                                            PartSample partSample) {
         String userId = SessionHandler.getUserIdBySession(userAgentHeader);
         log(userId, "creating sample for part " + partId);
-        sampleController.createSample(userId, partId, partSample, strainNamePrefix);
-        return sampleController.retrieveEntrySamples(userId, partId);
+        sampleService.createSample(userId, partId, partSample, strainNamePrefix);
+        return sampleService.retrieveEntrySamples(userId, partId);
     }
 
     @DELETE
@@ -377,7 +377,7 @@ public class PartResource extends RestResource {
                                  @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
                                  @PathParam("sampleId") long sampleId) {
         String userId = SessionHandler.getUserIdBySession(userAgentHeader);
-        boolean success = sampleController.delete(userId, partId, sampleId);
+        boolean success = sampleService.delete(userId, partId, sampleId);
         return super.respond(success);
     }
 

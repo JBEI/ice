@@ -109,11 +109,11 @@ public class RequestRetriever {
         samples.setCount(count);
 
         List<Request> results = dao.get(start, limit, sort, asc, status, filter);
-        SampleController sampleController = new SampleController();
+        SampleService sampleService = new SampleService();
 
         for (Request request : results) {
             SampleRequest sampleRequest = request.toDataTransferObject();
-            ArrayList<PartSample> location = sampleController.retrieveEntrySamples(userId, request.getEntry().getId());
+            ArrayList<PartSample> location = sampleService.retrieveEntrySamples(userId, request.getEntry().getId());
             sampleRequest.setLocation(location);
             samples.getRequests().add(sampleRequest);
         }
