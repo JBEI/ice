@@ -7,6 +7,7 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.entry.model.Entry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -112,11 +113,34 @@ public class EntryLinks {
         }
     }
 
+    /**
+     * Retrieves the list of children this entry, that the user has read permissions
+     *
+     * @return list of retrieved entries
+     */
     public List<PartData> getChildren() {
-        return null;
+        List<PartData> children = new ArrayList<>(this.entry.getLinkedEntries().size());
+        for (Entry childEntry : this.entry.getLinkedEntries()) {
+            if (!entryAuthorization.canRead(this.userId, childEntry))
+                continue;
+            children.add(childEntry.toDataTransferObject());
+        }
+        return children;
     }
 
+    /**
+     * Retrieves list of this entry's parents that user has read access to
+     *
+     * @return list of parents of entry
+     */
     public List<PartData> getParents() {
-        return null;
+        List<Entry> parents = this.entryDAO.getParents(this.entry.getId());
+        List<PartData> parentData = new ArrayList<>(parents.size());
+        for (Entry parent : parents) {
+            if (!entryAuthorization.canRead(this.userId, parent))
+                continue;
+            parentData.add(parent.toDataTransferObject());
+        }
+        return parentData;
     }
 }
