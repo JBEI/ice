@@ -17,10 +17,7 @@ import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
-import org.jbei.ice.lib.entry.Entries;
-import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.EntryCreator;
-import org.jbei.ice.lib.entry.EntryRetriever;
+import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
@@ -503,6 +500,28 @@ public class PartResource extends RestResource {
         log(userId, "removing link " + linkedPart + " from " + partId);
         boolean success = controller.removeLink(userId, partId, linkedPart);
         return respond(success);
+    }
+
+    /**
+     * Creates a new link between the referenced part id and the part in the parameter
+     *
+     * @param partId    part to be linked
+     * @param partData  should essentially just contain the part Id or details for a new entry that should be created
+     * @param sessionId unique session identifier for user performing action
+     * @return todo
+     */
+    @POST
+    @Path("/{id}/links")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createLink(@PathParam("id") long partId,
+                               @QueryParam("type") @DefaultValue("CHILD") LinkType type,
+                               @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+                               PartData partData) {
+        String userId = getUserIdFromSessionHeader(sessionId);
+        log(userId, "adding entry link " + partData.getId() + " to " + partId);
+        EntryLinks entryLinks = new EntryLinks(userId, partId);
+        return super.respond(entryLinks.addLink(partData, type));
     }
 
     @PUT

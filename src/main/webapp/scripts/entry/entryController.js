@@ -1003,7 +1003,6 @@ angular.module('ice.entry.controller', [])
                 controller: function ($scope, $http, $modalInstance, $cookieStore) {
                     $scope.mainEntry = part;
                     var sessionId = $cookieStore.get("sessionId");
-                    var originalLinks = angular.copy($scope.mainEntry.linkedParts);
                     $scope.getEntriesByPartNumber = function (val) {
                         return $http.get('rest/parts/autocomplete/partid', {
                             headers: {'X-ICE-Authentication-SessionId': sessionId},
@@ -1016,6 +1015,7 @@ angular.module('ice.entry.controller', [])
                     };
 
                     $scope.addExistingPartLink = function ($item, $model, $label) {
+                        $scope.errorMessage = undefined;
                         if ($item.id == $scope.mainEntry.id)
                             return;
 
@@ -1028,8 +1028,14 @@ angular.module('ice.entry.controller', [])
 
                         if (found)
                             return;
-                        $scope.mainEntry.linkedParts.push($item);
-                        $scope.addExistingPartNumber = undefined;
+
+                        entry.addLink({partId: $scope.mainEntry.id}, $item, function (result) {
+                            $scope.mainEntry.linkedParts.push($item);
+                            $scope.addExistingPartNumber = undefined;
+                        }, function (error) {
+                            console.error(error);
+                            $scope.errorMessage = "Error linking this entry to " + $item.partId;
+                        });
                     };
 
                     $scope.removeExistingPartLink = function (link) {
@@ -1037,24 +1043,14 @@ angular.module('ice.entry.controller', [])
                         if (i < 0)
                             return;
 
-                        $scope.mainEntry.linkedParts.splice(i, 1);
-                    };
-
-                    $scope.processLinkAdd = function () {
-                        entry.update($scope.mainEntry, function (result) {
-                            entry.query({partId: result.id}, function (result) {
-                                $scope.mainEntry.linkedParts = result.linkedParts;
-                                $modalInstance.close(result);
-                            }, function (error) {
-                                console.error(error);
-                            })
+                        entry.removeLink({partId: $scope.mainEntry.id, linkId: link.id}, function (result) {
+                            $scope.mainEntry.linkedParts.splice(i, 1);
                         }, function (error) {
-                            console.error(error);
-                        })
+
+                        });
                     };
 
-                    $scope.cancelAddLink = function () {
-                        $scope.mainEntry.linkedParts = originalLinks;
+                    $scope.close = function () {
                         $modalInstance.close();
                     }
                 },
