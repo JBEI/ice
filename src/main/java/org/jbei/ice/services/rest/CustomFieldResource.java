@@ -38,7 +38,7 @@ public class CustomFieldResource extends RestResource {
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sid,
             @QueryParam(value = "partId") long partId,
             CustomField customField) {
-        String userId = getUserIdFromSessionHeader(sid);
+        String userId = getUserId(sid);
         if (partId > 0 && customField.getPartId() > 0 && partId != customField.getPartId()) {
             throw new WebApplicationException("Inconsistent part Ids", Response.Status.BAD_REQUEST);
         }
@@ -57,7 +57,7 @@ public class CustomFieldResource extends RestResource {
     public Response get(
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sid,
             @PathParam(value = "id") long id) {
-        String userId = getUserIdFromSessionHeader(sid);
+        String userId = getUserId(sid);
         return super.respond(fields.getField(userId, id));
     }
 
@@ -67,7 +67,7 @@ public class CustomFieldResource extends RestResource {
     public Response list(
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sid,
             @QueryParam(value = "partId") long partId) {
-        String userId = getUserIdFromSessionHeader(sid);
+        String userId = getUserId(sid);
         List<CustomField> result = fields.getFieldsForPart(userId, partId);
         return super.respond(result);
     }
@@ -79,7 +79,7 @@ public class CustomFieldResource extends RestResource {
     public Response update(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sid,
                            @PathParam(value = "id") long id,
                            CustomField customField) {
-        String userId = getUserIdFromSessionHeader(sid);
+        String userId = getUserId(sid);
         return respond(fields.updateField(userId, id, customField));
     }
 
@@ -88,7 +88,7 @@ public class CustomFieldResource extends RestResource {
     public Response delete(
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String sid,
             @PathParam(value = "id") long id) {
-        String userId = getUserIdFromSessionHeader(sid);
+        String userId = getUserId(sid);
         boolean success = fields.deleteField(userId, id);
         return super.respond(success);
     }

@@ -1,8 +1,7 @@
 package org.jbei.ice.lib.bulkupload;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
-import org.jbei.ice.ControllerException;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
@@ -383,7 +382,7 @@ public class BulkUploadController {
         return null;
     }
 
-    public boolean revertSubmitted(Account account, long uploadId) throws ControllerException {
+    public boolean revertSubmitted(Account account, long uploadId) {
         boolean isAdmin = accountController.isAdministrator(account.getEmail());
         if (!isAdmin) {
             Logger.warn(account.getEmail() + " attempting to revert submitted bulk upload "

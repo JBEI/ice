@@ -1,10 +1,10 @@
 package org.jbei.ice.lib.parsers;
 
+import org.jbei.ice.lib.vo.DNASequence;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
-import org.jbei.ice.lib.vo.DNASequence;
 
 /**
  * An object that parser sequences and generates an annotated {@link DNASequence} object.
@@ -18,13 +18,6 @@ public interface IDNAParser {
      * @return Name of parser.
      */
     String getName();
-
-    /**
-     * Return true if parsing was completed, but there maybe errors in the parsing.
-     *
-     * @return True if parsing has errors.
-     */
-    Boolean hasErrors();
 
     /**
      * Parse the given bytes to {@link DNASequence} annotated sequence.
@@ -44,7 +37,7 @@ public interface IDNAParser {
      * @throws IOException
      * @throws InvalidFormatParserException
      */
-    DNASequence parse(File file) throws FileNotFoundException, IOException, InvalidFormatParserException;
+    DNASequence parse(File file) throws IOException, InvalidFormatParserException;
 
     /**
      * Parse the given string to {@link DNASequence} annotated sequence.

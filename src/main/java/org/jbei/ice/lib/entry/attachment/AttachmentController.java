@@ -1,10 +1,8 @@
 package org.jbei.ice.lib.entry.attachment;
 
-import org.apache.commons.lang.StringUtils;
-import org.jbei.ice.ControllerException;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.AttachmentDAO;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
@@ -45,7 +43,7 @@ public class AttachmentController {
      * This file identifier is assigned on upload
      *
      * @return Attachment file if one is found with the identifier, null otherwise (including if the user making
-     *         the request does not have read permissions on the entry that this attachment is associated with)
+     * the request does not have read permissions on the entry that this attachment is associated with)
      */
     public File getAttachmentByFileId(String userId, String fileId) {
         Attachment attachment = dao.getByFileId(fileId);
@@ -76,13 +74,10 @@ public class AttachmentController {
      * @param attachment  attachment
      * @param inputStream The data stream of the file.
      * @return Saved attachment.
-     * @throws ControllerException
      */
-    public Attachment save(Account account, Attachment attachment, InputStream inputStream) throws ControllerException {
-        if (attachment.getEntry().getVisibility() != Visibility.TRANSFERRED.getValue() &&
-                !entryAuthorization.canWrite(account.getEmail(), attachment.getEntry())) {
-            throw new ControllerException("No permissions to save attachment!");
-        }
+    public Attachment save(Account account, Attachment attachment, InputStream inputStream) {
+        if (attachment.getEntry().getVisibility() != Visibility.TRANSFERRED.getValue())
+            entryAuthorization.expectWrite(account.getEmail(), attachment.getEntry());
 
         if (attachment.getFileId() == null || attachment.getFileId().isEmpty()) {
             String fileId = Utils.generateUUID();
@@ -94,12 +89,7 @@ public class AttachmentController {
 
         String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
         File attachmentDir = Paths.get(dataDir, attachmentDirName).toFile();
-
-        try {
-            return dao.save(attachmentDir, attachment, inputStream);
-        } catch (DAOException e) {
-            throw new ControllerException("Failed to save attachment!", e);
-        }
+        return dao.save(attachmentDir, attachment, inputStream);
     }
 
     /**

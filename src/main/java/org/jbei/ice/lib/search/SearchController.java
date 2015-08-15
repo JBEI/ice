@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.search;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.BooleanClause;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -59,7 +59,7 @@ public class SearchController {
                 continue;
 
             try {
-                SearchResults results = (SearchResults) client.post(partner.getUrl(), "/rest/search", query,
+                SearchResults results = client.post(partner.getUrl(), "/rest/search", query,
                         SearchResults.class);
                 if (results == null)
                     continue;
@@ -70,7 +70,8 @@ public class SearchController {
                     resultsList.add(result);
                 }
 
-                total += results.getResults().size();
+                // up to 50 returned from each partner, but total size may be greater
+                total += results.getResultCount();
             } catch (Exception e) {
                 Logger.warn("Exception contacting partner " + partner.getUrl() + " : " + e.getMessage());
             }

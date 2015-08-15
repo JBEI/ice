@@ -59,7 +59,6 @@ iceServices.factory('User', function ($resource) {
                 responseType:"json",
                 url:"rest/users/:userId",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
-
             },
 
             list: {
@@ -580,7 +579,7 @@ iceServices.factory('Settings', function ($resource) {
 
             version: {
                 method: 'GET',
-                url: '/rest/config/version'
+                url: 'rest/config/version'
             }
         });
     }
