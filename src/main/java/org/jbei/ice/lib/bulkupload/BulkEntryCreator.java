@@ -24,7 +24,7 @@ import org.jbei.ice.lib.entry.EntryFactory;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Strain;
-import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.Utils;
@@ -418,7 +418,7 @@ public class BulkEntryCreator {
 
         // check permissions
         authorization.expectWrite(userId, draft);
-        SampleController sampleController = new SampleController();
+        SampleService sampleService = new SampleService();
 
         for (PartWithSample partWithSample : data) {
             if (partWithSample == null)
@@ -487,7 +487,7 @@ public class BulkEntryCreator {
             if (partSample == null)
                 continue;
 
-            sampleController.createSample(userId, entry.getId(), partSample, null);
+            sampleService.createSample(userId, entry.getId(), partSample, null);
         }
 
         return true;

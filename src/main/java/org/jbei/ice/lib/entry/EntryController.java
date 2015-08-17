@@ -677,10 +677,14 @@ public class EntryController {
             if (!authorization.canRead(userId, parent))
                 continue;
 
+            if (parent.getVisibility() != Visibility.OK.getValue() && !authorization.canWrite(userId, entry))
+                continue;
+
             EntryType type = EntryType.nameToType(parent.getRecordType());
             PartData parentData = new PartData(type);
             parentData.setId(parent.getId());
             parentData.setName(parent.getName());
+            parentData.setVisibility(Visibility.valueToEnum(parent.getVisibility()));
             partData.getParents().add(parentData);
         }
 

@@ -16,7 +16,17 @@
                 <div class="col-md-3 entryLabel text-right">
                     <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">{{setting.key}}</span>
                 </div>
-                <div class="col-md-9" ng-mouseover="partIdEdit=true" ng-mouseout="partIdEdit=false">
+
+                <!--for boolean fields only-->
+                <div class="col-md-9" ng-if="setting.isBoolean">
+                    <i class="cursor_pointer fa" ng-click="submitBooleanSetting(setting)"
+                       ng-class="{'fa-toggle-on green font-14em':setting.value != undefined && setting.value.toLowerCase() === 'yes',
+                       'fa-toggle-off font-14em opacity_hover':setting.value == undefined || setting.value.toLowerCase() !== 'yes'}"></i>
+                </div>
+
+                <!--for non boolean fields-->
+                <div class="col-md-9" ng-if="!setting.isBoolean" ng-mouseover="partIdEdit=true"
+                     ng-mouseout="partIdEdit=false">
                     <div data-ng-if="!setting.editMode">
                         <span ng-if="setting.value.trim() !==''">{{setting.value.trim()}}</span>
                         <i class='opacity_4' ng-if="!setting.value">No value entered</i>
@@ -34,6 +44,8 @@
          #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
                     </div>
                 </div>
+
+
             </div>
         </tab>
 
@@ -43,7 +55,17 @@
                 <div class="col-md-3 entryLabel text-right">
                     <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">{{setting.key}}</span>
                 </div>
-                <div class="col-md-9" ng-mouseover="partIdEdit=true" ng-mouseout="partIdEdit=false">
+
+                <!--for boolean fields only-->
+                <div class="col-md-9" ng-if="setting.isBoolean">
+                    <i class="cursor_pointer fa" ng-click="submitBooleanSetting(setting)"
+                       ng-class="{'fa-toggle-on green font-14em':setting.value != undefined && setting.value.toLowerCase() === 'yes',
+                       'fa-toggle-off font-14em opacity_hover':setting.value == undefined || setting.value.toLowerCase() !== 'yes'}"></i>
+                </div>
+
+                <!--for non boolean fields-->
+                <div class="col-md-9" ng-if="!setting.isBoolean" ng-mouseover="partIdEdit=true"
+                     ng-mouseout="partIdEdit=false">
                     <div data-ng-if="!setting.editMode"><span ng-if="setting.value&&!setting.value.trim()==''">{{setting.value}}</span>
                         <i class='opacity_4' ng-if="!setting.value">No value entered</i><span
                                 ng-click="setting.editMode=true">
