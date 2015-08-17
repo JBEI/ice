@@ -59,16 +59,16 @@ public class HibernateSearch {
     }
 
     protected BooleanQuery generateQueriesForType(FullTextSession fullTextSession, HashSet<String> fields,
-                                                  BooleanQuery booleanQuery, String term, BooleanClause.Occur occur, BioSafetyOption option,
-                                                  HashMap<String, Float> userBoost) {
+                                                  BooleanQuery booleanQuery, String term, QueryType type,
+                                                  BioSafetyOption option, HashMap<String, Float> userBoost) {
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
         if (!StringUtils.isEmpty(term)) {
             // generate term queries for each search term
             for (String field : fields) {
                 Query query;
 
-                if (occur == BooleanClause.Occur.MUST)
-                    query = qb.phrase().withSlop(3).onField(field).sentence(term).createQuery();
+                if (type == QueryType.PHRASE)
+                    query = qb.phrase().onField(field).sentence(term).createQuery();
                 else if (term.contains("*")) {
                     if (!field.equals("name"))
                         continue;
@@ -278,7 +278,7 @@ public class HibernateSearch {
         return results;
     }
 
-    public SearchResults executeSearch(String userId, HashMap<String, BooleanClause.Occur> terms,
+    public SearchResults executeSearch(String userId, HashMap<String, QueryType> terms,
                                        SearchQuery searchQuery, HashMap<String, Float> userBoost,
                                        HashMap<String, SearchResult> blastResults) {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -292,7 +292,7 @@ public class HibernateSearch {
         Class<?>[] classes = SearchFieldFactory.classesForTypes(searchQuery.getEntryTypes());
 
         // generate queries for terms filtering stop words
-        for (Map.Entry<String, BooleanClause.Occur> entry : terms.entrySet()) {
+        for (Map.Entry<String, QueryType> entry : terms.entrySet()) {
             String term = cleanQuery(entry.getKey());
             if (term.trim().isEmpty() || StandardAnalyzer.STOP_WORDS_SET.contains(term))
                 continue;

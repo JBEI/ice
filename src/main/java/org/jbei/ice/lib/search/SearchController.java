@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.search;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.search.BooleanClause;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -143,7 +142,7 @@ public class SearchController {
 //        }
 
         if (!StringUtils.isEmpty(queryString)) {
-            HashMap<String, BooleanClause.Occur> terms = parseQueryString(queryString);
+            HashMap<String, QueryType> terms = parseQueryString(queryString);
             return hibernateSearch.executeSearch(userId, terms, query, mapping, blastResults);
         } else {
             return hibernateSearch.executeSearchNoTerms(userId, blastResults, query);
@@ -189,8 +188,8 @@ public class SearchController {
      * @return a mapping of the phrases and terms to clauses that indicate how the matches should appear
      * in the document. Phrases must appear in the result document
      */
-    HashMap<String, BooleanClause.Occur> parseQueryString(String queryString) {
-        HashMap<String, BooleanClause.Occur> terms = new HashMap<>();
+    HashMap<String, QueryType> parseQueryString(String queryString) {
+        HashMap<String, QueryType> terms = new HashMap<>();
 
         if (queryString == null || queryString.trim().length() == 0)
             return terms;
@@ -201,7 +200,7 @@ public class SearchController {
             char c = queryString.charAt(i);
             if (c == '\"' || c == '\'') {
                 if (startedPhrase) {
-                    terms.put(builder.toString(), BooleanClause.Occur.MUST);
+                    terms.put(builder.toString(), QueryType.PHRASE);
                     builder = new StringBuilder();
                     startedPhrase = false;
                 } else {
@@ -216,7 +215,7 @@ public class SearchController {
                     continue;
 
                 if (!startedPhrase) {
-                    terms.put(builder.toString(), BooleanClause.Occur.SHOULD);
+                    terms.put(builder.toString(), QueryType.TERM);
                     builder = new StringBuilder();
                     continue;
                 }
@@ -226,9 +225,9 @@ public class SearchController {
         }
         if (builder.length() > 0) {
             if (startedPhrase)
-                terms.put(builder.toString(), BooleanClause.Occur.MUST);
+                terms.put(builder.toString(), QueryType.PHRASE);
             else
-                terms.put(builder.toString(), BooleanClause.Occur.SHOULD);
+                terms.put(builder.toString(), QueryType.TERM);
         }
 
         return terms;
