@@ -9,16 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -47,12 +38,9 @@ import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
-import org.jbei.ice.lib.entry.Entries;
-import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.EntryCreator;
-import org.jbei.ice.lib.entry.EntryRetriever;
+import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.experiment.ExperimentController;
 import org.jbei.ice.lib.experiment.Study;
@@ -72,7 +60,7 @@ public class PartResource extends RestResource {
     private AttachmentController attachmentController = new AttachmentController();
     private SequenceController sequenceController = new SequenceController();
     private ExperimentController experimentController = new ExperimentController();
-    private SampleController sampleController = new SampleController();
+    private SampleService sampleService = new SampleService();
 
     /**
      * @param val
@@ -469,9 +457,10 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
-    public List<PartSample> getSamples(@PathParam("id") final long partId) {
-        final String userId = getUserId();
-        return sampleController.retrieveEntrySamples(userId, partId);
+    public ArrayList<PartSample> getSamples(@Context UriInfo info, @PathParam("id") long partId,
+                                            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
+        String userId = getUserId(userAgentHeader);
+        return sampleService.retrieveEntrySamples(userId, partId);
     }
 
     /**
@@ -488,8 +477,8 @@ public class PartResource extends RestResource {
             final PartSample partSample) {
         final String userId = getUserId();
         log(userId, "creating sample for part " + partId);
-        sampleController.createSample(userId, partId, partSample, strainNamePrefix);
-        return sampleController.retrieveEntrySamples(userId, partId);
+        sampleService.createSample(userId, partId, partSample, strainNamePrefix);
+        return sampleService.retrieveEntrySamples(userId, partId);
     }
 
     /**
@@ -500,10 +489,11 @@ public class PartResource extends RestResource {
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples/{sampleId}")
-    public Response deleteSample(@PathParam("id") final long partId,
-            @PathParam("sampleId") final long sampleId) {
-        final String userId = getUserId();
-        final boolean success = sampleController.delete(userId, partId, sampleId);
+    public Response deleteSample(@Context UriInfo info, @PathParam("id") long partId,
+                                 @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+                                 @PathParam("sampleId") long sampleId) {
+        String userId = getUserId(userAgentHeader);
+        boolean success = sampleService.delete(userId, partId, sampleId);
         return super.respond(success);
     }
 
@@ -654,6 +644,28 @@ public class PartResource extends RestResource {
         log(userId, "removing link " + linkedPart + " from " + partId);
         final boolean success = controller.removeLink(userId, partId, linkedPart);
         return respond(success);
+    }
+
+    /**
+     * Creates a new link between the referenced part id and the part in the parameter
+     *
+     * @param partId    part to be linked
+     * @param partData  should essentially just contain the part Id or details for a new entry that should be created
+     * @param sessionId unique session identifier for user performing action
+     * @return todo
+     */
+    @POST
+    @Path("/{id}/links")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createLink(@PathParam("id") long partId,
+                               @QueryParam("type") @DefaultValue("CHILD") LinkType type,
+                               @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+                               PartData partData) {
+        String userId = getUserId(sessionId);
+        log(userId, "adding entry link " + partData.getId() + " to " + partId);
+        EntryLinks entryLinks = new EntryLinks(userId, partId);
+        return super.respond(entryLinks.addLink(partData, type));
     }
 
     @PUT

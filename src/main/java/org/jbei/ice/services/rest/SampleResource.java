@@ -7,7 +7,7 @@ import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.sample.UserSamples;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
-import org.jbei.ice.lib.entry.sample.SampleController;
+import org.jbei.ice.lib.entry.sample.SampleService;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -24,7 +24,7 @@ import java.util.List;
 public class SampleResource extends RestResource {
 
     private RequestRetriever requestRetriever = new RequestRetriever();
-    private SampleController sampleController = new SampleController();
+    private SampleService sampleService = new SampleService();
 
     /**
      * @param token
@@ -35,7 +35,7 @@ public class SampleResource extends RestResource {
     @Path("{token}")
     public Response getSampleByToken(@PathParam("token") final String token) {
         try {
-            final ArrayList<PartSample> result = sampleController.getSamplesByBarcode(null, token);
+            ArrayList<PartSample> result = sampleService.getSamplesByBarcode(null, token);
             return super.respond(result);
         } catch (final Exception e) {
             Logger.error(e);
@@ -171,9 +171,10 @@ public class SampleResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/storage/{type}")
     public Response getSampleStorageType(
-            @DefaultValue("IN_CART") @QueryParam("type") final String type) {
-        final String userId = getUserId();
-        final List<StorageLocation> locations = sampleController.getStorageLocations(userId, type);
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            @DefaultValue("IN_CART") @QueryParam("type") String type) {
+        String userId = getUserId(userAgentHeader);
+        List<StorageLocation> locations = sampleService.getStorageLocations(userId, type);
         return respond(locations);
     }
 }

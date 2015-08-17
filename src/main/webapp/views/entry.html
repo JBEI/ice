@@ -34,7 +34,7 @@
                     <strong style="color: #888;">{{entry.type}}</strong>
                     <strong>{{entry.name}}</strong>
                 <span ng-show="entry.canEdit">
-                    <i tooltip="Add entry link" tooltip-placement="right" class="fa fa-link opacity_hover font-80em"
+                    <i tooltip="Add entry link" class="fa fa-link opacity_hover font-80em"
                        ng-click="addLink(entry)" style="color: #3a6aad;"></i>&nbsp;
                 </span>
                     <small ng-if="entry.visible!=='OK'" class="label label-danger"
@@ -43,17 +43,18 @@
                 <span ng-if="entry.publicRead">&nbsp;
                     <small style="font-size: 12px; position: relative; top: -4px"
                            tooltip="Available on web of registries"
-                           tooltip-placement="right" tooltip-trigger="mouseenter"
+                           tooltip-trigger="mouseenter"
                            class="label label-info cursor_pointer"><i class="fa fa-globe"></i>
                         Public
                     </small>
                 </span>
                 <span ng-repeat="parent in entry.parents">
                 &nbsp;<a ng-href="entry/{{parent.id}}" tooltip="{{parent.name}}"
-                         tooltip-placement="right" tooltip-trigger="mouseenter"
+                         tooltip-trigger="mouseenter"
                          style="font-size: 12px; color: white; position: relative; top: -4px"
-                         class="small label label-default cursor_pointer"><b class="font-90em">{{parent.type |
-                    uppercase}}</b> <i class="fa fa-level-up"></i></a>
+                         class="small label cursor_pointer"
+                         ng-class="{'label-default':parent.visible=='OK', 'label-warning': parent.visible=='PENDING', 'label-danger': parent.visible=='DELETED'}">
+                    <b class="font-90em">{{parent.type | uppercase}}</b> <i class="fa fa-level-up"></i></a>
                     </span>
                     <br>
                     <small class="font-65em">{{entry.creationTime | date:'medium'}} - <a

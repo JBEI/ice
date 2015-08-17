@@ -21,6 +21,7 @@ public class PartSample implements IDataTransferModel {
     private boolean inCart;
     private StorageLocation location;
     private long partId;
+    private boolean canEdit;
     private ArrayList<UserComment> comments;
 
     public PartSample() {
@@ -81,6 +82,14 @@ public class PartSample implements IDataTransferModel {
 
     public void setPartId(long partId) {
         this.partId = partId;
+    }
+
+    public boolean isCanEdit() {
+        return canEdit;
+    }
+
+    public void setCanEdit(boolean canEdit) {
+        this.canEdit = canEdit;
     }
 
     public ArrayList<UserComment> getComments() {

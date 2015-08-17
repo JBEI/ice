@@ -433,11 +433,17 @@ iceServices.factory('Entry', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            // adds a new link to the referenced part. the link could be a parent or child
+            addLink: {
+                method: 'POST',
+                url: 'rest/parts/:partId/links',
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
+            },
+
             removeLink:{
                 method:'DELETE',
                 url:'rest/parts/:partId/links/:linkId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
-
             },
 
             updateEntryList: {

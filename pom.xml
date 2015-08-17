@@ -4,7 +4,7 @@
     <groupId>org.jbei</groupId>
     <artifactId>ice</artifactId>
     <packaging>war</packaging>
-    <version>4.3.4</version>
+    <version>4.3.5</version>
     <name>ice</name>
     <description>Inventory of Composable Elements (ICE) for Synthetic Biology</description>
     <repositories>

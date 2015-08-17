@@ -1,16 +1,15 @@
 package org.jbei.ice.lib.account.model;
 
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import javax.persistence.*;
-
+import org.hibernate.annotations.Type;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.group.Group;
 
-import org.hibernate.annotations.Type;
+import javax.persistence.*;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Store the account information for a single user.
@@ -38,7 +37,7 @@ public class Account implements IDataModel {
     @Column(name = "initials", length = 10, nullable = false)
     private String initials;
 
-    @Column(name = "email", length = 100, nullable = false)
+    @Column(name = "email", length = 100, nullable = false, unique = true)
     private String email;
 
     @Column(name = "institution", length = 255, nullable = false)

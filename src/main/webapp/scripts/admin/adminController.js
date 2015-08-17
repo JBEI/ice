@@ -30,6 +30,8 @@ angular.module('ice.admin.controller', [])
 
             $scope.generalSettings = [];
             $scope.emailSettings = [];
+            $scope.booleanSettings = ['NEW_REGISTRATION_ALLOWED', 'PASSWORD_CHANGE_ALLOWED',
+                'PROFILE_EDIT_ALLOWED', 'SEND_EMAIL_ON_ERRORS'];
 
             // retrieve site wide settings
             var settings = Settings(sessionId);
@@ -40,7 +42,8 @@ angular.module('ice.admin.controller', [])
                         $scope.generalSettings.push({
                             'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
                             'value': setting.value,
-                            'editMode': false
+                            'editMode': false,
+                            'isBoolean': $scope.booleanSettings.indexOf(setting.key) != -1
                         });
                     }
 
@@ -48,7 +51,8 @@ angular.module('ice.admin.controller', [])
                         $scope.emailSettings.push({
                             'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
                             'value': setting.value,
-                            'editMode': false
+                            'editMode': false,
+                            'isBoolean': $scope.booleanSettings.indexOf(setting.key) != -1
                         });
                     }
                 });
@@ -137,6 +141,15 @@ angular.module('ice.admin.controller', [])
                 newSetting.editMode = false;
             });
         };
+
+        $scope.submitBooleanSetting = function (booleanSetting) {
+            if (booleanSetting.value == undefined || booleanSetting.value.toLowerCase() === "no")
+                booleanSetting.value = "yes";
+            else
+                booleanSetting.value = "no";
+
+            $scope.submitSetting(booleanSetting);
+        }
     })
     .controller('AdminTransferredEntriesController', function ($rootScope, $cookieStore, $filter, $location, $scope, Folders, Entry, Util) {
         $scope.maxSize = 5;

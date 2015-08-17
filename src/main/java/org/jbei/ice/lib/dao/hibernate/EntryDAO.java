@@ -594,7 +594,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             criteria.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
             criteria.setMaxResults(limit);
             criteria.setFirstResult(start);
-            return new HashSet<>(criteria.list());
+            return new LinkedHashSet<>(criteria.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
