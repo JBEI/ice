@@ -4,13 +4,19 @@
     <groupId>org.jbei</groupId>
     <artifactId>ice</artifactId>
     <packaging>war</packaging>
-    <version>4.3.5</version>
+    <version>4.3.6</version>
     <name>ice</name>
     <description>Inventory of Composable Elements (ICE) for Synthetic Biology</description>
     <repositories>
         <repository>
-            <id>Sonatype OSS Snapshot Repository</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+            <id>biojava-maven-repo</id>
+            <name>BioJava repository</name>
+            <url>http://www.biojava.org/download/maven/</url>
+        </repository>
+        <repository>
+            <id>project.local</id>
+            <name>ice</name>
+            <url>file:${project.basedir}/repo</url>
         </repository>
     </repositories>
     <dependencies>
@@ -105,7 +111,7 @@
         <dependency>
             <groupId>org.sbolstandard</groupId>
             <artifactId>libSBOLj</artifactId>
-            <version>0.7.0-SNAPSHOT</version>
+            <version>2.0-beta</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
