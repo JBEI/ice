@@ -138,7 +138,7 @@
                                             <a href="http://public-registry.jbei.org/manual">Help</a>
                                         </td>
                                         <td align="left" style="vertical-align: top;">
-                                            <div>&nbsp; | &nbsp; <span class="label label-primary">v4.3.5</span></div>
+                                            <div>&nbsp; | &nbsp; <span class="label label-primary">v4.3.6</span></div>
                                         </td>
                                     </tr>
                                 </table>
