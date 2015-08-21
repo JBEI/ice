@@ -3,7 +3,7 @@ package org.jbei.ice.lib.dto.entry;
 import org.jbei.ice.lib.dao.IDataTransferModel;
 
 /**
- * User created fields for entry
+ * User created key/value pair fields for an entry.
  *
  * @author Hector Plahar
  */

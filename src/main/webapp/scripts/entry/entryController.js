@@ -934,7 +934,8 @@ angular.module('ice.entry.controller', [])
     })
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope,
-                                             FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection) {
+                                             FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection,
+                                             CustomField) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
@@ -1096,6 +1097,8 @@ angular.module('ice.entry.controller', [])
                 Selection.selectEntry(result);
 
                 $scope.entry = EntryService.convertToUIForm(result);
+                if ($scope.entry.canEdit)
+                    $scope.newParameter = {edit: false};
                 $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
 
                 entry.statistics({partId: $stateParams.id}, function (stats) {
@@ -1297,5 +1300,26 @@ angular.module('ice.entry.controller', [])
         uploader.onErrorItem = function (item, response, status, headers) {
             $scope.serverError = true;
         };
+
+        // customer parameter add for entry view
+        $scope.addNewCustomField = function () {
+            $scope.newParameter.nameInvalid = $scope.newParameter.name == undefined || $scope.newParameter.name == '';
+            $scope.newParameter.valueInvalid = $scope.newParameter.value == undefined || $scope.newParameter.value == '';
+            if ($scope.newParameter.nameInvalid || $scope.newParameter.valueInvalid)
+                return;
+
+            $scope.newParameter.partId = $scope.entry.id;
+            CustomField().createNewCustomField(
+                $scope.newParameter,
+                function (result) {
+                    if (!result)
+                        return;
+
+                    $scope.entry.parameters.push(result);
+                    $scope.newParameter.edit = false;
+                }, function (error) {
+                    console.error(error);
+                })
+        }
     });
 

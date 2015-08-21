@@ -30,9 +30,11 @@ public class SampleResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{token}")
-    public Response getSampleByToken(@PathParam("token") String token) {
+    public Response getSampleByToken(@PathParam("token") String token,
+                                     @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
         try {
-            ArrayList<PartSample> result = sampleService.getSamplesByBarcode(null, token);
+            String userId = getUserIdFromSessionHeader(userAgentHeader);
+            ArrayList<PartSample> result = sampleService.getSamplesByBarcode(userId, token);
             return super.respond(result);
         } catch (Exception e) {
             Logger.error(e);
