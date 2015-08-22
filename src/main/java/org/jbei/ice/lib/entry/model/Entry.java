@@ -128,7 +128,6 @@ public class Entry implements IDataModel {
 
     @Column(name = "name", length = 127)
     @Field(store = Store.YES, boost = @Boost(4f))
-    @Analyzer(definition = "customanalyzer")
     private String name;
 
     @Column(name = "part_number", length = 127)

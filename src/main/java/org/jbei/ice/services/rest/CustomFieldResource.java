@@ -4,8 +4,8 @@ import org.jbei.ice.lib.dto.entry.CustomField;
 import org.jbei.ice.lib.dto.entry.CustomFields;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,6 +17,31 @@ import java.util.List;
 public class CustomFieldResource extends RestResource {
 
     private CustomFields fields = new CustomFields();
+
+    @GET
+    @Path("/parts")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response getPartByCustomFields(
+            @Context UriInfo uriInfo,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sid) {
+        MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
+        if (queryParams.isEmpty())
+            return super.respond(new ArrayList<>());
+
+        String userId = getUserIdFromSessionHeader(sid);
+
+        List<CustomField> fieldList = new ArrayList<>();
+        for (String key : queryParams.keySet()) {
+            List<String> values = queryParams.get(key);
+            // currently disallowing multiple values
+            // todo : disjunction for same values
+            CustomField field = new CustomField(key, values.get(0));
+            fieldList.add(field);
+        }
+
+        return super.respond(fields.getPartsByFields(userId, fieldList));
+    }
 
     /**
      * Creates a new custom field and associated it with the specified entry.
