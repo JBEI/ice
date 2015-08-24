@@ -129,25 +129,13 @@ public class SearchController {
         // text query (may also include blast)
         // no filter type indicates a term or phrase query
         HibernateSearch hibernateSearch = HibernateSearch.getInstance();
-        //        List<SearchBoostField> boostFields = Arrays.asList(SearchBoostField.values());
-//        HashMap<String, String> results = new PreferencesController().retrieveUserPreferenceList(account, boostFields);
-        HashMap<String, Float> mapping = new HashMap<>();
-//        for (Map.Entry<String, String> entry : results.entrySet()) {
-//            try {
-//                String field = SearchBoostField.valueOf(entry.getKey()).getField();
-//                mapping.put(field, Float.valueOf(entry.getValue()));
-//            } catch (IllegalArgumentException nfe) {
-//                Logger.warn(nfe.getMessage());
-//            }
-//        }
 
         if (!StringUtils.isEmpty(queryString)) {
             HashMap<String, QueryType> terms = parseQueryString(queryString);
-            return hibernateSearch.executeSearch(userId, terms, query, mapping, blastResults);
+            return hibernateSearch.executeSearch(userId, terms, query, blastResults);
         } else {
             return hibernateSearch.executeSearchNoTerms(userId, blastResults, query);
         }
-
     }
 
     /**

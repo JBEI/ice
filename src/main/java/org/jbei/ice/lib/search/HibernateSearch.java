@@ -60,7 +60,7 @@ public class HibernateSearch {
 
     protected BooleanQuery generateQueriesForType(FullTextSession fullTextSession, HashSet<String> fields,
                                                   BooleanQuery booleanQuery, String term, QueryType type,
-                                                  BioSafetyOption option, HashMap<String, Float> userBoost) {
+                                                  BioSafetyOption option) {
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
         if (!StringUtils.isEmpty(term)) {
             // generate term queries for each search term
@@ -76,10 +76,6 @@ public class HibernateSearch {
                 } else
                     query = qb.keyword().fuzzy().withEditDistanceUpTo(1).onField(field).ignoreFieldBridge().matching(
                             term).createQuery();
-
-                Float boost = userBoost.get(field);
-                if (boost != null)
-                    query.setBoost(boost);
 
                 booleanQuery.add(query, BooleanClause.Occur.SHOULD);
             }
@@ -279,7 +275,7 @@ public class HibernateSearch {
     }
 
     public SearchResults executeSearch(String userId, HashMap<String, QueryType> terms,
-                                       SearchQuery searchQuery, HashMap<String, Float> userBoost,
+                                       SearchQuery searchQuery,
                                        HashMap<String, SearchResult> blastResults) {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         int resultCount;
@@ -299,7 +295,7 @@ public class HibernateSearch {
 
             BioSafetyOption safetyOption = searchQuery.getBioSafetyOption();
             booleanQuery = generateQueriesForType(fullTextSession, fields, booleanQuery, term, entry.getValue(),
-                    safetyOption, userBoost);
+                    safetyOption);
         }
 
         // check for blast search results filter

@@ -61,9 +61,10 @@ public class SearchControllerTest {
         PlasmidData plasmidData = new PlasmidData();
         plasmidData.setCircular(true);
         plasmidData.setPromoters("pTet");
+        plasmidData.setOriginOfReplication("oRep");
+
         PartData partData = new PartData(EntryType.PLASMID);
         partData.setBioSafetyLevel(BioSafetyOption.LEVEL_ONE.ordinal());
-        plasmidData.setOriginOfReplication("oRep");
         partData.setStatus("Complete");
         partData.setName("testPlasmid");
         partData.setFundingSource("DOE");
