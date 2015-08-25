@@ -74,9 +74,12 @@ public class HibernateSearch {
                     if (!SearchFieldFactory.isCommonField(field))
                         continue;
                     query = qb.keyword().wildcard().onField(field).matching(term).createQuery();
-                } else
-                    query = qb.keyword().fuzzy().onField(field).ignoreFieldBridge().matching(
-                            term).createQuery();
+                } else {
+                    if (!"partNumber".equalsIgnoreCase(field))
+                        query = qb.keyword().fuzzy().onField(field).ignoreFieldBridge().matching(term).createQuery();
+                    else
+                        query = qb.keyword().onField(field).ignoreFieldBridge().matching(term).createQuery();
+                }
 
                 booleanQuery.add(query, BooleanClause.Occur.SHOULD);
             }
