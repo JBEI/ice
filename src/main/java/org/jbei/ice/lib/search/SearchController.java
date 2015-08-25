@@ -113,7 +113,7 @@ public class SearchController {
             try {
                 blastResults = BlastPlus.runBlast(query.getBlastQuery());
             } catch (BlastException e) {
-                return null;
+                Logger.error("Exception running blast " + e.getMessage());
             }
         }
 

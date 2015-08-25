@@ -35,7 +35,8 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Apache Lucene full text library functionality in Hibernate
+ * Apache Lucene full text library functionality in Hibernate.
+ * Implemented as a singleton
  *
  * @author Hector Plahar
  */
@@ -67,14 +68,14 @@ public class HibernateSearch {
             for (String field : fields) {
                 Query query;
 
-                if (type == QueryType.PHRASE)
+                if (type == QueryType.PHRASE)  // phrase types are for quotes so slop is omitted
                     query = qb.phrase().onField(field).sentence(term).createQuery();
                 else if (term.contains("*")) {
-                    if (!field.equals("name"))
+                    if (!SearchFieldFactory.isCommonField(field))
                         continue;
                     query = qb.keyword().wildcard().onField(field).matching(term).createQuery();
                 } else
-                    query = qb.keyword().fuzzy().withEditDistanceUpTo(1).onField(field).ignoreFieldBridge().matching(
+                    query = qb.keyword().fuzzy().onField(field).ignoreFieldBridge().matching(
                             term).createQuery();
 
                 booleanQuery.add(query, BooleanClause.Occur.SHOULD);
@@ -93,9 +94,8 @@ public class HibernateSearch {
             // bio-safety level
             if (option != null) {
                 TermContext levelContext = qb.keyword();
-                Query biosafetyQuery =
-                        levelContext.onField("bioSafetyLevel").ignoreFieldBridge()
-                                .matching(option.getValue()).createQuery();
+                Query biosafetyQuery = levelContext.onField("bioSafetyLevel").ignoreFieldBridge()
+                        .matching(option.getValue()).createQuery();
                 booleanQuery.add(biosafetyQuery, BooleanClause.Occur.MUST);
             }
         }
@@ -499,9 +499,6 @@ public class HibernateSearch {
         cleanedQuery = cleanedQuery.endsWith("'") ? cleanedQuery.substring(0, cleanedQuery.length() - 1) : cleanedQuery;
         cleanedQuery = (cleanedQuery.endsWith("\\") ? cleanedQuery.substring(0,
                 cleanedQuery.length() - 1) : cleanedQuery);
-//        if (cleanedQuery.startsWith("*") || cleanedQuery.startsWith("?")) {
-//            cleanedQuery = cleanedQuery.substring(1);
-//        }
         return cleanedQuery;
     }
 }

@@ -110,4 +110,8 @@ public class SearchFieldFactory {
         }
         return classes;
     }
+
+    public static boolean isCommonField(String field) {
+        return commonFields.contains(field);
+    }
 }
