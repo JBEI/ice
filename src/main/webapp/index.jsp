@@ -19,16 +19,14 @@
     <script src="scripts/lib/angular/angular-touch.min.js"></script>
 
     <script src="scripts/lib/angular-ui/angular-ui-router.min-0.2.15.js"></script>
-    <script src="scripts/lib/angular-ui/ui-bootstrap-tpls-0.13.0.min.js"></script>
+    <script src="scripts/lib/angular-ui/ui-bootstrap-tpls-0.13.3.min.js"></script>
 
     <script src="scripts/lib/angular-file-upload/angular-file-upload.min.js"></script>
 
-    <script src="scripts/lib/handsontable-0.14.1/handsontable.full.min.js"></script>
-    <script src="scripts/lib/handsontable-0.14.1/pikaday.js"></script>
-    <link rel="stylesheet" href="scripts/lib/handsontable-0.14.1/pikaday.css">
-    <link rel="stylesheet" media="screen" href="scripts/lib/handsontable-0.14.1/handsontable.full.min.css">
-
-    <script src="scripts/lib/angular-slider/angular-slider.min.js"></script>
+    <script src="scripts/lib/handsontable-0.16.1/handsontable.full.min.js"></script>
+    <script src="scripts/lib/handsontable-0.16.1/pikaday.js"></script>
+    <link rel="stylesheet" href="scripts/lib/handsontable-0.16.1/pikaday.css">
+    <link rel="stylesheet" media="screen" href="scripts/lib/handsontable-0.16.1/handsontable.full.min.css">
 
     <script src="scripts/lib/momentjs/moment.min.js"></script>
     <script src="scripts/lib/angular-moment/angular-moment.min.js"></script>
