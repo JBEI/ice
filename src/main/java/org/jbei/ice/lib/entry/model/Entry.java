@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.entry.model;
 
 import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
-import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
+import org.apache.lucene.analysis.ngram.EdgeNGramTokenizerFactory;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.*;
 import org.hibernate.search.annotations.Index;
@@ -80,7 +80,7 @@ import org.jbei.ice.lib.entry.model.Parameter;
         @FullTextFilterDef(name = "boolean", impl = EntryHasFilterFactory.class, cache = FilterCacheModeType.INSTANCE_ONLY)
 })
 @AnalyzerDef(name = "customanalyzer",
-        tokenizer = @TokenizerDef(factory = StandardTokenizerFactory.class),
+        tokenizer = @TokenizerDef(factory = EdgeNGramTokenizerFactory.class),
         filters = {
                 @TokenFilterDef(factory = LowerCaseFilterFactory.class),
         })
@@ -127,7 +127,7 @@ public class Entry implements IDataModel {
     private String alias;
 
     @Column(name = "name", length = 127)
-    @Field(store = Store.YES, boost = @Boost(4f))
+    @Field(store = Store.YES, boost = @Boost(2f))
     private String name;
 
     @Column(name = "part_number", length = 127)

@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.search;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.lucene.search.BooleanClause;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -115,7 +114,7 @@ public class SearchController {
             try {
                 blastResults = BlastPlus.runBlast(query.getBlastQuery());
             } catch (BlastException e) {
-                return null;
+                Logger.error("Exception running blast " + e.getMessage());
             }
         }
 
@@ -131,25 +130,13 @@ public class SearchController {
         // text query (may also include blast)
         // no filter type indicates a term or phrase query
         HibernateSearch hibernateSearch = HibernateSearch.getInstance();
-        //        List<SearchBoostField> boostFields = Arrays.asList(SearchBoostField.values());
-//        HashMap<String, String> results = new PreferencesController().retrieveUserPreferenceList(account, boostFields);
-        HashMap<String, Float> mapping = new HashMap<>();
-//        for (Map.Entry<String, String> entry : results.entrySet()) {
-//            try {
-//                String field = SearchBoostField.valueOf(entry.getKey()).getField();
-//                mapping.put(field, Float.valueOf(entry.getValue()));
-//            } catch (IllegalArgumentException nfe) {
-//                Logger.warn(nfe.getMessage());
-//            }
-//        }
 
         if (!StringUtils.isEmpty(queryString)) {
-            HashMap<String, BooleanClause.Occur> terms = parseQueryString(queryString);
-            return hibernateSearch.executeSearch(userId, terms, query, mapping, blastResults);
+            HashMap<String, QueryType> terms = parseQueryString(queryString);
+            return hibernateSearch.executeSearch(userId, terms, query, blastResults);
         } else {
             return hibernateSearch.executeSearchNoTerms(userId, blastResults, query);
         }
-
     }
 
     /**
@@ -190,8 +177,8 @@ public class SearchController {
      * @return a mapping of the phrases and terms to clauses that indicate how the matches should appear
      * in the document. Phrases must appear in the result document
      */
-    HashMap<String, BooleanClause.Occur> parseQueryString(String queryString) {
-        HashMap<String, BooleanClause.Occur> terms = new HashMap<>();
+    HashMap<String, QueryType> parseQueryString(String queryString) {
+        HashMap<String, QueryType> terms = new HashMap<>();
 
         if (queryString == null || queryString.trim().length() == 0)
             return terms;
@@ -202,7 +189,7 @@ public class SearchController {
             char c = queryString.charAt(i);
             if (c == '\"' || c == '\'') {
                 if (startedPhrase) {
-                    terms.put(builder.toString(), BooleanClause.Occur.MUST);
+                    terms.put(builder.toString(), QueryType.PHRASE);
                     builder = new StringBuilder();
                     startedPhrase = false;
                 } else {
@@ -217,7 +204,7 @@ public class SearchController {
                     continue;
 
                 if (!startedPhrase) {
-                    terms.put(builder.toString(), BooleanClause.Occur.SHOULD);
+                    terms.put(builder.toString(), QueryType.TERM);
                     builder = new StringBuilder();
                     continue;
                 }
@@ -227,9 +214,9 @@ public class SearchController {
         }
         if (builder.length() > 0) {
             if (startedPhrase)
-                terms.put(builder.toString(), BooleanClause.Occur.MUST);
+                terms.put(builder.toString(), QueryType.PHRASE);
             else
-                terms.put(builder.toString(), BooleanClause.Occur.SHOULD);
+                terms.put(builder.toString(), QueryType.TERM);
         }
 
         return terms;

@@ -35,7 +35,8 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Apache Lucene full text library functionality in Hibernate
+ * Apache Lucene full text library functionality in Hibernate.
+ * Implemented as a singleton
  *
  * @author Hector Plahar
  */
@@ -59,27 +60,26 @@ public class HibernateSearch {
     }
 
     protected BooleanQuery generateQueriesForType(FullTextSession fullTextSession, HashSet<String> fields,
-                                                  BooleanQuery booleanQuery, String term, BooleanClause.Occur occur, BioSafetyOption option,
-                                                  HashMap<String, Float> userBoost) {
+                                                  BooleanQuery booleanQuery, String term, QueryType type,
+                                                  BioSafetyOption option) {
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
         if (!StringUtils.isEmpty(term)) {
             // generate term queries for each search term
             for (String field : fields) {
                 Query query;
 
-                if (occur == BooleanClause.Occur.MUST)
-                    query = qb.phrase().withSlop(3).onField(field).sentence(term).createQuery();
+                if (type == QueryType.PHRASE)  // phrase types are for quotes so slop is omitted
+                    query = qb.phrase().onField(field).sentence(term).createQuery();
                 else if (term.contains("*")) {
-                    if (!field.equals("name"))
+                    if (!SearchFieldFactory.isCommonField(field))
                         continue;
                     query = qb.keyword().wildcard().onField(field).matching(term).createQuery();
-                } else
-                    query = qb.keyword().fuzzy().withEditDistanceUpTo(1).onField(field).ignoreFieldBridge().matching(
-                            term).createQuery();
-
-                Float boost = userBoost.get(field);
-                if (boost != null)
-                    query.setBoost(boost);
+                } else {
+                    if (!"partNumber".equalsIgnoreCase(field))
+                        query = qb.keyword().fuzzy().onField(field).ignoreFieldBridge().matching(term).createQuery();
+                    else
+                        query = qb.keyword().onField(field).ignoreFieldBridge().matching(term).createQuery();
+                }
 
                 booleanQuery.add(query, BooleanClause.Occur.SHOULD);
             }
@@ -97,9 +97,8 @@ public class HibernateSearch {
             // bio-safety level
             if (option != null) {
                 TermContext levelContext = qb.keyword();
-                Query biosafetyQuery =
-                        levelContext.onField("bioSafetyLevel").ignoreFieldBridge()
-                                .matching(option.getValue()).createQuery();
+                Query biosafetyQuery = levelContext.onField("bioSafetyLevel").ignoreFieldBridge()
+                        .matching(option.getValue()).createQuery();
                 booleanQuery.add(biosafetyQuery, BooleanClause.Occur.MUST);
             }
         }
@@ -278,8 +277,8 @@ public class HibernateSearch {
         return results;
     }
 
-    public SearchResults executeSearch(String userId, HashMap<String, BooleanClause.Occur> terms,
-                                       SearchQuery searchQuery, HashMap<String, Float> userBoost,
+    public SearchResults executeSearch(String userId, HashMap<String, QueryType> terms,
+                                       SearchQuery searchQuery,
                                        HashMap<String, SearchResult> blastResults) {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         int resultCount;
@@ -292,14 +291,14 @@ public class HibernateSearch {
         Class<?>[] classes = SearchFieldFactory.classesForTypes(searchQuery.getEntryTypes());
 
         // generate queries for terms filtering stop words
-        for (Map.Entry<String, BooleanClause.Occur> entry : terms.entrySet()) {
+        for (Map.Entry<String, QueryType> entry : terms.entrySet()) {
             String term = cleanQuery(entry.getKey());
             if (term.trim().isEmpty() || StandardAnalyzer.STOP_WORDS_SET.contains(term))
                 continue;
 
             BioSafetyOption safetyOption = searchQuery.getBioSafetyOption();
             booleanQuery = generateQueriesForType(fullTextSession, fields, booleanQuery, term, entry.getValue(),
-                    safetyOption, userBoost);
+                    safetyOption);
         }
 
         // check for blast search results filter
@@ -503,9 +502,6 @@ public class HibernateSearch {
         cleanedQuery = cleanedQuery.endsWith("'") ? cleanedQuery.substring(0, cleanedQuery.length() - 1) : cleanedQuery;
         cleanedQuery = (cleanedQuery.endsWith("\\") ? cleanedQuery.substring(0,
                 cleanedQuery.length() - 1) : cleanedQuery);
-//        if (cleanedQuery.startsWith("*") || cleanedQuery.startsWith("?")) {
-//            cleanedQuery = cleanedQuery.substring(1);
-//        }
         return cleanedQuery;
     }
 }

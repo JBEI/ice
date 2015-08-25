@@ -38,6 +38,7 @@ public class SearchFieldFactory {
         commonFields.add("links.link");
         commonFields.add("links.url");
         commonFields.add("selectionMarkers.name");
+        commonFields.add("parameters.value");
         commonFields.add("fundingSource");
         commonFields.add("principalInvestigator");
 
@@ -108,5 +109,9 @@ public class SearchFieldFactory {
             }
         }
         return classes;
+    }
+
+    public static boolean isCommonField(String field) {
+        return commonFields.contains(field);
     }
 }
