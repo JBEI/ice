@@ -127,7 +127,7 @@ public class Entry implements IDataModel {
     private String alias;
 
     @Column(name = "name", length = 127)
-    @Field(store = Store.YES, boost = @Boost(4f))
+    @Field(store = Store.YES, boost = @Boost(2f))
     private String name;
 
     @Column(name = "part_number", length = 127)
