@@ -59,52 +59,6 @@ public class HibernateSearch {
         return SingletonHolder.INSTANCE;
     }
 
-    protected BooleanQuery generateQueriesForType(FullTextSession fullTextSession, HashSet<String> fields,
-                                                  BooleanQuery booleanQuery, String term, QueryType type,
-                                                  BioSafetyOption option) {
-        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
-        if (!StringUtils.isEmpty(term)) {
-            // generate term queries for each search term
-            for (String field : fields) {
-                Query query;
-
-                if (type == QueryType.PHRASE)  // phrase types are for quotes so slop is omitted
-                    query = qb.phrase().onField(field).sentence(term).createQuery();
-                else if (term.contains("*")) {
-                    if (!SearchFieldFactory.isCommonField(field))
-                        continue;
-                    query = qb.keyword().wildcard().onField(field).matching(term).createQuery();
-                } else {
-                    if (!"partNumber".equalsIgnoreCase(field))
-                        query = qb.keyword().fuzzy().onField(field).ignoreFieldBridge().matching(term).createQuery();
-                    else
-                        query = qb.keyword().onField(field).ignoreFieldBridge().matching(term).createQuery();
-                }
-
-                booleanQuery.add(query, BooleanClause.Occur.SHOULD);
-            }
-
-            // visibility (using must not because "must for visibility ok" adds it as the query and affects the match
-            // the security filter takes care of other values not to be included such as "transferred" and "deleted"
-            Query visibilityQuery = qb.keyword().onField("visibility")
-                    .matching(Visibility.DRAFT.getValue()).createQuery();
-            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
-
-            Query visibilityQuery2 = qb.keyword().onField("visibility")
-                    .matching(Visibility.DELETED.getValue()).createQuery();
-            booleanQuery.add(visibilityQuery2, BooleanClause.Occur.MUST_NOT);
-
-            // bio-safety level
-            if (option != null) {
-                TermContext levelContext = qb.keyword();
-                Query biosafetyQuery = levelContext.onField("bioSafetyLevel").ignoreFieldBridge()
-                        .matching(option.getValue()).createQuery();
-                booleanQuery.add(biosafetyQuery, BooleanClause.Occur.MUST);
-            }
-        }
-        return booleanQuery;
-    }
-
     public SearchResults executeSearchNoTerms(String userId, HashMap<String, SearchResult> blastResults, SearchQuery searchQuery) {
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null || entryTypes.isEmpty()) {
@@ -270,9 +224,6 @@ public class HibernateSearch {
 
         SearchResults results = new SearchResults();
         results.setResultCount(blastResults.size());
-
-        // sort only if the sort is a blast sort that cannot be handled by the query filter
-//        SearchResults.sort(searchQuery.getParameters().getSortField(), filtered);
         results.setResults(list);
         return results;
     }
@@ -373,6 +324,52 @@ public class HibernateSearch {
         results.setResults(searchResults);
         return results;
     }
+
+    protected BooleanQuery generateQueriesForType(FullTextSession fullTextSession, HashSet<String> fields,
+                                                  BooleanQuery booleanQuery, String term, QueryType type,
+                                                  BioSafetyOption option) {
+        QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
+        if (!StringUtils.isEmpty(term)) {
+            // generate term queries for each search term
+            Query query;
+            String[] queryFields = fields.toArray(new String[fields.size()]);
+            if (type == QueryType.PHRASE) {
+                // phrase types are for quotes so slop is omitted
+                for (String field : fields) {
+                    booleanQuery.add(qb.phrase().onField(field).sentence(term).createQuery(), BooleanClause.Occur.SHOULD);
+                }
+            } else {
+                // term
+                if (term.contains("*")) {
+                    query = qb.keyword().wildcard().onFields(SearchFieldFactory.getCommonFields()).matching(term).createQuery();
+                    booleanQuery.add(query, BooleanClause.Occur.SHOULD);
+                } else {
+                    query = qb.keyword().fuzzy().onFields(queryFields).ignoreFieldBridge().matching(term).createQuery();
+                    booleanQuery.add(query, BooleanClause.Occur.MUST);
+                }
+            }
+
+            // visibility (using must not because "must for visibility ok" adds it as the query and affects the match
+            // the security filter takes care of other values not to be included such as "transferred" and "deleted"
+            Query visibilityQuery = qb.keyword().onField("visibility")
+                    .matching(Visibility.DRAFT.getValue()).createQuery();
+            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
+
+            Query visibilityQuery2 = qb.keyword().onField("visibility")
+                    .matching(Visibility.DELETED.getValue()).createQuery();
+            booleanQuery.add(visibilityQuery2, BooleanClause.Occur.MUST_NOT);
+
+            // bio-safety level
+            if (option != null) {
+                TermContext levelContext = qb.keyword();
+                Query biosafetyQuery = levelContext.onField("bioSafetyLevel").ignoreFieldBridge()
+                        .matching(option.getValue()).createQuery();
+                booleanQuery.add(biosafetyQuery, BooleanClause.Occur.MUST);
+            }
+        }
+        return booleanQuery;
+    }
+
 
     protected Sort getSort(boolean asc, ColumnField sortField) {
         if (sortField == null)

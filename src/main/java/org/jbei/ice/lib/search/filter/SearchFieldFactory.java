@@ -60,6 +60,10 @@ public class SearchFieldFactory {
         seedFields.add("plantType");
     }
 
+    public static String[] getCommonFields() {
+        return commonFields.toArray(new String[commonFields.size()]);
+    }
+
     public static HashSet<String> entryFields(List<EntryType> types) {
         HashSet<String> fields = new HashSet<>();
 
@@ -109,9 +113,5 @@ public class SearchFieldFactory {
             }
         }
         return classes;
-    }
-
-    public static boolean isCommonField(String field) {
-        return commonFields.contains(field);
     }
 }
