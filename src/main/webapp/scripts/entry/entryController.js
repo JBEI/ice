@@ -975,12 +975,18 @@ angular.module('ice.entry.controller', [])
                 controller: function ($scope, $modalInstance) {
                     $scope.toDelete = part;
                     $scope.processingDelete = undefined;
-                    $scope.delete = function () {
+                    $scope.errorDeleting = undefined;
+
+                    $scope.deleteSequence = function () {
                         $scope.processingDelete = true;
+                        $scope.errorDeleting = false;
+
                         entry.deleteSequence({partId: part.id}, function (result) {
                             $scope.processingDelete = false;
                             $modalInstance.close(part);
                         }, function (error) {
+                            $scope.processingDelete = false;
+                            $scope.errorDeleting = true;
                             console.error(error);
                         })
                     }
