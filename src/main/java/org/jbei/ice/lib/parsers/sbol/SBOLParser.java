@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.parsers.sbol;
 
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.vo.DNASequence;
@@ -40,6 +41,7 @@ public class SBOLParser extends AbstractParser {
 
             return visitor.getFeaturedDNASequence();
         } catch (SBOLValidationException | IOException e) {
+            Logger.error(e);
             throw new InvalidFormatParserException("Could not parse SBOL file!", e);
         }
     }
