@@ -811,6 +811,7 @@ td.selected i.font-awesome {
 .entry_detail_submenu td {
     padding: 8px;
     border-left: 1px solid #e5e5e5;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .remove_user_button {
