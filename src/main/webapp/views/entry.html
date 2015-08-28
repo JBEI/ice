@@ -53,9 +53,11 @@
                          tooltip-trigger="mouseenter"
                          style="font-size: 12px; color: white; position: relative; top: -4px"
                          class="small label cursor_pointer"
-                         ng-class="{'label-default':parent.visible=='OK', 'label-warning': parent.visible=='PENDING', 'label-danger': parent.visible=='DELETED'}">
+                         ng-class="{'label-default':parent.visible=='OK',
+                         'label-warning': parent.visible=='PENDING' || parent.visible == 'DRAFT',
+                         'label-danger': parent.visible=='DELETED'}">
                     <b class="font-90em">{{parent.type | uppercase}}</b> <i class="fa fa-level-up"></i></a>
-                    </span>
+                </span>
                     <br>
                     <small class="font-65em">{{entry.creationTime | date:'medium'}} - <a
                             ng-href="profile/{{entry.ownerId}}">{{entry.owner}}</a></small>
