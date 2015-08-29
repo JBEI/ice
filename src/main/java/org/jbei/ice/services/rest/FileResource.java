@@ -144,7 +144,8 @@ public class FileResource extends RestResource {
         final StreamingOutput stream = new StreamingOutput() {
             @Override
             public void write(final OutputStream output) throws IOException, WebApplicationException {
-                byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType, linked);
+                byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType, linked,
+                        "existing".equalsIgnoreCase(linkedType));
                 ByteArrayInputStream stream = new ByteArrayInputStream(template);
                 IOUtils.copy(stream, output);
             }
@@ -189,8 +190,7 @@ public class FileResource extends RestResource {
                                          @QueryParam("sid") String sid,
                                          @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         final SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
-        final TraceSequence traceSequence = sequenceAnalysisController
-                .getTraceSequenceByFileId(fileId);
+        final TraceSequence traceSequence = sequenceAnalysisController.getTraceSequenceByFileId(fileId);
         if (traceSequence != null) {
             final File file = sequenceAnalysisController.getFile(traceSequence);
             return addHeaders(Response.ok(file), traceSequence.getFilename());

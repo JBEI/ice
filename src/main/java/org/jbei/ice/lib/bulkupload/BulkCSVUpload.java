@@ -5,6 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.bulkupload.SampleField;
@@ -14,6 +15,7 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.lib.entry.EntryUtil;
+import org.jbei.ice.lib.entry.model.Entry;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -71,7 +73,6 @@ public class BulkCSVUpload {
             }
 
             return uploadId;
-
         }
     }
 
@@ -198,6 +199,7 @@ public class BulkCSVUpload {
                 for (int i = 0; i < valuesArray.length; i += 1) {
                     HeaderValue headerForColumn = headers.get(i);
 
+                    // process sample information
                     if (headerForColumn.isSampleField()) {
                         // todo : move to another method
                         if (partSample == null)
@@ -234,6 +236,14 @@ public class BulkCSVUpload {
 
                             case SEQ_TRACE_FILES:
                                 // todo
+                                break;
+
+                            case EXISTING_PART_NUMBER:
+                                Entry entry = DAOFactory.getEntryDAO().getByPartNumber(value);
+                                if (entry == null)
+                                    throw new IOException("Could not locate part number \"" + value + "\" for linking");
+                                PartData toLink = entry.toDataTransferObject();
+                                data.getLinkedParts().add(toLink);
                                 break;
 
                             default:
