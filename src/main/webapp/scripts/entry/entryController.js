@@ -1179,6 +1179,37 @@ angular.module('ice.entry.controller', [])
             }
         };
 
+        $scope.createCopyOfEntry = function () {
+            $scope.entryCopy = angular.copy($scope.entry);
+            $scope.entryCopy.id = 0;
+            $scope.entryCopy.recordId = undefined;
+            $scope.entryCopy.name = $scope.entryCopy.name + " (copy)";
+            $scope.entryCopy.owner = undefined;
+            $scope.entryCopy.ownerEmail = undefined;
+
+            // convert arrays of objects to array strings
+            $scope.entryCopy.links = EntryService.toStringArray($scope.entryCopy.links);
+            $scope.entryCopy.selectionMarkers = EntryService.toStringArray($scope.entryCopy.selectionMarkers);
+
+            for (var i = 0; i < $scope.entryCopy.linkedParts.length; i += 1) {
+                $scope.entryCopy.linkedParts[i].links = EntryService.toStringArray($scope.entryCopy.linkedParts[i].links);
+                $scope.entryCopy.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.entryCopy.linkedParts[i].selectionMarkers);
+            }
+
+            // convert the part to a form the server can work with
+            $scope.entryCopy = EntryService.getTypeData($scope.entryCopy);
+            console.log($scope.entryCopy);
+
+            // create or update the part depending on whether there is a current part id
+            entry.create($scope.entryCopy, function (result) {
+                $scope.$emit("UpdateCollectionCounts");
+                $location.path('entry/' + result.id);   // todo : or /entry/edit/
+                $scope.showSBOL = false;
+            }, function (error) {
+                console.error(error);
+            });
+        };
+
         // check if a selection has been made
         var menuOption = $stateParams.option;
         if (menuOption === undefined) {
