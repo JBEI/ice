@@ -222,7 +222,6 @@ html, body {
     font-size: 0.90em;
     padding: 4px;
     border-radius: 2px 0 0 2px;
-    border-right: 0;
 }
 
 .entry_add_notes_input {
