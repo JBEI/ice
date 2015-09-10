@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.account.authentication.AuthenticationException;
 import org.jbei.ice.lib.account.authentication.IAuthentication;
 import org.jbei.ice.lib.account.authentication.LocalAuthentication;
-import org.jbei.ice.lib.account.authentication.UserIdAuthentication;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -393,7 +392,7 @@ public class AccountController {
      * @return the account identifier (email) on a successful login, otherwise {@code null}
      */
     public String authenticate(final String login, final String password, final String ip) {
-        final IAuthentication authentication = new UserIdAuthentication();
+        final IAuthentication authentication = new LocalAuthentication();
         String email;
 
         try {
@@ -491,16 +490,6 @@ public class AccountController {
     }
 
     /**
-     * See if the given sessionKey is still authenticated with the system.
-     *
-     * @param sessionKey unique session identifier
-     * @return True if sessionKey is still authenticated (active) to the system.
-     */
-    public static boolean isAuthenticated(final String sessionKey) {
-        return SessionHandler.isValidSession(sessionKey);
-    }
-
-    /**
      * De-authenticate the given sessionKey. The user is logged out from the system.
      *
      * @param sessionKey unique session identifier
@@ -551,8 +540,7 @@ public class AccountController {
     public AccountResults retrieveAccounts(final String userId, final int start, final int limit,
                                            final String sort, final boolean asc) {
         if (!isAdministrator(userId)) {
-            Logger.warn(userId
-                    + " attempting to retrieve all user accounts without admin privileges");
+            Logger.warn(userId + " attempting to retrieve all user accounts without admin privileges");
             return null;
         }
 

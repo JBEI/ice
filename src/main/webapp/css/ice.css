@@ -515,11 +515,6 @@ a:hover {
     padding-left: 10px;
 }
 
-.footer_line {
-    height: 1px;
-    background-color: #BBBAAA;
-}
-
 .required {
     color: #CC3333;
 }
