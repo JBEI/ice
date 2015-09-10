@@ -1,19 +1,18 @@
 package org.jbei.ice.lib.parsers.fasta;
 
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.util.LinkedList;
-
+import org.biojava.bio.BioException;
+import org.biojavax.bio.seq.RichSequence;
+import org.biojavax.bio.seq.RichSequence.IOTools;
+import org.biojavax.bio.seq.RichSequenceIterator;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.vo.DNAFeature;
 import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
-import org.biojava.bio.BioException;
-import org.biojavax.bio.seq.RichSequence;
-import org.biojavax.bio.seq.RichSequence.IOTools;
-import org.biojavax.bio.seq.RichSequenceIterator;
+import java.io.BufferedReader;
+import java.io.StringReader;
+import java.util.LinkedList;
 
 /**
  * Parse FASTA files.
@@ -26,12 +25,6 @@ public class FastaParser extends AbstractParser {
     @Override
     public String getName() {
         return FASTA_PARSER;
-    }
-
-    @Override
-    public Boolean hasErrors() {
-        //This parser cannot succeed with errors, so always return false, or fail.
-        return false;
     }
 
     @Override

@@ -1,9 +1,8 @@
 package org.jbei.ice.lib.parsers;
 
+import org.biojava.bio.symbol.SymbolList;
 import org.jbei.ice.lib.parsers.abi.ABITrace;
 import org.jbei.ice.lib.vo.DNASequence;
-
-import org.biojava.bio.symbol.SymbolList;
 
 /**
  * Parse ABI sequence trace file by wrappying BioJava.
@@ -17,12 +16,6 @@ public class ABIParser extends AbstractParser {
     @Override
     public String getName() {
         return ABI_PARSER;
-    }
-
-    @Override
-    public Boolean hasErrors() {
-        // This parser cannot succeed with errors, so always return false, or fail.
-        return false;
     }
 
     @Override

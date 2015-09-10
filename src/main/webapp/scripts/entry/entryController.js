@@ -934,7 +934,8 @@ angular.module('ice.entry.controller', [])
     })
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope,
-                                             FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection) {
+                                             FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection,
+                                             CustomField) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
@@ -974,12 +975,18 @@ angular.module('ice.entry.controller', [])
                 controller: function ($scope, $modalInstance) {
                     $scope.toDelete = part;
                     $scope.processingDelete = undefined;
-                    $scope.delete = function () {
+                    $scope.errorDeleting = undefined;
+
+                    $scope.deleteSequence = function () {
                         $scope.processingDelete = true;
+                        $scope.errorDeleting = false;
+
                         entry.deleteSequence({partId: part.id}, function (result) {
                             $scope.processingDelete = false;
                             $modalInstance.close(part);
                         }, function (error) {
+                            $scope.processingDelete = false;
+                            $scope.errorDeleting = true;
                             console.error(error);
                         })
                     }
@@ -1096,6 +1103,8 @@ angular.module('ice.entry.controller', [])
                 Selection.selectEntry(result);
 
                 $scope.entry = EntryService.convertToUIForm(result);
+                if ($scope.entry.canEdit)
+                    $scope.newParameter = {edit: false};
                 $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
 
                 entry.statistics({partId: $stateParams.id}, function (stats) {
@@ -1168,6 +1177,37 @@ angular.module('ice.entry.controller', [])
             } else {
                 $location.path("entry/" + $stateParams.id);
             }
+        };
+
+        $scope.createCopyOfEntry = function () {
+            $scope.entryCopy = angular.copy($scope.entry);
+            $scope.entryCopy.id = 0;
+            $scope.entryCopy.recordId = undefined;
+            $scope.entryCopy.name = $scope.entryCopy.name + " (copy)";
+            $scope.entryCopy.owner = undefined;
+            $scope.entryCopy.ownerEmail = undefined;
+
+            // convert arrays of objects to array strings
+            $scope.entryCopy.links = EntryService.toStringArray($scope.entryCopy.links);
+            $scope.entryCopy.selectionMarkers = EntryService.toStringArray($scope.entryCopy.selectionMarkers);
+
+            for (var i = 0; i < $scope.entryCopy.linkedParts.length; i += 1) {
+                $scope.entryCopy.linkedParts[i].links = EntryService.toStringArray($scope.entryCopy.linkedParts[i].links);
+                $scope.entryCopy.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.entryCopy.linkedParts[i].selectionMarkers);
+            }
+
+            // convert the part to a form the server can work with
+            $scope.entryCopy = EntryService.getTypeData($scope.entryCopy);
+            console.log($scope.entryCopy);
+
+            // create or update the part depending on whether there is a current part id
+            entry.create($scope.entryCopy, function (result) {
+                $scope.$emit("UpdateCollectionCounts");
+                $location.path('entry/' + result.id);   // todo : or /entry/edit/
+                $scope.showSBOL = false;
+            }, function (error) {
+                console.error(error);
+            });
         };
 
         // check if a selection has been made
@@ -1297,5 +1337,26 @@ angular.module('ice.entry.controller', [])
         uploader.onErrorItem = function (item, response, status, headers) {
             $scope.serverError = true;
         };
+
+        // customer parameter add for entry view
+        $scope.addNewCustomField = function () {
+            $scope.newParameter.nameInvalid = $scope.newParameter.name == undefined || $scope.newParameter.name == '';
+            $scope.newParameter.valueInvalid = $scope.newParameter.value == undefined || $scope.newParameter.value == '';
+            if ($scope.newParameter.nameInvalid || $scope.newParameter.valueInvalid)
+                return;
+
+            $scope.newParameter.partId = $scope.entry.id;
+            CustomField().createNewCustomField(
+                $scope.newParameter,
+                function (result) {
+                    if (!result)
+                        return;
+
+                    $scope.entry.parameters.push(result);
+                    $scope.newParameter.edit = false;
+                }, function (error) {
+                    console.error(error);
+                })
+        }
     });
 

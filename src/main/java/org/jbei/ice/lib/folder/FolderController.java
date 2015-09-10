@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.folder;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;

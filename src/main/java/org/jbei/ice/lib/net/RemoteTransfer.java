@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.net;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
@@ -98,7 +98,7 @@ public class RemoteTransfer {
 
         for (PartData data : entries) {
             try {
-                Object object = client.put(url, "/rest/parts/transfer", data, PartData.class);
+                PartData object = client.put(url, "/rest/parts/transfer", data, PartData.class);
                 if (object == null) {
                     exceptionCount += 1;
                     continue;

@@ -222,7 +222,6 @@ html, body {
     font-size: 0.90em;
     padding: 4px;
     border-radius: 2px 0 0 2px;
-    border-right: 0;
 }
 
 .entry_add_notes_input {
@@ -516,11 +515,6 @@ a:hover {
     padding-left: 10px;
 }
 
-.footer_line {
-    height: 1px;
-    background-color: #BBBAAA;
-}
-
 .required {
     color: #CC3333;
 }
@@ -811,6 +805,7 @@ td.selected i.font-awesome {
 .entry_detail_submenu td {
     padding: 8px;
     border-left: 1px solid #e5e5e5;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .remove_user_button {

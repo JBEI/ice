@@ -4,7 +4,6 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.models.Sequence;
@@ -36,13 +35,11 @@ import java.util.List;
 public class SequenceAnalysisController {
 
     private final TraceSequenceDAO traceDao;
-    private final EntryAuthorization entryAuthorization;
 
     public static final String TRACES_DIR_NAME = "traces";
 
     public SequenceAnalysisController() {
         traceDao = DAOFactory.getTraceSequenceDAO();
-        entryAuthorization = new EntryAuthorization();
     }
 
     /**

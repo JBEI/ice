@@ -1,12 +1,11 @@
 package org.jbei.ice.lib.utils;
 
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 
 /**
  * Utility methods for email.

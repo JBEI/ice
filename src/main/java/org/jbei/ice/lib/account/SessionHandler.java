@@ -1,12 +1,12 @@
 package org.jbei.ice.lib.account;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Handler for user sessions.

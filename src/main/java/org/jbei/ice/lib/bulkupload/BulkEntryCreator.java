@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.bulkupload;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.AccountController;
@@ -17,10 +17,7 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.sample.PartSample;
-import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.EntryCreator;
-import org.jbei.ice.lib.entry.EntryEditor;
-import org.jbei.ice.lib.entry.EntryFactory;
+import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.attachment.Attachment;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Strain;
@@ -419,6 +416,7 @@ public class BulkEntryCreator {
         // check permissions
         authorization.expectWrite(userId, draft);
         SampleService sampleService = new SampleService();
+        EntryAuthorization entryAuthorization = new EntryAuthorization();
 
         for (PartWithSample partWithSample : data) {
             if (partWithSample == null)
@@ -441,27 +439,41 @@ public class BulkEntryCreator {
             if (partData.getLinkedParts() != null && partData.getLinkedParts().size() > 0) {
                 // create linked
                 PartData linked = partData.getLinkedParts().get(0);
-                Entry linkedEntry = InfoToModelFactory.infoToEntry(linked);
-                if (linkedEntry != null) {
-                    linkedEntry.setVisibility(Visibility.DRAFT.getValue());
-                    linkedEntry.setOwner(account.getFullName());
-                    linkedEntry.setOwnerEmail(account.getEmail());
-                    linkedEntry = entryDAO.create(linkedEntry);
 
-                    linked.setId(linkedEntry.getId());
-                    linked.setModificationTime(linkedEntry.getModificationTime().getTime());
+                // for existing the link already....exists so just verify
+                if (linked.getId() == 0) {
+                    Entry linkedEntry = InfoToModelFactory.infoToEntry(linked);
+                    if (linkedEntry != null) {
+                        linkedEntry.setVisibility(Visibility.DRAFT.getValue());
+                        linkedEntry.setOwner(account.getFullName());
+                        linkedEntry.setOwnerEmail(account.getEmail());
+                        linkedEntry = entryDAO.create(linkedEntry);
 
-                    addWritePermission(account, linkedEntry);
+                        linked.setId(linkedEntry.getId());
+                        linked.setModificationTime(linkedEntry.getModificationTime().getTime());
 
-                    // check for attachments and sequences for linked entry
-                    saveFiles(linked, linkedEntry, files);
+                        addWritePermission(account, linkedEntry);
 
-                    // link to main entry in the database
-                    entry.getLinkedEntries().add(linkedEntry);
+                        // check for attachments and sequences for linked entry
+                        saveFiles(linked, linkedEntry, files);
+                        entry.getLinkedEntries().add(linkedEntry);
+                    }
                 }
+
+                entry = entryDAO.create(entry);
+
+                // attempt to get linked entry and add
+                if (linked.getId() != 0) {
+                    Entry linkedEntry = entryDAO.get(linked.getId());
+                    if (linkedEntry != null && entryAuthorization.canWrite(userId, entry)) {
+                        EntryLinks links = new EntryLinks(userId, entry.getId());
+                        links.addLink(linked, LinkType.CHILD);
+                    }
+                }
+            } else {
+                entry = entryDAO.create(entry);
             }
 
-            entry = entryDAO.create(entry);
             // check for pi
             String piEmail = entry.getPrincipalInvestigatorEmail();
             if (StringUtils.isNotEmpty(piEmail)) {

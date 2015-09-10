@@ -10,7 +10,6 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -36,12 +35,13 @@ public class IceRestClient extends RestClient {
         client = ClientBuilder.newClient(clientConfig);
     }
 
-    public Object get(String url, String path, Class<?> clazz) {
+    public <T> T get(String url, String path, Class<T> clazz) {
         WebTarget target = client.target("https://" + url).path(path);
         return target.request(MediaType.APPLICATION_JSON_TYPE).buildGet().invoke(clazz);
     }
 
-    public Object get(String url, String path, Class<?> clazz, HashMap<String, Object> queryParams) {
+    @Override
+    public <T> T get(String url, String path, Class<T> clazz, Map<String, Object> queryParams) {
         WebTarget target = client.target("https://" + url).path(path);
         if (queryParams != null) {
             for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
@@ -56,7 +56,8 @@ public class IceRestClient extends RestClient {
         return target.request(MediaType.APPLICATION_JSON_TYPE).buildGet().invoke();
     }
 
-    public Object post(String url, String resourcePath, Object object, Class<?> responseClass) {
+    @Override
+    public <T> T post(String url, String resourcePath, Object object, Class<T> responseClass) {
         WebTarget target = client.target("https://" + url).path(resourcePath);
         Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
         Response postResponse = invocationBuilder.post(Entity.entity(object, MediaType.APPLICATION_JSON_TYPE));
@@ -65,7 +66,7 @@ public class IceRestClient extends RestClient {
         return null;
     }
 
-    public Object put(String url, String resourcePath, Object object, Class<?> responseClass) {
+    public <T> T put(String url, String resourcePath, Object object, Class<T> responseClass) {
         WebTarget target = client.target("https://" + url).path(resourcePath);
         Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
         Response putResponse = invocationBuilder.put(Entity.entity(object, MediaType.APPLICATION_JSON_TYPE));

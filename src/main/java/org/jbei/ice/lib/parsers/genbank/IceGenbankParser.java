@@ -58,17 +58,11 @@ public class IceGenbankParser extends AbstractParser {
     private static final Pattern startStopPattern = Pattern.compile("[<>]*(\\d+)\\.\\.[<>]*(\\d+)");
     private static final Pattern startOnlyPattern = Pattern.compile("\\d+");
 
-    private Boolean hasErrors = false;
     private List<String> errors = new ArrayList<>();
 
     @Override
     public String getName() {
         return ICE_GENBANK_PARSER;
-    }
-
-    @Override
-    public Boolean hasErrors() {
-        return hasErrors;
     }
 
     public List<String> getErrors() {
@@ -351,7 +345,6 @@ public class IceGenbankParser extends AbstractParser {
                     }
                 } catch (final NumberFormatException e) {
                     getErrors().add("Could not parse feature " + line);
-                    hasErrors = true;
                     continue;
                 }
 
@@ -456,7 +449,6 @@ public class IceGenbankParser extends AbstractParser {
                 chunk = line.split("=");
                 if (chunk.length < 2) {
                     getErrors().add("Skipping bad genbank qualifier " + line);
-                    hasErrors = true;
                     dnaFeatureNote = null;
                 } else {
                     final String putativeName = chunk[0].trim().substring(1);

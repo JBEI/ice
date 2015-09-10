@@ -452,14 +452,9 @@ angular.module('ice.collection.controller', [])
         // selected entries
         $scope.selection = [];
         $scope.shoppingCartContents = [];
-        $scope.openShoppingCart = true;
         samples.userRequests({status: 'IN_CART'}, {userId: $rootScope.user.id}, function (result) {
             $scope.shoppingCartContents = result.requests;
         });
-
-        $scope.hidePopovers = function (hide) {
-            $scope.openShoppingCart = !hide;
-        };
 
         $scope.createEntry = {
             isOpen: false

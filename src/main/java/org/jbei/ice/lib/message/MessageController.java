@@ -1,15 +1,9 @@
 package org.jbei.ice.lib.message;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.jbei.ice.lib.dao.hibernate.MessageDAO;
@@ -17,6 +11,10 @@ import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.dto.message.MessageInfo;
 import org.jbei.ice.lib.dto.message.MessageList;
 import org.jbei.ice.lib.group.Group;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -37,18 +35,13 @@ public class MessageController {
      * @param account account for user making the request.
      * @param id      identifier for message to be marked as read
      * @return number of unread messages after marking message as read
-     * @throws ControllerException
      */
-    public int markMessageAsRead(Account account, long id) throws ControllerException {
-        try {
-            Message message = dao.retrieveMessage(id);
-            message.setRead(true);
-            message.setDateRead(new Date(System.currentTimeMillis()));
-            dao.update(message);
-            return getNewMessageCount(account);
-        } catch (DAOException de) {
-            throw new ControllerException(de);
-        }
+    public int markMessageAsRead(Account account, long id) {
+        Message message = dao.retrieveMessage(id);
+        message.setRead(true);
+        message.setDateRead(new Date());
+        dao.update(message);
+        return getNewMessageCount(account);
     }
 
     /**
@@ -58,11 +51,10 @@ public class MessageController {
      * @param sender account for user sending the message
      * @param info   details of message including recipient(s)
      * @return false if the message fails to be sent to all the intended recipients
-     * @throws ControllerException
      */
-    public boolean sendMessage(Account sender, MessageInfo info) throws ControllerException {
+    public boolean sendMessage(Account sender, MessageInfo info) {
         if (info == null || info.getAccounts().isEmpty() && info.getUserGroups().isEmpty())
-            throw new ControllerException("Cannot send message");
+            return false;
         boolean success = true;
 
         Message message = new Message();
@@ -98,11 +90,7 @@ public class MessageController {
         if (message.getDestinationAccounts().isEmpty() && message.getDestinationGroups().isEmpty())
             return false;
 
-        try {
-            dao.create(message);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        dao.create(message);
         return success;
     }
 
@@ -135,11 +123,7 @@ public class MessageController {
         return messageList;
     }
 
-    public int getNewMessageCount(Account account) throws ControllerException {
-        try {
-            return dao.retrieveNewMessageCount(account);
-        } catch (DAOException de) {
-            throw new ControllerException(de);
-        }
+    public int getNewMessageCount(Account account) {
+        return dao.retrieveNewMessageCount(account);
     }
 }

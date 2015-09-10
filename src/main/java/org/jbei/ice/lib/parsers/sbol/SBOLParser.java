@@ -1,16 +1,16 @@
 package org.jbei.ice.lib.parsers.sbol;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.vo.DNASequence;
-
 import org.sbolstandard.core.SBOLDocument;
 import org.sbolstandard.core.SBOLFactory;
 import org.sbolstandard.core.SBOLRootObject;
 import org.sbolstandard.core.SBOLValidationException;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 /**
  * Parse SBOL (v 1.1) files that are imported by the user
@@ -24,12 +24,6 @@ public class SBOLParser extends AbstractParser {
     @Override
     public String getName() {
         return SBOL_PARSER;
-    }
-
-    @Override
-    public Boolean hasErrors() {
-        // This parser cannot succeed with errors, so always return false, or fail.
-        return false;
     }
 
     @Override
@@ -47,6 +41,7 @@ public class SBOLParser extends AbstractParser {
 
             return visitor.getFeaturedDNASequence();
         } catch (SBOLValidationException | IOException e) {
+            Logger.error(e);
             throw new InvalidFormatParserException("Could not parse SBOL file!", e);
         }
     }

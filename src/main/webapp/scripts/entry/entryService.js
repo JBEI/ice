@@ -449,4 +449,19 @@ angular.module('ice.entry.service', [])
                 return entry;
             }
         }
-    });
+    })
+    .factory('CustomField', function ($resource, $cookieStore) {
+        return function () {
+
+            var sessionId = $cookieStore.get("sessionId");
+
+            return $resource('rest/custom-fields', {}, {
+                createNewCustomField: {
+                    method: 'POST',
+                    responseType: "json",
+                    headers: {'X-ICE-Authentication-SessionId': sessionId}
+                }
+            });
+        }
+    })
+;
