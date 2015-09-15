@@ -12,6 +12,7 @@
 
 <div class="modal-footer">
     <button class="btn btn-default btn-sm" ng-click="cancel()">Cancel</button>
-    <button ng-if="!modalClose && !processing" type="button" ng-click="reset()" class="btn  btn-sm btn-primary"
-            ng-disabled="!importUploader.getNotUploadedItems().length">Reset</button>
+    <button ng-if="!modalClose && !processing" type="button"
+            ng-click="resetBulkUpload()" class="btn  btn-sm btn-primary">Reset
+    </button>
 </div>

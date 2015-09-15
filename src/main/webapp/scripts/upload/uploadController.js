@@ -692,6 +692,10 @@ angular.module('ice.upload.controller', [])
 
                         linkedAddType: function () {
                             return $scope.linkedSelection;
+                        },
+
+                        uploadId: function () {
+                            return $scope.bulkUpload.id;
                         }
                     }
                 });
@@ -978,9 +982,23 @@ angular.module('ice.upload.controller', [])
             $modalInstance.dismiss('cancel');
         };
     })
-    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, $modalInstance, FileUploader, addType, linkedAddType) {
+    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, uploadId,
+                                                       $modalInstance, FileUploader, addType, linkedAddType, Folders) {
         var sid = $cookieStore.get("sessionId");
         $scope.addType = addType;
+
+        //
+        // reset the current bulk upload. involves deleting all entries and showing user new upload form
+        //
+        $scope.resetBulkUpload = function () {
+            // expected folders that can be deleted have type "PRIVATE" and "UPLOAD"
+            Folders().delete({folderId: uploadId, type: "UPLOAD"}, function (result) {
+                $location.path("/upload/" + addType);
+                $modalInstance.dismiss('cancel');
+            }, function (error) {
+                console.error(error);
+            });
+        };
 
         var uploader = $scope.importUploader = new FileUploader({
             url: "rest/upload/file",
