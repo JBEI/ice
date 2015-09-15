@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.account;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.authentication.AuthenticationException;
 import org.jbei.ice.lib.account.authentication.IAuthentication;
 import org.jbei.ice.lib.account.authentication.LocalAuthentication;
@@ -53,7 +54,8 @@ public class AccountController {
     public AccountTransfer updateAccount(final String requester, final long userId,
                                          final AccountTransfer transfer) {
         final Account account = dao.get(userId);
-        if (!account.getEmail().equalsIgnoreCase(requester) && !isAdministrator(requester)) {
+        boolean requesterIsAdmin = isAdministrator(requester);
+        if (!account.getEmail().equalsIgnoreCase(requester) && !requesterIsAdmin) {
             return null;
         }
 
@@ -74,7 +76,16 @@ public class AccountController {
             account.setInstitution(transfer.getInstitution());
         }
 
-        return dao.update(account).toDataTransferObject();
+        if (transfer.getAccountType() != null) {
+            if (transfer.getAccountType() != account.getType() && !requesterIsAdmin)
+                throw new PermissionException("Only admins can change account type");
+
+            account.setType(transfer.getAccountType());
+        }
+
+        AccountTransfer result = dao.update(account).toDataTransferObject();
+        result.setAdmin(isAdministrator(account.getEmail()));
+        return result;
     }
 
     /**
@@ -355,14 +366,6 @@ public class AccountController {
             account.setSalt(Utils.generateSaltForUserAccount());
         }
         return dao.create(account);
-    }
-
-    /**
-     * @param account
-     * @return {@code true} if an administrator account
-     */
-    public boolean isAdministrator(final Account account) {
-        return isAdministrator(account.getEmail());
     }
 
     /**

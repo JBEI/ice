@@ -27,7 +27,6 @@ public class SampleResource extends RestResource {
     private SampleService sampleService = new SampleService();
 
     /**
-     * @param token
      * @return Response with matching part sample
      */
     @GET
@@ -46,24 +45,20 @@ public class SampleResource extends RestResource {
     }
 
     /**
-     * @param offset
-     * @param limit
-     * @param sort
-     * @param asc
-     * @param filter
-     * @param status
      * @return Response with matching samples
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/requests")
-    public Response getRequests(@DefaultValue("0") @QueryParam("offset") final int offset,
+    public Response getRequests(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            @DefaultValue("0") @QueryParam("offset") final int offset,
             @DefaultValue("15") @QueryParam("limit") final int limit,
             @DefaultValue("requested") @QueryParam("sort") final String sort,
             @DefaultValue("false") @QueryParam("asc") final boolean asc,
             @QueryParam("filter") final String filter,
             @QueryParam("status") final SampleRequestStatus status) {
-        final String userId = getUserId();
+        final String userId = getUserId(userAgentHeader);
         Logger.info(userId + ": retrieving sample requests");
         final UserSamples samples = requestRetriever.getRequests(userId, offset, limit, sort, asc,
                 status, filter);
@@ -74,14 +69,12 @@ public class SampleResource extends RestResource {
      * Sets the status of sample requests. Must have admin privs to set the sample for others This
      * is intended for requesting samples
      *
-     * @param status
-     * @param requestIds
      * @return Response success or failure
      */
     @PUT
     @Path("/requests")
     public Response setRequestStatus(@QueryParam("status") final SampleRequestStatus status,
-            final ArrayList<Long> requestIds) {
+                                     final ArrayList<Long> requestIds) {
         final String userId = getUserId();
         try {
             if (requestIds == null || requestIds.isEmpty()) {
@@ -102,50 +95,41 @@ public class SampleResource extends RestResource {
         }
     }
 
-    /**
-     * @param requestId
-     * @return Response with the removed sample
-     */
     @DELETE
     @Path("/requests/{id}")
-    public Response deleteSampleRequest(@PathParam("id") final long requestId) {
-        final String userId = getUserId();
+    public Response deleteSampleRequest(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+                                        @PathParam("id") final long requestId) {
+        final String userId = getUserId(sessionId);
         return respond(Response.Status.OK, requestRetriever.removeSampleFromCart(userId, requestId));
     }
 
     /**
-     * @param requestId
-     * @param status
      * @return Response with the updated sample request
      */
     @PUT
     @Path("/requests/{id}")
-    public Response updateSampleRequest(@PathParam("id") final long requestId,
-            @QueryParam("status") final SampleRequestStatus status) {
-        final String userId = getUserId();
+    public Response updateSampleRequest(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+                                        @PathParam("id") final long requestId,
+                                        @QueryParam("status") final SampleRequestStatus status) {
+        final String userId = getUserId(sessionId);
         final SampleRequest request = requestRetriever.updateStatus(userId, requestId, status);
         return respond(Response.Status.OK, request);
     }
 
     /**
-     * @param offset
-     * @param limit
-     * @param sort
-     * @param asc
-     * @param uid
-     * @param status
      * @return response with the matching sample requests
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/requests/{userId}")
-    public Response getUserRequests(@DefaultValue("0") @QueryParam("offset") final int offset,
-            @DefaultValue("15") @QueryParam("limit") final int limit,
-            @DefaultValue("requested") @QueryParam("sort") final String sort,
-            @DefaultValue("false") @QueryParam("asc") final boolean asc,
-            @PathParam("userId") final long uid,
-            @DefaultValue("IN_CART") @QueryParam("status") final SampleRequestStatus status) {
-        final String userId = getUserId();
+    public Response getUserRequests(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+                                    @DefaultValue("0") @QueryParam("offset") final int offset,
+                                    @DefaultValue("15") @QueryParam("limit") final int limit,
+                                    @DefaultValue("requested") @QueryParam("sort") final String sort,
+                                    @DefaultValue("false") @QueryParam("asc") final boolean asc,
+                                    @PathParam("userId") final long uid,
+                                    @DefaultValue("IN_CART") @QueryParam("status") final SampleRequestStatus status) {
+        final String userId = getUserId(sessionId);
         Logger.info(userId + ": retrieving sample requests for user");
         final UserSamples userSamples = requestRetriever.getUserSamples(userId, status, offset,
                 limit, sort, asc);
@@ -153,20 +137,19 @@ public class SampleResource extends RestResource {
     }
 
     /**
-     * @param request
      * @return Response with the added sample requests
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/requests")
-    public ArrayList<SampleRequest> addRequest(final SampleRequest request) {
-        final String userId = getUserId();
+    public ArrayList<SampleRequest> addRequest(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+                                               final SampleRequest request) {
+        final String userId = getUserId(sessionId);
         log(userId, "add sample request to cart for " + request.getPartData().getId());
         return requestRetriever.placeSampleInCart(userId, request);
     }
 
     /**
-     * @param type
      * @return Response with the current sample requests
      */
     @GET

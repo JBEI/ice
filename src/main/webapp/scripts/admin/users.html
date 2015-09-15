@@ -57,10 +57,8 @@
             </div>
         </form>
     </div>
-
     <div class="pad_top">
-        <table cellspacing="0" class="table table-hover font-95em"
-               ng-class="{'opacity_4':loadingPage}">
+        <table cellspacing="0" class="table table-hover font-95em" ng-class="{'opacity_4':loadingPage}">
             <thead>
             <tr data-ng-show='!userList'>
                 <td colspan="10">Loading...</td>
@@ -82,21 +80,27 @@
             </tr>
             </thead>
             <tbody>
-            <tr data-ng-repeat="user in userList.users">
-                <td class="no_wrap">{{user.firstName}} {{user.lastName}} (<a ng-href="profile/{{user.id}}">{{user.email}}</a>)
+            <tr data-ng-repeat="userItem in userList.users">
+                <td class="no_wrap">{{userItem.firstName}} {{userItem.lastName}} (<a ng-href="profile/{{userItem.id}}">{{userItem.email}}</a>)
                 </td>
-                <td style="width:160px; white-space:nowrap" ng-if="user.isAdmin">
-                    <small class="label label-danger"
-                           style="font-size: 12px; position: relative; top: -4px">{{user.accountType |
-                        capitalize}}
-                    </small>
+                <td style="width:160px; white-space:nowrap">
+                    <!-- Single button -->
+                    <div class="btn-group" dropdown>
+                        <button type="button" class="btn btn-xs dropdown-toggle" dropdown-toggle
+                                ng-class="{'btn-warning':userItem.isAdmin, 'btn-default':!userItem.isAdmin}">
+                            {{userItem.accountType |capitalize}} <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li ng-if="userItem.accountType != 'ADMIN'"
+                                ng-click="setUserAccountType(userItem, 'ADMIN')"><a href="#">Admin</a></li>
+                            <li ng-if="userItem.accountType != 'NORMAL'"
+                                ng-click="setUserAccountType(userItem, 'NORMAL')"><a href="#">Regular</a></li>
+                        </ul>
+                    </div>
                 </td>
-                <td style="width:160px; white-space:nowrap" ng-if="!user.isAdmin">{{user.accountType ||
-                    "Normal" | capitalize}}
-                </td>
-                <td style="width:90px; white-space:nowrap">{{user.userEntryCount | number}}</td>
-                <td style="width:160px; white-space:nowrap">{{user.registerDate | date:'MMM d, yyyy'}}</td>
-                <td style="width:160px; white-space:nowrap"><span ng-show="user.lastLogin">{{user.lastLogin | date:'MMM d, yyyy'}}</span>
+                <td style="width:90px; white-space:nowrap">{{userItem.userEntryCount | number}}</td>
+                <td style="width:160px; white-space:nowrap">{{userItem.registerDate | date:'MMM d, yyyy'}}</td>
+                <td style="width:160px; white-space:nowrap"><span ng-show="userItem.lastLogin">{{userItem.lastLogin | date:'MMM d, yyyy'}}</span>
                 </td>
             </tr>
             </tbody>
