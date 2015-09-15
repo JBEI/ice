@@ -250,11 +250,15 @@ angular.module('ice.admin.controller', [])
 
         var samples = Samples($cookieStore.get("sessionId"));
         $scope.maxSize = 5;
-        $scope.params = {sort: 'requested', asc: false, currentPage: 1, status: 'ALL'};
+        $scope.params = {sort: 'requested', asc: false, currentPage: 1, status: undefined};
 
         $scope.requestSamples = function () {
             $scope.loadingPage = true;
-            samples.requests($scope.params, function (result) {
+            var params = angular.copy($scope.params);
+            if (params.status == 'ALL')
+                params.status = undefined;
+
+            samples.requests(params, function (result) {
                 $scope.sampleRequests = result;
                 $scope.loadingPage = false;
                 $scope.indexStart = ($scope.currentPage - 1) * 15;
