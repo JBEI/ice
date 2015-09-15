@@ -19,7 +19,7 @@
     <script src="scripts/lib/angular/angular-touch.min.js"></script>
 
     <script src="scripts/lib/angular-ui/angular-ui-router.min-0.2.15.js"></script>
-    <script src="scripts/lib/angular-ui/ui-bootstrap-tpls-0.13.4.min.js"></script>
+    <script src="scripts/lib/angular-ui/ui-bootstrap-tpls-0.13.3.min.js"></script>
 
     <script src="scripts/lib/angular-file-upload/angular-file-upload.min.js"></script>
 
