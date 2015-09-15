@@ -66,7 +66,7 @@ public class FileDownloadServlet extends HttpServlet {
             if (uri != null) {
                 try {
                     IOUtils.copy(uri.toURL().openStream(),
-                                 new FileOutputStream(tmpDir + File.separatorChar + hash + ".png"));
+                            new FileOutputStream(tmpDir + File.separatorChar + hash + ".png"));
                     fileId = hash + ".png";
                 } catch (IOException e) {
                     Logger.error(e);
@@ -76,6 +76,9 @@ public class FileDownloadServlet extends HttpServlet {
         }
 
         response.setContentType("image/png");
+        if (fileId == null)
+            return;
+
         File file = Paths.get(tmpDir, fileId).toFile();
         if (file.exists() && file.canRead()) {
             response.setContentLength((int) file.length());
