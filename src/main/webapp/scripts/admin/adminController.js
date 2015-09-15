@@ -340,5 +340,20 @@ angular.module('ice.admin.controller', [])
             }, function (error) {
 
             })
+        };
+
+        $scope.setUserAccountType = function (userItem, accountType) {
+            if (!accountType)
+                accountType = 'NORMAL';
+
+            var userCopy = angular.copy(userItem);
+            userCopy.accountType = accountType;
+
+            user.update({userId: userItem.id}, userCopy, function (result) {
+                userItem.accountType = result.accountType;
+                userItem.isAdmin = result.isAdmin;
+            }, function (error) {
+                console.log(error);
+            });
         }
     });
