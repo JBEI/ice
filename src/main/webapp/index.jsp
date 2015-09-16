@@ -5,12 +5,14 @@
 
     <meta charset="utf-8">
     <title>ICE - Inventory of Composable Elements</title>
-    <link href="css/font-awesome.min.css" rel="stylesheet">
 
+    <link href="css/font-awesome.min.css" rel="stylesheet">
     <link href="css/ice.css" rel="stylesheet">
-    <script src="scripts/lib/jquery/jquery-1.11.3.min.js"></script>
+    <link rel="stylesheet" href="scripts/lib/handsontable-0.18.0/pikaday.css">
+    <link rel="stylesheet" media="screen" href="scripts/lib/handsontable-0.18.0/handsontable.full.min.css">
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
+    <script src="scripts/lib/jquery/jquery-1.11.3.min.js"></script>
     <script src="scripts/lib/angular/angular.min.js"></script>
     <script src="scripts/lib/angular/angular-route.min.js"></script>
     <script src="scripts/lib/angular/angular-resource.min.js"></script>
@@ -25,8 +27,6 @@
 
     <script src="scripts/lib/handsontable-0.18.0/handsontable.full.min.js"></script>
     <script src="scripts/lib/handsontable-0.18.0/pikaday.js"></script>
-    <link rel="stylesheet" href="scripts/lib/handsontable-0.18.0/pikaday.css">
-    <link rel="stylesheet" media="screen" href="scripts/lib/handsontable-0.18.0/handsontable.full.min.css">
 
     <script src="scripts/lib/momentjs/moment.min.js"></script>
     <script src="scripts/lib/angular-moment/angular-moment.min.js"></script>
