@@ -675,6 +675,10 @@ angular.module('ice.upload.controller', [])
 
                         linkedAddType: function () {
                             return $scope.linkedSelection;
+                        },
+
+                        uploadId: function () {
+                            return $scope.bulkUpload.id;
                         }
                     }
                 });
