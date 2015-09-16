@@ -37,7 +37,8 @@
                     <span ng-show="entry.canEdit">
                         <i tooltip="Add entry link" class="fa fa-link opacity_hover font-80em"
                            ng-click="addLink(entry)" style="color: #3a6aad;"></i>&nbsp;
-                        <i tooltip="Copy" class="opacity_hover fa fa-copy font-80em" ng-click="createCopyOfEntry()"></i>
+                        <i tooltip="Clone" class="opacity_hover fa fa-clone font-80em"
+                           ng-click="createCopyOfEntry()"></i>
                     </span>
                     <small ng-if="entry.visible!=='OK'" class="label label-danger"
                            style="font-size: 12px; position: relative; top: -4px">{{entry.visible}}
