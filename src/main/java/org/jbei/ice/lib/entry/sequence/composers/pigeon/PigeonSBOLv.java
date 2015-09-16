@@ -25,7 +25,7 @@ import java.util.Iterator;
 public class PigeonSBOLv {
 
     private static final String NEWLINE = System.getProperty("line.separator");
-    private static final String PIGEON_URL = "http://cidar1.bu.edu:5801/dev/perch2.php";
+    private static final String PIGEON_URL = "http://128.197.173.22:5801/dev/perch2.php";
     private static final HashMap<String, String> map = new HashMap<>();
 
     static {
@@ -110,7 +110,7 @@ public class PigeonSBOLv {
 
         StringBuilder sb = new StringBuilder();
         if (visitor.getDnaComponent() != null) {
-            sb.append(toPigeon(visitor.getDnaComponent(), null));
+            sb.append(toPigeon(visitor.getDnaComponent(), null, false));
         }
 
         sb.append("# Arcs").append(NEWLINE);
@@ -126,14 +126,14 @@ public class PigeonSBOLv {
 
         StringBuilder sb = new StringBuilder();
         if (visitor.getDnaComponent() != null) {
-            sb.append(toPigeon(visitor.getDnaComponent(), null));
+            sb.append(toPigeon(visitor.getDnaComponent(), null, false));
         }
 
         sb.append("# Arcs").append(NEWLINE);
         return sb.toString();
     }
 
-    private static String toPigeon(DnaComponent component, StrandType strandType) {
+    private static String toPigeon(DnaComponent component, StrandType strandType, boolean addLabel) {
         if (component == null)
             return "";
 
@@ -158,11 +158,13 @@ public class PigeonSBOLv {
                 if (replacedSpaces.trim().isEmpty())
                     replacedSpaces = "unnamed";
                 sb.append(pigeonType).append(" ").append(replacedSpaces).append(" ").append(split[1]);
+                if (!addLabel)
+                    sb.append(" nl");
                 sb.append(NEWLINE);
             }
         } else {
             for (SequenceAnnotation sa : component.getAnnotations()) {
-                sb.append(toPigeon(sa.getSubComponent(), sa.getStrand()));
+                sb.append(toPigeon(sa.getSubComponent(), sa.getStrand(), false));
             }
         }
 
