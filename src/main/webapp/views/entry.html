@@ -1,38 +1,36 @@
 <div ng-controller="EntryController">
-    <div class="container-fluid" ng-show="!entry&&!notFound&&!noAccess">
-        <div class="row">
-            <div class="col-md-12 text-center" style="margin-top: 50px; color: #AAA; font-size: 25px">
-                <i class="fa fa-2x fa-gear fa-spin"></i> <br>Loading Contents
-            </div>
+    <div ng-show="!entry&&!notFound&&!noAccess">
+        <div class="col-md-12 text-center" style="margin-top: 50px; color: #AAA; font-size: 25px">
+            <i class="fa fa-2x fa-gear fa-spin"></i> <br>Loading Contents
         </div>
     </div>
 
     <div ng-show="!entry&&notFound">
-        <div class="row">
-            <div class="col-md-12 text-center" style="margin-top: 50px; color: #AAA; font-size: 25px">
-                <i class="fa fa-2x fa-warning" style="color: darkred"></i> <br> Specified entry could not be found
-            </div>
+        <div class="col-md-12 text-center" style="margin-top: 50px; color: #AAA; font-size: 25px">
+            <i class="fa fa-3x fa-warning" style="color: darkred"></i> <br> Specified entry not found
         </div>
     </div>
 
     <div ng-show="noAccess">
-        <div class="row">
-            <div class="col-md-12 text-center" style="margin-top: 50px; color: #AAA; font-size: 25px">
-                <i class="fa fa-2x fa-ban" style="color: darkred"></i> <br> No read permission for entry
-            </div>
+        <div class="col-md-12 text-center" style="margin-top: 50px; color: #AAA; font-size: 25px">
+            <i class="fa fa-3x fa-ban" style="color: darkred"></i> <br> No read permission for entry
         </div>
     </div>
 
-    <div class="container-fluid" ng-if="entry">
-        <div class="row entry_general_header_td" style="height: 60px;">
-
-            <div class="col-md-10" ng-if="entry">
+    <div ng-if="entry">
+        <div class="entry_general_header_td" style="height: 60px;">
+            <div class="col-md-10">
                 <i ng-if="context" ng-click="backTo()"
                    class="pull-left fa fa-arrow-circle-left entry_go_back cursor_pointer" title="Back">
                 </i>
 
                 <h4>
-                    <strong style="color: #888;">{{entry.type}}</strong>
+                    <span ng-if="entry.visible!=='OK'">
+                    <small class="label" ng-class="{
+                    'label-danger':entry.visible=='DELETED',
+                    'label-warning':entry.visible=='PENDING' || entry.visible=='DRAFT'}"
+                           style="font-size: 9px; position: relative; top: -4px">{{entry.visible}}
+                    </small>&nbsp;</span><strong style="color: #888;">{{entry.type}}</strong>
                     <strong>{{entry.name}}</strong>
                     <span ng-show="entry.canEdit">
                         <i tooltip="Add entry link" class="fa fa-link opacity_hover font-80em"
@@ -40,14 +38,12 @@
                         <i tooltip="Clone" class="opacity_hover fa fa-clone font-80em"
                            ng-click="createCopyOfEntry()"></i>
                     </span>
-                    <small ng-if="entry.visible!=='OK'" class="label label-danger"
-                           style="font-size: 12px; position: relative; top: -4px">{{entry.visible}}
-                    </small>
+
                     <span ng-if="entry.publicRead">&nbsp;
                         <small style="font-size: 12px; position: relative; top: -4px"
                                tooltip="Available on web of registries"
                                tooltip-trigger="mouseenter"
-                               class="label label-info cursor_pointer"><i class="fa fa-globe"></i>
+                               class="label label-info cursor_default"><i class="fa fa-globe"></i>
                             Public
                         </small>
                     </span>
@@ -55,11 +51,11 @@
                     &nbsp;<a ng-href="entry/{{parent.id}}" tooltip="{{parent.name}}"
                              tooltip-trigger="mouseenter"
                              style="font-size: 12px; color: white; position: relative; top: -4px"
-                             class="small label cursor_pointer"
+                             class="label cursor_pointer"
                              ng-class="{'label-default':parent.visible=='OK',
                              'label-warning': parent.visible=='PENDING' || parent.visible == 'DRAFT',
                              'label-danger': parent.visible=='DELETED'}">
-                        <b class="font-90em">{{parent.type | uppercase}}</b> <i class="fa fa-level-up"></i></a>
+                        {{parent.type | capitalize}} <i class="fa fa-level-up"></i></a>
                     </span>
                     <br>
                     <small class="font-65em">{{entry.creationTime | date:'medium'}} - <a
@@ -79,34 +75,32 @@
             </div>
         </div>
 
-        <div class="row">
-            <table width="100%">
-                <tr>
-                    <td style="vertical-align: top">
-                        <ng-include src="selection"></ng-include>
-                    </td>
-                    <td style="width: 25px">&nbsp;</td>
-                    <td style="width: 170px; vertical-align: top">
-                        <table cellpadding="0" cellspacing="0" class="entry_detail_submenu pull-right">
-                            <tr ng-repeat="subMenu in subDetails"
-                                ng-if="(subMenu.isPrivileged&&entry.ownerEmail===user.email) || !subMenu.isPrivileged || user.isAdmin">
-                                <td ng-class="{selected:subMenu.selected}" ng-click="showSelection($index)">
-                                    <i class="fa {{subMenu.icon}}" style="font-size: 14px;"></i> &nbsp;{{subMenu.display}}
-                                    <span ng-if="subMenu.countName" style="float: right; color: #999;">{{entryStatistics[(subMenu.countName)] || 0}}</span>
-                                </td>
-                            </tr>
-                        </table>
+        <table width="100%">
+            <tr>
+                <td style="vertical-align: top">
+                    <ng-include src="selection"></ng-include>
+                </td>
+                <td style="width: 25px">&nbsp;</td>
+                <td style="width: 170px; vertical-align: top">
+                    <table cellpadding="0" cellspacing="0" class="entry_detail_submenu pull-right">
+                        <tr ng-repeat="subMenu in subDetails"
+                            ng-if="(subMenu.isPrivileged&&entry.ownerEmail===user.email) || !subMenu.isPrivileged || user.isAdmin">
+                            <td ng-class="{selected:subMenu.selected}" ng-click="showSelection($index)">
+                                <i class="fa {{subMenu.icon}}" style="font-size: 14px;"></i> &nbsp;{{subMenu.display}}
+                                <span ng-if="subMenu.countName" style="float: right; color: #999;">{{entryStatistics[(subMenu.countName)] || 0}}</span>
+                            </td>
+                        </tr>
+                    </table>
 
-                        <div class="pad_top pull-right">
-                            <ice-entry-attachment></ice-entry-attachment>
-                        </div>
+                    <div class="pad_top pull-right">
+                        <ice-entry-attachment></ice-entry-attachment>
+                    </div>
 
-                        <div class="pad_top pull-right" ng-if="entry.canEdit">
-                            <ice-entry-permission entry='entry'></ice-entry-permission>
-                        </div>
-                    </td>
-                </tr>
-            </table>
-        </div>
+                    <div class="pad_top pull-right" ng-if="entry.canEdit">
+                        <ice-entry-permission entry='entry'></ice-entry-permission>
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
 </div>
