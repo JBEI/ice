@@ -7,6 +7,7 @@ import org.jbei.ice.lib.dto.entry.CustomField;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Parameter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,13 +24,25 @@ public class ParameterDAO extends HibernateRepository<Parameter> {
 
     // filter by key value pairs
     public List<Entry> filter(List<CustomField> fields) {
-        Criteria criteria = currentSession().createCriteria(Parameter.class);
+        List<Entry> entries = new ArrayList<>();
+        boolean flag = false;
+
         for (CustomField field : fields) {
-            criteria.add(
-                    Restrictions.and(
-                            Restrictions.eq("key", field.getName()), Restrictions.eq("value", field.getValue())));
+            if (flag && entries.isEmpty())
+                return entries;
+
+            Criteria criteria = currentSession().createCriteria(Parameter.class);
+            criteria.setProjection(Projections.property("entry"));
+            criteria.add(Restrictions.and(
+                    Restrictions.eq("key", field.getName()), Restrictions.eq("value", field.getValue())));
+
+            if (flag)
+                criteria.add(Restrictions.in("entry", entries));
+            else
+                flag = true;
+            entries = criteria.list();
         }
-        criteria.setProjection(Projections.property("entry"));
-        return criteria.list();
+
+        return entries;
     }
 }

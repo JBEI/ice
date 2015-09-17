@@ -717,6 +717,7 @@ angular.module('ice.entry.controller', [])
         uploader.onErrorItem = function (item, response, status, headers) {
             item.remove();
             $scope.serverError = true;
+            uploader.resetAll();
         };
 
         uploader.onCompleteAll = function () {
