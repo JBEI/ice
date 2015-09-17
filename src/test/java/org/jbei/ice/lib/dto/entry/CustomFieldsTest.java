@@ -167,22 +167,39 @@ public class CustomFieldsTest {
         fields.createField(userId, strainId, new CustomField(strainId, "type", "promoter"));
         fields.createField(userId, strainId, new CustomField(strainId, "strength", "weak"));
 
-        // search
+        // search for strength:weak
         List<CustomField> searchFields = new ArrayList<>();
         searchFields.add(new CustomField("strength", "weak"));
         List<PartData> results = fields.getPartsByFields(userId, searchFields);
         Assert.assertEquals(1, results.size());
-        Assert.assertEquals(strain.getId(), results.get(0).getId());
 
         // create additional entry
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
         Assert.assertNotNull(plasmid);
         long plasmidId = plasmid.getId();
+        fields.createField(userId, plasmidId, new CustomField(plasmidId, "type", "promoter"));
         fields.createField(userId, plasmidId, new CustomField(plasmidId, "strength", "strong"));
         searchFields.clear();
         searchFields.add(new CustomField("strength", "strong"));
         results = fields.getPartsByFields(userId, searchFields);
         Assert.assertEquals(1, results.size());
         Assert.assertEquals(plasmid.getId(), results.get(0).getId());
+
+        // search for type:promoter
+        searchFields.clear();
+        searchFields.add(new CustomField("type", "promoter"));
+        results = fields.getPartsByFields(userId, searchFields);
+        Assert.assertEquals(2, results.size());
+        Assert.assertEquals(strain.getId(), results.get(0).getId());
+
+        // test two
+        searchFields.clear();
+        searchFields.add(new CustomField(strainId, "type", "promoter"));
+        searchFields.add(new CustomField(strainId, "strength", "weak"));
+
+        results = fields.getPartsByFields(userId, searchFields);
+        Assert.assertNotNull(results);
+        Assert.assertTrue(results.size() == 1);
+        Assert.assertEquals(strain.getId(), results.get(0).getId());
     }
 }
