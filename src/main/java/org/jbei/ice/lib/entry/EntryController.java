@@ -520,17 +520,6 @@ public class EntryController {
         return true;
     }
 
-    public boolean removeLink(String userId, long partId, long linkedPart) {
-        Entry entry = dao.get(partId);
-        if (entry == null)
-            return false;
-
-        authorization.expectWrite(userId, entry);
-        Entry linkedEntry = dao.get(linkedPart);
-
-        return entry.getLinkedEntries().remove(linkedEntry) && dao.update(entry) != null;
-    }
-
     protected Entry getEntry(String id) {
         Entry entry = null;
 

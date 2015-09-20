@@ -594,10 +594,12 @@ public class PartResource extends RestResource {
     @DELETE
     @Path("/{id}/links/{linkedId}")
     public Response deleteLink(@PathParam("id") final long partId,
+                               @DefaultValue("CHILD") @QueryParam("linkType") LinkType linkType,
                                @PathParam("linkedId") final long linkedPart) {
         final String userId = getUserId();
         log(userId, "removing link " + linkedPart + " from " + partId);
-        final boolean success = controller.removeLink(userId, partId, linkedPart);
+        EntryLinks entryLinks = new EntryLinks(userId, partId);
+        final boolean success = entryLinks.removeLink(linkedPart, linkType);
         return respond(success);
     }
 
@@ -614,7 +616,7 @@ public class PartResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createLink(@PathParam("id") long partId,
-                               @QueryParam("type") @DefaultValue("CHILD") LinkType type,
+                               @QueryParam("linkType") @DefaultValue("CHILD") LinkType type,
                                @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
                                PartData partData) {
         String userId = getUserId(sessionId);

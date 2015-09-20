@@ -1004,12 +1004,20 @@ angular.module('ice.entry.controller', [])
 
         var entry = Entry(sessionId);
 
-        $scope.addLink = function (part) {
+        $scope.addLink = function (part, role) {
 
             var modalInstance = $modal.open({
                 templateUrl: 'views/modal/add-link-modal.html',
                 controller: function ($scope, $http, $modalInstance, $cookieStore) {
                     $scope.mainEntry = part;
+                    $scope.role = role;
+
+                    if (role === 'PARENT') {
+                        $scope.links = part.parents;
+                    } else {
+                        $scope.links = part.linkedParts;
+                    }
+
                     var sessionId = $cookieStore.get("sessionId");
                     $scope.getEntriesByPartNumber = function (val) {
                         return $http.get('rest/parts/autocomplete/partid', {
@@ -1028,7 +1036,7 @@ angular.module('ice.entry.controller', [])
                             return;
 
                         var found = false;
-                        angular.forEach($scope.mainEntry.linkedParts, function (t) {
+                        angular.forEach($scope.links, function (t) {
                             if (t.id === $item.id) {
                                 found = true;
                             }
@@ -1037,22 +1045,27 @@ angular.module('ice.entry.controller', [])
                         if (found)
                             return;
 
-                        entry.addLink({partId: $scope.mainEntry.id}, $item, function (result) {
-                            $scope.mainEntry.linkedParts.push($item);
-                            $scope.addExistingPartNumber = undefined;
-                        }, function (error) {
-                            console.error(error);
-                            $scope.errorMessage = "Error linking this entry to " + $item.partId;
-                        });
+                        entry.addLink({partId: $scope.mainEntry.id, linkType: $scope.role}, $item,
+                            function (result) {
+                                $scope.links.push($item);   // todo
+                                $scope.addExistingPartNumber = undefined;
+                            }, function (error) {
+                                console.error(error);
+                                $scope.errorMessage = "Error linking this entry to " + $item.partId;
+                            });
                     };
 
                     $scope.removeExistingPartLink = function (link) {
-                        var i = $scope.mainEntry.linkedParts.indexOf(link);
+                        var i = $scope.links.indexOf(link);
                         if (i < 0)
                             return;
 
-                        entry.removeLink({partId: $scope.mainEntry.id, linkId: link.id}, function (result) {
-                            $scope.mainEntry.linkedParts.splice(i, 1);
+                        entry.removeLink({
+                            partId: $scope.mainEntry.id,
+                            linkId: link.id,
+                            linkType: $scope.role
+                        }, function (result) {
+                            $scope.links.splice(i, 1);
                         }, function (error) {
 
                         });

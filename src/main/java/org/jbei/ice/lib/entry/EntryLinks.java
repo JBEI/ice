@@ -71,6 +71,27 @@ public class EntryLinks {
     }
 
     /**
+     * Removes link specified entry id based on the specified type
+     *
+     * @param partToRemove unique identifier for part to remove
+     * @param linkType     type of relationship that exists
+     * @return true, if entry is removed successfully.
+     */
+    public boolean removeLink(long partToRemove, LinkType linkType) {
+        entryAuthorization.expectWrite(userId, entry);
+        Entry linkedEntry = entryDAO.get(partToRemove);
+
+        switch (linkType) {
+            case PARENT:
+                return linkedEntry.getLinkedEntries().remove(entry) && entryDAO.update(linkedEntry) != null;
+
+            case CHILD:
+            default:
+                return entry.getLinkedEntries().remove(linkedEntry) && entryDAO.update(entry) != null;
+        }
+    }
+
+    /**
      * Adds specified entry as a child of the entry associated with <code>this</code>
      *
      * @param child entry to be added as the child entry

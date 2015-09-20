@@ -31,12 +31,22 @@
                     'label-warning':entry.visible=='PENDING' || entry.visible=='DRAFT'}"
                            style="font-size: 9px; position: relative; top: -4px">{{entry.visible}}
                     </small>&nbsp;</span><strong style="color: #888;">{{entry.type}}</strong>
-                    <strong>{{entry.name}}</strong>
+                    <strong>{{entry.name}}</strong>&nbsp;
                     <span ng-show="entry.canEdit">
-                        <i tooltip="Add entry link" class="fa fa-link opacity_hover font-80em"
-                           ng-click="addLink(entry)" style="color: #3a6aad;"></i>&nbsp;
-                        <i tooltip="Clone" class="opacity_hover fa fa-clone font-80em"
-                           ng-click="createCopyOfEntry()"></i>
+                        <span dropdown tooltip="Add entry link">
+                            <i dropdown-toggle class="fa fa-link opacity_hover font-80em"
+                               style="color: #3a6aad;"></i>
+                            <!--ng-click="addLink(entry)"-->
+                              <ul class="dropdown-menu" aria-labelledby="simple-dropdown">
+                                  <li><a href ng-click="addLink(entry, 'PARENT')" class="font-80em"><i
+                                          class="fa fa-level-up"></i> Add Parent</a></li>
+                                  <li><a href ng-click="addLink(entry, 'CHILD')" class="font-80em"><i
+                                          class="fa fa-level-down"></i> Add Child</a></li>
+                              </ul>
+                        </span>
+                        <span tooltip="Clone this entry">
+                            <i class="opacity_hover fa fa-clone font-80em" ng-click="createCopyOfEntry()"></i>
+                            </span>
                     </span>
 
                     <span ng-if="entry.publicRead">&nbsp;
