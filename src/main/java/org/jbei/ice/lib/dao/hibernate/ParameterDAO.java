@@ -34,7 +34,8 @@ public class ParameterDAO extends HibernateRepository<Parameter> {
             Criteria criteria = currentSession().createCriteria(Parameter.class);
             criteria.setProjection(Projections.property("entry"));
             criteria.add(Restrictions.and(
-                    Restrictions.eq("key", field.getName()), Restrictions.eq("value", field.getValue())));
+                    Restrictions.eq("key", field.getName()).ignoreCase(),
+                    Restrictions.eq("value", field.getValue()).ignoreCase()));
 
             if (flag)
                 criteria.add(Restrictions.in("entry", entries));
