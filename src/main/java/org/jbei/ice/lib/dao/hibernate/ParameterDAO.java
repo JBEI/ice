@@ -46,4 +46,20 @@ public class ParameterDAO extends HibernateRepository<Parameter> {
 
         return entries;
     }
+
+    public void addIfNotExists(String key, String value, Entry entry) {
+        Criteria criteria = currentSession().createCriteria(Parameter.class);
+        criteria.add(Restrictions.and(
+                Restrictions.eq("entry", entry),
+                Restrictions.eq("key", key).ignoreCase(),
+                Restrictions.eq("value", value).ignoreCase()));
+        if (!criteria.list().isEmpty())
+            return;
+
+        Parameter parameter = new Parameter();
+        parameter.setEntry(entry);
+        parameter.setKey(key);
+        parameter.setValue(value);
+        create(parameter);
+    }
 }

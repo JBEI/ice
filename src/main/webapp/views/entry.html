@@ -68,7 +68,8 @@
                         {{parent.type | capitalize}} <i class="fa fa-level-up"></i></a>
                     </span>
                     <br>
-                    <small class="font-65em">{{entry.creationTime | date:'medium'}} - <a
+                    <small class="font-65em">{{entry.creationTime | date:'medium'}} <span
+                            style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span> <a
                             ng-href="profile/{{entry.ownerId}}">{{entry.owner}}</a></small>
                 </h4>
             </div>
