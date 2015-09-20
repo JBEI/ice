@@ -1,14 +1,13 @@
 package org.jbei.ice.lib.models;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import org.hibernate.annotations.Type;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.vo.DNAFeature;
+
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
-
-import org.jbei.ice.lib.dao.IDataModel;
-import org.jbei.ice.lib.dao.IDataTransferModel;
-
-import org.hibernate.annotations.Type;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Stores the sequence annotation information, and associates {@link Feature} objects to a
@@ -106,8 +105,11 @@ public class SequenceFeature implements IDataModel {
     }
 
     @Override
-    public IDataTransferModel toDataTransferObject() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public DNAFeature toDataTransferObject() {
+        DNAFeature dnaFeature = new DNAFeature();
+        dnaFeature.setName(this.name);
+        dnaFeature.setType(this.genbankType);
+        return dnaFeature;
     }
 
     /**
