@@ -182,10 +182,36 @@ angular.module('ice.wor.controller', [])
         };
 
         var menuSubDetails = $scope.subDetails = [
-            {url:'scripts/wor/entry/general-information.html', display:'General Information', isPrivileged:false, icon:'fa-exclamation-circle'},
-            {id:'sequences', url:'scripts/wor/entry/sequence-analysis.html', display:'Sequence Analysis', isPrivileged:false, countName:'traceSequenceCount', icon:'fa-search-plus'},
-            {id:'comments', url:'scripts/wor/entry/comments.html', display:'Comments', isPrivileged:false, countName:'commentCount', icon:'fa-comments-o'},
-            {id:'samples', url:'scripts/wor/entry/samples.html', display:'Samples', isPrivileged:false, countName:'sampleCount', icon:'fa-flask'}
+            {
+                url: 'scripts/wor/entry/general-information.html',
+                display: 'General Information',
+                isPrivileged: false,
+                icon: 'fa-exclamation-circle'
+            },
+            {
+                id: 'sequences',
+                url: 'scripts/wor/entry/sequence-analysis.html',
+                display: 'Sequence Analysis',
+                isPrivileged: false,
+                countName: 'traceSequenceCount',
+                icon: 'fa-search-plus'
+            },
+            {
+                id: 'comments',
+                url: 'scripts/wor/entry/comments.html',
+                display: 'Comments',
+                isPrivileged: false,
+                countName: 'commentCount',
+                icon: 'fa-comments-o'
+            },
+            {
+                id: 'samples',
+                url: 'scripts/wor/entry/samples.html',
+                display: 'Samples',
+                isPrivileged: false,
+                countName: 'sampleCount',
+                icon: 'fa-flask'
+            }
         ];
 
         $scope.showSelection = function (index) {
@@ -242,8 +268,15 @@ angular.module('ice.wor.controller', [])
     })
     .controller('WebOfRegistriesController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote, Settings) {
         var setting = Settings($cookieStore.get("sessionId"));
+        $scope.newPartner = undefined;
+        $scope.partnerStatusList = [
+            {status: 'BLOCKED', action: 'Block'},
+            {status: 'APPROVED', action: 'Approve'}
+        ];
 
+        //
         // retrieve web of registries partners
+        //
         $scope.wor = undefined;
         $scope.isWorEnabled = false;
         setting.getSetting({}, {key: 'JOIN_WEB_OF_REGISTRIES'}, function (result) {
@@ -259,6 +292,9 @@ angular.module('ice.wor.controller', [])
             $scope.wor = result;
         });
 
+        //
+        // enable or disable web of registries functionality
+        //
         $scope.enableDisableWor = function () {
             var value = $scope.isWorEnabled ? 'no' : 'yes';
             setting.update({}, {key: 'JOIN_WEB_OF_REGISTRIES', value: value},
@@ -273,7 +309,9 @@ angular.module('ice.wor.controller', [])
                 });
         };
 
-        $scope.newPartner = undefined;
+        //
+        // add remote partner to web of registries
+        //
         $scope.addPartner = function () {
             wor.addPartner({}, $scope.newPartner, function (result) {
                 if (!result) {
@@ -290,19 +328,27 @@ angular.module('ice.wor.controller', [])
             });
         };
 
+        //
+        // remove web of registries partner
+        //
         $scope.removePartner = function (partner, index) {
             wor.removePartner({url: partner.url}, function (result) {
                 $scope.wor.partners.splice(index, 1);
             });
         };
 
-        $scope.approvePartner = function (partner, index) {
-            partner.status = 'APPROVED';
+        //
+        // set the status of a partner
+        //
+        $scope.setPartnerStatus = function (partner, newStatus) {
+            partner.status = newStatus;
             wor.updatePartner({url: partner.url}, partner, function (result) {
-
             });
         };
 
+        //
+        //
+        //
         $scope.selectPartner = function (partner) {
             $location.path("web/" + partner.id);
             $scope.selectedPartner = partner.id;
