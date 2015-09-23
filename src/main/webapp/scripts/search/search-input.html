@@ -3,87 +3,87 @@
            style="white-space: nowrap;">
         <tr>
             <td class="quick_search dropdown" dropdown is-open="advancedMenu.isOpen">
-                <i class="fa fa-fw fa-search search-indicator" ng-hide="canReset()"></i>
+                <div>
+                    <i class="fa fa-fw fa-search search-indicator" ng-hide="canReset()"></i>
 
-                <i class="fa fa-times-circle opacity_hover search-indicator" ng-click="reset()" title="Reset Search"
-                   ng-show="canReset()"
-                        ></i>
+                    <i class="fa fa-times-circle opacity_hover search-indicator" ng-click="reset()" title="Reset Search"
+                       ng-show="canReset()"></i>
 
-                <input type="search" class="quick_search_input" ng-model="queryText" placeholder="Search">
+                    <input type="search" class="quick_search_input" ng-model="queryText" placeholder="Search">
 
-                <i class="fa fa-caret-down opacity_hover" ng-click="toggleAdvancedMenuDropdown($event)"
-                   style="padding: 9px 5px 4px 5px; color: #999; height: 33px; background-color: #ededed;"></i>
+                    <i class="fa fa-caret-down opacity_hover" ng-click="toggleAdvancedMenuDropdown($event)"
+                       style="padding: 9px 5px 4px 5px; color: #999; height: 33px; background-color: #ededed;"></i>
 
-                <!--<i class="fa fa-search cursor_pointer blue"-->
-                <!--style="padding: 4px 9px 4px 5px; background-color: #fff; font-size: 19px"></i>-->
+                    <!--<i class="fa fa-search cursor_pointer blue"-->
+                    <!--style="padding: 4px 9px 4px 5px; background-color: #fff; font-size: 19px"></i>-->
 
-                <div class="dropdown-menu" style="padding: 12px;width: 451px">
-                    <span style="letter-spacing:-1px; color:#555;">&nbsp;<b>TYPE</b>&nbsp;&nbsp;</span>
-                    <label class="checkbox-inline" stop-event='click'>
-                        <input type="checkbox" ng-model="searchTypes.all" ng-change="check('all')">All
-                    </label>
+                    <div class="dropdown-menu" style="padding: 12px;width: 451px">
+                        <span style="letter-spacing:-1px; color:#555;">&nbsp;<b>TYPE</b>&nbsp;&nbsp;</span>
+                        <label class="checkbox-inline" stop-event='click'>
+                            <input type="checkbox" ng-model="searchTypes.all" ng-change="check('all')">All
+                        </label>
 
-                    <label class="checkbox-inline" stop-event='click'>
-                        <input type="checkbox" ng-model="searchTypes.strain" ng-change="check('strain')">Strain
-                    </label>
+                        <label class="checkbox-inline" stop-event='click'>
+                            <input type="checkbox" ng-model="searchTypes.strain" ng-change="check('strain')">Strain
+                        </label>
 
-                    <label class="checkbox-inline" stop-event='click'>
-                        <input type="checkbox" ng-model="searchTypes.plasmid" ng-change="check('plasmid')">Plasmid
-                    </label>
+                        <label class="checkbox-inline" stop-event='click'>
+                            <input type="checkbox" ng-model="searchTypes.plasmid" ng-change="check('plasmid')">Plasmid
+                        </label>
 
-                    <label class="checkbox-inline" stop-event='click'>
-                        <input type="checkbox" ng-model="searchTypes.part" ng-change="check('part')">Part
-                    </label>
+                        <label class="checkbox-inline" stop-event='click'>
+                            <input type="checkbox" ng-model="searchTypes.part" ng-change="check('part')">Part
+                        </label>
 
-                    <label class="checkbox-inline" stop-event='click'>
-                        <input type="checkbox" ng-model="searchTypes.arabidopsis" ng-change="check('arabidopsis')">Arabidopsis
-                    </label>
+                        <label class="checkbox-inline" stop-event='click'>
+                            <input type="checkbox" ng-model="searchTypes.arabidopsis" ng-change="check('arabidopsis')">Arabidopsis
+                        </label>
 
-                    <div class="divider"></div>
+                        <div class="divider"></div>
 
-                    <span style="letter-spacing:-1px; color:#555;"><b>BLAST</b></span>
+                        <span style="letter-spacing:-1px; color:#555;"><b>BLAST</b></span>
 
-                    <select class="pull_down" stop-event='click' ng-model="blastSearchType">
-                        <option value="">Choose one</option>
-                        <option value="BLAST_N">Nucleotide Search (blastn)</option>
-                        <option value="TBLAST_X">Nucleotide Translated Search (tblastx)</option>
-                    </select>
+                        <select class="pull_down" stop-event='click' ng-model="blastSearchType">
+                            <option value="">Choose one</option>
+                            <option value="BLAST_N">Nucleotide Search (blastn)</option>
+                            <option value="TBLAST_X">Nucleotide Translated Search (tblastx)</option>
+                        </select>
 
-                    <br>
+                        <br>
                     <textarea class="margin-top-5" rows="9" placeholder="Enter Sequence" style="width: 100%"
                               stop-event='click' class="input-sm" ng-model="sequenceText"></textarea>
 
-                    <div class="divider"></div>
+                        <div class="divider"></div>
 
-                    <label class="checkbox-inline" stop-event='click'>
-                        <input type="checkbox" ng-model="hasAttachment">Has Attachment
-                    </label>
+                        <label class="checkbox-inline" stop-event='click'>
+                            <input type="checkbox" ng-model="hasAttachment">Has Attachment
+                        </label>
 
-                    <label class="checkbox-inline" stop-event='click'>
-                        <input type="checkbox" ng-model="hasSample">Has Sample
-                    </label>
+                        <label class="checkbox-inline" stop-event='click'>
+                            <input type="checkbox" ng-model="hasSample">Has Sample
+                        </label>
 
-                    <label class="checkbox-inline" stop-event='click'>
-                        <input type="checkbox" ng-model="hasSequence">Has Sequence
-                    </label>
+                        <label class="checkbox-inline" stop-event='click'>
+                            <input type="checkbox" ng-model="hasSequence">Has Sequence
+                        </label>
 
-                    <div class="divider"></div>
+                        <div class="divider"></div>
 
-                    <span style="letter-spacing:-1px; color:#555;"><b>BIO SAFETY LEVEL</b></span>
+                        <span style="letter-spacing:-1px; color:#555;"><b>BIO SAFETY LEVEL</b></span>
 
-                    <select class="pull_down" stop-event='click' ng-model="bioSafetyLevelOption">
-                        <option value="">Choose one</option>
-                        <option value="1">Level 1</option>
-                        <option value="2">Level 2</option>
-                    </select>
+                        <select class="pull_down" stop-event='click' ng-model="bioSafetyLevelOption">
+                            <option value="">Choose one</option>
+                            <option value="1">Level 1</option>
+                            <option value="2">Level 2</option>
+                        </select>
 
-                    <div class="divider"></div>
+                        <div class="divider"></div>
 
-                    <div>
-                        <button class="btn btn-link" type="button" ng-click="search(true)">
-                            <i style="color: #555" class="fa fa-globe"></i> <span
-                                class="font-90em">Search other registries</span>
-                        </button>
+                        <div>
+                            <button class="btn btn-link" type="button" ng-click="search(true)">
+                                <i style="color: #555" class="fa fa-globe"></i> <span
+                                    class="font-90em">Search other registries</span>
+                            </button>
 
                         <span class="pull-right">
                             <button type="submit" class="btn btn-sm btn-primary">Search</button>
@@ -91,6 +91,7 @@
                                 Reset
                             </button>
                         </span>
+                        </div>
                     </div>
                 </div>
             </td>

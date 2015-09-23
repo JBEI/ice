@@ -35,15 +35,13 @@ public class WoRController {
      * enable the web of registries functionality
      */
     public boolean isWebEnabled() {
-        String value = new ConfigurationController().getPropertyValue(
-                ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
+        String value = new ConfigurationController().getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
         return "yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
     }
 
     public WebOfRegistries getRegistryPartners(boolean approvedOnly) {
-        String value = new ConfigurationController().getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
         WebOfRegistries webOfRegistries = new WebOfRegistries();
-        webOfRegistries.setWebEnabled("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
+        webOfRegistries.setWebEnabled(isWebEnabled());
 
         // retrieve actual partners
         List<RemotePartner> partners = dao.getRegistryPartners();
@@ -65,6 +63,9 @@ public class WoRController {
      * @param partnerUrl url identifier for partner
      */
     public boolean removeWebPartner(String userId, String partnerUrl) {
+        if (!new AccountController().isAdministrator(userId))
+            return false;
+
         RemotePartner partner = dao.getByUrl(partnerUrl);
         if (partner == null)
             return true;
@@ -82,7 +83,7 @@ public class WoRController {
         if (existing == null)
             return false;
 
-        RemotePartnerStatus newStatus = RemotePartnerStatus.APPROVED;
+        RemotePartnerStatus newStatus = RemotePartnerStatus.valueOf(partner.getStatus());
         if (newStatus == existing.getPartnerStatus())
             return true;
 

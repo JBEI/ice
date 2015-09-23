@@ -154,7 +154,7 @@ public class SequenceController {
      * Update the {@link Sequence} in the database, with the option to rebuild the search index.
      *
      * @param userId   unique identifier for user performing action
-     * @param sequence sequence to be upated
+     * @param sequence sequence to be updated
      * @return Saved Sequence.
      */
 
@@ -296,6 +296,7 @@ public class SequenceController {
                             new DNAFeatureLocation(location.getGenbankStart(), location.getEnd()));
                 }
 
+                dnaFeature.setId(sequenceFeature.getId());
                 dnaFeature.setType(sequenceFeature.getGenbankType());
                 dnaFeature.setName(sequenceFeature.getName());
                 dnaFeature.setStrand(sequenceFeature.getStrand());
@@ -340,8 +341,8 @@ public class SequenceController {
         }
 
         Sequence sequence = new Sequence(sequenceString, "", fwdHash, revHash, null);
-
         Set<SequenceFeature> sequenceFeatures = sequence.getSequenceFeatures();
+
         if (dnaSequence instanceof FeaturedDNASequence) {
             FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) dnaSequence;
             sequence.setUri(featuredDNASequence.getUri());
@@ -367,13 +368,6 @@ public class SequenceController {
                             end = 1;
                         } else if (end > featuredDNASequence.getSequence().length()) {
                             end = featuredDNASequence.getSequence().length();
-                        }
-                        if (genbankStart > end) { // over zero case
-                            featureSequence += featuredDNASequence.getSequence().substring(
-                                    genbankStart - 1, featuredDNASequence.getSequence().length());
-                            featureSequence += featuredDNASequence.getSequence().substring(0, end);
-                        } else { // normal
-                            featureSequence += featuredDNASequence.getSequence().substring(genbankStart - 1, end);
                         }
 
                         if (genbankStart > end) { // over zero case
@@ -433,13 +427,6 @@ public class SequenceController {
             }
         }
 
-        return sequence;
-    }
-
-    public Sequence saveSequence(Sequence partSequence) {
-        Sequence sequence = dao.create(partSequence);
-        if (sequence != null)
-            ApplicationController.scheduleBlastIndexRebuildTask(true);
         return sequence;
     }
 

@@ -432,7 +432,8 @@ public class FolderController {
         Account account = getAccount(userId);
         ArrayList<FolderDetails> folderDetails = new ArrayList<>();
 
-        Set<Group> groups = groupController.getAllGroups(account);
+        Set<Group> groups = account.getGroups();
+        groups.remove(groupController.createOrRetrievePublicGroup());
         Set<Folder> sharedFolders = DAOFactory.getPermissionDAO().retrieveFolderPermissions(account, groups);
         if (sharedFolders == null)
             return null;
