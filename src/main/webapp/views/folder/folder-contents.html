@@ -76,18 +76,19 @@
         </div>
 
         <table ng-if="folder && folder.entries && folder.entries.length" cellspacing="0"
-               class="table table-responsive table-border-bottom table-hover table-condensed table-striped font-95em"
+               class="table table-responsive table-border-bottom table-hover table-condensed font-95em"
                ng-class="{'opacity_4':loadingPage}">
             <thead>
             <tr>
                 <!--selection toggle-->
-                <th class="dropdown" style="padding:0; font-size: 15px; vertical-align: middle; text-align: center">
-                    <span class="dropdown-toggle">
+                <th class="dropdown" dropdown
+                    style="padding:0; font-size: 15px; vertical-align: middle; text-align: center">
+                    <span class="dropdown-toggle" dropdown-toggle>
                         <i class="fa cursor_default" ng-class="selectAllClass()" ng-click="selectAll()"
                            stop-event="click"></i>
                         <span class="caret cursor_pointer"></span>
                     </span>
-                    <ul class="dropdown-menu" style="min-width: 100px">
+                    <ul class="dropdown-menu" dropdown-menu style="min-width: 100px">
                         <li class="font-75em cursor_pointer" ng-click="setType('all')"><a>All</a></li>
                         <li ng-repeat="choice in items" ng-click="setType(choice.type)"
                             class="font-75em cursor_pointer">

@@ -125,209 +125,6 @@ angular.module('ice.entry.controller', [])
                 $scope.newComment.samples.splice(idx, 1);
         }
     })
-    .controller('EntrySampleController', function ($location, $rootScope, $scope, $modal, $cookieStore, $stateParams, Entry, Samples) {
-        var sessionId = $cookieStore.get("sessionId");
-        var entry = Entry(sessionId);
-        var partId = $stateParams.id;
-
-        $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-        $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
-
-        // retrieve samples for partId
-        entry.samples({
-            partId: partId
-        }, function (result) {
-            $scope.samples = result;
-        });
-
-        // marks the sample object "inCart" field if the data
-        // contains the entry id of current part being viewed
-        var setInCart = function (data) {
-            if (!data || !data.length) {
-                $scope.samples[0].inCart = false;
-                return;
-            }
-
-            // check specific values added to cart
-            for (var idx = 0; idx < data.length; idx += 1) {
-                // using "==" instead of "===" since partId is a string
-                if (data[idx].partData.id == partId) {
-                    $scope.samples[0].inCart = true;
-                    return;
-                }
-            }
-
-            // assuming not found
-            $scope.samples[0].inCart = false;
-        };
-
-        $scope.isAddGene = function (samples) {
-            if (!samples || !samples.length)
-                return false;
-
-            for (var i = 0; i < samples.length; i += 1) {
-                if (samples[i].location.type == 'ADDGENE')
-                    return true;
-            }
-
-            return false;
-        };
-
-        $scope.requestFromAddGene = function (samples) {
-            for (var i = 0; i < samples.length; i += 1) {
-                if (samples[i].location.type == 'ADDGENE') {
-                    window.open("https://www.addgene.org/" + samples[i].location.display, "_blank");
-                    return;
-                }
-            }
-        };
-
-        $scope.openAddToCart = function (entryId, samples) {
-            var modalInstance = $modal.open({
-                templateUrl: 'views/modal/sample-request.html',
-                controller: function ($scope, samples) {
-                    $scope.samples = samples;
-                    $scope.tempRange = [{value: 30}, {value: 37}];
-                    $scope.sampleTemp = $scope.tempRange[0];
-
-                    $scope.hasComments = function () {
-                        for (var i = 0; i < $scope.samples.length; i += 1) {
-                            if ($scope.samples[i].comments.length)
-                                return true;
-                        }
-                        return false;
-                    };
-
-                    $scope.addSampleToCart = function (type, tmp) {
-                        var sampleSelection = {
-                            requestType: type,
-                            growthTemperature: tmp.value,
-                            partData: {
-                                id: entryId
-                            }
-                        };
-
-                        // add selection to shopping cart
-                        Samples(sessionId).addRequestToCart({}, sampleSelection, function (result) {
-                            $rootScope.$emit("SamplesInCart", result);
-                            setInCart(result);
-                            modalInstance.close('');
-                        });
-                    }
-                },
-                resolve: {
-                    samples: function () {
-                        return samples;
-                    }
-                }
-            });
-        };
-
-        $scope.newSample = {
-            open: {},
-            depositor: {
-                id: $scope.user.id,
-                email: $scope.user.email
-            },
-            location: {}
-        };
-
-        $scope.format = "M/d/yyyy h:mm a";
-        $scope.newSampleTemplate = "scripts/entry/sample/barcode-popover.html";
-        $scope.enablePopup = function (row, col) {
-            return $scope.newSample.open.cell === row + (10 + col + '').slice(-2);
-        };
-
-        // add sample 96 well plate click
-        $scope.cellBarcodeClick = function (row, col) {
-            var rc = row + (10 + col + '').slice(-2);
-            $scope.newSample.open = {
-                cell: rc
-            };
-        };
-
-        $scope.delete = function (sample) {
-            entry.deleteSample({partId: partId, sampleId: sample.id}, function (result) {
-                console.log(result);
-                var idx = $scope.samples.indexOf(sample);
-                $scope.samples.splice(idx, 1);
-                console.log("deleted", sample, idx);
-            }, function (error) {
-                console.log(error);
-            });
-        };
-
-        $scope.submitBarcode = function () {
-            $scope.newSample.code = $scope.newSample.open.cell;
-            $scope.newSample.location.child = {
-                display: $scope.newSample.open.cell,
-                type: 'WELL'
-            };
-
-            if ($scope.newSample.open.barcode) {
-                $scope.newSample.location.child.child = {
-                    display: $scope.newSample.open.barcode,
-                    type: 'TUBE'
-                }
-            }
-            $scope.createNewSample();
-        };
-
-        $scope.createNewSample = function () {
-            // create sample
-            entry.addSample({partId: partId}, $scope.newSample, function (result) {
-                $scope.samples = result;
-                $scope.newSample = {
-                    open: {},
-                    depositor: {
-                        id: $scope.user.id,
-                        email: $scope.user.email
-                    },
-                    location: {}
-                };
-            }, function (error) {
-                console.error(error);
-            });
-        };
-
-        $scope.hasTube = function (row, col) {
-            return check("TUBE", row, col);
-        };
-
-        $scope.hasWell = function (row, col) {
-            return check("WELL", row, col);
-        };
-
-        var check = function (type, row, col) {
-            var rc = row + (10 + col + '').slice(-2);
-            if ($scope.newSample.code != rc)
-                return false;
-
-            var recurse = $scope.newSample.location;
-            while (recurse != null) {
-                if (recurse.type != type) {
-                    recurse = recurse.child;
-                    continue;
-                }
-
-                return true;
-            }
-            return false;
-        };
-
-        // has either well or t
-        $scope.hasContent = function (row, col) {
-            var rc = row + (10 + col + '').slice(-2);
-            var recurse = $scope.newSample.location;
-            while (recurse != null) {
-                if (recurse.display == rc)
-                    return true;
-
-                recurse = recurse.child;
-            }
-            return false;
-        }
-    })
     .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Entry) {
         var entryId = $stateParams.id;
         var sid = $cookieStore.get("sessionId");
@@ -920,6 +717,7 @@ angular.module('ice.entry.controller', [])
         uploader.onErrorItem = function (item, response, status, headers) {
             item.remove();
             $scope.serverError = true;
+            uploader.resetAll();
         };
 
         uploader.onCompleteAll = function () {
@@ -1137,7 +935,8 @@ angular.module('ice.entry.controller', [])
     })
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope,
-                                             FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection) {
+                                             FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection,
+                                             CustomField) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
@@ -1177,12 +976,18 @@ angular.module('ice.entry.controller', [])
                 controller: function ($scope, $modalInstance) {
                     $scope.toDelete = part;
                     $scope.processingDelete = undefined;
-                    $scope.delete = function () {
+                    $scope.errorDeleting = undefined;
+
+                    $scope.deleteSequence = function () {
                         $scope.processingDelete = true;
+                        $scope.errorDeleting = false;
+
                         entry.deleteSequence({partId: part.id}, function (result) {
                             $scope.processingDelete = false;
                             $modalInstance.close(part);
                         }, function (error) {
+                            $scope.processingDelete = false;
+                            $scope.errorDeleting = true;
                             console.error(error);
                         })
                     }
@@ -1199,14 +1004,22 @@ angular.module('ice.entry.controller', [])
 
         var entry = Entry(sessionId);
 
-        $scope.addLink = function (part) {
+        $scope.addLink = function (part, role) {
 
             var modalInstance = $modal.open({
                 templateUrl: 'views/modal/add-link-modal.html',
                 controller: function ($scope, $http, $modalInstance, $cookieStore) {
                     $scope.mainEntry = part;
+                    $scope.role = role;
+                    $scope.loadingAddExistingData = undefined;
+
+                    if (role === 'PARENT') {
+                        $scope.links = part.parents;
+                    } else {
+                        $scope.links = part.linkedParts;
+                    }
+
                     var sessionId = $cookieStore.get("sessionId");
-                    var originalLinks = angular.copy($scope.mainEntry.linkedParts);
                     $scope.getEntriesByPartNumber = function (val) {
                         return $http.get('rest/parts/autocomplete/partid', {
                             headers: {'X-ICE-Authentication-SessionId': sessionId},
@@ -1218,48 +1031,119 @@ angular.module('ice.entry.controller', [])
                         });
                     };
 
+                    var addLinkAtServer = function (item) {
+                        entry.addLink({partId: $scope.mainEntry.id, linkType: $scope.role}, item,
+                            function (result) {
+                                $scope.links.push(item);   // todo
+                                $scope.addExistingPartNumber = undefined;
+                                $scope.mainEntrySequence = undefined;
+                            }, function (error) {
+                                console.error(error);
+                                $scope.errorMessage = "Error linking this entry to " + item.partId;
+                            });
+                    };
+
                     $scope.addExistingPartLink = function ($item, $model, $label) {
+                        $scope.errorMessage = undefined;
+
+                        // prevent selecting current entry
                         if ($item.id == $scope.mainEntry.id)
                             return;
 
+                        // or already added entry
                         var found = false;
-                        angular.forEach($scope.mainEntry.linkedParts, function (t) {
+                        angular.forEach($scope.links, function (t) {
                             if (t.id === $item.id) {
                                 found = true;
                             }
                         });
-
                         if (found)
                             return;
-                        $scope.mainEntry.linkedParts.push($item);
-                        $scope.addExistingPartNumber = undefined;
+
+                        $scope.selectedLink = $item;
+                        if ($scope.role == 'CHILD') {
+                            // fetch item.id and check if it has a sequence
+
+                            entry.query({partId: $item.id}, function (result) {
+                                if (!result.hasSequence) {
+                                    // then present the current entry sequence options to user
+                                    $scope.getEntrySequence($scope.mainEntry.id);
+                                } else {
+                                    // just add the link
+                                    addLinkAtServer($item);
+                                }
+                            }, function (error) {
+                                $scope.errorMessage = "Error";
+                            })
+                        } else {
+                            // adding parent : check if main (current) entry has sequence
+                            if (!$scope.mainEntry.hasSequence) {
+                                // retrieve sequence feature options for selected
+                                $scope.getEntrySequence($scope.addExistingPartNumber.id);
+                            } else {
+                                addLinkAtServer($scope.mainEntry);
+                            }
+                        }
                     };
 
                     $scope.removeExistingPartLink = function (link) {
-                        var i = $scope.mainEntry.linkedParts.indexOf(link);
+                        var i = $scope.links.indexOf(link);
                         if (i < 0)
                             return;
 
-                        $scope.mainEntry.linkedParts.splice(i, 1);
+                        entry.removeLink({
+                            partId: $scope.mainEntry.id,
+                            linkId: link.id,
+                            linkType: $scope.role
+                        }, function (result) {
+                            $scope.links.splice(i, 1);
+                        }, function (error) {
+
+                        });
                     };
 
-                    $scope.processLinkAdd = function () {
-                        entry.update($scope.mainEntry, function (result) {
-                            entry.query({partId: result.id}, function (result) {
-                                $scope.mainEntry.linkedParts = result.linkedParts;
-                                $modalInstance.close(result);
+                    $scope.close = function () {
+                        $modalInstance.close();
+                    };
+
+                    $scope.getEntrySequence = function (id) {
+                        $scope.mainEntrySequence = undefined;
+                        entry.sequence({partId: id}, function (result) {
+                            console.log(result);
+                            $scope.mainEntrySequence = result;
+                        }, function (error) {
+                            console.error(error);
+                        });
+                    };
+
+                    $scope.addSequenceToLinkAndLink = function (feature) {
+                        // update sequence information on entry
+                        // POST rest/parts/{id}/sequence featuredDNA sequence
+                        //console.log($scope.mainEntrySequence, feature, $scope.addExistingPartNumber);
+
+                        // todo : backend should handle this; quick fix for the milestone
+                        var start = feature.locations[0].genbankStart;
+                        var end = feature.locations[0].end;
+                        var sequence = $scope.mainEntrySequence.sequence.substring(start - 1, end);
+                        feature.genbankStart = 0;
+                        feature.end = sequence.length;
+
+                        var linkSequence = {
+                            identifier: $scope.addExistingPartNumber.partId,
+                            sequence: sequence,
+                            genbankStart: 0,
+                            end: sequence.length,
+                            features: [feature]
+                        };
+
+                        entry.addSequenceAsString({partId: $scope.selectedLink.id}, linkSequence,
+                            function (result) {
+                                console.log(result);
+                                addLinkAtServer($scope.addExistingPartNumber);
                             }, function (error) {
                                 console.error(error);
                             })
-                        }, function (error) {
-                            console.error(error);
-                        })
                     };
-
-                    $scope.cancelAddLink = function () {
-                        $scope.mainEntry.linkedParts = originalLinks;
-                        $modalInstance.close();
-                    }
                 },
                 backdrop: "static"
             });
@@ -1303,6 +1187,8 @@ angular.module('ice.entry.controller', [])
                 Selection.selectEntry(result);
 
                 $scope.entry = EntryService.convertToUIForm(result);
+                if ($scope.entry.canEdit)
+                    $scope.newParameter = {edit: false};
                 $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
 
                 entry.statistics({partId: $stateParams.id}, function (stats) {
@@ -1375,6 +1261,37 @@ angular.module('ice.entry.controller', [])
             } else {
                 $location.path("entry/" + $stateParams.id);
             }
+        };
+
+        $scope.createCopyOfEntry = function () {
+            $scope.entryCopy = angular.copy($scope.entry);
+            $scope.entryCopy.id = 0;
+            $scope.entryCopy.recordId = undefined;
+            $scope.entryCopy.name = $scope.entryCopy.name + " (copy)";
+            $scope.entryCopy.owner = undefined;
+            $scope.entryCopy.ownerEmail = undefined;
+
+            // convert arrays of objects to array strings
+            $scope.entryCopy.links = EntryService.toStringArray($scope.entryCopy.links);
+            $scope.entryCopy.selectionMarkers = EntryService.toStringArray($scope.entryCopy.selectionMarkers);
+
+            for (var i = 0; i < $scope.entryCopy.linkedParts.length; i += 1) {
+                $scope.entryCopy.linkedParts[i].links = EntryService.toStringArray($scope.entryCopy.linkedParts[i].links);
+                $scope.entryCopy.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.entryCopy.linkedParts[i].selectionMarkers);
+            }
+
+            // convert the part to a form the server can work with
+            $scope.entryCopy = EntryService.getTypeData($scope.entryCopy);
+            console.log($scope.entryCopy);
+
+            // create or update the part depending on whether there is a current part id
+            entry.create($scope.entryCopy, function (result) {
+                $scope.$emit("UpdateCollectionCounts");
+                $location.path('entry/' + result.id);   // todo : or /entry/edit/
+                $scope.showSBOL = false;
+            }, function (error) {
+                console.error(error);
+            });
         };
 
         // check if a selection has been made
@@ -1504,5 +1421,26 @@ angular.module('ice.entry.controller', [])
         uploader.onErrorItem = function (item, response, status, headers) {
             $scope.serverError = true;
         };
+
+        // customer parameter add for entry view
+        $scope.addNewCustomField = function () {
+            $scope.newParameter.nameInvalid = $scope.newParameter.name == undefined || $scope.newParameter.name == '';
+            $scope.newParameter.valueInvalid = $scope.newParameter.value == undefined || $scope.newParameter.value == '';
+            if ($scope.newParameter.nameInvalid || $scope.newParameter.valueInvalid)
+                return;
+
+            $scope.newParameter.partId = $scope.entry.id;
+            CustomField().createNewCustomField(
+                $scope.newParameter,
+                function (result) {
+                    if (!result)
+                        return;
+
+                    $scope.entry.parameters.push(result);
+                    $scope.newParameter.edit = false;
+                }, function (error) {
+                    console.error(error);
+                })
+        }
     });
 

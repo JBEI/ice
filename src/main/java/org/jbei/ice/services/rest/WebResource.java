@@ -1,6 +1,6 @@
 package org.jbei.ice.services.rest;
 
-import org.hsqldb.lib.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
@@ -17,7 +17,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Resource for web of registries requests
@@ -31,19 +31,17 @@ public class WebResource extends RestResource {
     private final RemoteEntries remoteEntries = new RemoteEntries();
 
     /**
-     * Retrieves information on other ice instances that is in a web of registries
-     * configuration with this instance; also know as registry partners
+     * Retrieves information on other ice instances that is in a web of registries configuration
+     * with this instance; also know as registry partners
      *
-     * @param approvedOnly    if true (default), only instances that have been approved are returned
-     * @param userAgentHeader session id for user logged in user
+     * @param approvedOnly
+     *            if true, only instances that have been approved are returned; defaults to true
      * @return wrapper around the list of registry partners
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response query(
-            @DefaultValue("true") @QueryParam("approved_only") boolean approvedOnly,
-            @HeaderParam(AUTHENTICATION_PARAM_NAME) String userAgentHeader) {
-        getUserIdFromSessionHeader(userAgentHeader);
+    public Response query(@DefaultValue("true") @QueryParam("approved_only") boolean approvedOnly) {
+        getUserId(); // ensure valid session or auth header
         return super.respond(controller.getRegistryPartners(approvedOnly));
     }
 
@@ -55,115 +53,142 @@ public class WebResource extends RestResource {
      * @param limit     maximum number of entries to retrieve
      * @param sort      field to sort on
      * @param asc       sort order
-     * @param sessionId unique identifier for user making request
-     * @return <code>OK</code> HTTP status with the list of entries wrapped in a result object
+     *
+     * @return Response with public entries from registry partners
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries")
     public Response getWebEntries(
-            @PathParam("id") long partnerId,
-            @DefaultValue("0") @QueryParam("offset") int offset,
-            @DefaultValue("15") @QueryParam("limit") int limit,
-            @DefaultValue("created") @QueryParam("sort") String sort,
-            @DefaultValue("false") @QueryParam("asc") boolean asc,
-            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
-        String userId = getUserIdFromSessionHeader(sessionId);
-        WebEntries result = remoteEntries.getPublicEntries(userId, partnerId, offset, limit, sort, asc);
+            @PathParam("id") final long partnerId,
+            @DefaultValue("0") @QueryParam("offset") final int offset,
+            @DefaultValue("15") @QueryParam("limit") final int limit,
+            @DefaultValue("created") @QueryParam("sort") final String sort,
+            @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+        final String userId = getUserId();
+        final WebEntries result = remoteEntries.getPublicEntries(userId, partnerId, offset, limit, sort, asc);
         return super.respond(Response.Status.OK, result);
     }
 
+    /**
+     * @param partnerId
+     * @param partId
+     * @return attachment info on a registry partner entry
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}/attachments")
-    public ArrayList<AttachmentInfo> getAttachments(
-            @PathParam("id") long partnerId,
-            @PathParam("entryId") long partId,
-            @HeaderParam(AUTHENTICATION_PARAM_NAME) String userAgentHeader) {
-        String userId = getUserIdFromSessionHeader(userAgentHeader);
+    public List<AttachmentInfo> getAttachments(@PathParam("id") final long partnerId,
+            @PathParam("entryId") final long partId) {
+        final String userId = getUserId();
         return remoteEntries.getEntryAttachments(userId, partnerId, partId);
     }
 
+    /**
+     * @param remoteId
+     * @param entrySelection
+     * @return Response for success
+     */
     @POST
     @Path("/{id}/transfer")
-    public Response transferEntries(
-            @PathParam("id") long remoteId,
-            EntrySelection entrySelection,
-            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
-        String userId = super.getUserIdFromSessionHeader(sessionId);
+    public Response transferEntries(@PathParam("id") final long remoteId,
+            final EntrySelection entrySelection) {
+        final String userId = super.getUserId();
         remoteEntries.transferEntries(userId, remoteId, entrySelection);
         return super.respond(Response.Status.OK);
     }
 
+    /**
+     * @param partnerId
+     * @param entryId
+     * @return Response with a specific entry for a registry partner
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}")
-    public Response getWebEntry(@Context UriInfo uriInfo,
-                                @PathParam("id") long partnerId,
-                                @PathParam("entryId") long entryId,
-                                @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
-        String userId = super.getUserIdFromSessionHeader(sessionId);
-        PartData result = remoteEntries.getPublicEntry(userId, partnerId, entryId);
+    public Response getWebEntry(
+            @PathParam("id") final long partnerId, @PathParam("entryId") final long entryId) {
+        final String userId = super.getUserId();
+        final PartData result = remoteEntries.getPublicEntry(userId, partnerId, entryId);
         return super.respond(Response.Status.OK, result);
     }
 
+    /**
+     * @param partnerId
+     * @param entryId
+     * @return Response with a specific entry tooltip for a registry partner
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}/tooltip")
-    public Response getWebEntryTooltip(@Context UriInfo uriInfo,
-                                       @PathParam("id") long partnerId,
-                                       @PathParam("entryId") long entryId,
-                                       @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
-        String userId = super.getUserIdFromSessionHeader(sessionId);
-        PartData result = remoteEntries.getPublicEntryTooltip(userId, partnerId, entryId);
+    public Response getWebEntryTooltip(
+            @PathParam("id") final long partnerId, @PathParam("entryId") final long entryId) {
+        final String userId = super.getUserId();
+        final PartData result = remoteEntries.getPublicEntryTooltip(userId, partnerId, entryId);
         return super.respond(Response.Status.OK, result);
     }
 
+    /**
+     * @param partnerId
+     * @param entryId
+     * @return Response with statistics on a specific entry for a registry partner
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}/statistics")
-    public Response getStatistics(@PathParam("id") long partnerId,
-                                  @PathParam("entryId") long entryId,
-                                  @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
-        String userId = super.getUserIdFromSessionHeader(sessionId);
-        PartStatistics statistics = remoteEntries.getPublicEntryStatistics(userId, partnerId, entryId);
+    public Response getStatistics(@PathParam("id") final long partnerId,
+            @PathParam("entryId") final long entryId) {
+        final String userId = super.getUserId();
+        final PartStatistics statistics = remoteEntries.getPublicEntryStatistics(userId, partnerId, entryId);
         return super.respond(statistics);
     }
 
+    /**
+     * @param partnerId
+     * @param entryId
+     * @return Response with a sequence on a registry partner entry
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}/sequence")
-    public Response getWebEntrySequence(@Context UriInfo uriInfo,
-                                        @PathParam("id") long partnerId,
-                                        @PathParam("entryId") long entryId,
-                                        @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
-        String userId = super.getUserIdFromSessionHeader(sessionId);
-        FeaturedDNASequence result = remoteEntries.getPublicEntrySequence(userId, partnerId, entryId);
+    public Response getWebEntrySequence(
+            @PathParam("id") final long partnerId, @PathParam("entryId") final long entryId) {
+        final String userId = super.getUserId();
+        final FeaturedDNASequence result = remoteEntries.getPublicEntrySequence(userId, partnerId, entryId);
         return super.respond(Response.Status.OK, result);
     }
 
+    /**
+     * @param partner
+     * @return Response with an added registry partner
+     */
     @POST
     @Path("/partner")
     // admin function
-    public Response addWebPartner(@Context UriInfo info,
-                                  @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-                                  RegistryPartner partner) {
-        String userId = getUserIdFromSessionHeader(sessionId);
-        RemoteContact contactRemote = new RemoteContact();
-        RegistryPartner registryPartner = contactRemote.addWebPartner(userId, partner);
+    public Response addWebPartner(final RegistryPartner partner) {
+        final String userId = getUserId();
+        final RemoteContact contactRemote = new RemoteContact();
+        final RegistryPartner registryPartner = contactRemote.addWebPartner(userId, partner);
         return respond(Response.Status.OK, registryPartner);
     }
 
+    /**
+     * @param info
+     * @param partnerId
+     * @return Response with registry partner info
+     */
     @GET
     @Path("/partner/{id}")
-    public Response getWebPartner(@Context UriInfo info,
-                                  @PathParam("id") long partnerId,
-                                  @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
-        String userId = getUserIdFromSessionHeader(sessionId);
-        RegistryPartner partner = controller.getWebPartner(userId, partnerId);
+    public Response getWebPartner(@Context final UriInfo info, @PathParam("id") final long partnerId) {
+        final String userId = getUserId();
+        final RegistryPartner partner = controller.getWebPartner(userId, partnerId);
         return super.respond(Response.Status.OK, partner);
     }
 
+    /**
+     * @param partner
+     * @return Response for success or failure
+     */
     @POST
     @Path("/partner/remote")
     public Response remoteWebPartnerRequest(RegistryPartner partner) {
@@ -185,31 +210,39 @@ public class WebResource extends RestResource {
     public Response getWebPartners(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
                                    @HeaderParam(WOR_PARTNER_TOKEN) String worToken,
                                    @QueryParam("url") String url) {
-        if (StringUtil.isEmpty(sessionId))
+        if (StringUtils.isEmpty(sessionId))
             return super.respond(controller.getWebPartners(worToken, url));
-        String userId = getUserIdFromSessionHeader(sessionId);
+        final String userId = getUserId();
         return super.respond(controller.getWebPartners(userId));
     }
 
+    /**
+     * @param url
+     * @param partner
+     * @return Response for success or failure
+     */
     @PUT
     @Path("/partner/{url}")
-    public Response updateWebPartner(
-            @PathParam("url") String url, RegistryPartner partner,
-            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
-        String userId = getUserIdFromSessionHeader(sessionId);
-        if (controller.updateWebPartner(userId, url, partner))
+    public Response updateWebPartner(@PathParam("url") final String url,
+            final RegistryPartner partner) {
+        final String userId = getUserId();
+        if (controller.updateWebPartner(userId, url, partner)) {
             return respond(Response.Status.OK);
+        }
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
+    /**
+     * @param url
+     * @return Response for success or failure
+     */
     @DELETE
     @Path("/partner/{url}")
-    public Response removeWebPartner(
-            @PathParam("url") String url,
-            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
-        String userId = getUserIdFromSessionHeader(sessionId);
-        if (controller.removeWebPartner(userId, url))
+    public Response removeWebPartner(@PathParam("url") final String url) {
+        final String userId = getUserId();
+        if (controller.removeWebPartner(userId, url)) {
             return respond(Response.Status.OK);
+        }
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 }

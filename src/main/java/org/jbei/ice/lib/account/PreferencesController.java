@@ -1,14 +1,7 @@
 package org.jbei.ice.lib.account;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-
-import org.jbei.ice.ControllerException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.Preference;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.jbei.ice.lib.dao.hibernate.PreferencesDAO;
@@ -16,6 +9,11 @@ import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.dto.search.SearchBoostField;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.dto.user.UserPreferences;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Controller for managing user preferences.
@@ -32,15 +30,9 @@ public class PreferencesController {
         accountDAO = DAOFactory.getAccountDAO();
     }
 
-    public HashMap<PreferenceKey, String> retrieveAccountPreferences(Account account, ArrayList<PreferenceKey> keys)
-            throws ControllerException {
+    public HashMap<PreferenceKey, String> retrieveAccountPreferences(Account account, ArrayList<PreferenceKey> keys) {
         HashMap<PreferenceKey, String> preferences = new HashMap<>();
-        ArrayList<Preference> results;
-        try {
-            results = dao.getAccountPreferences(account, keys);
-        } catch (DAOException de) {
-            throw new ControllerException(de);
-        }
+        ArrayList<Preference> results = dao.getAccountPreferences(account, keys);
 
         for (Preference preference : results) {
             PreferenceKey key = PreferenceKey.fromString(preference.getKey());
@@ -101,22 +93,9 @@ public class PreferencesController {
         return dao.retrievePreferenceValues(account, values);
     }
 
-    // really an update
-    public boolean saveSetting(Account account, String key, String value) throws ControllerException {
-        try {
-            return dao.createOrUpdatePreference(account, key, value) != null;
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
-    }
-
-    public Preference createPreference(Account account, String key, String value) throws ControllerException {
+    public Preference createPreference(Account account, String key, String value) {
         Preference preference = new Preference(account, key.toUpperCase(), value);
-        try {
-            return dao.create(preference);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
-        }
+        return dao.create(preference);
     }
 
     public PreferenceInfo updatePreference(String requesterEmail, long userId, String key, String value) {

@@ -10,7 +10,7 @@
             <span ng-if="!isAddGene(samples)">
             <button ng-if="!samples[0].inCart" ng-click="openAddToCart(entry.id, samples)" type="button"
                     class="ice-button">
-                <i style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Add to Cart
+                <i style="font-size: 14px; color: #007dbc" class="fa fa-cart-plus"></i> Add to Cart
             </button>
             <button ng-if="samples[0].inCart" ng-click="removeFromCart(null, entry);samples[0].inCart=false"
                     type="button" class="ice-button">

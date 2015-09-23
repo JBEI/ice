@@ -36,7 +36,7 @@ angular.module('ice.upload.service', [])
 
         var seedHeaders = angular.copy(partHeaders);
         seedHeaders.splice.apply(seedHeaders, [15, 0].concat(["Homozygosity", "Ecotype", "Harvest Date", "Parents",
-            "Plant Type", "Generation", "Sent to ABRC?"]));
+            "Plant Type", "Generation", "Sent to ABRC?", "Selection Markers <span class='required'>*</span>"]));
 
         //
         // data schema (should map exactly to headers)
@@ -56,7 +56,7 @@ angular.module('ice.upload.service', [])
 
         var seedSchema = angular.copy(dataSchema);
         seedSchema.splice.apply(seedSchema, [15, 0].concat('homozygosity', 'ecotype', 'harvestDate', 'parents',
-            'plantType', 'generation', 'sentToAbrc'));
+            'plantType', 'generation', 'sentToAbrc', 'selectionMarkers'));
 
         return {
             getDataSchema: function (type) {

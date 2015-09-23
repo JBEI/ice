@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.group;
 
-import org.jbei.ice.ControllerException;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.AccountType;
@@ -177,16 +177,16 @@ public class GroupController {
         return group != null;
     }
 
-    public UserGroup deleteGroup(Account account, UserGroup user) throws ControllerException {
+    public UserGroup deleteGroup(Account account, UserGroup user) {
         if (user.getType() == GroupType.PUBLIC && account.getType() != AccountType.ADMIN) {
             String errMsg = "Non admin " + account.getEmail() + " attempting to delete public group";
             Logger.error(errMsg);
-            throw new ControllerException(errMsg);
+            throw new PermissionException(errMsg);
         }
 
         Group group = dao.get(user.getId());
         if (group == null) {
-            throw new ControllerException("Could not find group to delete");
+            throw new IllegalArgumentException("Could not find group to delete");
         }
 
         if (group.getMembers() != null) {
@@ -306,10 +306,6 @@ public class GroupController {
             result.add(accountTransfer);
         }
         return new ArrayList<>(result);
-    }
-
-    public long retrieveGroupMemberCount(String uuid) throws ControllerException {
-        return dao.getMemberCount(uuid);
     }
 
     public AccountResults getAvailableAccounts(String userId, int offset, int limit, boolean asc, String sort) {

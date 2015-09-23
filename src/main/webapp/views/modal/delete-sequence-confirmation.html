@@ -12,9 +12,13 @@
 </div>
 
 <div class="modal-footer">
+    <div class="col-sm-5 red" ng-if="errorDeleting">
+        Error deleting sequence
+    </div>
+
     <div ng-if="!processingDelete">
         <button class="btn btn-default btn-sm" ng-click="$close()">Cancel</button>
-        <button type="button" ng-click="delete()" class="btn  btn-sm btn-primary">Delete</button>
+        <button type="button" ng-click="deleteSequence()" class="btn  btn-sm btn-primary">Delete</button>
     </div>
 
     <div ng-if="processingDelete" class="text-muted">

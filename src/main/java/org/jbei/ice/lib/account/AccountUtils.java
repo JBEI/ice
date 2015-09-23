@@ -1,14 +1,15 @@
 package org.jbei.ice.lib.account;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.utils.Utils;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 
 /**
  * Utility class for account management
@@ -30,7 +31,7 @@ public class AccountUtils {
     }
 
     public static String encryptNewUserPassword(String password, String salt) {
-        if (password == null || password.trim().isEmpty() || salt == null || salt.trim().isEmpty())
+        if (StringUtils.isEmpty(password) || StringUtils.isEmpty(salt))
             throw new IllegalArgumentException("Password and salt cannot be empty");
 
         KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), 20000, 160);

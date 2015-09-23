@@ -1,5 +1,11 @@
 package org.jbei.ice.lib.bulkupload;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,13 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Bulk Upload with zip files. It is expected that the zip contains a csv
@@ -86,12 +85,13 @@ public class BulkZipUpload {
         try (ByteArrayInputStream inputStream = new ByteArrayInputStream(csvFile.getBytes())) {
 
             // retrieve the partData and validates
-            List<PartData> updates = csvUpload.getBulkUploadDataFromFile(inputStream);
+            List<PartWithSample> updates = csvUpload.getBulkUploadDataFromFile(inputStream);
 
             // validate files to ensure that for each partData with a file, that the file is available
-            for (PartData data : updates) {
+            for (PartWithSample partWithSample : updates) {
 
                 // check sequences
+                PartData data = partWithSample.getPartData();
                 String sequenceFile = data.getSequenceFileName();
                 if (StringUtils.isNotBlank(sequenceFile) && files.get(sequenceFile) == null)
                     throw new Exception("Sequence file \"" + sequenceFile + "\" not found in the zip archive");

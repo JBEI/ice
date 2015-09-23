@@ -253,7 +253,7 @@ angular.module('ice.collection.controller', [])
                     function (result) {
                         callback(result.entries[0].id);
                     });
-            }, $scope.params.count, offset, "/folders/" + $scope.params.folderId, $scope.params.sort);
+            }, $scope.params.count, offset, "folders/" + $scope.params.folderId, $scope.params.sort);
 
             $location.path("entry/" + entry.id);
         };
@@ -268,7 +268,7 @@ angular.module('ice.collection.controller', [])
                 });
         };
 
-        $scope.folderPopupTemplateUrl = "/views/folder/template.html";
+        $scope.folderPopupTemplateUrl = "views/folder/template.html";
 
         // opens a modal that presents user with options to share selected folder
         $scope.openFolderShareSettings = function () {
@@ -352,7 +352,7 @@ angular.module('ice.collection.controller', [])
     // also the main controller
     .controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope, Folders, Settings, Search, Samples) {
         // todo : set on all
-        var searchUrl = "/search";
+        var searchUrl = "search";
         if ($location.path().slice(0, searchUrl.length) != searchUrl) {
             $location.search('q', null);
         }
@@ -452,14 +452,9 @@ angular.module('ice.collection.controller', [])
         // selected entries
         $scope.selection = [];
         $scope.shoppingCartContents = [];
-        $scope.openShoppingCart = true;
         samples.userRequests({status: 'IN_CART'}, {userId: $rootScope.user.id}, function (result) {
             $scope.shoppingCartContents = result.requests;
         });
-
-        $scope.hidePopovers = function (hide) {
-            $scope.openShoppingCart = !hide;
-        };
 
         $scope.createEntry = {
             isOpen: false
@@ -489,7 +484,7 @@ angular.module('ice.collection.controller', [])
             })
         };
 
-        $scope.shoppingCartTemplate = "/views/shopping-cart-template.html";
+        $scope.shoppingCartTemplate = "views/shopping-cart-template.html";
 
         // remove sample request
         $scope.removeFromCart = function (content, entry) {

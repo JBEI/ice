@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.entry;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
@@ -113,16 +113,20 @@ public class EntryController {
 
     public long getNumberOfEntriesSharedWithUser(String userId) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        return dao.sharedEntryCount(account, account.getGroups());
+        GroupController groupController = new GroupController();
+        Group publicGroup = groupController.createOrRetrievePublicGroup();
+        Set<Group> accountGroups = account.getGroups();
+        accountGroups.remove(publicGroup);
+        return dao.sharedEntryCount(account, accountGroups);
     }
 
     public List<PartData> getEntriesSharedWithUser(String userId, ColumnField field, boolean asc, int start,
                                                    int limit) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        Set<Group> accountGroups = new HashSet<>(account.getGroups());
-        GroupController controller = new GroupController();
-        Group everybodyGroup = controller.createOrRetrievePublicGroup();
-        accountGroups.add(everybodyGroup);
+        GroupController groupController = new GroupController();
+        Group publicGroup = groupController.createOrRetrievePublicGroup();
+        Set<Group> accountGroups = account.getGroups();
+        accountGroups.remove(publicGroup);
         List<Entry> entries = dao.sharedWithUserEntries(account, accountGroups, field, asc, start, limit);
 
         ArrayList<PartData> data = new ArrayList<>();
@@ -380,14 +384,13 @@ public class EntryController {
         if (entry == null)
             return false;
 
-        Account account = accountController.getByEmail(userId);
         TraceSequenceDAO traceSequenceDAO = DAOFactory.getTraceSequenceDAO();
         TraceSequence traceSequence = traceSequenceDAO.get(traceId);
-        if (traceSequence == null)
+        if (traceSequence == null || !canEdit(userId, traceSequence.getDepositor(), entry))
             return false;
 
         try {
-            new SequenceAnalysisController().removeTraceSequence(account, traceSequence);
+            new SequenceAnalysisController().removeTraceSequence(traceSequence);
         } catch (Exception e) {
             Logger.error(e);
             return false;
@@ -413,10 +416,15 @@ public class EntryController {
             TraceSequenceAnalysis analysis = traceSequence.toDataTransferObject();
             AccountTransfer accountTransfer = new AccountTransfer();
 
+            String depositor = traceSequence.getDepositor();
+            boolean canEdit = canEdit(userId, depositor, entry);
+            analysis.setCanEdit(canEdit);
+
             Account account = accountController.getByEmail(traceSequence.getDepositor());
             if (account != null) {
                 accountTransfer.setFirstName(account.getFirstName());
                 accountTransfer.setLastName(account.getLastName());
+                accountTransfer.setEmail(account.getEmail());
                 accountTransfer.setId(account.getId());
             }
 
@@ -425,6 +433,10 @@ public class EntryController {
         }
 
         return analysisArrayList;
+    }
+
+    protected boolean canEdit(String userId, String depositor, Entry entry) {
+        return userId.equalsIgnoreCase(depositor) || authorization.canWrite(userId, entry);
     }
 
     public ArrayList<History> getHistory(String userId, long entryId) {
@@ -480,6 +492,14 @@ public class EntryController {
         return statistics;
     }
 
+    /**
+     * Moves the specified list of entries to the deleted folder
+     *
+     * @param userId unique identifier for user making the request. Must have write access privileges on the
+     *               entries in the list
+     * @param list   unique identifiers for entries
+     * @return true or false if operation succeeds on all listed entries or not
+     */
     public boolean moveEntriesToTrash(String userId, ArrayList<PartData> list) {
         List<Entry> toTrash = new LinkedList<>();
         for (PartData data : list) {
@@ -502,17 +522,6 @@ public class EntryController {
         }
 
         return true;
-    }
-
-    public boolean removeLink(String userId, long partId, long linkedPart) {
-        Entry entry = dao.get(partId);
-        if (entry == null)
-            return false;
-
-        authorization.expectWrite(userId, entry);
-        Entry linkedEntry = dao.get(linkedPart);
-
-        return entry.getLinkedEntries().remove(linkedEntry) && dao.update(entry) != null;
     }
 
     protected Entry getEntry(String id) {
@@ -661,10 +670,14 @@ public class EntryController {
             if (!authorization.canRead(userId, parent))
                 continue;
 
+            if (parent.getVisibility() != Visibility.OK.getValue() && !authorization.canWrite(userId, entry))
+                continue;
+
             EntryType type = EntryType.nameToType(parent.getRecordType());
             PartData parentData = new PartData(type);
             parentData.setId(parent.getId());
             parentData.setName(parent.getName());
+            parentData.setVisibility(Visibility.valueToEnum(parent.getVisibility()));
             partData.getParents().add(parentData);
         }
 
@@ -676,7 +689,7 @@ public class EntryController {
         if (entry == null)
             return false;
 
-        authorization.expectWrite(userId, entry);
+        authorization.expectRead(userId, entry);
 
         FileInputStream inputStream;
         try {

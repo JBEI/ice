@@ -1,16 +1,16 @@
 package org.jbei.ice.lib.experiment;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.ExperimentDAO;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.model.Entry;
 
-import org.hsqldb.lib.StringUtil;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 
 /**
  * Manages all things experiment related
@@ -53,7 +53,7 @@ public class ExperimentController {
         if (entry == null)
             return null;
 
-        if (StringUtil.isEmpty(study.getUrl()))
+        if (StringUtils.isEmpty(study.getUrl()))
             return null;
 
         entryAuthorization.expectWrite(userId, entry);

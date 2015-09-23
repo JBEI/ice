@@ -76,6 +76,20 @@ public class CustomFields {
         return result;
     }
 
+    public List<PartData> getPartsByFields(String userId, List<CustomField> fields) {
+        // todo : performance
+        List<Entry> entries = dao.filter(fields);
+        List<PartData> parts = new ArrayList<>();
+        for (Entry entry : entries) {
+            if (!authorization.canRead(userId, entry))
+                continue;
+
+            parts.add(entry.toDataTransferObject());
+        }
+
+        return parts;
+    }
+
     /**
      * Deletes the custom field specified by the unique identifier in the parameter.
      * The user must have write privileges on field associated with entry

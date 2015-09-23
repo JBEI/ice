@@ -1,15 +1,13 @@
 package org.jbei.ice.lib.account;
 
-import org.apache.commons.lang.StringUtils;
-import org.jbei.ice.ControllerException;
+import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.authentication.AuthenticationException;
 import org.jbei.ice.lib.account.authentication.IAuthentication;
-import org.jbei.ice.lib.account.authentication.InvalidCredentialsException;
 import org.jbei.ice.lib.account.authentication.LocalAuthentication;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.jbei.ice.lib.dao.hibernate.AccountPreferencesDAO;
@@ -25,10 +23,9 @@ import java.util.*;
 
 /**
  * ABI to manipulate {@link Account} objects.
- * <p/>
- * This class contains methods that wrap {@link org.jbei.ice.lib.dao.hibernate.AccountDAO} to manipulate {@link
- * Account}
- * objects.
+ * <p>
+ * This class contains methods that wrap {@link org.jbei.ice.lib.dao.hibernate.AccountDAO} to
+ * manipulate {@link Account} objects.
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
@@ -40,30 +37,55 @@ public class AccountController {
     private final AccountDAO dao;
     private final AccountPreferencesDAO accountPreferencesDAO;
 
+    /**
+     * Default constructor.
+     */
     public AccountController() {
         dao = DAOFactory.getAccountDAO();
         accountPreferencesDAO = DAOFactory.getAccountPreferencesDAO();
     }
 
-    public AccountTransfer updateAccount(String requester, long userId, AccountTransfer transfer) {
-        Account account = dao.get(userId);
-        if (!account.getEmail().equalsIgnoreCase(requester) && !isAdministrator(requester))
+    /**
+     * @param requester
+     * @param userId
+     * @param transfer
+     * @return updated account object
+     */
+    public AccountTransfer updateAccount(final String requester, final long userId,
+                                         final AccountTransfer transfer) {
+        final Account account = dao.get(userId);
+        boolean requesterIsAdmin = isAdministrator(requester);
+        if (!account.getEmail().equalsIgnoreCase(requester) && !requesterIsAdmin) {
             return null;
+        }
 
         // if transfer has password then it is a password change
-        if (!StringUtils.isEmpty(transfer.getFirstName()))
+        if (!StringUtils.isEmpty(transfer.getFirstName())) {
             account.setFirstName(transfer.getFirstName());
+        }
 
-        if (!StringUtils.isEmpty(transfer.getLastName()))
+        if (!StringUtils.isEmpty(transfer.getLastName())) {
             account.setLastName(transfer.getLastName());
+        }
 
-        if (!StringUtils.isEmpty(transfer.getDescription()))
+        if (!StringUtils.isEmpty(transfer.getDescription())) {
             account.setDescription(transfer.getDescription());
+        }
 
-        if (!StringUtils.isEmpty(transfer.getInstitution()))
+        if (!StringUtils.isEmpty(transfer.getInstitution())) {
             account.setInstitution(transfer.getInstitution());
+        }
 
-        return dao.update(account).toDataTransferObject();
+        if (transfer.getAccountType() != null) {
+            if (transfer.getAccountType() != account.getType() && !requesterIsAdmin)
+                throw new PermissionException("Only admins can change account type");
+
+            account.setType(transfer.getAccountType());
+        }
+
+        AccountTransfer result = dao.update(account).toDataTransferObject();
+        result.setAdmin(isAdministrator(account.getEmail()));
+        return result;
     }
 
     /**
@@ -72,7 +94,7 @@ public class AccountController {
      * @param id Database id of account
      * @return Account for the id
      */
-    public Account get(long id) {
+    public Account get(final long id) {
         return dao.get(id);
     }
 
@@ -80,47 +102,58 @@ public class AccountController {
      * Reset a user's password
      *
      * @param targetEmail email address of user account to be changed
-     * @return true if the user account is found with email specified in the parameter and password for it is
-     *         successfully reset, false otherwise
+     * @return true if the user account is found with email specified in the parameter and password
+     * for it is successfully reset, false otherwise
      */
-    public boolean resetPassword(String targetEmail) {
+    public boolean resetPassword(final String targetEmail) {
         Account account = getByEmail(targetEmail);
-        if (account == null)
+        if (account == null) {
             return false;
+        }
 
         try {
-            String newPassword = Utils.generateUUID().substring(24);
-            String encryptedNewPassword = AccountUtils.encryptNewUserPassword(newPassword, account.getSalt());
+            final String newPassword = Utils.generateUUID().substring(24);
+            final String encryptedNewPassword = AccountUtils.encryptNewUserPassword(newPassword,
+                    account.getSalt());
             account.setPassword(encryptedNewPassword);
 
             account = dao.update(account);
-            AccountTransfer transfer = account.toDataTransferObject();
+            final AccountTransfer transfer = account.toDataTransferObject();
             transfer.setPassword(newPassword);
 
-            String url = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+            final String url = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
             String projectName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
-            if (StringUtils.isEmpty(projectName))
+            if (StringUtils.isEmpty(projectName)) {
                 projectName = "ICE";
-            String subject = projectName + " Password Reset";
+            }
+            final String subject = projectName + " Password Reset";
             String name = account.getFirstName();
             if (StringUtils.isBlank(name)) {
                 name = account.getLastName();
             }
 
-            SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, MMM d, yyyy 'at' HH:mm aaa, z");
+            final SimpleDateFormat dateFormat = new SimpleDateFormat(
+                    "EEE, MMM d, yyyy 'at' HH:mm aaa, z");
 
-            StringBuilder builder = new StringBuilder();
-            builder.append("Dear ").append(name).append(",\n\n")
-                   .append("The password for your ").append(projectName)
-                   .append(" account (").append(targetEmail).append(") was reset on ")
-                   .append(dateFormat.format(new Date())).append(".\nYour new temporary password is\n\n")
-                   .append(newPassword).append("\n\n")
-                   .append("Please go to the following link to login and change your password.\n\n")
-                   .append("https://").append(url).append("/profile/").append(account.getId())
-                   .append("\n\nThank you.");
+            final StringBuilder builder = new StringBuilder();
+            builder.append("Dear ")
+                    .append(name)
+                    .append(",\n\n")
+                    .append("The password for your ")
+                    .append(projectName)
+                    .append(" account (")
+                    .append(targetEmail)
+                    .append(") was reset on ")
+                    .append(dateFormat.format(new Date()))
+                    .append(".\nYour new temporary password is\n\n")
+                    .append(newPassword)
+                    .append("\n\n")
+                    .append("Please go to the following link to login and change your password.\n\n")
+                    .append("https://").append(url).append("/profile/").append(account.getId())
+                    .append("\n\nThank you.");
 
             Emailer.send(account.getEmail(), subject, builder.toString());
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             Logger.error(ex);
             return false;
         }
@@ -130,34 +163,46 @@ public class AccountController {
     /**
      * Updates account password associated the account email. It encrypts it before associating it
      * with the account
+     *
+     * @param userId
+     * @param transfer
+     * @return updated account object
      */
-    public AccountTransfer updatePassword(String userId, AccountTransfer transfer) {
-        Account userAccount = getByEmail(transfer.getEmail());
-        if (userAccount == null)
-            throw new IllegalArgumentException("Could not retrieve account by id " + transfer.getEmail());
+    public AccountTransfer updatePassword(final String userId, final AccountTransfer transfer) {
+        final Account userAccount = getByEmail(transfer.getEmail());
+        if (userAccount == null) {
+            throw new IllegalArgumentException("Could not retrieve account by id "
+                    + transfer.getEmail());
+        }
 
-        if (!isAdministrator(userId) && !userAccount.getEmail().equalsIgnoreCase(userId))
+        if (!isAdministrator(userId) && !userAccount.getEmail().equalsIgnoreCase(userId)) {
             return null;
+        }
 
-        userAccount.setPassword(AccountUtils.encryptNewUserPassword(transfer.getPassword(), userAccount.getSalt()));
+        userAccount.setPassword(AccountUtils.encryptNewUserPassword(transfer.getPassword(),
+                userAccount.getSalt()));
         return dao.update(userAccount).toDataTransferObject();
     }
 
     /**
-     * validates the account dto to ensure that the fields required (especially by the database)
-     * are present
+     * validates the account dto to ensure that the fields required (especially by the database) are
+     * present
      *
      * @param accountTransfer account dto for validation
      */
-    private boolean validateRequiredAccountFields(AccountTransfer accountTransfer) {
-        if (accountTransfer.getFirstName() == null || accountTransfer.getFirstName().trim().isEmpty())
+    private boolean validateRequiredAccountFields(final AccountTransfer accountTransfer) {
+        if (accountTransfer.getFirstName() == null
+                || accountTransfer.getFirstName().trim().isEmpty()) {
             return false;
+        }
 
-        if (accountTransfer.getLastName() == null || accountTransfer.getLastName().trim().isEmpty())
+        if (accountTransfer.getLastName() == null || accountTransfer.getLastName().trim().isEmpty()) {
             return false;
+        }
 
-        if (accountTransfer.getEmail() == null || accountTransfer.getEmail().trim().isEmpty())
+        if (accountTransfer.getEmail() == null || accountTransfer.getEmail().trim().isEmpty()) {
             return false;
+        }
 
         return true;
     }
@@ -170,22 +215,22 @@ public class AccountController {
      * @param sendEmail whether to send account information (including password by email)
      * @return generated password
      */
-    public AccountTransfer createNewAccount(AccountTransfer info, boolean sendEmail) {
+    public AccountTransfer createNewAccount(final AccountTransfer info, final boolean sendEmail) {
         // validate fields required by the database
         validateRequiredAccountFields(info);
 
-        String email = info.getEmail().trim();
+        final String email = info.getEmail().trim();
         if (getByEmail(email) != null) {
             Logger.error("Account with id \"" + email + "\" already exists");
             return null;
         }
 
         // generate salt and encrypt password before storing
-        String salt = Utils.generateSaltForUserAccount();
-        String newPassword = Utils.generateUUID().substring(24);
-        String encryptedPassword = AccountUtils.encryptNewUserPassword(newPassword, salt);
+        final String salt = Utils.generateSaltForUserAccount();
+        final String newPassword = Utils.generateUUID().substring(24);
+        final String encryptedPassword = AccountUtils.encryptNewUserPassword(newPassword, salt);
 
-        Account account = AccountUtils.fromDTO(info);
+        final Account account = AccountUtils.fromDTO(info);
         account.setPassword(encryptedPassword);
         account.setSalt(salt);
         account.setCreationTime(Calendar.getInstance().getTime());
@@ -196,24 +241,25 @@ public class AccountController {
             return info;
         }
 
-        String subject = "Account created successfully";
-        StringBuilder stringBuilder = new StringBuilder();
+        final String subject = "Account created successfully";
+        final StringBuilder stringBuilder = new StringBuilder();
 
         String name = account.getFirstName();
         if (StringUtils.isBlank(name)) {
             name = account.getLastName();
-            if (StringUtils.isBlank(name))
+            if (StringUtils.isBlank(name)) {
                 name = email;
+            }
         }
 
         stringBuilder.append("Dear ").append(name).append(", ")
-                     .append("\n\nThank you for creating a ")
-                     .append(Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
-                     .append(" account. \nBy accessing ")
-                     .append("this site with the password provided at the bottom ")
-                     .append("you agree to the following terms:\n\n");
+                .append("\n\nThank you for creating a ")
+                .append(Utils.getConfigValue(ConfigurationKey.PROJECT_NAME))
+                .append(" account. \nBy accessing ")
+                .append("this site with the password provided at the bottom ")
+                .append("you agree to the following terms:\n\n");
 
-        String terms = "Biological Parts IP Disclaimer: \n\n"
+        final String terms = "Biological Parts IP Disclaimer: \n\n"
                 + "The JBEI Registry of Biological Parts Software is licensed under a standard BSD\n"
                 + "license. Permission or license to use the biological parts registered in\n"
                 + "the JBEI Registry of Biological Parts is not included in the BSD license\n"
@@ -222,26 +268,28 @@ public class AccountController {
                 + "Biological Parts will not infringe any patent or other proprietary right.";
 
         stringBuilder.append(terms);
-        stringBuilder.append("\n\nYour new password is: ")
-                     .append(newPassword)
-                     .append("\nYour login id is: ")
-                     .append(info.getEmail())
-                     .append("\n\n");
+        stringBuilder.append("\n\nYour new password is: ").append(newPassword)
+                .append("\nYour login id is: ").append(info.getEmail()).append("\n\n");
 
-        String server = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
-        stringBuilder.append("Please remember to change your password by going to your profile page at \n\n")
-                     .append("https://").append(server).append("/profile/").append(account.getId())
-                     .append("\n\nThank you.");
+        final String server = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+        stringBuilder
+                .append("Please remember to change your password by going to your profile page at \n\n")
+                .append("https://").append(server).append("/profile/").append(account.getId())
+                .append("\n\nThank you.");
 
         Emailer.send(info.getEmail(), subject, stringBuilder.toString());
         info.setPassword(newPassword);
         return info;
     }
 
+    /**
+     * @return new admin account
+     */
     public Account createAdminAccount() {
         Account adminAccount = getByEmail(ADMIN_ACCOUNT_EMAIL);
-        if (adminAccount != null)
+        if (adminAccount != null) {
             return adminAccount;
+        }
 
         adminAccount = new Account();
         adminAccount.setEmail(ADMIN_ACCOUNT_EMAIL);
@@ -250,11 +298,12 @@ public class AccountController {
         adminAccount.setInitials("");
         adminAccount.setInstitution("");
         adminAccount.setSalt(Utils.generateSaltForUserAccount());
-        adminAccount.setPassword(AccountUtils.encryptNewUserPassword(ADMIN_ACCOUNT_PASSWORD, adminAccount.getSalt()));
+        adminAccount.setPassword(AccountUtils.encryptNewUserPassword(ADMIN_ACCOUNT_PASSWORD,
+                adminAccount.getSalt()));
         adminAccount.setDescription("Administrator Account");
 
         adminAccount.setIp("");
-        Date currentTime = Calendar.getInstance().getTime();
+        final Date currentTime = Calendar.getInstance().getTime();
         adminAccount.setCreationTime(currentTime);
         adminAccount.setModificationTime(currentTime);
         adminAccount.setLastLoginTime(currentTime);
@@ -268,19 +317,29 @@ public class AccountController {
      * @param email unique identifier for account, typically email
      * @return {@link Account}
      */
-    public Account getByEmail(String email) {
+    public Account getByEmail(final String email) {
         return dao.getByEmail(email);
     }
 
-    public long getAccountId(String email) {
-        Account account = dao.getByEmail(email);
-        if (account == null)
+    /**
+     * @param email an account identifier (usually email)
+     * @return database identifier of account matching account identifier (email)
+     * @throws IllegalArgumentException for an invalid account identifier
+     */
+    public long getAccountId(final String email) {
+        final Account account = dao.getByEmail(email);
+        if (account == null) {
             throw new IllegalArgumentException("No account found with email " + email);
+        }
         return account.getId();
     }
 
-    public AccountTransfer getAccountBySessionKey(String sessionKey) {
-        String userId = SessionHandler.getUserIdBySession(sessionKey);
+    /**
+     * @param sessionKey
+     * @return Account object matching a session key, or {@code null}
+     */
+    public AccountTransfer getAccountBySessionKey(final String sessionKey) {
+        final String userId = SessionHandler.getUserIdBySession(sessionKey);
         if (userId == null) {
             Logger.warn("Could not retrieve user id for session " + sessionKey);
             return null;
@@ -301,10 +360,11 @@ public class AccountController {
      * @param account
      * @return {@link Account} that has been saved.
      */
-    public Account save(Account account) {
+    public Account save(final Account account) {
         account.setModificationTime(Calendar.getInstance().getTime());
-        if (account.getSalt() == null || account.getSalt().isEmpty())
+        if (account.getSalt() == null || account.getSalt().isEmpty()) {
             account.setSalt(Utils.generateSaltForUserAccount());
+        }
         return dao.create(account);
     }
 
@@ -314,53 +374,45 @@ public class AccountController {
      * @param userId unique account identifier for user
      * @return True, if the account is a moderator.
      */
-    public boolean isAdministrator(String userId) {
-        if (StringUtils.isEmpty(userId))
+    public boolean isAdministrator(final String userId) {
+        if (StringUtils.isEmpty(userId)) {
             return false;
+        }
 
-        Account account = this.getByEmail(userId);
+        final Account account = getByEmail(userId);
         return account != null && account.getType() == AccountType.ADMIN;
     }
 
     /**
      * Authenticate a user in the database.
-     * <p/>
-     * Using the {@link org.jbei.ice.lib.account.authentication.IAuthentication} specified in the settings file,
-     * authenticate
-     * the
-     * user, and return the sessionData
+     * <p>
+     * Using the {@link org.jbei.ice.lib.account.authentication.IAuthentication} specified in the
+     * settings file, authenticate the user, and return the sessionData
      *
      * @param login
      * @param password
      * @param ip       IP Address of the user.
-     * @throws InvalidCredentialsException
+     * @return the account identifier (email) on a successful login, otherwise {@code null}
      */
-    public String authenticate(String login, String password, String ip) throws InvalidCredentialsException {
-        IAuthentication authentication = new LocalAuthentication();
+    public String authenticate(final String login, final String password, final String ip) {
+        final IAuthentication authentication = new LocalAuthentication();
         String email;
 
         try {
             email = authentication.authenticates(login.trim(), password);
             if (email == null) {
-                try {
-                    Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password brute force hacking
-                } catch (InterruptedException ie) {
-                    Logger.warn(ie.getMessage());
-                }
+                loginFailureCooldown();
                 return null;
             }
-        } catch (AuthenticationException e2) {
-            try {
-                Thread.sleep(2000); // sets 2 seconds delay on login to prevent login/password brute force hacking
-            } catch (InterruptedException ie) {
-                Logger.warn(ie.getMessage());
-            }
+        } catch (final AuthenticationException e2) {
+            loginFailureCooldown();
             return null;
         }
 
-        Account account = dao.getByEmail(email);
+        final Account account = dao.getByEmail(email);
         if (account != null) {
-            AccountPreferences accountPreferences = accountPreferencesDAO.getAccountPreferences(account);
+            AccountPreferences accountPreferences = accountPreferencesDAO
+                    .getAccountPreferences(account);
 
             if (accountPreferences == null) {
                 accountPreferences = new AccountPreferences();
@@ -378,38 +430,63 @@ public class AccountController {
         return null;
     }
 
+    private void loginFailureCooldown() {
+        // sets 2 seconds delay on login to prevent login/password brute force hacking
+        try {
+            Thread.sleep(2000);
+        } catch (final InterruptedException ie) {
+            Logger.warn(ie.getMessage());
+        }
+    }
+
+    /**
+     * Attempts to load the ICE Authentication Backend from database configuration.
+     *
+     * @return an IAuthentication backend
+     */
+    public IAuthentication getAuthenticationBackend() {
+        final String clazzName = Utils.getConfigValue(ConfigurationKey.AUTHENTICATION_BACKEND);
+        try {
+            final Class<?> clazz = Class.forName(clazzName);
+            if (IAuthentication.class.isAssignableFrom(clazz)) {
+                return (IAuthentication) clazz.newInstance();
+            }
+        } catch (final ClassNotFoundException e) {
+            Logger.error("Failed to load class " + clazzName);
+        } catch (final InstantiationException e) {
+            Logger.error("Failed to instantiate class " + clazzName);
+        } catch (final IllegalAccessException e) {
+            Logger.error("Inaccessible class " + clazzName);
+        }
+        return new LocalAuthentication();
+    }
+
     /**
      * Authenticate a user in the database.
-     * <p/>
-     * Using the {@link org.jbei.ice.lib.account.authentication.IAuthentication} specified in the settings file,
-     * authenticate
-     * the
-     * user, and return the sessionData
+     * <p>
+     * Using the {@link org.jbei.ice.lib.account.authentication.IAuthentication} specified in the
+     * settings file, authenticate the user, and return the sessionData
      *
      * @param transfer user information containing the email and password to be used for authentication
      *                 If the sessionId field is set, it may or may not be used as the user's session id
      * @return {@link AccountTransfer}
      */
-    public AccountTransfer authenticate(AccountTransfer transfer) {
-        String email;
-        try {
-            email = authenticate(transfer.getEmail(), transfer.getPassword(), "");
-        } catch (InvalidCredentialsException e) {
-            Logger.error(e);
+    public AccountTransfer authenticate(final AccountTransfer transfer) {
+        final String email = authenticate(transfer.getEmail(), transfer.getPassword(), "");
+
+        if (email == null) {
             return null;
         }
 
-        if (email == null)
+        final Account account = dao.getByEmail(email);
+        if (account == null) {
             return null;
+        }
 
-        Account account = dao.getByEmail(email);
-        if (account == null)
-            return null;
-
-        AccountTransfer info = account.toDataTransferObject();
+        final AccountTransfer info = account.toDataTransferObject();
         info.setLastLogin(account.getLastLoginTime().getTime());
         info.setId(account.getId());
-        boolean isAdmin = isAdministrator(email);
+        final boolean isAdmin = isAdministrator(email);
         info.setAdmin(isAdmin);
         info.setSessionId(SessionHandler.createSessionForUser(email, transfer.getSessionId()));
         return info;
@@ -420,7 +497,7 @@ public class AccountController {
      *
      * @param sessionKey unique session identifier
      */
-    public void invalidate(String sessionKey) {
+    public void invalidate(final String sessionKey) {
         SessionHandler.invalidateSession(sessionKey);
     }
 
@@ -429,15 +506,24 @@ public class AccountController {
      *
      * @param accountPreferences
      */
-    public void saveAccountPreferences(AccountPreferences accountPreferences) {
+    public void saveAccountPreferences(final AccountPreferences accountPreferences) {
         accountPreferencesDAO.create(accountPreferences);
     }
 
-    public ArrayList<AccountTransfer> getMatchingAccounts(String userId, String query, int limit) {
-        Set<Account> matches = dao.getMatchingAccounts(query, limit);
-        ArrayList<AccountTransfer> result = new ArrayList<>();
-        for (Account match : matches) {
-            AccountTransfer info = new AccountTransfer();
+    /**
+     * @param userId
+     * @param query
+     * @param limit
+     * @return accounts matching the query
+     */
+    public List<AccountTransfer> getMatchingAccounts(final String userId, final String query,
+                                                     final int limit) {
+        // TODO account object is never used?
+        getByEmail(userId);
+        final Set<Account> matches = dao.getMatchingAccounts(query, limit);
+        final ArrayList<AccountTransfer> result = new ArrayList<>();
+        for (final Account match : matches) {
+            final AccountTransfer info = new AccountTransfer();
             info.setEmail(match.getEmail());
             info.setFirstName(match.getFirstName());
             info.setLastName(match.getLastName());
@@ -446,44 +532,56 @@ public class AccountController {
         return result;
     }
 
-    public AccountResults retrieveAccounts(String userId, int start, int limit, String sort, boolean asc) {
+    /**
+     * @param userId
+     * @param start
+     * @param limit
+     * @param sort
+     * @param asc
+     * @return window of results to all accounts
+     */
+    public AccountResults retrieveAccounts(final String userId, final int start, final int limit,
+                                           final String sort, final boolean asc) {
         if (!isAdministrator(userId)) {
             Logger.warn(userId + " attempting to retrieve all user accounts without admin privileges");
             return null;
         }
 
-        AccountResults results = new AccountResults();
-        EntryController entryController = new EntryController();
-        List<Account> accounts = dao.getAccounts(start, limit, sort, asc);
+        final AccountResults results = new AccountResults();
+        final EntryController entryController = new EntryController();
+        final List<Account> accounts = dao.getAccounts(start, limit, sort, asc);
 
-        ArrayList<AccountTransfer> infos = new ArrayList<>();
-        for (Account userAccount : accounts) {
-            AccountTransfer info = userAccount.toDataTransferObject();
-            long count = entryController.getNumberOfOwnerEntries(userId, userAccount.getEmail());
+        final List<AccountTransfer> infos = new ArrayList<>();
+        for (final Account userAccount : accounts) {
+            final AccountTransfer info = userAccount.toDataTransferObject();
+            final long count = entryController.getNumberOfOwnerEntries(userId,
+                    userAccount.getEmail());
             info.setUserEntryCount(count);
             info.setAdmin(isAdministrator(userAccount.getEmail()));
             infos.add(info);
         }
 
         results.getResults().addAll(infos);
-        long count = dao.getAccountsCount();
+        final long count = dao.getAccountsCount();
         results.setResultCount(count);
         return results;
     }
 
-    public void removeMemberFromGroup(long id, String email) throws ControllerException {
-        Account account = getByEmail(email);
-        if (account == null)
-            throw new ControllerException("Could not find account " + email);
-
-        Group group = DAOFactory.getGroupDAO().get(id);
-        if (group == null)
-            throw new ControllerException("Could not find group " + id);
-        account.getGroups().remove(group);
-        try {
-            dao.update(account);
-        } catch (DAOException e) {
-            throw new ControllerException(e);
+    /**
+     * @param id
+     * @param email
+     */
+    public void removeMemberFromGroup(final long id, final String email) {
+        final Account account = getByEmail(email);
+        if (account == null) {
+            throw new IllegalArgumentException("Could not find account " + email);
         }
+
+        final Group group = DAOFactory.getGroupDAO().get(id);
+        if (group == null) {
+            throw new IllegalArgumentException("Could not find group " + id);
+        }
+        account.getGroups().remove(group);
+        dao.update(account);
     }
 }

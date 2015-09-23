@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.folder;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
@@ -432,7 +432,8 @@ public class FolderController {
         Account account = getAccount(userId);
         ArrayList<FolderDetails> folderDetails = new ArrayList<>();
 
-        Set<Group> groups = groupController.getAllGroups(account);
+        Set<Group> groups = account.getGroups();
+        groups.remove(groupController.createOrRetrievePublicGroup());
         Set<Folder> sharedFolders = DAOFactory.getPermissionDAO().retrieveFolderPermissions(account, groups);
         if (sharedFolders == null)
             return null;

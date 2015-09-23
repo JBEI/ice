@@ -16,6 +16,7 @@ public class PartData implements IDataTransferModel {
 
     private int index;
     private String recordId;
+    private String versionId;
     private String name;
     private String owner;
     private String ownerEmail;
@@ -76,6 +77,14 @@ public class PartData implements IDataTransferModel {
 
     public void setRecordId(String recordId) {
         this.recordId = recordId;
+    }
+
+    public String getVersionId() {
+        return versionId;
+    }
+
+    public void setVersionId(String versionId) {
+        this.versionId = versionId;
     }
 
     public EntryType getType() {

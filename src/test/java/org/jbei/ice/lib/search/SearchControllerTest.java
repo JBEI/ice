@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.search;
 
-import org.apache.lucene.search.BooleanClause;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
@@ -42,15 +41,15 @@ public class SearchControllerTest {
     @Test
     public void testParseQueryString() throws Exception {
         String query = "\"the quick\" brown fox jumped \"over\" \"the\" moon";
-        HashMap<String, BooleanClause.Occur> result = controller.parseQueryString(query);
+        HashMap<String, QueryType> result = controller.parseQueryString(query);
         Assert.assertNotNull(result);
-        Assert.assertEquals(result.get("the quick"), BooleanClause.Occur.MUST);
-        Assert.assertEquals(result.get("brown"), BooleanClause.Occur.SHOULD);
-        Assert.assertEquals(result.get("fox"), BooleanClause.Occur.SHOULD);
-        Assert.assertEquals(result.get("jumped"), BooleanClause.Occur.SHOULD);
-        Assert.assertEquals(result.get("over"), BooleanClause.Occur.MUST);
-        Assert.assertEquals(result.get("the"), BooleanClause.Occur.MUST);
-        Assert.assertEquals(result.get("moon"), BooleanClause.Occur.SHOULD);
+        Assert.assertEquals(result.get("the quick"), QueryType.PHRASE);
+        Assert.assertEquals(result.get("brown"), QueryType.TERM);
+        Assert.assertEquals(result.get("fox"), QueryType.TERM);
+        Assert.assertEquals(result.get("jumped"), QueryType.TERM);
+        Assert.assertEquals(result.get("over"), QueryType.PHRASE);
+        Assert.assertEquals(result.get("the"), QueryType.PHRASE);
+        Assert.assertEquals(result.get("moon"), QueryType.TERM);
     }
 
     @Test
@@ -62,9 +61,10 @@ public class SearchControllerTest {
         PlasmidData plasmidData = new PlasmidData();
         plasmidData.setCircular(true);
         plasmidData.setPromoters("pTet");
+        plasmidData.setOriginOfReplication("oRep");
+
         PartData partData = new PartData(EntryType.PLASMID);
         partData.setBioSafetyLevel(BioSafetyOption.LEVEL_ONE.ordinal());
-        plasmidData.setOriginOfReplication("oRep");
         partData.setStatus("Complete");
         partData.setName("testPlasmid");
         partData.setFundingSource("DOE");

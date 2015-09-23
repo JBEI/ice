@@ -1,11 +1,11 @@
 package org.jbei.ice.lib.bulkupload;
 
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryType;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
-
-import org.jbei.ice.lib.dto.bulkupload.EntryField;
-import org.jbei.ice.lib.dto.entry.EntryType;
 
 /**
  * Processes bulk uploads. Supported file formats are "csv", "zip" and "xml", with the latter being for SBOL
@@ -51,11 +51,12 @@ public class FileBulkUpload {
     /**
      * Creates a CSV template for download based on the the type of entries
      *
-     * @param addType entry type that is to be uploaded
-     * @param linked  type that is linked to this entry
+     * @param addType        entry type that is to be uploaded
+     * @param linked         optional type that is linked to this entry. Should be one of {@link EntryType} or null
+     * @param linkToExisting true, if <code>addType</code> is to be linked to an existing entry
      * @return byte array of the template or null if the headers for the type cannot be retrieved/is unsupported
      */
-    public static byte[] getCSVTemplateBytes(EntryType addType, EntryType linked) {
+    public static byte[] getCSVTemplateBytes(EntryType addType, EntryType linked, boolean linkToExisting) {
         List<EntryField> headers = BulkCSVUploadHeaders.getHeadersForType(addType);
         if (headers == null)
             return null;
@@ -75,17 +76,23 @@ public class FileBulkUpload {
         }
 
         // check linked
-        if (linked != null) {
-            headers = BulkCSVUploadHeaders.getHeadersForType(linked);
-            if (headers != null) {
-                for (int i = 0; i < headers.size(); i++) {
-                    sb.append(",");
-                    sb.append('"');
-                    EntryField header = headers.get(i);
-                    sb.append(linked.getDisplay()).append(" ").append(header.getLabel());
-                    if (header.isRequired())
-                        sb.append("*");
-                    sb.append('"');
+        if (linkToExisting) {
+            sb.append(",");
+            sb.append('"');
+            sb.append("Existing Part Number");
+            sb.append('"');
+        } else {
+            if (linked != null) {
+                headers = BulkCSVUploadHeaders.getHeadersForType(linked);
+                if (headers != null) {
+                    for (EntryField header : headers) {
+                        sb.append(",");
+                        sb.append('"');
+                        sb.append(linked.getDisplay()).append(" ").append(header.getLabel());
+                        if (header.isRequired())
+                            sb.append("*");
+                        sb.append('"');
+                    }
                 }
             }
         }

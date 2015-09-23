@@ -59,7 +59,6 @@ iceServices.factory('User', function ($resource) {
                 responseType:"json",
                 url:"rest/users/:userId",
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
-
             },
 
             list: {
@@ -434,11 +433,17 @@ iceServices.factory('Entry', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            // adds a new link to the referenced part. the link could be a parent or child
+            addLink: {
+                method: 'POST',
+                url: 'rest/parts/:partId/links',
+                headers: {'X-ICE-Authentication-SessionId': sessionId}
+            },
+
             removeLink:{
                 method:'DELETE',
                 url:'rest/parts/:partId/links/:linkId',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
-
             },
 
             updateEntryList: {
@@ -568,19 +573,19 @@ iceServices.factory('Settings', function ($resource) {
 
             rebuildLucene: {
                 method: 'PUT',
-                url: '/rest/config/lucene',
+                url: 'rest/config/lucene',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             rebuildBlast: {
                 method: 'PUT',
-                url: '/rest/config/blast',
+                url: 'rest/config/blast',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             version: {
                 method: 'GET',
-                url: '/rest/config/version'
+                url: 'rest/config/version'
             }
         });
     }
@@ -809,7 +814,6 @@ iceServices.factory('Authentication',
 
             // checks if the session is valid
             isSessionValid: function () {
-//                console.log("check for valid session", who);
                 var sid = $cookieStore.get('sessionId');
                 if (sid === undefined) {
                     if ($location.path() !== '/login')

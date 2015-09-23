@@ -5,12 +5,14 @@
 
     <meta charset="utf-8">
     <title>ICE - Inventory of Composable Elements</title>
-    <link href="css/font-awesome.min.css" rel="stylesheet">
 
+    <link href="css/font-awesome.min.css" rel="stylesheet">
     <link href="css/ice.css" rel="stylesheet">
-    <script src="scripts/lib/jquery/jquery-1.11.3.min.js"></script>
+    <link rel="stylesheet" href="scripts/lib/handsontable-0.18.0/pikaday.css">
+    <link rel="stylesheet" media="screen" href="scripts/lib/handsontable-0.18.0/handsontable.full.min.css">
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
+    <script src="scripts/lib/jquery/jquery-1.11.3.min.js"></script>
     <script src="scripts/lib/angular/angular.min.js"></script>
     <script src="scripts/lib/angular/angular-route.min.js"></script>
     <script src="scripts/lib/angular/angular-resource.min.js"></script>
@@ -19,16 +21,12 @@
     <script src="scripts/lib/angular/angular-touch.min.js"></script>
 
     <script src="scripts/lib/angular-ui/angular-ui-router.min-0.2.15.js"></script>
-    <script src="scripts/lib/angular-ui/ui-bootstrap-tpls-0.13.0.min.js"></script>
+    <script src="scripts/lib/angular-ui/ui-bootstrap-tpls-0.13.3.min.js"></script>
 
     <script src="scripts/lib/angular-file-upload/angular-file-upload.min.js"></script>
 
-    <script src="scripts/lib/handsontable-0.14.1/handsontable.full.min.js"></script>
-    <script src="scripts/lib/handsontable-0.14.1/pikaday.js"></script>
-    <link rel="stylesheet" href="scripts/lib/handsontable-0.14.1/pikaday.css">
-    <link rel="stylesheet" media="screen" href="scripts/lib/handsontable-0.14.1/handsontable.full.min.css">
-
-    <script src="scripts/lib/angular-slider/angular-slider.min.js"></script>
+    <script src="scripts/lib/handsontable-0.18.0/handsontable.full.min.js"></script>
+    <script src="scripts/lib/handsontable-0.18.0/pikaday.js"></script>
 
     <script src="scripts/lib/momentjs/moment.min.js"></script>
     <script src="scripts/lib/angular-moment/angular-moment.min.js"></script>
@@ -78,76 +76,26 @@
 <body>
 <div id="container">
     <div id="body" ui-view></div>
-    <div class="navbar-fixed-bottom">
-        <table cellpadding="0" cellspacing="0" style="width: 100%; background-color: #fff">
-            <tr>
-                <td colspan="2" class="footer_line"></td>
-            </tr>
-            <tr>
-                <td>
-                    <table cellspacing="0" cellpadding="0">
-                        <tr>
-                            <td align="left" style="vertical-align: top;"><img
-                                    src="img/doe-bioenergy-research-cent.gif" height="60px"></td>
-                            <td align="left" style="vertical-align: top;"><img src="img/lbnl-logo.gif" height="60px">
-                            </td>
-                            <td align="left" style="vertical-align: top;"><img src="img/sandia-lab-logo.gif"
-                                                                               height="60px"></td>
-                            <td align="left" style="vertical-align: top;"><img src="img/ucb-logo.gif" height="60px">
-                            </td>
-                            <td align="left" style="vertical-align: top;"><img src="img/ucdavis-logo.gif" height="60px">
-                            </td>
-                            <td align="left" style="vertical-align: top;"><img
-                                    src="img/carnegie-institution-logo.gif" height="60px"></td>
-                            <td align="left" style="vertical-align: top;"><img src="img/llnl-logo.gif" height="60px">
-                            </td>
-                            <td align="left" style="vertical-align: top;"><img src="img/pnw.png" height="60px"></td>
-                        </tr>
-                    </table>
-                </td>
-                <td align="right">
-                    <table cellspacing="0" cellpadding="0" class="font-90em">
-                        <tr>
-                            <td align="right" style="vertical-align: top;">
-                                <table cellspacing="0" cellpadding="0">
-                                    <tr>
-                                        <td align="left" style="vertical-align: top;">
-                                            <div>©&nbsp;</div>
-                                        </td>
-                                        <td align="left" style="vertical-align: top;">
-                                            <a href="https://github.com/JBEI/ice">JBEI ICE Registry</a></td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td align="right" style="vertical-align: top;">
-                                <div>All rights reserved.</div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td align="right" style="vertical-align: top;">
-                                <table cellspacing="0" cellpadding="0">
-                                    <tr>
-                                        <td align="left" style="vertical-align: top;"><a
-                                                href="https://github.com/JBEI/ice/issues/new">Submit an Issue</a></td>
-                                        <td align="left" style="vertical-align: top;">
-                                            <div>&nbsp; | &nbsp;</div>
-                                        </td>
-                                        <td align="left" style="vertical-align: top;">
-                                            <a href="http://public-registry.jbei.org/manual">Help</a>
-                                        </td>
-                                        <td align="left" style="vertical-align: top;">
-                                            <div>&nbsp; | &nbsp; <span class="label label-primary">v4.3.2</span></div>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
+    <div class="navbar-fixed-bottom" style="border-top: 1px solid #BBBAAA; background-color: white;">
+        <div class="container-fluid font-90em" style="margin-top: 3px">
+            <div class="col-sm-10">
+                <img src="img/doe-bioenergy-research-cent.gif" height="60px">
+                <img src="img/lbnl-logo.gif" height="60px">
+                <img src="img/sandia-lab-logo.gif" height="60px">
+                <img src="img/ucb-logo.gif" height="60px">
+                <img src="img/ucdavis-logo.gif" height="60px">
+                <img src="img/carnegie-institution-logo.gif" height="60px">
+                <img src="img/llnl-logo.gif" height="60px">
+                <img src="img/pnw.png" height="60px">
+            </div>
+            <div class="text-right">
+                &copy;&nbsp;<a href="https://github.com/JBEI/ice">JBEI ICE Registry</a> <span
+                    class="label label-primary">v4.4.3</span><br>
+                All rights reserved. <br>
+                <a href="https://github.com/JBEI/ice/issues/new">Submit an Issue</a>&nbsp; <span class="text-muted">|</span> &nbsp;<a
+                    href="http://public-registry.jbei.org/manual">Help</a>
+            </div>
+        </div>
     </div>
 </div>
 

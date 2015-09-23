@@ -1,10 +1,8 @@
 package org.jbei.ice.lib.entry.sequence;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.ApplicationController;
-import org.jbei.ice.ControllerException;
-import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -156,7 +154,7 @@ public class SequenceController {
      * Update the {@link Sequence} in the database, with the option to rebuild the search index.
      *
      * @param userId   unique identifier for user performing action
-     * @param sequence sequence to be upated
+     * @param sequence sequence to be updated
      * @return Saved Sequence.
      */
 
@@ -194,10 +192,8 @@ public class SequenceController {
      * Delete the {@link Sequence} in the database, then rebuild the search index.
      *
      * @param sequence
-     * @throws ControllerException
-     * @throws PermissionException
      */
-    public void delete(Account account, Sequence sequence) throws ControllerException, PermissionException {
+    public void delete(Account account, Sequence sequence) {
         authorization.expectWrite(account.getEmail(), sequence.getEntry());
         String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         dao.deleteSequence(sequence, tmpDir);
@@ -234,14 +230,13 @@ public class SequenceController {
      * @param sequence
      * @param formatter
      * @return Text of a formatted sequence.
-     * @throws ControllerException
      */
-    public String compose(Sequence sequence, IFormatter formatter) throws ControllerException {
+    public String compose(Sequence sequence, IFormatter formatter) {
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         try {
             formatter.format(sequence, byteStream);
         } catch (FormatterException | IOException e) {
-            throw new ControllerException(e);
+            Logger.error(e);
         }
         return byteStream.toString();
     }
@@ -301,6 +296,7 @@ public class SequenceController {
                             new DNAFeatureLocation(location.getGenbankStart(), location.getEnd()));
                 }
 
+                dnaFeature.setId(sequenceFeature.getId());
                 dnaFeature.setType(sequenceFeature.getGenbankType());
                 dnaFeature.setName(sequenceFeature.getName());
                 dnaFeature.setStrand(sequenceFeature.getStrand());
@@ -345,8 +341,8 @@ public class SequenceController {
         }
 
         Sequence sequence = new Sequence(sequenceString, "", fwdHash, revHash, null);
-
         Set<SequenceFeature> sequenceFeatures = sequence.getSequenceFeatures();
+
         if (dnaSequence instanceof FeaturedDNASequence) {
             FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) dnaSequence;
             sequence.setUri(featuredDNASequence.getUri());
@@ -372,13 +368,6 @@ public class SequenceController {
                             end = 1;
                         } else if (end > featuredDNASequence.getSequence().length()) {
                             end = featuredDNASequence.getSequence().length();
-                        }
-                        if (genbankStart > end) { // over zero case
-                            featureSequence += featuredDNASequence.getSequence().substring(
-                                    genbankStart - 1, featuredDNASequence.getSequence().length());
-                            featureSequence += featuredDNASequence.getSequence().substring(0, end);
-                        } else { // normal
-                            featureSequence += featuredDNASequence.getSequence().substring(genbankStart - 1, end);
                         }
 
                         if (genbankStart > end) { // over zero case
@@ -438,13 +427,6 @@ public class SequenceController {
             }
         }
 
-        return sequence;
-    }
-
-    public Sequence saveSequence(Sequence partSequence) {
-        Sequence sequence = dao.create(partSequence);
-        if (sequence != null)
-            ApplicationController.scheduleBlastIndexRebuildTask(true);
         return sequence;
     }
 

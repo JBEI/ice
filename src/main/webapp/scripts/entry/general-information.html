@@ -1,161 +1,163 @@
 <div class="container-fluid">
 
-<!--hard-coding part number-->
-<div class="row pad_top">
-    <div class="col-md-2 entryLabel">Part ID</div>
-    <div class="col-md-10">{{entry.partId}}</div>
-</div>
+    <!--hard-coding part number-->
+    <div class="row pad_top">
+        <div class="col-md-2 entryLabel">Part ID</div>
+        <div class="col-md-10">{{entry.partId}}</div>
+    </div>
 
-<!--iterate through fields and show if field has value -->
-<div class="row pad_top" ng-repeat="field in entryFields"
-     ng-if="entry[field.schema] != null&&entry[field.schema].toString().length!==0">
+    <!--iterate through fields and show if field has value -->
+    <div class="row pad_top" ng-repeat="field in entryFields"
+         ng-if="entry[field.schema] != null&&entry[field.schema].toString().length!==0">
 
-<div class="col-md-2 entryLabel">
-    <span ng-class="{'entryEditLabel':field.edit}">{{field.label}}</span>
-    <img ng-if="field.updating && !field.errorUpdating" src="img/loader-mini.gif">
+        <div class="col-md-2 entryLabel">
+            <span ng-class="{'entryEditLabel':field.edit}">{{field.label}}</span>
+            <img ng-if="field.updating && !field.errorUpdating" src="img/loader-mini.gif">
 
-    <!--show error icon if update failed-->
-    <i ng-if="!field.updating && field.errorUpdating" class="red fa fa-exclamation-circle"></i>
-</div>
+            <!--show error icon if update failed-->
+            <i ng-if="!field.updating && field.errorUpdating" class="red fa fa-exclamation-circle"></i>
+        </div>
 
-<div class="col-md-10" ng-mouseover="showEdit=entry.canEdit" ng-mouseout="showEdit=entry.canEdit&&!showEdit">
-    <form ng-submit="quickEditEntry(field)">
-        <!--todo : also need different display widgets for different types-->
-        <div ng-if="!field.edit&&field.inputType!=='withEmail'&&field.inputType!=='date'">
-            {{entry[field.schema].toString()}}
+        <div class="col-md-10" ng-mouseover="showEdit=entry.canEdit" ng-mouseout="showEdit=entry.canEdit&&!showEdit">
+            <form ng-submit="quickEditEntry(field)">
+                <!--todo : also need different display widgets for different types-->
+                <div ng-if="!field.edit&&field.inputType!=='withEmail'&&field.inputType!=='date'">
+                    {{entry[field.schema].toString()}}
                 <span ng-click="field.edit=true">
                     <i ng-show="showEdit&&field.canEdit!=false" class="fa fa-pencil edit_icon"
                        style="margin-left: 5px;"></i>
                 </span>
-        </div>
+                </div>
 
-        <!-- short input field with email -->
-        <div class="input-group" ng-if="field.inputType==='withEmail'&&!field.edit">
-            <a ng-href="profile/{{entry[field.schema+'Id']}}" ng-if="entry[field.schema+'Id']">{{entry[field.schema]}}
-                ({{entry[field.schema+'Email']}})</a>
-            <span ng-if="!entry[field.schema+'Id']">{{entry[field.schema]}} <span ng-if="entry[field.schema+'Email']">({{entry[field.schema+'Email']}})</span></span>
+                <!-- short input field with email -->
+                <div class="input-group" ng-if="field.inputType==='withEmail'&&!field.edit">
+                    <a ng-href="profile/{{entry[field.schema+'Id']}}" ng-if="entry[field.schema+'Id']">{{entry[field.schema]}}
+                        ({{entry[field.schema+'Email']}})</a>
+                    <span ng-if="!entry[field.schema+'Id']">{{entry[field.schema]}} <span
+                            ng-if="entry[field.schema+'Email']">({{entry[field.schema+'Email']}})</span></span>
                         <span ng-click="field.edit=true">
                     <i ng-show="showEdit&&field.canEdit!=false" class="fa fa-pencil edit_icon"
                        style="margin-left: 5px;"></i>
                 </span>
-        </div>
+                </div>
 
-        <!--display for dates. The expectation is that all dates are longs-->
-        <div ng-if="!field.edit&&field.inputType==='date'">{{entry[field.schema] | date:'fullDate' }}
+                <!--display for dates. The expectation is that all dates are longs-->
+                <div ng-if="!field.edit&&field.inputType==='date'">{{entry[field.schema] | date:'fullDate' }}
                 <span ng-click="field.edit=true">
                     <i ng-show="showEdit&&field.canEdit!=false" class="fa fa-pencil edit_icon"
                        style="margin-left: 5px;"></i>
                 </span>
-        </div>
+                </div>
 
-        <!--start field edit section-->
-        <!--short input field-->
-        <div class="input-group" ng-if="field.inputType==='short'&&field.edit"
-             ng-init="quickEdit[field.schema]=entry[field.schema]">
-            <input type="text" ng-model="quickEdit[field.schema]" ng-trim="true" focus
-                   ng-change="field.dirty=true"
-                   ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
-                   maxlength="125" placeHolder="{{field.placeHolder}}" style="width: 205px;">
+                <!--start field edit section-->
+                <!--short input field-->
+                <div class="input-group" ng-if="field.inputType==='short'&&field.edit"
+                     ng-init="quickEdit[field.schema]=entry[field.schema]">
+                    <input type="text" ng-model="quickEdit[field.schema]" ng-trim="true" focus
+                           ng-change="field.dirty=true"
+                           ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
+                           maxlength="125" placeHolder="{{field.placeHolder}}" style="width: 205px;">
 
-            &nbsp;<i ng-if="field.help" class="fa fa-question-circle opacity_hover" tooltip="{{field.help}}"
-                     tooltip-placement="right"></i>
+                    &nbsp;<i ng-if="field.help" class="fa fa-question-circle opacity_hover" tooltip="{{field.help}}"
+                             tooltip-placement="right"></i>
 
                 <span style="padding-top:5px;">
                     <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Update</a>
                     <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
                 </span>
-        </div>
+                </div>
 
-        <!-- short input field with email -->
-        <div class="input-group" ng-if="field.inputType==='withEmail'&&field.edit">
-            <input type="text" ng-model="quickEdit[field.schema]" ng-trim="true" focus
-                   ng-change="field.dirty=true" ng-init="quickEdit[field.schema]=entry[field.schema]"
-                   ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-                   maxlength="125" style="width: 205px;">
+                <!-- short input field with email -->
+                <div class="input-group" ng-if="field.inputType==='withEmail'&&field.edit">
+                    <input type="text" ng-model="quickEdit[field.schema]" ng-trim="true" focus
+                           ng-change="field.dirty=true" ng-init="quickEdit[field.schema]=entry[field.schema]"
+                           ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                           maxlength="125" style="width: 205px;">
 
-            <input type="text" ng-model="quickEdit[field.schema+'Email']" ng-trim="true"
-                   ng-change="field.dirty=true"
-                   ng-init="quickEdit[field.schema+'Email']=entry[field.schema+'Email']"
-                   ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-                   placeholder="Email if known" style="width: 191px;">
-
-                <span style="padding-top:5px;">
-                    <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
-                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
-                </span>
-        </div>
-
-        <!--options-->
-        <div class="input-group" ng-if="field.options&&field.edit"
-             ng-init="quickEdit[field.schema]=entry[field.schema]">
-            <select focus class="input_box pull_down"
-                    ng-model="quickEdit[field.schema]" size="1" ng-change="field.dirty=true"
-                    ng-options="option.value as option.text for option in field.options">
-            </select>
+                    <input type="text" ng-model="quickEdit[field.schema+'Email']" ng-trim="true"
+                           ng-change="field.dirty=true"
+                           ng-init="quickEdit[field.schema+'Email']=entry[field.schema+'Email']"
+                           ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                           placeholder="Email if known" style="width: 191px;">
 
                 <span style="padding-top:5px;">
                     <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
                     <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
                 </span>
-        </div>
+                </div>
 
-        <!--checkbox-->
-        <div ng-if="field.inputType==='bool'&&field.edit" ng-init="quickEdit[field.schema]=entry[field.schema]">
-            <input type="checkbox" ng-model="quickEdit[field.schema]" ng-change="field.dirty=true">
+                <!--options-->
+                <div class="input-group" ng-if="field.options&&field.edit"
+                     ng-init="quickEdit[field.schema]=entry[field.schema]">
+                    <select focus class="input_box pull_down"
+                            ng-model="quickEdit[field.schema]" size="1" ng-change="field.dirty=true"
+                            ng-options="option.value as option.text for option in field.options">
+                    </select>
+
+                <span style="padding-top:5px;">
+                    <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
+                </span>
+                </div>
+
+                <!--checkbox-->
+                <div ng-if="field.inputType==='bool'&&field.edit" ng-init="quickEdit[field.schema]=entry[field.schema]">
+                    <input type="checkbox" ng-model="quickEdit[field.schema]" ng-change="field.dirty=true">
                  <span style="padding-top:5px;">
                      <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
                     <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
                 </span>
-        </div>
+                </div>
 
-        <!--datepicker-->
-        <div ng-if="field.inputType==='date'&&field.edit">date
-            <div class="input-group" ng-init="quickEdit[field.schema]=entry[field.schema]">
-                <input type="text" ng-model="quickEdit[field.schema]" show-button-bar="false" show-weeks="false"
-                       datepicker-popup="yyyy-MM-dd" class="input_box_group" maxlength="125" is-open="opened"
-                       datepicker-options="dateOptions" close-text="Close" style="width: 205px;" focus
-                       ng-change="field.dirty=true">
+                <!--datepicker-->
+                <div ng-if="field.inputType==='date'&&field.edit">date
+                    <div class="input-group" ng-init="quickEdit[field.schema]=entry[field.schema]">
+                        <input type="text" ng-model="quickEdit[field.schema]" show-button-bar="false" show-weeks="false"
+                               datepicker-popup="yyyy-MM-dd" class="input_box_group" maxlength="125" is-open="opened"
+                               datepicker-options="dateOptions" close-text="Close" style="width: 205px;" focus
+                               ng-change="field.dirty=true">
                     <span class="input-group-addon" style="padding:3px; background-color: #f1f1f1;width: 19px">
                         <i class="fa fa-calendar"></i>
                     </span>
-            </div>
+                    </div>
 
                 <span style="padding-top:5px;">
                      <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
                     <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
                 </span>
-        </div>
+                </div>
 
-        <!--medium input-->
-        <div ng-if="field.inputType==='medium'&&field.edit" ng-init="quickEdit[field.schema]=entry[field.schema]">
-            <input type="text" ng-model="quickEdit[field.schema]" maxlength="150" style="width:400px;" focus
-                   ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-                   ng-change="field.dirty=true">
-
-                <span style="padding-top:5px;">
-                     <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
-                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
-                </span>
-        </div>
-
-        <!--autocomplete-->
-        <div ng-if="field.inputType==='autoComplete'&&field.edit"
-             ng-init="quickEdit[field.schema]=entry[field.schema]">
-            <input type="text" ng-model="quickEdit[field.schema]" maxlength="150" focus
-                   ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-                   placeHolder={{field.placeHolder}} style="width:205px;" typeahead-loading="loadingData"
-                   typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue"
-                   ng-change="field.dirty=true">
-            <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
+                <!--medium input-->
+                <div ng-if="field.inputType==='medium'&&field.edit"
+                     ng-init="quickEdit[field.schema]=entry[field.schema]">
+                    <input type="text" ng-model="quickEdit[field.schema]" maxlength="150" style="width:400px;" focus
+                           ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                           ng-change="field.dirty=true">
 
                 <span style="padding-top:5px;">
                      <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
                     <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
                 </span>
-        </div>
+                </div>
 
-        <!--add todo : use full edit -->
-        <div ng-if="field.inputType==='add'&&field.edit">
+                <!--autocomplete-->
+                <div ng-if="field.inputType==='autoComplete'&&field.edit"
+                     ng-init="quickEdit[field.schema]=entry[field.schema]">
+                    <input type="text" ng-model="quickEdit[field.schema]" maxlength="150" focus
+                           ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                           placeHolder={{field.placeHolder}} style="width:205px;" typeahead-loading="loadingData"
+                           typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue"
+                           ng-change="field.dirty=true">
+                    <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
+
+                <span style="padding-top:5px;">
+                     <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
+                    <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
+                </span>
+                </div>
+
+                <!--add todo : use full edit -->
+                <div ng-if="field.inputType==='add'&&field.edit">
         <span ng-repeat="link in entry[field.schema]">
             <div ng-if="!$index">
                 <input ng-model="entry[field.schema][$index].value" type="text" maxlength="125"
@@ -180,10 +182,10 @@
                 <i class="fa fa-plus green opacity_hover" ng-click="addLink(field.schema, $index)"></i>
             </div>
         </span>
-        </div>
+                </div>
 
-        <!-- autocompleteAdd -->
-        <div ng-if="field.inputType==='autoCompleteAdd'&&field.edit">
+                <!-- autocompleteAdd -->
+                <div ng-if="field.inputType==='autoCompleteAdd'&&field.edit">
         <span ng-repeat="link in entry[field.schema]">
             <div ng-if="!$index">
                 <input ng-model="link.value" type="text" typeahead-loading="loadingData"
@@ -209,59 +211,87 @@
                 <i class="fa fa-plus green opacity_hover" ng-click="addLink(field.schema, $index)"></i>
             </div>
         </span>
-        </div>
+                </div>
 
-        <!--long-->
-        <div ng-if="field.inputType==='long'&&field.edit" ng-init="quickEdit[field.schema]=entry[field.schema]">
+                <!--long-->
+                <div ng-if="field.inputType==='long'&&field.edit" ng-init="quickEdit[field.schema]=entry[field.schema]">
             <textarea ng-model="quickEdit[field.schema]" style="width: 640px; height: 50px;" ng-trim="true"
                       ng-change="field.dirty=true" focus
                       ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"></textarea>
-            <br>
+                    <br>
                 <span style="padding-top:5px;">
                     <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
                     <a class="btn btn-link btn-xs" ng-click="field.edit=false">Cancel</a>
                 </span>
+                </div>
+            </form>
+            <!--end field edit section-->
+
         </div>
-    </form>
-    <!--end field edit section-->
-
-</div>
-</div>
-
-<div class="row margin-top-10" ng-if="entry.parameters&&entry.parameters.length"
-     ng-repeat="parameter in entry.parameters">
-    <div class="col-md-2 entryLabel">
-        {{parameter.name}}
     </div>
 
-    <div class="col-md-10">
-        {{parameter.value}}
+    <div class="row margin-top-10" ng-if="entry.parameters&&entry.parameters.length"
+         ng-repeat="parameter in entry.parameters">
+        <div class="col-md-2 entryLabel">
+            {{parameter.name}}
+        </div>
+
+        <div class="col-md-10">
+            {{parameter.value}}
+        </div>
     </div>
-</div>
 
-<div class="row margin-top-10" ng-if="entry.linkedParts.length">
-    <div class="col-md-12">
-        <div class="entry-details-subheader"><strong style="color: #233559;">CONTAINS</strong></div>
+    <!--if user can edit show allow to add custom fields-->
+    <div class="row margin-top-10" ng-if="entry.canEdit">
 
-        <div ng-repeat="part in entry.linkedParts">
-            <div class="row" ng-if="$index % 2 == 0">
-                <div class="col-md-6" ng-if="entry.linkedParts[$index+0]">
-                    <div class="contained-part">
-                        <div class="pull-right font-90em" style="padding: .75em .5em;">
-                            <a ng-href="entry/{{entry.linkedParts[$index+0].id}}"
-                               class="">{{entry.linkedParts[$index+0].partId}}</a>
-                        </div>
-                        <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
-                            <!--can break the link if allowed to edit this part-->
-                            <i class="fa fa-unlink red opacity_hover" tooltip="Remove link"
-                               ng-click="removeLink(entry, entry.linkedParts[$index+0])"
-                               ng-if="entry.canEdit"></i>
-                            <b>{{entry.linkedParts[$index+0].type}} <a
-                                    ng-href="entry/{{entry.linkedParts[$index+0].id}}"
-                                    style="color: #000">{{entry.linkedParts[$index+0].name}}</a></b>
-                        </div>
+        <div class="row pad-top-5" ng-if="newParameter.edit">
+            <div class="col-md-2 text-right">
+                <input type="text" ng-trim="true" placeHolder="Custom field name" maxlength="125" class="input_box"
+                       ng-class="{'input_box':!newParameter.nameInvalid, 'input_box_error':newParameter.nameInvalid}"
+                       ng-model="newParameter.name">
+            </div>
 
-                        <div style="background-color: #999; color: #fff; padding: 3px; text-align: center">
+            <div class="col-md-10">
+                <input type="text" ng-model="newParameter.value" ng-trim="true"
+                       ng-class="{'input_box':!newParameter.valueInvalid, 'input_box_error':newParameter.valueInvalid}"
+                       maxlength="125" style="width: 400px;" placeHolder="Custom field value">
+                <span style="padding-top:5px;">
+                    <a class="btn btn-primary btn-xs" ng-click="addNewCustomField()">Save</a>
+                    <a class="btn btn-link btn-xs" ng-click="newParameter.edit=false; newParameter={}">Cancel</a>
+                </span>
+            </div>
+        </div>
+
+        <div class="col-md-2 pad-top-5 pad-left-8" ng-if="!newParameter.edit">
+            <i class="fa fa-plus-circle font-14em color-888 opacity_hover" tooltip="Add custom field"
+               tooltip-placement="right" ng-click="newParameter.edit = true;"></i>
+        </div>
+    </div>
+
+    <!--show quick information about linked parts-->
+    <div class="row margin-top-10" ng-if="entry.linkedParts.length">
+        <div class="col-md-12">
+            <div class="entry-details-subheader"><strong style="color: #233559;">CONTAINS</strong></div>
+
+            <div ng-repeat="part in entry.linkedParts">
+                <div class="row" ng-if="$index % 2 == 0">
+                    <div class="col-md-6" ng-if="entry.linkedParts[$index+0]">
+                        <div class="contained-part">
+                            <div class="pull-right font-90em" style="padding: .75em .5em;">
+                                <a ng-href="entry/{{entry.linkedParts[$index+0].id}}"
+                                   class="">{{entry.linkedParts[$index+0].partId}}</a>
+                            </div>
+                            <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
+                                <!--can break the link if allowed to edit this part-->
+                                <i class="fa fa-unlink red opacity_hover" tooltip="Remove link"
+                                   ng-click="removeLink(entry, entry.linkedParts[$index+0])"
+                                   ng-if="entry.canEdit"></i>
+                                <b>{{entry.linkedParts[$index+0].type}} <a
+                                        ng-href="entry/{{entry.linkedParts[$index+0].id}}"
+                                        style="color: #000">{{entry.linkedParts[$index+0].name}}</a></b>
+                            </div>
+
+                            <div style="background-color: #999; color: #fff; padding: 3px; text-align: center">
                             <span ng-if="entry.linkedParts[$index+0].basePairCount">
                             Sequence with {{entry.linkedParts[$index+0].basePairCount | number}} base pairs <span
                                     ng-if="entry.linkedParts[$index+0].featureCount">& {{entry.linkedParts[$index+0].featureCount}} features</span>
@@ -269,116 +299,119 @@
                             <span ng-if="!entry.linkedParts[$index+0].basePairCount">
                                 <i>No sequence data</i>
                                 </span>
+                            </div>
+                            <p style="clear: both; margin: 0; padding: .75em .5em; color: #888;">
+                                {{entry.linkedParts[$index+0].shortDescription}}</p>
                         </div>
-                        <p style="clear: both; margin: 0; padding: .75em .5em; color: #888;">
-                            {{entry.linkedParts[$index+0].shortDescription}}</p>
                     </div>
-                </div>
 
-                <div class="col-md-6" ng-if="entry.linkedParts[$index+1]">
-                    <div class="contained-part">
-                        <div class="pull-right font-90em" style="padding: .75em .5em;">
-                            <a ng-href="entry/{{entry.linkedParts[$index+1].id}}"
-                               class="">{{entry.linkedParts[$index+1].partId}}</a>
-                        </div>
-                        <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
-                            <!--can break the link if allowed to edit this part-->
-                            <i class="fa fa-unlink red opacity_hover" tooltip="Remove link"
-                               ng-click="removeLink(entry, entry.linkedParts[$index+1])"
-                               ng-if="entry.canEdit"></i>
-                            <b>{{entry.linkedParts[$index+1].type}} <a
-                                    ng-href="entry/{{entry.linkedParts[$index+1].id}}"
-                                    style="color: #000">{{entry.linkedParts[$index+1].name}}</a></b>
-                        </div>
+                    <div class="col-md-6" ng-if="entry.linkedParts[$index+1]">
+                        <div class="contained-part">
+                            <div class="pull-right font-90em" style="padding: .75em .5em;">
+                                <a ng-href="entry/{{entry.linkedParts[$index+1].id}}"
+                                   class="">{{entry.linkedParts[$index+1].partId}}</a>
+                            </div>
+                            <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
+                                <!--can break the link if allowed to edit this part-->
+                                <i class="fa fa-unlink red opacity_hover" tooltip="Remove link"
+                                   ng-click="removeLink(entry, entry.linkedParts[$index+1])"
+                                   ng-if="entry.canEdit"></i>
+                                <b>{{entry.linkedParts[$index+1].type}} <a
+                                        ng-href="entry/{{entry.linkedParts[$index+1].id}}"
+                                        style="color: #000">{{entry.linkedParts[$index+1].name}}</a></b>
+                            </div>
 
-                        <div style="background-color: #999; color: #fff; padding: 3px; text-align: center">
-                            Sequence with {{entry.linkedParts[$index+1].basePairCount | number}} base pairs <span
-                                ng-if="entry.linkedParts[$index+1].featureCount">& {{entry.linkedParts[$index+1].featureCount}} features</span>
+                            <div style="background-color: #999; color: #fff; padding: 3px; text-align: center">
+                                Sequence with {{entry.linkedParts[$index+1].basePairCount | number}} base pairs <span
+                                    ng-if="entry.linkedParts[$index+1].featureCount">& {{entry.linkedParts[$index+1].featureCount}} features</span>
+                            </div>
+                            <p style="clear: both; margin: 0; color: rgba(0,0,0,.45);padding: .75em .5em;">
+                                {{entry.linkedParts[$index+1].shortDescription}}</p>
                         </div>
-                        <p style="clear: both; margin: 0; color: rgba(0,0,0,.45);padding: .75em .5em;">
-                            {{entry.linkedParts[$index+1].shortDescription}}</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="row margin-top-10">
-    <div class="col-md-12">
-        <div class="entry-details-subheader">
-            <strong style="color: #233559;">SEQUENCE</strong>
+    <div class="row margin-top-10">
+        <div class="col-md-12">
+            <div class="entry-details-subheader">
+                <strong style="color: #233559;">SEQUENCE</strong>
 
-            <!-- menu if no sequence then [Create in VE | Upload File | Paste -->
-            <div class="pull-right" ng-if='!entry.hasSequence&&entry.canEdit'>
-                <small class="opacity_hover" style="text-decoration: none" ng-click="open()"
-                       target="_blank"><i class="fa fa-external-link blue"></i> Create in VectorEditor
-                </small>
-                <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-                <small class="opacity_hover" ng-click="sequenceUpload('file')">
-                    <i class="fa fa-upload"></i>&nbsp; Upload File
-                </small>
-                <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-                <small class="opacity_hover" ng-click="sequenceUpload('paste')">
-                    <i class="fa fa-paste"></i> Paste Sequence
-                </small>
-            </div>
+                <!-- menu if no sequence then [Create in VE | Upload File | Paste -->
+                <div class="pull-right" ng-if='!entry.hasSequence&&entry.canEdit'>
+                    <small class="opacity_hover" style="text-decoration: none" ng-click="open()"
+                           target="_blank"><i class="fa fa-external-link blue"></i> Create in VectorEditor
+                    </small>
+                    <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                    <small class="opacity_hover" ng-click="sequenceUpload('file')">
+                        <i class="fa fa-upload"></i>&nbsp; Upload File
+                    </small>
+                    <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                    <small class="opacity_hover" ng-click="sequenceUpload('paste')">
+                        <i class="fa fa-paste"></i> Paste Sequence
+                    </small>
+                </div>
 
-            <!--menu if entry sequence exists-->
-            <div class="pull-right" ng-if='entry.hasSequence'>
+                <!--menu if entry sequence exists-->
+                <div class="pull-right" ng-if='entry.hasSequence'>
                 <span ng-if="entry.canEdit">
                     <small class="opacity_hover" ng-click="deleteSequence(entry)">Delete</small>
                     <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                 </span>
-                <small class="opacity_hover" ng-click="open()"><i class="fa fa-external-link blue"></i>
-                    Open in VectorEditor
-                </small>
+                    <small class="opacity_hover" ng-click="open()"><i class="fa fa-external-link blue"></i>
+                        Open in VectorEditor
+                    </small>
 
-                <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                    <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
 
-                <small class="btn-group" dropdown>
+                    <small class="btn-group" dropdown>
 
-                    <div dropdown-toggle class="dropdown-toggle opacity_hover">Download <span class="caret"></span>
-                    </div>
-                    <ul class="dropdown-menu">
-                        <li class="cursor_pointer font-80em" ng-if="entry.hasOriginalSequence">
-                            <a ng-href="rest/file/{{entry.id}}/sequence/original?sid={{sessionId}}" target="_self">Original</a>
-                        </li>
-                        <li class="cursor_pointer font-80em">
-                            <a ng-href="rest/file/{{entry.id}}/sequence/genbank?sid={{sessionId}}" target="_self"><i>Genbank</i></a>
-                        </li>
-                        <li class="cursor_pointer font-80em">
-                            <a ng-href="rest/file/{{entry.id}}/sequence/fasta?sid={{sessionId}}" target="_self"><i>FASTA</i></a>
-                        </li>
-                        <li class="cursor_pointer font-80em">
-                            <a ng-href="rest/file/{{entry.id}}/sequence/sbol?sid={{sessionId}}"
-                               target="_self"><i>SBOL</i></a>
-                        </li>
-                        <li class="cursor_pointer font-80em">
-                            <a ng-href="rest/file/{{entry.id}}/sequence/pigeonI?sid={{sessionId}}" target="_self"><i>Pigeon
-                                Image</i></a>
-                        </li>
-                        <li class="cursor_pointer font-80em">
-                            <a ng-href="rest/file/{{entry.id}}/sequence/pigeonS?sid={{sessionId}}" target="_self"><i>Pigeon
-                                Script</i></a>
-                        </li>
-                    </ul>
-                </small>
+                        <div dropdown-toggle class="dropdown-toggle opacity_hover">Download <span class="caret"></span>
+                        </div>
+                        <ul class="dropdown-menu">
+                            <li class="cursor_pointer font-80em" ng-if="entry.hasOriginalSequence">
+                                <a ng-href="rest/file/{{entry.id}}/sequence/original?sid={{sessionId}}" target="_self">Original</a>
+                            </li>
+                            <li class="cursor_pointer font-80em">
+                                <a ng-href="rest/file/{{entry.id}}/sequence/genbank?sid={{sessionId}}"
+                                   target="_self"><i>Genbank</i></a>
+                            </li>
+                            <li class="cursor_pointer font-80em">
+                                <a ng-href="rest/file/{{entry.id}}/sequence/fasta?sid={{sessionId}}" target="_self"><i>FASTA</i></a>
+                            </li>
+                            <li class="cursor_pointer font-80em">
+                                <a ng-href="rest/file/{{entry.id}}/sequence/sbol?sid={{sessionId}}"
+                                   target="_self"><i>SBOL</i></a>
+                            </li>
+                            <li class="cursor_pointer font-80em">
+                                <a ng-href="rest/file/{{entry.id}}/sequence/pigeonI?sid={{sessionId}}"
+                                   target="_self"><i>Pigeon
+                                    Image</i></a>
+                            </li>
+                            <li class="cursor_pointer font-80em">
+                                <a ng-href="rest/file/{{entry.id}}/sequence/pigeonS?sid={{sessionId}}"
+                                   target="_self"><i>Pigeon
+                                    Script</i></a>
+                            </li>
+                        </ul>
+                    </small>
 
-                <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                    <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
 
-                <small class="opacity_hover" ng-click="sbolShowHide()">
-                    <span ng-show="showSBOL">Hide</span>
-                    <span ng-hide="showSBOL">Show</span> Pigeon Image
-                </small>
+                    <small class="opacity_hover" ng-click="sbolShowHide()">
+                        <span ng-show="showSBOL">Hide</span>
+                        <span ng-hide="showSBOL">Show</span> Pigeon Image
+                    </small>
+                </div>
             </div>
-        </div>
 
-        <!--area where sequence is when there is no sequence available -->
-        <div class="pad_top" ng-if='!entry.hasSequence' style="color: #999;">
-            <i style="color: #999" class="font-90em" ng-hide="isFileUpload||isPaste">No sequence data provided</i>
+            <!--area where sequence is when there is no sequence available -->
+            <div class="pad_top" ng-if='!entry.hasSequence' style="color: #999;">
+                <i style="color: #999" class="font-90em" ng-hide="isFileUpload||isPaste">No sequence data provided</i>
 
-            <!--file upload-->
+                <!--file upload-->
             <span ng-show="isFileUpload">
                 <div class="alert alert-info font-90em" style="margin-bottom: 10px; margin-top: 10px">
                     <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Supported file formats are
@@ -389,7 +422,8 @@
                     <i style="font-size: 18px" class="fa fa-exclamation-triangle pull-left"></i> Error parsing file
                 </div>
 
-                <div class="margin-top-20 font-90em"><input nv-file-select uploader="sequenceFileUpload" type="file"/></div>
+                <div class="margin-top-20 font-90em"><input nv-file-select uploader="sequenceFileUpload" type="file"/>
+                </div>
                 <div style="height: 7px; background-color: #f9f9f9;" class="font-90em">
                     <div class="progress-bar" role="progressbar"
                          ng-style="{ 'width': sequenceFileUpload.progress + '%' }"></div>
@@ -400,32 +434,32 @@
                 <i class="fa fa-spinner fa-gear font-90em"></i> Processing file {{processingFile}}
             </span>
 
-            <!--sequence paste-->
+                <!--sequence paste-->
             <textarea ng-show="isPaste" class="input_box"
                       placeholder="Paste sequence" rows="14" ng-paste="processPastedSequence($event, entry)"
                       style="width: 100%; height: 100%; color:#111"></textarea>
-        </div>
+            </div>
 
-        <!--sbol-->
-        <div style="width: 100%; overflow: auto; position: relative; zoom: 1;" ng-if='entry.hasSequence && showSBOL'>
-            <div style="width: 0;">
-                <img height="130px"
-                     ng-src="download?sid={{sessionId}}&amp;rid={{entry.recordId}}">
+            <!--sbol-->
+            <div style="width: 100%; overflow: auto; position: relative; zoom: 1;"
+                 ng-if='entry.hasSequence && showSBOL'>
+                <div style="width: 0;">
+                    <img height="100px" ng-src="download?sid={{sessionId}}&amp;rid={{entry.recordId}}">
+                </div>
+            </div>
+
+            <div ng-show="entry.hasSequence" style="height: 600px">
+                <span ice-vector-viewer></span>
             </div>
         </div>
+    </div>
 
-        <div ng-show="entry.hasSequence" style="height: 600px">
-            <span ice-vector-viewer></span>
+    <div class="row margin-top-10" ng-if="entry.longDescription">
+        <div class="col-md-12">
+            <div class="entry-details-subheader">
+                <strong style="color: #233559;">NOTES</strong>
+            </div>
+            {{entry.longDescription}}
         </div>
     </div>
-</div>
-
-<div class="row margin-top-10" ng-if="entry.longDescription">
-    <div class="col-md-12">
-        <div class="entry-details-subheader">
-            <strong style="color: #233559;">NOTES</strong>
-        </div>
-        {{entry.longDescription}}
-    </div>
-</div>
 </div>

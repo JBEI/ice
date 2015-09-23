@@ -32,7 +32,7 @@
                 ng-href="profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}
             {{sample.depositor.lastName}}</a>
 
-            <div class="display-inline pull-right" ng-if="canDelete() && sample.deleteRequested">
+            <div class="display-inline pull-right" ng-if="sample.canEdit && sample.deleteRequested">
                 <i class="fa fa-exclamation-triangle alert_color fa-fw"></i>
                 <b style="color:#CC3333">Delete?</b>
 
@@ -41,7 +41,7 @@
                 </button>
             </div>
 
-            <div class="pull-right" style="font-size: 14px;" ng-if="canDelete() && !sample.deleteRequested">
+            <div class="pull-right" style="font-size: 14px;" ng-if="sample.canEdit && !sample.deleteRequested">
                 <i class="fa fa-fw delete_icon fa-trash-o" ng-click="sample.deleteRequested=true"></i>
             </div>
         </td>

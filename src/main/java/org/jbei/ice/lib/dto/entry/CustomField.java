@@ -3,7 +3,7 @@ package org.jbei.ice.lib.dto.entry;
 import org.jbei.ice.lib.dao.IDataTransferModel;
 
 /**
- * User created fields for entry
+ * User created key/value pair fields for an entry.
  *
  * @author Hector Plahar
  */
@@ -15,6 +15,17 @@ public class CustomField implements IDataTransferModel {
     private String value;
 
     public CustomField() {
+    }
+
+    public CustomField(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
+
+    public CustomField(long partId, String name, String value) {
+        this.partId = partId;
+        this.name = name;
+        this.value = value;
     }
 
     public CustomField(long id, long partId, String name, String value) {

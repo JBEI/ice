@@ -337,14 +337,14 @@
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                 </th>
                 <th></th>
-                <th style="width: 250px;"><span style="font-size: 12px; text-transform: uppercase">OWNER</span></th>
-                <th style="width:100px;">
+                <th style="width: 250px"><span style="font-size: 12px">OWNER</span></th>
+                <th style="width:100px">
                     <!--<i class="fa fa-paperclip fa-fw" style="font-size: 14px;"></i>-->
                     <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
                     <img src="img/dna.svg" width="15px" alt="has dna"/>
                 </th>
                 <th ng-click="sortResults('created')" class="cursor_pointer">
-                    <span style="font-size: 11px; text-transform: uppercase">Created</span>
+                    <span style="font-size: 11px">CREATED</span>
                     <i ng-show="searchFilters.parameters.sortField==='CREATED'" style="font-size: 14px"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':!searchFilters.parameters.sortAscending, 'fa-angle-up':searchFilters.parameters.sortAscending}"></i>
@@ -385,9 +385,7 @@
                 <td style="vertical-align: middle">
                     <small style="opacity: 0.4">
                         <ng-pluralize count="result.entryInfo.viewCount"
-                                      when="{'0': '',
-                                  '1': '1 view',
-                                  'other':'{} views'}"></ng-pluralize>
+                                      when="{'0': '', '1': '1 view', 'other':'{} views'}"></ng-pluralize>
                     </small>
                 </td>
                 <td>
@@ -402,7 +400,7 @@
                        style="opacity: 0; font-size: 14px;"></i>
                     <img ng-show="result.entryInfo.hasSequence" src="img/dna.svg" width="15px"/>
                 </td>
-                <td style="width:130px; white-space:nowrap">{{result.entryInfo.creationTime | date:'MMM d, yyyy'}}</td>
+                <td style="width:110px; white-space:nowrap">{{result.entryInfo.creationTime | date:'MMM d, yyyy'}}</td>
             </tr>
             </tbody>
         </table>

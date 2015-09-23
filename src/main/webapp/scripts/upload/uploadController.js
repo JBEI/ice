@@ -30,11 +30,20 @@ angular.module('ice.upload.controller', [])
         // this will be allowed as long as the user has not entered any data into the linked portion
         //
         $scope.addNewPartLink = function (type) {
+            var ht = angular.element('#dataTable').handsontable('getInstance');
+
+            // check if there is already a link
+            if (linkedHeaders) {
+                var length = UploadUtil.getSheetHeaders($scope.importType).length;
+                ht.alter('remove_col', length - 1, linkedHeaders.length);
+            }
+
             linkedImportType = type;
             $scope.linkedSelection = type.charAt(0).toUpperCase() + type.substring(1);
-            var ht = angular.element('#dataTable').handsontable('getInstance');
             linkedHeaders = UploadUtil.getSheetHeaders(type);
             linkedDataSchema = UploadUtil.getDataSchema(type);
+
+            // add linkedHeaders.length columns after the last column
             ht.alter('insert_col', undefined, linkedHeaders.length);
         };
 
@@ -44,6 +53,13 @@ angular.module('ice.upload.controller', [])
         $scope.addExistingPart = function () {
             linkedImportType = $scope.linkedSelection = "Existing";
             var ht = angular.element('#dataTable').handsontable('getInstance');
+
+            // check if there is already a link
+            if (linkedHeaders) {
+                var length = UploadUtil.getSheetHeaders($scope.importType).length;
+                ht.alter('remove_col', length - 1, linkedHeaders.length);
+            }
+
             linkedHeaders = ["Part Number"];
             linkedDataSchema = ["partId"];
             ht.alter('insert_col', undefined, linkedHeaders.length);
@@ -659,6 +675,10 @@ angular.module('ice.upload.controller', [])
 
                         linkedAddType: function () {
                             return $scope.linkedSelection;
+                        },
+
+                        uploadId: function () {
+                            return $scope.bulkUpload.id;
                         }
                     }
                 });
@@ -676,6 +696,10 @@ angular.module('ice.upload.controller', [])
 
                         linkedAddType: function () {
                             return $scope.linkedSelection;
+                        },
+
+                        uploadId: function () {
+                            return $scope.bulkUpload.id;
                         }
                     }
                 });
@@ -804,7 +828,7 @@ angular.module('ice.upload.controller', [])
                 case 'plasmid':
                     $scope.linkOptions = [
                         {type: 'part', display: 'Part'},
-                        {type: 'Plasmid', display: 'Plasmid'}
+                        {type: 'plasmid', display: 'Plasmid'}
                     ];
                     break;
 
@@ -817,7 +841,7 @@ angular.module('ice.upload.controller', [])
                 case 'strain':
                     $scope.linkOptions = [
                         {type: 'part', display: 'Part'},
-                        {type: 'Plasmid', display: 'Plasmid'},
+                        {type: 'plasmid', display: 'Plasmid'},
                         {type: 'strain', display: 'Strain'}
                     ];
                     break;
@@ -962,9 +986,23 @@ angular.module('ice.upload.controller', [])
             $modalInstance.dismiss('cancel');
         };
     })
-    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, $modalInstance, FileUploader, addType, linkedAddType) {
+    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, uploadId,
+                                                       $modalInstance, FileUploader, addType, linkedAddType, Folders) {
         var sid = $cookieStore.get("sessionId");
         $scope.addType = addType;
+
+        //
+        // reset the current bulk upload. involves deleting all entries and showing user new upload form
+        //
+        $scope.resetBulkUpload = function () {
+            // expected folders that can be deleted have type "PRIVATE" and "UPLOAD"
+            Folders().delete({folderId: uploadId, type: "UPLOAD"}, function (result) {
+                $location.path("/upload/" + addType);
+                $modalInstance.dismiss('cancel');
+            }, function (error) {
+                console.error(error);
+            });
+        };
 
         var uploader = $scope.importUploader = new FileUploader({
             url: "rest/upload/file",

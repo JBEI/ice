@@ -38,6 +38,7 @@ public class SearchFieldFactory {
         commonFields.add("links.link");
         commonFields.add("links.url");
         commonFields.add("selectionMarkers.name");
+        commonFields.add("parameters.value");
         commonFields.add("fundingSource");
         commonFields.add("principalInvestigator");
 
@@ -57,6 +58,10 @@ public class SearchFieldFactory {
         seedFields.add("generation");
         seedFields.add("parents");
         seedFields.add("plantType");
+    }
+
+    public static String[] getCommonFields() {
+        return commonFields.toArray(new String[commonFields.size()]);
     }
 
     public static HashSet<String> entryFields(List<EntryType> types) {
