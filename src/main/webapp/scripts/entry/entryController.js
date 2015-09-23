@@ -1011,6 +1011,7 @@ angular.module('ice.entry.controller', [])
                 controller: function ($scope, $http, $modalInstance, $cookieStore) {
                     $scope.mainEntry = part;
                     $scope.role = role;
+                    $scope.loadingAddExistingData = undefined;
 
                     if (role === 'PARENT') {
                         $scope.links = part.parents;
@@ -1030,29 +1031,59 @@ angular.module('ice.entry.controller', [])
                         });
                     };
 
+                    var addLinkAtServer = function (item) {
+                        entry.addLink({partId: $scope.mainEntry.id, linkType: $scope.role}, item,
+                            function (result) {
+                                $scope.links.push(item);   // todo
+                                $scope.addExistingPartNumber = undefined;
+                                $scope.mainEntrySequence = undefined;
+                            }, function (error) {
+                                console.error(error);
+                                $scope.errorMessage = "Error linking this entry to " + item.partId;
+                            });
+                    };
+
                     $scope.addExistingPartLink = function ($item, $model, $label) {
                         $scope.errorMessage = undefined;
+
+                        // prevent selecting current entry
                         if ($item.id == $scope.mainEntry.id)
                             return;
 
+                        // or already added entry
                         var found = false;
                         angular.forEach($scope.links, function (t) {
                             if (t.id === $item.id) {
                                 found = true;
                             }
                         });
-
                         if (found)
                             return;
 
-                        entry.addLink({partId: $scope.mainEntry.id, linkType: $scope.role}, $item,
-                            function (result) {
-                                $scope.links.push($item);   // todo
-                                $scope.addExistingPartNumber = undefined;
+                        $scope.selectedLink = $item;
+                        if ($scope.role == 'CHILD') {
+                            // fetch item.id and check if it has a sequence
+
+                            entry.query({partId: $item.id}, function (result) {
+                                if (!result.hasSequence) {
+                                    // then present the current entry sequence options to user
+                                    $scope.getEntrySequence($scope.mainEntry.id);
+                                } else {
+                                    // just add the link
+                                    addLinkAtServer($item);
+                                }
                             }, function (error) {
-                                console.error(error);
-                                $scope.errorMessage = "Error linking this entry to " + $item.partId;
-                            });
+                                $scope.errorMessage = "Error";
+                            })
+                        } else {
+                            // adding parent : check if main (current) entry has sequence
+                            if (!$scope.mainEntry.hasSequence) {
+                                // retrieve sequence feature options for selected
+                                $scope.getEntrySequence($scope.addExistingPartNumber.id);
+                            } else {
+                                addLinkAtServer($scope.mainEntry);
+                            }
+                        }
                     };
 
                     $scope.removeExistingPartLink = function (link) {
@@ -1073,7 +1104,46 @@ angular.module('ice.entry.controller', [])
 
                     $scope.close = function () {
                         $modalInstance.close();
-                    }
+                    };
+
+                    $scope.getEntrySequence = function (id) {
+                        $scope.mainEntrySequence = undefined;
+                        entry.sequence({partId: id}, function (result) {
+                            console.log(result);
+                            $scope.mainEntrySequence = result;
+                        }, function (error) {
+                            console.error(error);
+                        });
+                    };
+
+                    $scope.addSequenceToLinkAndLink = function (feature) {
+                        // update sequence information on entry
+                        // POST rest/parts/{id}/sequence featuredDNA sequence
+                        //console.log($scope.mainEntrySequence, feature, $scope.addExistingPartNumber);
+
+                        // todo : backend should handle this; quick fix for the milestone
+                        var start = feature.locations[0].genbankStart;
+                        var end = feature.locations[0].end;
+                        var sequence = $scope.mainEntrySequence.sequence.substring(start - 1, end);
+                        feature.genbankStart = 0;
+                        feature.end = sequence.length;
+
+                        var linkSequence = {
+                            identifier: $scope.addExistingPartNumber.partId,
+                            sequence: sequence,
+                            genbankStart: 0,
+                            end: sequence.length,
+                            features: [feature]
+                        };
+
+                        entry.addSequenceAsString({partId: $scope.selectedLink.id}, linkSequence,
+                            function (result) {
+                                console.log(result);
+                                addLinkAtServer($scope.addExistingPartNumber);
+                            }, function (error) {
+                                console.error(error);
+                            })
+                    };
                 },
                 backdrop: "static"
             });

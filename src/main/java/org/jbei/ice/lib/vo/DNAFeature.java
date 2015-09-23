@@ -1,10 +1,10 @@
 package org.jbei.ice.lib.vo;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.models.SequenceFeature;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Value object to hold a combination of {@link SequenceFeature} and
@@ -16,6 +16,7 @@ public class DNAFeature implements IDataTransferModel {
 
     private static final long serialVersionUID = 1L;
 
+    private long id;
     private String type = "";
     private String name = "";
     private int strand = 1;
@@ -27,6 +28,14 @@ public class DNAFeature implements IDataTransferModel {
 
     public DNAFeature() {
         super();
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getType() {
