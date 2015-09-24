@@ -109,14 +109,15 @@
 
     <div ng-if="userList && userList.users.length > 0">
         <div class="col-md-5" style="padding-left: 0">
-            <pagination total-items="userList.resultCount" ng-change="setUserListPage(page)" ng-model="currentPage"
-                        max-size="maxSize"
-                        class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+            <pagination total-items="userList.resultCount" ng-change="userListPageChanged()"
+                        ng-model="userListParams.currentPage"
+                        max-size="maxSize" class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
         </div>
 
         <div class="col-md-7" style="margin-top: 25px;">
             <strong class="small">
-                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(currentPage,
+                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
+                {{pageCounts(userListParams.currentPage,
                 userList.resultCount)}}
             </strong>
         </div>

@@ -1,24 +1,8 @@
 package org.jbei.ice.services.rest;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.account.Accounts;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
@@ -33,6 +17,14 @@ import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * REST Resource for users
@@ -58,22 +50,24 @@ public class UserResource extends RestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public AccountResults get(@DefaultValue("0") @QueryParam("offset") final int offset,
+    public Response get(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+            @DefaultValue("0") @QueryParam("offset") final int offset,
             @DefaultValue("15") @QueryParam("limit") final int limit,
             @DefaultValue("lastName") @QueryParam("sort") final String sort,
             @DefaultValue("true") @QueryParam("asc") final boolean asc) {
-        final String userId = getUserId();
+        final String userId = getUserId(sessionId);
         log(userId, "retrieving available accounts");
-        return groupController.getAvailableAccounts(userId, offset, limit, asc, sort);
+        Accounts accounts = new Accounts();
+        AccountResults result = accounts.getAvailableAccounts(userId, offset, limit, asc, sort);
+        return super.respond(result);
     }
 
     /**
      * Retrieves (up to specified limit), the list of users that match the value
      *
-     * @param val
-     *            text to match against users
-     * @param limit
-     *            upper limit for number of users to return
+     * @param val   text to match against users
+     * @param limit upper limit for number of users to return
      * @return list of matching users
      */
     @GET
@@ -117,7 +111,7 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/groups")
     public ArrayList<UserGroup> getProfileGroups(@Context final UriInfo info,
-            @PathParam("id") final long userId) {
+                                                 @PathParam("id") final long userId) {
         final String userIdString = getUserId();
         return groupController.retrieveUserGroups(userIdString, userId, false);
     }
@@ -148,11 +142,11 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries")
     public FolderDetails getProfileEntries(@Context final UriInfo info,
-            @PathParam("id") final long userId,
-            @DefaultValue("0") @QueryParam("offset") final int offset,
-            @DefaultValue("15") @QueryParam("limit") final int limit,
-            @DefaultValue("created") @QueryParam("sort") final String sort,
-            @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+                                           @PathParam("id") final long userId,
+                                           @DefaultValue("0") @QueryParam("offset") final int offset,
+                                           @DefaultValue("15") @QueryParam("limit") final int limit,
+                                           @DefaultValue("created") @QueryParam("sort") final String sort,
+                                           @DefaultValue("false") @QueryParam("asc") final boolean asc) {
         final String userIdString = getUserId();
         final EntryController entryController = new EntryController();
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
@@ -177,7 +171,7 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/preferences")
     public UserPreferences getUserPreferences(@Context final UriInfo info,
-            @PathParam("id") final long userId) {
+                                              @PathParam("id") final long userId) {
         final String userIdString = getUserId();
         final PreferencesController preferencesController = new PreferencesController();
         return preferencesController.getUserPreferences(userIdString, userId);
@@ -193,7 +187,7 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/preferences/{key}")
     public PreferenceInfo updatePreference(@PathParam("id") final long userId,
-            @PathParam("key") final String key, @QueryParam("value") final String value) {
+                                           @PathParam("key") final String key, @QueryParam("value") final String value) {
         final String userIdString = getUserId();
         final PreferencesController preferencesController = new PreferencesController();
         return preferencesController.updatePreference(userIdString, userId, key, value);
@@ -210,7 +204,7 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     public AccountTransfer update(@Context final UriInfo info, @PathParam("id") final long userId,
-            final AccountTransfer transfer) {
+                                  final AccountTransfer transfer) {
         final String user = getUserId();
         return controller.updateAccount(user, userId, transfer);
     }
@@ -271,12 +265,12 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
     public Response getRequestedSamples(@PathParam("id") final long userId,
-            @DefaultValue("0") @QueryParam("offset") final int offset,
-            @DefaultValue("15") @QueryParam("limit") final int limit,
-            @DefaultValue("requested") @QueryParam("sort") final String sort,
-            @DefaultValue("false") @QueryParam("asc") final boolean asc,
-            @PathParam("userId") final long uid,
-            @DefaultValue("") @QueryParam("status") final SampleRequestStatus status) {
+                                        @DefaultValue("0") @QueryParam("offset") final int offset,
+                                        @DefaultValue("15") @QueryParam("limit") final int limit,
+                                        @DefaultValue("requested") @QueryParam("sort") final String sort,
+                                        @DefaultValue("false") @QueryParam("asc") final boolean asc,
+                                        @PathParam("userId") final long uid,
+                                        @DefaultValue("") @QueryParam("status") final SampleRequestStatus status) {
         final String user = getUserId();
         return super.respond(Response.Status.OK,
                 requestRetriever.getUserSamples(user, status, offset, limit, sort, asc));
