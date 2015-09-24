@@ -282,11 +282,14 @@ public class PermissionDAO extends HibernateRepository<Permission> {
                 .add(Restrictions.eq("canRead", true));
         Session session = currentSession();
         try {
+            Disjunction disjunction = Restrictions.disjunction();
+            if (!accountGroups.isEmpty())
+                disjunction.add(Restrictions.in("group", accountGroups));
+            disjunction.add(Restrictions.eq("account", account));
+
             List list = session.createCriteria(Permission.class)
                     .add(Restrictions.isNull("entry"))
-                    .add(Restrictions.disjunction()
-                            .add(Restrictions.in("group", accountGroups))
-                            .add(Restrictions.eq("account", account)))
+                    .add(disjunction)
                     .add(criterion)
                     .setProjection(Projections.property("folder"))
                     .add(Restrictions.isNotNull("folder"))
