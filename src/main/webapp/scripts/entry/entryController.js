@@ -1062,26 +1062,37 @@ angular.module('ice.entry.controller', [])
 
                         $scope.selectedLink = $item;
                         if ($scope.role == 'CHILD') {
-                            // fetch item.id and check if it has a sequence
 
-                            entry.query({partId: $item.id}, function (result) {
-                                if (!result.hasSequence) {
-                                    // then present the current entry sequence options to user
-                                    $scope.getEntrySequence($scope.mainEntry.id);
+                            // if item being added as a child is of type part then
+                            if ($item.type.toLowerCase() == 'part') {
+                                // fetch item.id and check if it has a sequence
+                                entry.query({partId: $item.id}, function (result) {
+                                    if (!result.hasSequence) {
+                                        // then present the current entry sequence options to user
+                                        $scope.getEntrySequence($scope.mainEntry.id);
+                                    } else {
+                                        // just add the link
+                                        addLinkAtServer($item);
+                                    }
+                                }, function (error) {
+                                    $scope.errorMessage = "Error";
+                                })
+                            } else {
+                                // just add the link
+                                addLinkAtServer($item);
+                            }
+                        } else {
+                            // parent of main entry being added
+                            if ($scope.mainEntry.type.toLowerCase() == 'part') {
+                                // adding parent : check if main (current) entry has sequence
+                                if (!$scope.mainEntry.hasSequence) {
+                                    // retrieve sequence feature options for selected
+                                    $scope.getEntrySequence($scope.addExistingPartNumber.id);
                                 } else {
-                                    // just add the link
                                     addLinkAtServer($item);
                                 }
-                            }, function (error) {
-                                $scope.errorMessage = "Error";
-                            })
-                        } else {
-                            // adding parent : check if main (current) entry has sequence
-                            if (!$scope.mainEntry.hasSequence) {
-                                // retrieve sequence feature options for selected
-                                $scope.getEntrySequence($scope.addExistingPartNumber.id);
                             } else {
-                                addLinkAtServer($scope.mainEntry);
+                                addLinkAtServer($item);
                             }
                         }
                     };
