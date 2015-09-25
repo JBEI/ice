@@ -1365,6 +1365,20 @@ angular.module('ice.entry.controller', [])
             });
         };
 
+        $scope.deleteCustomField = function (parameter) {
+            var index = $scope.entry.parameters.indexOf(parameter);
+            if (index >= 0) {
+                var currentParam = $scope.entry.parameters[index];
+                if (currentParam.id == parameter.id) {
+                    CustomField().deleteCustomField({id: parameter.id}, function (result) {
+                        $scope.entry.parameters.splice(index, 1);
+                    }, function (error) {
+                        console.error(error);
+                    })
+                }
+            }
+        };
+
         $scope.nextEntryInContext = function () {
             $scope.context.offset += 1;
             $scope.context.callback($scope.context.offset, function (result) {

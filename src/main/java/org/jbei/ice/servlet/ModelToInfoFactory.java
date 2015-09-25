@@ -186,6 +186,7 @@ public class ModelToInfoFactory {
         if (entry.getParameters() != null) {
             for (Parameter parameter : entry.getParameters()) {
                 CustomField paramInfo = new CustomField();
+                paramInfo.setId(parameter.getId());
                 paramInfo.setName(parameter.getKey());
                 paramInfo.setValue(parameter.getValue());
                 params.add(paramInfo);

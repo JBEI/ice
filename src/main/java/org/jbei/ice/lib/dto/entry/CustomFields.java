@@ -23,7 +23,7 @@ public class CustomFields {
         this.dao = DAOFactory.getParameterDAO();
     }
 
-    public long createField(String userId, long partId, CustomField field) {
+    public CustomField createField(String userId, long partId, CustomField field) {
         EntryDAO entryDAO = DAOFactory.getEntryDAO();
 
         Entry entry = entryDAO.get(partId);
@@ -34,8 +34,7 @@ public class CustomFields {
         parameter.setKey(field.getName());
         parameter.setValue(field.getValue());
         entry.getParameters().add(parameter);
-        parameter = this.dao.create(parameter);
-        return parameter.getId();
+        return this.dao.create(parameter).toDataTransferObject();
     }
 
     public CustomField updateField(String userId, long id, CustomField customField) {
