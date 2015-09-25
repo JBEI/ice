@@ -55,11 +55,12 @@ public class UserResource extends RestResource {
             @DefaultValue("0") @QueryParam("offset") final int offset,
             @DefaultValue("15") @QueryParam("limit") final int limit,
             @DefaultValue("lastName") @QueryParam("sort") final String sort,
-            @DefaultValue("true") @QueryParam("asc") final boolean asc) {
+            @DefaultValue("true") @QueryParam("asc") final boolean asc,
+            @QueryParam("filter") String filter) {
         final String userId = getUserId(sessionId);
         log(userId, "retrieving available accounts");
         Accounts accounts = new Accounts();
-        AccountResults result = accounts.getAvailableAccounts(userId, offset, limit, asc, sort);
+        AccountResults result = accounts.getAvailableAccounts(userId, offset, limit, asc, sort, filter);
         return super.respond(result);
     }
 

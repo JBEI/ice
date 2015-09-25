@@ -1,16 +1,15 @@
 package org.jbei.ice.lib.dao.hibernate;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dao.IRepository;
 
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Parent abstract class for Hibernate Persistence
@@ -117,20 +116,6 @@ public abstract class HibernateRepository<T extends IDataModel> implements IRepo
             Query query = session.createQuery("from " + theClass.getName());
             results = new ArrayList<T>(query.list());
             return results;
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
-    }
-
-    protected List<T> getList(Class<T> clazz, int offset, int limit, String sort, boolean asc) {
-        try {
-            String queryString = "from " + clazz.getName() + " order by " + sort;
-            queryString += asc ? " asc" : " desc";
-            Query query = currentSession().createQuery(queryString);
-            query.setFirstResult(offset);
-            query.setMaxResults(limit);
-            return new ArrayList<T>(query.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

@@ -37,14 +37,15 @@ public class Accounts {
      * @param sort   account sort type
      * @return wrapper around list of retrieved requested records and number available for retrieval
      */
-    public AccountResults getAvailableAccounts(String userId, int offset, int limit, boolean asc, String sort) {
+    public AccountResults getAvailableAccounts(String userId, int offset, int limit, boolean asc, String sort,
+                                               String filter) {
         Account account = accountDAO.getByEmail(userId);
         if (!isAdministrator(account))
             throw new PermissionException(userId + " does not have the privilege to access all accounts");
 
         AccountResults results = new AccountResults();
         EntryController entryController = new EntryController();
-        List<Account> accounts = accountDAO.getAccounts(offset, limit, sort, asc);
+        List<Account> accounts = accountDAO.getAccounts(offset, limit, sort, asc, filter);
 
         for (Account userAccount : accounts) {
             AccountTransfer info = userAccount.toDataTransferObject();

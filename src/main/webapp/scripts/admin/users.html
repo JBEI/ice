@@ -58,22 +58,22 @@
         </form>
     </div>
     <div class="pad_top">
-        <table cellspacing="0" class="table table-hover font-95em" ng-class="{'opacity_4':loadingPage}">
+        <table cellspacing="0" class="table table-hover" ng-class="{'opacity_4':loadingPage}">
             <thead>
             <tr data-ng-show='!userList'>
                 <td colspan="10">Loading...</td>
             </tr>
 
             <tr data-ng-if='userList && userList.users.length > 0'>
-                <th ng-click="sort('type')" style="width: 85px">
+                <th style="width: 85px">
                     <span class="cursor_pointer">Name</span>
                 </th>
-                <th ng-click="sort('summary')">AccountType</th>
-                <th ng-click="sort('status')">
+                <th>AccountType</th>
+                <th>
                     <span class="cursor_pointer"># Entries</span>
                 </th>
-                <th ng-click="sort('summary')">Registered</th>
-                <th ng-click="sort('summary')">Last Login</th>
+                <th>Registered</th>
+                <th>Last Login</th>
             </tr>
             <tr data-ng-show=" userList.users.length == 0">
                 <td colspan="10">No user accounts available</td>
@@ -81,9 +81,15 @@
             </thead>
             <tbody>
             <tr data-ng-repeat="userItem in userList.users">
-                <td class="no_wrap">{{userItem.firstName}} {{userItem.lastName}} (<a ng-href="profile/{{userItem.id}}">{{userItem.email}}</a>)
+                <td class="no_wrap">
+                    <a ng-href="profile/{{userItem.id}}">
+                    <span ng-if="userItem.firstName && userItem.lastName">{{userItem.firstName}}
+                    {{userItem.lastName}}</span>
+                        <span ng-if="!userItem.firstName && !userItem.lastName">{{userItem.email}}</span></a>
+                    <br>
+                    <small class="color-888">{{userItem.email}}</small>
                 </td>
-                <td style="width:160px; white-space:nowrap">
+                <td style="width:90px; white-space:nowrap; vertical-align: middle;">
                     <!-- Single button -->
                     <div class="btn-group" dropdown>
                         <button type="button" class="btn btn-xs dropdown-toggle" dropdown-toggle
@@ -98,9 +104,16 @@
                         </ul>
                     </div>
                 </td>
-                <td style="width:90px; white-space:nowrap">{{userItem.userEntryCount | number}}</td>
-                <td style="width:160px; white-space:nowrap">{{userItem.registerDate | date:'MMM d, yyyy'}}</td>
-                <td style="width:160px; white-space:nowrap"><span ng-show="userItem.lastLogin">{{userItem.lastLogin | date:'MMM d, yyyy'}}</span>
+                <td style="width:90px; white-space:nowrap; vertical-align: middle;">
+                    <span class="label"
+                          ng-class="{
+                          'label-primary': userItem.userEntryCount,
+                          'label-default': userItem.userEntryCount == 0}">{{userItem.userEntryCount | number}}
+                    </span>
+                </td>
+                <td style="width:110px; vertical-align: middle">{{userItem.registerDate | date:'MMM d, yyyy'}}</td>
+                <td style="width:110px; vertical-align: middle">
+                    <span ng-show="userItem.lastLogin">{{userItem.lastLogin | date:'MMM d, yyyy'}}</span>
                 </td>
             </tr>
             </tbody>
@@ -117,8 +130,7 @@
         <div class="col-md-7" style="margin-top: 25px;">
             <strong class="small">
                 <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
-                {{pageCounts(userListParams.currentPage,
-                userList.resultCount)}}
+                {{pageCounts(userListParams.currentPage, userList.resultCount)}}
             </strong>
         </div>
 
