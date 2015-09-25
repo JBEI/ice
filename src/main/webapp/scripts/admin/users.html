@@ -1,5 +1,9 @@
 <div ng-controller="AdminUserController">
     <div class="pad_top">
+
+        <input type="text" ng-model="userListParams.filter" class="input_box"
+               ng-change="filterChanged()" placeholder="Filter Users"/>
+
         <button type="button" ng-click="showCreateProfile=true" class="ice-button">
             <i style="font-size: 14px" class="blue fa fa-user"></i> Create Account
         </button>
@@ -58,20 +62,16 @@
         </form>
     </div>
     <div class="pad_top">
-        <table cellspacing="0" class="table table-hover" ng-class="{'opacity_4':loadingPage}">
+        <table cellspacing="0" class="table table-hover table-border-bottom" ng-class="{'opacity_4':loadingPage}">
             <thead>
             <tr data-ng-show='!userList'>
                 <td colspan="10">Loading...</td>
             </tr>
 
             <tr data-ng-if='userList && userList.users.length > 0'>
-                <th style="width: 85px">
-                    <span class="cursor_pointer">Name</span>
-                </th>
+                <th>Name</th>
                 <th>AccountType</th>
-                <th>
-                    <span class="cursor_pointer"># Entries</span>
-                </th>
+                <th># Entries</th>
                 <th>Registered</th>
                 <th>Last Login</th>
             </tr>
@@ -89,7 +89,7 @@
                     <br>
                     <small class="color-888">{{userItem.email}}</small>
                 </td>
-                <td style="width:90px; white-space:nowrap; vertical-align: middle;">
+                <td style="width:180px; white-space:nowrap; vertical-align: middle;">
                     <!-- Single button -->
                     <div class="btn-group" dropdown>
                         <button type="button" class="btn btn-xs dropdown-toggle" dropdown-toggle
@@ -104,15 +104,15 @@
                         </ul>
                     </div>
                 </td>
-                <td style="width:90px; white-space:nowrap; vertical-align: middle;">
+                <td style="width:180px; white-space:nowrap; vertical-align: middle;">
                     <span class="label"
                           ng-class="{
                           'label-primary': userItem.userEntryCount,
                           'label-default': userItem.userEntryCount == 0}">{{userItem.userEntryCount | number}}
                     </span>
                 </td>
-                <td style="width:110px; vertical-align: middle">{{userItem.registerDate | date:'MMM d, yyyy'}}</td>
-                <td style="width:110px; vertical-align: middle">
+                <td style="width:150px; vertical-align: middle">{{userItem.registerDate | date:'MMM d, yyyy'}}</td>
+                <td style="width:150px; vertical-align: middle">
                     <span ng-show="userItem.lastLogin">{{userItem.lastLogin | date:'MMM d, yyyy'}}</span>
                 </td>
             </tr>

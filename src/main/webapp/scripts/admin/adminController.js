@@ -357,6 +357,9 @@ angular.module('ice.admin.controller', [])
             }, function (error) {
                 console.log(error);
             });
+        };
+
+        $scope.filterChanged = function () {
+            getUsers();
         }
-    })
-;
+    });

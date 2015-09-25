@@ -55,7 +55,7 @@ public class Accounts {
             results.getResults().add(info);
         }
 
-        long count = accountDAO.getAccountsCount();
+        long count = accountDAO.getAccountsCount(filter);
         results.setResultCount(count);
         return results;
     }
