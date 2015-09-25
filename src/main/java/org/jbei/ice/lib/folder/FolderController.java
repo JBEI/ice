@@ -394,7 +394,7 @@ public class FolderController {
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
             long folderSize = dao.getFolderSize(folder.getId());
             details.setCount(folderSize);
-            details.setType(FolderType.PRIVATE);
+            details.setType(folder.getType());
             details.setCanEdit(true);
             folderDetails.add(details);
         }

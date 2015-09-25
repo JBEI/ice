@@ -1,8 +1,10 @@
 package org.jbei.ice.lib.dao.hibernate;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.account.model.Account;
@@ -77,8 +79,23 @@ public class AccountDAO extends HibernateRepository<Account> {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Account> getAccounts(int offset, int limit, String sort, boolean asc) {
-        return super.getList(Account.class, offset, limit, sort, asc);
+    public List<Account> getAccounts(int offset, int limit, String sort, boolean asc, String filter) {
+        try {
+            Criteria criteria = currentSession().createCriteria(Account.class.getName());
+            if (!StringUtils.isEmpty(filter)) {
+                criteria.add(Restrictions.disjunction()
+                        .add(Restrictions.ilike("firstName", filter, MatchMode.ANYWHERE))
+                        .add(Restrictions.ilike("lastName", filter, MatchMode.ANYWHERE))
+                        .add(Restrictions.ilike("email", filter, MatchMode.ANYWHERE)));
+            }
+            criteria.addOrder(asc ? Order.asc(sort) : Order.desc(sort));
+            criteria.setMaxResults(limit);
+            criteria.setFirstResult(offset);
+            return criteria.list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 
     public long getAccountsCount() {

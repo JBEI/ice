@@ -315,26 +315,24 @@ angular.module('ice.admin.controller', [])
         $scope.maxSize = 5;
         $scope.currentPage = 1;
         $scope.newProfile = undefined;
+        $scope.userListParams = {sort: 'lastName', asc: true, currentPage: 1, status: undefined};
 
         var user = User($cookieStore.get("sessionId"));
         var getUsers = function () {
-            user.list(function (result) {
+            $scope.loadingPage = true;
+            user.list($scope.userListParams, function (result) {
                 $scope.userList = result;
+                $scope.loadingPage = false;
+            }, function (error) {
+                $scope.loadingPage = false;
             });
         };
 
         getUsers();
-
-        $scope.setUserListPage = function (pageNo) {
-            if (pageNo == undefined || isNaN(pageNo))
-                pageNo = 1;
-
+        $scope.userListPageChanged = function () {
             $scope.loadingPage = true;
-            var offset = (pageNo - 1) * 15;
-            user.list({offset: offset}, function (result) {
-                $scope.userList = result;
-                $scope.loadingPage = false;
-            });
+            $scope.userListParams.offset = ($scope.userListParams.currentPage - 1) * 15;
+            getUsers();
         };
 
         $scope.createProfile = function () {
@@ -360,4 +358,5 @@ angular.module('ice.admin.controller', [])
                 console.log(error);
             });
         }
-    });
+    })
+;
