@@ -1,22 +1,5 @@
 package org.jbei.ice.services.rest;
 
-import java.util.List;
-
-import javax.ws.rs.DELETE;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -28,6 +11,13 @@ import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+import java.util.List;
 
 /**
  * Resource for web of registries requests
@@ -169,7 +159,6 @@ public class WebResource extends RestResource {
     }
 
     /**
-     * @param info
      * @param partner
      * @return Response with an added registry partner
      */

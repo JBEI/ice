@@ -231,13 +231,15 @@
     </div>
 
     <div class="row margin-top-10" ng-if="entry.parameters&&entry.parameters.length"
-         ng-repeat="parameter in entry.parameters">
+         ng-repeat="parameter in entry.parameters" ng-mouseover="parameter.edit=true"
+         ng-mouseleave="parameter.edit=false">
         <div class="col-md-2 entryLabel">
             {{parameter.name}}
         </div>
 
         <div class="col-md-10">
-            {{parameter.value}}
+            {{parameter.value}} &nbsp; <i ng-if="entry.canEdit && parameter.edit"
+                                          ng-click="deleteCustomField(parameter)" class="delete_icon fa fa-trash-o"></i>
         </div>
     </div>
 

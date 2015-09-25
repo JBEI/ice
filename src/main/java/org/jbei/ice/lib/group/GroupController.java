@@ -8,10 +8,8 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.GroupDAO;
-import org.jbei.ice.lib.dto.AccountResults;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.dto.group.UserGroup;
-import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.utils.Utils;
 
 import java.util.ArrayList;
@@ -286,49 +284,6 @@ public class GroupController {
         }
 
         return groupIds;
-    }
-
-    public ArrayList<AccountTransfer> retrieveGroupMembers(String uuid, boolean includeEntryCounts) {
-        Set<AccountTransfer> result = new HashSet<>();
-        Group group = dao.get(uuid);
-        EntryController entryController = new EntryController();
-        for (Account account : group.getMembers()) {
-            AccountTransfer accountTransfer = account.toDataTransferObject();
-            if (includeEntryCounts) {
-                // TODO :
-//                try {
-//
-//                    count = entryController.getNumberOfOwnerEntries(userAccount, userAccount.getEmail());
-//                    info.setUserEntryCount(count);
-//                } catch (Exception e) {
-//                }
-            }
-            result.add(accountTransfer);
-        }
-        return new ArrayList<>(result);
-    }
-
-    public AccountResults getAvailableAccounts(String userId, int offset, int limit, boolean asc, String sort) {
-        Account account = accountController.getByEmail(userId);
-        Set<AccountTransfer> accounts = new HashSet<>();
-
-        if (accountController.isAdministrator(userId)) {
-            return accountController.retrieveAccounts(userId, offset, limit, sort, asc);
-        } else {
-            Set<Group> groups = getAllGroups(account);
-            AccountResults results = new AccountResults();
-
-            for (Group group : groups) {
-                if (group.getType() == GroupType.PRIVATE)
-                    continue;
-
-                ArrayList<AccountTransfer> members = retrieveGroupMembers(group.getUuid(), false);
-                accounts.addAll(members);
-            }
-
-            results.getResults().addAll(accounts);
-            return results;
-        }
     }
 
     protected void setGroupMembers(Group group, ArrayList<AccountTransfer> members) {

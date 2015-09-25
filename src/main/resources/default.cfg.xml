@@ -10,7 +10,6 @@
         <property name="hibernate.connection.url">jdbc:h2:./db/h2db</property>
         <property name="hibernate.connection.username">sa</property>
         <property name="hibernate.connection.password"></property>
-        <property name="hibernate.default_schema">PUBLIC</property>
         <property name="hibernate.dialect">org.hibernate.dialect.H2Dialect</property>
 
         <property name="hibernate.search.default.indexBase">./data/lucene-data</property>

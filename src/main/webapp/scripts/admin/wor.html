@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    <div class="pad_top" ng-init="getPartners(true)" ng-if="isWorEnabled && wor && wor.partners.length">
+    <div class="pad_top" ng-if="isWorEnabled && wor && wor.partners.length">
         <table cellspacing="0" class="table table-hover font-95em">
             <thead>
             <tr>
@@ -54,24 +54,37 @@
             </thead>
             <tbody>
             <tr ng-repeat="partner in wor.partners">
-                <td style="line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;">
+                <td style="vertical-align: middle; line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"
+                    class="font-14em">
                     <b>{{$index+1}}</b>
                 </td>
-                <td><a target="_blank" ng-href="https://{{partner.url}}">{{partner.name}}</a>
-                    <b class="small color-888">{{partner.url}}</b></td>
-                <td>{{partner.addTime | date:'MMM d, y, h:mm a'}}</td>
+                <td><a target="_blank" ng-href="https://{{partner.url}}">{{partner.name}}</a> <br>
+                    <small class="color-888">{{partner.url}}</small>
+                </td>
+                <td style="vertical-align: middle">{{partner.addTime | date:'MMM d, y, h:mm a'}}</td>
                 <!--lastContactTime-->
-                <td>{{partner.status | capitalize}}</td>
-                <td style="font-size:14px">
-                    <span tooltip="Delete" style="padding: 2px 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);"><i
-                            class="fa fa-trash-o fa-fw delete_icon"
-                            ng-click="removePartner(partner, $index)"></i></span>
-                    <span ng-if="partner.status !== 'APPROVED'" tooltip="Approve"
-                          style="padding: 2px 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);"><i
-                            class="fa fa-check fa-fw add_icon" ng-click="approvePartner(partner, $index)"></i></span>
-                    <span ng-if="partner.status !== 'BLOCKED'" tooltip="Block"
-                          style="padding: 2px 4px; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);"><i
-                            class="fa fa-ban fa-fw flag_icon" ng-click="removePartner(partner, $index)"></i></span>
+                <td style="vertical-align: middle">
+                    <div class="btn-group" dropdown>
+                        <button type="button" class="btn btn-xs dropdown-toggle strong" dropdown-toggle
+                                ng-class="{
+                                'btn-success':partner.status === 'APPROVED',
+                                'btn-warning':partner.status === 'PENDING',
+                                'btn-danger':partner.status === 'BLOCKED'
+                                }">
+                            {{partner.status |capitalize}} <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li ng-repeat="listObject in partnerStatusList" class="font-90em"
+                                ng-click="setPartnerStatus(partner, listObject.status)">
+                                <a href="#">{{listObject.action | capitalize}}</a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+                <td class="font-12em" style="vertical-align: middle">
+                    <span tooltip="Delete partner">
+                    <i class="fa fa-trash-o fa-fw delete_icon" ng-click="removePartner(partner, $index)"></i>
+                    </span>
                 </td>
             </tr>
             </tbody>

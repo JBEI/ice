@@ -11,9 +11,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.jbei.ice.lib.dao.hibernate.AccountPreferencesDAO;
-import org.jbei.ice.lib.dto.AccountResults;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
@@ -530,41 +528,6 @@ public class AccountController {
             result.add(info);
         }
         return result;
-    }
-
-    /**
-     * @param userId
-     * @param start
-     * @param limit
-     * @param sort
-     * @param asc
-     * @return window of results to all accounts
-     */
-    public AccountResults retrieveAccounts(final String userId, final int start, final int limit,
-                                           final String sort, final boolean asc) {
-        if (!isAdministrator(userId)) {
-            Logger.warn(userId + " attempting to retrieve all user accounts without admin privileges");
-            return null;
-        }
-
-        final AccountResults results = new AccountResults();
-        final EntryController entryController = new EntryController();
-        final List<Account> accounts = dao.getAccounts(start, limit, sort, asc);
-
-        final List<AccountTransfer> infos = new ArrayList<>();
-        for (final Account userAccount : accounts) {
-            final AccountTransfer info = userAccount.toDataTransferObject();
-            final long count = entryController.getNumberOfOwnerEntries(userId,
-                    userAccount.getEmail());
-            info.setUserEntryCount(count);
-            info.setAdmin(isAdministrator(userAccount.getEmail()));
-            infos.add(info);
-        }
-
-        results.getResults().addAll(infos);
-        final long count = dao.getAccountsCount();
-        results.setResultCount(count);
-        return results;
     }
 
     /**

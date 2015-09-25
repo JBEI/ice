@@ -98,6 +98,6 @@ public class RegistryPartner implements IDataTransferModel {
 
     @Override
     public String toString() {
-        return name + "(" + url + "); status = " + status + "; apiKey = " + apiKey;
+        return "[" + name + "(" + url + "); status = " + status + "; apiKey = " + apiKey + "]";
     }
 }

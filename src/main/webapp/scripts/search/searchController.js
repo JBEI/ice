@@ -71,25 +71,25 @@ angular.module('ice.search.controller', [])
             return 'info';
         };
 
-        $scope.searchResultPopupTemplate = "scripts/search/tooltip.html";
+        $scope.searchResultPopupTemplate = "views/folder/template.html";
 
         $scope.tooltipDetails = function (entry) {
-            $scope.searchResultToolTip = undefined;
+            $scope.currentTooltip = undefined;
             var sessionId = $cookieStore.get("sessionId");
 
             Entry(sessionId).tooltip({partId: entry.id},
                 function (result) {
-                    $scope.searchResultToolTip = result;
+                    $scope.currentTooltip = result;
                 }, function (error) {
                     console.error(error);
                 });
         };
 
         $scope.remoteTooltipDetails = function (result) {
-            $scope.searchResultToolTip = undefined;
+            $scope.currentTooltip = undefined;
             WebOfRegistries().getToolTip({partnerId: result.partner.id, entryId: result.entryInfo.id},
                 function (result) {
-                    $scope.searchResultToolTip = result;
+                    $scope.currentTooltip = result;
                 }, function (error) {
                     console.error(error);
                 });

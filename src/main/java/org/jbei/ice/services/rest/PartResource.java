@@ -390,7 +390,6 @@ public class PartResource extends RestResource {
     /**
      * @param info
      * @param partId
-     * @param sessionId
      * @return traces for the part
      */
     @GET
@@ -477,8 +476,10 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/sequence")
     public Response getSequence(@PathParam("id") final long partId,
-                                @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-                                @QueryParam("sid") final String sessionId) {
+                                @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+                                @QueryParam("sid") final String sid) {
+        if (StringUtils.isEmpty(sessionId))
+            sessionId = sid;
         final String userId = getUserId(sessionId);
         final FeaturedDNASequence sequence = sequenceController.retrievePartSequence(userId, partId);
         if (sequence == null) {
@@ -487,13 +488,25 @@ public class PartResource extends RestResource {
         return Response.status(Response.Status.OK).entity(sequence).build();
     }
 
+//    @PUT
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Path("/{id}/sequence")
+//    public Response addSequenceToEntry(@PathParam("id") final long partId,
+//                                       @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+//                                       @QueryParam("sid") final String sid,
+//                                       FeaturedDNASequence sequence) {
+//
+//    }
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/sequence")
     public FeaturedDNASequence updateSequence(@PathParam("id") final long partId,
-                                              @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-                                              @QueryParam("sid") final String sessionId,
+                                              @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+                                              @QueryParam("sid") final String sid,
                                               FeaturedDNASequence sequence) {
+        if (StringUtils.isEmpty(sessionId))
+            sessionId = sid;
         final String userId = getUserId(sessionId);
         return sequenceController.updateSequence(userId, partId, sequence);
     }
@@ -594,10 +607,12 @@ public class PartResource extends RestResource {
     @DELETE
     @Path("/{id}/links/{linkedId}")
     public Response deleteLink(@PathParam("id") final long partId,
+                               @DefaultValue("CHILD") @QueryParam("linkType") LinkType linkType,
                                @PathParam("linkedId") final long linkedPart) {
         final String userId = getUserId();
         log(userId, "removing link " + linkedPart + " from " + partId);
-        final boolean success = controller.removeLink(userId, partId, linkedPart);
+        EntryLinks entryLinks = new EntryLinks(userId, partId);
+        final boolean success = entryLinks.removeLink(linkedPart, linkType);
         return respond(success);
     }
 
@@ -614,7 +629,7 @@ public class PartResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createLink(@PathParam("id") long partId,
-                               @QueryParam("type") @DefaultValue("CHILD") LinkType type,
+                               @QueryParam("linkType") @DefaultValue("CHILD") LinkType type,
                                @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
                                PartData partData) {
         String userId = getUserId(sessionId);

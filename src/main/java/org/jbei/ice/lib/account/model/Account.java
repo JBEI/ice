@@ -13,7 +13,7 @@ import java.util.Set;
 
 /**
  * Store the account information for a single user.
- * <p/>
+ * <p>
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
@@ -77,7 +77,7 @@ public class Account implements IDataModel {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "account_group", joinColumns = @JoinColumn(name = "account_id"),
-               inverseJoinColumns = @JoinColumn(name = "group_id"))
+            inverseJoinColumns = @JoinColumn(name = "group_id"))
     private Set<Group> groups = new LinkedHashSet<>();
 
     /**
@@ -233,7 +233,10 @@ public class Account implements IDataModel {
         info.setDescription(description);
         if (lastLoginTime != null)
             info.setLastLogin(lastLoginTime.getTime());
-        info.setAccountType(this.type);
+        if (this.type != null)
+            info.setAccountType(this.type);
+        else
+            info.setAccountType(AccountType.NORMAL);
         if (this.creationTime != null)
             info.setRegisterDate(this.creationTime.getTime());
         info.setId(id);

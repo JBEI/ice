@@ -394,7 +394,7 @@ public class FolderController {
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
             long folderSize = dao.getFolderSize(folder.getId());
             details.setCount(folderSize);
-            details.setType(FolderType.PRIVATE);
+            details.setType(folder.getType());
             details.setCanEdit(true);
             folderDetails.add(details);
         }
@@ -432,7 +432,8 @@ public class FolderController {
         Account account = getAccount(userId);
         ArrayList<FolderDetails> folderDetails = new ArrayList<>();
 
-        Set<Group> groups = groupController.getAllGroups(account);
+        Set<Group> groups = account.getGroups();
+        groups.remove(groupController.createOrRetrievePublicGroup());
         Set<Folder> sharedFolders = DAOFactory.getPermissionDAO().retrieveFolderPermissions(account, groups);
         if (sharedFolders == null)
             return null;
