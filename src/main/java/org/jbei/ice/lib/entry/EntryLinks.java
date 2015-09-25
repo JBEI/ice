@@ -60,6 +60,9 @@ public class EntryLinks {
             return false;
         }
 
+        if (linkedEntry.getId() == this.entry.getId())
+            throw new IllegalArgumentException("Cannot link and entry to itself");
+
         entryAuthorization.expectWrite(userId, linkedEntry);
         entryAuthorization.expectWrite(userId, entry);
 
