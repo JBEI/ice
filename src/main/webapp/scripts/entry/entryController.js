@@ -1136,8 +1136,8 @@ angular.module('ice.entry.controller', [])
                         var start = feature.locations[0].genbankStart;
                         var end = feature.locations[0].end;
                         var sequence = $scope.mainEntrySequence.sequence.substring(start - 1, end);
-                        feature.genbankStart = 0;
-                        feature.end = sequence.length;
+                        feature.locations[0].genbankStart = 1;
+                        feature.locations[0].end = sequence.length;
 
                         var linkSequence = {
                             identifier: $scope.addExistingPartNumber.partId,
