@@ -9,6 +9,7 @@ import org.jbei.ice.lib.entry.model.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Hector Plahar
@@ -77,7 +78,7 @@ public class CustomFields {
 
     public List<PartData> getPartsByFields(String userId, List<CustomField> fields) {
         // todo : performance
-        List<Entry> entries = dao.filter(fields);
+        Set<Entry> entries = dao.filter(fields);
         List<PartData> parts = new ArrayList<>();
         for (Entry entry : entries) {
             if (!authorization.canRead(userId, entry))

@@ -7,8 +7,9 @@ import org.jbei.ice.lib.dto.entry.CustomField;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Parameter;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Data accessor object for handling {@link Parameter}s
@@ -23,8 +24,8 @@ public class ParameterDAO extends HibernateRepository<Parameter> {
     }
 
     // filter by key value pairs
-    public List<Entry> filter(List<CustomField> fields) {
-        List<Entry> entries = new ArrayList<>();
+    public Set<Entry> filter(List<CustomField> fields) {
+        Set<Entry> entries = new HashSet<>();
         boolean flag = false;
 
         for (CustomField field : fields) {
@@ -41,7 +42,7 @@ public class ParameterDAO extends HibernateRepository<Parameter> {
                 criteria.add(Restrictions.in("entry", entries));
             else
                 flag = true;
-            entries = criteria.list();
+            entries = new HashSet<>(criteria.list());
         }
 
         return entries;
