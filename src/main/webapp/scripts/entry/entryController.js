@@ -1136,8 +1136,8 @@ angular.module('ice.entry.controller', [])
                         var start = feature.locations[0].genbankStart;
                         var end = feature.locations[0].end;
                         var sequence = $scope.mainEntrySequence.sequence.substring(start - 1, end);
-                        feature.genbankStart = 0;
-                        feature.end = sequence.length;
+                        feature.locations[0].genbankStart = 1;
+                        feature.locations[0].end = sequence.length;
 
                         var linkSequence = {
                             identifier: $scope.addExistingPartNumber.partId,
@@ -1363,6 +1363,20 @@ angular.module('ice.entry.controller', [])
                 field.updating = false;
                 field.errorUpdating = true;
             });
+        };
+
+        $scope.deleteCustomField = function (parameter) {
+            var index = $scope.entry.parameters.indexOf(parameter);
+            if (index >= 0) {
+                var currentParam = $scope.entry.parameters[index];
+                if (currentParam.id == parameter.id) {
+                    CustomField().deleteCustomField({id: parameter.id}, function (result) {
+                        $scope.entry.parameters.splice(index, 1);
+                    }, function (error) {
+                        console.error(error);
+                    })
+                }
+            }
         };
 
         $scope.nextEntryInContext = function () {

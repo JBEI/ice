@@ -44,7 +44,7 @@ public class CustomFieldsTest {
         Strain strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
         CustomField field = new CustomField(0, strain.getId(), "foo", "bar");
-        long id = fields.createField(userId, strain.getId(), field);
+        long id = fields.createField(userId, strain.getId(), field).getId();
         strain = (Strain) DAOFactory.getEntryDAO().get(strain.getId());
         Assert.assertNotNull(strain);
         Assert.assertTrue(strain.getParameters().size() == 1);
@@ -62,7 +62,7 @@ public class CustomFieldsTest {
         Strain strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
         CustomField field = new CustomField(0, strain.getId(), "foo1", "bar1");
-        long id = fields.createField(userId, strain.getId(), field);
+        long id = fields.createField(userId, strain.getId(), field).getId();
         CustomField created = fields.getField(userId, id);
         Assert.assertEquals(created.getName(), field.getName());
         Assert.assertEquals(created.getValue(), field.getValue());
@@ -77,7 +77,7 @@ public class CustomFieldsTest {
         Strain strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
         CustomField field = new CustomField(0, strain.getId(), "Afoo2", "Bbar2");
-        long id = fields.createField(userId, strain.getId(), field);
+        long id = fields.createField(userId, strain.getId(), field).getId();
 
         // update
         field.setId(id);
@@ -112,7 +112,7 @@ public class CustomFieldsTest {
 
         for (int i = 1; i <= 10; i += 1) {
             CustomField field = new CustomField(strain.getId(), "name" + i, "value" + i);
-            long id = fields.createField(userId, strain.getId(), field);
+            long id = fields.createField(userId, strain.getId(), field).getId();
             ids.add(id);
         }
 
@@ -133,7 +133,7 @@ public class CustomFieldsTest {
         Strain strain = TestEntryCreator.createTestStrain(account);
         Assert.assertNotNull(strain);
         CustomField field = new CustomField(strain.getId(), "foo3", "bar3");
-        long id = fields.createField(userId, strain.getId(), field);
+        long id = fields.createField(userId, strain.getId(), field).getId();
 
         // verify custom field creation
         strain = (Strain) DAOFactory.getEntryDAO().get(strain.getId());

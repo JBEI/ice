@@ -74,9 +74,7 @@ public class CustomFieldResource extends RestResource {
         if (partId <= 0)
             throw new WebApplicationException("Invalid part id", Response.Status.BAD_REQUEST);
 
-        if (fields.createField(userId, partId, customField) > 0)
-            return super.respond(Response.Status.CREATED);
-        return super.respond(false);
+        return super.respond(fields.createField(userId, partId, customField));
     }
 
     @GET

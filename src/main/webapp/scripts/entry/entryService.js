@@ -455,10 +455,17 @@ angular.module('ice.entry.service', [])
 
             var sessionId = $cookieStore.get("sessionId");
 
-            return $resource('rest/custom-fields', {}, {
+            return $resource('rest/custom-fields', {id: '@id'}, {
                 createNewCustomField: {
                     method: 'POST',
                     responseType: "json",
+                    headers: {'X-ICE-Authentication-SessionId': sessionId}
+                },
+
+                deleteCustomField: {
+                    method: 'DELETE',
+                    responseType: "json",
+                    url: "rest/custom-fields/:id",
                     headers: {'X-ICE-Authentication-SessionId': sessionId}
                 }
             });

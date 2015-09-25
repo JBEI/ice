@@ -98,10 +98,16 @@ public class AccountDAO extends HibernateRepository<Account> {
         }
     }
 
-    public long getAccountsCount() {
+    public long getAccountsCount(String filter) {
         try {
-            Number itemCount = (Number) currentSession().createCriteria(Account.class.getName())
-                    .setProjection(Projections.countDistinct("id")).uniqueResult();
+            Criteria criteria = currentSession().createCriteria(Account.class.getName());
+            if (!StringUtils.isEmpty(filter)) {
+                criteria.add(Restrictions.disjunction()
+                        .add(Restrictions.ilike("firstName", filter, MatchMode.ANYWHERE))
+                        .add(Restrictions.ilike("lastName", filter, MatchMode.ANYWHERE))
+                        .add(Restrictions.ilike("email", filter, MatchMode.ANYWHERE)));
+            }
+            Number itemCount = (Number) criteria.setProjection(Projections.countDistinct("id")).uniqueResult();
             return itemCount.longValue();
         } catch (HibernateException he) {
             Logger.error(he);
