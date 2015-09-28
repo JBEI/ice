@@ -1308,12 +1308,25 @@ angular.module('ice.entry.controller', [])
 
             // create or update the part depending on whether there is a current part id
             entry.create($scope.entryCopy, function (result) {
-                $scope.$emit("UpdateCollectionCounts");
-                $location.path('entry/' + result.id);   // todo : or /entry/edit/
-                $scope.showSBOL = false;
-            }, function (error) {
-                console.error(error);
-            });
+                    $scope.$emit("UpdateCollectionCounts");
+                    $scope.showSBOL = false;
+
+                    if ($scope.entry.hasSequence) {
+                        // retrieve sequence information and create copy
+                        entry.sequence({partId: $scope.entry.id}, function (copiedSequence) {
+                            copiedSequence.identifier = result.partId;
+                            entry.addSequenceAsString({partId: result.id}, copiedSequence,
+                                function (res) {
+                                    $location.path('entry/' + result.id);
+                                });
+                        }, function (error) {
+                            console.error(error);
+                        });
+                    }
+                }, function (error) {
+                    console.error(error);
+                }
+            );
         };
 
         // check if a selection has been made
@@ -1420,7 +1433,7 @@ angular.module('ice.entry.controller', [])
             });
         };
 
-        // file upload
+// file upload
         var uploader = $scope.sequenceFileUpload = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "rest/file/sequence",
@@ -1458,7 +1471,7 @@ angular.module('ice.entry.controller', [])
             $scope.serverError = true;
         };
 
-        // customer parameter add for entry view
+// customer parameter add for entry view
         $scope.addNewCustomField = function () {
             $scope.newParameter.nameInvalid = $scope.newParameter.name == undefined || $scope.newParameter.name == '';
             $scope.newParameter.valueInvalid = $scope.newParameter.value == undefined || $scope.newParameter.value == '';
@@ -1478,5 +1491,6 @@ angular.module('ice.entry.controller', [])
                     console.error(error);
                 })
         }
-    });
+    })
+;
 
