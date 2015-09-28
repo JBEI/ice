@@ -1,6 +1,9 @@
 package org.jbei.ice.lib.models;
 
 import org.hibernate.annotations.Type;
+import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.IDataModel;
 import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;

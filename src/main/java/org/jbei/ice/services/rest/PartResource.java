@@ -26,6 +26,7 @@ import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.experiment.ExperimentController;
 import org.jbei.ice.lib.experiment.Study;
+import org.jbei.ice.lib.models.ShotgunSequence;
 import org.jbei.ice.lib.net.TransferredParts;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.lib.vo.FeaturedDNASequence;
@@ -400,13 +401,37 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/traces")
-    public ArrayList<TraceSequenceAnalysis> getTraces(@Context final UriInfo info,
-                                                      @PathParam("id") final long partId,
-                                                      @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-                                                      @QueryParam("sid") final String sid) {
+    public ArrayList<TraceSequenceAnalysis> getTraces(
+                                        @Context final UriInfo info,
+                                        @PathParam("id") final long partId,
+                                        @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+                                        @QueryParam("sid") final String sid) {
         String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
         final String userId = getUserId(sessionId);
         return controller.getTraceSequences(userId, partId);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/shotgunsequences")
+    public ArrayList<ShotgunSequence> getShotgunSequences(
+            @Context final UriInfo info,
+            @PathParam("id") final long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            @QueryParam("sid") final String sid) {
+        String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
+        final String userId = getUserId(sessionId);
+        ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
+        final EntryDAO entryDAO = DAOFactory.getEntryDAO();
+        final Entry entry = entryDAO.get(partId);
+
+        if (entry == null){
+            return null;
+        }
+
+        // No need to check authorization since only the sysadmins can upload shotgun sequences for now
+
+        return dao.getByEntry(entry, userId);
     }
 
     @POST
