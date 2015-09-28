@@ -90,7 +90,7 @@
             </div>
             <div class="text-right">
                 &copy;&nbsp;<a href="https://github.com/JBEI/ice">JBEI ICE Registry</a> <span
-                    class="label label-primary">v4.5.0</span><br>
+                    class="label label-primary">v4.5.1</span><br>
                 All rights reserved. <br>
                 <a href="https://github.com/JBEI/ice/issues/new">Submit an Issue</a>&nbsp; <span class="text-muted">|</span> &nbsp;<a
                     href="http://public-registry.jbei.org/manual">Help</a>
