@@ -1031,7 +1031,7 @@ angular.module('ice.entry.controller', [])
                         });
                     };
 
-                    var addLinkAtServer = function (item) {
+                    var linkPartToMainEntry = function (item) {
                         entry.addLink({partId: $scope.mainEntry.id, linkType: $scope.role}, item,
                             function (result) {
                                 $scope.links.push(item);   // todo
@@ -1072,27 +1072,29 @@ angular.module('ice.entry.controller', [])
                                         $scope.getEntrySequence($scope.mainEntry.id);
                                     } else {
                                         // just add the link
-                                        addLinkAtServer($item);
+                                        linkPartToMainEntry($item);
                                     }
                                 }, function (error) {
                                     $scope.errorMessage = "Error";
                                 })
                             } else {
                                 // just add the link
-                                addLinkAtServer($item);
+                                linkPartToMainEntry($item);
                             }
                         } else {
                             // parent of main entry being added
                             if ($scope.mainEntry.type.toLowerCase() == 'part') {
-                                // adding parent : check if main (current) entry has sequence
+
+                                // if child (main) does not have a parent sequence
                                 if (!$scope.mainEntry.hasSequence) {
+
                                     // retrieve sequence feature options for selected
                                     $scope.getEntrySequence($scope.addExistingPartNumber.id);
                                 } else {
-                                    addLinkAtServer($item);
+                                    linkPartToMainEntry($item);
                                 }
                             } else {
-                                addLinkAtServer($item);
+                                linkPartToMainEntry($item);
                             }
                         }
                     };
@@ -1118,12 +1120,14 @@ angular.module('ice.entry.controller', [])
                     };
 
                     $scope.getEntrySequence = function (id) {
+                        $scope.retrievingSequenceFeatureList = true;
                         $scope.mainEntrySequence = undefined;
                         entry.sequence({partId: id}, function (result) {
-                            console.log(result);
                             $scope.mainEntrySequence = result;
+                            $scope.retrievingSequenceFeatureList = false;
                         }, function (error) {
                             console.error(error);
+                            $scope.retrievingSequenceFeatureList = false;
                         });
                     };
 
@@ -1132,7 +1136,7 @@ angular.module('ice.entry.controller', [])
                         // POST rest/parts/{id}/sequence featuredDNA sequence
                         //console.log($scope.mainEntrySequence, feature, $scope.addExistingPartNumber);
 
-                        // todo : backend should handle this; quick fix for the milestone
+                        // todo : backend should probably handle this; quick fix for the milestone
                         var start = feature.locations[0].genbankStart;
                         var end = feature.locations[0].end;
                         var sequence = $scope.mainEntrySequence.sequence.substring(start - 1, end);
@@ -1147,10 +1151,17 @@ angular.module('ice.entry.controller', [])
                             features: [feature]
                         };
 
-                        entry.addSequenceAsString({partId: $scope.selectedLink.id}, linkSequence,
+                        var sequencePart;
+                        if ($scope.role == 'CHILD') {
+                            sequencePart = $scope.selectedLink.id;
+                        } else {
+                            sequencePart = $scope.mainEntry.id;
+                        }
+
+                        entry.addSequenceAsString({partId: sequencePart}, linkSequence,
                             function (result) {
                                 console.log(result);
-                                addLinkAtServer($scope.addExistingPartNumber);
+                                linkPartToMainEntry($scope.addExistingPartNumber);
                             }, function (error) {
                                 console.error(error);
                             })
@@ -1297,12 +1308,25 @@ angular.module('ice.entry.controller', [])
 
             // create or update the part depending on whether there is a current part id
             entry.create($scope.entryCopy, function (result) {
-                $scope.$emit("UpdateCollectionCounts");
-                $location.path('entry/' + result.id);   // todo : or /entry/edit/
-                $scope.showSBOL = false;
-            }, function (error) {
-                console.error(error);
-            });
+                    $scope.$emit("UpdateCollectionCounts");
+                    $scope.showSBOL = false;
+
+                    if ($scope.entry.hasSequence) {
+                        // retrieve sequence information and create copy
+                        entry.sequence({partId: $scope.entry.id}, function (copiedSequence) {
+                            copiedSequence.identifier = result.partId;
+                            entry.addSequenceAsString({partId: result.id}, copiedSequence,
+                                function (res) {
+                                    $location.path('entry/' + result.id);
+                                });
+                        }, function (error) {
+                            console.error(error);
+                        });
+                    }
+                }, function (error) {
+                    console.error(error);
+                }
+            );
         };
 
         // check if a selection has been made
@@ -1409,7 +1433,7 @@ angular.module('ice.entry.controller', [])
             });
         };
 
-        // file upload
+// file upload
         var uploader = $scope.sequenceFileUpload = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "rest/file/sequence",
@@ -1447,7 +1471,7 @@ angular.module('ice.entry.controller', [])
             $scope.serverError = true;
         };
 
-        // customer parameter add for entry view
+// customer parameter add for entry view
         $scope.addNewCustomField = function () {
             $scope.newParameter.nameInvalid = $scope.newParameter.name == undefined || $scope.newParameter.name == '';
             $scope.newParameter.valueInvalid = $scope.newParameter.value == undefined || $scope.newParameter.value == '';
@@ -1467,5 +1491,6 @@ angular.module('ice.entry.controller', [])
                     console.error(error);
                 })
         }
-    });
+    })
+;
 
