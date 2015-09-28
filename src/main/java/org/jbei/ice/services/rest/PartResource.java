@@ -10,6 +10,9 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.EntryDAO;
+import org.jbei.ice.lib.dao.hibernate.ShotgunSequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.comment.UserComment;
@@ -18,6 +21,7 @@ import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
+import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.experiment.ExperimentController;
@@ -37,6 +41,7 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -427,6 +432,34 @@ public class PartResource extends RestResource {
         return respond(success);
     }
 
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/shotgunsequences")
+    public Response addShotgunSequence(@PathParam("id") final long partId,
+                                     @FormDataParam("file") final InputStream fileInputStream,
+                                     @FormDataParam("file") final FormDataContentDisposition contentDispositionHeader,
+                                     @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+                                     @QueryParam("sid") final String sid) {
+        String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
+        final String userId = getUserId(sessionId);
+        final String fileName = contentDispositionHeader.getFileName();
+        final String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+        final File file = Paths.get(tmpDir, fileName).toFile();
+        final EntryDAO entryDAO = DAOFactory.getEntryDAO();
+        final Entry entry = entryDAO.get(partId);
+        ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
+
+        try {
+            String storageName = Utils.generateUUID();
+            dao.writeSequenceFileToDisk(storageName, fileInputStream);
+            dao.create(fileName, userId, entry, storageName, new Date());
+        }catch(Exception e){
+            Logger.error(e);
+            return respond(Response.Status.INTERNAL_SERVER_ERROR);
+        }
+
+        return respond(Response.Status.OK);
+    }
     @DELETE
     @Path("/{id}/traces/{traceId}")
     public Response deleteTrace(@Context final UriInfo info,

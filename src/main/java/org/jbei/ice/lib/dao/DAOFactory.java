@@ -25,6 +25,7 @@ public class DAOFactory {
     private static SequenceDAO sequenceDAO;
     private static StorageDAO storageDAO;
     private static TraceSequenceDAO traceSequenceDAO;
+    private static ShotgunSequenceDAO shotgunSequenceDAO;
     private static AuditDAO auditDAO;
     private static RemotePermissionDAO remotePermissionDAO;
     private static ExperimentDAO experimentDAO;
@@ -142,6 +143,13 @@ public class DAOFactory {
         if (traceSequenceDAO == null)
             traceSequenceDAO = new TraceSequenceDAO();
         return traceSequenceDAO;
+    }
+
+
+    public static ShotgunSequenceDAO getShotgunSequenceDAO() {
+        if (shotgunSequenceDAO == null)
+            shotgunSequenceDAO = new ShotgunSequenceDAO();
+        return shotgunSequenceDAO;
     }
 
     public static RemotePermissionDAO getRemotePermissionDAO() {
