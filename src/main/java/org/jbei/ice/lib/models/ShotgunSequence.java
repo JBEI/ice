@@ -24,7 +24,7 @@ public class ShotgunSequence implements IDataModel, IDataTransferModel {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;
 

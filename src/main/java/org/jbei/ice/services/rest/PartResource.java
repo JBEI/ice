@@ -15,6 +15,7 @@ import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dao.hibernate.ShotgunSequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.History;
+import org.jbei.ice.lib.dto.ShotgunSequenceDTO;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
@@ -36,15 +37,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Hector Plahar
@@ -411,10 +407,11 @@ public class PartResource extends RestResource {
         return controller.getTraceSequences(userId, partId);
     }
 
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/shotgunsequences")
-    public ArrayList<ShotgunSequence> getShotgunSequences(
+    public ArrayList<ShotgunSequenceDTO> getShotgunSequences(
             @Context final UriInfo info,
             @PathParam("id") final long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
@@ -431,7 +428,16 @@ public class PartResource extends RestResource {
 
         // No need to check authorization since only the sysadmins can upload shotgun sequences for now
 
-        return dao.getByEntry(entry, userId);
+
+        ArrayList<ShotgunSequenceDTO> returns = new ArrayList<ShotgunSequenceDTO>();
+        List<ShotgunSequence> results = dao.getByEntry(entry, userId);
+
+        for (ShotgunSequence ret : results){
+            returns.add(new ShotgunSequenceDTO(ret));
+        }
+
+        Logger.info("Shotgun Sequences requested for entry " + partId);
+        return returns;
     }
 
     @POST
@@ -468,8 +474,6 @@ public class PartResource extends RestResource {
         String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
         final String userId = getUserId(sessionId);
         final String fileName = contentDispositionHeader.getFileName();
-        final String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-        final File file = Paths.get(tmpDir, fileName).toFile();
         final EntryDAO entryDAO = DAOFactory.getEntryDAO();
         final Entry entry = entryDAO.get(partId);
         ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
@@ -483,6 +487,7 @@ public class PartResource extends RestResource {
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
 
+        Logger.info("Uploaded shotgun sequence for entry " + entry.getId());
         return respond(Response.Status.OK);
     }
     @DELETE
