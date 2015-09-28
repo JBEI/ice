@@ -8,7 +8,9 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.dao.hibernate.ShotgunSequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
@@ -34,6 +36,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author Hector Plahar
@@ -196,6 +199,22 @@ public class FileResource extends RestResource {
             return addHeaders(Response.ok(file), traceSequence.getFilename());
         }
         return Response.serverError().build();
+    }
+
+    @GET
+    @Path("shotgunsequence/{fileId}")
+    public Response getShotgunSequenceFile(@PathParam("fileId") String fileId,
+                                         @QueryParam("sid") String sid,
+                                         @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+        ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
+
+        try {
+            final File file = dao.getFile(fileId);
+            return addHeaders(Response.ok(file), "sequence-" + ThreadLocalRandom.current().nextInt(10000, 100001) + ".ss.zip");
+        }catch (Exception e){
+            Logger.error(e);
+            return Response.serverError().build();
+        }
     }
 
     @GET

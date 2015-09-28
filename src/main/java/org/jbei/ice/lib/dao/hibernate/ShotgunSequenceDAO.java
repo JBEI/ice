@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
@@ -83,7 +84,14 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
 
         return result;
     }
-    
+
+    public File getFile(String fileId) {
+        Path path = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
+                SHOTGUN_SEQUENCES_DIR,
+                fileId);
+        return path.toFile();
+    }
+
     @Override
     public ShotgunSequence get(long id) {
         return super.get(ShotgunSequence.class, id);
