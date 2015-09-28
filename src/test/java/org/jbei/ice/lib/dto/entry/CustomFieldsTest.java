@@ -190,7 +190,7 @@ public class CustomFieldsTest {
         searchFields.add(new CustomField("type", "promoter"));
         results = fields.getPartsByFields(userId, searchFields);
         Assert.assertEquals(2, results.size());
-        Assert.assertEquals(strain.getId(), results.get(0).getId());
+        Assert.assertTrue(strain.getId() == results.get(0).getId() || results.get(1).getId() == strain.getId());
 
         // test two
         searchFields.clear();
