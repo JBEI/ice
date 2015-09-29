@@ -354,6 +354,14 @@ iceServices.factory('Entry', function ($resource) {
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
+            shotgunSequences:{
+                method:'GET',
+                responseType:'json',
+                isArray:true,
+                url:'rest/parts/:partId/shotgunsequences',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
+            },
+
             traceSequences:{
                 method:'GET',
                 responseType:'json',

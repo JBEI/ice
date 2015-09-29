@@ -125,6 +125,22 @@ angular.module('ice.entry.controller', [])
                 $scope.newComment.samples.splice(idx, 1);
         }
     })
+    .controller('ShotgunSequenceController', function ($scope, $window, $cookieStore, $stateParams, Entry) {
+        var entryId = $stateParams.id;
+        var sid = $cookieStore.get("sessionId");
+        var entry = Entry(sid);
+        $scope.shotgunUploadError = undefined;
+
+        entry.shotgunSequences({
+            partId: entryId
+        }, function (result) {
+            $scope.shotgunSequences = result;
+        });
+        
+        $scope.downloadShotgunFile = function (sequence) {
+            $window.open("rest/file/shotgunsequence/" + sequence.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
+        };
+    })
     .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Entry) {
         var entryId = $stateParams.id;
         var sid = $cookieStore.get("sessionId");

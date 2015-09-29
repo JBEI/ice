@@ -1,8 +1,44 @@
+<div ng-controller="ShotgunSequenceController">
+    <div class="row pad_top" ng-if="shotgunSequences.length===0">
+        <div class="col-md-12">
+            <i class="text-muted">No shotgun sequences available</i>
+        </div>
+    </div>
+
+    <div class="row pad_top" ng-if="shotgunSequences.length">
+        <div class="col-md-12">
+            <table cellspacing="0" class="table table-condensed table-hover font-95em">
+                <thead>
+                <tr>
+                    <td></td>
+                    <td><b>Shotgun Sequence</b></td>
+                    <td><b>Quality</b></td>
+                    <td><b>Uploaded On</b></td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="shotgunSequence in shotgunSequences">
+                    <td style="opacity:0.2; text-shadow:0 1px 0 #fff;" width="30px">
+                        <b class="no_wrap">{{$index+1}}</b>
+                    </td>
+                    <td><a class="cursor_pointer"
+                           ng-click="downloadShotgunFile(shotgunSequence)">{{shotgunSequence.filename}}</a>
+                    </td>
+                    <td><span class="label label-default">{{shotgunSequence.score}}</span>
+                        {{shotgunSequence.call}}</td>
+                    <td>{{shotgunSequence.created | date:'MMM d, y, h:mm a'}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <div ng-controller="TraceSequenceController">
     <div class="row pad_top">
         <div class="col-md-12">
             <button type="button" class="ice-button" ng-click="showUploadOptions=true">
-                <i style="font-size: 14px" class="fa fa-upload blue"></i> Add File
+                <i style="font-size: 14px" class="fa fa-upload blue"></i> Add Trace Sequence
             </button>
         </div>
     </div>
@@ -40,9 +76,9 @@
                 <thead>
                 <tr>
                     <td></td>
-                    <td><b>Trace Sequence Files</b></td>
-                    <td><b>Uploaded By</b></td>
-                    <td><b>On</b></td>
+                    <td><b>Trace Sequence</b></td>
+                    <td><b>Uploader</b></td>
+                    <td><b>Uploaded On</b></td>
                     <td>&nbsp;</td>
                 </tr>
                 </thead>

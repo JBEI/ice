@@ -11,6 +11,7 @@ import org.jbei.ice.lib.utils.Utils;
 
 import java.io.*;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -21,8 +22,10 @@ public class ShotgunSequenceDTO implements IDataTransferModel {
     public double score;
     public String fileId;
     public AccountTransfer depositor;
+    public long created;
 
     public ShotgunSequenceDTO(ShotgunSequence s) {
+        created = s.getCreationTime().getTime();
         filename = s.getFilename();
         fileId = s.getFileId();
         setQuality(fileId);
