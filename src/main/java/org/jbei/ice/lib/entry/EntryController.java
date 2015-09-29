@@ -436,7 +436,7 @@ public class EntryController {
     }
 
     protected boolean canEdit(String userId, String depositor, Entry entry) {
-        return userId.equalsIgnoreCase(depositor) || authorization.canWrite(userId, entry);
+        return userId.equalsIgnoreCase(depositor) || authorization.canWriteThoroughCheck(userId, entry);
     }
 
     public ArrayList<History> getHistory(String userId, long entryId) {
@@ -504,7 +504,7 @@ public class EntryController {
         List<Entry> toTrash = new LinkedList<>();
         for (PartData data : list) {
             Entry entry = dao.get(data.getId());
-            if (entry == null || !authorization.canWrite(userId, entry))
+            if (entry == null || !authorization.canWriteThoroughCheck(userId, entry))
                 return false;
 
             toTrash.add(entry);
@@ -621,7 +621,7 @@ public class EntryController {
         partData.setHasOriginalSequence(hasOriginalSequence);
 
         // permissions
-        partData.setCanEdit(authorization.canWrite(userId, entry));
+        partData.setCanEdit(authorization.canWriteThoroughCheck(userId, entry));
         partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
 
         // create audit event if not owner
@@ -670,7 +670,7 @@ public class EntryController {
             if (!authorization.canRead(userId, parent))
                 continue;
 
-            if (parent.getVisibility() != Visibility.OK.getValue() && !authorization.canWrite(userId, entry))
+            if (parent.getVisibility() != Visibility.OK.getValue() && !authorization.canWriteThoroughCheck(userId, entry))
                 continue;
 
             EntryType type = EntryType.nameToType(parent.getRecordType());

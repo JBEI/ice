@@ -144,7 +144,7 @@ angular.module('ice.collection.controller', [])
         //
         // init
         //
-        $scope.params = {'asc': false, 'sort': 'created', currentPage: 1};
+        $scope.params = {'asc': false, 'sort': 'created', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
         var subCollection = $stateParams.collection;   // folder id or one of the defined collections (Shared etc)
 
@@ -152,7 +152,7 @@ angular.module('ice.collection.controller', [])
             $scope.loadingPage = true;
             if ($scope.params.folderId === undefined)
                 $scope.params.folderId = 'personal';
-            $scope.params.offset = ($scope.params.currentPage - 1) * 15;
+            $scope.params.offset = ($scope.params.currentPage - 1) * $scope.params.limit;
 
             folders.folder($scope.params, function (result) {
                 $scope.folder = result;
@@ -169,7 +169,7 @@ angular.module('ice.collection.controller', [])
 
             var context = EntryContextUtil.getContext();
             if (context) {
-                var pageNum = (Math.floor(context.offset / 15)) + 1;
+                var pageNum = (Math.floor(context.offset / $scope.params.limit)) + 1;
                 $scope.params.sort = context.sort;
                 $scope.params.currentPage = pageNum;
                 $scope.folderPageChange();
@@ -199,6 +199,17 @@ angular.module('ice.collection.controller', [])
                 $scope.params.asc = false;
 
             $scope.params.sort = sortType;
+
+            folders.folder($scope.params, function (result) {
+                $scope.folder = result;
+                if (result.canEdit)
+                    $scope.folderNameTooltip = "Click to rename";
+                $scope.params.currentPage = 1;
+            });
+        };
+
+        $scope.hStepChanged = function () {
+            console.log($scope.params);
 
             folders.folder($scope.params, function (result) {
                 $scope.folder = result;
@@ -362,8 +373,9 @@ angular.module('ice.collection.controller', [])
         $rootScope.settings = {};
 
         // retrieve site wide settings
-        $scope.pageCounts = function (currentPage, resultCount) {
-            var maxPageCount = 15;
+        $scope.pageCounts = function (currentPage, resultCount, maxPageCount) {
+            if (maxPageCount == undefined)
+                maxPageCount = 30;
             var pageNum = ((currentPage - 1) * maxPageCount) + 1;
 
             // number on this page
@@ -373,7 +385,7 @@ angular.module('ice.collection.controller', [])
 
         // retrieve user settings
 
-        // default list of collections
+        // default list of collections (move to service)
         $scope.collectionList = [
             {
                 name: 'available',

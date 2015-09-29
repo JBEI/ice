@@ -74,8 +74,7 @@ public class EntryAuthorization extends Authorization<Entry> {
         return canWrite(userId, entry);
     }
 
-    @Override
-    public boolean canWrite(String userId, Entry entry) {
+    public boolean canWriteThoroughCheck(String userId, Entry entry) {
         if (userId == null)
             return false;
 

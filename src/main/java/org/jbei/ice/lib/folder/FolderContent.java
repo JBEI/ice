@@ -88,7 +88,7 @@ public class FolderContent {
 
         for (Permission folderPermission : permissions) {
             for (Entry entry : entries) {
-                if (!entryAuthorization.canWrite(userId, entry))
+                if (!entryAuthorization.canWriteThoroughCheck(userId, entry))
                     continue;
 
                 // does the permissions already exists
