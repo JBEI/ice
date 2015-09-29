@@ -465,7 +465,7 @@ public class BulkEntryCreator {
                 // attempt to get linked entry and add
                 if (linked.getId() != 0) {
                     Entry linkedEntry = entryDAO.get(linked.getId());
-                    if (linkedEntry != null && entryAuthorization.canWrite(userId, entry)) {
+                    if (linkedEntry != null && entryAuthorization.canWriteThoroughCheck(userId, entry)) {
                         EntryLinks links = new EntryLinks(userId, entry.getId());
                         links.addLink(linked, LinkType.CHILD);
                     }
