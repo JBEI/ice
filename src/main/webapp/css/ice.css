@@ -1165,6 +1165,34 @@ input.no_border:focus {
     background-color: #3a87ad;
 }
 
+.quality-flawless {
+    background-color: darkgreen;
+}
+
+.quality-almost {
+    background-color:green;
+}
+
+.quality-incomplete {
+    background-color: tan;
+}
+
+.quality-low-coverage {
+    background-color: lightgray;
+}
+
+.quality-errors {
+    background-color: pink;
+}
+
+.quality-dips {
+    background-color: lightblue;
+}
+
+.quality-unknown {
+    background-color: grey;
+}
+
 th i.sortable {
     opacity: 0;
 }

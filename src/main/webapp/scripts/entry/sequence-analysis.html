@@ -24,7 +24,7 @@
                     <td><a class="cursor_pointer"
                            ng-click="downloadShotgunFile(shotgunSequence)">{{shotgunSequence.filename}}</a>
                     </td>
-                    <td><span class="label label-default">{{shotgunSequence.score}}</span>
+                    <td><span class="label quality-{{shotgunSequence.call}}">{{shotgunSequence.score}}</span>
                         {{shotgunSequence.call}}</td>
                     <td>{{shotgunSequence.created | date:'MMM d, y, h:mm a'}}</td>
                 </tr>
