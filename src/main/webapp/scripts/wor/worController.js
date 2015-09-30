@@ -193,7 +193,7 @@ angular.module('ice.wor.controller', [])
                 url: 'scripts/wor/entry/sequence-analysis.html',
                 display: 'Sequence Analysis',
                 isPrivileged: false,
-                countName: 'traceSequenceCount',
+                countName: 'sequenceCount',
                 icon: 'fa-search-plus'
             },
             {

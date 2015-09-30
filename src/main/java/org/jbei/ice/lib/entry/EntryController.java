@@ -481,8 +481,9 @@ public class EntryController {
         PartStatistics statistics = new PartStatistics();
         statistics.setEntryId(entryId);
         statistics.setCommentCount(commentDAO.getCommentCount(entry));
-        int traceSequenceCount = DAOFactory.getTraceSequenceDAO().getTraceSequenceCount(entry);
-        statistics.setTraceSequenceCount(traceSequenceCount);
+        int sequenceCount = DAOFactory.getTraceSequenceDAO().getTraceSequenceCount(entry) +
+                            DAOFactory.getShotgunSequenceDAO().getShotgunSequenceCount(entry);
+        statistics.setSequenceCount(sequenceCount);
         int sampleCount = DAOFactory.getSampleDAO().getSampleCount(entry);
         statistics.setSampleCount(sampleCount);
         int historyCount = DAOFactory.getAuditDAO().getHistoryCount(entry);

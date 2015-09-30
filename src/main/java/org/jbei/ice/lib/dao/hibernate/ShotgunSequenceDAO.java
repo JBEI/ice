@@ -4,10 +4,13 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.ShotgunSequence;
+import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.utils.Utils;
 
 import java.io.File;
@@ -92,6 +95,13 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
         return path.toFile();
     }
 
+    public int getShotgunSequenceCount(Entry entry) {
+        Number itemCount = (Number) currentSession().createCriteria(ShotgunSequence.class)
+                .setProjection(Projections.countDistinct("id"))
+                .add(Restrictions.eq("entry", entry)).uniqueResult();
+        return itemCount.intValue();
+    }
+    
     @Override
     public ShotgunSequence get(long id) {
         return super.get(ShotgunSequence.class, id);

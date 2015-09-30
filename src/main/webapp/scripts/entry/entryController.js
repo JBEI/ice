@@ -208,7 +208,7 @@ angular.module('ice.entry.controller', [])
                     traceId: foundTrace.id
                 }, function (result) {
                     $scope.traceSequences.splice(foundIndex, 1);
-                    $scope.entryStatistics.traceSequenceCount = $scope.traceSequences.length;
+                    $scope.entryStatistics.sequenceCount = $scope.traceSequences.length;
                 }, function (error) {
                     console.log(error);
                 });
@@ -1251,7 +1251,7 @@ angular.module('ice.entry.controller', [])
                 url: 'scripts/entry/sequence-analysis.html',
                 display: 'Sequence Analysis',
                 isPrivileged: false,
-                countName: 'traceSequenceCount',
+                countName: 'sequenceCount',
                 icon: 'fa-search-plus'
             },
             {
