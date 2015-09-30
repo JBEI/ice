@@ -1,7 +1,17 @@
+<div ng-controller="TraceSequenceController">
+    <div class="row pad_top">
+        <div class="col-md-12">
+            <button type="button" class="ice-button" ng-click="showUploadOptions=true">
+                <i style="font-size: 14px" class="fa fa-upload blue"></i> Add Sanger Trace
+            </button>
+        </div>
+    </div>
+</div>
+
 <div ng-controller="ShotgunSequenceController">
     <div class="row pad_top" ng-if="shotgunSequences.length===0">
         <div class="col-md-12">
-            <i class="text-muted">No shotgun sequences available</i>
+            <i class="text-muted">No MiSeq/PacBio sequences available</i>
         </div>
     </div>
 
@@ -11,7 +21,7 @@
                 <thead>
                 <tr>
                     <td></td>
-                    <td><b>Shotgun Sequence</b></td>
+                    <td><b>MiSeq/PacBio Sequence</b></td>
                     <td><b>Quality</b></td>
                     <td><b>Uploaded On</b></td>
                 </tr>
@@ -35,14 +45,6 @@
 </div>
 
 <div ng-controller="TraceSequenceController">
-    <div class="row pad_top">
-        <div class="col-md-12">
-            <button type="button" class="ice-button" ng-click="showUploadOptions=true">
-                <i style="font-size: 14px" class="fa fa-upload blue"></i> Add Trace Sequence
-            </button>
-        </div>
-    </div>
-
     <div class="row pad_top font-90em" ng-if="showUploadOptions">
         <div class="col-md-12">
             <div class="alert alert-info" style="margin-bottom: 10px">
@@ -66,7 +68,7 @@
 
     <div class="row pad_top" ng-if="traceSequences.length===0">
         <div class="col-md-12">
-            <i class="text-muted">No trace sequences available</i>
+            <i class="text-muted">No Sanger traces available</i>
         </div>
     </div>
 
@@ -76,7 +78,7 @@
                 <thead>
                 <tr>
                     <td></td>
-                    <td><b>Trace Sequence</b></td>
+                    <td><b>Sanger Trace</b></td>
                     <td><b>Uploader</b></td>
                     <td><b>Uploaded On</b></td>
                     <td>&nbsp;</td>
