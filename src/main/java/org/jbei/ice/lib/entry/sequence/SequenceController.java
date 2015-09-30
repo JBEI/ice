@@ -254,7 +254,7 @@ public class SequenceController {
             return null;
 
         FeaturedDNASequence featuredDNASequence = sequenceToDNASequence(sequence);
-        boolean canEdit = authorization.canWrite(userId, entry);
+        boolean canEdit = authorization.canWriteThoroughCheck(userId, entry);
         featuredDNASequence.setCanEdit(canEdit);
         featuredDNASequence.setIdentifier(entry.getPartNumber());
         String uriPrefix = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX).getValue();

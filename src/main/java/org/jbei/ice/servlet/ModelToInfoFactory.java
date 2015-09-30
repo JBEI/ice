@@ -286,10 +286,6 @@ public class ModelToInfoFactory {
             view.setCreatorId(getAccountId(entry.getCreatorEmail()));
         }
 
-        // attachments
-        boolean hasAttachment = DAOFactory.getAttachmentDAO().hasAttachment(entry);
-        view.setHasAttachment(hasAttachment);
-
         // has sample
         view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));
 
