@@ -171,7 +171,7 @@ public class EntryCreator {
 
                     linked.setVisibility(Visibility.OK.getValue());
 
-                    if (authorization.canWrite(userId, linked)) {
+                    if (authorization.canWriteThoroughCheck(userId, linked)) {
                         // then update
                     }
                 } else {

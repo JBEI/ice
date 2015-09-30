@@ -32,7 +32,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
     };
 
     // select a folder in the pull down
-    $scope.select = function (folder, $event) {
+    $scope.selectFolderForMoveTo = function (folder, $event) {
         if ($event) {
             $event.preventDefault();
             $event.stopPropagation();
