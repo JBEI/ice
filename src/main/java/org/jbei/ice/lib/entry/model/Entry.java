@@ -109,6 +109,7 @@ public class Entry implements IDataModel {
 
     @Column(name = "record_type", length = 127, nullable = false)
     @Field(store = Store.YES, analyze = Analyze.NO)
+    @SortableField(forField = "recordType")
     private String recordType;
 
     @Column(name = "owner", length = 127)
@@ -136,7 +137,10 @@ public class Entry implements IDataModel {
     private String name;
 
     @Column(name = "part_number", length = 127)
-    @Field(boost = @Boost(2f), store = Store.YES)
+    @Fields({
+            @Field(boost = @Boost(2f), store = Store.YES),
+            @Field(name = "partNumber_forSort", analyze = Analyze.NO, store = Store.YES)
+    })
     @Analyzer(definition = "customanalyzer")
     private String partNumber;
 
@@ -177,6 +181,7 @@ public class Entry implements IDataModel {
     @Temporal(TemporalType.TIMESTAMP)
     @Field(index = Index.YES, analyze = Analyze.NO, store = Store.YES)
     @DateBridge(resolution = Resolution.DAY)
+    @SortableField(forField = "creationTime")
     private Date creationTime;
 
     @Column(name = "modification_time")

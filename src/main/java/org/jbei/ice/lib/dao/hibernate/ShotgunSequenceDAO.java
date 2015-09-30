@@ -10,7 +10,6 @@ import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.ShotgunSequence;
-import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.utils.Utils;
 
 import java.io.File;
@@ -28,8 +27,8 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
     public ShotgunSequence create(String fileName, String depositor, Entry entry, String fileUUID, Date date)
             throws DAOException {
 
-        ShotgunSequence result= new ShotgunSequence(entry, fileUUID, fileName, depositor, date);
-        
+        ShotgunSequence result = new ShotgunSequence(entry, fileUUID, fileName, depositor, date);
+
         try {
             super.create(result);
         } catch (DAOException e) {
@@ -42,9 +41,9 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
     public void writeSequenceFileToDisk(String fileName, InputStream inputStream)
             throws IOException, DAOException {
         try {
-            String dataDirectory        = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-            File traceFilesDirectory    = Paths.get(dataDirectory, SHOTGUN_SEQUENCES_DIR).toFile();
-            File file                   = new File(traceFilesDirectory + File.separator + fileName);
+            String dataDirectory = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+            File traceFilesDirectory = Paths.get(dataDirectory, SHOTGUN_SEQUENCES_DIR).toFile();
+            File file = new File(traceFilesDirectory + File.separator + fileName);
 
             if (!traceFilesDirectory.exists()) {
                 if (!traceFilesDirectory.mkdirs()) {
@@ -101,7 +100,7 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
                 .add(Restrictions.eq("entry", entry)).uniqueResult();
         return itemCount.intValue();
     }
-    
+
     @Override
     public ShotgunSequence get(long id) {
         return super.get(ShotgunSequence.class, id);

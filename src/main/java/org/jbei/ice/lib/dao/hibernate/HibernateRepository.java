@@ -85,7 +85,7 @@ public abstract class HibernateRepository<T extends IDataModel> implements IRepo
      */
     protected T get(Class<T> clazz, long id) throws DAOException {
         try {
-            return (T) currentSession().get(clazz, id);
+            return currentSession().get(clazz, id);
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Error retrieving " + clazz.getSimpleName() + " with id \"" + id + "\"", e);

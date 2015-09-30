@@ -2,12 +2,7 @@ package org.jbei.ice.lib.search;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.index.DocsEnum;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
-import org.apache.lucene.util.Bits;
-import org.apache.lucene.util.OpenBitSet;
 import org.hibernate.Session;
 import org.hibernate.search.FullTextQuery;
 import org.hibernate.search.FullTextSession;
@@ -31,7 +26,6 @@ import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.servlet.ModelToInfoFactory;
 
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -69,8 +63,7 @@ public class HibernateSearch {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         int resultCount;
         FullTextSession fullTextSession = Search.getFullTextSession(session);
-        BooleanQuery booleanQuery = new BooleanQuery();
-
+        BooleanQuery.Builder builder = new BooleanQuery.Builder();
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
 
         ArrayList<Query> except = new ArrayList<>();
@@ -79,16 +72,16 @@ public class HibernateSearch {
                 continue;
 
             except.add(qb.keyword().onField("recordType").matching(type.getName()).createQuery());
-
         }
+
         // add terms for record types
         Query[] queries = new Query[]{};
         Query recordTypeQuery = qb.all().except(except.toArray(queries)).createQuery();
-        booleanQuery.add(recordTypeQuery, BooleanClause.Occur.MUST);
+        builder.add(recordTypeQuery, BooleanClause.Occur.FILTER);
 
         // visibility
         Query visibilityQuery = qb.keyword().onField("visibility").matching(Visibility.OK.getValue()).createQuery();
-        booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST);
+        builder.add(visibilityQuery, BooleanClause.Occur.FILTER);
 
         // biosafety
         BioSafetyOption option = searchQuery.getBioSafetyOption();
@@ -96,14 +89,14 @@ public class HibernateSearch {
             TermContext bslContext = qb.keyword();
             Query biosafetyQuery =
                     bslContext.onField("bioSafetyLevel").ignoreFieldBridge().matching(option.getIntValue()).createQuery();
-            booleanQuery.add(biosafetyQuery, BooleanClause.Occur.MUST);
+            builder.add(biosafetyQuery, BooleanClause.Occur.FILTER);
         }
 
         // check if there is a blast results
-        createBlastFilterQuery(fullTextSession, blastResults, booleanQuery);
+        createBlastFilterQuery(fullTextSession, blastResults, builder);
 
         // wrap Lucene query in a org.hibernate.Query
-        FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, Entry.class);
+        FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(builder.build(), Entry.class);
 
         // get sorting values
         Sort sort = getSort(searchQuery.getParameters().isSortAscending(), searchQuery.getParameters().getSortField());
@@ -169,27 +162,17 @@ public class HibernateSearch {
 
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
         Query query = qb.keyword().onField("visibility").matching(Visibility.OK.getValue()).createQuery();
-        FilteredQuery filteredQuery = new FilteredQuery(query, new Filter() {
-            @Override
-            public DocIdSet getDocIdSet(AtomicReaderContext context, Bits acceptDocs) throws IOException {
-                OpenBitSet bitSet = new OpenBitSet(context.reader().maxDoc());
-                DocsEnum docs;
-                for (String id : blastResults.keySet()) {
-                    docs = context.reader().termDocsEnum(new Term("id", id));
-                    if (docs == null)
-                        continue;
+        // todo : there is a limit of 1024 boolean clauses so return only return top blast results
+        BooleanQuery.Builder builder = new BooleanQuery.Builder();
+        builder.add(query, BooleanClause.Occur.FILTER);
 
-                    int doc;
-                    while ((doc = docs.nextDoc()) != DocsEnum.NO_MORE_DOCS) {
-                        bitSet.set(doc);
-                    }
-                }
-                return bitSet;
-            }
-        });
+        for (String id : blastResults.keySet()) {
+            Query blastQuery = qb.keyword().onField("id").matching(id).createQuery();
+            builder.add(new BooleanClause(blastQuery, BooleanClause.Occur.FILTER));
+        }
 
         // wrap Lucene query in a org.hibernate.Query
-        FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(filteredQuery, Entry.class);
+        FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(builder.build(), Entry.class);
 
         // enable security filter if an admin
         fullTextQuery = checkEnableSecurityFilter(userId, fullTextQuery);
@@ -220,7 +203,8 @@ public class HibernateSearch {
 
         SearchResult searchResults[] = new SearchResult[count];
         int limit = (start + count) > blastResults.size() ? blastResults.size() : (start + count);
-        LinkedList<SearchResult> list = new LinkedList<>(Arrays.asList(blastResults.values().toArray(searchResults)).subList(start, limit));
+        LinkedList<SearchResult> list = new LinkedList<>(Arrays.asList(blastResults.values().toArray(searchResults))
+                .subList(start, limit));
 
         SearchResults results = new SearchResults();
         results.setResultCount(blastResults.size());
@@ -234,7 +218,7 @@ public class HibernateSearch {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         int resultCount;
         FullTextSession fullTextSession = Search.getFullTextSession(session);
-        BooleanQuery booleanQuery = new BooleanQuery();
+        BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
         // get classes for search
         HashSet<String> fields = new HashSet<>();
@@ -248,19 +232,14 @@ public class HibernateSearch {
                 continue;
 
             BioSafetyOption safetyOption = searchQuery.getBioSafetyOption();
-            booleanQuery = generateQueriesForType(fullTextSession, fields, booleanQuery, term, entry.getValue(),
-                    safetyOption);
+            generateQueriesForType(fullTextSession, fields, builder, term, entry.getValue(), safetyOption);
         }
 
         // check for blast search results filter
-        createBlastFilterQuery(fullTextSession, blastResults, booleanQuery);
-
-        // if no queries then run empty search
-        if (booleanQuery.getClauses().length == 0)
-            return executeSearchNoTerms(userId, blastResults, searchQuery);
+        createBlastFilterQuery(fullTextSession, blastResults, builder);
 
         // wrap Lucene query in a org.hibernate.Query
-        FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(booleanQuery, classes);
+        FullTextQuery fullTextQuery = fullTextSession.createFullTextQuery(builder.build(), classes);
 
         // get max score
         fullTextQuery.setFirstResult(0);
@@ -325,9 +304,9 @@ public class HibernateSearch {
         return results;
     }
 
-    protected BooleanQuery generateQueriesForType(FullTextSession fullTextSession, HashSet<String> fields,
-                                                  BooleanQuery booleanQuery, String term, QueryType type,
-                                                  BioSafetyOption option) {
+    protected BooleanQuery.Builder generateQueriesForType(FullTextSession fullTextSession, HashSet<String> fields,
+                                                          BooleanQuery.Builder builder, String term, QueryType type,
+                                                          BioSafetyOption option) {
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
         if (!StringUtils.isEmpty(term)) {
             // generate term queries for each search term
@@ -336,16 +315,16 @@ public class HibernateSearch {
             if (type == QueryType.PHRASE) {
                 // phrase types are for quotes so slop is omitted
                 for (String field : fields) {
-                    booleanQuery.add(qb.phrase().onField(field).sentence(term).createQuery(), BooleanClause.Occur.SHOULD);
+                    builder.add(qb.phrase().onField(field).sentence(term).createQuery(), BooleanClause.Occur.SHOULD);
                 }
             } else {
                 // term
                 if (term.contains("*")) {
                     query = qb.keyword().wildcard().onFields(SearchFieldFactory.getCommonFields()).matching(term).createQuery();
-                    booleanQuery.add(query, BooleanClause.Occur.SHOULD);
+                    builder.add(query, BooleanClause.Occur.SHOULD);
                 } else {
                     query = qb.keyword().fuzzy().onFields(queryFields).ignoreFieldBridge().matching(term).createQuery();
-                    booleanQuery.add(query, BooleanClause.Occur.MUST);
+                    builder.add(query, BooleanClause.Occur.MUST);
                 }
             }
 
@@ -353,23 +332,22 @@ public class HibernateSearch {
             // the security filter takes care of other values not to be included such as "transferred" and "deleted"
             Query visibilityQuery = qb.keyword().onField("visibility")
                     .matching(Visibility.DRAFT.getValue()).createQuery();
-            booleanQuery.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
+            builder.add(visibilityQuery, BooleanClause.Occur.MUST_NOT);
 
             Query visibilityQuery2 = qb.keyword().onField("visibility")
                     .matching(Visibility.DELETED.getValue()).createQuery();
-            booleanQuery.add(visibilityQuery2, BooleanClause.Occur.MUST_NOT);
+            builder.add(visibilityQuery2, BooleanClause.Occur.MUST_NOT);
 
             // bio-safety level
             if (option != null) {
                 TermContext levelContext = qb.keyword();
                 Query biosafetyQuery = levelContext.onField("bioSafetyLevel").ignoreFieldBridge()
                         .matching(option.getValue()).createQuery();
-                booleanQuery.add(biosafetyQuery, BooleanClause.Occur.MUST);
+                builder.add(biosafetyQuery, BooleanClause.Occur.MUST);
             }
         }
-        return booleanQuery;
+        return builder;
     }
-
 
     protected Sort getSort(boolean asc, ColumnField sortField) {
         if (sortField == null)
@@ -384,16 +362,17 @@ public class HibernateSearch {
                 return new Sort(new SortField("recordType", SortField.Type.STRING, asc));
 
             case PART_ID:
-                return new Sort(new SortField("partNumber", SortField.Type.STRING, asc));
+                return new Sort(new SortField("partNumber_forSort", SortField.Type.STRING, asc));
 
             case CREATED:
-                return new Sort(new SortField("creationTime", SortField.Type.STRING, asc));
+                return new Sort(new SortField("creationTime", SortField.Type.INT, asc));
         }
     }
 
     // empty blast results indicates valid results
     protected void createBlastFilterQuery(FullTextSession fullTextSession,
-                                          final HashMap<String, SearchResult> blastResults, BooleanQuery booleanQuery) {
+                                          final HashMap<String, SearchResult> blastResults,
+                                          BooleanQuery.Builder builder) {
         // null blast results indicates no blast query
         if (blastResults == null)
             return;
@@ -401,26 +380,11 @@ public class HibernateSearch {
         // enable blast filter
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
         Query query = qb.keyword().onField("visibility").matching(Visibility.OK.getValue()).createQuery();
-        FilteredQuery filteredQuery = new FilteredQuery(query, new Filter() {
-            @Override
-            public DocIdSet getDocIdSet(AtomicReaderContext context, Bits acceptDocs) throws IOException {
-                OpenBitSet bitSet = new OpenBitSet(context.reader().maxDoc());
-                DocsEnum docs;
-                for (String id : blastResults.keySet()) {
-                    docs = context.reader().termDocsEnum(new Term("id", id));
-                    if (docs == null)
-                        continue;
-
-                    int doc;
-                    while ((doc = docs.nextDoc()) != DocsEnum.NO_MORE_DOCS) {
-                        bitSet.set(doc);
-                    }
-                }
-                return bitSet;
-            }
-        });
-
-        booleanQuery.add(filteredQuery, BooleanClause.Occur.MUST);
+        builder.add(query, BooleanClause.Occur.FILTER);
+        for (String id : blastResults.keySet()) {
+            Query filterQuery = qb.keyword().onField("id").matching(id).createQuery();
+            builder.add(filterQuery, BooleanClause.Occur.FILTER);
+        }
     }
 
     /**
