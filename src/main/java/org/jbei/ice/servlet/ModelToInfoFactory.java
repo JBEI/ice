@@ -5,7 +5,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
+import org.jbei.ice.lib.dao.hibernate.dao.SequenceDAO;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryUtil;

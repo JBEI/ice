@@ -1,19 +1,19 @@
-package org.jbei.ice.lib.dao.hibernate;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.sample.model.Sample;
-import org.jbei.ice.lib.models.Storage;
+package org.jbei.ice.lib.dao.hibernate.dao;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.sample.model.Sample;
+import org.jbei.ice.lib.models.Storage;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar

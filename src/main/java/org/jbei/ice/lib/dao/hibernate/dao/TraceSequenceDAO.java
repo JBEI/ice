@@ -1,15 +1,4 @@
-package org.jbei.ice.lib.dao.hibernate;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.models.TraceSequenceAlignment;
+package org.jbei.ice.lib.dao.hibernate.dao;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
@@ -17,6 +6,17 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.models.TraceSequence;
+import org.jbei.ice.lib.models.TraceSequenceAlignment;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 /**
  * Data accessor for {@link TraceSequence}s

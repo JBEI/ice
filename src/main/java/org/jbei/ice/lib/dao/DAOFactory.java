@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.dao;
 
-import org.jbei.ice.lib.dao.hibernate.*;
+import org.jbei.ice.lib.dao.hibernate.dao.*;
 
 /**
  * @author Hector Plahar

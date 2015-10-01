@@ -3,7 +3,7 @@ package org.jbei.ice.lib.account;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.AccountDAO;
+import org.jbei.ice.lib.dao.hibernate.dao.AccountDAO;
 import org.jbei.ice.lib.dto.AccountResults;
 import org.jbei.ice.lib.entry.EntryController;
 

@@ -2,7 +2,7 @@ package org.jbei.ice.lib.folder;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.FolderDAO;
+import org.jbei.ice.lib.dao.hibernate.dao.FolderDAO;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;

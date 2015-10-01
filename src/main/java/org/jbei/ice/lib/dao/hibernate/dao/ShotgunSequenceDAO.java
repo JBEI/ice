@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.dao.hibernate;
+package org.jbei.ice.lib.dao.hibernate.dao;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.ShotgunSequence;

@@ -1,15 +1,10 @@
 package org.jbei.ice.lib.config;
 
-import org.jbei.ice.lib.dao.hibernate.ConfigurationDAO;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
+import org.jbei.ice.lib.dao.hibernate.dao.ConfigurationDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.models.Configuration;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 /**
  * @author Hector Plahar

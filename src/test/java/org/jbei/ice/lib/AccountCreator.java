@@ -5,7 +5,7 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.AccountDAO;
+import org.jbei.ice.lib.dao.hibernate.dao.AccountDAO;
 import org.junit.Assert;
 
 /**

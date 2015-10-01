@@ -1,15 +1,15 @@
 package org.jbei.ice.lib.folder;
 
-import java.util.List;
-
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.EntryDAO;
+import org.jbei.ice.lib.dao.hibernate.dao.EntryDAO;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.servlet.ModelToInfoFactory;
+
+import java.util.List;
 
 /**
  * Retriever for entries contained in a folder

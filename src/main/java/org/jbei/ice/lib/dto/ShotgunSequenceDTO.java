@@ -5,13 +5,12 @@ import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dao.IDataTransferModel;
-import org.jbei.ice.lib.dao.hibernate.ShotgunSequenceDAO;
+import org.jbei.ice.lib.dao.hibernate.dao.ShotgunSequenceDAO;
 import org.jbei.ice.lib.models.ShotgunSequence;
 import org.jbei.ice.lib.utils.Utils;
 
 import java.io.*;
 import java.nio.file.Paths;
-import java.util.Date;
 import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;

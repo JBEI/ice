@@ -2,14 +2,9 @@ package org.jbei.ice.lib.account;
 
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.jbei.ice.lib.dao.hibernate.dao.AccountDAO;
+import org.junit.*;
 
 public class AccountDAOTest {
 

@@ -1,13 +1,13 @@
-package org.jbei.ice.lib.dao.hibernate;
-
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.account.model.AccountPreferences;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
+package org.jbei.ice.lib.dao.hibernate.dao;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.account.model.AccountPreferences;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 
 /**
  * DAO to manipulate {@link AccountPreferences} objects in the database.

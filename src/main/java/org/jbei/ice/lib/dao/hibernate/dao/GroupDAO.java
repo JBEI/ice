@@ -1,22 +1,22 @@
-package org.jbei.ice.lib.dao.hibernate;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dto.group.GroupType;
-import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.group.GroupController;
+package org.jbei.ice.lib.dao.hibernate.dao;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.dto.group.GroupType;
+import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.group.GroupController;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Manager to manipulate {@link org.jbei.ice.lib.group.Group} objects.

@@ -1,14 +1,14 @@
-package org.jbei.ice.lib.dao.hibernate;
-
-import java.util.List;
-
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.models.Configuration;
+package org.jbei.ice.lib.dao.hibernate.dao;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.models.Configuration;
+
+import java.util.List;
 
 /**
  * Manage {@link Configuration} objects in the database.

@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.dao.hibernate;
+package org.jbei.ice.lib.dao.hibernate.dao;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -8,6 +8,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.models.AnnotationLocation;

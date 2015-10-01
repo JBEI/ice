@@ -4,7 +4,7 @@ import org.jbei.ice.lib.access.Authorization;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
+import org.jbei.ice.lib.dao.hibernate.dao.PermissionDAO;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.folder.Folder;

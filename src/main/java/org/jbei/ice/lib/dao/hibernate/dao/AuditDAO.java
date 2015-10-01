@@ -1,16 +1,16 @@
-package org.jbei.ice.lib.dao.hibernate;
-
-import java.util.ArrayList;
-
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.models.Audit;
+package org.jbei.ice.lib.dao.hibernate.dao;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.models.Audit;
+
+import java.util.ArrayList;
 
 /**
  * Accessor for {@link Audit} objects

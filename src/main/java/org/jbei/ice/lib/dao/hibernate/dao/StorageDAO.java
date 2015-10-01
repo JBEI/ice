@@ -1,19 +1,19 @@
-package org.jbei.ice.lib.dao.hibernate;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dto.sample.SampleType;
-import org.jbei.ice.lib.models.Storage;
-import org.jbei.ice.lib.utils.Utils;
+package org.jbei.ice.lib.dao.hibernate.dao;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.dto.sample.SampleType;
+import org.jbei.ice.lib.models.Storage;
+import org.jbei.ice.lib.utils.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Manager to manipulate {@link Storage} objects in the database.

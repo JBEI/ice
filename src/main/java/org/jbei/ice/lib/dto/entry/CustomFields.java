@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.dto.entry;
 
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.EntryDAO;
-import org.jbei.ice.lib.dao.hibernate.ParameterDAO;
+import org.jbei.ice.lib.dao.hibernate.dao.EntryDAO;
+import org.jbei.ice.lib.dao.hibernate.dao.ParameterDAO;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.model.Parameter;

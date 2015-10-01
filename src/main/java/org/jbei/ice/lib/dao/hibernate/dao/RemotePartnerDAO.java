@@ -1,9 +1,10 @@
-package org.jbei.ice.lib.dao.hibernate;
+package org.jbei.ice.lib.dao.hibernate.dao;
 
 import org.hibernate.HibernateException;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.net.RemotePartner;
 
 import java.util.ArrayList;

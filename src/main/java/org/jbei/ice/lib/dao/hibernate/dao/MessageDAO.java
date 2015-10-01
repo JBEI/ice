@@ -1,14 +1,4 @@
-package org.jbei.ice.lib.dao.hibernate;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.message.Message;
+package org.jbei.ice.lib.dao.hibernate.dao;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -16,6 +6,16 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
+import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.lib.message.Message;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Hibernate DAO for {@link org.jbei.ice.lib.message.Message}

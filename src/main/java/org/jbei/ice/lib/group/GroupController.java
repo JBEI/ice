@@ -7,7 +7,7 @@ import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.GroupDAO;
+import org.jbei.ice.lib.dao.hibernate.dao.GroupDAO;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.utils.Utils;

@@ -2,8 +2,8 @@ package org.jbei.ice.lib.experiment;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.EntryDAO;
-import org.jbei.ice.lib.dao.hibernate.ExperimentDAO;
+import org.jbei.ice.lib.dao.hibernate.dao.EntryDAO;
+import org.jbei.ice.lib.dao.hibernate.dao.ExperimentDAO;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.model.Entry;
 

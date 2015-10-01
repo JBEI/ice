@@ -1,6 +1,7 @@
-package org.jbei.ice.lib.dao.hibernate;
+package org.jbei.ice.lib.dao.hibernate.dao;
 
 import org.jbei.ice.lib.access.RemotePermission;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 
 /**
  * @author Hector Plahar

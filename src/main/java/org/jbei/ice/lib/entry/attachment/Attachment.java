@@ -1,21 +1,21 @@
 package org.jbei.ice.lib.entry.attachment;
 
-import javax.persistence.*;
-
-import org.jbei.ice.lib.dao.IDataModel;
-import org.jbei.ice.lib.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.EntryBooleanPropertiesBridge;
-
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
+import org.jbei.ice.lib.dao.IDataModel;
+import org.jbei.ice.lib.dao.hibernate.dao.AttachmentDAO;
+import org.jbei.ice.lib.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.lib.entry.model.EntryBooleanPropertiesBridge;
+
+import javax.persistence.*;
 
 /**
  * Store information about attachments.
  * <p/>
- * The actual bytes are written to a file on disk. See {@link org.jbei.ice.lib.dao.hibernate.AttachmentDAO}.
+ * The actual bytes are written to a file on disk. See {@link AttachmentDAO}.
  *
  * @author Timothy Ham, Zinovii Dmytriv
  */

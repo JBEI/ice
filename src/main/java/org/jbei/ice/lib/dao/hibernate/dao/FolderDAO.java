@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.dao.hibernate;
+package org.jbei.ice.lib.dao.hibernate.dao;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
@@ -11,6 +11,7 @@ import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dao.DAOException;
+import org.jbei.ice.lib.dao.hibernate.HibernateRepository;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderType;

@@ -4,6 +4,7 @@ import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.lib.dao.hibernate.dao.PermissionDAO;
 import org.jbei.ice.lib.entry.model.Strain;
 import org.junit.After;
 import org.junit.Assert;
