@@ -209,8 +209,6 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.hStepChanged = function () {
-            console.log($scope.params);
-
             folders.folder($scope.params, function (result) {
                 $scope.folder = result;
                 if (result.canEdit)

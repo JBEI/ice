@@ -410,14 +410,19 @@
         <div class="col-md-5" style="padding-left: 0">
             <pagination total-items="searchResults.resultCount" ng-change="searchResultPageChanged()"
                         ng-model="params.currentPage" max-size="maxSize"
-                        class="pagination-sm" items-per-page="15" boundary-links="true">
+                        class="pagination-sm" items-per-page=params.limit" boundary-links="true">
             </pagination>
         </div>
-        <div class="col-md-7" style="margin: 22px 0;">
+        <div class="col-md-4" style="margin: 22px 0;">
             <strong class="small">
                 <i ng-show="loadingSearchResults" class="fa fa-spin fa-gear opacity_4"></i>
                 {{pageCounts(params.currentPage, searchResults.resultCount)}}
             </strong>
+        </div>
+        <div class="col-md-2" style="margin-top: 25px;">
+            <small class="text-muted pull-right">Show:
+                <select ng-change="hStepChanged()" ng-model="params.limit"
+                        ng-options="opt for opt in params.hstep"></select></small>
         </div>
     </div>
 </div>
