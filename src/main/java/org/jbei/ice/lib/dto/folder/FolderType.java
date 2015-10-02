@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.dto.folder;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * Type of folder sharing, which indicates where it will be displayed

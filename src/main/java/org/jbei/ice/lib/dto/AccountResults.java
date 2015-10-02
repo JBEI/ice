@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.dto;
 
-import java.util.LinkedList;
-
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
+
+import java.util.LinkedList;
 
 /**
  * Wrapper around a list of user accounts

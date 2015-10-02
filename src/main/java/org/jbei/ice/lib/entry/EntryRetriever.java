@@ -1,19 +1,15 @@
 package org.jbei.ice.lib.entry;
 
-import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.AccountType;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.dao.EntryDAO;
 import org.jbei.ice.lib.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.folder.Folder;
-import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;

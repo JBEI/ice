@@ -1,11 +1,12 @@
 package org.jbei.ice.lib.folder;
 
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.dao.FolderDAO;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
-import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.FolderDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Folder;
+import org.jbei.ice.storage.model.Group;
 
 import java.util.ArrayList;
 import java.util.HashSet;

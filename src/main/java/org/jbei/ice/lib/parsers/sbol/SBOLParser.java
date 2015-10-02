@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.parsers.sbol;
 
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
-import org.jbei.ice.lib.vo.DNASequence;
 import org.sbolstandard.core.SBOLDocument;
 import org.sbolstandard.core.SBOLFactory;
 import org.sbolstandard.core.SBOLRootObject;

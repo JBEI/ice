@@ -1,11 +1,11 @@
 package org.jbei.ice.lib.account;
 
 import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.dao.AccountDAO;
 import org.jbei.ice.lib.dto.AccountResults;
 import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
+import org.jbei.ice.storage.model.Account;
 
 import java.util.List;
 

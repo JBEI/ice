@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.entry.sequence.composers.formatters;
 
+import org.jbei.ice.storage.model.Sequence;
+
 import java.io.IOException;
 import java.io.OutputStream;
-
-import org.jbei.ice.lib.models.Sequence;
 
 /**
  * Interface for Formatters.

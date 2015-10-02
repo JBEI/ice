@@ -2,13 +2,13 @@ package org.jbei.ice.lib.config;
 
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.dao.ConfigurationDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
-import org.jbei.ice.lib.models.Configuration;
 import org.jbei.ice.lib.net.RemoteAccessController;
 import org.jbei.ice.lib.net.WoRController;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.ConfigurationDAO;
+import org.jbei.ice.storage.model.Configuration;
 
 import java.util.ArrayList;
 

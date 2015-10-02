@@ -1,13 +1,13 @@
 package org.jbei.ice.lib.dto;
 
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.IDataTransferModel;
-import org.jbei.ice.lib.dao.hibernate.dao.ShotgunSequenceDAO;
-import org.jbei.ice.lib.models.ShotgunSequence;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.IDataTransferModel;
+import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.ShotgunSequence;
 
 import java.io.*;
 import java.nio.file.Paths;

@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.executor;
 
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateUtil;
 
 /**
  * Runnable for running tasks

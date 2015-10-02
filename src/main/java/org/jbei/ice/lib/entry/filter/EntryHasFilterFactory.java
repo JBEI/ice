@@ -21,10 +21,11 @@ public class EntryHasFilterFactory {
 
     @Factory
     public Filter getFilter() {
-        BooleanQuery query = new BooleanQuery(true);
+        BooleanQuery.Builder builder = new BooleanQuery.Builder();
+
         for (String f : field) {
-            query.add(new TermQuery(new Term(f, "true")), BooleanClause.Occur.MUST);
+            builder.add(new TermQuery(new Term(f, "true")), BooleanClause.Occur.MUST);
         }
-        return new CachingWrapperFilter(new QueryWrapperFilter(query));
+        return new CachingWrapperFilter(new QueryWrapperFilter(builder.build()));
     }
 }

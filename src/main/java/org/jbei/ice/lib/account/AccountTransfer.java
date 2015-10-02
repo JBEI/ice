@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.account;
 
-import java.util.ArrayList;
-
-import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.storage.IDataTransferModel;
+
+import java.util.ArrayList;
 
 /**
  * Data transfer object for user account

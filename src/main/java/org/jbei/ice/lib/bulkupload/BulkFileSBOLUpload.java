@@ -1,18 +1,17 @@
 package org.jbei.ice.lib.bulkupload;
 
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.DNASequence;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.parsers.sbol.ICESBOLParserVisitor;
+import org.sbolstandard.core.SBOLDocument;
+import org.sbolstandard.core.SBOLFactory;
+import org.sbolstandard.core.SBOLRootObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.parsers.sbol.ICESBOLParserVisitor;
-import org.jbei.ice.lib.vo.DNASequence;
-
-import org.sbolstandard.core.SBOLDocument;
-import org.sbolstandard.core.SBOLFactory;
-import org.sbolstandard.core.SBOLRootObject;
 
 /**
  * Bulk upload with multiple components in a single SBOL document

@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.dto;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.sample.SampleType;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * Storage location information that specifies display (which can be a unique identifier)

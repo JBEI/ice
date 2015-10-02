@@ -1,18 +1,5 @@
 package org.jbei.ice.lib.entry.sequence.composers.formatters;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.models.AnnotationLocation;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.SequenceFeature;
-import org.jbei.ice.lib.models.SequenceFeatureAttribute;
-
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.Feature;
 import org.biojava.bio.symbol.Location;
@@ -20,14 +7,20 @@ import org.biojavax.RichAnnotation;
 import org.biojavax.RichObjectFactory;
 import org.biojavax.SimpleNote;
 import org.biojavax.SimpleRichAnnotation;
-import org.biojavax.bio.seq.CompoundRichLocation;
-import org.biojavax.bio.seq.RichFeature;
+import org.biojavax.bio.seq.*;
 import org.biojavax.bio.seq.RichLocation.Strand;
-import org.biojavax.bio.seq.RichSequence;
-import org.biojavax.bio.seq.SimplePosition;
-import org.biojavax.bio.seq.SimpleRichFeature;
-import org.biojavax.bio.seq.SimpleRichLocation;
-import org.biojavax.bio.seq.SimpleRichSequence;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.storage.model.AnnotationLocation;
+import org.jbei.ice.storage.model.Sequence;
+import org.jbei.ice.storage.model.SequenceFeature;
+import org.jbei.ice.storage.model.SequenceFeatureAttribute;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Formatter for the Genbank file format.

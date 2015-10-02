@@ -1,10 +1,10 @@
 package org.jbei.ice.lib.account.authentication;
 
 import org.jbei.ice.lib.account.AccountUtils;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Account;
 
 /**
  * Default ICE authentication scheme

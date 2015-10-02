@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.common.logging;
 
-import org.jbei.ice.lib.dao.DAOException;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
@@ -48,7 +47,7 @@ public class Logger {
     }
 
     private static void sendEmail(String message, Throwable e) {
-        if (e instanceof MessagingException || e instanceof DAOException || true) {
+        if (e instanceof MessagingException) {
             // if error is "Can't send email", there is no need to try to send email
             return;
         }

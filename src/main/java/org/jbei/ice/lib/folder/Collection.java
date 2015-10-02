@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.folder;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * Wrapper around counts for collections

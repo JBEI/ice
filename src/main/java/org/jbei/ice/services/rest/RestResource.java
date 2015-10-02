@@ -5,11 +5,11 @@ import org.jbei.auth.KeyTable;
 import org.jbei.auth.hmac.HmacAuthorizor;
 import org.jbei.auth.hmac.HmacSignature;
 import org.jbei.auth.hmac.HmacSignatureFactory;
-import org.jbei.ice.lib.account.SessionHandler;
+import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.storage.hibernate.HibernateUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HeaderParam;
@@ -99,7 +99,7 @@ public class RestResource {
      * @throws WebApplicationException for unauthorized access
      */
     protected String getUserId(final String sessionId) {
-        String userId = SessionHandler.getUserIdBySession(sessionId);
+        String userId = UserSessions.getUserIdBySession(sessionId);
         if (!StringUtils.isEmpty(userId))
             return userId;
 

@@ -1,10 +1,10 @@
 package org.jbei.ice.lib.dto.web;
 
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.storage.IDataTransferModel;
+
 import java.util.LinkedList;
 import java.util.List;
-
-import org.jbei.ice.lib.dao.IDataTransferModel;
-import org.jbei.ice.lib.dto.entry.PartData;
 
 /**
  * Wrapper around a list of entries that are received from other registries on the web

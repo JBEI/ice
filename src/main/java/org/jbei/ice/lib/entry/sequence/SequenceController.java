@@ -4,12 +4,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.access.PermissionsController;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.dao.SequenceDAO;
-import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.dto.entry.Visibility;
@@ -17,16 +14,14 @@ import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryFactory;
 import org.jbei.ice.lib.entry.EntryRetriever;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Plasmid;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
-import org.jbei.ice.lib.models.*;
-import org.jbei.ice.lib.models.SequenceFeature.AnnotationType;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
-import org.jbei.ice.lib.vo.*;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
+import org.jbei.ice.storage.model.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -387,9 +382,9 @@ public class SequenceController {
                         }
                     }
 
-                    AnnotationType annotationType = null;
+                    SequenceFeature.AnnotationType annotationType = null;
                     if (dnaFeature.getAnnotationType() != null && !dnaFeature.getAnnotationType().isEmpty()) {
-                        annotationType = AnnotationType.valueOf(dnaFeature.getAnnotationType());
+                        annotationType = SequenceFeature.AnnotationType.valueOf(dnaFeature.getAnnotationType());
                     }
 
                     Feature feature = new Feature(dnaFeature.getName(), dnaFeature.getIdentifier(), featureSequence, 0,

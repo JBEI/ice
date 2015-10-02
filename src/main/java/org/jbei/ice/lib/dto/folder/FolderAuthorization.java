@@ -2,9 +2,9 @@ package org.jbei.ice.lib.dto.folder;
 
 import org.jbei.ice.lib.access.Authorization;
 import org.jbei.ice.lib.access.PermissionsController;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.folder.Folder;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Folder;
 
 import java.util.HashSet;
 import java.util.Set;

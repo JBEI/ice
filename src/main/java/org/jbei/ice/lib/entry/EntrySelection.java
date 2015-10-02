@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.entry;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.search.SearchQuery;
+import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.ArrayList;
 

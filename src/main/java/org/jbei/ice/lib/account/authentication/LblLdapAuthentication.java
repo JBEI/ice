@@ -1,24 +1,20 @@
 package org.jbei.ice.lib.account.authentication;
 
+import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Group;
+
+import javax.naming.Context;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
+import javax.naming.directory.*;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Hashtable;
-import javax.naming.Context;
-import javax.naming.NamingEnumeration;
-import javax.naming.NamingException;
-import javax.naming.directory.Attributes;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
-import javax.naming.directory.SearchControls;
-import javax.naming.directory.SearchResult;
-
-import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.group.Group;
 
 
 /**

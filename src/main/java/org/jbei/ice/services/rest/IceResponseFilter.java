@@ -1,14 +1,13 @@
 package org.jbei.ice.services.rest;
 
-import java.io.IOException;
+import org.jbei.ice.storage.hibernate.HibernateUtil;
+
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
-
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
+import java.io.IOException;
 
 /**
  * Rolls back the transaction if http status is 500

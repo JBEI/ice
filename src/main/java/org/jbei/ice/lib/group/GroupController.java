@@ -4,13 +4,14 @@ import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.AccountType;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.dao.GroupDAO;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.GroupDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Group;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -238,7 +239,7 @@ public class GroupController {
     }
 
     /**
-     * Retrieve all parent {@link Group}s of a given {@link org.jbei.ice.lib.account.model.Account}.
+     * Retrieve all parent {@link Group}s of a given {@link Account}.
      *
      * @param account Account to query on.
      * @return Set of Group ids.

@@ -1,14 +1,14 @@
 package org.jbei.ice.lib.account;
 
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.account.model.Preference;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.dao.AccountDAO;
-import org.jbei.ice.lib.dao.hibernate.dao.PreferencesDAO;
 import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.dto.search.SearchBoostField;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.dto.user.UserPreferences;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
+import org.jbei.ice.storage.hibernate.dao.PreferencesDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Preference;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.account;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * Type of account managed by the system

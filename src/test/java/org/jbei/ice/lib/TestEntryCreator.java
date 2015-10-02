@@ -1,12 +1,12 @@
 package org.jbei.ice.lib;
 
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.entry.EntryCreator;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Plasmid;
+import org.jbei.ice.storage.model.Strain;
 import org.junit.Assert;
 
 /**

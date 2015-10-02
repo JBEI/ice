@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.account;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.storage.model.Account;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;

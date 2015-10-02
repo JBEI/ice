@@ -1,14 +1,13 @@
 package org.jbei.ice.services.rest;
 
-import java.io.IOException;
+import org.glassfish.jersey.server.ContainerRequest;
+import org.jbei.ice.storage.hibernate.HibernateUtil;
+
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
-
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
-
-import org.glassfish.jersey.server.ContainerRequest;
+import java.io.IOException;
 
 /**
  * @author Hector Plahar

@@ -1,13 +1,12 @@
 package org.jbei.ice.lib.entry.sequence.composers.formatters;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
-import org.jbei.ice.lib.models.Sequence;
-
+import org.jbei.ice.storage.model.Sequence;
 import org.sbolstandard.core.DnaComponent;
 import org.sbolstandard.core.SBOLDocument;
 import org.sbolstandard.core.SBOLFactory;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Format to SBOL v1.1 using libSBOLj

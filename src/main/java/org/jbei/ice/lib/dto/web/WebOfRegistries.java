@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.dto.web;
 
-import java.util.ArrayList;
+import org.jbei.ice.storage.IDataTransferModel;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import java.util.ArrayList;
 
 /**
  * Wrapper around web of registries settings and partners

@@ -10,10 +10,8 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.dao.EntryDAO;
-import org.jbei.ice.lib.dao.hibernate.dao.ShotgunSequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.ShotgunSequenceDTO;
 import org.jbei.ice.lib.dto.comment.UserComment;
@@ -22,15 +20,17 @@ import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.experiment.ExperimentController;
 import org.jbei.ice.lib.experiment.Study;
-import org.jbei.ice.lib.models.ShotgunSequence;
 import org.jbei.ice.lib.net.TransferredParts;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
+import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.ShotgunSequence;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -555,16 +555,6 @@ public class PartResource extends RestResource {
         }
         return Response.status(Response.Status.OK).entity(sequence).build();
     }
-
-//    @PUT
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Path("/{id}/sequence")
-//    public Response addSequenceToEntry(@PathParam("id") final long partId,
-//                                       @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
-//                                       @QueryParam("sid") final String sid,
-//                                       FeaturedDNASequence sequence) {
-//
-//    }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)

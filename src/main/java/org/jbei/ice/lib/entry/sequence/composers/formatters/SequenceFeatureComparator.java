@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.entry.sequence.composers.formatters;
 
-import java.util.Comparator;
+import org.jbei.ice.storage.model.SequenceFeature;
 
-import org.jbei.ice.lib.models.SequenceFeature;
+import java.util.Comparator;
 
 /**
  * Comparator for the sequence feature

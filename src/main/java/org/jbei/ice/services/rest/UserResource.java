@@ -4,8 +4,6 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.Accounts;
 import org.jbei.ice.lib.account.PreferencesController;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.AccountResults;
 import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -17,6 +15,8 @@ import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Account;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;

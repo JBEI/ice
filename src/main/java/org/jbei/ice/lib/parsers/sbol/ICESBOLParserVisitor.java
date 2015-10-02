@@ -1,25 +1,24 @@
 package org.jbei.ice.lib.parsers.sbol;
 
-import java.net.URI;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import org.jbei.ice.lib.bulkupload.BulkUploadAutoUpdate;
 import org.jbei.ice.lib.bulkupload.DNAFeatureComparator;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.DNAFeature;
+import org.jbei.ice.lib.dto.DNAFeatureLocation;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.IceSequenceOntology;
-import org.jbei.ice.lib.vo.DNAFeature;
-import org.jbei.ice.lib.vo.DNAFeatureLocation;
-import org.jbei.ice.lib.vo.FeaturedDNASequence;
-
 import org.sbolstandard.core.DnaComponent;
 import org.sbolstandard.core.DnaSequence;
 import org.sbolstandard.core.SequenceAnnotation;
 import org.sbolstandard.core.StrandType;
 import org.sbolstandard.core.util.SBOLBaseVisitor;
+
+import java.net.URI;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Implementation of the ICESBOLParserVisitor

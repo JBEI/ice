@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.shared;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * Column fields for tables used on the ice platform UI
@@ -36,9 +36,6 @@ public enum ColumnField implements IDataTransferModel {
 
     ColumnField(String name) {
         this.name = name;
-    }
-
-    private ColumnField() {
     }
 
     public String getName() {

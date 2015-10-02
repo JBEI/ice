@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.utils;
 
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.models.Configuration;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Configuration;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;

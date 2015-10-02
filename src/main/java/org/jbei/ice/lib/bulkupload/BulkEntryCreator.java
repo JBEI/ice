@@ -3,14 +3,10 @@ package org.jbei.ice.lib.bulkupload;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.ApplicationController;
-import org.jbei.ice.lib.access.Permission;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.dao.BulkUploadDAO;
-import org.jbei.ice.lib.dao.hibernate.dao.EntryDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -18,15 +14,14 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.entry.*;
-import org.jbei.ice.lib.entry.attachment.Attachment;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.servlet.InfoToModelFactory;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.BulkUploadDAO;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.model.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -347,13 +342,14 @@ public class BulkEntryCreator {
                 entry.setVisibility(Visibility.DRAFT.getValue());
         }
 
-        EntryEditor editor = new EntryEditor();
-        // set the plasmids and update
-        if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString())
-                && entry.getLinkedEntries().isEmpty()) {
-            Strain strain = (Strain) entry;
-            editor.setStrainPlasmids(account, strain, strain.getPlasmids());
-        }
+        // todo : que?
+//        EntryEditor editor = new EntryEditor();
+//        // set the plasmids and update
+//        if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString())
+//                && entry.getLinkedEntries().isEmpty()) {
+//            Strain strain = (Strain) entry;
+//            editor.setStrainPlasmids(account, strain, strain.getPlasmids());
+//        }
 
         entryController.update(userId, entry);
 

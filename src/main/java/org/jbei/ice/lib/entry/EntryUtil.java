@@ -1,14 +1,12 @@
 package org.jbei.ice.lib.entry;
 
-
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.*;
-import org.jbei.ice.lib.entry.model.*;
-import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.storage.model.*;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -54,7 +52,7 @@ public class EntryUtil {
     }
 
     /**
-     * String representation of {@link org.jbei.ice.lib.entry.model.Link}s.
+     * String representation of {@link Link}s.
      *
      * @return Comma separated list of links.
      */
@@ -125,9 +123,6 @@ public class EntryUtil {
 
             case GENOTYPE_OR_PHENOTYPE:
                 return strain.getGenotypePhenotype();
-
-            case PLASMIDS:
-                return strain.getPlasmids();
 
             default:
                 return null;
@@ -442,7 +437,6 @@ public class EntryUtil {
 
             case PARENTAL_STRAIN:
             case GENOTYPE_OR_PHENOTYPE:
-            case PLASMIDS:
                 data.setStrainData(setStrainDataFromField(data.getStrainData(), value, field));
                 break;
 

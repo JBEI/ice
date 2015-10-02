@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.dto.search;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.ArrayList;
 import java.util.Arrays;

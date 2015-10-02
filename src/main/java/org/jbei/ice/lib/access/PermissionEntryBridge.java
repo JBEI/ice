@@ -3,6 +3,7 @@ package org.jbei.ice.lib.access;
 import org.apache.lucene.document.Document;
 import org.hibernate.search.bridge.FieldBridge;
 import org.hibernate.search.bridge.LuceneOptions;
+import org.jbei.ice.storage.model.Permission;
 
 /**
  * Permission bridge that indexes the fields needed by the

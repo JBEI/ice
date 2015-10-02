@@ -1,9 +1,10 @@
 package org.jbei.ice.lib.dto.web;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
+import org.jbei.ice.storage.model.RemotePartner;
 
 /**
- * Data transfer model for {@link org.jbei.ice.lib.net.RemotePartner}
+ * Data transfer model for {@link RemotePartner}
  *
  * @author Hector Plahar
  */

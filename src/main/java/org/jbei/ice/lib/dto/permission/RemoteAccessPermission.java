@@ -2,7 +2,7 @@ package org.jbei.ice.lib.dto.permission;
 
 import org.jbei.ice.lib.access.AccessType;
 import org.jbei.ice.lib.access.Article;
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * @author Hector Plahar

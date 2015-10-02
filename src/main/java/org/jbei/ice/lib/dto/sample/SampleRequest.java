@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.dto.sample;
 
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.ArrayList;
 import java.util.List;

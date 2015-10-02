@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.dto;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * Types of configuration stored in the database. This acts as the base for

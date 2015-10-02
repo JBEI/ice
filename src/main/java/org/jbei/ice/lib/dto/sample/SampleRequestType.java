@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.dto.sample;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * Available forms that the samples can be requested in
