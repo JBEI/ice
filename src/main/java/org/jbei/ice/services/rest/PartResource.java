@@ -9,6 +9,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
+import org.jbei.ice.lib.account.SessionHandler;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.History;
@@ -95,8 +96,10 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public Response read(@Context final UriInfo info, @PathParam("id") final String id) {
-        final String userId = getUserId();
+    public Response read(@Context final UriInfo info,
+                         @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
+                         @PathParam("id") final String id) {
+        String userId = SessionHandler.getUserIdBySession(sessionId);
         try {
             log(userId, "retrieving details for " + id);
             final EntryType type = EntryType.nameToType(id);
