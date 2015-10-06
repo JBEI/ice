@@ -1,17 +1,17 @@
 'use strict';
 
 angular.module('ice.collection.service', [])
-    .factory('FolderSelection', function ($rootScope) {
+    .factory('FolderSelection', function ($rootScope, Util) {
         var selectedCollection;
         var selectedFolder;
 
         return {
-            selectFolder:function (folder) {
+            selectFolder: function (folder) {
                 selectedFolder = folder;
                 $rootScope.$emit("CollectionFolderSelected", folder);
             },
 
-            selectCollection:function (collection) {
+            selectCollection: function (collection) {
                 // if user is on /{domain}/folder/{id} and refreshes, selectCollection is triggered
                 if (!isNaN(collection)) {
                     // TODO : folder selected, not collection
@@ -23,20 +23,25 @@ angular.module('ice.collection.service', [])
                 $rootScope.$emit("CollectionSelected", collection);
             },
 
-            canEditSelectedFolder:function () {
+            canEditSelectedFolder: function () {
                 if (selectedCollection === "personal")
                     return true;
 
                 return selectedFolder && selectedFolder.canEdit;
             },
 
-            getSelectedFolder:function () {
+            getSelectedFolder: function () {
                 return selectedFolder;
             },
 
-            reset:function () {
+            reset: function () {
                 selectedCollection = undefined;
                 selectedFolder = undefined;
+            },
+
+            getCounts: function (success) {
+                Util.get("/folders/stats", success);
             }
         }
-    });
+    })
+;

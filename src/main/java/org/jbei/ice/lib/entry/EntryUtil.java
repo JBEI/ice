@@ -27,6 +27,8 @@ public class EntryUtil {
             return value;
 
         EntryType type = EntryType.nameToType(entry.getRecordType());
+        if (type == null)
+            return null;
 
         switch (type) {
             case STRAIN:

@@ -14,13 +14,10 @@ import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.*;
-import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
@@ -58,119 +55,6 @@ public class EntryController {
         authorization = new EntryAuthorization();
         sequenceDAO = DAOFactory.getSequenceDAO();
         auditDAO = DAOFactory.getAuditDAO();
-    }
-
-    public FolderDetails retrieveVisibleEntries(String userId, ColumnField field, boolean asc, int start, int limit) {
-        Set<Entry> results;
-        FolderDetails details = new FolderDetails();
-        Account account = accountController.getByEmail(userId);
-
-        if (authorization.isAdmin(userId)) {
-            // no filters
-            results = dao.retrieveAllEntries(field, asc, start, limit);
-        } else {
-            // retrieve groups for account and filter by permission
-            Set<Group> accountGroups = new HashSet<>(account.getGroups());
-            GroupController controller = new GroupController();
-            Group everybodyGroup = controller.createOrRetrievePublicGroup();
-            accountGroups.add(everybodyGroup);
-            results = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit);
-        }
-
-        for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
-            details.getEntries().add(info);
-        }
-
-        return details;
-    }
-
-    /**
-     * Retrieve the number of entries that is visible to a particular user
-     *
-     * @param userId user account unique identifier
-     * @return Number of entries that user with account referenced in the parameter can read.
-     */
-    public long getNumberOfVisibleEntries(String userId) {
-        Account account = accountController.getByEmail(userId);
-
-        if (account == null)
-            return -1;
-
-        if (authorization.isAdmin(userId)) {
-            return dao.getAllEntryCount();
-        }
-
-        Set<Group> accountGroups = new HashSet<>(account.getGroups());
-        GroupController controller = new GroupController();
-        Group everybodyGroup = controller.createOrRetrievePublicGroup();
-        accountGroups.add(everybodyGroup);
-        return dao.visibleEntryCount(account, accountGroups);
-    }
-
-    public long getNumberOfEntriesSharedWithUser(String userId) {
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        GroupController groupController = new GroupController();
-        Group publicGroup = groupController.createOrRetrievePublicGroup();
-        Set<Group> accountGroups = account.getGroups();
-        accountGroups.remove(publicGroup);
-        return dao.sharedEntryCount(account, accountGroups);
-    }
-
-    public List<PartData> getEntriesSharedWithUser(String userId, ColumnField field, boolean asc, int start,
-                                                   int limit) {
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        GroupController groupController = new GroupController();
-        Group publicGroup = groupController.createOrRetrievePublicGroup();
-        Set<Group> accountGroups = account.getGroups();
-        accountGroups.remove(publicGroup);
-        List<Entry> entries = dao.sharedWithUserEntries(account, accountGroups, field, asc, start, limit);
-
-        ArrayList<PartData> data = new ArrayList<>();
-        for (Entry entry : entries) {
-            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
-            info.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
-            data.add(info);
-        }
-        return data;
-    }
-
-    public List<PartData> retrieveOwnerEntries(String userId, String ownerEmail,
-                                               ColumnField sort, boolean asc, int start, int limit) {
-        List<Entry> entries;
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-
-        if (authorization.isAdmin(userId) || account.getEmail().equals(ownerEmail)) {
-            entries = dao.retrieveOwnerEntries(ownerEmail, sort, asc, start, limit);
-        } else {
-            Set<Group> accountGroups = new HashSet<>(account.getGroups());
-            GroupController controller = new GroupController();
-            Group everybodyGroup = controller.createOrRetrievePublicGroup();
-            accountGroups.add(everybodyGroup);
-            // retrieve entries for user that can be read by others
-            entries = dao.retrieveUserEntries(account, ownerEmail, accountGroups, sort, asc, start, limit);
-        }
-
-        ArrayList<PartData> data = new ArrayList<>();
-        for (Entry entry : entries) {
-            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
-            info.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
-            data.add(info);
-        }
-        return data;
-    }
-
-    public long getNumberOfOwnerEntries(String requesterUserEmail, String ownerEmail) {
-        Account account = DAOFactory.getAccountDAO().getByEmail(requesterUserEmail);
-        if (authorization.isAdmin(requesterUserEmail) || account.getEmail().equals(ownerEmail)) {
-            return dao.ownerEntryCount(ownerEmail);
-        }
-
-        Set<Group> accountGroups = new HashSet<>(account.getGroups());
-        GroupController controller = new GroupController();
-        Group everybodyGroup = controller.createOrRetrievePublicGroup();
-        accountGroups.add(everybodyGroup);
-        return dao.ownerEntryCount(account, ownerEmail, accountGroups);
     }
 
     /**

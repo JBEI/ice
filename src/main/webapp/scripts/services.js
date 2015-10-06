@@ -698,8 +698,6 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
                 headers:{'X-ICE-Authentication-SessionId':$cookieStore.get("sessionId")}
             },
 
-            // get all counts (todo: instead of hard coding the folder types on the ui,
-            // have this method also return the names)
             query: {
                 method: 'GET',
                 responseType: "json",

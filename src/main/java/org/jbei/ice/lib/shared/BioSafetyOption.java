@@ -9,21 +9,15 @@ import org.jbei.ice.storage.IDataTransferModel;
  */
 public enum BioSafetyOption implements IDataTransferModel {
 
-    LEVEL_ONE("Level 1", "1"),
-    LEVEL_TWO("Level 2", "2");
+    LEVEL_ONE("1"),
+    LEVEL_TWO("2");
 
-    private String displayName;
     private String value;
 
-    BioSafetyOption(String name, String value) {
-        this.displayName = name;
+    BioSafetyOption(String value) {
         this.value = value;
     }
 
-    @Override
-    public String toString() {
-        return this.displayName;
-    }
 
     public String getValue() {
         return this.value;
@@ -47,7 +41,7 @@ public enum BioSafetyOption implements IDataTransferModel {
 
     public static Integer intValue(String value) {
         for (BioSafetyOption option : BioSafetyOption.values()) {
-            if (option.displayName.equalsIgnoreCase(value) || option.getValue().equals(value)) {
+            if (option.value.equalsIgnoreCase(value) || option.getValue().equals(value)) {
                 return Integer.valueOf(option.getValue());
             }
         }

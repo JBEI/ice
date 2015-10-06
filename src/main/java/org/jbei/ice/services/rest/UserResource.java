@@ -11,7 +11,7 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.user.UserPreferences;
-import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.OwnerEntries;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
@@ -149,14 +149,11 @@ public class UserResource extends RestResource {
                                            @DefaultValue("created") @QueryParam("sort") final String sort,
                                            @DefaultValue("false") @QueryParam("asc") final boolean asc) {
         final String userIdString = getUserId();
-        final EntryController entryController = new EntryController();
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
-
         final Account requestAccount = DAOFactory.getAccountDAO().get(userId);
-        final List<PartData> entries = entryController.retrieveOwnerEntries(userIdString,
-                requestAccount.getEmail(), field, asc, offset, limit);
-        final long count = entryController.getNumberOfOwnerEntries(userIdString,
-                requestAccount.getEmail());
+        OwnerEntries ownerEntries = new OwnerEntries(userIdString, requestAccount.getEmail());
+        final List<PartData> entries = ownerEntries.retrieveOwnerEntries(field, asc, offset, limit);
+        final long count = ownerEntries.getNumberOfOwnerEntries();
         final FolderDetails details = new FolderDetails();
         details.getEntries().addAll(entries);
         details.setCount(count);

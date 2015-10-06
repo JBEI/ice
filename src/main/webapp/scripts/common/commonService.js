@@ -4,6 +4,8 @@ angular.module('ice.common.service', [])
     .factory('Util', function ($rootScope, $location, $cookieStore, $resource) {
         return {
             handleError: function (response) {
+                console.error("error", response);
+
                 switch (response.status) {
                     case 401:
                         if ($location.path() != '/login') {
@@ -39,7 +41,12 @@ angular.module('ice.common.service', [])
                 }
 
                 queryParams.sid = $cookieStore.get("sessionId");
-                return $resource(url).get(queryParams, successHandler, this.handleError);
+                $resource(url, queryParams, {
+                    'get': {
+                        method: 'GET',
+                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
+                    }
+                }).get(successHandler, this.handleError);
             },
 
             // difference between this and get is "isArray"

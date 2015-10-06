@@ -204,7 +204,7 @@ public class ICESBOLParserVisitor extends SBOLBaseVisitor<RuntimeException> {
         URI typesURI = (URI) types.toArray()[0];
         if (typesURI != null && typesURI.getRawPath().contains("SO_")) {
             String[] s = typesURI.getRawPath().split("SO_");
-            if (s != null && s.length == 2) {
+            if (s.length == 2) {
                 return (IceSequenceOntology.getFeatureType("SO_" + s[1]));
             }
         }

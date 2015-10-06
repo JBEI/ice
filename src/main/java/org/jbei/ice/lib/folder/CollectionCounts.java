@@ -7,7 +7,7 @@ import org.jbei.ice.storage.IDataTransferModel;
  *
  * @author Hector Plahar
  */
-public class Collection implements IDataTransferModel {
+public class CollectionCounts implements IDataTransferModel {
 
     private long available;
     private long personal;

@@ -196,7 +196,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @return Number of visible entries.
      * @throws DAOException on hibernate exception
      */
-    @SuppressWarnings({"unchecked" })
+    @SuppressWarnings({"unchecked"})
     public Set<Entry> retrieveVisibleEntries(Account account, Set<Group> groups, ColumnField sortField, boolean asc,
                                              int start, int count) throws DAOException {
         try {
@@ -628,8 +628,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
             Criteria criteria = session.createCriteria(Permission.class);
             criteria.setProjection(Projections.property("entry"));
 
-            // expect everyone to at least belong to the everyone group so groups should never be empty
-            Junction disjunction = Restrictions.disjunction().add(Restrictions.in("group", accountGroups));
+            Junction disjunction = Restrictions.disjunction();
+            if (!accountGroups.isEmpty())
+                disjunction.add(Restrictions.in("group", accountGroups));
             disjunction.add(Restrictions.eq("account", requester));
 
             criteria.add(disjunction);
