@@ -61,7 +61,7 @@ angular.module('ice.admin.controller', [])
 
         var menuOption = $stateParams.option;
 
-        var menuOptions = $scope.profileMenuOptions = [
+        var menuOptions = $scope.adminMenuOptions = [
             {url: 'scripts/admin/settings.html', display: 'Settings', selected: true, icon: 'fa-cogs'},
             {
                 id: 'web',

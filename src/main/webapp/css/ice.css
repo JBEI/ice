@@ -739,7 +739,7 @@ a:hover {
 }
 
 .profile_menu {
-    color: #cecece;
+    color: #a7a7a7;
     cursor: pointer;
 }
 
@@ -748,12 +748,12 @@ a:hover {
     border-left: 0;
     font-weight: bold;
     background-color: #fff;
-    border-bottom: 1px solid #e5e5e5;
-    border-top: 1px solid #e5e5e5;
+    /*border-bottom: 1px solid #e5e5e5;*/
+    /*border-top: 1px solid #e5e5e5;*/
 }
 
 .profile_menu .font-awesome {
-    color: #777;
+    color: #f3f6fc;
 }
 
 .profile_menu td:hover {
@@ -761,9 +761,10 @@ a:hover {
 }
 
 .profile_menu td {
-    padding: 8px;
-    border-left: 1px solid #e5e5e5;
-    background-color: #efefef;
+    padding: 9px 7px;
+    border-top: 2px solid #fff;
+    /*border-left: 1px solid #e5e5e5;*/
+    background-color: #f9f9f9;
 }
 
 td.selected i.font-awesome {

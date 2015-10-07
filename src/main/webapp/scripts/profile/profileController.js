@@ -1,6 +1,17 @@
 'use strict';
 
 angular.module('ice.profile.controller', [])
+    .controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
+        var message = Message($cookieStore.get('sessionId'));
+        var profileId = $stateParams.id;
+        $location.path("profile/" + profileId + "/messages", false);
+        message.query(function (result) {
+            $scope.messages = result;
+        });
+    })
+    .controller('ApiKeysController', function ($scope) {
+
+    })
     .controller('ProfileEntryController', function ($scope, $location, $cookieStore, $stateParams, User, Entry) {
         var user = User($cookieStore.get("sessionId"));
         var profileId = $stateParams.id;
@@ -127,7 +138,7 @@ angular.module('ice.profile.controller', [])
             {
                 id: 'prefs',
                 url: 'scripts/profile/preferences.html',
-                display: 'Preferences',
+                display: 'Settings',
                 selected: false,
                 icon: 'fa-cog'
             },
@@ -152,6 +163,14 @@ angular.module('ice.profile.controller', [])
                 display: 'Entries',
                 selected: false,
                 icon: 'fa-th-list',
+                open: true
+            },
+            {
+                id: 'api-keys',
+                url: 'scripts/profile/api-keys.html',
+                display: 'API Keys',
+                selected: false,
+                icon: 'fa-key',
                 open: true
             }
         ];
