@@ -4,7 +4,7 @@ angular.module('ice.search.controller', [])
     .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil,
                                               Selection, WebOfRegistries) {
 
-        $scope.params = {'asc': false, 'sort': 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
+        $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
 
         $scope.$on("RunSearch", function (event, filters) {

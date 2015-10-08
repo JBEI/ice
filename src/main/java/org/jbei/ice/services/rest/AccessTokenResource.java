@@ -14,7 +14,7 @@ import javax.ws.rs.core.Response;
  *
  * @author Hector Plahar
  */
-@Path("/accesstoken")
+@Path("/accesstokens")
 public class AccessTokenResource extends RestResource {
 
     private final AccountController accountController = new AccountController();
@@ -23,8 +23,7 @@ public class AccessTokenResource extends RestResource {
      * Creates a new access token for the user referenced in the parameter, after the credentials
      * (username and password) are validated. If one already exists, it is invalidated
      *
-     * @param transfer
-     *            wraps username and password
+     * @param transfer wraps username and password
      * @return account information including a valid session id if credentials validate
      */
     @POST
@@ -54,8 +53,7 @@ public class AccessTokenResource extends RestResource {
     /**
      * Retrieve account information for user referenced by session id
      *
-     * @param sessionId
-     *            unique session identifier for logged in user
+     * @param sessionId unique session identifier for logged in user
      * @return account information for session if session is valid, null otherwise
      */
     @GET

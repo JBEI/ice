@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.entry.filter;
+package org.jbei.ice.storage.hibernate.filter;
 
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;

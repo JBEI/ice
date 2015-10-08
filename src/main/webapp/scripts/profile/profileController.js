@@ -9,8 +9,34 @@ angular.module('ice.profile.controller', [])
             $scope.messages = result;
         });
     })
-    .controller('ApiKeysController', function ($scope) {
+    .controller('ApiKeysController', function ($scope, $modal, Util) {
+        $scope.apiKeys = undefined;
 
+        // retrieve existing api keys for current user
+        $scope.retrieveKeys = function () {
+            Util.get("/rest/api-keys", function (result) {
+                $scope.apiKeys = result.data;
+            });
+        };
+
+        $scope.openApiKeyRequest = function () {
+            var modalInstance = $modal.open({
+                templateUrl: 'scripts/profile/modal/api-key-request.html',
+                controller: function ($scope, $modalInstance, Util) {
+
+                    $scope.cancel = function () {
+                        $modalInstance.dismiss('cancel');
+                    };
+
+                    $scope.generateToken = function () {
+                        var queryParams = {client_id: $scope.client};
+                        Util.post("/rest/api-keys", null, function (result) {
+                            console.log(result);
+                        }, queryParams);
+                    }
+                }
+            })
+        };
     })
     .controller('ProfileEntryController', function ($scope, $location, $cookieStore, $stateParams, User, Entry) {
         var user = User($cookieStore.get("sessionId"));
@@ -142,7 +168,13 @@ angular.module('ice.profile.controller', [])
                 selected: false,
                 icon: 'fa-cog'
             },
-            {id: 'groups', url: 'scripts/profile/groups.html', display: 'Groups', selected: false, icon: 'fa-group'},
+            {
+                id: 'groups',
+                url: 'scripts/profile/groups.html',
+                display: 'Private Groups',
+                selected: false,
+                icon: 'fa-group'
+            },
             {
                 id: 'messages',
                 url: 'scripts/profile/messages.html',

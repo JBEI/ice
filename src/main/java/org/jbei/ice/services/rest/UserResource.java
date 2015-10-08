@@ -41,12 +41,6 @@ public class UserResource extends RestResource {
     /**
      * Retrieves list of users that are available to user making request. Availability is defined by
      * being in the same group if the user does not have admin privileges.
-     *
-     * @param offset
-     * @param limit
-     * @param sort
-     * @param asc
-     * @return wrapper around list of users
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -82,8 +76,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param userId
      * @return account information for transfer
      */
     @GET
@@ -104,8 +96,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param userId
      * @return group listing for a user
      */
     @GET
@@ -118,8 +108,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param userId
-     * @param userGroup
      * @return created group
      */
     @PUT
@@ -131,12 +119,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param userId
-     * @param offset
-     * @param limit
-     * @param sort
-     * @param asc
      * @return collection for user's part entries
      */
     @GET
@@ -161,8 +143,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param userId
      * @return preferences for a user
      */
     @GET
@@ -176,9 +156,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param userId
-     * @param key
-     * @param value
      * @return updated preferences for a user
      */
     @POST
@@ -192,9 +169,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param userId
-     * @param transfer
      * @return updated user information
      */
     @POST
@@ -208,8 +182,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param transfer
      * @return Response for success or failure
      */
     @POST
@@ -225,7 +197,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param transfer
      * @return updated user information
      */
     @PUT
@@ -238,7 +209,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param accountTransfer
      * @return Response with created user information
      */
     @PUT
@@ -250,13 +220,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param userId
-     * @param offset
-     * @param limit
-     * @param sort
-     * @param asc
-     * @param uid
-     * @param status
      * @return Response with user's samples
      */
     @GET

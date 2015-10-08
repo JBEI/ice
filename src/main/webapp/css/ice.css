@@ -12,7 +12,7 @@ button::-moz-focus-inner {
 }
 
 #body {
-    padding-bottom: 89px; /*Height of the footer*/
+    padding-bottom: 60px; /*Height of the footer*/
 }
 
 html, body {
@@ -600,10 +600,10 @@ a:hover {
 }
 
 .ice-button {
-    background-color: #f4f4f4;
+    background-color: #f9f9f9;
     border: 1px solid #CCC;
     padding: 5px 7px;
-    color: #666;
+    color: #444;
     font-family: Arial, serif;
     font-size: 0.80em;
     box-shadow: 0 0 1px 0 #ddd;

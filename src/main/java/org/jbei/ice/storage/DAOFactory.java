@@ -30,6 +30,7 @@ public class DAOFactory {
     private static RemotePermissionDAO remotePermissionDAO;
     private static ExperimentDAO experimentDAO;
     private static ParameterDAO parameterDAO;
+    private static ApiKeyDAO apiKeyDAO;
 
     public static AccountDAO getAccountDAO() {
         if (accountDAO == null)
@@ -168,5 +169,11 @@ public class DAOFactory {
         if (parameterDAO == null)
             parameterDAO = new ParameterDAO();
         return parameterDAO;
+    }
+
+    public static ApiKeyDAO getApiKeyDAO() {
+        if (apiKeyDAO == null)
+            apiKeyDAO = new ApiKeyDAO();
+        return apiKeyDAO;
     }
 }

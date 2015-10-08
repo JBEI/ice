@@ -139,6 +139,7 @@ public class SequenceController {
 
 //        sequence = update(userId, sequence);
         sequence = save(userId, sequence);
+        ApplicationController.scheduleBlastIndexRebuildTask(true);
 
         if (sequence != null)
             return sequenceToDNASequence(sequence);
@@ -181,18 +182,6 @@ public class SequenceController {
 
         ApplicationController.scheduleBlastIndexRebuildTask(true);
         return result;
-    }
-
-    /**
-     * Delete the {@link Sequence} in the database, then rebuild the search index.
-     *
-     * @param sequence
-     */
-    public void delete(Account account, Sequence sequence) {
-        authorization.expectWrite(account.getEmail(), sequence.getEntry());
-        String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-        dao.deleteSequence(sequence, tmpDir);
-        ApplicationController.scheduleBlastIndexRebuildTask(true);
     }
 
     public boolean deleteSequence(String requester, long partId) {

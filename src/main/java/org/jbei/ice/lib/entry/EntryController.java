@@ -2,7 +2,6 @@ package org.jbei.ice.lib.entry;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
@@ -94,7 +93,6 @@ public class EntryController {
         }
 
         authorization.expectWrite(userId, entry);
-        boolean scheduleRebuild = sequenceDAO.hasSequence(entry.getId());
 
         entry.setModificationTime(Calendar.getInstance().getTime());
         if (entry.getVisibility() == null)
@@ -114,10 +112,6 @@ public class EntryController {
                 accessPermission.setTypeId(entry.getId());
                 permissionsController.addPermission(userId, accessPermission);
             }
-        }
-
-        if (scheduleRebuild) {
-            ApplicationController.scheduleBlastIndexRebuildTask(true);
         }
     }
 

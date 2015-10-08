@@ -10,13 +10,15 @@
                 <i ng-show="params.sort=='type'" style="font-size: 14px;" class="fa opacity_4"
                    ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
             </th>
-            <th ng-click="sort('part_id')" class="cursor_pointer" style="font-size: 12px; text-transform: uppercase">
+            <th ng-click="sort('part_id')" class="cursor_pointer"
+                style="font-size: 12px; text-transform: uppercase">
                 <span style="font-size: 12px; text-transform: uppercase">Part ID</span>
                 <i ng-if="params.sort!=='part_id'" class="sortable fa fa-angle-down"></i>
                 <i ng-show="params.sort=='part_id'" style="font-size: 14px" class="fa opacity_4"
                    ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
             </th>
-            <th data-ng-click="sort('name')" class="cursor_pointer" style="font-size: 12px; text-transform: uppercase">
+            <th data-ng-click="sort('name')" class="cursor_pointer"
+                style="font-size: 12px; text-transform: uppercase">
                 <span style="font-size: 12px; text-transform: uppercase">Name</span>
                 <i ng-if="params.sort!=='name'" class="sortable fa fa-angle-down"></i>
                 <i ng-show="params.sort=='name'" style="font-size: 14px" class="fa opacity_4"

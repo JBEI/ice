@@ -60,14 +60,27 @@ angular.module('ice.common.service', [])
                 }
 
                 queryParams.sid = $cookieStore.get("sessionId");
-                return $resource(url).query(queryParams, successHandler, this.handleError);
+                $resource(url, queryParams, {
+                    'list': {
+                        method: 'GET',
+                        isArray: true,
+                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
+                    }
+                }).list(successHandler, this.handleError);
             },
 
             post: function (url, obj, successHandler, params) {
                 if (!params)
                     params = {};
                 params.sid = $cookieStore.get("sessionId");
-                $resource(url, params).save(obj, successHandler, this.handleError);
+                $resource(url, params, {
+                    'post': {
+                        method: 'POST',
+                        headers: {'X-ICE-Authentication-SessionId': params.sid}
+                    }
+                }).post(obj, successHandler, this.handleError);
+
+                //$resource(url, params).save(obj, successHandler, this.handleError);
             },
 
             update: function (url, obj, params, successHandler) {

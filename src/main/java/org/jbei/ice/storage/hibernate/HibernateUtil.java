@@ -115,6 +115,7 @@ public class HibernateUtil {
             configuration.addAnnotatedClass(org.jbei.ice.storage.model.Experiment.class);
             configuration.addAnnotatedClass(org.jbei.ice.storage.model.ShotgunSequence.class);
             configuration.addAnnotatedClass(org.jbei.ice.storage.model.Configuration.class);
+            configuration.addAnnotatedClass(org.jbei.ice.storage.model.ApiKey.class);
 
             sessionFactory = configuration.buildSessionFactory(serviceRegistry);
         }

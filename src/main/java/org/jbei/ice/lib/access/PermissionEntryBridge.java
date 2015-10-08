@@ -7,7 +7,7 @@ import org.jbei.ice.storage.model.Permission;
 
 /**
  * Permission bridge that indexes the fields needed by the
- * {@link org.jbei.ice.lib.entry.filter.EntrySecurityFilterFactory}
+ * {@link org.jbei.ice.storage.hibernate.filter.EntrySecurityFilterFactory}
  *
  * @author Hector Plahar
  */

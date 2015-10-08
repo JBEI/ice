@@ -32,8 +32,7 @@ public enum BioSafetyOption implements IDataTransferModel {
             return false;
 
         for (BioSafetyOption option : BioSafetyOption.values()) {
-            Integer intValue = intValue(option.toString());
-            if (intValue != null && integer.intValue() == intValue)
+            if (option.getIntValue() == integer)
                 return true;
         }
         return false;

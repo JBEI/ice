@@ -782,7 +782,7 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
 
 iceServices.factory('AccessToken', function ($resource) {
     return function () {
-        return $resource('rest/accesstoken', {}, {
+        return $resource('rest/accesstokens', {}, {
             createToken:{
                 method:'POST',
                 responseType:'json'
@@ -828,7 +828,7 @@ iceServices.factory('Authentication',
                     return;
                 }
 
-                return $http.get('rest/accesstoken',
+                return $http.get('rest/accesstokens',
                     {headers:{'X-ICE-Authentication-SessionId':sid}})
                     .success(function (data) {
                         if (data.sessionId === undefined) {
@@ -866,7 +866,7 @@ iceServices.factory('Authentication',
             // logs out user by invalidating the session id
             logout: function () {
                 var sid = $cookieStore.get("sessionId");
-                return $http.delete('rest/accesstoken', {headers:{'X-ICE-Authentication-SessionId':sid}}).
+                return $http.delete('rest/accesstokens', {headers: {'X-ICE-Authentication-SessionId': sid}}).
                     success(function () {
                         $rootScope.user = undefined;
                         $cookieStore.remove('userId');

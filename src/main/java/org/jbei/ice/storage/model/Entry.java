@@ -9,10 +9,10 @@ import org.hibernate.search.annotations.Index;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.entry.filter.EntryHasFilterFactory;
-import org.jbei.ice.lib.entry.filter.EntrySecurityFilterFactory;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.ModelToInfoFactory;
+import org.jbei.ice.storage.hibernate.filter.EntryHasFilterFactory;
+import org.jbei.ice.storage.hibernate.filter.EntrySecurityFilterFactory;
 
 import javax.persistence.*;
 import java.util.*;
