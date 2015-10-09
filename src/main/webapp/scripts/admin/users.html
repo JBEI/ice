@@ -66,22 +66,16 @@
         </form>
     </div>
     <div class="pad_top">
-        <table cellspacing="0" class="table table-hover table-border-bottom" ng-class="{'opacity_4':loadingPage}">
+        <table cellspacing="0" class="table table-con table-hover table-border-bottom"
+               ng-class="{'opacity_4':loadingPage}">
             <thead>
-            <tr data-ng-show='!userList'>
-                <td colspan="10">Loading...</td>
-            </tr>
-
-            <tr data-ng-if='userList && userList.users.length > 0'>
-                <td>&nbsp;</td>
-                <td><b>Name</b></td>
-                <td><b>AccountType</b></td>
-                <td><b># Entries</b></td>
-                <td><b>Registered</b></td>
-                <td><b>Last Login</b></td>
-            </tr>
-            <tr data-ng-show=" userList.users.length == 0">
-                <td colspan="10">No user accounts available</td>
+            <tr>
+                <th>&nbsp;</th>
+                <th>Name</th>
+                <th>AccountType</th>
+                <th># Entries</th>
+                <th>Registered</th>
+                <th>Last Login</th>
             </tr>
             </thead>
             <tbody>
