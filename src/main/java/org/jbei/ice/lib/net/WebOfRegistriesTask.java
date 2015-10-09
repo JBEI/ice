@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Task to to enable or disable web of registries by contacting a master node to obtain a (curated) list
- * of other ICE instances. The task then contacts each in turn to exchange tokens
+ * Task to enable or disable web of registries by contacting a master node to obtain a (potentially curated) list
+ * of other ICE instances. This task then contacts each ICE instance in turn, to exchange access tokens
  *
  * @author Hector Plahar
  */
@@ -34,6 +34,11 @@ public class WebOfRegistriesTask extends Task {
 
     @Override
     public void execute() {
+        if (this.myUrl.startsWith("localhost") || this.myUrl.startsWith("127.0.0.1")) {
+            Logger.warn("Local instance detected. Aborting run of web of registries task");
+            return;
+        }
+
         final String NODE_MASTER = Utils.getConfigValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER);
         if (NODE_MASTER.equalsIgnoreCase(this.myUrl) || StringUtils.isEmpty(NODE_MASTER)) {
             return;
