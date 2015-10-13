@@ -9,7 +9,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
-import org.jbei.ice.lib.account.SessionHandler;
+import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
@@ -106,7 +106,7 @@ public class PartResource extends RestResource {
     public Response read(@Context final UriInfo info,
                          @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
                          @PathParam("id") final String id) {
-        String userId = SessionHandler.getUserIdBySession(sessionId);
+        String userId = UserSessions.getUserIdBySession(sessionId);
         try {
             log(userId, "retrieving details for " + id);
             final EntryType type = EntryType.nameToType(id);
