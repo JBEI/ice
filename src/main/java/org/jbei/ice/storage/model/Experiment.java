@@ -31,6 +31,9 @@ public class Experiment implements DataModel {
     @Column(name = "url", length = 512)
     private String url;
 
+    @Column(name = "owner_email", length = 512)
+    private String ownerEmail;
+
     @Column(name = "creation_time")
     private Date creationTime;
 
@@ -76,11 +79,20 @@ public class Experiment implements DataModel {
         this.subjects = subjects;
     }
 
+    public String getOwnerEmail() {
+        return ownerEmail;
+    }
+
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
+    }
+
     public Study toDataTransferObject() {
         Study study = new Study();
         study.setId(id);
         study.setCreated(creationTime.getTime());
         study.setLabel(label);
+        study.setOwnerEmail(this.ownerEmail);
         study.setUrl(url);
         return study;
     }

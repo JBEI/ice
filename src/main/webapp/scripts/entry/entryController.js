@@ -136,7 +136,7 @@ angular.module('ice.entry.controller', [])
         }, function (result) {
             $scope.shotgunSequences = result;
         });
-        
+
         $scope.downloadShotgunFile = function (sequence) {
             $window.open("rest/file/shotgunsequence/" + sequence.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
         };
@@ -219,7 +219,7 @@ angular.module('ice.entry.controller', [])
             $window.open("rest/file/trace/" + trace.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
         };
     })
-    .controller('EntryExperimentController', function ($scope, $cookieStore, $stateParams, Entry) {
+    .controller('EntryExperimentController', function ($scope, $cookieStore, $stateParams, Entry, Util) {
         var entryId = $stateParams.id;
         var entry = Entry($cookieStore.get("sessionId"));
         $scope.experiment = {};
@@ -250,6 +250,15 @@ angular.module('ice.entry.controller', [])
                 console.error("experiment create error", error);
             });
         };
+
+        $scope.deleteStudy = function (study) {
+            Util.remove("/rest/parts/" + entryId + "/experiments/" + study.id, function (result) {
+                var idx = $scope.entryExperiments.indexOf(study);
+                if (idx >= 0) {
+                    $scope.entryExperiments.splice(idx, 1);
+                }
+            });
+        }
     })
     .controller('PartHistoryController', function ($scope, $window, $cookieStore, $stateParams, Entry) {
         var entryId = $stateParams.id;

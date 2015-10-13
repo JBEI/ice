@@ -23,7 +23,7 @@ import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.experiment.ExperimentController;
+import org.jbei.ice.lib.experiment.Experiments;
 import org.jbei.ice.lib.experiment.Study;
 import org.jbei.ice.lib.net.TransferredParts;
 import org.jbei.ice.lib.utils.Utils;
@@ -59,7 +59,7 @@ public class PartResource extends RestResource {
     private PermissionsController permissionsController = new PermissionsController();
     private AttachmentController attachmentController = new AttachmentController();
     private SequenceController sequenceController = new SequenceController();
-    private ExperimentController experimentController = new ExperimentController();
+    private Experiments experiments = new Experiments();
     private SampleService sampleService = new SampleService();
 
     /**
@@ -171,9 +171,11 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/experiments")
-    public Response getPartExperiments(@PathParam("id") final long partId) {
-        final String userId = getUserId();
-        final List<Study> studies = experimentController.getPartStudies(userId, partId);
+    public Response getPartExperiments(
+            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
+            @PathParam("id") final long partId) {
+        final String userId = getUserId(sessionId);
+        final List<Study> studies = experiments.getPartStudies(userId, partId);
         if (studies == null) {
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
@@ -188,10 +190,23 @@ public class PartResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/experiments")
-    public Response getPartExperiments(@PathParam("id") final long partId, final Study study) {
-        final String userId = getUserId();
-        final Study created = experimentController.createStudy(userId, partId, study);
+    public Response createPartExperiment(
+            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
+            @PathParam("id") final long partId,
+            final Study study) {
+        final String userId = getUserId(sessionId);
+        final Study created = experiments.createStudy(userId, partId, study);
         return respond(Response.Status.OK, created);
+    }
+
+    @DELETE
+    @Path("/{id}/experiments/{eid}")
+    public Response deletePartExperiment(
+            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
+            @PathParam("id") final long partId,
+            @PathParam("eid") final long experimentId) {
+        String userId = getUserId(sessionId);
+        return super.respond(experiments.deleteStudy(userId, partId, experimentId));
     }
 
     /**
@@ -406,10 +421,10 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/traces")
     public ArrayList<TraceSequenceAnalysis> getTraces(
-                                        @Context final UriInfo info,
-                                        @PathParam("id") final long partId,
-                                        @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-                                        @QueryParam("sid") final String sid) {
+            @Context final UriInfo info,
+            @PathParam("id") final long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            @QueryParam("sid") final String sid) {
         String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
         final String userId = getUserId(sessionId);
         return controller.getTraceSequences(userId, partId);
@@ -430,7 +445,7 @@ public class PartResource extends RestResource {
         final EntryDAO entryDAO = DAOFactory.getEntryDAO();
         final Entry entry = entryDAO.get(partId);
 
-        if (entry == null){
+        if (entry == null) {
             return null;
         }
 
@@ -440,7 +455,7 @@ public class PartResource extends RestResource {
         ArrayList<ShotgunSequenceDTO> returns = new ArrayList<ShotgunSequenceDTO>();
         List<ShotgunSequence> results = dao.getByEntry(entry, userId);
 
-        for (ShotgunSequence ret : results){
+        for (ShotgunSequence ret : results) {
             returns.add(new ShotgunSequenceDTO(ret));
         }
 
@@ -475,10 +490,10 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/shotgunsequences")
     public Response addShotgunSequence(@PathParam("id") final long partId,
-                                     @FormDataParam("file") final InputStream fileInputStream,
-                                     @FormDataParam("file") final FormDataContentDisposition contentDispositionHeader,
-                                     @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-                                     @QueryParam("sid") final String sid) {
+                                       @FormDataParam("file") final InputStream fileInputStream,
+                                       @FormDataParam("file") final FormDataContentDisposition contentDispositionHeader,
+                                       @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+                                       @QueryParam("sid") final String sid) {
         String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
         final String userId = getUserId(sessionId);
         final String fileName = contentDispositionHeader.getFileName();
@@ -490,7 +505,7 @@ public class PartResource extends RestResource {
             String storageName = Utils.generateUUID();
             dao.writeSequenceFileToDisk(storageName, fileInputStream);
             dao.create(fileName, userId, entry, storageName, new Date());
-        }catch(Exception e){
+        } catch (Exception e) {
             Logger.error(e);
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
@@ -498,6 +513,7 @@ public class PartResource extends RestResource {
         Logger.info("Uploaded shotgun sequence for entry " + entry.getId());
         return respond(Response.Status.OK);
     }
+
     @DELETE
     @Path("/{id}/traces/{traceId}")
     public Response deleteTrace(@Context final UriInfo info,

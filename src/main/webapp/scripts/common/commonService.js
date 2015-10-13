@@ -104,12 +104,12 @@ angular.module('ice.common.service', [])
                     }
                 }
 
-                $resource(url, {
+                $resource(url, {}, {
                     'delete': {
                         method: 'DELETE',
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
                     }
-                }).remove(successHandler, this.handleError)
+                }).delete(successHandler, this.handleError)
             }
         }
     });
