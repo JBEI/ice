@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.utils;
 
-import org.jbei.ice.lib.entry.model.Part;
+import org.jbei.ice.storage.model.Part;
 
 /**
  * Abstract class for assembling standardized format DNA.

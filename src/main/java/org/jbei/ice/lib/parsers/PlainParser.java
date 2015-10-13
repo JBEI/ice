@@ -4,7 +4,7 @@ import org.biojava.bio.BioException;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.symbol.SimpleSymbolList;
 import org.biojava.bio.symbol.SymbolList;
-import org.jbei.ice.lib.vo.DNASequence;
+import org.jbei.ice.lib.dto.DNASequence;
 
 /**
  * Parser to handle file with simply nucleotide sequences. Technically these files are not FASTA

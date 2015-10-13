@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.dto.sample;
 
-import java.util.ArrayList;
+import org.jbei.ice.storage.IDataTransferModel;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import java.util.ArrayList;
 
 /**
  * Wrapper around user sample requests to include information such as the total count

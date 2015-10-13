@@ -2,7 +2,8 @@
 
 angular.module('ice.collection.controller', [])
     // controller for <ice.menu.collections> directive
-    .controller('CollectionMenuController', function ($cookieStore, $scope, $modal, $rootScope, $location, $stateParams, Folders, FolderSelection, EntryContextUtil) {
+    .controller('CollectionMenuController', function ($cookieStore, $scope, $modal, $rootScope, $location, $stateParams,
+                                                      Folders, FolderSelection, EntryContextUtil, Util) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
 
@@ -30,9 +31,9 @@ angular.module('ice.collection.controller', [])
                 });
         }
 
-        // retrieve folder counts
-        var updateCounts = function () {
-            folders.query(function (result) {
+        // updates the numbers for the collections
+        $scope.updateCollectionCounts = function () {
+            Util.get("/rest/collections/stats", function (result) {
                 if (result === undefined || $scope.collectionList === undefined)
                     return;
 
@@ -42,7 +43,6 @@ angular.module('ice.collection.controller', [])
                 }
             });
         };
-        updateCounts();
 
         //
         // end initialize
@@ -50,7 +50,7 @@ angular.module('ice.collection.controller', [])
 
         // Menu count change handler
         $scope.$on("UpdateCollectionCounts", function (event) {
-            updateCounts();
+            $scope.updateCollectionCounts();
         });
 
         // updates the counts for personal collection to indicate items removed/added
@@ -209,8 +209,6 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.hStepChanged = function () {
-            console.log($scope.params);
-
             folders.folder($scope.params, function (result) {
                 $scope.folder = result;
                 if (result.canEdit)

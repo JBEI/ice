@@ -1,12 +1,12 @@
 package org.jbei.ice.lib.parsers;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
+import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.parsers.fasta.FastaParser;
 import org.jbei.ice.lib.parsers.genbank.IceGenbankParser;
 import org.jbei.ice.lib.parsers.sbol.SBOLParser;
-import org.jbei.ice.lib.vo.DNASequence;
+
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Helper class to set up a list of parsers to iterate over, to try to parse the input file.

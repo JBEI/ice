@@ -1,13 +1,13 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.storage.IDataTransferModel;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Data model for bulk upload auto updates

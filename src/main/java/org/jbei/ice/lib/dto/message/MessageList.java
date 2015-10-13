@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.dto.message;
 
-import java.util.ArrayList;
+import org.jbei.ice.storage.IDataTransferModel;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import java.util.ArrayList;
 
 /**
  * Wrapper around a list of messages that also contains information about start and count

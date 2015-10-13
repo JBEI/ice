@@ -1,10 +1,9 @@
 package org.jbei.ice.lib.account.authentication;
 
 import org.jbei.ice.lib.account.AccountUtils;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Account;
 
 /**
  * Default ICE authentication scheme
@@ -12,6 +11,8 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
  * @author Hector Plahar
  */
 public class LocalAuthentication implements IAuthentication {
+
+    private static final String DEPRECATED_SECRET_KEY = "o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+";
 
     public LocalAuthentication() {
     }
@@ -46,8 +47,7 @@ public class LocalAuthentication implements IAuthentication {
             return valid;
 
         // invalid check for deprecated salt using older encryption scheme
-        String salt = ConfigurationKey.SECRET_KEY.getDefaultValue();
-        valid = account.getPassword().equals(AccountUtils.encryptPassword(password, salt));
+        valid = account.getPassword().equals(AccountUtils.encryptPassword(password, DEPRECATED_SECRET_KEY));
         if (!valid) {
             // check old encryption scheme using user salt
             valid = account.getPassword().equals(AccountUtils.encryptPassword(password, account.getSalt()));

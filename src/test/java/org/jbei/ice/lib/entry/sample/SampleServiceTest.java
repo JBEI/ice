@@ -2,13 +2,13 @@ package org.jbei.ice.lib.entry.sample;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.TestEntryCreator;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.sample.SampleType;
-import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Strain;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

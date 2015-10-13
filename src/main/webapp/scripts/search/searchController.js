@@ -4,7 +4,7 @@ angular.module('ice.search.controller', [])
     .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil,
                                               Selection, WebOfRegistries) {
 
-        $scope.params = {'asc': false, 'sort': 'created', currentPage: 1};
+        $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
 
         $scope.$on("RunSearch", function (event, filters) {
@@ -31,7 +31,7 @@ angular.module('ice.search.controller', [])
         };
 
         $scope.searchResultPageChanged = function () {
-            $scope.searchFilters.parameters.start = ($scope.params.currentPage - 1) * 15;
+            $scope.searchFilters.parameters.start = ($scope.params.currentPage - 1) * $scope.params.limit;
             runAdvancedSearch($scope.searchFilters);
         };
 
@@ -48,11 +48,11 @@ angular.module('ice.search.controller', [])
 
         var context = EntryContextUtil.getContext();
         if (context) {
-            $scope.params.currentPage = (Math.floor(context.offset / 15)) + 1;
+            $scope.params.currentPage = (Math.floor(context.offset / $scope.params.limit)) + 1;
             $scope.searchResultPageChanged();
         } else {
             $scope.searchFilters.parameters.start = 0;
-            $scope.searchFilters.parameters.retrieveCount = 15;
+            $scope.searchFilters.parameters.retrieveCount = $scope.params.limit;
             $scope.searchFilters.parameters.sortField = "RELEVANCE";
             $scope.params.currentPage = 1;
             runAdvancedSearch($scope.searchFilters);
@@ -100,7 +100,7 @@ angular.module('ice.search.controller', [])
                 $scope.searchFilters.parameters = {start: index}
             }
 
-            var offset = (($scope.params.currentPage - 1) * 15) + index;
+            var offset = (($scope.params.currentPage - 1) * $scope.params.limit) + index;
             EntryContextUtil.setContextCallback(function (offset, callback) {
                 $scope.searchFilters.parameters.start = offset;
                 $scope.searchFilters.parameters.retrieveCount = 1;
@@ -124,7 +124,12 @@ angular.module('ice.search.controller', [])
 
         $scope.searchEntrySelected = function (entry) {
             return Selection.searchEntrySelected(entry);
-        }
+        };
+
+        $scope.hStepChanged = function () {
+            $scope.params.currentPage = 1;
+            runAdvancedSearch($scope.params);
+        };
     })
     .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location, Search) {
         $scope.searchTypes = {all: true, strain: true, plasmid: true, part: true, arabidopsis: true};
@@ -144,7 +149,7 @@ angular.module('ice.search.controller', [])
         var defineQuery = function () {
             var searchQuery = {
                 entryTypes: [],
-                parameters: {start: 0, retrieveCount: 15, sortField: "RELEVANCE"},
+                parameters: {start: 0, retrieveCount: 30, sortField: "RELEVANCE"},
                 blastQuery: {}
             };
 

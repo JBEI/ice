@@ -1,6 +1,43 @@
 'use strict';
 
 angular.module('ice.profile.controller', [])
+    .controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
+        var message = Message($cookieStore.get('sessionId'));
+        var profileId = $stateParams.id;
+        $location.path("profile/" + profileId + "/messages", false);
+        message.query(function (result) {
+            $scope.messages = result;
+        });
+    })
+    .controller('ApiKeysController', function ($scope, $modal, Util) {
+        $scope.apiKeys = undefined;
+
+        // retrieve existing api keys for current user
+        $scope.retrieveKeys = function () {
+            Util.get("/rest/api-keys", function (result) {
+                $scope.apiKeys = result.data;
+            });
+        };
+
+        $scope.openApiKeyRequest = function () {
+            var modalInstance = $modal.open({
+                templateUrl: 'scripts/profile/modal/api-key-request.html',
+                controller: function ($scope, $modalInstance, Util) {
+
+                    $scope.cancel = function () {
+                        $modalInstance.dismiss('cancel');
+                    };
+
+                    $scope.generateToken = function () {
+                        var queryParams = {client_id: $scope.client};
+                        Util.post("/rest/api-keys", null, function (result) {
+                            console.log(result);
+                        }, queryParams);
+                    }
+                }
+            })
+        };
+    })
     .controller('ProfileEntryController', function ($scope, $location, $cookieStore, $stateParams, User, Entry) {
         var user = User($cookieStore.get("sessionId"));
         var profileId = $stateParams.id;
@@ -127,11 +164,17 @@ angular.module('ice.profile.controller', [])
             {
                 id: 'prefs',
                 url: 'scripts/profile/preferences.html',
-                display: 'Preferences',
+                display: 'Settings',
                 selected: false,
                 icon: 'fa-cog'
             },
-            {id: 'groups', url: 'scripts/profile/groups.html', display: 'Groups', selected: false, icon: 'fa-group'},
+            {
+                id: 'groups',
+                url: 'scripts/profile/groups.html',
+                display: 'Private Groups',
+                selected: false,
+                icon: 'fa-group'
+            },
             {
                 id: 'messages',
                 url: 'scripts/profile/messages.html',
@@ -152,6 +195,14 @@ angular.module('ice.profile.controller', [])
                 display: 'Entries',
                 selected: false,
                 icon: 'fa-th-list',
+                open: true
+            },
+            {
+                id: 'api-keys',
+                url: 'scripts/profile/api-keys.html',
+                display: 'API Keys',
+                selected: false,
+                icon: 'fa-key',
                 open: true
             }
         ];

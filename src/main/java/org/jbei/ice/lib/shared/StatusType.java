@@ -11,9 +11,6 @@ public enum StatusType {
 
     private String displayName;
 
-    private StatusType() {
-    }
-
     StatusType(String name) {
         this.displayName = name;
     }

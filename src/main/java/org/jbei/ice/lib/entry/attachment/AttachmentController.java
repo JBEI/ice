@@ -2,17 +2,18 @@ package org.jbei.ice.lib.entry.attachment;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.AttachmentDAO;
-import org.jbei.ice.lib.dao.hibernate.EntryDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.EntryAuthorization;
-import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.servlet.ModelToInfoFactory;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.ModelToInfoFactory;
+import org.jbei.ice.storage.hibernate.dao.AttachmentDAO;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Attachment;
+import org.jbei.ice.storage.model.Entry;
 
 import java.io.File;
 import java.io.InputStream;

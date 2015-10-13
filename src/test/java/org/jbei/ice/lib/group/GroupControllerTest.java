@@ -1,19 +1,15 @@
 package org.jbei.ice.lib.group;
 
-import java.util.Set;
-
 import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.dto.group.UserGroup;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Group;
+import org.junit.*;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import java.util.Set;
 
 /**
  * @author Hector Plahar

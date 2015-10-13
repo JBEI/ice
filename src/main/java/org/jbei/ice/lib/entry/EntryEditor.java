@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.entry;
 
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.hibernate.EntryDAO;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Strain;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.Strain;
 
 /**
  * @author Hector Plahar

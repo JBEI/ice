@@ -1,14 +1,14 @@
 package org.jbei.ice.lib.entry;
 
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.EntryDAO;
-import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
 import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.Group;
 
 import java.util.List;
 import java.util.Set;

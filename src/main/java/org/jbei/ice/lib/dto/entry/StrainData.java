@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.dto.entry;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 public class StrainData implements IDataTransferModel {
 

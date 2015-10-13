@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.dto.entry;
 
-import java.util.ArrayList;
+import org.jbei.ice.storage.IDataTransferModel;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import java.util.ArrayList;
 
 /**
  * General information for part data

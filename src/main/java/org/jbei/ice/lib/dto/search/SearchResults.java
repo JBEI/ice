@@ -1,11 +1,11 @@
 package org.jbei.ice.lib.dto.search;
 
+import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.storage.IDataTransferModel;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
-
-import org.jbei.ice.lib.dao.IDataTransferModel;
-import org.jbei.ice.lib.shared.ColumnField;
 
 /**
  * Wrapper around a list of search results which also contains information about the search.

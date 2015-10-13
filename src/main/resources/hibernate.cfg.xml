@@ -19,22 +19,23 @@
         <property name="hibernate.c3p0.acquireRetryDelay">30000</property>
 
         <!-- Enables Hibernate's automatic session context management -->
-        <property name="current_session_context_class">org.hibernate.context.internal.ThreadLocalSessionContext
+        <property name="hibernate.current_session_context_class">
+            org.hibernate.context.internal.ThreadLocalSessionContext
         </property>
 
         <!-- Disable the second-level cache  -->
-        <property name="cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</property>
+        <property name="hibernate.cache.provider_class">org.hibernate.cache.internal.NoCachingRegionFactory</property>
 
         <!-- Echo all executed SQL to stdout -->
-        <property name="show_sql">false</property>
+        <property name="hibernate.show_sql">false</property>
 
         <property name="hibernate.jdbc.batch_size">20</property>
 
         <!-- format -->
-        <property name="format_sql">true</property>
+        <property name="hibernate.format_sql">true</property>
 
         <!-- Drop and re-create the database schema on startup (normally it should be validate) -->
-        <property name="hbm2ddl.auto">update</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
 
         <!-- hibernate search -->
         <!-- use org.hibernate.search.store.RAMDirectoryProvider for testing -->
@@ -42,39 +43,5 @@
             org.hibernate.search.store.impl.FSDirectoryProvider
         </property>
 
-        <!-- mapping files -->
-        <mapping class="org.jbei.ice.lib.entry.model.Entry"/>
-        <mapping class="org.jbei.ice.lib.entry.model.Plasmid"/>
-        <mapping class="org.jbei.ice.lib.entry.model.Strain"/>
-        <mapping class="org.jbei.ice.lib.entry.model.Part"/>
-        <mapping class="org.jbei.ice.lib.entry.model.ArabidopsisSeed"/>
-        <mapping class="org.jbei.ice.lib.entry.model.Link"/>
-        <mapping class="org.jbei.ice.lib.models.SelectionMarker"/>
-        <mapping class="org.jbei.ice.lib.models.Sequence"/>
-        <mapping class="org.jbei.ice.lib.models.Feature"/>
-        <mapping class="org.jbei.ice.lib.models.SequenceFeature"/>
-        <mapping class="org.jbei.ice.lib.models.SequenceFeatureAttribute"/>
-        <mapping class="org.jbei.ice.lib.models.Comment"/>
-        <mapping class="org.jbei.ice.lib.account.model.Account"/>
-        <mapping class="org.jbei.ice.lib.entry.attachment.Attachment"/>
-        <mapping class="org.jbei.ice.lib.entry.sample.model.Sample"/>
-        <mapping class="org.jbei.ice.lib.account.model.AccountPreferences"/>
-        <mapping class="org.jbei.ice.lib.group.Group"/>
-        <mapping class="org.jbei.ice.lib.models.TraceSequence"/>
-        <mapping class="org.jbei.ice.lib.models.TraceSequenceAlignment"/>
-        <mapping class="org.jbei.ice.lib.models.Configuration"/>
-        <mapping class="org.jbei.ice.lib.models.ShotgunSequence"/>
-        <mapping class="org.jbei.ice.lib.models.Storage"/>
-        <mapping class="org.jbei.ice.lib.folder.Folder"/>
-        <mapping class="org.jbei.ice.lib.entry.model.Parameter"/>
-        <mapping class="org.jbei.ice.lib.models.AnnotationLocation"/>
-        <mapping class="org.jbei.ice.lib.bulkupload.BulkUpload"/>
-        <mapping class="org.jbei.ice.lib.access.Permission"/>
-        <mapping class="org.jbei.ice.lib.message.Message"/>
-        <mapping class="org.jbei.ice.lib.account.model.Preference"/>
-        <mapping class="org.jbei.ice.lib.net.RemotePartner"/>
-        <mapping class="org.jbei.ice.lib.entry.sample.model.Request"/>
-        <mapping class="org.jbei.ice.lib.models.Audit"/>
-        <mapping class="org.jbei.ice.lib.experiment.Experiment"/>
     </session-factory>
 </hibernate-configuration>

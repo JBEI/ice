@@ -16,10 +16,8 @@ public class TokenHash {
 
     private static final int HASH_BYTE_SIZE = 160;
     private static final int SALT_BYTE_SIZE = 32;
+    private static final int TOKEN_BYTE_SIZE = 256;
     private static final int PBKDF2_ITERATIONS = 20000;
-
-    public TokenHash() {
-    }
 
     public String encryptPassword(String password, String salt) {
         if (password == null || password.trim().isEmpty() || salt == null || salt.trim().isEmpty())
@@ -45,8 +43,15 @@ public class TokenHash {
 
     public String generateRandomToken() {
         SecureRandom random = new SecureRandom();
-        byte[] salt = new byte[256];
-        random.nextBytes(salt);
-        return DatatypeConverter.printBase64Binary(salt);
+        byte[] token = new byte[TOKEN_BYTE_SIZE];
+        random.nextBytes(token);
+        return DatatypeConverter.printBase64Binary(token);
+    }
+
+    public String generateRandomToken(int byteSize) {
+        SecureRandom random = new SecureRandom();
+        byte[] token = new byte[byteSize];
+        random.nextBytes(token);
+        return DatatypeConverter.printBase64Binary(token);
     }
 }

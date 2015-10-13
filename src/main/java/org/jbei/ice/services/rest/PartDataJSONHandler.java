@@ -2,7 +2,7 @@ package org.jbei.ice.services.rest;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;

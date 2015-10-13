@@ -1,10 +1,10 @@
 package org.jbei.ice.lib.entry.sample;
 
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.storage.model.Sample;
+
 import java.util.Calendar;
 import java.util.Date;
-
-import org.jbei.ice.lib.entry.sample.model.Sample;
-import org.jbei.ice.lib.utils.Utils;
 
 /**
  * Handles creation of sample and associated actions
@@ -14,14 +14,14 @@ import org.jbei.ice.lib.utils.Utils;
 public class SampleCreator {
 
     /**
-     * Create a {@link org.jbei.ice.lib.entry.sample.model.Sample} object.
+     * Create a {@link Sample} object.
      * <p/>
      * Generates the UUID and the time stamps.
      *
      * @param label     display label for sample
      * @param depositor name of the depositor
      * @param notes     associated notes
-     * @return {@link org.jbei.ice.lib.entry.sample.model.Sample}
+     * @return {@link Sample}
      */
     public static Sample createSampleObject(String label, String depositor, String notes) {
         String uuid = Utils.generateUUID();

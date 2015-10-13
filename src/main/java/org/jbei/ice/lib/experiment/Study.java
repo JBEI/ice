@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.experiment;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * Data transfer object for experiments

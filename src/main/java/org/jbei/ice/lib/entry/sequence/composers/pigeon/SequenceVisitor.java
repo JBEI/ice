@@ -1,10 +1,10 @@
 package org.jbei.ice.lib.entry.sequence.composers.pigeon;
 
-import java.util.Set;
+import org.jbei.ice.storage.model.AnnotationLocation;
+import org.jbei.ice.storage.model.Sequence;
+import org.jbei.ice.storage.model.SequenceFeature;
 
-import org.jbei.ice.lib.models.AnnotationLocation;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.SequenceFeature;
+import java.util.Set;
 
 /**
  * @author Hector Plahar

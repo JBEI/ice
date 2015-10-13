@@ -1,15 +1,14 @@
 package org.jbei.ice.lib.dto.web;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
+import org.jbei.ice.storage.model.RemotePartner;
 
 /**
- * Data transfer model for {@link org.jbei.ice.lib.net.RemotePartner}
+ * Data transfer model for {@link RemotePartner}
  *
  * @author Hector Plahar
  */
 public class RegistryPartner implements IDataTransferModel {
-
-    private static final long serialVersionUID = 1l;
 
     private long id;
     private String status;

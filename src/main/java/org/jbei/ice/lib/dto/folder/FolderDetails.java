@@ -1,13 +1,13 @@
 package org.jbei.ice.lib.dto.folder;
 
+import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.storage.IDataTransferModel;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.dao.IDataTransferModel;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
 
 /**
  * Folder Transfer Object

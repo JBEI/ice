@@ -266,7 +266,7 @@ angular.module('ice.wor.controller', [])
             $location.path('web/' + $stateParams.partner + "/folder/" + folder.id);
         };
     })
-    .controller('WebOfRegistriesController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote, Settings) {
+    .controller('WebOfRegistriesController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote, Util, Settings) {
         var setting = Settings($cookieStore.get("sessionId"));
         $scope.newPartner = undefined;
         $scope.partnerStatusList = [
@@ -279,7 +279,9 @@ angular.module('ice.wor.controller', [])
         //
         $scope.wor = undefined;
         $scope.isWorEnabled = false;
-        setting.getSetting({}, {key: 'JOIN_WEB_OF_REGISTRIES'}, function (result) {
+
+        Util.get('/rest/config/JOIN_WEB_OF_REGISTRIES', function (result) {
+            //console.log(result);
             var joined = result.value === 'yes';
             $scope.isWorEnabled = joined;
             if (!$rootScope.settings)
@@ -358,15 +360,15 @@ angular.module('ice.wor.controller', [])
             });
         }
     })
-    .controller('WebOfRegistriesMenuController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote, Settings) {
+    .controller('WebOfRegistriesMenuController', function ($rootScope, $scope, $location, $modal, $cookieStore,
+                                                           $stateParams, WebOfRegistries, Remote, Settings, Util) {
         // retrieve web of registries partners
         $scope.wor = WebOfRegistries().query({approved_only: true});
         $scope.selectedPartner = $stateParams.partner;
 
         // retrieve web of registries setting
         var sessionId = $cookieStore.get("sessionId");
-        var settings = Settings(sessionId);
-        settings.getSetting({key: "JOIN_WEB_OF_REGISTRIES"}, function (result) {
+        Util.get('/rest/config/JOIN_WEB_OF_REGISTRIES', function (result) {
             if (!$scope.settings)
                 $scope.settings = {};
 

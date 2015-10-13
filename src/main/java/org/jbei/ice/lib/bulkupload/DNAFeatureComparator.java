@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.util.Comparator;
+import org.jbei.ice.lib.dto.DNAFeature;
 
-import org.jbei.ice.lib.vo.DNAFeature;
+import java.util.Comparator;
 
 /**
  * @author Hector Plahar

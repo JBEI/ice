@@ -1,12 +1,11 @@
 package org.jbei.ice.lib.entry.sequence.composers.formatters;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
-import org.jbei.ice.lib.models.Sequence;
-
 import org.biojavax.Namespace;
 import org.biojavax.SimpleNamespace;
+import org.jbei.ice.storage.model.Sequence;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Abstract formatter implementing {@link IFormatter} interface.

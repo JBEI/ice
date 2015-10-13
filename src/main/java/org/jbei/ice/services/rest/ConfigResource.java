@@ -29,13 +29,12 @@ public class ConfigResource extends RestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Setting> get() {
+    public ArrayList<Setting> get(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         final String userId = getUserId();
         return controller.retrieveSystemSettings(userId);
     }
 
     /**
-     * @param uriInfo
      * @return the version setting of this ICE instance
      */
     @GET
@@ -55,7 +54,9 @@ public class ConfigResource extends RestResource {
     @GET
     @Path("/{key}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Setting getConfig(@PathParam("key") final String key) {
+    public Setting getConfig(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+                             @PathParam("key") final String key) {
+        final String userId = getUserId(sessionId);
         return controller.getPropertyValue(key);
     }
 
@@ -64,8 +65,8 @@ public class ConfigResource extends RestResource {
      */
     @PUT
     @Path("/lucene")
-    public Response buildLuceneIndex() {
-        final String userId = getUserId();
+    public Response buildLuceneIndex(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        final String userId = getUserId(sessionId);
         final boolean success = searchController.rebuildIndexes(userId, IndexType.LUCENE);
         return super.respond(success);
     }
@@ -75,8 +76,8 @@ public class ConfigResource extends RestResource {
      */
     @PUT
     @Path("/blast")
-    public Response buildBlastIndex() {
-        final String userId = getUserId();
+    public Response buildBlastIndex(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        final String userId = getUserId(sessionId);
         final boolean success = searchController.rebuildIndexes(userId, IndexType.BLAST);
         return super.respond(success);
     }
@@ -87,8 +88,11 @@ public class ConfigResource extends RestResource {
      */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public Setting update(final Setting setting) {
-        final String userId = getUserId();
-        return controller.updateSetting(userId, setting);
+    public Response update(@Context final UriInfo uriInfo,
+                           @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+                           final Setting setting) {
+        final String userId = getUserId(sessionId);
+        final String url = uriInfo.getBaseUri().getAuthority();
+        return super.respond(controller.updateSetting(userId, setting, url));
     }
 }

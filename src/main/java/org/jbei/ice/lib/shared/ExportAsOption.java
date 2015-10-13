@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.shared;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * Options for the "Export As" menu typically found at the top of

@@ -1,14 +1,11 @@
 package org.jbei.ice.lib.net;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.access.RemotePermission;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.RemotePartnerDAO;
-import org.jbei.ice.lib.dao.hibernate.RemotePermissionDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
@@ -21,8 +18,12 @@ import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.executor.TransferTask;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.FeaturedDNASequence;
 import org.jbei.ice.services.rest.IceRestClient;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
+import org.jbei.ice.storage.hibernate.dao.RemotePermissionDAO;
+import org.jbei.ice.storage.model.RemotePartner;
+import org.jbei.ice.storage.model.RemotePermission;
 
 import java.util.ArrayList;
 import java.util.HashMap;

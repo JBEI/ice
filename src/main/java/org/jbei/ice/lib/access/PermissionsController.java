@@ -1,25 +1,21 @@
 package org.jbei.ice.lib.access;
 
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.bulkupload.BulkUpload;
 import org.jbei.ice.lib.bulkupload.BulkUploadAuthorization;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.FolderDAO;
-import org.jbei.ice.lib.dao.hibernate.GroupDAO;
-import org.jbei.ice.lib.dao.hibernate.PermissionDAO;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryAuthorization;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.folder.Folder;
-import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.storage.DAOException;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.FolderDAO;
+import org.jbei.ice.storage.hibernate.dao.GroupDAO;
+import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
+import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;

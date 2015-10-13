@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.dto.bulkupload;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * Sheet edit mode that is used to determine the sheet view to show to users

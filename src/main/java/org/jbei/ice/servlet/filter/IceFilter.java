@@ -1,15 +1,10 @@
 package org.jbei.ice.servlet.filter;
 
-import java.io.IOException;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateUtil;
+
+import javax.servlet.*;
+import java.io.IOException;
 
 /**
  * @author Hector Plahar

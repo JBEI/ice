@@ -1,0 +1,31 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-key"></i> &nbsp;Request API Key</span>
+</div>
+
+<div class="modal-body">
+    <div class="alert alert-info" style="padding: 8px">
+        <i style="font-size:50px; float: left;padding-right:10px; color: #3a87ad" class="fa fa-info-circle"></i>
+        <span class="font-90em">
+            Enter a client identifier to request an API key.<br>
+            API keys enable third party application access to this ICE instance. For web applications, it is recommended that a domain
+            name be used. e.g. app.example.com
+        </span>
+    </div>
+
+    <!--<div class="alert alert-danger pad-8">-->
+    <!--Error creating key-->
+    <!--</div>-->
+
+    <form>
+        <div class="form-group">
+            <label>Client ID</label> &nbsp; <input type="text" class="input_box" style="width: 423px" ng-model="client">
+            <button type="button" class="btn btn-sm" ng-click="generateToken()">Generate</button>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-default btn-sm" ng-click="cancel()">Close</button>
+</div>

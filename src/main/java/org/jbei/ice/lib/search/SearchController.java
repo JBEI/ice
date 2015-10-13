@@ -3,15 +3,16 @@ package org.jbei.ice.lib.search;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.search.*;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.executor.IceExecutorService;
-import org.jbei.ice.lib.net.RemotePartner;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.services.rest.IceRestClient;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.search.HibernateSearch;
+import org.jbei.ice.storage.model.RemotePartner;
 
 import java.util.*;
 

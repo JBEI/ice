@@ -1,23 +1,19 @@
 package org.jbei.ice.lib.entry.sample;
 
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.SampleDAO;
-import org.jbei.ice.lib.dao.hibernate.StorageDAO;
 import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryEditor;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.sample.model.Sample;
-import org.jbei.ice.lib.models.Comment;
-import org.jbei.ice.lib.models.Storage;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.storage.DAOException;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.SampleDAO;
+import org.jbei.ice.storage.hibernate.dao.StorageDAO;
+import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
 import java.util.List;

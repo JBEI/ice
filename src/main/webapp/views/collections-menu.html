@@ -1,6 +1,6 @@
 <div class="collections_header">Collections</div>
 
-<div style="border-top: 1px solid #f6f6f6; border-bottom: 1px solid #f6f6f6">
+<div style="border-top: 1px solid #f6f6f6; border-bottom: 1px solid #f6f6f6" ng-init="updateCollectionCounts()">
 
     <div ng-repeat="collection in collectionList" ng-if="collection.count||collection.alwaysVisible">
         <div ng-class="{'collection_user_menu_row_selected':collection.name.toLowerCase()===selectedFolder}"

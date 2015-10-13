@@ -4,6 +4,8 @@ angular.module('ice.common.service', [])
     .factory('Util', function ($rootScope, $location, $cookieStore, $resource) {
         return {
             handleError: function (response) {
+                console.error("error", response);
+
                 switch (response.status) {
                     case 401:
                         if ($location.path() != '/login') {
@@ -39,7 +41,12 @@ angular.module('ice.common.service', [])
                 }
 
                 queryParams.sid = $cookieStore.get("sessionId");
-                return $resource(url).get(queryParams, successHandler, this.handleError);
+                $resource(url, queryParams, {
+                    'get': {
+                        method: 'GET',
+                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
+                    }
+                }).get(successHandler, this.handleError);
             },
 
             // difference between this and get is "isArray"
@@ -52,15 +59,26 @@ angular.module('ice.common.service', [])
                     }
                 }
 
-                queryParams.sid = $cookieStore.get("sessionId");
-                return $resource(url).query(queryParams, successHandler, this.handleError);
+                queryParams.sid = $cookieStore.get('sessionId');
+                $resource(url, queryParams, {
+                    'list': {
+                        method: 'GET',
+                        isArray: true,
+                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
+                    }
+                }).list(successHandler, this.handleError);
             },
 
             post: function (url, obj, successHandler, params) {
                 if (!params)
                     params = {};
-                params.sid = $cookieStore.get("sessionId");
-                $resource(url, params).save(obj, successHandler, this.handleError);
+                params.sid = $cookieStore.get('sessionId');
+                $resource(url, params, {
+                    'post': {
+                        method: 'POST',
+                        headers: {'X-ICE-Authentication-SessionId': params.sid}
+                    }
+                }).post(obj, successHandler, this.handleError);
             },
 
             update: function (url, obj, params, successHandler) {
@@ -75,7 +93,7 @@ angular.module('ice.common.service', [])
                 $resource(url, params, {
                     'update': {
                         method: 'PUT',
-                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
+                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
                     }
                 }).update(obj, successHandler, this.handleError);
             },
@@ -85,8 +103,13 @@ angular.module('ice.common.service', [])
                     successHandler = function (resp) {
                     }
                 }
-                $resource(url, {sid: $cookieStore.get("sessionId")}).remove(successHandler, this.handleError)
+
+                $resource(url, {
+                    'delete': {
+                        method: 'DELETE',
+                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
+                    }
+                }).remove(successHandler, this.handleError)
             }
         }
-    })
-;
+    });

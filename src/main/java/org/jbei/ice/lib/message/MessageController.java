@@ -2,15 +2,16 @@ package org.jbei.ice.lib.message;
 
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.AccountType;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.AccountDAO;
-import org.jbei.ice.lib.dao.hibernate.MessageDAO;
 import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.dto.message.MessageInfo;
 import org.jbei.ice.lib.dto.message.MessageList;
-import org.jbei.ice.lib.group.Group;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
+import org.jbei.ice.storage.hibernate.dao.MessageDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Group;
+import org.jbei.ice.storage.model.Message;
 
 import java.util.ArrayList;
 import java.util.Date;
