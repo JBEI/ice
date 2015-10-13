@@ -12,9 +12,9 @@ import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.AccountPreferencesDAO;
-import org.jbei.ice.storage.hibernate.model.Account;
-import org.jbei.ice.storage.hibernate.model.AccountPreferences;
-import org.jbei.ice.storage.hibernate.model.Group;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountPreferences;
+import org.jbei.ice.storage.model.Group;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -337,7 +337,7 @@ public class AccountController {
      * @return Account object matching a session key, or {@code null}
      */
     public AccountTransfer getAccountBySessionKey(final String sessionKey) {
-        final String userId = SessionHandler.getUserIdBySession(sessionKey);
+        final String userId = UserSessions.getUserIdBySession(sessionKey);
         if (userId == null) {
             Logger.warn("Could not retrieve user id for session " + sessionKey);
             return null;
@@ -421,7 +421,7 @@ public class AccountController {
             account.setIp(ip);
             account.setLastLoginTime(Calendar.getInstance().getTime());
             save(account);
-            SessionHandler.createNewSessionForUser(account.getEmail());
+            UserSessions.createNewSessionForUser(account.getEmail());
             return email;
         }
 
@@ -486,7 +486,7 @@ public class AccountController {
         info.setId(account.getId());
         final boolean isAdmin = isAdministrator(email);
         info.setAdmin(isAdmin);
-        info.setSessionId(SessionHandler.createSessionForUser(email, transfer.getSessionId()));
+        info.setSessionId(UserSessions.createSessionForUser(email, transfer.getSessionId()));
         return info;
     }
 
@@ -496,7 +496,7 @@ public class AccountController {
      * @param sessionKey unique session identifier
      */
     public void invalidate(final String sessionKey) {
-        SessionHandler.invalidateSession(sessionKey);
+        UserSessions.invalidateSession(sessionKey);
     }
 
     /**
