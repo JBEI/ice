@@ -10,8 +10,6 @@ import org.jbei.ice.storage.model.RemotePartner;
  */
 public class RegistryPartner implements IDataTransferModel {
 
-    private static final long serialVersionUID = 1l;
-
     private long id;
     private String status;
     private String name;

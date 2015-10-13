@@ -7,7 +7,7 @@ import java.util.LinkedList;
 /**
  * @author Hector Plahar
  */
-public class Results<T extends IDataTransferModel> implements IDataTransferModel {
+public class Results<T> implements IDataTransferModel {
 
     private long resultCount;
     private LinkedList<T> data;

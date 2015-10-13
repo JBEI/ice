@@ -11,8 +11,6 @@ import java.util.ArrayList;
  */
 public class WebOfRegistries implements IDataTransferModel {
 
-    private static final long serialVersionUID = 1l;
-
     private boolean webEnabled;
     private ArrayList<RegistryPartner> partners;
 

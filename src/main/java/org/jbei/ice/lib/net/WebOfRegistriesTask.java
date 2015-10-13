@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.net;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.UrlValidator;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -34,13 +35,14 @@ public class WebOfRegistriesTask extends Task {
 
     @Override
     public void execute() {
-        if (this.myUrl.startsWith("localhost") || this.myUrl.startsWith("127.0.0.1")) {
+        if (!UrlValidator.getInstance().isValid(this.myUrl)) {
             Logger.warn("Local instance detected. Aborting run of web of registries task");
             return;
         }
 
         final String NODE_MASTER = Utils.getConfigValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER);
         if (NODE_MASTER.equalsIgnoreCase(this.myUrl) || StringUtils.isEmpty(NODE_MASTER)) {
+            Logger.warn("Aborting contact of node master.");
             return;
         }
 
@@ -50,16 +52,17 @@ public class WebOfRegistriesTask extends Task {
             return;
         }
 
-        RegistryPartner partner = new RegistryPartner();
-        partner.setApiKey(tokenHash.generateRandomToken());
         String name = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
         if (StringUtils.isEmpty(name))
             name = myUrl;
-        partner.setName(name);
-        partner.setUrl(myUrl);
 
-        // todo : if master then it should return link to retrieve (HATEOAS) which this can follow
-        RegistryPartner masterPartner = requestToJoin(NODE_MASTER, partner);
+        RemoteContact remoteContact = new RemoteContact();
+
+        // exchange key information with the master registry
+//        RegistryPartner masterPartner = requestToJoin(NODE_MASTER, partner);
+        RegistryPartner masterPartner = new RegistryPartner();
+        masterPartner.setUrl(NODE_MASTER);
+        masterPartner = remoteContact.addWebPartner(name, myUrl, masterPartner);
         if (masterPartner == null) {
             Logger.error("Could not connect to master node");
             return;
@@ -67,33 +70,30 @@ public class WebOfRegistriesTask extends Task {
 
         // get partners from master (this call requires that this ice instance already be a partner, so
         // the requestToJoin call above must succeed)
-        List<RegistryPartner> partners = getWebOfRegistryPartners(NODE_MASTER);
-        String myURL = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
-        String myName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
-        RemoteContact remoteContact = new RemoteContact();
+        List<RegistryPartner> partners = getWebOfRegistryPartners(masterPartner.getUrl(), masterPartner.getApiKey());
 
         // for potential, check already in partner list and add if not by performing exchange
         for (RegistryPartner registryPartner : partners) {
-            remoteContact.addWebPartner(myName, myURL, registryPartner);
+            if (registryPartner.getUrl().equalsIgnoreCase(myUrl))
+                continue;
+            remoteContact.addWebPartner(name, myUrl, registryPartner);
         }
     }
 
     // contacts the master node for other ice instances
     protected RegistryPartner requestToJoin(String masterUrl, RegistryPartner partner) {
         IceRestClient restClient = IceRestClient.getInstance();
-        return restClient.post(masterUrl, "/rest/web/partner/remote", partner, RegistryPartner.class);
+        return restClient.post(masterUrl, "/rest/partners", partner, RegistryPartner.class);
     }
 
     @SuppressWarnings("unchecked")
-    protected List<RegistryPartner> getWebOfRegistryPartners(String url) {
+    protected List<RegistryPartner> getWebOfRegistryPartners(String url, String token) {
         IceRestClient restClient = IceRestClient.getInstance();
-        return restClient.get(url, "/rest/web/partners", ArrayList.class);
+        return restClient.getWor(url, "/rest/web/partners", ArrayList.class, null, token);
     }
 
     /**
      * Sends a message to the master that this instance no longer wants to be a part of the web of registries
-     *
-     * @param masterUrl
      */
     protected void requestToDisjoin(String token, String masterUrl) {
         IceRestClient restClient = IceRestClient.getInstance();

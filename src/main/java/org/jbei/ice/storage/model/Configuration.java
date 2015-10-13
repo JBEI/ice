@@ -6,7 +6,8 @@ import org.jbei.ice.storage.DataModel;
 import javax.persistence.*;
 
 /**
- * Place to store installation specific values. For example, uuids for default site install groups.
+ * Site wide configuration values. See {@link org.jbei.ice.lib.dto.ConfigurationKey} for
+ * the built in configuration values
  *
  * @author Hector Plahar, Timothy Ham
  */

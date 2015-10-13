@@ -83,7 +83,7 @@ public class ConfigurationController {
         return dao.update(configuration);
     }
 
-    public Setting updateSetting(String userId, Setting setting) {
+    public Setting updateSetting(String userId, Setting setting, String url) {
         AccountController accountController = new AccountController();
         if (!accountController.isAdministrator(userId))
             return null;
@@ -98,7 +98,7 @@ public class ConfigurationController {
         if (key == ConfigurationKey.JOIN_WEB_OF_REGISTRIES) {
             WoRController woRController = new WoRController();
             boolean enable = "yes".equalsIgnoreCase(setting.getValue()) || "true".equalsIgnoreCase(setting.getValue());
-            woRController.setEnable(enable);
+            woRController.setEnable(enable, url);
         }
 
         return configuration.toDataTransferObject();

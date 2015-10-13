@@ -104,4 +104,17 @@ public class IceRestClient extends RestClient {
         multiPart.field("entryType", entryType.name());
         return invocationBuilder.post(Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
     }
+
+    // WOR
+    public <T> T getWor(String url, String path, Class<T> clazz, Map<String, Object> queryParams, String token) {
+        WebTarget target = client.target("https://" + url).path(path);
+        if (queryParams != null) {
+            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+                target = target.queryParam(entry.getKey(), entry.getValue());
+            }
+        }
+        Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
+        invocationBuilder = invocationBuilder.header(WOR_PARTNER_TOKEN_HEADER, token);
+        return invocationBuilder.buildGet().invoke(clazz);
+    }
 }
