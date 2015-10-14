@@ -24,8 +24,6 @@ public class HibernateUtil {
 
     private static String BASE_FILE = "hibernate.cfg.xml";
     private static String MOCK_FILE = "mock.cfg.xml";
-    private static String AWS_FILE = "aws.cfg.xml";
-    private static String DEFAULT_FILE = "default.cfg.xml";
 
     /**
      * Open a new {@link Session} from the sessionFactory.
@@ -77,12 +75,21 @@ public class HibernateUtil {
                 if (type == Type.MOCK) {
                     configuration.configure(MOCK_FILE);
                 } else {
-                    String environment = System.getProperty("environment");
+                    String[] properties =
+                            {"hibernate.connection.username",
+                             "hibernate.connection.url",
+                             "hibernate.connection.driver_class",
+                             "hibernate.connection.password",
+                             "hibernate.dialect"};
 
-                    if (environment != null && environment.equals("aws")){
-                        configuration.configure(AWS_FILE);
-                    }else{
-                        configuration.configure(DEFAULT_FILE);
+                    for(int i = 0; i < properties.length; i++){
+                        String key = properties[i];
+                        String value = System.getProperty(properties[i]);
+
+                        if(value != null){
+                            Logger.info("Set " + key + ": " + value);
+                            configuration.setProperty(key, value);
+                        }
                     }
                 }
 

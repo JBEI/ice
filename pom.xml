@@ -200,13 +200,6 @@
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-war-plugin</artifactId>
               <version>2.6</version>
-              <configuration>
-                <webResources>
-                  <resource>
-                    <directory>src/main/resources/aws</directory>
-                  </resource>
-                </webResources>
-              </configuration>
             </plugin>
         </plugins>
     </build>
