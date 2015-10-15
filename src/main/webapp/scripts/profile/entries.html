@@ -60,7 +60,7 @@
             </td>
             <td><a ng-href="entry/{{entry.id}}" class="cell_mouseover form-group"
                    popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                   popover-template="profileEntryPopupTemplate" popover-placement="right">{{entry.partId}}</a>
+                   uib-popover-template="profileEntryPopupTemplate" popover-placement="right">{{entry.partId}}</a>
             </td>
             <td>
                 <div title="{{entry.name}}" class="ellipsis" style="width: 350px">{{entry.name}}</div>
@@ -99,8 +99,10 @@
 
     <div ng-if="folder && folder.entries.length > 0" style="margin-top: -15px">
         <div class="col-md-6" style="padding-left: 0">
-            <pagination total-items="folder.count" ng-change="userEntriesPageChanged()" ng-model="params.currentPage"
-                        max-size="maxSize" class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+            <uib-pagination total-items="folder.count" ng-change="userEntriesPageChanged()"
+                            ng-model="params.currentPage"
+                            max-size="maxSize" class="pagination-sm" items-per-page="15"
+                            boundary-links="true"></uib-pagination>
         </div>
         <div class="col-md-4" style="margin-top: 20px;"><strong class="small">
             <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(params.currentPage,

@@ -1,8 +1,8 @@
 <div class="btn-toolbar" style="white-space: nowrap">
     <div class="btn-group" style="margin-left: 12px">
-        <div class="btn-group" dropdown>
+        <div class="btn-group" uib-dropdown>
             <button type="button" ng-disabled="addToDisabled" ng-click="retrieveUserFolders()"
-                    class="btn btn-default btn-sm subMenuTransfer dropdown-toggle" dropdown-toggle>
+                    class="btn btn-default btn-sm subMenuTransfer uib-dropdown-toggle" uib-dropdown-toggle>
                 <!--<i style="font-size: 14px;" class="fa fa-plus blue"></i>-->
 
                 <span class="fa-stack" style="font-size: 8px;">
@@ -12,11 +12,11 @@
 
                 Add To <span class="caret"></span>
             </button>
-            <span class="dropdown-menu color-888" ng-if="!userFolders">
+            <span class="uib-dropdown-menu color-888" ng-if="!userFolders">
                 <i class="fa fa-fw fa-spin fa-spinner"></i> Loading...
             </span>
 
-            <div class="dropdown-menu" dropdown-menu>
+            <div class="uib-dropdown-menu" uib-dropdown-menu>
                 <div style="height: 200px; width: 270px; overflow: auto">
                     <!--displays list of folders that the user can add entries to to-->
                     <span class="pad-8" ng-if="!userFolders || !userFolders.length">
@@ -55,16 +55,16 @@
             Remove
         </button>
 
-        <div class="btn-group" dropdown>
+        <div class="btn-group" uib-dropdown>
             <button type="button" ng-disabled="!canMoveFromFolder()" ng-click="retrieveUserFolders()"
-                    class="btn btn-default btn-sm subMenuTransfer dropdown-toggle" dropdown-toggle>
+                    class="btn btn-default btn-sm subMenuTransfer uib-dropdown-toggle" uib-dropdown-toggle>
                 <i style="font-size: 14px;" class="fa fa-arrows blue"></i> Move To <span class="caret"></span>
             </button>
-            <span class="dropdown-menu color-888" dropdown-menu ng-if="!userFolders">
+            <span class="uib-dropdown-menu color-888" uib-dropdown-menu ng-if="!userFolders">
                 <i class="fa fa-fw fa-spin fa-spinner"></i> Loading...
             </span>
 
-            <div class="dropdown-menu" dropdown-menu>
+            <div class="uib-dropdown-menu" uib-dropdown-menu>
                 <div style="height: 200px; width: 270px; overflow: auto">
                     <!--displays list of folders that the user can add entries to to-->
                     <span class="pad-8" ng-if="!userFolders || !userFolders.length">
@@ -103,25 +103,26 @@
     </div>
 
     <div class="btn-group" style="margin-left: 12px">
-        <button type="button" class="btn btn-default btn-sm subMenuTransfer dropdown-toggle" dropdown-toggle
+        <button type="button" class="btn btn-default btn-sm subMenuTransfer uib-dropdown-toggle" uib-dropdown-toggle
                 ng-disabled="addToDisabled" ng-click="csvExport()">
             <i style="font-size: 14px; opacity:0.85;" class="fa fa-download blue"></i>
             CSV Export
         </button>
     </div>
 
-    <div class="btn-group" style="margin-left: 12px" ng-if="user.isAdmin" dropdown>
-        <button type="button" class="btn btn-default btn-sm subMenuTransfer dropdown-toggle" ng-disabled="addToDisabled"
-                ng-click="retrieveRegistryPartners()" dropdown-toggle>
+    <div class="btn-group" style="margin-left: 12px" ng-if="user.isAdmin" uib-dropdown>
+        <button type="button" class="btn btn-default btn-sm subMenuTransfer uib-dropdown-toggle"
+                ng-disabled="addToDisabled"
+                ng-click="retrieveRegistryPartners()" uib-dropdown-toggle>
             <i style="font-size: 14px; opacity:0.85;" class="fa fa-share-square blue"></i>
             Transfer <span class="caret"></span>
         </button>
 
-        <span class="dropdown-menu color-888" dropdown-menu ng-if="!registryPartners"><i
+        <span class="uib-dropdown-menu color-888" uib-dropdown-menu ng-if="!registryPartners"><i
                 class="fa fa-fw fa-spin fa-spinner"></i>
             Loading...</span>
 
-        <ul class="dropdown-menu" dropdown-menu ng-if="registryPartners">
+        <ul class="uib-dropdown-menu" uib-dropdown-menu ng-if="registryPartners">
             <li ng-repeat="partner in registryPartners.partners" ng-init="selected=false" stop-event="click"
                 ng-click="partner.selected=!partner.selected" class="font-75em cursor_pointer">&nbsp;
                 <i class="fa fa-fw"

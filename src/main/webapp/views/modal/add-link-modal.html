@@ -51,7 +51,7 @@
         <tr ng-repeat="link in links" class="no_wrap">
             <td><b class="small color-888 ng-binding">{{link.type}}</b> {{link.partId}}</td>
             <td>{{link.name}}</td>
-            <td><i class="fa fa-unlink red opacity_hover" tooltip="Remove link"
+            <td><i class="fa fa-unlink red opacity_hover" uib-tooltip="Remove link"
                    ng-click="removeExistingPartLink(link)"></i></td>
         </tr>
     </table>

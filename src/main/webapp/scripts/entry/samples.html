@@ -30,11 +30,11 @@
         <div class="col-md-12" ng-init="newSample.location.type=undefined">
             <b class="strong">Storage Type</b>
 
-            <div class="btn-group" dropdown>
-                <button type="button" class="btn btn-sm btn-default" dropdown-toggle>
+            <div class="btn-group" uib-dropdown>
+                <button type="button" class="btn btn-sm btn-default" uib-dropdown-toggle>
                     Select <span class="caret"></span>
                 </button>
-                <ul class="dropdown-menu">
+                <ul class="uib-dropdown-menu">
                     <li ng-click="newSample.location.type ='PLATE96'"><a>96 Well Plate</a></li>
                     <li ng-click="newSample.location.type ='ADDGENE'"><a>AddGene</a></li>
                     <li ng-click="newSample.location.type ='SHELF'"><a>Shelf</a></li>
@@ -86,7 +86,7 @@
                            style="font-size: 30px"
                            ng-click="cellBarcodeClick(row, col)"
                            popover-placement="bottom" popover-title="Well {{row + (10+col+'').slice(-2)}}"
-                           popover-template="newSampleTemplate"></i>
+                           uib-popover-template="newSampleTemplate"></i>
                     </td>
                 </tr>
                 <tr>

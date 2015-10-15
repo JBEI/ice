@@ -58,7 +58,7 @@
                            ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
                            maxlength="125" placeHolder="{{field.placeHolder}}" style="width: 205px;">
 
-                    &nbsp;<i ng-if="field.help" class="fa fa-question-circle opacity_hover" tooltip="{{field.help}}"
+                    &nbsp;<i ng-if="field.help" class="fa fa-question-circle opacity_hover" uib-tooltip="{{field.help}}"
                              tooltip-placement="right"></i>
 
                 <span style="padding-top:5px;">
@@ -164,7 +164,7 @@
                        style="width: 400px;"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        ng-focus="field.edit=true" ng-blur="field.edit=false">
-                <span ng-if="entry[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
+                <span ng-if="entry[field.schema].length===1" uib-tooltip="Add another" tooltip-placement="right"
                       ng-click="addLink(field.schema, $index)">
                     <i class="fa fa-plus green opacity_hover"></i>
                 </span>
@@ -192,7 +192,7 @@
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
                        typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
-                <span ng-if="entry[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
+                <span ng-if="entry[field.schema].length===1" uib-tooltip="Add another" tooltip-placement="right"
                       ng-click="addLink(field.schema, $index)">
                     <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
                     <i class="fa fa-plus green opacity_hover"></i>
@@ -265,7 +265,7 @@
         </div>
 
         <div class="col-md-2 pad-top-5 pad-left-8" ng-if="!newParameter.edit">
-            <i class="fa fa-plus-circle font-14em color-888 opacity_hover" tooltip="Add custom field"
+            <i class="fa fa-plus-circle font-14em color-888 opacity_hover" uib-tooltip="Add custom field"
                tooltip-placement="right" ng-click="newParameter.edit = true;"></i>
         </div>
     </div>
@@ -285,7 +285,7 @@
                             </div>
                             <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
                                 <!--can break the link if allowed to edit this part-->
-                                <i class="fa fa-unlink red opacity_hover" tooltip="Remove link"
+                                <i class="fa fa-unlink red opacity_hover" uib-tooltip="Remove link"
                                    ng-click="removeLink(entry, entry.linkedParts[$index+0])"
                                    ng-if="entry.canEdit"></i>
                                 <b>{{entry.linkedParts[$index+0].type}} <a
@@ -315,7 +315,7 @@
                             </div>
                             <div style="display: block; margin-bottom: .2em; color: #555; padding: .75em .5em;">
                                 <!--can break the link if allowed to edit this part-->
-                                <i class="fa fa-unlink red opacity_hover" tooltip="Remove link"
+                                <i class="fa fa-unlink red opacity_hover" uib-tooltip="Remove link"
                                    ng-click="removeLink(entry, entry.linkedParts[$index+1])"
                                    ng-if="entry.canEdit"></i>
                                 <b>{{entry.linkedParts[$index+1].type}} <a
@@ -368,11 +368,12 @@
 
                     <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
 
-                    <small class="btn-group" dropdown>
+                    <small class="btn-group" uib-dropdown>
 
-                        <div dropdown-toggle class="dropdown-toggle opacity_hover">Download <span class="caret"></span>
+                        <div uib-dropdown-toggle class="uib-dropdown-toggle opacity_hover">Download <span
+                                class="caret"></span>
                         </div>
-                        <ul class="dropdown-menu">
+                        <ul class="uib-dropdown-menu">
                             <li class="cursor_pointer font-80em" ng-if="entry.hasOriginalSequence">
                                 <a ng-href="rest/file/{{entry.id}}/sequence/original?sid={{sessionId}}" target="_self">Original</a>
                             </li>

@@ -54,7 +54,7 @@
         <input type="text" ng-model="activePart[field.schema]" ng-trim="true" ng-focus="field.edit=true"
                ng-blur="field.edit=false" ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                maxlength="125" placeHolder="{{field.placeHolder}}" style="width: 205px;">
-        <i ng-if="field.help" class="fa fa-question-circle opacity_hover" tooltip="{{field.help}}"
+        <i ng-if="field.help" class="fa fa-question-circle opacity_hover" uib-tooltip="{{field.help}}"
            tooltip-placement="right"></i>
     </div>
 
@@ -120,7 +120,7 @@
                        style="width: 400px;"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        ng-focus="field.edit=true" ng-blur="field.edit=false">
-                <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
+                <span ng-if="activePart[field.schema].length===1" uib-tooltip="Add another" tooltip-placement="right"
                       ng-click="addLink(field.schema, $index)">
                     <i class="fa fa-plus green opacity_hover"></i>
                 </span>
@@ -149,7 +149,7 @@
                        ng-change="field.invalid=false"
                        maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
                        typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
-                <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
+                <span ng-if="activePart[field.schema].length===1" uib-tooltip="Add another" tooltip-placement="right"
                       ng-click="addLink(field.schema, $index)">
                     <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
                     <i class="fa fa-plus green opacity_hover"></i>

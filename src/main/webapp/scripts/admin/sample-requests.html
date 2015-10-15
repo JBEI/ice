@@ -1,6 +1,6 @@
 <div ng-controller="AdminSampleRequestController">
     <div class="pad_top">
-        <span class="dropdown">
+        <span class="uib-dropdown">
             <!--todo filter and update the results based on selection-->
             Show <select ng-model="params.status" ng-change="requestSamples()"
                          ng-options="option for option in selectOptions"></select>
@@ -123,9 +123,9 @@
                 </td>
                 <td style="width: 80px; vertical-align: middle">
                     <div ng-if="request.status==='PENDING'">
-                        <i tooltip="Fulfilled" class="fa fa-check font-14em green action"
+                        <i uib-tooltip="Fulfilled" class="fa fa-check font-14em green action"
                            ng-click="updateStatus(request, 'FULFILLED')"></i>
-                        <i tooltip="Reject" lass="fa fa-ban font-14em red action"
+                        <i uib-tooltip="Reject" lass="fa fa-ban font-14em red action"
                            ng-click="updateStatus(request, 'REJECTED')"></i>
                     </div>
                 </td>
@@ -142,10 +142,10 @@
 
     <div ng-if='sampleRequests && sampleRequests.requests.length > 0'>
         <div class="col-md-6" style="padding-left: 0">
-            <pagination total-items="sampleRequests.count" ng-change="sampleRequestPageChanged()"
+            <uib-pagination total-items="sampleRequests.count" ng-change="sampleRequestPageChanged()"
                         ng-model="params.currentPage"
                         max-size="maxSize"
-                        class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+                            class="pagination-sm" items-per-page="15" boundary-links="true"></uib-pagination>
         </div>
         <div class="col-md-4" style="margin-top: 20px;"><strong class="small">
             <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(params.currentPage,

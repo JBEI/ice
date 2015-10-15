@@ -462,7 +462,7 @@ angular.module('ice.entry.controller', [])
             $scope.activePart.fields = EntryService.getFieldsForType($scope.activePart.type);
         };
     })
-    .controller('CreateEntryController', function ($http, $scope, $modal, $rootScope, FileUploader, $location,
+    .controller('CreateEntryController', function ($http, $scope, $uibModal, $rootScope, FileUploader, $location,
                                                    $stateParams, $cookieStore, Entry, EntryService) {
         $scope.createType = $stateParams.type;
         $scope.showMain = true;
@@ -751,7 +751,7 @@ angular.module('ice.entry.controller', [])
     })
 
     .
-    controller('SequenceFileUploadController', function ($scope, $cookieStore, $modal, $modalInstance, FileUploader, type, paste) {
+    controller('SequenceFileUploadController', function ($scope, $cookieStore, $uibModal, $modalInstance, FileUploader, type, paste) {
         console.log("SequenceFileUploadController");
         var sid = $cookieStore.get("sessionId");
         $scope.isPaste = paste;
@@ -959,7 +959,7 @@ angular.module('ice.entry.controller', [])
         };
     })
 
-    .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope,
+    .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
                                              FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection,
                                              CustomField) {
         $scope.partIdEditMode = false;
@@ -996,7 +996,7 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.deleteSequence = function (part) {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'views/modal/delete-sequence-confirmation.html',
                 controller: function ($scope, $modalInstance) {
                     $scope.toDelete = part;
@@ -1031,7 +1031,7 @@ angular.module('ice.entry.controller', [])
 
         $scope.addLink = function (part, role) {
 
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'views/modal/add-link-modal.html',
                 controller: function ($scope, $http, $modalInstance, $cookieStore) {
                     $scope.mainEntry = part;

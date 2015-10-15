@@ -10,14 +10,14 @@
                                 <img alt="Loading..." ng-if="loadingPage" src="img/loader-mini.gif"/>
                                 <strong>
                                     <span style="text-transform: uppercase; color: #888">{{selectedCollection || folder.type}}</span>
-                                    <span ng-class="{folder_name:folder.canEdit}" tooltip={{folderNameTooltip}}
+                                    <span ng-class="{folder_name:folder.canEdit}" uib-tooltip={{folderNameTooltip}}
                                           ng-click="showFolderRenameModal()">
                                         {{folder.folderName}}
                                     </span>
                                 </strong>
                                 <span ng-if="folder.publicReadAccess">&nbsp;
                                     <small style="font-size: 12px; position: relative; top: -4px"
-                                           tooltip="Available on web of registries"
+                                           uib-tooltip="Available on web of registries"
                                            tooltip-placement="right" tooltip-trigger="mouseenter"
                                            class="label label-info cursor_pointer"><i class="fa fa-globe"></i>
                                         Public
@@ -38,7 +38,7 @@
                                     <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
 
                                     <span ng-repeat="permission in folder.accessPermissions" style="margin-right: 3px">
-                                        <span class="label" tooltip="{{shareText(permission)}}"
+                                        <span class="label" uib-tooltip="{{shareText(permission)}}"
                                               ng-class="{'bg_permission_group':permission.article==='GROUP', 'bg_permission_user':permission.article==='ACCOUNT'}">
                                              <i class="fa"
                                                 ng-class="{'fa-group':permission.article==='GROUP', 'fa-user':permission.article==='ACCOUNT'}"></i> {{getDisplay(permission)}}
@@ -81,14 +81,14 @@
             <thead>
             <tr>
                 <!--selection toggle-->
-                <th class="dropdown" dropdown
+                <th class="uib-dropdown" uib-dropdown
                     style="padding:0; font-size: 15px; vertical-align: middle; text-align: center">
-                    <span class="dropdown-toggle" dropdown-toggle>
+                    <span class="uib-dropdown-toggle" uib-dropdown-toggle>
                         <i class="fa cursor_default" ng-class="selectAllClass()" ng-click="selectAll()"
                            stop-event="click"></i>
                         <span class="caret cursor_pointer"></span>
                     </span>
-                    <ul class="dropdown-menu" dropdown-menu style="min-width: 100px">
+                    <ul class="uib-dropdown-menu" uib-dropdown-menu style="min-width: 100px">
                         <li class="font-75em cursor_pointer" ng-click="setType('all')"><a>All</a></li>
                         <li ng-repeat="choice in items" ng-click="setType(choice.type)"
                             class="font-75em cursor_pointer">
@@ -155,7 +155,7 @@
                 </td>
                 <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                       popover-template="folderPopupTemplateUrl" popover-placement="right">{{entry.partId}}</a>
+                       uib-popover-template="folderPopupTemplateUrl" popover-placement="right">{{entry.partId}}</a>
                 </td>
                 <td>
                     <div title="{{entry.name}}" class="ellipsis" style="width: 350px">{{entry.name}}</div>
@@ -196,9 +196,9 @@
     </div>
     <div class="row" ng-if="folder && folder.entries.length > 0" style="margin-top: -15px">
         <div class="col-md-6" style="padding-left: 0">
-            <pagination total-items="folder.count" ng-change="folderPageChange()" ng-model="params.currentPage"
+            <uib-pagination total-items="folder.count" ng-change="folderPageChange()" ng-model="params.currentPage"
                         max-size="maxSize" class="pagination-sm" items-per-page="params.limit" boundary-links="true">
-            </pagination>
+            </uib-pagination>
         </div>
         <div class="col-md-4" style="margin-top: 25px;">
             <strong class="small">

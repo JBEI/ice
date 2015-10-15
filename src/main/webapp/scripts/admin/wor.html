@@ -64,8 +64,8 @@
                 <td style="vertical-align: middle">{{partner.addTime | date:'MMM d, y, h:mm a'}}</td>
                 <!--lastContactTime-->
                 <td style="vertical-align: middle">
-                    <div class="btn-group" dropdown>
-                        <button type="button" class="btn btn-xs dropdown-toggle strong" dropdown-toggle
+                    <div class="btn-group" uib-dropdown>
+                        <button type="button" class="btn btn-xs uib-dropdown-toggle strong" uib-dropdown-toggle
                                 ng-class="{
                                 'btn-success':partner.status === 'APPROVED',
                                 'btn-warning':partner.status === 'PENDING',
@@ -73,7 +73,7 @@
                                 }">
                             {{partner.status |capitalize}} <span class="caret"></span>
                         </button>
-                        <ul class="dropdown-menu">
+                        <ul class="uib-dropdown-menu">
                             <li ng-repeat="listObject in partnerStatusList" class="font-90em"
                                 ng-click="setPartnerStatus(partner, listObject.status)">
                                 <a href="#">{{listObject.action | capitalize}}</a>
@@ -82,7 +82,7 @@
                     </div>
                 </td>
                 <td class="font-12em" style="vertical-align: middle">
-                    <span tooltip="Delete partner">
+                    <span uib-tooltip="Delete partner">
                     <i class="fa fa-trash-o fa-fw delete_icon" ng-click="removePartner(partner, $index)"></i>
                     </span>
                 </td>

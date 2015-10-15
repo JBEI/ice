@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.wor.controller', [])
-    .controller('WorContentController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams,
+    .controller('WorContentController', function ($rootScope, $scope, $location, $uibModal, $cookieStore, $stateParams,
                                                   WebOfRegistries, WorService) {
         $scope.selectedPartner = $stateParams.partner;
         $scope.loadingPage = true;
@@ -266,7 +266,7 @@ angular.module('ice.wor.controller', [])
             $location.path('web/' + $stateParams.partner + "/folder/" + folder.id);
         };
     })
-    .controller('WebOfRegistriesController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, WebOfRegistries, Remote, Util, Settings) {
+    .controller('WebOfRegistriesController', function ($rootScope, $scope, $location, $uibModal, $cookieStore, $stateParams, WebOfRegistries, Remote, Util, Settings) {
         var setting = Settings($cookieStore.get("sessionId"));
         $scope.newPartner = undefined;
         $scope.partnerStatusList = [
@@ -360,7 +360,7 @@ angular.module('ice.wor.controller', [])
             });
         }
     })
-    .controller('WebOfRegistriesMenuController', function ($rootScope, $scope, $location, $modal, $cookieStore,
+    .controller('WebOfRegistriesMenuController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
                                                            $stateParams, WebOfRegistries, Remote, Settings, Util) {
         // retrieve web of registries partners
         $scope.wor = WebOfRegistries().query({approved_only: true});

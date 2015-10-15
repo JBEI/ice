@@ -33,32 +33,32 @@
                     </small>&nbsp;</span><strong style="color: #888;">{{entry.type}}</strong>
                     <strong>{{entry.name}}</strong>&nbsp;
                     <span ng-show="entry.canEdit">
-                        <span dropdown tooltip="Link to another entry">
-                            <i dropdown-toggle class="fa fa-link opacity_hover font-80em"
+                        <span uib-dropdown uib-tooltip="Link to another entry">
+                            <i uib-dropdown-toggle class="fa fa-link opacity_hover font-80em"
                                style="color: #3a6aad;"></i>
                             <!--ng-click="addLink(entry)"-->
-                              <ul class="dropdown-menu" aria-labelledby="simple-dropdown">
+                              <ul class="uib-dropdown-menu" aria-labelledby="simple-dropdown">
                                   <li><a href ng-click="addLink(entry, 'PARENT')" class="font-80em"><i
                                           class="fa fa-level-up"></i> Add Parent</a></li>
                                   <li><a href ng-click="addLink(entry, 'CHILD')" class="font-80em"><i
                                           class="fa fa-level-down"></i> Add Child</a></li>
                               </ul>
                         </span>
-                        <span tooltip="Clone this entry">
+                        <span uib-tooltip="Clone this entry">
                             <i class="opacity_hover fa fa-clone font-80em" ng-click="createCopyOfEntry()"></i>
                             </span>
                     </span>
 
                     <span ng-if="entry.publicRead">&nbsp;
                         <small style="font-size: 12px; position: relative; top: -4px"
-                               tooltip="Available on web of registries"
+                               uib-tooltip="Available on web of registries"
                                tooltip-trigger="mouseenter"
                                class="label label-info cursor_default"><i class="fa fa-globe"></i>
                             Public
                         </small>
                     </span>
                     <span ng-repeat="parent in entry.parents">
-                    &nbsp;<a ng-href="entry/{{parent.id}}" tooltip="{{parent.name}}"
+                    &nbsp;<a ng-href="entry/{{parent.id}}" uib-tooltip="{{parent.name}}"
                              tooltip-trigger="mouseenter"
                              style="font-size: 12px; color: white; position: relative; top: -4px"
                              class="label cursor_pointer"

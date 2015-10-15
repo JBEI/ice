@@ -85,8 +85,8 @@
             <tr data-ng-repeat="result in searchResults.results">
                 <td ng-init="val=result.score/result.maxScore*100">
                     <div style="width: 75px">
-                        <progressbar animate='false' value='val' type='{{getType(val)}}'
-                                     style="margin-bottom: 0"></progressbar>
+                        <uib-progressbar animate='false' value='val' type='{{getType(val)}}'
+                                         style="margin-bottom: 0"></uib-progressbar>
                     </div>
                 </td>
                 <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
@@ -95,7 +95,7 @@
                 <td><a ng-href="web/{{result.partner.id}}/entry/{{result.entryInfo.id}}"
                        class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result)"
-                       popover-template="searchResultPopupTemplate"
+                       uib-popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -181,7 +181,7 @@
                 <td><a ng-href="web/{{result.partner.id}}/entry/{{result.entryInfo.id}}"
                        class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result)"
-                       popover-template="searchResultPopupTemplate"
+                       uib-popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -267,7 +267,7 @@
                 </td>
                 <td><a ng-click="goToEntryDetails(result.entryInfo, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                       popover-template="searchResultPopupTemplate"
+                       uib-popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -361,8 +361,8 @@
                 </td>
                 <td ng-init="val=(result.score/result.maxScore)*100">
                     <div style="width: 75px">
-                        <progressbar animate='false' value='val' type='{{getType(val)}}'
-                                     style="margin-bottom: 0"></progressbar>
+                        <uib-progressbar animate='false' value='val' type='{{getType(val)}}'
+                                         style="margin-bottom: 0"></uib-progressbar>
                     </div>
                 </td>
                 <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
@@ -370,7 +370,7 @@
                 </td>
                 <td><a ng-click="goToEntryDetails(result.entryInfo, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                       popover-template="searchResultPopupTemplate"
+                       uib-popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -408,10 +408,10 @@
 
     <div class="row" data-ng-if="searchResults && searchResults.results.length > 0" style="margin-top: -15px">
         <div class="col-md-6" style="padding-left: 0">
-            <pagination total-items="searchResults.resultCount" ng-change="searchResultPageChanged()"
+            <uib-pagination total-items="searchResults.resultCount" ng-change="searchResultPageChanged()"
                         ng-model="params.currentPage" max-size="maxSize"
                         class="pagination-sm" items-per-page="params.limit" boundary-links="true">
-            </pagination>
+            </uib-pagination>
         </div>
         <div class="col-md-4" style="margin: 22px 0;">
             <strong class="small">

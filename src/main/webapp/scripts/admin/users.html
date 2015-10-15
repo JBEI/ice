@@ -94,12 +94,12 @@
                 </td>
                 <td style="width:180px; white-space:nowrap; vertical-align: middle;">
                     <!-- Single button -->
-                    <div class="btn-group" dropdown>
-                        <button type="button" class="btn btn-xs dropdown-toggle" dropdown-toggle
+                    <div class="btn-group" uib-dropdown>
+                        <button type="button" class="btn btn-xs uib-dropdown-toggle" uib-dropdown-toggle
                                 ng-class="{'btn-warning':userItem.isAdmin, 'btn-default':!userItem.isAdmin}">
                             {{userItem.accountType |capitalize}} <span class="caret"></span>
                         </button>
-                        <ul class="dropdown-menu">
+                        <ul class="uib-dropdown-menu">
                             <li ng-if="userItem.accountType != 'ADMIN'"
                                 ng-click="setUserAccountType(userItem, 'ADMIN')"><a href="#">Admin</a></li>
                             <li ng-if="userItem.accountType != 'NORMAL'"
@@ -125,9 +125,10 @@
 
     <div ng-if="userList && userList.users.length > 0">
         <div class="col-md-5" style="padding-left: 0">
-            <pagination total-items="userList.resultCount" ng-change="userListPageChanged()"
+            <uib-pagination total-items="userList.resultCount" ng-change="userListPageChanged()"
                         ng-model="userListParams.currentPage"
-                        max-size="maxSize" class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+                            max-size="maxSize" class="pagination-sm" items-per-page="15"
+                            boundary-links="true"></uib-pagination>
         </div>
 
         <div class="col-md-7" style="margin-top: 25px;">

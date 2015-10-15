@@ -83,7 +83,7 @@
                 <td><a ng-click="getRemoteEntryDetails(selectedPartner.id, entry.id, $index)"
                        class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
-                       popover-template="worFolderContentsPopoverTemplate"
+                       uib-popover-template="worFolderContentsPopoverTemplate"
                        popover-placement="right">{{entry.partId}}</a>
                 </td>
                 <td>
@@ -117,9 +117,10 @@
     </div>
     <div class="row" ng-if="selectedPartnerFolder&&selectedPartnerFolder.entries.length > 0">
         <div class="col-md-5" style="padding-left: 0">
-            <pagination total-items="selectedPartnerFolder.count" ng-change="worFolderContentPageChange()"
+            <uib-pagination total-items="selectedPartnerFolder.count" ng-change="worFolderContentPageChange()"
                         ng-model="params.currentPage"
-                        max-size="maxSize" class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+                            max-size="maxSize" class="pagination-sm" items-per-page="15"
+                            boundary-links="true"></uib-pagination>
         </div>
         <div class="col-md-7" style="margin-top: 25px;">
             <strong class="small">

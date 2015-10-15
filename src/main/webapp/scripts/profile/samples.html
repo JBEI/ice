@@ -52,9 +52,10 @@
 
     <div ng-if='userSamples && userSamples.requests.length > 0' style="margin-top: -15px">
         <div class="col-md-6" style="padding-left: 0">
-            <pagination total-items="userSamples.count" ng-change="profileSamplesPageChanged()"
+            <uib-pagination total-items="userSamples.count" ng-change="profileSamplesPageChanged()"
                         ng-model="params.currentPage"
-                        max-size="maxSize" class="pagination-sm" items-per-page="15" boundary-links="true"></pagination>
+                            max-size="maxSize" class="pagination-sm" items-per-page="15"
+                            boundary-links="true"></uib-pagination>
         </div>
         <div class="col-md-4" style="margin-top: 25px;"><strong class="small">
             <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(params.currentPage,

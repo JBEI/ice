@@ -9,9 +9,9 @@
 </div>
 
 <div class="pad_top" ng-init="getSetting()">
-    <tabset>
-        <tab>
-            <tab-heading><i class="fa fa-gear"></i> General Settings</tab-heading>
+    <uib-tabset>
+        <uib-tab>
+            <uib-tab-heading><i class="fa fa-gear"></i> General Settings</uib-tab-heading>
             <div class="pad_top" ng-repeat="setting in generalSettings">
                 <div class="col-md-3 entryLabel text-right">
                     <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">{{setting.key}}</span>
@@ -47,10 +47,10 @@
 
 
             </div>
-        </tab>
+        </uib-tab>
 
-        <tab>
-            <tab-heading><i class="fa fa-envelope"></i> Email Settings</tab-heading>
+        <uib-tab>
+            <uib-tab-heading><i class="fa fa-envelope"></i> Email Settings</uib-tab-heading>
             <div class="pad_top" ng-repeat="setting in emailSettings">
                 <div class="col-md-3 entryLabel text-right">
                     <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">{{setting.key}}</span>
@@ -83,9 +83,9 @@
                     </div>
                 </div>
             </div>
-        </tab>
+        </uib-tab>
 
-    </tabset>
+    </uib-tabset>
 </div>
 
 

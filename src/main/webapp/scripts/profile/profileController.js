@@ -9,7 +9,7 @@ angular.module('ice.profile.controller', [])
             $scope.messages = result;
         });
     })
-    .controller('ApiKeysController', function ($scope, $modal, Util) {
+    .controller('ApiKeysController', function ($scope, $uibModal, Util) {
         $scope.apiKeys = undefined;
 
         // retrieve existing api keys for current user
@@ -20,7 +20,7 @@ angular.module('ice.profile.controller', [])
         };
 
         $scope.openApiKeyRequest = function () {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/profile/modal/api-key-request.html',
                 controller: function ($scope, $modalInstance, Util) {
 

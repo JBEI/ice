@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.upload.controller', [])
-    .controller('UploadController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource,
+    .controller('UploadController', function ($rootScope, $location, $scope, $uibModal, $cookieStore, $resource,
                                               $stateParams, FileUploader, $http, Upload, UploadUtil) {
         var sid = $cookieStore.get("sessionId");
         var upload = Upload(sid);
@@ -664,7 +664,7 @@ angular.module('ice.upload.controller', [])
             $scope.spreadSheet = $dataTable.data('handsontable');
 
             $scope.fileUploadModal = function () {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'scripts/upload/modal/file-upload.html',
                     controller: 'BulkUploadModalController',
                     backdrop: 'static',
@@ -685,7 +685,7 @@ angular.module('ice.upload.controller', [])
             };
 
             $scope.confirmResetFormModal = function () {
-                var resetModalInstance = $modal.open({
+                var resetModalInstance = $uibModal.open({
                     templateUrl: 'scripts/upload/modal/reset-bulk-upload-sheet.html',
                     controller: 'BulkUploadModalController',
                     backdrop: 'static',
@@ -706,7 +706,7 @@ angular.module('ice.upload.controller', [])
             };
 
             $scope.confirmRejectUploadModal = function () {
-                var resetModalInstance = $modal.open({
+                var resetModalInstance = $uibModal.open({
                     templateUrl: 'scripts/upload/modal/reject-upload.html',
                     controller: 'BulkUploadRejectModalController',
                     backdrop: 'static',
@@ -719,7 +719,7 @@ angular.module('ice.upload.controller', [])
             };
 
             $scope.setPermissionsModal = function () {
-                var modelInstance = $modal.open({
+                var modelInstance = $uibModal.open({
                     templateUrl: 'scripts/upload/modal/permissions.html',
                     controller: 'BulkUploadPermissionsController',
                     backdrop: 'static',
@@ -756,7 +756,7 @@ angular.module('ice.upload.controller', [])
                         $scope.requestError = "Unknown server error";
                     }
 
-                    var resetModalInstance = $modal.open({
+                    var resetModalInstance = $uibModal.open({
                         templateUrl: 'scripts/upload/modal/upload-submit-alert.html',
                         controller: function ($scope, msg, isError) {
                             $scope.requestError = msg;
@@ -776,7 +776,7 @@ angular.module('ice.upload.controller', [])
             };
 
             $scope.showBulkUploadRenameModal = function () {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'scripts/upload/modal/rename-bulk-upload-sheet.html',
                     controller: function ($scope, $modalInstance, uploadName) {
                         $scope.newBulkUploadName = uploadName;

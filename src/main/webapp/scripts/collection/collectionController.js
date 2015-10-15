@@ -2,7 +2,7 @@
 
 angular.module('ice.collection.controller', [])
     // controller for <ice.menu.collections> directive
-    .controller('CollectionMenuController', function ($cookieStore, $scope, $modal, $rootScope, $location, $stateParams,
+    .controller('CollectionMenuController', function ($cookieStore, $scope, $uibModal, $rootScope, $location, $stateParams,
                                                       Folders, FolderSelection, EntryContextUtil, Util) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
@@ -136,7 +136,7 @@ angular.module('ice.collection.controller', [])
     })
     // deals with sub collections e.g. /folders/:id
     // retrieves the contents of folders
-    .controller('CollectionFolderController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, Folders, Entry, EntryContextUtil, Selection) {
+    .controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $cookieStore, $stateParams, Folders, Entry, EntryContextUtil, Selection) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
         var entry = Entry(sessionId);
@@ -281,7 +281,7 @@ angular.module('ice.collection.controller', [])
 
         // opens a modal that presents user with options to share selected folder
         $scope.openFolderShareSettings = function () {
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'views/modal/folder-permissions.html',
                 controller: "FolderPermissionsController",
                 backdrop: "static",
@@ -333,7 +333,7 @@ angular.module('ice.collection.controller', [])
             if (!$scope.folder.canEdit)
                 return;
 
-            var modalInstance = $modal.open({
+            var modalInstance = $uibModal.open({
                 templateUrl: 'views/folder/modal/rename-folder.html',
                 controller: function ($scope, $modalInstance, folderName) {
                     $scope.newFolderName = folderName;
