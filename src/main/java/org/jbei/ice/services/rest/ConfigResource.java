@@ -30,7 +30,7 @@ public class ConfigResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<Setting> get(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
-        final String userId = getUserId();
+        final String userId = getUserId(sessionId);
         return controller.retrieveSystemSettings(userId);
     }
 
@@ -56,7 +56,9 @@ public class ConfigResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Setting getConfig(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
                              @PathParam("key") final String key) {
-        final String userId = getUserId(sessionId);
+        if (!"NEW_REGISTRATION_ALLOWED".equalsIgnoreCase(key) && !"PASSWORD_CHANGE_ALLOWED".equalsIgnoreCase(key)) {
+            getUserId(sessionId);
+        }
         return controller.getPropertyValue(key);
     }
 

@@ -89,7 +89,7 @@ angular.module('ice.profile.controller', [])
             });
         };
     })
-    .controller('ProfileController', function ($scope, $location, $cookieStore, $rootScope, $stateParams, User, Settings) {
+    .controller('ProfileController', function ($scope, $location, $cookieStore, $rootScope, $stateParams, User, Util) {
         $scope.showChangePassword = false;
         $scope.showEditProfile = false;
         $scope.showSendMessage = false;
@@ -97,7 +97,7 @@ angular.module('ice.profile.controller', [])
         $scope.passwordChangeAllowed = false;
 
         // get settings
-        Settings().getSetting({key: 'PASSWORD_CHANGE_ALLOWED'}, function (result) {
+        Util.get("/rest/config/PASSWORD_CHANGE_ALLOWED", function (result) {
             $scope.passwordChangeAllowed = (result.value.toLowerCase() === 'yes');
         });
 

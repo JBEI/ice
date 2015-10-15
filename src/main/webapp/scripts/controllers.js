@@ -315,7 +315,7 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
     }
 });
 
-iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Authentication, Settings, AccessToken) {
+iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Authentication, Settings, Util, AccessToken) {
     $scope.login = {};
 
     $scope.submit = function () {
@@ -372,12 +372,12 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
     $scope.canChangePassword = false;
     $scope.errMsg = undefined;
 
-    Settings().getSetting({key: 'NEW_REGISTRATION_ALLOWED'}, function (result) {
+    Util.get('/rest/config/NEW_REGISTRATION_ALLOWED', function (result) {
         $scope.canCreateAccount = (result !== undefined && result.key === 'NEW_REGISTRATION_ALLOWED'
         && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
     });
 
-    Settings().getSetting({key: 'PASSWORD_CHANGE_ALLOWED'}, function (result) {
+    Util.get('/rest/config/PASSWORD_CHANGE_ALLOWED', function (result) {
         $scope.canChangePassword = (result !== undefined && result.key === 'PASSWORD_CHANGE_ALLOWED'
         && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
     });
