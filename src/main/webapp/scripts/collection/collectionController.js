@@ -361,7 +361,16 @@ angular.module('ice.collection.controller', [])
         }
     })
     // also the main controller
-    .controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope, Folders, Settings, Search, Samples) {
+    .controller('CollectionController', function ($scope,
+                                                  $state,
+                                                  $filter,
+                                                  $location,
+                                                  $cookieStore,
+                                                  $rootScope,
+                                                  Folders,
+                                                  Settings,
+                                                  Search,
+                                                  Samples) {
         // todo : set on all
         var searchUrl = "search";
         if ($location.path().slice(0, searchUrl.length) != searchUrl) {
@@ -371,6 +380,9 @@ angular.module('ice.collection.controller', [])
         var sessionId = $cookieStore.get("sessionId");
         $scope.searchFilters = {};
         $rootScope.settings = {};
+        $scope.logo = $rootScope.siteSettings.logo;
+        $scope.loginMessage = $rootScope.siteSettings.loginMessage;
+
 
         // retrieve site wide settings
         $scope.pageCounts = function (currentPage, resultCount, maxPageCount) {

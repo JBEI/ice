@@ -37,6 +37,7 @@ public enum ConfigurationKey implements IDataTransferModel {
     WEB_OF_REGISTRIES_MASTER("registry.jbei.org"),
     
     AUTHENTICATION_BACKEND("org.jbei.ice.lib.account.authentication.LocalAuthentication");
+//    LOGO("asfsdaf");
 
     private String defaultValue;
 

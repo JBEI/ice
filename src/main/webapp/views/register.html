@@ -1,12 +1,12 @@
-<div class="container-fluid">
+<div ng-if="siteSettings" class="container-fluid">
     <div class="row" style="margin-top: 80px">
         <div class="col-xs-6">
             <div class="pull-right">
-                <ng-include src="'views/institution.html'"></ng-include>
+                <ng-include src="siteSettings.loginMessage"></ng-include>
             </div>
         </div>
         <div class="col-xs-6">
-            <br><img src="img/logo.png"><br><br>
+            <br><img src="{{siteSettings.logo}}"><br><br>
 
             <div class="alert alert-danger" style="width: 250px; padding: 8px" ng-if="errMsg">
                 <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>

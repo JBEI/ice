@@ -1,3 +1,4 @@
+<%@ page import="com.google.gson.Gson" %>
 <!doctype html>
 <html lang="en" data-ng-app="iceApp">
 <head>
@@ -33,7 +34,6 @@
 
     <!-- GRUNT START -->
     <script src="scripts/ice.app.js"></script>
-
     <script src="scripts/common/ice.common.js"></script>
     <script src="scripts/common/commonService.js"></script>
     <script src="scripts/search/ice.search.js"></script>
@@ -73,30 +73,10 @@
     <!-- GRUNT END -->
 </head>
 
-<body>
+<body >
 <div id="container">
     <div id="body" ui-view></div>
-    <div class="navbar-fixed-bottom" style="border-top: 1px solid #BBBAAA; background-color: white;">
-        <div class="container-fluid font-90em" style="margin-top: 3px">
-            <div class="col-sm-10">
-                <img src="img/doe-bioenergy-research-cent.gif" height="60px">
-                <img src="img/lbnl-logo.gif" height="60px">
-                <img src="img/sandia-lab-logo.gif" height="60px">
-                <img src="img/ucb-logo.gif" height="60px">
-                <img src="img/ucdavis-logo.gif" height="60px">
-                <img src="img/carnegie-institution-logo.gif" height="60px">
-                <img src="img/llnl-logo.gif" height="60px">
-                <img src="img/pnw.png" height="60px">
-            </div>
-            <div class="text-right">
-                &copy;&nbsp;<a href="https://github.com/JBEI/ice">JBEI ICE Registry</a> <span
-                    class="label label-primary">v4.5.2</span><br>
-                All rights reserved. <br>
-                <a href="https://github.com/JBEI/ice/issues/new">Submit an Issue</a>&nbsp; <span class="text-muted">|</span> &nbsp;<a
-                    href="http://public-registry.jbei.org/manual">Help</a>
-            </div>
-        </div>
-    </div>
+    <ng-include src="siteSettings.footer"></ng-include>
 </div>
 
 </body>

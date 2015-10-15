@@ -288,8 +288,12 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
     }
 });
 
-iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location, User) {
+iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location, $rootScope, $sce, User) {
     $scope.user = {};
+
+    var siteSettings = $rootScope.siteSettings;
+    $scope.logo = siteSettings.logo;
+    $scope.loginMessage = $sce.trustAsHtml(siteSettings.loginMessage);
 
     $scope.resetPassword = function () {
         $scope.user.processing = true;
@@ -324,9 +328,15 @@ iceControllers.controller('MessageController', function ($scope, $location, $coo
     });
 });
 
-iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Authentication, Settings, AccessToken) {
+iceControllers.controller('LoginController', function ($scope,
+                                                       $location,
+                                                       $cookieStore,
+                                                       $cookies,
+                                                       $rootScope,
+                                                       Authentication,
+                                                       Settings,
+                                                       AccessToken) {
     $scope.login = {};
-
     $scope.submit = function () {
         $scope.errMsg = undefined;
         $scope.login.processing = true;

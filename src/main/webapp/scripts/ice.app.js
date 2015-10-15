@@ -17,13 +17,28 @@ iceApp.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $
     };
 }]);
 
+iceApp.run(function($http, $rootScope){
+    //
+    //{
+    //    "logo": "img/logo.png",
+    //    "loginMessage": "views/institution.html",
+    //    "footer": 'views/footer.html',
+    //    "version": "-"
+    //};
+    //
+    $http({ method: 'GET', url: '/rest/config/site' }).
+        success(function (data, status, headers, config) {
+            $rootScope.siteSettings = data;
+        });
+});
+
 iceApp.run(function (Authentication, $rootScope) {
     $rootScope.logout = function () {
         Authentication.logout();
     };
 });
 
-iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
+iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $sceDelegateProvider) {
     $locationProvider.html5Mode(true);
 
     $urlRouterProvider.otherwise('/');

@@ -3,6 +3,7 @@ package org.jbei.ice.services.rest;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.search.IndexType;
+import org.jbei.ice.lib.models.SiteSetting;
 import org.jbei.ice.lib.search.SearchController;
 
 import javax.ws.rs.*;
@@ -32,6 +33,13 @@ public class ConfigResource extends RestResource {
     public ArrayList<Setting> get() {
         final String userId = getUserId();
         return controller.retrieveSystemSettings(userId);
+    }
+
+    @GET
+    @Path("/site")
+    @Produces(MediaType.APPLICATION_JSON)
+    public SiteSetting getSiteSettings() {
+        return new SiteSetting();
     }
 
     /**
