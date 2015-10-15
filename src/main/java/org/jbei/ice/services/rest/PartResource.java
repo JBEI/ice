@@ -195,7 +195,7 @@ public class PartResource extends RestResource {
             @PathParam("id") final long partId,
             final Study study) {
         final String userId = getUserId(sessionId);
-        final Study created = experiments.createStudy(userId, partId, study);
+        final Study created = experiments.createOrUpdateStudy(userId, partId, study);
         return respond(Response.Status.OK, created);
     }
 

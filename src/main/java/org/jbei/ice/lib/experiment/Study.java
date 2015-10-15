@@ -16,6 +16,14 @@ public class Study implements IDataTransferModel {
     private String ownerEmail;
     private long created;
 
+    public Study() {
+    }
+
+    public Study(String label, String url) {
+        this.label = label;
+        this.url = url;
+    }
+
     public long getId() {
         return id;
     }

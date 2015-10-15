@@ -21,6 +21,7 @@ public class ExperimentDAO extends HibernateRepository<Experiment> {
         return super.get(Experiment.class, id);
     }
 
+    @SuppressWarnings("unchecked")
     public List<Experiment> getExperimentList(long entryId) {
         try {
             String sql = "SELECT DISTINCT e FROM Experiment e JOIN e.subjects s WHERE s.id=:id";
@@ -48,8 +49,8 @@ public class ExperimentDAO extends HibernateRepository<Experiment> {
 
     public Experiment getByUrl(String url) throws DAOException {
         try {
-            Criteria criteria = currentSession().createCriteria(Experiment.class.getName()).add(Restrictions.eq("url",
-                                                                                                                url));
+            Criteria criteria = currentSession().createCriteria(Experiment.class.getName())
+                    .add(Restrictions.eq("url", url));
             return (Experiment) criteria.uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);

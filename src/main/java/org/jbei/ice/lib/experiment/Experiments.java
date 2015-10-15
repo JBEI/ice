@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Manages all things experiment related
+ * Links to experimental data associated with entries
  *
  * @author Hector Plahar
  */
@@ -31,6 +31,16 @@ public class Experiments {
         entryDAO = DAOFactory.getEntryDAO();
     }
 
+    /**
+     * Retrieves experiment data associated with a specific entry
+     *
+     * @param userId unique identifier for user making request
+     * @param partId unique identifier for entry whose experiment links are being retrieved. The user making the request
+     *               must have read privileges on the entry
+     * @return list of experiment studies associated with the specified entry, or null if the entry does not exist
+     * @throws PermissionException if the specified user does not have read privileges on the
+     *                             specified entry
+     */
     public ArrayList<Study> getPartStudies(String userId, long partId) {
         Entry entry = entryDAO.get(partId);
         if (entry == null)
@@ -50,7 +60,16 @@ public class Experiments {
         return studies;
     }
 
-    public Study createStudy(String userId, long partId, Study study) {
+    /**
+     * Creates a new study for a particular entry. If a unique identifier is associated with the {@link Study} object
+     * then an update occurs instead of a new object being created
+     *
+     * @param userId id of user making request. Must have write privileges on the entry
+     * @param partId id of entry the study is being created for
+     * @param study  data for study
+     * @return saved study (including unique identifier)
+     */
+    public Study createOrUpdateStudy(String userId, long partId, Study study) {
         Entry entry = entryDAO.get(partId);
         if (entry == null)
             return null;
@@ -74,13 +93,27 @@ public class Experiments {
             experiment.setUrl(study.getUrl());
             experiment.setLabel(study.getLabel());
             experiment.getSubjects().add(entry);
+            experiment.setOwnerEmail(userId);
             experiment = dao.create(experiment);
             return experiment.toDataTransferObject();
         }
+
+        experiment.setUrl(study.getUrl());
+        experiment.setLabel(study.getLabel());
         experiment.getSubjects().add(entry);
         return dao.update(experiment).toDataTransferObject();
     }
 
+    /**
+     * Deletes a study associated with the specified part and with the specified unique identifier.
+     * User making request must have created the study ({@see createOrUpdateStudy()}) or must have write
+     * permissions for the part that the study is associated with
+     *
+     * @param userId  id of user making request
+     * @param partId  id of part study is associated with
+     * @param studyId id of study to be deleted
+     * @return true if study is found and deleted successfully, false otherwise
+     */
     public boolean deleteStudy(String userId, long partId, long studyId) {
         Experiment experiment = dao.get(studyId);
         if (experiment == null)
@@ -91,8 +124,6 @@ public class Experiments {
             Logger.error("Could not retrieve entry with id " + partId);
             return false;
         }
-
-        entryAuthorization.expectRead(userId, entry);
 
         if (!entryAuthorization.canWriteThoroughCheck(userId, entry) &&
                 !experiment.getOwnerEmail().equalsIgnoreCase(userId)) {
