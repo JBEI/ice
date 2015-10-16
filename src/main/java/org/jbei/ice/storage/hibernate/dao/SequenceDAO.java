@@ -59,7 +59,12 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
                     throw new DAOException("SequenceFeature has no feature");
                 }
 
-                Feature existingFeature = getFeatureBySequence(feature.getSequence());
+                Feature existingFeature = null;
+                try {
+                    existingFeature = getFeatureBySequence(feature.getSequence());
+                } catch (DAOException de) {
+                    // ok to ignore
+                }
 
                 if (existingFeature == null) { // new feature -> save it
                     existingFeature = saveFeature(feature); // tODO : this needs to be handled by another DAO
@@ -200,8 +205,8 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         Session session = currentSession();
         try {
             Number itemCount = (Number) session.createCriteria(Sequence.class)
-                                               .setProjection(Projections.countDistinct("id"))
-                                               .add(Restrictions.eq("entry.id", entryId)).uniqueResult();
+                    .setProjection(Projections.countDistinct("id"))
+                    .add(Restrictions.eq("entry.id", entryId)).uniqueResult();
             return itemCount.intValue() > 0;
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve sequence by entry: " + entryId, e);
@@ -226,12 +231,12 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         Session session = currentSession();
         try {
             Number itemCount = (Number) session.createCriteria(Sequence.class)
-                                               .setProjection(Projections.countDistinct("id"))
-                                               .add(Restrictions.eq("entry.id", entryId))
-                                               .add(Restrictions.conjunction().add(
-                                                       Restrictions.ne("sequenceUser", "")).add(
-                                                       Restrictions.isNotNull("sequenceUser")))
-                                               .uniqueResult();
+                    .setProjection(Projections.countDistinct("id"))
+                    .add(Restrictions.eq("entry.id", entryId))
+                    .add(Restrictions.conjunction().add(
+                            Restrictions.ne("sequenceUser", "")).add(
+                            Restrictions.isNotNull("sequenceUser")))
+                    .uniqueResult();
 
             return itemCount.intValue() > 0;
         } catch (HibernateException e) {
@@ -244,12 +249,12 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      * <p>
      * Expected usage is
      * <code>
-     *     long count = getSequenceCount();
-     *     int offset = 0;
-     *     while( offset < count ) {
-     *         Sequence sequence = dao.getSequence(offset);
-     *         // do something with sequence
-     *     }
+     * long count = getSequenceCount();
+     * int offset = 0;
+     * while( offset < count ) {
+     * Sequence sequence = dao.getSequence(offset);
+     * // do something with sequence
+     * }
      * </code>
      *
      * @return Sequence at the specified offset
@@ -335,12 +340,9 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
 
     /**
      * Normalize {@link AnnotationLocation}s by fixing strangely defined annotationLocations.
-     * <p/>
+     * <p>
      * Fix locations that encompass the entire sequence, but defined strangely. This causes problems
      * elsewhere.
-     *
-     * @param sequence
-     * @return
      */
     private static Sequence normalizeAnnotationLocations(Sequence sequence) {
         if (sequence == null) {
