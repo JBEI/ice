@@ -1,7 +1,7 @@
 package org.jbei.ice.servlet;
 
 import org.hibernate.SessionFactory;
-import org.jbei.ice.ApplicationController;
+import org.jbei.ice.ApplicationInitialize;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
@@ -53,7 +53,7 @@ public class IceServletContextListener implements ServletContextListener {
     protected void init() {
         try {
             HibernateUtil.beginTransaction();
-            ApplicationController.initialize();
+            ApplicationInitialize.startUp();
             HibernateUtil.commitTransaction();
         } catch (Throwable e) {
             HibernateUtil.rollbackTransaction();

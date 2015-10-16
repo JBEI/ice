@@ -1,32 +1,23 @@
 package org.jbei.ice;
 
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
-import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
+import org.jbei.ice.lib.search.blast.BlastPlus;
 
 /**
- * Application wide controller with responsibilities for also system initialization
+ * Responsible for initializing the ICE application
+ * on startup
  *
  * @author Hector Plahar
  */
-public class ApplicationController {
-
-    /**
-     * Schedule task to rebuild the blast index
-     */
-    public static void scheduleBlastIndexRebuildTask(boolean force) {
-        RebuildBlastIndexTask task = new RebuildBlastIndexTask(force);
-        IceExecutorService.getInstance().runTask(task);
-    }
+public class ApplicationInitialize {
 
     /**
      * Responsible for initializing the system and checking for the existence of needed
      * data (such as settings) and creating as needed
      */
-    public static void initialize() {
+    public static void startUp() {
         // check for and create public group
         GroupController groupController = new GroupController();
         groupController.createOrRetrievePublicGroup();
@@ -40,7 +31,6 @@ public class ApplicationController {
         configurationController.initPropertyValues();
 
         // check blast
-        Logger.info("Checking blast database");
-        scheduleBlastIndexRebuildTask(false);
+        BlastPlus.scheduleBlastIndexRebuildTask(false);
     }
 }

@@ -1,11 +1,11 @@
 package org.jbei.ice.lib.entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
@@ -34,7 +34,7 @@ public class EntryCreator {
 
     /**
      * Create an entry in the database.
-     * <p/>
+     * <p>
      * Generates a new Part Number, the record id (UUID), version id, and timestamps.
      * Optionally set the record globally visible or schedule an index rebuild.
      *
@@ -112,7 +112,7 @@ public class EntryCreator {
 
         // rebuild blast database
         if (sequenceDAO.hasSequence(entry.getId())) {
-            ApplicationController.scheduleBlastIndexRebuildTask(true);
+            BlastPlus.scheduleBlastIndexRebuildTask(true);
         }
 
         return entry;
@@ -175,7 +175,8 @@ public class EntryCreator {
                     linked = createEntry(account, linkedEntry, data.getAccessPermissions());
                 }
 
-                entry.getLinkedEntries().add(linked);
+                if (entry != null)
+                    entry.getLinkedEntries().add(linked);
             }
         }
 

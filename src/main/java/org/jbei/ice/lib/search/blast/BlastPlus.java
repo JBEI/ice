@@ -16,6 +16,7 @@ import org.jbei.ice.lib.dto.search.BlastProgram;
 import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
 import org.jbei.ice.lib.entry.EntryRetriever;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -305,6 +306,14 @@ public class BlastPlus {
         }
 
         return result;
+    }
+
+    /**
+     * Schedule task to rebuild the blast index
+     */
+    public static void scheduleBlastIndexRebuildTask(boolean force) {
+        RebuildBlastIndexTask task = new RebuildBlastIndexTask(force);
+        IceExecutorService.getInstance().runTask(task);
     }
 
     /**

@@ -2,7 +2,6 @@ package org.jbei.ice.lib.entry.sequence;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
@@ -17,6 +16,7 @@ import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.parsers.GeneralParser;
+import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.storage.DAOFactory;
@@ -105,7 +105,7 @@ public class SequenceController {
             sequence.setFileName(name);
 
         Sequence result = dao.saveSequence(sequence);
-        ApplicationController.scheduleBlastIndexRebuildTask(true);
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
         SequenceInfo info = result.toDataTransferObject();
         info.setSequence(dnaSequence);
         return info;
@@ -122,7 +122,7 @@ public class SequenceController {
     public Sequence save(String userId, Sequence sequence) {
         authorization.expectWrite(userId, sequence.getEntry());
         Sequence result = dao.saveSequence(sequence);
-        ApplicationController.scheduleBlastIndexRebuildTask(true);
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
         return result;
     }
 
@@ -139,7 +139,7 @@ public class SequenceController {
 
 //        sequence = update(userId, sequence);
         sequence = save(userId, sequence);
-        ApplicationController.scheduleBlastIndexRebuildTask(true);
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
 
         if (sequence != null)
             return sequenceToDNASequence(sequence);
@@ -180,7 +180,7 @@ public class SequenceController {
             result = dao.updateSequence(oldSequence, sequence.getSequenceFeatures());
         }
 
-        ApplicationController.scheduleBlastIndexRebuildTask(true);
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
         return result;
     }
 
@@ -194,7 +194,7 @@ public class SequenceController {
 
         String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         dao.deleteSequence(sequence, tmpDir);
-        ApplicationController.scheduleBlastIndexRebuildTask(true);
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
         return true;
     }
 

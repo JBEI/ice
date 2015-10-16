@@ -2,7 +2,6 @@ package org.jbei.ice.lib.bulkupload;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -16,6 +15,7 @@ import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
@@ -518,7 +518,7 @@ public class BulkEntryCreator {
                     sequence.setFileName(sequenceName);
                     Sequence result = DAOFactory.getSequenceDAO().saveSequence(sequence);
                     if (result != null)
-                        ApplicationController.scheduleBlastIndexRebuildTask(true);
+                        BlastPlus.scheduleBlastIndexRebuildTask(true);
                 }
             }
         } catch (IOException e) {
