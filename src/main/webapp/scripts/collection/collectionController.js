@@ -380,8 +380,6 @@ angular.module('ice.collection.controller', [])
         var sessionId = $cookieStore.get("sessionId");
         $scope.searchFilters = {};
         $rootScope.settings = {};
-        $scope.logo = $rootScope.siteSettings.logo;
-        $scope.loginMessage = $rootScope.siteSettings.loginMessage;
 
 
         // retrieve site wide settings

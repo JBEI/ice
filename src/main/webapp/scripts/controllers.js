@@ -291,10 +291,6 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
 iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location, $rootScope, $sce, User) {
     $scope.user = {};
 
-    var siteSettings = $rootScope.siteSettings;
-    $scope.logo = siteSettings.logo;
-    $scope.loginMessage = $sce.trustAsHtml(siteSettings.loginMessage);
-
     $scope.resetPassword = function () {
         $scope.user.processing = true;
 

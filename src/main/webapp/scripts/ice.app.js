@@ -18,14 +18,6 @@ iceApp.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $
 }]);
 
 iceApp.run(function($http, $rootScope){
-    //
-    //{
-    //    "logo": "img/logo.png",
-    //    "loginMessage": "views/institution.html",
-    //    "footer": 'views/footer.html',
-    //    "version": "-"
-    //};
-    //
     $http({ method: 'GET', url: '/rest/config/site' }).
         success(function (data, status, headers, config) {
             $rootScope.siteSettings = data;

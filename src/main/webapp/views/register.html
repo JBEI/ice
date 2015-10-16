@@ -1,4 +1,4 @@
-<div ng-if="siteSettings" class="container-fluid">
+<div  class="container-fluid">
     <div class="row" style="margin-top: 80px">
         <div class="col-xs-6">
             <div class="pull-right">
@@ -6,7 +6,7 @@
             </div>
         </div>
         <div class="col-xs-6">
-            <br><img src="{{siteSettings.logo}}"><br><br>
+            <br><img ng-src="{{siteSettings.logo}}"><br><br>
 
             <div class="alert alert-danger" style="width: 250px; padding: 8px" ng-if="errMsg">
                 <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
