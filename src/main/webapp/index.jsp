@@ -1,4 +1,3 @@
-<%@ page import="com.google.gson.Gson" %>
 <!doctype html>
 <html lang="en" data-ng-app="iceApp">
 <head>
