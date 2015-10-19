@@ -16,6 +16,7 @@ import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.ShotgunSequenceDTO;
 import org.jbei.ice.lib.dto.comment.UserComment;
+import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
@@ -23,6 +24,7 @@ import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.TraceSequences;
 import org.jbei.ice.lib.experiment.Experiments;
 import org.jbei.ice.lib.experiment.Study;
 import org.jbei.ice.lib.net.TransferredParts;
@@ -413,23 +415,28 @@ public class PartResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param partId
      * @return traces for the part
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/traces")
-    public ArrayList<TraceSequenceAnalysis> getTraces(
+    public Response getTraces(
             @Context final UriInfo info,
             @PathParam("id") final long partId,
+            @DefaultValue("1000") @QueryParam("limit") int limit,
+            @DefaultValue("0") @QueryParam("start") int start,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
             @QueryParam("sid") final String sid) {
         String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
         final String userId = getUserId(sessionId);
-        return controller.getTraceSequences(userId, partId);
-    }
+        TraceSequences traceSequences = new TraceSequences(userId, partId);
+        Results<TraceSequenceAnalysis> results = traceSequences.getTraces(start, limit);
 
+        // hack for trace sequence viewer without having to modify it
+        if (StringUtils.isEmpty(userAgentHeader))
+            return super.respond(new ArrayList<>(results.getData()));
+        return super.respond(results);
+    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

@@ -146,7 +146,7 @@
                     <input type="text" ng-model="quickEdit[field.schema]" maxlength="150" focus
                            ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                            placeHolder={{field.placeHolder}} style="width:205px;" typeahead-loading="loadingData"
-                           typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue"
+                           uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue"
                            ng-change="field.dirty=true">
                     <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
 
@@ -191,7 +191,7 @@
                 <input ng-model="link.value" type="text" typeahead-loading="loadingData"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
-                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
+                       uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
                 <span ng-if="entry[field.schema].length===1" uib-tooltip="Add another" tooltip-placement="right"
                       ng-click="addLink(field.schema, $index)">
                     <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
@@ -203,7 +203,7 @@
                 <input type="text" ng-model="link.value" maxlength="125" style="width: 400px;"
                        ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
                        ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
-                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
+                       uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
                 <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)" style="padding:3px;
                 background-color: #f1f1f1;width: 19px; border-left: 0">
                     <i class="fa fa-minus delete_icon"></i>

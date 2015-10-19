@@ -117,9 +117,9 @@ public class SequenceAnalysisController {
         if (sequence == null) { // it will remove invalid alignments
             rebuildAllAlignments(entry);
 
-            traces = traceDao.getByEntry(entry);
+            traces = traceDao.getByEntry(entry, 0, Integer.MAX_VALUE);
         } else {
-            traces = traceDao.getByEntry(entry);
+            traces = traceDao.getByEntry(entry, 0, Integer.MAX_VALUE);
 
             boolean wasUpdated = false;
             for (TraceSequence traceSequence : traces) {
@@ -133,7 +133,7 @@ public class SequenceAnalysisController {
             }
 
             if (wasUpdated) { // fetch again because alignment has been updated
-                traces = traceDao.getByEntry(entry);
+                traces = traceDao.getByEntry(entry, 0, Integer.MAX_VALUE);
             }
         }
 

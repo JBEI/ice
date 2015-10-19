@@ -4,7 +4,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.AuditType;
@@ -12,7 +11,10 @@ import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.comment.UserComment;
-import org.jbei.ice.lib.dto.entry.*;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PartStatistics;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
@@ -210,43 +212,6 @@ public class EntryController {
             return false;
         }
         return true;
-    }
-
-    public ArrayList<TraceSequenceAnalysis> getTraceSequences(String userId, long entryId) {
-        Entry entry = dao.get(entryId);
-        if (entry == null)
-            return null;
-
-        authorization.expectRead(userId, entry);
-        List<TraceSequence> sequences = DAOFactory.getTraceSequenceDAO().getByEntry(entry);
-
-        ArrayList<TraceSequenceAnalysis> analysisArrayList = new ArrayList<>();
-        if (sequences == null)
-            return analysisArrayList;
-
-        AccountController accountController = new AccountController();
-
-        for (TraceSequence traceSequence : sequences) {
-            TraceSequenceAnalysis analysis = traceSequence.toDataTransferObject();
-            AccountTransfer accountTransfer = new AccountTransfer();
-
-            String depositor = traceSequence.getDepositor();
-            boolean canEdit = canEdit(userId, depositor, entry);
-            analysis.setCanEdit(canEdit);
-
-            Account account = accountController.getByEmail(traceSequence.getDepositor());
-            if (account != null) {
-                accountTransfer.setFirstName(account.getFirstName());
-                accountTransfer.setLastName(account.getLastName());
-                accountTransfer.setEmail(account.getEmail());
-                accountTransfer.setId(account.getId());
-            }
-
-            analysis.setDepositor(accountTransfer);
-            analysisArrayList.add(analysis);
-        }
-
-        return analysisArrayList;
     }
 
     protected boolean canEdit(String userId, String depositor, Entry entry) {

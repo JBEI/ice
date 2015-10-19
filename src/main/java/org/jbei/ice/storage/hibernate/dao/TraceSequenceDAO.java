@@ -1,9 +1,11 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.apache.commons.io.IOUtils;
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.storage.DAOException;
@@ -182,32 +184,37 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public List<TraceSequence> getByEntry(Entry entry) throws DAOException {
-        List<TraceSequence> result = null;
-
-        Session session = currentSession();
+    public List<TraceSequence> getByEntry(Entry entry, int start, int limit) throws DAOException {
         try {
-            String queryString = "from TraceSequence as traceSequence where traceSequence.entry = :entry order by "
-                    + "traceSequence.creationTime asc";
-            Query query = session.createQuery(queryString);
-
-            query.setEntity("entry", entry);
-
-            Object queryResult = query.list();
-
-            if (queryResult != null) {
-                result = query.list();
-            }
+            Criteria criteria = currentSession().createCriteria(TraceSequence.class.getName())
+                    .add(Restrictions.eq("entry", entry));
+            criteria.addOrder(Order.asc("creationTime"));
+            criteria.setFirstResult(start);
+            criteria.setMaxResults(limit);
+            return criteria.list();
         } catch (HibernateException e) {
             throw new DAOException("Failed to get trace sequence by entry!", e);
         }
-        return result;
+    }
+
+    public int getCountByEntry(Entry entry) throws DAOException {
+        try {
+            Criteria criteria = currentSession().createCriteria(TraceSequence.class.getName())
+                    .add(Restrictions.eq("entry", entry))
+                    .setProjection(Projections.countDistinct("id"));
+            Number number = (Number) criteria.uniqueResult();
+            if (number == null)
+                return 0;
+            return number.intValue();
+        } catch (HibernateException e) {
+            throw new DAOException("Failed to get trace sequence by entry!", e);
+        }
     }
 
     public int getTraceSequenceCount(Entry entry) {
         Number itemCount = (Number) currentSession().createCriteria(TraceSequence.class)
-                                                    .setProjection(Projections.countDistinct("id"))
-                                                    .add(Restrictions.eq("entry", entry)).uniqueResult();
+                .setProjection(Projections.countDistinct("id"))
+                .add(Restrictions.eq("entry", entry)).uniqueResult();
         return itemCount.intValue();
     }
 

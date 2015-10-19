@@ -1,13 +1,3 @@
-<div ng-controller="TraceSequenceController">
-    <div class="row pad_top">
-        <div class="col-md-12">
-            <button type="button" class="ice-button" ng-click="showUploadOptions=true">
-                <i style="font-size: 14px" class="fa fa-upload blue"></i> Add Sanger Trace
-            </button>
-        </div>
-    </div>
-</div>
-
 <div ng-controller="ShotgunSequenceController">
     <div class="row pad_top" ng-if="shotgunSequences.length">
         <div class="col-md-12">
@@ -29,7 +19,8 @@
                            ng-click="downloadShotgunFile(shotgunSequence)">{{shotgunSequence.filename}}</a>
                     </td>
                     <td><span class="label quality-{{shotgunSequence.call}}">{{shotgunSequence.score}}</span>
-                        {{shotgunSequence.call}}</td>
+                        {{shotgunSequence.call}}
+                    </td>
                     <td>{{shotgunSequence.created | date:'MMM d, y, h:mm a'}}</td>
                 </tr>
                 </tbody>
@@ -39,51 +30,37 @@
 </div>
 
 <div ng-controller="TraceSequenceController">
-    <div class="row pad_top font-90em" ng-if="showUploadOptions">
+    <div class="row pad_top">
         <div class="col-md-12">
-            <div class="alert alert-info" style="margin-bottom: 10px">
-                <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Upload Fasta, GenBank, or ABI
-                formats (optionally in a zip file)
-            </div>
-
-            <div class="alert alert-danger" style="margin-bottom: 10px" ng-if="traceUploadError==true">
-                <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Error processing file
-            </div>
-
-            <!--file upload-->
-            <input nv-file-select type="file" uploader="traceSequenceUploader"/>
-
-            <div style="height: 7px; background-color: #f9f9f9;">
-                <div class="progress-bar" role="progressbar"
-                     ng-style="{ 'width': traceSequenceUploader.progress + '%' }"></div>
-            </div>
+            <button type="button" class="ice-button" ng-click="showAddSangerTraceModal()">Add Sanger Trace</button>
         </div>
     </div>
 
-    <div class="row pad_top" ng-if="traceSequences.length===0">
+    <div class="row pad_top" ng-if="traces && traces.data.length===0">
         <div class="col-md-12">
             <i class="text-muted">No Sanger traces available</i>
         </div>
     </div>
 
-    <div class="row pad_top" ng-if="traceSequences.length">
+    <div class="row pad_top" ng-if="traces && traces.data.length">
         <div class="col-md-12">
-            <table cellspacing="0" class="table table-condensed table-hover font-95em">
+            <table cellspacing="0" class="table table-condensed table-hover table-border-bottom font-95em">
                 <thead>
                 <tr>
                     <td></td>
-                    <td><b>Sanger Trace</b></td>
-                    <td><b>Uploader</b></td>
-                    <td><b>Uploaded On</b></td>
-                    <td>&nbsp;</td>
+                    <th><b>Sanger Trace</b></th>
+                    <th><b>Uploader</b></th>
+                    <th><b>Uploaded On</b></th>
+                    <th>&nbsp;</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="traceSequence in traceSequences">
+                <tr ng-repeat="traceSequence in traces.data">
                     <td style="opacity:0.2; text-shadow:0 1px 0 #fff;" width="30px">
-                        <b class="no_wrap">{{$index+1}}</b>
+                        <b class="no_wrap">{{$index+tracesParams.start+1 | number}}</b>
                     </td>
-                    <td><a class="cursor_pointer"
+                    <td>
+                        <a class="cursor_pointer"
                            ng-click="downloadTraceFile(traceSequence)">{{traceSequence.filename}}</a>
                     </td>
                     <td><a ng-href="profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}
@@ -99,7 +76,17 @@
         </div>
     </div>
 
-    <div class="row pad_top" ng-if="entry.hasSequence&&traceSequences.length">
+    <div class="row">
+        <div class="col-sm-12">
+            <uib-pagination total-items="traces.resultCount" ng-change="tracesPageChanged()"
+                            ng-model="tracesParams.currentPage"
+                            max-size="maxSize" class="pagination-sm" items-per-page="tracesParams.limit"
+                            boundary-links="true">
+            </uib-pagination>
+        </div>
+    </div>
+
+    <div class="row pad_top" ng-if="entry.hasSequence&&traces.data.length">
         <div class="col-md-12" style="height: 600px">
             <ice-sequence-checker entryId="{{entry.id}}"></ice-sequence-checker>
         </div>

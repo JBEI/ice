@@ -141,52 +141,45 @@ angular.module('ice.entry.controller', [])
             $window.open("rest/file/shotgunsequence/" + sequence.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
         };
     })
-    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Entry) {
+    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Entry, $uibModal, Util) {
         var entryId = $stateParams.id;
         var sid = $cookieStore.get("sessionId");
         var entry = Entry(sid);
+
         $scope.traceUploadError = undefined;
+        $scope.maxSize = 5;
+        $scope.tracesParams = {limit: 5, currentPage: 1, start: 0};
 
-        entry.traceSequences({
-            partId: entryId
-        }, function (result) {
-            $scope.traceSequences = result;
-        });
+        Util.get("/rest/parts/" + entryId + "/traces", function (result) {
+            $scope.traces = result;
+        }, $scope.tracesParams);
 
-        $scope.traceSequenceUploader = new FileUploader({
-            scope: $scope, // to automatically update the html. Default: $rootScope
-            url: "rest/parts/" + entryId + "/traces",
-            method: 'POST',
-            removeAfterUpload: true,
-            headers: {
-                "X-ICE-Authentication-SessionId": sid
-            },
-            autoUpload: true,
-            queueLimit: 1, // can only upload 1 file
-            formData: [
-                {
-                    entryId: entryId
-                }
-            ]
-        });
-
-        $scope.traceSequenceUploader.onSuccessItem = function (item, response, status, headers) {
-            if (status != "200") {
-                $scope.traceUploadError = true;
-                return;
-            }
-
-            entry.traceSequences({
-                partId: entryId
-            }, function (result) {
-                $scope.traceSequences = result;
-                $scope.showUploadOptions = false;
-                $scope.traceUploadError = false;
-            });
+        $scope.tracesPageChanged = function () {
+            $scope.tracesParams.start = ($scope.tracesParams.currentPage - 1) * $scope.tracesParams.limit;
+            Util.get("/rest/parts/" + entryId + "/traces", function (result) {
+                $scope.traces = result;
+            }, $scope.tracesParams);
         };
 
-        $scope.traceSequenceUploader.onErrorItem = function (item, response, status, headers) {
-            $scope.traceUploadError = true;
+        $scope.showAddSangerTraceModal = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: "scripts/entry/modal/add-sanger-trace.html",
+                controller: 'TraceSequenceUploadModalController',
+                backdrop: 'static',
+                resolve: {
+                    entryId: function () {
+                        return $stateParams.id;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function () {
+                Util.get("/rest/parts/" + entryId + "/traces", function (result) {
+                    $scope.traces = result;
+                    $scope.showUploadOptions = false;
+                    $scope.traceUploadError = false;
+                });
+            });
         };
 
         $scope.deleteTraceSequenceFile = function (fileId) {
@@ -217,6 +210,41 @@ angular.module('ice.entry.controller', [])
 
         $scope.downloadTraceFile = function (trace) {
             $window.open("rest/file/trace/" + trace.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
+        };
+    })
+    .controller('TraceSequenceUploadModalController', function ($scope, FileUploader, $modalInstance, entryId, $cookieStore) {
+        $scope.cancelAddSangerTrace = function () {
+            $modalInstance.dismiss('cancel');
+        };
+
+        $scope.traceSequenceUploader = new FileUploader({
+            scope: $scope, // to automatically update the html. Default: $rootScope
+            url: "rest/parts/" + entryId + "/traces",
+            method: 'POST',
+            removeAfterUpload: true,
+            headers: {
+                "X-ICE-Authentication-SessionId": $cookieStore.get("sessionId")
+            },
+            autoUpload: true,
+            queueLimit: 1, // can only upload 1 file
+            formData: [
+                {
+                    entryId: entryId
+                }
+            ]
+        });
+
+        $scope.traceSequenceUploader.onSuccessItem = function (item, response, status, headers) {
+            if (status != "200") {
+                $scope.traceUploadError = true;
+                return;
+            }
+
+            $modalInstance.close();
+        };
+
+        $scope.traceSequenceUploader.onErrorItem = function (item, response, status, headers) {
+            $scope.traceUploadError = true;
         };
     })
     .controller('EntryExperimentController', function ($scope, $cookieStore, $stateParams, Entry, Util) {
