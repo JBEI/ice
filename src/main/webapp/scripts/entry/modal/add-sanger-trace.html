@@ -1,0 +1,29 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="cancelAddSangerTrace()">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">Add Sanger Trace(s)</span>
+</div>
+
+<div class="modal-body">
+    <div class="alert alert-info" style="margin-bottom: 10px">
+        <i style="font-size: 30px" class="fa fa-info-circle pull-left"></i>
+        Upload Fasta, GenBank, or ABI formats (optionally in a zip file)
+    </div>
+
+    <div class="alert alert-danger" style="margin-bottom: 10px" ng-if="traceUploadError==true">
+        <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Error processing file
+    </div>
+
+    <br>
+
+    <!--file upload-->
+    <input nv-file-select type="file" uploader="traceSequenceUploader"/>
+
+    <div style="height: 7px; background-color: #f9f9f9;">
+        <div class="progress-bar" role="progressbar"
+             ng-style="{ 'width': traceSequenceUploader.progress + '%' }"></div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-default btn-sm" ng-click="cancelAddSangerTrace()">{{'Close'}}</button>
+</div>
