@@ -20,7 +20,13 @@ iceApp.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $
 iceApp.run(function($http, $rootScope){
     $http({ method: 'GET', url: '/rest/config/site' }).
         success(function (data, status, headers, config) {
-            $rootScope.siteSettings = data;
+            var settings = {};
+
+            for(var i = 0; i < data.length; i++){
+                settings[data[i].key] = data[i].value;
+            }
+
+            $rootScope.siteSettings = settings;
         });
 });
 
