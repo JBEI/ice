@@ -2,9 +2,9 @@ package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.auth.KeyTable;
-import org.jbei.auth.hmac.HmacAuthorizor;
 import org.jbei.auth.hmac.HmacSignature;
 import org.jbei.auth.hmac.HmacSignatureFactory;
+import org.jbei.ice.lib.access.TokenVerification;
 import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -31,6 +31,9 @@ public class RestResource {
 
     protected final String AUTHENTICATION_PARAM_NAME = "X-ICE-Authentication-SessionId";
     protected final String WOR_PARTNER_TOKEN = "X-ICE-WOR-Token";
+    protected final String API_KEY_TOKEN = "X-ICE-API-Token";        // token for validation
+    protected final String API_KEY_USER = "X-ICE-API-Token-User";    // optional user
+    protected final String API_KEY_CLIENT_ID = "X-ICE-API-Token-Client"; // client id
 
     // do lookup by using existing configuration DATA_DIRECTORY to find key names => key data
     private static final KeyTable TABLE = new KeyTable() {
@@ -67,10 +70,18 @@ public class RestResource {
             }
             return null;
         }
-
     };
 
-    private static final HmacAuthorizor AUTHORIZOR = new HmacAuthorizor(TABLE);
+//    private static final HmacAuthorizor AUTHORIZOR = new HmacAuthorizor(TABLE);
+
+    @HeaderParam(value = API_KEY_CLIENT_ID)
+    private String apiClientId;
+
+    @HeaderParam(value = API_KEY_USER)
+    private String apiUser;
+
+    @HeaderParam(value = API_KEY_TOKEN)
+    private String apiToken;
 
     @HeaderParam(value = AUTHENTICATION_PARAM_NAME)
     private String sessionId;
@@ -102,6 +113,17 @@ public class RestResource {
         String userId = UserSessions.getUserIdBySession(sessionId);
         if (!StringUtils.isEmpty(userId))
             return userId;
+
+        // check api key
+        if (!StringUtils.isEmpty(apiToken)) {
+            TokenVerification tokenVerification = new TokenVerification();
+            String clientId = !StringUtils.isEmpty(apiClientId) ? apiClientId : request.getRemoteHost();
+            userId = tokenVerification.verifyAPIKey(apiToken, clientId, apiUser);
+
+            // being a bit generous in terms of allowing other auth methods to be attempted
+            if (userId != null)
+                return userId;
+        }
 
         final Object hmac = request.getAttribute(AuthenticationInterceptor.HMAC_SIGNATURE);
         final Object valid = request.getAttribute(AuthenticationInterceptor.EXPECTED_SIGNATURE);

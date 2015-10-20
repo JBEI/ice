@@ -34,7 +34,7 @@ public class ApiKey implements DataModel {
     @Column(name = "client_id")
     private String clientId;
 
-    @Column(name = "secret")
+    @Column(name = "secret", unique = true)
     private String secret;
 
     @Column(name = "hashed_token")
@@ -107,6 +107,7 @@ public class ApiKey implements DataModel {
     @Override
     public AccessKey toDataTransferObject() {
         AccessKey accessKey = new AccessKey();
+        accessKey.setId(this.id);
         accessKey.setSecret(this.secret);
         accessKey.setClientId(this.clientId);
         accessKey.setCreationTime(this.creationTime.getTime());

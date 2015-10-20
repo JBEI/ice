@@ -42,4 +42,16 @@ public class ApiKeyResource extends RestResource {
         UserApiKeys apiKeys = new UserApiKeys(userId);
         return super.respond(apiKeys.getKeys(limit, offset, sort, asc));
     }
+
+    @DELETE
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteApiKey(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
+                                 @QueryParam("secret") String secret,
+                                 @QueryParam("clientId") String clientId,
+                                 @PathParam("id") long id) {
+        String userId = getUserId(sessionId);
+        UserApiKeys apiKeys = new UserApiKeys(userId);
+        return super.respond(apiKeys.deleteKey(id, secret));
+    }
 }

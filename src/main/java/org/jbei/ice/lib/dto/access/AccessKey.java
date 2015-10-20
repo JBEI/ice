@@ -8,10 +8,28 @@ import org.jbei.ice.storage.IDataTransferModel;
  */
 public class AccessKey implements IDataTransferModel {
 
+    private long id;
     private AccountTransfer account;
     private String clientId;
     private String secret;
+    private String token;
     private long creationTime;
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 
     public AccountTransfer getAccount() {
         return account;

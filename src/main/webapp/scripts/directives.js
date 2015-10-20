@@ -304,7 +304,7 @@ iceDirectives.directive("iceSequenceChecker", function ($cookieStore) {
         });
 
         scope.$watch("traceSequences", function (value) {
-            if (value.length)
+            if (value && value.length)
                 generateObject();
         });
     }

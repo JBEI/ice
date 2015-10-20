@@ -280,7 +280,7 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.deleteStudy = function (study) {
-            Util.remove("/rest/parts/" + entryId + "/experiments/" + study.id, function (result) {
+            Util.remove("/rest/parts/" + entryId + "/experiments/" + study.id, {}, function (result) {
                 var idx = $scope.entryExperiments.indexOf(study);
                 if (idx >= 0) {
                     $scope.entryExperiments.splice(idx, 1);

@@ -30,6 +30,16 @@ public class ApiKeyDAO extends HibernateRepository<ApiKey> {
             throw new DAOException(he);
         }
     }
+
+    public ApiKey getByClientId(String clientId) throws DAOException {
+        try {
+            return (ApiKey) currentSession().createCriteria(ApiKey.class.getName())
+                    .add(Restrictions.eq("clientId", clientId))
+                    .uniqueResult();
+        } catch (HibernateException he) {
+            throw new DAOException(he);
+        }
+    }
 }
 
 

@@ -22,21 +22,40 @@ angular.module('ice.profile.controller', [])
         $scope.openApiKeyRequest = function () {
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/profile/modal/api-key-request.html',
-                controller: function ($scope, $modalInstance, Util) {
-
-                    $scope.cancel = function () {
-                        $modalInstance.dismiss('cancel');
-                    };
-
-                    $scope.generateToken = function () {
-                        var queryParams = {client_id: $scope.client};
-                        Util.post("/rest/api-keys", null, function (result) {
-                            console.log(result);
-                        }, queryParams);
-                    }
-                }
+                controller: 'GenerateApiKeyController'
             })
         };
+
+        $scope.deleteAPIKey = function (key) {
+            Util.remove("/rest/api-keys/" + key.id, key, function (result) {
+                var idx = $scope.apiKeys.indexOf(key);
+                if (idx >= 0)
+                    $scope.apiKeys.splice(idx, 1);
+            });
+        }
+    })
+    .controller('GenerateApiKeyController', function ($scope, $modalInstance, Util) {
+        $scope.apiKey = undefined;
+        $scope.clientIdValidationError = undefined;
+        $scope.errorCreatingKey = undefined;
+        $scope.client = {};
+
+        $scope.cancel = function () {
+            $modalInstance.dismiss('cancel');
+        };
+
+        $scope.generateToken = function () {
+            console.log($scope.client);
+            if (!$scope.client.id) {
+                $scope.clientIdValidationError = true;
+                return;
+            }
+
+            var queryParams = {client_id: $scope.client.id};
+            Util.post("/rest/api-keys", null, function (result) {
+                $scope.apiKey = result;
+            }, queryParams);
+        }
     })
     .controller('ProfileEntryController', function ($scope, $location, $cookieStore, $stateParams, User, Entry) {
         var user = User($cookieStore.get("sessionId"));

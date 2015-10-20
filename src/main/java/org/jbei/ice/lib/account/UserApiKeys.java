@@ -38,7 +38,9 @@ public class UserApiKeys {
         apiKey.setHashedToken(hash_token);
 
         apiKey = apiKeyDAO.create(apiKey);
-        return apiKey.toDataTransferObject();
+        AccessKey key = apiKey.toDataTransferObject();
+        key.setToken(token);
+        return key;
     }
 
     public Results<AccessKey> getKeys(int limit, int offset, String sortField, boolean asc) {
@@ -48,5 +50,14 @@ public class UserApiKeys {
             accessKeyResults.getData().add(key.toDataTransferObject());
         }
         return accessKeyResults;
+    }
+
+    public boolean deleteKey(long id, String secret) {
+        ApiKey key = apiKeyDAO.get(id);
+        if (!key.getSecret().equalsIgnoreCase(secret))
+            return false;
+
+        apiKeyDAO.delete(key);
+        return true;
     }
 }
