@@ -1,17 +1,21 @@
 <div class="row">
-    <div class="col-md-12 entry_general_header_td">
-        <h4>
-            <strong style="color: #888;text-transform: uppercase;">
-                <i class="fa fa-fw fa-globe"></i> {{webResults.registryPartner.name}}</strong>
-            <img alt="Loading..." ng-if="loadingPage" src="img/loader-mini.gif"/>
-            &nbsp;&nbsp;&nbsp;<span ng-show="folder.id" folder-actions class="font-95em"></span>
+    <div class="col-md-12 entry_general_header_td" style="height: 58px">
+        <i class="pull-left fa fa-fw fa-globe" style="margin-top: 8px; font-size: 40px"></i>
+
+        <h4 style="line-height: 80%; margin-top: 15px">
+            <strong style="color: #888; text-transform: uppercase">{{webResults.registryPartner.name}}</strong>
+            <br>
+            <small class="font-65em">
+                <a ng-href="https://{{webResults.registryPartner.url}}" target="_blank">{{webResults.registryPartner.url}}</a>
+                <!--<span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>-->
+                <!--{{webResults.registryPartner.addTime | date:'short'}}-->
+            </small>
         </h4>
     </div>
 </div>
 
 <div class="row">
-    <table cellspacing="0"
-           class="table table-responsive table-condensed table-hover table-striped font-95em table-border-bottom"
+    <table cellspacing="0" class="table table-hover font-95em table-border-bottom"
            ng-class="{'opacity_4':loadingPage}">
         <thead>
         <tr data-ng-if='webResults&&webResults.entries.length>0'>
@@ -105,17 +109,22 @@
 </div>
 
 <div class="row" ng-if="webResults && webResults.entries.length > 0">
-    <div class="col-md-5" style="padding-left: 0">
+    <div class="col-md-6" style="padding-left: 0">
         <uib-pagination total-items="webResults.count" ng-change="worContentsPageChange()"
-                    ng-model="queryParams.currentPage"
+                        ng-model="queryParams.currentPage"
                         max-size="maxSize" class="pagination-sm" items-per-page="15"
                         boundary-links="true"></uib-pagination>
     </div>
-    <div class="col-md-7" style="margin-top: 25px;">
+    <div class="col-md-4" style="margin-top: 25px;">
         <strong class="small">
             <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(queryParams.currentPage,
             webResults.count)}}
         </strong>
+    </div>
+    <div class="col-md-2" style="margin-top: 25px;">
+        <small class="text-muted pull-right">Show:
+            <select ng-change="hStepChanged()" ng-model="queryParams.limit"
+                    ng-options="opt for opt in queryParams.hstep"></select></small>
     </div>
 </div>
 

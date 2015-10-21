@@ -8,15 +8,13 @@
             <thead>
             <tr>
                 <th>ClientId</th>
-                <th>Secret</th>
                 <th>Creation Time</th>
-                <th>Remove</th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="apiKey in apiKeys">
                 <td>{{apiKey.clientId}}</td>
-                <td>{{apiKey.secret}} &nbsp; <i class="fa fa-eye"></i></td>
                 <td>{{apiKey.creationTime | date:'MMM d, yyyy hh:mm a'}}</td>
                 <td><i class="fa fa-trash-o delete_icon" ng-click="deleteAPIKey(apiKey)"></i></td>
             </tr>

@@ -103,27 +103,33 @@ public final class RemoteContact {
         AccessTokens.setToken(partner.getUrl(), token);
 
         try {
-            RegistryPartner newPartner = restClient.post(partner.getUrl(), "/rest/partners", thisPartner, RegistryPartner.class);
+            RegistryPartner newPartner = restClient.post(partner.getUrl(), "/rest/partners",
+                    thisPartner, RegistryPartner.class);
             if (newPartner == null) {
                 Logger.error("Could not add web partner");
                 return null;
             }
 
-            remotePartner = new RemotePartner();
-            remotePartner.setName(newPartner.getName());
-            remotePartner.setUrl(newPartner.getUrl());
-            remotePartner.setPartnerStatus(RemotePartnerStatus.APPROVED);
-            remotePartner.setSalt(tokenHash.generateSalt());
-            String hash = tokenHash.encryptPassword(token + newPartner.getUrl(), remotePartner.getSalt());
-            remotePartner.setAuthenticationToken(hash);
-            remotePartner.setAdded(new Date());
-            remotePartner = DAOFactory.getRemotePartnerDAO().create(remotePartner);
+            remotePartner = createRemotePartnerObject(newPartner, token);
             AccessTokens.removeToken(partner.getUrl());
             return remotePartner.toDataTransferObject();
         } catch (Exception e) {
             Logger.error("Exception adding remote partner " + e);
             return null;
         }
+    }
+
+    protected RemotePartner createRemotePartnerObject(RegistryPartner newPartner, String token) {
+        RemotePartner remotePartner = new RemotePartner();
+        remotePartner.setName(newPartner.getName());
+        remotePartner.setUrl(newPartner.getUrl());
+        remotePartner.setPartnerStatus(RemotePartnerStatus.APPROVED);
+        remotePartner.setSalt(tokenHash.generateSalt());
+        String hash = tokenHash.encryptPassword(token + newPartner.getUrl(), remotePartner.getSalt());
+        remotePartner.setAuthenticationToken(hash);
+        remotePartner.setApiKey(newPartner.getApiKey());
+        remotePartner.setAdded(new Date());
+        return DAOFactory.getRemotePartnerDAO().create(remotePartner);
     }
 
     /**
@@ -184,7 +190,8 @@ public final class RemoteContact {
             partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
             partner.setSalt(tokenHash.generateSalt());
             token = tokenHash.generateRandomToken();
-            partner.setAuthenticationToken(tokenHash.encryptPassword(token + request.getUrl(), partner.getSalt()));
+            String hash = tokenHash.encryptPassword(token + request.getUrl(), partner.getSalt());
+            partner.setAuthenticationToken(hash);
             dao.create(partner);
         }
 

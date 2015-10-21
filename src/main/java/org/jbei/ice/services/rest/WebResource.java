@@ -107,7 +107,8 @@ public class WebResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}")
     public Response getWebEntry(
-            @PathParam("id") final long partnerId, @PathParam("entryId") final long entryId) {
+            @PathParam("id") final long partnerId,
+            @PathParam("entryId") final long entryId) {
         final String userId = super.getUserId();
         final PartData result = remoteEntries.getPublicEntry(userId, partnerId, entryId);
         return super.respond(Response.Status.OK, result);

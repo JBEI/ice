@@ -124,37 +124,8 @@ angular.module('ice.profile.controller', [])
             {display: "Principal Investigator", id: "PRINCIPAL_INVESTIGATOR", help: "Enter Email or Name"},
             {display: "Funding Source", id: "FUNDING_SOURCE"}
         ];
-        $scope.searchPreferenceDefaults = [
-            {display: "Alias", id: "alias"},
-            {display: "Backbone", id: "backbone"},
-            {display: "Keywords", id: "keywords"},
-            {display: "Name", id: "name"},
-            {display: "Part ID", id: "partId"},
-            {display: "Summary", id: "summary"}
-        ];
-
-        $scope.handleSliderChange = function (model) {
-            console.log("handleSliderChange", model);
-        };
-
-        $scope.translate = function (value) {
-            switch (value) {
-                case "1":
-                default:
-                    return "default";
-                case "2":
-                    return "low";
-                case "3":
-                    return "medium";
-                case "4":
-                    return "high";
-                case "5":
-                    return "very high";
-            }
-        };
 
         $scope.preferences = {};
-        $scope.searchPreferences = {};
 
         var user = User($cookieStore.get('sessionId'));
         var profileOption = $stateParams.option;

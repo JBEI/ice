@@ -2,11 +2,18 @@
 
 angular.module('ice.wor.controller', [])
     .controller('WorContentController', function ($rootScope, $scope, $location, $uibModal, $cookieStore, $stateParams,
-                                                  WebOfRegistries, WorService) {
+                                                  WebOfRegistries, WorService, Util) {
         $scope.selectedPartner = $stateParams.partner;
         $scope.loadingPage = true;
         var wor = WebOfRegistries();
-        $scope.queryParams = {limit: 15, offset: 0, sort: 'created', partnerId: $stateParams.partner, currentPage: 1};
+        $scope.queryParams = {
+            limit: 15,
+            offset: 0,
+            hstep: [15, 30, 50, 100],
+            sort: 'created',
+            partnerId: $stateParams.partner,
+            currentPage: 1
+        };
         $scope.webResults = undefined;
 
         // init: retrieve first page of all public entries
@@ -25,7 +32,7 @@ angular.module('ice.wor.controller', [])
 
         $scope.worContentsPageChange = function () {
             $scope.loadingPage = true;
-            $scope.queryParams.offset = ($scope.queryParams.currentPage - 1) * 15;
+            $scope.queryParams.offset = ($scope.queryParams.currentPage - 1) * $scope.queryParams.limit;
 
             wor.getPublicEntries($scope.queryParams, function (result) {
                 $scope.webResults = result;
@@ -59,6 +66,13 @@ angular.module('ice.wor.controller', [])
             wor.getToolTip({partnerId: $stateParams.partner, entryId: entry.id}, function (result) {
                 $scope.currentTooltip = result;
             })
+        };
+
+        $scope.hStepChanged = function () {
+            Util.get("rest/web/" + $stateParams.partner + "/entries", function (result) {
+                $scope.webResults = result;
+                $scope.queryParams.currentPage = 1;
+            }, $scope.queryParams);
         };
     })
     .controller('WorFolderContentController', function ($location, $rootScope, $scope, $stateParams, Remote, WorService, WebOfRegistries) {

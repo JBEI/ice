@@ -593,45 +593,31 @@ a:hover {
     font-size: 0.75em;
     padding: 4px;
     font-weight: 700 !important;
-    /*<!-- 233559 -->*/
     text-transform: uppercase;
     font-family: Helvetica, serif;
     color: #BBBAAA;
 }
 
 .ice-button {
-    background-color: #f9f9f9;
+    background-color: #fbfbfb;
     border: 1px solid #CCC;
     padding: 5px 7px;
-    color: #444;
-    font-family: Arial, serif;
+    color: #333;
     font-size: 0.80em;
-    box-shadow: 0 0 1px 0 #ddd;
-    border-radius: 2px;
+    box-shadow: 1px 0 1px 0 #ddd;
+    border-radius: 3px;
     cursor: pointer;
+    font-weight: 500;
 }
 
 .ice-button:hover {
     background-color: #f1f2f3;
     border: 1px solid #AAA;
     color: #222;
-    font-family: Arial, serif;
     font-size: 0.80em;
     box-shadow: 0 0 1px 1px #ddd;
     border-radius: 2px;
     cursor: pointer;
-}
-
-.ice-button[disabled], .ice-button[disabled]:hover {
-    background-color: #f1f2f3;
-    border: 1px solid #efefef;
-    padding: 6px 8px;
-    color: #bbb;
-    font-family: Helvetica, Arial, serif;
-    font-size: 0.8em;
-    border-radius: 2px 4px;
-    box-shadow: 0 0 0 0 #ddd;
-    cursor: default;
 }
 
 .pager_nav {

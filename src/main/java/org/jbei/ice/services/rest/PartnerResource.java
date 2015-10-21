@@ -1,6 +1,7 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.net.WebPartners;
 import org.jbei.ice.lib.net.WoRController;
@@ -10,7 +11,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 
 /**
  * Partner resource for web of registries configuration
@@ -33,29 +33,32 @@ public class PartnerResource extends RestResource {
     }
 
     /**
-     * Add current url obtained from uriInfo as a web partner. Returns list of current
-     * partners that are available for web of registries if this is a master.
-     *
-     * @return information about this instance for use in exchanging data
+     * Adds a remote instance as a registry partner. There are two entry points for this call within ICE.
+     * One is from the web of registries task. This does not contain any authentication information
+     * and therefore requires verification of the token.<p>
+     * The second is from the admin ui where a partner is manually added to this ice instance.
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response addNewPartner(@Context final UriInfo uriInfo,
-                                  @Context HttpServletRequest request,
+    public Response addNewPartner(@Context HttpServletRequest request,
                                   @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
                                   RegistryPartner partner) {
-//        String url = uriInfo.getBaseUri().getAuthority();
-
-        // where the request is coming from
-        String url = request.getRemoteHost();
 
         WebPartners webPartners = new WebPartners();
+        RegistryPartner result;
+        String url = null;
         String userId = null;
-        if (!StringUtils.isEmpty(sessionId))
-            userId = getUserId(sessionId);
 
-        RegistryPartner result = webPartners.addNewPartner(url, partner);
+        // where the request is coming from
+        if (StringUtils.isEmpty(sessionId)) {
+            url = request.getRemoteHost();
+            Logger.info("Received partner add request from " + url);
+        } else {
+            userId = getUserId(sessionId);
+        }
+
+        result = webPartners.addNewPartner(userId, url, partner);
         return super.respond(result);
     }
 }
