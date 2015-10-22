@@ -23,8 +23,6 @@ public class HibernateUtil {
 
     private static String BASE_FILE = "hibernate.cfg.xml";
     private static String MOCK_FILE = "mock.cfg.xml";
-    private static String AWS_FILE = "aws.cfg.xml";
-    private static String DEFAULT_FILE = "default.cfg.xml";
 
     /**
      * Open a new {@link Session} from the sessionFactory.
@@ -66,58 +64,72 @@ public class HibernateUtil {
         if (sessionFactory == null) {
             Logger.info("Initializing session factory for type " + type.name());
             Configuration configuration = new Configuration().configure(BASE_FILE);
-            if (type == Type.MOCK) {
-                configuration.configure(MOCK_FILE);
-            } else {
-                String environment = System.getProperty("environment");
-
-                if (environment != null && environment.equals("aws")) {
-                    configuration.configure(AWS_FILE);
+            try {
+                if (type == Type.MOCK) {
+                    configuration.configure(MOCK_FILE);
                 } else {
-                    configuration.configure(DEFAULT_FILE);
+                    String[] properties =
+                            {"hibernate.connection.username",
+                             "hibernate.connection.url",
+                             "hibernate.connection.driver_class",
+                             "hibernate.connection.password",
+                             "hibernate.dialect"};
+
+                    for(int i = 0; i < properties.length; i++){
+                        String key = properties[i];
+                        String value = System.getProperty(properties[i]);
+
+                        if(value != null){
+                            Logger.info("Set " + key + ": " + value);
+                            configuration.setProperty(key, value);
+                        }
+                    }
                 }
+ 
+                ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
+                       configuration.getProperties()).build();
+
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Entry.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Plasmid.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Strain.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Part.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.ArabidopsisSeed.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Link.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.SelectionMarker.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Sequence.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Feature.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.SequenceFeature.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.SequenceFeatureAttribute.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Comment.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Account.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Attachment.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Sample.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.AccountPreferences.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Group.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.TraceSequence.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.TraceSequenceAlignment.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Configuration.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Storage.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Folder.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Parameter.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.AnnotationLocation.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.BulkUpload.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Permission.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Message.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Preference.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.RemotePartner.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Request.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Audit.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Experiment.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.ShotgunSequence.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Configuration.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.ApiKey.class);
+
+                sessionFactory = configuration.buildSessionFactory(serviceRegistry);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
             }
-
-            ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
-                    configuration.getProperties()).build();
-
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Entry.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Plasmid.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Strain.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Part.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.ArabidopsisSeed.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Link.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.SelectionMarker.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Sequence.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Feature.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.SequenceFeature.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.SequenceFeatureAttribute.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Comment.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Account.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Attachment.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Sample.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.AccountPreferences.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Group.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.TraceSequence.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.TraceSequenceAlignment.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Configuration.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Storage.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Folder.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Parameter.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.AnnotationLocation.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.BulkUpload.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Permission.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Message.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Preference.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.RemotePartner.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Request.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Audit.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Experiment.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.ShotgunSequence.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.Configuration.class);
-            configuration.addAnnotatedClass(org.jbei.ice.storage.model.ApiKey.class);
-
-            sessionFactory = configuration.buildSessionFactory(serviceRegistry);
         }
     }
 

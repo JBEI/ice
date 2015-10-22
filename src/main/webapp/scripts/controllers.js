@@ -288,7 +288,7 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
     }
 });
 
-iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location, User) {
+iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location, $rootScope, $sce, User) {
     $scope.user = {};
 
     $scope.resetPassword = function () {
@@ -315,9 +315,26 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
     }
 });
 
-iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Authentication, Settings, Util, AccessToken) {
-    $scope.login = {};
 
+iceControllers.controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
+    var message = Message($cookieStore.get('sessionId'));
+    var profileId = $stateParams.id;
+    $location.path("profile/" + profileId + "/messages", false);
+    message.query(function (result) {
+        $scope.messages = result;
+    });
+});
+
+iceControllers.controller('LoginController', function ($scope,
+                                                       $location,
+                                                       $cookieStore,
+                                                       $cookies,
+                                                       $rootScope,
+                                                       Authentication,
+                                                       Settings,
+                                                       Util,
+                                                       AccessToken) {
+    $scope.login = {};
     $scope.submit = function () {
         $scope.errMsg = undefined;
         $scope.login.processing = true;

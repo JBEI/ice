@@ -17,13 +17,26 @@ iceApp.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $
     };
 }]);
 
+iceApp.run(function($http, $rootScope){
+    $http({ method: 'GET', url: '/rest/config/site' }).
+        success(function (data, status, headers, config) {
+            var settings = {};
+
+            for(var i = 0; i < data.length; i++){
+                settings[data[i].key] = data[i].value;
+            }
+
+            $rootScope.siteSettings = settings;
+        });
+});
+
 iceApp.run(function (Authentication, $rootScope) {
     $rootScope.logout = function () {
         Authentication.logout();
     };
 });
 
-iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
+iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $sceDelegateProvider) {
     $locationProvider.html5Mode(true);
 
     $urlRouterProvider.otherwise('/');

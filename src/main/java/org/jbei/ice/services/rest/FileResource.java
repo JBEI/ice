@@ -46,6 +46,24 @@ public class FileResource extends RestResource {
     private SequenceController sequenceController = new SequenceController();
     private AttachmentController attachmentController = new AttachmentController();
 
+    @GET
+    @Path("asset/{assetName}")
+    public Response getAsset(@PathParam("assetName") final String assetName) {
+        String dataDirectory = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        String dataAssetSubdirectory = "asset";
+
+        File data = Paths.get(dataDirectory, dataAssetSubdirectory, assetName).toFile();
+        File asset;
+
+        if (data != null && data.exists()) {
+            asset = data;
+        } else {
+            return super.respond(Response.Status.NOT_FOUND);
+        }
+
+        return addHeaders(Response.ok(asset), asset.getName());
+    }
+
     /**
      * @return Response with attachment info on uploaded file
      */
