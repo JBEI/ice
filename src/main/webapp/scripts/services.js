@@ -780,24 +780,12 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
     }
 });
 
-iceServices.factory('AccessToken', function ($resource) {
-    return function () {
-        return $resource('rest/accesstokens', {}, {
-            createToken:{
-                method:'POST',
-                responseType:'json'
-            }
-        })
-    }
-});
-
 iceServices.factory('Authentication',
-    function ($resource, $cookieStore, $http, $rootScope, $location, $cookies, AccessToken) {
+    function ($resource, $cookieStore, $http, $rootScope, $location, $cookies, Util) {
         return {
             // logs in user to ice
             login: function (username, password) {
-                var token = AccessToken();
-                token.createToken({}, {email: username, password: password},
+                Util.post("/rest/accesstokens", {email: username, password: password},
                     function (success) {
                         if (success && success.sessionId) {
                             $rootScope.user = success;
