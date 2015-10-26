@@ -12,6 +12,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
         function (event, toState, toParams, fromState, fromParams) {
             $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
             $scope.entrySelected = false;
+            $rootScope.hasError = true;
             Selection.reset();
         });
 
@@ -19,6 +20,11 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
     var folders = Folders();
     var entry = Entry(sid);
     $scope.selectedFolders = [];
+
+    $scope.closeFeedbackAlert = function () {
+        console.log("feedback closed");
+        $rootScope.hasError = false;
+    };
 
     // retrieve personal list of folders user can add or move parts to
     $scope.retrieveUserFolders = function () {
@@ -332,8 +338,7 @@ iceControllers.controller('LoginController', function ($scope,
                                                        $rootScope,
                                                        Authentication,
                                                        Settings,
-                                                       Util,
-                                                       AccessToken) {
+                                                       Util) {
     $scope.login = {};
     $scope.submit = function () {
         $scope.errMsg = undefined;
@@ -354,8 +359,7 @@ iceControllers.controller('LoginController', function ($scope,
             return;
         }
 
-        var token = AccessToken();
-        token.createToken({}, $scope.login,
+        Util.post("/rest/accesstokens", $scope.login,
             function (success) {
                 if (success && success.sessionId) {
                     $rootScope.user = success;
@@ -375,10 +379,7 @@ iceControllers.controller('LoginController', function ($scope,
             function (error) {
                 $scope.login.processing = false;
                 $scope.errMsg = "Login failed";
-            }
-        );
-
-//        Authentication.login($scope.userId, $scope.userPassword);
+            });
     };
 
     $scope.goToRegister = function () {

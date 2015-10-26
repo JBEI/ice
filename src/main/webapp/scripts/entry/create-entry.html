@@ -271,7 +271,7 @@
                     </div>
 
                     <div class="margin-top-10 font-95em" ng-hide="activePart.hasSequence">
-                        <div class="alert alert-info" style="margin-bottom: 10px; margin-top: 10px">
+                        <div ng-hide="isPaste" class="alert alert-info" style="margin-bottom: 10px; margin-top: 10px">
                             <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Supported file formats
                             are Genbank, Fasta and SBOL
                         </div>
@@ -358,7 +358,7 @@
         <div class="row pad-top-5" ng-if="activePart.fields">
             <div class="col-md-2"></div>
 
-            <div class="col-md-10">
+            <div class="col-md-10" style="margin-bottom: 13px">
                 <button type="submit" class="btn btn-primary font-85em">Submit</button>
                 <button type="button" class="btn btn-default font-85em" ng-click="cancelEntryCreate()">Cancel</button>
             </div>

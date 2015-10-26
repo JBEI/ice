@@ -526,16 +526,6 @@ a:hover {
     white-space: nowrap;
 }
 
-.blue_underline {
-    height: 2px;
-    background-color: #6C95C9;
-}
-
-.form_textarea {
-    height: 50px;
-    width: 640px;
-}
-
 .subMenuCreateNew {
     /*height: 30px;*/
     color: #fff;
@@ -551,44 +541,6 @@ a:hover {
     border-color: #4CAE4C;
 }
 
-.subMenuTransfer[disabled] i {
-    color: #ccc;
-}
-
-.subMenuTransfer {
-    height: 30px;
-    color: #393939;
-    text-align: center;
-    border-radius: 2px;
-    border: 1px solid;
-    border-color: #DDDDDD #DDDDDD #C5C5C5;
-    background-image: linear-gradient(#FCFCFC, #ECECEC);
-}
-
-.subMenuTransfer:hover {
-    border: 1px solid #A5A5A5;
-    background: #f2f2f2 linear-gradient(#FEFEFE, #F2F2F2);
-    color: #111;
-    box-shadow: 0 0 1px 1px #DEDEDE;
-}
-
-.subMenuTransfer[disabled] {
-    height: 30px;
-    color: #aaa;
-    text-align: center;
-    border: 1px solid #f7f7f7;
-    border-radius: 2px;
-    font-family: Arial, sans-serif;
-    opacity: 0.4;
-    background-color: #f1f1f1;
-}
-
-.subMenuTransfer[disabled]:hover {
-    cursor: default;
-    box-shadow: 0 0 0 0 #ddd;
-    border-top: 1px solid #c2c2c2;
-}
-
 .collections_header {
     font-size: 0.75em;
     padding: 4px;
@@ -599,14 +551,19 @@ a:hover {
 }
 
 .ice-button {
-    background-color: #fbfbfb;
-    border: 1px solid #CCC;
+    /*background-color: #fbfbfb;*/
+    /*border: 1px solid #CCC;*/
     padding: 5px 7px;
     color: #333;
     font-size: 0.80em;
-    box-shadow: 1px 0 1px 0 #ddd;
+    /*box-shadow: 1px 0 1px 0 #ddd;*/
     border-radius: 3px;
     cursor: pointer;
+
+    border: 1px solid #A5A5A5;
+    background: #f2f2f2 linear-gradient(#FEFEFE, #F2F2F2);
+    /*color: #111;*/
+    /*box-shadow: 0 0 1px 1px #DEDEDE;*/
     font-weight: 500;
 }
 
@@ -700,7 +657,6 @@ a:hover {
 
 .ice-btn-group {
     position: relative;
-    font-size: 0;
     white-space: nowrap;
     vertical-align: middle;
     display: inline-block;
@@ -1157,7 +1113,7 @@ input.no_border:focus {
 }
 
 .quality-almost {
-    background-color:green;
+    background-color: green;
 }
 
 .quality-incomplete {
@@ -1249,3 +1205,31 @@ th:hover i.sortable {
     color: #aaa;
     font-size: 16px
 }
+
+.no-border-radius {
+    border-radius: 0;
+}
+
+button.action-menu {
+    border-radius: 2px;
+    padding: 4px 15px;
+    color: #555;
+    border: 1px solid #f1f2f3;
+    background-color: #f9f9f9;
+}
+
+button.action-menu:hover {
+    color: #000;
+    border: 1px solid #c6c6c6;
+}
+
+button[disabled].action-menu {
+    color: #c9c9c9;
+    border: 1px solid #eaeaea;
+}
+
+button[disabled].action-menu:hover {
+    color: #c9c9c9;
+    border: 1px solid #eaeaea;
+}
+
