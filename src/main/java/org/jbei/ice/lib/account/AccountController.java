@@ -183,29 +183,6 @@ public class AccountController {
     }
 
     /**
-     * validates the account dto to ensure that the fields required (especially by the database) are
-     * present
-     *
-     * @param accountTransfer account dto for validation
-     */
-    private boolean validateRequiredAccountFields(final AccountTransfer accountTransfer) {
-        if (accountTransfer.getFirstName() == null
-                || accountTransfer.getFirstName().trim().isEmpty()) {
-            return false;
-        }
-
-        if (accountTransfer.getLastName() == null || accountTransfer.getLastName().trim().isEmpty()) {
-            return false;
-        }
-
-        if (accountTransfer.getEmail() == null || accountTransfer.getEmail().trim().isEmpty()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Creates a new account using the parameters passed. A random password is initially generated ,
      * encrypted and assigned to the account
      *
@@ -214,8 +191,8 @@ public class AccountController {
      * @return generated password
      */
     public AccountTransfer createNewAccount(final AccountTransfer info, final boolean sendEmail) {
-        // validate fields required by the database
-        validateRequiredAccountFields(info);
+        if (StringUtils.isEmpty(info.getLastName()) || StringUtils.isEmpty(info.getEmail()))
+            throw new IllegalArgumentException("Cannot create account without email or lastname");
 
         final String email = info.getEmail().trim();
         if (getByEmail(email) != null) {
