@@ -3,6 +3,7 @@ package org.jbei.ice.lib.dto.common;
 import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -10,7 +11,7 @@ import java.util.LinkedList;
 public class Results<T> implements IDataTransferModel {
 
     private long resultCount;
-    private LinkedList<T> data;
+    private List<T> data;
 
     public Results() {
         this.data = new LinkedList<>();
@@ -24,7 +25,7 @@ public class Results<T> implements IDataTransferModel {
         this.resultCount = resultCount;
     }
 
-    public LinkedList<T> getData() {
+    public List<T> getData() {
         return data;
     }
 
