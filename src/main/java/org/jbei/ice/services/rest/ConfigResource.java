@@ -31,15 +31,16 @@ public class ConfigResource extends RestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Setting> get(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+    public ArrayList<Setting> get(
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
         final String userId = getUserId(sessionId);
         return controller.retrieveSystemSettings(userId);
     }
 
-    private String alt(String value, String orelse){
-        if(value != null && !value.isEmpty()){
+    private String alt(String value, String orelse) {
+        if (value != null && !value.isEmpty()) {
             return value;
-        }else{
+        } else {
             return orelse;
         }
     }
@@ -48,7 +49,7 @@ public class ConfigResource extends RestResource {
     @Path("/site")
     @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<Setting> getSiteSettings() {
-        ArrayList<Setting> settings = new ArrayList<Setting>();
+        ArrayList<Setting> settings = new ArrayList<>();
 
         settings.add(new Setting("logo",
                 alt(Utils.getConfigValue(ConfigurationKey.LOGO), "rest/file/asset/logo.png")));

@@ -3,7 +3,7 @@
 // Declare app level module which depends on filters, and services, etc
 var iceApp = angular.module('iceApp', ['ice.dependencies']);
 
-iceApp.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $location) {
+iceApp.run(function (Authentication, $route, $location, $rootScope, Util) {
     var original = $location.path;
     $location.path = function (path, reload) {
         if (reload === false) {
@@ -15,28 +15,20 @@ iceApp.run(['$route', '$rootScope', '$location', function ($route, $rootScope, $
         }
         return original.apply($location, [path]);
     };
-}]);
 
-iceApp.run(function($http, $rootScope){
-    $http({ method: 'GET', url: '/rest/config/site' }).
-        success(function (data, status, headers, config) {
-            var settings = {};
-
-            for(var i = 0; i < data.length; i++){
-                settings[data[i].key] = data[i].value;
-            }
-
-            $rootScope.siteSettings = settings;
-        });
-});
-
-iceApp.run(function (Authentication, $rootScope) {
     $rootScope.logout = function () {
         Authentication.logout();
     };
+
+    Util.list("/rest/config/site", function (result) {
+        $rootScope.siteSettings = {};
+        for (var i = 0; i < result.length; i++) {
+            $rootScope.siteSettings[result[i].key] = result[i].value;
+        }
+    });
 });
 
-iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $sceDelegateProvider) {
+iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
     $locationProvider.html5Mode(true);
 
     $urlRouterProvider.otherwise('/');
@@ -44,149 +36,148 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider, $
     // angular ui
     $stateProvider
         .state('main', {
-            url:'/',
-            templateUrl:'views/folder.html',
-            controller:'CollectionController',
-            resolve:{
-                sessionValid:function (Authentication) {
+            url: '/',
+            templateUrl: 'views/folder.html',
+            controller: 'CollectionController',
+            resolve: {
+                sessionValid: function (Authentication) {
                     return Authentication.isSessionValid();
                 }
             }
         })
         .state('login', {
-            url:'/login',
-            controller:'LoginController',
-            templateUrl:'views/login.html'
+            url: '/login',
+            controller: 'LoginController',
+            templateUrl: 'views/login.html'
         })
         .state('register', {
-            url:'/register',
-            controller:'RegisterController',
-            templateUrl:'views/register.html'
+            url: '/register',
+            controller: 'RegisterController',
+            templateUrl: 'views/register.html'
         })
         .state('forgot-password', {
-            url:'/forgot-password',
-            controller:'ForgotPasswordController',
-            templateUrl:'views/forgot-password.html'
+            url: '/forgot-password',
+            controller: 'ForgotPasswordController',
+            templateUrl: 'views/forgot-password.html'
         })
         .state('main.folder', {
-            url:'folders/:collection',
-            templateUrl:'views/collection-selection.html',
-            resolve:{
-                sessionValid:function (Authentication) {
+            url: 'folders/:collection',
+            templateUrl: 'views/collection-selection.html',
+            resolve: {
+                sessionValid: function (Authentication) {
                     return Authentication.isSessionValid();
                 }
             }
         })
         .state('main.web', {
-            url:'web',
-            templateUrl:'scripts/wor/index.html',
-            resolve:{
-                sessionValid:function (Authentication) {
+            url: 'web',
+            templateUrl: 'scripts/wor/index.html',
+            resolve: {
+                sessionValid: function (Authentication) {
                     return Authentication.isSessionValid();
                 }
             }
         })
         .state('main.web.list', {
-            url:'/:partner',
-            templateUrl:'scripts/wor/wor-contents.html',
-            controller:'WorContentController'
+            url: '/:partner',
+            templateUrl: 'scripts/wor/wor-contents.html',
+            controller: 'WorContentController'
         })
         .state('main.web.entry', {
-            url:'/:partner/entry/:entryId',
-            templateUrl:'scripts/wor/entry.html',
-            controller:'WorEntryController'
+            url: '/:partner/entry/:entryId',
+            templateUrl: 'scripts/wor/entry.html',
+            controller: 'WorEntryController'
         })
 
         .state('main.web_folder', {
-            url:'web/:partner/folder/:folderId',
-            templateUrl:'scripts/wor/wor-folder-contents.html',
-            controller:'WorFolderContentController',
-            resolve:{
-                sessionValid:function (Authentication) {
+            url: 'web/:partner/folder/:folderId',
+            templateUrl: 'scripts/wor/wor-folder-contents.html',
+            controller: 'WorFolderContentController',
+            resolve: {
+                sessionValid: function (Authentication) {
                     return Authentication.isSessionValid();
                 }
             }
         })
         .state('main.search', {
-            url:'search?q&w',
-            templateUrl:'scripts/search/search-results.html',
-            controller:'SearchController',
-            resolve:{
-                sessionValid:function (Authentication) {
+            url: 'search?q&w',
+            templateUrl: 'scripts/search/search-results.html',
+            controller: 'SearchController',
+            resolve: {
+                sessionValid: function (Authentication) {
                     return Authentication.isSessionValid();
                 }
             }
         })
         .state('main.edit', {
-            url:'entry/edit/:id',
-            controller:'EditEntryController',
-            templateUrl:'scripts/entry/edit.html'
+            url: 'entry/edit/:id',
+            controller: 'EditEntryController',
+            templateUrl: 'scripts/entry/edit.html'
         })
         .state('main.entry', {
-            url:'entry/:id',
-            templateUrl:'views/entry.html',
-            resolve:{
-                sessionValid:function (Authentication) {
+            url: 'entry/:id',
+            templateUrl: 'views/entry.html',
+            resolve: {
+                sessionValid: function (Authentication) {
                     return Authentication.isSessionValid();
                 }
             }
         })
         .state('main.entry.option', {
-            url:'/:option',
-            templateUrl:'scripts/entry/sequence-analysis.html'
+            url: '/:option',
+            templateUrl: 'scripts/entry/sequence-analysis.html'
         })
         .state('main.create', {
-            url:'create/:type',
-            controller:'CreateEntryController',
-            templateUrl:'scripts/entry/create-entry.html'
+            url: 'create/:type',
+            controller: 'CreateEntryController',
+            templateUrl: 'scripts/entry/create-entry.html'
         })
         .state('main.profile', {
-            url:'profile/:id',
+            url: 'profile/:id',
             templateUrl: 'scripts/profile/profile.html'
         })
         .state('main.profile.option', {
-            url:'/:option',
+            url: '/:option',
             templateUrl: 'scripts/profile/groups.html',
-            resolve:{
-                sessionValid:function (Authentication) {
+            resolve: {
+                sessionValid: function (Authentication) {
                     return Authentication.isSessionValid();
                 }
             }
         })
         .state('main.admin', {
-            url:'admin',
-            templateUrl:'scripts/admin/admin.html',
-            resolve:{
-                sessionValid:function (Authentication) {
+            url: 'admin',
+            templateUrl: 'scripts/admin/admin.html',
+            resolve: {
+                sessionValid: function (Authentication) {
                     return Authentication.isSessionValid() && Authentication.isAdmin();
                 }
             }
         })
         .state('main.admin.option', {
-            url:'/:option',
-            templateUrl:'scripts/admin/settings.html'
+            url: '/:option',
+            templateUrl: 'scripts/admin/settings.html'
 
         })
         .state('main.upload', {
-            url:'upload/:type',
-            controller:'UploadController',
-            templateUrl:'scripts/upload/import.html',
-            resolve:{
-                sessionValid:function (Authentication) {
+            url: 'upload/:type',
+            controller: 'UploadController',
+            templateUrl: 'scripts/upload/import.html',
+            resolve: {
+                sessionValid: function (Authentication) {
                     return Authentication.isSessionValid();
                 }
             }
         })
         .state('flash', {
-            url:'/static/swf/:shortHand/:swfName?entryId&sessionId&url',
-            controller:'FullScreenFlashController',
-            templateUrl:'scripts/entry/fullscreen-flash.html'
+            url: '/static/swf/:shortHand/:swfName?entryId&sessionId&url',
+            controller: 'FullScreenFlashController',
+            templateUrl: 'scripts/entry/fullscreen-flash.html'
         })
         .state('redirect', {
             url: '/page=collections;id=:id',
             controller: function ($stateParams, $location) {
                 $location.path("folders/" + $stateParams.id);
             }
-        })
-    ;
+        });
 });
