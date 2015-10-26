@@ -83,7 +83,7 @@ public class RestResource {
     private String hmacHeader;
 
     @Context
-    private HttpServletRequest request;
+    protected HttpServletRequest request;
 
     /**
      * Extract the User ID from header values in the resource request.
