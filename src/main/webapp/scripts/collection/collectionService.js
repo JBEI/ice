@@ -37,10 +37,6 @@ angular.module('ice.collection.service', [])
             reset: function () {
                 selectedCollection = undefined;
                 selectedFolder = undefined;
-            },
-
-            getCounts: function (success) {
-                Util.get("/folders/stats", success);
             }
         }
     })

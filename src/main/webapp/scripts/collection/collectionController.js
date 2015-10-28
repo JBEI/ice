@@ -33,7 +33,7 @@ angular.module('ice.collection.controller', [])
 
         // updates the numbers for the collections
         $scope.updateCollectionCounts = function () {
-            Util.get("/rest/collections/stats", function (result) {
+            Util.get("/rest/collections/counts", function (result) {
                 if (result === undefined || $scope.collectionList === undefined)
                     return;
 
@@ -359,16 +359,8 @@ angular.module('ice.collection.controller', [])
         }
     })
     // also the main controller
-    .controller('CollectionController', function ($scope,
-                                                  $state,
-                                                  $filter,
-                                                  $location,
-                                                  $cookieStore,
-                                                  $rootScope,
-                                                  Folders,
-                                                  Settings,
-                                                  Search,
-                                                  Samples) {
+    .controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope,
+                                                  Folders, Settings, Search, Authentication, Samples, Util) {
         // todo : set on all
         var searchUrl = "search";
         if ($location.path().slice(0, searchUrl.length) != searchUrl) {
@@ -472,9 +464,19 @@ angular.module('ice.collection.controller', [])
         // selected entries
         $scope.selection = [];
         $scope.shoppingCartContents = [];
-        samples.userRequests({status: 'IN_CART'}, {userId: $rootScope.user.id}, function (result) {
-            $scope.shoppingCartContents = result.requests;
-        });
+
+        if (!$rootScope.user) {
+            Util.get("rest/accesstokens", function (result) {
+                $rootScope.user = result;
+                Util.get("rest/samples/requests/" + $rootScope.user.id, function (result) {
+                    $scope.shoppingCartContents = result.requests;
+                })
+            });
+        } else {
+            Util.get("rest/samples/requests/" + $rootScope.user.id, function (result) {
+                $scope.shoppingCartContents = result.requests;
+            })
+        }
 
         $scope.createEntry = {
             isOpen: false
