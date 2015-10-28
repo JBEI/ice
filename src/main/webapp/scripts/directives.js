@@ -34,7 +34,7 @@ iceDirectives.directive("addSequence", function () {
 iceDirectives.directive("folderActions", function () {
     return {
         restrict: "AE",
-        templateUrl: "views/folder/folder-actions.html"
+        templateUrl: "scripts/folder/folder-actions.html"
     }
 });
 
@@ -150,7 +150,7 @@ iceDirectives.directive('myTabs', function () {
 iceDirectives.directive("iceCollectionContents", function () {
     return {
         restrict:"AE",
-        templateUrl:"views/folder/folder-contents.html",
+        templateUrl: "scripts/folder/folder-contents.html",
         controller:"CollectionFolderController"
     }
 });
