@@ -35,10 +35,9 @@ public enum ConfigurationKey implements IDataTransferModel {
     WEB_OF_REGISTRIES_MASTER("registry.jbei.org"),
     
     AUTHENTICATION_BACKEND("org.jbei.ice.lib.account.authentication.LocalAuthentication"),
-    LOGO("img/logo.png"),
-    LOGIN_MESSAGE("views/institution.html"),
-    FOOTER("views/footer.html");
-
+    LOGO(""),
+    LOGIN_MESSAGE(""),
+    FOOTER("");
 
     private String defaultValue;
 

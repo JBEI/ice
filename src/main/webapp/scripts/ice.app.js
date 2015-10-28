@@ -21,9 +21,15 @@ iceApp.run(function (Authentication, $route, $location, $rootScope, Util) {
     };
 
     Util.list("/rest/config/site", function (result) {
-        $rootScope.siteSettings = {};
+        $rootScope.siteSettings = {
+            LOGO: "img/logo.png",
+            LOGIN_MESSAGE: "views/institution.html",
+            FOOTER: "views/footer.html"
+        };
+
         for (var i = 0; i < result.length; i++) {
-            $rootScope.siteSettings[result[i].key] = result[i].value;
+            if (result[i].value)
+                $rootScope.siteSettings[result[i].key] = result[i].value;
         }
     });
 });
