@@ -1,7 +1,7 @@
 <div class="btn-toolbar">
 
     <div class="btn-group" uib-dropdown style="margin-left: 20px">
-        <button class="btn btn-default action-menu uib-dropdown-toggle" uib-dropdown-toggle uib-tooltip="Add to folder"
+        <button class="btn btn-default action-menu uib-dropdown-toggle" uib-dropdown-toggle uib-tooltip="Add"
                 ng-disabled="addToDisabled" ng-click="retrieveUserFolders()">
             <i class="fa fa-fw fa-folder font-12em"></i>
             <small class="caret"></small>
@@ -45,7 +45,7 @@
         <!--move to -->
         <div class="btn-group" uib-dropdown>
             <button class="btn btn-default action-menu uib-dropdown-toggle" ng-disabled="!canMoveFromFolder()"
-                    uib-tooltip="Move to folder" ng-click="retrieveUserFolders()" uib-dropdown-toggle>
+                    uib-tooltip="Move" ng-click="retrieveUserFolders()" uib-dropdown-toggle>
                 <i class="fa fa-folder-o font-12em"></i>
                 <small class="caret"></small>
             </button>
@@ -130,10 +130,11 @@
         </ul>
     </div>
 
-    <div class="pull-right" style="margin-right: 2px; height: 30px">
-        <uib-alert style="width: 200px; padding: 5px 25px 5px 10px" type="warning" close="closeFeedbackAlert()"
+    <div class="pull-right" style="margin-right: 2px; height: 30px" ng-if="serverFeedback">
+        <uib-alert style="width: 200px; padding: 5px 25px 5px 10px" type="serverFeedback.type"
+                   close="closeFeedbackAlert()"
                    dismiss-on-timeout="3000">
-            <small>Feedback: has error {{hasError}}</small>
+            <small>{{serverFeedback.message}}</small>
         </uib-alert>
     </div>
 </div>
