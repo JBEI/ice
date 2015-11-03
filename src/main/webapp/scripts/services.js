@@ -793,38 +793,38 @@ iceServices.factory('Authentication',
             },
 
             getLoggedInUser: function () {
-                if ($rootScope.user)
+                if ($rootScope.user) {
                     return $rootScope.user;
+                }
 
                 var sid = $cookieStore.get('sessionId');
                 return $http.get('rest/accesstokens',
                     {headers: {'X-ICE-Authentication-SessionId': sid}})
                     .success(function (data) {
-                        if (data.sessionId === undefined) {
-                            $cookieStore.remove('userId');
-                            $cookieStore.remove('sessionId');
-                            if ($location.path() !== '/login')
-                                $cookies.loginDestination = $location.path();
-                            $location.path('/login');
-                        }
                         $rootScope.user = data;
                     })
                     .error(function (data, status) {
                         if (status === 401) {
                             $cookieStore.remove('userId');
                             $cookieStore.remove('sessionId');
+                            if ($location.path() !== '/login')
+                                $cookies.loginDestination = $location.path();
+                            $location.path('/login');
                         }
                     });
             },
 
-            // todo : use a parameter in isSessionValid to check
             isAdmin: function () {
-                this.getLoggedInUser().then(function (result) {
-                    if (!result || !result.data || !result.data.isAdmin) {
-                        $location.path("folders/personal");
-                        return false;
-                    }
-                });
+                if ($rootScope.user) {
+                    if (!$rootScope.user.isAdmin)
+                        $location.path('/folders/personal');
+                } else {
+                    Util.get('rest/accesstokens', function (result) {
+                        if (!result || !result.isAdmin) {
+                            $location.path('/folders/personal');
+                        }
+                    });
+                }
             },
 
             // logs out user by invalidating the session id

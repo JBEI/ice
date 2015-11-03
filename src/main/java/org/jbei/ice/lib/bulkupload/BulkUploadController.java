@@ -643,9 +643,6 @@ public class BulkUploadController {
             compatibleTypes.add(EntryType.PLASMID.getName());
 
         token = token.replaceAll("'", "");
-        for (Entry entry : DAOFactory.getEntryDAO().getMatchingEntryPartNumbers(token, limit, compatibleTypes)) {
-            dataList.add(entry.getPartNumber());
-        }
-        return dataList;
+        return new ArrayList<>(DAOFactory.getEntryDAO().getMatchingEntryPartNumbers(token, limit, compatibleTypes));
     }
 }

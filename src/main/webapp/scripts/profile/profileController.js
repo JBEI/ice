@@ -83,7 +83,7 @@ angular.module('ice.profile.controller', [])
             });
         };
 
-        $scope.profileEntryPopupTemplate = "views/folder/template.html";
+        $scope.profileEntryPopupTemplate = "scripts/folder/template.html";
 
         $scope.tooltipDetails = function (entry) {
             $scope.currentTooltip = undefined;

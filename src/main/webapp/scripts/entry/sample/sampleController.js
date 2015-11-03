@@ -68,7 +68,7 @@ angular.module('ice.entry.sample.controller', [])
 
         $scope.openAddToCart = function (entryId, samples) {
             var modalInstance = $uibModal.open({
-                templateUrl: 'views/modal/sample-request.html',
+                templateUrl: 'scripts/entry/sample/modal-sample-request.html',
                 controller: function ($scope, samples) {
                     $scope.samples = samples;
                     $scope.tempRange = [{value: 30}, {value: 37}];

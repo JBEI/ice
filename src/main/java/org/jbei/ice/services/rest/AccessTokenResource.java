@@ -60,9 +60,9 @@ public class AccessTokenResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response get(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
-        AccountTransfer transfer = accountController.getAccountBySessionKey(sessionId);
-        if (transfer == null)
-            return super.respond(Response.Status.UNAUTHORIZED);
+        String userId = getUserId();
+        AccountTransfer transfer = accountController.getByEmail(userId).toDataTransferObject();
+        transfer.setAdmin(accountController.isAdministrator(userId));
         return super.respond(transfer);
     }
 

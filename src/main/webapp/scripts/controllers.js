@@ -22,8 +22,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $scope
     $scope.selectedFolders = [];
 
     $scope.closeFeedbackAlert = function () {
-        console.log("feedback closed");
-        $rootScope.hasError = false;
+        $rootScope.serverFeedback = undefined;
     };
 
     // retrieve personal list of folders user can add or move parts to
@@ -331,14 +330,8 @@ iceControllers.controller('MessageController', function ($scope, $location, $coo
     });
 });
 
-iceControllers.controller('LoginController', function ($scope,
-                                                       $location,
-                                                       $cookieStore,
-                                                       $cookies,
-                                                       $rootScope,
-                                                       Authentication,
-                                                       Settings,
-                                                       Util) {
+iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope,
+                                                       Authentication, Settings, Util) {
     $scope.login = {};
     $scope.submit = function () {
         $scope.errMsg = undefined;
@@ -367,18 +360,12 @@ iceControllers.controller('LoginController', function ($scope,
                     $cookieStore.put('sessionId', success.sessionId);
                     var loginDestination = $cookies.loginDestination || '/';
                     $cookies.loginDestination = null;
-                    $scope.errMsg = undefined;
                     $location.path(loginDestination);
                 } else {
                     $cookieStore.remove('userId');
                     $cookieStore.remove('sessionId');
-                    $scope.errMsg = "Login failed";
                 }
                 $scope.login.processing = false;
-            },
-            function (error) {
-                $scope.login.processing = false;
-                $scope.errMsg = "Login failed";
             });
     };
 

@@ -277,12 +277,12 @@ angular.module('ice.collection.controller', [])
                 });
         };
 
-        $scope.folderPopupTemplateUrl = "views/folder/template.html";
+        $scope.folderPopupTemplateUrl = "scripts/folder/template.html";
 
         // opens a modal that presents user with options to share selected folder
         $scope.openFolderShareSettings = function () {
             var modalInstance = $uibModal.open({
-                templateUrl: 'views/modal/folder-permissions.html',
+                templateUrl: 'scripts/folder/modal/folder-permissions.html',
                 controller: "FolderPermissionsController",
                 backdrop: "static",
                 resolve: {
@@ -334,7 +334,7 @@ angular.module('ice.collection.controller', [])
                 return;
 
             var modalInstance = $uibModal.open({
-                templateUrl: 'views/folder/modal/rename-folder.html',
+                templateUrl: 'scripts/folder/modal/rename-folder.html',
                 controller: function ($scope, $modalInstance, folderName) {
                     $scope.newFolderName = folderName;
                 },
@@ -506,7 +506,7 @@ angular.module('ice.collection.controller', [])
             })
         };
 
-        $scope.shoppingCartTemplate = "views/shopping-cart-template.html";
+        $scope.shoppingCartTemplate = "scripts/collection/popover/shopping-cart-template.html";
 
         // remove sample request
         $scope.removeFromCart = function (content, entry) {

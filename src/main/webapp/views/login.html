@@ -10,21 +10,23 @@
                 <div class="form-group">
                     <br><img ng-src="{{siteSettings.logo}}"><br><br>
 
-                    <div class="alert alert-danger" style="width: 250px; padding: 8px" ng-if="errMsg">
+                    <div class="alert alert-danger" style="width: 250px; padding: 8px" ng-if="serverFeedback">
                         <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
                         <span class="font-90em">Login failed. Please try again.</span>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <input type="text" ng-disabled="login.processing"
+                    <input type="text" ng-disabled="login.processing&&!serverFeedback"
                            ng-class="{'login_input':!login.emailError, 'login_input_error':login.emailError}"
-                           placeholder="Username" ng-model="login.email" ng-change="login.emailError=undefined"/>
-                    <img src="img/loader-mini.gif" ng-if="login.processing">
+                           placeholder="Username" ng-model="login.email"
+                           ng-change="login.emailError=undefined;login.processing=undefined"/>
+                    <img src="img/loader-mini.gif" ng-if="login.processing&&!serverFeedback">
                     <br>
-                    <input type="password" ng-disabled="login.processing"
+                    <input type="password" ng-disabled="login.processing&&!serverFeedback"
                            ng-class="{'login_input':!login.passwordError, 'login_input_error':login.passwordError}"
-                           placeholder="Password" ng-model="login.password" ng-change="login.passwordError=undefined"/>
+                           placeholder="Password" ng-model="login.password"
+                           ng-change="login.passwordError=undefined;login.processing=undefined"/>
                 </div>
 
                 <div class="checkbox">
@@ -33,7 +35,7 @@
                     </label>
                 </div>
 
-                <button type="submit" class="btn btn-sm btn-primary" ng-disabled="login.processing">
+                <button type="submit" class="btn btn-sm btn-primary" ng-disabled="login.processing&&!serverFeedback">
                     <strong>Sign in</strong>
                 </button>
                 <button type="button" ng-if="canCreateAccount" ng-click="goToRegister()"

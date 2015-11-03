@@ -26,7 +26,7 @@ iceApp.run(function (Authentication, $route, $location, $rootScope, Util) {
         FOOTER: "views/footer.html"
     };
 
-    Util.list("/rest/config/site", function (result) {
+    Util.list("rest/config/site", function (result) {
         for (var i = 0; i < result.length; i++) {
             if (result[i].value)
                 $rootScope.siteSettings[result[i].key] = result[i].value;
@@ -98,7 +98,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         })
         .state('main.entry', {
             url: 'entry/:id',
-            templateUrl: 'views/entry.html'
+            templateUrl: 'scripts/entry/entry.html'
         })
         .state('main.entry.option', {
             url: '/:option',

@@ -4,7 +4,7 @@ angular.module('ice.common.service', [])
     .factory('Util', function ($rootScope, $location, $cookieStore, $resource) {
         return {
             handleError: function (response) {
-                console.error("error", response);
+                var errorMsg;
 
                 switch (response.status) {
                     case 401:
@@ -12,23 +12,24 @@ angular.module('ice.common.service', [])
                             $cookieStore.remove('user');
                             $rootScope.user = undefined;
                             $location.path('/login');
-                            $rootScope.error = "Your session has expired. Please login again";
+                            errorMsg = "Your session has expired. Please login again";
                         } else {
-                            $rootScope.error = response.data.errorMessage;
+                            errorMsg = response.data.errorMessage;
                         }
                         break;
 
                     case 404:
-                        $rootScope.error = "The requested resource could not be found";
+                        errorMsg = "The requested resource could not be found";
                         break;
 
                     case 500:
-                        $rootScope.error = response.data.errorMessage;
+                        errorMsg = response.data.errorMessage;
                         break;
 
                     default:
-                        $rootScope.error = "Unknown server error";
+                        errorMsg = "Unknown server error";
                 }
+                $rootScope.serverFeedback = {message: errorMsg};
             },
 
             get: function (url, successHandler, queryParams) {

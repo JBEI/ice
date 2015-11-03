@@ -71,7 +71,7 @@ angular.module('ice.search.controller', [])
             return 'info';
         };
 
-        $scope.searchResultPopupTemplate = "views/folder/template.html";
+        $scope.searchResultPopupTemplate = "scripts/folder/template.html";
 
         $scope.tooltipDetails = function (entry) {
             $scope.currentTooltip = undefined;

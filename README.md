@@ -6,15 +6,10 @@ software for biological parts developed by the `Joint
 BioEnergy Institute <http://www.jbei.org/>`__. It is a Web application used by laboratories to track and search their
 constructs.
 
-ICE is distributed under the Modified BSD license. See LICENSE.txt and LIBRARY_LICENSES.txt for details.
+ICE is distributed under the Modified BSD license. 
 
 You can try out the software at our `Public
 Registry <http://public-registry.jbei.org>`__.
-
-Documentation for ICE Users
--------------
-
-Read the `Manual <https://jbei.github.io/ice/>`__ for installation and usage instructions.
 
 
 Documentation for ICE developers
@@ -58,19 +53,13 @@ Set Up
 
 4. Point your browser to https://localhost:8443/ to access the application
 
-Testing
-~~~~~~~
-To run the unit test suite
-
-::
-
-  mvn test
 
 Links
 -----
 
 * `ICE Google Group <http://groups.google.com/group/gd-ice>`__
 * `Releases <https://github.com/JBEI/ice/releases>`__: Download the war file associated with the latest release
+* `Manual <https://jbei.github.io/ice/>`__: Installation and usage instructions
 * `REST API WADL <https://public-registry.jbei.org/rest/application.wadl>`__
 
 Related Projects

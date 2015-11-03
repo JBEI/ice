@@ -48,9 +48,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
+ * Rest parts resource
+ *
  * @author Hector Plahar
  */
 @Path("/parts")
@@ -65,42 +66,8 @@ public class PartResource extends RestResource {
     private SampleService sampleService = new SampleService();
 
     /**
-     * @param val
-     * @param field
-     * @param limit
-     * @return list of autocomplete values for a field
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/autocomplete")
-    public ArrayList<String> autoComplete(@QueryParam("val") String val,
-                                          @DefaultValue("SELECTION_MARKERS") @QueryParam("field") String field,
-                                          @DefaultValue("8") @QueryParam("limit") int limit) {
-        AutoCompleteField autoCompleteField = AutoCompleteField.valueOf(field.toUpperCase());
-        Set<String> result = retriever.getMatchingAutoCompleteField(autoCompleteField, val, limit);
-        return new ArrayList<>(result);
-    }
-
-    /**
-     * @param token
-     * @param limit
-     * @return list of autocomplete values for parts
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/autocomplete/partid")
-    public ArrayList<PartData> autoComplete(@QueryParam("token") String token,
-                                            @DefaultValue("8") @QueryParam("limit") int limit) {
-        return retriever.getMatchingPartNumber(token, limit);
-    }
-
-    /**
      * Retrieves a part using any of the unique identifiers. e.g. Part number, synthetic id, or
      * global unique identifier
-     *
-     * @param info
-     * @param id
-     * @return Response with part data
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -126,8 +93,6 @@ public class PartResource extends RestResource {
     }
 
     /**
-     * @param id
-     * @return part data with tooltip information
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

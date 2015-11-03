@@ -2,6 +2,7 @@ package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.entry.AutoCompleteFieldValues;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResults;
@@ -26,21 +27,34 @@ public class SearchResource extends RestResource {
     private SearchController controller = new SearchController();
 
     /**
+     * Search entries by using filters on the values
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/filter")
+    public Response searchPartFields(
+            @DefaultValue("") @QueryParam("token") String token,
+            @DefaultValue("SELECTION_MARKERS") @QueryParam("field") String field,
+            @DefaultValue("8") @QueryParam("limit") int limit) {
+        getUserId();
+        AutoCompleteFieldValues values = new AutoCompleteFieldValues(field);
+        return super.respond(values.getMatchingValues(token, limit));
+    }
+
+    /**
      * Advanced Search. The use of post is mostly for the sequence string for blast which can get
      * very long and results in a 413 status code if sent via GET
      *
-     * @param searchWeb
-     *            whether to perform a web of registry search or not
-     * @param query
-     *            parameters to the search
-     *
+     * @param searchWeb whether to perform a web of registry search or not
+     * @param query     parameters to the search
      * @return results of the search
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response search(@DefaultValue("false") @QueryParam("webSearch") final boolean searchWeb,
-            final SearchQuery query) {
+                           final SearchQuery query) {
         final String userId = getUserId();
         try {
             final SearchResults results = controller.runSearch(userId, query, searchWeb);
@@ -54,29 +68,23 @@ public class SearchResource extends RestResource {
     /**
      * Keyword search
      *
-     * @param queryString
-     *            keywords to search on
-     * @param searchWeb
-     *            whether to perform a web of registry search or not
-     * @param offset
-     *            result start
-     * @param limit
-     *            result count upper limit
-     * @param sort
-     *            result sort
-     * @param asc
-     *            true if return results in ascending order, false otherwise
+     * @param queryString keywords to search on
+     * @param searchWeb   whether to perform a web of registry search or not
+     * @param offset      result start
+     * @param limit       result count upper limit
+     * @param sort        result sort
+     * @param asc         true if return results in ascending order, false otherwise
      * @return wrapper around list of search results conforming to query params
      */
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response search(@QueryParam("q") final String queryString,
-            @DefaultValue("false") @QueryParam("webSearch") final boolean searchWeb,
-            @DefaultValue("0") @QueryParam("offset") final int offset,
-            @DefaultValue("15") @QueryParam("limit") final int limit,
-            @DefaultValue("relevance") @QueryParam("sort") final String sort,
-            @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+                           @DefaultValue("false") @QueryParam("webSearch") final boolean searchWeb,
+                           @DefaultValue("0") @QueryParam("offset") final int offset,
+                           @DefaultValue("15") @QueryParam("limit") final int limit,
+                           @DefaultValue("relevance") @QueryParam("sort") final String sort,
+                           @DefaultValue("false") @QueryParam("asc") final boolean asc) {
         final String userId = getUserId();
         if (StringUtils.isEmpty(userId) && !searchWeb) {
             return super.respond(Response.Status.FORBIDDEN);

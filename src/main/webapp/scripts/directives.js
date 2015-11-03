@@ -49,7 +49,7 @@ iceDirectives.directive("iceActionMenu", function () {
 iceDirectives.directive("iceEntryAttachment", function () {
     return {
         restrict: "E",
-        templateUrl: "views/entry-attachment.html"
+        templateUrl: "scripts/entry/entry-attachment.html"
     }
 });
 
@@ -66,7 +66,7 @@ iceDirectives.directive("iceEntryPermission", function () {
         scope: {
             entry: '='
         },
-        templateUrl:"views/entry-permission.html",
+        templateUrl: "scripts/entry/entry-permission.html",
         controller:'EntryPermissionController'
     }
 });

@@ -212,9 +212,9 @@ angular.module('ice.entry.controller', [])
             $window.open("rest/file/trace/" + trace.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
         };
     })
-    .controller('TraceSequenceUploadModalController', function ($scope, FileUploader, $modalInstance, entryId, $cookieStore) {
+    .controller('TraceSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId, $cookieStore) {
         $scope.cancelAddSangerTrace = function () {
-            $modalInstance.dismiss('cancel');
+            $uibModalInstance.dismiss('cancel');
         };
 
         $scope.traceSequenceUploader = new FileUploader({
@@ -240,22 +240,19 @@ angular.module('ice.entry.controller', [])
                 return;
             }
 
-            $modalInstance.close();
+            $uibModalInstance.close();
         };
 
         $scope.traceSequenceUploader.onErrorItem = function (item, response, status, headers) {
             $scope.traceUploadError = true;
         };
     })
-    .controller('EntryExperimentController', function ($scope, $cookieStore, $stateParams, Entry, Util) {
+    .controller('EntryExperimentController', function ($scope, $cookieStore, $stateParams, Util) {
         var entryId = $stateParams.id;
-        var entry = Entry($cookieStore.get("sessionId"));
         $scope.experiment = {};
         $scope.addExperiment = false;
 
-        entry.experiments({
-            partId: entryId
-        }, function (result) {
+        Util.list("/rest/parts/" + entryId + "/experiments", function (result) {
             $scope.entryExperiments = result;
         });
 
@@ -268,14 +265,10 @@ angular.module('ice.entry.controller', [])
                 return;
             }
 
-            entry.createExperiment({
-                partId: entryId
-            }, $scope.experiment, function (result) {
+            Util.post("/rest/parts/" + entryId + "/experiments", $scope.experiment, function (result) {
                 $scope.entryExperiments.splice(0, 0, result);
                 $scope.addExperiment = false;
                 $scope.entryStatistics.experimentalDataCount = $scope.entryExperiments.length;
-            }, function (error) {
-                console.error("experiment create error", error);
             });
         };
 
@@ -357,39 +350,28 @@ angular.module('ice.entry.controller', [])
             $scope.linkOptions = EntryService.linkOptions(result.type);
             $scope.selectedFields = EntryService.getFieldsForType(result.type);
             $scope.activePart = $scope.entry;
-            console.log($scope.activePart);
         });
 
         $scope.cancelEdit = function () {
             $location.path("entry/" + $stateParams.id);
         };
 
-        $scope.getLocation = function (inputField, val) {   // todo : move to service
-            return $http.get('rest/parts/autocomplete', {
+        $scope.getLocation = function (inputField, val) {
+            return $http.get('rest/search/filter', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
                     val: val,
                     field: inputField
                 }
             }).then(function (res) {
+                console.log(res);
                 return res.data;
             });
         };
 
-        // difference between this and getLocation() is getLocation() returns a list of strings
-        // and this returns a list of objects
-        $scope.getEntriesByPartNumber = function (val) {
-            return $http.get('rest/parts/autocomplete/partid', {
-                headers: {'X-ICE-Authentication-SessionId': sid},
-                params: {
-                    token: val
-                }
-            }).then(function (res) {
-                return res.data;
-            });
-        };
+        $scope.addExistingPartLink = function ($item, $model) {
+            console.log($item, $model);
 
-        $scope.addExistingPartLink = function ($item, $model, $label) {
             entry.query({partId: $model.id}, function (result) {
                 $scope.activePart = result;
 
@@ -539,7 +521,7 @@ angular.module('ice.entry.controller', [])
             getPartDefaults(type, false);
         };
 
-        $scope.addExistingPartLink = function ($item, $model, $label) {
+        $scope.addExistingPartLink = function ($item, $model) {
             entry.query({partId: $model.id}, function (result) {
                 $scope.activePart = result;
                 $scope.activePart.isExistingPart = true;
@@ -595,7 +577,7 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.getLocation = function (inputField, val) {
-            return $http.get('rest/parts/autocomplete', {
+            return $http.get('rest/search/filter', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
                     val: val,
@@ -675,12 +657,14 @@ angular.module('ice.entry.controller', [])
         $scope.format = 'MMM d, yyyy h:mm:ss a';
 
         $scope.getEntriesByPartNumber = function (val) {
-            return $http.get('rest/parts/autocomplete/partid', {
+            return $http.get('rest/search/filter', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
-                    token: val
+                    token: val,
+                    field: 'PART_NUMBER'
                 }
             }).then(function (res) {
+                console.log(res);
                 return res.data;
             });
         };
@@ -779,7 +763,7 @@ angular.module('ice.entry.controller', [])
     })
 
     .
-    controller('SequenceFileUploadController', function ($scope, $cookieStore, $uibModal, $modalInstance, FileUploader, type, paste) {
+    controller('SequenceFileUploadController', function ($scope, $cookieStore, $uibModal, $uibModalInstance, FileUploader, type, paste) {
         console.log("SequenceFileUploadController");
         var sid = $cookieStore.get("sessionId");
         $scope.isPaste = paste;
@@ -801,7 +785,7 @@ angular.module('ice.entry.controller', [])
         });
 
         $scope.cancel = function () {
-            $modalInstance.dismiss('cancel');
+            $uibModalInstance.dismiss('cancel');
         };
 
         $scope.uploadFile = function () {
@@ -989,7 +973,7 @@ angular.module('ice.entry.controller', [])
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
                                              FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection,
-                                             CustomField) {
+                                             CustomField, Util, Authentication) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
@@ -1025,8 +1009,8 @@ angular.module('ice.entry.controller', [])
 
         $scope.deleteSequence = function (part) {
             var modalInstance = $uibModal.open({
-                templateUrl: 'views/modal/delete-sequence-confirmation.html',
-                controller: function ($scope, $modalInstance) {
+                templateUrl: 'scripts/entry/sequence/modal-delete-sequence-confirmation.html',
+                controller: function ($scope, $uibModalInstance) {
                     $scope.toDelete = part;
                     $scope.processingDelete = undefined;
                     $scope.errorDeleting = undefined;
@@ -1037,7 +1021,7 @@ angular.module('ice.entry.controller', [])
 
                         entry.deleteSequence({partId: part.id}, function (result) {
                             $scope.processingDelete = false;
-                            $modalInstance.close(part);
+                            $uibModalInstance.close(part);
                         }, function (error) {
                             $scope.processingDelete = false;
                             $scope.errorDeleting = true;
@@ -1060,8 +1044,8 @@ angular.module('ice.entry.controller', [])
         $scope.addLink = function (part, role) {
 
             var modalInstance = $uibModal.open({
-                templateUrl: 'views/modal/add-link-modal.html',
-                controller: function ($scope, $http, $modalInstance, $cookieStore) {
+                templateUrl: 'scripts/entry/modal/add-link-modal.html',
+                controller: function ($scope, $http, $uibModalInstance, $cookieStore) {
                     $scope.mainEntry = part;
                     $scope.role = role;
                     $scope.loadingAddExistingData = undefined;
@@ -1074,10 +1058,11 @@ angular.module('ice.entry.controller', [])
 
                     var sessionId = $cookieStore.get("sessionId");
                     $scope.getEntriesByPartNumber = function (val) {
-                        return $http.get('rest/parts/autocomplete/partid', {
+                        return $http.get('rest/search/filter', {
                             headers: {'X-ICE-Authentication-SessionId': sessionId},
                             params: {
-                                token: val
+                                token: val,
+                                field: 'PART_NUMBER'
                             }
                         }).then(function (res) {
                             return res.data;
@@ -1096,60 +1081,60 @@ angular.module('ice.entry.controller', [])
                             });
                     };
 
+                    // todo : todo
                     $scope.addExistingPartLink = function ($item, $model, $label) {
                         $scope.errorMessage = undefined;
 
                         // prevent selecting current entry
-                        if ($item.id == $scope.mainEntry.id)
+                        if ($item == $scope.mainEntry.partId)
                             return;
 
                         // or already added entry
                         var found = false;
                         angular.forEach($scope.links, function (t) {
-                            if (t.id === $item.id) {
+                            if (t.partId === $item) {
                                 found = true;
                             }
                         });
                         if (found)
                             return;
 
-                        $scope.selectedLink = $item;
-                        if ($scope.role == 'CHILD') {
+                        // fetch entry from server
+                        Util.get("rest/parts/" + $item, function (result) {
+                            $scope.selectedLink = result;
+                            if ($scope.role == 'CHILD') {
 
-                            // if item being added as a child is of type part then
-                            if ($item.type.toLowerCase() == 'part') {
-                                // fetch item.id and check if it has a sequence
-                                entry.query({partId: $item.id}, function (result) {
+                                // if item being added as a child is of type part then
+                                if ($item.type.toLowerCase() == 'part') {
+                                    // fetch item.id and check if it has a sequence
                                     if (!result.hasSequence) {
                                         // then present the current entry sequence options to user
                                         $scope.getEntrySequence($scope.mainEntry.id);
                                     } else {
                                         // just add the link
-                                        linkPartToMainEntry($item);
+                                        linkPartToMainEntry(result);
                                     }
-                                }, function (error) {
-                                    $scope.errorMessage = "Error";
-                                })
-                            } else {
-                                // just add the link
-                                linkPartToMainEntry($item);
-                            }
-                        } else {
-                            // parent of main entry being added
-                            if ($scope.mainEntry.type.toLowerCase() == 'part') {
-
-                                // if child (main) does not have a parent sequence
-                                if (!$scope.mainEntry.hasSequence) {
-
-                                    // retrieve sequence feature options for selected
-                                    $scope.getEntrySequence($scope.addExistingPartNumber.id);
                                 } else {
-                                    linkPartToMainEntry($item);
+                                    // just add the link
+                                    linkPartToMainEntry(result);
                                 }
                             } else {
-                                linkPartToMainEntry($item);
+                                // parent of main entry being added
+                                if ($scope.mainEntry.type.toLowerCase() == 'part') {
+
+                                    // if child (main) does not have a parent sequence
+                                    if (!$scope.mainEntry.hasSequence) {
+
+                                        // retrieve sequence feature options for selected
+                                        $scope.getEntrySequence($scope.addExistingPartNumber.id);
+                                    } else {
+                                        linkPartToMainEntry(result);
+                                    }
+                                } else {
+                                    linkPartToMainEntry(result);
+                                }
                             }
-                        }
+                        });
                     };
 
                     $scope.removeExistingPartLink = function (link) {
@@ -1157,19 +1142,14 @@ angular.module('ice.entry.controller', [])
                         if (i < 0)
                             return;
 
-                        entry.removeLink({
-                            partId: $scope.mainEntry.id,
-                            linkId: link.id,
-                            linkType: $scope.role
-                        }, function (result) {
-                            $scope.links.splice(i, 1);
-                        }, function (error) {
-
-                        });
+                        Util.remove('rest/parts/' + $scope.mainEntry.id + '/links/' + link.id,
+                            {linkType: $scope.role}, function (result) {
+                                $scope.links.splice(i, 1);
+                            });
                     };
 
                     $scope.close = function () {
-                        $modalInstance.close();
+                        $uibModalInstance.close();
                     };
 
                     $scope.getEntrySequence = function (id) {
@@ -1231,21 +1211,34 @@ angular.module('ice.entry.controller', [])
             });
         };
 
-        var partDefaults = {
-            type: $scope.createType,
-            links: [
-                {}
-            ],
-            selectionMarkers: [
-                {}
-            ],
-            bioSafetyLevel: '1',
-            status: 'Complete',
-            creator: $scope.user.firstName + ' ' + $scope.user.lastName,
-            creatorEmail: $scope.user.email
+        // todo :
+
+        var setPartDefaults = function (user) {
+            var partDefaults = {
+                type: $scope.createType,
+                links: [
+                    {}
+                ],
+                selectionMarkers: [
+                    {}
+                ],
+                bioSafetyLevel: '1',
+                status: 'Complete',
+                creator: user.firstName + ' ' + user.lastName,
+                creatorEmail: user.email
+            };
+
+            $scope.part = angular.copy(partDefaults);
         };
 
-        $scope.part = angular.copy(partDefaults);
+        if (!$rootScope.user) {
+            Authentication.getLoggedInUser().then(function (result) {
+                var user = result.data;
+                setPartDefaults(user);
+            });
+        } else {
+            setPartDefaults($rootScope.user);
+        }
 
         $scope.sbolShowHide = function () {
             $scope.showSBOL = !$scope.showSBOL;

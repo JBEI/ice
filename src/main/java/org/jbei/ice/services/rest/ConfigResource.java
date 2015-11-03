@@ -37,31 +37,15 @@ public class ConfigResource extends RestResource {
         return controller.retrieveSystemSettings(userId);
     }
 
-    private String alt(String value, String orelse) {
-        if (value != null && !value.isEmpty()) {
-            return value;
-        } else {
-            return orelse;
-        }
-    }
-
     @GET
     @Path("/site")
     @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<Setting> getSiteSettings() {
         ArrayList<Setting> settings = new ArrayList<>();
-
-        settings.add(new Setting("logo",
-                alt(Utils.getConfigValue(ConfigurationKey.LOGO), "rest/file/asset/logo.png")));
-
-        settings.add(new Setting("loginMessage",
-                alt(Utils.getConfigValue(ConfigurationKey.LOGIN_MESSAGE), "rest/file/asset/institution.html")));
-
-        settings.add(new Setting("footer",
-                alt(Utils.getConfigValue(ConfigurationKey.FOOTER), "rest/file/asset/footer.html")));
-
-        settings.add(new Setting("version", "4.5.3"));
-
+        settings.add(new Setting("logo", Utils.getConfigValue(ConfigurationKey.LOGO)));
+        settings.add(new Setting("loginMessage", Utils.getConfigValue(ConfigurationKey.LOGIN_MESSAGE)));
+        settings.add(new Setting("footer", Utils.getConfigValue(ConfigurationKey.FOOTER)));
+        settings.add(new Setting("version", "4.6.0"));
         return settings;
     }
 
@@ -121,11 +105,9 @@ public class ConfigResource extends RestResource {
      */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public Response update(@Context final UriInfo uriInfo,
-                           @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
-                           final Setting setting) {
-        final String userId = getUserId(sessionId);
-        final String url = uriInfo.getBaseUri().getAuthority();
+    public Response update(final Setting setting) {
+        final String userId = getUserId();
+        final String url = request.getRemoteHost();
         return super.respond(controller.updateSetting(userId, setting, url));
     }
 }
