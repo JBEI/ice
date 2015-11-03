@@ -1,10 +1,12 @@
 <div class="btn-toolbar">
 
     <div class="btn-group" uib-dropdown style="margin-left: 20px">
-        <button class="btn btn-default action-menu uib-dropdown-toggle" uib-dropdown-toggle uib-tooltip="Add"
-                ng-disabled="addToDisabled" ng-click="retrieveUserFolders()">
-            <i class="fa fa-fw fa-folder font-12em"></i>
+        <button class="btn btn-default action-menu uib-dropdown-toggle" uib-dropdown-toggle
+                ng-disabled="addToDisabled" ng-click="retrieveUserFolders()" style="height: 32px;">
+            <i class="fa fa-fw fa-folder font-11em"></i>
             <small class="caret"></small>
+            <br>
+            <small class="text-uppercase" style="font-size: 0.50em; position: relative; top: -10px">Add To</small>
         </button>
 
         <div class="uib-dropdown-menu" uib-dropdown-menu>
@@ -37,17 +39,21 @@
 
         <!--remove from folder-->
         <button class="btn btn-default action-menu" ng-disabled="!canMoveFromFolder()"
-                uib-tooltip="Remove from folder" ng-click="removeEntriesFromFolder()">
-            <i class="fa fa-folder-open-o font-12em"></i>
+                ng-click="removeEntriesFromFolder()">
+            <i class="fa fa-folder-open-o font-11em"></i>
+            <br>
+            <small class="text-uppercase" style="font-size: 0.50em; position: relative; top: -10px">Remove</small>
         </button>
 
 
         <!--move to -->
         <div class="btn-group" uib-dropdown>
             <button class="btn btn-default action-menu uib-dropdown-toggle" ng-disabled="!canMoveFromFolder()"
-                    uib-tooltip="Move" ng-click="retrieveUserFolders()" uib-dropdown-toggle>
-                <i class="fa fa-folder-o font-12em"></i>
+                    ng-click="retrieveUserFolders()" uib-dropdown-toggle>
+                <i class="fa fa-folder-o font-11em"></i>
                 <small class="caret"></small>
+                <br>
+                <small class="text-uppercase" style="font-size: 0.50em; position: relative; top: -10px">Move To</small>
             </button>
 
             <span class="uib-dropdown-menu color-888" uib-dropdown-menu ng-if="!userFolders">
@@ -87,18 +93,24 @@
     <!--edit and delete-->
     <div class="btn-group" style="margin-left: 20px">
         <button class="btn btn-default action-menu" ng-disabled="!canEdit()" ng-click="editEntry()">
-            <i class="fa fa-pencil font-12em"></i>
+            <i class="fa fa-pencil font-11em"></i>
+            <br>
+            <small class="text-uppercase" style="font-size: 0.50em; position: relative; top: -10px">Edit</small>
         </button>
 
         <button class="btn btn-default action-menu" ng-disabled="!canDelete()" ng-click="deleteSelectedEntries()">
-            <i class="fa fa-trash-o font-12em"></i>
+            <i class="fa fa-trash-o font-11em"></i>
+            <br>
+            <small class="text-uppercase" style="font-size: 0.50em; position: relative; top: -10px">Delete</small>
         </button>
     </div>
 
     <!--download-->
-    <button class="btn btn-default action-menu" uib-tooltip="Export" ng-disabled="addToDisabled" ng-click="csvExport()"
+    <button class="btn btn-default action-menu" ng-disabled="addToDisabled" ng-click="csvExport()"
             style="margin-left: 20px">
-        <i class="fa fa-cloud-download font-12em"></i>
+        <i class="fa fa-cloud-download font-11em"></i>
+        <br>
+        <small class="text-uppercase" style="font-size: 0.50em; position: relative; top: -10px">Export</small>
     </button>
 
 
@@ -106,8 +118,10 @@
     <div class="btn-group" style="margin-left: 20px" ng-if="user.isAdmin" uib-dropdown>
         <button class="btn btn-default action-menu" ng-disabled="addToDisabled"
                 ng-click="retrieveRegistryPartners()" uib-dropdown-toggle>
-            <i class="fa fa-share font-12em"></i>
+            <i class="fa fa-share font-11em"></i>
             <small class="caret"></small>
+            <br>
+            <small class="text-uppercase" style="font-size: 0.50em; position: relative; top: -10px">Transfer</small>
         </button>
 
         <span class="uib-dropdown-menu color-888" uib-dropdown-menu ng-if="!registryPartners"><i
