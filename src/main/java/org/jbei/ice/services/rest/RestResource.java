@@ -132,7 +132,7 @@ public class RestResource {
         }
 
         if (userId == null)
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         return userId;
     }
 
