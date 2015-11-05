@@ -1,0 +1,40 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="closeModal()">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-fw fa-folder"></i> &nbsp;Add selected entries to folder(s)</span>
+</div>
+
+<div class="modal-body" style="padding: 0">
+    <div style="max-height: 200px; overflow: auto">
+        <!--displays list of folders that the user can add entries to to-->
+        <span class="pad-8" ng-if="!userFolders || !userFolders.length">
+            No personal folders available
+        </span>
+
+        <table class="table font-90em table-hover table-condensed" ng-if="userFolders">
+            <thead>
+            <small class="text-muted pull-right">{{selectedFolders.length}}</small>
+            </thead>
+
+            <tr ng-click="selectFolderForMoveTo(folder, $event)" ng-repeat="folder in userFolders"
+                class="cursor_pointer" ng-class="{'warning': selectedFolders.indexOf(folder) >= 0}">
+                <td style="width: 35px">
+                    <i class="fa font-12em fa-fw" style="margin-left: 25px"
+                       ng-class="{'fa-square-o':!folder.isSelected, 'fa-check-square-o':folder.isSelected}"></i>
+                </td>
+                <td>
+                    {{folder.folderName}}
+                    <br>
+                    <small class="text-muted">{{folder.type}}</small>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-xs btn-default pull-left"><i class="fa fa-fw fa-plus"></i> Create new folder</button>
+    <button class="btn btn-sm btn-primary pull-right" ng-disabled="selectedFolders.length===0"
+            ng-click="performAction()">Submit
+    </button>
+</div>

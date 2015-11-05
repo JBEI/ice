@@ -33,7 +33,7 @@ angular.module('ice.collection.controller', [])
 
         // updates the numbers for the collections
         $scope.updateCollectionCounts = function () {
-            Util.get("/rest/collections/counts", function (result) {
+            Util.get("rest/collections/counts", function (result) {
                 if (result === undefined || $scope.collectionList === undefined)
                     return;
 
@@ -134,8 +134,181 @@ angular.module('ice.collection.controller', [])
             }
         });
     })
-    // deals with sub collections e.g. /folders/:id
-    // retrieves the contents of folders
+    .controller('FolderPermissionsController', function ($scope, $modalInstance, $cookieStore, Folders, Permission, User, folder) {
+        var sessionId = $cookieStore.get("sessionId");
+        var panes = $scope.panes = [];
+        $scope.folder = folder;
+        $scope.userFilterInput = undefined;
+        var folders = Folders();
+
+        $scope.activateTab = function (pane) {
+            angular.forEach(panes, function (pane) {
+                pane.selected = false;
+            });
+            pane.selected = true;
+            if (pane.title === 'Read')
+                $scope.activePermissions = $scope.readPermissions;
+            else
+                $scope.activePermissions = $scope.writePermissions;
+
+            angular.forEach($scope.users, function (item) {
+                for (var i = 0; i < $scope.activePermissions.length; i += 1) {
+                    item.selected = (item.id !== undefined && item.id === $scope.activePermissions[i].articleId);
+                }
+            });
+        };
+
+        // retrieve permissions for folder
+        folders.permissions({folderId: folder.id}, function (result) {
+            $scope.readPermissions = [];
+            $scope.writePermissions = [];
+
+            angular.forEach(result, function (item) {
+                if (item.type === 'WRITE_FOLDER')
+                    $scope.writePermissions.push(item);
+                else
+                    $scope.readPermissions.push(item);
+            });
+
+            $scope.panes.push({title: 'Read', count: $scope.readPermissions.length, selected: true});
+            $scope.panes.push({title: 'Write', count: $scope.writePermissions.length});
+
+            $scope.activePermissions = $scope.readPermissions;
+        });
+
+        this.addPane = function (pane) {
+            // activate the first pane that is added
+            if (panes.length == 0)
+                $scope.activateTab(pane);
+            panes.push(pane);
+        };
+
+        $scope.closeModal = function () {
+            $modalInstance.close('cancel'); // todo : pass object to inform if folder is shared or cleared
+        };
+
+        $scope.showAddPermissionOptionsClick = function () {
+            $scope.showPermissionInput = true;
+        };
+
+        $scope.closePermissionOptions = function () {
+            $scope.users = undefined;
+            $scope.showPermissionInput = false;
+        };
+
+        var removePermission = function (permissionId) {
+            folders.removePermission({folderId: folder.id, permissionId: permissionId},
+                function (result) {
+                    if (!result)
+                        return;
+
+                    // check which pane is selected
+                    var pane;
+                    if ($scope.panes[0].selected)
+                        pane = $scope.panes[0];
+                    else
+                        pane = $scope.panes[1];
+
+                    var i = -1;
+
+                    for (var idx = 0; idx < $scope.activePermissions.length; idx += 1) {
+                        if (permissionId != $scope.activePermissions[idx].id) {
+                            i = idx;
+                            break;
+                        }
+                    }
+
+                    if (i == -1)
+                        return;
+
+                    $scope.activePermissions.splice(i, 1);
+                    pane.count = $scope.activePermissions.length;
+                });
+        };
+
+        $scope.setPropagatePermission = function (folder) {
+            folder.propagatePermission = !folder.propagatePermission;
+            folders.update({folderId: folder.id}, folder, function (result) {
+
+            }, function (error) {
+
+            })
+        };
+
+        $scope.addRemovePermission = function (permission) {
+            permission.selected = !permission.selected;
+            if (!permission.selected) {
+                removePermission(permission.id);
+                return;
+            }
+
+            // add permission
+            var pane;
+            for (var i = 0; i < panes.length; i += 1) {
+                if (panes[i].selected) {
+                    permission.type = panes[i].title.toUpperCase() + "_FOLDER";
+                    pane = panes[i];
+                    break;
+                }
+            }
+            permission.typeId = folder.id;
+
+            folders.addPermission({folderId: folder.id}, permission, function (result) {
+                // result is the permission object
+                if (result.type == 'READ_FOLDER') {
+                    $scope.readPermissions.push(result);
+                    $scope.activePermissions = $scope.readPermissions;
+                }
+                else {
+                    $scope.writePermissions.push(result);
+                    $scope.activePermissions = $scope.writePermissions;
+                }
+
+                permission.id = result.id;
+                pane.count = $scope.activePermissions.length;
+            });
+        };
+
+        $scope.enablePublicRead = function (folder) {
+            Folders().enablePublicReadAccess({id: folder.id}, function (result) {
+                folder.publicReadAccess = true;
+            }, function (error) {
+
+            });
+        };
+
+        $scope.disablePublicRead = function (folder) {
+            Folders().disablePublicReadAccess({folderId: folder.id}, function (result) {
+                folder.publicReadAccess = false;
+            }, function (error) {
+
+            })
+        };
+
+        $scope.deletePermission = function (index, permission) {
+            removePermission(permission.id);
+        };
+
+        $scope.filter = function (val) {
+            if (!val) {
+                $scope.accessPermissions = undefined;
+                return;
+            }
+
+            $scope.filtering = true;
+            Permission().filterUsersAndGroups({limit: 10, val: val},
+                function (result) {
+                    $scope.accessPermissions = result;
+                    $scope.filtering = false;
+                }, function (error) {
+                    $scope.filtering = false;
+                    $scope.accessPermissions = undefined;
+                });
+        };
+    })
+
+// deals with sub collections e.g. /folders/:id
+// retrieves the contents of folders
     .controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $cookieStore, $stateParams, Folders, Entry, EntryContextUtil, Selection) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
@@ -320,9 +493,9 @@ angular.module('ice.collection.controller', [])
             folders.update({id: tmp.id}, tmp, function (result) {
                 $scope.folder.type = result.type;
                 if (newType === 'PUBLIC')
-                    $location.path('/folders/available');
+                    $location.path('folders/available');
                 else
-                    $location.path('/folders/personal');
+                    $location.path('folders/personal');
                 // todo : send message to be received by the collection menu
             }, function (error) {
                 console.error(error);
@@ -448,15 +621,6 @@ angular.module('ice.collection.controller', [])
         if ($location.path() === "/") {
             // change state
             $location.path("folders/personal");
-//        // a bit of a hack. the folders are a child state so when
-//        // url/folder/personal is accessed, this code is still executed (stateParams do not help here)
-//        // so that causes personal folder to be retrieved twice
-//        $scope.folder = undefined; // should already be undefined
-//
-//        var folders = Folders;
-//        folders.folder({folderId:'personal'}, function (result) {
-//            $scope.folder = result;
-//        });
         }
 
         var samples = Samples(sessionId);

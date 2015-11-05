@@ -32,6 +32,13 @@ angular.module('ice.common.service', [])
                 $rootScope.serverFeedback = {message: errorMsg};
             },
 
+            setFeedback: function (message, type) {
+                if (!type)
+                    type = 'info';
+
+                $rootScope.serverFeedback = {type: type, message: message};
+            },
+
             get: function (url, successHandler, queryParams) {
                 if (!queryParams)
                     queryParams = {};

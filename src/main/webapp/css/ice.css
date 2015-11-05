@@ -1220,11 +1220,14 @@ th:hover i.sortable {
 
 button.action-menu {
     border-radius: 3px;
-    padding: 1px 18px;
+    padding: 1px;
     color: #555;
+    margin: auto;
     border: 1px solid #f1f2f3;
     background-color: #f9f9f9;
     height: 32px;
+    width: 65px;
+    line-height: 50%;
 }
 
 button.action-menu:hover {
