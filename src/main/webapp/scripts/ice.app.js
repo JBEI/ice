@@ -64,7 +64,7 @@ iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
         })
         .state('main.folder', {
             url: 'folders/:collection',
-            templateUrl: 'views/collection-selection.html'
+            templateUrl: 'scripts/collection/collection-selection.html'
         })
         .state('main.web', {
             url: 'web',

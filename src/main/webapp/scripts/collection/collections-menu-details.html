@@ -14,7 +14,7 @@
 <div data-ng-repeat="folder in selectedCollectionFolders">
     <div class="collection-menu-sub-folder"
          ng-hide="folder.deleteRequested" ng-click="selectCollectionFolder(folder)"
-         ng-Mouseover="showSubMenu=folder.canEdit" ng-Mouseleave="showSubMenu=false">
+         ng-mouseover="showSubMenu=folder.canEdit" ng-mouseleave="showSubMenu=false">
 
         <span ng-if="folder.type==='PRIVATE'||folder.type==='PUBLIC'">
             <i class="fa fa-folder-o fa-fw"

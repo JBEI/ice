@@ -13,7 +13,7 @@ import org.jbei.ice.lib.entry.VisibleEntries;
 import org.jbei.ice.lib.folder.FolderContent;
 import org.jbei.ice.lib.folder.FolderContentRetriever;
 import org.jbei.ice.lib.folder.FolderController;
-import org.jbei.ice.lib.folder.Folders;
+import org.jbei.ice.lib.folder.UserFolder;
 import org.jbei.ice.lib.shared.ColumnField;
 
 import javax.ws.rs.*;
@@ -56,38 +56,13 @@ public class FolderResource extends RestResource {
         return controller.getPublicFolders();
     }
 
-    /**
-     * @return all collections of a type
-     */
     @GET
-    @Path("/{type}")
+    @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<FolderDetails> getSubFolders(
-            @DefaultValue("personal") @PathParam("type") String folderType,
-            @DefaultValue("false") @QueryParam("canEdit") boolean canEdit) {
-        final String sid = getUserId();
-        if (canEdit)
-            return new Folders().getCanEditFolders(sid);
-
-        switch (folderType) {
-            case "personal":
-                return controller.getUserFolders(sid);
-
-            case "available":
-                return controller.getAvailableFolders(sid);
-
-            case "drafts":
-                return controller.getBulkUploadDrafts(sid);
-
-            case "pending":
-                return controller.getPendingBulkUploads(sid);
-
-            case "shared":
-                return controller.getSharedUserFolders(sid);
-
-            default:
-                return new ArrayList<>();
-        }
+    public Response getFolder(@PathParam("id") long folderId) {
+        String userId = getUserId();
+        UserFolder folder = new UserFolder(userId);
+        return super.respond(folder.getFolder(folderId));
     }
 
     /**

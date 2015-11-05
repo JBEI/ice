@@ -276,7 +276,7 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
     //init
     $scope.selectedFolders = [];
 
-    Util.list("rest/collections/PERSONAL", function (result) {
+    Util.list("rest/collections/PERSONAL/folders", function (result) {
         $scope.userFolders = result;
     }, {canEdit: 'true'});
 

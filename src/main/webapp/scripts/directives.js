@@ -176,7 +176,7 @@ iceDirectives.directive("iceBulkUploadContents", function () {
 iceDirectives.directive("ice.menu.collections", function () {
     return {
         restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
-        templateUrl:"views/collections-menu.html",
+        templateUrl: "scripts/collection/collections-menu.html",
         controller:"CollectionMenuController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)
@@ -187,7 +187,7 @@ iceDirectives.directive("ice.menu.collections", function () {
 iceDirectives.directive("ice.menu.collections.details", function () {
     return {
         restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
-        templateUrl:"views/collections-menu-details.html",
+        templateUrl: "scripts/collection/collections-menu-details.html",
         controller:"CollectionDetailController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)

@@ -4,13 +4,8 @@ angular.module('ice.collection.controller', [])
     // controller for <ice.menu.collections> directive
     .controller('CollectionMenuController', function ($cookieStore, $scope, $uibModal, $rootScope, $location, $stateParams,
                                                       Folders, FolderSelection, EntryContextUtil, Util) {
-        var sessionId = $cookieStore.get("sessionId");
+        //var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
-
-        $rootScope.$on('$stateChangeStart',
-            function (event, toState, toParams, fromState, fromParams) {
-                //console.log(toState, toParams, fromState, fromParams);
-            });
 
         //
         // initialize
@@ -18,18 +13,45 @@ angular.module('ice.collection.controller', [])
 
         // folders contained in the selected folder (default selected to personal)
         $scope.selectedCollectionFolders = undefined;
+
+        // can either be a collection ("shared") or a folder id (34)
         $scope.selectedFolder = $stateParams.collection === undefined ? 'personal' : $stateParams.collection;
-        FolderSelection.selectCollection($scope.selectedFolder);
+
 
         // retrieve collections contained in the selectedFolder (only if a collection)
         if (isNaN($scope.selectedFolder)) {
-            folders.getByType({folderType: $scope.selectedFolder},
-                function (result) {
+            console.log('retrieving folders for ' + $scope.selectedFolder);
+            if ($scope.selectedFolder.toLowerCase() == "available")
+                $scope.selectedFolder = "featured";
+
+            FolderSelection.selectCollection($scope.selectedFolder);
+            Util.list("rest/collections/" + $scope.selectedFolder.toUpperCase() + "/folders", function (result) {
+                $scope.selectedCollectionFolders = result;
+            });
+        } else {
+            // selected folder is a number. folder selected, need collection it is contained in
+            Util.get("rest/folders/" + $scope.selectedFolder, function (result) {
+                if (result.type == 'PUBLIC')
+                    $scope.selectedFolder = "available";
+                else
+                    $scope.selectedFolder = 'personal';
+
+
+                var folder = $scope.selectedFolder.toLowerCase();
+                if (folder == "available")
+                    folder = "featured";
+                //console.log("id folder", result);
+                FolderSelection.selectCollection($scope.selectedFolder);
+                Util.list("rest/collections/" + folder.toUpperCase() + "/folders", function (result) {
                     $scope.selectedCollectionFolders = result;
-                }, function (error) {
-                    console.error(error);
                 });
+            });
         }
+
+        //
+        // end initialize
+        //
+
 
         // updates the numbers for the collections
         $scope.updateCollectionCounts = function () {
@@ -44,9 +66,6 @@ angular.module('ice.collection.controller', [])
             });
         };
 
-        //
-        // end initialize
-        //
 
         // Menu count change handler
         $scope.$on("UpdateCollectionCounts", function (event) {
@@ -94,17 +113,14 @@ angular.module('ice.collection.controller', [])
             $scope.selectedFolder = name;
 
             // name and display differ for "Featured". using this till they are reconciled
-            for (var i = 0; i < $scope.collectionList.length; i += 1) {
-                if ($scope.collectionList[i].name === name) {
-                    $scope.selectedCollection = $scope.collectionList[i].display;
-                    break;
-                }
-            }
+            if (name === 'available')
+                name = 'featured';
 
+            $scope.selectedCollection = name;
             $scope.selectedCollectionFolders = undefined;
 
             // retrieve sub folders for selected collection
-            folders.getByType({folderType: name},
+            folders.getByType({folderType: $scope.selectedCollection.toUpperCase()},
                 function (result) {
                     $scope.selectedCollectionFolders = result;
                 },
@@ -533,7 +549,8 @@ angular.module('ice.collection.controller', [])
     })
     // also the main controller
     .controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope,
-                                                  Folders, Settings, Search, Authentication, Samples, Util) {
+                                                  Folders, Settings, Search, Authentication, Samples,
+                                                  CollectionMenuOptions, Util) {
         // todo : set on all
         var searchUrl = "search";
         if ($location.path().slice(0, searchUrl.length) != searchUrl) {
@@ -559,56 +576,7 @@ angular.module('ice.collection.controller', [])
         // retrieve user settings
 
         // default list of collections (move to service)
-        $scope.collectionList = [
-            {
-                name: 'available',
-                description: '',
-                display: 'Featured',
-                icon: 'fa-certificate',
-                iconOpen: 'fa-certificate dark-orange',
-                alwaysVisible: true
-            },
-            {
-                name: 'personal',
-                description: 'Personal entries',
-                display: 'Personal',
-                icon: 'fa-folder',
-                iconOpen: 'fa-folder-open dark_blue',
-                alwaysVisible: true
-            },
-            {
-                name: 'shared',
-                description: 'Folders & Entries shared with you',
-                display: 'Shared',
-                icon: 'fa-share-alt',
-                iconOpen: 'fa-share-alt green',
-                alwaysVisible: true
-            },
-            {
-                name: 'drafts',
-                description: 'Entries from bulk upload still in progress',
-                display: 'Drafts',
-                icon: 'fa-pencil',
-                iconOpen: 'fa-pencil brown',
-                alwaysVisible: true
-            },
-            {
-                name: 'pending',
-                description: 'Entries from bulk upload waiting approval',
-                display: 'Pending Approval',
-                icon: 'fa-moon-o',
-                iconOpen: 'fa-moon-o purple',
-                alwaysVisible: false
-            },
-            {
-                name: 'deleted',
-                description: 'Deleted Entries',
-                display: 'Deleted',
-                icon: 'fa-trash-o',
-                iconOpen: 'fa-trash red',
-                alwaysVisible: false
-            }
-        ];
+        $scope.collectionList = CollectionMenuOptions.getCollectionOptions();
 
         // entry items that can be created
         $scope.items = [
@@ -619,7 +587,7 @@ angular.module('ice.collection.controller', [])
         ];
 
         if ($location.path() === "/") {
-            // change state
+            // change state to trigger collection-selection.html (see ice.app.js)
             $location.path("folders/personal");
         }
 

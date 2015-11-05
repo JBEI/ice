@@ -29,10 +29,10 @@ public class CollectionResource extends RestResource {
     }
 
     /**
-     * @return all collections of a type
+     * @return all folders found under a collection of specified type
      */
     @GET
-    @Path("/{type}")
+    @Path("/{type}/folders")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCollectionSubFolders(
             @DefaultValue("PERSONAL") @PathParam("type") CollectionType type) {

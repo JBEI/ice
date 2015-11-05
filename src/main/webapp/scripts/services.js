@@ -684,7 +684,7 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
             getByType: {
                 method: 'GET',
                 responseType: "json",
-                url: "rest/folders/:folderType",
+                url: "rest/collections/:folderType/folders",
                 isArray: true,
                 headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
             },
