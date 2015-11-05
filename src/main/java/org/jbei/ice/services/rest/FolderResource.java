@@ -114,12 +114,14 @@ public class FolderResource extends RestResource {
     }
 
     /**
+     * Adds entries referenced in the <code>entrySelection</code> object
+     * to the folders also referenced in the same object
+     *
      * @return Response with updated collection details
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/transfer")
     public Response addSelectedEntriesToFolder(final EntrySelection entrySelection) {
         final String userId = getUserId();
         final FolderContent folderContent = new FolderContent();
