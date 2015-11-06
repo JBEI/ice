@@ -34,14 +34,14 @@ angular.module('ice.profile.controller', [])
             });
         }
     })
-    .controller('GenerateApiKeyController', function ($scope, $modalInstance, Util) {
+    .controller('GenerateApiKeyController', function ($scope, $uibModalInstance, Util) {
         $scope.apiKey = undefined;
         $scope.clientIdValidationError = undefined;
         $scope.errorCreatingKey = undefined;
         $scope.client = {};
 
         $scope.cancel = function () {
-            $modalInstance.dismiss('cancel');
+            $uibModalInstance.dismiss('cancel');
         };
 
         $scope.generateToken = function () {
