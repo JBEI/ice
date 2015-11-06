@@ -5,6 +5,7 @@ angular.module('ice.common.service', [])
         return {
             handleError: function (response) {
                 var errorMsg;
+                var type;
 
                 switch (response.status) {
                     case 401:
@@ -20,16 +21,24 @@ angular.module('ice.common.service', [])
 
                     case 404:
                         errorMsg = "The requested resource could not be found";
+                        type = "warning";
                         break;
 
                     case 500:
                         errorMsg = response.data.errorMessage;
+                        type = "danger";
                         break;
 
                     default:
                         errorMsg = "Unknown server error";
+                        type = "danger";
                 }
-                $rootScope.serverFeedback = {message: errorMsg};
+
+                if (errorMsg == undefined) {
+                    type = "danger";
+                }
+
+                $rootScope.serverFeedback = {message: errorMsg, type: type};
             },
 
             setFeedback: function (message, type) {
