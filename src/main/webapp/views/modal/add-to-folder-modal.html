@@ -13,7 +13,13 @@
 
         <table class="table font-90em table-hover table-condensed" ng-if="userFolders">
             <thead>
-            <small class="text-muted pull-right">{{selectedFolders.length}}</small>
+            <small class="text-muted pull-right">
+                <ng-pluralize count="selectedFolders.length"
+                              when="{
+                                  '1': '1 folder',
+                                  'other':'{} folders'}"></ng-pluralize>
+                selected &nbsp;
+            </small>
             </thead>
 
             <tr ng-click="selectFolderForMoveTo(folder, $event)" ng-repeat="folder in userFolders"
