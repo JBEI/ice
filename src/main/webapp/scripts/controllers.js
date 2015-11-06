@@ -28,15 +28,15 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     };
 
     // retrieve personal list of folders user can add or move parts to
-    $scope.retrieveUserFolders = function () {
-        $scope.userFolders = undefined;
-        $scope.selectedFolders = [];
-
-        folders.getByType({folderType: "personal", canEdit: "true"}, function (data) {
-            if (data.length)
-                $scope.userFolders = data;
-        });
-    };
+    //$scope.retrieveUserFolders = function () {
+    //    $scope.userFolders = undefined;
+    //    $scope.selectedFolders = [];
+    //
+    //    folders.getByType({folderType: "personal", canEdit: "true"}, function (data) {
+    //        if (data.length)
+    //            $scope.userFolders = data;
+    //    });
+    //};
 
     // select a folder in the pull down
     $scope.selectFolderForMoveTo = function (folder, $event) {
@@ -219,7 +219,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
                     $window.open("rest/file/tmp/" + result.value, "_self");
                     Selection.reset();
                 }
-
             }, function (error) {
                 console.log(error);
             });
@@ -253,7 +252,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         modalInstance.result.then(function (result) {
             console.log("closed with " + result);
 
-            // if added then
             //$scope.updatePersonalCollections = function () {
             //    var folder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
             //
@@ -267,18 +265,40 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
             //        });
             //};
         });
+    };
+
+    $scope.openTransferEntriesModal = function () {
+        var modalInstance = $uibModal.open({
+            templateUrl: 'views/modal/transfer-entries-modal.html',
+            controller: "TransferEntriesToPartnersModal",
+            backdrop: "static",
+            resolve: {
+                selectedFolder: function () {
+                    return $scope.collectionFolderSelected;
+                }
+            }
+        });
     }
+});
+
+iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $uibModalInstance) {
+    $scope.closeModal = function () {
+        $uibModalInstance.close();
+    };
 });
 
 iceControllers.controller('AddToFolderController', function ($scope, $uibModalInstance, Util, FolderSelection,
                                                              Selection, move, selectedFolder, $stateParams) {
+    var getPersonalFolders = function () {
+        Util.list("rest/collections/PERSONAL/folders", function (result) {
+            $scope.userFolders = result;
+        }, {canEdit: 'true'});
+    };
 
     //init
     $scope.selectedFolders = [];
-
-    Util.list("rest/collections/PERSONAL/folders", function (result) {
-        $scope.userFolders = result;
-    }, {canEdit: 'true'});
+    $scope.newFolder = {creating: false};
+    getPersonalFolders();
 
     $scope.closeModal = function () {
         $uibModalInstance.close();
@@ -315,6 +335,29 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
         return entrySelection;
     };
 
+    $scope.submitNewFolderForCreation = function () {
+        if ($scope.newFolder.folderName == undefined || $scope.newFolder.folderName === '') {
+            $scope.newFolder.error = true;
+            return;
+        }
+
+        Util.update("rest/folders", $scope.newFolder, null, function (result) {
+            console.log(result);
+            $scope.newFolder = {creating: false};
+            getPersonalFolders();
+        });
+    };
+
+    // updates the counts for personal collection to indicate items removed/added
+    $scope.updateSelectedFolderCounts = function () {
+        var selectedFolder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
+        Util.get("rest/collections/" + selectedFolder.toUpperCase() + "/folders", function (result) {
+            if (result) {
+                $scope.selectedCollectionFolders = result;
+            }
+        });
+    };
+
 
     // select a folder in the pull down
     $scope.selectFolderForMoveTo = function (folder, $event) {
@@ -333,6 +376,8 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
         folder.isSelected = !folder.isSelected;
     };
 
+    // adds entries to selected folders
+    // based on user selected, this action may remove the entries from the source folder first
     $scope.performAction = function () {
         var entrySelection = getEntrySelection();
 
@@ -341,43 +386,32 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
             // remove from current folder
             Util.update("rest/folders/" + selectedFolder.id + "/entries", entrySelection, {}, function (result) {
                 if (result) {
-                    $scope.$broadcast("RefreshAfterDeletion");  // todo
-                    $scope.$broadcast("UpdateCollectionCounts");
-                    $scope.updatePersonalCollections();
+                    // todo : duplicated code
+                    Util.post("rest/folders", entrySelection, function (res) {
+                        if (res) {
+                            console.log(res);
+                            // result contains list of destination folders
+                            $scope.$broadcast("RefreshAfterDeletion");  // todo
+                            $scope.$broadcast("UpdateCollectionCounts");
+                            $scope.updateSelectedFolderCounts();
+                            Selection.reset();
+                            $scope.closeModal();
+                        }
+                    });
+                }
+            });
+        } else {
+            Util.post("rest/folders", entrySelection, function (res) {
+                if (res) {
+                    // todo : duplicated code
+                    console.log(res);
+                    // result contains list of destination folders
+                    $scope.updateSelectedFolderCounts();
                     Selection.reset();
+                    $scope.closeModal();
                 }
             });
         }
-
-        // just add to folder
-        Util.post("rest/folders", entrySelection, function (updatedFolders) {
-            if (updatedFolders) {
-                // result contains list of destination folders
-                //$scope.updatePersonalCollections();
-                Selection.reset();
-            }
-        });
-    };
-
-    $scope.removeEntriesFromFolder = function () {
-        // remove selected entries from the current folder
-        folders.removeEntriesFromFolder({folderId: $scope.collectionFolderSelected.id}, getEntrySelection(),
-            function (result) {
-                if (result) {
-                    $scope.$broadcast("RefreshAfterDeletion");  // todo
-                    $scope.$broadcast("UpdateCollectionCounts");
-                    $scope.updatePersonalCollections();
-                    Selection.reset();
-                }
-            }, function (error) {
-                console.error(error);
-            });
-    };
-
-    // remove entries from folder and add to selected folders
-    $scope.moveEntriesToFolders = function () {
-        $scope.removeEntriesFromFolder();
-        $scope.addEntriesToFolders();
     };
 });
 

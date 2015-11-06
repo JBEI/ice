@@ -33,7 +33,18 @@
 </div>
 
 <div class="modal-footer">
-    <button class="btn btn-xs btn-default pull-left"><i class="fa fa-fw fa-plus"></i> Create new folder</button>
+    <button ng-click="newFolder.creating=true" ng-if="!newFolder.creating" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-fw fa-plus"></i> Create folder
+    </button>
+
+    <div ng-if="newFolder.creating" class="pull-left">
+        <input type="text" class="input_box font-11em" maxlength="35" style="padding: 2px;"
+               placeholder="Enter folder name" ng-model="newFolder.folderName">
+
+        <button class="btn btn-xs btn-primary" ng-click="submitNewFolderForCreation()">Create</button>
+        <button class="btn btn-xs btn-default" ng-click="newFolder.creating=false">Cancel</button>
+    </div>
+
     <button class="btn btn-sm btn-primary pull-right" ng-disabled="selectedFolders.length===0"
             ng-click="performAction()">Submit
     </button>

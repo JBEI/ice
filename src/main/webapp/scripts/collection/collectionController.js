@@ -150,7 +150,7 @@ angular.module('ice.collection.controller', [])
             }
         });
     })
-    .controller('FolderPermissionsController', function ($scope, $modalInstance, $cookieStore, Folders, Permission, User, folder) {
+    .controller('FolderPermissionsController', function ($scope, $uibModalInstance, $cookieStore, Folders, Permission, User, folder) {
         var sessionId = $cookieStore.get("sessionId");
         var panes = $scope.panes = [];
         $scope.folder = folder;
@@ -200,7 +200,7 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.closeModal = function () {
-            $modalInstance.close('cancel'); // todo : pass object to inform if folder is shared or cleared
+            $uibModalInstance.close('cancel'); // todo : pass object to inform if folder is shared or cleared
         };
 
         $scope.showAddPermissionOptionsClick = function () {
@@ -524,7 +524,7 @@ angular.module('ice.collection.controller', [])
 
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/folder/modal/rename-folder.html',
-                controller: function ($scope, $modalInstance, folderName) {
+                controller: function ($scope, $uibModalInstance, folderName) {
                     $scope.newFolderName = folderName;
                 },
                 backdrop: 'static',
