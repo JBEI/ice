@@ -7,7 +7,6 @@ import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.lib.entry.EntryAuthorization;
-import org.jbei.ice.lib.entry.EntryEditor;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
@@ -115,7 +114,7 @@ public class SampleService {
         sample = dao.create(sample);
         String name = entry.getName();
         if (strainNamePrefix != null && name != null && !name.startsWith(strainNamePrefix)) {
-            new EntryEditor().updateWithNextStrainName(strainNamePrefix, entry);
+            DAOFactory.getEntryDAO().generateNextStrainNameForEntry(entry, strainNamePrefix);
         }
         return sample.toDataTransferObject();
     }
