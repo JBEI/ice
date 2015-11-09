@@ -90,7 +90,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         folders.addSelectionToFolders({}, entrySelection, function (updatedFolders) {
             if (updatedFolders) {
                 // result contains list of destination folders
-                $scope.updatePersonalCollections();
+                $scope.updateSelectedCollectionFolders();
                 Selection.reset();
                 Util.setFeedback('Entries successfully added', 'success');
             }
@@ -104,7 +104,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
                 if (result) {
                     $scope.$broadcast("RefreshAfterDeletion");  // todo
                     $scope.$broadcast("UpdateCollectionCounts");
-                    $scope.updatePersonalCollections();
+                    $scope.updateSelectedCollectionFolders();
                     Selection.reset();
                     var word = entrySelection.entries.length == 1 ? 'Entry' : "Entries";
                     Util.setFeedback(word + ' successfully removed', 'success');
@@ -514,8 +514,25 @@ iceControllers.controller('MessageController', function ($scope, $location, $coo
 
 iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope,
                                                        Authentication, Settings, Util) {
+
+    // init
     $scope.login = {};
-    $scope.submit = function () {
+    $scope.canCreateAccount = false;
+    $scope.canChangePassword = false;
+    $scope.errMsg = undefined;
+
+    Util.get('rest/config/NEW_REGISTRATION_ALLOWED', function (result) {
+        $scope.canCreateAccount = (result !== undefined && result.key === 'NEW_REGISTRATION_ALLOWED'
+        && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
+    });
+
+    Util.get('rest/config/PASSWORD_CHANGE_ALLOWED', function (result) {
+        $scope.canChangePassword = (result !== undefined && result.key === 'PASSWORD_CHANGE_ALLOWED'
+        && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
+    });
+
+    // login function
+    $scope.getAccessToken = function () {
         $scope.errMsg = undefined;
         $scope.login.processing = true;
 
@@ -548,26 +565,14 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
                     $cookieStore.remove('sessionId');
                 }
                 $scope.login.processing = false;
+            }, null, function (error) {
+                $scope.errMsg = error.statusText;
             });
     };
 
     $scope.goToRegister = function () {
         $location.path("register");
     };
-
-    $scope.canCreateAccount = false;
-    $scope.canChangePassword = false;
-    $scope.errMsg = undefined;
-
-    Util.get('rest/config/NEW_REGISTRATION_ALLOWED', function (result) {
-        $scope.canCreateAccount = (result !== undefined && result.key === 'NEW_REGISTRATION_ALLOWED'
-        && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
-    });
-
-    Util.get('rest/config/PASSWORD_CHANGE_ALLOWED', function (result) {
-        $scope.canChangePassword = (result !== undefined && result.key === 'PASSWORD_CHANGE_ALLOWED'
-        && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
-    });
 });
 
 // turning out to be pretty specific to the permissions
