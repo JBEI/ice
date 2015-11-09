@@ -19,7 +19,8 @@ public class ApiKeyDAO extends HibernateRepository<ApiKey> {
         return super.get(ApiKey.class, id);
     }
 
-    public List<ApiKey> getApiKeysForUser(String userId, int limit, int start, boolean asc) throws DAOException {
+    public List<ApiKey> getApiKeysForUser(String userId, String sort, int limit, int start, boolean asc)
+            throws DAOException {
         try {
             Criteria criteria = currentSession().createCriteria(ApiKey.class.getName());
             criteria.add(Restrictions.eq("ownerEmail", userId));
