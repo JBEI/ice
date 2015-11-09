@@ -14,7 +14,7 @@ angular.module('ice.profile.controller', [])
 
         // retrieve existing api keys for current user
         $scope.retrieveKeys = function () {
-            Util.get("/rest/api-keys", function (result) {
+            Util.get("rest/api-keys", function (result) {
                 $scope.apiKeys = result.data;
             });
         };
@@ -27,7 +27,7 @@ angular.module('ice.profile.controller', [])
         };
 
         $scope.deleteAPIKey = function (key) {
-            Util.remove("/rest/api-keys/" + key.id, key, function (result) {
+            Util.remove("rest/api-keys/" + key.id, key, function (result) {
                 var idx = $scope.apiKeys.indexOf(key);
                 if (idx >= 0)
                     $scope.apiKeys.splice(idx, 1);
@@ -116,7 +116,7 @@ angular.module('ice.profile.controller', [])
         $scope.passwordChangeAllowed = false;
 
         // get settings
-        Util.get("/rest/config/PASSWORD_CHANGE_ALLOWED", function (result) {
+        Util.get("rest/config/PASSWORD_CHANGE_ALLOWED", function (result) {
             $scope.passwordChangeAllowed = (result.value.toLowerCase() === 'yes');
         });
 
