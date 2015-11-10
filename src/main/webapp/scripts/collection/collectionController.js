@@ -423,7 +423,7 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.selectAllClass = function () {
-            if (Selection.allSelected())
+            if (Selection.allSelected() || $scope.folder.entries.length === Selection.getSelectedEntries().length)
                 return 'fa-check-square-o';
 
             if (Selection.hasSelection())
