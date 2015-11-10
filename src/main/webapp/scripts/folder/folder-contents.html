@@ -171,6 +171,7 @@
                        ng-click="select(entry)"></i>
                 </td>
                 <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
+                    <i class="fa fa-fw fa-trash-o red" ng-if="entry.visible=='DELETED'"></i>
                     {{entry.type | uppercase}}
                 </td>
                 <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
