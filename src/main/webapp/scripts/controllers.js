@@ -234,6 +234,16 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         Selection.reset();
     });
 
+    $scope.updateSelectedCollectionFolders = function () {
+        var folder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
+        if (folder == "available")
+            folder = "featured";
+
+        Util.list("rest/collections/" + folder.toUpperCase() + "/folders", function (result) {
+            $scope.selectedCollectionFolders = result;
+        });
+    };
+
     $scope.openAddToFolderModal = function (isMove) {
         var modalInstance = $uibModal.open({
             templateUrl: 'views/modal/add-to-folder-modal.html',
@@ -250,20 +260,12 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         });
 
         modalInstance.result.then(function (result) {
-            console.log("closed with " + result);
-
-            //$scope.updatePersonalCollections = function () {
-            //    var folder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
-            //
-            //    folders.getByType({folderType: folder},
-            //        function (result) {
-            //            if (result) {
-            //                $scope.selectedCollectionFolders = result;
-            //            }
-            //        }, function (error) {
-            //            console.error(error);
-            //        });
-            //};
+            console.log("closed with ", result);
+            if (result) {
+                $scope.$broadcast("UpdateCollectionCounts");
+                $scope.updateSelectedCollectionFolders();
+                Selection.reset();
+            }
         });
     };
 
@@ -300,8 +302,8 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
     $scope.newFolder = {creating: false};
     getPersonalFolders();
 
-    $scope.closeModal = function () {
-        $uibModalInstance.close();
+    $scope.closeModal = function (res) {
+        $uibModalInstance.close(res);
     };
 
     // create entry selection object that provides context for user selection
@@ -342,22 +344,20 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
         }
 
         Util.update("rest/folders", $scope.newFolder, null, function (result) {
-            console.log(result);
             $scope.newFolder = {creating: false};
             getPersonalFolders();
         });
     };
 
-    // updates the counts for personal collection to indicate items removed/added
-    $scope.updateSelectedFolderCounts = function () {
-        var selectedFolder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
-        Util.get("rest/collections/" + selectedFolder.toUpperCase() + "/folders", function (result) {
-            if (result) {
-                $scope.selectedCollectionFolders = result;
-            }
-        });
-    };
-
+    //// updates the counts for personal collection to indicate items removed/added
+    //$scope.updateSelectedFolderCounts = function () {
+    //    var selectedFolder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
+    //    Util.list("rest/collections/" + selectedFolder.toUpperCase() + "/folders", function (result) {
+    //        if (result) {
+    //            $scope.selectedCollectionFolders = result;
+    //        }
+    //    });
+    //};
 
     // select a folder in the pull down
     $scope.selectFolderForMoveTo = function (folder, $event) {
@@ -395,7 +395,7 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
                             $scope.$broadcast("UpdateCollectionCounts");
                             $scope.updateSelectedFolderCounts();
                             Selection.reset();
-                            $scope.closeModal();
+                            $scope.closeModal(res);
                         }
                     });
                 }
@@ -406,9 +406,8 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
                     // todo : duplicated code
                     console.log(res);
                     // result contains list of destination folders
-                    $scope.updateSelectedFolderCounts();
-                    Selection.reset();
-                    $scope.closeModal();
+
+                    $scope.closeModal(res);
                 }
             });
         }
