@@ -21,9 +21,9 @@ iceApp.run(function (Authentication, $route, $location, $rootScope, Util) {
     };
 
     $rootScope.siteSettings = {
-        LOGO: "img/logo.png",
-        LOGIN_MESSAGE: "views/institution.html",
-        FOOTER: "views/footer.html"
+        logo: "img/logo.png",
+        loginMessage: "views/institution.html",
+        footer: "views/footer.html"
     };
 
     Util.list("rest/config/site", function (result) {
