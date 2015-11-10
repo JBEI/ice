@@ -305,10 +305,8 @@ public class FileResource extends RestResource {
     @Path("csv")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response downloadCSV(
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId,
-            EntrySelection selection) {
-        String userId = super.getUserId(sessionId);
+    public Response downloadCSV(EntrySelection selection) {
+        String userId = super.getUserId();
         EntriesAsCSV entriesAsCSV = new EntriesAsCSV();
         boolean success = entriesAsCSV.setSelectedEntries(userId, selection);
         if (!success)
@@ -319,6 +317,6 @@ public class FileResource extends RestResource {
             return Response.ok(new Setting("key", file.getName())).build();
         }
 
-        return respond(false);
+        return Response.serverError().build();
     }
 }
