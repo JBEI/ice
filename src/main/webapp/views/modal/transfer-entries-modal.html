@@ -1,0 +1,42 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="closeModal()">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-fw fa-share"></i> &nbsp;Transfer selected entries</span>
+</div>
+
+<div class="modal-body" style="padding: 0">
+    <div style="max-height: 200px; overflow: auto">
+        <!--displays list of folders that the user can add entries to to-->
+        <div style="padding: 20px;" ng-if="!registryPartners || !registryPartners.partners.length">
+            No web of registries partners available
+        </div>
+
+        <table class="table font-90em table-hover table-condensed table-border-bottom"
+               style="margin-bottom: 0" ng-if="registryPartners">
+            <tr ng-repeat="partner in registryPartners.partners" ng-click="selectPartnerForTransfer(partner)"
+                class="cursor_pointer">
+                <td style="width: 35px">
+                    <i class="fa font-12em fa-fw" style="margin-left: 25px"
+                       ng-class="{'fa-square-o':!partner.selected, 'fa-check-square-o':partner.selected==true}"></i>
+                </td>
+                <td>
+                    {{partner.name}}
+                    <br>
+                    <small class="text-muted">{{partner.url}}</small>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <div class="pull-right">
+        <button class="btn btn-sm btn-default" ng-click="closeModal()">Cancel</button>
+        <button class="btn btn-sm btn-primary" ng-disabled="selectedPartners.length===0"
+                ng-if="registryPartners && registryPartners.partners.length" ng-click="transferEntriesToRegistry()">
+            Submit
+        </button>
+    </div>
+</div>
+
+

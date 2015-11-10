@@ -1,5 +1,5 @@
 <!-- details (sub folders) of a selected folder -->
-<div style="margin-left: 3px" ng-show="hideAddCollection===false" ng-init="hideAddCollection=true">
+<div style="margin-left: 3px" ng-show="hideAddCollection===false">
     <form ng-submit="createCollection()">
         <div class="input-group" style="font-weight: normal">
             <input type="text" class="input_box" placeholder="Enter collection name" maxlength="35"
@@ -14,7 +14,7 @@
 <div data-ng-repeat="folder in selectedCollectionFolders">
     <div class="collection-menu-sub-folder"
          ng-hide="folder.deleteRequested" ng-click="selectCollectionFolder(folder)"
-         ng-Mouseover="showSubMenu=folder.canEdit" ng-Mouseleave="showSubMenu=false">
+         ng-mouseover="showSubMenu=folder.canEdit" ng-mouseleave="showSubMenu=false">
 
         <span ng-if="folder.type==='PRIVATE'||folder.type==='PUBLIC'">
             <i class="fa fa-folder-o fa-fw"

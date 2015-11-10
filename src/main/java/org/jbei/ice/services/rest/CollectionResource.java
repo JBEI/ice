@@ -1,11 +1,9 @@
 package org.jbei.ice.services.rest;
 
+import org.jbei.ice.lib.collection.CollectionType;
 import org.jbei.ice.lib.collection.Collections;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -22,12 +20,24 @@ public class CollectionResource extends RestResource {
      * Retrieve the statistics (counts) of all the collections for the specified user
      */
     @GET
-    @Path("/stats")
+    @Path("/counts")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCollectionStats(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
-        String userId = getUserId(sessionId);
+    public Response getCollectionStats() {
+        String userId = getUserId();
         Collections collections = new Collections(userId);
         return super.respond(collections.getAllCounts());
+    }
+
+    /**
+     * @return all folders found under a collection of specified type
+     */
+    @GET
+    @Path("/{type}/folders")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getCollectionSubFolders(
+            @DefaultValue("PERSONAL") @PathParam("type") CollectionType type) {
+        final String userId = getUserId();
+        Collections collections = new Collections(userId);
+        return super.respond(collections.getSubFolders(type));
     }
 }

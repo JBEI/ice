@@ -10,7 +10,7 @@
            ng-model="addExistingPartNumber"
            placeHolder="Enter part number to create link" style="width: 205px;"
            typeahead-loading="loadingAddExistingData"
-           typeahead="result as result.partId for result in getEntriesByPartNumber($viewValue) | filter:{partId:$viewValue}"
+           uib-typeahead="result for result in getEntriesByPartNumber($viewValue)"
            typeahead-editable="true"
            typeahead-on-select="addExistingPartLink($item, $model, $label)"/>
 

@@ -1,9 +1,7 @@
 package org.jbei.ice.lib.entry;
 
 import org.jbei.ice.lib.account.AccountType;
-import org.jbei.ice.lib.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.group.GroupController;
@@ -12,7 +10,6 @@ import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -81,66 +78,6 @@ public class EntryRetriever {
         }
 
         return accessPermissions;
-    }
-
-    // return list of part data with only partId and id filled in
-    public ArrayList<PartData> getMatchingPartNumber(String token, int limit) {
-        if (token == null)
-            return new ArrayList<>();
-
-        token = token.replaceAll("'", "");
-        ArrayList<PartData> dataList = new ArrayList<>();
-        for (Entry entry : dao.getMatchingEntryPartNumbers(token, limit, null)) {
-            EntryType type = EntryType.nameToType(entry.getRecordType());
-            PartData partData = new PartData(type);
-            partData.setId(entry.getId());
-            partData.setPartId(entry.getPartNumber());
-            partData.setName(entry.getName());
-            dataList.add(partData);
-        }
-        return dataList;
-    }
-
-    public Set<String> getMatchingAutoCompleteField(AutoCompleteField field, String token, int limit) {
-        token = token.replaceAll("'", "");
-        Set<String> results;
-        switch (field) {
-            case SELECTION_MARKERS:
-                results = dao.getMatchingSelectionMarkers(token, limit);
-                break;
-
-            case ORIGIN_OF_REPLICATION:
-                results = dao.getMatchingOriginOfReplication(token, limit);
-                break;
-
-            case PROMOTERS:
-                results = dao.getMatchingPromoters(token, limit);
-                break;
-
-            case REPLICATES_IN:
-                results = dao.getMatchingReplicatesIn(token, limit);
-                break;
-
-            case PLASMID_NAME:
-                results = dao.getMatchingPlasmidPartNumbers(token, limit);
-                break;
-
-            case PLASMID_PART_NUMBER:
-                results = dao.getMatchingPlasmidPartNumbers(token, limit);
-                break;
-
-            default:
-                results = new HashSet<>();
-        }
-
-        // process to remove commas
-        HashSet<String> individualResults = new HashSet<>();
-        for (String result : results) {
-            for (String split : result.split(",")) {
-                individualResults.add(split.trim());
-            }
-        }
-        return individualResults;
     }
 
     /**

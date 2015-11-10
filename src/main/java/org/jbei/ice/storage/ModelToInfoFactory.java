@@ -266,6 +266,7 @@ public class ModelToInfoFactory {
         view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime().getTime());
         view.setStatus(entry.getStatus());
+        view.setAlias(entry.getAlias());
         view.setOwnerEmail(entry.getOwnerEmail());
         view.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
 

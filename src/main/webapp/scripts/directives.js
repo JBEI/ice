@@ -34,7 +34,7 @@ iceDirectives.directive("addSequence", function () {
 iceDirectives.directive("folderActions", function () {
     return {
         restrict: "AE",
-        templateUrl: "views/folder/folder-actions.html"
+        templateUrl: "scripts/folder/folder-actions.html"
     }
 });
 
@@ -49,7 +49,7 @@ iceDirectives.directive("iceActionMenu", function () {
 iceDirectives.directive("iceEntryAttachment", function () {
     return {
         restrict: "E",
-        templateUrl: "views/entry-attachment.html"
+        templateUrl: "scripts/entry/entry-attachment.html"
     }
 });
 
@@ -66,7 +66,7 @@ iceDirectives.directive("iceEntryPermission", function () {
         scope: {
             entry: '='
         },
-        templateUrl:"views/entry-permission.html",
+        templateUrl: "scripts/entry/entry-permission.html",
         controller:'EntryPermissionController'
     }
 });
@@ -150,7 +150,7 @@ iceDirectives.directive('myTabs', function () {
 iceDirectives.directive("iceCollectionContents", function () {
     return {
         restrict:"AE",
-        templateUrl:"views/folder/folder-contents.html",
+        templateUrl: "scripts/folder/folder-contents.html",
         controller:"CollectionFolderController"
     }
 });
@@ -176,7 +176,7 @@ iceDirectives.directive("iceBulkUploadContents", function () {
 iceDirectives.directive("ice.menu.collections", function () {
     return {
         restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
-        templateUrl:"views/collections-menu.html",
+        templateUrl: "scripts/collection/collections-menu.html",
         controller:"CollectionMenuController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)
@@ -187,7 +187,7 @@ iceDirectives.directive("ice.menu.collections", function () {
 iceDirectives.directive("ice.menu.collections.details", function () {
     return {
         restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
-        templateUrl:"views/collections-menu-details.html",
+        templateUrl: "scripts/collection/collections-menu-details.html",
         controller:"CollectionDetailController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)

@@ -68,26 +68,11 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    public Set<String> getMatchingPlasmidPartNumbers(String token, int limit) throws DAOException {
-        try {
-            Criteria criteria = currentSession().createCriteria(Entry.class)
-                    .add(Restrictions.ilike("partNumber", token, MatchMode.ANYWHERE))
-                    .add(Restrictions.eq("recordType", EntryType.PLASMID.getName()));
-
-            criteria.setProjection(Projections.distinct(Projections.property("partNumber")));
-            if (limit > 0)
-                criteria.setMaxResults(limit);
-            return new HashSet<>(criteria.list());
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
-    }
-
-    public Set<Entry> getMatchingEntryPartNumbers(String token, int limit, Set<String> include) throws DAOException {
+    public Set<String> getMatchingEntryPartNumbers(String token, int limit, Set<String> include) throws DAOException {
         try {
             Criteria criteria = currentSession().createCriteria(Entry.class)
                     .add(Restrictions.ilike("partNumber", token, MatchMode.ANYWHERE));
+            criteria.setProjection(Projections.distinct(Projections.property("partNumber")));
             if (limit > 0)
                 criteria.setMaxResults(limit);
             if (include != null && !include.isEmpty()) {

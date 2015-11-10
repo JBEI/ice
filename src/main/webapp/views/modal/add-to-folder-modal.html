@@ -1,0 +1,55 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="closeModal()">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-fw fa-folder"></i> &nbsp;Add selected entries to folder(s)</span>
+</div>
+
+<div class="modal-body" style="padding: 0">
+    <div style="max-height: 200px; overflow: auto">
+        <!--displays list of folders that the user can add entries to to-->
+        <span class="pad-8" ng-if="!userFolders || !userFolders.length">
+            No personal folders available
+        </span>
+
+        <table class="table font-90em table-hover table-condensed" ng-if="userFolders">
+            <thead>
+            <small class="text-muted pull-right">
+                <ng-pluralize count="selectedFolders.length" when="{'1': '1 folder', 'other':'{} folders'}">
+                </ng-pluralize>
+                selected &nbsp;
+            </small>
+            </thead>
+
+            <tr ng-click="selectFolderForMoveTo(folder, $event)" ng-repeat="folder in userFolders"
+                class="cursor_pointer" ng-class="{'warning': selectedFolders.indexOf(folder) >= 0}">
+                <td style="width: 35px">
+                    <i class="fa font-12em fa-fw" style="margin-left: 25px"
+                       ng-class="{'fa-square-o':!folder.isSelected, 'fa-check-square-o':folder.isSelected}"></i>
+                </td>
+                <td>
+                    {{folder.folderName}}
+                    <br>
+                    <small class="text-muted">{{folder.type}}</small>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button ng-click="newFolder.creating=true" ng-if="!newFolder.creating" class="btn btn-xs btn-default pull-left">
+        <i class="fa fa-fw fa-plus"></i> Create folder
+    </button>
+
+    <div ng-if="newFolder.creating" class="pull-left">
+        <input type="text" class="input_box font-11em" maxlength="35" style="padding: 2px;"
+               placeholder="Enter folder name" ng-model="newFolder.folderName">
+
+        <button class="btn btn-xs btn-primary" ng-click="submitNewFolderForCreation()">Create</button>
+        <button class="btn btn-xs btn-default" ng-click="newFolder.creating=false">Cancel</button>
+    </div>
+
+    <button class="btn btn-sm btn-primary pull-right" ng-disabled="selectedFolders.length===0"
+            ng-click="performAction()">Submit
+    </button>
+</div>

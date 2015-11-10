@@ -1,10 +1,10 @@
 <div class="pad_top">
     <button type="button" ng-click="rebuildLuceneIndex()" class="ice-button">
-        <i style="font-size: 14px" class="blue fa fa-refresh"></i> Rebuild Indexes
+        Rebuild Indexes
     </button>
     &nbsp;
     <button type="button" ng-click="rebuildBlastIndex()" class="ice-button">
-        <i style="font-size: 14px" class="blue fa fa-refresh"></i> Rebuild Blast
+        Rebuild Blast
     </button>
 </div>
 
@@ -19,7 +19,7 @@
 
                 <!--for boolean fields only-->
                 <div class="col-md-9" ng-if="setting.isBoolean">
-                    <i class="cursor_pointer fa" ng-click="submitBooleanSetting(setting)"
+                    <i class="cursor_pointer fa fa-fw" ng-click="submitBooleanSetting(setting)"
                        ng-class="{'fa-toggle-on green font-14em':setting.value != undefined && setting.value.toLowerCase() === 'yes',
                        'fa-toggle-off font-14em opacity_hover':setting.value == undefined || setting.value.toLowerCase() !== 'yes'}"></i>
                 </div>
@@ -58,7 +58,7 @@
 
                 <!--for boolean fields only-->
                 <div class="col-md-9" ng-if="setting.isBoolean">
-                    <i class="cursor_pointer fa" ng-click="submitBooleanSetting(setting)"
+                    <i class="cursor_pointer fa fa-fw" ng-click="submitBooleanSetting(setting)"
                        ng-class="{'fa-toggle-on green font-14em':setting.value != undefined && setting.value.toLowerCase() === 'yes',
                        'fa-toggle-off font-14em opacity_hover':setting.value == undefined || setting.value.toLowerCase() !== 'yes'}"></i>
                 </div>

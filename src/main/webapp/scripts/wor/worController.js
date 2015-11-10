@@ -28,7 +28,7 @@ angular.module('ice.wor.controller', [])
         });
 
         $scope.maxSize = 5;
-        $scope.worContentsPopoverTemplate = "views/folder/template.html";
+        $scope.worContentsPopoverTemplate = "scripts/folder/template.html";
 
         $scope.worContentsPageChange = function () {
             $scope.loadingPage = true;
@@ -114,7 +114,7 @@ angular.module('ice.wor.controller', [])
             getRemoteFolderEntries();
         };
 
-        $scope.worFolderContentsPopoverTemplate = "views/folder/template.html";
+        $scope.worFolderContentsPopoverTemplate = "scripts/folder/template.html";
 
         $scope.tooltipDetails = function (entry) {
             WebOfRegistries().getToolTip({partnerId: $stateParams.partner, entryId: entry.id}, function (result) {

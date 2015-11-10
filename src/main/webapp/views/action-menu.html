@@ -1,86 +1,29 @@
 <div class="btn-toolbar">
 
-    <div class="btn-group" uib-dropdown style="margin-left: 20px">
-        <button class="btn btn-default action-menu uib-dropdown-toggle" uib-dropdown-toggle uib-tooltip="Add to folder"
-                ng-disabled="addToDisabled" ng-click="retrieveUserFolders()">
+    <div class="btn-group" style="margin-left: 20px">
+
+        <!--add to folder-->
+        <button class="btn btn-default action-menu" ng-disabled="addToDisabled" ng-click="openAddToFolderModal(false)">
             <i class="fa fa-fw fa-folder font-12em"></i>
-            <small class="caret"></small>
+            <br>
+            <small class="text-uppercase font-55em">Add To</small>
         </button>
-
-        <div class="uib-dropdown-menu" uib-dropdown-menu>
-            <div style="height: 200px; width: 270px; overflow: auto">
-                <!--displays list of folders that the user can add entries to to-->
-                <span class="pad-8" ng-if="!userFolders || !userFolders.length">
-                    No personal folders available
-                </span>
-
-                <table class="table font-90em table-hover table-condensed" ng-if="userFolders">
-                    <tr ng-click="selectFolderForMoveTo(folder, $event)" ng-repeat="folder in userFolders"
-                        class="cursor_pointer" ng-class="{'warning': selectedFolders.indexOf(folder) >= 0}">
-                        <td>
-                            <i class="fa font-11em fa-fw"
-                               ng-class="{'fa-square-o':!folder.isSelected, 'fa-check-square-o':folder.isSelected}"></i>
-                        </td>
-                        <td>{{folder.folderName}}</td>
-                    </tr>
-                </table>
-            </div>
-
-            <div style="padding: 5px; border-top: 1px solid #ccc">
-                <!--<small class="text-muted pull-left">No folders selected</small>-->
-                <button class="btn btn-sm btn-primary pull-right" ng-disabled="selectedFolders.length===0"
-                        ng-click="addEntriesToFolders()">Submit
-                </button>
-            </div>
-        </div>
-
 
         <!--remove from folder-->
         <button class="btn btn-default action-menu" ng-disabled="!canMoveFromFolder()"
-                uib-tooltip="Remove from folder" ng-click="removeEntriesFromFolder()">
+                ng-click="removeEntriesFromFolder()">
             <i class="fa fa-folder-open-o font-12em"></i>
+            <br>
+            <small class="text-uppercase font-55em">Remove</small>
         </button>
 
-
         <!--move to -->
-        <div class="btn-group" uib-dropdown>
-            <button class="btn btn-default action-menu uib-dropdown-toggle" ng-disabled="!canMoveFromFolder()"
-                    uib-tooltip="Move to folder" ng-click="retrieveUserFolders()" uib-dropdown-toggle>
-                <i class="fa fa-folder-o font-12em"></i>
-                <small class="caret"></small>
-            </button>
-
-            <span class="uib-dropdown-menu color-888" uib-dropdown-menu ng-if="!userFolders">
-              <i class="fa fa-fw fa-spin fa-spinner"></i> Loading...
-            </span>
-
-            <div class="uib-dropdown-menu" uib-dropdown-menu>
-                <div style="height: 200px; width: 270px; overflow: auto">
-                    <!--displays list of folders that the user can add entries to to-->
-                    <span class="pad-8" ng-if="!userFolders || !userFolders.length">
-                        No personal folders available
-                    </span>
-
-                    <table class="table font-90em table-hover table-condensed" ng-if="userFolders">
-                        <tr ng-click="selectFolderForMoveTo(folder, $event)" ng-repeat="folder in userFolders"
-                            class="cursor_pointer" ng-class="{'warning': $scope.selectedFolders.indexOf(folder) >= 0}">
-                            <td>
-                                <i class="fa font-11em fa-fw"
-                                   ng-class="{'fa-square-o':!folder.isSelected, 'fa-check-square-o':folder.isSelected}"></i>
-                            </td>
-                            <td>{{folder.folderName}}</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div style="padding: 5px; border-top: 1px solid #ccc">
-                    <!--<small class="text-muted pull-left">No folders selected</small>-->
-                    <button class="btn btn-sm btn-primary pull-right" ng-disabled="selectedFolders.length===0"
-                            ng-click="moveEntriesToFolders()">Move
-                    </button>
-                </div>
-            </div>
-        </div>
+        <button class="btn btn-default action-menu uib-dropdown-toggle" ng-disabled="!canMoveFromFolder()"
+                ng-click="openAddToFolderModal(true)">
+            <i class="fa fa-folder-o font-12em"></i>
+            <br>
+            <small class="text-uppercase font-55em">Move To</small>
+        </button>
     </div>
 
 
@@ -88,52 +31,40 @@
     <div class="btn-group" style="margin-left: 20px">
         <button class="btn btn-default action-menu" ng-disabled="!canEdit()" ng-click="editEntry()">
             <i class="fa fa-pencil font-12em"></i>
+            <br>
+            <small class="text-uppercase font-55em">Edit</small>
         </button>
 
         <button class="btn btn-default action-menu" ng-disabled="!canDelete()" ng-click="deleteSelectedEntries()">
             <i class="fa fa-trash-o font-12em"></i>
+            <br>
+            <small class="text-uppercase font-55em">Delete</small>
         </button>
     </div>
 
     <!--download-->
-    <button class="btn btn-default action-menu" uib-tooltip="Export" ng-disabled="addToDisabled" ng-click="csvExport()"
+    <button class="btn btn-default action-menu" ng-disabled="addToDisabled" ng-click="csvExport()"
             style="margin-left: 20px">
         <i class="fa fa-cloud-download font-12em"></i>
+        <br>
+        <small class="text-uppercase font-55em">Export</small>
     </button>
 
 
     <!--transfer-->
-    <div class="btn-group" style="margin-left: 20px" ng-if="user.isAdmin" uib-dropdown>
-        <button class="btn btn-default action-menu" ng-disabled="addToDisabled"
-                ng-click="retrieveRegistryPartners()" uib-dropdown-toggle>
+    <div class="btn-group" style="margin-left: 20px" ng-if="user.isAdmin">
+        <button class="btn btn-default action-menu" ng-disabled="addToDisabled" ng-click="openTransferEntriesModal()">
             <i class="fa fa-share font-12em"></i>
-            <small class="caret"></small>
+            <br>
+            <small class="text-uppercase font-55em">Transfer</small>
         </button>
-
-        <span class="uib-dropdown-menu color-888" uib-dropdown-menu ng-if="!registryPartners"><i
-                class="fa fa-fw fa-spin fa-spinner"></i>
-            Loading partners...</span>
-
-        <ul class="uib-dropdown-menu" uib-dropdown-menu ng-if="registryPartners">
-            <li ng-repeat="partner in registryPartners.partners" ng-init="selected=false" stop-event="click"
-                ng-click="partner.selected=!partner.selected" class="font-75em cursor_pointer">&nbsp;
-                <i class="fa fa-fw"
-                   ng-class="{'fa-square-o':!partner.selected, 'fa-check-square-o':partner.selected==true}"></i>
-                {{partner.name}}
-            </li>
-            <li class="divider"></li>
-            <li style="padding-right: 5px">
-                <button class="btn btn-xs btn-primary pull-right" ng-disabled="selectedPartners.length===0"
-                        ng-click="transferEntriesToRegistry()">Submit
-                </button>
-            </li>
-        </ul>
     </div>
 
-    <div class="pull-right" style="margin-right: 2px; height: 30px">
-        <uib-alert style="width: 200px; padding: 5px 25px 5px 10px" type="warning" close="closeFeedbackAlert()"
-                   dismiss-on-timeout="3000">
-            <small>Feedback: has error {{hasError}}</small>
+    <div class="pull-right" style="margin-right: 2px; height: 30px" ng-if="serverFeedback">
+        <uib-alert style="width: 300px; padding: 5px 25px 5px 10px" type="{{serverFeedback.type}}"
+                   close="closeFeedbackAlert()"
+                   dismiss-on-timeout="5000">
+            <small>{{serverFeedback.message}}</small>
         </uib-alert>
     </div>
 </div>

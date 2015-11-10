@@ -23,13 +23,13 @@
                 <span class="menu_count">
                     <span ng-hide="showAddCollection">{{(collection.count | number) || 0}}</span>
                     <!--shown only for personal collection-->
-                    <i ng-show="showAddCollection" ng-click="hideAddCollection=!hideAddCollection"
-                       class="fa fa-plus edit_icon" style="font-size: 17px">
+                    <i ng-show="showAddCollection" ng-click="addCollectionIconClick()"
+                       class="fa fa-plus edit_icon" style="font-size: 17px" stop-event="click">
                     </i>
                 </span>
             </div>
 
-            <ice.menu.collections.details ng-show="selectedFolder===collection.name"></ice.menu.collections.details>
+            <ice.menu.collections.details ng-if="selectedFolder===collection.name"></ice.menu.collections.details>
         </div>
     </div>
 </div>

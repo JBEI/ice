@@ -13,7 +13,7 @@ import org.jbei.ice.lib.entry.VisibleEntries;
 import org.jbei.ice.lib.folder.FolderContent;
 import org.jbei.ice.lib.folder.FolderContentRetriever;
 import org.jbei.ice.lib.folder.FolderController;
-import org.jbei.ice.lib.folder.Folders;
+import org.jbei.ice.lib.folder.UserFolder;
 import org.jbei.ice.lib.shared.ColumnField;
 
 import javax.ws.rs.*;
@@ -56,38 +56,13 @@ public class FolderResource extends RestResource {
         return controller.getPublicFolders();
     }
 
-    /**
-     * @return all collections of a type
-     */
     @GET
-    @Path("/{type}")
+    @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<FolderDetails> getSubFolders(
-            @DefaultValue("personal") @PathParam("type") String folderType,
-            @DefaultValue("false") @QueryParam("canEdit") boolean canEdit) {
-        final String sid = getUserId();
-        if (canEdit)
-            return new Folders().getCanEditFolders(sid);
-
-        switch (folderType) {
-            case "personal":
-                return controller.getUserFolders(sid);
-
-            case "available":
-                return controller.getAvailableFolders(sid);
-
-            case "drafts":
-                return controller.getBulkUploadDrafts(sid);
-
-            case "pending":
-                return controller.getPendingBulkUploads(sid);
-
-            case "shared":
-                return controller.getSharedUserFolders(sid);
-
-            default:
-                return new ArrayList<>();
-        }
+    public Response getFolder(@PathParam("id") long folderId) {
+        String userId = getUserId();
+        UserFolder folder = new UserFolder(userId);
+        return super.respond(folder.getFolder(folderId));
     }
 
     /**
@@ -114,17 +89,17 @@ public class FolderResource extends RestResource {
     }
 
     /**
-     * @return Response with updated collection details
+     * Adds entries referenced in the <code>entrySelection</code> object
+     * to the folders also referenced in the same object
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/transfer")
     public Response addSelectedEntriesToFolder(final EntrySelection entrySelection) {
         final String userId = getUserId();
         final FolderContent folderContent = new FolderContent();
-        final List<FolderDetails> result = folderContent.addEntrySelection(userId, entrySelection);
-        return super.respond(result);
+        folderContent.addEntrySelection(userId, entrySelection);
+        return super.respond(true);
     }
 
     /**
@@ -154,7 +129,8 @@ public class FolderResource extends RestResource {
                               @DefaultValue("0") @QueryParam("offset") final int offset,
                               @DefaultValue("15") @QueryParam("limit") final int limit,
                               @DefaultValue("created") @QueryParam("sort") final String sort,
-                              @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+                              @DefaultValue("false") @QueryParam("asc") final boolean asc,
+                              @QueryParam("fields") List<String> queryParam) {
 
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
 

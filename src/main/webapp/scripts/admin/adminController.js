@@ -51,7 +51,13 @@ angular.module('ice.admin.controller', [])
                 icon: 'fa-globe'
             },
             {id: 'users', url: 'scripts/admin/users.html', display: 'Users', selected: false, icon: 'fa-user'},
-            {id: 'groups', url: 'scripts/admin/groups.html', display: 'Groups', selected: false, icon: 'fa-group'},
+            {
+                id: 'groups',
+                url: 'scripts/admin/groups.html',
+                display: 'Public Groups',
+                selected: false,
+                icon: 'fa-group'
+            },
             {
                 id: 'transferred', url: 'scripts/admin/transferred.html', display: 'Transferred Entries',
                 selected: false, icon: 'fa-list'
@@ -59,6 +65,13 @@ angular.module('ice.admin.controller', [])
             {
                 id: 'samples', url: 'scripts/admin/sample-requests.html', display: 'Sample Requests', selected: false,
                 icon: 'fa-shopping-cart'
+            },
+            {
+                id: 'api-keys',
+                url: 'scripts/admin/all-api-keys.html',
+                display: 'API Keys',
+                selected: false,
+                icon: 'fa-key'
             }
         ];
 
@@ -342,4 +355,15 @@ angular.module('ice.admin.controller', [])
         $scope.filterChanged = function () {
             getUsers();
         }
+    })
+    .controller('AdminApiKeysController', function ($scope, Util) {
+        $scope.apiKeys = undefined;
+
+        // retrieve existing api keys for current user
+        $scope.retrieveKeys = function () {
+            Util.get("rest/api-keys", function (result) {
+                $scope.apiKeys = result.data;
+                console.log(result);
+            });
+        };
     });

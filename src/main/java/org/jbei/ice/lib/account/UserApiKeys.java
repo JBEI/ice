@@ -5,6 +5,7 @@ import org.jbei.ice.lib.dto.access.AccessKey;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ApiKeyDAO;
+import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.ApiKey;
 
 import java.util.Date;
@@ -45,9 +46,17 @@ public class UserApiKeys {
 
     public Results<AccessKey> getKeys(int limit, int offset, String sortField, boolean asc) {
         Results<AccessKey> accessKeyResults = new Results<>();
-        List<ApiKey> results = DAOFactory.getApiKeyDAO().getApiKeysForUser(userId, limit, offset, asc);
+        AccountController accountController = new AccountController();
+        boolean isAdmin = accountController.isAdministrator(this.userId);
+
+        List<ApiKey> results = DAOFactory.getApiKeyDAO().getApiKeysForUser(userId, sortField, limit, offset, asc);
         for (ApiKey key : results) {
-            accessKeyResults.getData().add(key.toDataTransferObject());
+            AccessKey accessKey = key.toDataTransferObject();
+            if (isAdmin) {
+                Account account = accountController.getByEmail(key.getOwnerEmail());
+                accessKey.setAccount(account.toDataTransferObject());
+            }
+            accessKeyResults.getData().add(accessKey);
         }
         return accessKeyResults;
     }

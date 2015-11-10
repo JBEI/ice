@@ -4,7 +4,10 @@ angular.module('ice.common.service', [])
     .factory('Util', function ($rootScope, $location, $cookieStore, $resource) {
         return {
             handleError: function (response) {
-                console.error("error", response);
+                var errorMsg;
+                var type;
+
+                console.log(response);
 
                 switch (response.status) {
                     case 401:
@@ -12,23 +15,40 @@ angular.module('ice.common.service', [])
                             $cookieStore.remove('user');
                             $rootScope.user = undefined;
                             $location.path('/login');
-                            $rootScope.error = "Your session has expired. Please login again";
+                            errorMsg = "Your session has expired. Please login again";
                         } else {
-                            $rootScope.error = response.data.errorMessage;
+                            errorMsg = response.data.errorMessage;
                         }
                         break;
 
                     case 404:
-                        $rootScope.error = "The requested resource could not be found";
+                        errorMsg = "The requested resource could not be found";
+                        type = "warning";
                         break;
 
                     case 500:
-                        $rootScope.error = response.data.errorMessage;
+                        errorMsg = response.data.errorMessage;
+                        type = "danger";
                         break;
 
                     default:
-                        $rootScope.error = "Unknown server error";
+                        errorMsg = "Unknown server error";
+                        type = "danger";
                 }
+
+                if (errorMsg == undefined) {
+                    errorMsg = "Unknown server error";
+                    type = "danger";
+                }
+
+                $rootScope.serverFeedback = {message: errorMsg, type: type};
+            },
+
+            setFeedback: function (message, type) {
+                if (!type)
+                    type = 'info';
+
+                $rootScope.serverFeedback = {type: type, message: message};
             },
 
             get: function (url, successHandler, queryParams) {
@@ -69,7 +89,11 @@ angular.module('ice.common.service', [])
                 }).list(successHandler, this.handleError);
             },
 
-            post: function (url, obj, successHandler, params) {
+            post: function (url, obj, successHandler, params, errHandler) {
+                var errorCallback = this.handleError;
+                if (errHandler)
+                    errorCallback = errHandler;
+
                 if (!params)
                     params = {};
                 params.sid = $cookieStore.get('sessionId');
@@ -78,7 +102,7 @@ angular.module('ice.common.service', [])
                         method: 'POST',
                         headers: {'X-ICE-Authentication-SessionId': params.sid}
                     }
-                }).post(obj, successHandler, this.handleError);
+                }).post(obj, successHandler, errorCallback);
             },
 
             update: function (url, obj, params, successHandler) {

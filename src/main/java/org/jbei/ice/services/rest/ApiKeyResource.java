@@ -36,8 +36,7 @@ public class ApiKeyResource extends RestResource {
                                @DefaultValue("0") @QueryParam("offset") int offset,
                                @DefaultValue("15") @QueryParam("limit") int limit,
                                @DefaultValue("true") @QueryParam("asc") boolean asc,
-                               @DefaultValue("creationTime") @QueryParam("sort") String sort,
-                               @QueryParam("client_id") String clientId) {
+                               @DefaultValue("creationTime") @QueryParam("sort") String sort) {
         String userId = getUserId(sessionId);
         UserApiKeys apiKeys = new UserApiKeys(userId);
         return super.respond(apiKeys.getKeys(limit, offset, sort, asc));
