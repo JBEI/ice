@@ -53,6 +53,9 @@ angular.module('ice.collection.controller', [])
         // end initialize
         //
 
+        $scope.addCollectionIconClick = function () {
+            $scope.$broadcast("ShowCollectionFolderAdd");
+        };
 
         // updates the numbers for the collections
         $scope.updateCollectionCounts = function () {
@@ -327,6 +330,7 @@ angular.module('ice.collection.controller', [])
             hasSample: {field: "hasSample", display: "Has Sample", selected: true},
             hasSequence: {field: "hasSequence", display: "Has Sequence", selected: true},
             alias: {field: "alias", display: "Alias"},
+            created: {field: "creationTime", display: "Created", selected: true}
         };
 
         $scope.params = {
@@ -339,6 +343,15 @@ angular.module('ice.collection.controller', [])
 
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
         var subCollection = $stateParams.collection;   // folder id or one of the defined collections (Shared etc)
+
+        $scope.selectedHeaderField = function (field, $event) {
+            if ($event) {
+                $event.preventDefault();
+                $event.stopPropagation();
+            }
+            console.log(field);
+            field.selected = !field.selected;
+        };
 
         $scope.folderPageChange = function () {
             $scope.loadingPage = true;
@@ -806,6 +819,11 @@ angular.module('ice.collection.controller', [])
     .controller('CollectionDetailController', function ($scope, $cookieStore, Folders, $stateParams, $location) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
+        $scope.hideAddCollection = true;
+
+        $scope.$on("ShowCollectionFolderAdd", function (e) {
+            $scope.hideAddCollection = false;
+        });
 
         $scope.createCollection = function () {
             var details = {folderName: $scope.newCollectionName};
