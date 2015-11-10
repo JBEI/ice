@@ -4,8 +4,19 @@ angular.module('ice.collection.controller', [])
     // controller for <ice.menu.collections> directive
     .controller('CollectionMenuController', function ($cookieStore, $scope, $uibModal, $rootScope, $location, $stateParams,
                                                       Folders, FolderSelection, EntryContextUtil, Util) {
-        //var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
+
+        // retrieve (to refresh the information such as part counts) all the sub folders under
+        // $scope.selectedFolder (defaults to "personal" if not set)
+        $scope.updateSelectedCollectionFolders = function () {
+            var folder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
+            if (folder == "available")
+                folder = "featured";
+
+            Util.list("rest/collections/" + folder.toUpperCase() + "/folders", function (result) {
+                $scope.selectedCollectionFolders = result;
+            });
+        };
 
         //
         // initialize
@@ -25,9 +36,7 @@ angular.module('ice.collection.controller', [])
                 $scope.selectedFolder = "featured";
 
             FolderSelection.selectCollection($scope.selectedFolder);
-            Util.list("rest/collections/" + $scope.selectedFolder.toUpperCase() + "/folders", function (result) {
-                $scope.selectedCollectionFolders = result;
-            });
+            $scope.updateSelectedCollectionFolders();
         } else {
             // selected folder is a number. folder selected, need collection it is contained in
             Util.get("rest/folders/" + $scope.selectedFolder, function (result) {
@@ -36,18 +45,10 @@ angular.module('ice.collection.controller', [])
                 else
                     $scope.selectedFolder = 'personal';
 
-
-                var folder = $scope.selectedFolder.toLowerCase();
-                if (folder == "available")
-                    folder = "featured";
-                //console.log("id folder", result);
                 FolderSelection.selectCollection($scope.selectedFolder);
-                Util.list("rest/collections/" + folder.toUpperCase() + "/folders", function (result) {
-                    $scope.selectedCollectionFolders = result;
-                });
+                $scope.updateSelectedCollectionFolders();
             });
         }
-
         //
         // end initialize
         //
@@ -71,20 +72,6 @@ angular.module('ice.collection.controller', [])
         $scope.$on("UpdateCollectionCounts", function (event) {
             $scope.updateCollectionCounts();
         });
-
-        // updates the counts for personal collection to indicate items removed/added
-        $scope.updatePersonalCollections = function () {
-            var folder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
-
-            folders.getByType({folderType: folder},
-                function (result) {
-                    if (result) {
-                        $scope.selectedCollectionFolders = result;
-                    }
-                }, function (error) {
-                    console.error(error);
-                });
-        };
 
         //
         // called from collections-menu-details.html when a collection's folder is selected
@@ -325,7 +312,9 @@ angular.module('ice.collection.controller', [])
 
 // deals with sub collections e.g. /folders/:id
 // retrieves the contents of folders
-    .controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $cookieStore, $stateParams, Folders, Entry, EntryContextUtil, Selection) {
+    .controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
+                                                        $stateParams, Folders, Entry, EntryContextUtil,
+                                                        Selection, Util) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
         var entry = Entry(sessionId);
@@ -333,7 +322,21 @@ angular.module('ice.collection.controller', [])
         //
         // init
         //
-        $scope.params = {'asc': false, 'sort': 'created', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
+        $scope.entryHeaders = {
+            status: {field: "status", display: "Status", selected: true},
+            hasSample: {field: "hasSample", display: "Has Sample", selected: true},
+            hasSequence: {field: "hasSequence", display: "Has Sequence", selected: true},
+            alias: {field: "alias", display: "Alias"},
+        };
+
+        $scope.params = {
+            'asc': false,
+            'sort': 'created',
+            currentPage: 1,
+            hstep: [15, 30, 50, 100],
+            limit: 30
+        };
+
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
         var subCollection = $stateParams.collection;   // folder id or one of the defined collections (Shared etc)
 
@@ -343,12 +346,12 @@ angular.module('ice.collection.controller', [])
                 $scope.params.folderId = 'personal';
             $scope.params.offset = ($scope.params.currentPage - 1) * $scope.params.limit;
 
-            folders.folder($scope.params, function (result) {
+            Util.get("rest/folders/" + $scope.params.folderId + "/entries", function (result) {
                 $scope.folder = result;
                 if (result.canEdit)
                     $scope.folderNameTooltip = "Click to rename";
                 $scope.loadingPage = false;
-            });
+            }, $scope.params);
         };
 
         // retrieve folder contents. all folders are redirected to /folder/{id} which triggers this
