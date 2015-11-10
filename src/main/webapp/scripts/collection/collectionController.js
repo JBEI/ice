@@ -349,7 +349,6 @@ angular.module('ice.collection.controller', [])
                 $event.preventDefault();
                 $event.stopPropagation();
             }
-            console.log(field);
             field.selected = !field.selected;
         };
 
