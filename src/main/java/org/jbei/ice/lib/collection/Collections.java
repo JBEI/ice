@@ -12,6 +12,7 @@ import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Group;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -71,6 +72,10 @@ public class Collections {
 
             case SHARED:
                 return controller.getSharedUserFolders(userId);
+
+            case DELETED:
+                // not able to delete folders yet
+                return new ArrayList<>();
 
             default:
                 throw new IllegalArgumentException("Unknown collection type " + type);
