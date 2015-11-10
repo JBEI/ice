@@ -86,7 +86,11 @@ angular.module('ice.common.service', [])
                 }).list(successHandler, this.handleError);
             },
 
-            post: function (url, obj, successHandler, params) {
+            post: function (url, obj, successHandler, params, errHandler) {
+                var errorCallback = this.handleError;
+                if (errHandler)
+                    errorCallback = errHandler;
+
                 if (!params)
                     params = {};
                 params.sid = $cookieStore.get('sessionId');
@@ -95,7 +99,7 @@ angular.module('ice.common.service', [])
                         method: 'POST',
                         headers: {'X-ICE-Authentication-SessionId': params.sid}
                     }
-                }).post(obj, successHandler, this.handleError);
+                }).post(obj, successHandler, errorCallback);
             },
 
             update: function (url, obj, params, successHandler) {
