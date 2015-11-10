@@ -535,7 +535,6 @@ a:hover {
 }
 
 .subMenuCreateNew {
-    /*height: 30px;*/
     color: #fff;
     background-color: #47a447;
     border: 1px solid #398439;
@@ -559,19 +558,14 @@ a:hover {
 }
 
 .ice-button {
-    /*background-color: #fbfbfb;*/
-    /*border: 1px solid #CCC;*/
     padding: 5px 7px;
     color: #333;
     font-size: 0.80em;
-    /*box-shadow: 1px 0 1px 0 #ddd;*/
     border-radius: 3px;
     cursor: pointer;
 
     border: 1px solid #A5A5A5;
     background: #f2f2f2 linear-gradient(#FEFEFE, #F2F2F2);
-    /*color: #111;*/
-    /*box-shadow: 0 0 1px 1px #DEDEDE;*/
     font-weight: 500;
 }
 
@@ -1225,7 +1219,7 @@ button.action-menu {
     margin: auto;
     border: 1px solid #f1f2f3;
     background-color: #f9f9f9;
-    height: 32px;
+    height: 34px;
     width: 65px;
     line-height: 50%;
 }
@@ -1249,5 +1243,10 @@ button[disabled].action-menu:hover {
     color: #657B83;
     font-size: 19px;
     font-family: "BebasNeue", sans-serif;
+}
+
+.entry-table-header {
+    font-size: 11px;
+    text-transform: uppercase;
 }
 

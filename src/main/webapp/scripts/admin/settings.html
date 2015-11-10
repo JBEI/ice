@@ -19,7 +19,7 @@
 
                 <!--for boolean fields only-->
                 <div class="col-md-9" ng-if="setting.isBoolean">
-                    <i class="cursor_pointer fa" ng-click="submitBooleanSetting(setting)"
+                    <i class="cursor_pointer fa fa-fw" ng-click="submitBooleanSetting(setting)"
                        ng-class="{'fa-toggle-on green font-14em':setting.value != undefined && setting.value.toLowerCase() === 'yes',
                        'fa-toggle-off font-14em opacity_hover':setting.value == undefined || setting.value.toLowerCase() !== 'yes'}"></i>
                 </div>
@@ -58,7 +58,7 @@
 
                 <!--for boolean fields only-->
                 <div class="col-md-9" ng-if="setting.isBoolean">
-                    <i class="cursor_pointer fa" ng-click="submitBooleanSetting(setting)"
+                    <i class="cursor_pointer fa fa-fw" ng-click="submitBooleanSetting(setting)"
                        ng-class="{'fa-toggle-on green font-14em':setting.value != undefined && setting.value.toLowerCase() === 'yes',
                        'fa-toggle-off font-14em opacity_hover':setting.value == undefined || setting.value.toLowerCase() !== 'yes'}"></i>
                 </div>
