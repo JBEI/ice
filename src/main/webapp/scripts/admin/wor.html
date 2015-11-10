@@ -3,7 +3,7 @@
         <button type="button" class="ice-button" ng-click="enableDisableWor()">
             <span ng-if="isWorEnabled">Disable</span>
             <span ng-if="!isWorEnabled">Enable</span>
-            <i style="font-size: 14px" class="fa"
+            <i style="font-size: 14px" class="fa fa-fw"
                ng-class="{'fa-toggle-on green':isWorEnabled, 'fa-toggle-off':!isWorEnabled}"></i>
         </button>
         <button type="button" class="ice-button" ng-click="showAddRegistryForm=true" ng-show="isWorEnabled">
