@@ -91,8 +91,6 @@ public class FolderResource extends RestResource {
     /**
      * Adds entries referenced in the <code>entrySelection</code> object
      * to the folders also referenced in the same object
-     *
-     * @return Response with updated collection details
      */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -100,8 +98,8 @@ public class FolderResource extends RestResource {
     public Response addSelectedEntriesToFolder(final EntrySelection entrySelection) {
         final String userId = getUserId();
         final FolderContent folderContent = new FolderContent();
-        final List<FolderDetails> result = folderContent.addEntrySelection(userId, entrySelection);
-        return super.respond(result);
+        folderContent.addEntrySelection(userId, entrySelection);
+        return super.respond(true);
     }
 
     /**
@@ -131,7 +129,8 @@ public class FolderResource extends RestResource {
                               @DefaultValue("0") @QueryParam("offset") final int offset,
                               @DefaultValue("15") @QueryParam("limit") final int limit,
                               @DefaultValue("created") @QueryParam("sort") final String sort,
-                              @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+                              @DefaultValue("false") @QueryParam("asc") final boolean asc,
+                              @QueryParam("fields") List<String> queryParam) {
 
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
 
