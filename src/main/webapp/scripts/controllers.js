@@ -27,17 +27,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         $rootScope.serverFeedback = undefined;
     };
 
-    // retrieve personal list of folders user can add or move parts to
-    //$scope.retrieveUserFolders = function () {
-    //    $scope.userFolders = undefined;
-    //    $scope.selectedFolders = [];
-    //
-    //    folders.getByType({folderType: "personal", canEdit: "true"}, function (data) {
-    //        if (data.length)
-    //            $scope.userFolders = data;
-    //    });
-    //};
-
     // select a folder in the pull down
     $scope.selectFolderForMoveTo = function (folder, $event) {
         if ($event) {
@@ -185,28 +174,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         $scope.editDisabled = true;
     };
 
-    $scope.retrieveRegistryPartners = function () {
-        WebOfRegistries().query({}, function (result) {
-            $scope.registryPartners = result;
-        }, function (error) {
-            console.error(error);
-        });
-    };
-
-    $scope.transferEntriesToRegistry = function () {
-        var entrySelection = getEntrySelection();
-        angular.forEach($scope.registryPartners.partners, function (partner) {
-            if (partner.selected) {
-                WebOfRegistries().transferEntries({partnerId: partner.id}, entrySelection,
-                    function (result) {
-                        Selection.reset();
-                    }, function (error) {
-                        console.error(error);
-                    })
-            }
-        });
-    };
-
     // todo : getEntrySelection() should be moved to Selection
     $scope.csvExport = function () {
         var selection = getEntrySelection();
@@ -283,10 +250,44 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     }
 });
 
-iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $uibModalInstance) {
+iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $uibModalInstance, Util) {
     $scope.closeModal = function () {
         $uibModalInstance.close();
     };
+
+    $scope.retrieveRegistryPartners = function () {
+        Util.get("rest/web", function (result) {
+            $scope.registryPartners = result;
+        });
+    };
+
+    $scope.transferEntriesToRegistry = function () {
+        var entrySelection = getEntrySelection();
+        angular.forEach($scope.registryPartners.partners, function (partner) {
+            if (partner.selected) {
+                Util.post('rest/web/' + partner.id + '/transfer', entrySelection, function (result) {
+                    Selection.reset();
+                });
+            }
+        });
+    };
+
+    $scope.selectPartnerForTransfer = function (partner) {
+        var indexOf = $scope.selectedPartners.indexOf(partner);
+        if (indexOf != -1) {
+            $scope.selectedPartners.splice(indexOf, 1);
+        } else {
+            $scope.selectedPartners.push(partner);
+        }
+        partner.selected = !partner.selected
+    };
+
+
+    //
+    // init
+    //
+    $scope.selectedPartners = [];
+    $scope.retrieveRegistryPartners();
 });
 
 iceControllers.controller('AddToFolderController', function ($scope, $uibModalInstance, Util, FolderSelection,

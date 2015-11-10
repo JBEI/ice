@@ -11,17 +11,18 @@
             No web of registries partners available
         </div>
 
-        <table class="table font-90em table-hover table-condensed" ng-if="registryPartners">
-            <tr ng-repeat="partner in registryPartners.partners" ng-click="partner.selected=!partner.selected"
-                class="cursor_pointer" ng-class="{'warning': selectedFolders.indexOf(folder) >= 0}">
+        <table class="table font-90em table-hover table-condensed table-border-bottom"
+               style="margin-bottom: 0" ng-if="registryPartners">
+            <tr ng-repeat="partner in registryPartners.partners" ng-click="selectPartnerForTransfer(partner)"
+                class="cursor_pointer">
                 <td style="width: 35px">
                     <i class="fa font-12em fa-fw" style="margin-left: 25px"
                        ng-class="{'fa-square-o':!partner.selected, 'fa-check-square-o':partner.selected==true}"></i>
                 </td>
                 <td>
-                    {{partner}}
+                    {{partner.name}}
                     <br>
-                    <small class="text-muted">url?</small>
+                    <small class="text-muted">{{partner.url}}</small>
                 </td>
             </tr>
         </table>
@@ -29,9 +30,13 @@
 </div>
 
 <div class="modal-footer">
-    <button class="btn btn-sm btn-primary pull-right" ng-disabled="selectedFolders.length===0"
-            ng-if="registryPartners && registryPartners.partners.length" ng-click="transferEntriesToRegistry()">Submit
-    </button>
+    <div class="pull-right">
+        <button class="btn btn-sm btn-default" ng-click="closeModal()">Cancel</button>
+        <button class="btn btn-sm btn-primary" ng-disabled="selectedPartners.length===0"
+                ng-if="registryPartners && registryPartners.partners.length" ng-click="transferEntriesToRegistry()">
+            Submit
+        </button>
+    </div>
 </div>
 
 
