@@ -7,6 +7,8 @@ angular.module('ice.common.service', [])
                 var errorMsg;
                 var type;
 
+                console.log(response);
+
                 switch (response.status) {
                     case 401:
                         if ($location.path() != '/login') {
@@ -35,6 +37,7 @@ angular.module('ice.common.service', [])
                 }
 
                 if (errorMsg == undefined) {
+                    errorMsg = "Unknown server error";
                     type = "danger";
                 }
 
