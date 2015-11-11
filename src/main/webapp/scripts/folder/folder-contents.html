@@ -82,11 +82,10 @@
             <tr style="height: 32px">
                 <!--selection toggle-->
                 <th class="uib-dropdown" uib-dropdown
-                    style="padding:0; font-size: 15px; vertical-align: middle; text-align: center">
+                    style="font-size: 15px; vertical-align: middle;">
                     <span class="uib-dropdown-toggle" uib-dropdown-toggle>
                         <i class="fa fa-fw cursor_default" ng-class="selectAllClass()" ng-click="selectAll()"
-                           stop-event="click"></i>
-                        <small class="caret cursor_pointer"></small>
+                           stop-event="click"></i><small class="caret cursor_pointer" style="margin-left: 0"></small>
                     </span>
                     <ul class="uib-dropdown-menu" uib-dropdown-menu style="min-width: 100px">
                         <li class="font-75em cursor_pointer" ng-click="setType('all')"><a>All</a></li>
