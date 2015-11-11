@@ -33,11 +33,8 @@ public enum ConfigurationKey implements IDataTransferModel {
     PROFILE_EDIT_ALLOWED("YES"),
     JOIN_WEB_OF_REGISTRIES("NO"),
     WEB_OF_REGISTRIES_MASTER("registry.jbei.org"),
-    
-    AUTHENTICATION_BACKEND("org.jbei.ice.lib.account.authentication.LocalAuthentication"),
-    LOGO(""),
-    LOGIN_MESSAGE(""),
-    FOOTER("");
+
+    AUTHENTICATION_BACKEND("org.jbei.ice.lib.account.authentication.LocalAuthentication");
 
     private String defaultValue;
 

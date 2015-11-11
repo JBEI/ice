@@ -27,9 +27,20 @@ iceApp.run(function (Authentication, $route, $location, $rootScope, Util) {
     };
 
     Util.list("rest/config/site", function (result) {
+        // todo : should have a separate call for version
         for (var i = 0; i < result.length; i++) {
-            if (result[i].value)
+            var key = result[i].key;
+            if (key == "version")
                 $rootScope.siteSettings[result[i].key] = result[i].value;
+            else if (key == "UI_ASSET") {
+                if (result[i].value) {
+                    var value = result[i].value;
+
+                    $rootScope.siteSettings.logo = "rest/file/" + value + "/logo.png";
+                    $rootScope.siteSettings.loginMessage = "rest/file/" + value + "/institution.html";
+                    $rootScope.siteSettings.footer = "rest/file/" + value + "/footer.html";
+                }
+            }
         }
     });
 });
