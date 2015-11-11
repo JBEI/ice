@@ -1,86 +1,98 @@
 <div ng-controller="ShotgunSequenceController">
-    <div class="col-md-12 pad_top" ng-if="shotgunSequences.length">
-        <table cellspacing="0" class="table table-condensed table-hover font-95em">
-            <thead>
-            <tr>
-                <td></td>
-                <td><b>MiSeq/PacBio Sequence</b></td>
-                <td><b>Quality</b></td>
-                <td><b>Uploaded On</b></td>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="shotgunSequence in shotgunSequences">
-                <td style="opacity:0.2; text-shadow:0 1px 0 #fff;" width="30px">
-                    <b class="no_wrap">{{$index+1}}</b>
-                </td>
-                <td><a class="cursor_pointer"
-                       ng-click="downloadShotgunFile(shotgunSequence)">{{shotgunSequence.filename}}</a>
-                </td>
-                <td><span class="label quality-{{shotgunSequence.call}}">{{shotgunSequence.score}}</span>
-                    {{shotgunSequence.call}}
-                </td>
-                <td>{{shotgunSequence.created | date:'MMM d, y, h:mm a'}}</td>
-            </tr>
-            </tbody>
-        </table>
+    <div class="row pad_top" ng-if="shotgunSequences.length">
+        <div class="col-md-12">
+            <table cellspacing="0" class="table table-condensed table-hover font-95em">
+                <thead>
+                <tr>
+                    <td></td>
+                    <td><b>MiSeq/PacBio Sequence</b></td>
+                    <td><b>Quality</b></td>
+                    <td><b>Uploaded On</b></td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="shotgunSequence in shotgunSequences">
+                    <td style="opacity:0.2; text-shadow:0 1px 0 #fff;" width="30px">
+                        <b class="no_wrap">{{$index+1}}</b>
+                    </td>
+                    <td><a class="cursor_pointer"
+                           ng-click="downloadShotgunFile(shotgunSequence)">{{shotgunSequence.filename}}</a>
+                    </td>
+                    <td><span class="label quality-{{shotgunSequence.call}}">{{shotgunSequence.score}}</span>
+                        {{shotgunSequence.call}}
+                    </td>
+                    <td>{{shotgunSequence.created | date:'MMM d, y, h:mm a'}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <div ng-controller="TraceSequenceController">
-    <div class="col-md-12 pad_top">
-        <button type="button" class="ice-button" ng-click="showAddSangerTraceModal()">Add Sanger Trace</button>
+    <div class="row pad_top">
+        <div class="col-md-12">
+            <button type="button" class="ice-button" ng-click="showAddSangerTraceModal()">Add Sanger Trace</button>
+        </div>
     </div>
 
-    <div class="col-md-12 pad_top" ng-if="traces && traces.data.length===0">
-        <i class="text-muted">No Sanger traces available</i>
+    <div class="row pad_top" ng-if="traces && traces.data.length===0">
+        <div class="col-md-12">
+            <i class="text-muted">No Sanger traces available</i>
+        </div>
     </div>
 
-    <div class="col-md-12 pad_top" ng-if="traces && traces.data.length">
-        <table cellspacing="0" class="table table-condensed table-hover table-border-bottom font-95em">
-            <thead>
-            <tr>
-                <td></td>
-                <th><b>Sanger Trace</b></th>
-                <th><b>Uploader</b></th>
-                <th><b>Uploaded On</b></th>
-                <th>&nbsp;</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr ng-repeat="traceSequence in traces.data">
-                <td style="opacity:0.2; text-shadow:0 1px 0 #fff;" width="30px">
-                    <b class="no_wrap">{{$index+tracesParams.start+1 | number}}</b>
-                </td>
-                <td>
-                    <a class="cursor_pointer"
-                       ng-click="downloadTraceFile(traceSequence)">{{traceSequence.filename}}</a>
-                </td>
-                <td><a ng-href="profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}
-                    {{traceSequence.depositor.lastName}}</a></td>
-                <td>{{traceSequence.created | date:'MMM d, y, h:mm a'}}</td>
-                <td style="font-size:14px">
-                    <i ng-click="deleteTraceSequenceFile(traceSequence.fileId)" ng-show="traceSequence.canEdit"
-                       class="fa fa-trash-o delete_icon"></i>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+    <div class="row pad_top" ng-if="traces && traces.data.length">
+        <div class="col-md-12">
+            <table cellspacing="0" class="table table-condensed table-hover table-border-bottom font-95em">
+                <thead>
+                <tr>
+                    <td></td>
+                    <th><b>Sanger Trace</b></th>
+                    <th><b>Uploader</b></th>
+                    <th><b>Uploaded On</b></th>
+                    <th>&nbsp;</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="traceSequence in traces.data">
+                    <td style="opacity:0.2; text-shadow:0 1px 0 #fff;" width="30px">
+                        <b class="no_wrap">{{$index+tracesParams.start+1 | number}}</b>
+                    </td>
+                    <td>
+                        <a class="cursor_pointer"
+                           ng-click="downloadTraceFile(traceSequence)">{{traceSequence.filename}}</a>
+                    </td>
+                    <td><a ng-href="profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}
+                        {{traceSequence.depositor.lastName}}</a></td>
+                    <td>{{traceSequence.created | date:'MMM d, y, h:mm a'}}</td>
+                    <td style="font-size:14px">
+                        <i ng-click="deleteTraceSequenceFile(traceSequence.fileId)" ng-show="traceSequence.canEdit"
+                           class="fa fa-trash-o delete_icon"></i>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="col-sm-6" ng-if="traces && traces.resultCount">
-        <uib-pagination total-items="traces.resultCount" ng-change="tracesPageChanged()"
-                        ng-model="tracesParams.currentPage"
-                        max-size="maxSize" class="pagination-sm" items-per-page="tracesParams.limit"
-                        boundary-links="true">
-        </uib-pagination>
+    <div class="row" ng-if="traces && traces.resultCount">
+        <div class="col-sm-6">
+            <uib-pagination total-items="traces.resultCount" ng-change="tracesPageChanged()"
+                            ng-model="tracesParams.currentPage"
+                            max-size="maxSize" class="pagination-sm" items-per-page="tracesParams.limit"
+                            boundary-links="true">
+            </uib-pagination>
+        </div>
+
+        <div class="col-md-6" style="margin-top: 20px;" ng-if="traces && traces.resultCount">
+            <strong class="small">{{pageCounts(tracesParams.currentPage, traces.resultCount)}}</strong>
+        </div>
     </div>
 
-    <div class="col-md-6" style="margin-top: 20px;" ng-if="traces && traces.resultCount">
-        <strong class="small">{{pageCounts(tracesParams.currentPage, traces.resultCount)}}</strong>
-    </div>
-
-    <div class="col-md-12 pad_top" style="height: 600px" ng-if="entry.hasSequence&&traces.data.length">
-        <ice-sequence-checker entryId="{{entry.id}}"></ice-sequence-checker>
+    <div class="row pad_top" ng-if="entry.hasSequence&&traces.data.length">
+        <div class="col-md-12" style="height: 600px">
+            <ice-sequence-checker entryId="{{entry.id}}"></ice-sequence-checker>
+        </div>
     </div>
 </div>
