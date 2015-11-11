@@ -593,13 +593,13 @@ iceServices.factory('Settings', function ($resource) {
 iceServices.factory('Remote', function ($resource, $cookieStore) {
     return function () {
         return $resource('rest/remote/:id', {id: '@id', email: '@email', partId: '@partId', folderId: '@folderId'}, {
-            publicFolders: {
-                method: 'GET',
-                responseType: 'json',
-                url: 'rest/remote/:id/available',
-                isArray: true,
-                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
-            },
+            //publicFolders: {
+            //    method: 'GET',
+            //    responseType: 'json',
+            //    url: 'rest/remote/:id/available',
+            //    isArray: true,
+            //    headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
+            //},
 
             publicEntries: {
                 method: 'GET',

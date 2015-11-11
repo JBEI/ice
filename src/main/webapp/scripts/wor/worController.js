@@ -280,7 +280,8 @@ angular.module('ice.wor.controller', [])
             $location.path('web/' + $stateParams.partner + "/folder/" + folder.id);
         };
     })
-    .controller('WebOfRegistriesController', function ($rootScope, $scope, $location, $uibModal, $cookieStore, $stateParams, WebOfRegistries, Remote, Util, Settings) {
+    .controller('WebOfRegistriesController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
+                                                       $stateParams, WebOfRegistries, Remote, Util, Settings) {
         var setting = Settings($cookieStore.get("sessionId"));
         $scope.newPartner = undefined;
         $scope.partnerStatusList = [
@@ -368,8 +369,7 @@ angular.module('ice.wor.controller', [])
         $scope.selectPartner = function (partner) {
             $location.path("web/" + partner.id);
             $scope.selectedPartner = partner.id;
-            var remote = Remote();
-            remote.publicFolders({id: partner.id}, function (result) {
+            Util.list("rest/remote/" + partner.id + "/available", function (result) {
                 $scope.selectedPartnerFolders = result;
             });
         }
@@ -379,6 +379,9 @@ angular.module('ice.wor.controller', [])
         // retrieve web of registries partners
         $scope.wor = WebOfRegistries().query({approved_only: true});
         $scope.selectedPartner = $stateParams.partner;
+        Util.list("rest/remote/" + $scope.selectedPartner + "/available", function (result) {
+            $scope.selectedPartnerFolders = result;
+        });
 
         // retrieve web of registries setting
         var sessionId = $cookieStore.get("sessionId");
@@ -391,13 +394,16 @@ angular.module('ice.wor.controller', [])
 
         // retrieves public folders for specified registry and re-directs
         $scope.selectPartner = function (partner) {
+            $scope.selectedPartnerFolders = undefined;
+            if ($scope.selectedPartner == partner.id) {
+                $scope.selectedPartner = undefined;
+                return;
+            }
+
             $location.path("web/" + partner.id);
             $scope.selectedPartner = partner.id;
-            var remote = Remote();
-            remote.publicFolders({id: partner.id}, function (result) {
+            Util.list("rest/remote/" + partner.id + "/available", function (result) {
                 $scope.selectedPartnerFolders = result;
-            }, function (error) {
-                console.error(error);
             });
         }
     })
