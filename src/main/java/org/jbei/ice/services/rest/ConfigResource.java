@@ -1,11 +1,9 @@
 package org.jbei.ice.services.rest;
 
 import org.jbei.ice.lib.config.ConfigurationController;
-import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.search.IndexType;
 import org.jbei.ice.lib.search.SearchController;
-import org.jbei.ice.lib.utils.Utils;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -31,22 +29,16 @@ public class ConfigResource extends RestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Setting> get(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
-        final String userId = getUserId(sessionId);
+    public ArrayList<Setting> get() {
+        final String userId = getUserId();
         return controller.retrieveSystemSettings(userId);
     }
 
     @GET
     @Path("/site")
     @Produces(MediaType.APPLICATION_JSON)
-    public ArrayList<Setting> getSiteSettings() {
-        ArrayList<Setting> settings = new ArrayList<>();
-        settings.add(new Setting("logo", Utils.getConfigValue(ConfigurationKey.LOGO)));
-        settings.add(new Setting("loginMessage", Utils.getConfigValue(ConfigurationKey.LOGIN_MESSAGE)));
-        settings.add(new Setting("footer", Utils.getConfigValue(ConfigurationKey.FOOTER)));
-        settings.add(new Setting("version", "4.6.0"));
-        return settings;
+    public Response getSiteSettings() {
+        return super.respond(controller.getSiteSettings());
     }
 
     /**

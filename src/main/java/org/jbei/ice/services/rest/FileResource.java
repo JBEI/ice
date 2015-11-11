@@ -8,6 +8,7 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
@@ -49,19 +50,11 @@ public class FileResource extends RestResource {
     @GET
     @Path("asset/{assetName}")
     public Response getAsset(@PathParam("assetName") final String assetName) {
-        String dataDirectory = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-        String dataAssetSubdirectory = "asset";
-
-        File data = Paths.get(dataDirectory, dataAssetSubdirectory, assetName).toFile();
-        File asset;
-
-        if (data != null && data.exists()) {
-            asset = data;
-        } else {
+        ConfigurationController configurationController = new ConfigurationController();
+        File assetFile = configurationController.getUIAsset(assetName);
+        if (assetFile == null)
             return super.respond(Response.Status.NOT_FOUND);
-        }
-
-        return addHeaders(Response.ok(asset), asset.getName());
+        return addHeaders(Response.ok(assetFile), assetFile.getName());
     }
 
     /**
@@ -221,14 +214,14 @@ public class FileResource extends RestResource {
     @GET
     @Path("shotgunsequence/{fileId}")
     public Response getShotgunSequenceFile(@PathParam("fileId") String fileId,
-                                         @QueryParam("sid") String sid,
-                                         @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                                           @QueryParam("sid") String sid,
+                                           @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
         ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
 
         try {
             final File file = dao.getFile(fileId);
             return addHeaders(Response.ok(file), "sequence-" + ThreadLocalRandom.current().nextInt(10000, 100001) + ".ss.zip");
-        }catch (Exception e){
+        } catch (Exception e) {
             Logger.error(e);
             return Response.serverError().build();
         }
