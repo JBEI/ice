@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    <div ng-if="entry">
+    <div ng-if="entry" style="margin-bottom: 60px">
         <div class="entry_general_header_td" style="height: 60px;">
             <div class="col-md-10">
                 <i ng-if="context" ng-click="backTo()"
@@ -97,7 +97,7 @@
                         <tr ng-repeat="subMenu in subDetails"
                             ng-if="(subMenu.isPrivileged&&entry.ownerEmail===user.email) || !subMenu.isPrivileged || user.isAdmin">
                             <td ng-class="{selected:subMenu.selected}" ng-click="showSelection($index)">
-                                <i class="fa {{subMenu.icon}}" style="font-size: 14px;"></i> &nbsp;{{subMenu.display}}
+                                <i class="fa {{subMenu.icon}}"></i> &nbsp;{{subMenu.display}}
                                 <span ng-if="subMenu.countName" style="float: right; color: #999;">{{entryStatistics[(subMenu.countName)] || 0}}</span>
                             </td>
                         </tr>
