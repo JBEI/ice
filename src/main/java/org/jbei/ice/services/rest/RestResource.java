@@ -96,11 +96,20 @@ public class RestResource {
     }
 
     /**
-     * Extract the User ID from a query parameter value or header values in the resource request.
+     * Attempts to retrieve the identifier for the specific user
      *
-     * @param sessionId a session ID sent via query parameters
-     * @return a string User ID
-     * @throws WebApplicationException for unauthorized access
+     * @return valid user identifier
+     * @throws WebApplicationException with status 401 if the user id cannot be retrieved
+     */
+    protected String requireUserId() {
+        String userId = getUserId();
+        if (userId == null)
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+        return userId;
+    }
+
+    /**
+     * Extract the User ID from a query parameter value or header values in the resource request.
      */
     protected String getUserId(final String sessionId) {
         String userId = UserSessions.getUserIdBySession(sessionId);
@@ -131,8 +140,6 @@ public class RestResource {
             }
         }
 
-        if (userId == null)
-            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         return userId;
     }
 
