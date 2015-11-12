@@ -132,6 +132,7 @@ public class SequenceController {
             return null;
         }
 
+        featuredDNASequence.setSequence(featuredDNASequence.getSequence().replaceAll("[^A-Za-z]", ""));
         Sequence sequence = dnaSequenceToSequence(featuredDNASequence);
         sequence.setEntry(entry);
         if (!deleteSequence(userId, entryId))

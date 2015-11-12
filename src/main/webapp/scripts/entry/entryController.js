@@ -710,8 +710,6 @@ angular.module('ice.entry.controller', [])
         $scope.uploadFile = function () {
             if (!$scope.isPaste) {
                 uploader.queue[0].upload();
-            } else {
-                console.log($scope.pastedSequence);
             }
         };
 
@@ -761,51 +759,50 @@ angular.module('ice.entry.controller', [])
             $scope.processingFile = undefined;
         };
     })
-
-    .
-    controller('SequenceFileUploadController', function ($scope, $cookieStore, $uibModal, $uibModalInstance, FileUploader, type, paste) {
-        console.log("SequenceFileUploadController");
-        var sid = $cookieStore.get("sessionId");
-        $scope.isPaste = paste;
-        $scope.headerText = paste ? "Paste Sequence" : "Upload Sequence file";
-
-        var uploader = $scope.sequenceFileUpload = new FileUploader({
-            scope: $scope, // to automatically update the html. Default: $rootScope
-            url: "rest/file/sequence",
-            method: 'POST',
-            formData: [
-                {
-                    entryType: type
-                }
-            ],
-//        removeAfterUpload: true,
-            headers: {"X-ICE-Authentication-SessionId": sid},
-//        autoUpload: true
-            queueLimit: 1 // can only upload 1 file
-        });
-
-        $scope.cancel = function () {
-            $uibModalInstance.dismiss('cancel');
-        };
-
-        $scope.uploadFile = function () {
-            if (!$scope.isPaste) {
-                uploader.queue[0].upload();
-            } else {
-                console.log($scope.pastedSequence);
-            }
-        };
-
-        // REGISTER HANDLERS
-        uploader.onAfterAddingFile = function (item) {
-            $scope.$emit("FileAdd", item);
-        };
-
-        uploader.onErrorItem = function (item, response, status, headers) {
-            item.remove();
-            $scope.serverError = true;
-        };
-    }).controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group, filterFilter, Permission) {
+//    .controller('SequenceFileUploadController', function ($scope, $cookieStore, $uibModal, $uibModalInstance,
+//                                                         FileUploader, type, paste) {
+//        var sid = $cookieStore.get("sessionId");
+//        $scope.isPaste = paste;
+//        $scope.headerText = paste ? "Paste Sequence" : "Upload Sequence file";
+//
+//        var uploader = $scope.sequenceFileUpload = new FileUploader({
+//            scope: $scope, // to automatically update the html. Default: $rootScope
+//            url: "rest/file/sequence",
+//            method: 'POST',
+//            formData: [
+//                {
+//                    entryType: type
+//                }
+//            ],
+////        removeAfterUpload: true,
+//            headers: {"X-ICE-Authentication-SessionId": sid},
+////        autoUpload: true
+//            queueLimit: 1 // can only upload 1 file
+//        });
+//
+//        $scope.cancel = function () {
+//            $uibModalInstance.dismiss('cancel');
+//        };
+//
+//        $scope.uploadFile = function () {
+//            if (!$scope.isPaste) {
+//                uploader.queue[0].upload();
+//            } else {
+//                console.log($scope.pastedSequence);
+//            }
+//        };
+//
+//        // REGISTER HANDLERS
+//        uploader.onAfterAddingFile = function (item) {
+//            $scope.$emit("FileAdd", item);
+//        };
+//
+//        uploader.onErrorItem = function (item, response, status, headers) {
+//            item.remove();
+//            $scope.serverError = true;
+//        };
+//    })
+    .controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group, filterFilter, Permission) {
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
         var panes = $scope.panes = [];
@@ -1000,11 +997,9 @@ angular.module('ice.entry.controller', [])
 
         $scope.processPastedSequence = function (event, part) {
             var sequenceString = event.originalEvent.clipboardData.getData('text/plain');
-            entry.addSequenceAsString({partId: part.id}, {sequence: sequenceString}, function (result) {
+            Util.post("rest/parts/" + part.id + "/sequence", {sequence: sequenceString}, function (result) {
                 part.hasSequence = true;
-            }, function (error) {
-                console.log("error", error);
-            });
+            })
         };
 
         $scope.deleteSequence = function (part) {
