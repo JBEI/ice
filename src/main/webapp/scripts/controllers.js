@@ -292,16 +292,20 @@ iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $u
 
 iceControllers.controller('AddToFolderController', function ($scope, $uibModalInstance, Util, FolderSelection,
                                                              Selection, move, selectedFolder, $stateParams) {
-    var getPersonalFolders = function () {
+    $scope.getPersonalFolders = function () {
         Util.list("rest/collections/PERSONAL/folders", function (result) {
-            $scope.userFolders = result;
+            $scope.userFolders = [];
+            for (var i = 0; i < result.length; i += 1) {
+                $scope.userFolders.push({name: result[i].folderName, type: result[i].type});
+            }
+            //$scope.userFolders = result;
+            //console.log(result);
         }, {canEdit: 'true'});
     };
 
     //init
     $scope.selectedFolders = [];
     $scope.newFolder = {creating: false};
-    getPersonalFolders();
 
     $scope.closeModal = function (res) {
         $uibModalInstance.close(res);
@@ -346,7 +350,7 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
 
         Util.update("rest/folders", $scope.newFolder, null, function (result) {
             $scope.newFolder = {creating: false};
-            getPersonalFolders();
+            $scope.getPersonalFolders();
         });
     };
 
