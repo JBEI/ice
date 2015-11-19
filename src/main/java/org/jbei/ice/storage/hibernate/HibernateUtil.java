@@ -22,7 +22,6 @@ public class HibernateUtil {
     }
 
     private static String BASE_FILE = "hibernate.cfg.xml";
-    private static String MOCK_FILE = "mock.cfg.xml";
 
     /**
      * Open a new {@link Session} from the sessionFactory.
@@ -63,31 +62,24 @@ public class HibernateUtil {
     private static synchronized void initialize(Type type) {
         if (sessionFactory == null) {
             Logger.info("Initializing session factory for type " + type.name());
-            Configuration configuration = new Configuration().configure(BASE_FILE);
+            final Configuration configuration = new Configuration();
             try {
                 if (type == Type.MOCK) {
-                    configuration.configure(MOCK_FILE);
+                    configuration.setProperty("hibernate.connection.url", "jdbc:h2:mem:test");
+                    configuration.setProperty("hibernate.connection.driver_class", "org.h2.Driver");
+                    configuration.setProperty("hibernate.connection.username", "sa");
+                    configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
+                    configuration.setProperty("hibernate.current_session_context_class",
+                            "org.hibernate.context.internal.ThreadLocalSessionContext");
+                    configuration.setProperty("hibernate.hbm2ddl.auto", "update");
+                    configuration.setProperty("hibernate.search.default.directory_provider",
+                            "org.hibernate.search.store.impl.RAMDirectoryProvider");
                 } else {
-                    String[] properties =
-                            {"hibernate.connection.username",
-                             "hibernate.connection.url",
-                             "hibernate.connection.driver_class",
-                             "hibernate.connection.password",
-                             "hibernate.dialect"};
-
-                    for(int i = 0; i < properties.length; i++){
-                        String key = properties[i];
-                        String value = System.getProperty(properties[i]);
-
-                        if(value != null){
-                            Logger.info("Set " + key + ": " + value);
-                            configuration.setProperty(key, value);
-                        }
-                    }
+                    configuration.configure(BASE_FILE);
                 }
- 
+
                 ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
-                       configuration.getProperties()).build();
+                        configuration.getProperties()).build();
 
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.Entry.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.Plasmid.class);
