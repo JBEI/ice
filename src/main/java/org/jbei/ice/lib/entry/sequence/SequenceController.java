@@ -140,8 +140,6 @@ public class SequenceController {
 
 //        sequence = update(userId, sequence);
         sequence = save(userId, sequence);
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
-
         if (sequence != null)
             return sequenceToDNASequence(sequence);
         return null;
