@@ -99,33 +99,33 @@
                     <!--<sup style="font-size: 9px; font-weight: normal; display: inherit"-->
                     <!--ng-show="selection.length>0">{{selection.length}}</sup>-->
                 </th>
-                <th ng-click="sort('type')" class="cursor_pointer">
-                    <span class="entry-table-header">TYPE</span>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('type')">TYPE</span>
                     <i ng-if="params.sort!=='type'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="params.sort=='type'" style="font-size: 14px;" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                 </th>
-                <th ng-click="sort('part_id')" class="cursor_pointer">
-                    <span class="entry-table-header">Part ID</span>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('part_id')">Part ID</span>
                     <i ng-if="params.sort!=='part_id'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="params.sort=='part_id'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                 </th>
-                <th ng-click="sort('alias')" class="cursor_pointer" ng-if="entryHeaders.alias.selected">
-                    <span class="entry-table-header">Alias</span>
+                <th ng-if="entryHeaders.alias.selected">
+                    <span class="entry-table-header" ng-click="sort('alias')">Alias</span>
                     <i ng-if="params.sort!=='alias'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="params.sort=='alias'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                 </th>
-                <th data-ng-click="sort('name')" class="cursor_pointer">
-                    <span class="entry-table-header">Name</span>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('name')">Name</span>
                     <i ng-if="params.sort!=='name'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="params.sort=='name'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                 </th>
                 <th></th>
-                <th ng-click="sort('status')" class="cursor_pointer" ng-if="entryHeaders.status.selected">
-                    <span class="entry-table-header">Status</span>
+                <th ng-if="entryHeaders.status.selected">
+                    <span class="entry-table-header" ng-click="sort('status')">Status</span>
                     <i ng-if="params.sort!=='status'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="params.sort=='status'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
@@ -134,8 +134,8 @@
                     <i class="fa fa-flask fa-fw" style="font-size: 14px" ng-if="entryHeaders.hasSample.selected"></i>
                     <img src="img/dna.svg" width="15px" ng-if="entryHeaders.hasSequence.selected" alt="has dna"/>
                 </th>
-                <th ng-click="sort('created')" class="cursor_pointer" ng-if="entryHeaders.created.selected">
-                    <span class="entry-table-header">Created</span>
+                <th ng-if="entryHeaders.created.selected">
+                    <span class="entry-table-header" ng-click="sort('created')">Created</span>
                     <i ng-show="params.sort=='created'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                     <i ng-if="params.sort!=='created'" class="sortable fa fa-angle-down"></i>
