@@ -25,6 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Rest resource for dealing with folders. Note that this is different from collections
+ * whose api can be found in the {@link CollectionResource} class.
+ * Folders are generally contained in collections and can be created and deleted in an ad-hoc manner
+ * while collections are a fixed set
+ *
  * @author Hector Plahar
  */
 @Path("/folders")
@@ -40,14 +45,11 @@ public class FolderResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     public FolderDetails create(final FolderDetails folder) {
-        final String sid = getUserId();
+        final String sid = requireUserId();
         return controller.createPersonalFolder(sid, folder);
     }
 
     /**
-     * TODO allow api key as well
-     *
-     * @return all public collections
      */
     @GET
     @Path("/public")
@@ -70,7 +72,8 @@ public class FolderResource extends RestResource {
      */
     @PUT
     @Path("/{id}")
-    public Response update(@PathParam("id") final long folderId, final FolderDetails details) {
+    public Response update(@PathParam("id") final long folderId,
+                           final FolderDetails details) {
         final String userId = getUserId();
         final FolderDetails resp = controller.update(userId, folderId, details);
         return super.respond(Response.Status.OK, resp);
@@ -131,16 +134,14 @@ public class FolderResource extends RestResource {
                               @DefaultValue("created") @QueryParam("sort") final String sort,
                               @DefaultValue("false") @QueryParam("asc") final boolean asc,
                               @QueryParam("fields") List<String> queryParam) {
-
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
-
         if (folderId.equalsIgnoreCase("public")) {
             // return public entries
             log(uriInfo.getBaseUri().toString(), "requesting public entries");
             return controller.getPublicEntries(field, offset, limit, asc);
         }
 
-        final String userId = getUserId();
+        final String userId = super.requireUserId();
 
         try {
             final long id = Long.decode(folderId);
@@ -212,7 +213,8 @@ public class FolderResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
     public FolderDetails setPermissions(@Context final UriInfo info,
-                                        @PathParam("id") final long folderId, final ArrayList<AccessPermission> permissions) {
+                                        @PathParam("id") final long folderId,
+                                        final ArrayList<AccessPermission> permissions) {
         final String userId = getUserId();
         return permissionsController.setFolderPermissions(userId, folderId, permissions);
     }
@@ -224,7 +226,8 @@ public class FolderResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
     public AccessPermission addPermission(@Context final UriInfo info,
-                                          @PathParam("id") final long folderId, final AccessPermission permission) {
+                                          @PathParam("id") final long folderId,
+                                          final AccessPermission permission) {
         final String userId = getUserId();
         return controller.createFolderPermission(userId, folderId, permission);
     }
@@ -236,7 +239,8 @@ public class FolderResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions/{permissionId}")
     public Response removePermission(@Context final UriInfo info,
-                                     @PathParam("id") final long partId, @PathParam("permissionId") final long permissionId) {
+                                     @PathParam("id") final long partId,
+                                     @PathParam("permissionId") final long permissionId) {
         final String userId = getUserId();
         permissionsController.removeFolderPermission(userId, partId, permissionId);
         return Response.ok().build();
