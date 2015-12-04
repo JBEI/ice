@@ -55,8 +55,8 @@ iceDirectives.directive("iceEntryAttachment", function () {
 
 iceDirectives.directive("iceRemoteEntryAttachment", function () {
     return {
-        restrict:"E",
-        templateUrl:"scripts/wor/entry/attachment.html"
+        restrict: "E",
+        templateUrl: "scripts/wor/entry/attachment.html"
     }
 });
 
@@ -67,16 +67,27 @@ iceDirectives.directive("iceEntryPermission", function () {
             entry: '='
         },
         templateUrl: "scripts/entry/entry-permission.html",
-        controller:'EntryPermissionController'
+        controller: 'EntryPermissionController'
+    }
+});
+
+iceDirectives.directive("iceEntryFolders", function () {
+    return {
+        restrict: "E",
+        scope: {
+            entry: '='
+        },
+        templateUrl: "scripts/entry/entry-folders.html",
+        controller: 'EntryFoldersController'
     }
 });
 
 iceDirectives.directive("tabs", function () {
     return {
-        restrict:'E',
-        transclude:true,
-        controller:"GenericTabsController",
-        templateUrl:"views/tabs.html"
+        restrict: 'E',
+        transclude: true,
+        controller: "GenericTabsController",
+        templateUrl: "views/tabs.html"
     }
 });
 
@@ -92,7 +103,7 @@ iceDirectives.directive("pane", function () {
         link: function (scope, element, attrs, permCtrl) {
             permCtrl.addPane(scope);
         },
-        templateUrl:"views/generic-pane.html"
+        templateUrl: "views/generic-pane.html"
     }
 });
 
@@ -129,7 +140,7 @@ iceDirectives.directive('myTabs', function () {
                 panes.push(pane);
             };
         },
-        templateUrl:'scripts/entry/tabs.html'
+        templateUrl: 'scripts/entry/tabs.html'
     };
 })
     .directive('myPane', function () {
@@ -143,23 +154,23 @@ iceDirectives.directive('myTabs', function () {
             link: function (scope, element, attrs, tabsCtrl) {
                 tabsCtrl.addPane(scope);
             },
-            templateUrl:'scripts/entry/pane.html'
+            templateUrl: 'scripts/entry/pane.html'
         };
     });
 
 iceDirectives.directive("iceCollectionContents", function () {
     return {
-        restrict:"AE",
+        restrict: "AE",
         templateUrl: "scripts/folder/folder-contents.html",
-        controller:"CollectionFolderController"
+        controller: "CollectionFolderController"
     }
 });
 
 iceDirectives.directive("ice-wor-contents", function () {
     return {
-        restrict:"AE",
-        templateUrl:"scripts/wor/wor-contents.html",
-        controller:"WorContentController"
+        restrict: "AE",
+        templateUrl: "scripts/wor/wor-contents.html",
+        controller: "WorContentController"
     }
 });
 
@@ -168,16 +179,16 @@ iceDirectives.directive("iceBulkUploadContents", function () {
         scope: {
             contents: "="
         },
-        restrict:"AE",
-        templateUrl:"views/bulk-upload-contents.html"
+        restrict: "AE",
+        templateUrl: "views/bulk-upload-contents.html"
     }
 });
 
 iceDirectives.directive("ice.menu.collections", function () {
     return {
-        restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
+        restrict: "E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
         templateUrl: "scripts/collection/collections-menu.html",
-        controller:"CollectionMenuController"
+        controller: "CollectionMenuController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)
 //        }
@@ -186,9 +197,9 @@ iceDirectives.directive("ice.menu.collections", function () {
 
 iceDirectives.directive("ice.menu.collections.details", function () {
     return {
-        restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
+        restrict: "E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
         templateUrl: "scripts/collection/collections-menu-details.html",
-        controller:"CollectionDetailController"
+        controller: "CollectionDetailController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)
 //        }
@@ -198,8 +209,8 @@ iceDirectives.directive("ice.menu.collections.details", function () {
 // tags menu directive
 iceDirectives.directive("ice.menu.tags", function () {
     return {
-        restrict:"E",
-        templateUrl:"views/tags-menu.html"
+        restrict: "E",
+        templateUrl: "views/tags-menu.html"
     }
 });
 

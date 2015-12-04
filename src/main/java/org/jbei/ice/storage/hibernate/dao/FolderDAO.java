@@ -51,7 +51,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
     public Folder removeFolderEntries(Folder folder, List<Long> entries) {
         Session session = currentSession();
         try {
-            folder = (Folder) session.get(Folder.class, folder.getId());
+            folder = session.get(Folder.class, folder.getId());
             Iterator<Entry> it = folder.getContents().iterator();
 
             while (it.hasNext()) {
@@ -154,7 +154,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
     public Folder addFolderContents(Folder folder, List<Entry> entrys) {
         Session session = currentSession();
         try {
-            folder = (Folder) session.get(Folder.class, folder.getId());
+            folder = session.get(Folder.class, folder.getId());
             folder.getContents().addAll(entrys);
             folder.setModificationTime(new Date());
             session.saveOrUpdate(folder);
