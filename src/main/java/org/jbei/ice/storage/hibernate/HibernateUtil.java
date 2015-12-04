@@ -21,8 +21,6 @@ public class HibernateUtil {
     private HibernateUtil() {
     }
 
-    private static String BASE_FILE = "hibernate.cfg.xml";
-
     /**
      * Open a new {@link Session} from the sessionFactory.
      * This needs to be closed when done with
@@ -75,7 +73,7 @@ public class HibernateUtil {
                     configuration.setProperty("hibernate.search.default.directory_provider",
                             "org.hibernate.search.store.impl.RAMDirectoryProvider");
                 } else {
-                    configuration.configure(BASE_FILE);
+                    configuration.configure();
                 }
 
                 ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
