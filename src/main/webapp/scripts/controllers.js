@@ -296,10 +296,8 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
         Util.list("rest/collections/PERSONAL/folders", function (result) {
             $scope.userFolders = [];
             for (var i = 0; i < result.length; i += 1) {
-                $scope.userFolders.push({name: result[i].folderName, type: result[i].type});
+                $scope.userFolders.push({id: result[i].id, name: result[i].folderName, type: result[i].type});
             }
-            //$scope.userFolders = result;
-            //console.log(result);
         }, {canEdit: 'true'});
     };
 
@@ -366,6 +364,8 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
 
     // select a folder in the pull down
     $scope.selectFolderForMoveTo = function (folder, $event) {
+        console.log("selected", folder);
+
         if ($event) {
             $event.preventDefault();
             $event.stopPropagation();
