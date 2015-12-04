@@ -1,14 +1,17 @@
 package org.jbei.ice.lib.entry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
@@ -25,11 +28,13 @@ public class EntryCreator {
     private final EntryDAO dao;
     private final PermissionDAO permissionDAO;
     private final SequenceDAO sequenceDAO;
+    private final EntryAuthorization entryAuthorization;
 
     public EntryCreator() {
         dao = DAOFactory.getEntryDAO();
         permissionDAO = DAOFactory.getPermissionDAO();
         sequenceDAO = DAOFactory.getSequenceDAO();
+        this.entryAuthorization = new EntryAuthorization();
     }
 
     /**
@@ -144,7 +149,6 @@ public class EntryCreator {
 
     public long createPart(String userId, PartData part) {
         Entry entry = InfoToModelFactory.infoToEntry(part);
-        EntryAuthorization authorization = new EntryAuthorization();
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
         // linked entries can be a combination of new and existing parts
@@ -156,17 +160,16 @@ public class EntryCreator {
                     if (linked == null)
                         continue;
 
-                    if (!authorization.canRead(userId, linked)) {
+                    if (!entryAuthorization.canRead(userId, linked)) {
                         continue;
                     }
 
                     // TODO : may contain new information e.g. if the sequence is uploaded before
                     // TODO : this entry was created then the general information is added here
                     linked = InfoToModelFactory.updateEntryField(data, linked);
-
                     linked.setVisibility(Visibility.OK.getValue());
 
-                    if (authorization.canWriteThoroughCheck(userId, linked)) {
+                    if (entryAuthorization.canWriteThoroughCheck(userId, linked)) {
                         // then update
                     }
                 } else {
@@ -181,6 +184,44 @@ public class EntryCreator {
         }
 
         entry = createEntry(account, entry, part.getAccessPermissions());
+        return entry.getId();
+    }
+
+    public long copyPart(String userId, String sourceRecordId) {
+        Entry entry = dao.getByRecordId(sourceRecordId);
+        if (entry == null)
+            throw new IllegalArgumentException("Could not retrieve entry \"" + sourceRecordId + "\" for copy");
+
+        // check permission (expecting read permission)
+        entryAuthorization.expectRead(userId, entry);
+
+        Sequence sequence = null;
+        if (sequenceDAO.hasSequence(entry.getId())) {
+            sequence = sequenceDAO.getByEntry(entry);
+        }
+
+        // copy to data model and back ??
+        PartData partData = ModelToInfoFactory.getInfo(entry);
+        entry = InfoToModelFactory.infoToEntry(partData);
+
+        // create entry
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        entry.setName(entry.getName() + " (copy)");
+        String existingRecordId = entry.getRecordId();
+        entry.setRecordId(Utils.generateUUID());
+        entry.setVersionId(existingRecordId);
+        entry = createEntry(account, entry, new ArrayList<>());
+
+        // check sequence
+        if (sequence != null) {
+            SequenceController sequenceController = new SequenceController();
+            FeaturedDNASequence dnaSequence = sequenceController.sequenceToDNASequence(sequence);
+            sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+            sequence.setEntry(entry);
+            sequenceDAO.saveSequence(sequence);
+            BlastPlus.scheduleBlastIndexRebuildTask(true);
+        }
+
         return entry.getId();
     }
 }

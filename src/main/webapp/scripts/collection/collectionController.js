@@ -28,10 +28,8 @@ angular.module('ice.collection.controller', [])
         // can either be a collection ("shared") or a folder id (34)
         $scope.selectedFolder = $stateParams.collection === undefined ? 'personal' : $stateParams.collection;
 
-
         // retrieve collections contained in the selectedFolder (only if a collection)
         if (isNaN($scope.selectedFolder)) {
-            console.log('retrieving folders for ' + $scope.selectedFolder);
             if ($scope.selectedFolder.toLowerCase() == "available")
                 $scope.selectedFolder = "featured";
 

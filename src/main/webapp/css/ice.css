@@ -1250,6 +1250,11 @@ button[disabled].action-menu:hover {
     text-transform: uppercase;
 }
 
+.entry-table-header:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
     display: none !important;
 }
