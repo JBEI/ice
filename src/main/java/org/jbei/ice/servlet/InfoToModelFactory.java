@@ -43,7 +43,7 @@ public class InfoToModelFactory {
         }
 
         if (entry == null)
-            return null;
+            throw new IllegalArgumentException("Could not create entry from info object");
 
         // common fields
         if (StringUtils.isEmpty(info.getRecordId()))

@@ -22,8 +22,6 @@ import java.util.List;
  */
 public class ModelToInfoFactory {
 
-    private static EntryAuthorization authorization = new EntryAuthorization();
-
     public static PartData getInfo(Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
@@ -270,8 +268,10 @@ public class ModelToInfoFactory {
         view.setOwnerEmail(entry.getOwnerEmail());
         view.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
 
-        if (userId != null)
+        if (userId != null) {
+            EntryAuthorization authorization = new EntryAuthorization();
             view.setCanEdit(authorization.canWrite(userId, entry));
+        }
 
         // information about the owner and creator
         if (includeOwnerInfo) {
