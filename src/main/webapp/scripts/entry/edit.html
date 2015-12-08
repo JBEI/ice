@@ -148,9 +148,9 @@
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        ng-change="field.invalid=false"
                        maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
-                       uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
+                       uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue)">
                 <span ng-if="activePart[field.schema].length===1" uib-tooltip="Add another" tooltip-placement="right"
-                      ng-click="addLink(field.schema, $index)">
+                      ng-click="addLink(field.schema, $index)"> {{$viewValue}}
                     <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
                     <i class="fa fa-plus green opacity_hover"></i>
                 </span>
@@ -162,7 +162,7 @@
                        ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
                        ng-change="field.invalid=false"
                        ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
-                       uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
+                       uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue)">
                 <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)"
                       style="padding:3px; background-color: #f1f1f1;width: 19px; border-left: 0">
                     <i class="fa fa-minus delete_icon"></i>
