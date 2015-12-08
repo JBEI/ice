@@ -48,8 +48,19 @@
                             </div>
                         </h4>
                     </td>
-                    <td style="padding-left: 40px">
+                    <td style="padding-left: 40px; white-space: nowrap">
                         <span ng-show="folder.id" folder-actions class="font-95em"></span>
+                    </td>
+                    <td style="width: 99%">
+                        <div class="input-group input-group-sm pull-right" ng-if="params.showFilter">
+                            <i class="fa fa-fw fa-filter input-group-addon"></i>
+                            <input ng-model="params.filter" class="form-control"  ng-change="hStepChanged()">
+                            <i class="fa fa-fw fa-times opacity_hover input-group-addon" ng-click="params.showFilter = false; params.filter=''; hStepChanged()"></i>
+                        </div>
+
+                        <div class="pull-right" ng-if="!params.showFilter">
+                            <i class="fa fa-fw fa-filter opacity_hover" uib-tooltip="Filter" ng-click="params.showFilter=true"></i>
+                        </div>
                     </td>
                 </tr>
             </table>
@@ -81,8 +92,7 @@
             <thead>
             <tr style="height: 32px">
                 <!--selection toggle-->
-                <th class="uib-dropdown" uib-dropdown
-                    style="font-size: 15px; vertical-align: middle;">
+                <th class="uib-dropdown" uib-dropdown style="font-size: 15px; vertical-align: middle;">
                     <span class="uib-dropdown-toggle" uib-dropdown-toggle>
                         <i class="fa fa-fw cursor_default" ng-class="selectAllClass()" ng-click="selectAll()"
                            stop-event="click"></i><small class="caret cursor_pointer" style="margin-left: 0"></small>
@@ -183,7 +193,7 @@
                 <td>
                     <div title="{{entry.name}}" class="ellipsis" style="width: 350px">{{entry.name}}</div>
                     <div title="{{entry.shortDescription}}" class="small"
-                         style="opacity: 0.6; width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                         style="opacity: 0.6; width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
                         {{entry.shortDescription}}
                     </div>
                 </td>

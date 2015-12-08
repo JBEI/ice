@@ -46,9 +46,9 @@ iceApp.run(function (Authentication, $route, $location, $rootScope, Util) {
 });
 
 // this is run first
-iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider) {
+iceApp.config(function ($locationProvider, $stateProvider, $urlRouterProvider, localStorageServiceProvider) {
     $locationProvider.html5Mode(true);
-
+    localStorageServiceProvider.setPrefix('ice');
     $urlRouterProvider.otherwise('/');
 
     // angular ui
