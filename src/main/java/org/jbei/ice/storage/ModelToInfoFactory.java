@@ -297,6 +297,9 @@ public class ModelToInfoFactory {
 
     public static PartData createTipView(Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
+        if (type == null)
+            throw new IllegalArgumentException("Invalid entry type " + entry.getRecordType());
+
         PartData part = getTipViewCommon(entry);
 
         switch (type) {
