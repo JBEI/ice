@@ -123,7 +123,10 @@ public class ModelToInfoFactory {
         info.setRecordId(entry.getRecordId());
         info.setPartId(entry.getPartNumber());
         info.setName(entry.getName());
-        info.setOwner(entry.getOwner());
+        String owner = entry.getOwner();
+        if (owner.trim().isEmpty())
+            owner = entry.getOwnerEmail();
+        info.setOwner(owner);
         info.setOwnerEmail(entry.getOwnerEmail());
         info.setCreator(entry.getCreator());
         info.setCreatorEmail(entry.getCreatorEmail());
