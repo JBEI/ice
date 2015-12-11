@@ -408,12 +408,6 @@ iceServices.factory('Entry', function ($resource) {
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
-            moveEntriesToTrash: {
-                method: 'POST',
-                url: 'rest/parts/trash',
-                headers: {'X-ICE-Authentication-SessionId': sessionId}
-            },
-
             delete: {
                 method: 'DELETE',
                 url: 'rest/parts/:partId',
@@ -696,12 +690,12 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
             },
 
             create: {
-                method: 'PUT',
+                method: 'POST',
                 headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
             },
 
             addSelectionToFolders: {
-                method: 'POST',
+                method: 'PUT',
                 isArray: true,
                 url: 'rest/folders',
                 headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
@@ -829,7 +823,7 @@ iceServices.factory('Authentication',
 
             // logs out user by invalidating the session id
             logout: function () {
-                Util.remove("rest/accesstokens", function (result) {
+                Util.remove("rest/accesstokens", {}, function (result) {
                     $rootScope.user = undefined;
                     $cookieStore.remove('userId');
                     $cookieStore.remove('sessionId');
