@@ -623,22 +623,22 @@ public class PartResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param partId
-     * @param partData
-     * @return updated part data
+     * Update the part information at the specified resource identifier
+     *
+     * @param partId   unique resource identifier for part being updated
+     * @param partData data to update part with
      */
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public PartData update(@Context final UriInfo info, @PathParam("id") final long partId,
+    public Response update(@PathParam("id") final long partId,
                            final PartData partData) {
-        final String userId = getUserId();
+        final String userId = requireUserId();
         final long id = controller.updatePart(userId, partId, partData);
-        log(userId, "updated entry " + id);
+        log(userId, "update entry " + id);
         partData.setId(id);
-        return partData;
+        return super.respond(partData);
     }
 
     /**
