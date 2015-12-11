@@ -9,7 +9,8 @@
     </tr>
     <tr ng-repeat="folder in containedFolders">
         <td class="entry_detail_view_row">
-            <a ng-href="folders/{{folder.id}}" class="pad_left font-85em">{{folder.folderName |
+            <i class="fa fa-folder-open-o small pad_left"></i>&nbsp;<a ng-href="folders/{{folder.id}}"
+                                                                       class="font-85em">{{folder.folderName |
                 fileTruncate:23:false}}</a>
         </td>
     </tr>
