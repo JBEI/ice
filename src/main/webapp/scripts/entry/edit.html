@@ -18,29 +18,6 @@
     </div>
 </div>
 
-<!--tabs created when someone clicks on link--  -->
-<div class="row" ng-if="entry.linkedParts.length" style="margin-bottom: 14px; height: 23px; border-top: 1px solid #eee">
-    <div class="cursor_pointer col-md-1" style="padding-right: 4px; padding-left: 4px;"
-         ng-click="setActive('main')"
-         ng-class="{new_entry_tab_inactive:active!=='main', new_entry_tab_active:active==='main'}">
-        <strong class="fluid_no_wrap small">{{entry.name || 'Main Entry'}}</strong>
-        <span class="pull-right" style="">&nbsp;</span>
-    </div>
-    <div ng-repeat="linkedPart in entry.linkedParts" class="col-md-1" ng-click="setActive($index)"
-         ng-class="{new_entry_tab_inactive:active!==$index, new_entry_tab_active:active===$index}"
-         style="padding-right:3px; padding-left: 6px">
-        <small class="fluid_no_wrap">{{linkedPart.name || 'Linked ' + linkedPart.type | capitalize}}</small>
-        <span ng-click="deleteNewPartLink(linkedPart)" class="pull-right opacity_hover opacity_4" stop-event="click">
-            <i class="fa fa-times delete_icon font-70em"></i>
-        </span>
-    </div>
-
-    <div class="col-md-{{colLength}}" style="border-left: 1px solid #eee; background-color: #f7f7f7; height: 23px">
-        &nbsp;
-    </div>
-</div>
-
-
 <!--fields for the type of entry being edited -->
 <div class="row pad-top-5" ng-repeat="field in selectedFields" ng-if="!activePart.isExistingPart">
     <div class="col-md-2 text-right">
