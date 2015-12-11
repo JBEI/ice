@@ -58,6 +58,18 @@ public class EntryController {
         auditDAO = DAOFactory.getAuditDAO();
     }
 
+    /**
+     * Update the information associated with the specified part.<br>
+     * <b>Note</b> that any missing information will be deleted from the original entry.
+     * In other words, if the part referenced by id <code>partId</code> has an alias value
+     * of <code>alias</code> and the part object passed in the parameter does not contain this value,
+     * when this method returns, the original entry's alias field will be removed.
+     *
+     * @param userId unique identifier for user making request
+     * @param partId unique identifier for part being updated. This overrides the id in the partData object
+     * @param part   information to update part with
+     * @return unique identifier for part that was updated
+     */
     public long updatePart(String userId, long partId, PartData part) {
         Entry existing = dao.get(partId);
         authorization.expectWrite(userId, existing);
