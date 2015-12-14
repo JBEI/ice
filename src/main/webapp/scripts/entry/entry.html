@@ -30,7 +30,8 @@
                     'label-danger':entry.visible=='DELETED',
                     'label-warning':entry.visible=='PENDING' || entry.visible=='DRAFT'}"
                            style="font-size: 9px; position: relative; top: -4px">{{entry.visible}}
-                    </small>&nbsp;</span><strong style="color: #888;">{{entry.type}}</strong>
+                    </small>
+                        &nbsp;</span><strong style="color: #888;">{{entry.type}}</strong>
                     <strong>{{entry.name}}</strong>&nbsp;
                     <span ng-show="entry.canEdit">
                         <span uib-dropdown uib-tooltip="Link to another entry">

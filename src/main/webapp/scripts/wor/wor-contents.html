@@ -22,7 +22,7 @@
             <th ng-click="sort('type')" class="cursor_pointer">
                 <span style="font-size: 12px; text-transform: uppercase">TYPE</span>
                 <i ng-if="queryParams.sort!=='type'" class="sortable fa fa-angle-down"></i>
-                <i ng-show="queryParams.sort=='type'" style="font-size: 14px;" class="fa opacity_4"
+                <i ng-show="queryParams.sort=='type'" style="font-size: 14px" class="fa opacity_4"
                    ng-class="{'fa-angle-down':queryParams.asc==false, 'fa-angle-up':queryParams.asc==true}"></i>
             </th>
             <th ng-click="sort('part_id')" class="cursor_pointer"
@@ -57,7 +57,7 @@
             </th>
         </tr>
 
-        <tr data-ng-show='!webResults'>
+        <tr data-ng-show='!webResults && loadingPage'>
             <td colspan="10">
                 <img alt="Loading..." src="img/loader-mini.gif"/>
                 Loading...

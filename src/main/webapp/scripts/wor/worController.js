@@ -14,6 +14,7 @@ angular.module('ice.wor.controller', [])
             partnerId: $stateParams.partner,
             currentPage: 1
         };
+
         $scope.webResults = undefined;
 
         // init: retrieve first page of all public entries
@@ -25,6 +26,7 @@ angular.module('ice.wor.controller', [])
             console.error(error);
             $scope.loadingPage = false;
             WorService.setSelectedPartner(undefined);
+            Util.setFeedback("Error retrieving entries", "danger");
         });
 
         $scope.maxSize = 5;
@@ -75,7 +77,8 @@ angular.module('ice.wor.controller', [])
             }, $scope.queryParams);
         };
     })
-    .controller('WorFolderContentController', function ($location, $rootScope, $scope, $stateParams, Remote, WorService, WebOfRegistries) {
+    .controller('WorFolderContentController', function ($location, $rootScope, $scope, $stateParams, Remote,
+                                                        WorService, WebOfRegistries) {
         var id;
         $scope.remoteRetrieveError = undefined;
         if ($stateParams.folderId === undefined)
@@ -140,7 +143,8 @@ angular.module('ice.wor.controller', [])
             $location.path("web/" + partnerId + "/entry/" + entryId, true);
         };
     })
-    .controller('WorEntryController', function ($location, $scope, $window, WebOfRegistries, $stateParams, EntryService, WorService, Remote) {
+    .controller('WorEntryController', function ($location, $scope, $window, WebOfRegistries, $stateParams,
+                                                EntryService, WorService) {
         var web = WebOfRegistries();
         $scope.notFound = undefined;
         $scope.remoteEntry = undefined;
@@ -195,38 +199,7 @@ angular.module('ice.wor.controller', [])
             $location.path($scope.context.back);
         };
 
-        var menuSubDetails = $scope.subDetails = [
-            {
-                url: 'scripts/wor/entry/general-information.html',
-                display: 'General Information',
-                isPrivileged: false,
-                icon: 'fa-exclamation-circle'
-            },
-            {
-                id: 'sequences',
-                url: 'scripts/wor/entry/sequence-analysis.html',
-                display: 'Sequence Analysis',
-                isPrivileged: false,
-                countName: 'sequenceCount',
-                icon: 'fa-search-plus'
-            },
-            {
-                id: 'comments',
-                url: 'scripts/wor/entry/comments.html',
-                display: 'Comments',
-                isPrivileged: false,
-                countName: 'commentCount',
-                icon: 'fa-comments-o'
-            },
-            {
-                id: 'samples',
-                url: 'scripts/wor/entry/samples.html',
-                display: 'Samples',
-                isPrivileged: false,
-                countName: 'sampleCount',
-                icon: 'fa-flask'
-            }
-        ];
+        var menuSubDetails = $scope.subDetails = WorService.getMenu();
 
         $scope.showSelection = function (index) {
             angular.forEach(menuSubDetails, function (details) {
@@ -296,7 +269,6 @@ angular.module('ice.wor.controller', [])
         $scope.isWorEnabled = false;
 
         Util.get('/rest/config/JOIN_WEB_OF_REGISTRIES', function (result) {
-            //console.log(result);
             var joined = result.value === 'yes';
             $scope.isWorEnabled = joined;
             if (!$rootScope.settings)
@@ -379,9 +351,12 @@ angular.module('ice.wor.controller', [])
         // retrieve web of registries partners
         $scope.wor = WebOfRegistries().query({approved_only: true});
         $scope.selectedPartner = $stateParams.partner;
-        Util.list("rest/remote/" + $scope.selectedPartner + "/available", function (result) {
-            $scope.selectedPartnerFolders = result;
-        });
+
+        if ($scope.selectedPartner) {
+            Util.list("rest/remote/" + $scope.selectedPartner + "/available", function (result) {
+                $scope.selectedPartnerFolders = result;
+            });
+        }
 
         // retrieve web of registries setting
         var sessionId = $cookieStore.get("sessionId");
