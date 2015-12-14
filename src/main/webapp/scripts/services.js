@@ -46,7 +46,7 @@ iceServices.factory('Permission', function ($resource, $cookieStore) {
 
 iceServices.factory('User', function ($resource) {
     return function (sessionId) {
-        return $resource('rest/users', {userId:'@userId', preferenceKey:'@preferenceKey'}, {
+        return $resource('rest/users', {userId: '@userId', preferenceKey: '@preferenceKey', sendEmail: '@sendEmail'}, {
             query:{
                 method:'GET',
                 responseType:"json",
@@ -127,7 +127,7 @@ iceServices.factory('User', function ($resource) {
 
             changePassword:{
                 method:'PUT',
-                url:'rest/users/password',
+                url: 'rest/users/:userId/password',
                 responseType:'json',
                 headers:{'X-ICE-Authentication-SessionId':sessionId}
             },

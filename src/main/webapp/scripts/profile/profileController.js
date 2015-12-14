@@ -102,7 +102,7 @@ angular.module('ice.profile.controller', [])
 
         var user = User($cookieStore.get('sessionId'));
         var profileOption = $stateParams.option;
-        var profileId = $stateParams.id;
+        var profileId = $scope.userId = $stateParams.id;
 
         $scope.savePreference = function (pref) {
             if (!$scope.preferences[pref.id]) {
@@ -219,31 +219,30 @@ angular.module('ice.profile.controller', [])
 
         $scope.updatePassword = function () {
             var pass = $scope.changePass;
-            console.log(pass);
 
-            if (!$scope.changePass || $scope.changePass.current === undefined || !$scope.changePass.current.length) {
-                $scope.changePasswordError = "Please enter your current password";
-                $scope.currentError = true;
-                return;
-            }
+            //if (!$scope.changePass || $scope.changePass.current === undefined || !$scope.changePass.current.length) {
+            //    $scope.changePasswordError = "Please enter your current password";
+            //    $scope.currentError = true;
+            //    return;
+            //}
 
             // check new password value
             if (pass.new === undefined || pass.new.length === 0) {
-                $scope.changePasswordError = "Please enter a new password for your account";
+                $scope.changePasswordError = "Please enter a new password";
                 $scope.newPassError = true;
                 return;
             }
 
             // check for new password confirm value
             if (pass.new2 === undefined || pass.new2.length === 0) {
-                $scope.changePasswordError = "Please confirm the new password for your account";
+                $scope.changePasswordError = "Please confirm the new password";
                 $scope.newPass2Error = true;
                 return;
             }
 
             // check for matching password values
             if (pass.new2 !== pass.new) {
-                $scope.changePasswordError = "The password for your account does not match";
+                $scope.changePasswordError = "Passwords do not match";
                 $scope.newPassError = true;
                 $scope.newPass2Error = true;
                 return;
@@ -252,36 +251,21 @@ angular.module('ice.profile.controller', [])
             var user = User($cookieStore.get("sessionId"));
 
             // validate existing password
-            var userId = $cookieStore.get('userId');
             $scope.passwordChangeSuccess = undefined;
             $scope.changePasswordError = undefined;
 
-//        var userObj = {sessionId:$cookieStore.get("sessionId"), password:$scope.changePass.current, email:userId};
-
-            // authenticate new password
-//        user.resetPassword({}, userObj, function (result) {
-//            if (result == null) {
-//                $scope.changePasswordError = "Current password is invalid";
-//                $scope.currentError = true;
-//                return;
-//            }
-
-            user.changePassword({},
-                {email: userId, password: pass.new},
+            // server call
+            user.changePassword({userId: $stateParams.id}, {password: pass.new},
                 function (success) {
                     console.log("password change", success);
                     if (!success) {
-                        $scope.changePasswordError = "There was an error changing your password";
+                        $scope.changePasswordError = "There was an error changing the password";
                     } else {
                         $scope.passwordChangeSuccess = true;
                     }
                 }, function (error) {
                     $scope.changePasswordError = "There was an error changing your password";
                 });
-            //  change password
-//        }, function (error) {
-//            $scope.changePasswordError = "There was an error changing your password";
-//        });
         };
 
         $scope.updateProfile = function () {

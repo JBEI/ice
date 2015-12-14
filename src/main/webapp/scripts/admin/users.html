@@ -1,7 +1,7 @@
 <div ng-controller="AdminUserController">
     <div class="pad_top">
 
-        <button type="button" ng-click="showCreateProfile=true" class="ice-button">
+        <button type="button" ng-click="newProfile.show=true" class="ice-button">
             <i style="font-size: 14px" class="blue fa fa-user"></i> Create Account
         </button>
 
@@ -13,8 +13,24 @@
         </span>
     </div>
 
-    <div class="margin-top-10 panel panel-default font-95em" ng-show="showCreateProfile">
-        <form class="panel-body" role="form" ng-submit="createProfile()">
+    <div class="margin-top-10 panel panel-default font-95em" ng-show="newProfile.show">
+        <div ng-if="newProfile.password" class="pad-8">
+            Account successfully created
+            <br><br>
+            <b>Username</b>: {{newProfile.email}} <br>
+            <b>Password:</b> {{newProfile.password}}
+            <br><br>
+            The password can be changed on the profile page.
+            <br><br><br>
+
+            &nbsp;&nbsp;
+            <button type="button" class="btn btn-primary btn-sm"
+                    ng-click="newProfile.show=false;newProfile.password=undefined">Ok
+            </button>
+            <br>
+        </div>
+
+        <form class="panel-body" role="form" ng-submit="createProfile()" ng-if="!newProfile.password">
             <div class="col-md-2 pad-top-5 text-right">
                 <span style="white-space:nowrap">First name <span class="required">*</span> </span>
             </div>
