@@ -692,8 +692,6 @@ a:hover {
     border-left: 0;
     font-weight: bold;
     background-color: #fff;
-    /*border-bottom: 1px solid #e5e5e5;*/
-    /*border-top: 1px solid #e5e5e5;*/
 }
 
 .profile_menu .font-awesome {
@@ -705,9 +703,8 @@ a:hover {
 }
 
 .profile_menu td {
-    padding: 9px 7px;
+    padding: 9px 7px 4px 7px;
     border-top: 2px solid #fff;
-    /*border-left: 1px solid #e5e5e5;*/
     background-color: #f9f9f9;
 }
 
@@ -1248,5 +1245,14 @@ button[disabled].action-menu:hover {
 .entry-table-header {
     font-size: 11px;
     text-transform: uppercase;
+}
+
+.entry-table-header:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+    display: none !important;
 }
 

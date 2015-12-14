@@ -15,5 +15,6 @@ angular.module('ice.dependencies', ['ngRoute',
     'ice.wor',
     'ice.admin',
     'ice.common.service',
-    'ice.profile'
+    'ice.profile',
+    'LocalStorageModule'
 ]);

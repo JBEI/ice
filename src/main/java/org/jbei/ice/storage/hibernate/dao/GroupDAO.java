@@ -13,7 +13,6 @@ import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Group;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +32,17 @@ public class GroupDAO extends HibernateRepository<Group> {
      * @throws DAOException
      */
     public Group get(String uuid) throws DAOException {
-        return super.getByUUID(Group.class, uuid);
+        Session session = currentSession();
+
+        try {
+            Query query = session.createQuery("from " + Group.class.getName() + " where uuid = :uuid");
+            query.setString("uuid", uuid);
+            return (Group) query.uniqueResult();
+
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
     }
 
     public long getMemberCount(String uuid) throws DAOException {
@@ -57,7 +66,7 @@ public class GroupDAO extends HibernateRepository<Group> {
         try {
             Criteria criteria = session.createCriteria(Group.class).add(Restrictions.in("id", idsSet));
             List list = criteria.list();
-            return new HashSet<Group>(list);
+            return new HashSet<>(list);
 
         } catch (HibernateException he) {
             Logger.error(he);
@@ -79,8 +88,8 @@ public class GroupDAO extends HibernateRepository<Group> {
                 query.setMaxResults(limit);
 
             @SuppressWarnings("unchecked")
-            HashSet<Group> result = new HashSet<Group>(query.list());
-            if (result == null || result.isEmpty())
+            HashSet<Group> result = new HashSet<>(query.list());
+            if (result.isEmpty())
                 return result;
 
             HashSet<Group> matches = new HashSet<>();
@@ -106,7 +115,7 @@ public class GroupDAO extends HibernateRepository<Group> {
         Criteria criteria = currentSession().createCriteria(Group.class);
         // groups created
         List list = criteria.add(Restrictions.eq("owner", account)).list();
-        HashSet<Group> groups = new HashSet<Group>(list);
+        HashSet<Group> groups = new HashSet<>(list);
 
         criteria = currentSession().createCriteria(Group.class);
         criteria.createAlias("members", "m");
@@ -115,42 +124,5 @@ public class GroupDAO extends HibernateRepository<Group> {
         if (list != null)
             groups.addAll(list);
         return groups;
-    }
-
-    public ArrayList<Group> retrieveGroups(Account account, GroupType type) throws DAOException {
-        Session session = currentSession();
-        Criteria criteria = session.createCriteria(Group.class);
-        if (type != null) {
-            criteria = criteria.add(Restrictions.eq("type", type));
-        }
-
-        criteria.add(Restrictions.eq("owner", account));
-        List result = criteria.list();
-        return new ArrayList<Group>(result);
-    }
-
-    public ArrayList<Group> retrievePublicGroups() throws DAOException {
-        Session session = currentSession();
-        Criteria criteria = session.createCriteria(Group.class);
-        criteria = criteria.add(Restrictions.eq("type", GroupType.PUBLIC));
-        List result = criteria.list();
-        return new ArrayList<Group>(result);
-    }
-
-    public List<Group> getAutoJoinGroups() throws DAOException {
-        Session session = currentSession();
-        Criteria criteria = session.createCriteria(Group.class);
-        criteria = criteria.add(Restrictions.eq("type", GroupType.PUBLIC));
-        criteria.add(Restrictions.conjunction()
-                                 .add(Restrictions.isNotNull("autoJoin"))
-                                 .add(Restrictions.eq("autoJoin", Boolean.TRUE)));
-
-        try {
-            List result = criteria.list();
-            return new ArrayList<Group>(result);
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException();
-        }
     }
 }

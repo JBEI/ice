@@ -107,16 +107,15 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         $scope.addEntriesToFolders();
     };
 
+    // deletes the selected entries (or current entry)
+    // "select all" cannot be used to delete entries. they have to be explicitly selected
     $scope.deleteSelectedEntries = function () {
         var entries = Selection.getSelectedEntries();
-        Entry(sid).moveEntriesToTrash(entries,
-            function (result) {
-                $scope.$broadcast("RefreshAfterDeletion");
-                $scope.$broadcast("UpdateCollectionCounts");
-                $location.path("folders/personal")
-            }, function (error) {
-                console.log(error);
-            })
+        Util.post("rest/parts/trash", entries, function () {
+            $scope.$broadcast("RefreshAfterDeletion");
+            $scope.$broadcast("UpdateCollectionCounts");
+            $location.path("folders/personal");
+        });
     };
 
     $rootScope.$on("EntrySelected", function (event, count) {
@@ -132,9 +131,11 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     };
 
     $scope.canMoveFromFolder = function () {
+        // something has been selected
         if (!Selection.hasSelection())
             return false;
 
+        // has selected entries so check if user can edit the current selected folder
         if (!FolderSelection.canEditSelectedFolder())
             return false;
 
@@ -292,16 +293,18 @@ iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $u
 
 iceControllers.controller('AddToFolderController', function ($scope, $uibModalInstance, Util, FolderSelection,
                                                              Selection, move, selectedFolder, $stateParams) {
-    var getPersonalFolders = function () {
+    $scope.getPersonalFolders = function () {
         Util.list("rest/collections/PERSONAL/folders", function (result) {
-            $scope.userFolders = result;
+            $scope.userFolders = [];
+            for (var i = 0; i < result.length; i += 1) {
+                $scope.userFolders.push({id: result[i].id, name: result[i].folderName, type: result[i].type});
+            }
         }, {canEdit: 'true'});
     };
 
     //init
     $scope.selectedFolders = [];
     $scope.newFolder = {creating: false};
-    getPersonalFolders();
 
     $scope.closeModal = function (res) {
         $uibModalInstance.close(res);
@@ -346,7 +349,7 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
 
         Util.update("rest/folders", $scope.newFolder, null, function (result) {
             $scope.newFolder = {creating: false};
-            getPersonalFolders();
+            $scope.getPersonalFolders();
         });
     };
 
@@ -362,6 +365,8 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
 
     // select a folder in the pull down
     $scope.selectFolderForMoveTo = function (folder, $event) {
+        console.log("selected", folder);
+
         if ($event) {
             $event.preventDefault();
             $event.stopPropagation();

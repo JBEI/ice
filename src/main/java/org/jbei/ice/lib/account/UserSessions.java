@@ -55,7 +55,7 @@ public class UserSessions {
      * @param userId    unique user identifier
      * @param sessionId optional session id to set for that user
      * @return session id set for specified user. It will be the same as that passed in the parameter if
-     *         it meets the criteria
+     * it meets the criteria
      */
     public static String createSessionForUser(String userId, String sessionId) {
         if (StringUtils.isEmpty(sessionId) || sessionId.length() < 5)
@@ -72,6 +72,8 @@ public class UserSessions {
      * @param userId unique user id
      */
     public static void invalidateSession(String userId) {
+        if (userId == null)
+            return;
         userSessionMap.remove(userId);
     }
 }

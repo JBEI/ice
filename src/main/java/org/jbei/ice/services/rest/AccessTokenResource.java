@@ -45,10 +45,12 @@ public class AccessTokenResource extends RestResource {
      * Invalidates the current session information.
      */
     @DELETE
-    public void deleteToken(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
+    public Response deleteToken() {
         // ensure the user is valid
-        String userId = getUserId();
+        String userId = requireUserId();
+        log(userId, "logging out");
         accountController.invalidate(userId);
+        return super.respond(Response.Status.OK);
     }
 
     /**
@@ -60,7 +62,7 @@ public class AccessTokenResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response get(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
-        String userId = getUserId();
+        String userId = requireUserId();
         AccountTransfer transfer = accountController.getByEmail(userId).toDataTransferObject();
         transfer.setAdmin(accountController.isAdministrator(userId));
         return super.respond(transfer);

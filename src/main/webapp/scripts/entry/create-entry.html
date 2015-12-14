@@ -209,7 +209,7 @@
                        ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
                        ng-change="field.invalid=false"
                        ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
-                       uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
+                       uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue)">
                 <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)"
                       style="padding:3px; background-color: #f1f1f1;width: 19px; border-left: 0">
                     <i class="fa fa-minus delete_icon"></i>
@@ -290,7 +290,7 @@
                 </div>
             </span>
 
-            <span ng-if="processingFile">
+            <span ng-if="processingFile&&!serverError">
                 <i class="fa fa-spinner fa-gear"></i> Processing file {{processingFile}}
             </span>
 

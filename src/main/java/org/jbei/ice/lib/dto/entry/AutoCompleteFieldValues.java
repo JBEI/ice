@@ -5,6 +5,7 @@ import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -14,16 +15,27 @@ import java.util.Set;
  */
 public class AutoCompleteFieldValues {
 
-    public final AutoCompleteField autoCompleteField;
+    private final AutoCompleteField autoCompleteField;
     private final EntryDAO entryDAO;
 
-
+    /**
+     * Each instance of this object is tied to a specified field
+     *
+     * @param field user specified field
+     */
     public AutoCompleteFieldValues(String field) {
         this.autoCompleteField = AutoCompleteField.valueOf(field);
         this.entryDAO = DAOFactory.getEntryDAO();
     }
 
-    public ArrayList<String> getMatchingValues(String token, int limit) {
+    /**
+     * Retrieves list of values that match the user specified token up to the specified limit
+     *
+     * @param token token to match values against
+     * @param limit maximum number of matching values to return
+     * @return list of matching values
+     */
+    public List<String> getMatchingValues(String token, int limit) {
         token = token.replaceAll("'", "");
         Set<String> results;
         switch (this.autoCompleteField) {
@@ -32,15 +44,9 @@ public class AutoCompleteFieldValues {
                 break;
 
             case ORIGIN_OF_REPLICATION:
-                results = entryDAO.getMatchingOriginOfReplication(token, limit);
-                break;
-
             case PROMOTERS:
-                results = entryDAO.getMatchingPromoters(token, limit);
-                break;
-
             case REPLICATES_IN:
-                results = entryDAO.getMatchingReplicatesIn(token, limit);
+                results = entryDAO.getMatchingPlasmidField(this.autoCompleteField, token, limit);
                 break;
 
             case PART_NUMBER:

@@ -48,8 +48,19 @@
                             </div>
                         </h4>
                     </td>
-                    <td style="padding-left: 40px">
+                    <td style="padding-left: 40px; white-space: nowrap">
                         <span ng-show="folder.id" folder-actions class="font-95em"></span>
+                    </td>
+                    <td style="width: 99%">
+                        <div class="input-group input-group-sm pull-right" ng-if="params.showFilter">
+                            <i class="fa fa-fw fa-filter input-group-addon"></i>
+                            <input ng-model="params.filter" class="form-control"  ng-change="hStepChanged()">
+                            <i class="fa fa-fw fa-times opacity_hover input-group-addon" ng-click="params.showFilter = false; params.filter=''; hStepChanged()"></i>
+                        </div>
+
+                        <div class="pull-right" ng-if="!params.showFilter">
+                            <i class="fa fa-fw fa-filter opacity_hover" uib-tooltip="Filter" ng-click="params.showFilter=true"></i>
+                        </div>
                     </td>
                 </tr>
             </table>
@@ -81,12 +92,10 @@
             <thead>
             <tr style="height: 32px">
                 <!--selection toggle-->
-                <th class="uib-dropdown" uib-dropdown
-                    style="padding:0; font-size: 15px; vertical-align: middle; text-align: center">
+                <th class="uib-dropdown" uib-dropdown style="font-size: 15px; vertical-align: middle;">
                     <span class="uib-dropdown-toggle" uib-dropdown-toggle>
                         <i class="fa fa-fw cursor_default" ng-class="selectAllClass()" ng-click="selectAll()"
-                           stop-event="click"></i>
-                        <small class="caret cursor_pointer"></small>
+                           stop-event="click"></i><small class="caret cursor_pointer" style="margin-left: 0"></small>
                     </span>
                     <ul class="uib-dropdown-menu" uib-dropdown-menu style="min-width: 100px">
                         <li class="font-75em cursor_pointer" ng-click="setType('all')"><a>All</a></li>
@@ -100,33 +109,33 @@
                     <!--<sup style="font-size: 9px; font-weight: normal; display: inherit"-->
                     <!--ng-show="selection.length>0">{{selection.length}}</sup>-->
                 </th>
-                <th ng-click="sort('type')" class="cursor_pointer">
-                    <span class="entry-table-header">TYPE</span>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('type')">TYPE</span>
                     <i ng-if="params.sort!=='type'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="params.sort=='type'" style="font-size: 14px;" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                 </th>
-                <th ng-click="sort('part_id')" class="cursor_pointer">
-                    <span class="entry-table-header">Part ID</span>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('part_id')">Part ID</span>
                     <i ng-if="params.sort!=='part_id'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="params.sort=='part_id'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                 </th>
-                <th ng-click="sort('alias')" class="cursor_pointer" ng-if="entryHeaders.alias.selected">
-                    <span class="entry-table-header">Alias</span>
+                <th ng-if="entryHeaders.alias.selected">
+                    <span class="entry-table-header" ng-click="sort('alias')">Alias</span>
                     <i ng-if="params.sort!=='alias'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="params.sort=='alias'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                 </th>
-                <th data-ng-click="sort('name')" class="cursor_pointer">
-                    <span class="entry-table-header">Name</span>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('name')">Name</span>
                     <i ng-if="params.sort!=='name'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="params.sort=='name'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                 </th>
                 <th></th>
-                <th ng-click="sort('status')" class="cursor_pointer" ng-if="entryHeaders.status.selected">
-                    <span class="entry-table-header">Status</span>
+                <th ng-if="entryHeaders.status.selected">
+                    <span class="entry-table-header" ng-click="sort('status')">Status</span>
                     <i ng-if="params.sort!=='status'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="params.sort=='status'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
@@ -135,8 +144,8 @@
                     <i class="fa fa-flask fa-fw" style="font-size: 14px" ng-if="entryHeaders.hasSample.selected"></i>
                     <img src="img/dna.svg" width="15px" ng-if="entryHeaders.hasSequence.selected" alt="has dna"/>
                 </th>
-                <th ng-click="sort('created')" class="cursor_pointer" ng-if="entryHeaders.created.selected">
-                    <span class="entry-table-header">Created</span>
+                <th ng-if="entryHeaders.created.selected">
+                    <span class="entry-table-header" ng-click="sort('created')">Created</span>
                     <i ng-show="params.sort=='created'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                     <i ng-if="params.sort!=='created'" class="sortable fa fa-angle-down"></i>
@@ -184,7 +193,7 @@
                 <td>
                     <div title="{{entry.name}}" class="ellipsis" style="width: 350px">{{entry.name}}</div>
                     <div title="{{entry.shortDescription}}" class="small"
-                         style="opacity: 0.6; width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                         style="opacity: 0.6; width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
                         {{entry.shortDescription}}
                     </div>
                 </td>

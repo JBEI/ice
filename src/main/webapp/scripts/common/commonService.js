@@ -7,7 +7,7 @@ angular.module('ice.common.service', [])
                 var errorMsg;
                 var type;
 
-                console.log(response);
+                console.error(response);
 
                 switch (response.status) {
                     case 401:
@@ -44,6 +44,11 @@ angular.module('ice.common.service', [])
                 $rootScope.serverFeedback = {message: errorMsg, type: type};
             },
 
+            /**
+             * sets the feedback for display to the user
+             * @param message message to display to user. make as brief as possible
+             * @param type type of alert. one of 'success', 'info' (default), 'warning', 'danger'
+             */
             setFeedback: function (message, type) {
                 if (!type)
                     type = 'info';

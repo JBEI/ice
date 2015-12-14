@@ -74,7 +74,7 @@ public class FolderContent {
                 addEntryPermission(userId, folderPermissions, entryModelList);
             }
 
-            details.setCount(folderDAO.getFolderSize(folder.getId()));
+            details.setCount(folderDAO.getFolderSize(folder.getId(), null));
         }
         return folders;
     }

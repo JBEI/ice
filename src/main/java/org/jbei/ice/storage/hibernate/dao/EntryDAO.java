@@ -6,6 +6,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.*;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.entry.AutoCompleteField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.EntryUtil;
@@ -14,10 +15,7 @@ import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
-import org.jbei.ice.storage.model.Account;
-import org.jbei.ice.storage.model.Entry;
-import org.jbei.ice.storage.model.Group;
-import org.jbei.ice.storage.model.Permission;
+import org.jbei.ice.storage.model.*;
 
 import java.util.*;
 
@@ -36,36 +34,37 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     public Set<String> getMatchingSelectionMarkers(String token, int limit) throws DAOException {
-        return getMatchingField("selectionMarker.name", "selection_markers selectionMarker", token, limit);
+        List result = currentSession().createCriteria(SelectionMarker.class)
+                .add(Restrictions.ilike("name", token, MatchMode.START))
+                .setMaxResults(limit)
+                .setProjection(Projections.distinct(Projections.property("name")))
+                .list();
+        return new HashSet<>(result);
     }
 
-    public Set<String> getMatchingOriginOfReplication(String token, int limit) throws DAOException {
-        return getMatchingField("plasmid.origin_of_replication", "Plasmids plasmid", token, limit);
-    }
+    public Set<String> getMatchingPlasmidField(AutoCompleteField field, String token, int limit) throws DAOException {
+        String fieldString;
+        switch (field) {
+            case ORIGIN_OF_REPLICATION:
+            default:
+                fieldString = "originOfReplication";
+                break;
 
-    public Set<String> getMatchingPromoters(String token, int limit) throws DAOException {
-        return getMatchingField("plasmid.promoters", "Plasmids plasmid", token, limit);
-    }
+            case PROMOTERS:
+                fieldString = "promoters";
+                break;
 
-    public Set<String> getMatchingReplicatesIn(String token, int limit) throws DAOException {
-        return getMatchingField("plasmid.replicates_in", "Plasmids plasmid", token, limit);
-    }
-
-    @SuppressWarnings("unchecked")
-    protected Set<String> getMatchingField(String field, String object, String token, int limit) throws DAOException {
-        Session session = currentSession();
-        try {
-            token = token.toUpperCase();
-            String queryString = "select distinct " + field + " from " + object + " where "
-                    + " UPPER(" + field + ") like '%" + token + "%'";
-            Query query = session.createSQLQuery(queryString);
-            if (limit > 0)
-                query.setMaxResults(limit);
-            return new HashSet<>(query.list());
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
+            case REPLICATES_IN:
+                fieldString = "replicatesIn";
+                break;
         }
+
+        List result = currentSession().createCriteria(SelectionMarker.class)
+                .add(Restrictions.ilike(fieldString, token, MatchMode.START))
+                .setMaxResults(limit)
+                .setProjection(Projections.distinct(Projections.property("name")))
+                .list();
+        return new HashSet<>(result);
     }
 
     public Set<String> getMatchingEntryPartNumbers(String token, int limit, Set<String> include) throws DAOException {
@@ -325,7 +324,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      */
     @SuppressWarnings("unchecked")
     public List<Entry> retrieveUserEntries(Account requester, String owner, Set<Group> requesterGroups,
-                                           ColumnField sortField, boolean asc, int start, int limit)
+                                           ColumnField sortField, boolean asc, int start, int limit, String filter)
             throws DAOException {
         Criteria criteria = currentSession().createCriteria(Permission.class);
         criteria.setProjection(Projections.property("entry"));
@@ -342,6 +341,13 @@ public class EntryDAO extends HibernateRepository<Entry> {
         // sort
         String fieldName = sortField == ColumnField.CREATED ? "entry.id" : columnFieldToString(sortField);
         criteria.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
+        if (filter != null && filter.trim().length() != 0) {
+            criteria.add(Restrictions.disjunction()
+                    .add(Restrictions.ilike("name", filter, MatchMode.ANYWHERE))
+                    .add(Restrictions.ilike("alias", filter, MatchMode.ANYWHERE))
+                    .add(Restrictions.ilike("partNumber", filter, MatchMode.ANYWHERE)));
+        }
+
         criteria.setFirstResult(start);
         criteria.setMaxResults(limit);
         criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
@@ -349,7 +355,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     /**
-     * @return number of entries that have visibility of "OK" or null (which is a legacy equivalent to "OK")
+     * @return number of entries that have visibility of "OK"
      * @throws DAOException
      */
     public long getAllEntryCount() throws DAOException {
@@ -504,10 +510,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @param asc        sort order
      * @param start      start of retrieve
      * @param limit      maximum number of records to retrieve from
+     * @param filter     filter for entries
      * @return list of matching entries
      * @throws DAOException
      */
-    public List<Entry> retrieveOwnerEntries(String ownerEmail, ColumnField sort, boolean asc, int start, int limit)
+    public List<Entry> retrieveOwnerEntries(String ownerEmail, ColumnField sort, boolean asc, int start,
+                                            int limit, String filter)
             throws DAOException {
         try {
             String fieldName = columnFieldToString(sort);
@@ -516,6 +524,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
                             .add(Restrictions.eq("visibility", Visibility.OK.getValue()))
                             .add(Restrictions.eq("visibility", Visibility.PENDING.getValue())));
             criteria.add(Restrictions.eq("ownerEmail", ownerEmail));
+            if (filter != null && filter.trim().length() != 0) {
+                criteria.add(Restrictions.disjunction()
+                        .add(Restrictions.ilike("name", filter, MatchMode.ANYWHERE))
+                        .add(Restrictions.ilike("alias", filter, MatchMode.ANYWHERE))
+                        .add(Restrictions.ilike("partNumber", filter, MatchMode.ANYWHERE)));
+            }
             criteria.setMaxResults(limit);
             criteria.setFirstResult(start);
             criteria.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));

@@ -8,8 +8,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
- * Collections represent system defined sets of parts. These are <code>Available</code>,
- * <code>Personal</code>, <code>Shared</code>, <code>Drafts</code> and <code>Deleted</code>
+ * Collections represent system defined sets of parts.
+ * These are:
+ * <ul>
+ * <li><code>Available</code></li>
+ * <li><code>Personal</code></li>
+ * <li><code>Shared</code></li>
+ * <li><code>Drafts</code></li>
+ * <li><code>Deleted</code></li>
+ * </ul>
+ * <p>
+ * These cannot be created or deleted by users
  *
  * @author Hector Plahar
  */
@@ -23,7 +32,7 @@ public class CollectionResource extends RestResource {
     @Path("/counts")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCollectionStats() {
-        String userId = getUserId();
+        String userId = super.requireUserId();
         Collections collections = new Collections(userId);
         return super.respond(collections.getAllCounts());
     }
@@ -36,7 +45,7 @@ public class CollectionResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCollectionSubFolders(
             @DefaultValue("PERSONAL") @PathParam("type") CollectionType type) {
-        final String userId = getUserId();
+        final String userId = super.requireUserId();
         Collections collections = new Collections(userId);
         return super.respond(collections.getSubFolders(type));
     }

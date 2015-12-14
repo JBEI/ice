@@ -77,12 +77,16 @@
     </div>
 
     <div class="row" ng-if="traces && traces.resultCount">
-        <div class="col-sm-12">
+        <div class="col-sm-6">
             <uib-pagination total-items="traces.resultCount" ng-change="tracesPageChanged()"
                             ng-model="tracesParams.currentPage"
                             max-size="maxSize" class="pagination-sm" items-per-page="tracesParams.limit"
                             boundary-links="true">
             </uib-pagination>
+        </div>
+
+        <div class="col-md-6" style="margin-top: 20px;" ng-if="traces && traces.resultCount">
+            <strong class="small">{{pageCounts(tracesParams.currentPage, traces.resultCount)}}</strong>
         </div>
     </div>
 

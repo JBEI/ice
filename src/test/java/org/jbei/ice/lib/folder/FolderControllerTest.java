@@ -79,7 +79,7 @@ public class FolderControllerTest {
     @Test
     public void testRetrieveFolderContents() throws Exception {
         // test with null id
-        controller.retrieveFolderContents(null, 0, ColumnField.PART_ID, false, 0, 10);
+        controller.retrieveFolderContents(null, 0, ColumnField.PART_ID, false, 0, 10, null);
 
         Account account = AccountCreator.createTestAccount("testRetrieveFolderContents", false);
         String userId = account.getEmail();
@@ -116,7 +116,7 @@ public class FolderControllerTest {
         // retrieve (supported sort types created, status, name, part_id, type)
         FolderDetails details = controller.retrieveFolderContents(account.getEmail(), folder.getId(),
                                                                   ColumnField.PART_ID, false,
-                                                                  0, 15);
+                0, 15, null);
         Assert.assertNotNull(details);
 
         short pageSize = 15;
@@ -132,7 +132,7 @@ public class FolderControllerTest {
             // check remaining
             Assert.assertEquals((size - (it * pageSize)), parts.size());
             details = controller.retrieveFolderContents(account.getEmail(), folder.getId(), ColumnField.PART_ID, false,
-                                                        pageSize * it, pageSize);
+                    pageSize * it, pageSize, null);
             it += 1;
         }
     }
