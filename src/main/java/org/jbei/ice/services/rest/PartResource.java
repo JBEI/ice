@@ -75,17 +75,21 @@ public class PartResource extends RestResource {
     public Response read(@Context final UriInfo info,
                          @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
                          @PathParam("id") final String id) {
-        String userId = UserSessions.getUserIdBySession(sessionId);
+        boolean allowUnauthenticatedUser = true;
+        String userIdIfAuthenticated = getUserId(allowUnauthenticatedUser);
         try {
-            log(userId, "retrieving details for " + id);
+            log(userIdIfAuthenticated, "retrieving details for " + id);
             final EntryType type = EntryType.nameToType(id);
-            PartData data;
+            PartData part;
             if (type != null) {
-                data = controller.getPartDefaults(userId, type);
+                if(userIdIfAuthenticated == null) {
+                    return Response.status(Response.Status.FORBIDDEN).build();
+                }
+                part = controller.getPartDefaults(userIdIfAuthenticated, type);
             } else {
-                data = controller.retrieveEntryDetails(userId, id);
+                part = controller.retrieveEntryDetails(userIdIfAuthenticated, id);
             }
-            return super.respond(data);
+            return super.respond(part);
         } catch (final PermissionException pe) {
             // todo : have a generic error entity returned
             return Response.status(Response.Status.FORBIDDEN).build();

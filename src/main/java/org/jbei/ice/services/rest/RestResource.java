@@ -90,9 +90,26 @@ public class RestResource {
      *
      * @return a string User ID
      * @throws WebApplicationException for unauthorized access
+     * @see #getUserId(boolean)
+     * @see #getUserId(String)
+     * @see #getUserId(String, boolean)
      */
     protected String getUserId() {
-        return getUserId(sessionId);
+        return getUserId(false); // false = throw exception for unauthenticated users
+    }
+
+    /**
+     * Extract the User ID from header values in the resource request.
+     *
+     * @return a string User ID, or null if no user is authenticated and <code>suppressException == true</code>
+     * @param suppressException true to return null instead of throwing WebApplicationException if no user
+     *                          is authenticated.
+     * @throws WebApplicationException for unauthorized access
+     * @see #getUserId(String)
+     * @see #getUserId(String, boolean)
+     */
+    protected String getUserId(boolean suppressException) {
+        return getUserId(sessionId, suppressException);
     }
 
     /**
@@ -101,8 +118,25 @@ public class RestResource {
      * @param sessionId a session ID sent via query parameters
      * @return a string User ID
      * @throws WebApplicationException for unauthorized access
+     * @see #getUserId(boolean)
+     * @see #getUserId(String, boolean)
      */
     protected String getUserId(final String sessionId) {
+        return getUserId(sessionId, false); // false= throw exception for un-authenticated user
+    }
+
+    /**
+     * Extract the User ID from a query parameter value or header values in the resource request.
+     *
+     * @param sessionId a session ID sent via query parameters
+     * @param suppressException true to return null instead of throwing WebApplicationException if no user
+     *                          is authenticated.
+     * @return a string User ID, or null if no user is authenticated and <code>suppressException == true</code>
+     * @throws WebApplicationException for unauthorized access
+     * @see #getUserId(boolean)
+     * @see #getUserId(String)
+     */
+    protected String getUserId(final String sessionId, boolean suppressException) {
         String userId = UserSessions.getUserIdBySession(sessionId);
         if (!StringUtils.isEmpty(userId))
             return userId;
@@ -131,7 +165,7 @@ public class RestResource {
             }
         }
 
-        if (userId == null)
+        if ((userId == null) && !suppressException)
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         return userId;
     }
