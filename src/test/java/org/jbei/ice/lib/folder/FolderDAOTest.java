@@ -89,11 +89,11 @@ public class FolderDAOTest {
 
     @Test
     public void testGetFolderSize() throws Exception {
-        Account account = AccountCreator.createTestAccount("testRemoveFolderEntries", false);
+        Account account = AccountCreator.createTestAccount("testGetFolderSize", false);
         String email = account.getEmail();
 
         // create test folder
-        Folder folder = createFolderObject("testRemoveFolderEntries");
+        Folder folder = createFolderObject("testGetFolderSize");
         folder = dao.create(folder);
         Assert.assertNotNull(folder);
 
@@ -191,7 +191,7 @@ public class FolderDAOTest {
 
     @Test
     public void testRetrieveFolderContents() throws Exception {
-        Account account = AccountCreator.createTestAccount("testRetrieveFolderContents", false);
+        Account account = AccountCreator.createTestAccount("FolderDAOTest.testRetrieveFolderContents", false);
         String email = account.getEmail();
         Folder folder = createFolderObject(email);
         folder = dao.create(folder);
