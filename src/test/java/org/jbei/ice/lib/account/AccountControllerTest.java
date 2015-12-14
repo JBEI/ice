@@ -72,7 +72,7 @@ public class AccountControllerTest {
         Account account = AccountCreator.createTestAccount("testUpdatePassword", false);
         AccountTransfer transfer = account.toDataTransferObject();
         transfer.setPassword("p455W0rd");
-        controller.updatePassword(account.getEmail(), transfer);
+        controller.updatePassword(account.getEmail(), transfer.getId(), transfer);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class AccountControllerTest {
         Account account = AccountCreator.createTestAccount("testGetAccountBySessionKey", false);
         AccountTransfer transfer = account.toDataTransferObject();
         transfer.setPassword("p455W0rd");
-        controller.updatePassword(account.getEmail(), transfer);
+        controller.updatePassword(account.getEmail(), transfer.getId(), transfer);
         AccountTransfer info = controller.authenticate(new AccountTransfer(account.getEmail(), "p455W0rd"));
         Assert.assertNotNull(info);
         Assert.assertFalse(info.getSessionId().isEmpty());

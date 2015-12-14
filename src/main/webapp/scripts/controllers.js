@@ -324,7 +324,8 @@ iceControllers.controller('MessageController', function ($scope, $location, $coo
     });
 });
 
-iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Authentication, Settings, AccessToken) {
+iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope,
+                                                       Authentication, Settings, AccessToken) {
     $scope.login = {};
 
     $scope.submit = function () {
@@ -369,8 +370,6 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
                 $scope.errMsg = "Login failed";
             }
         );
-
-//        Authentication.login($scope.userId, $scope.userPassword);
     };
 
     $scope.goToRegister = function () {

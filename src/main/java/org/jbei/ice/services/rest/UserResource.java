@@ -210,11 +210,6 @@ public class UserResource extends RestResource {
         return controller.updateAccount(user, userId, transfer);
     }
 
-    /**
-     * @param info
-     * @param transfer
-     * @return Response for success or failure
-     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -234,10 +229,12 @@ public class UserResource extends RestResource {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/password")
-    public AccountTransfer updatePassword(final AccountTransfer transfer) {
+    @Path("/{id}/password")
+    public AccountTransfer updatePassword(@PathParam("id") final long userId,
+                                          final AccountTransfer transfer) {
         final String user = getUserId();
-        return controller.updatePassword(user, transfer);
+        log(user, "changing password for user " + userId);
+        return controller.updatePassword(user, userId, transfer);
     }
 
     /**
@@ -247,8 +244,10 @@ public class UserResource extends RestResource {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createNewUser(final AccountTransfer accountTransfer) {
-        final AccountTransfer created = controller.createNewAccount(accountTransfer, true);
+    public Response createNewUser(
+            @DefaultValue("true") @QueryParam("sendEmail") boolean sendEmail,
+            final AccountTransfer accountTransfer) {
+        final AccountTransfer created = controller.createNewAccount(accountTransfer, sendEmail);
         return super.respond(created);
     }
 
