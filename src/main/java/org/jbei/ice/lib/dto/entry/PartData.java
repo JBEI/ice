@@ -5,6 +5,11 @@ import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.ArrayList;
 
+/**
+ * Data transfer object for parts and associated meta-data
+ *
+ * @author Hector Plahar
+ */
 public class PartData implements IDataTransferModel {
 
     private static final long serialVersionUID = 1l;
