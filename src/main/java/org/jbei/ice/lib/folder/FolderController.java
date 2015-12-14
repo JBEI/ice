@@ -66,7 +66,7 @@ public class FolderController {
         ArrayList<FolderDetails> list = new ArrayList<>();
         for (Folder folder : folders) {
             FolderDetails details = folder.toDataTransferObject();
-            long folderSize = dao.getFolderSize(folder.getId());
+            long folderSize = dao.getFolderSize(folder.getId(), null);
             details.setCount(folderSize);
             details.setType(FolderType.PUBLIC);
             details.setCanEdit(isAdmin);
@@ -88,7 +88,7 @@ public class FolderController {
         ArrayList<FolderDetails> list = new ArrayList<>();
         for (Folder folder : folders) {
             FolderDetails details = folder.toDataTransferObject();
-            long folderSize = dao.getFolderSize(folder.getId());
+            long folderSize = dao.getFolderSize(folder.getId(), null);
             details.setCount(folderSize);
             list.add(details);
         }
@@ -193,7 +193,7 @@ public class FolderController {
      * @throws PermissionException if user does not have read permissions on folder
      */
     public FolderDetails retrieveFolderContents(String userId, long folderId, ColumnField sort, boolean asc,
-                                                int start, int limit) {
+                                                int start, int limit, String filter) {
         Folder folder = dao.get(folderId);
         if (folder == null)
             return null;
@@ -202,7 +202,7 @@ public class FolderController {
         authorization.expectRead(userId, folder);
 
         FolderDetails details = folder.toDataTransferObject();
-        long folderSize = dao.getFolderSize(folderId);
+        long folderSize = dao.getFolderSize(folderId, filter);
         details.setCount(folderSize);
 
         if (userId != null) {
@@ -218,7 +218,7 @@ public class FolderController {
             details.setOwner(owner.toDataTransferObject());
 
         // retrieve folder contents
-        List<Entry> results = dao.retrieveFolderContents(folderId, sort, asc, start, limit);
+        List<Entry> results = dao.retrieveFolderContents(folderId, sort, asc, start, limit, filter);
         for (Entry entry : results) {
             PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
             details.getEntries().add(info);
@@ -333,7 +333,7 @@ public class FolderController {
                 }
 
                 details = folder.toDataTransferObject();
-                long folderSize = dao.getFolderSize(folderId);
+                long folderSize = dao.getFolderSize(folderId, null);
                 details.setCount(folderSize);
 
                 dao.delete(folder);
@@ -369,7 +369,7 @@ public class FolderController {
                 continue;
 
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
-            long folderSize = dao.getFolderSize(folder.getId());
+            long folderSize = dao.getFolderSize(folder.getId(), null);
             details.setCount(folderSize);
             details.setType(folder.getType());
             details.setCanEdit(true);
@@ -418,7 +418,7 @@ public class FolderController {
         for (Folder folder : sharedFolders) {
             FolderDetails details = folder.toDataTransferObject();
             details.setType(FolderType.SHARED);
-            long folderSize = dao.getFolderSize(folder.getId());
+            long folderSize = dao.getFolderSize(folder.getId(), null);
             details.setCount(folderSize);
             folderDetails.add(details);
         }

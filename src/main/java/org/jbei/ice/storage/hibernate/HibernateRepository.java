@@ -1,23 +1,17 @@
 package org.jbei.ice.storage.hibernate;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.IRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Parent abstract class for Hibernate Persistence
  *
  * @author Hector Plahar
  */
-
-@SuppressWarnings("unchecked")
 public abstract class HibernateRepository<T extends DataModel> implements IRepository<T> {
 
     /**
@@ -59,7 +53,6 @@ public abstract class HibernateRepository<T extends DataModel> implements IRepos
         return object;
     }
 
-
     /**
      * Creates new object in the database
      *
@@ -89,36 +82,6 @@ public abstract class HibernateRepository<T extends DataModel> implements IRepos
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Error retrieving " + clazz.getSimpleName() + " with id \"" + id + "\"", e);
-        }
-    }
-
-    protected T getByUUID(Class<T> theClass, String uuid) throws DAOException {
-        T result;
-        Session session = currentSession();
-
-        try {
-            Query query = session.createQuery("from " + theClass.getName() + " where uuid = :uuid");
-            query.setString("uuid", uuid);
-            result = (T) query.uniqueResult();
-
-        } catch (HibernateException e) {
-            Logger.error(e);
-            throw new DAOException(e);
-        }
-        return result;
-    }
-
-    protected List<T> getAll(Class<T> theClass) throws DAOException {
-        Session session = currentSession();
-
-        try {
-            List<T> results;
-            Query query = session.createQuery("from " + theClass.getName());
-            results = new ArrayList<T>(query.list());
-            return results;
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
         }
     }
 }

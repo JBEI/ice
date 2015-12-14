@@ -129,12 +129,13 @@ public class UserResource extends RestResource {
                                            @DefaultValue("0") @QueryParam("offset") final int offset,
                                            @DefaultValue("15") @QueryParam("limit") final int limit,
                                            @DefaultValue("created") @QueryParam("sort") final String sort,
-                                           @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+                                           @DefaultValue("false") @QueryParam("asc") final boolean asc,
+                                           @DefaultValue("") @QueryParam("filter") String filter) {
         final String userIdString = getUserId();
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
         final Account requestAccount = DAOFactory.getAccountDAO().get(userId);
         OwnerEntries ownerEntries = new OwnerEntries(userIdString, requestAccount.getEmail());
-        final List<PartData> entries = ownerEntries.retrieveOwnerEntries(field, asc, offset, limit);
+        final List<PartData> entries = ownerEntries.retrieveOwnerEntries(field, asc, offset, limit, filter);
         final long count = ownerEntries.getNumberOfOwnerEntries();
         final FolderDetails details = new FolderDetails();
         details.getEntries().addAll(entries);

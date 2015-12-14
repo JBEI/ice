@@ -3,10 +3,7 @@ package org.jbei.ice.storage.hibernate.dao;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.*;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.Visibility;
@@ -41,8 +38,8 @@ public class FolderDAO extends HibernateRepository<Folder> {
     }
 
     /**
-     * Removes entries with the which have the unique identifier in the list of entries
-     * from the specified folder, if it is contained in it
+     * Removes, from the list of entries in the specified folder, those whose ids match the ids passed in the
+     * parameter
      *
      * @param folder  folder to remove entries from
      * @param entries unique identifiers for list of entries to remove from the folder
@@ -61,7 +58,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             }
 
             folder.setModificationTime(new Date());
-            session.saveOrUpdate(folder);
+            session.update(folder);
             return folder;
         } catch (HibernateException he) {
             Logger.error(he);
@@ -74,16 +71,20 @@ public class FolderDAO extends HibernateRepository<Folder> {
      * Currently, it is assumed that the contents of folders are only entries. The entries
      * that are counted are those that have a visibility of "OK"
      *
-     * @param id unique folder identifier
+     * @param id     unique folder identifier
+     * @param filter optional filter for entry fields
      * @return number of child contents in the folder
      */
-    public Long getFolderSize(long id) {
+    public Long getFolderSize(long id, String filter) {
         try {
             Criteria criteria = currentSession().createCriteria(Entry.class);
             criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
             criteria.createAlias("folders", "f");
             criteria.add(Restrictions.eq("f.id", id));
-            Number number = (Number) criteria.setProjection(Projections.rowCount()).uniqueResult();
+
+            addFilter(criteria, filter);
+
+            Number number = (Number) criteria.setProjection(Projections.countDistinct("id")).uniqueResult();
             return number.longValue();
         } catch (HibernateException he) {
             Logger.error(he);
@@ -111,7 +112,8 @@ public class FolderDAO extends HibernateRepository<Folder> {
         return criteria.setProjection(Projections.property("entry.id")).list();
     }
 
-    public List<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit) {
+    public List<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit,
+                                              String filterText) {
         try {
             String sortString;
             switch (sort) {
@@ -136,10 +138,13 @@ public class FolderDAO extends HibernateRepository<Folder> {
                     sortString = "recordType";
                     break;
             }
+
             Criteria criteria = currentSession().createCriteria(Entry.class);
             criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
             criteria.createAlias("folders", "folder");
             criteria.add(Restrictions.eq("folder.id", folderId));
+
+            addFilter(criteria, filterText);
 
             criteria.addOrder(asc ? Order.asc(sortString) : Order.desc(sortString));
             criteria.setMaxResults(limit);
@@ -149,6 +154,17 @@ public class FolderDAO extends HibernateRepository<Folder> {
             Logger.error(he);
             throw new DAOException(he);
         }
+    }
+
+    protected final void addFilter(Criteria criteria, String filterText) {
+        if (filterText == null || filterText.trim().isEmpty())
+            return;
+
+        criteria.add(Restrictions.disjunction()
+                .add(Restrictions.ilike("name", filterText, MatchMode.ANYWHERE))
+                .add(Restrictions.ilike("alias", filterText, MatchMode.ANYWHERE))
+                .add(Restrictions.ilike("shortDescription", filterText, MatchMode.ANYWHERE))
+                .add(Restrictions.ilike("partNumber", filterText, MatchMode.ANYWHERE)));
     }
 
     public Folder addFolderContents(Folder folder, List<Entry> entrys) {
