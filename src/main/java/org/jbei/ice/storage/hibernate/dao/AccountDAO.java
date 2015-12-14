@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * DAO to manipulate {@link Account} objects in the database.
+ * Data accessor object to manipulate {@link Account} objects in the database.
  *
  * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
@@ -35,7 +35,8 @@ public class AccountDAO extends HibernateRepository<Account> {
     }
 
     /**
-     * Retrieves accounts whose firstName, lastName, or email fields match the specified token up to the specified limit
+     * Retrieves accounts whose firstName, lastName, or email fields match the specified
+     * token up to the specified limit.
      *
      * @param token filter for the account fields
      * @param limit maximum number of matching accounts to return; 0 to return all
@@ -79,6 +80,17 @@ public class AccountDAO extends HibernateRepository<Account> {
         }
     }
 
+    /**
+     * Retrieves list of pageable accounts, matching the parameter values
+     *
+     * @param offset offset to start retrieving matching accounts
+     * @param limit  maximum number of accounts to retrieve
+     * @param sort   sort order for retrieval
+     * @param asc    whether to sort in ascending or descending order
+     * @param filter optional filter to for matching text against firstName, lastName or email fields of accounts
+     * @return list of matching accounts
+     * @throws DAOException on {@link HibernateException} retrieving accounts
+     */
     @SuppressWarnings("unchecked")
     public List<Account> getAccounts(int offset, int limit, String sort, boolean asc, String filter) {
         try {
@@ -99,6 +111,14 @@ public class AccountDAO extends HibernateRepository<Account> {
         }
     }
 
+    /**
+     * Retrieves maximum number of distinct accounts available and, if specified, whose firstName, lastName and email
+     * fields match the filter token. This is intended to be used for paging.
+     *
+     * @param filter optional token used to match against the firstName, lastName and email fields of accounts
+     * @return number of accounts that match the optional filter.
+     * @throws DAOException on {@link HibernateException} retrieving the number
+     */
     public long getAccountsCount(String filter) {
         try {
             Criteria criteria = currentSession().createCriteria(Account.class.getName());
