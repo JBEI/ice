@@ -25,9 +25,9 @@ public class RemoteAccessResource extends RestResource {
     private RemoteAccessController controller = new RemoteAccessController();
 
     /**
-     * @param remoteId
-     *            unique identifier for remote partner being accessed
-     * @return list of available folders that are available on the registry
+     * Retrieves available folders from the specified remote ice partner
+     *
+     * @param remoteId unique identifier for remote partner being accessed
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -45,7 +45,7 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/users/{email}")
     public AccountTransfer getRemoteUser(@PathParam("id") final long remoteId,
-            @PathParam("email") final String email) {
+                                         @PathParam("email") final String email) {
         return controller.getRemoteUser(remoteId, email);
     }
 
@@ -58,7 +58,7 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{entryId}/sequence")
     public Response getSequence(@PathParam("id") final long remoteId,
-            @PathParam("entryId") final long partId) {
+                                @PathParam("entryId") final long partId) {
         final FeaturedDNASequence sequence = controller.getRemoteSequence(remoteId, partId);
         if (sequence == null) {
             return Response.status(Response.Status.NO_CONTENT).build();
@@ -75,7 +75,7 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/parts/{entryId}/traces")
     public Response getSequenceTraces(@PathParam("id") long remoteId,
-            @PathParam("entryId") long partId) {
+                                      @PathParam("entryId") long partId) {
         List<TraceSequenceAnalysis> traces = controller.getRemoteTraces(remoteId, partId);
         if (traces == null) {
             return Response.status(Response.Status.NO_CONTENT).build();
@@ -96,11 +96,11 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/folders/{folderId}")
     public FolderDetails getPublicFolderEntries(@PathParam("id") final long remoteId,
-            @PathParam("folderId") final long folderId,
-            @DefaultValue("0") @QueryParam("offset") final int offset,
-            @DefaultValue("15") @QueryParam("limit") final int limit,
-            @DefaultValue("created") @QueryParam("sort") final String sort,
-            @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+                                                @PathParam("folderId") final long folderId,
+                                                @DefaultValue("0") @QueryParam("offset") final int offset,
+                                                @DefaultValue("15") @QueryParam("limit") final int limit,
+                                                @DefaultValue("created") @QueryParam("sort") final String sort,
+                                                @DefaultValue("false") @QueryParam("asc") final boolean asc) {
         return controller.getPublicFolderEntries(remoteId, folderId, sort, asc, offset, limit);
     }
 
@@ -113,7 +113,7 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/parts/{partId}/samples")
     public Response getRemotePartSamples(@PathParam("id") long remoteId,
-            @PathParam("partId") long partId) {
+                                         @PathParam("partId") long partId) {
         List<PartSample> result = controller.getRemotePartSamples(remoteId, partId);
         return super.respond(result);
     }
@@ -127,7 +127,7 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/parts/{partId}/comments")
     public Response getRemotePartComments(@PathParam("id") long remoteId,
-            @PathParam("partId") long partId) {
+                                          @PathParam("partId") long partId) {
         List<UserComment> result = controller.getRemotePartComments(remoteId, partId);
         return super.respond(result);
     }
