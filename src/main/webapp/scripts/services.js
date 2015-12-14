@@ -46,12 +46,12 @@ iceServices.factory('Permission', function ($resource, $cookieStore) {
 
 iceServices.factory('User', function ($resource) {
     return function (sessionId) {
-        return $resource('rest/users', {userId: '@userId', preferenceKey: '@preferenceKey'}, {
-            query: {
-                method: 'GET',
-                responseType: "json",
-                url: "rest/users/:userId",
-                headers: {'X-ICE-Authentication-SessionId': sessionId}
+        return $resource('rest/users', {userId: '@userId', preferenceKey: '@preferenceKey', sendEmail: '@sendEmail'}, {
+            query:{
+                method:'GET',
+                responseType:"json",
+                url:"rest/users/:userId",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             update: {
@@ -125,11 +125,11 @@ iceServices.factory('User', function ($resource) {
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
-            changePassword: {
-                method: 'PUT',
-                url: 'rest/users/password',
-                responseType: 'json',
-                headers: {'X-ICE-Authentication-SessionId': sessionId}
+            changePassword:{
+                method:'PUT',
+                url: 'rest/users/:userId/password',
+                responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             samples: {

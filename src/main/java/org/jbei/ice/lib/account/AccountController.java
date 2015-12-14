@@ -159,27 +159,29 @@ public class AccountController {
     }
 
     /**
-     * Updates account password associated the account email. It encrypts it before associating it
-     * with the account
+     * Updates the specified user account's password
      *
-     * @param userId
-     * @param transfer
+     * @param userId   email of user making change. If it is not the same as the email associated with the
+     *                 <code>id</code>, then this account must have administrator privileges
+     * @param id       unique (db) identifier for user whose password is to be changed.
+     * @param transfer wrapper around new password
      * @return updated account object
+     * @throws PermissionException if the account associated with <code>userId</code> and <code>id</code> are not
+     *                             the same but the <code>userId</code> does not have administrative privileges
      */
-    public AccountTransfer updatePassword(final String userId, final AccountTransfer transfer) {
-        final Account userAccount = getByEmail(transfer.getEmail());
-        if (userAccount == null) {
-            throw new IllegalArgumentException("Could not retrieve account by id "
-                    + transfer.getEmail());
+    public AccountTransfer updatePassword(String userId, long id, AccountTransfer transfer) throws PermissionException {
+        Account account = get(id);
+        if (account == null) {
+            throw new IllegalArgumentException("Could not retrieve account by id " + id);
         }
 
-        if (!isAdministrator(userId) && !userAccount.getEmail().equalsIgnoreCase(userId)) {
-            return null;
+        if (!isAdministrator(userId) && !account.getEmail().equalsIgnoreCase(userId)) {
+            throw new PermissionException("User " + userId + " does not have permission to change "
+                    + transfer.getEmail() + "'s password");
         }
 
-        userAccount.setPassword(AccountUtils.encryptNewUserPassword(transfer.getPassword(),
-                userAccount.getSalt()));
-        return dao.update(userAccount).toDataTransferObject();
+        account.setPassword(AccountUtils.encryptNewUserPassword(transfer.getPassword(), account.getSalt()));
+        return dao.update(account).toDataTransferObject();
     }
 
     /**

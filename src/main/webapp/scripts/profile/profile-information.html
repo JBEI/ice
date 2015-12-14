@@ -66,6 +66,12 @@
 
 <div class=" margin-top-10 panel panel-default" ng-if="showChangePassword">
     <div class="panel-body">
+        <h4>Change password
+            <small ng-if="userId != user.id"><i class="fa fa-exclamation-circle fa-fw orange"></i>Changing another
+                user's password
+            </small>
+        </h4>
+
         <div class="alert alert-danger" style="width: 435px; padding: 8px" ng-if="changePasswordError">
             <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
             <span class="font-90em">{{changePasswordError}}</span>
@@ -73,20 +79,21 @@
 
         <div class="alert alert-info" style="width: 435px; padding: 8px"
              ng-if="passwordChangeSuccess&&!changePasswordError">
-            <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
+            <i style="font-size: 15px" class="fa fa-info-circle"></i>
             <span class="font-90em">Password successfully changed</span>
         </div>
 
-        <form class="font-95em" role="form" ng-submit="updatePassword()"
-              ng-if="!passwordChangeSuccess&&!changePasswordError">
-            <div class="col-md-2 pad-top-5">
-                <span style="white-space:nowrap">Current password <span class="required">*</span> </span>
-            </div>
-            <div class="col-md-10 pad-top-5">
-                <input type="password" ng-model="changePass.current" ng-change="currentError=false"
-                       ng-class="{'input_box':!currentError, 'input_box_error':currentError}" ng-trim="true"
-                       maxlength="125" style="width: 205px;">
-            </div>
+        <form class="font-95em" role="form" ng-submit="updatePassword()" ng-if="!passwordChangeSuccess">
+            <!--<div class="col-md-2 pad-top-5">-->
+            <!--<span style="white-space:nowrap">Verify your password <span class="required">*</span> </span>-->
+            <!--</div>-->
+            <!--<div class="col-md-10 pad-top-5">-->
+            <!--<input type="password" ng-model="changePass.current" ng-change="currentError=false"-->
+            <!--ng-class="{'input_box':!currentError, 'input_box_error':currentError}" ng-trim="true"-->
+            <!--maxlength="125" style="width: 205px;">-->
+            <!--</div>-->
+
+            <div class="col-md-12">&nbsp;</div>
 
             <div class="col-md-2 pad-top-5">
                 <span style="white-space:nowrap">New password <span class="required">*</span></span>
@@ -98,17 +105,23 @@
             </div>
 
             <div class="col-md-2 pad-top-5">
-                <span style="white-space:nowrap">Confirm new password</span>
+                <span style="white-space:nowrap">Confirm new password <span class="required">*</span></span>
             </div>
             <div class="col-md-10 pad-top-5">
                 <input type="password" ng-model="changePass.new2" class="input_box" maxlength="125"
                        style="width: 205px;">
+                <i class="fa fa-fw fa-check green font-12em"
+                   ng-if="changePass.new2 && changePass.new === changePass.new2"></i>
+                <i class="fa fa-fw fa-minus-circle red font-12em" tooltip="Passwords do not match"
+                   ng-if="changePass.new2 && changePass.new !== changePass.new2"></i>
             </div>
 
             <br>
 
             <div class="col-xs-offset-2 col-md-10 pad_top">
-                <button type="submit" class="btn btn-xs btn-primary">Save</button>
+                <button type="submit" class="btn btn-xs btn-primary"
+                        ng-disabled="!changePass.new2 || !changePass.new">Update
+                </button>
                 <button type="button" ng-click="editClick(false, false, false)" class="btn btn-xs btn-default">Cancel
                 </button>
             </div>
