@@ -54,12 +54,14 @@
                     <td style="width: 99%">
                         <div class="input-group input-group-sm pull-right" ng-if="params.showFilter">
                             <i class="fa fa-fw fa-filter input-group-addon"></i>
-                            <input ng-model="params.filter" class="form-control"  ng-change="hStepChanged()">
-                            <i class="fa fa-fw fa-times opacity_hover input-group-addon" ng-click="params.showFilter = false; params.filter=''; hStepChanged()"></i>
+                            <input ng-model="params.filter" class="form-control" ng-change="hStepChanged()">
+                            <i class="fa fa-fw fa-times opacity_hover input-group-addon"
+                               ng-click="params.showFilter = false; params.filter=''; hStepChanged()"></i>
                         </div>
 
                         <div class="pull-right" ng-if="!params.showFilter">
-                            <i class="fa fa-fw fa-filter opacity_hover" uib-tooltip="Filter" ng-click="params.showFilter=true"></i>
+                            <i class="fa fa-fw fa-filter opacity_hover" uib-tooltip="Filter"
+                               ng-click="params.showFilter=true"></i>
                         </div>
                     </td>
                 </tr>
@@ -69,11 +71,25 @@
 
     <!--collections like 'personal', 'available' do not have a folderName-->
     <div class="row" ng-if="!folder.type">
-        <div class="col-md-12 entry_general_header_td">
+        <div class="col-md-9 entry_general_header_td">
             <h4><img alt="Loading..." ng-if="loadingPage" src="img/loader-mini.gif"/>
                 <strong style="color: #888;text-transform: uppercase;">{{selectedFolder}}</strong>
                 <!--<br><small class="font-65em">Folder Description</small>-->
             </h4>
+        </div>
+
+        <!-- filter for collections -->
+        <div class="col-md-3 entry_general_header_td" style="padding-top: 8px">
+            <div class="input-group input-group-sm pull-right" ng-if="params.showFilter">
+                <i class="fa fa-fw fa-filter input-group-addon"></i>
+                <input ng-model="params.filter" class="form-control" ng-change="hStepChanged()">
+                <i class="fa fa-fw fa-times opacity_hover input-group-addon"
+                   ng-click="params.showFilter = false; params.filter=''; hStepChanged()"></i>
+            </div>
+
+            <div class="pull-right" ng-if="!params.showFilter">
+                <i class="fa fa-fw fa-filter opacity_hover" uib-tooltip="Filter" ng-click="params.showFilter=true"></i>
+            </div>
         </div>
     </div>
 
