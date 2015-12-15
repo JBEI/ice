@@ -175,7 +175,7 @@ public class FolderResource extends RestResource {
 
             case "available":
                 VisibleEntries visibleEntries = new VisibleEntries(userId);
-                final FolderDetails retrieved = visibleEntries.getEntries(field, asc, offset, limit);
+                final FolderDetails retrieved = visibleEntries.getEntries(field, asc, offset, limit, filter);
                 details.setEntries(retrieved.getEntries());
                 details.setCount(visibleEntries.getEntryCount());
                 return details;

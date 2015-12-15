@@ -515,8 +515,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @throws DAOException
      */
     public List<Entry> retrieveOwnerEntries(String ownerEmail, ColumnField sort, boolean asc, int start,
-                                            int limit, String filter)
-            throws DAOException {
+                                            int limit, String filter) throws DAOException {
         try {
             String fieldName = columnFieldToString(sort);
             Criteria criteria = currentSession().createCriteria(Entry.class)
@@ -580,11 +579,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
             return query.list();
         } catch (HibernateException he) {
             Logger.error(he);
-            throw new RuntimeException(he);
+            throw new DAOException(he);
         }
     }
 
-    public Set<Entry> retrieveAllEntries(ColumnField sort, boolean asc, int start, int limit) throws DAOException {
+    public Set<Entry> retrieveAllEntries(ColumnField sort, boolean asc, int start, int limit, String filter)
+            throws DAOException {
         try {
             if (sort == null)
                 sort = ColumnField.CREATED;

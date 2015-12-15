@@ -3,8 +3,8 @@ package org.jbei.ice.lib.folder;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
+import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
-import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.storage.DAOFactory;
@@ -27,7 +27,7 @@ public class FolderContent {
     private FolderAuthorization folderAuthorization = new FolderAuthorization();
 
     public List<FolderDetails> addEntrySelection(String userId, EntrySelection entryLocation) {
-        EntryRetriever retriever = new EntryRetriever();
+        Entries retriever = new Entries();
         List<Long> entries = retriever.getEntriesFromSelectionContext(userId, entryLocation);
         return addEntriesToFolders(userId, entries, entryLocation.getDestination());
     }

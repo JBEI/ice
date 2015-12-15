@@ -6,7 +6,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.entry.EntryRetriever;
+import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.storage.DAOFactory;
@@ -36,7 +36,7 @@ public class EntriesAsCSV {
 
     public final boolean setSelectedEntries(String userId, EntrySelection selection) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        EntryRetriever retriever = new EntryRetriever();
+        Entries retriever = new Entries();
         List<Long> entries = retriever.getEntriesFromSelectionContext(account.getEmail(), selection);
         return writeList(entries);
     }

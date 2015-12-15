@@ -12,7 +12,7 @@ import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
-import org.jbei.ice.lib.entry.EntryRetriever;
+import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
@@ -175,8 +175,8 @@ public class FolderController {
             throw new PermissionException(errMsg);
         }
 
-        EntryRetriever retriever = new EntryRetriever();
-        List<Long> entryIds = retriever.getEntriesFromSelectionContext(userId, selection);
+        Entries entries = new Entries();
+        List<Long> entryIds = entries.getEntriesFromSelectionContext(userId, selection);
         return dao.removeFolderEntries(folder, entryIds) != null;
     }
 

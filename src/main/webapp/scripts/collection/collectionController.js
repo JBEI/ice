@@ -446,7 +446,11 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.hStepChanged = function () {
+            var filterText = $scope.params.filter;
             Util.get("rest/folders/" + $scope.params.folderId + "/entries", function (result) {
+                if (filterText !== $scope.params.filter)
+                    return;
+
                 $scope.folder = result;
                 if (result.canEdit)
                     $scope.folderNameTooltip = "Click to rename";

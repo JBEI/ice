@@ -36,13 +36,13 @@ public class VisibleEntries {
         this.dao = DAOFactory.getEntryDAO();
     }
 
-    public FolderDetails getEntries(ColumnField field, boolean asc, int start, int limit) {
+    public FolderDetails getEntries(ColumnField field, boolean asc, int start, int limit, String filter) {
         Set<Entry> results;
         FolderDetails details = new FolderDetails();
 
         if (isAdmin) {
             // no filters
-            results = dao.retrieveAllEntries(field, asc, start, limit);
+            results = dao.retrieveAllEntries(field, asc, start, limit, filter);
         } else {
             // retrieve groups for account and filter by permission
             Set<Group> accountGroups = new HashSet<>(account.getGroups());
