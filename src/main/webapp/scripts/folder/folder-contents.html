@@ -54,7 +54,7 @@
                     <td style="width: 99%">
                         <div class="input-group input-group-sm pull-right" ng-if="params.showFilter">
                             <i class="fa fa-fw fa-filter input-group-addon"></i>
-                            <input ng-model="params.filter" class="form-control" ng-change="hStepChanged()">
+                            <input ng-model="params.filter" class="form-control" focus ng-change="hStepChanged()">
                             <i class="fa fa-fw fa-times opacity_hover input-group-addon"
                                ng-click="params.showFilter = false; params.filter=''; hStepChanged()"></i>
                         </div>
@@ -82,7 +82,7 @@
         <div class="col-md-3 entry_general_header_td" style="padding-top: 8px">
             <div class="input-group input-group-sm pull-right" ng-if="params.showFilter">
                 <i class="fa fa-fw fa-filter input-group-addon"></i>
-                <input ng-model="params.filter" class="form-control" ng-change="hStepChanged()">
+                <input ng-model="params.filter" class="input_box form-control" focus ng-change="hStepChanged()">
                 <i class="fa fa-fw fa-times opacity_hover input-group-addon"
                    ng-click="params.showFilter = false; params.filter=''; hStepChanged()"></i>
             </div>
