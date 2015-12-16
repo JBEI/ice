@@ -110,7 +110,11 @@ angular.module('ice.common.service', [])
                 }).post(obj, successHandler, errorCallback);
             },
 
-            update: function (url, obj, params, successHandler) {
+            update: function (url, obj, params, successHandler, failureHandler) {
+                var errorCallback = this.handleError;
+                if (failureHandler)
+                    errorCallback = failureHandler;
+
                 if (!params)
                     params = {};
 
@@ -124,7 +128,7 @@ angular.module('ice.common.service', [])
                         method: 'PUT',
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
                     }
-                }).update(obj, successHandler, this.handleError);
+                }).update(obj, successHandler, errorCallback);
             },
 
             remove: function (url, params, successHandler) {

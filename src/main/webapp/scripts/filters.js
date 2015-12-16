@@ -64,3 +64,12 @@ iceFilters.filter('fileTruncate', function () {
     };
 });
 
+// check is an object is an array and return a comma separated display
+iceFilters.filter('arrayDisplay', function () {
+    return function (arr) {
+        if (angular.isArray(arr))
+            return arr.join(', ');
+        return arr;
+    }
+});
+
