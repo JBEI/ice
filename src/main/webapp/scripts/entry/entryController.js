@@ -619,8 +619,9 @@ angular.module('ice.entry.controller', [])
             $scope.part = EntryService.getTypeData($scope.part);
 
             // create or update the part depending on whether there is a current part id
+            // which might be the case if a sequence is uploaded first
             if ($scope.part.id) {
-                entry.update({partId: $scope.part.id}, $scope.part, function (result) {
+                Util.update("rest/parts/" + $scope.part.id, $scope.part, {}, function (result) {
                     $location.path('/entry/' + result.id);
                 });
             } else {

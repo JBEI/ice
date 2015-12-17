@@ -592,6 +592,17 @@ public class PartResource extends RestResource {
         return Response.serverError().build();
     }
 
+    /**
+     * Creates a new entry. If the <code>sourceId</code> parameter is set, the new entry is a copy
+     * of the source id (if found) otherwise the new entry is created from the data contained in the
+     * <code>partData</code>
+     *
+     * @param sourceId optional unique identifier for an existing part to copy. If not set, the <code>partData</code>
+     *                 parameter must be set
+     * @param partData optional data for creating new entry. if not set, then the <code>sourceId</code> must
+     *                 be set
+     * @return wrapper around identifier for newly created part which can be used to retrieve it
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
