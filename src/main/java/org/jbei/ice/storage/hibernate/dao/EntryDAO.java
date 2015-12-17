@@ -182,7 +182,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      */
     @SuppressWarnings({"unchecked"})
     public Set<Entry> retrieveVisibleEntries(Account account, Set<Group> groups, ColumnField sortField, boolean asc,
-                                             int start, int count) throws DAOException {
+                                             int start, int count, String filter) throws DAOException {
         try {
             Session session = currentSession();
             String fieldName = columnFieldToString(sortField);
@@ -358,7 +358,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @return number of entries that have visibility of "OK"
      * @throws DAOException
      */
-    public long getAllEntryCount() throws DAOException {
+    public long getAllEntryCount(String filter) throws DAOException {
         try {
             Session session = currentSession();
             Criteria criteria = session.createCriteria(Entry.class.getName());
@@ -438,7 +438,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
     @SuppressWarnings("unchecked")
     public List<Entry> getByVisibility(String ownerEmail, Visibility visibility, ColumnField field, boolean asc,
-                                       int start, int limit) throws DAOException {
+                                       int start, int limit, String filter) throws DAOException {
         try {
             String fieldName = columnFieldToString(field);
             Session session = currentSession();
@@ -462,7 +462,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    public long getByVisibilityCount(String ownerEmail, Visibility visibility) throws DAOException {
+    public long getByVisibilityCount(String ownerEmail, Visibility visibility, String filter) throws DAOException {
         Criteria criteria = currentSession().createCriteria(Entry.class);
         if (ownerEmail != null)
             criteria = criteria.add(Restrictions.eq("ownerEmail", ownerEmail));

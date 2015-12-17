@@ -9,9 +9,11 @@ package org.jbei.ice.lib.collection;
  */
 public enum CollectionType {
     FEATURED,
+    AVAILABLE,
     PERSONAL,
     SHARED,
     DRAFTS,
     PENDING,
-    DELETED
+    DELETED,
+    TRANSFERRED
 }

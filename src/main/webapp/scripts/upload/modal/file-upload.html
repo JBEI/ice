@@ -13,7 +13,7 @@
                     (<a class="cursor_pointer" ng-click="downloadCSVTemplate()"><i class="fa fa-download"></i> Download
                         template</a>)
                 </li>
-                <li><b>Zip Archive</b> (must contain exactly 1 CSV file)</li>
+                <li><b>Zip Archive with sequences</b> (must contain exactly 1 CSV file)</li>
                 <li><b>SBOL XML</b></li>
             </ul>
         </span>
@@ -23,7 +23,8 @@
         {{uploadError}}
     </div>
 
-    <input ng-if="!processing && !modalClose" type="file" nv-file-select uploader="importUploader" class="font-90em">
+    <input ng-if="!processing && !modalClose" type="file" nv-file-select uploader="importUploader" multiple
+           class="font-90em">
 
     <div style="height: 12px; width: 100%" ng-if="!processing && !modalClose">
         <div class="progress-bar" role="progressbar" ng-style="{ 'width': importUploader.progress + '%' }"></div>

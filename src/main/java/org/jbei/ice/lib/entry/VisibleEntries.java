@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.entry;
 
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
@@ -11,7 +10,9 @@ import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Group;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -36,9 +37,8 @@ public class VisibleEntries {
         this.dao = DAOFactory.getEntryDAO();
     }
 
-    public FolderDetails getEntries(ColumnField field, boolean asc, int start, int limit, String filter) {
+    public List<PartData> getEntries(ColumnField field, boolean asc, int start, int limit, String filter) {
         Set<Entry> results;
-        FolderDetails details = new FolderDetails();
 
         if (isAdmin) {
             // no filters
@@ -49,15 +49,17 @@ public class VisibleEntries {
             GroupController controller = new GroupController();
             Group everybodyGroup = controller.createOrRetrievePublicGroup();
             accountGroups.add(everybodyGroup);
-            results = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit);
+            results = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit, filter);
         }
 
+        ArrayList<PartData> data = new ArrayList<>();
         for (Entry entry : results) {
             PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false);
-            details.getEntries().add(info);
+            info.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
+            data.add(info);
         }
 
-        return details;
+        return data;
     }
 
     /**
@@ -65,9 +67,9 @@ public class VisibleEntries {
      *
      * @return Number of entries that user with account referenced in the parameter can read.
      */
-    public long getEntryCount() {
+    public long getEntryCount(String filter) {
         if (isAdmin) {
-            return dao.getAllEntryCount();
+            return dao.getAllEntryCount(filter);
         }
 
         Set<Group> accountGroups = new HashSet<>(account.getGroups());
@@ -75,5 +77,9 @@ public class VisibleEntries {
         Group everybodyGroup = controller.createOrRetrievePublicGroup();
         accountGroups.add(everybodyGroup);
         return dao.visibleEntryCount(account, accountGroups);
+    }
+
+    public long getEntryCount() {
+        return this.getEntryCount(null);
     }
 }

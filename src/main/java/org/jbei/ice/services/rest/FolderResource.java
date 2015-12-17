@@ -2,16 +2,11 @@ package org.jbei.ice.services.rest;
 
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntrySelection;
-import org.jbei.ice.lib.entry.OwnerEntries;
-import org.jbei.ice.lib.entry.SharedEntries;
-import org.jbei.ice.lib.entry.VisibleEntries;
-import org.jbei.ice.lib.folder.FolderContent;
-import org.jbei.ice.lib.folder.FolderContentRetriever;
+import org.jbei.ice.lib.folder.FolderContents;
 import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.folder.UserFolder;
 import org.jbei.ice.lib.shared.ColumnField;
@@ -37,7 +32,6 @@ import java.util.List;
 public class FolderResource extends RestResource {
 
     private FolderController controller = new FolderController();
-    private FolderContentRetriever retriever = new FolderContentRetriever();
     private PermissionsController permissionsController = new PermissionsController();
 
     /**
@@ -105,8 +99,8 @@ public class FolderResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addSelectedEntriesToFolder(final EntrySelection entrySelection) {
         final String userId = getUserId();
-        final FolderContent folderContent = new FolderContent();
-        folderContent.addEntrySelection(userId, entrySelection);
+        final FolderContents folderContents = new FolderContents();
+        folderContents.addEntrySelection(userId, entrySelection);
         return super.respond(true);
     }
 
@@ -155,52 +149,11 @@ public class FolderResource extends RestResource {
             if (filter.length() > 0)
                 message += " filtered by \"" + filter + "\"";
             log(userId, message);
-            return controller.retrieveFolderContents(userId, id, field, asc, offset, limit, filter);
+            FolderContents folderContents = new FolderContents();
+            return folderContents.getContents(userId, id, field, asc, offset, limit, filter);
         } catch (final NumberFormatException nfe) {
-            // ok. just not a number
-            Logger.debug("Passed folder id " + folderId + " is not a number");
-        }
-
-        final FolderDetails details = new FolderDetails();
-        log(userId, "retrieving " + folderId + " entries");
-
-        switch (folderId) {
-            case "personal":
-                OwnerEntries ownerEntries = new OwnerEntries(userId, userId);
-                final List<PartData> entries = ownerEntries.retrieveOwnerEntries(field, asc, offset, limit, filter);
-                final long count = ownerEntries.getNumberOfOwnerEntries();
-                details.getEntries().addAll(entries);
-                details.setCount(count);
-                return details;
-
-            case "available":
-                VisibleEntries visibleEntries = new VisibleEntries(userId);
-                final FolderDetails retrieved = visibleEntries.getEntries(field, asc, offset, limit, filter);
-                details.setEntries(retrieved.getEntries());
-                details.setCount(visibleEntries.getEntryCount());
-                return details;
-
-            case "shared":
-                SharedEntries sharedEntries = new SharedEntries(userId);
-                final List<PartData> data = sharedEntries.getEntries(field, asc, offset, limit);
-                details.setEntries(data);
-                details.setCount(sharedEntries.getNumberofEntries());
-                return details;
-
-            case "drafts":
-                return retriever.getDraftEntries(userId, field, asc, offset, limit);
-
-            case "deleted":
-                return retriever.getDeletedEntries(userId, field, asc, offset, limit);
-
-            case "pending":
-                return retriever.getPendingEntries(userId, field, asc, offset, limit);
-
-            case "transferred":
-                return retriever.getTransferredEntries(userId, field, asc, offset, limit);
-
-            default:
-                return null;
+            Logger.error("Passed folder id " + folderId + " is not a number");
+            return null;
         }
     }
 

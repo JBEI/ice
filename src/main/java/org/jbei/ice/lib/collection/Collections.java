@@ -41,7 +41,7 @@ public class Collections {
         collection.setPersonal(getNumberOfOwnerEntries(userId));
         SharedEntries sharedEntries = new SharedEntries(userId);
         collection.setShared(sharedEntries.getNumberofEntries());
-        collection.setDrafts(entryDAO.getByVisibilityCount(userId, Visibility.DRAFT));
+        collection.setDrafts(entryDAO.getByVisibilityCount(userId, Visibility.DRAFT, null));
         if (account.getType() == AccountType.ADMIN)
             collection.setPending(entryDAO.getPendingCount());
         return collection;
@@ -74,7 +74,7 @@ public class Collections {
                 return controller.getSharedUserFolders(userId);
 
             case DELETED:
-                // not able to delete folders yet
+                // not able to delete folders under the deleted collections yet
                 return new ArrayList<>();
 
             default:
