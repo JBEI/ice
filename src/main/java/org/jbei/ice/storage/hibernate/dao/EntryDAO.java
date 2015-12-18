@@ -28,21 +28,30 @@ import java.util.*;
 public class EntryDAO extends HibernateRepository<Entry> {
 
     public String getEntrySummary(long id) throws DAOException {
-        return (String) currentSession().createCriteria(Entry.class)
-                .add(Restrictions.eq("id", id))
-                .setProjection(Projections.property("shortDescription")).uniqueResult();
+        try {
+            return (String) currentSession().createCriteria(Entry.class)
+                    .add(Restrictions.eq("id", id))
+                    .setProjection(Projections.property("shortDescription")).uniqueResult();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 
-    public Set<String> getMatchingSelectionMarkers(String token, int limit) throws DAOException {
-        List result = currentSession().createCriteria(SelectionMarker.class)
-                .add(Restrictions.ilike("name", token, MatchMode.START))
-                .setMaxResults(limit)
-                .setProjection(Projections.distinct(Projections.property("name")))
-                .list();
-        return new HashSet<>(result);
+    public List<String> getMatchingSelectionMarkers(String token, int limit) throws DAOException {
+        try {
+            return currentSession().createCriteria(SelectionMarker.class)
+                    .add(Restrictions.ilike("name", token, MatchMode.ANYWHERE))
+                    .setMaxResults(limit)
+                    .setProjection(Projections.distinct(Projections.property("name")))
+                    .list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 
-    public Set<String> getMatchingPlasmidField(AutoCompleteField field, String token, int limit) throws DAOException {
+    public List<String> getMatchingPlasmidField(AutoCompleteField field, String token, int limit) throws DAOException {
         String fieldString;
         switch (field) {
             case ORIGIN_OF_REPLICATION:
@@ -59,15 +68,19 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 break;
         }
 
-        List result = currentSession().createCriteria(SelectionMarker.class)
-                .add(Restrictions.ilike(fieldString, token, MatchMode.START))
-                .setMaxResults(limit)
-                .setProjection(Projections.distinct(Projections.property("name")))
-                .list();
-        return new HashSet<>(result);
+        try {
+            return currentSession().createCriteria(Plasmid.class)
+                    .add(Restrictions.ilike(fieldString, token, MatchMode.START))
+                    .setMaxResults(limit)
+                    .setProjection(Projections.distinct(Projections.property(fieldString)))
+                    .list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 
-    public Set<String> getMatchingEntryPartNumbers(String token, int limit, Set<String> include) throws DAOException {
+    public List<String> getMatchingEntryPartNumbers(String token, int limit, Set<String> include) throws DAOException {
         try {
             Criteria criteria = currentSession().createCriteria(Entry.class)
                     .add(Restrictions.ilike("partNumber", token, MatchMode.ANYWHERE));
@@ -77,7 +90,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             if (include != null && !include.isEmpty()) {
                 criteria.add(Restrictions.in("recordType", include));
             }
-            return new HashSet<>(criteria.list());
+            return criteria.list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -663,7 +676,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * links are stored in a join table in the form [entry_id, linked_entry_id] which is used
      * to represent a parent child reln. This method returns the parents in the reln
      */
-    @SuppressWarnings("unchecked")
     public List<Entry> getParents(long entryId) throws DAOException {
         return currentSession().createCriteria(Entry.class)
                 .createAlias("linkedEntries", "link")
