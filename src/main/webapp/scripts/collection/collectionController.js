@@ -326,8 +326,7 @@ angular.module('ice.collection.controller', [])
             $scope.params.offset = ($scope.params.currentPage - 1) * $scope.params.limit;
             Util.get("rest/" + resource + "/" + $scope.params.folderId + "/entries", function (result) {
                 if (resource == "collections") {
-                    $scope.folder = {entries: result.data};
-                    $scope.params.count = result.resultCount;
+                    $scope.folder = {entries: result.data, count: result.resultCount};
                 } else {
                     // retrieved folders
                     $scope.folder = result;
