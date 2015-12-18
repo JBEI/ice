@@ -37,6 +37,7 @@ public class FolderResource extends RestResource {
     /**
      * Creates a new folder with the details specified in the parameter.
      * The default type for the folder is <code>PRIVATE</code> and is owned by the user creating it
+     *
      * @param folder details of the folder to create
      * @return information about the created folder including the unique identifier
      */
@@ -56,11 +57,17 @@ public class FolderResource extends RestResource {
         return controller.getPublicFolders();
     }
 
+    /**
+     * Retrieve specified folder resource
+     *
+     * @param folderId unique folder resource identifier
+     * @return folder specified by resource id, if the user making request has appropriate privileges
+     */
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFolder(@PathParam("id") long folderId) {
-        String userId = getUserId();
+        String userId = requireUserId();
         UserFolder folder = new UserFolder(userId);
         return super.respond(folder.getFolder(folderId));
     }
@@ -72,12 +79,14 @@ public class FolderResource extends RestResource {
     @Path("/{id}")
     public Response update(@PathParam("id") final long folderId,
                            final FolderDetails details) {
-        final String userId = getUserId();
+        final String userId = requireUserId();
         final FolderDetails resp = controller.update(userId, folderId, details);
         return super.respond(Response.Status.OK, resp);
     }
 
     /**
+     * Deletes the specified folder resource
+     *
      * @return the details of the deleted collection
      */
     @DELETE
@@ -98,21 +107,20 @@ public class FolderResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addSelectedEntriesToFolder(final EntrySelection entrySelection) {
-        final String userId = getUserId();
+        final String userId = requireUserId();
         final FolderContents folderContents = new FolderContents();
         folderContents.addEntrySelection(userId, entrySelection);
         return super.respond(true);
     }
 
     /**
-     * @return Response indicating success or failure
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries")
-    public Response removeEntriesFromFolder(final EntrySelection entrySelection,
-                                            @PathParam("id") final long folderId) {
+    public Response removeEntriesFromFolder(@PathParam("id") final long folderId,
+                                            final EntrySelection entrySelection) {
         final String userId = getUserId();
         if (controller.removeFolderContents(userId, folderId, entrySelection)) {
             return respond(Response.Status.OK);

@@ -302,7 +302,7 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
         }, {canEdit: 'true'});
     };
 
-    //init
+    // init
     $scope.selectedFolders = [];
     $scope.newFolder = {creating: false};
 
@@ -347,25 +347,24 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
             return;
         }
 
-        Util.update("rest/folders", $scope.newFolder, null, function (result) {
+        Util.post("rest/folders", $scope.newFolder, function (result) {
             $scope.newFolder = {creating: false};
             $scope.getPersonalFolders();
         });
     };
 
-    //// updates the counts for personal collection to indicate items removed/added
-    //$scope.updateSelectedFolderCounts = function () {
-    //    var selectedFolder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
-    //    Util.list("rest/collections/" + selectedFolder.toUpperCase() + "/folders", function (result) {
-    //        if (result) {
-    //            $scope.selectedCollectionFolders = result;
-    //        }
-    //    });
-    //};
+    // updates the counts for personal collection to indicate items removed/added
+    $scope.updateSelectedFolderCounts = function () {
+        var selectedFolder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
+        Util.list("rest/collections/" + selectedFolder.toUpperCase() + "/folders", function (result) {
+            if (result) {
+                $scope.selectedCollectionFolders = result;
+            }
+        });
+    };
 
-    // select a folder in the pull down
+    // folder selected by user in the pop up
     $scope.selectFolderForMoveTo = function (folder, $event) {
-        console.log("selected", folder);
 
         if ($event) {
             $event.preventDefault();
@@ -407,12 +406,10 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
                 }
             });
         } else {
-            Util.post("rest/folders", entrySelection, function (res) {
+            // add to folder (see entrySelection) for details
+            Util.update("rest/folders", entrySelection, {}, function (res) {
                 if (res) {
-                    // todo : duplicated code
-                    console.log(res);
-                    // result contains list of destination folders
-
+                    $scope.updateSelectedFolderCounts();
                     $scope.closeModal(res);
                 }
             });

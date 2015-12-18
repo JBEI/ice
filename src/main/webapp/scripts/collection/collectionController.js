@@ -398,7 +398,6 @@ angular.module('ice.collection.controller', [])
                 resource = "collections";
             else
                 resource = "folders";
-            console.log("folderId:", subCollection, ", resource: " + resource);
 
             var context = EntryContextUtil.getContext();
             if (context) {

@@ -21,10 +21,6 @@
         </small>
     </div>
 
-    <div style="padding: 8px; border-bottom: 1px solid #AAAABB">
-        <a href="">Personal folder</a>
-    </div>
-
     <div style="max-height: 200px; overflow: auto">
         <!--displays list of folders that the user can add entries to to-->
         <span class="pad-8" ng-if="!userFolders || !userFolders.length">
@@ -55,11 +51,13 @@
     </button>
 
     <div ng-if="newFolder.creating" class="pull-left">
-        <input type="text" class="input_box font-11em" maxlength="35" style="padding: 2px;"
-               placeholder="Enter folder name" ng-model="newFolder.folderName">
+        <form ng-submit="submitNewFolderForCreation()">
+            <input type="text" class="input_box font-11em" maxlength="35" style="padding: 2px;"
+                   placeholder="Enter folder name" ng-model="newFolder.folderName">
 
-        <button class="btn btn-xs btn-primary" ng-click="submitNewFolderForCreation()">Create</button>
-        <button class="btn btn-xs btn-default" ng-click="newFolder.creating=false">Cancel</button>
+            <button class="btn btn-xs btn-primary" type="submit">Create</button>
+            <button class="btn btn-xs btn-default" type="cancel" ng-click="newFolder.creating=false">Cancel</button>
+        </form>
     </div>
 
     <button class="btn btn-sm btn-primary pull-right" ng-disabled="selectedFolders.length===0"
