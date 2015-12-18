@@ -7,6 +7,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
+import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
@@ -33,11 +34,53 @@ public class FolderContents {
     private FolderDAO folderDAO = DAOFactory.getFolderDAO();
     private FolderAuthorization folderAuthorization = new FolderAuthorization();
     private PermissionsController permissionsController = new PermissionsController();
+    private AccountController accountController = new AccountController();
 
+    /**
+     * Adds entries in the selection context, to specified folders
+     *
+     * @param userId        unique identifier for user making request
+     * @param entryLocation entry selection context which also contains the folders to
+     *                      add the entries obtained from the context to
+     * @return list of folders that the entries where added to. They should correspond to the specified
+     * folders in the selection context
+     */
     public List<FolderDetails> addEntrySelection(String userId, EntrySelection entryLocation) {
         Entries retriever = new Entries();
         List<Long> entries = retriever.getEntriesFromSelectionContext(userId, entryLocation);
         return addEntriesToFolders(userId, entries, entryLocation.getDestination());
+    }
+
+    /**
+     * Removes the specified contents of a folder, optionally adding them to another folder
+     *
+     * @param userId    unique identifier for user making request
+     * @param folderId  unique identifier for folder whose (specified) entries are being removed
+     * @param selection wrapper around the selection context for the contents
+     * @param move      true, if the contents are to be added to another (set of) folder(s) (which should be specified in
+     *                  <code>selection</code> parameter)
+     * @return true, if action completed successfully; false otherwise
+     */
+    public boolean removeFolderContents(String userId, long folderId, EntrySelection selection, boolean move) {
+        // remove entries from specified folder
+        boolean isAdministrator = accountController.isAdministrator(userId);
+        Folder folder = folderDAO.get(folderId);
+
+        if (folder.getType() == FolderType.PUBLIC && !isAdministrator) {
+            String errMsg = userId + ": cannot modify folder " + folder.getName();
+            throw new PermissionException(errMsg);
+        }
+
+        Entries entries = new Entries();
+        List<Long> entryIds = entries.getEntriesFromSelectionContext(userId, selection);
+        boolean successRemove = folderDAO.removeFolderEntries(folder, entryIds) != null;
+        if (!move)
+            return successRemove;
+
+        // add to specified folder
+        selection.setFolderId(Long.toString(folderId));
+        List<FolderDetails> details = addEntrySelection(userId, selection);
+        return !details.isEmpty();
     }
 
     /**
@@ -146,7 +189,6 @@ public class FolderContents {
      */
     protected ArrayList<AccessPermission> getAndFilterFolderPermissions(String userId, Folder folder) {
         ArrayList<AccessPermission> permissions = permissionsController.retrieveSetFolderPermission(folder, false);
-        AccountController accountController = new AccountController();
         if (accountController.isAdministrator(userId) || folder.getOwnerEmail().equalsIgnoreCase(userId)) {
             return permissions;
         }

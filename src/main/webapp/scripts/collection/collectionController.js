@@ -431,7 +431,7 @@ angular.module('ice.collection.controller', [])
             }
         };
 
-        $scope.$on("RefreshAfterDeletion", function (event, data) {
+        $rootScope.$on("RefreshAfterDeletion", function (event, data) {
             $scope.params.currentPage = 1;
             $scope.folderPageChange();
         });

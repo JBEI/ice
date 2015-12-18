@@ -10,13 +10,12 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     $scope.entrySelected = false;
 
     // reset all on state change
-    $rootScope.$on('$stateChangeStart',
-        function (event, toState, toParams, fromState, fromParams) {
-            $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
-            $scope.entrySelected = false;
-            $rootScope.hasError = true;
-            Selection.reset();
-        });
+    $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
+        $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
+        $scope.entrySelected = false;
+        $rootScope.hasError = true;
+        Selection.reset();
+    });
 
     var sid = $cookieStore.get("sessionId");
     var folders = Folders();
@@ -74,37 +73,19 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         return entrySelection;
     };
 
-    $scope.addEntriesToFolders = function () {
-        var entrySelection = getEntrySelection();
-        folders.addSelectionToFolders({}, entrySelection, function (updatedFolders) {
-            if (updatedFolders) {
-                // result contains list of destination folders
-                $scope.updateSelectedCollectionFolders();
-                Selection.reset();
-                Util.setFeedback('Entries successfully added', 'success');
-            }
-        });
-    };
-
     $scope.removeEntriesFromFolder = function () {
         var entrySelection = getEntrySelection();
-        Util.update("rest/folders/" + $scope.collectionFolderSelected.id + "/entries",
-            entrySelection, {}, function (result) {
+        Util.post("rest/folders/" + $scope.collectionFolderSelected.id + "/entries",
+            entrySelection, function (result) {
                 if (result) {
-                    $scope.$broadcast("RefreshAfterDeletion");  // todo
+                    $rootScope.$broadcast("RefreshAfterDeletion");  // todo
                     $scope.$broadcast("UpdateCollectionCounts");
                     $scope.updateSelectedCollectionFolders();
                     Selection.reset();
                     var word = entrySelection.entries.length == 1 ? 'Entry' : "Entries";
                     Util.setFeedback(word + ' successfully removed', 'success');
                 }
-            });
-    };
-
-    // remove entries from folder and add to selected folders
-    $scope.moveEntriesToFolders = function () {
-        $scope.removeEntriesFromFolder();
-        $scope.addEntriesToFolders();
+            }, {move: false});
     };
 
     // deletes the selected entries (or current entry)
@@ -112,7 +93,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     $scope.deleteSelectedEntries = function () {
         var entries = Selection.getSelectedEntries();
         Util.post("rest/parts/trash", entries, function () {
-            $scope.$broadcast("RefreshAfterDeletion");
+            $rootScope.$broadcast("RefreshAfterDeletion");
             $scope.$broadcast("UpdateCollectionCounts");
             $location.path("folders/personal");
         });
@@ -228,7 +209,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         });
 
         modalInstance.result.then(function (result) {
-            console.log("closed with ", result);
             if (result) {
                 $scope.$broadcast("UpdateCollectionCounts");
                 $scope.updateSelectedCollectionFolders();
@@ -291,7 +271,7 @@ iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $u
     $scope.retrieveRegistryPartners();
 });
 
-iceControllers.controller('AddToFolderController', function ($scope, $uibModalInstance, Util, FolderSelection,
+iceControllers.controller('AddToFolderController', function ($rootScope, $scope, $uibModalInstance, Util, FolderSelection,
                                                              Selection, move, selectedFolder, $stateParams) {
     $scope.getPersonalFolders = function () {
         Util.list("rest/collections/PERSONAL/folders", function (result) {
@@ -385,31 +365,21 @@ iceControllers.controller('AddToFolderController', function ($scope, $uibModalIn
     // based on user selected, this action may remove the entries from the source folder first
     $scope.performAction = function () {
         var entrySelection = getEntrySelection();
-
         if (move === true && selectedFolder) {
-
-            // remove from current folder
-            Util.update("rest/folders/" + selectedFolder.id + "/entries", entrySelection, {}, function (result) {
-                if (result) {
-                    // todo : duplicated code
-                    Util.post("rest/folders", entrySelection, function (res) {
-                        if (res) {
-                            console.log(res);
-                            // result contains list of destination folders
-                            $scope.$broadcast("RefreshAfterDeletion");  // todo
-                            $scope.$broadcast("UpdateCollectionCounts");
-                            $scope.updateSelectedFolderCounts();
-                            Selection.reset();
-                            $scope.closeModal(res);
-                        }
-                    });
-                }
-            });
+            Util.post("rest/folders/" + selectedFolder.id + "/entries", entrySelection, function (result) {
+                $rootScope.$emit("RefreshAfterDeletion");
+                $scope.$broadcast("UpdateCollectionCounts");
+                $scope.updateSelectedFolderCounts();
+                Selection.reset();
+                $scope.closeModal(result);
+            }, {move: true});
         } else {
             // add to folder (see entrySelection) for details
-            Util.update("rest/folders", entrySelection, {}, function (res) {
+            Util.update("rest/folders/entries", entrySelection, {}, function (res) {
                 if (res) {
+                    $rootScope.$emit("RefreshAfterDeletion");
                     $scope.updateSelectedFolderCounts();
+                    Selection.reset();
                     $scope.closeModal(res);
                 }
             });
@@ -503,7 +473,6 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
         $location.path("login");
     }
 });
-
 
 iceControllers.controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
     var message = Message($cookieStore.get('sessionId'));

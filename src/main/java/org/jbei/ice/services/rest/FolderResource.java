@@ -68,18 +68,23 @@ public class FolderResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFolder(@PathParam("id") long folderId) {
         String userId = requireUserId();
+        log(userId, "get folder \"" + folderId + "\"");
         UserFolder folder = new UserFolder(userId);
         return super.respond(folder.getFolder(folderId));
     }
 
     /**
-     * @return Response with updated collection info
+     * Updates the specified folder resource
+     *
+     * @param folderId resource identifier of folder to be updated
+     * @param details  details for update
      */
     @PUT
     @Path("/{id}")
     public Response update(@PathParam("id") final long folderId,
                            final FolderDetails details) {
         final String userId = requireUserId();
+        log(userId, "update folder \"" + folderId + "\"");
         final FolderDetails resp = controller.update(userId, folderId, details);
         return super.respond(Response.Status.OK, resp);
     }
@@ -100,32 +105,41 @@ public class FolderResource extends RestResource {
     }
 
     /**
-     * Adds entries referenced in the <code>entrySelection</code> object
+     * Adds contents referenced in the <code>entrySelection</code> object
      * to the folders also referenced in the same object
      */
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addSelectedEntriesToFolder(final EntrySelection entrySelection) {
+    @Path("/entries")
+    public Response addSelectedEntriesToFolders(final EntrySelection entrySelection) {
         final String userId = requireUserId();
+        log(userId, "adding entries to folders");
         final FolderContents folderContents = new FolderContents();
         folderContents.addEntrySelection(userId, entrySelection);
         return super.respond(true);
     }
 
     /**
+     * Modifies the contents of a folder either by removing or moving entries as determined by the <code>move</code>
+     * parameter
+     *
+     * @param folderId       resource identifier for folder whose contents are to be modified
+     * @param move           whether to move the specified entries or simply remove them from the folder
+     * @param entrySelection wrapper around context for modification
      */
-    @PUT
+    @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries")
-    public Response removeEntriesFromFolder(@PathParam("id") final long folderId,
-                                            final EntrySelection entrySelection) {
-        final String userId = getUserId();
-        if (controller.removeFolderContents(userId, folderId, entrySelection)) {
-            return respond(Response.Status.OK);
-        }
-        return respond(Response.Status.INTERNAL_SERVER_ERROR);
+    public Response modifyFolderEntries(@PathParam("id") long folderId,
+                                        @DefaultValue("false") @QueryParam("move") boolean move,
+                                        EntrySelection entrySelection) {
+        String userId = requireUserId();
+        super.log(userId, "modifying entries for folder " + folderId);
+        FolderContents folderContents = new FolderContents();
+        boolean success = folderContents.removeFolderContents(userId, folderId, entrySelection, move);
+        return super.respond(success);
     }
 
     /**

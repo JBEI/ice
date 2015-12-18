@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.folder;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
@@ -12,8 +11,6 @@ import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
-import org.jbei.ice.lib.entry.Entries;
-import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
@@ -164,20 +161,6 @@ public class FolderController {
             folders.add(details);
         }
         return folders;
-    }
-
-    public boolean removeFolderContents(String userId, long folderId, EntrySelection selection) {
-        boolean isAdministrator = accountController.isAdministrator(userId);
-        Folder folder = dao.get(folderId);
-
-        if (folder.getType() == FolderType.PUBLIC && !isAdministrator) {
-            String errMsg = userId + ": cannot modify folder " + folder.getName();
-            throw new PermissionException(errMsg);
-        }
-
-        Entries entries = new Entries();
-        List<Long> entryIds = entries.getEntriesFromSelectionContext(userId, selection);
-        return dao.removeFolderEntries(folder, entryIds) != null;
     }
 
     public FolderDetails update(String userId, long folderId, FolderDetails details) {
