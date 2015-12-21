@@ -136,9 +136,9 @@
                         <input type="text" ng-model="activePart[field.schema]" placeholder="mm/dd/yyyy"
                                style="width: 205px;"
                                ng-focus="field.edit=true" ng-blur="field.edit=false">
-            <span class="input-group-addon" style="padding:3px; background-color: #f1f1f1;width: 19px">
-                <i class="fa fa-calendar"></i>
-            </span>
+                        <span class="input-group-addon" style="padding:3px; background-color: #f1f1f1; width: 19px">
+                            <i class="fa fa-calendar"></i>
+                        </span>
                     </div>
                 </div>
 
@@ -154,7 +154,7 @@
                     <input type="text" ng-model="activePart[field.schema]" maxlength="150"
                            ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                            placeHolder={{field.placeHolder}} style="width:205px;" typeahead-loading="loadingData"
-                           uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue"
+                           uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue)"
                            ng-change="field.invalid=false" ng-focus="field.edit=true" ng-blur="field.edit=false">
                     <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
                 </div>

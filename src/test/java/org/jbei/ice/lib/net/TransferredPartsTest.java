@@ -48,7 +48,7 @@ public class TransferredPartsTest {
         Assert.assertNull(parts.receiveTransferredEntry(data));
 
         // retrieve list of transferred
-        List<Entry> entries = DAOFactory.getEntryDAO().getByVisibility(null, Visibility.TRANSFERRED, ColumnField.CREATED, false, 0, 1000);
+        List<Entry> entries = DAOFactory.getEntryDAO().getByVisibility(null, Visibility.TRANSFERRED, ColumnField.CREATED, false, 0, 1000, null);
         Assert.assertNotNull(entries);
         Assert.assertTrue(entries.size() == 1);
     }

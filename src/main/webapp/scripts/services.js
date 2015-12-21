@@ -707,8 +707,6 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
                 headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
             },
 
-            // retrieves folder contents. folderId could be a string such as "personal"
-            // "available", "shared", "upload"
             folder: {
                 method: 'GET',
                 url: "rest/folders/:folderId/entries",

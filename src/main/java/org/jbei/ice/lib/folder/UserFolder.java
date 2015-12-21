@@ -7,12 +7,17 @@ import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Folder;
 
 /**
+ * Represents a folder created or owned by a user
+ *
  * @author Hector Plahar
  */
 public class UserFolder {
 
     private final String userId;
 
+    /**
+     * @param userId identifier for owner or created of the folder
+     */
     public UserFolder(String userId) {
         this.userId = userId;
     }

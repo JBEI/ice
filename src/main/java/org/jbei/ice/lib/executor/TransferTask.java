@@ -3,7 +3,7 @@ package org.jbei.ice.lib.executor;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.entry.EntryRetriever;
+import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.net.RemoteTransfer;
 import org.jbei.ice.storage.DAOFactory;
@@ -34,7 +34,7 @@ public class TransferTask extends Task {
         if (account.getType() != AccountType.ADMIN)
             return;
 
-        EntryRetriever retriever = new EntryRetriever();
+        Entries retriever = new Entries();
         List<Long> entries = retriever.getEntriesFromSelectionContext(account.getEmail(), entrySelection);
         Logger.info(userId + ": requesting transfer of " + entries.size() + " entries to " + remoteId);
         List<PartData> dataList = transfer.getPartsForTransfer(entries);

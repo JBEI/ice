@@ -417,28 +417,6 @@ public class AccountController {
     }
 
     /**
-     * Attempts to load the ICE Authentication Backend from database configuration.
-     *
-     * @return an IAuthentication backend
-     */
-    public IAuthentication getAuthenticationBackend() {
-        final String clazzName = Utils.getConfigValue(ConfigurationKey.AUTHENTICATION_BACKEND);
-        try {
-            final Class<?> clazz = Class.forName(clazzName);
-            if (IAuthentication.class.isAssignableFrom(clazz)) {
-                return (IAuthentication) clazz.newInstance();
-            }
-        } catch (final ClassNotFoundException e) {
-            Logger.error("Failed to load class " + clazzName);
-        } catch (final InstantiationException e) {
-            Logger.error("Failed to instantiate class " + clazzName);
-        } catch (final IllegalAccessException e) {
-            Logger.error("Inaccessible class " + clazzName);
-        }
-        return new LocalAuthentication();
-    }
-
-    /**
      * Authenticate a user in the database.
      * <p>
      * Using the {@link org.jbei.ice.lib.account.authentication.IAuthentication} specified in the

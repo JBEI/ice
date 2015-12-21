@@ -6,7 +6,6 @@ import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Values for auto complete fields
@@ -37,11 +36,10 @@ public class AutoCompleteFieldValues {
      */
     public List<String> getMatchingValues(String token, int limit) {
         token = token.replaceAll("'", "");
-        Set<String> results;
+        List<String> results;
         switch (this.autoCompleteField) {
             case SELECTION_MARKERS:
-                results = entryDAO.getMatchingSelectionMarkers(token, limit);
-                break;
+                return entryDAO.getMatchingSelectionMarkers(token, limit);
 
             case ORIGIN_OF_REPLICATION:
             case PROMOTERS:
@@ -54,7 +52,7 @@ public class AutoCompleteFieldValues {
                 break;
 
             default:
-                results = new HashSet<>();
+                return new ArrayList<>();
         }
 
         // process to remove commas

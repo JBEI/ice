@@ -16,6 +16,7 @@ import java.util.Set;
 
 /**
  * Entries that have been shared with the specified user
+ * or with groups that the specified user is a member of
  *
  * @author Hector Plahar
  */
@@ -31,20 +32,20 @@ public class SharedEntries {
         this.entryDAO = DAOFactory.getEntryDAO();
     }
 
-    public long getNumberofEntries() {
+    public long getNumberofEntries(String filter) {
         GroupController groupController = new GroupController();
         Group publicGroup = groupController.createOrRetrievePublicGroup();
         Set<Group> accountGroups = account.getGroups();
         accountGroups.remove(publicGroup);
-        return this.entryDAO.sharedEntryCount(account, accountGroups);
+        return this.entryDAO.sharedEntryCount(account, accountGroups, filter);
     }
 
-    public List<PartData> getEntries(ColumnField field, boolean asc, int start, int limit) {
+    public List<PartData> getEntries(ColumnField field, boolean asc, int start, int limit, String filter) {
         GroupController groupController = new GroupController();
         Group publicGroup = groupController.createOrRetrievePublicGroup();
         Set<Group> accountGroups = account.getGroups();
         accountGroups.remove(publicGroup);
-        List<Entry> entries = this.entryDAO.sharedWithUserEntries(account, accountGroups, field, asc, start, limit);
+        List<Entry> entries = this.entryDAO.sharedWithUserEntries(account, accountGroups, field, asc, start, limit, filter);
 
         ArrayList<PartData> data = new ArrayList<>();
         for (Entry entry : entries) {

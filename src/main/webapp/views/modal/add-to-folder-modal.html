@@ -8,7 +8,7 @@
     <div ng-show="userFolders" class="input-group"
          style="padding: 5px; border-bottom: 1px solid #AAAABB; background-color: #f1f1f1">
         <span class="input-group-addon" style="padding: 1px 5px 1px 5px; border: 1px solid #BBBBBB;
-        background-color: #fff; border-radius: 0;">
+        background-color: #dcdcdc; border-radius: 0;">
             <i class="fa fa-filter"></i>
         </span>
         <input type="text" ng-model="search.name" class="input_box" style="border-width: 1px 1px 1px 0"
@@ -51,11 +51,13 @@
     </button>
 
     <div ng-if="newFolder.creating" class="pull-left">
-        <input type="text" class="input_box font-11em" maxlength="35" style="padding: 2px;"
-               placeholder="Enter folder name" ng-model="newFolder.folderName">
+        <form ng-submit="submitNewFolderForCreation()">
+            <input type="text" class="input_box font-11em" maxlength="35" style="padding: 2px;"
+                   placeholder="Enter folder name" ng-model="newFolder.folderName">
 
-        <button class="btn btn-xs btn-primary" ng-click="submitNewFolderForCreation()">Create</button>
-        <button class="btn btn-xs btn-default" ng-click="newFolder.creating=false">Cancel</button>
+            <button class="btn btn-xs btn-primary" type="submit">Create</button>
+            <button class="btn btn-xs btn-default" type="cancel" ng-click="newFolder.creating=false">Cancel</button>
+        </form>
     </div>
 
     <button class="btn btn-sm btn-primary pull-right" ng-disabled="selectedFolders.length===0"

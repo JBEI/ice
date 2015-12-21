@@ -50,7 +50,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Rest parts resource
+ * Rest resource for biological parts
  *
  * @author Hector Plahar
  */
@@ -58,7 +58,6 @@ import java.util.List;
 public class PartResource extends RestResource {
 
     private EntryController controller = new EntryController();
-    private EntryRetriever retriever = new EntryRetriever();
     private PermissionsController permissionsController = new PermissionsController();
     private AttachmentController attachmentController = new AttachmentController();
     private SequenceController sequenceController = new SequenceController();
@@ -92,7 +91,6 @@ public class PartResource extends RestResource {
         }
     }
 
-
     /**
      * Returns the folders that an entry is contained in (filtered by permissions).
      */
@@ -108,6 +106,8 @@ public class PartResource extends RestResource {
     }
 
     /**
+     * Retrieves the information shown in the tooltip view
+     * for entries
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -128,7 +128,8 @@ public class PartResource extends RestResource {
     public List<AccessPermission> getPermissions(@Context final UriInfo info,
                                                  @PathParam("id") final String id) {
         final String userId = getUserId();
-        return retriever.getEntryPermissions(userId, id);
+        Entries entries = new Entries();
+        return entries.getEntryPermissions(userId, id);
     }
 
     /**
@@ -591,6 +592,17 @@ public class PartResource extends RestResource {
         return Response.serverError().build();
     }
 
+    /**
+     * Creates a new entry. If the <code>sourceId</code> parameter is set, the new entry is a copy
+     * of the source id (if found) otherwise the new entry is created from the data contained in the
+     * <code>partData</code>
+     *
+     * @param sourceId optional unique identifier for an existing part to copy. If not set, the <code>partData</code>
+     *                 parameter must be set
+     * @param partData optional data for creating new entry. if not set, then the <code>sourceId</code> must
+     *                 be set
+     * @return wrapper around identifier for newly created part which can be used to retrieve it
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

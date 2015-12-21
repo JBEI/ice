@@ -6,9 +6,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * Wrapper around a list of data transfer models in response to a paging request
+ *
  * @author Hector Plahar
  */
-public class Results<T> implements IDataTransferModel {
+public class Results<T extends IDataTransferModel> implements IDataTransferModel {
 
     private long resultCount;
     private List<T> data;
@@ -25,11 +27,14 @@ public class Results<T> implements IDataTransferModel {
         this.resultCount = resultCount;
     }
 
+    /**
+     * @return list of data models from a retrieve call
+     */
     public List<T> getData() {
         return data;
     }
 
-    public void setData(LinkedList<T> data) {
+    public void setData(List<T> data) {
         this.data = data;
     }
 }

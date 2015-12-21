@@ -11,7 +11,6 @@ import org.jbei.ice.storage.IDataTransferModel;
 public enum ConfigurationKey implements IDataTransferModel {
 
     APPLICATION_VERSION("4.0.0"),
-    DATABASE_SCHEMA_VERSION(""),
     TEMPORARY_DIRECTORY("/tmp"),
     DATA_DIRECTORY("data"),
 
@@ -32,9 +31,7 @@ public enum ConfigurationKey implements IDataTransferModel {
     PASSWORD_CHANGE_ALLOWED("YES"),
     PROFILE_EDIT_ALLOWED("YES"),
     JOIN_WEB_OF_REGISTRIES("NO"),
-    WEB_OF_REGISTRIES_MASTER("registry.jbei.org"),
-
-    AUTHENTICATION_BACKEND("org.jbei.ice.lib.account.authentication.LocalAuthentication");
+    WEB_OF_REGISTRIES_MASTER("registry.jbei.org");
 
     private String defaultValue;
 

@@ -619,8 +619,9 @@ angular.module('ice.entry.controller', [])
             $scope.part = EntryService.getTypeData($scope.part);
 
             // create or update the part depending on whether there is a current part id
+            // which might be the case if a sequence is uploaded first
             if ($scope.part.id) {
-                entry.update({partId: $scope.part.id}, $scope.part, function (result) {
+                Util.update("rest/parts/" + $scope.part.id, $scope.part, {}, function (result) {
                     $location.path('/entry/' + result.id);
                 });
             } else {
@@ -1302,25 +1303,40 @@ angular.module('ice.entry.controller', [])
         $scope.quickEdit = {};
 
         $scope.quickEditEntry = function (field) {
-            // dirty is used to flag that the field's value has been modified to
-            // prevent saving unchanged values on blur
-
             field.errorUpdating = false;
-            if (!field.dirty) {
-                return;
+            field.updating = true;
+            field.invalid = false;
+
+            if (field.inputType === "autoCompleteAdd") {
+                $scope.quickEdit[field.schema] = $scope.convertedAutoCompleteAdd;
             }
 
-            field.updating = true;
+            // validate
+            var canSubmit = EntryService.validateFields($scope.quickEdit, [field]);
+            if (!canSubmit) {
+                field.updating = false;
+                return;
+            }
+            // getTypeData is not converting selection markers for some reason
+            if (field.inputType === "autoCompleteAdd") {
+                $scope.entry[field.schema] = [];
+                angular.forEach($scope.convertedAutoCompleteAdd, function (val) {
+                    if (val.value.trim() == "")
+                        return;
 
-            // update the main entry with quickEdit (which is the model)
-            $scope.entry[field.schema] = $scope.quickEdit[field.schema];
-            if (field.inputType === 'withEmail') {
-                $scope.entry[field.schema + 'Email'] = $scope.quickEdit[field.schema + 'Email'];
+                    $scope.entry[field.schema].push(val.value);
+                });
+            } else {
+                // update the main entry with quickEdit (which is the model)
+                $scope.entry[field.schema] = $scope.quickEdit[field.schema];
+                if (field.inputType === 'withEmail') {
+                    $scope.entry[field.schema + 'Email'] = $scope.quickEdit[field.schema + 'Email'];
+                }
             }
 
             $scope.entry = EntryService.getTypeData($scope.entry);
 
-            entry.update($scope.entry, function (result) {
+            Util.update("rest/parts/" + $scope.entry.id, $scope.entry, {}, function (result) {
                 field.edit = false;
 
                 if (result)
@@ -1331,7 +1347,22 @@ angular.module('ice.entry.controller', [])
             }, function (error) {
                 field.updating = false;
                 field.errorUpdating = true;
+                Util.setFeedback("Error updating entry", "danger")
             });
+        };
+
+        // converts an array of string (currently only for autoCompleteAdd) to object so it can be edited
+        $scope.checkConvertFieldToObject = function (field) {
+            $scope.convertedAutoCompleteAdd = [];
+            if (!angular.isArray($scope.entry[field.schema]))
+                return;
+
+            if (field.inputType !== 'autoCompleteAdd')
+                return;
+
+            for (var i = 0; i < $scope.entry[field.schema].length; i += 1) {
+                $scope.convertedAutoCompleteAdd[i] = {value: $scope.entry[field.schema][i]};
+            }
         };
 
         $scope.deleteCustomField = function (parameter) {
@@ -1367,6 +1398,7 @@ angular.module('ice.entry.controller', [])
             $location.path($scope.context.back);
         };
 
+        // removes linked parts
         $scope.removeLink = function (mainEntry, linkedEntry) {
             entry.removeLink({partId: mainEntry.id, linkId: linkedEntry.id}, function (result) {
                 var idx = mainEntry.linkedParts.indexOf(linkedEntry);
@@ -1378,7 +1410,17 @@ angular.module('ice.entry.controller', [])
             });
         };
 
-// file upload
+        // removes a value from an autoCompleteAdd field at the specified index
+        $scope.removeAutoCompleteAdd = function (index) {
+            $scope.convertedAutoCompleteAdd.splice(index, 1);
+        };
+
+        // add a new autoComplete add value at the specified index
+        $scope.addAutoCompleteAdd = function (index) {
+            $scope.convertedAutoCompleteAdd.splice(index + 1, 0, {value: ""});
+        };
+
+        // file upload
         var uploader = $scope.sequenceFileUpload = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "rest/file/sequence",
@@ -1436,6 +1478,7 @@ angular.module('ice.entry.controller', [])
                     console.error(error);
                 })
         }
-    })
+    }
+)
 ;
 
