@@ -76,7 +76,7 @@ public class VisibleEntries {
         GroupController controller = new GroupController();
         Group everybodyGroup = controller.createOrRetrievePublicGroup();
         accountGroups.add(everybodyGroup);
-        return dao.visibleEntryCount(account, accountGroups);
+        return dao.visibleEntryCount(account, accountGroups, filter);
     }
 
     public long getEntryCount() {

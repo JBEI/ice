@@ -40,7 +40,7 @@ public class Collections {
 
         collection.setPersonal(getNumberOfOwnerEntries(userId));
         SharedEntries sharedEntries = new SharedEntries(userId);
-        collection.setShared(sharedEntries.getNumberofEntries());
+        collection.setShared(sharedEntries.getNumberofEntries(null));
         collection.setDrafts(entryDAO.getByVisibilityCount(userId, Visibility.DRAFT, null));
         if (account.getType() == AccountType.ADMIN)
             collection.setPending(entryDAO.getPendingCount());

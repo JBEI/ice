@@ -110,7 +110,7 @@ public class FolderController {
 
         EntryDAO entryDAO = DAOFactory.getEntryDAO();
         Set<Entry> results = entryDAO.retrieveVisibleEntries(null, groups, sort, asc, offset, limit, null);
-        long visibleCount = entryDAO.visibleEntryCount(null, groups);
+        long visibleCount = entryDAO.visibleEntryCount(null, groups, null);
 
         FolderDetails details = new FolderDetails();
         details.setCount(visibleCount);

@@ -4,6 +4,7 @@ import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.OwnerEntries;
+import org.jbei.ice.lib.entry.SharedEntries;
 import org.jbei.ice.lib.entry.VisibleEntries;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
@@ -66,6 +67,9 @@ public class CollectionEntries {
             case AVAILABLE:
                 return this.getAvailableEntries(field, asc, offset, limit, filter);
 
+            case SHARED:
+                return this.getSharedEntries(field, asc, offset, limit, filter);
+
             case DELETED:
                 return this.getEntriesByVisibility(Visibility.DELETED, field, asc, offset, limit, filter);
 
@@ -118,6 +122,17 @@ public class CollectionEntries {
         VisibleEntries visibleEntries = new VisibleEntries(userId);
         List<PartData> entries = visibleEntries.getEntries(field, asc, offset, limit, filter);
         long count = visibleEntries.getEntryCount(filter);
+        Results<PartData> results = new Results<>();
+        results.setResultCount(count);
+        results.setData(entries);
+        return results;
+    }
+
+    protected Results<PartData> getSharedEntries(ColumnField field, boolean asc, int offset, int limit,
+                                                 String filter) {
+        SharedEntries sharedEntries = new SharedEntries(this.userId);
+        List<PartData> entries = sharedEntries.getEntries(field, asc, offset, limit, filter);
+        final long count = sharedEntries.getNumberofEntries(filter);
         Results<PartData> results = new Results<>();
         results.setResultCount(count);
         results.setData(entries);
