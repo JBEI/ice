@@ -16,6 +16,10 @@ import javax.persistence.*;
 
 public class RemotePermission implements DataModel {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    private long id;
+
     private Account account;    // local account performing the share
 
     @OneToOne(fetch = FetchType.EAGER)
@@ -28,6 +32,11 @@ public class RemotePermission implements DataModel {
 
     @Enumerated(value = EnumType.STRING)
     private org.jbei.ice.lib.access.AccessType accessType; //read or write
+
+    @Override
+    public long getId() {
+        return this.id;
+    }
 
     @Override
     public IDataTransferModel toDataTransferObject() {

@@ -26,7 +26,7 @@ public class BulkUpload implements DataModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
-    private Long id;
+    private long id;
 
     @Column(name = "name", length = 50)
     private String name;
@@ -62,8 +62,7 @@ public class BulkUpload implements DataModel {
             inverseJoinColumns = {@JoinColumn(name = "permission_id", nullable = false)})
     private Set<Permission> permissions = new HashSet<>();
 
-
-    public Long getId() {
+    public long getId() {
         return this.id;
     }
 

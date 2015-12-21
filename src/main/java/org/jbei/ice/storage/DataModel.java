@@ -5,5 +5,7 @@ package org.jbei.ice.storage;
  */
 public interface DataModel {
 
+    long getId();
+
     IDataTransferModel toDataTransferObject();
 }

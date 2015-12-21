@@ -22,7 +22,7 @@ public class Preference implements DataModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
-    private int id;
+    private long id;
 
     @ManyToOne
     @JoinColumn(name = "account_id")
@@ -40,10 +40,7 @@ public class Preference implements DataModel {
         this.value = value;
     }
 
-    public Preference() {
-    }
-
-    public int getId() {
+    public long getId() {
         return id;
     }
 
