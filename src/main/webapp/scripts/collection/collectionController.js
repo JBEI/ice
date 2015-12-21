@@ -68,7 +68,6 @@ angular.module('ice.collection.controller', [])
             });
         };
 
-
         // Menu count change handler
         $scope.$on("UpdateCollectionCounts", function (event) {
             $scope.updateCollectionCounts();
@@ -327,6 +326,7 @@ angular.module('ice.collection.controller', [])
             Util.get("rest/" + resource + "/" + $scope.params.folderId + "/entries", function (result) {
                 if (resource == "collections") {
                     $scope.folder = {entries: result.data, count: result.resultCount};
+                    $scope.params.count = result.resultCount; // used in context display
                 } else {
                     // retrieved folders
                     $scope.folder = result;
@@ -487,15 +487,19 @@ angular.module('ice.collection.controller', [])
                 $scope.params.offset = index;
             }
 
-            var offset = (($scope.params.currentPage - 1) * 15) + index;
+            var offset = (($scope.params.currentPage - 1) * $scope.params.limit) + index;
             EntryContextUtil.setContextCallback(function (offset, callback) {
                 $scope.params.offset = offset;
                 $scope.params.limit = 1;
 
-                Folders().folder($scope.params,
-                    function (result) {
+                Util.get("rest/" + resource + "/" + $scope.params.folderId + "/entries", function (result) {
+                    if (resource == "collections") {
+                        callback(result.data[0].id);
+                    } else {
                         callback(result.entries[0].id);
-                    });
+                    }
+                    $scope.loadingPage = false;
+                }, $scope.params);
             }, $scope.params.count, offset, "folders/" + $scope.params.folderId, $scope.params.sort);
 
             $location.path("entry/" + entry.id);
@@ -503,12 +507,9 @@ angular.module('ice.collection.controller', [])
 
         $scope.tooltipDetails = function (e) {
             $scope.currentTooltip = undefined;
-            entry.tooltip({partId: e.id},
-                function (result) {
-                    $scope.currentTooltip = result;
-                }, function (error) {
-                    console.error(error);
-                });
+            Util.get("rest/parts/" + e.id + "/tooltip", function (result) {
+                $scope.currentTooltip = result;
+            });
         };
 
         $scope.folderPopupTemplateUrl = "scripts/folder/template.html";
