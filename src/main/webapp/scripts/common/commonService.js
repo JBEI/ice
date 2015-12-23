@@ -53,10 +53,17 @@ angular.module('ice.common.service', [])
                 if (!type)
                     type = 'info';
 
+                if (type == 'error')
+                    type = "danger";
+
                 $rootScope.serverFeedback = {type: type, message: message};
             },
 
-            get: function (url, successHandler, queryParams) {
+            get: function (url, successHandler, queryParams, errorHandler) {
+                var errorCallback = this.handleError;
+                if (errorHandler)
+                    errorCallback = errorHandler;
+
                 if (!queryParams)
                     queryParams = {};
 
@@ -71,7 +78,7 @@ angular.module('ice.common.service', [])
                         method: 'GET',
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
                     }
-                }).get(successHandler, this.handleError);
+                }).get(successHandler, errorCallback);
             },
 
             // difference between this and get is "isArray"
