@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.collection;
+package org.jbei.ice.lib.folder.collection;
 
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.entry.PartData;

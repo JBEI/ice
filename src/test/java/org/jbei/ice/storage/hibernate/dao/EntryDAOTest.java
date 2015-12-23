@@ -2,6 +2,8 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.TestEntryCreator;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
@@ -114,9 +116,17 @@ public class EntryDAOTest {
         Assert.assertEquals(entry.getPartNumber(), result.getPartNumber());
     }
 
-
     @Test
-    public void testRetrieveVisibleEntries() throws Exception {
-
+    public void testGetByUniqueName() throws Exception {
+        Account account = AccountCreator.createTestAccount("testGetByUniqueName", false);
+        PartData data = new PartData(EntryType.PART);
+        data.setShortDescription("summary for test");
+        String uniqueName = "pTest" + account.getEmail();
+        data.setName(uniqueName);
+        data.setBioSafetyLevel(1);
+        EntryCreator creator = new EntryCreator();
+        creator.createPart(account.getEmail(), data);
+        Assert.assertNull(entryDAO.getByUniqueName("pTest"));
+        Assert.assertNotNull(entryDAO.getByUniqueName(uniqueName));
     }
 }

@@ -1,13 +1,7 @@
 package org.jbei.ice.lib.dto.folder;
 
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
-import org.jbei.ice.storage.IDataTransferModel;
-
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import org.jbei.ice.lib.folder.AbstractFolder;
 
 /**
  * Folder Transfer Object
@@ -15,36 +9,25 @@ import java.util.List;
  * @author Hector Plahar
  */
 
-public class FolderDetails implements IDataTransferModel, Comparable<FolderDetails> {
+public class FolderDetails extends AbstractFolder {
 
-    private long id;
     private String folderName;
     private long count;
     private String description;
     private boolean propagatePermission;
-    private List<PartData> entries = new LinkedList<>();
     private FolderType type;
     private AccountTransfer owner;    // owner or person sharing this folder
-    private ArrayList<AccessPermission> accessPermissions;
     private boolean publicReadAccess;
     private boolean canEdit;
-    private long created;
     private FolderDetails parent;
 
     public FolderDetails() {
+        super();
     }
 
     public FolderDetails(long id, String name) {
-        this.id = id;
+        super(id);
         this.folderName = name;
-    }
-
-    public long getId() {
-        return this.id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -71,14 +54,6 @@ public class FolderDetails implements IDataTransferModel, Comparable<FolderDetai
         this.description = description;
     }
 
-    public List<PartData> getEntries() {
-        return entries;
-    }
-
-    public void setEntries(List<PartData> entries) {
-        this.entries = entries;
-    }
-
     public FolderType getType() {
         return type;
     }
@@ -98,14 +73,6 @@ public class FolderDetails implements IDataTransferModel, Comparable<FolderDetai
         this.owner = owner;
     }
 
-    public ArrayList<AccessPermission> getAccessPermissions() {
-        return accessPermissions;
-    }
-
-    public void setAccessPermissions(ArrayList<AccessPermission> accessPermissions) {
-        this.accessPermissions = accessPermissions;
-    }
-
     public boolean isPropagatePermission() {
         return propagatePermission;
     }
@@ -122,10 +89,6 @@ public class FolderDetails implements IDataTransferModel, Comparable<FolderDetai
         this.publicReadAccess = publicReadAccess;
     }
 
-    public int compareTo(FolderDetails details) {
-        return Integer.compare((int) id, (int) details.getId());
-    }
-
     public FolderDetails getParent() {
         return parent;
     }
@@ -140,13 +103,5 @@ public class FolderDetails implements IDataTransferModel, Comparable<FolderDetai
 
     public void setCanEdit(boolean canEdit) {
         this.canEdit = canEdit;
-    }
-
-    public long getCreated() {
-        return created;
-    }
-
-    public void setCreated(long created) {
-        this.created = created;
     }
 }

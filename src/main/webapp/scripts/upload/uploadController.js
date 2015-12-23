@@ -2,7 +2,7 @@
 
 angular.module('ice.upload.controller', [])
     .controller('UploadController', function ($rootScope, $location, $scope, $uibModal, $cookieStore, $resource,
-                                              $stateParams, FileUploader, $http, Upload, UploadUtil) {
+                                              $stateParams, FileUploader, $http, Upload, UploadUtil, Util) {
         var sid = $cookieStore.get("sessionId");
         var upload = Upload(sid);
         var sheetData = [
@@ -85,24 +85,21 @@ angular.module('ice.upload.controller', [])
                 console.log(Math.round(progress));
             };
 
-            var transformResponse = function (response) {
-                $http.defaults.transformResponse.forEach(function (transformFn) {
-                    response = transformFn(response);
-                });
-                return response;
-            };
-
             xhr.onload = function () {
-                var response = transformResponse(xhr.response);
-                if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+                var response = JSON.parse(xhr.responseText);
+
+                if (response && response.filename) {
+                    var ht = angular.element('#dataTable').handsontable('getInstance')
                     sheetData[row][col] = response.filename;
+                    ht.setDataAtCell(row, col, response.filename, 'loadData');
                 } else {
-                    console.log("Error uploading document");
+                    Util.setFeedback("Error uploading file", "error");
                 }
             };
 
             xhr.onerror = function () {
                 // error
+                console.log("error uploading");
             };
 
             xhr.onabort = function () {
@@ -173,6 +170,7 @@ angular.module('ice.upload.controller', [])
                     Upload(sid).deleteAttachment({importId: id, entryId: entryId},
                         function (success) {
                             sheetData[row][col] = undefined;
+                            ht.setDataAtCell(row, col, undefined, 'loadData');
                         }, function (error) {
                             console.error(error);
                         });
@@ -181,6 +179,7 @@ angular.module('ice.upload.controller', [])
                     Upload(sid).deleteSequence({importId: $scope.bulkUpload.id, entryId: entryId},
                         function (success) {
                             sheetData[row][col] = undefined;
+                            ht.setDataAtCell(row, col, undefined, 'loadData');
                         }, function (error) {
                             console.error(error);
                         });
