@@ -86,7 +86,7 @@ angular.module('ice.collection.controller', [])
                 type = "folders";
             }
 
-            $location.path("" + type + "/" + folder.id);
+            $location.path(type + "/" + folder.id);
         };
 
         //
@@ -107,12 +107,9 @@ angular.module('ice.collection.controller', [])
             $scope.selectedCollectionFolders = undefined;
 
             // retrieve sub folders for selected collection
-            folders.getByType({folderType: $scope.selectedCollection.toUpperCase()},
+            Util.list("rest/collections/" + $scope.selectedCollection.toUpperCase() + "/folders",
                 function (result) {
                     $scope.selectedCollectionFolders = result;
-                },
-                function (error) {
-                    console.error(error);
                 });
         };
 
