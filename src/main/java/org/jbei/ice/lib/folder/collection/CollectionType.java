@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.collection;
+package org.jbei.ice.lib.folder.collection;
 
 /**
  * Types of collections that are supported in ICE.

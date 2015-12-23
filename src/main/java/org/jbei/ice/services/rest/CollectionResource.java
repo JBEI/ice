@@ -1,8 +1,9 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.collection.CollectionEntries;
-import org.jbei.ice.lib.collection.CollectionType;
-import org.jbei.ice.lib.collection.Collections;
+import org.jbei.ice.lib.folder.collection.Collection;
+import org.jbei.ice.lib.folder.collection.CollectionEntries;
+import org.jbei.ice.lib.folder.collection.CollectionType;
+import org.jbei.ice.lib.folder.collection.Collections;
 import org.jbei.ice.lib.shared.ColumnField;
 
 import javax.ws.rs.*;
@@ -51,6 +52,24 @@ public class CollectionResource extends RestResource {
         final String userId = super.requireUserId();
         Collections collections = new Collections(userId);
         return super.respond(collections.getSubFolders(type));
+    }
+
+    /**
+     * Retrieves the specified collection type's folder
+     * Since the folder is intended to be retrieved from a
+     * specified resource's context, this may not always return a result
+     * even the folder with the specified id exists
+     *
+     * @return
+     */
+    @GET
+    @Path("/{type}/folders/{id}")
+    public Response getCollectionFolder(
+            @PathParam("type") CollectionType type,
+            @PathParam("id") long folderId) {
+        String userId = getUserId();
+        Collection collection = new Collection(userId, type);
+        return super.respond(collection.getFolder(folderId, 0, 30));
     }
 
     /**
