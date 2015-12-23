@@ -1009,6 +1009,8 @@ angular.module('ice.entry.controller', [])
                     };
 
                     var linkPartToMainEntry = function (item) {
+                        console.log("link", item, "to", $scope.mainEntry.id);
+
                         entry.addLink({partId: $scope.mainEntry.id, linkType: $scope.role}, item,
                             function (result) {
                                 $scope.links.push(item);   // todo
@@ -1038,19 +1040,25 @@ angular.module('ice.entry.controller', [])
                         if (found)
                             return;
 
-                        // fetch entry from server
+                        // fetch entry being added from server
                         Util.get("rest/parts/" + $item, function (result) {
                             $scope.selectedLink = result;
                             if ($scope.role == 'CHILD') {
 
                                 // if item being added as a child is of type part then
-                                if ($item.type.toLowerCase() == 'part') {
-                                    // fetch item.id and check if it has a sequence
+                                if (result.type.toLowerCase() == 'part') {
+
+                                    // check if it has a sequence
                                     if (!result.hasSequence) {
-                                        // then present the current entry sequence options to user
+                                        $scope.addExistingPartNumber = result;
+
+                                        // if not, retrieve sequence annotations for parent entry
+                                        // to allow user to select one annotation as the sequence for the entry being
+                                        // added
                                         $scope.getEntrySequence($scope.mainEntry.id);
                                     } else {
-                                        // just add the link
+
+                                        // has sequence so just add the link
                                         linkPartToMainEntry(result);
                                     }
                                 } else {
@@ -1061,10 +1069,11 @@ angular.module('ice.entry.controller', [])
                                 // parent of main entry being added
                                 if ($scope.mainEntry.type.toLowerCase() == 'part') {
 
-                                    // if child (main) does not have a parent sequence
+                                    // if child (main) does not have a attached sequence
                                     if (!$scope.mainEntry.hasSequence) {
 
-                                        // retrieve sequence feature options for selected
+                                        // retrieve sequence feature options for parent
+                                        $scope.addExistingPartNumber = result;
                                         $scope.getEntrySequence($scope.addExistingPartNumber.id);
                                     } else {
                                         linkPartToMainEntry(result);
@@ -1094,7 +1103,8 @@ angular.module('ice.entry.controller', [])
                     $scope.getEntrySequence = function (id) {
                         $scope.retrievingSequenceFeatureList = true;
                         $scope.mainEntrySequence = undefined;
-                        entry.sequence({partId: id}, function (result) {
+
+                        Util.get("rest/parts/" + id + "/sequence", function (result) {
                             $scope.mainEntrySequence = result;
                             $scope.retrievingSequenceFeatureList = false;
                         }, function (error) {
@@ -1123,17 +1133,17 @@ angular.module('ice.entry.controller', [])
                             features: [feature]
                         };
 
-                        var sequencePart;
+                        var sequencePartId;
                         if ($scope.role == 'CHILD') {
-                            sequencePart = $scope.selectedLink.id;
+                            sequencePartId = $scope.selectedLink.id;
                         } else {
-                            sequencePart = $scope.mainEntry.id;
+                            sequencePartId = $scope.mainEntry.id;
                         }
 
-                        entry.addSequenceAsString({partId: sequencePart}, linkSequence,
-                            function (result) {
-                                linkPartToMainEntry($scope.addExistingPartNumber);
-                            })
+                        // add sequence to entry
+                        Util.post("rest/parts/" + sequencePartId + "/sequence", linkSequence, function (result) {
+                            linkPartToMainEntry($scope.addExistingPartNumber);
+                        });
                     };
                 },
                 backdrop: "static"
@@ -1147,7 +1157,7 @@ angular.module('ice.entry.controller', [])
             });
         };
 
-        // todo :
+// todo :
 
         var setPartDefaults = function (user) {
             var partDefaults = {
@@ -1275,7 +1285,7 @@ angular.module('ice.entry.controller', [])
             }, {source: $scope.entry.recordId});
         };
 
-        // check if a selection has been made
+// check if a selection has been made
         var menuOption = $stateParams.option;
         if (menuOption === undefined) {
             $scope.selection = menuSubDetails[0].url;
@@ -1351,7 +1361,7 @@ angular.module('ice.entry.controller', [])
             });
         };
 
-        // converts an array of string (currently only for autoCompleteAdd) to object so it can be edited
+// converts an array of string (currently only for autoCompleteAdd) to object so it can be edited
         $scope.checkConvertFieldToObject = function (field) {
             $scope.convertedAutoCompleteAdd = [];
             if (!angular.isArray($scope.entry[field.schema]))
@@ -1398,7 +1408,7 @@ angular.module('ice.entry.controller', [])
             $location.path($scope.context.back);
         };
 
-        // removes linked parts
+// removes linked parts
         $scope.removeLink = function (mainEntry, linkedEntry) {
             entry.removeLink({partId: mainEntry.id, linkId: linkedEntry.id}, function (result) {
                 var idx = mainEntry.linkedParts.indexOf(linkedEntry);
@@ -1410,17 +1420,17 @@ angular.module('ice.entry.controller', [])
             });
         };
 
-        // removes a value from an autoCompleteAdd field at the specified index
+// removes a value from an autoCompleteAdd field at the specified index
         $scope.removeAutoCompleteAdd = function (index) {
             $scope.convertedAutoCompleteAdd.splice(index, 1);
         };
 
-        // add a new autoComplete add value at the specified index
+// add a new autoComplete add value at the specified index
         $scope.addAutoCompleteAdd = function (index) {
             $scope.convertedAutoCompleteAdd.splice(index + 1, 0, {value: ""});
         };
 
-        // file upload
+// file upload
         var uploader = $scope.sequenceFileUpload = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "rest/file/sequence",
