@@ -302,7 +302,7 @@ angular.module('ice.admin.controller', [])
                 $scope.params.asc = false;
 
             $scope.params.sort = field;
-            requestSamples();
+            $scope.requestSamples();
         };
     })
     .controller('AdminUserController', function ($rootScope, $scope, $stateParams, $cookieStore, User) {
