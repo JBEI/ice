@@ -1,75 +1,51 @@
-ICE
-===
+## ICE: Inventory of Composable Elements
+ICE is a registry platform that provides robust data storage for DNA components, integrated tools for part characterization, as well as mechanisms for secure access and information sharing with other users and software tools.
 
-Inventory of Composable Elements (ICE) is an open source registry
-software for biological parts developed by the `Joint
-BioEnergy Institute <http://www.jbei.org/>`__. It is a Web application used by laboratories to track and search their
-constructs.
+ICE is open source and distributed under the Modified BSD license. You can try it out at [https://public-registry.jbei.org](https://public-registry.jbei.org)
 
-ICE is distributed under the Modified BSD license. 
+## Features
+* Support for storing biological parts in addition to plasmids, microbial strains and *Arabidopsis* seeds. Supported sequence formats are genbank, FASTA and SBOL
+* Full text and BLAST search capabilities
+* Advanced collection management
+* Graphical application and other tool integration for sequence design, annotation and verification
+* Real time DNA editing with live vector map display and sophisticated feature annotation
+* Opt-in community collaboration capabilities that enable dataset publishing and sharing across multiple ICE instances
+* Granular read and write permissions for entries or collections across users and groups 
 
-You can try out the software at our `Public
-Registry <http://public-registry.jbei.org>`__.
+## Installation
+### Production
+To install in a production environment, please consult our manual for detailed setup and configuration instructions.
 
+### Development
+To set up a development environment or local machine installation make sure you have the following dependencies installed
 
-Documentation for ICE developers
---------------------------------
+* [Java JDK 8] (http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+* [Maven 3] (https://maven.apache.org/download.cgi)
+* [Git] (https://git-scm.com/downloads) 
 
-Requirements
-~~~~~~~~~~~~
-To set up a development environment for ICE you will need to install:
+Command line installation steps:
 
-* `BLAST+ <http://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download>`__ ≥ 2.2.28
-* `Java JDK 7 <http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html>`__
-* `Maven <https://maven.apache.org/download.cgi>`__  ≥ 3.0
+* Clone this repo
+     
+        git clone https://github.com/JBEI/ice.git ./ice
+        cd ice
 
-If you use a Debian-like operating system, the following command will install all the requirements
+* Generate a self-signed certificate
 
-::
+* Start the built in jetty server. This may take a few minutes to download additional dependencies.
+        
+        mvn jetty:run
 
-  sudo apt-get install ncbi-blast+ default-jdk maven
+* Access the application at [https://localhost:8443] (https://localhost:8443)
 
-
-Set Up
-~~~~~~
-1. Checkout the code and enter the repository
-
-::
-
-  git checkout https://github.com/JBEI/ice.git
-  cd ice
-
-2. Since the application requires an SSL certificate, generate one that the Jetty Web server can use this command. When prompted for a password, enter **changeit**
-
-::
-
-  keytool -genkey -alias tomcat -keyalg RSA -keystore ./.keystore
-
-3. Start Jetty
-
-::
-
-  mvn jetty:run
-
-4. Point your browser to https://localhost:8443/ to access the application
+* Ctrl + C to stop the application
 
 
-Links
------
+## Links
+* [ICE Google Group] (http://groups.google.com/group/gd-ice)
+* Build Status: 
 
-* `ICE Google Group <http://groups.google.com/group/gd-ice>`__
-* `Releases <https://github.com/JBEI/ice/releases>`__: Download the war file associated with the latest release
-* `Manual <https://jbei.github.io/ice/>`__: Installation and usage instructions
-* `REST API WADL <https://public-registry.jbei.org/rest/application.wadl>`__
+![Build Status](https://travis-ci.org/JBEI/ice.svg?branch=dev)
 
-Related Projects
-----------------
-
-`The VectorEditor project <https://github.com/JBEI/vectoreditor/>`__ is
-used in ICE to display and edit sequences. It also contains other
-modules such as sequence checker.
-
-|Build Status|
-
-.. |Build Status| image:: https://travis-ci.org/JBEI/ice.svg?branch=dev
-   :target: https://travis-ci.org/JBEI/ice
+## Related Projects
+[Vector Editor] (https://github.com/JBEI/vectoreditor) is used in ICE to display and edit sequences

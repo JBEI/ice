@@ -144,7 +144,8 @@ angular.module('ice.admin.controller', [])
             $scope.submitSetting(booleanSetting);
         }
     })
-    .controller('AdminTransferredEntriesController', function ($rootScope, $cookieStore, $filter, $location, $scope, Folders, Entry, Util) {
+    .controller('AdminTransferredEntriesController', function ($rootScope, $cookieStore, $filter, $location, $scope,
+                                                               Folders, Entry, Util) {
         $scope.maxSize = 5;
         $scope.currentPage = 1;
         $scope.selectedTransferredEntries = [];
@@ -307,7 +308,7 @@ angular.module('ice.admin.controller', [])
     .controller('AdminUserController', function ($rootScope, $scope, $stateParams, $cookieStore, User) {
         $scope.maxSize = 5;
         $scope.currentPage = 1;
-        $scope.newProfile = undefined;
+        $scope.newProfile = {show: false};
         $scope.userListParams = {sort: 'lastName', asc: true, currentPage: 1, status: undefined};
 
         var user = User($cookieStore.get("sessionId"));
@@ -329,11 +330,10 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.createProfile = function () {
+            $scope.newProfile.sendEmail = false;
             user.createUser($scope.newProfile, function (result) {
-                $scope.showCreateProfile = false;
+                $scope.newProfile.password = result.password;
                 getUsers();
-            }, function (error) {
-
             })
         };
 

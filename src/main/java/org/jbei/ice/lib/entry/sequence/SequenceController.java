@@ -9,10 +9,10 @@ import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryFactory;
-import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.parsers.GeneralParser;
@@ -39,12 +39,12 @@ public class SequenceController {
 
     private final SequenceDAO dao;
     private final EntryAuthorization authorization;
-    private final EntryRetriever retriever;
+    private final Entries retriever;
 
     public SequenceController() {
         dao = new SequenceDAO();
         authorization = new EntryAuthorization();
-        retriever = new EntryRetriever();
+        retriever = new Entries();
     }
 
     public boolean parseAndSaveSequence(String userId, long partId, String sequenceString) {
@@ -132,6 +132,7 @@ public class SequenceController {
             return null;
         }
 
+        featuredDNASequence.setSequence(featuredDNASequence.getSequence().replaceAll("[^A-Za-z]", ""));
         Sequence sequence = dnaSequenceToSequence(featuredDNASequence);
         sequence.setEntry(entry);
         if (!deleteSequence(userId, entryId))
@@ -139,8 +140,6 @@ public class SequenceController {
 
 //        sequence = update(userId, sequence);
         sequence = save(userId, sequence);
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
-
         if (sequence != null)
             return sequenceToDNASequence(sequence);
         return null;

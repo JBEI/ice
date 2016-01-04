@@ -154,7 +154,7 @@ public class Folder implements DataModel {
             details.setParent(parent.toDataTransferObject());
         }
         if (getCreationTime() != null)
-            details.setCreated(getCreationTime().getTime());
+            details.setCreationTime(getCreationTime().getTime());
         details.setPropagatePermission(this.isPropagatePermissions());
         return details;
     }

@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.folder;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
@@ -12,8 +11,6 @@ import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
-import org.jbei.ice.lib.entry.EntryRetriever;
-import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
@@ -66,7 +63,7 @@ public class FolderController {
         ArrayList<FolderDetails> list = new ArrayList<>();
         for (Folder folder : folders) {
             FolderDetails details = folder.toDataTransferObject();
-            long folderSize = dao.getFolderSize(folder.getId());
+            long folderSize = dao.getFolderSize(folder.getId(), null);
             details.setCount(folderSize);
             details.setType(FolderType.PUBLIC);
             details.setCanEdit(isAdmin);
@@ -88,7 +85,7 @@ public class FolderController {
         ArrayList<FolderDetails> list = new ArrayList<>();
         for (Folder folder : folders) {
             FolderDetails details = folder.toDataTransferObject();
-            long folderSize = dao.getFolderSize(folder.getId());
+            long folderSize = dao.getFolderSize(folder.getId(), null);
             details.setCount(folderSize);
             list.add(details);
         }
@@ -112,8 +109,8 @@ public class FolderController {
         groups.add(publicGroup);
 
         EntryDAO entryDAO = DAOFactory.getEntryDAO();
-        Set<Entry> results = entryDAO.retrieveVisibleEntries(null, groups, sort, asc, offset, limit);
-        long visibleCount = entryDAO.visibleEntryCount(null, groups);
+        Set<Entry> results = entryDAO.retrieveVisibleEntries(null, groups, sort, asc, offset, limit, null);
+        long visibleCount = entryDAO.visibleEntryCount(null, groups, null);
 
         FolderDetails details = new FolderDetails();
         details.setCount(visibleCount);
@@ -164,114 +161,6 @@ public class FolderController {
             folders.add(details);
         }
         return folders;
-    }
-
-    public boolean removeFolderContents(String userId, long folderId, EntrySelection selection) {
-        boolean isAdministrator = accountController.isAdministrator(userId);
-        Folder folder = dao.get(folderId);
-
-        if (folder.getType() == FolderType.PUBLIC && !isAdministrator) {
-            String errMsg = userId + ": cannot modify folder " + folder.getName();
-            throw new PermissionException(errMsg);
-        }
-
-        EntryRetriever retriever = new EntryRetriever();
-        List<Long> entryIds = retriever.getEntriesFromSelectionContext(userId, selection);
-        return dao.removeFolderEntries(folder, entryIds) != null;
-    }
-
-    /**
-     * Retrieves the folder specified in the parameter and contents
-     *
-     * @param userId   unique identifier for user making request. If null, folder must have public read privs
-     * @param folderId unique identifier for folder to be retrieved
-     * @param sort     sort order for folder content retrieval
-     * @param asc      sort order for folder content retrieval; ascending if true
-     * @param start    index of first item in retrieval
-     * @param limit    upper limit count of items to be retrieval
-     * @return wrapper around list of folder entries if folder is found, null otherwise
-     * @throws PermissionException if user does not have read permissions on folder
-     */
-    public FolderDetails retrieveFolderContents(String userId, long folderId, ColumnField sort, boolean asc,
-                                                int start, int limit) {
-        Folder folder = dao.get(folderId);
-        if (folder == null)
-            return null;
-
-        // should have permission to read folder (folder should be public, you should be an admin, or owner)
-        authorization.expectRead(userId, folder);
-
-        FolderDetails details = folder.toDataTransferObject();
-        long folderSize = dao.getFolderSize(folderId);
-        details.setCount(folderSize);
-
-        if (userId != null) {
-            ArrayList<AccessPermission> permissions = getAndFilterFolderPermissions(userId, folder);
-            details.setAccessPermissions(permissions);
-            boolean canEdit = permissionsController.hasWritePermission(userId, folder);
-            details.setCanEdit(canEdit);
-        }
-
-        details.setPublicReadAccess(permissionsController.isPublicVisible(folder));
-        Account owner = accountController.getByEmail(folder.getOwnerEmail());
-        if (owner != null)
-            details.setOwner(owner.toDataTransferObject());
-
-        // retrieve folder contents
-        List<Entry> results = dao.retrieveFolderContents(folderId, sort, asc, start, limit);
-        for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
-            details.getEntries().add(info);
-        }
-        return details;
-    }
-
-    /**
-     * The permission(s) enabling the share for user
-     * is(are) included. If the user is an admin then all the permissions are included, otherwise only those pertaining
-     * to the user are included.
-     * <p>e.g. if a folder F is shared with groups A and B and the user is a non-admin belonging to group B, folder
-     * F will be included in the list of folders returned but will only include permissions for group B
-     *
-     * @param userId identifier for user making request
-     * @param folder Folder whose permissions are to be retrieved
-     * @return list of filtered permissions
-     */
-    protected ArrayList<AccessPermission> getAndFilterFolderPermissions(String userId, Folder folder) {
-        ArrayList<AccessPermission> permissions = permissionsController.retrieveSetFolderPermission(folder, false);
-        if (accountController.isAdministrator(userId) || folder.getOwnerEmail().equalsIgnoreCase(userId)) {
-            return permissions;
-        }
-
-        Account account = accountDAO.getByEmail(userId);
-
-        // filter permissions
-        ArrayList<AccessPermission> filteredPermissions = new ArrayList<>();
-        for (AccessPermission accessPermission : permissions) {
-
-            // account either has direct write permissions
-            if (accessPermission.getArticle() == AccessPermission.Article.ACCOUNT
-                    && accessPermission.getArticleId() == account.getId()) {
-                filteredPermissions.add(accessPermission);
-                continue;
-            }
-
-            if (account.getGroups() == null || account.getGroups().isEmpty())
-                continue;
-
-            // or belongs to a group that has the write permissions
-            if (accessPermission.getArticle() == AccessPermission.Article.GROUP) {
-                Group group = DAOFactory.getGroupDAO().get(accessPermission.getArticleId());
-                if (group == null)
-                    continue;
-
-                if (account.getGroups().contains(group)) {
-                    filteredPermissions.add(accessPermission);
-                }
-            }
-        }
-
-        return filteredPermissions;
     }
 
     public FolderDetails update(String userId, long folderId, FolderDetails details) {
@@ -333,7 +222,7 @@ public class FolderController {
                 }
 
                 details = folder.toDataTransferObject();
-                long folderSize = dao.getFolderSize(folderId);
+                long folderSize = dao.getFolderSize(folderId, null);
                 details.setCount(folderSize);
 
                 dao.delete(folder);
@@ -369,7 +258,7 @@ public class FolderController {
                 continue;
 
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
-            long folderSize = dao.getFolderSize(folder.getId());
+            long folderSize = dao.getFolderSize(folder.getId(), null);
             details.setCount(folderSize);
             details.setType(folder.getType());
             details.setCanEdit(true);
@@ -418,7 +307,7 @@ public class FolderController {
         for (Folder folder : sharedFolders) {
             FolderDetails details = folder.toDataTransferObject();
             details.setType(FolderType.SHARED);
-            long folderSize = dao.getFolderSize(folder.getId());
+            long folderSize = dao.getFolderSize(folder.getId(), null);
             details.setCount(folderSize);
             folderDetails.add(details);
         }

@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.collection;
+package org.jbei.ice.lib.folder.collection;
 
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.dto.entry.Visibility;
@@ -40,8 +40,8 @@ public class Collections {
 
         collection.setPersonal(getNumberOfOwnerEntries(userId));
         SharedEntries sharedEntries = new SharedEntries(userId);
-        collection.setShared(sharedEntries.getNumberofEntries());
-        collection.setDrafts(entryDAO.getByVisibilityCount(userId, Visibility.DRAFT));
+        collection.setShared(sharedEntries.getNumberofEntries(null));
+        collection.setDrafts(entryDAO.getByVisibilityCount(userId, Visibility.DRAFT, null));
         if (account.getType() == AccountType.ADMIN)
             collection.setPending(entryDAO.getPendingCount());
         return collection;
@@ -74,7 +74,7 @@ public class Collections {
                 return controller.getSharedUserFolders(userId);
 
             case DELETED:
-                // not able to delete folders yet
+                // not able to delete folders under the deleted collections yet
                 return new ArrayList<>();
 
             default:

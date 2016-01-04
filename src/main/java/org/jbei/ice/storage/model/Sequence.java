@@ -72,7 +72,7 @@ public class Sequence implements DataModel {
     }))
     private Entry entry;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "sequence")
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "sequence")
     @OrderBy("id")
     private Set<SequenceFeature> sequenceFeatures = new SequenceFeatureCollection();
 

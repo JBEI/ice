@@ -15,7 +15,6 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.search.BlastProgram;
 import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
-import org.jbei.ice.lib.entry.EntryRetriever;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
@@ -117,7 +116,7 @@ public class BlastPlus {
             info = new SearchResult();
             info.setEntryInfo(view);
 
-            String summary = new EntryRetriever().getEntrySummary(info.getEntryInfo().getId());
+            String summary = DAOFactory.getEntryDAO().getEntrySummary(info.getEntryInfo().getId());
             info.getEntryInfo().setShortDescription(summary);
 //                searchResult.setAlignmentLength(alignmentLength);
 //                searchResult.setPercentId(percentId);
@@ -146,7 +145,7 @@ public class BlastPlus {
                 i += 1;
                 line = lines.get(i);
                 if (line.startsWith("Length")) {
-                    int sequenceLength = Integer.valueOf(line.substring(7).trim());
+//                    int sequenceLength = Integer.valueOf(line.substring(7).trim());
 //                    System.out.println(info.getQueryLength() + ", " + sequenceLength / 2);
                     continue;
                 }

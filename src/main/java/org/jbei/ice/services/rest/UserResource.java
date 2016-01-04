@@ -129,12 +129,13 @@ public class UserResource extends RestResource {
                                            @DefaultValue("0") @QueryParam("offset") final int offset,
                                            @DefaultValue("15") @QueryParam("limit") final int limit,
                                            @DefaultValue("created") @QueryParam("sort") final String sort,
-                                           @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+                                           @DefaultValue("false") @QueryParam("asc") final boolean asc,
+                                           @DefaultValue("") @QueryParam("filter") String filter) {
         final String userIdString = getUserId();
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
         final Account requestAccount = DAOFactory.getAccountDAO().get(userId);
         OwnerEntries ownerEntries = new OwnerEntries(userIdString, requestAccount.getEmail());
-        final List<PartData> entries = ownerEntries.retrieveOwnerEntries(field, asc, offset, limit);
+        final List<PartData> entries = ownerEntries.retrieveOwnerEntries(field, asc, offset, limit, filter);
         final long count = ownerEntries.getNumberOfOwnerEntries();
         final FolderDetails details = new FolderDetails();
         details.getEntries().addAll(entries);
@@ -181,9 +182,6 @@ public class UserResource extends RestResource {
         return controller.updateAccount(user, userId, transfer);
     }
 
-    /**
-     * @return Response for success or failure
-     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -202,10 +200,12 @@ public class UserResource extends RestResource {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/password")
-    public AccountTransfer updatePassword(final AccountTransfer transfer) {
+    @Path("/{id}/password")
+    public AccountTransfer updatePassword(@PathParam("id") final long userId,
+                                          final AccountTransfer transfer) {
         final String user = getUserId();
-        return controller.updatePassword(user, transfer);
+        log(user, "changing password for user " + userId);
+        return controller.updatePassword(user, userId, transfer);
     }
 
     /**
@@ -214,8 +214,10 @@ public class UserResource extends RestResource {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createNewUser(final AccountTransfer accountTransfer) {
-        final AccountTransfer created = controller.createNewAccount(accountTransfer, true);
+    public Response createNewUser(
+            @DefaultValue("true") @QueryParam("sendEmail") boolean sendEmail,
+            final AccountTransfer accountTransfer) {
+        final AccountTransfer created = controller.createNewAccount(accountTransfer, sendEmail);
         return super.respond(created);
     }
 

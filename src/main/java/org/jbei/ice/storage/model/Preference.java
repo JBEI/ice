@@ -9,7 +9,7 @@ import javax.persistence.*;
  * Entity for storing user preferences. It serves a dual role in terms of storing the default user values
  * for certain supported entry fields and also the user entered boost values for searching. The list of supported
  * fields for "boosting" can be found in {@link org.jbei.ice.lib.dto.search.SearchBoostField}.
- * <p/>
+ * <p>
  * Boost field keys are prefixed with "BOOST_". e.g. "BOOST_PRINCIPAL_INVESTIGATOR" will be the boost key for
  * the principal investigator field while the default value key will be "PRINCIPAL_INVESTIGATOR"
  *
@@ -22,7 +22,7 @@ public class Preference implements DataModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
-    private int id;
+    private long id;
 
     @ManyToOne
     @JoinColumn(name = "account_id")
@@ -34,16 +34,16 @@ public class Preference implements DataModel {
     @Column(name = "preference_value")
     private String value;
 
+    public Preference() {
+    }
+
     public Preference(Account account, String key, String value) {
         this.account = account;
         this.key = key;
         this.value = value;
     }
 
-    public Preference() {
-    }
-
-    public int getId() {
+    public long getId() {
         return id;
     }
 

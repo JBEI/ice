@@ -46,12 +46,12 @@ iceServices.factory('Permission', function ($resource, $cookieStore) {
 
 iceServices.factory('User', function ($resource) {
     return function (sessionId) {
-        return $resource('rest/users', {userId: '@userId', preferenceKey: '@preferenceKey'}, {
-            query: {
-                method: 'GET',
-                responseType: "json",
-                url: "rest/users/:userId",
-                headers: {'X-ICE-Authentication-SessionId': sessionId}
+        return $resource('rest/users', {userId: '@userId', preferenceKey: '@preferenceKey', sendEmail: '@sendEmail'}, {
+            query:{
+                method:'GET',
+                responseType:"json",
+                url:"rest/users/:userId",
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             update: {
@@ -125,11 +125,11 @@ iceServices.factory('User', function ($resource) {
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
-            changePassword: {
-                method: 'PUT',
-                url: 'rest/users/password',
-                responseType: 'json',
-                headers: {'X-ICE-Authentication-SessionId': sessionId}
+            changePassword:{
+                method:'PUT',
+                url: 'rest/users/:userId/password',
+                responseType:'json',
+                headers:{'X-ICE-Authentication-SessionId':sessionId}
             },
 
             samples: {
@@ -408,12 +408,6 @@ iceServices.factory('Entry', function ($resource) {
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
-            moveEntriesToTrash: {
-                method: 'POST',
-                url: 'rest/parts/trash',
-                headers: {'X-ICE-Authentication-SessionId': sessionId}
-            },
-
             delete: {
                 method: 'DELETE',
                 url: 'rest/parts/:partId',
@@ -457,7 +451,7 @@ iceServices.factory('Entry', function ($resource) {
 
 iceServices.factory('Upload', function ($resource) {
     return function (sessionId) {
-        return $resource('rest/upload/:importId', {importId: '@id', type: '@type', entryId: '@entryId', pId: '@pId'}, {
+        return $resource('rest/uploads/:importId', {importId: '@id', type: '@type', entryId: '@entryId', pId: '@pId'}, {
             get: {
                 method: 'GET',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
@@ -470,74 +464,74 @@ iceServices.factory('Upload', function ($resource) {
 
             updateStatus: {
                 method: 'PUT',
-                url: 'rest/upload/:importId/status',
+                url: 'rest/uploads/:importId/status',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             createEntry: {
                 method: 'PUT',
-                url: 'rest/upload/:importId/entry',
+                url: 'rest/uploads/:importId/entry',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             updateEntry: {
                 method: 'POST',
-                url: 'rest/upload/:importId/entry/:entryId',
+                url: 'rest/uploads/:importId/entry/:entryId',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             deleteEntry: {
                 method: 'DELETE',
-                url: 'rest/upload/:importId/entry/:entryId',
+                url: 'rest/uploads/:importId/entry/:entryId',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             rename: {
                 method: 'PUT',
-                url: 'rest/upload/:importId/name',
+                url: 'rest/uploads/:importId/name',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             fileUpload: {
                 method: 'POST',
-                url: 'rest/upload/file',
+                url: 'rest/uploads/file',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             updateList: {
                 method: 'PUT',
-                url: 'rest/upload/:importId',
+                url: 'rest/uploads/:importId',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             deleteSequence: {
                 method: 'DELETE',
-                url: 'rest/upload/:importId/entry/:entryId/sequence',
+                url: 'rest/uploads/:importId/entry/:entryId/sequence',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             deleteAttachment: {
                 method: 'DELETE',
-                url: 'rest/upload/:importId/entry/:entryId/attachment',
+                url: 'rest/uploads/:importId/entry/:entryId/attachment',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             getPermissions: {
                 method: 'GET',
-                url: 'rest/upload/:importId/permissions',
+                url: 'rest/uploads/:importId/permissions',
                 isArray: true,
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             addPermission: {
                 method: 'POST',
-                url: 'rest/upload/:importId/permissions',
+                url: 'rest/uploads/:importId/permissions',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             },
 
             removePermission: {
                 method: 'DELETE',
-                url: 'rest/upload/:importId/permissions/:pId',
+                url: 'rest/uploads/:importId/permissions/:pId',
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             }
         });
@@ -593,13 +587,13 @@ iceServices.factory('Settings', function ($resource) {
 iceServices.factory('Remote', function ($resource, $cookieStore) {
     return function () {
         return $resource('rest/remote/:id', {id: '@id', email: '@email', partId: '@partId', folderId: '@folderId'}, {
-            publicFolders: {
-                method: 'GET',
-                responseType: 'json',
-                url: 'rest/remote/:id/available',
-                isArray: true,
-                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
-            },
+            //publicFolders: {
+            //    method: 'GET',
+            //    responseType: 'json',
+            //    url: 'rest/remote/:id/available',
+            //    isArray: true,
+            //    headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
+            //},
 
             publicEntries: {
                 method: 'GET',
@@ -696,12 +690,12 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
             },
 
             create: {
-                method: 'PUT',
+                method: 'POST',
                 headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
             },
 
             addSelectionToFolders: {
-                method: 'POST',
+                method: 'PUT',
                 isArray: true,
                 url: 'rest/folders',
                 headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
@@ -713,8 +707,6 @@ iceServices.factory('Folders', function ($resource, $cookieStore) {
                 headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
             },
 
-            // retrieves folder contents. folderId could be a string such as "personal"
-            // "available", "shared", "upload"
             folder: {
                 method: 'GET',
                 url: "rest/folders/:folderId/entries",
@@ -829,7 +821,7 @@ iceServices.factory('Authentication',
 
             // logs out user by invalidating the session id
             logout: function () {
-                Util.remove("rest/accesstokens", function (result) {
+                Util.remove("rest/accesstokens", {}, function (result) {
                     $rootScope.user = undefined;
                     $cookieStore.remove('userId');
                     $cookieStore.remove('sessionId');

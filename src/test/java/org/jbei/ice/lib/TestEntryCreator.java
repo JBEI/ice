@@ -48,7 +48,7 @@ public class TestEntryCreator {
 
     public static long createTestPart(String userId) throws Exception {
         PartData data = new PartData(EntryType.PART);
-        data.setShortDescription("summary for test ");
+        data.setShortDescription("summary for test");
         data.setName("pTest " + userId);
         data.setBioSafetyLevel(1);
         return new EntryCreator().createPart(userId, data);

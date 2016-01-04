@@ -7,7 +7,7 @@ angular.module('ice.common.service', [])
                 var errorMsg;
                 var type;
 
-                console.log(response);
+                console.error(response);
 
                 switch (response.status) {
                     case 401:
@@ -44,14 +44,26 @@ angular.module('ice.common.service', [])
                 $rootScope.serverFeedback = {message: errorMsg, type: type};
             },
 
+            /**
+             * sets the feedback for display to the user
+             * @param message message to display to user. make as brief as possible
+             * @param type type of alert. one of 'success', 'info' (default), 'warning', 'danger'
+             */
             setFeedback: function (message, type) {
                 if (!type)
                     type = 'info';
 
+                if (type == 'error')
+                    type = "danger";
+
                 $rootScope.serverFeedback = {type: type, message: message};
             },
 
-            get: function (url, successHandler, queryParams) {
+            get: function (url, successHandler, queryParams, errorHandler) {
+                var errorCallback = this.handleError;
+                if (errorHandler)
+                    errorCallback = errorHandler;
+
                 if (!queryParams)
                     queryParams = {};
 
@@ -66,7 +78,7 @@ angular.module('ice.common.service', [])
                         method: 'GET',
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
                     }
-                }).get(successHandler, this.handleError);
+                }).get(successHandler, errorCallback);
             },
 
             // difference between this and get is "isArray"
@@ -105,7 +117,11 @@ angular.module('ice.common.service', [])
                 }).post(obj, successHandler, errorCallback);
             },
 
-            update: function (url, obj, params, successHandler) {
+            update: function (url, obj, params, successHandler, failureHandler) {
+                var errorCallback = this.handleError;
+                if (failureHandler)
+                    errorCallback = failureHandler;
+
                 if (!params)
                     params = {};
 
@@ -119,7 +135,7 @@ angular.module('ice.common.service', [])
                         method: 'PUT',
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
                     }
-                }).update(obj, successHandler, this.handleError);
+                }).update(obj, successHandler, errorCallback);
             },
 
             remove: function (url, params, successHandler) {

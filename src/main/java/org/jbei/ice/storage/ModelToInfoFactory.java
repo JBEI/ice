@@ -22,8 +22,6 @@ import java.util.List;
  */
 public class ModelToInfoFactory {
 
-    private static EntryAuthorization authorization = new EntryAuthorization();
-
     public static PartData getInfo(Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
@@ -125,7 +123,10 @@ public class ModelToInfoFactory {
         info.setRecordId(entry.getRecordId());
         info.setPartId(entry.getPartNumber());
         info.setName(entry.getName());
-        info.setOwner(entry.getOwner());
+        String owner = entry.getOwner();
+        if (owner.trim().isEmpty())
+            owner = entry.getOwnerEmail();
+        info.setOwner(owner);
         info.setOwnerEmail(entry.getOwnerEmail());
         info.setCreator(entry.getCreator());
         info.setCreatorEmail(entry.getCreatorEmail());
@@ -270,8 +271,10 @@ public class ModelToInfoFactory {
         view.setOwnerEmail(entry.getOwnerEmail());
         view.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
 
-        if (userId != null)
+        if (userId != null) {
+            EntryAuthorization authorization = new EntryAuthorization();
             view.setCanEdit(authorization.canWrite(userId, entry));
+        }
 
         // information about the owner and creator
         if (includeOwnerInfo) {
@@ -297,6 +300,9 @@ public class ModelToInfoFactory {
 
     public static PartData createTipView(Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
+        if (type == null)
+            throw new IllegalArgumentException("Invalid entry type " + entry.getRecordType());
+
         PartData part = getTipViewCommon(entry);
 
         switch (type) {

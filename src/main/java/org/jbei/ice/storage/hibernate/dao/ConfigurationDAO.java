@@ -3,6 +3,7 @@ package org.jbei.ice.storage.hibernate.dao;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
@@ -49,11 +50,20 @@ public class ConfigurationDAO extends HibernateRepository<Configuration> {
 
     @Override
     public Configuration get(long id) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return get(Configuration.class, id);
     }
 
+    @SuppressWarnings("unchecked")
     public List<Configuration> getAll() {
-        return super.getAll(Configuration.class);
+        Session session = currentSession();
+
+        try {
+            Query query = session.createQuery("from " + Configuration.class.getName());
+            return query.list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 }
 

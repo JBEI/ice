@@ -50,7 +50,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Rest parts resource
+ * Rest resource for biological parts
  *
  * @author Hector Plahar
  */
@@ -58,7 +58,6 @@ import java.util.List;
 public class PartResource extends RestResource {
 
     private EntryController controller = new EntryController();
-    private EntryRetriever retriever = new EntryRetriever();
     private PermissionsController permissionsController = new PermissionsController();
     private AttachmentController attachmentController = new AttachmentController();
     private SequenceController sequenceController = new SequenceController();
@@ -93,6 +92,22 @@ public class PartResource extends RestResource {
     }
 
     /**
+     * Returns the folders that an entry is contained in (filtered by permissions).
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/folders")
+    public Response read(@PathParam("id") String id) {
+        // user id is allowed to be empty. The entry has to be public in that instance
+        // and only public entries it is contained in is returned
+        String userId = getUserId();
+        EntryFolders entryFolders = new EntryFolders(userId, id);
+        return super.respond(entryFolders.getFolders());
+    }
+
+    /**
+     * Retrieves the information shown in the tooltip view
+     * for entries
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -113,7 +128,8 @@ public class PartResource extends RestResource {
     public List<AccessPermission> getPermissions(@Context final UriInfo info,
                                                  @PathParam("id") final String id) {
         final String userId = getUserId();
-        return retriever.getEntryPermissions(userId, id);
+        Entries entries = new Entries();
+        return entries.getEntryPermissions(userId, id);
     }
 
     /**
@@ -557,6 +573,8 @@ public class PartResource extends RestResource {
         if (StringUtils.isEmpty(sessionId))
             sessionId = sid;
         final String userId = getUserId(sessionId);
+        if (userId == null)
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         return sequenceController.updateSequence(userId, partId, sequence);
     }
 
@@ -574,13 +592,29 @@ public class PartResource extends RestResource {
         return Response.serverError().build();
     }
 
+    /**
+     * Creates a new entry. If the <code>sourceId</code> parameter is set, the new entry is a copy
+     * of the source id (if found) otherwise the new entry is created from the data contained in the
+     * <code>partData</code>
+     *
+     * @param sourceId optional unique identifier for an existing part to copy. If not set, the <code>partData</code>
+     *                 parameter must be set
+     * @param partData optional data for creating new entry. if not set, then the <code>sourceId</code> must
+     *                 be set
+     * @return wrapper around identifier for newly created part which can be used to retrieve it
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public PartData create(@Context UriInfo info, PartData partData) {
-        final String userId = getUserId();
+    public PartData create(@QueryParam("source") String sourceId,
+                           PartData partData) {
+        final String userId = requireUserId();
         final EntryCreator creator = new EntryCreator();
-        final long id = creator.createPart(userId, partData);
+        long id;
+        if (StringUtils.isEmpty(sourceId))
+            id = creator.createPart(userId, partData);
+        else
+            id = creator.copyPart(userId, sourceId);
         log(userId, "created entry " + id);
         partData.setId(id);
         return partData;
@@ -601,22 +635,22 @@ public class PartResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param partId
-     * @param partData
-     * @return updated part data
+     * Update the part information at the specified resource identifier
+     *
+     * @param partId   unique resource identifier for part being updated
+     * @param partData data to update part with
      */
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public PartData update(@Context final UriInfo info, @PathParam("id") final long partId,
+    public Response update(@PathParam("id") final long partId,
                            final PartData partData) {
-        final String userId = getUserId();
+        final String userId = requireUserId();
         final long id = controller.updatePart(userId, partId, partData);
-        log(userId, "updated entry " + id);
+        log(userId, "update entry " + id);
         partData.setId(id);
-        return partData;
+        return super.respond(partData);
     }
 
     /**

@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.collection;
+package org.jbei.ice.lib.folder.collection;
 
 /**
  * Types of collections that are supported in ICE.
@@ -9,9 +9,11 @@ package org.jbei.ice.lib.collection;
  */
 public enum CollectionType {
     FEATURED,
+    AVAILABLE,
     PERSONAL,
     SHARED,
     DRAFTS,
     PENDING,
-    DELETED
+    DELETED,
+    TRANSFERRED
 }

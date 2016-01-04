@@ -37,7 +37,7 @@ public class SearchResource extends RestResource {
             @DefaultValue("") @QueryParam("token") String token,
             @DefaultValue("SELECTION_MARKERS") @QueryParam("field") String field,
             @DefaultValue("8") @QueryParam("limit") int limit) {
-        getUserId();
+        requireUserId();
         AutoCompleteFieldValues values = new AutoCompleteFieldValues(field);
         return super.respond(values.getMatchingValues(token, limit));
     }
