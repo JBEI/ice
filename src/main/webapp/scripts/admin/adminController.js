@@ -363,7 +363,9 @@ angular.module('ice.admin.controller', [])
         $scope.retrieveKeys = function () {
             Util.get("rest/api-keys", function (result) {
                 $scope.apiKeys = result.data;
-                console.log(result);
-            });
+            }, {getAll: true});
         };
+
+        // init
+        $scope.retrieveKeys();
     });

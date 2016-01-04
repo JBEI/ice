@@ -3,8 +3,12 @@
         <button type="button" class="ice-button" ng-click="openApiKeyRequest()">Request Key</button>
     </div>
 
-    <div class="pad_top">
-        <table class="table table-border-bottom table-hover" ng-init="retrieveKeys()">
+    <div class="pad_top" ng-if="!apiKeys || !apiKeys.length">
+        No api keys created
+    </div>
+
+    <div class="pad_top" ng-if="apiKeys && apiKeys.length">
+        <table class="table table-border-bottom table-hover">
             <thead>
             <tr>
                 <th>ClientId</th>

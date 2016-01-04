@@ -13,11 +13,13 @@ angular.module('ice.profile.controller', [])
         $scope.apiKeys = undefined;
 
         // retrieve existing api keys for current user
-        $scope.retrieveKeys = function () {
+        $scope.retrieveProfileApiKeys = function () {
             Util.get("rest/api-keys", function (result) {
                 $scope.apiKeys = result.data;
             });
         };
+
+        $scope.retrieveProfileApiKeys();
 
         $scope.openApiKeyRequest = function () {
             var modalInstance = $uibModal.open({

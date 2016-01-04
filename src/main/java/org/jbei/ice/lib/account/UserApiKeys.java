@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.account;
 
 import org.jbei.ice.lib.access.AccessStatus;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.dto.access.AccessKey;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.storage.DAOFactory;
@@ -44,20 +45,43 @@ public class UserApiKeys {
         return key;
     }
 
-    public Results<AccessKey> getKeys(int limit, int offset, String sortField, boolean asc) {
+    /**
+     * Retrieves either list of available keys for current user or all keys.
+     * If requesting all keys then user must be an administrator
+     *
+     * @param limit        maximum number of keys to retrieve
+     * @param offset       paging parameter start
+     * @param sortField    field to sort on
+     * @param asc          whether the retrieve order is in ascending order
+     * @param getAvailable whether to retrieve all available keys or restrict by current user
+     * @return wrapper around list of retrieved keys including number available
+     */
+    public Results<AccessKey> getKeys(int limit, int offset, String sortField, boolean asc, boolean getAvailable) {
         Results<AccessKey> accessKeyResults = new Results<>();
+        List<ApiKey> results;
         AccountController accountController = new AccountController();
         boolean isAdmin = accountController.isAdministrator(this.userId);
 
-        List<ApiKey> results = DAOFactory.getApiKeyDAO().getApiKeysForUser(userId, sortField, limit, offset, asc);
+        if (getAvailable) {
+            if (!isAdmin)
+                throw new PermissionException("Cannot retrieve all api keys without admin privileges");
+
+            results = apiKeyDAO.getAllApiKeys(sortField, limit, offset, asc);
+        } else {
+            results = apiKeyDAO.getApiKeysForUser(userId, sortField, limit, offset, asc);
+        }
+
         for (ApiKey key : results) {
             AccessKey accessKey = key.toDataTransferObject();
-            if (isAdmin) {
-                Account account = accountController.getByEmail(key.getOwnerEmail());
-                accessKey.setAccount(account.toDataTransferObject());
-            }
+            Account account = accountController.getByEmail(key.getOwnerEmail());
+            accessKey.setAccount(account.toDataTransferObject());
             accessKeyResults.getData().add(accessKey);
         }
+
+        // get count
+        String user = getAvailable ? null : this.userId;
+        long count = apiKeyDAO.getApiKeysCount(user);
+        accessKeyResults.setResultCount(count);
         return accessKeyResults;
     }
 
