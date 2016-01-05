@@ -20,9 +20,8 @@ public class ApiKeyResource extends RestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createApiKey(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-                                 @QueryParam("client_id") String clientId) {
-        String userId = getUserId(sessionId);
+    public Response createApiKey(@QueryParam("client_id") String clientId) {
+        String userId = requireUserId();
         UserApiKeys apiKeys = new UserApiKeys(userId);
         return super.respond(apiKeys.requestKey(clientId));
     }
@@ -32,24 +31,23 @@ public class ApiKeyResource extends RestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getApiKeys(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-                               @DefaultValue("0") @QueryParam("offset") int offset,
+    public Response getApiKeys(@DefaultValue("0") @QueryParam("offset") int offset,
                                @DefaultValue("15") @QueryParam("limit") int limit,
                                @DefaultValue("true") @QueryParam("asc") boolean asc,
-                               @DefaultValue("creationTime") @QueryParam("sort") String sort) {
-        String userId = getUserId(sessionId);
+                               @DefaultValue("creationTime") @QueryParam("sort") String sort,
+                               @DefaultValue("false") @QueryParam("getAll") boolean getAll) {
+        String userId = requireUserId();
         UserApiKeys apiKeys = new UserApiKeys(userId);
-        return super.respond(apiKeys.getKeys(limit, offset, sort, asc));
+        return super.respond(apiKeys.getKeys(limit, offset, sort, asc, getAll));
     }
 
     @DELETE
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteApiKey(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-                                 @QueryParam("secret") String secret,
+    public Response deleteApiKey(@QueryParam("secret") String secret,
                                  @QueryParam("clientId") String clientId,
                                  @PathParam("id") long id) {
-        String userId = getUserId(sessionId);
+        String userId = requireUserId();
         UserApiKeys apiKeys = new UserApiKeys(userId);
         return super.respond(apiKeys.deleteKey(id, secret));
     }

@@ -75,24 +75,18 @@ public class SampleResource extends RestResource {
     @Path("/requests")
     public Response setRequestStatus(@QueryParam("status") final SampleRequestStatus status,
                                      final ArrayList<Long> requestIds) {
-        final String userId = getUserId();
-        try {
-            if (requestIds == null || requestIds.isEmpty()) {
-                return super.respond(Response.Status.OK);
-            }
-
-            final ArrayList<Long> sampleRequestIds = new ArrayList<>();
-            for (final Number number : requestIds) {
-                sampleRequestIds.add(number.longValue());
-            }
-
-            final boolean success = requestRetriever.setRequestsStatus(userId, sampleRequestIds,
-                    status);
-            return super.respond(success);
-        } catch (final Exception e) {
-            Logger.error(e);
-            return super.respond(Response.Status.INTERNAL_SERVER_ERROR);
+        final String userId = requireUserId();
+        if (requestIds == null || requestIds.isEmpty()) {
+            return super.respond(Response.Status.OK);
         }
+
+        final ArrayList<Long> sampleRequestIds = new ArrayList<>();
+        for (final Number number : requestIds) {
+            sampleRequestIds.add(number.longValue());
+        }
+
+        final boolean success = requestRetriever.setRequestsStatus(userId, sampleRequestIds, status);
+        return super.respond(success);
     }
 
     @DELETE

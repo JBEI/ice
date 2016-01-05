@@ -327,6 +327,7 @@ angular.module('ice.collection.controller', [])
                 } else {
                     // retrieved folders
                     $scope.folder = result;
+                    $scope.params.count = result.count;
                     if (result.canEdit)
                         $scope.folderNameTooltip = "Click to rename";
                 }
@@ -673,12 +674,10 @@ angular.module('ice.collection.controller', [])
             for (var idx = 0; idx < $scope.shoppingCartContents.length; idx += 1)
                 contentIds.push($scope.shoppingCartContents[idx].id);
 
-            samples.submitRequests({status: 'PENDING'}, contentIds, function (result) {
+            Util.update("rest/samples/requests", contentIds, {status: 'PENDING'}, function (result) {
                 $scope.shoppingCartContents = [];
                 $scope.openShoppingCart = false;
-            }, function (error) {
-                console.error(error);
-            })
+            });
         };
 
         $scope.shoppingCartTemplate = "scripts/collection/popover/shopping-cart-template.html";
