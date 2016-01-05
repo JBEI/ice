@@ -327,6 +327,7 @@ angular.module('ice.collection.controller', [])
                 } else {
                     // retrieved folders
                     $scope.folder = result;
+                    $scope.params.count = result.count;
                     if (result.canEdit)
                         $scope.folderNameTooltip = "Click to rename";
                 }
