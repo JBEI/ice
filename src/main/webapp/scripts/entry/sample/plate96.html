@@ -19,14 +19,14 @@
                ng-class="{'green':sample.location.child.child, 'alert_color':!sample.location.child.child}"
                style="font-size: 30px; cursor: default"
                ng-if="row + (10+col+'').slice(-2) === sample.location.child.display"
-               tooltip="{{sample.location.child.child.display}}"></i>
+               uib-tooltip="{{sample.location.child.child.display}}"></i>
         </td>
     </tr>
     <tr>
         <td colspan="{{Plate96Cols.length+1}}" class="small">
             <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
             <i class="fa fa-warning dark-orange font-14em" ng-if="sample.comments.length"
-               tooltip="1 or more comments available"></i>
+               uib-tooltip="1 or more comments available"></i>
             <strong>{{sample.label}}</strong><br>
             <span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a
                 ng-href="profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}

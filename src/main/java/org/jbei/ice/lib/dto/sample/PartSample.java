@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.dto.sample;
 
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.comment.UserComment;
+import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.ArrayList;
 

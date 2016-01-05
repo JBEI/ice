@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.dto.entry;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * @author Hector Plahar
@@ -8,7 +8,7 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
 public class PartStatistics implements IDataTransferModel {
 
     private long entryId;
-    private int traceSequenceCount;
+    private int sequenceCount;
     private int commentCount;
     private int sampleCount;
     private int historyCount;
@@ -17,12 +17,12 @@ public class PartStatistics implements IDataTransferModel {
     public PartStatistics() {
     }
 
-    public int getTraceSequenceCount() {
-        return traceSequenceCount;
+    public int getSequenceCount() {
+        return sequenceCount;
     }
 
-    public void setTraceSequenceCount(int traceSequenceCount) {
-        this.traceSequenceCount = traceSequenceCount;
+    public void setSequenceCount(int sequenceCount) {
+        this.sequenceCount = sequenceCount;
     }
 
     public int getCommentCount() {

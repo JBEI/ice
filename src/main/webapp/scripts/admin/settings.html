@@ -1,17 +1,17 @@
 <div class="pad_top">
     <button type="button" ng-click="rebuildLuceneIndex()" class="ice-button">
-        <i style="font-size: 14px" class="blue fa fa-refresh"></i> Rebuild Indexes
+        Rebuild Indexes
     </button>
     &nbsp;
     <button type="button" ng-click="rebuildBlastIndex()" class="ice-button">
-        <i style="font-size: 14px" class="blue fa fa-refresh"></i> Rebuild Blast
+        Rebuild Blast
     </button>
 </div>
 
 <div class="pad_top" ng-init="getSetting()">
-    <tabset>
-        <tab>
-            <tab-heading><i class="fa fa-gear"></i> General Settings</tab-heading>
+    <uib-tabset>
+        <uib-tab>
+            <uib-tab-heading><i class="fa fa-gear"></i> General Settings</uib-tab-heading>
             <div class="pad_top" ng-repeat="setting in generalSettings">
                 <div class="col-md-3 entryLabel text-right">
                     <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">{{setting.key}}</span>
@@ -19,7 +19,7 @@
 
                 <!--for boolean fields only-->
                 <div class="col-md-9" ng-if="setting.isBoolean">
-                    <i class="cursor_pointer fa" ng-click="submitBooleanSetting(setting)"
+                    <i class="cursor_pointer fa fa-fw" ng-click="submitBooleanSetting(setting)"
                        ng-class="{'fa-toggle-on green font-14em':setting.value != undefined && setting.value.toLowerCase() === 'yes',
                        'fa-toggle-off font-14em opacity_hover':setting.value == undefined || setting.value.toLowerCase() !== 'yes'}"></i>
                 </div>
@@ -47,10 +47,10 @@
 
 
             </div>
-        </tab>
+        </uib-tab>
 
-        <tab>
-            <tab-heading><i class="fa fa-envelope"></i> Email Settings</tab-heading>
+        <uib-tab>
+            <uib-tab-heading><i class="fa fa-envelope"></i> Email Settings</uib-tab-heading>
             <div class="pad_top" ng-repeat="setting in emailSettings">
                 <div class="col-md-3 entryLabel text-right">
                     <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">{{setting.key}}</span>
@@ -58,7 +58,7 @@
 
                 <!--for boolean fields only-->
                 <div class="col-md-9" ng-if="setting.isBoolean">
-                    <i class="cursor_pointer fa" ng-click="submitBooleanSetting(setting)"
+                    <i class="cursor_pointer fa fa-fw" ng-click="submitBooleanSetting(setting)"
                        ng-class="{'fa-toggle-on green font-14em':setting.value != undefined && setting.value.toLowerCase() === 'yes',
                        'fa-toggle-off font-14em opacity_hover':setting.value == undefined || setting.value.toLowerCase() !== 'yes'}"></i>
                 </div>
@@ -83,9 +83,9 @@
                     </div>
                 </div>
             </div>
-        </tab>
+        </uib-tab>
 
-    </tabset>
+    </uib-tabset>
 </div>
 
 

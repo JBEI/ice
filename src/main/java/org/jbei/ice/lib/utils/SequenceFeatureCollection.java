@@ -1,15 +1,11 @@
 package org.jbei.ice.lib.utils;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import org.jbei.ice.storage.model.AnnotationLocation;
+import org.jbei.ice.storage.model.Feature;
+import org.jbei.ice.storage.model.SequenceFeature;
 
-import org.jbei.ice.lib.models.AnnotationLocation;
-import org.jbei.ice.lib.models.Feature;
-import org.jbei.ice.lib.models.SequenceFeature;
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * Container class for {@link SequenceFeature} objects.
@@ -68,7 +64,7 @@ public class SequenceFeatureCollection implements Collection<SequenceFeature>, S
      * @return List of {@link SequenceFeature}s.
      */
     public List<SequenceFeature> get(Feature feature) {
-        ArrayList<SequenceFeature> result = new ArrayList<SequenceFeature>();
+        ArrayList<SequenceFeature> result = new ArrayList<>();
         for (int i = 0; i < hashes.size(); i++) {
             if (hashes.get(i).equals(feature.getHash())) {
                 result.add(sequenceFeatures.get(i));
@@ -86,7 +82,7 @@ public class SequenceFeatureCollection implements Collection<SequenceFeature>, S
      * @return List of SequenceFeatures.
      */
     public List<SequenceFeature> get(SequenceFeature.AnnotationType flag) {
-        ArrayList<SequenceFeature> result = new ArrayList<SequenceFeature>();
+        ArrayList<SequenceFeature> result = new ArrayList<>();
         for (SequenceFeature sequenceFeature : sequenceFeatures) {
             if (sequenceFeature.getAnnotationType() == flag) {
                 result.add(sequenceFeature);

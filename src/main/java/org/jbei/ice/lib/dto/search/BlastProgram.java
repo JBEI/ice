@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.dto.search;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * Types of blast programs that this system supports for nucleotide search

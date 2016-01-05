@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.experiment;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * Data transfer object for experiments
@@ -13,7 +13,16 @@ public class Study implements IDataTransferModel {
     private String partId;
     private String label;
     private String url;
+    private String ownerEmail;
     private long created;
+
+    public Study() {
+    }
+
+    public Study(String label, String url) {
+        this.label = label;
+        this.url = url;
+    }
 
     public long getId() {
         return id;
@@ -53,5 +62,13 @@ public class Study implements IDataTransferModel {
 
     public void setCreated(long created) {
         this.created = created;
+    }
+
+    public String getOwnerEmail() {
+        return ownerEmail;
+    }
+
+    public void setOwnerEmail(String ownerEmail) {
+        this.ownerEmail = ownerEmail;
     }
 }

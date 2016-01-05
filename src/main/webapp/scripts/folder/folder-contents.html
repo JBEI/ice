@@ -1,0 +1,272 @@
+<div class="container-fluid">
+    <!--if subfolder-->
+    <div class="row entry_general_header_td" style="height: 60px;" ng-if="folder.type">
+        <div class="col-md-12">
+            <table>
+                <tr>
+                    <td>
+                        <h4>
+                            <span style="white-space: nowrap">
+                                <img alt="Loading..." ng-if="loadingPage" src="img/loader-mini.gif"/>
+                                <strong>
+                                    <span style="text-transform: uppercase; color: #888">{{selectedCollection || folder.type}}</span>
+                                    <span ng-class="{folder_name:folder.canEdit}" uib-tooltip={{folderNameTooltip}}
+                                          ng-click="showFolderRenameModal()">
+                                        {{folder.folderName}}
+                                    </span>
+                                </strong>
+                                <span ng-if="folder.publicReadAccess">&nbsp;
+                                    <small style="font-size: 12px; position: relative; top: -4px"
+                                           uib-tooltip="Available on web of registries"
+                                           tooltip-placement="right" tooltip-trigger="mouseenter"
+                                           class="label label-info cursor_pointer"><i class="fa fa-globe"></i>
+                                        Public
+                                    </small>
+                                </span>
+                            </span>
+
+                            <div class="no_wrap">
+                                <small class="font-65em" ng-if="folder.type==='SHARED'">
+                                    Shared by <a ng-href="profile/{{folder.owner.id}}">{{folder.owner.firstName}}
+                                    {{folder.owner.lastName}}</a>
+                                    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+                                </small>
+                                <small class="font-65em">
+                                    {{folder.creationTime | date:'short'}}
+                                </small>
+                                <small ng-if="folder.type==='SHARED'" style="color: #333">
+                                    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+
+                                    <span ng-repeat="permission in folder.accessPermissions" style="margin-right: 3px">
+                                        <span class="label" uib-tooltip="{{shareText(permission)}}"
+                                              ng-class="{'bg_permission_group':permission.article==='GROUP', 'bg_permission_user':permission.article==='ACCOUNT'}">
+                                             <i class="fa"
+                                                ng-class="{'fa-group':permission.article==='GROUP', 'fa-user':permission.article==='ACCOUNT'}"></i> {{getDisplay(permission)}}
+                                        </span>
+                                    </span>
+                                </small>
+                            </div>
+                        </h4>
+                    </td>
+                    <td style="padding-left: 40px; white-space: nowrap">
+                        <span ng-show="folder.id" folder-actions class="font-95em"></span>
+                    </td>
+                    <td style="width: 99%">
+                        <div class="input-group input-group-sm pull-right" ng-if="params.showFilter">
+                            <i class="fa fa-fw fa-filter input-group-addon"></i>
+                            <input ng-model="params.filter" class="form-control" focus ng-change="hStepChanged()">
+                            <i class="fa fa-fw fa-times opacity_hover input-group-addon"
+                               ng-click="params.showFilter = false; params.filter=''; hStepChanged()"></i>
+                        </div>
+
+                        <div class="pull-right" ng-if="!params.showFilter">
+                            <i class="fa fa-fw fa-filter opacity_hover" uib-tooltip="Filter"
+                               ng-click="params.showFilter=true"></i>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!--collections like 'personal', 'available' do not have a folderName-->
+    <div class="row" ng-if="!folder.type">
+        <div class="col-md-9 entry_general_header_td">
+            <h4><img alt="Loading..." ng-if="loadingPage" src="img/loader-mini.gif"/>
+                <strong style="color: #888;text-transform: uppercase;">{{selectedFolder}}</strong>
+                <!--<br><small class="font-65em">Folder Description</small>-->
+            </h4>
+        </div>
+
+        <!-- filter for collections -->
+        <div class="col-md-3 entry_general_header_td" style="padding-top: 8px">
+            <div class="input-group input-group-sm pull-right" ng-if="params.showFilter">
+                <i class="fa fa-fw fa-filter input-group-addon"></i>
+                <input ng-model="params.filter" class="input_box form-control" focus ng-change="hStepChanged()">
+                <i class="fa fa-fw fa-times opacity_hover input-group-addon"
+                   ng-click="params.showFilter = false; params.filter=''; hStepChanged()"></i>
+            </div>
+
+            <div class="pull-right" ng-if="!params.showFilter">
+                <i class="fa fa-fw fa-filter opacity_hover" uib-tooltip="Filter" ng-click="params.showFilter=true"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="pad_top" data-ng-show='!folder'>
+            <img alt="Loading..." src="img/loader-mini.gif"/> Loading...
+        </div>
+
+        <div class="pad_top" ng-show="folder && folder.entries.length == 0">
+            No entries available for selection
+        </div>
+
+        <table ng-if="folder && folder.entries && folder.entries.length" cellspacing="0"
+               class="table table-border-bottom table-hover table-condensed font-95em"
+               ng-class="{'opacity_4':loadingPage}">
+            <thead>
+            <tr style="height: 32px">
+                <!--selection toggle-->
+                <th class="uib-dropdown" uib-dropdown style="font-size: 15px; vertical-align: middle;">
+                    <span class="uib-dropdown-toggle" uib-dropdown-toggle>
+                        <i class="fa fa-fw cursor_default" ng-class="selectAllClass()" ng-click="selectAll()"
+                           stop-event="click"></i><small class="caret cursor_pointer" style="margin-left: 0"></small>
+                    </span>
+                    <ul class="uib-dropdown-menu" uib-dropdown-menu style="min-width: 100px">
+                        <li class="font-75em cursor_pointer" ng-click="setType('all')"><a>All</a></li>
+                        <li ng-repeat="choice in items" ng-click="setType(choice.type)"
+                            class="font-75em cursor_pointer">
+                            <a>{{choice.type | capitalize}}</a>
+                        </li>
+                        <li class="font-75em cursor_pointer" ng-click="setType('none')"><a>None</a></li>
+                    </ul>
+
+                    <!--<sup style="font-size: 9px; font-weight: normal; display: inherit"-->
+                    <!--ng-show="selection.length>0">{{selection.length}}</sup>-->
+                </th>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('type')">TYPE</span>
+                    <i ng-if="params.sort!=='type'" class="sortable fa fa-angle-down"></i>
+                    <i ng-show="params.sort=='type'" style="font-size: 14px;" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
+                </th>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('part_id')">Part ID</span>
+                    <i ng-if="params.sort!=='part_id'" class="sortable fa fa-angle-down"></i>
+                    <i ng-show="params.sort=='part_id'" style="font-size: 14px" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
+                </th>
+                <th ng-if="entryHeaders.alias.selected">
+                    <span class="entry-table-header" ng-click="sort('alias')">Alias</span>
+                    <i ng-if="params.sort!=='alias'" class="sortable fa fa-angle-down"></i>
+                    <i ng-show="params.sort=='alias'" style="font-size: 14px" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
+                </th>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('name')">Name</span>
+                    <i ng-if="params.sort!=='name'" class="sortable fa fa-angle-down"></i>
+                    <i ng-show="params.sort=='name'" style="font-size: 14px" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
+                </th>
+                <th></th>
+                <th ng-if="entryHeaders.status.selected">
+                    <span class="entry-table-header" ng-click="sort('status')">Status</span>
+                    <i ng-if="params.sort!=='status'" class="sortable fa fa-angle-down"></i>
+                    <i ng-show="params.sort=='status'" style="font-size: 14px" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
+                </th>
+                <th style="width:100px;">
+                    <i class="fa fa-flask fa-fw" style="font-size: 14px" ng-if="entryHeaders.hasSample.selected"></i>
+                    <img src="img/dna.svg" width="15px" ng-if="entryHeaders.hasSequence.selected" alt="has dna"/>
+                </th>
+                <th ng-if="entryHeaders.created.selected">
+                    <span class="entry-table-header" ng-click="sort('created')">Created</span>
+                    <i ng-show="params.sort=='created'" style="font-size: 14px" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
+                    <i ng-if="params.sort!=='created'" class="sortable fa fa-angle-down"></i>
+                </th>
+                <th uib-dropdown-toggle class="text-muted opacity_hover" uib-dropdown
+                    style="width: 14px; border-left: 1px solid #efefef; padding: 0; vertical-align: middle">
+                    <i class="fa fa-fw fa-ellipsis-v pull-right font-11em"></i>
+
+                    <div class="uib-dropdown-menu pull-right" uib-dropdown-menu>
+                        <strong class="pad-8 small">Show/Hide fields</strong>
+                        <table class="small no_wrap table table-condensed font-85em" style="font-weight: normal"
+                               stop-event="click">
+                            <tr ng-click="selectedHeaderField(header, $event)" ng-repeat="header in entryHeaders">
+                                <td class="check-box-table-cell">
+                                    <input type="checkbox" ng-model="header.selected"> {{header.display}}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr data-ng-repeat="entry in folder.entries">
+                <td width="43px">
+                    <!--<i class="fa cursor_pointer fa-check-square-o" ng-if="allSelected"-->
+                    <!--style="color: #000; font-size: 14px;" ng-click="select(entry)"></i>-->
+
+                    <i class="fa fa-fw cursor_default" style="font-size: 15px"
+                       ng-class="{'fa-square-o':!isSelected(entry), 'fa-check-square-o':isSelected(entry)}"
+                       ng-click="select(entry)"></i>
+                </td>
+                <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
+                    <i class="fa fa-fw fa-trash-o red" ng-if="entry.visible=='DELETED'"></i>
+                    {{entry.type | uppercase}}
+                </td>
+                <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
+                       popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
+                       uib-popover-template="folderPopupTemplateUrl" popover-placement="right">{{entry.partId}}</a>
+                </td>
+                <td ng-if="entryHeaders.alias.selected">
+                    <div class="ellipsis">{{entry.alias}}</div>
+                </td>
+                <td>
+                    <div title="{{entry.name}}" class="ellipsis" style="width: 350px">{{entry.name}}</div>
+                    <div title="{{entry.shortDescription}}" class="small"
+                         style="opacity: 0.6; width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
+                        {{entry.shortDescription}}
+                    </div>
+                </td>
+                <td style="vertical-align: middle">
+                    <small style="opacity: 0.4">
+                        <ng-pluralize count="entry.viewCount"
+                                      when="{'0': '',
+                                  '1': '1 view',
+                                  'other':'{} views'}"></ng-pluralize>
+                    </small>
+                </td>
+                <td style="vertical-align: middle; width:100px; white-space:nowrap"
+                    ng-if="entryHeaders.status.selected">
+                    <span class="label" ng-class="{
+                    'ice-label-success':entry.status.toUpperCase()=='COMPLETE',
+                    'label-default': entry.status.toUpperCase()=='In Progress'.toUpperCase(),
+                    'ice-label-danger': entry.status.toUpperCase()=='Abandoned'.toUpperCase(),
+                    'ice-label-info': entry.status.toUpperCase()=='Planned'.toUpperCase()}">{{entry.status | capitalize}}
+                    </span>
+                </td>
+                <td style="vertical-align: middle;">
+                    <span ng-if="entryHeaders.hasSample.selected">
+                        <i ng-show="entry.hasSample" class="fa fa-flask fa-fw"
+                           style="color: #555; font-size: 14px;"></i>
+                        <i ng-show="!entry.hasSample" class="fa fa-square fa-fw"
+                           style="opacity: 0; font-size: 14px;"></i>
+                    </span>
+                    <img ng-show="entry.hasSequence && entryHeaders.hasSequence.selected" src="img/dna.svg"
+                         width="15px"/>
+                </td>
+                <td style="width: 130px; white-space: nowrap; vertical-align: middle;"
+                    ng-if="entryHeaders.created.selected">
+                    {{entry.creationTime | date:'MMM d, yyyy'}}
+                </td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="row" ng-if="folder && folder.entries.length > 0" style="margin-top: -15px">
+        <div class="col-md-6" style="padding-left: 0">
+            <uib-pagination total-items="folder.count" ng-change="folderPageChange()" ng-model="params.currentPage"
+                            max-size="maxSize" class="pagination-sm" items-per-page="params.limit"
+                            boundary-links="true">
+            </uib-pagination>
+        </div>
+        <div class="col-md-4" style="margin-top: 25px;">
+            <strong class="small">
+                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(params.currentPage,
+                folder.count, params.limit)}}
+            </strong>
+        </div>
+        <div class="col-md-2" style="margin-top: 25px;">
+            <small class="text-muted pull-right">Show:
+                <select ng-change="hStepChanged()" ng-model="params.limit"
+                        ng-options="opt for opt in params.hstep"></select></small>
+        </div>
+    </div>
+</div>
+

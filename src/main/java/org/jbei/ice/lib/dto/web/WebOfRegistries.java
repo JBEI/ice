@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.dto.web;
 
-import java.util.ArrayList;
+import org.jbei.ice.storage.IDataTransferModel;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import java.util.ArrayList;
 
 /**
  * Wrapper around web of registries settings and partners
@@ -10,8 +10,6 @@ import org.jbei.ice.lib.dao.IDataTransferModel;
  * @author Hector Plahar
  */
 public class WebOfRegistries implements IDataTransferModel {
-
-    private static final long serialVersionUID = 1l;
 
     private boolean webEnabled;
     private ArrayList<RegistryPartner> partners;

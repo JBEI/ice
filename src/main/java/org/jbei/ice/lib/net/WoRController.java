@@ -4,8 +4,6 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.RemotePartnerDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
@@ -13,6 +11,9 @@ import org.jbei.ice.lib.dto.web.WebOfRegistries;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.rest.IceRestClient;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
+import org.jbei.ice.storage.model.RemotePartner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,10 +116,16 @@ public class WoRController {
      * web of registries functionality
      *
      * @param enable if true, enables WoR; disables it otherwise
+     * @param url    the url for this ice instance
      */
-    public void setEnable(boolean enable) {
+    public void setEnable(boolean enable, String url) {
         String thisUrl = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
-        WebOfRegistriesTask contactTask = new WebOfRegistriesTask(thisUrl, enable);
+        if (!thisUrl.equalsIgnoreCase(url)) {
+            ConfigurationController configurationController = new ConfigurationController();
+            configurationController.setPropertyValue(ConfigurationKey.URI_PREFIX, url);
+        }
+
+        WebOfRegistriesTask contactTask = new WebOfRegistriesTask(url, enable);
         IceExecutorService.getInstance().runTask(contactTask);
     }
 
@@ -134,11 +141,18 @@ public class WoRController {
         String encryptedToken = partner.getAuthenticationToken();
         TokenHash hash = new TokenHash();
         if (encryptedToken.equalsIgnoreCase(hash.encryptPassword(token, partner.getSalt()))) {
-            partner.toDataTransferObject();
+            return partner.toDataTransferObject();
         }
         return null;
     }
 
+    /**
+     * Request for the list of partners that this instance has, from other partners
+     *
+     * @param apiKey authentication token that this instance previously provided to instance at <code>url</code>
+     * @param url    location of ICE instance (partner) making request
+     * @return list of registry partners that this instance has, null if apiKey could not be authenticated
+     */
     public List<RegistryPartner> getWebPartners(String apiKey, String url) {
         if (!isInWebOfRegistries())
             return null;

@@ -1,0 +1,17 @@
+<table cellpadding="0" cellspacing="0" class="entry_attribute">
+    <tr>
+        <td class="entry_attributes_sub_header" colspan="2">
+            <i class="fa fa-folder fa-fw font-90em"></i>&nbsp;Folders
+        </td>
+    </tr>
+    <tr ng-hide="(containedFolders&&containedFolders.length)">
+        <td class="font-85em pad-6"><i style="color: #999">Not contained in any folders</i></td>
+    </tr>
+    <tr ng-repeat="folder in containedFolders">
+        <td class="entry_detail_view_row">
+            <i class="fa fa-folder-open-o small pad_left"></i>&nbsp;<a ng-href="folders/{{folder.id}}"
+                                                                       class="font-85em">{{folder.folderName |
+                fileTruncate:23:false}}</a>
+        </td>
+    </tr>
+</table>

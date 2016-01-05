@@ -1,6 +1,7 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
@@ -10,7 +11,6 @@ import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.WoRController;
-import org.jbei.ice.lib.vo.FeaturedDNASequence;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -107,7 +107,8 @@ public class WebResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}")
     public Response getWebEntry(
-            @PathParam("id") final long partnerId, @PathParam("entryId") final long entryId) {
+            @PathParam("id") final long partnerId,
+            @PathParam("entryId") final long entryId) {
         final String userId = super.getUserId();
         final PartData result = remoteEntries.getPublicEntry(userId, partnerId, entryId);
         return super.respond(Response.Status.OK, result);

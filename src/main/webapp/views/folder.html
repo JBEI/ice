@@ -4,11 +4,11 @@
     <ice.menu.wor></ice.menu.wor>
 </div>
 
-<div class="navbar-fixed-top" style="background-color: #fff">
+<div class="navbar-fixed-top" style="background-color: #fff" ng-cloak>
 
-    <a href="folders/personal"><img class="cursor_pointer" src="img/logo.png" alt="ICE" height="84px"></a>
+    <a href="folders/personal"><img class="cursor_pointer" ng-src="{{siteSettings.logo}}" alt="ICE"></a>
 
-    <div style="position: fixed; top: 0; right: 0; left: 260px; background-color: #fff">
+    <div style="position: fixed; top: 0; right: 0; left: 260px; background-color: #fff; border-bottom: 1px solid #f6f6f6">
         <!-- very top of header. Account and logout links -->
         <div style="background-color: #f1f1f1; padding:6px">
 
@@ -38,7 +38,7 @@
                   ng-if="shoppingCartContents.length"
                   popover-trigger="click"
                   popover-placement="bottom" popover-title="Samples Cart"
-                  popover-template="shoppingCartTemplate">
+                  uib-popover-template="shoppingCartTemplate">
                 &nbsp;
                 <i class="fa fa-shopping-cart" style="font-size: 16px"></i>
                 <sup class="count-badge">{{shoppingCartContents.length}}</sup>
@@ -49,7 +49,7 @@
             </span>
                 &nbsp;
             <span class="cursor_pointer opacity_hover">
-                <i class="fa fa-sign-out" style="font-size: 20px" tooltip="Logout"
+                <i class="fa fa-sign-out" style="font-size: 20px" uib-tooltip="Logout"
                    tooltip-placement="bottom"
                    data-ng-click="logout()"></i>
             </span>
@@ -58,21 +58,21 @@
             </div>
         </div>
 
-        <div class="btn-toolbar" style="margin-top: 20px;">
+        <div class="btn-toolbar" style="margin-top: 23px;">
             <!-- sub menu [Create Entry, Add To, etc] -->
-            <div class="btn-group" dropdown is-open="createEntry.isOpen">
+            <div class="btn-group" uib-dropdown is-open="createEntry.isOpen">
                 <button type="button" class="subMenuCreateNew btn-sm"
-                        style="font-size: 13px"
+                        style="font-size: 14px"
                         ng-click="toggleUploadDropdown($event, 'create')">Create Entry <span class="caret"></span>
                 </button>
 
                 <button type="button" style="padding: 5px 5px"
                         class="btn-xs subMenuCreateNew"
                         title="Bulk Import" ng-click="toggleUploadDropdown($event, 'upload')">
-                    <i class="fa fa-table" style="font-size: 14px"></i>
+                    <i class="fa fa-table" style="font-size: 19px"></i>
                 </button>
 
-                <ul class="dropdown-menu">
+                <ul class="uib-dropdown-menu">
                     <li ng-repeat="choice in items">
                         <a ng-href="{{createType}}/{{choice.type}}" class="cursor_pointer">
                             <i ng-if="createType==='upload'"
@@ -86,7 +86,7 @@
         </div>
 
         <!-- space -->
-        <div style="height: 25px"></div>
+        <div style="height: 18px"></div>
     </div>
 </div>
 

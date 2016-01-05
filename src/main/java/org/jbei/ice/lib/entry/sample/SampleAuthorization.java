@@ -3,9 +3,9 @@
 package org.jbei.ice.lib.entry.sample;
 
 import org.jbei.ice.lib.access.Authorization;
-import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.entry.EntryAuthorization;
-import org.jbei.ice.lib.entry.sample.model.Sample;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Sample;
 
 /**
  * @author Hector Plahar

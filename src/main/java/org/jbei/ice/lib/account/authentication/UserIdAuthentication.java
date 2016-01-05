@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.account.authentication;
 
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.model.Account;
+import org.jbei.ice.storage.model.Account;
 
 /**
  * Authentication implementation that only validates the user id

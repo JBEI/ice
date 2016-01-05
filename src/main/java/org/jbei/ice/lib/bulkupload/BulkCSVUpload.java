@@ -5,7 +5,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.bulkupload.SampleField;
@@ -15,7 +14,8 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.lib.entry.EntryUtil;
-import org.jbei.ice.lib.entry.model.Entry;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Entry;
 
 import java.io.FileInputStream;
 import java.io.IOException;

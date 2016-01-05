@@ -1,13 +1,13 @@
 package org.jbei.ice.lib.dto.comment;
 
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.sample.PartSample;
+import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.ArrayList;
 
 /**
- * DTO for {@link org.jbei.ice.lib.models.Comment}. Comments are tied to specific entries
+ * Comments are tied to specific entries
  * and the entryId field is used to uniquely identify the entry this comment is tied to
  *
  * @author Hector Plahar

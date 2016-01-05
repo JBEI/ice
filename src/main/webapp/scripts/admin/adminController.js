@@ -1,28 +1,8 @@
 'use strict';
 
 angular.module('ice.admin.controller', [])
-    .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, $cookieStore, Settings) {
-        var generalSettingKeys = [
-            'TEMPORARY_DIRECTORY',
-            'DATA_DIRECTORY',
-            'PROJECT_NAME',
-            'PART_NUMBER_DIGITAL_SUFFIX',
-            'PART_NUMBER_DELIMITER',
-            'NEW_REGISTRATION_ALLOWED',
-            'PROFILE_EDIT_ALLOWED',
-            'PASSWORD_CHANGE_ALLOWED',
-            'PART_NUMBER_PREFIX',
-            'URI_PREFIX',
-            'BLAST_INSTALL_DIR'
-        ];
-
-        var emailSettingKeys = [
-            'SMTP_HOST',
-            'ADMIN_EMAIL',
-            'BULK_UPLOAD_APPROVER_EMAIL',
-            'SEND_EMAIL_ON_ERRORS',
-            'ERROR_EMAIL_EXCEPTION_PREFIX'
-        ];
+    .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, $cookieStore, Settings,
+                                             AdminSettings) {
 
         // retrieve general setting
         $scope.getSetting = function () {
@@ -38,7 +18,7 @@ angular.module('ice.admin.controller', [])
             settings.get(function (result) {
 
                 angular.forEach(result, function (setting) {
-                    if (generalSettingKeys.indexOf(setting.key) != -1) {
+                    if (AdminSettings.generalSettingKeys().indexOf(setting.key) != -1) {
                         $scope.generalSettings.push({
                             'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
                             'value': setting.value,
@@ -47,7 +27,7 @@ angular.module('ice.admin.controller', [])
                         });
                     }
 
-                    if (emailSettingKeys.indexOf(setting.key) != -1) {
+                    if (AdminSettings.getEmailKeys().indexOf(setting.key) != -1) {
                         $scope.emailSettings.push({
                             'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
                             'value': setting.value,
@@ -61,7 +41,7 @@ angular.module('ice.admin.controller', [])
 
         var menuOption = $stateParams.option;
 
-        var menuOptions = $scope.profileMenuOptions = [
+        var menuOptions = $scope.adminMenuOptions = [
             {url: 'scripts/admin/settings.html', display: 'Settings', selected: true, icon: 'fa-cogs'},
             {
                 id: 'web',
@@ -71,7 +51,13 @@ angular.module('ice.admin.controller', [])
                 icon: 'fa-globe'
             },
             {id: 'users', url: 'scripts/admin/users.html', display: 'Users', selected: false, icon: 'fa-user'},
-            {id: 'groups', url: 'scripts/admin/groups.html', display: 'Groups', selected: false, icon: 'fa-group'},
+            {
+                id: 'groups',
+                url: 'scripts/admin/groups.html',
+                display: 'Public Groups',
+                selected: false,
+                icon: 'fa-group'
+            },
             {
                 id: 'transferred', url: 'scripts/admin/transferred.html', display: 'Transferred Entries',
                 selected: false, icon: 'fa-list'
@@ -79,6 +65,13 @@ angular.module('ice.admin.controller', [])
             {
                 id: 'samples', url: 'scripts/admin/sample-requests.html', display: 'Sample Requests', selected: false,
                 icon: 'fa-shopping-cart'
+            },
+            {
+                id: 'api-keys',
+                url: 'scripts/admin/all-api-keys.html',
+                display: 'API Keys',
+                selected: false,
+                icon: 'fa-key'
             }
         ];
 
@@ -309,7 +302,7 @@ angular.module('ice.admin.controller', [])
                 $scope.params.asc = false;
 
             $scope.params.sort = field;
-            requestSamples();
+            $scope.requestSamples();
         };
     })
     .controller('AdminUserController', function ($rootScope, $scope, $stateParams, $cookieStore, User) {
@@ -362,4 +355,17 @@ angular.module('ice.admin.controller', [])
         $scope.filterChanged = function () {
             getUsers();
         }
+    })
+    .controller('AdminApiKeysController', function ($scope, Util) {
+        $scope.apiKeys = undefined;
+
+        // retrieve existing api keys for current user
+        $scope.retrieveKeys = function () {
+            Util.get("rest/api-keys", function (result) {
+                $scope.apiKeys = result.data;
+            }, {getAll: true});
+        };
+
+        // init
+        $scope.retrieveKeys();
     });

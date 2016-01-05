@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.parsers;
 
 import org.apache.commons.io.IOUtils;
-import org.jbei.ice.lib.vo.DNASequence;
+import org.jbei.ice.lib.dto.DNASequence;
 
 import java.io.File;
 import java.io.FileInputStream;

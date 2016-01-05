@@ -1,12 +1,12 @@
 package org.jbei.ice.lib;
 
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.entry.EntryCreator;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.entry.model.Strain;
 import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Plasmid;
+import org.jbei.ice.storage.model.Strain;
 import org.junit.Assert;
 
 /**
@@ -48,7 +48,7 @@ public class TestEntryCreator {
 
     public static long createTestPart(String userId) throws Exception {
         PartData data = new PartData(EntryType.PART);
-        data.setShortDescription("summary for test ");
+        data.setShortDescription("summary for test");
         data.setName("pTest " + userId);
         data.setBioSafetyLevel(1);
         return new EntryCreator().createPart(userId, data);

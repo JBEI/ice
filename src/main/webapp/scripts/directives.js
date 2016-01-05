@@ -34,7 +34,7 @@ iceDirectives.directive("addSequence", function () {
 iceDirectives.directive("folderActions", function () {
     return {
         restrict: "AE",
-        templateUrl: "views/folder/folder-actions.html"
+        templateUrl: "scripts/folder/folder-actions.html"
     }
 });
 
@@ -49,14 +49,14 @@ iceDirectives.directive("iceActionMenu", function () {
 iceDirectives.directive("iceEntryAttachment", function () {
     return {
         restrict: "E",
-        templateUrl: "views/entry-attachment.html"
+        templateUrl: "scripts/entry/entry-attachment.html"
     }
 });
 
 iceDirectives.directive("iceRemoteEntryAttachment", function () {
     return {
-        restrict:"E",
-        templateUrl:"scripts/wor/entry/attachment.html"
+        restrict: "E",
+        templateUrl: "scripts/wor/entry/attachment.html"
     }
 });
 
@@ -66,17 +66,28 @@ iceDirectives.directive("iceEntryPermission", function () {
         scope: {
             entry: '='
         },
-        templateUrl:"views/entry-permission.html",
-        controller:'EntryPermissionController'
+        templateUrl: "scripts/entry/entry-permission.html",
+        controller: 'EntryPermissionController'
+    }
+});
+
+iceDirectives.directive("iceEntryFolders", function () {
+    return {
+        restrict: "E",
+        scope: {
+            entry: '='
+        },
+        templateUrl: "scripts/entry/entry-folders.html",
+        controller: 'EntryFoldersController'
     }
 });
 
 iceDirectives.directive("tabs", function () {
     return {
-        restrict:'E',
-        transclude:true,
-        controller:"GenericTabsController",
-        templateUrl:"views/tabs.html"
+        restrict: 'E',
+        transclude: true,
+        controller: "GenericTabsController",
+        templateUrl: "views/tabs.html"
     }
 });
 
@@ -92,7 +103,7 @@ iceDirectives.directive("pane", function () {
         link: function (scope, element, attrs, permCtrl) {
             permCtrl.addPane(scope);
         },
-        templateUrl:"views/generic-pane.html"
+        templateUrl: "views/generic-pane.html"
     }
 });
 
@@ -129,7 +140,7 @@ iceDirectives.directive('myTabs', function () {
                 panes.push(pane);
             };
         },
-        templateUrl:'scripts/entry/tabs.html'
+        templateUrl: 'scripts/entry/tabs.html'
     };
 })
     .directive('myPane', function () {
@@ -143,23 +154,23 @@ iceDirectives.directive('myTabs', function () {
             link: function (scope, element, attrs, tabsCtrl) {
                 tabsCtrl.addPane(scope);
             },
-            templateUrl:'scripts/entry/pane.html'
+            templateUrl: 'scripts/entry/pane.html'
         };
     });
 
 iceDirectives.directive("iceCollectionContents", function () {
     return {
-        restrict:"AE",
-        templateUrl:"views/folder/folder-contents.html",
-        controller:"CollectionFolderController"
+        restrict: "AE",
+        templateUrl: "scripts/folder/folder-contents.html",
+        controller: "CollectionFolderController"
     }
 });
 
 iceDirectives.directive("ice-wor-contents", function () {
     return {
-        restrict:"AE",
-        templateUrl:"scripts/wor/wor-contents.html",
-        controller:"WorContentController"
+        restrict: "AE",
+        templateUrl: "scripts/wor/wor-contents.html",
+        controller: "WorContentController"
     }
 });
 
@@ -168,16 +179,16 @@ iceDirectives.directive("iceBulkUploadContents", function () {
         scope: {
             contents: "="
         },
-        restrict:"AE",
-        templateUrl:"views/bulk-upload-contents.html"
+        restrict: "AE",
+        templateUrl: "views/bulk-upload-contents.html"
     }
 });
 
 iceDirectives.directive("ice.menu.collections", function () {
     return {
-        restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
-        templateUrl:"views/collections-menu.html",
-        controller:"CollectionMenuController"
+        restrict: "E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
+        templateUrl: "scripts/collection/collections-menu.html",
+        controller: "CollectionMenuController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)
 //        }
@@ -186,29 +197,9 @@ iceDirectives.directive("ice.menu.collections", function () {
 
 iceDirectives.directive("ice.menu.collections.details", function () {
     return {
-        restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
-        templateUrl:"views/collections-menu-details.html",
-        controller:"CollectionDetailController"
-//        link: function ( scope, element, attributes ){
-//            element.bind( "click", function)
-//        }
-    };
-});
-
-// web of registries menu directive
-iceDirectives.directive("ice.menu.wor", function () {
-    return {
-        restrict:"E",
-        templateUrl:"scripts/wor/web-of-registries-menu.html",
-        controller:"WebOfRegistriesMenuController"
-    }
-});
-
-iceDirectives.directive("ice.menu.wor.details", function () {
-    return {
-        restrict:"E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
-        templateUrl:"scripts/wor/web-of-registries-menu-details.html",
-        controller:"WebOfRegistriesDetailController"
+        restrict: "E", // match element name ("A" for attribute - e.g. <div ice.menu.collections></div>)
+        templateUrl: "scripts/collection/collections-menu-details.html",
+        controller: "CollectionDetailController"
 //        link: function ( scope, element, attributes ){
 //            element.bind( "click", function)
 //        }
@@ -218,8 +209,8 @@ iceDirectives.directive("ice.menu.wor.details", function () {
 // tags menu directive
 iceDirectives.directive("ice.menu.tags", function () {
     return {
-        restrict:"E",
-        templateUrl:"views/tags-menu.html"
+        restrict: "E",
+        templateUrl: "views/tags-menu.html"
     }
 });
 
@@ -304,7 +295,7 @@ iceDirectives.directive("iceSequenceChecker", function ($cookieStore) {
         });
 
         scope.$watch("traceSequences", function (value) {
-            if (value.length)
+            if (value && value.length)
                 generateObject();
         });
     }

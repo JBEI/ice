@@ -22,11 +22,11 @@
                             </h4>
                         </td>
                         <td style="padding-left: 25px">
-                            <div class="dropdown" dropdown>
-                        <span class="opacity_hover dropdown-toggle" dropdown-toggle><i class="fa fa-link"></i> Link To
+                            <div class="uib-dropdown" uib-dropdown>
+                        <span class="opacity_hover uib-dropdown-toggle" uib-dropdown-toggle><i class="fa fa-link"></i> Link To
                             <span class="caret"></span>
                         </span>
-                                <ul class="dropdown-menu">
+                                <ul class="uib-dropdown-menu">
                                     <li class="cursor_pointer font-80em"><a ng-click="addExisting=true">Existing
                                         Entry</a></li>
                                     <li class="cursor_pointer font-80em" ng-repeat="option in linkOptions">
@@ -41,7 +41,7 @@
                                        ng-model="addExistingPartNumber"
                                        placeHolder="Enter Part Number" style="width: 205px;"
                                        typeahead-loading="loadingAddExistingData"
-                                       typeahead="result as result.partId for result in getEntriesByPartNumber($viewValue) | filter:{partId:$viewValue}"
+                                       uib-typeahead="result for result in getEntriesByPartNumber($viewValue)"
                                        typeahead-editable="true"
                                        typeahead-on-select="addExistingPartLink($item, $model, $label)">
                         <span class="input-group-addon" data-ng-click="addExisting=false" style="padding:3px;
@@ -99,7 +99,7 @@
                            ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                            ng-change="field.invalid=false" maxlength="125" placeHolder="{{field.placeHolder}}"
                            style="width: 205px;">
-                    <i ng-if="field.help" class="fa fa-question-circle opacity_hover" tooltip="{{field.help}}"
+                    <i ng-if="field.help" class="fa fa-question-circle opacity_hover" uib-tooltip="{{field.help}}"
                        tooltip-placement="right"></i>
                 </div>
 
@@ -136,9 +136,9 @@
                         <input type="text" ng-model="activePart[field.schema]" placeholder="mm/dd/yyyy"
                                style="width: 205px;"
                                ng-focus="field.edit=true" ng-blur="field.edit=false">
-            <span class="input-group-addon" style="padding:3px; background-color: #f1f1f1;width: 19px">
-                <i class="fa fa-calendar"></i>
-            </span>
+                        <span class="input-group-addon" style="padding:3px; background-color: #f1f1f1; width: 19px">
+                            <i class="fa fa-calendar"></i>
+                        </span>
                     </div>
                 </div>
 
@@ -154,7 +154,7 @@
                     <input type="text" ng-model="activePart[field.schema]" maxlength="150"
                            ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                            placeHolder={{field.placeHolder}} style="width:205px;" typeahead-loading="loadingData"
-                           typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue"
+                           uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue)"
                            ng-change="field.invalid=false" ng-focus="field.edit=true" ng-blur="field.edit=false">
                     <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
                 </div>
@@ -167,7 +167,7 @@
                        ng-change="field.invalid=false" style="width: 400px;"
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        ng-focus="field.edit=true" ng-blur="field.edit=false">
-                <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
+                <span ng-if="activePart[field.schema].length===1" uib-tooltip="Add another" tooltip-placement="right"
                       ng-click="addLink(field.schema, $index)">
                     <i class="fa fa-plus green opacity_hover"></i>
                 </span>
@@ -195,8 +195,8 @@
                        ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                        ng-change="field.invalid=false"
                        maxlength="125" style="width: 400px;" ng-focus="field.edit=true" ng-blur="field.edit=false"
-                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
-                <span ng-if="activePart[field.schema].length===1" tooltip="Add another" tooltip-placement="right"
+                       uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue)">
+                <span ng-if="activePart[field.schema].length===1" uib-tooltip="Add another" tooltip-placement="right"
                       ng-click="addLink(field.schema, $index)">
                     <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
                     <i class="fa fa-plus green opacity_hover"></i>
@@ -209,7 +209,7 @@
                        ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}"
                        ng-change="field.invalid=false"
                        ng-focus="field.edit=true" ng-blur="field.edit=false" typeahead-loading="loadingData"
-                       typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue">
+                       uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue)">
                 <span class="input-group-addon" data-ng-click="removeLink(field.schema, $index)"
                       style="padding:3px; background-color: #f1f1f1;width: 19px; border-left: 0">
                     <i class="fa fa-minus delete_icon"></i>
@@ -248,7 +248,7 @@
             <!-- add custom parameter action icon -->
             <div class="row pad_top">
                 <div class="col-md-2 text-right">
-                    <i class="fa fa-plus-circle font-14em color-888 opacity_hover" tooltip="Add custom parameter"
+                    <i class="fa fa-plus-circle font-14em color-888 opacity_hover" uib-tooltip="Add custom parameter"
                        tooltip-placement="right" ng-click="addCustomParameter()"></i>
                 </div>
             </div>
@@ -271,7 +271,7 @@
                     </div>
 
                     <div class="margin-top-10 font-95em" ng-hide="activePart.hasSequence">
-                        <div class="alert alert-info" style="margin-bottom: 10px; margin-top: 10px">
+                        <div ng-hide="isPaste" class="alert alert-info" style="margin-bottom: 10px; margin-top: 10px">
                             <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Supported file formats
                             are Genbank, Fasta and SBOL
                         </div>
@@ -290,7 +290,7 @@
                 </div>
             </span>
 
-            <span ng-if="processingFile">
+            <span ng-if="processingFile&&!serverError">
                 <i class="fa fa-spinner fa-gear"></i> Processing file {{processingFile}}
             </span>
 
@@ -358,7 +358,7 @@
         <div class="row pad-top-5" ng-if="activePart.fields">
             <div class="col-md-2"></div>
 
-            <div class="col-md-10">
+            <div class="col-md-10" style="margin-bottom: 13px">
                 <button type="submit" class="btn btn-primary font-85em">Submit</button>
                 <button type="button" class="btn btn-default font-85em" ng-click="cancelEntryCreate()">Cancel</button>
             </div>

@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ice.upload.controller', [])
-    .controller('UploadController', function ($rootScope, $location, $scope, $modal, $cookieStore, $resource,
-                                              $stateParams, FileUploader, $http, Upload, UploadUtil) {
+    .controller('UploadController', function ($rootScope, $location, $scope, $uibModal, $cookieStore, $resource,
+                                              $stateParams, FileUploader, $http, Upload, UploadUtil, Util) {
         var sid = $cookieStore.get("sessionId");
         var upload = Upload(sid);
         var sheetData = [
@@ -85,24 +85,21 @@ angular.module('ice.upload.controller', [])
                 console.log(Math.round(progress));
             };
 
-            var transformResponse = function (response) {
-                $http.defaults.transformResponse.forEach(function (transformFn) {
-                    response = transformFn(response);
-                });
-                return response;
-            };
-
             xhr.onload = function () {
-                var response = transformResponse(xhr.response);
-                if ((xhr.status >= 200 && xhr.status < 300) || xhr.status === 304) {
+                var response = JSON.parse(xhr.responseText);
+
+                if (response && response.filename) {
+                    var ht = angular.element('#dataTable').handsontable('getInstance')
                     sheetData[row][col] = response.filename;
+                    ht.setDataAtCell(row, col, response.filename, 'loadData');
                 } else {
-                    console.log("Error uploading document");
+                    Util.setFeedback("Error uploading file", "error");
                 }
             };
 
             xhr.onerror = function () {
                 // error
+                console.log("error uploading");
             };
 
             xhr.onabort = function () {
@@ -173,6 +170,7 @@ angular.module('ice.upload.controller', [])
                     Upload(sid).deleteAttachment({importId: id, entryId: entryId},
                         function (success) {
                             sheetData[row][col] = undefined;
+                            ht.setDataAtCell(row, col, undefined, 'loadData');
                         }, function (error) {
                             console.error(error);
                         });
@@ -181,6 +179,7 @@ angular.module('ice.upload.controller', [])
                     Upload(sid).deleteSequence({importId: $scope.bulkUpload.id, entryId: entryId},
                         function (success) {
                             sheetData[row][col] = undefined;
+                            ht.setDataAtCell(row, col, undefined, 'loadData');
                         }, function (error) {
                             console.error(error);
                         });
@@ -664,7 +663,7 @@ angular.module('ice.upload.controller', [])
             $scope.spreadSheet = $dataTable.data('handsontable');
 
             $scope.fileUploadModal = function () {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'scripts/upload/modal/file-upload.html',
                     controller: 'BulkUploadModalController',
                     backdrop: 'static',
@@ -685,7 +684,7 @@ angular.module('ice.upload.controller', [])
             };
 
             $scope.confirmResetFormModal = function () {
-                var resetModalInstance = $modal.open({
+                var resetModalInstance = $uibModal.open({
                     templateUrl: 'scripts/upload/modal/reset-bulk-upload-sheet.html',
                     controller: 'BulkUploadModalController',
                     backdrop: 'static',
@@ -706,7 +705,7 @@ angular.module('ice.upload.controller', [])
             };
 
             $scope.confirmRejectUploadModal = function () {
-                var resetModalInstance = $modal.open({
+                var resetModalInstance = $uibModal.open({
                     templateUrl: 'scripts/upload/modal/reject-upload.html',
                     controller: 'BulkUploadRejectModalController',
                     backdrop: 'static',
@@ -719,7 +718,7 @@ angular.module('ice.upload.controller', [])
             };
 
             $scope.setPermissionsModal = function () {
-                var modelInstance = $modal.open({
+                var modelInstance = $uibModal.open({
                     templateUrl: 'scripts/upload/modal/permissions.html',
                     controller: 'BulkUploadPermissionsController',
                     backdrop: 'static',
@@ -756,7 +755,7 @@ angular.module('ice.upload.controller', [])
                         $scope.requestError = "Unknown server error";
                     }
 
-                    var resetModalInstance = $modal.open({
+                    var resetModalInstance = $uibModal.open({
                         templateUrl: 'scripts/upload/modal/upload-submit-alert.html',
                         controller: function ($scope, msg, isError) {
                             $scope.requestError = msg;
@@ -776,9 +775,9 @@ angular.module('ice.upload.controller', [])
             };
 
             $scope.showBulkUploadRenameModal = function () {
-                var modalInstance = $modal.open({
+                var modalInstance = $uibModal.open({
                     templateUrl: 'scripts/upload/modal/rename-bulk-upload-sheet.html',
-                    controller: function ($scope, $modalInstance, uploadName) {
+                    controller: function ($scope, $uibModalInstance, uploadName) {
                         $scope.newBulkUploadName = uploadName;
                     },
                     backdrop: 'static',
@@ -966,14 +965,14 @@ angular.module('ice.upload.controller', [])
             createSheet();
         }
     })
-    .controller('BulkUploadRejectModalController', function ($scope, $cookieStore, $location, $modalInstance, upload, Upload) {
+    .controller('BulkUploadRejectModalController', function ($scope, $cookieStore, $location, $uibModalInstance, upload, Upload) {
         $scope.rejectUpload = function () {
             $scope.submitting = true;
             var sid = $cookieStore.get("sessionId");
 
             Upload(sid).updateStatus({importId: upload.id}, {id: upload.id, status: 'IN_PROGRESS'}, function (result) {
                 $location.path('/folders/pending');
-                $modalInstance.close();
+                $uibModalInstance.close();
                 $scope.submitting = false;
                 // todo : send optional message if any
             }, function (error) {
@@ -983,11 +982,11 @@ angular.module('ice.upload.controller', [])
         };
 
         $scope.cancel = function () {
-            $modalInstance.dismiss('cancel');
+            $uibModalInstance.dismiss('cancel');
         };
     })
     .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, uploadId,
-                                                       $modalInstance, FileUploader, addType, linkedAddType, Folders) {
+                                                       $uibModalInstance, FileUploader, addType, linkedAddType, Folders) {
         var sid = $cookieStore.get("sessionId");
         $scope.addType = addType;
 
@@ -998,7 +997,7 @@ angular.module('ice.upload.controller', [])
             // expected folders that can be deleted have type "PRIVATE" and "UPLOAD"
             Folders().delete({folderId: uploadId, type: "UPLOAD"}, function (result) {
                 $location.path("/upload/" + addType);
-                $modalInstance.dismiss('cancel');
+                $uibModalInstance.dismiss('cancel');
             }, function (error) {
                 console.error(error);
             });
@@ -1019,7 +1018,7 @@ angular.module('ice.upload.controller', [])
             $scope.processing = false;
 //
             if (!isNaN(response)) {
-                $modalInstance.close();
+                $uibModalInstance.close();
                 $location.path("upload/" + response);
             } else {
                 $scope.uploadError = response;
@@ -1036,11 +1035,11 @@ angular.module('ice.upload.controller', [])
         };
 
         $scope.ok = function () {
-            $modalInstance.close($scope.selected.item);
+            $uibModalInstance.close($scope.selected.item);
         };
 
         $scope.cancel = function () {
-            $modalInstance.dismiss('cancel');
+            $uibModalInstance.dismiss('cancel');
         };
 
         $scope.uploadFile = function () {
@@ -1061,9 +1060,9 @@ angular.module('ice.upload.controller', [])
                 url += "?link=" + linkedAddType;
             $window.open(url, "_self");
         }
-    }).controller('BulkUploadPermissionsController', function ($scope, $cookieStore, $location, $modalInstance, upload, Upload, Folders, Permission) {
+    }).controller('BulkUploadPermissionsController', function ($scope, $cookieStore, $location, $uibModalInstance, upload, Upload, Folders, Permission) {
         $scope.cancel = function () {
-            $modalInstance.dismiss('cancel');
+            $uibModalInstance.dismiss('cancel');
         };
 
         var sessionId = $cookieStore.get("sessionId");
@@ -1113,7 +1112,7 @@ angular.module('ice.upload.controller', [])
         };
 
         $scope.closeModal = function () {
-            $modalInstance.close('cancel'); // todo : pass object to inform if folder is shared or cleared
+            $uibModalInstance.close('cancel'); // todo : pass object to inform if folder is shared or cleared
         };
 
         $scope.showAddPermissionOptionsClick = function () {

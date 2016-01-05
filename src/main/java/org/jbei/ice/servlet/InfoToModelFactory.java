@@ -4,9 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.*;
-import org.jbei.ice.lib.entry.model.*;
-import org.jbei.ice.lib.models.SelectionMarker;
 import org.jbei.ice.lib.shared.BioSafetyOption;
+import org.jbei.ice.storage.model.*;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -44,7 +43,7 @@ public class InfoToModelFactory {
         }
 
         if (entry == null)
-            return null;
+            throw new IllegalArgumentException("Could not create entry from info object");
 
         // common fields
         if (StringUtils.isEmpty(info.getRecordId()))
@@ -435,7 +434,6 @@ public class InfoToModelFactory {
 
             case PARENTAL_STRAIN:
             case GENOTYPE_OR_PHENOTYPE:
-            case PLASMIDS:
                 entry = infoToStrainForField(entry, value, field);
                 break;
 
@@ -478,10 +476,6 @@ public class InfoToModelFactory {
 
             case GENOTYPE_OR_PHENOTYPE:
                 strain.setGenotypePhenotype(value);
-                return strain;
-
-            case PLASMIDS:
-                strain.setPlasmids(value);
                 return strain;
 
             default:

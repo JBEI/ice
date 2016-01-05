@@ -1,17 +1,19 @@
 package org.jbei.ice.lib.net;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.UrlValidator;
+import org.jbei.ice.lib.access.AccessTokens;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.RemotePartnerDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.rest.IceRestClient;
-import org.jbei.ice.services.rest.RestClient;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
+import org.jbei.ice.storage.model.RemotePartner;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -25,7 +27,7 @@ public final class RemoteContact {
 
     private final RemotePartnerDAO dao;
     private final TokenHash tokenHash;
-    private final RestClient restClient;
+    private final IceRestClient restClient;
 
     public RemoteContact() {
         dao = DAOFactory.getRemotePartnerDAO();
@@ -71,45 +73,63 @@ public final class RemoteContact {
         return addWebPartner(myName, myURL, partner);
     }
 
+    /**
+     * Adds another ICE instance as a registry partner by send an api call to the remote instance.
+     * That call is handled in {@link this.handleRemoteAddRequest()}
+     *
+     * @param myName  the name of this ice instance
+     * @param myUrl   the url that this ice instance is hosted at. It is send to the remote instance
+     *                in order to exchange API keys
+     * @param partner remote ice instance to add as partner
+     * @return added registry partner including the token to use to contact that instance
+     */
     protected RegistryPartner addWebPartner(String myName, String myUrl, RegistryPartner partner) {
-        // check if partner already exists
+        // check if partner already exists locally
         RemotePartner remotePartner = dao.getByUrl(partner.getUrl());
         if (remotePartner != null) {
-            if (remotePartner.getPartnerStatus() == RemotePartnerStatus.NOT_CONTACTED) {
-                // attempt to make contact
-                try {
-                    // todo : check response
-                    restClient.post(partner.getUrl(), "/rest/web/partner/remote",
-                            remotePartner.toDataTransferObject(), RegistryPartner.class);
-                } catch (Exception e) {
-                    Logger.error("Exception adding remote partner " + e);
-                }
-            }
             return remotePartner.toDataTransferObject();
         }
 
+        // create information about this instance to send to potential partner
+        // including a random token for use when contacting this instance
         RegistryPartner thisPartner = new RegistryPartner();
         thisPartner.setUrl(myUrl);
         thisPartner.setName(myName);
-        String apiKey = Utils.generateToken();
-        thisPartner.setApiKey(apiKey);  // key to use in contacting this instance
+        String token = tokenHash.generateRandomToken();
+        thisPartner.setApiKey(token);
 
-        // send notice to remote for key
-        remotePartner = new RemotePartner();
-        remotePartner.setName(partner.getName());
-        remotePartner.setUrl(partner.getUrl());
-        remotePartner.setPartnerStatus(RemotePartnerStatus.NOT_CONTACTED);
-        remotePartner.setAuthenticationToken(apiKey);
-        remotePartner.setAdded(new Date());
+        // send to remote in order to trigger an api exchange. Note that the remote partner will
+        // request validation of the api key at GET /rest/accesstokens/web
+        AccessTokens.setToken(partner.getUrl(), token);
 
         try {
-            restClient.post(partner.getUrl(), "/rest/web/partner/remote", thisPartner, RegistryPartner.class);
-            remotePartner.setPartnerStatus(RemotePartnerStatus.PENDING);
+            RegistryPartner newPartner = restClient.post(partner.getUrl(), "/rest/partners",
+                    thisPartner, RegistryPartner.class);
+            if (newPartner == null) {
+                Logger.error("Could not add web partner");
+                return null;
+            }
+
+            remotePartner = createRemotePartnerObject(newPartner, token);
+            AccessTokens.removeToken(partner.getUrl());
+            return remotePartner.toDataTransferObject();
         } catch (Exception e) {
             Logger.error("Exception adding remote partner " + e);
+            return null;
         }
+    }
 
-        return dao.create(remotePartner).toDataTransferObject();
+    protected RemotePartner createRemotePartnerObject(RegistryPartner newPartner, String token) {
+        RemotePartner remotePartner = new RemotePartner();
+        remotePartner.setName(newPartner.getName());
+        remotePartner.setUrl(newPartner.getUrl());
+        remotePartner.setPartnerStatus(RemotePartnerStatus.APPROVED);
+        remotePartner.setSalt(tokenHash.generateSalt());
+        String hash = tokenHash.encryptPassword(token + newPartner.getUrl(), remotePartner.getSalt());
+        remotePartner.setAuthenticationToken(hash);
+        remotePartner.setApiKey(newPartner.getApiKey());
+        remotePartner.setAdded(new Date());
+        return DAOFactory.getRemotePartnerDAO().create(remotePartner);
     }
 
     /**
@@ -130,10 +150,11 @@ public final class RemoteContact {
         if (!isInWebOfRegistries())
             return null;
 
-        if (request == null || StringUtils.isEmpty(request.getUrl()) || StringUtils.isEmpty(request.getApiKey()))
+        if (request == null || !UrlValidator.getInstance().isValid(request.getUrl()) ||
+                StringUtils.isEmpty(request.getApiKey()))
             return null;
 
-        Logger.info(request.getUrl() + ": request to connect. Details [" + request.toString() + "]");
+        Logger.info(request.getUrl() + ": request to connect.");
 
         String myURL = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
         if (request.getUrl().equalsIgnoreCase(myURL))
@@ -144,7 +165,7 @@ public final class RemoteContact {
             name = myURL;
 
         boolean apiKeyValidates = apiKeyValidates(myURL, request);
-        if (!apiKeyValidates)
+        if (!apiKeyValidates)  // todo : save and based on state, enable admin to retry at some point
             return null;
 
         // request should contain api key for use to contact third party
@@ -152,12 +173,12 @@ public final class RemoteContact {
         String token;
 
         if (partner != null) {
-            Logger.info("Updating authentication");
+            Logger.info("Updating authentication for existing");
             // validated. update the authorization token
             partner.setApiKey(request.getApiKey());
             partner.setSalt(tokenHash.generateSalt());
             token = tokenHash.generateRandomToken();
-            partner.setAuthenticationToken(tokenHash.encryptPassword(token, partner.getSalt()));
+            partner.setAuthenticationToken(tokenHash.encryptPassword(token + request.getUrl(), partner.getSalt()));
             dao.update(partner);
         } else {
             // save in db
@@ -169,7 +190,8 @@ public final class RemoteContact {
             partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
             partner.setSalt(tokenHash.generateSalt());
             token = tokenHash.generateRandomToken();
-            partner.setAuthenticationToken(tokenHash.encryptPassword(token, partner.getSalt()));
+            String hash = tokenHash.encryptPassword(token + request.getUrl(), partner.getSalt());
+            partner.setAuthenticationToken(hash);
             dao.create(partner);
         }
 
@@ -181,14 +203,22 @@ public final class RemoteContact {
         return newPartner;
     }
 
+    /**
+     * Contacts the registry partner at the specified url, to ensure that the API key validates.
+     *
+     * @param myURL           the url of this ICE instance
+     * @param registryPartner partner infor
+     * @return true if the api key validated successfully with the specified url, false otherwise (including when
+     * the instance cannot be contacted)
+     */
     protected boolean apiKeyValidates(String myURL, RegistryPartner registryPartner) {
         if (StringUtils.isEmpty(registryPartner.getApiKey()))
             return false;
 
         HashMap<String, Object> queryParams = new HashMap<>();
         queryParams.put("url", myURL);
-        RegistryPartner response = restClient.get(registryPartner.getUrl(), "/accesstoken/web",
-                RegistryPartner.class, queryParams);
+        RegistryPartner response = restClient.getWor(registryPartner.getUrl(), "/accesstokens/web",
+                RegistryPartner.class, queryParams, registryPartner.getApiKey());
         if (response == null) { // todo : should retry up to a certain number of times
             Logger.error("Could not validate request");
             return false;

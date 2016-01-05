@@ -1,15 +1,14 @@
 package org.jbei.ice.lib.entry.sequence.composers.formatters;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
-import org.jbei.ice.lib.models.Sequence;
-
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.utils.ChangeVetoException;
 import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.SimpleRichSequence;
+import org.jbei.ice.storage.model.Sequence;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 /*
  * >gi|<identifier>|<namespace>|<accession>.<version>|<name> <description>
@@ -18,7 +17,7 @@ import org.biojavax.bio.seq.SimpleRichSequence;
 
 /**
  * Formatter for creating a FASTA formatted output.
- * <p/>
+ * <p>
  *
  * @author Zinovii Dmytriv
  */
@@ -60,8 +59,8 @@ public class FastaFormatter extends AbstractFormatter {
         SimpleRichSequence simpleRichSequence = null;
         try {
             simpleRichSequence = new SimpleRichSequence(getNamespace(), name, accessionNumber,
-                                                        version, DNATools.createDNA(sequence.getSequence()),
-                                                        seqVersion);
+                    version, DNATools.createDNA(sequence.getSequence()),
+                    seqVersion);
         } catch (IllegalSymbolException e) {
             throw new FormatterException("Failed to create generate fasta file", e);
         } catch (ChangeVetoException e) {

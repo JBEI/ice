@@ -3,11 +3,11 @@
         <button type="button" class="ice-button" ng-click="enableDisableWor()">
             <span ng-if="isWorEnabled">Disable</span>
             <span ng-if="!isWorEnabled">Enable</span>
-            <i style="font-size: 14px" class="fa"
+            <i style="font-size: 14px" class="fa fa-fw"
                ng-class="{'fa-toggle-on green':isWorEnabled, 'fa-toggle-off':!isWorEnabled}"></i>
         </button>
         <button type="button" class="ice-button" ng-click="showAddRegistryForm=true" ng-show="isWorEnabled">
-            <i class="fa fa-plus blue opacity_hover" style="font-size: 14px"></i> Add Partner
+            Add Partner
         </button>
 
         <div class=" margin-top-10 panel panel-default font-95em" ng-show="showAddRegistryForm">
@@ -42,14 +42,14 @@
     </div>
 
     <div class="pad_top" ng-if="isWorEnabled && wor && wor.partners.length">
-        <table cellspacing="0" class="table table-hover font-95em">
+        <table cellspacing="0" class="table table-hover table-border-bottom font-95em">
             <thead>
             <tr>
-                <td>&nbsp;</td>
-                <td><b>Partner</b></td>
-                <td><b>Added</b></td>
-                <td><b>Status</b></td>
-                <td>&nbsp;</td>
+                <th>&nbsp;</th>
+                <th>Partner</th>
+                <th>Added</th>
+                <th>Status</th>
+                <th>&nbsp;</th>
             </tr>
             </thead>
             <tbody>
@@ -64,8 +64,8 @@
                 <td style="vertical-align: middle">{{partner.addTime | date:'MMM d, y, h:mm a'}}</td>
                 <!--lastContactTime-->
                 <td style="vertical-align: middle">
-                    <div class="btn-group" dropdown>
-                        <button type="button" class="btn btn-xs dropdown-toggle strong" dropdown-toggle
+                    <div class="btn-group" uib-dropdown>
+                        <button type="button" class="btn btn-xs uib-dropdown-toggle strong" uib-dropdown-toggle
                                 ng-class="{
                                 'btn-success':partner.status === 'APPROVED',
                                 'btn-warning':partner.status === 'PENDING',
@@ -73,7 +73,7 @@
                                 }">
                             {{partner.status |capitalize}} <span class="caret"></span>
                         </button>
-                        <ul class="dropdown-menu">
+                        <ul class="uib-dropdown-menu">
                             <li ng-repeat="listObject in partnerStatusList" class="font-90em"
                                 ng-click="setPartnerStatus(partner, listObject.status)">
                                 <a href="#">{{listObject.action | capitalize}}</a>
@@ -82,7 +82,7 @@
                     </div>
                 </td>
                 <td class="font-12em" style="vertical-align: middle">
-                    <span tooltip="Delete partner">
+                    <span uib-tooltip="Delete partner">
                     <i class="fa fa-trash-o fa-fw delete_icon" ng-click="removePartner(partner, $index)"></i>
                     </span>
                 </td>

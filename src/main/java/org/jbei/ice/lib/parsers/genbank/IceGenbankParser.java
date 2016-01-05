@@ -1,12 +1,12 @@
 package org.jbei.ice.lib.parsers.genbank;
 
 import org.apache.commons.io.IOUtils;
+import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.*;
 
 import java.io.File;
 import java.io.FileInputStream;

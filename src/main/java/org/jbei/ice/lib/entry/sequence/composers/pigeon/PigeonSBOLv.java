@@ -3,7 +3,7 @@ package org.jbei.ice.lib.entry.sequence.composers.pigeon;
 import com.google.gson.Gson;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.SBOLVisitor;
-import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.storage.model.Sequence;
 import org.sbolstandard.core.DnaComponent;
 import org.sbolstandard.core.SequenceAnnotation;
 import org.sbolstandard.core.StrandType;

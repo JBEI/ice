@@ -125,52 +125,61 @@ angular.module('ice.entry.controller', [])
                 $scope.newComment.samples.splice(idx, 1);
         }
     })
-    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Entry) {
+    .controller('ShotgunSequenceController', function ($scope, $window, $cookieStore, $stateParams, Entry) {
         var entryId = $stateParams.id;
         var sid = $cookieStore.get("sessionId");
         var entry = Entry(sid);
-        $scope.traceUploadError = undefined;
+        $scope.shotgunUploadError = undefined;
 
-        entry.traceSequences({
+        entry.shotgunSequences({
             partId: entryId
         }, function (result) {
-            $scope.traceSequences = result;
+            $scope.shotgunSequences = result;
         });
 
-        $scope.traceSequenceUploader = new FileUploader({
-            scope: $scope, // to automatically update the html. Default: $rootScope
-            url: "rest/parts/" + entryId + "/traces",
-            method: 'POST',
-            removeAfterUpload: true,
-            headers: {
-                "X-ICE-Authentication-SessionId": sid
-            },
-            autoUpload: true,
-            queueLimit: 1, // can only upload 1 file
-            formData: [
-                {
-                    entryId: entryId
-                }
-            ]
-        });
+        $scope.downloadShotgunFile = function (sequence) {
+            $window.open("rest/file/shotgunsequence/" + sequence.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
+        };
+    })
+    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Entry, $uibModal, Util) {
+        var entryId = $stateParams.id;
+        var sid = $cookieStore.get("sessionId");
+        var entry = Entry(sid);
 
-        $scope.traceSequenceUploader.onSuccessItem = function (item, response, status, headers) {
-            if (status != "200") {
-                $scope.traceUploadError = true;
-                return;
-            }
+        $scope.traceUploadError = undefined;
+        $scope.maxSize = 5;
+        $scope.tracesParams = {limit: 5, currentPage: 1, start: 0};
 
-            entry.traceSequences({
-                partId: entryId
-            }, function (result) {
-                $scope.traceSequences = result;
-                $scope.showUploadOptions = false;
-                $scope.traceUploadError = false;
-            });
+        Util.get("/rest/parts/" + entryId + "/traces", function (result) {
+            $scope.traces = result;
+        }, $scope.tracesParams);
+
+        $scope.tracesPageChanged = function () {
+            $scope.tracesParams.start = ($scope.tracesParams.currentPage - 1) * $scope.tracesParams.limit;
+            Util.get("/rest/parts/" + entryId + "/traces", function (result) {
+                $scope.traces = result;
+            }, $scope.tracesParams);
         };
 
-        $scope.traceSequenceUploader.onErrorItem = function (item, response, status, headers) {
-            $scope.traceUploadError = true;
+        $scope.showAddSangerTraceModal = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: "scripts/entry/modal/add-sanger-trace.html",
+                controller: 'TraceSequenceUploadModalController',
+                backdrop: 'static',
+                resolve: {
+                    entryId: function () {
+                        return $stateParams.id;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function () {
+                Util.get("/rest/parts/" + entryId + "/traces", function (result) {
+                    $scope.traces = result;
+                    $scope.showUploadOptions = false;
+                    $scope.traceUploadError = false;
+                });
+            });
         };
 
         $scope.deleteTraceSequenceFile = function (fileId) {
@@ -187,14 +196,9 @@ angular.module('ice.entry.controller', [])
             }
 
             if (foundTrace != undefined) {
-                entry.deleteTraceSequence({
-                    partId: entryId,
-                    traceId: foundTrace.id
-                }, function (result) {
+                Util.remove("rest/parts/" + entryId + "/traces/" + foundTrace.id, {}, function (result) {
                     $scope.traceSequences.splice(foundIndex, 1);
-                    $scope.entryStatistics.traceSequenceCount = $scope.traceSequences.length;
-                }, function (error) {
-                    console.log(error);
+                    $scope.entryStatistics.sequenceCount = $scope.traceSequences.length;
                 });
             }
         };
@@ -203,15 +207,48 @@ angular.module('ice.entry.controller', [])
             $window.open("rest/file/trace/" + trace.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
         };
     })
-    .controller('EntryExperimentController', function ($scope, $cookieStore, $stateParams, Entry) {
+    .controller('TraceSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId,
+                                                                $cookieStore) {
+        $scope.cancelAddSangerTrace = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.traceSequenceUploader = new FileUploader({
+            scope: $scope, // to automatically update the html. Default: $rootScope
+            url: "rest/parts/" + entryId + "/traces",
+            method: 'POST',
+            removeAfterUpload: true,
+            headers: {
+                "X-ICE-Authentication-SessionId": $cookieStore.get("sessionId")
+            },
+            autoUpload: true,
+            queueLimit: 1, // can only upload 1 file
+            formData: [
+                {
+                    entryId: entryId
+                }
+            ]
+        });
+
+        $scope.traceSequenceUploader.onSuccessItem = function (item, response, status, headers) {
+            if (status != "200") {
+                $scope.traceUploadError = true;
+                return;
+            }
+
+            $uibModalInstance.close();
+        };
+
+        $scope.traceSequenceUploader.onErrorItem = function (item, response, status, headers) {
+            $scope.traceUploadError = true;
+        };
+    })
+    .controller('EntryExperimentController', function ($scope, $cookieStore, $stateParams, Util) {
         var entryId = $stateParams.id;
-        var entry = Entry($cookieStore.get("sessionId"));
         $scope.experiment = {};
         $scope.addExperiment = false;
 
-        entry.experiments({
-            partId: entryId
-        }, function (result) {
+        Util.list("/rest/parts/" + entryId + "/experiments", function (result) {
             $scope.entryExperiments = result;
         });
 
@@ -224,16 +261,21 @@ angular.module('ice.entry.controller', [])
                 return;
             }
 
-            entry.createExperiment({
-                partId: entryId
-            }, $scope.experiment, function (result) {
+            Util.post("/rest/parts/" + entryId + "/experiments", $scope.experiment, function (result) {
                 $scope.entryExperiments.splice(0, 0, result);
                 $scope.addExperiment = false;
                 $scope.entryStatistics.experimentalDataCount = $scope.entryExperiments.length;
-            }, function (error) {
-                console.error("experiment create error", error);
             });
         };
+
+        $scope.deleteStudy = function (study) {
+            Util.remove("/rest/parts/" + entryId + "/experiments/" + study.id, {}, function (result) {
+                var idx = $scope.entryExperiments.indexOf(study);
+                if (idx >= 0) {
+                    $scope.entryExperiments.splice(idx, 1);
+                }
+            });
+        }
     })
     .controller('PartHistoryController', function ($scope, $window, $cookieStore, $stateParams, Entry) {
         var entryId = $stateParams.id;
@@ -256,8 +298,8 @@ angular.module('ice.entry.controller', [])
             });
         }
     })
-    .controller('EditEntryController',
-    function ($scope, $http, $location, $cookieStore, $rootScope, $stateParams, Entry, EntryService) {
+    .controller('EditEntryController', function ($scope, $http, $location, $cookieStore, $rootScope, FileUploader,
+                                                 $stateParams, Entry, EntryService, Util, $anchorScroll) {
 
         var sid = $cookieStore.get("sessionId");
         var entry = Entry(sid);
@@ -304,15 +346,61 @@ angular.module('ice.entry.controller', [])
             $scope.linkOptions = EntryService.linkOptions(result.type);
             $scope.selectedFields = EntryService.getFieldsForType(result.type);
             $scope.activePart = $scope.entry;
-            console.log($scope.activePart);
         });
+
+        // file upload
+        var uploader = $scope.sequenceFileUpload = new FileUploader({
+            scope: $scope, // to automatically update the html. Default: $rootScope
+            url: "rest/file/sequence",
+            method: 'POST',
+            removeAfterUpload: true,
+            headers: {"X-ICE-Authentication-SessionId": sid},
+            autoUpload: true,
+            queueLimit: 1 // can only upload 1 file
+        });
+
+        uploader.onProgressItem = function (event, item, progress) {
+            $scope.serverError = undefined;
+
+            if (progress != "100")  // isUploading is always true until it returns
+                return;
+
+            // upload complete. have processing
+            $scope.processingFile = item.file.name;
+        };
+
+        uploader.onSuccessItem = function (item, response, status, header) {
+            $scope.entry.hasSequence = true;
+        };
+
+        uploader.onCompleteAll = function () {
+            $scope.processingFile = undefined;
+        };
+
+        uploader.onBeforeUploadItem = function (item) {
+            item.formData.push({entryType: $scope.entry.type});
+            item.formData.push({entryRecordId: $scope.entry.recordId});
+        };
+
+        uploader.onErrorItem = function (item, response, status, headers) {
+            $scope.serverError = true;
+        };
+
+        $scope.addLink = function (schema, index) {
+            $scope.activePart[schema].splice(index + 1, 0, {value: ''});
+        };
+
+        // todo : make name more generic
+        $scope.removeLink = function (schema, index) {
+            $scope.activePart[schema].splice(index, 1);
+        };
 
         $scope.cancelEdit = function () {
             $location.path("entry/" + $stateParams.id);
         };
 
-        $scope.getLocation = function (inputField, val) {   // todo : move to service
-            return $http.get('rest/parts/autocomplete', {
+        $scope.getLocation = function (inputField, val) {
+            return $http.get('rest/search/filter', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
                     val: val,
@@ -323,82 +411,13 @@ angular.module('ice.entry.controller', [])
             });
         };
 
-        // difference between this and getLocation() is getLocation() returns a list of strings
-        // and this returns a list of objects
-        $scope.getEntriesByPartNumber = function (val) {
-            return $http.get('rest/parts/autocomplete/partid', {
-                headers: {'X-ICE-Authentication-SessionId': sid},
-                params: {
-                    token: val
-                }
-            }).then(function (res) {
-                return res.data;
-            });
-        };
-
-        $scope.addExistingPartLink = function ($item, $model, $label) {
-            entry.query({partId: $model.id}, function (result) {
-                $scope.activePart = result;
-
-                // convert selection markers from array of strings to array of objects for the ui
-                var arrayLength = result.selectionMarkers.length;
-                if (arrayLength) {
-                    var tmp = [];
-                    for (var i = 0; i < arrayLength; i++) {
-                        tmp.push({value: result.selectionMarkers[i]});
-                    }
-                    angular.copy(tmp, $scope.activePart.selectionMarkers);
-                } else {
-                    $scope.activePart.selectionMarkers = [
-                        {}
-                    ];
-                }
-
-                // convert links from array of strings to array of objects for the ui
-                var linkLength = result.links.length;
-
-                if (linkLength) {
-                    var tmpLinkObjectArray = [];
-                    for (var j = 0; j < linkLength; j++) {
-                        tmpLinkObjectArray.push({value: result.links[j]});
-                    }
-                    angular.copy(tmpLinkObjectArray, $scope.activePart.links);
-                } else {
-                    $scope.activePart.links = [
-                        {}
-                    ];
-                }
-
-                $scope.activePart.isExistingPart = true;
-                $scope.activePart.fields = EntryService.getFieldsForType($scope.activePart.type);
-                $scope.addExisting = false;
-                $scope.entry.linkedParts.push($scope.activePart);
-
-                $scope.colLength = 11 - $scope.entry.linkedParts.length;
-                $scope.active = $scope.entry.linkedParts.length - 1;
-            });
-        };
-
-        // todo : this is pretty much a copy of submitPart in CreateEntryController
         $scope.editEntry = function () {
             var canSubmit = EntryService.validateFields($scope.entry, $scope.selectedFields);
             $scope.entry.type = $scope.entry.type.toUpperCase();
 
-
-            // validate contained parts, if any
-            if ($scope.entry.linkedParts && $scope.entry.linkedParts.length) {
-                for (var idx = 0; idx < $scope.entry.linkedParts.length; idx += 1) {
-                    var canSubmitLinked = EntryService.validateFields($scope.entry.linkedParts[idx], $scope.selectedFields);
-                    if (!canSubmitLinked) {
-                        // show icon in tab
-                        console.log("linked entry at idx " + idx + " is not valid", $scope.entry);
-                        canSubmit = canSubmitLinked;
-                    }
-                }
-            }
-
             if (!canSubmit) {
-                $("body").animate({scrollTop: 130}, "slow");
+                Util.setFeedback('Missing required fields', 'danger');
+                $anchorScroll();
                 return;
             }
 
@@ -411,17 +430,13 @@ angular.module('ice.entry.controller', [])
             $scope.entry.links = EntryService.toStringArray($scope.entry.links);
             $scope.entry.selectionMarkers = EntryService.toStringArray($scope.entry.selectionMarkers);
 
-            //for (var i = 0; i < $scope.entry.linkedParts.length; i += 1) {
-            //    $scope.entry.linkedParts[i].links = EntryService.toStringArray($scope.entry.linkedParts[i].links);
-            //    $scope.entry.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.entry.linkedParts[i].selectionMarkers);
-            //}
-
             // convert the part to a form the server can work with
             $scope.entry = EntryService.getTypeData($scope.entry);
             $scope.entry.linkedParts = partLinks;
 
-            entry.update({partId: $scope.entry.id}, $scope.entry, function (result) {
+            Util.update("rest/parts/" + $scope.entry.id, $scope.entry, {}, function (result) {
                 $location.path("entry/" + result.id);
+                Util.setFeedback('Part successfully updated', 'success');
             });
         };
 
@@ -437,8 +452,8 @@ angular.module('ice.entry.controller', [])
             $scope.activePart.fields = EntryService.getFieldsForType($scope.activePart.type);
         };
     })
-    .controller('CreateEntryController', function ($http, $scope, $modal, $rootScope, FileUploader, $location,
-                                                   $stateParams, $cookieStore, Entry, EntryService) {
+    .controller('CreateEntryController', function ($http, $scope, $uibModal, $rootScope, FileUploader, $location,
+                                                   $stateParams, $cookieStore, Entry, EntryService, Util, $anchorScroll) {
         $scope.createType = $stateParams.type;
         $scope.showMain = true;
 
@@ -449,7 +464,8 @@ angular.module('ice.entry.controller', [])
 
         // retrieves the defaults for the specified type. Note that $scope.part is the main part
         var getPartDefaults = function (type, isMain) {
-            entry.query({partId: type}, function (result) {
+            //entry.query({partId: type}, function (result) {
+            Util.get("rest/parts/" + type, function (result) {
                 if (isMain) { // or if !$scope.part
                     $scope.part = result;
                     $scope.part = EntryService.setNewEntryFields($scope.part);
@@ -466,8 +482,6 @@ angular.module('ice.entry.controller', [])
                     $scope.active = $scope.part.linkedParts.length - 1;
                     $scope.activePart = $scope.part.linkedParts[$scope.active];
                 }
-            }, function (error) {
-                console.log("Error: " + error);
             });
         };
 
@@ -486,7 +500,7 @@ angular.module('ice.entry.controller', [])
             getPartDefaults(type, false);
         };
 
-        $scope.addExistingPartLink = function ($item, $model, $label) {
+        $scope.addExistingPartLink = function ($item, $model) {
             entry.query({partId: $model.id}, function (result) {
                 $scope.activePart = result;
                 $scope.activePart.isExistingPart = true;
@@ -542,7 +556,7 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.getLocation = function (inputField, val) {
-            return $http.get('rest/parts/autocomplete', {
+            return $http.get('rest/search/filter', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
                     val: val,
@@ -587,7 +601,8 @@ angular.module('ice.entry.controller', [])
             }
 
             if (!canSubmit) {
-                $("body").animate({scrollTop: 0}, "slow");
+                Util.setFeedback("Missing required fields", "danger");
+                $anchorScroll();
                 return;
             }
 
@@ -604,17 +619,16 @@ angular.module('ice.entry.controller', [])
             $scope.part = EntryService.getTypeData($scope.part);
 
             // create or update the part depending on whether there is a current part id
+            // which might be the case if a sequence is uploaded first
             if ($scope.part.id) {
-                entry.update({partId: $scope.part.id}, $scope.part, function (result) {
+                Util.update("rest/parts/" + $scope.part.id, $scope.part, {}, function (result) {
                     $location.path('/entry/' + result.id);
                 });
             } else {
-                entry.create($scope.part, function (result) {
+                Util.post("rest/parts", $scope.part, function (result) {
                     $scope.$emit("UpdateCollectionCounts");
                     $location.path('/entry/' + result.id);
                     $scope.showSBOL = false;
-                }, function (error) {
-                    console.error(error);
                 });
             }
         };
@@ -622,12 +636,14 @@ angular.module('ice.entry.controller', [])
         $scope.format = 'MMM d, yyyy h:mm:ss a';
 
         $scope.getEntriesByPartNumber = function (val) {
-            return $http.get('rest/parts/autocomplete/partid', {
+            return $http.get('rest/search/filter', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
-                    token: val
+                    token: val,
+                    field: 'PART_NUMBER'
                 }
             }).then(function (res) {
+                console.log(res);
                 return res.data;
             });
         };
@@ -673,8 +689,6 @@ angular.module('ice.entry.controller', [])
         $scope.uploadFile = function () {
             if (!$scope.isPaste) {
                 uploader.queue[0].upload();
-            } else {
-                console.log($scope.pastedSequence);
             }
         };
 
@@ -717,58 +731,17 @@ angular.module('ice.entry.controller', [])
         uploader.onErrorItem = function (item, response, status, headers) {
             item.remove();
             $scope.serverError = true;
+            $scope.processingFile = undefined;
             uploader.resetAll();
         };
 
         uploader.onCompleteAll = function () {
             $scope.processingFile = undefined;
+            $scope.serverError = false;
         };
     })
-
-    .
-    controller('SequenceFileUploadController', function ($scope, $cookieStore, $modal, $modalInstance, FileUploader, type, paste) {
-        console.log("SequenceFileUploadController");
-        var sid = $cookieStore.get("sessionId");
-        $scope.isPaste = paste;
-        $scope.headerText = paste ? "Paste Sequence" : "Upload Sequence file";
-
-        var uploader = $scope.sequenceFileUpload = new FileUploader({
-            scope: $scope, // to automatically update the html. Default: $rootScope
-            url: "rest/file/sequence",
-            method: 'POST',
-            formData: [
-                {
-                    entryType: type
-                }
-            ],
-//        removeAfterUpload: true,
-            headers: {"X-ICE-Authentication-SessionId": sid},
-//        autoUpload: true
-            queueLimit: 1 // can only upload 1 file
-        });
-
-        $scope.cancel = function () {
-            $modalInstance.dismiss('cancel');
-        };
-
-        $scope.uploadFile = function () {
-            if (!$scope.isPaste) {
-                uploader.queue[0].upload();
-            } else {
-                console.log($scope.pastedSequence);
-            }
-        };
-
-        // REGISTER HANDLERS
-        uploader.onAfterAddingFile = function (item) {
-            $scope.$emit("FileAdd", item);
-        };
-
-        uploader.onErrorItem = function (item, response, status, headers) {
-            item.remove();
-            $scope.serverError = true;
-        };
-    }).controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group, filterFilter, Permission) {
+    .controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group,
+                                                       filterFilter, Permission) {
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
         var panes = $scope.panes = [];
@@ -913,7 +886,12 @@ angular.module('ice.entry.controller', [])
             removePermission(permission.id);
         };
     })
-
+    .controller('EntryFoldersController', function ($scope, Util) {
+        $scope.containedFolders = undefined;
+        Util.list("rest/parts/" + $scope.entry.id + "/folders", function (result) {
+            $scope.containedFolders = result;
+        });
+    })
     .controller('EntryDetailsController', function ($scope) {
         console.log("EntryDetailsController");
         var entryPanes = $scope.entryPanes = [];
@@ -934,9 +912,9 @@ angular.module('ice.entry.controller', [])
         };
     })
 
-    .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $modal, $rootScope,
+    .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
                                              FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection,
-                                             CustomField) {
+                                             CustomField, Util, Authentication) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
@@ -963,17 +941,15 @@ angular.module('ice.entry.controller', [])
 
         $scope.processPastedSequence = function (event, part) {
             var sequenceString = event.originalEvent.clipboardData.getData('text/plain');
-            entry.addSequenceAsString({partId: part.id}, {sequence: sequenceString}, function (result) {
+            Util.post("rest/parts/" + part.id + "/sequence", {sequence: sequenceString}, function (result) {
                 part.hasSequence = true;
-            }, function (error) {
-                console.log("error", error);
-            });
+            })
         };
 
         $scope.deleteSequence = function (part) {
-            var modalInstance = $modal.open({
-                templateUrl: 'views/modal/delete-sequence-confirmation.html',
-                controller: function ($scope, $modalInstance) {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/entry/sequence/modal-delete-sequence-confirmation.html',
+                controller: function ($scope, $uibModalInstance) {
                     $scope.toDelete = part;
                     $scope.processingDelete = undefined;
                     $scope.errorDeleting = undefined;
@@ -984,7 +960,7 @@ angular.module('ice.entry.controller', [])
 
                         entry.deleteSequence({partId: part.id}, function (result) {
                             $scope.processingDelete = false;
-                            $modalInstance.close(part);
+                            $uibModalInstance.close(part);
                         }, function (error) {
                             $scope.processingDelete = false;
                             $scope.errorDeleting = true;
@@ -1006,9 +982,9 @@ angular.module('ice.entry.controller', [])
 
         $scope.addLink = function (part, role) {
 
-            var modalInstance = $modal.open({
-                templateUrl: 'views/modal/add-link-modal.html',
-                controller: function ($scope, $http, $modalInstance, $cookieStore) {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/entry/modal/add-link-modal.html',
+                controller: function ($scope, $http, $uibModalInstance, $cookieStore) {
                     $scope.mainEntry = part;
                     $scope.role = role;
                     $scope.loadingAddExistingData = undefined;
@@ -1021,10 +997,11 @@ angular.module('ice.entry.controller', [])
 
                     var sessionId = $cookieStore.get("sessionId");
                     $scope.getEntriesByPartNumber = function (val) {
-                        return $http.get('rest/parts/autocomplete/partid', {
+                        return $http.get('rest/search/filter', {
                             headers: {'X-ICE-Authentication-SessionId': sessionId},
                             params: {
-                                token: val
+                                token: val,
+                                field: 'PART_NUMBER'
                             }
                         }).then(function (res) {
                             return res.data;
@@ -1032,6 +1009,8 @@ angular.module('ice.entry.controller', [])
                     };
 
                     var linkPartToMainEntry = function (item) {
+                        console.log("link", item, "to", $scope.mainEntry.id);
+
                         entry.addLink({partId: $scope.mainEntry.id, linkType: $scope.role}, item,
                             function (result) {
                                 $scope.links.push(item);   // todo
@@ -1043,60 +1022,67 @@ angular.module('ice.entry.controller', [])
                             });
                     };
 
+                    // todo : todo
                     $scope.addExistingPartLink = function ($item, $model, $label) {
                         $scope.errorMessage = undefined;
 
                         // prevent selecting current entry
-                        if ($item.id == $scope.mainEntry.id)
+                        if ($item == $scope.mainEntry.partId)
                             return;
 
                         // or already added entry
                         var found = false;
                         angular.forEach($scope.links, function (t) {
-                            if (t.id === $item.id) {
+                            if (t.partId === $item) {
                                 found = true;
                             }
                         });
                         if (found)
                             return;
 
-                        $scope.selectedLink = $item;
-                        if ($scope.role == 'CHILD') {
+                        // fetch entry being added from server
+                        Util.get("rest/parts/" + $item, function (result) {
+                            $scope.selectedLink = result;
+                            if ($scope.role == 'CHILD') {
 
-                            // if item being added as a child is of type part then
-                            if ($item.type.toLowerCase() == 'part') {
-                                // fetch item.id and check if it has a sequence
-                                entry.query({partId: $item.id}, function (result) {
+                                // if item being added as a child is of type part then
+                                if (result.type.toLowerCase() == 'part') {
+
+                                    // check if it has a sequence
                                     if (!result.hasSequence) {
-                                        // then present the current entry sequence options to user
+                                        $scope.addExistingPartNumber = result;
+
+                                        // if not, retrieve sequence annotations for parent entry
+                                        // to allow user to select one annotation as the sequence for the entry being
+                                        // added
                                         $scope.getEntrySequence($scope.mainEntry.id);
                                     } else {
-                                        // just add the link
-                                        linkPartToMainEntry($item);
+
+                                        // has sequence so just add the link
+                                        linkPartToMainEntry(result);
                                     }
-                                }, function (error) {
-                                    $scope.errorMessage = "Error";
-                                })
-                            } else {
-                                // just add the link
-                                linkPartToMainEntry($item);
-                            }
-                        } else {
-                            // parent of main entry being added
-                            if ($scope.mainEntry.type.toLowerCase() == 'part') {
-
-                                // if child (main) does not have a parent sequence
-                                if (!$scope.mainEntry.hasSequence) {
-
-                                    // retrieve sequence feature options for selected
-                                    $scope.getEntrySequence($scope.addExistingPartNumber.id);
                                 } else {
-                                    linkPartToMainEntry($item);
+                                    // just add the link
+                                    linkPartToMainEntry(result);
                                 }
                             } else {
-                                linkPartToMainEntry($item);
+                                // parent of main entry being added
+                                if ($scope.mainEntry.type.toLowerCase() == 'part') {
+
+                                    // if child (main) does not have a attached sequence
+                                    if (!$scope.mainEntry.hasSequence) {
+
+                                        // retrieve sequence feature options for parent
+                                        $scope.addExistingPartNumber = result;
+                                        $scope.getEntrySequence($scope.addExistingPartNumber.id);
+                                    } else {
+                                        linkPartToMainEntry(result);
+                                    }
+                                } else {
+                                    linkPartToMainEntry(result);
+                                }
                             }
-                        }
+                        });
                     };
 
                     $scope.removeExistingPartLink = function (link) {
@@ -1104,25 +1090,21 @@ angular.module('ice.entry.controller', [])
                         if (i < 0)
                             return;
 
-                        entry.removeLink({
-                            partId: $scope.mainEntry.id,
-                            linkId: link.id,
-                            linkType: $scope.role
-                        }, function (result) {
-                            $scope.links.splice(i, 1);
-                        }, function (error) {
-
-                        });
+                        Util.remove('rest/parts/' + $scope.mainEntry.id + '/links/' + link.id,
+                            {linkType: $scope.role}, function (result) {
+                                $scope.links.splice(i, 1);
+                            });
                     };
 
                     $scope.close = function () {
-                        $modalInstance.close();
+                        $uibModalInstance.close();
                     };
 
                     $scope.getEntrySequence = function (id) {
                         $scope.retrievingSequenceFeatureList = true;
                         $scope.mainEntrySequence = undefined;
-                        entry.sequence({partId: id}, function (result) {
+
+                        Util.get("rest/parts/" + id + "/sequence", function (result) {
                             $scope.mainEntrySequence = result;
                             $scope.retrievingSequenceFeatureList = false;
                         }, function (error) {
@@ -1151,20 +1133,17 @@ angular.module('ice.entry.controller', [])
                             features: [feature]
                         };
 
-                        var sequencePart;
+                        var sequencePartId;
                         if ($scope.role == 'CHILD') {
-                            sequencePart = $scope.selectedLink.id;
+                            sequencePartId = $scope.selectedLink.id;
                         } else {
-                            sequencePart = $scope.mainEntry.id;
+                            sequencePartId = $scope.mainEntry.id;
                         }
 
-                        entry.addSequenceAsString({partId: sequencePart}, linkSequence,
-                            function (result) {
-                                console.log(result);
-                                linkPartToMainEntry($scope.addExistingPartNumber);
-                            }, function (error) {
-                                console.error(error);
-                            })
+                        // add sequence to entry
+                        Util.post("rest/parts/" + sequencePartId + "/sequence", linkSequence, function (result) {
+                            linkPartToMainEntry($scope.addExistingPartNumber);
+                        });
                     };
                 },
                 backdrop: "static"
@@ -1178,21 +1157,34 @@ angular.module('ice.entry.controller', [])
             });
         };
 
-        var partDefaults = {
-            type: $scope.createType,
-            links: [
-                {}
-            ],
-            selectionMarkers: [
-                {}
-            ],
-            bioSafetyLevel: '1',
-            status: 'Complete',
-            creator: $scope.user.firstName + ' ' + $scope.user.lastName,
-            creatorEmail: $scope.user.email
+// todo :
+
+        var setPartDefaults = function (user) {
+            var partDefaults = {
+                type: $scope.createType,
+                links: [
+                    {}
+                ],
+                selectionMarkers: [
+                    {}
+                ],
+                bioSafetyLevel: '1',
+                status: 'Complete',
+                creator: user.firstName + ' ' + user.lastName,
+                creatorEmail: user.email
+            };
+
+            $scope.part = angular.copy(partDefaults);
         };
 
-        $scope.part = angular.copy(partDefaults);
+        if (!$rootScope.user) {
+            Authentication.getLoggedInUser().then(function (result) {
+                var user = result.data;
+                setPartDefaults(user);
+            });
+        } else {
+            setPartDefaults($rootScope.user);
+        }
 
         $scope.sbolShowHide = function () {
             $scope.showSBOL = !$scope.showSBOL;
@@ -1235,7 +1227,7 @@ angular.module('ice.entry.controller', [])
                 url: 'scripts/entry/sequence-analysis.html',
                 display: 'Sequence Analysis',
                 isPrivileged: false,
-                countName: 'traceSequenceCount',
+                countName: 'sequenceCount',
                 icon: 'fa-search-plus'
             },
             {
@@ -1286,50 +1278,14 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.createCopyOfEntry = function () {
-            $scope.entryCopy = angular.copy($scope.entry);
-            $scope.entryCopy.id = 0;
-            $scope.entryCopy.recordId = undefined;
-            $scope.entryCopy.name = $scope.entryCopy.name + " (copy)";
-            $scope.entryCopy.owner = undefined;
-            $scope.entryCopy.ownerEmail = undefined;
-
-            // convert arrays of objects to array strings
-            $scope.entryCopy.links = EntryService.toStringArray($scope.entryCopy.links);
-            $scope.entryCopy.selectionMarkers = EntryService.toStringArray($scope.entryCopy.selectionMarkers);
-
-            for (var i = 0; i < $scope.entryCopy.linkedParts.length; i += 1) {
-                $scope.entryCopy.linkedParts[i].links = EntryService.toStringArray($scope.entryCopy.linkedParts[i].links);
-                $scope.entryCopy.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.entryCopy.linkedParts[i].selectionMarkers);
-            }
-
-            // convert the part to a form the server can work with
-            $scope.entryCopy = EntryService.getTypeData($scope.entryCopy);
-            console.log($scope.entryCopy);
-
-            // create or update the part depending on whether there is a current part id
-            entry.create($scope.entryCopy, function (result) {
-                    $scope.$emit("UpdateCollectionCounts");
-                    $scope.showSBOL = false;
-
-                    if ($scope.entry.hasSequence) {
-                        // retrieve sequence information and create copy
-                        entry.sequence({partId: $scope.entry.id}, function (copiedSequence) {
-                            copiedSequence.identifier = result.partId;
-                            entry.addSequenceAsString({partId: result.id}, copiedSequence,
-                                function (res) {
-                                    $location.path('entry/' + result.id);
-                                });
-                        }, function (error) {
-                            console.error(error);
-                        });
-                    }
-                }, function (error) {
-                    console.error(error);
-                }
-            );
+            Util.post("rest/parts", {}, function (result) {
+                $scope.$emit("UpdateCollectionCounts");
+                $scope.showSBOL = false;
+                $location.path('entry/' + result.id);
+            }, {source: $scope.entry.recordId});
         };
 
-        // check if a selection has been made
+// check if a selection has been made
         var menuOption = $stateParams.option;
         if (menuOption === undefined) {
             $scope.selection = menuSubDetails[0].url;
@@ -1357,25 +1313,40 @@ angular.module('ice.entry.controller', [])
         $scope.quickEdit = {};
 
         $scope.quickEditEntry = function (field) {
-            // dirty is used to flag that the field's value has been modified to
-            // prevent saving unchanged values on blur
-
             field.errorUpdating = false;
-            if (!field.dirty) {
-                return;
+            field.updating = true;
+            field.invalid = false;
+
+            if (field.inputType === "autoCompleteAdd") {
+                $scope.quickEdit[field.schema] = $scope.convertedAutoCompleteAdd;
             }
 
-            field.updating = true;
+            // validate
+            var canSubmit = EntryService.validateFields($scope.quickEdit, [field]);
+            if (!canSubmit) {
+                field.updating = false;
+                return;
+            }
+            // getTypeData is not converting selection markers for some reason
+            if (field.inputType === "autoCompleteAdd") {
+                $scope.entry[field.schema] = [];
+                angular.forEach($scope.convertedAutoCompleteAdd, function (val) {
+                    if (val.value.trim() == "")
+                        return;
 
-            // update the main entry with quickEdit (which is the model)
-            $scope.entry[field.schema] = $scope.quickEdit[field.schema];
-            if (field.inputType === 'withEmail') {
-                $scope.entry[field.schema + 'Email'] = $scope.quickEdit[field.schema + 'Email'];
+                    $scope.entry[field.schema].push(val.value);
+                });
+            } else {
+                // update the main entry with quickEdit (which is the model)
+                $scope.entry[field.schema] = $scope.quickEdit[field.schema];
+                if (field.inputType === 'withEmail') {
+                    $scope.entry[field.schema + 'Email'] = $scope.quickEdit[field.schema + 'Email'];
+                }
             }
 
             $scope.entry = EntryService.getTypeData($scope.entry);
 
-            entry.update($scope.entry, function (result) {
+            Util.update("rest/parts/" + $scope.entry.id, $scope.entry, {}, function (result) {
                 field.edit = false;
 
                 if (result)
@@ -1386,7 +1357,22 @@ angular.module('ice.entry.controller', [])
             }, function (error) {
                 field.updating = false;
                 field.errorUpdating = true;
+                Util.setFeedback("Error updating entry", "danger")
             });
+        };
+
+// converts an array of string (currently only for autoCompleteAdd) to object so it can be edited
+        $scope.checkConvertFieldToObject = function (field) {
+            $scope.convertedAutoCompleteAdd = [];
+            if (!angular.isArray($scope.entry[field.schema]))
+                return;
+
+            if (field.inputType !== 'autoCompleteAdd')
+                return;
+
+            for (var i = 0; i < $scope.entry[field.schema].length; i += 1) {
+                $scope.convertedAutoCompleteAdd[i] = {value: $scope.entry[field.schema][i]};
+            }
         };
 
         $scope.deleteCustomField = function (parameter) {
@@ -1422,6 +1408,7 @@ angular.module('ice.entry.controller', [])
             $location.path($scope.context.back);
         };
 
+// removes linked parts
         $scope.removeLink = function (mainEntry, linkedEntry) {
             entry.removeLink({partId: mainEntry.id, linkId: linkedEntry.id}, function (result) {
                 var idx = mainEntry.linkedParts.indexOf(linkedEntry);
@@ -1431,6 +1418,16 @@ angular.module('ice.entry.controller', [])
             }, function (error) {
                 console.error(error);
             });
+        };
+
+// removes a value from an autoCompleteAdd field at the specified index
+        $scope.removeAutoCompleteAdd = function (index) {
+            $scope.convertedAutoCompleteAdd.splice(index, 1);
+        };
+
+// add a new autoComplete add value at the specified index
+        $scope.addAutoCompleteAdd = function (index) {
+            $scope.convertedAutoCompleteAdd.splice(index + 1, 0, {value: ""});
         };
 
 // file upload
@@ -1491,6 +1488,7 @@ angular.module('ice.entry.controller', [])
                     console.error(error);
                 })
         }
-    })
+    }
+)
 ;
 

@@ -5,16 +5,16 @@ import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.authentication.AuthenticationException;
 import org.jbei.ice.lib.account.authentication.IAuthentication;
 import org.jbei.ice.lib.account.authentication.LocalAuthentication;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.account.model.AccountPreferences;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.AccountDAO;
-import org.jbei.ice.lib.dao.hibernate.AccountPreferencesDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.group.Group;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
+import org.jbei.ice.storage.hibernate.dao.AccountPreferencesDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.AccountPreferences;
+import org.jbei.ice.storage.model.Group;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -22,7 +22,7 @@ import java.util.*;
 /**
  * ABI to manipulate {@link Account} objects.
  * <p>
- * This class contains methods that wrap {@link org.jbei.ice.lib.dao.hibernate.AccountDAO} to
+ * This class contains methods that wrap {@link AccountDAO} to
  * manipulate {@link Account} objects.
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
@@ -185,29 +185,6 @@ public class AccountController {
     }
 
     /**
-     * validates the account dto to ensure that the fields required (especially by the database) are
-     * present
-     *
-     * @param accountTransfer account dto for validation
-     */
-    private boolean validateRequiredAccountFields(final AccountTransfer accountTransfer) {
-        if (accountTransfer.getFirstName() == null
-                || accountTransfer.getFirstName().trim().isEmpty()) {
-            return false;
-        }
-
-        if (accountTransfer.getLastName() == null || accountTransfer.getLastName().trim().isEmpty()) {
-            return false;
-        }
-
-        if (accountTransfer.getEmail() == null || accountTransfer.getEmail().trim().isEmpty()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
      * Creates a new account using the parameters passed. A random password is initially generated ,
      * encrypted and assigned to the account
      *
@@ -216,8 +193,8 @@ public class AccountController {
      * @return generated password
      */
     public AccountTransfer createNewAccount(final AccountTransfer info, final boolean sendEmail) {
-        // validate fields required by the database
-        validateRequiredAccountFields(info);
+        if (StringUtils.isEmpty(info.getLastName()) || StringUtils.isEmpty(info.getEmail()))
+            throw new IllegalArgumentException("Cannot create account without email or lastname");
 
         final String email = info.getEmail().trim();
         if (getByEmail(email) != null) {
@@ -339,7 +316,7 @@ public class AccountController {
      * @return Account object matching a session key, or {@code null}
      */
     public AccountTransfer getAccountBySessionKey(final String sessionKey) {
-        final String userId = SessionHandler.getUserIdBySession(sessionKey);
+        final String userId = UserSessions.getUserIdBySession(sessionKey);
         if (userId == null) {
             Logger.warn("Could not retrieve user id for session " + sessionKey);
             return null;
@@ -423,7 +400,7 @@ public class AccountController {
             account.setIp(ip);
             account.setLastLoginTime(Calendar.getInstance().getTime());
             save(account);
-            SessionHandler.createNewSessionForUser(account.getEmail());
+            UserSessions.createNewSessionForUser(account.getEmail());
             return email;
         }
 
@@ -437,28 +414,6 @@ public class AccountController {
         } catch (final InterruptedException ie) {
             Logger.warn(ie.getMessage());
         }
-    }
-
-    /**
-     * Attempts to load the ICE Authentication Backend from database configuration.
-     *
-     * @return an IAuthentication backend
-     */
-    public IAuthentication getAuthenticationBackend() {
-        final String clazzName = Utils.getConfigValue(ConfigurationKey.AUTHENTICATION_BACKEND);
-        try {
-            final Class<?> clazz = Class.forName(clazzName);
-            if (IAuthentication.class.isAssignableFrom(clazz)) {
-                return (IAuthentication) clazz.newInstance();
-            }
-        } catch (final ClassNotFoundException e) {
-            Logger.error("Failed to load class " + clazzName);
-        } catch (final InstantiationException e) {
-            Logger.error("Failed to instantiate class " + clazzName);
-        } catch (final IllegalAccessException e) {
-            Logger.error("Inaccessible class " + clazzName);
-        }
-        return new LocalAuthentication();
     }
 
     /**
@@ -488,7 +443,7 @@ public class AccountController {
         info.setId(account.getId());
         final boolean isAdmin = isAdministrator(email);
         info.setAdmin(isAdmin);
-        info.setSessionId(SessionHandler.createSessionForUser(email, transfer.getSessionId()));
+        info.setSessionId(UserSessions.createSessionForUser(email, transfer.getSessionId()));
         return info;
     }
 
@@ -498,7 +453,7 @@ public class AccountController {
      * @param sessionKey unique session identifier
      */
     public void invalidate(final String sessionKey) {
-        SessionHandler.invalidateSession(sessionKey);
+        UserSessions.invalidateSession(sessionKey);
     }
 
     /**

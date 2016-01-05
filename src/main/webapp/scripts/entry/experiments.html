@@ -17,7 +17,7 @@
 
                     <div class="col-sm-11 pad-top-5">
                         <input size="35" type="text" class="input_box" placeholder="Brief descriptive label"
-                               ng-model="experiment.name"/>
+                               ng-model="experiment.label"/>
                     </div>
 
                     <div class="col-sm-1 pad-top-5">
@@ -67,8 +67,9 @@
                     <!--<td><a ng-href="profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}-->
                     <!--{{traceSequence.depositor.lastName}}</a></td>-->
                     <td>{{experiment.created | date:'MMM d, y, h:mm a'}}</td>
-                    <td style="font-size:14px"><i ng-click="deleteTraceSequenceFile(traceSequence.fileId)"
-                                                  class="fa fa-trash-o delete_icon"></i></td>
+                    <td style="font-size:14px">
+                        <i ng-click="deleteStudy(experiment)" class="fa fa-trash-o delete_icon"></i>
+                    </td>
                 </tr>
                 </tbody>
             </table>

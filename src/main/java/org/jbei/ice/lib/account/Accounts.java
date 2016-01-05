@@ -1,13 +1,15 @@
 package org.jbei.ice.lib.account;
 
 import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.AccountDAO;
 import org.jbei.ice.lib.dto.AccountResults;
-import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Group;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * ICE user accounts
@@ -23,7 +25,6 @@ public class Accounts {
     }
 
     protected boolean isAdministrator(Account account) {
-//        Account account = accountDAO.getByEmail(userId);
         return account != null && account.getType() == AccountType.ADMIN;
     }
 
@@ -44,12 +45,11 @@ public class Accounts {
             throw new PermissionException(userId + " does not have the privilege to access all accounts");
 
         AccountResults results = new AccountResults();
-        EntryController entryController = new EntryController();
         List<Account> accounts = accountDAO.getAccounts(offset, limit, sort, asc, filter);
 
         for (Account userAccount : accounts) {
             AccountTransfer info = userAccount.toDataTransferObject();
-            long entryCount = entryController.getNumberOfOwnerEntries(userId, userAccount.getEmail());
+            long entryCount = getNumberOfOwnerEntries(account, userAccount.getEmail());
             info.setUserEntryCount(entryCount);
             info.setAdmin(isAdministrator(userAccount));
             results.getResults().add(info);
@@ -58,5 +58,10 @@ public class Accounts {
         long count = accountDAO.getAccountsCount(filter);
         results.setResultCount(count);
         return results;
+    }
+
+    protected long getNumberOfOwnerEntries(Account account, String ownerEmail) {
+        Set<Group> accountGroups = new HashSet<>(account.getGroups());
+        return DAOFactory.getEntryDAO().ownerEntryCount(account, ownerEmail, accountGroups);
     }
 }

@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.dto;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * POJO for site-wide Configuration setting

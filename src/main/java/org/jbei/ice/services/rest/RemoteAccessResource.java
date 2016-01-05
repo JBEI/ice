@@ -1,24 +1,17 @@
 package org.jbei.ice.services.rest;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
 import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.net.RemoteAccessController;
-import org.jbei.ice.lib.vo.FeaturedDNASequence;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * REST resource for sending/retrieving messages from remote ICE instances. Local instances access
@@ -32,9 +25,9 @@ public class RemoteAccessResource extends RestResource {
     private RemoteAccessController controller = new RemoteAccessController();
 
     /**
-     * @param remoteId
-     *            unique identifier for remote partner being accessed
-     * @return list of available folders that are available on the registry
+     * Retrieves available folders from the specified remote ice partner
+     *
+     * @param remoteId unique identifier for remote partner being accessed
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -52,7 +45,7 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/users/{email}")
     public AccountTransfer getRemoteUser(@PathParam("id") final long remoteId,
-            @PathParam("email") final String email) {
+                                         @PathParam("email") final String email) {
         return controller.getRemoteUser(remoteId, email);
     }
 
@@ -65,7 +58,7 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{entryId}/sequence")
     public Response getSequence(@PathParam("id") final long remoteId,
-            @PathParam("entryId") final long partId) {
+                                @PathParam("entryId") final long partId) {
         final FeaturedDNASequence sequence = controller.getRemoteSequence(remoteId, partId);
         if (sequence == null) {
             return Response.status(Response.Status.NO_CONTENT).build();
@@ -82,7 +75,7 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/parts/{entryId}/traces")
     public Response getSequenceTraces(@PathParam("id") long remoteId,
-            @PathParam("entryId") long partId) {
+                                      @PathParam("entryId") long partId) {
         List<TraceSequenceAnalysis> traces = controller.getRemoteTraces(remoteId, partId);
         if (traces == null) {
             return Response.status(Response.Status.NO_CONTENT).build();
@@ -103,11 +96,11 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/folders/{folderId}")
     public FolderDetails getPublicFolderEntries(@PathParam("id") final long remoteId,
-            @PathParam("folderId") final long folderId,
-            @DefaultValue("0") @QueryParam("offset") final int offset,
-            @DefaultValue("15") @QueryParam("limit") final int limit,
-            @DefaultValue("created") @QueryParam("sort") final String sort,
-            @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+                                                @PathParam("folderId") final long folderId,
+                                                @DefaultValue("0") @QueryParam("offset") final int offset,
+                                                @DefaultValue("15") @QueryParam("limit") final int limit,
+                                                @DefaultValue("created") @QueryParam("sort") final String sort,
+                                                @DefaultValue("false") @QueryParam("asc") final boolean asc) {
         return controller.getPublicFolderEntries(remoteId, folderId, sort, asc, offset, limit);
     }
 
@@ -120,7 +113,7 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/parts/{partId}/samples")
     public Response getRemotePartSamples(@PathParam("id") long remoteId,
-            @PathParam("partId") long partId) {
+                                         @PathParam("partId") long partId) {
         List<PartSample> result = controller.getRemotePartSamples(remoteId, partId);
         return super.respond(result);
     }
@@ -134,7 +127,7 @@ public class RemoteAccessResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/parts/{partId}/comments")
     public Response getRemotePartComments(@PathParam("id") long remoteId,
-            @PathParam("partId") long partId) {
+                                          @PathParam("partId") long partId) {
         List<UserComment> result = controller.getRemotePartComments(remoteId, partId);
         return super.respond(result);
     }

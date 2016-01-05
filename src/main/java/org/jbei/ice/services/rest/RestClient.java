@@ -10,7 +10,6 @@ import java.util.Map;
 public abstract class RestClient {
 
     protected final String AUTHENTICATION_PARAM_NAME = "X-ICE-Authentication-SessionId";
-    protected final String WOR_PARTNER_TOKEN_HEADER = "X-ICE-WOR-Token";
 
     public abstract <T> T get(String url, String path, Class<T> clazz, Map<String, Object> queryParams);
 

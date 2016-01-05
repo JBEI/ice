@@ -1,18 +1,17 @@
 package org.jbei.ice.servlet;
 
+import org.hibernate.SessionFactory;
+import org.jbei.ice.ApplicationInitialize;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.executor.IceExecutorService;
+import org.jbei.ice.storage.hibernate.HibernateUtil;
+
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Enumeration;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-
-import org.jbei.ice.ApplicationController;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
-import org.jbei.ice.lib.executor.IceExecutorService;
-
-import org.hibernate.SessionFactory;
 
 /**
  * Ice servlet context listener for running initializing
@@ -54,7 +53,7 @@ public class IceServletContextListener implements ServletContextListener {
     protected void init() {
         try {
             HibernateUtil.beginTransaction();
-            ApplicationController.initialize();
+            ApplicationInitialize.startUp();
             HibernateUtil.commitTransaction();
         } catch (Throwable e) {
             HibernateUtil.rollbackTransaction();

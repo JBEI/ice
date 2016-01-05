@@ -2,14 +2,21 @@
 
 angular.module('ice.collection.controller', [])
     // controller for <ice.menu.collections> directive
-    .controller('CollectionMenuController', function ($cookieStore, $scope, $modal, $rootScope, $location, $stateParams, Folders, FolderSelection, EntryContextUtil) {
-        var sessionId = $cookieStore.get("sessionId");
+    .controller('CollectionMenuController', function ($cookieStore, $scope, $uibModal, $rootScope, $location, $stateParams,
+                                                      Folders, FolderSelection, EntryContextUtil, Util) {
         var folders = Folders();
 
-        $rootScope.$on('$stateChangeStart',
-            function (event, toState, toParams, fromState, fromParams) {
-                //console.log(toState, toParams, fromState, fromParams);
+        // retrieve (to refresh the information such as part counts) all the sub folders under
+        // $scope.selectedFolder (defaults to "personal" if not set)
+        $scope.updateSelectedCollectionFolders = function () {
+            var folder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
+            if (folder == "available")
+                folder = "featured";
+
+            Util.list("rest/collections/" + folder.toUpperCase() + "/folders", function (result) {
+                $scope.selectedCollectionFolders = result;
             });
+        };
 
         //
         // initialize
@@ -17,22 +24,40 @@ angular.module('ice.collection.controller', [])
 
         // folders contained in the selected folder (default selected to personal)
         $scope.selectedCollectionFolders = undefined;
+
+        // can either be a collection ("shared") or a folder id (34)
         $scope.selectedFolder = $stateParams.collection === undefined ? 'personal' : $stateParams.collection;
-        FolderSelection.selectCollection($scope.selectedFolder);
 
         // retrieve collections contained in the selectedFolder (only if a collection)
         if (isNaN($scope.selectedFolder)) {
-            folders.getByType({folderType: $scope.selectedFolder},
-                function (result) {
-                    $scope.selectedCollectionFolders = result;
-                }, function (error) {
-                    console.error(error);
-                });
-        }
+            if ($scope.selectedFolder.toLowerCase() == "available")
+                $scope.selectedFolder = "featured";
 
-        // retrieve folder counts
-        var updateCounts = function () {
-            folders.query(function (result) {
+            FolderSelection.selectCollection($scope.selectedFolder);
+            $scope.updateSelectedCollectionFolders();
+        } else {
+            // selected folder is a number. folder selected, need collection it is contained in
+            Util.get("rest/folders/" + $scope.selectedFolder, function (result) {
+                if (result.type == 'PUBLIC')
+                    $scope.selectedFolder = "available";
+                else
+                    $scope.selectedFolder = 'personal';
+
+                FolderSelection.selectCollection($scope.selectedFolder);
+                $scope.updateSelectedCollectionFolders();
+            });
+        }
+        //
+        // end initialize
+        //
+
+        $scope.addCollectionIconClick = function () {
+            $scope.$broadcast("ShowCollectionFolderAdd");
+        };
+
+        // updates the numbers for the collections
+        $scope.updateCollectionCounts = function () {
+            Util.get("rest/collections/counts", function (result) {
                 if (result === undefined || $scope.collectionList === undefined)
                     return;
 
@@ -42,30 +67,11 @@ angular.module('ice.collection.controller', [])
                 }
             });
         };
-        updateCounts();
-
-        //
-        // end initialize
-        //
 
         // Menu count change handler
         $scope.$on("UpdateCollectionCounts", function (event) {
-            updateCounts();
+            $scope.updateCollectionCounts();
         });
-
-        // updates the counts for personal collection to indicate items removed/added
-        $scope.updatePersonalCollections = function () {
-            var folder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
-
-            folders.getByType({folderType: folder},
-                function (result) {
-                    if (result) {
-                        $scope.selectedCollectionFolders = result;
-                    }
-                }, function (error) {
-                    console.error(error);
-                });
-        };
 
         //
         // called from collections-menu-details.html when a collection's folder is selected
@@ -80,7 +86,7 @@ angular.module('ice.collection.controller', [])
                 type = "folders";
             }
 
-            $location.path("" + type + "/" + folder.id);
+            $location.path(type + "/" + folder.id);
         };
 
         //
@@ -94,22 +100,16 @@ angular.module('ice.collection.controller', [])
             $scope.selectedFolder = name;
 
             // name and display differ for "Featured". using this till they are reconciled
-            for (var i = 0; i < $scope.collectionList.length; i += 1) {
-                if ($scope.collectionList[i].name === name) {
-                    $scope.selectedCollection = $scope.collectionList[i].display;
-                    break;
-                }
-            }
+            if (name === 'available')
+                name = 'featured';
 
+            $scope.selectedCollection = name;
             $scope.selectedCollectionFolders = undefined;
 
             // retrieve sub folders for selected collection
-            folders.getByType({folderType: name},
+            Util.list("rest/collections/" + $scope.selectedCollection.toUpperCase() + "/folders",
                 function (result) {
                     $scope.selectedCollectionFolders = result;
-                },
-                function (error) {
-                    console.error(error);
                 });
         };
 
@@ -134,58 +134,302 @@ angular.module('ice.collection.controller', [])
             }
         });
     })
-    // deals with sub collections e.g. /folders/:id
-    // retrieves the contents of folders
-    .controller('CollectionFolderController', function ($rootScope, $scope, $location, $modal, $cookieStore, $stateParams, Folders, Entry, EntryContextUtil, Selection) {
+    .controller('FolderPermissionsController', function ($scope, $uibModalInstance, $cookieStore, Folders, Permission, User, folder) {
+        var sessionId = $cookieStore.get("sessionId");
+        var panes = $scope.panes = [];
+        $scope.folder = folder;
+        $scope.userFilterInput = undefined;
+        var folders = Folders();
+
+        $scope.activateTab = function (pane) {
+            angular.forEach(panes, function (pane) {
+                pane.selected = false;
+            });
+            pane.selected = true;
+            if (pane.title === 'Read')
+                $scope.activePermissions = $scope.readPermissions;
+            else
+                $scope.activePermissions = $scope.writePermissions;
+
+            angular.forEach($scope.users, function (item) {
+                for (var i = 0; i < $scope.activePermissions.length; i += 1) {
+                    item.selected = (item.id !== undefined && item.id === $scope.activePermissions[i].articleId);
+                }
+            });
+        };
+
+        // retrieve permissions for folder
+        folders.permissions({folderId: folder.id}, function (result) {
+            $scope.readPermissions = [];
+            $scope.writePermissions = [];
+
+            angular.forEach(result, function (item) {
+                if (item.type === 'WRITE_FOLDER')
+                    $scope.writePermissions.push(item);
+                else
+                    $scope.readPermissions.push(item);
+            });
+
+            $scope.panes.push({title: 'Read', count: $scope.readPermissions.length, selected: true});
+            $scope.panes.push({title: 'Write', count: $scope.writePermissions.length});
+
+            $scope.activePermissions = $scope.readPermissions;
+        });
+
+        this.addPane = function (pane) {
+            // activate the first pane that is added
+            if (panes.length == 0)
+                $scope.activateTab(pane);
+            panes.push(pane);
+        };
+
+        $scope.closeModal = function () {
+            $uibModalInstance.close('cancel'); // todo : pass object to inform if folder is shared or cleared
+        };
+
+        $scope.showAddPermissionOptionsClick = function () {
+            $scope.showPermissionInput = true;
+        };
+
+        $scope.closePermissionOptions = function () {
+            $scope.users = undefined;
+            $scope.showPermissionInput = false;
+        };
+
+        var removePermission = function (permissionId) {
+            folders.removePermission({folderId: folder.id, permissionId: permissionId},
+                function (result) {
+                    if (!result)
+                        return;
+
+                    // check which pane is selected
+                    var pane;
+                    if ($scope.panes[0].selected)
+                        pane = $scope.panes[0];
+                    else
+                        pane = $scope.panes[1];
+
+                    var i = -1;
+
+                    for (var idx = 0; idx < $scope.activePermissions.length; idx += 1) {
+                        if (permissionId != $scope.activePermissions[idx].id) {
+                            i = idx;
+                            break;
+                        }
+                    }
+
+                    if (i == -1)
+                        return;
+
+                    $scope.activePermissions.splice(i, 1);
+                    pane.count = $scope.activePermissions.length;
+                });
+        };
+
+        $scope.setPropagatePermission = function (folder) {
+            folder.propagatePermission = !folder.propagatePermission;
+            folders.update({folderId: folder.id}, folder, function (result) {
+
+            }, function (error) {
+
+            })
+        };
+
+        $scope.addRemovePermission = function (permission) {
+            permission.selected = !permission.selected;
+            if (!permission.selected) {
+                removePermission(permission.id);
+                return;
+            }
+
+            // add permission
+            var pane;
+            for (var i = 0; i < panes.length; i += 1) {
+                if (panes[i].selected) {
+                    permission.type = panes[i].title.toUpperCase() + "_FOLDER";
+                    pane = panes[i];
+                    break;
+                }
+            }
+            permission.typeId = folder.id;
+
+            folders.addPermission({folderId: folder.id}, permission, function (result) {
+                // result is the permission object
+                if (result.type == 'READ_FOLDER') {
+                    $scope.readPermissions.push(result);
+                    $scope.activePermissions = $scope.readPermissions;
+                }
+                else {
+                    $scope.writePermissions.push(result);
+                    $scope.activePermissions = $scope.writePermissions;
+                }
+
+                permission.id = result.id;
+                pane.count = $scope.activePermissions.length;
+            });
+        };
+
+        $scope.enablePublicRead = function (folder) {
+            Folders().enablePublicReadAccess({id: folder.id}, function (result) {
+                folder.publicReadAccess = true;
+            }, function (error) {
+
+            });
+        };
+
+        $scope.disablePublicRead = function (folder) {
+            Folders().disablePublicReadAccess({folderId: folder.id}, function (result) {
+                folder.publicReadAccess = false;
+            }, function (error) {
+
+            })
+        };
+
+        $scope.deletePermission = function (index, permission) {
+            removePermission(permission.id);
+        };
+
+        $scope.filter = function (val) {
+            if (!val) {
+                $scope.accessPermissions = undefined;
+                return;
+            }
+
+            $scope.filtering = true;
+            Permission().filterUsersAndGroups({limit: 10, val: val},
+                function (result) {
+                    $scope.accessPermissions = result;
+                    $scope.filtering = false;
+                }, function (error) {
+                    $scope.filtering = false;
+                    $scope.accessPermissions = undefined;
+                });
+        };
+    })
+
+// deals with sub collections e.g. /folders/:id
+// retrieves the contents of folders
+    .controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
+                                                        $stateParams, Folders, Entry, EntryContextUtil,
+                                                        Selection, Util, localStorageService) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
         var entry = Entry(sessionId);
+        var resource = "collections";
+
+        $scope.folderPageChange = function () {
+            $scope.loadingPage = true;
+            $scope.params.offset = ($scope.params.currentPage - 1) * $scope.params.limit;
+            Util.get("rest/" + resource + "/" + $scope.params.folderId + "/entries", function (result) {
+                if (resource == "collections") {
+                    $scope.folder = {entries: result.data, count: result.resultCount};
+                    $scope.params.count = result.resultCount; // used in context display
+                } else {
+                    // retrieved folders
+                    $scope.folder = result;
+                    $scope.params.count = result.count;
+                    if (result.canEdit)
+                        $scope.folderNameTooltip = "Click to rename";
+                }
+                $scope.loadingPage = false;
+            }, $scope.params);
+        };
 
         //
         // init
         //
-        $scope.params = {'asc': false, 'sort': 'created', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
-        $scope.maxSize = 5;  // number of clickable pages to show in pagination
-        var subCollection = $stateParams.collection;   // folder id or one of the defined collections (Shared etc)
 
-        $scope.folderPageChange = function () {
-            $scope.loadingPage = true;
-            if ($scope.params.folderId === undefined)
-                $scope.params.folderId = 'personal';
-            $scope.params.offset = ($scope.params.currentPage - 1) * $scope.params.limit;
-
-            folders.folder($scope.params, function (result) {
-                $scope.folder = result;
-                if (result.canEdit)
-                    $scope.folderNameTooltip = "Click to rename";
-                $scope.loadingPage = false;
-            });
+        // default entry headers
+        $scope.entryHeaders = {
+            status: {field: "status", display: "Status", selected: true},
+            hasSample: {field: "hasSample", display: "Has Sample", selected: true},
+            hasSequence: {field: "hasSequence", display: "Has Sequence", selected: true},
+            alias: {field: "alias", display: "Alias"},
+            created: {field: "creationTime", display: "Created", selected: true}
         };
 
+        // default init params
+        $scope.params = {
+            'asc': false,
+            'sort': 'created',
+            currentPage: 1,
+            hstep: [15, 30, 50, 100],
+            limit: 30
+        };
+
+        // get client stored headers
+        var storedFields = localStorageService.get('entryHeaderFields');
+        if (!storedFields) {
+            // set default headers
+            var entryHeaderFields = [];
+            for (var key in $scope.entryHeaders) {
+                if (!$scope.entryHeaders.hasOwnProperty(key))
+                    continue;
+
+                var header = $scope.entryHeaders[key];
+                if (header.selected) {
+                    entryHeaderFields.push(header.field);
+                }
+            }
+
+            // and store
+            localStorageService.set('entryHeaderFields', entryHeaderFields);
+        } else {
+            // set user selected
+            for (var key in $scope.entryHeaders) {
+                if (!$scope.entryHeaders.hasOwnProperty(key))
+                    continue;
+
+                var header = $scope.entryHeaders[key];
+                header.selected = (storedFields.indexOf(header.field) != -1);
+            }
+        }
+
+        $scope.maxSize = 5;  // number of clickable pages to show in pagination
+        var subCollection = $stateParams.collection;   // folder id or one of the defined collections (Shared etc)   ]
         // retrieve folder contents. all folders are redirected to /folder/{id} which triggers this
         if (subCollection !== undefined) {
             $scope.folder = undefined;
             $scope.params.folderId = subCollection;
+            if (isNaN($scope.params.folderId))
+                resource = "collections";
+            else
+                resource = "folders";
 
             var context = EntryContextUtil.getContext();
             if (context) {
                 var pageNum = (Math.floor(context.offset / $scope.params.limit)) + 1;
                 $scope.params.sort = context.sort;
                 $scope.params.currentPage = pageNum;
-                $scope.folderPageChange();
-            } else {
-                // retrieve contents of collection (e,g, "personal")
-                folders.folder($scope.params, function (result) {
-                    $scope.loadingPage = false;
-                    $scope.folder = result;
-                    if (result.canEdit)
-                        $scope.folderNameTooltip = "Click to rename";
-                    $scope.params.count = $scope.folder.count;
-                });
             }
+
+            $scope.folderPageChange();
         }
 
-        $scope.$on("RefreshAfterDeletion", function (event, data) {
+        // custom header selection or de-selection by user
+        $scope.selectedHeaderField = function (header, $event) {
+            if ($event) {
+                $event.preventDefault();
+                $event.stopPropagation();
+            }
+            header.selected = !header.selected;
+            var storedFields = localStorageService.get('entryHeaderFields');
+
+            if (header.selected) {
+                // selected by user, add to stored list
+                storedFields.push(header.field);
+                localStorageService.set('entryHeaderFields', storedFields);
+            } else {
+                // not selected by user, remove from stored list
+                var i = storedFields.indexOf(header.field);
+                if (i != -1) {
+                    storedFields.splice(i, 1);
+                    localStorageService.set('entryHeaderFields', storedFields);
+                }
+            }
+        };
+
+        $rootScope.$on("RefreshAfterDeletion", function (event, data) {
             $scope.params.currentPage = 1;
             $scope.folderPageChange();
         });
@@ -197,30 +441,16 @@ angular.module('ice.collection.controller', [])
                 $scope.params.asc = !$scope.params.asc;
             else
                 $scope.params.asc = false;
-
             $scope.params.sort = sortType;
-
-            folders.folder($scope.params, function (result) {
-                $scope.folder = result;
-                if (result.canEdit)
-                    $scope.folderNameTooltip = "Click to rename";
-                $scope.params.currentPage = 1;
-            });
+            $scope.folderPageChange();
         };
 
         $scope.hStepChanged = function () {
-            console.log($scope.params);
-
-            folders.folder($scope.params, function (result) {
-                $scope.folder = result;
-                if (result.canEdit)
-                    $scope.folderNameTooltip = "Click to rename";
-                $scope.params.currentPage = 1;
-            });
+            $scope.folderPageChange();
         };
 
         $scope.selectAllClass = function () {
-            if (Selection.allSelected())
+            if (Selection.allSelected() || $scope.folder.entries.length === Selection.getSelectedEntries().length)
                 return 'fa-check-square-o';
 
             if (Selection.hasSelection())
@@ -255,15 +485,19 @@ angular.module('ice.collection.controller', [])
                 $scope.params.offset = index;
             }
 
-            var offset = (($scope.params.currentPage - 1) * 15) + index;
+            var offset = (($scope.params.currentPage - 1) * $scope.params.limit) + index;
             EntryContextUtil.setContextCallback(function (offset, callback) {
                 $scope.params.offset = offset;
                 $scope.params.limit = 1;
 
-                Folders().folder($scope.params,
-                    function (result) {
+                Util.get("rest/" + resource + "/" + $scope.params.folderId + "/entries", function (result) {
+                    if (resource == "collections") {
+                        callback(result.data[0].id);
+                    } else {
                         callback(result.entries[0].id);
-                    });
+                    }
+                    $scope.loadingPage = false;
+                }, $scope.params);
             }, $scope.params.count, offset, "folders/" + $scope.params.folderId, $scope.params.sort);
 
             $location.path("entry/" + entry.id);
@@ -271,20 +505,17 @@ angular.module('ice.collection.controller', [])
 
         $scope.tooltipDetails = function (e) {
             $scope.currentTooltip = undefined;
-            entry.tooltip({partId: e.id},
-                function (result) {
-                    $scope.currentTooltip = result;
-                }, function (error) {
-                    console.error(error);
-                });
+            Util.get("rest/parts/" + e.id + "/tooltip", function (result) {
+                $scope.currentTooltip = result;
+            });
         };
 
-        $scope.folderPopupTemplateUrl = "views/folder/template.html";
+        $scope.folderPopupTemplateUrl = "scripts/folder/template.html";
 
         // opens a modal that presents user with options to share selected folder
         $scope.openFolderShareSettings = function () {
-            var modalInstance = $modal.open({
-                templateUrl: 'views/modal/folder-permissions.html',
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/folder/modal/folder-permissions.html',
                 controller: "FolderPermissionsController",
                 backdrop: "static",
                 resolve: {
@@ -322,9 +553,9 @@ angular.module('ice.collection.controller', [])
             folders.update({id: tmp.id}, tmp, function (result) {
                 $scope.folder.type = result.type;
                 if (newType === 'PUBLIC')
-                    $location.path('/folders/available');
+                    $location.path('folders/available');
                 else
-                    $location.path('/folders/personal');
+                    $location.path('folders/personal');
                 // todo : send message to be received by the collection menu
             }, function (error) {
                 console.error(error);
@@ -335,9 +566,9 @@ angular.module('ice.collection.controller', [])
             if (!$scope.folder.canEdit)
                 return;
 
-            var modalInstance = $modal.open({
-                templateUrl: 'views/folder/modal/rename-folder.html',
-                controller: function ($scope, $modalInstance, folderName) {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/folder/modal/rename-folder.html',
+                controller: function ($scope, $uibModalInstance, folderName) {
                     $scope.newFolderName = folderName;
                 },
                 backdrop: 'static',
@@ -361,7 +592,9 @@ angular.module('ice.collection.controller', [])
         }
     })
     // also the main controller
-    .controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope, Folders, Settings, Search, Samples) {
+    .controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope,
+                                                  Folders, Settings, Search, Authentication, Samples,
+                                                  CollectionMenuOptions, Util) {
         // todo : set on all
         var searchUrl = "search";
         if ($location.path().slice(0, searchUrl.length) != searchUrl) {
@@ -371,6 +604,7 @@ angular.module('ice.collection.controller', [])
         var sessionId = $cookieStore.get("sessionId");
         $scope.searchFilters = {};
         $rootScope.settings = {};
+
 
         // retrieve site wide settings
         $scope.pageCounts = function (currentPage, resultCount, maxPageCount) {
@@ -386,56 +620,7 @@ angular.module('ice.collection.controller', [])
         // retrieve user settings
 
         // default list of collections (move to service)
-        $scope.collectionList = [
-            {
-                name: 'available',
-                description: '',
-                display: 'Featured',
-                icon: 'fa-certificate',
-                iconOpen: 'fa-certificate dark-orange',
-                alwaysVisible: true
-            },
-            {
-                name: 'personal',
-                description: 'Personal entries',
-                display: 'Personal',
-                icon: 'fa-folder',
-                iconOpen: 'fa-folder-open dark_blue',
-                alwaysVisible: true
-            },
-            {
-                name: 'shared',
-                description: 'Folders & Entries shared with you',
-                display: 'Shared',
-                icon: 'fa-share-alt',
-                iconOpen: 'fa-share-alt green',
-                alwaysVisible: true
-            },
-            {
-                name: 'drafts',
-                description: 'Entries from bulk upload still in progress',
-                display: 'Drafts',
-                icon: 'fa-pencil',
-                iconOpen: 'fa-pencil brown',
-                alwaysVisible: true
-            },
-            {
-                name: 'pending',
-                description: 'Entries from bulk upload waiting approval',
-                display: 'Pending Approval',
-                icon: 'fa-moon-o',
-                iconOpen: 'fa-moon-o purple',
-                alwaysVisible: false
-            },
-            {
-                name: 'deleted',
-                description: 'Deleted Entries',
-                display: 'Deleted',
-                icon: 'fa-trash-o',
-                iconOpen: 'fa-trash red',
-                alwaysVisible: false
-            }
-        ];
+        $scope.collectionList = CollectionMenuOptions.getCollectionOptions();
 
         // entry items that can be created
         $scope.items = [
@@ -446,17 +631,8 @@ angular.module('ice.collection.controller', [])
         ];
 
         if ($location.path() === "/") {
-            // change state
+            // change state to trigger collection-selection.html (see ice.app.js)
             $location.path("folders/personal");
-//        // a bit of a hack. the folders are a child state so when
-//        // url/folder/personal is accessed, this code is still executed (stateParams do not help here)
-//        // so that causes personal folder to be retrieved twice
-//        $scope.folder = undefined; // should already be undefined
-//
-//        var folders = Folders;
-//        folders.folder({folderId:'personal'}, function (result) {
-//            $scope.folder = result;
-//        });
         }
 
         var samples = Samples(sessionId);
@@ -464,9 +640,19 @@ angular.module('ice.collection.controller', [])
         // selected entries
         $scope.selection = [];
         $scope.shoppingCartContents = [];
-        samples.userRequests({status: 'IN_CART'}, {userId: $rootScope.user.id}, function (result) {
-            $scope.shoppingCartContents = result.requests;
-        });
+
+        if (!$rootScope.user) {
+            Util.get("rest/accesstokens", function (result) {
+                $rootScope.user = result;
+                Util.get("rest/samples/requests/" + $rootScope.user.id, function (result) {
+                    $scope.shoppingCartContents = result.requests;
+                })
+            });
+        } else {
+            Util.get("rest/samples/requests/" + $rootScope.user.id, function (result) {
+                $scope.shoppingCartContents = result.requests;
+            })
+        }
 
         $scope.createEntry = {
             isOpen: false
@@ -488,15 +674,13 @@ angular.module('ice.collection.controller', [])
             for (var idx = 0; idx < $scope.shoppingCartContents.length; idx += 1)
                 contentIds.push($scope.shoppingCartContents[idx].id);
 
-            samples.submitRequests({status: 'PENDING'}, contentIds, function (result) {
+            Util.update("rest/samples/requests", contentIds, {status: 'PENDING'}, function (result) {
                 $scope.shoppingCartContents = [];
                 $scope.openShoppingCart = false;
-            }, function (error) {
-                console.error(error);
-            })
+            });
         };
 
-        $scope.shoppingCartTemplate = "views/shopping-cart-template.html";
+        $scope.shoppingCartTemplate = "scripts/collection/popover/shopping-cart-template.html";
 
         // remove sample request
         $scope.removeFromCart = function (content, entry) {
@@ -658,13 +842,19 @@ angular.module('ice.collection.controller', [])
             return results;
         };
     })
-    .controller('CollectionDetailController', function ($scope, $cookieStore, Folders, $stateParams, $location) {
+    .controller('CollectionDetailController', function ($scope, $cookieStore, Folders, $stateParams, $location, Util) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
+        $scope.hideAddCollection = true;
 
-        $scope.createCollection = function () {
+        $scope.$on("ShowCollectionFolderAdd", function (e) {
+            $scope.hideAddCollection = false;
+        });
+
+        // creates a personal folder
+        $scope.createPersonalFolder = function () {
             var details = {folderName: $scope.newCollectionName};
-            folders.create(details, function (result) {
+            Util.post("/rest/folders", details, function (result) {
                 $scope.selectedCollectionFolders.splice(0, 0, result);
                 $scope.newCollectionName = "";
                 $scope.hideAddCollection = true;

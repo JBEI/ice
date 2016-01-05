@@ -34,8 +34,14 @@ public class ConfigResource extends RestResource {
         return controller.retrieveSystemSettings(userId);
     }
 
+    @GET
+    @Path("/site")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getSiteSettings() {
+        return super.respond(controller.getSiteSettings());
+    }
+
     /**
-     * @param uriInfo
      * @return the version setting of this ICE instance
      */
     @GET
@@ -55,7 +61,11 @@ public class ConfigResource extends RestResource {
     @GET
     @Path("/{key}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Setting getConfig(@PathParam("key") final String key) {
+    public Setting getConfig(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
+                             @PathParam("key") final String key) {
+        if (!"NEW_REGISTRATION_ALLOWED".equalsIgnoreCase(key) && !"PASSWORD_CHANGE_ALLOWED".equalsIgnoreCase(key)) {
+            getUserId(sessionId);
+        }
         return controller.getPropertyValue(key);
     }
 
@@ -64,8 +74,8 @@ public class ConfigResource extends RestResource {
      */
     @PUT
     @Path("/lucene")
-    public Response buildLuceneIndex() {
-        final String userId = getUserId();
+    public Response buildLuceneIndex(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        final String userId = getUserId(sessionId);
         final boolean success = searchController.rebuildIndexes(userId, IndexType.LUCENE);
         return super.respond(success);
     }
@@ -75,8 +85,8 @@ public class ConfigResource extends RestResource {
      */
     @PUT
     @Path("/blast")
-    public Response buildBlastIndex() {
-        final String userId = getUserId();
+    public Response buildBlastIndex(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId) {
+        final String userId = getUserId(sessionId);
         final boolean success = searchController.rebuildIndexes(userId, IndexType.BLAST);
         return super.respond(success);
     }
@@ -87,8 +97,9 @@ public class ConfigResource extends RestResource {
      */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    public Setting update(final Setting setting) {
+    public Response update(final Setting setting) {
         final String userId = getUserId();
-        return controller.updateSetting(userId, setting);
+        final String url = request.getRemoteHost();
+        return super.respond(controller.updateSetting(userId, setting, url));
     }
 }

@@ -5,10 +5,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.jbei.ice.lib.account.SessionHandler;
+import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
+import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
@@ -16,16 +16,18 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.TraceSequence;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.utils.EntriesAsCSV;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
+import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.Sequence;
+import org.jbei.ice.storage.model.TraceSequence;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -34,6 +36,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author Hector Plahar
@@ -43,6 +46,16 @@ public class FileResource extends RestResource {
 
     private SequenceController sequenceController = new SequenceController();
     private AttachmentController attachmentController = new AttachmentController();
+
+    @GET
+    @Path("asset/{assetName}")
+    public Response getAsset(@PathParam("assetName") final String assetName) {
+        ConfigurationController configurationController = new ConfigurationController();
+        File assetFile = configurationController.getUIAsset(assetName);
+        if (assetFile == null)
+            return super.respond(Response.Status.NOT_FOUND);
+        return addHeaders(Response.ok(assetFile), assetFile.getName());
+    }
 
     /**
      * @return Response with attachment info on uploaded file
@@ -199,6 +212,22 @@ public class FileResource extends RestResource {
     }
 
     @GET
+    @Path("shotgunsequence/{fileId}")
+    public Response getShotgunSequenceFile(@PathParam("fileId") String fileId,
+                                           @QueryParam("sid") String sid,
+                                           @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+        ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
+
+        try {
+            final File file = dao.getFile(fileId);
+            return addHeaders(Response.ok(file), "sequence-" + ThreadLocalRandom.current().nextInt(10000, 100001) + ".ss.zip");
+        } catch (Exception e) {
+            Logger.error(e);
+            return Response.serverError().build();
+        }
+    }
+
+    @GET
     @Produces("image/png")
     @Path("sbolVisual/{rid}")
     public Response getSBOLVisual(@PathParam("rid") String recordId,
@@ -246,7 +275,7 @@ public class FileResource extends RestResource {
             }
 
             final String fileName = contentDispositionHeader.getFileName();
-            final String userId = SessionHandler.getUserIdBySession(sessionId);
+            final String userId = UserSessions.getUserIdBySession(sessionId);
             final String sequence = IOUtils.toString(fileInputStream);
             final SequenceInfo sequenceInfo = sequenceController.parseSequence(userId, recordId,
                     entryType, sequence, fileName);
@@ -269,10 +298,8 @@ public class FileResource extends RestResource {
     @Path("csv")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response downloadCSV(
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId,
-            EntrySelection selection) {
-        String userId = super.getUserId(sessionId);
+    public Response downloadCSV(EntrySelection selection) {
+        String userId = super.getUserId();
         EntriesAsCSV entriesAsCSV = new EntriesAsCSV();
         boolean success = entriesAsCSV.setSelectedEntries(userId, selection);
         if (!success)
@@ -283,6 +310,6 @@ public class FileResource extends RestResource {
             return Response.ok(new Setting("key", file.getName())).build();
         }
 
-        return respond(false);
+        return Response.serverError().build();
     }
 }

@@ -1,11 +1,12 @@
 package org.jbei.ice.lib.bulkupload;
 
 import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.BulkUpload;
 import org.junit.*;
 
 /**

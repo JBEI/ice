@@ -2,34 +2,29 @@ package org.jbei.ice.lib.entry;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.ApplicationController;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.PreferencesController;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.*;
+import org.jbei.ice.lib.dto.AuditType;
+import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.comment.UserComment;
-import org.jbei.ice.lib.dto.entry.*;
-import org.jbei.ice.lib.dto.folder.FolderDetails;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PartStatistics;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.sample.model.Sample;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.lib.group.Group;
-import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.models.*;
-import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.lib.vo.DNASequence;
 import org.jbei.ice.servlet.InfoToModelFactory;
-import org.jbei.ice.servlet.ModelToInfoFactory;
+import org.jbei.ice.storage.DAOException;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.ModelToInfoFactory;
+import org.jbei.ice.storage.hibernate.dao.*;
+import org.jbei.ice.storage.model.*;
 
 import java.io.*;
 import java.util.*;
@@ -37,7 +32,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * ABI to manipulate {@link org.jbei.ice.lib.entry.model.Entry}s.
+ * ABI to manipulate {@link Entry}s.
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
@@ -63,185 +58,23 @@ public class EntryController {
         auditDAO = DAOFactory.getAuditDAO();
     }
 
-    public FolderDetails retrieveVisibleEntries(String userId, ColumnField field, boolean asc, int start, int limit) {
-        Set<Entry> results;
-        FolderDetails details = new FolderDetails();
-        Account account = accountController.getByEmail(userId);
-
-        if (authorization.isAdmin(userId)) {
-            // no filters
-            results = dao.retrieveAllEntries(field, asc, start, limit);
-        } else {
-            // retrieve groups for account and filter by permission
-            Set<Group> accountGroups = new HashSet<>(account.getGroups());
-            GroupController controller = new GroupController();
-            Group everybodyGroup = controller.createOrRetrievePublicGroup();
-            accountGroups.add(everybodyGroup);
-            results = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit);
-        }
-
-        for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
-            details.getEntries().add(info);
-        }
-
-        return details;
-    }
-
     /**
-     * Retrieve the number of entries that is visible to a particular user
+     * Update the information associated with the specified part.<br>
+     * <b>Note</b> that any missing information will be deleted from the original entry.
+     * In other words, if the part referenced by id <code>partId</code> has an alias value
+     * of <code>alias</code> and the part object passed in the parameter does not contain this value,
+     * when this method returns, the original entry's alias field will be removed.
      *
-     * @param userId user account unique identifier
-     * @return Number of entries that user with account referenced in the parameter can read.
+     * @param userId unique identifier for user making request
+     * @param partId unique identifier for part being updated. This overrides the id in the partData object
+     * @param part   information to update part with
+     * @return unique identifier for part that was updated
      */
-    public long getNumberOfVisibleEntries(String userId) {
-        Account account = accountController.getByEmail(userId);
-
-        if (account == null)
-            return -1;
-
-        if (authorization.isAdmin(userId)) {
-            return dao.getAllEntryCount();
-        }
-
-        Set<Group> accountGroups = new HashSet<>(account.getGroups());
-        GroupController controller = new GroupController();
-        Group everybodyGroup = controller.createOrRetrievePublicGroup();
-        accountGroups.add(everybodyGroup);
-        return dao.visibleEntryCount(account, accountGroups);
-    }
-
-    public long getNumberOfEntriesSharedWithUser(String userId) {
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        GroupController groupController = new GroupController();
-        Group publicGroup = groupController.createOrRetrievePublicGroup();
-        Set<Group> accountGroups = account.getGroups();
-        accountGroups.remove(publicGroup);
-        return dao.sharedEntryCount(account, accountGroups);
-    }
-
-    public List<PartData> getEntriesSharedWithUser(String userId, ColumnField field, boolean asc, int start,
-                                                   int limit) {
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        GroupController groupController = new GroupController();
-        Group publicGroup = groupController.createOrRetrievePublicGroup();
-        Set<Group> accountGroups = account.getGroups();
-        accountGroups.remove(publicGroup);
-        List<Entry> entries = dao.sharedWithUserEntries(account, accountGroups, field, asc, start, limit);
-
-        ArrayList<PartData> data = new ArrayList<>();
-        for (Entry entry : entries) {
-            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
-            info.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
-            data.add(info);
-        }
-        return data;
-    }
-
-    public List<PartData> retrieveOwnerEntries(String userId, String ownerEmail,
-                                               ColumnField sort, boolean asc, int start, int limit) {
-        List<Entry> entries;
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-
-        if (authorization.isAdmin(userId) || account.getEmail().equals(ownerEmail)) {
-            entries = dao.retrieveOwnerEntries(ownerEmail, sort, asc, start, limit);
-        } else {
-            Set<Group> accountGroups = new HashSet<>(account.getGroups());
-            GroupController controller = new GroupController();
-            Group everybodyGroup = controller.createOrRetrievePublicGroup();
-            accountGroups.add(everybodyGroup);
-            // retrieve entries for user that can be read by others
-            entries = dao.retrieveUserEntries(account, ownerEmail, accountGroups, sort, asc, start, limit);
-        }
-
-        ArrayList<PartData> data = new ArrayList<>();
-        for (Entry entry : entries) {
-            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
-            info.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
-            data.add(info);
-        }
-        return data;
-    }
-
-    public long getNumberOfOwnerEntries(String requesterUserEmail, String ownerEmail) {
-        Account account = DAOFactory.getAccountDAO().getByEmail(requesterUserEmail);
-        if (authorization.isAdmin(requesterUserEmail) || account.getEmail().equals(ownerEmail)) {
-            return dao.ownerEntryCount(ownerEmail);
-        }
-
-        Set<Group> accountGroups = new HashSet<>(account.getGroups());
-        GroupController controller = new GroupController();
-        Group everybodyGroup = controller.createOrRetrievePublicGroup();
-        accountGroups.add(everybodyGroup);
-        return dao.ownerEntryCount(account, ownerEmail, accountGroups);
-    }
-
-    /**
-     * Determines if the two entries can be linked
-     *
-     * @param entry parent in link hierarchy
-     * @param link  child in link hierarchy
-     * @return true if the two entries can be linked in the hierarchy specified
-     */
-    private boolean canLink(Entry entry, Entry link) {
-        if (entry == null || link == null || entry.getId() == link.getId())
-            return false;
-
-        if (link.getLinkedEntries().contains(entry))
-            return false;
-
-        EntryType linkedType = EntryType.nameToType(link.getRecordType());
-        EntryType type = EntryType.nameToType(entry.getRecordType());
-        if (type == null || linkedType == null)
-            return false;
-
-        switch (type) {
-            case PLASMID:
-                if (linkedType != type && linkedType != EntryType.PART)
-                    return false;
-                break;
-
-            case PART:
-                if (linkedType != type)
-                    return false;
-                break;
-
-            case STRAIN:
-                if (linkedType != type && linkedType != EntryType.PLASMID && linkedType != EntryType.PART)
-                    return false;
-                break;
-
-            case ARABIDOPSIS:
-                if (linkedType != type && linkedType != EntryType.PART)
-                    return false;
-                break;
-        }
-
-        return true;
-    }
-
     public long updatePart(String userId, long partId, PartData part) {
         Entry existing = dao.get(partId);
         authorization.expectWrite(userId, existing);
 
         Entry entry = InfoToModelFactory.updateEntryField(part, existing);
-        entry.getLinkedEntries().clear();
-        if (part.getLinkedParts() != null && part.getLinkedParts().size() > 0) {
-            for (PartData data : part.getLinkedParts()) {
-                Entry linked = dao.getByPartNumber(data.getPartId());
-
-                // check permissions on link
-                if (!authorization.canRead(userId, linked)) {
-                    continue;
-                }
-
-                if (!canLink(entry, linked))
-                    continue;
-
-                entry.getLinkedEntries().add(linked);
-            }
-        }
-
         entry.setModificationTime(Calendar.getInstance().getTime());
         if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
             List<EntryField> invalidFields = EntryUtil.validates(part);
@@ -274,7 +107,6 @@ public class EntryController {
         }
 
         authorization.expectWrite(userId, entry);
-        boolean scheduleRebuild = sequenceDAO.hasSequence(entry.getId());
 
         entry.setModificationTime(Calendar.getInstance().getTime());
         if (entry.getVisibility() == null)
@@ -294,10 +126,6 @@ public class EntryController {
                 accessPermission.setTypeId(entry.getId());
                 permissionsController.addPermission(userId, accessPermission);
             }
-        }
-
-        if (scheduleRebuild) {
-            ApplicationController.scheduleBlastIndexRebuildTask(true);
         }
     }
 
@@ -398,43 +226,6 @@ public class EntryController {
         return true;
     }
 
-    public ArrayList<TraceSequenceAnalysis> getTraceSequences(String userId, long entryId) {
-        Entry entry = dao.get(entryId);
-        if (entry == null)
-            return null;
-
-        authorization.expectRead(userId, entry);
-        List<TraceSequence> sequences = DAOFactory.getTraceSequenceDAO().getByEntry(entry);
-
-        ArrayList<TraceSequenceAnalysis> analysisArrayList = new ArrayList<>();
-        if (sequences == null)
-            return analysisArrayList;
-
-        AccountController accountController = new AccountController();
-
-        for (TraceSequence traceSequence : sequences) {
-            TraceSequenceAnalysis analysis = traceSequence.toDataTransferObject();
-            AccountTransfer accountTransfer = new AccountTransfer();
-
-            String depositor = traceSequence.getDepositor();
-            boolean canEdit = canEdit(userId, depositor, entry);
-            analysis.setCanEdit(canEdit);
-
-            Account account = accountController.getByEmail(traceSequence.getDepositor());
-            if (account != null) {
-                accountTransfer.setFirstName(account.getFirstName());
-                accountTransfer.setLastName(account.getLastName());
-                accountTransfer.setEmail(account.getEmail());
-                accountTransfer.setId(account.getId());
-            }
-
-            analysis.setDepositor(accountTransfer);
-            analysisArrayList.add(analysis);
-        }
-
-        return analysisArrayList;
-    }
-
     protected boolean canEdit(String userId, String depositor, Entry entry) {
         return userId.equalsIgnoreCase(depositor) || authorization.canWriteThoroughCheck(userId, entry);
     }
@@ -481,8 +272,9 @@ public class EntryController {
         PartStatistics statistics = new PartStatistics();
         statistics.setEntryId(entryId);
         statistics.setCommentCount(commentDAO.getCommentCount(entry));
-        int traceSequenceCount = DAOFactory.getTraceSequenceDAO().getTraceSequenceCount(entry);
-        statistics.setTraceSequenceCount(traceSequenceCount);
+        int sequenceCount = DAOFactory.getTraceSequenceDAO().getTraceSequenceCount(entry) +
+                DAOFactory.getShotgunSequenceDAO().getShotgunSequenceCount(entry);
+        statistics.setSequenceCount(sequenceCount);
         int sampleCount = DAOFactory.getSampleDAO().getSampleCount(entry);
         statistics.setSampleCount(sampleCount);
         int historyCount = DAOFactory.getAuditDAO().getHistoryCount(entry);
@@ -543,8 +335,14 @@ public class EntryController {
             entry = dao.getByRecordId(id);
 
         // get by unique name
-        if (entry == null)
-            return dao.getByUniqueName(id);
+        if (entry == null) {
+            try {
+                return dao.getByUniqueName(id);
+            } catch (DAOException de) {
+                // fine to ignore
+                return null;
+            }
+        }
 
         return entry;
     }

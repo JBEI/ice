@@ -2,17 +2,18 @@ package org.jbei.ice.lib.net;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.EntryDAO;
-import org.jbei.ice.lib.dao.hibernate.RemotePartnerDAO;
-import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
-import org.jbei.ice.lib.models.Sequence;
 import org.jbei.ice.services.rest.IceRestClient;
-import org.jbei.ice.servlet.ModelToInfoFactory;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.ModelToInfoFactory;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
+import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
+import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.RemotePartner;
+import org.jbei.ice.storage.model.Sequence;
 
 import java.util.*;
 

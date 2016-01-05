@@ -1,14 +1,8 @@
 package org.jbei.ice.lib.entry.sequence;
 
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.TraceSequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.model.Plasmid;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.TraceSequence;
-import org.jbei.ice.lib.models.TraceSequenceAlignment;
+import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.parsers.ABIParser;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
@@ -19,7 +13,9 @@ import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.DNASequence;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.TraceSequenceDAO;
+import org.jbei.ice.storage.model.*;
 
 import java.io.File;
 import java.io.InputStream;
@@ -121,9 +117,9 @@ public class SequenceAnalysisController {
         if (sequence == null) { // it will remove invalid alignments
             rebuildAllAlignments(entry);
 
-            traces = traceDao.getByEntry(entry);
+            traces = traceDao.getByEntry(entry, 0, Integer.MAX_VALUE);
         } else {
-            traces = traceDao.getByEntry(entry);
+            traces = traceDao.getByEntry(entry, 0, Integer.MAX_VALUE);
 
             boolean wasUpdated = false;
             for (TraceSequence traceSequence : traces) {
@@ -137,7 +133,7 @@ public class SequenceAnalysisController {
             }
 
             if (wasUpdated) { // fetch again because alignment has been updated
-                traces = traceDao.getByEntry(entry);
+                traces = traceDao.getByEntry(entry, 0, Integer.MAX_VALUE);
             }
         }
 

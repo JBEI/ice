@@ -1,26 +1,16 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.auth.KeyTable;
-import org.jbei.auth.hmac.HmacAuthorizor;
 import org.jbei.auth.hmac.HmacSignature;
-import org.jbei.auth.hmac.HmacSignatureFactory;
-import org.jbei.ice.lib.account.SessionHandler;
+import org.jbei.ice.lib.access.TokenVerification;
+import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
-import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.utils.Utils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.nio.file.Paths;
-import java.security.Key;
 
 /**
  * Parent class for all rest resource objects
@@ -31,46 +21,60 @@ public class RestResource {
 
     protected final String AUTHENTICATION_PARAM_NAME = "X-ICE-Authentication-SessionId";
     protected final String WOR_PARTNER_TOKEN = "X-ICE-WOR-Token";
+    protected final String API_KEY_TOKEN = "X-ICE-API-Token";        // token for validation
+    protected final String API_KEY_USER = "X-ICE-API-Token-User";    // optional user
+    protected final String API_KEY_CLIENT_ID = "X-ICE-API-Token-Client"; // client id
 
     // do lookup by using existing configuration DATA_DIRECTORY to find key names => key data
-    private static final KeyTable TABLE = new KeyTable() {
+//    private static final KeyTable TABLE = new KeyTable() {
+//
+//        // keys stored in /var/lib/tomcat6/data/rest-auth by default
+//        private final File directory;
+//
+//        {
+//            // need to force-create a transaction to get the DATA_DIRECTORY config value
+//            HibernateUtil.beginTransaction();
+//            directory = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
+//                    "rest-auth").toFile();
+//            HibernateUtil.commitTransaction();
+//        }
+//
+//        @Override
+//        public Key getKey(final String keyId) {
+//            try {
+//                // find file named by keyId in the directory
+//                final File keyFile = new File(directory, keyId);
+//                // collect all lines in the file to a buffer
+//                final StringBuilder encoded = new StringBuilder();
+//                try (final FileReader reader = new FileReader(keyFile);
+//                     final BufferedReader buffered = new BufferedReader(reader);) {
+//                    String line;
+//                    while ((line = buffered.readLine()) != null) {
+//                        encoded.append(line);
+//                    }
+//                    // after reading all lines, decode value into a Key object
+//                    return HmacSignatureFactory.decodeKey(encoded.toString());
+//                }
+//            } catch (final Throwable t) {
+//                Logger.error("Failed to load rest-auth key " + keyId);
+//            }
+//            return null;
+//        }
+//    };
 
-        // keys stored in /var/lib/tomcat6/data/rest-auth by default
-        private final File directory;
+//    private static final HmacAuthorizor AUTHORIZOR = new HmacAuthorizor(TABLE);
 
-        {
-            // need to force-create a transaction to get the DATA_DIRECTORY config value
-            HibernateUtil.beginTransaction();
-            directory = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
-                    "rest-auth").toFile();
-            HibernateUtil.commitTransaction();
-        }
+    @HeaderParam(value = WOR_PARTNER_TOKEN)
+    private String worPartnerToken;
 
-        @Override
-        public Key getKey(final String keyId) {
-            try {
-                // find file named by keyId in the directory
-                final File keyFile = new File(directory, keyId);
-                // collect all lines in the file to a buffer
-                final StringBuilder encoded = new StringBuilder();
-                try (final FileReader reader = new FileReader(keyFile);
-                     final BufferedReader buffered = new BufferedReader(reader);) {
-                    String line;
-                    while ((line = buffered.readLine()) != null) {
-                        encoded.append(line);
-                    }
-                    // after reading all lines, decode value into a Key object
-                    return HmacSignatureFactory.decodeKey(encoded.toString());
-                }
-            } catch (final Throwable t) {
-                Logger.error("Failed to load rest-auth key " + keyId);
-            }
-            return null;
-        }
+    @HeaderParam(value = API_KEY_CLIENT_ID)
+    private String apiClientId;
 
-    };
+    @HeaderParam(value = API_KEY_USER)
+    private String apiUser;
 
-    private static final HmacAuthorizor AUTHORIZOR = new HmacAuthorizor(TABLE);
+    @HeaderParam(value = API_KEY_TOKEN)
+    private String apiToken;
 
     @HeaderParam(value = AUTHENTICATION_PARAM_NAME)
     private String sessionId;
@@ -79,7 +83,7 @@ public class RestResource {
     private String hmacHeader;
 
     @Context
-    private HttpServletRequest request;
+    protected HttpServletRequest request;
 
     /**
      * Extract the User ID from header values in the resource request.
@@ -92,17 +96,39 @@ public class RestResource {
     }
 
     /**
-     * Extract the User ID from a query parameter value or header values in the resource request.
+     * Attempts to retrieve the identifier for the specific user
      *
-     * @param sessionId a session ID sent via query parameters
-     * @return a string User ID
-     * @throws WebApplicationException for unauthorized access
+     * @return valid user identifier
+     * @throws WebApplicationException with status 401 if the user id cannot be retrieved
+     */
+    protected String requireUserId() {
+        String userId = getUserId();
+        if (userId == null)
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+        return userId;
+    }
+
+    /**
+     * Extract the User ID from a query parameter value or header values in the resource request.
      */
     protected String getUserId(final String sessionId) {
-        String userId = SessionHandler.getUserIdBySession(sessionId);
+        String userId = UserSessions.getUserIdBySession(sessionId);
         if (!StringUtils.isEmpty(userId))
             return userId;
 
+        // check api key
+        if (!StringUtils.isEmpty(apiToken)) {
+            String clientId = !StringUtils.isEmpty(apiClientId) ? apiClientId : request.getRemoteHost();
+
+            TokenVerification tokenVerification = new TokenVerification();
+            userId = tokenVerification.verifyAPIKey(apiToken, clientId, apiUser);
+
+            // being a bit generous in terms of allowing other auth methods to be attempted even though apiToken is set
+            if (userId != null)
+                return userId;
+        }
+
+        // check hmac signature
         final Object hmac = request.getAttribute(AuthenticationInterceptor.HMAC_SIGNATURE);
         final Object valid = request.getAttribute(AuthenticationInterceptor.EXPECTED_SIGNATURE);
         if (hmac != null && hmac instanceof HmacSignature) {
@@ -114,9 +140,14 @@ public class RestResource {
             }
         }
 
-        if (userId == null)
-            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         return userId;
+    }
+
+    protected void verifyWebPartnerUrl() {
+        String clientId = !StringUtils.isEmpty(apiClientId) ? apiClientId : request.getRemoteHost();
+        TokenVerification tokenVerification = new TokenVerification();
+        if (!tokenVerification.verifyPartnerToken(clientId, worPartnerToken))
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
     }
 
     /**

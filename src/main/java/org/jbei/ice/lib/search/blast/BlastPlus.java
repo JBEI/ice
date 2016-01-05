@@ -9,18 +9,18 @@ import org.biojava.bio.seq.RNATools;
 import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.bio.symbol.SymbolList;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.search.BlastProgram;
 import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
-import org.jbei.ice.lib.entry.EntryRetriever;
-import org.jbei.ice.lib.models.Sequence;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
+import org.jbei.ice.storage.model.Sequence;
 
 import java.io.*;
 import java.nio.channels.FileLock;
@@ -116,7 +116,7 @@ public class BlastPlus {
             info = new SearchResult();
             info.setEntryInfo(view);
 
-            String summary = new EntryRetriever().getEntrySummary(info.getEntryInfo().getId());
+            String summary = DAOFactory.getEntryDAO().getEntrySummary(info.getEntryInfo().getId());
             info.getEntryInfo().setShortDescription(summary);
 //                searchResult.setAlignmentLength(alignmentLength);
 //                searchResult.setPercentId(percentId);
@@ -145,7 +145,7 @@ public class BlastPlus {
                 i += 1;
                 line = lines.get(i);
                 if (line.startsWith("Length")) {
-                    int sequenceLength = Integer.valueOf(line.substring(7).trim());
+//                    int sequenceLength = Integer.valueOf(line.substring(7).trim());
 //                    System.out.println(info.getQueryLength() + ", " + sequenceLength / 2);
                     continue;
                 }
@@ -305,6 +305,14 @@ public class BlastPlus {
         }
 
         return result;
+    }
+
+    /**
+     * Schedule task to rebuild the blast index
+     */
+    public static void scheduleBlastIndexRebuildTask(boolean force) {
+        RebuildBlastIndexTask task = new RebuildBlastIndexTask(force);
+        IceExecutorService.getInstance().runTask(task);
     }
 
     /**

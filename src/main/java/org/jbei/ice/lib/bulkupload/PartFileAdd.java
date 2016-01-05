@@ -1,21 +1,20 @@
 package org.jbei.ice.lib.bulkupload;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-
+import org.apache.commons.io.IOUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.entry.attachment.Attachment;
+import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.vo.DNASequence;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Attachment;
+import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.Sequence;
 
-import org.apache.commons.io.IOUtils;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * Handles sequence and attachment files added parts; specifically those that are uploaded via bulk upload

@@ -1,21 +1,21 @@
 package org.jbei.ice.lib.bulkupload;
 
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.dao.IDataTransferModel;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.lib.folder.AbstractFolder;
 
 import java.util.ArrayList;
 import java.util.Date;
 
 /**
- * Data transfer model for bulk upload
+ * Data transfer model for bulk upload. Wraps information about the bulk upload
+ * including permissions and parts contained in each
  *
  * @author Hector Plahar
  */
-public class BulkUploadInfo implements IDataTransferModel {
+public class BulkUploadInfo extends AbstractFolder {
 
-    private long id;
     private String name;
     private String type;
     private int count;
@@ -29,14 +29,6 @@ public class BulkUploadInfo implements IDataTransferModel {
     public BulkUploadInfo() {
         entryList = new ArrayList<>();
         permissions = new ArrayList<>();
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getName() {

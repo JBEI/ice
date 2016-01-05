@@ -1,17 +1,17 @@
 package org.jbei.ice.lib.search;
 
 import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PlasmidData;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.entry.EntryCreator;
-import org.jbei.ice.lib.entry.model.Entry;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.servlet.InfoToModelFactory;
+import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Entry;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

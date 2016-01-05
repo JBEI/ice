@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.dto;
 
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * @author Hector Plahar

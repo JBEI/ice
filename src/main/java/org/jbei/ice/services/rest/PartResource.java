@@ -9,11 +9,14 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
-import org.jbei.ice.lib.account.SessionHandler;
+import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.History;
+import org.jbei.ice.lib.dto.ShotgunSequenceDTO;
 import org.jbei.ice.lib.dto.comment.UserComment;
+import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
@@ -21,11 +24,16 @@ import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.experiment.ExperimentController;
+import org.jbei.ice.lib.entry.sequence.TraceSequences;
+import org.jbei.ice.lib.experiment.Experiments;
 import org.jbei.ice.lib.experiment.Study;
 import org.jbei.ice.lib.net.TransferredParts;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.lib.vo.FeaturedDNASequence;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
+import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.ShotgunSequence;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -38,60 +46,27 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
+ * Rest resource for biological parts
+ *
  * @author Hector Plahar
  */
 @Path("/parts")
 public class PartResource extends RestResource {
 
     private EntryController controller = new EntryController();
-    private EntryRetriever retriever = new EntryRetriever();
     private PermissionsController permissionsController = new PermissionsController();
     private AttachmentController attachmentController = new AttachmentController();
     private SequenceController sequenceController = new SequenceController();
-    private ExperimentController experimentController = new ExperimentController();
+    private Experiments experiments = new Experiments();
     private SampleService sampleService = new SampleService();
-
-    /**
-     * @param val
-     * @param field
-     * @param limit
-     * @return list of autocomplete values for a field
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/autocomplete")
-    public ArrayList<String> autoComplete(@QueryParam("val") String val,
-                                          @DefaultValue("SELECTION_MARKERS") @QueryParam("field") String field,
-                                          @DefaultValue("8") @QueryParam("limit") int limit) {
-        AutoCompleteField autoCompleteField = AutoCompleteField.valueOf(field.toUpperCase());
-        Set<String> result = retriever.getMatchingAutoCompleteField(autoCompleteField, val, limit);
-        return new ArrayList<>(result);
-    }
-
-    /**
-     * @param token
-     * @param limit
-     * @return list of autocomplete values for parts
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/autocomplete/partid")
-    public ArrayList<PartData> autoComplete(@QueryParam("token") String token,
-                                            @DefaultValue("8") @QueryParam("limit") int limit) {
-        return retriever.getMatchingPartNumber(token, limit);
-    }
 
     /**
      * Retrieves a part using any of the unique identifiers. e.g. Part number, synthetic id, or
      * global unique identifier
-     *
-     * @param info
-     * @param id
-     * @return Response with part data
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -99,7 +74,7 @@ public class PartResource extends RestResource {
     public Response read(@Context final UriInfo info,
                          @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
                          @PathParam("id") final String id) {
-        String userId = SessionHandler.getUserIdBySession(sessionId);
+        String userId = UserSessions.getUserIdBySession(sessionId);
         try {
             log(userId, "retrieving details for " + id);
             final EntryType type = EntryType.nameToType(id);
@@ -117,8 +92,22 @@ public class PartResource extends RestResource {
     }
 
     /**
-     * @param id
-     * @return part data with tooltip information
+     * Returns the folders that an entry is contained in (filtered by permissions).
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/folders")
+    public Response read(@PathParam("id") String id) {
+        // user id is allowed to be empty. The entry has to be public in that instance
+        // and only public entries it is contained in is returned
+        String userId = getUserId();
+        EntryFolders entryFolders = new EntryFolders(userId, id);
+        return super.respond(entryFolders.getFolders());
+    }
+
+    /**
+     * Retrieves the information shown in the tooltip view
+     * for entries
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -139,7 +128,8 @@ public class PartResource extends RestResource {
     public List<AccessPermission> getPermissions(@Context final UriInfo info,
                                                  @PathParam("id") final String id) {
         final String userId = getUserId();
-        return retriever.getEntryPermissions(userId, id);
+        Entries entries = new Entries();
+        return entries.getEntryPermissions(userId, id);
     }
 
     /**
@@ -164,9 +154,11 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/experiments")
-    public Response getPartExperiments(@PathParam("id") final long partId) {
-        final String userId = getUserId();
-        final List<Study> studies = experimentController.getPartStudies(userId, partId);
+    public Response getPartExperiments(
+            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
+            @PathParam("id") final long partId) {
+        final String userId = getUserId(sessionId);
+        final List<Study> studies = experiments.getPartStudies(userId, partId);
         if (studies == null) {
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
@@ -181,10 +173,23 @@ public class PartResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/experiments")
-    public Response getPartExperiments(@PathParam("id") final long partId, final Study study) {
-        final String userId = getUserId();
-        final Study created = experimentController.createStudy(userId, partId, study);
+    public Response createPartExperiment(
+            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
+            @PathParam("id") final long partId,
+            final Study study) {
+        final String userId = getUserId(sessionId);
+        final Study created = experiments.createOrUpdateStudy(userId, partId, study);
         return respond(Response.Status.OK, created);
+    }
+
+    @DELETE
+    @Path("/{id}/experiments/{eid}")
+    public Response deletePartExperiment(
+            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
+            @PathParam("id") final long partId,
+            @PathParam("eid") final long experimentId) {
+        String userId = getUserId(sessionId);
+        return super.respond(experiments.deleteStudy(userId, partId, experimentId));
     }
 
     /**
@@ -391,20 +396,59 @@ public class PartResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param partId
      * @return traces for the part
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/traces")
-    public ArrayList<TraceSequenceAnalysis> getTraces(@Context final UriInfo info,
-                                                      @PathParam("id") final long partId,
-                                                      @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-                                                      @QueryParam("sid") final String sid) {
+    public Response getTraces(
+            @Context final UriInfo info,
+            @PathParam("id") final long partId,
+            @DefaultValue("1000") @QueryParam("limit") int limit,
+            @DefaultValue("0") @QueryParam("start") int start,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            @QueryParam("sid") final String sid) {
         String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
         final String userId = getUserId(sessionId);
-        return controller.getTraceSequences(userId, partId);
+        TraceSequences traceSequences = new TraceSequences(userId, partId);
+        Results<TraceSequenceAnalysis> results = traceSequences.getTraces(start, limit);
+
+        // hack for trace sequence viewer without having to modify it
+        if (StringUtils.isEmpty(userAgentHeader))
+            return super.respond(new ArrayList<>(results.getData()));
+        return super.respond(results);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/shotgunsequences")
+    public ArrayList<ShotgunSequenceDTO> getShotgunSequences(
+            @Context final UriInfo info,
+            @PathParam("id") final long partId,
+            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+            @QueryParam("sid") final String sid) {
+        String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
+        final String userId = getUserId(sessionId);
+        ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
+        final EntryDAO entryDAO = DAOFactory.getEntryDAO();
+        final Entry entry = entryDAO.get(partId);
+
+        if (entry == null) {
+            return null;
+        }
+
+        // No need to check authorization since only the sysadmins can upload shotgun sequences for now
+
+
+        ArrayList<ShotgunSequenceDTO> returns = new ArrayList<ShotgunSequenceDTO>();
+        List<ShotgunSequence> results = dao.getByEntry(entry, userId);
+
+        for (ShotgunSequence ret : results) {
+            returns.add(new ShotgunSequenceDTO(ret));
+        }
+
+        Logger.info("Shotgun Sequences requested for entry " + partId);
+        return returns;
     }
 
     @POST
@@ -428,6 +472,34 @@ public class PartResource extends RestResource {
         }
         final boolean success = controller.addTraceSequence(userId, partId, file, fileName);
         return respond(success);
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/shotgunsequences")
+    public Response addShotgunSequence(@PathParam("id") final long partId,
+                                       @FormDataParam("file") final InputStream fileInputStream,
+                                       @FormDataParam("file") final FormDataContentDisposition contentDispositionHeader,
+                                       @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
+                                       @QueryParam("sid") final String sid) {
+        String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
+        final String userId = getUserId(sessionId);
+        final String fileName = contentDispositionHeader.getFileName();
+        final EntryDAO entryDAO = DAOFactory.getEntryDAO();
+        final Entry entry = entryDAO.get(partId);
+        ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
+
+        try {
+            String storageName = Utils.generateUUID();
+            dao.writeSequenceFileToDisk(storageName, fileInputStream);
+            dao.create(fileName, userId, entry, storageName, new Date());
+        } catch (Exception e) {
+            Logger.error(e);
+            return respond(Response.Status.INTERNAL_SERVER_ERROR);
+        }
+
+        Logger.info("Uploaded shotgun sequence for entry " + entry.getId());
+        return respond(Response.Status.OK);
     }
 
     @DELETE
@@ -491,16 +563,6 @@ public class PartResource extends RestResource {
         return Response.status(Response.Status.OK).entity(sequence).build();
     }
 
-//    @PUT
-//    @Produces(MediaType.APPLICATION_JSON)
-//    @Path("/{id}/sequence")
-//    public Response addSequenceToEntry(@PathParam("id") final long partId,
-//                                       @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
-//                                       @QueryParam("sid") final String sid,
-//                                       FeaturedDNASequence sequence) {
-//
-//    }
-
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/sequence")
@@ -511,6 +573,8 @@ public class PartResource extends RestResource {
         if (StringUtils.isEmpty(sessionId))
             sessionId = sid;
         final String userId = getUserId(sessionId);
+        if (userId == null)
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         return sequenceController.updateSequence(userId, partId, sequence);
     }
 
@@ -528,13 +592,29 @@ public class PartResource extends RestResource {
         return Response.serverError().build();
     }
 
+    /**
+     * Creates a new entry. If the <code>sourceId</code> parameter is set, the new entry is a copy
+     * of the source id (if found) otherwise the new entry is created from the data contained in the
+     * <code>partData</code>
+     *
+     * @param sourceId optional unique identifier for an existing part to copy. If not set, the <code>partData</code>
+     *                 parameter must be set
+     * @param partData optional data for creating new entry. if not set, then the <code>sourceId</code> must
+     *                 be set
+     * @return wrapper around identifier for newly created part which can be used to retrieve it
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public PartData create(@Context UriInfo info, PartData partData) {
-        final String userId = getUserId();
+    public PartData create(@QueryParam("source") String sourceId,
+                           PartData partData) {
+        final String userId = requireUserId();
         final EntryCreator creator = new EntryCreator();
-        final long id = creator.createPart(userId, partData);
+        long id;
+        if (StringUtils.isEmpty(sourceId))
+            id = creator.createPart(userId, partData);
+        else
+            id = creator.copyPart(userId, sourceId);
         log(userId, "created entry " + id);
         partData.setId(id);
         return partData;
@@ -555,22 +635,22 @@ public class PartResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param partId
-     * @param partData
-     * @return updated part data
+     * Update the part information at the specified resource identifier
+     *
+     * @param partId   unique resource identifier for part being updated
+     * @param partData data to update part with
      */
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public PartData update(@Context final UriInfo info, @PathParam("id") final long partId,
+    public Response update(@PathParam("id") final long partId,
                            final PartData partData) {
-        final String userId = getUserId();
+        final String userId = requireUserId();
         final long id = controller.updatePart(userId, partId, partData);
-        log(userId, "updated entry " + id);
+        log(userId, "update entry " + id);
         partData.setId(id);
-        return partData;
+        return super.respond(partData);
     }
 
     /**

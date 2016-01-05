@@ -1,11 +1,11 @@
 package org.jbei.ice.lib.dto.message;
 
+import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.dto.group.UserGroup;
+import org.jbei.ice.storage.IDataTransferModel;
+
 import java.util.ArrayList;
 import java.util.Date;
-
-import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.dao.IDataTransferModel;
-import org.jbei.ice.lib.dto.group.UserGroup;
 
 /**
  * DTO for message object
@@ -24,8 +24,8 @@ public class MessageInfo implements IDataTransferModel {
     private ArrayList<AccountTransfer> accounts;
 
     public MessageInfo() {
-        userGroups = new ArrayList<UserGroup>();
-        accounts = new ArrayList<AccountTransfer>();
+        userGroups = new ArrayList<>();
+        accounts = new ArrayList<>();
     }
 
     public void setId(long id) {

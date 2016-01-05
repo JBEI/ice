@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.dto.entry;
 
-import org.jbei.ice.lib.dao.IDataTransferModel;
-import org.jbei.ice.lib.vo.DNASequence;
+import org.jbei.ice.lib.dto.DNASequence;
+import org.jbei.ice.storage.IDataTransferModel;
 
 /**
  * @author Hector Plahar

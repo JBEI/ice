@@ -1,13 +1,12 @@
 package org.jbei.ice.lib.search;
 
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
-import org.jbei.ice.lib.executor.Task;
-
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.executor.Task;
+import org.jbei.ice.storage.hibernate.HibernateUtil;
 
 /**
  * Task to rebuild lucene index

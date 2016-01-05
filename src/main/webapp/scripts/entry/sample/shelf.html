@@ -30,7 +30,7 @@
         <td colspan="5" class="small">
             <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
             <i class="fa fa-warning dark-orange font-14em" ng-if="sample.comments.length"
-               tooltip="1 or more comments available"></i>
+               uib-tooltip="1 or more comments available"></i>
             <strong>{{sample.label}}</strong><br>
             &nbsp;<span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a
                 ng-href="profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}

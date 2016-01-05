@@ -9,7 +9,7 @@ angular.module('ice.entry.sample.controller', [])
             return !$scope.remote && $rootScope.user && $rootScope.user.isAdmin;
         }
     })
-    .controller('EntrySampleController', function ($location, $rootScope, $scope, $modal, $cookieStore, $stateParams, Entry, Samples) {
+    .controller('EntrySampleController', function ($location, $rootScope, $scope, $uibModal, $cookieStore, $stateParams, Entry, Samples) {
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
         var partId = $stateParams.id;
@@ -67,8 +67,8 @@ angular.module('ice.entry.sample.controller', [])
         };
 
         $scope.openAddToCart = function (entryId, samples) {
-            var modalInstance = $modal.open({
-                templateUrl: 'views/modal/sample-request.html',
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/entry/sample/modal-sample-request.html',
                 controller: function ($scope, samples) {
                     $scope.samples = samples;
                     $scope.tempRange = [{value: 30}, {value: 37}];

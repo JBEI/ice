@@ -17,7 +17,7 @@ angular.module('ice.upload.service', [])
             , "Summary <span class='required'>*</span>"
             , "Notes"
             , "References"
-            , "Links"
+            , "External URL"
             , "Status <span class='required'>*</span>"
             , "Creator <span class='required'>*</span>"
             , "Creator Email <span class='required'>*</span>"

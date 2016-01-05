@@ -1,19 +1,14 @@
 package org.jbei.ice.lib.entry;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.EntryDAO;
-import org.jbei.ice.lib.dao.hibernate.SequenceDAO;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.models.Sequence;
-import org.jbei.ice.lib.models.SequenceFeature;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.model.Entry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Represents a main part and the hierarchical links that it is involved in.
@@ -112,9 +107,7 @@ public class EntryLinks {
             return false;
         }
         this.entry.getLinkedEntries().add(child);
-        boolean success = this.entryDAO.update(this.entry) != null;
-        checkAddType(this.entry, child);
-        return success;
+        return this.entryDAO.update(this.entry) != null;
     }
 
     protected boolean addParentEntry(Entry parent) {
@@ -124,41 +117,7 @@ public class EntryLinks {
             return false;
         }
         parent.getLinkedEntries().add(this.entry);
-        boolean success = this.entryDAO.update(parent) != null;
-        checkAddType(parent, this.entry);
-        return success;
-    }
-
-    protected void checkAddType(Entry parent, Entry child) {
-        SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
-        if (sequenceDAO.hasSequence(child.getId()) && sequenceDAO.hasSequence(parent.getId())) {
-            Sequence parentSequence = sequenceDAO.getByEntry(parent);
-            Sequence childSequence = sequenceDAO.getByEntry(child);
-            String value = null;
-
-            Set<SequenceFeature> parentFeatures = parentSequence.getSequenceFeatures();
-            Set<SequenceFeature> childFeatures = childSequence.getSequenceFeatures();
-            if (childFeatures.size() == 1) {
-                SequenceFeature sequenceFeature = childFeatures.stream().findFirst().get();
-                value = sequenceFeature.getGenbankType();
-            } else if (childFeatures.isEmpty()) {
-                String fwdHash = childSequence.getFwdHash();
-
-                for (SequenceFeature parentFeature : parentFeatures) {
-                    String parentFeatureHash = parentFeature.getFeature().getHash();
-                    if (fwdHash.equalsIgnoreCase(parentFeatureHash)) {
-                        value = parentFeature.getGenbankType();
-                        break;
-                    }
-                }
-            }
-
-            // todo : look into link type
-            Logger.info("Child has genbank type = " + value);
-            if (!StringUtils.isEmpty(value)) {
-                DAOFactory.getParameterDAO().addIfNotExists("Type", value, child);
-            }
-        }
+        return this.entryDAO.update(parent) != null;
     }
 
     private boolean isCompatible(EntryType parentType, EntryType childType) {

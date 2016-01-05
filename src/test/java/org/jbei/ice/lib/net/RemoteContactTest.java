@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.net;
 
-import org.jbei.ice.lib.dao.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateUtil;
 import org.junit.After;
 import org.junit.Before;
 

@@ -1,0 +1,13 @@
+<div class="no_wrap">
+    <div ng-repeat="content in shoppingCartContents">
+        <i class="fa"
+           ng-class="{'fa-flask':content.requestType==='LIQUID_CULTURE', 'fa-circle-o':content.requestType==='STREAK_ON_AGAR_PLATE'}"></i>
+        <a class="font-90em" ng-href="entry/{{content.partData.id}}">{{content.partData.partId}}</a>
+        &nbsp;<i ng-click="removeFromCart(content)" class="fa fa-times delete_icon"></i>
+    </div>
+    <br>
+
+    <div class="pull-right pad-6">
+        <button class="btn btn-xs btn-primary" ng-click="submitShoppingCart()">Submit</button>
+    </div>
+</div>

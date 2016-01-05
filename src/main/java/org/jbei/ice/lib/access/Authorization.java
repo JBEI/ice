@@ -1,22 +1,22 @@
 package org.jbei.ice.lib.access;
 
 import org.jbei.ice.lib.account.AccountType;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.IDataModel;
-import org.jbei.ice.lib.dao.IDataTransferModel;
-import org.jbei.ice.lib.dao.IRepository;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.DataModel;
+import org.jbei.ice.storage.IDataTransferModel;
+import org.jbei.ice.storage.IRepository;
+import org.jbei.ice.storage.model.Account;
 
 /**
  * Used in instances where access permissions are to be enforced.
- * <p/>
+ * <p>
  * Currently, the only rule is that a user must belong to the same
  * group as the owner of the object being accessed, in order to be able to
  * read it.
  *
  * @author Hector Plahar
  */
-public class Authorization<T extends IDataModel> {
+public class Authorization<T extends DataModel> {
 
     private final IRepository<T> repository;
 
@@ -57,6 +57,9 @@ public class Authorization<T extends IDataModel> {
     }
 
     public boolean isAdmin(String userId) {
+        if (userId == null || userId.trim().isEmpty())
+            return false;
+
         Account account = getAccount(userId);
         return account.getType() == AccountType.ADMIN;
     }

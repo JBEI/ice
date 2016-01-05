@@ -1,21 +1,30 @@
 package org.jbei.ice.lib.config;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.ConfigurationDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
-import org.jbei.ice.lib.models.Configuration;
 import org.jbei.ice.lib.net.RemoteAccessController;
 import org.jbei.ice.lib.net.WoRController;
+import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.ConfigurationDAO;
+import org.jbei.ice.storage.model.Configuration;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Hector Plahar
  */
 public class ConfigurationController {
+
+    public static final String UI_CONFIG_DIR = "asset";
 
     private final ConfigurationDAO dao;
 
@@ -83,7 +92,7 @@ public class ConfigurationController {
         return dao.update(configuration);
     }
 
-    public Setting updateSetting(String userId, Setting setting) {
+    public Setting updateSetting(String userId, Setting setting, String url) {
         AccountController accountController = new AccountController();
         if (!accountController.isAdministrator(userId))
             return null;
@@ -98,7 +107,7 @@ public class ConfigurationController {
         if (key == ConfigurationKey.JOIN_WEB_OF_REGISTRIES) {
             WoRController woRController = new WoRController();
             boolean enable = "yes".equalsIgnoreCase(setting.getValue()) || "true".equalsIgnoreCase(setting.getValue());
-            woRController.setEnable(enable);
+            woRController.setEnable(enable, url);
         }
 
         return configuration.toDataTransferObject();
@@ -116,5 +125,33 @@ public class ConfigurationController {
             Logger.info("Setting value for " + key.name() + " to " + key.getDefaultValue());
             setPropertyValue(key, key.getDefaultValue());
         }
+    }
+
+    public List<Setting> getSiteSettings() {
+        String dataDirectory = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        Path path = Paths.get(dataDirectory, UI_CONFIG_DIR);
+        ArrayList<Setting> settings = new ArrayList<>();
+        settings.add(new Setting("version", "4.6.0"));
+        Setting setting;
+
+        // todo: also check if all the required files are in there
+        if (Files.exists(path))
+            setting = new Setting("UI_ASSET", UI_CONFIG_DIR);
+        else
+            setting = new Setting("UI_ASSET", "");
+        settings.add(setting);
+        return settings;
+    }
+
+    public File getUIAsset(String assetName) {
+        if (StringUtils.isEmpty(assetName))
+            throw new IllegalArgumentException("Cannot retrieve asset with no name");
+        String dataDirectory = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        Path path = Paths.get(dataDirectory, UI_CONFIG_DIR, assetName);
+        if (Files.exists(path)) {
+            return path.toFile();
+        }
+
+        return null;
     }
 }

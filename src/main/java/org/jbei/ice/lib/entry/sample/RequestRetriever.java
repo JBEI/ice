@@ -2,18 +2,18 @@ package org.jbei.ice.lib.entry.sample;
 
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountType;
-import org.jbei.ice.lib.account.model.Account;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dao.DAOException;
-import org.jbei.ice.lib.dao.DAOFactory;
-import org.jbei.ice.lib.dao.hibernate.EntryDAO;
-import org.jbei.ice.lib.dao.hibernate.RequestDAO;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.sample.*;
-import org.jbei.ice.lib.entry.model.Entry;
-import org.jbei.ice.lib.entry.sample.model.Request;
 import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.storage.DAOException;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.hibernate.dao.RequestDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.Request;
 
 import java.util.ArrayList;
 import java.util.Date;

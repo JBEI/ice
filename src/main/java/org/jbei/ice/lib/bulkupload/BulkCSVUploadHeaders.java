@@ -66,7 +66,6 @@ public class BulkCSVUploadHeaders {
     public static void addStrainHeaders(List<EntryField> list) {
         list.add(EntryField.PARENTAL_STRAIN);
         list.add(EntryField.GENOTYPE_OR_PHENOTYPE);
-        list.add(EntryField.PLASMIDS);
         list.add(EntryField.SELECTION_MARKERS);
     }
 

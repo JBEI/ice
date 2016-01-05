@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.entry;
 
 import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.entry.model.*;
+import org.jbei.ice.storage.model.*;
 
 /**
  * Factory class for creating new entry object depending on type

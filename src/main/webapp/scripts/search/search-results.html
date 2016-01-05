@@ -28,7 +28,7 @@
     <div class="row" ng-if="isWebSearch()">
         <!--non-blast results remote search results-->
         <table cellspacing="0"
-               class="table table-responsive table-hover font-95em table-condensed table-striped table-border-bottom"
+               class="table table-hover font-95em table-condensed table-border-bottom"
                ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
@@ -85,8 +85,8 @@
             <tr data-ng-repeat="result in searchResults.results">
                 <td ng-init="val=result.score/result.maxScore*100">
                     <div style="width: 75px">
-                        <progressbar animate='false' value='val' type='{{getType(val)}}'
-                                     style="margin-bottom: 0"></progressbar>
+                        <uib-progressbar animate='false' value='val' type='{{getType(val)}}'
+                                         style="margin-bottom: 0"></uib-progressbar>
                     </div>
                 </td>
                 <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
@@ -95,7 +95,7 @@
                 <td><a ng-href="web/{{result.partner.id}}/entry/{{result.entryInfo.id}}"
                        class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result)"
-                       popover-template="searchResultPopupTemplate"
+                       uib-popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -126,7 +126,7 @@
 
         <!-- remote blast results -->
         <table cellspacing="0"
-               class="table table-bordered table-condensed table-border-bottom table-responsive table-hover font-95em"
+               class="table table-bordered table-condensed table-border-bottom table-hover font-95em"
                ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
@@ -181,7 +181,7 @@
                 <td><a ng-href="web/{{result.partner.id}}/entry/{{result.entryInfo.id}}"
                        class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="remoteTooltipDetails(result)"
-                       popover-template="searchResultPopupTemplate"
+                       uib-popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -215,7 +215,7 @@
     <div class="row" ng-if="!isWebSearch()">
         <!--local blast search results-->
         <table cellspacing="0"
-               class="table table-responsive table-hover table-condensed table-border-bottom table-striped font-95em"
+               class="table table-hover table-condensed table-border-bottom font-95em"
                ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
@@ -267,7 +267,7 @@
                 </td>
                 <td><a ng-click="goToEntryDetails(result.entryInfo, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                       popover-template="searchResultPopupTemplate"
+                       uib-popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -295,7 +295,7 @@
 
         <!--local non-blast search results-->
         <table cellspacing="0"
-               class="table table-responsive table-hover table-condensed table-striped font-95em table-border-bottom"
+               class="table table-hover table-condensed font-95em table-border-bottom"
                ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
@@ -361,8 +361,8 @@
                 </td>
                 <td ng-init="val=(result.score/result.maxScore)*100">
                     <div style="width: 75px">
-                        <progressbar animate='false' value='val' type='{{getType(val)}}'
-                                     style="margin-bottom: 0"></progressbar>
+                        <uib-progressbar animate='false' value='val' type='{{getType(val)}}'
+                                         style="margin-bottom: 0"></uib-progressbar>
                     </div>
                 </td>
                 <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
@@ -370,7 +370,7 @@
                 </td>
                 <td><a ng-click="goToEntryDetails(result.entryInfo, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(result.entryInfo)"
-                       popover-template="searchResultPopupTemplate"
+                       uib-popover-template="searchResultPopupTemplate"
                        popover-placement="right">{{result.entryInfo.partId}}</a>
                 </td>
                 <td>
@@ -406,18 +406,23 @@
         </table>
     </div>
 
-    <div class="row" data-ng-if='searchResults && searchResults.results.length > 0' style="margin-top: -15px">
-        <div class="col-md-5" style="padding-left: 0">
-            <pagination total-items="searchResults.resultCount" ng-change="searchResultPageChanged()"
+    <div class="row" data-ng-if="searchResults && searchResults.results.length > 0" style="margin-top: -15px">
+        <div class="col-md-6" style="padding-left: 0">
+            <uib-pagination total-items="searchResults.resultCount" ng-change="searchResultPageChanged()"
                         ng-model="params.currentPage" max-size="maxSize"
-                        class="pagination-sm" items-per-page="15" boundary-links="true">
-            </pagination>
+                        class="pagination-sm" items-per-page="params.limit" boundary-links="true">
+            </uib-pagination>
         </div>
-        <div class="col-md-7" style="margin: 22px 0;">
+        <div class="col-md-4" style="margin: 22px 0;">
             <strong class="small">
                 <i ng-show="loadingSearchResults" class="fa fa-spin fa-gear opacity_4"></i>
                 {{pageCounts(params.currentPage, searchResults.resultCount)}}
             </strong>
+        </div>
+        <div class="col-md-2" style="margin-top: 25px;">
+            <small class="text-muted pull-right">Show:
+                <select ng-change="hStepChanged()" ng-model="params.limit"
+                        ng-options="opt for opt in params.hstep"></select></small>
         </div>
     </div>
 </div>

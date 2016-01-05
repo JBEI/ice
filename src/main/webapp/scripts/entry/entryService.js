@@ -189,7 +189,7 @@ angular.module('ice.entry.service', [])
             },
             {label: "Creator", required: true, schema: 'creator', inputType: 'withEmail', bothRequired: true},
             {label: "Keywords", schema: 'keywords', inputType: 'medium'},
-            {label: "Links", schema: 'links', inputType: 'add'},
+            {label: "External URL", schema: 'links', inputType: 'add'},
             {label: "Summary", required: true, schema: 'shortDescription', inputType: 'long'},
             {label: "References", schema: 'references', inputType: 'long'},
             {label: "Intellectual Property", schema: 'intellectualProperty', inputType: 'long'}
@@ -275,13 +275,6 @@ angular.module('ice.entry.service', [])
                 inputType: 'autoCompleteAdd', autoCompleteField: 'SELECTION_MARKERS'
             },
             {label: "Genotype/Phenotype", schema: 'genotypePhenotype', inputType: 'long', subSchema: 'strainData'},
-            {
-                label: "Plasmids",
-                schema: 'plasmids',
-                inputType: 'autoComplete',
-                autoCompleteField: 'PLASMID_PART_NUMBER',
-                subSchema: 'strainData'
-            },
             {label: "Host", schema: 'host', inputType: 'short', subSchema: 'strainData'}
         ];
 

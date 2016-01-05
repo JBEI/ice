@@ -1,9 +1,9 @@
 package org.jbei.ice.lib.dto.group;
 
-import java.util.ArrayList;
-
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.dao.IDataTransferModel;
+import org.jbei.ice.storage.IDataTransferModel;
+
+import java.util.ArrayList;
 
 /**
  * DTO for groups

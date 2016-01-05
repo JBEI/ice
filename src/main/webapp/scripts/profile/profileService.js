@@ -1,4 +1,3 @@
 'use strict';
 
-angular.module('ice.profile.service', [])
-;
+angular.module('ice.profile.service', []);

@@ -1,6 +1,64 @@
 'use strict';
 
 angular.module('ice.profile.controller', [])
+    .controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
+        var message = Message($cookieStore.get('sessionId'));
+        var profileId = $stateParams.id;
+        $location.path("profile/" + profileId + "/messages", false);
+        message.query(function (result) {
+            $scope.messages = result;
+        });
+    })
+    .controller('ApiKeysController', function ($scope, $uibModal, Util) {
+        $scope.apiKeys = undefined;
+
+        // retrieve existing api keys for current user
+        $scope.retrieveProfileApiKeys = function () {
+            Util.get("rest/api-keys", function (result) {
+                $scope.apiKeys = result.data;
+            });
+        };
+
+        $scope.retrieveProfileApiKeys();
+
+        $scope.openApiKeyRequest = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/profile/modal/api-key-request.html',
+                controller: 'GenerateApiKeyController'
+            })
+        };
+
+        $scope.deleteAPIKey = function (key) {
+            Util.remove("rest/api-keys/" + key.id, key, function (result) {
+                var idx = $scope.apiKeys.indexOf(key);
+                if (idx >= 0)
+                    $scope.apiKeys.splice(idx, 1);
+            });
+        }
+    })
+    .controller('GenerateApiKeyController', function ($scope, $uibModalInstance, Util) {
+        $scope.apiKey = undefined;
+        $scope.clientIdValidationError = undefined;
+        $scope.errorCreatingKey = undefined;
+        $scope.client = {};
+
+        $scope.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.generateToken = function () {
+            console.log($scope.client);
+            if (!$scope.client.id) {
+                $scope.clientIdValidationError = true;
+                return;
+            }
+
+            var queryParams = {client_id: $scope.client.id};
+            Util.post("/rest/api-keys", null, function (result) {
+                $scope.apiKey = result;
+            }, queryParams);
+        }
+    })
     .controller('ProfileEntryController', function ($scope, $location, $cookieStore, $stateParams, User, Entry) {
         var user = User($cookieStore.get("sessionId"));
         var profileId = $stateParams.id;
@@ -27,7 +85,7 @@ angular.module('ice.profile.controller', [])
             });
         };
 
-        $scope.profileEntryPopupTemplate = "views/folder/template.html";
+        $scope.profileEntryPopupTemplate = "scripts/folder/template.html";
 
         $scope.tooltipDetails = function (entry) {
             $scope.currentTooltip = undefined;
@@ -52,7 +110,7 @@ angular.module('ice.profile.controller', [])
             });
         };
     })
-    .controller('ProfileController', function ($scope, $location, $cookieStore, $rootScope, $stateParams, User, Settings) {
+    .controller('ProfileController', function ($scope, $location, $cookieStore, $rootScope, $stateParams, User, Util) {
         $scope.showChangePassword = false;
         $scope.showEditProfile = false;
         $scope.showSendMessage = false;
@@ -60,7 +118,7 @@ angular.module('ice.profile.controller', [])
         $scope.passwordChangeAllowed = false;
 
         // get settings
-        Settings().getSetting({key: 'PASSWORD_CHANGE_ALLOWED'}, function (result) {
+        Util.get("rest/config/PASSWORD_CHANGE_ALLOWED", function (result) {
             $scope.passwordChangeAllowed = (result.value.toLowerCase() === 'yes');
         });
 
@@ -68,37 +126,8 @@ angular.module('ice.profile.controller', [])
             {display: "Principal Investigator", id: "PRINCIPAL_INVESTIGATOR", help: "Enter Email or Name"},
             {display: "Funding Source", id: "FUNDING_SOURCE"}
         ];
-        $scope.searchPreferenceDefaults = [
-            {display: "Alias", id: "alias"},
-            {display: "Backbone", id: "backbone"},
-            {display: "Keywords", id: "keywords"},
-            {display: "Name", id: "name"},
-            {display: "Part ID", id: "partId"},
-            {display: "Summary", id: "summary"}
-        ];
-
-        $scope.handleSliderChange = function (model) {
-            console.log("handleSliderChange", model);
-        };
-
-        $scope.translate = function (value) {
-            switch (value) {
-                case "1":
-                default:
-                    return "default";
-                case "2":
-                    return "low";
-                case "3":
-                    return "medium";
-                case "4":
-                    return "high";
-                case "5":
-                    return "very high";
-            }
-        };
 
         $scope.preferences = {};
-        $scope.searchPreferences = {};
 
         var user = User($cookieStore.get('sessionId'));
         var profileOption = $stateParams.option;
@@ -127,11 +156,17 @@ angular.module('ice.profile.controller', [])
             {
                 id: 'prefs',
                 url: 'scripts/profile/preferences.html',
-                display: 'Preferences',
+                display: 'Settings',
                 selected: false,
                 icon: 'fa-cog'
             },
-            {id: 'groups', url: 'scripts/profile/groups.html', display: 'Groups', selected: false, icon: 'fa-group'},
+            {
+                id: 'groups',
+                url: 'scripts/profile/groups.html',
+                display: 'Private Groups',
+                selected: false,
+                icon: 'fa-group'
+            },
             {
                 id: 'messages',
                 url: 'scripts/profile/messages.html',
@@ -152,6 +187,14 @@ angular.module('ice.profile.controller', [])
                 display: 'Entries',
                 selected: false,
                 icon: 'fa-th-list',
+                open: true
+            },
+            {
+                id: 'api-keys',
+                url: 'scripts/profile/api-keys.html',
+                display: 'API Keys',
+                selected: false,
+                icon: 'fa-key',
                 open: true
             }
         ];

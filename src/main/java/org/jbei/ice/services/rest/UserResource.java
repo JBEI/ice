@@ -4,8 +4,6 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.Accounts;
 import org.jbei.ice.lib.account.PreferencesController;
-import org.jbei.ice.lib.account.model.Account;
-import org.jbei.ice.lib.dao.DAOFactory;
 import org.jbei.ice.lib.dto.AccountResults;
 import org.jbei.ice.lib.dto.bulkupload.PreferenceInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -13,10 +11,12 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.user.UserPreferences;
-import org.jbei.ice.lib.entry.EntryController;
+import org.jbei.ice.lib.entry.OwnerEntries;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Account;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -41,12 +41,6 @@ public class UserResource extends RestResource {
     /**
      * Retrieves list of users that are available to user making request. Availability is defined by
      * being in the same group if the user does not have admin privileges.
-     *
-     * @param offset
-     * @param limit
-     * @param sort
-     * @param asc
-     * @return wrapper around list of users
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -82,8 +76,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param userId
      * @return account information for transfer
      */
     @GET
@@ -104,8 +96,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param userId
      * @return group listing for a user
      */
     @GET
@@ -118,8 +108,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param userId
-     * @param userGroup
      * @return created group
      */
     @PUT
@@ -131,12 +119,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param userId
-     * @param offset
-     * @param limit
-     * @param sort
-     * @param asc
      * @return collection for user's part entries
      */
     @GET
@@ -147,16 +129,14 @@ public class UserResource extends RestResource {
                                            @DefaultValue("0") @QueryParam("offset") final int offset,
                                            @DefaultValue("15") @QueryParam("limit") final int limit,
                                            @DefaultValue("created") @QueryParam("sort") final String sort,
-                                           @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+                                           @DefaultValue("false") @QueryParam("asc") final boolean asc,
+                                           @DefaultValue("") @QueryParam("filter") String filter) {
         final String userIdString = getUserId();
-        final EntryController entryController = new EntryController();
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
-
         final Account requestAccount = DAOFactory.getAccountDAO().get(userId);
-        final List<PartData> entries = entryController.retrieveOwnerEntries(userIdString,
-                requestAccount.getEmail(), field, asc, offset, limit);
-        final long count = entryController.getNumberOfOwnerEntries(userIdString,
-                requestAccount.getEmail());
+        OwnerEntries ownerEntries = new OwnerEntries(userIdString, requestAccount.getEmail());
+        final List<PartData> entries = ownerEntries.retrieveOwnerEntries(field, asc, offset, limit, filter);
+        final long count = ownerEntries.getNumberOfOwnerEntries();
         final FolderDetails details = new FolderDetails();
         details.getEntries().addAll(entries);
         details.setCount(count);
@@ -164,8 +144,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param userId
      * @return preferences for a user
      */
     @GET
@@ -179,9 +157,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param userId
-     * @param key
-     * @param value
      * @return updated preferences for a user
      */
     @POST
@@ -195,9 +170,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param info
-     * @param userId
-     * @param transfer
      * @return updated user information
      */
     @POST
@@ -223,7 +195,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param transfer
      * @return updated user information
      */
     @PUT
@@ -238,7 +209,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param accountTransfer
      * @return Response with created user information
      */
     @PUT
@@ -252,13 +222,6 @@ public class UserResource extends RestResource {
     }
 
     /**
-     * @param userId
-     * @param offset
-     * @param limit
-     * @param sort
-     * @param asc
-     * @param uid
-     * @param status
      * @return Response with user's samples
      */
     @GET
