@@ -127,7 +127,7 @@ angular.module('ice.upload.controller', [])
                 var uploadFile = function () {
                     var id = $scope.bulkUpload.id;
                     var file = files[0];
-                    var url = "rest/upload/" + id + "/";
+                    var url = "rest/uploads/" + id + "/";
                     var formDataType;
                     var actualEntryId;
 
@@ -240,7 +240,7 @@ angular.module('ice.upload.controller', [])
                         object.type = 'autocomplete';
                         object.strict = true;
                         object.source = function (query, process) {
-                            $http.get('rest/upload/partNumbers', {
+                            $http.get('rest/uploads/partNumbers', {
                                 headers: {'X-ICE-Authentication-SessionId': sid},
                                 params: {
                                     token: query,
@@ -1004,7 +1004,7 @@ angular.module('ice.upload.controller', [])
         };
 
         var uploader = $scope.importUploader = new FileUploader({
-            url: "rest/upload/file",
+            url: "rest/uploads/file",
             method: 'POST',
             headers: {"X-ICE-Authentication-SessionId": sid},
             formData: [
