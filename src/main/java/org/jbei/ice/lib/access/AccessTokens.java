@@ -3,6 +3,8 @@ package org.jbei.ice.lib.access;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Wrapper around mapping of a resource identifier to an access token generated for it
+ *
  * @author Hector Plahar
  */
 public class AccessTokens {

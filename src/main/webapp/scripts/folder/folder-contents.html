@@ -31,8 +31,8 @@
                                     {{folder.owner.lastName}}</a>
                                     <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
                                 </small>
-                                <small class="font-65em" ng-if="folder.created">
-                                    {{folder.created | date:'short'}}
+                                <small class="font-65em">
+                                    {{folder.creationTime | date:'short'}}
                                 </small>
                                 <small ng-if="folder.type==='SHARED'" style="color: #333">
                                     <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
