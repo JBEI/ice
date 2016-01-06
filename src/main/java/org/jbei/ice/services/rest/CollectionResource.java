@@ -89,6 +89,7 @@ public class CollectionResource extends RestResource {
         ColumnField sortField = ColumnField.valueOf(sort.toUpperCase());
 
         String userId = getUserId();
+        log(userId, "retrieving entries for collection " + type);
         CollectionEntries entries = new CollectionEntries(userId, type);
         return super.respond(entries.getEntries(sortField, asc, offset, limit, filter));
     }

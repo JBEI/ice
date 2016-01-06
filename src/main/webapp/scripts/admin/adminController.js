@@ -156,13 +156,12 @@ angular.module('ice.admin.controller', [])
         $scope.transferredEntries = undefined;
 
         var getTransferredEntries = function () {
-            Folders().folder(params, function (result) {
+            Util.get("rest/collections/TRANSFERRED/entries", function (result) {
                 $scope.transferredEntries = result;
                 $scope.selectedTransferredEntries = [];
-            }, function (error) {
-                console.error(error);
-            });
+            }, params);
         };
+
         getTransferredEntries();
 
         $scope.setPage = function (pageNo) {
@@ -171,14 +170,7 @@ angular.module('ice.admin.controller', [])
 
             $scope.loadingPage = true;
             params.offset = (pageNo - 1) * 15;
-            Folders().folder(params, function (result) {
-                $scope.transferredEntries = result;
-                $scope.loadingPage = false;
-            }, function (error) {
-                console.error(error);
-                $scope.transferredEntries = undefined;
-                $scope.loadingPage = false;
-            })
+            getTransferredEntries();
         };
 
         $scope.acceptEntries = function () {
