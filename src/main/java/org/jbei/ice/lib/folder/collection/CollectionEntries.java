@@ -128,8 +128,18 @@ public class CollectionEntries {
         return results;
     }
 
-    protected Results<PartData> getSharedEntries(ColumnField field, boolean asc, int offset, int limit,
-                                                 String filter) {
+    /**
+     * Retrieves entries shared with user.
+     *
+     * @param field  sort field
+     * @param asc    sort order ascending if true, descending if false
+     * @param offset paging parameter start
+     * @param limit  maximum number of entries to retrieve
+     * @param filter optional text to filter entries by
+     * @return wrapper around list of parts matching the parameters along with the maximum number of entries
+     * available
+     */
+    protected Results<PartData> getSharedEntries(ColumnField field, boolean asc, int offset, int limit, String filter) {
         SharedEntries sharedEntries = new SharedEntries(this.userId);
         List<PartData> entries = sharedEntries.getEntries(field, asc, offset, limit, filter);
         final long count = sharedEntries.getNumberofEntries(filter);
