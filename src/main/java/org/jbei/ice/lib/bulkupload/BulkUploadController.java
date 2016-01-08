@@ -16,7 +16,6 @@ import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
@@ -317,65 +316,6 @@ public class BulkUploadController {
         return creator.createOrUpdateEntry(userId, autoUpdate, addType);
     }
 
-    /**
-     * Submits a bulk import that has been saved. This action is restricted to the owner of the
-     * draft or to administrators.
-     *
-     * @param userId  Account identifier of user performing save
-     * @param draftId unique identifier for saved bulk import
-     * @return true, if draft was sa
-     */
-    public BulkUploadInfo submitBulkImportDraft(String userId, long draftId) throws PermissionException {
-        // retrieve draft
-        BulkUpload draft = dao.get(draftId);
-        if (draft == null)
-            return null;
-
-        // check permissions
-        authorization.expectWrite(userId, draft);
-        BulkUploadValidation validation = new BulkUploadValidation(draft);
-        if (!validation.isValid()) {
-            Logger.warn("Attempting to submit a bulk upload draft (" + draftId + ") which does not validate");
-            Logger.warn("Invalid Fields for (" + draftId + "): " + StringUtils.join(validation.getFailedFields().iterator(), ","));
-            return null;
-        }
-
-        draft.setStatus(BulkUploadStatus.PENDING_APPROVAL);
-        draft.setLastUpdateTime(new Date());
-        draft.setName(userId);
-
-        BulkUpload bulkUpload = dao.update(draft);
-        if (bulkUpload != null) {
-            // convert entries to pending
-            ArrayList<Long> list = dao.getEntryIds(bulkUpload);
-            for (Number l : list) {
-                Entry entry = entryDAO.get(l.longValue());
-                if (entry == null)
-                    continue;
-
-                entry.setVisibility(Visibility.PENDING.getValue());
-                entryDAO.update(entry);
-
-                // if linked entries
-                for (Entry linked : entry.getLinkedEntries()) {
-                    linked.setVisibility(Visibility.PENDING.getValue());
-                    entryDAO.update(linked);
-                }
-            }
-
-            String email = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
-            if (email != null && !email.isEmpty()) {
-                String subject = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME) + " Bulk Upload Notification";
-                String body = "A bulk upload has been submitted and is pending verification.\n\n";
-                body += "Please login to the registry at:\n\n";
-                body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
-                body += "\n\nand use the \"Pending Approval\" menu item to approve it\n\nThanks.";
-                Emailer.send(email, subject, body);
-            }
-            return bulkUpload.toDataTransferObject();
-        }
-        return null;
-    }
 
     public boolean revertSubmitted(Account account, long uploadId) {
         boolean isAdmin = accountController.isAdministrator(account.getEmail());
