@@ -14,7 +14,7 @@ ICE is open source and distributed under the Modified BSD license. You can try i
 
 ## Installation
 ### Production
-To install in a production environment, please consult our manual for detailed setup and configuration instructions.
+To install in a production environment, please [consult our manual](http://public-registry.jbei.org/manual/) for detailed setup and configuration instructions.
 
 ### Development
 To set up a development environment or local machine installation make sure you have the following dependencies installed
