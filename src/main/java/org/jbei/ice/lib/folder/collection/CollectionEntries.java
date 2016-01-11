@@ -71,16 +71,16 @@ public class CollectionEntries {
                 return this.getSharedEntries(field, asc, offset, limit, filter);
 
             case DELETED:
-                return this.getEntriesByVisibility(Visibility.DELETED, field, asc, offset, limit, filter);
+                return this.getEntriesByVisibility(Visibility.DELETED, field, asc, offset, limit, this.userId, filter);
 
             case DRAFTS:
-                return this.getEntriesByVisibility(Visibility.DRAFT, field, asc, offset, limit, filter);
+                return this.getEntriesByVisibility(Visibility.DRAFT, field, asc, offset, limit, this.userId, filter);
 
             case PENDING:
-                return this.getEntriesByVisibility(Visibility.PENDING, field, asc, offset, limit, filter);
+                return this.getEntriesByVisibility(Visibility.PENDING, field, asc, offset, limit, this.userId, filter);
 
             case TRANSFERRED:
-                return this.getEntriesByVisibility(Visibility.TRANSFERRED, field, asc, offset, limit, filter);
+                return this.getEntriesByVisibility(Visibility.TRANSFERRED, field, asc, offset, limit, null, filter);
         }
     }
 
@@ -128,8 +128,18 @@ public class CollectionEntries {
         return results;
     }
 
-    protected Results<PartData> getSharedEntries(ColumnField field, boolean asc, int offset, int limit,
-                                                 String filter) {
+    /**
+     * Retrieves entries shared with user.
+     *
+     * @param field  sort field
+     * @param asc    sort order ascending if true, descending if false
+     * @param offset paging parameter start
+     * @param limit  maximum number of entries to retrieve
+     * @param filter optional text to filter entries by
+     * @return wrapper around list of parts matching the parameters along with the maximum number of entries
+     * available
+     */
+    protected Results<PartData> getSharedEntries(ColumnField field, boolean asc, int offset, int limit, String filter) {
         SharedEntries sharedEntries = new SharedEntries(this.userId);
         List<PartData> entries = sharedEntries.getEntries(field, asc, offset, limit, filter);
         final long count = sharedEntries.getNumberofEntries(filter);
@@ -148,19 +158,20 @@ public class CollectionEntries {
      * @param asc        sort order
      * @param offset     paging start
      * @param limit      maximum number of entries to retrieve
+     * @param user       additional user filter
      * @param filter     optional text to filter entries by
      * @return wrapper around list of parts that conform to the parameters and the maximum number
      * of such entries that are available
      */
     protected Results<PartData> getEntriesByVisibility(Visibility visibility, ColumnField field, boolean asc,
-                                                       int offset, int limit, String filter) {
-        List<Entry> entries = entryDAO.getByVisibility(userId, visibility, field, asc, offset, limit, filter);
+                                                       int offset, int limit, String user, String filter) {
+        List<Entry> entries = entryDAO.getByVisibility(user, visibility, field, asc, offset, limit, filter);
         Results<PartData> results = new Results<>();
         for (Entry entry : entries) {
             PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
             results.getData().add(info);
         }
-        results.setResultCount(entryDAO.getByVisibilityCount(userId, visibility, filter));
+        results.setResultCount(entryDAO.getByVisibilityCount(user, visibility, filter));
         return results;
     }
 }

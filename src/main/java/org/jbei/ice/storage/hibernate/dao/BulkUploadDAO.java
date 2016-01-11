@@ -8,6 +8,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.bulkupload.BulkUploadStatus;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Account;
@@ -94,6 +95,35 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
         query.setMaxResults(limit);
         List l = query.list();
         return new ArrayList<>(l);
+    }
+
+    @SuppressWarnings("unchecked")
+    public int setEntryStatus(BulkUpload upload, Visibility status) {
+        // get all entries (and linked)
+        try {
+            Criteria criteria = currentSession().createCriteria(BulkUpload.class)
+                    .add(Restrictions.eq("id", upload.getId()))
+                    .createAlias("contents", "entry")
+                    .setProjection(Projections.property("entry.id"));
+
+            List<Long> entryIds = criteria.list();
+
+            Criteria c = currentSession().createCriteria(Entry.class)
+                    .add(Restrictions.in("id", entryIds))
+                    .createAlias("linkedEntries", "links")
+                    .setProjection(Projections.property("links.id"));
+            entryIds.addAll(c.list());
+
+            String hql = "update " + Entry.class.getName() + " set visibility=:v where id in :ids";
+            return currentSession().createQuery(hql)
+                    .setParameter("v", status.getValue())
+                    .setParameterList("ids", entryIds)
+                    .executeUpdate();
+
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
     }
 
     @Override

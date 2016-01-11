@@ -13,7 +13,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
 /**
- * Parent class for all rest resource objects
+ * Parent class for all rest resource objects.
+ * Handles session validation as well as return responses based on specific values
  *
  * @author Hector Plahar
  */
@@ -24,45 +25,6 @@ public class RestResource {
     protected final String API_KEY_TOKEN = "X-ICE-API-Token";        // token for validation
     protected final String API_KEY_USER = "X-ICE-API-Token-User";    // optional user
     protected final String API_KEY_CLIENT_ID = "X-ICE-API-Token-Client"; // client id
-
-    // do lookup by using existing configuration DATA_DIRECTORY to find key names => key data
-//    private static final KeyTable TABLE = new KeyTable() {
-//
-//        // keys stored in /var/lib/tomcat6/data/rest-auth by default
-//        private final File directory;
-//
-//        {
-//            // need to force-create a transaction to get the DATA_DIRECTORY config value
-//            HibernateUtil.beginTransaction();
-//            directory = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
-//                    "rest-auth").toFile();
-//            HibernateUtil.commitTransaction();
-//        }
-//
-//        @Override
-//        public Key getKey(final String keyId) {
-//            try {
-//                // find file named by keyId in the directory
-//                final File keyFile = new File(directory, keyId);
-//                // collect all lines in the file to a buffer
-//                final StringBuilder encoded = new StringBuilder();
-//                try (final FileReader reader = new FileReader(keyFile);
-//                     final BufferedReader buffered = new BufferedReader(reader);) {
-//                    String line;
-//                    while ((line = buffered.readLine()) != null) {
-//                        encoded.append(line);
-//                    }
-//                    // after reading all lines, decode value into a Key object
-//                    return HmacSignatureFactory.decodeKey(encoded.toString());
-//                }
-//            } catch (final Throwable t) {
-//                Logger.error("Failed to load rest-auth key " + keyId);
-//            }
-//            return null;
-//        }
-//    };
-
-//    private static final HmacAuthorizor AUTHORIZOR = new HmacAuthorizor(TABLE);
 
     @HeaderParam(value = WOR_PARTNER_TOKEN)
     private String worPartnerToken;
