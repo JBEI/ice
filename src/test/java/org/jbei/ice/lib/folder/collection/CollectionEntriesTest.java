@@ -28,7 +28,7 @@ public class CollectionEntriesTest {
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
+        HibernateUtil.rollbackTransaction();
     }
 
     @Test
@@ -61,16 +61,12 @@ public class CollectionEntriesTest {
         Assert.assertNotNull(account);
         long id = TestEntryCreator.createTestPart(account.getEmail());
         Entry entry = DAOFactory.getEntryDAO().get(id);
-        entry.setVisibility(Visibility.TRANSFERRED.getValue());
+        entry.setVisibility(Visibility.PENDING.getValue());
         DAOFactory.getEntryDAO().update(entry);
-
-        // create different account for retrieve
-        Account admin = AccountCreator.createTestAccount("CollectionEntriesTest.testGetEntriesByVisibility_retrieve", true);
-
-        CollectionEntries collectionEntries = new CollectionEntries(admin.getEmail(), CollectionType.TRANSFERRED);
+        CollectionEntries collectionEntries = new CollectionEntries(account.getEmail(), CollectionType.PENDING);
         Results<PartData> results = collectionEntries.getEntries(ColumnField.CREATED, true, 0, 13);
         Assert.assertNotNull(results);
-        Assert.assertTrue(results.getData().size() == 1);
-        Assert.assertTrue(results.getResultCount() == 1);
+        Assert.assertEquals(1, results.getData().size());
+        Assert.assertEquals(1, results.getResultCount());
     }
 }
