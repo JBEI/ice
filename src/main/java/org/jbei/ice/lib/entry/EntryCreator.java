@@ -207,9 +207,8 @@ public class EntryCreator {
         // create entry
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         entry.setName(entry.getName() + " (copy)");
-        String existingRecordId = entry.getRecordId();
         entry.setRecordId(Utils.generateUUID());
-        entry.setVersionId(existingRecordId);
+        entry.setVersionId(entry.getRecordId());
         entry = createEntry(account, entry, new ArrayList<>());
 
         // check sequence
