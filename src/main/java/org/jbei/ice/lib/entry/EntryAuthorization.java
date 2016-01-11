@@ -74,6 +74,20 @@ public class EntryAuthorization extends Authorization<Entry> {
         return canWrite(userId, entry);
     }
 
+    @Override
+    public boolean canWrite(String userId, Entry entry) {
+        if (super.canWrite(userId, entry))
+            return true;
+
+        Account account = getAccount(userId);
+
+        // check explicit write permission
+        if (permissionDAO.hasPermissionMulti(entry, null, account, null, false, true))
+            return true;
+
+        return false;
+    }
+
     public boolean canWriteThoroughCheck(String userId, Entry entry) {
         if (userId == null)
             return false;
