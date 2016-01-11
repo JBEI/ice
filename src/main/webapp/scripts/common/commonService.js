@@ -7,7 +7,7 @@ angular.module('ice.common.service', [])
                 var errorMsg;
                 var type;
 
-                console.error(response);
+                //console.error(response);
 
                 switch (response.status) {
                     case 401:
