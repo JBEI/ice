@@ -163,7 +163,8 @@ public class FolderResource extends RestResource {
             return controller.getPublicEntries(field, offset, limit, asc);
         }
 
-        final String userId = super.requireUserId();
+        // userId can be empty for public folders
+        final String userId = super.getUserId();
 
         try {
             final long id = Long.decode(folderId);
