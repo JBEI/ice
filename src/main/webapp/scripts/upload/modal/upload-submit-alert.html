@@ -4,9 +4,17 @@
 
 <div class="modal-body">
     <i style="font-size: 65px; float: left; padding-right:10px; color: #ff4500" class="fa fa-exclamation-triangle"></i>
-    <strong style="font-size: 24px">Error submitting upload</strong> <br>
+    <strong style="font-size: 24px">Problem submitting upload</strong> <br>
 
-    <div>{{requestError}}</div>
+    <div>{{requestError.userMessage}}</div>
+    <div ng-if="requestError.headers" style="margin-left: 77px">
+        <br>
+        The values for following fields were reported as invalid:
+        <ul>
+            <li ng-repeat="header in requestError.headers">{{header.entryField}}</li>
+        </ul>
+        Please fix the issues and try again!
+    </div>
 </div>
 
 <div class="modal-footer">

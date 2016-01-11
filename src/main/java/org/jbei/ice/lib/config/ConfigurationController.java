@@ -131,7 +131,7 @@ public class ConfigurationController {
         String dataDirectory = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
         Path path = Paths.get(dataDirectory, UI_CONFIG_DIR);
         ArrayList<Setting> settings = new ArrayList<>();
-        settings.add(new Setting("version", "4.6.0"));
+        settings.add(new Setting("version", "4.6.1"));
         Setting setting;
 
         // todo: also check if all the required files are in there

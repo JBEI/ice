@@ -5,10 +5,7 @@ import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.AuthorizationException;
-import org.jbei.ice.lib.bulkupload.BulkEntryCreator;
-import org.jbei.ice.lib.bulkupload.BulkUploadController;
-import org.jbei.ice.lib.bulkupload.BulkUploadInfo;
-import org.jbei.ice.lib.bulkupload.FileBulkUpload;
+import org.jbei.ice.lib.bulkupload.*;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
@@ -43,6 +40,7 @@ public class BulkUploadResource extends RestResource {
 
     /**
      * Retrieves specified bulk upload resource including
+     *
      * @param id
      * @param offset
      * @param limit
@@ -121,13 +119,6 @@ public class BulkUploadResource extends RestResource {
         return super.respond(success);
     }
 
-    /**
-     * @param uploadId
-     * @param fileInputStream
-     * @param entryId
-     * @param contentDispositionHeader
-     * @return Response with sequence information if upload is successful
-     */
     @POST
     @Path("/{id}/sequence")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -152,13 +143,6 @@ public class BulkUploadResource extends RestResource {
         }
     }
 
-    /**
-     * @param uploadId
-     * @param fileInputStream
-     * @param entryId
-     * @param contentDispositionHeader
-     * @return Response with information on attachment upload
-     */
     @POST
     @Path("/{id}/attachment")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -233,21 +217,23 @@ public class BulkUploadResource extends RestResource {
     }
 
     /**
-     * @param id
+     * Updates the status of the bulk upload
+     *
+     * @param id   unique identifier of bulk upload whose status is to be updated
      * @param info
-     * @return Response with updated bulk upload info
+     * @return
      */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/status")
-    public Response updateStatus(@PathParam("id") final long id, final BulkUploadInfo info) {
-        final String userId = getUserId();
-        Logger.info(userId + ": updating bulk upload status for " + info.getId() + " to " + info.getStatus());
-        final BulkUploadInfo resp = creator.updateStatus(userId, id, info.getStatus());
-        if (resp == null) {
-            return super.respond(Response.Status.BAD_REQUEST);
-        }
-        return super.respond(resp);
+    public Response updateStatus(@PathParam("id") final long id,
+                                 final BulkUploadInfo info) {
+        final String userId = requireUserId();
+        Logger.info(userId + ": updating bulk upload status for \"" + info.getId() + "\" to " + info.getStatus());
+        ProcessedBulkUpload resp = creator.updateStatus(userId, id, info.getStatus());
+        if (resp.isSuccess())
+            return super.respond(resp);
+        return super.respond(Response.Status.BAD_REQUEST, resp);
     }
 
     /**
@@ -306,9 +292,6 @@ public class BulkUploadResource extends RestResource {
     }
 
     /**
-     * @param fileInputStream
-     * @param type
-     * @param contentDispositionHeader
      * @return Response with the id of the imported bulk upload
      */
     @POST
@@ -320,20 +303,24 @@ public class BulkUploadResource extends RestResource {
                          @FormDataParam("file") final FormDataContentDisposition contentDispositionHeader) {
         try {
             final String userId = getUserId();
-            final String fileName = userId + "-" + contentDispositionHeader.getFileName();
+            final String fileName = userId + "-" + System.currentTimeMillis() + "-" +
+                    contentDispositionHeader.getFileName();
             final File file = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
                     "bulk-import", fileName).toFile();
             FileUtils.copyInputStreamToFile(fileInputStream, file);
 
             final EntryType addType = EntryType.valueOf(type.toUpperCase());
             final FileBulkUpload bulkUpload = new FileBulkUpload(userId, file.toPath(), addType);
-            // converted to string because there is no messagebodywriter for json for long
-            final String importId = Long.toString(bulkUpload.process());
-            return Response.status(Response.Status.OK).entity(importId).build();
+            ProcessedBulkUpload processedBulkUpload = bulkUpload.process();
+            if (processedBulkUpload.isSuccess())
+                return Response.status(Response.Status.OK).entity(processedBulkUpload).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(processedBulkUpload).build();
         } catch (IOException e) {
             Logger.error(e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage())
-                    .build();
+            ProcessedBulkUpload processedBulkUpload = new ProcessedBulkUpload();
+            processedBulkUpload.setUserMessage(e.getCause().getMessage());
+            processedBulkUpload.setSuccess(false);
+            return Response.status(Response.Status.BAD_REQUEST).entity(processedBulkUpload).build();
         }
     }
 

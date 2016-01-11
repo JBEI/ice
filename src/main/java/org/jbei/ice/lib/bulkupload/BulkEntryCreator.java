@@ -2,6 +2,7 @@ package org.jbei.ice.lib.bulkupload;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -16,6 +17,7 @@ import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.search.blast.BlastPlus;
+import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
@@ -201,7 +203,7 @@ public class BulkEntryCreator {
         return data;
     }
 
-    public BulkUploadInfo updateStatus(String userId, long id, BulkUploadStatus status) {
+    public ProcessedBulkUpload updateStatus(String userId, long id, BulkUploadStatus status) {
         if (status == null)
             return null;
 
@@ -211,11 +213,13 @@ public class BulkEntryCreator {
             return null;
 
         authorization.expectWrite(userId, upload);
+        ProcessedBulkUpload processedBulkUpload = new ProcessedBulkUpload();
+        processedBulkUpload.setUploadId(id);
 
         switch (status) {
             case PENDING_APPROVAL:
             default:
-                return controller.submitBulkImportDraft(userId, id);
+                return submitBulkImportDraft(userId, upload, processedBulkUpload);
 
             // rejected by admin
             case IN_PROGRESS:
@@ -232,20 +236,61 @@ public class BulkEntryCreator {
                 Date updateTime = new Date(System.currentTimeMillis());
                 upload.setLastUpdateTime(updateTime);
                 upload.setStatus(status);
-                return dao.update(upload).toDataTransferObject();
+                return processedBulkUpload;
 
             // approved by an administrator
             case APPROVED:
                 if (new BulkUploadController().approveBulkImport(userId, id))
-                    return upload.toDataTransferObject();
+                    return processedBulkUpload;
                 return null;
 
             case BULK_EDIT:
                 upload.getContents().clear();
                 dao.delete(upload);
-                return upload.toDataTransferObject();
+                return processedBulkUpload;
         }
     }
+
+    /**
+     * Submits a bulk import that has been saved. This action is restricted to the owner of the
+     * draft or to administrators.
+     */
+    protected ProcessedBulkUpload submitBulkImportDraft(String userId, BulkUpload draft,
+                                                        ProcessedBulkUpload processedBulkUpload) throws PermissionException {
+        // validate entries
+        BulkUploadValidation validation = new BulkUploadValidation(draft);
+        if (!validation.isValid()) {
+            processedBulkUpload.setSuccess(false);
+            for (EntryField entryField : validation.getFailedFields()) {
+                processedBulkUpload.getHeaders().add(new EntryHeaderValue(false, entryField));
+            }
+            processedBulkUpload.setUserMessage("Cannot submit your bulk upload due to a validation failure");
+            return processedBulkUpload;
+        }
+
+        draft.setStatus(BulkUploadStatus.PENDING_APPROVAL);
+        draft.setLastUpdateTime(new Date());
+        draft.setName(userId);
+
+        BulkUpload bulkUpload = dao.update(draft);
+        if (bulkUpload != null) {
+            // convert entries to pending
+            dao.setEntryStatus(bulkUpload, Visibility.PENDING);
+
+            String email = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
+            if (email != null && !email.isEmpty()) {
+                String subject = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME) + " Bulk Upload Notification";
+                String body = "A bulk upload has been submitted and is pending verification.\n\n";
+                body += "Please login to the registry at:\n\n";
+                body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
+                body += "\n\nand use the \"Pending Approval\" menu item to approve it\n\nThanks.";
+                Emailer.send(email, subject, body);
+            }
+            return processedBulkUpload;
+        }
+        return null;
+    }
+
 
     /**
      * Renames the bulk upload referenced by the id in the parameter
