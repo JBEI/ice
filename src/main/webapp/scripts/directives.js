@@ -24,13 +24,6 @@ iceDirectives.directive('focus', function ($timeout, $rootScope) {
     }
 });
 
-iceDirectives.directive("addSequence", function () {
-    return {
-        restrict: "AE",
-        templateUrl: "scripts/entry/sequence/add-sequence.html"
-    }
-});
-
 iceDirectives.directive("folderActions", function () {
     return {
         restrict: "AE",
