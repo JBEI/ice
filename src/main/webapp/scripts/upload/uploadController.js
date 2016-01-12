@@ -744,7 +744,7 @@ angular.module('ice.upload.controller', [])
 
                 Util.update("rest/uploads/" + $scope.bulkUpload.id + "/status", tmp, {},
                     function (result) {
-                        if (error.isSuccess) {
+                        if (result.success) {
                             $scope.submitting = false;
                             $location.path('/folders/personal');
                         }
