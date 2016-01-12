@@ -518,11 +518,13 @@ public class PartResource extends RestResource {
         final String userId = requireUserId();
         final EntryCreator creator = new EntryCreator();
         long id;
-        if (StringUtils.isEmpty(sourceId))
-            id = creator.createPart(userId, partData);
-        else
-            id = creator.copyPart(userId, sourceId);
-        log(userId, "created entry " + id);
+        if (StringUtils.isEmpty(sourceId)) {
+            log(userId, "created new " + partData.getType().getDisplay());
+            return creator.createPart(userId, partData);
+        }
+
+        id = creator.copyPart(userId, sourceId);
+        log(userId, "created copy of entry " + sourceId + " at " + id);
         partData.setId(id);
         return partData;
     }

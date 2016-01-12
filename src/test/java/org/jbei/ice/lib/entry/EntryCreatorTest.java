@@ -45,7 +45,7 @@ public class EntryCreatorTest {
 
         strain.setBioSafetyLevel(1);
 
-        long id = creator.createPart(userId, strain);
+        long id = creator.createPart(userId, strain).getId();
         Strain entry = (Strain) DAOFactory.getEntryDAO().get(id);
         Assert.assertNotNull(entry);
         Assert.assertEquals(entry.getOwnerEmail(), strain.getOwnerEmail());
@@ -62,7 +62,7 @@ public class EntryCreatorTest {
         seed.setBioSafetyLevel(2);
         seed.setArabidopsisSeedData(seedData);
 
-        long seedId = creator.createPart(userId, seed);
+        long seedId = creator.createPart(userId, seed).getId();
         ArabidopsisSeed entrySeed = (ArabidopsisSeed) DAOFactory.getEntryDAO().get(seedId);
         Assert.assertNotNull(entrySeed);
         Assert.assertEquals(seedData.getGeneration(), entrySeed.getGeneration());
