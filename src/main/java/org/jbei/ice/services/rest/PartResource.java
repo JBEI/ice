@@ -136,10 +136,8 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/experiments")
-    public Response getPartExperiments(
-            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-            @PathParam("id") final long partId) {
-        final String userId = getUserId(sessionId);
+    public Response getPartExperiments(@PathParam("id") final long partId) {
+        final String userId = requireUserId();
         final List<Study> studies = experiments.getPartStudies(userId, partId);
         if (studies == null) {
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
@@ -150,11 +148,9 @@ public class PartResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/experiments")
-    public Response createPartExperiment(
-            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-            @PathParam("id") final long partId,
-            final Study study) {
-        final String userId = getUserId(sessionId);
+    public Response createPartExperiment(@PathParam("id") final long partId,
+                                         final Study study) {
+        final String userId = requireUserId();
         final Study created = experiments.createOrUpdateStudy(userId, partId, study);
         return respond(Response.Status.OK, created);
     }
@@ -162,10 +158,9 @@ public class PartResource extends RestResource {
     @DELETE
     @Path("/{id}/experiments/{eid}")
     public Response deletePartExperiment(
-            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
             @PathParam("id") final long partId,
             @PathParam("eid") final long experimentId) {
-        String userId = getUserId(sessionId);
+        String userId = requireUserId();
         return super.respond(experiments.deleteStudy(userId, partId, experimentId));
     }
 
@@ -425,9 +420,8 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
     public ArrayList<PartSample> getSamples(@Context UriInfo info,
-                                            @PathParam("id") long partId,
-                                            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserId(userAgentHeader);
+                                            @PathParam("id") long partId) {
+        String userId = getUserId();
         return sampleService.retrieveEntrySamples(userId, partId);
     }
 
@@ -518,11 +512,13 @@ public class PartResource extends RestResource {
         final String userId = requireUserId();
         final EntryCreator creator = new EntryCreator();
         long id;
-        if (StringUtils.isEmpty(sourceId))
-            id = creator.createPart(userId, partData);
-        else
-            id = creator.copyPart(userId, sourceId);
-        log(userId, "created entry " + id);
+        if (StringUtils.isEmpty(sourceId)) {
+            log(userId, "created new " + partData.getType().getDisplay());
+            return creator.createPart(userId, partData);
+        }
+
+        id = creator.copyPart(userId, sourceId);
+        log(userId, "created copy of entry " + sourceId + " at " + id);
         partData.setId(id);
         return partData;
     }
@@ -593,9 +589,8 @@ public class PartResource extends RestResource {
     /**
      * Creates a new link between the referenced part id and the part in the parameter
      *
-     * @param partId    part to be linked
-     * @param partData  should essentially just contain the part Id or details for a new entry that should be created
-     * @param sessionId unique session identifier for user performing action
+     * @param partId   part to be linked
+     * @param partData should essentially just contain the part Id or details for a new entry that should be created
      */
     @POST
     @Path("/{id}/links")
@@ -603,9 +598,8 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response createLink(@PathParam("id") long partId,
                                @QueryParam("linkType") @DefaultValue("CHILD") LinkType type,
-                               @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
                                PartData partData) {
-        String userId = getUserId(sessionId);
+        String userId = getUserId();
         log(userId, "adding entry link " + partData.getId() + " to " + partId);
         EntryLinks entryLinks = new EntryLinks(userId, partId);
         return super.respond(entryLinks.addLink(partData, type));

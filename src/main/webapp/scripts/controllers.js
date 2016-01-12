@@ -231,7 +231,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     }
 });
 
-iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $uibModalInstance, Util) {
+iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $uibModalInstance, Util, FolderSelection, $stateParams, Selection) {
     $scope.closeModal = function () {
         $uibModalInstance.close();
     };
@@ -240,6 +240,37 @@ iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $u
         Util.get("rest/web", function (result) {
             $scope.registryPartners = result;
         });
+    };
+
+    // create entry selection object that provides context for user selection
+    var getEntrySelection = function () {
+        var folderSelected = FolderSelection.getSelectedFolder();
+
+        if (!folderSelected)
+            folderSelected = $stateParams.collection;
+        else
+            folderSelected = folderSelected.id;
+
+        var selectionType;
+        if (!isNaN(folderSelected))
+            selectionType = 'FOLDER';
+        else
+            selectionType = 'COLLECTION';
+
+        var entrySelection = {
+            all: Selection.getSelection().type == 'ALL',
+            folderId: folderSelected,
+            selectionType: selectionType,
+            entryType: Selection.getSelection().type,
+            entries: [],
+            destination: angular.copy($scope.selectedFolders)
+        };
+
+        var selectedEntriesObjectArray = Selection.getSelectedEntries();
+        for (var i = 0; i < selectedEntriesObjectArray.length; i += 1) {
+            entrySelection.entries.push(selectedEntriesObjectArray[i].id);
+        }
+        return entrySelection;
     };
 
     $scope.transferEntriesToRegistry = function () {
