@@ -182,16 +182,24 @@ public class BulkEntryCreator {
         if (linkedEntry == null && !StringUtils.isEmpty(linkedPartData.getPartId())) {
             // try partId
             linkedEntry = entryDAO.getByPartNumber(linkedPartData.getPartId());
+            linkedPartData.setId(linkedEntry.getId());
         }
 
-        if (linkedEntry == null && (linkedEntry = InfoToModelFactory.infoToEntry(linkedPartData)) != null) {
-            linkedEntry.setVisibility(Visibility.DRAFT.getValue());
-            Account account = accountController.getByEmail(userId);
-            linkedEntry.setOwner(account.getFullName());
-            linkedEntry.setOwnerEmail(account.getEmail());
-            linkedEntry = entryDAO.create(linkedEntry);
-            entry.getLinkedEntries().add(linkedEntry);
-            entryDAO.update(linkedEntry);
+        if (linkedEntry == null) {
+            linkedEntry = InfoToModelFactory.infoToEntry(linkedPartData);
+            if (linkedEntry != null) {
+                linkedEntry.setVisibility(Visibility.DRAFT.getValue());
+                Account account = accountController.getByEmail(userId);
+                linkedEntry.setOwner(account.getFullName());
+                linkedEntry.setOwnerEmail(account.getEmail());
+                linkedEntry = entryDAO.create(linkedEntry);
+                entry.getLinkedEntries().add(linkedEntry);
+                entryDAO.update(linkedEntry);
+            }
+        } else {
+            // linking to existing
+            EntryLinks entryLinks = new EntryLinks(userId, entry.getId());
+            entryLinks.addLink(linkedPartData, LinkType.CHILD);
         }
 
         // recursively update
