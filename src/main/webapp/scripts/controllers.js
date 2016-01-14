@@ -279,6 +279,7 @@ iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $u
             if (partner.selected) {
                 Util.post('rest/web/' + partner.id + '/transfer', entrySelection, function (result) {
                     Selection.reset();
+                    $scope.closeModal();
                 });
             }
         });
