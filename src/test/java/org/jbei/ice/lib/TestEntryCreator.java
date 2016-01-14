@@ -51,6 +51,6 @@ public class TestEntryCreator {
         data.setShortDescription("summary for test");
         data.setName("pTest " + userId);
         data.setBioSafetyLevel(1);
-        return new EntryCreator().createPart(userId, data);
+        return new EntryCreator().createPart(userId, data).getId();
     }
 }
