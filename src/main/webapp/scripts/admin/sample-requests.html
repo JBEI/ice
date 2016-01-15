@@ -1,5 +1,9 @@
 <div ng-controller="AdminSampleRequestController">
     <div class="pad_top">
+        <button type="button" ng-click="searchSampleLocations()" class="ice-button">
+            <i style="font-size: 14px" class="blue fa fa-search"></i> Search Sample Locations
+        </button>
+
         <span class="uib-dropdown">
             <!--todo filter and update the results based on selection-->
             Show <select ng-model="params.status" ng-change="requestSamples()"
