@@ -1,0 +1,37 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="closeModal()">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-search"></i> &nbsp;Search Sample Location
+    </span>
+</div>
+
+<div class="modal-body">
+    <form class="form-inline">
+        <div class="form-group">
+            <label for="tubeNumber">Enter tube location</label>
+            <input type="text" class="input_box" ng-model="sample.location" id="tubeNumber">
+        </div>
+        <button type="submit" ng-click="searchSampleLocation()" class="btn btn-default btn-sm">Search</button>
+
+        <br>
+
+        <div class="pad_top text-muted" ng-if="sample.searching">
+            <img src="img/loader-mini.gif"> Searching ...
+        </div>
+
+        <div class="pad_top" ng-if="sample.partId">
+            <a ng-href="entry/{{sample.partId}}" target="_blank">Found entry <i class="fa fa-external-link"></i> </a>
+        </div>
+
+        <br><br>
+
+        <div class="alert alert-warning pad_top" style="width: 435px; padding: 8px" ng-if="sample.notFound">
+            <i style="font-size: 15px" class="fa fa-exclamation-triangle"></i>
+            <span class="font-90em">No entry found for that sample location</span>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-sm btn-primary" ng-click="closeModal()">Close</button>
+</div>

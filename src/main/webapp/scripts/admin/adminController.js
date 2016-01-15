@@ -229,7 +229,8 @@ angular.module('ice.admin.controller', [])
             return pageNum + " - " + $filter('number')(pageCount) + " of " + $filter('number')(resultCount);
         };
     })
-    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, Samples) {
+    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, Samples,
+                                                          $uibModal) {
         $rootScope.error = undefined;
 
         $scope.selectOptions = ['ALL', 'PENDING', 'FULFILLED', 'REJECTED'];
@@ -296,6 +297,43 @@ angular.module('ice.admin.controller', [])
             $scope.params.sort = field;
             $scope.requestSamples();
         };
+
+        $scope.searchSampleLocations = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/admin/modal/sample-location-search.html',
+                controller: "AdminSampleLocationSearch",
+                backdrop: "static"
+            });
+        }
+    })
+    .controller('AdminSampleLocationSearch', function ($scope, $uibModalInstance, Util) {
+        $scope.closeModal = function () {
+            $uibModalInstance.close();
+        };
+
+        $scope.sample = {};
+
+        $scope.searchSampleLocation = function () {
+            $scope.sample.searching = true;
+            $scope.sample.notFound = false;
+            $scope.sample.partId = undefined;
+
+            Util.list("rest/samples/" + $scope.sample.location, function (result) {
+                $scope.sample.searching = false;
+
+                if (result && result.length) {
+                    $scope.sample.partId = result[0].partId;
+                    //Util.get("rest/parts/" + $scope.sample.partId, function (entry) {
+                    //    $scope.sample.entry = entry;
+                    //});entry
+                } else {
+                    $scope.sample.notFound = true;
+                }
+            }, {}, function (error) {
+                $scope.sample.searching = false;
+                $scope.sample.notFound = true;
+            })
+        }
     })
     .controller('AdminUserController', function ($rootScope, $scope, $stateParams, $cookieStore, User) {
         $scope.maxSize = 5;
