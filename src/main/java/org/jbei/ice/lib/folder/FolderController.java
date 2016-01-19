@@ -3,6 +3,7 @@ package org.jbei.ice.lib.folder;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -239,7 +240,12 @@ public class FolderController {
         if (folderDetails.getName() == null)
             return null;
         Folder folder = new Folder(folderDetails.getName());
-        folder.setOwnerEmail(userId);
+        AccountTransfer owner = folderDetails.getOwner();
+        if (owner != null && !StringUtils.isEmpty(owner.getEmail()) && accountController.isAdministrator(userId))
+            folder.setOwnerEmail(owner.getEmail());
+        else
+            folder.setOwnerEmail(userId);
+
         folder.setType(FolderType.PRIVATE);
         folder.setCreationTime(new Date());
         folder = dao.create(folder);

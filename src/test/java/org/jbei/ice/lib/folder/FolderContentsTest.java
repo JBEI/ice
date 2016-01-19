@@ -40,16 +40,22 @@ public class FolderContentsTest {
     @Test
     public void testAddEntrySelection() throws Exception {
         // create account
-        Account account = AccountCreator.createTestAccount("FolderContentsTest.testAddEntrySelection", false);
+        Account account = AccountCreator.createTestAccount("FolderContentsTest.testAddEntrySelection", true);
         String userId = account.getEmail();
+
+        Account user = AccountCreator.createTestAccount("FolderContentsTest.testAddEntrySelection2", false);
 
         // create folder
         FolderDetails folderDetails = new FolderDetails();
         folderDetails.setName("testAdd");
+        folderDetails.setOwner(user.toDataTransferObject());
 
         FolderController controller = new FolderController();
         folderDetails = controller.createPersonalFolder(userId, folderDetails);
         Assert.assertNotNull(folderDetails);
+
+        // check folder ownership
+        Assert.assertEquals(1, controller.getUserFolders(user.getEmail()).size());
 
         // entry selection context for adding to folder
         EntrySelection selection = new EntrySelection();
