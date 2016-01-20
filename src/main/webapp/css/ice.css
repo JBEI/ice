@@ -9,12 +9,10 @@ button::-moz-focus-inner {
 
 #container {
     min-height: 100%;
-    overflow: auto;
 }
 
 #body {
     padding-bottom: 60px; /*Height of the footer*/
-    overflow: auto;
 }
 
 html, body {
