@@ -29,11 +29,9 @@ public class EntryAuthorization extends Authorization<Entry> {
 
     public boolean canRead(String userId, Entry entry) {
         // super checks for owner or admin
-        if (new PermissionsController().isPubliclyVisible(entry))
-            return true;
-
-        if (userId == null)
-            return false;
+        if (userId == null) {
+            return new PermissionsController().isPubliclyVisible(entry);
+        }
 
         if (super.canRead(userId, entry) || super.canWrite(userId, entry))
             return true;
