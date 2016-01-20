@@ -73,8 +73,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
     public boolean hasPermissionMulti(Entry entry, Set<Folder> folders, Account account, Set<Group> groups,
                                       boolean canRead, boolean canWrite) {
         try {
-            Session session = currentSession();
-            Criteria criteria = session.createCriteria(Permission.class)
+            Criteria criteria = currentSession().createCriteria(Permission.class)
                     .add(Restrictions.eq("canWrite", canWrite))
                     .add(Restrictions.eq("canRead", canRead));
 
