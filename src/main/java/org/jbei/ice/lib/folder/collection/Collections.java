@@ -10,12 +10,9 @@ import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Account;
-import org.jbei.ice.storage.model.Group;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Represents the fixed collections supported in the eco-system
@@ -83,7 +80,6 @@ public class Collections {
     }
 
     protected long getNumberOfOwnerEntries(String ownerEmail) {
-        Set<Group> accountGroups = new HashSet<>(account.getGroups());
-        return DAOFactory.getEntryDAO().ownerEntryCount(account, ownerEmail, accountGroups);
+        return DAOFactory.getEntryDAO().ownerEntryCount(ownerEmail);
     }
 }

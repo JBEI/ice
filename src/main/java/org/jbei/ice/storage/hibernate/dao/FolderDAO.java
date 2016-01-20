@@ -192,7 +192,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
     public List<Folder> getFoldersByOwner(Account account) {
         try {
             Criteria criteria = currentSession().createCriteria(Folder.class)
-                    .add(Restrictions.eq("ownerEmail", account.getEmail()));
+                    .add(Restrictions.eq("ownerEmail", account.getEmail()).ignoreCase());
             criteria.addOrder(Order.desc("creationTime"));
             return criteria.list();
         } catch (HibernateException e) {
@@ -231,7 +231,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
                 .setProjection(Projections.property("folder.id"))
                 .list();
 
-        Disjunction disjunction = Restrictions.or(Restrictions.eq("ownerEmail", account.getEmail()));
+        Disjunction disjunction = Restrictions.or(Restrictions.eq("ownerEmail", account.getEmail()).ignoreCase());
         if (!resultList.isEmpty()) {
             disjunction.add(Restrictions.in("id", resultList));
         }
