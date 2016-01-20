@@ -7,7 +7,7 @@
 <div class="modal-body">
 
     <input type="text" class="input_box"
-           ng-model="addExistingPartNumber"
+           ng-model="addExistingPartNumber.partId"
            placeHolder="Enter part number to create link" style="width: 205px;"
            typeahead-loading="loadingAddExistingData"
            uib-typeahead="result for result in getEntriesByPartNumber($viewValue)"
