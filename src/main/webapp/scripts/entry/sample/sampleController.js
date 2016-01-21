@@ -154,7 +154,6 @@ angular.module('ice.entry.sample.controller', [])
                     type: 'TUBE'
                 }
             }
-            $scope.createNewSample();
         };
 
         $scope.createNewSample = function () {

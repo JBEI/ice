@@ -1,5 +1,9 @@
 <div ng-controller="AdminSampleRequestController">
     <div class="pad_top">
+        <button type="button" ng-click="searchSampleLocations()" class="ice-button">
+            <i style="font-size: 14px" class="blue fa fa-search"></i> Search Sample Locations
+        </button>
+
         <span class="uib-dropdown">
             <!--todo filter and update the results based on selection-->
             Show <select ng-model="params.status" ng-change="requestSamples()"
@@ -143,8 +147,7 @@
     <div ng-if='sampleRequests && sampleRequests.requests.length > 0'>
         <div class="col-md-6" style="padding-left: 0">
             <uib-pagination total-items="sampleRequests.count" ng-change="sampleRequestPageChanged()"
-                        ng-model="params.currentPage"
-                        max-size="maxSize"
+                            ng-model="params.currentPage" max-size="maxSize"
                             class="pagination-sm" items-per-page="15" boundary-links="true"></uib-pagination>
         </div>
         <div class="col-md-4" style="margin-top: 20px;"><strong class="small">

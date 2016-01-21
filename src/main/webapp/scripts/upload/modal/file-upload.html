@@ -19,11 +19,20 @@
         </span>
     </div>
 
-    <div ng-if="uploadError" class="alert alert-danger font-95em"><i class="fa fa-exclamation-triangle"></i>
-        {{uploadError}}
+    <div ng-if="uploadError" class="alert alert-danger">
+        <i style="font-size:45px; float:left; padding-right: 10px" class="fa fa-exclamation-triangle"></i>
+        <strong class="font-90em">{{uploadError.message}}</strong>
+        <br>
+        <span ng-if="!uploadError.headers.length" class="font-85em" style="margin-left: 25px">{{uploadError.userMessage}}</span>
+        <span ng-if="uploadError.headers.length" class="font-85em" style="margin-left: 25px">
+            The following fields are required and left blank or have invalid values:
+            <ul style="margin-left: 62px">
+                <li ng-repeat="header in uploadError.headers">{{header.entryField}}</li>
+            </ul>
+        </span>
     </div>
 
-    <input ng-if="!processing && !modalClose" type="file" nv-file-select uploader="importUploader" multiple
+    <input ng-if="!processing && !modalClose && !uploadError" type="file" nv-file-select="" uploader="importUploader"
            class="font-90em">
 
     <div style="height: 12px; width: 100%" ng-if="!processing && !modalClose">
@@ -37,7 +46,8 @@
 
 <div class="modal-footer">
     <button class="btn btn-default btn-sm" ng-click="cancel()">{{modalClose || 'Cancel'}}</button>
-    <button ng-if="!modalClose && !processing" type="button" ng-click="uploadFile()" class="btn btn-primary btn-sm"
-            ng-disabled="!importUploader.getNotUploadedItems().length">Upload File
+    <button ng-if="!uploadError && !modalClose && !processing" type="button" ng-click="importUploader.uploadAll()"
+            class="btn btn-primary btn-sm" ng-disabled="!importUploader.getNotUploadedItems().length">Upload File
     </button>
+    <button ng-if="uploadError" type="button" ng-click="retryUpload()" class="btn btn-primary btn-sm">Retry</button>
 </div>

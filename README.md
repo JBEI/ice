@@ -14,7 +14,7 @@ ICE is open source and distributed under the Modified BSD license. You can try i
 
 ## Installation
 ### Production
-To install in a production environment, please consult our manual for detailed setup and configuration instructions.
+To install in a production environment, please [consult our manual](http://public-registry.jbei.org/manual/) for detailed setup and configuration instructions.
 
 ### Development
 To set up a development environment or local machine installation make sure you have the following dependencies installed
@@ -45,7 +45,7 @@ Command line installation steps:
 * [ICE Google Group] (http://groups.google.com/group/gd-ice)
 * Build Status: 
 
-![Build Status](https://travis-ci.org/JBEI/ice.svg?branch=dev)
+[![Build Status](https://travis-ci.org/JBEI/ice.svg?branch=dev)](https://travis-ci.org/JBEI/ice)
 
 ## Related Projects
 [Vector Editor] (https://github.com/JBEI/vectoreditor) is used in ICE to display and edit sequences

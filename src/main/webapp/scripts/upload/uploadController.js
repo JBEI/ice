@@ -127,7 +127,7 @@ angular.module('ice.upload.controller', [])
                 var uploadFile = function () {
                     var id = $scope.bulkUpload.id;
                     var file = files[0];
-                    var url = "rest/upload/" + id + "/";
+                    var url = "rest/uploads/" + id + "/";
                     var formDataType;
                     var actualEntryId;
 
@@ -240,7 +240,7 @@ angular.module('ice.upload.controller', [])
                         object.type = 'autocomplete';
                         object.strict = true;
                         object.source = function (query, process) {
-                            $http.get('rest/upload/partNumbers', {
+                            $http.get('rest/uploads/partNumbers', {
                                 headers: {'X-ICE-Authentication-SessionId': sid},
                                 params: {
                                     token: query,
@@ -742,36 +742,33 @@ angular.module('ice.upload.controller', [])
                     tmp.status = 'PENDING_APPROVAL';
                 $scope.requestError = undefined;
 
-                Upload(sid).updateStatus({importId: $scope.bulkUpload.id}, tmp, function (result) {
-                    $scope.submitting = false;
-                    $location.path('/folders/personal');
-                }, function (error) {
-                    console.log(error, error.status === 400);
-
-                    $scope.submitting = false;
-                    if (error.status === 400) {
-                        $scope.requestError = "Error: validation failed";
-                    } else {
-                        $scope.requestError = "Unknown server error";
-                    }
-
-                    var resetModalInstance = $uibModal.open({
-                        templateUrl: 'scripts/upload/modal/upload-submit-alert.html',
-                        controller: function ($scope, msg, isError) {
-                            $scope.requestError = msg;
-                        },
-                        backdrop: 'static',
-                        resolve: {
-                            msg: function () {
-                                return $scope.requestError;
-                            },
-
-                            isError: function () {
-                                return true;
-                            }
+                Util.update("rest/uploads/" + $scope.bulkUpload.id + "/status", tmp, {},
+                    function (result) {
+                        if (result.success) {
+                            $scope.submitting = false;
+                            $location.path('/folders/personal');
                         }
+                    }, function (error) {
+                        $scope.requestError = error.data;
+                        $scope.submitting = false;
+
+                        var resetModalInstance = $uibModal.open({
+                            templateUrl: 'scripts/upload/modal/upload-submit-alert.html',
+                            controller: function ($scope, msg, isError) {
+                                $scope.requestError = msg;
+                            },
+                            backdrop: 'static',
+                            resolve: {
+                                msg: function () {
+                                    return $scope.requestError;
+                                },
+
+                                isError: function () {
+                                    return true;
+                                }
+                            }
+                        });
                     });
-                });
             };
 
             $scope.showBulkUploadRenameModal = function () {
@@ -1003,35 +1000,63 @@ angular.module('ice.upload.controller', [])
             });
         };
 
-        var uploader = $scope.importUploader = new FileUploader({
-            url: "rest/upload/file",
-            method: 'POST',
-            headers: {"X-ICE-Authentication-SessionId": sid},
-            formData: [
-                {type: addType}
-            ]
-        });
+        $scope.retryUpload = function () {
+            $scope.uploadError = undefined;
+            createUploader();
+        };
 
-        uploader.onSuccessItem = function (item, response, status, headers) {
-            console.log("success", response);
+        var createUploader = function () {
+            if ($scope.importUploader) {
+                $scope.importUploader.cancelAll();
+                $scope.importUploader.clearQueue();
+                $scope.importUploader.destroy();
+            }
+
+            $scope.importUploader = new FileUploader({
+                url: "rest/uploads/file",
+                method: 'POST',
+                removeAfterUpload: true,
+                headers: {"X-ICE-Authentication-SessionId": sid},
+                formData: [
+                    {type: addType}
+                ]
+            });
+        };
+
+        createUploader();
+
+        $scope.importUploader.onSuccessItem = function (item, response, status, headers) {
             $scope.modalClose = "Close";
             $scope.processing = false;
-//
-            if (!isNaN(response)) {
+            if (response.success && response.uploadInfo.id) {
                 $uibModalInstance.close();
-                $location.path("upload/" + response);
+                $location.path("upload/" + response.uploadInfo.id);
             } else {
-                $scope.uploadError = response;
+                $scope.uploadError = "Unknown server error";
             }
         };
 
-        uploader.onErrorItem = function (item, response, status, headers) {
+        $scope.importUploader.onErrorItem = function (item, response, status, headers) {
+            $scope.processing = false;
             $scope.uploadError = response;
+
+            if (status == 400) {
+                $scope.uploadError.message = "Validation error processing file \'" + item.file.name + "\'";
+            } else {
+                $scope.uploadError.message = "Unknown server error";
+            }
+        };
+
+        $scope.importUploader.onCompleteItem = function (item, response, status, headers) {
             $scope.processing = false;
         };
 
-        uploader.onCompleteItem = function (item, response, status, headers) {
-            $scope.processing = false;
+        $scope.importUploader.onProgressItem = function (event, item, progress) {
+            if (progress !== '100')
+                return;
+
+            $scope.processing = true;
+            item.remove();
         };
 
         $scope.ok = function () {
@@ -1040,18 +1065,6 @@ angular.module('ice.upload.controller', [])
 
         $scope.cancel = function () {
             $uibModalInstance.dismiss('cancel');
-        };
-
-        $scope.uploadFile = function () {
-            uploader.uploadAll();
-        };
-
-        uploader.onProgressItem = function (event, item, progress) {
-            if (progress !== '100')
-                return;
-
-            $scope.processing = true;
-            item.remove();
         };
 
         $scope.downloadCSVTemplate = function () {

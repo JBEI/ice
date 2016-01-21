@@ -147,7 +147,14 @@ public class EntryCreator {
         permissionDAO.create(permission);
     }
 
-    public long createPart(String userId, PartData part) {
+    /**
+     * Creates a new entry using the passed data
+     *
+     * @param userId unique identifier for user creating entry
+     * @param part   data used to create new part
+     * @return new part data id and record id information
+     */
+    public PartData createPart(String userId, PartData part) {
         Entry entry = InfoToModelFactory.infoToEntry(part);
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
@@ -184,7 +191,10 @@ public class EntryCreator {
         }
 
         entry = createEntry(account, entry, part.getAccessPermissions());
-        return entry.getId();
+        PartData partData = new PartData(part.getType());
+        partData.setId(entry.getId());
+        partData.setRecordId(entry.getRecordId());
+        return partData;
     }
 
     public long copyPart(String userId, String sourceRecordId) {
@@ -207,9 +217,8 @@ public class EntryCreator {
         // create entry
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         entry.setName(entry.getName() + " (copy)");
-        String existingRecordId = entry.getRecordId();
         entry.setRecordId(Utils.generateUUID());
-        entry.setVersionId(existingRecordId);
+        entry.setVersionId(entry.getRecordId());
         entry = createEntry(account, entry, new ArrayList<>());
 
         // check sequence

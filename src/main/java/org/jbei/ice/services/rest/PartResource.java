@@ -9,7 +9,6 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
-import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
@@ -71,10 +70,8 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public Response read(@Context final UriInfo info,
-                         @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-                         @PathParam("id") final String id) {
-        String userId = UserSessions.getUserIdBySession(sessionId);
+    public Response read(@PathParam("id") final String id) {
+        String userId = getUserId();
         try {
             log(userId, "retrieving details for " + id);
             final EntryType type = EntryType.nameToType(id);
@@ -97,7 +94,7 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/folders")
-    public Response read(@PathParam("id") String id) {
+    public Response getEntryFolders(@PathParam("id") String id) {
         // user id is allowed to be empty. The entry has to be public in that instance
         // and only public entries it is contained in is returned
         String userId = getUserId();
@@ -117,11 +114,6 @@ public class PartResource extends RestResource {
         return controller.retrieveEntryTipDetails(userId, id);
     }
 
-    /**
-     * @param info
-     * @param id
-     * @return permissions on the part
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
@@ -132,12 +124,6 @@ public class PartResource extends RestResource {
         return entries.getEntryPermissions(userId, id);
     }
 
-    /**
-     * @param info
-     * @param partId
-     * @param permissions
-     * @return part data with permission information
-     */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
@@ -147,17 +133,11 @@ public class PartResource extends RestResource {
         return permissionsController.setEntryPermissions(userId, partId, permissions);
     }
 
-    /**
-     * @param partId
-     * @return Response with studies on a part
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/experiments")
-    public Response getPartExperiments(
-            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-            @PathParam("id") final long partId) {
-        final String userId = getUserId(sessionId);
+    public Response getPartExperiments(@PathParam("id") final long partId) {
+        final String userId = requireUserId();
         final List<Study> studies = experiments.getPartStudies(userId, partId);
         if (studies == null) {
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
@@ -165,19 +145,12 @@ public class PartResource extends RestResource {
         return respond(Response.Status.OK, studies);
     }
 
-    /**
-     * @param partId
-     * @param study
-     * @return response with study information
-     */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/experiments")
-    public Response createPartExperiment(
-            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-            @PathParam("id") final long partId,
-            final Study study) {
-        final String userId = getUserId(sessionId);
+    public Response createPartExperiment(@PathParam("id") final long partId,
+                                         final Study study) {
+        final String userId = requireUserId();
         final Study created = experiments.createOrUpdateStudy(userId, partId, study);
         return respond(Response.Status.OK, created);
     }
@@ -185,18 +158,12 @@ public class PartResource extends RestResource {
     @DELETE
     @Path("/{id}/experiments/{eid}")
     public Response deletePartExperiment(
-            @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
             @PathParam("id") final long partId,
             @PathParam("eid") final long experimentId) {
-        String userId = getUserId(sessionId);
+        String userId = requireUserId();
         return super.respond(experiments.deleteStudy(userId, partId, experimentId));
     }
 
-    /**
-     * @param info
-     * @param partId
-     * @return Response for success or failure
-     */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions/public")
@@ -209,11 +176,6 @@ public class PartResource extends RestResource {
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
-    /**
-     * @param info
-     * @param partId
-     * @return Response for success or failure
-     */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions/public")
@@ -226,12 +188,6 @@ public class PartResource extends RestResource {
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
-    /**
-     * @param info
-     * @param partId
-     * @param permission
-     * @return the created permission
-     */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
@@ -242,12 +198,6 @@ public class PartResource extends RestResource {
         return permissionsController.createPermission(userId, partId, permission);
     }
 
-    /**
-     * @param info
-     * @param partId
-     * @param permissionId
-     * @return Response for success or failure
-     */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions/{permissionId}")
@@ -259,10 +209,6 @@ public class PartResource extends RestResource {
         return super.respond(true);
     }
 
-    /**
-     * @param partId
-     * @return statistics on part
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/statistics")
@@ -271,11 +217,6 @@ public class PartResource extends RestResource {
         return controller.retrieveEntryStatistics(userId, partId);
     }
 
-    /**
-     * @param info
-     * @param partId
-     * @return comments on part
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/comments")
@@ -285,29 +226,17 @@ public class PartResource extends RestResource {
         return controller.retrieveEntryComments(userId, partId);
     }
 
-    /**
-     * @param partId
-     * @param userComment
-     * @return the created comment
-     */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/comments")
     public Response createComment(@PathParam("id") final long partId,
                                   final UserComment userComment) {
-        // todo : check for null
         final String userId = getUserId();
         log(userId, "adding comment to entry " + partId);
         final UserComment comment = controller.createEntryComment(userId, partId, userComment);
         return respond(comment);
     }
 
-    /**
-     * @param partId
-     * @param commentId
-     * @param userComment
-     * @return the updated comment
-     */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/comments/{commentId}")
@@ -318,27 +247,17 @@ public class PartResource extends RestResource {
         return controller.updateEntryComment(userId, partId, commentId, userComment);
     }
 
-    /**
-     * @param partId
-     * @param attachment
-     * @return created attachment info
-     */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/{id}/attachments")
     public AttachmentInfo addAttachment(@PathParam("id") final long partId,
                                         final AttachmentInfo attachment) {
-        // todo : check for null
         final String userId = getUserId();
         final AttachmentController attachmentController = new AttachmentController();
         return attachmentController.addAttachmentToEntry(userId, partId, attachment);
     }
 
-    /**
-     * @param partId
-     * @return all attachments on a part
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/attachments")
@@ -347,22 +266,13 @@ public class PartResource extends RestResource {
         return attachmentController.getByEntry(userId, partId);
     }
 
-    /**
-     * @param info
-     * @param partId
-     * @param attachmentId
-     * @return A response for success or failure
-     */
     @DELETE
     @Path("/{id}/attachments/{attachmentId}")
     public Response deleteAttachment(@Context final UriInfo info,
                                      @PathParam("id") final long partId,
                                      @PathParam("attachmentId") final long attachmentId) {
         final String userId = getUserId();
-        if (!attachmentController.delete(userId, partId, attachmentId)) {
-            return Response.notModified().build();    // todo : use 404 ?
-        }
-        return Response.ok().build();
+        return super.respond(attachmentController.delete(userId, partId, attachmentId));
     }
 
     /**
@@ -380,11 +290,6 @@ public class PartResource extends RestResource {
         return controller.getHistory(userId, partId);
     }
 
-    /**
-     * @param partId
-     * @param historyId
-     * @return Response for success or failure
-     */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/history/{historyId}")
@@ -437,10 +342,7 @@ public class PartResource extends RestResource {
             return null;
         }
 
-        // No need to check authorization since only the sysadmins can upload shotgun sequences for now
-
-
-        ArrayList<ShotgunSequenceDTO> returns = new ArrayList<ShotgunSequenceDTO>();
+        ArrayList<ShotgunSequenceDTO> returns = new ArrayList<>();
         List<ShotgunSequence> results = dao.getByEntry(entry, userId);
 
         for (ShotgunSequence ret : results) {
@@ -518,9 +420,8 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
     public ArrayList<PartSample> getSamples(@Context UriInfo info,
-                                            @PathParam("id") long partId,
-                                            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader) {
-        String userId = getUserId(userAgentHeader);
+                                            @PathParam("id") long partId) {
+        String userId = getUserId();
         return sampleService.retrieveEntrySamples(userId, partId);
     }
 
@@ -611,19 +512,17 @@ public class PartResource extends RestResource {
         final String userId = requireUserId();
         final EntryCreator creator = new EntryCreator();
         long id;
-        if (StringUtils.isEmpty(sourceId))
-            id = creator.createPart(userId, partData);
-        else
-            id = creator.copyPart(userId, sourceId);
-        log(userId, "created entry " + id);
+        if (StringUtils.isEmpty(sourceId)) {
+            log(userId, "created new " + partData.getType().getDisplay());
+            return creator.createPart(userId, partData);
+        }
+
+        id = creator.copyPart(userId, sourceId);
+        log(userId, "created copy of entry " + sourceId + " at " + id);
         partData.setId(id);
         return partData;
     }
 
-    /**
-     * @param partData
-     * @return created part data
-     */
     @PUT
     @Path("/transfer")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -653,20 +552,12 @@ public class PartResource extends RestResource {
         return super.respond(partData);
     }
 
-    /**
-     * @param id
-     */
     @DELETE
     @Path("/{id}")
     public void delete(@PathParam("id") final long id) {
         Logger.info("Deleting part " + id);
-        // TODO this does nothing but log?
     }
 
-    /**
-     * @param list
-     * @return Response for success or failure
-     */
     @POST
     @Path("/trash")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -682,10 +573,6 @@ public class PartResource extends RestResource {
 
     /**
      * Removes the linkId from id
-     *
-     * @param partId     id of entry whose link we are removing
-     * @param linkedPart
-     * @return Response for success or failure
      */
     @DELETE
     @Path("/{id}/links/{linkedId}")
@@ -702,10 +589,8 @@ public class PartResource extends RestResource {
     /**
      * Creates a new link between the referenced part id and the part in the parameter
      *
-     * @param partId    part to be linked
-     * @param partData  should essentially just contain the part Id or details for a new entry that should be created
-     * @param sessionId unique session identifier for user performing action
-     * @return todo
+     * @param partId   part to be linked
+     * @param partData should essentially just contain the part Id or details for a new entry that should be created
      */
     @POST
     @Path("/{id}/links")
@@ -713,9 +598,8 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response createLink(@PathParam("id") long partId,
                                @QueryParam("linkType") @DefaultValue("CHILD") LinkType type,
-                               @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
                                PartData partData) {
-        String userId = getUserId(sessionId);
+        String userId = getUserId();
         log(userId, "adding entry link " + partData.getId() + " to " + partId);
         EntryLinks entryLinks = new EntryLinks(userId, partId);
         return super.respond(entryLinks.addLink(partData, type));

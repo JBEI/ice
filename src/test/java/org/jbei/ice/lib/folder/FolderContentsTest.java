@@ -5,6 +5,8 @@ import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
+import org.jbei.ice.lib.entry.EntrySelection;
+import org.jbei.ice.lib.entry.EntrySelectionType;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
@@ -37,7 +39,40 @@ public class FolderContentsTest {
 
     @Test
     public void testAddEntrySelection() throws Exception {
+        // create account
+        Account account = AccountCreator.createTestAccount("FolderContentsTest.testAddEntrySelection", true);
+        String userId = account.getEmail();
 
+        Account user = AccountCreator.createTestAccount("FolderContentsTest.testAddEntrySelection2", false);
+
+        // create folder
+        FolderDetails folderDetails = new FolderDetails();
+        folderDetails.setName("testAdd");
+        folderDetails.setOwner(user.toDataTransferObject());
+
+        FolderController controller = new FolderController();
+        folderDetails = controller.createPersonalFolder(userId, folderDetails);
+        Assert.assertNotNull(folderDetails);
+
+        // check folder ownership
+        Assert.assertEquals(1, controller.getUserFolders(user.getEmail()).size());
+
+        // entry selection context for adding to folder
+        EntrySelection selection = new EntrySelection();
+        selection.setSelectionType(EntrySelectionType.FOLDER);
+        selection.getDestination().add(folderDetails);
+
+        // create entries
+        long id = TestEntryCreator.createTestPart(userId);
+        selection.getEntries().add(id);
+
+        id = TestEntryCreator.createTestPart(userId);
+        selection.getEntries().add(id);
+
+        // add to folder
+        FolderContents folderContents = new FolderContents();
+        List<FolderDetails> folders = folderContents.addEntrySelection(userId, selection);
+        Assert.assertNotNull(folders);
     }
 
     @Test

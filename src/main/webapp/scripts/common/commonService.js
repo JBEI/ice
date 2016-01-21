@@ -7,7 +7,7 @@ angular.module('ice.common.service', [])
                 var errorMsg;
                 var type;
 
-                console.error(response);
+                //console.error(response);
 
                 switch (response.status) {
                     case 401:
@@ -82,7 +82,7 @@ angular.module('ice.common.service', [])
             },
 
             // difference between this and get is "isArray"
-            list: function (url, successHandler, queryParams) {
+            list: function (url, successHandler, queryParams, errorHandler) {
                 if (!queryParams)
                     queryParams = {};
 
@@ -91,6 +91,10 @@ angular.module('ice.common.service', [])
                     }
                 }
 
+                var errorCallback = this.handleError;
+                if (errorHandler)
+                    errorCallback = errorHandler;
+
                 queryParams.sid = $cookieStore.get('sessionId');
                 $resource(url, queryParams, {
                     'list': {
@@ -98,7 +102,7 @@ angular.module('ice.common.service', [])
                         isArray: true,
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
                     }
-                }).list(successHandler, this.handleError);
+                }).list(successHandler, errorCallback);
             },
 
             post: function (url, obj, successHandler, params, errHandler) {

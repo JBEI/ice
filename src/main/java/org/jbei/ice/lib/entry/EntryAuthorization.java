@@ -29,11 +29,9 @@ public class EntryAuthorization extends Authorization<Entry> {
 
     public boolean canRead(String userId, Entry entry) {
         // super checks for owner or admin
-        if (new PermissionsController().isPubliclyVisible(entry))
-            return true;
-
-        if (userId == null)
-            return false;
+        if (userId == null) {
+            return new PermissionsController().isPubliclyVisible(entry);
+        }
 
         if (super.canRead(userId, entry) || super.canWrite(userId, entry))
             return true;
@@ -72,6 +70,20 @@ public class EntryAuthorization extends Authorization<Entry> {
             return true;
 
         return canWrite(userId, entry);
+    }
+
+    @Override
+    public boolean canWrite(String userId, Entry entry) {
+        if (super.canWrite(userId, entry))
+            return true;
+
+        Account account = getAccount(userId);
+
+        // check explicit write permission
+        if (permissionDAO.hasPermissionMulti(entry, null, account, null, false, true))
+            return true;
+
+        return false;
     }
 
     public boolean canWriteThoroughCheck(String userId, Entry entry) {

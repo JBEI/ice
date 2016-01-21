@@ -380,10 +380,9 @@ a.cell_mouseover:hover {
 
 /* LOGIN */
 .login_input {
-    width: 250px;
+    width: 220px;
     border: 1px solid #ccc;
     padding: 8px;
-    margin-bottom: 10px;
     font-size: 0.9em;
 }
 
@@ -396,13 +395,16 @@ a.cell_mouseover:hover {
 }
 
 .login_input_error {
-    width: 250px;
+    width: 220px;
     padding: 8px;
-    margin-bottom: 10px;
     font-size: 0.9em;
     border: 1px solid #CC3333;
     background: #FCC;
     color: #f08080;
+}
+
+textarea:focus, input:focus {
+    outline: none;
 }
 
 .login_input_error::-webkit-input-placeholder {

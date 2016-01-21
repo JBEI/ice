@@ -167,7 +167,7 @@ public class WebResource extends RestResource {
     @Path("/partner")
     // admin function
     public Response addWebPartner(final RegistryPartner partner) {
-        final String userId = getUserId();
+        final String userId = requireUserId();
         final RemoteContact contactRemote = new RemoteContact();
         final RegistryPartner registryPartner = contactRemote.addWebPartner(userId, partner);
         return respond(Response.Status.OK, registryPartner);
