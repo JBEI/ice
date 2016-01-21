@@ -2,6 +2,7 @@ package org.jbei.ice.lib.entry;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.PreferencesController;
@@ -348,16 +349,11 @@ public class EntryController {
     }
 
     public PartData retrieveEntryDetails(String userId, String id) {
-        try {
-            Entry entry = getEntry(id);
-            if (entry == null)
-                return null;
-
-            return retrieveEntryDetails(userId, entry);
-        } catch (Exception e) {
-            Logger.error(e);
+        Entry entry = getEntry(id);
+        if (entry == null)
             return null;
-        }
+
+        return retrieveEntryDetails(userId, entry);
     }
 
     /**
@@ -404,7 +400,7 @@ public class EntryController {
         return EntryUtil.setPartDefaults(partData);
     }
 
-    protected PartData retrieveEntryDetails(String userId, Entry entry) {
+    protected PartData retrieveEntryDetails(String userId, Entry entry) throws PermissionException {
         // user must be able to read if not public entry
         if (!permissionsController.isPubliclyVisible(entry))
             authorization.expectRead(userId, entry);
