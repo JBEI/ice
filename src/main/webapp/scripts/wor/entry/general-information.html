@@ -79,54 +79,46 @@
         <div class="entry-details-subheader">
             <strong style="color: #233559;">SEQUENCE</strong>
 
-            <!-- menu if no sequence then [Create in VE | Upload File | Paste -->
-            <div class="pull-right"></div>
+            <div class="pull-right" ng-if="remoteEntry.hasSequence">
+                <!--<small class="opacity_hover" ng-click="open()"><i class="fa fa-external-link blue"></i>-->
+                <!--Open in VectorEditor-->
+                <!--</small>-->
 
-            <!--&lt;!&ndash;menu if entry sequence exists&ndash;&gt;-->
-            <!--<div class="pull-right" ng-if='remoteEntry.hasSequence'>-->
-            <!--<span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>-->
-            <!--<small class="opacity_hover" ng-click="open()"><i class="fa fa-external-link blue"></i>-->
-            <!--Open in VectorEditor-->
-            <!--</small>-->
-            <!--<span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>-->
-            <!--<small class="dropdown opacity_hover">-->
-            <!--<span class="dropdown-toggle">Download <span class="caret"></span></span>-->
-            <!--<ul class="dropdown-menu">-->
-            <!--<li class="cursor_pointer font-80em" ng-if="remoteEntry.hasOriginalSequence">-->
-            <!--<a ng-href="rest/file/{{remoteEntry.id}}/sequence/original?sid={{sessionId}}"-->
-            <!--target="_self">Original</a>-->
-            <!--</li>-->
-            <!--<li class="cursor_pointer font-80em">-->
-            <!--<a ng-href="rest/file/{{remoteEntry.id}}/sequence/genbank?sid={{sessionId}}"-->
-            <!--target="_self"><i>Genbank</i></a>-->
-            <!--</li>-->
-            <!--<li class="cursor_pointer font-80em">-->
-            <!--<a ng-href="rest/file/{{remoteEntry.id}}/sequence/fasta?sid={{sessionId}}"-->
-            <!--target="_self"><i>FASTA</i></a>-->
-            <!--</li>-->
-            <!--<li class="cursor_pointer font-80em">-->
-            <!--<a ng-href="rest/file/{{remoteEntry.id}}/sequence/sbol?sid={{sessionId}}"-->
-            <!--target="_self"><i>SBOL</i></a>-->
-            <!--</li>-->
-            <!--<li class="cursor_pointer font-80em">-->
-            <!--<a ng-href="rest/file/{{remoteEntry.id}}/sequence/pigeonI?sid={{sessionId}}"-->
-            <!--target="_self"><i>Pigeon-->
-            <!--Image</i></a>-->
-            <!--</li>-->
-            <!--<li class="cursor_pointer font-80em">-->
-            <!--<a ng-href="rest/file/{{remoteEntry.id}}/sequence/pigeonS?sid={{sessionId}}"-->
-            <!--target="_self"><i>Pigeon-->
-            <!--Script</i></a>-->
-            <!--</li>-->
-            <!--</ul>-->
-            <!--</small>-->
-            <!--<span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>-->
+                <!--<span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>-->
 
-            <!--<small class="opacity_hover" ng-click="sbolShowHide()">-->
-            <!--<span ng-show="showSBOL">Hide</span>-->
-            <!--<span ng-hide="showSBOL">Show</span> Pigeon Image-->
-            <!--</small>-->
-            <!--</div>-->
+                <small class="btn-group" uib-dropdown>
+
+                    <div uib-dropdown-toggle class="uib-dropdown-toggle opacity_hover">Download <span
+                            class="caret"></span>
+                    </div>
+                    <ul class="uib-dropdown-menu">
+                        <li class="cursor_pointer font-80em" ng-if="remoteEntry.hasOriginalSequence">
+                            <a ng-href="https://{{currentPartner.url}}/rest/file/{{remoteEntry.id}}/sequence/original"
+                               target="_self">Original</a>
+                        </li>
+                        <li class="cursor_pointer font-80em">
+                            <a ng-href="https://{{currentPartner.url}}/rest/file/{{remoteEntry.id}}/sequence/genbank"
+                               target="_self"><i>Genbank</i></a>
+                        </li>
+                        <li class="cursor_pointer font-80em">
+                            <a ng-href="https://{{currentPartner.url}}/rest/file/{{remoteEntry.id}}/sequence/fasta"
+                               target="_self"><i>FASTA</i></a>
+                        </li>
+                        <li class="cursor_pointer font-80em">
+                            <a ng-href="https://{{currentPartner.url}}/rest/file/{{remoteEntry.id}}/sequence/sbol"
+                               target="_self"><i>SBOL</i></a>
+                        </li>
+                    </ul>
+                </small>
+
+                <!--<span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>-->
+
+                <!--<small class="opacity_hover" ng-click="sbolShowHide()">-->
+                <!--<span ng-show="showSBOL">Hide</span>-->
+                <!--<span ng-hide="showSBOL">Show</span> Pigeon Image-->
+                <!--</small>-->
+            </div>
+
         </div>
 
         <div class="pad_top" ng-if='!remoteEntry.hasSequence' style="color: #999;">
