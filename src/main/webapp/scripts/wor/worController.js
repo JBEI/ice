@@ -302,8 +302,9 @@ angular.module('ice.wor.controller', [])
         // add remote partner to web of registries
         //
         $scope.addPartner = function () {
-            wor.addPartner({}, $scope.newPartner, function (result) {
+            Util.post("rest/web/partner", $scope.newPartner, function (result) {
                 if (!result) {
+                    Util.setFeedback('Error adding web partner', 'danger');
                     console.error("Error adding");
                     return;
                 }
@@ -311,9 +312,9 @@ angular.module('ice.wor.controller', [])
                 $scope.showAddRegistryForm = false;
                 $scope.newPartner = undefined;
 
-                wor.query({approved_only: false}, function (result) {
+                Util.get("rest/web", function (result) {
                     $scope.wor = result;
-                });
+                }, {approved_only: false});
             });
         };
 
