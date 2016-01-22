@@ -398,4 +398,52 @@ angular.module('ice.admin.controller', [])
 
         // init
         $scope.retrieveKeys();
+    })
+    .controller('AdminGroupsController', function ($scope, $uibModal, Util) {
+        $scope.groups = undefined;
+        $scope.adminGroupsPagingParams = {
+            offset: 0,
+            limit: 15,
+            available: 0,
+            currentPage: 1,
+            maxSize: 5,
+            type: 'PUBLIC'
+        };
+
+        $scope.groupListPageChanged = function () {
+            Util.get("rest/groups", function (result) {
+                $scope.groups = result.data;
+                $scope.adminGroupsPagingParams.available = result.resultCount;
+            }, $scope.adminGroupsPagingParams);
+        };
+
+        $scope.openCreatePublicGroupModal = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/admin/modal/create-public-group.html',
+                controller: 'AdminGroupsModalController',
+                backdrop: "static",
+                size: "lg"
+            });
+
+            modalInstance.result.then(function (result) {
+                if (!result)
+                    return;
+
+                Util.setFeedback("Public group successfully created", "success");
+                $scope.groupListPageChanged();
+            })
+        }
+    })
+    .controller('AdminGroupsModalController', function ($scope, $uibModalInstance, Util) {
+        $scope.newPublicGroup = {type: 'PUBLIC'};
+        $scope.closeCreatePublicGroupModal = function () {
+            $uibModalInstance.close();
+        };
+
+        $scope.createNewPublicGroup = function () {
+            console.log("create group ", $scope.newPublicGroup);
+            Util.post("rest/groups", $scope.newPublicGroup, function (result) {
+                $uibModalInstance.close(result);
+            });
+        }
     });
