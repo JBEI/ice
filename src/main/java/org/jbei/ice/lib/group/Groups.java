@@ -2,16 +2,19 @@ package org.jbei.ice.lib.group;
 
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.GroupDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Group;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,7 +38,10 @@ public class Groups {
         Results<UserGroup> results = new Results<>();
         results.setResultCount(dao.getGroupsByTypeCount(groupType));
         for (Group group : groupList) {
-            results.getData().add(group.toDataTransferObject());
+            UserGroup userGroup = group.toDataTransferObject();
+            long memberCount = dao.getMemberCount(group.getUuid());
+            userGroup.setMemberCount(memberCount);
+            results.getData().add(userGroup);
         }
         return results;
     }
@@ -60,25 +66,23 @@ public class Groups {
         group.setDescription(userGroup.getDescription() == null ? "" : userGroup.getDescription());
         group.setType(userGroup.getType());
         group.setOwner(account);
+        group.setAutoJoin(userGroup.isAutoJoin());
+        group.setCreationTime(new Date());
         group = dao.create(group);
+
+        if (userGroup.getMembers() != null) {
+            AccountDAO accountDAO = DAOFactory.getAccountDAO();
+
+            for (AccountTransfer accountTransfer : userGroup.getMembers()) {
+                Account memberAccount = accountDAO.getByEmail(accountTransfer.getEmail());
+                if (memberAccount == null)
+                    continue;
+
+                memberAccount.getGroups().add(group);
+                accountDAO.update(memberAccount);
+            }
+        }
+
         return group.toDataTransferObject();
-
-//        for (AccountTransfer accountTransfer : userGroup.getMembers()) {
-//            Account memberAccount = accountController.getByEmail(accountTransfer.getEmail());
-//            if (memberAccount == null)
-//                continue;
-//            memberAccount.getGroups().add(group);
-//            accountController.save(memberAccount);
-//        }
-
-//        group.getMembers().addAll(accounts);
-//        group = dao.update(group);
-
-//        userGroup = group.toDataTransferObject();
-//        for (Account addedAccount : group.getMembers()) {
-//            userGroup.getMembers().add(addedAccount.toDataTransferObject());
-//        }
-//        userGroup.setMemberCount(userGroup.getMembers().size());
-//        return userGroup;
     }
 }

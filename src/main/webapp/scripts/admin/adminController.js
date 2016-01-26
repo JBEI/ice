@@ -401,9 +401,10 @@ angular.module('ice.admin.controller', [])
     })
     .controller('AdminGroupsController', function ($scope, $uibModal, Util) {
         $scope.groups = undefined;
+
         $scope.adminGroupsPagingParams = {
             offset: 0,
-            limit: 15,
+            limit: 10,
             available: 0,
             currentPage: 1,
             maxSize: 5,
@@ -417,12 +418,17 @@ angular.module('ice.admin.controller', [])
             }, $scope.adminGroupsPagingParams);
         };
 
-        $scope.openCreatePublicGroupModal = function () {
+        $scope.openCreatePublicGroupModal = function (group) {
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/admin/modal/create-public-group.html',
                 controller: 'AdminGroupsModalController',
                 backdrop: "static",
-                size: "lg"
+                //size: "lg",
+                resolve: {
+                    currentGroup: function () {
+                        return group;
+                    }
+                }
             });
 
             modalInstance.result.then(function (result) {
@@ -434,16 +440,47 @@ angular.module('ice.admin.controller', [])
             })
         }
     })
-    .controller('AdminGroupsModalController', function ($scope, $uibModalInstance, Util) {
-        $scope.newPublicGroup = {type: 'PUBLIC'};
+    .controller('AdminGroupsModalController', function ($scope, $uibModalInstance, currentGroup, Util) {
+        $scope.selectedUsers = [];
+
+        if (currentGroup)
+            $scope.newPublicGroup = currentGroup;
+        else
+            $scope.newPublicGroup = {type: 'PUBLIC'};
+
         $scope.closeCreatePublicGroupModal = function () {
             $uibModalInstance.close();
         };
 
         $scope.createNewPublicGroup = function () {
-            console.log("create group ", $scope.newPublicGroup);
+            $scope.newPublicGroup.members = $scope.selectedUsers;
             Util.post("rest/groups", $scope.newPublicGroup, function (result) {
                 $uibModalInstance.close(result);
             });
-        }
+        };
+
+        $scope.filterUsers = function (val) {
+            if (!val) {
+                $scope.userMatches = undefined;
+                return;
+            }
+
+            $scope.filtering = true;
+
+            Util.list("rest/users/autocomplete", function (result) {
+                $scope.userMatches = result;
+                $scope.filtering = false;
+            }, {limit: 10, val: val}, function (error) {
+                $scope.filtering = false;
+                $scope.userMatches = undefined;
+            });
+        };
+
+        $scope.selectUser = function (user) {
+            var index = $scope.selectedUsers.indexOf(user);
+            if (index == -1)
+                $scope.selectedUsers.push(user);
+            else
+                $scope.selectedUsers.splice(index, 1);
+        };
     });

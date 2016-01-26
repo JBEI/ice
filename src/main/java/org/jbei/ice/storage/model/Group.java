@@ -150,6 +150,11 @@ public class Group implements DataModel {
         user.setId(getId());
         user.setLabel(getLabel());
         user.setDescription(getDescription());
+        if (autoJoin != null)
+            user.setAutoJoin(autoJoin);
+        if (creationTime != null)
+            user.setCreationTime(creationTime.getTime());
+
         Group parent = getParent();
         if (parent != null) {
             user.setParentId(parent.getId());

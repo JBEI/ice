@@ -23,6 +23,8 @@ public class UserGroup implements IDataTransferModel {
     private long memberCount;
     private GroupType type;
     private String ownerEmail;
+    private boolean autoJoin;
+    private long creationTime;
 
     public UserGroup() {
         children = new ArrayList<>();
@@ -107,5 +109,21 @@ public class UserGroup implements IDataTransferModel {
 
     public void setOwnerEmail(String ownerEmail) {
         this.ownerEmail = ownerEmail;
+    }
+
+    public boolean isAutoJoin() {
+        return autoJoin;
+    }
+
+    public void setAutoJoin(boolean autoJoin) {
+        this.autoJoin = autoJoin;
+    }
+
+    public long getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(long creationTime) {
+        this.creationTime = creationTime;
     }
 }
