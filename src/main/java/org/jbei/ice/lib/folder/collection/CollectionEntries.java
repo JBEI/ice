@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.folder.collection;
 
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
@@ -94,9 +95,12 @@ public class CollectionEntries {
      * @param filter optional text to filter entries by
      * @return wrapper around list of parts that conform to the parameters and the maximum number
      * of such entries that are available
+     * @throws PermissionException on null user id which is required for owner entries
      */
     protected Results<PartData> getPersonalEntries(ColumnField field, boolean asc, int offset, int limit,
                                                    String filter) {
+        if (userId == null || userId.isEmpty())
+            throw new PermissionException("User id is required to retrieve owner entries");
         OwnerEntries ownerEntries = new OwnerEntries(userId, userId);
         final List<PartData> entries = ownerEntries.retrieveOwnerEntries(field, asc, offset, limit, filter);
         final long count = ownerEntries.getNumberOfOwnerEntries();
