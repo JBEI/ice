@@ -22,10 +22,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     var entry = Entry(sid);
     $scope.selectedFolders = [];
 
-    $scope.closeFeedbackAlert = function () {
-        $rootScope.serverFeedback = undefined;
-    };
-
     // select a folder in the pull down
     $scope.selectFolderForMoveTo = function (folder, $event) {
         if ($event) {
@@ -563,6 +559,7 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
                     var loginDestination = $cookies.loginDestination || '/';
                     $cookies.loginDestination = null;
                     $location.path(loginDestination);
+                    Util.clearFeedback();
                 } else {
                     $cookieStore.remove('userId');
                     $cookieStore.remove('sessionId');

@@ -59,6 +59,10 @@ angular.module('ice.common.service', [])
                 $rootScope.serverFeedback = {type: type, message: message};
             },
 
+            clearFeedback: function () {
+                $rootScope.serverFeedback = undefined;
+            },
+
             get: function (url, successHandler, queryParams, errorHandler) {
                 var errorCallback = this.handleError;
                 if (errorHandler)
