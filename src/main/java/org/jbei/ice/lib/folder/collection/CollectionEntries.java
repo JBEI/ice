@@ -78,7 +78,7 @@ public class CollectionEntries {
                 return this.getEntriesByVisibility(Visibility.DRAFT, field, asc, offset, limit, this.userId, filter);
 
             case PENDING:
-                return this.getEntriesByVisibility(Visibility.PENDING, field, asc, offset, limit, this.userId, filter);
+                return this.getEntriesByVisibility(Visibility.PENDING, field, asc, offset, limit, null, filter);
 
             case TRANSFERRED:
                 return this.getEntriesByVisibility(Visibility.TRANSFERRED, field, asc, offset, limit, null, filter);
