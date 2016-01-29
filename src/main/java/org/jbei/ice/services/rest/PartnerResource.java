@@ -22,13 +22,11 @@ import javax.ws.rs.core.Response;
 public class PartnerResource extends RestResource {
 
     @GET
-    public Response getWebPartners(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-                                   @HeaderParam(WOR_PARTNER_TOKEN) String worToken,
-                                   @QueryParam("url") String url) {
+    public Response getWebPartners(@QueryParam("url") String url) {
+        String userId = getUserId();
         WoRController controller = new WoRController();
-        if (StringUtils.isEmpty(sessionId))
-            return super.respond(controller.getWebPartners(worToken, url));
-        final String userId = getUserId(sessionId);
+        if (StringUtils.isEmpty(userId))
+            return super.respond(controller.getWebPartners(worPartnerToken, url));
         return super.respond(controller.getWebPartners(userId));
     }
 

@@ -27,7 +27,7 @@ public class RestResource {
     protected final String API_KEY_CLIENT_ID = "X-ICE-API-Token-Client"; // client id
 
     @HeaderParam(value = WOR_PARTNER_TOKEN)
-    private String worPartnerToken;
+    protected String worPartnerToken;
 
     @HeaderParam(value = API_KEY_CLIENT_ID)
     private String apiClientId;
@@ -74,7 +74,8 @@ public class RestResource {
     protected String getThisServer(boolean includeContext) {
         String url = request.getServerName();
         int port = request.getServerPort();
-        if (port > 0) {
+        // exclude invalid and default http(s) ports
+        if (port > 0 && port != 443 && port != 80) {
             url += (":" + Integer.toString(port));
         }
 

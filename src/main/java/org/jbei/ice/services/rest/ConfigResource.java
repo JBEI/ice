@@ -98,8 +98,9 @@ public class ConfigResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     public Response update(final Setting setting) {
-        final String userId = getUserId();
-        final String url = request.getRemoteHost();
+        final String userId = requireUserId();
+        log(userId, "updating system setting " + setting.getKey() + " to \'" + setting.getValue() + "\'");
+        final String url = getThisServer(false);
         return super.respond(controller.updateSetting(userId, setting, url));
     }
 }

@@ -31,6 +31,7 @@ public class WebPartners {
     public WebPartners() {
         this.dao = DAOFactory.getRemotePartnerDAO();
         this.tokenHash = new TokenHash();
+        this.remoteContact = new RemoteContact();
     }
 
     public WebPartners(RemoteContact remoteContact) {

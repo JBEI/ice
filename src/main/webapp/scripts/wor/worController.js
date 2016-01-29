@@ -286,14 +286,13 @@ angular.module('ice.wor.controller', [])
         //
         $scope.enableDisableWor = function () {
             var value = $scope.isWorEnabled ? 'no' : 'yes';
-            setting.update({}, {key: 'JOIN_WEB_OF_REGISTRIES', value: value},
-                function (result) {
-                    var joined = result.value === 'yes';
-                    $scope.isWorEnabled = joined;
-                    if (!$rootScope.settings)
-                        $rootScope.settings = {};
-                    $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = joined;
-                });
+            Util.update("rest/config", {key: 'JOIN_WEB_OF_REGISTRIES', value: value}, {}, function (result) {
+                var joined = result.value === 'yes';
+                $scope.isWorEnabled = joined;
+                if (!$rootScope.settings)
+                    $rootScope.settings = {};
+                $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = joined;
+            });
         };
 
         //
