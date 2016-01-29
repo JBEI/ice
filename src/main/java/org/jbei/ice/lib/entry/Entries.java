@@ -5,6 +5,7 @@ import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
+import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.storage.DAOFactory;
@@ -146,6 +147,8 @@ public class Entries extends HasEntry {
 
         if (all)
             type = null;
-        return DAOFactory.getFolderDAO().getFolderContentIds(folderId, type);
+
+        boolean visibleOnly = folder.getType() != FolderType.TRANSFERRED;
+        return DAOFactory.getFolderDAO().getFolderContentIds(folderId, type, visibleOnly);
     }
 }

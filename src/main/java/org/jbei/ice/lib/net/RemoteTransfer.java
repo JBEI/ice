@@ -5,6 +5,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.entry.EntrySelection;
+import org.jbei.ice.lib.entry.EntrySelectionType;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
 import org.jbei.ice.storage.DAOFactory;
@@ -141,11 +142,16 @@ public class RemoteTransfer {
             return null;
         }
 
+        if (remoteIds == null || remoteIds.isEmpty()) {
+            Logger.info("Skipping transfer of entries. List is empty");
+            return details;
+        }
+
         // move entries to the transferred entries
         EntrySelection entrySelection = new EntrySelection();
         entrySelection.getEntries().addAll(remoteIds);
-        entrySelection.getDestination().clear();
         entrySelection.getDestination().add(details);
+        entrySelection.setSelectionType(EntrySelectionType.FOLDER);
 
         remoteContact.addTransferredEntriesToFolder(partner.getUrl(), entrySelection);
         return details;

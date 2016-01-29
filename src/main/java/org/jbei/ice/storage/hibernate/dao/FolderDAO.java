@@ -101,11 +101,12 @@ public class FolderDAO extends HibernateRepository<Folder> {
      * @return List of entry ids found in the folder with the filter applied if applicable and which have
      * a visibility of "OK"
      */
-    public List<Long> getFolderContentIds(long folderId, EntryType type) {
+    public List<Long> getFolderContentIds(long folderId, EntryType type, boolean visibleOnly) {
         Criteria criteria = currentSession().createCriteria(Folder.class)
                 .add(Restrictions.eq("id", folderId))
-                .createAlias("contents", "entry")
-                .add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()));
+                .createAlias("contents", "entry");
+        if (visibleOnly)
+            criteria.add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()));
 
         if (type != null) {
             criteria.add(Restrictions.eq("entry.recordType", type.getName()));
@@ -114,7 +115,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
     }
 
     public List<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit,
-                                              String filterText) {
+                                              String filterText, boolean visibleOnly) {
         try {
             String sortString;
             switch (sort) {
@@ -141,7 +142,8 @@ public class FolderDAO extends HibernateRepository<Folder> {
             }
 
             Criteria criteria = currentSession().createCriteria(Entry.class);
-            criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
+            if (visibleOnly)
+                criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
             criteria.createAlias("folders", "folder");
             criteria.add(Restrictions.eq("folder.id", folderId));
 

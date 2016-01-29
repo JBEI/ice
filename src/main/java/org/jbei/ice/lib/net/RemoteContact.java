@@ -103,6 +103,6 @@ public final class RemoteContact {
     }
 
     public void addTransferredEntriesToFolder(String url, EntrySelection entrySelection) {
-        restClient.post(url, "/rest/folders/entries", entrySelection, FolderDetails.class, null);
+        restClient.put(url, "/rest/folders/entries", entrySelection, FolderDetails.class);
     }
 }
