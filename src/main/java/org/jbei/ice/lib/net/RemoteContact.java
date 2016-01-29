@@ -24,7 +24,7 @@ import java.util.Map;
  *
  * @author Hector Plahar
  */
-public final class RemoteContact {
+public class RemoteContact {
 
     private final RemotePartnerDAO dao;
     private final TokenHash tokenHash;
