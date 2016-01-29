@@ -286,16 +286,13 @@ angular.module('ice.wor.controller', [])
         //
         $scope.enableDisableWor = function () {
             var value = $scope.isWorEnabled ? 'no' : 'yes';
-            setting.update({}, {key: 'JOIN_WEB_OF_REGISTRIES', value: value},
-                function (result) {
-                    var joined = result.value === 'yes';
-                    $scope.isWorEnabled = joined;
-                    if (!$rootScope.settings)
-                        $rootScope.settings = {};
-                    $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = joined;
-                }, function (error) {
-                    console.error(error);
-                });
+            Util.update("rest/config", {key: 'JOIN_WEB_OF_REGISTRIES', value: value}, {}, function (result) {
+                var joined = result.value === 'yes';
+                $scope.isWorEnabled = joined;
+                if (!$rootScope.settings)
+                    $rootScope.settings = {};
+                $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = joined;
+            });
         };
 
         //
@@ -305,7 +302,6 @@ angular.module('ice.wor.controller', [])
             Util.post("rest/partners", $scope.newPartner, function (result) {
                 if (!result) {
                     Util.setFeedback('Error adding web partner', 'danger');
-                    console.error("Error adding");
                     return;
                 }
 

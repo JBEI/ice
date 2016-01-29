@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.net;
 
+import org.jbei.ice.lib.access.TokenVerification;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -26,9 +26,11 @@ import java.util.List;
 public class WoRController {
 
     private final RemotePartnerDAO dao;
+    private final TokenVerification tokenVerification;
 
     public WoRController() {
         dao = DAOFactory.getRemotePartnerDAO();
+        this.tokenVerification = new TokenVerification();
     }
 
     /**
@@ -118,32 +120,20 @@ public class WoRController {
      * @param enable if true, enables WoR; disables it otherwise
      * @param url    the url for this ice instance
      */
-    public void setEnable(boolean enable, String url) {
+    public void setEnable(String userId, boolean enable, String url) {
         String thisUrl = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
         if (!thisUrl.equalsIgnoreCase(url)) {
+            Logger.info("Auto updating uri to " + url);
             ConfigurationController configurationController = new ConfigurationController();
             configurationController.setPropertyValue(ConfigurationKey.URI_PREFIX, url);
         }
 
-        WebOfRegistriesTask contactTask = new WebOfRegistriesTask(url, enable);
+        WebOfRegistriesTask contactTask = new WebOfRegistriesTask(userId, url, enable);
         IceExecutorService.getInstance().runTask(contactTask);
     }
 
     public RegistryPartner getWebPartner(String userId, long partnerId) {
         return dao.get(partnerId).toDataTransferObject();
-    }
-
-    public RegistryPartner getRegistryPartner(String token, String url) {
-        RemotePartner partner = dao.getByUrl(url);
-        if (partner == null)
-            return null;
-
-        String encryptedToken = partner.getAuthenticationToken();
-        TokenHash hash = new TokenHash();
-        if (encryptedToken.equalsIgnoreCase(hash.encryptPassword(token, partner.getSalt()))) {
-            return partner.toDataTransferObject();
-        }
-        return null;
     }
 
     /**
@@ -160,10 +150,8 @@ public class WoRController {
         RemotePartner partner = dao.getByUrl(url);
         if (partner == null)
             return null;
-        TokenHash hash = new TokenHash();
-        if (!partner.getAuthenticationToken().equals(hash.encryptPassword(apiKey, partner.getSalt())))
-            return null;
 
+        tokenVerification.verifyPartnerToken(url, apiKey);
         return getWebPartners();
     }
 

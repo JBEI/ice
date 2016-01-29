@@ -14,7 +14,9 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
 import org.jbei.ice.storage.model.RemotePartner;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,7 +26,7 @@ import java.util.Map;
  *
  * @author Hector Plahar
  */
-public final class RemoteContact {
+public class RemoteContact {
 
     private final RemotePartnerDAO dao;
     private final TokenHash tokenHash;
@@ -61,7 +63,7 @@ public final class RemoteContact {
 
         HashMap<String, Object> queryParams = new HashMap<>();
         queryParams.put("url", myURL);
-        RegistryPartner response = restClient.getWor(registryPartner.getUrl(), "/accesstokens/web",
+        RegistryPartner response = restClient.getWor(registryPartner.getUrl(), "/rest/accesstokens/web",
                 RegistryPartner.class, queryParams, registryPartner.getApiKey());
         if (response == null) { // todo : should retry up to a certain number of times
             Logger.error("Could not validate request");
@@ -83,7 +85,7 @@ public final class RemoteContact {
             return false;
         }
 
-        Logger.info("Deleting partner " + url + " at their request");
+        Logger.info("Deleting partner '" + url + "' at their request");
         dao.delete(partner); // todo : contact other instances (if this is a master node)
         return true;
     }
@@ -104,5 +106,10 @@ public final class RemoteContact {
 
     public void addTransferredEntriesToFolder(String url, EntrySelection entrySelection) {
         restClient.put(url, "/rest/folders/entries", entrySelection, FolderDetails.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<RegistryPartner> getPartners(String url, String token) {
+        return restClient.getWor(url, "/rest/partners", ArrayList.class, null, token);
     }
 }

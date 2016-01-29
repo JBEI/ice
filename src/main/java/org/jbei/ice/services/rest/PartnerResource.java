@@ -4,13 +4,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntrySelection;
+import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.WebPartners;
 import org.jbei.ice.lib.net.WoRController;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -23,13 +22,11 @@ import javax.ws.rs.core.Response;
 public class PartnerResource extends RestResource {
 
     @GET
-    public Response getWebPartners(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-                                   @HeaderParam(WOR_PARTNER_TOKEN) String worToken,
-                                   @QueryParam("url") String url) {
+    public Response getWebPartners(@QueryParam("url") String url) {
+        String userId = getUserId();
         WoRController controller = new WoRController();
-        if (StringUtils.isEmpty(sessionId))
-            return super.respond(controller.getWebPartners(worToken, url));
-        final String userId = getUserId(sessionId);
+        if (StringUtils.isEmpty(userId))
+            return super.respond(controller.getWebPartners(worPartnerToken, url));
         return super.respond(controller.getWebPartners(userId));
     }
 
@@ -42,30 +39,27 @@ public class PartnerResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response addNewPartner(@Context HttpServletRequest request,
-                                  RegistryPartner partner) {
-
-        WebPartners webPartners = new WebPartners();
+    public Response addNewPartner(RegistryPartner partner) {
+        WebPartners webPartners = new WebPartners(new RemoteContact());
         RegistryPartner result;
         String userId = getUserId();
 
         // where the request is coming from
-        // assumes that if no session information (or invalid user) then this is
+        // assumes that if no session information (or invalid user or request server is different from local? or contains token?) then this is
         // a request coming remotely
-        // todo : consider making /rest/partners/remote ... the
-        if (StringUtils.isEmpty(userId)) {
-            String url = request.getRemoteHost();
-            Logger.info("Received partner add request from " + url);
-            webPartners.processRemoteWebPartnerAdd(url, partner);
+        if (StringUtils.isEmpty(userId) && !StringUtils.isEmpty(partner.getApiKey())) {
+            Logger.info("Received remote partner add request from " + partner.getUrl());
+            result = webPartners.processRemoteWebPartnerAdd(partner);
+        } else {
+            // local request
+            result = webPartners.addNewPartner(userId, partner);
         }
 
-        // local request
-        result = webPartners.addNewPartner(userId, partner);
         return super.respond(result);
     }
 
     @POST
-    @Path("/{id}/transfer")
+    @Path("/{id}/entries")
     public Response transferEntries(@PathParam("id") final long remoteId,
                                     final EntrySelection entrySelection) {
         final String userId = super.getUserId();
