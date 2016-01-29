@@ -73,6 +73,7 @@ public class FolderContents {
 
     protected FolderDetails addEntriesToTransferredFolder(List<Long> entries, Folder folder) {
         List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);  // todo : performance
+        Logger.info("Adding " + entryModelList.size() + " transferred entries to folder " + folder.getId());
         folderDAO.addFolderContents(folder, entryModelList);
         return folder.toDataTransferObject();
     }
@@ -194,7 +195,8 @@ public class FolderContents {
             details.setOwner(owner.toDataTransferObject());
 
         // retrieve folder contents
-        List<Entry> results = folderDAO.retrieveFolderContents(folderId, sort, asc, start, limit, filter);
+        boolean visibleOnly = folder.getType() != FolderType.TRANSFERRED;
+        List<Entry> results = folderDAO.retrieveFolderContents(folderId, sort, asc, start, limit, filter, visibleOnly);
         for (Entry entry : results) {
             PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
             details.getEntries().add(info);
