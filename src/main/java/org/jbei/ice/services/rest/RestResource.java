@@ -70,6 +70,22 @@ public class RestResource {
         return userId;
     }
 
+    // returns the  name and port for this server
+    protected String getThisServer(boolean includeContext) {
+        String url = request.getServerName();
+        int port = request.getServerPort();
+        if (port > 0) {
+            url += (":" + Integer.toString(port));
+        }
+
+        if (includeContext) {
+            String context = request.getContextPath();
+            if (!StringUtils.isEmpty(context))
+                url += "/" + context;
+        }
+        return url;
+    }
+
     /**
      * Extract the User ID from a query parameter value or header values in the resource request.
      */

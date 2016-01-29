@@ -293,8 +293,6 @@ angular.module('ice.wor.controller', [])
                     if (!$rootScope.settings)
                         $rootScope.settings = {};
                     $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = joined;
-                }, function (error) {
-                    console.error(error);
                 });
         };
 
@@ -305,7 +303,6 @@ angular.module('ice.wor.controller', [])
             Util.post("rest/partners", $scope.newPartner, function (result) {
                 if (!result) {
                     Util.setFeedback('Error adding web partner', 'danger');
-                    console.error("Error adding");
                     return;
                 }
 
