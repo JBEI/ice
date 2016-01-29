@@ -2,6 +2,7 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.*;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -238,5 +239,19 @@ public class FolderDAO extends HibernateRepository<Folder> {
 
         Criteria criteria = currentSession().createCriteria(Folder.class).add(disjunction);
         return criteria.list();
+    }
+
+    public int setFolderEntryVisibility(long folderId, Visibility ok) {
+        Criteria criteria = currentSession().createCriteria(Folder.class)
+                .add(Restrictions.eq("id", folderId))
+                .createAlias("contents", "entry").setProjection(Projections.property("entry.id"));
+        List list = criteria.list();
+
+        // update entries where folder id in
+        Query query = currentSession().createQuery("update " + Entry.class.getName()
+                + " e set e.visibility=:v where e.id in :ids");
+        query.setParameter("v", ok.getValue());
+        query.setParameterList("ids", list);
+        return query.executeUpdate();
     }
 }

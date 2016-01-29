@@ -21,6 +21,7 @@ import java.util.List;
  * <li><code>Shared</code></li>
  * <li><code>Drafts</code></li>
  * <li><code>Deleted</code></li>
+ * <li><code>Transferred</code></li>
  * </ul>
  * <p>
  * These cannot be created or deleted by users

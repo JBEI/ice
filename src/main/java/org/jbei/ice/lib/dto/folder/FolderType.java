@@ -9,10 +9,11 @@ import org.jbei.ice.storage.IDataTransferModel;
  * @author Hector Plahar
  */
 public enum FolderType implements IDataTransferModel {
-    PUBLIC,     // featured folder
-    PRIVATE,    // same as no type; personal folder
-    SHARED,     // folder shared with other users or group
-    UPLOAD;     // bulk upload; implicit folder
+    PUBLIC,         // featured folder
+    PRIVATE,        // same as no type; personal folder
+    SHARED,         // folder shared with other users or group
+    TRANSFERRED,    // folder transferred from an external source
+    UPLOAD;         // bulk upload; implicit folder
 
     FolderType() {
     }

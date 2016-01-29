@@ -89,6 +89,12 @@ angular.module('ice.collection.controller', [])
             $location.path(type + "/" + folder.id);
         };
 
+        // todo :
+        $scope.acceptTransferredFolder = function (folder) {
+            console.log(folder);
+            // update folder status
+        };
+
         //
         // called when a collection is selected. Collections are pre-defined ['Featured', 'Deleted', etc]
         // and some allow folders and when that is selected then the selectCollectionFolder() is called
@@ -316,6 +322,8 @@ angular.module('ice.collection.controller', [])
         var folders = Folders();
         var entry = Entry(sessionId);
         var resource = "collections";
+
+        console.log($stateParams);
 
         $scope.folderPageChange = function () {
             $scope.loadingPage = true;
@@ -550,15 +558,12 @@ angular.module('ice.collection.controller', [])
 
         $scope.changeFolderType = function (newType) {
             var tmp = {id: $scope.folder.id, type: newType};
-            folders.update({id: tmp.id}, tmp, function (result) {
+            Util.update('rest/folders/' + $scope.folder.id, tmp, function (result) {
                 $scope.folder.type = result.type;
                 if (newType === 'PUBLIC')
                     $location.path('folders/available');
                 else
                     $location.path('folders/personal');
-                // todo : send message to be received by the collection menu
-            }, function (error) {
-                console.error(error);
             });
         };
 

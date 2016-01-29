@@ -3,9 +3,10 @@ package org.jbei.ice.lib.net;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.folder.FolderDetails;
+import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
-import org.jbei.ice.services.rest.IceRestClient;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
@@ -24,9 +25,11 @@ public class RemoteTransfer {
 
     private final RemotePartnerDAO remotePartnerDAO;
     private final EntryDAO entryDAO;
+    private final RemoteContact remoteContact;
 
     public RemoteTransfer() {
         this.remotePartnerDAO = DAOFactory.getRemotePartnerDAO();
+        this.remoteContact = new RemoteContact();
         this.entryDAO = DAOFactory.getEntryDAO();
     }
 
@@ -51,6 +54,10 @@ public class RemoteTransfer {
                 continue;
 
             PartData data = ModelToInfoFactory.getInfo(entry);
+            if (data == null) {
+                Logger.error("Could not convert entry " + entry.getId() + " to data model");
+                continue;
+            }
 
             // check if the linked entries (if any) is in the list of entries to be transferred
             if (data.getLinkedParts() != null && !data.getLinkedParts().isEmpty()) {
@@ -87,36 +94,61 @@ public class RemoteTransfer {
      * @param remoteId unique identifier for remote partner the parts are to be transferred to
      * @param entries  list of entries to be transferred. Note that the entries contain the linked
      *                 entries as well and these may or may not already exist on the recipient
+     * @return list of ids of the transferred entries. These are the ids on the remote recipient and this ice instance
      */
-    public void transferEntries(long remoteId, List<PartData> entries) {
+    public List<Long> transferEntries(long remoteId, List<PartData> entries) {
         RemotePartner partner = this.remotePartnerDAO.get(remoteId);
         if (partner == null)
-            return;
+            throw new IllegalArgumentException("Invalid remote host id: " + remoteId);
 
-        IceRestClient client = IceRestClient.getInstance();
         int exceptionCount = 0;
         String url = partner.getUrl();
+        List<Long> remoteIds = new LinkedList<>();
 
         for (PartData data : entries) {
             try {
-                PartData object = client.put(url, "/rest/parts/transfer", data, PartData.class);
+                PartData object = remoteContact.transferPart(url, data);
                 if (object == null) {
                     exceptionCount += 1;
                     continue;
                 }
 
+                remoteIds.add(object.getId());
                 performTransfer(partner, data);
             } catch (Exception e) {
                 exceptionCount += 1;
                 if (exceptionCount >= 5) {
                     Logger.error(e);
                     Logger.error(exceptionCount + " exceptions encountered during transfer. Aborting");
-                    return;
+                    return null;
                 }
 
                 Logger.error(e);
             }
         }
+
+        return remoteIds;
+    }
+
+    public FolderDetails transferFolder(long remoteId, FolderDetails folderDetails, List<Long> remoteIds) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null)
+            throw new IllegalArgumentException("Invalid remote host id: " + remoteId);
+
+        FolderDetails details = remoteContact.transferFolder(partner.getUrl(), folderDetails);
+        if (folderDetails == null) {
+            Logger.error("Could not create remote folder");
+            return null;
+        }
+
+        // move entries to the transferred entries
+        EntrySelection entrySelection = new EntrySelection();
+        entrySelection.getEntries().addAll(remoteIds);
+        entrySelection.getDestination().clear();
+        entrySelection.getDestination().add(details);
+
+        remoteContact.addTransferredEntriesToFolder(partner.getUrl(), entrySelection);
+        return details;
     }
 
     /**
@@ -128,7 +160,6 @@ public class RemoteTransfer {
     protected void performTransfer(RemotePartner partner, PartData data) {
         SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
         String url = partner.getUrl();
-        IceRestClient client = IceRestClient.getInstance();
 
         // check main entry for sequence
         if (sequenceDAO.hasSequence(data.getId())) {
@@ -145,9 +176,7 @@ public class RemoteTransfer {
                 sequenceString = sequence.getSequenceUser();
             }
             if (StringUtils.isEmpty(sequenceString))
-                sequenceString = sequence.getSequence();
-
-            client.postSequenceFile(url, data.getRecordId(), data.getType(), sequenceString);
+                remoteContact.transferSequence(url, data.getRecordId(), data.getType(), sequence.getSequence());
         }
 
         // todo : check main entry for attachments

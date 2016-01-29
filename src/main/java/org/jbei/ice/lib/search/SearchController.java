@@ -59,8 +59,7 @@ public class SearchController {
                 continue;
 
             try {
-                SearchResults results = client.post(partner.getUrl(), "/rest/search", query,
-                        SearchResults.class);
+                SearchResults results = client.post(partner.getUrl(), "/rest/search", query, SearchResults.class, null);
                 if (results == null)
                     continue;
 

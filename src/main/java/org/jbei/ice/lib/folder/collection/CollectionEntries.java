@@ -49,7 +49,7 @@ public class CollectionEntries {
     }
 
     /**
-     * Retrieves parts (paged and sorted by the specified parameter values) based on the type of collection
+     * Retrieves parts (paged and sorted by the specified parameter values) based on the type of collection.
      *
      * @param field  sort field
      * @param asc    sort order

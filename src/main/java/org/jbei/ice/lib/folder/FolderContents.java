@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.folder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
@@ -48,7 +49,32 @@ public class FolderContents {
     public List<FolderDetails> addEntrySelection(String userId, EntrySelection entryLocation) {
         Entries retriever = new Entries();
         List<Long> entries = retriever.getEntriesFromSelectionContext(userId, entryLocation);
+        if (StringUtils.isEmpty(userId)) {
+            ArrayList<FolderDetails> destination = entryLocation.getDestination();
+
+            // check that folder is transferred before rejecting
+            if (destination == null || destination.isEmpty())
+                throw new IllegalArgumentException("Cannot add without valid user id or destination");
+
+            Folder folder = folderDAO.get(destination.get(0).getId());
+            if (folder == null)
+                throw new IllegalArgumentException("Cannot find folder");
+
+            if (folder.getType() != FolderType.TRANSFERRED)
+                throw new PermissionException("Can only add to transferred folder without id");
+
+            FolderDetails details = addEntriesToTransferredFolder(entries, folder);
+            List<FolderDetails> result = new ArrayList<>();
+            result.add(details);
+            return result;
+        }
         return addEntriesToFolders(userId, entries, entryLocation.getDestination());
+    }
+
+    protected FolderDetails addEntriesToTransferredFolder(List<Long> entries, Folder folder) {
+        List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);  // todo : performance
+        folderDAO.addFolderContents(folder, entryModelList);
+        return folder.toDataTransferObject();
     }
 
     /**

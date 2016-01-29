@@ -39,8 +39,13 @@ public class Collections {
         SharedEntries sharedEntries = new SharedEntries(userId);
         collection.setShared(sharedEntries.getNumberofEntries(null));
         collection.setDrafts(entryDAO.getByVisibilityCount(userId, Visibility.DRAFT, null));
-        if (account.getType() == AccountType.ADMIN)
-            collection.setPending(entryDAO.getPendingCount());
+
+        if (account.getType() != AccountType.ADMIN)
+            return collection;
+
+        // admin only options
+        collection.setPending(entryDAO.getByVisibilityCount(Visibility.PENDING));
+        collection.setTransferred(entryDAO.getByVisibilityCount(Visibility.TRANSFERRED));
         return collection;
     }
 
@@ -69,6 +74,9 @@ public class Collections {
 
             case SHARED:
                 return controller.getSharedUserFolders(userId);
+
+            case TRANSFERRED:
+                return controller.getTransferredFolders(userId);
 
             case DELETED:
                 // not able to delete folders under the deleted collections yet

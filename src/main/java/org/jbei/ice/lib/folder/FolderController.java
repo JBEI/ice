@@ -8,6 +8,7 @@ import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
@@ -171,6 +172,11 @@ public class FolderController {
 
         authorization.expectWrite(userId, folder);
 
+        // check if status is being updated first
+        if (folder.getType() == FolderType.TRANSFERRED && details.getType() == FolderType.PRIVATE) {
+            return acceptTransferredFolder(userId, folder);
+        }
+
         if (details.getType() == FolderType.PUBLIC && folder.getType() != FolderType.PUBLIC)
             return promoteFolder(userId, folder);
 
@@ -187,6 +193,22 @@ public class FolderController {
         }
 
         return dao.update(folder).toDataTransferObject();
+    }
+
+    private FolderDetails acceptTransferredFolder(String userId, Folder folder) {
+        authorization.expectAdmin(userId);
+
+        if (folder.getType() != FolderType.TRANSFERRED)
+            throw new IllegalArgumentException("Folder " + folder.getId() + " is not a transferred folder");
+
+        // change the status and those of the entries contained to "ok"
+        if (dao.setFolderEntryVisibility(folder.getId(), Visibility.OK) == 0)
+            return null;
+
+        folder.setType(FolderType.PRIVATE);
+        folder.setOwnerEmail(userId);  // todo : review. making the owner the current admin accepting
+        folder = dao.update(folder);
+        return folder.toDataTransferObject();
     }
 
     /**
@@ -254,6 +276,18 @@ public class FolderController {
         return details;
     }
 
+    public FolderDetails createTransferredFolder(FolderDetails folderDetails) {
+        Folder folder = new Folder(folderDetails.getName());
+        AccountTransfer owner = folderDetails.getOwner();
+        if (owner != null)
+            folder.setOwnerEmail(owner.getEmail());
+        else
+            folder.setOwnerEmail("transferred");
+        folder.setType(FolderType.TRANSFERRED);
+        folder.setCreationTime(new Date(folderDetails.getCreationTime()));
+        folder = dao.create(folder);
+        return folder.toDataTransferObject();
+    }
 
     public ArrayList<FolderDetails> getUserFolders(String userId) {
         Account account = getAccount(userId);
@@ -313,6 +347,23 @@ public class FolderController {
         for (Folder folder : sharedFolders) {
             FolderDetails details = folder.toDataTransferObject();
             details.setType(FolderType.SHARED);
+            long folderSize = dao.getFolderSize(folder.getId(), null);
+            details.setCount(folderSize);
+            folderDetails.add(details);
+        }
+
+        return folderDetails;
+    }
+
+    public ArrayList<FolderDetails> getTransferredFolders(String userId) {
+        if (!accountController.isAdministrator(userId))
+            return new ArrayList<>();
+
+        List<Folder> transferredFolders = dao.getFoldersByType(FolderType.TRANSFERRED);
+        ArrayList<FolderDetails> folderDetails = new ArrayList<>();
+
+        for (Folder folder : transferredFolders) {
+            FolderDetails details = folder.toDataTransferObject();
             long folderSize = dao.getFolderSize(folder.getId(), null);
             details.setCount(folderSize);
             folderDetails.add(details);
