@@ -64,8 +64,15 @@ public class IceRestClient extends RestClient {
     }
 
     @Override
-    public <T> T post(String url, String resourcePath, Object object, Class<T> responseClass) {
+    public <T> T post(String url, String resourcePath, Object object, Class<T> responseClass,
+                      Map<String, Object> queryParams) {
         WebTarget target = client.target("https://" + url).path(resourcePath);
+        if (queryParams != null) {
+            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+                target = target.queryParam(entry.getKey(), entry.getValue());
+            }
+        }
+
         Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
         Response postResponse = invocationBuilder.post(Entity.entity(object, MediaType.APPLICATION_JSON_TYPE));
         if (postResponse.hasEntity() && postResponse.getStatus() == Response.Status.OK.getStatusCode())

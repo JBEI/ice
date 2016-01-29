@@ -35,18 +35,30 @@ public class FolderResource extends RestResource {
     private PermissionsController permissionsController = new PermissionsController();
 
     /**
-     * Creates a new folder with the details specified in the parameter.
+     * Creates a new folder with the details specified in the parameter. The folder
+     * is either created by a user or represents one that is transferred
+     * <p>
      * The default type for the folder is <code>PRIVATE</code> and is owned by the user creating it
+     * unless it is transferred
      *
-     * @param folder details of the folder to create
+     * @param isTransfer whether the folder being created is a transfer folder or not
+     * @param folder     details of the folder to create
      * @return information about the created folder including the unique identifier
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response create(final FolderDetails folder) {
-        final String userId = requireUserId();
-        log(userId, "creating new folder");
-        FolderDetails created = controller.createPersonalFolder(userId, folder);
+    public Response create(@DefaultValue("false") @QueryParam("isTransfer") boolean isTransfer,
+                           final FolderDetails folder) {
+        FolderDetails created;
+        if (!isTransfer) {
+            final String userId = requireUserId();
+            log(userId, "creating new folder");
+            created = controller.createPersonalFolder(userId, folder);
+        } else {
+            // todo : get partner identifier
+            created = controller.createTransferredFolder(folder);
+        }
+
         return super.respond(created);
     }
 
@@ -113,7 +125,7 @@ public class FolderResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/entries")
     public Response addSelectedEntriesToFolders(final EntrySelection entrySelection) {
-        final String userId = requireUserId();
+        final String userId = getUserId();
         log(userId, "adding entries to folders");
         final FolderContents folderContents = new FolderContents();
         folderContents.addEntrySelection(userId, entrySelection);
@@ -217,9 +229,6 @@ public class FolderResource extends RestResource {
         return controller.createFolderPermission(userId, folderId, permission);
     }
 
-    /**
-     * @return Response for success or failure
-     */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions/{permissionId}")
@@ -231,9 +240,6 @@ public class FolderResource extends RestResource {
         return Response.ok().build();
     }
 
-    /**
-     * @return Response for success or failure
-     */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions/public")

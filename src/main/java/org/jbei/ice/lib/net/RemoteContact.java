@@ -1,25 +1,26 @@
 package org.jbei.ice.lib.net;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.validator.routines.UrlValidator;
 import org.jbei.ice.lib.access.AccessTokens;
-import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
-import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
-import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.services.rest.IceRestClient;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
 import org.jbei.ice.storage.model.RemotePartner;
 
-import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Remote communications with other ice instances
+ * Any method calls to this class will likely be slow since
+ * it requires remote access
  *
  * @author Hector Plahar
  */
@@ -35,171 +36,14 @@ public final class RemoteContact {
         restClient = IceRestClient.getInstance();
     }
 
-    /**
-     * Checks if the web of registries admin config value has been set to enable this ICE instance
-     * to join the web of registries configuration
-     *
-     * @return true if value has been set to the affirmative, false otherwise
-     */
-    private boolean isInWebOfRegistries() {
-        String value = Utils.getConfigValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
-        return ("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
-    }
-
-    /**
-     * Adds the registry instance specified by the url to the list of existing partners (if not already in there)
-     * and sends a request to the remote instance that includes a security token that the remote instance
-     * can use to communicate with this instance.
-     * <p>
-     * Information about the remote instance is still saved even when it cannot be communicated with. This
-     * allows a future communication attempt.
-     *
-     * @param userId  id of user performing action (must have admin privileges)
-     * @param partner registry partner object that contains unique uniform resource identifier for the registry
-     * @return add partner ofr
-     */
-    public RegistryPartner addWebPartner(String userId, RegistryPartner partner) {
-        if (!isInWebOfRegistries())
-            return null;
-
-        boolean isAdmin = new AccountController().isAdministrator(userId);
-        if (!isAdmin || partner.getUrl() == null)
-            return null;
-
-        String myURL = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
-        String myName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
-
-        Logger.info(userId + ": adding WoR partner [" + partner.getUrl() + "]");
-        return addWebPartner(myName, myURL, partner);
-    }
-
-    /**
-     * Adds another ICE instance as a registry partner by send an api call to the remote instance.
-     * That call is handled in {@link this.handleRemoteAddRequest()}
-     *
-     * @param myName  the name of this ice instance
-     * @param myUrl   the url that this ice instance is hosted at. It is send to the remote instance
-     *                in order to exchange API keys
-     * @param partner remote ice instance to add as partner
-     * @return added registry partner including the token to use to contact that instance
-     */
-    protected RegistryPartner addWebPartner(String myName, String myUrl, RegistryPartner partner) {
-        // check if partner already exists locally
-        RemotePartner remotePartner = dao.getByUrl(partner.getUrl());
-        if (remotePartner != null) {
-            return remotePartner.toDataTransferObject();
-        }
-
-        // create information about this instance to send to potential partner
-        // including a random token for use when contacting this instance
-        RegistryPartner thisPartner = new RegistryPartner();
-        thisPartner.setUrl(myUrl);
-        thisPartner.setName(myName);
-        String token = tokenHash.generateRandomToken();
-        thisPartner.setApiKey(token);
-
-        // send to remote in order to trigger an api exchange. Note that the remote partner will
-        // request validation of the api key at GET /rest/accesstokens/web
-        AccessTokens.setToken(partner.getUrl(), token);
-
-        try {
-            RegistryPartner newPartner = restClient.post(partner.getUrl(), "/rest/partners",
-                    thisPartner, RegistryPartner.class);
-            if (newPartner == null) {
-                Logger.error("Could not add web partner");
-                return null;
-            }
-
-            remotePartner = createRemotePartnerObject(newPartner, token);
-            AccessTokens.removeToken(partner.getUrl());
-            return remotePartner.toDataTransferObject();
-        } catch (Exception e) {
-            Logger.error("Exception adding remote partner " + e);
-            return null;
-        }
-    }
-
-    protected RemotePartner createRemotePartnerObject(RegistryPartner newPartner, String token) {
-        RemotePartner remotePartner = new RemotePartner();
-        remotePartner.setName(newPartner.getName());
-        remotePartner.setUrl(newPartner.getUrl());
-        remotePartner.setPartnerStatus(RemotePartnerStatus.APPROVED);
-        remotePartner.setSalt(tokenHash.generateSalt());
-        String hash = tokenHash.encryptPassword(token + newPartner.getUrl(), remotePartner.getSalt());
-        remotePartner.setAuthenticationToken(hash);
-        remotePartner.setApiKey(newPartner.getApiKey());
-        remotePartner.setAdded(new Date());
-        return DAOFactory.getRemotePartnerDAO().create(remotePartner);
-    }
-
-    /**
-     * Handles requests from remote ice instances that will like to be in a WoR config with this instance
-     * Serves the dual purpose of:
-     * <ul>
-     * <li>please add me as a partner to your list with token</li>
-     * <li>add accepted; use this as the authorization token</li>
-     * </ul>
-     * <p>
-     * Note that the request is rejected if this ICE instance has not opted to be a member of web of
-     * registries
-     *
-     * @param request partner request object containing all information needed
-     * @return true if request is processed successfully, false otherwise
-     */
-    public RegistryPartner handleRemoteAddRequest(RegistryPartner request) {
-        if (!isInWebOfRegistries())
-            return null;
-
-        if (request == null || !UrlValidator.getInstance().isValid(request.getUrl()) ||
-                StringUtils.isEmpty(request.getApiKey()))
-            return null;
-
-        Logger.info(request.getUrl() + ": request to connect.");
-
-        String myURL = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
-        if (request.getUrl().equalsIgnoreCase(myURL))
-            return null;
-
-        String name = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
-        if (StringUtils.isEmpty(name))
-            name = myURL;
-
-        boolean apiKeyValidates = apiKeyValidates(myURL, request);
-        if (!apiKeyValidates)  // todo : save and based on state, enable admin to retry at some point
-            return null;
-
-        // request should contain api key for use to contact third party
-        RemotePartner partner = dao.getByUrl(request.getUrl());
-        String token;
-
-        if (partner != null) {
-            Logger.info("Updating authentication for existing");
-            // validated. update the authorization token
-            partner.setApiKey(request.getApiKey());
-            partner.setSalt(tokenHash.generateSalt());
-            token = tokenHash.generateRandomToken();
-            partner.setAuthenticationToken(tokenHash.encryptPassword(token + request.getUrl(), partner.getSalt()));
-            dao.update(partner);
-        } else {
-            // save in db
-            partner = new RemotePartner();
-            partner.setName(request.getName());
-            partner.setUrl(request.getUrl());
-            partner.setApiKey(request.getApiKey());
-            partner.setAdded(new Date());
-            partner.setPartnerStatus(RemotePartnerStatus.APPROVED);
-            partner.setSalt(tokenHash.generateSalt());
-            token = tokenHash.generateRandomToken();
-            String hash = tokenHash.encryptPassword(token + request.getUrl(), partner.getSalt());
-            partner.setAuthenticationToken(hash);
-            dao.create(partner);
-        }
-
-        // send information about this instance
-        RegistryPartner newPartner = new RegistryPartner();
-        newPartner.setName(name);
-        newPartner.setUrl(myURL);
-        newPartner.setApiKey(token);
+    // exchange api key with remote partner
+    // send to remote in order to trigger an api exchange. Note that the remote partner will
+    // request validation of the api key at GET /rest/accesstokens/web
+    public RegistryPartner contactPotentialPartner(RegistryPartner thisPartner, String remotePartnerUrl) {
+        AccessTokens.setToken(remotePartnerUrl, thisPartner.getApiKey());
+        RegistryPartner newPartner = restClient.post(remotePartnerUrl, "/rest/partners",
+                thisPartner, RegistryPartner.class, null);
+        AccessTokens.removeToken(remotePartnerUrl);
         return newPartner;
     }
 
@@ -211,7 +55,7 @@ public final class RemoteContact {
      * @return true if the api key validated successfully with the specified url, false otherwise (including when
      * the instance cannot be contacted)
      */
-    protected boolean apiKeyValidates(String myURL, RegistryPartner registryPartner) {
+    public boolean apiKeyValidates(String myURL, RegistryPartner registryPartner) {
         if (StringUtils.isEmpty(registryPartner.getApiKey()))
             return false;
 
@@ -242,5 +86,23 @@ public final class RemoteContact {
         Logger.info("Deleting partner " + url + " at their request");
         dao.delete(partner); // todo : contact other instances (if this is a master node)
         return true;
+    }
+
+    public PartData transferPart(String url, PartData data) {
+        return restClient.put(url, "/rest/parts/transfer", data, PartData.class);
+    }
+
+    public void transferSequence(String url, String recordId, EntryType entryType, String sequenceString) {
+        restClient.postSequenceFile(url, recordId, entryType, sequenceString);
+    }
+
+    public FolderDetails transferFolder(String url, FolderDetails folderDetails) {
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("isTransfer", true);
+        return restClient.post(url, "/rest/folders", folderDetails, FolderDetails.class, queryParams);
+    }
+
+    public void addTransferredEntriesToFolder(String url, EntrySelection entrySelection) {
+        restClient.post(url, "/rest/folders/entries", entrySelection, FolderDetails.class, null);
     }
 }

@@ -23,7 +23,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     $scope.selectedFolders = [];
 
     $scope.closeFeedbackAlert = function () {
-        $rootScope.serverFeedback = undefined;
+        Util.clearFeedback();
     };
 
     // select a folder in the pull down
@@ -109,6 +109,24 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
 
     $scope.canDelete = function () {
         return Selection.canDelete();
+    };
+
+    $scope.canAccept = function () {
+        if ($scope.collectionSelected != 'transferred')
+            return false;
+
+        // check that something is actually selected
+        if ($scope.collectionFolderSelected && $scope.collectionFolderSelected.type == 'TRANSFERRED') {
+            return true;
+        }
+
+        return Selection.hasSelection();
+    };
+
+    // used to enable/disable the transfer action menu button
+    $scope.transferAvailable = function () {
+        //console.log(FolderSelection.getSelectedFolder());
+        return FolderSelection.getSelectedFolder() != undefined;
     };
 
     $scope.canMoveFromFolder = function () {
@@ -228,10 +246,30 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
                 }
             }
         });
+    };
+
+    $scope.acceptTransferredEntries = function () {
+        var selection = getEntrySelection();
+        console.log(selection);
+        if (selection.folderId) {
+            // approve folder
+            Util.update("/rest/folders/" + selection.folderId, {
+                id: selection.folderId,
+                type: 'PRIVATE'
+            }, function (result) {
+                console.log(result);
+            })
+        } else {
+            // todo : accept individual entries
+        }
     }
 });
 
-iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $uibModalInstance, Util, FolderSelection, $stateParams, Selection) {
+iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $uibModalInstance, Util, FolderSelection,
+                                                                      $stateParams, Selection, selectedFolder) {
+    $scope.selectedFolder = selectedFolder;
+    console.log(FolderSelection.getSelectedFolder(), selectedFolder);
+
     $scope.closeModal = function () {
         $uibModalInstance.close();
     };
@@ -563,6 +601,7 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
                     var loginDestination = $cookies.loginDestination || '/';
                     $cookies.loginDestination = null;
                     $location.path(loginDestination);
+                    Util.clearFeedback();
                 } else {
                     $cookieStore.remove('userId');
                     $cookieStore.remove('sessionId');

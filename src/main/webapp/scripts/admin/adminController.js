@@ -59,10 +59,6 @@ angular.module('ice.admin.controller', [])
                 icon: 'fa-group'
             },
             {
-                id: 'transferred', url: 'scripts/admin/transferred.html', display: 'Transferred Entries',
-                selected: false, icon: 'fa-list'
-            },
-            {
                 id: 'samples', url: 'scripts/admin/sample-requests.html', display: 'Sample Requests', selected: false,
                 icon: 'fa-shopping-cart'
             },
@@ -143,91 +139,6 @@ angular.module('ice.admin.controller', [])
 
             $scope.submitSetting(booleanSetting);
         }
-    })
-    .controller('AdminTransferredEntriesController', function ($rootScope, $cookieStore, $filter, $location, $scope,
-                                                               Folders, Entry, Util) {
-        $scope.maxSize = 5;
-        $scope.currentPage = 1;
-        $scope.selectedTransferredEntries = [];
-
-        var params = {folderId: 'transferred'};
-
-        // get all entries that are transferred
-        $scope.transferredEntries = undefined;
-
-        var getTransferredEntries = function () {
-            Util.get("rest/collections/TRANSFERRED/entries", function (result) {
-                $scope.transferredEntries = result;
-                $scope.selectedTransferredEntries = [];
-            }, params);
-        };
-
-        getTransferredEntries();
-
-        $scope.setPage = function (pageNo) {
-            if (pageNo == undefined || isNaN(pageNo))
-                pageNo = 1;
-
-            $scope.loadingPage = true;
-            params.offset = (pageNo - 1) * 15;
-            getTransferredEntries();
-        };
-
-        $scope.acceptEntries = function () {
-            var successHandler = function (result) {
-                getTransferredEntries();
-            };
-
-            Util.update("rest/parts", $scope.selectedTransferredEntries, {visibility: "OK"}, successHandler);
-        };
-
-        $scope.rejectEntries = function () {
-            var successHandler = function (result) {
-                getTransferredEntries();
-            };
-
-            Util.update("rest/parts", $scope.selectedTransferredEntries, {visibility: "DELETED"}, successHandler);
-        };
-
-        $scope.selectTransferredEntry = function (entry) {
-            var index = $scope.selectedTransferredEntries.indexOf(entry.id);
-            if (index != -1) {
-                $scope.selectedTransferredEntries.splice(index, 1);
-                return;
-            }
-
-            // add to selected
-            $scope.selectedTransferredEntries.push(entry.id);
-        };
-
-        $scope.showEntryDetails = function (entry, index) {
-            if (!params.offset) {
-                params.offset = index;
-            }
-            $rootScope.collectionContext = params;
-            $location.path("entry/" + entry.id);
-        };
-
-        $scope.tranferredPopupTooltip = "scripts/admin/transferred-tooltip.html";
-
-        $scope.transferredTooltip = function (entry) {
-            $scope.tooltip = undefined;
-            Entry($cookieStore.get("sessionId")).tooltip({partId: entry.id},
-                function (result) {
-                    $scope.tooltip = result;
-                }, function (error) {
-                    console.error(error);
-                });
-        };
-
-        $scope.pageCounts = function (currentPage, resultCount) {
-            var maxPageCount = 15;
-            var pageNum = ((currentPage - 1) * maxPageCount) + 1;
-
-            // number on this page
-            var pageCount = (currentPage * maxPageCount) > resultCount ? resultCount : (currentPage * maxPageCount);
-            return pageNum + " - " + $filter('number')(pageCount) + " of " + $filter('number')(resultCount);
-        };
     })
     .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, Samples,
                                                           $uibModal) {
@@ -398,4 +309,89 @@ angular.module('ice.admin.controller', [])
 
         // init
         $scope.retrieveKeys();
+    })
+    .controller('AdminGroupsController', function ($scope, $uibModal, Util) {
+        $scope.groups = undefined;
+
+        $scope.adminGroupsPagingParams = {
+            offset: 0,
+            limit: 10,
+            available: 0,
+            currentPage: 1,
+            maxSize: 5,
+            type: 'PUBLIC'
+        };
+
+        $scope.groupListPageChanged = function () {
+            Util.get("rest/groups", function (result) {
+                $scope.groups = result.data;
+                $scope.adminGroupsPagingParams.available = result.resultCount;
+            }, $scope.adminGroupsPagingParams);
+        };
+
+        $scope.openCreatePublicGroupModal = function (group) {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/admin/modal/create-public-group.html',
+                controller: 'AdminGroupsModalController',
+                backdrop: "static",
+                //size: "lg",
+                resolve: {
+                    currentGroup: function () {
+                        return group;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (result) {
+                if (!result)
+                    return;
+
+                Util.setFeedback("Public group successfully created", "success");
+                $scope.groupListPageChanged();
+            })
+        }
+    })
+    .controller('AdminGroupsModalController', function ($scope, $uibModalInstance, currentGroup, Util) {
+        $scope.selectedUsers = [];
+
+        if (currentGroup)
+            $scope.newPublicGroup = currentGroup;
+        else
+            $scope.newPublicGroup = {type: 'PUBLIC'};
+
+        $scope.closeCreatePublicGroupModal = function () {
+            $uibModalInstance.close();
+        };
+
+        $scope.createNewPublicGroup = function () {
+            $scope.newPublicGroup.members = $scope.selectedUsers;
+            Util.post("rest/groups", $scope.newPublicGroup, function (result) {
+                $uibModalInstance.close(result);
+            });
+        };
+
+        $scope.filterUsers = function (val) {
+            if (!val) {
+                $scope.userMatches = undefined;
+                return;
+            }
+
+            $scope.filtering = true;
+
+            Util.list("rest/users/autocomplete", function (result) {
+                $scope.userMatches = result;
+                $scope.filtering = false;
+            }, {limit: 10, val: val}, function (error) {
+                $scope.filtering = false;
+                $scope.userMatches = undefined;
+            });
+        };
+
+        $scope.selectUser = function (user) {
+            var index = $scope.selectedUsers.indexOf(user);
+            if (index == -1)
+                $scope.selectedUsers.push(user);
+            else
+                $scope.selectedUsers.splice(index, 1);
+        };
     });

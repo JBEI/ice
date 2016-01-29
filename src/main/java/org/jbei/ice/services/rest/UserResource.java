@@ -1,5 +1,6 @@
 package org.jbei.ice.services.rest;
 
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.Accounts;
@@ -53,9 +54,13 @@ public class UserResource extends RestResource {
             @QueryParam("filter") String filter) {
         final String userId = getUserId(sessionId);
         log(userId, "retrieving available accounts");
-        Accounts accounts = new Accounts();
-        AccountResults result = accounts.getAvailableAccounts(userId, offset, limit, asc, sort, filter);
-        return super.respond(result);
+        try {
+            Accounts accounts = new Accounts();
+            AccountResults result = accounts.getAvailableAccounts(userId, offset, limit, asc, sort, filter);
+            return super.respond(result);
+        } catch (PermissionException pe) {
+            return super.respond(Response.Status.UNAUTHORIZED);
+        }
     }
 
     /**

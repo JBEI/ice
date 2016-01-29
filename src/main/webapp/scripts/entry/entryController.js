@@ -186,8 +186,8 @@ angular.module('ice.entry.controller', [])
             var foundTrace;
             var foundIndex;
 
-            for (var i = 0; i < $scope.traceSequences.length; i++) {
-                var trace = $scope.traceSequences[i];
+            for (var i = 0; i < $scope.traces.data.length; i++) {
+                var trace = $scope.traces.data[i];
                 if (trace.fileId === fileId && trace.fileId != undefined) {
                     foundTrace = trace;
                     foundIndex = i;
@@ -197,8 +197,8 @@ angular.module('ice.entry.controller', [])
 
             if (foundTrace != undefined) {
                 Util.remove("rest/parts/" + entryId + "/traces/" + foundTrace.id, {}, function (result) {
-                    $scope.traceSequences.splice(foundIndex, 1);
-                    $scope.entryStatistics.sequenceCount = $scope.traceSequences.length;
+                    $scope.traces.data.splice(foundIndex, 1);
+                    $scope.entryStatistics.sequenceCount = $scope.traces.data.length;
                 });
             }
         };

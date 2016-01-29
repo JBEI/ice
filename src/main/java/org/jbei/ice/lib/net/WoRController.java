@@ -100,7 +100,7 @@ public class WoRController {
 
         IceRestClient client = IceRestClient.getInstance();
         try {
-            client.post(partner.getUrl(), "/rest/web/partner/remote", thisPartner, RegistryPartner.class);
+            client.post(partner.getUrl(), "/rest/web/partner/remote", thisPartner, RegistryPartner.class, null);
             existing.setPartnerStatus(newStatus);
             existing.setAuthenticationToken(apiKey);
             dao.update(existing);

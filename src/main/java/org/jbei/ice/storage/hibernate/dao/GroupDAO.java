@@ -4,6 +4,7 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.group.GroupType;
@@ -124,5 +125,30 @@ public class GroupDAO extends HibernateRepository<Group> {
         if (list != null)
             groups.addAll(list);
         return groups;
+    }
+
+    public List<Group> getGroupsByType(GroupType type, int offset, int limit) throws DAOException {
+        try {
+            Criteria criteria = currentSession().createCriteria(Group.class)
+                    .add(Restrictions.eq("type", type))
+                    .setFirstResult(offset)
+                    .setMaxResults(limit);
+            return criteria.list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    public long getGroupsByTypeCount(GroupType type) throws DAOException {
+        try {
+            Number number = (Number) currentSession().createCriteria(Group.class)
+                    .add(Restrictions.eq("type", type))
+                    .setProjection(Projections.rowCount()).uniqueResult();
+            return number.longValue();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 }
