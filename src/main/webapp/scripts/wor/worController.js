@@ -301,8 +301,8 @@ angular.module('ice.wor.controller', [])
         //
         // add remote partner to web of registries
         //
-        $scope.addPartner = function () {
-            Util.post("rest/web/partner", $scope.newPartner, function (result) {
+        $scope.addWebPartner = function () {
+            Util.post("rest/partners", $scope.newPartner, function (result) {
                 if (!result) {
                     Util.setFeedback('Error adding web partner', 'danger');
                     console.error("Error adding");
@@ -345,6 +345,10 @@ angular.module('ice.wor.controller', [])
             Util.list("rest/remote/" + partner.id + "/available", function (result) {
                 $scope.selectedPartnerFolders = result;
             });
+        };
+
+        $scope.retryRemotePartnerContact = function () {
+            // todo
         }
     })
     .controller('WebOfRegistriesMenuController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,

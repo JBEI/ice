@@ -2,7 +2,6 @@ package org.jbei.ice.lib.net;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
-import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
@@ -24,13 +23,11 @@ import java.util.List;
 public class WebOfRegistriesTask extends Task {
 
     private final boolean enable;
-    private final TokenHash tokenHash;
     private final String myUrl;
 
     public WebOfRegistriesTask(String thisUrl, boolean enable) {
         this.enable = enable;
         this.myUrl = thisUrl;
-        this.tokenHash = new TokenHash();
     }
 
     @Override
@@ -56,13 +53,12 @@ public class WebOfRegistriesTask extends Task {
         if (StringUtils.isEmpty(name))
             name = myUrl;
 
-        RemoteContact remoteContact = new RemoteContact();
 
         // exchange key information with the master registry
 //        RegistryPartner masterPartner = requestToJoin(NODE_MASTER, partner);
         RegistryPartner masterPartner = new RegistryPartner();
         masterPartner.setUrl(NODE_MASTER);
-        masterPartner = remoteContact.addWebPartner(name, myUrl, masterPartner);
+//        masterPartner = remoteContact.addWebPartner(name, myUrl, masterPartner);
         if (masterPartner == null) {
             Logger.error("Could not connect to master node");
             return;
@@ -76,14 +72,14 @@ public class WebOfRegistriesTask extends Task {
         for (RegistryPartner registryPartner : partners) {
             if (registryPartner.getUrl().equalsIgnoreCase(myUrl))
                 continue;
-            remoteContact.addWebPartner(name, myUrl, registryPartner);
+//            remoteContact.addWebPartner(name, myUrl, registryPartner);
         }
     }
 
     // contacts the master node for other ice instances
     protected RegistryPartner requestToJoin(String masterUrl, RegistryPartner partner) {
         IceRestClient restClient = IceRestClient.getInstance();
-        return restClient.post(masterUrl, "/rest/partners", partner, RegistryPartner.class);
+        return restClient.post(masterUrl, "/rest/partners", partner, RegistryPartner.class, null);
     }
 
     @SuppressWarnings("unchecked")

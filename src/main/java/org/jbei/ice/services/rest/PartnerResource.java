@@ -3,6 +3,8 @@ package org.jbei.ice.services.rest;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.lib.entry.EntrySelection;
+import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.WebPartners;
 import org.jbei.ice.lib.net.WoRController;
 
@@ -21,7 +23,6 @@ import javax.ws.rs.core.Response;
 public class PartnerResource extends RestResource {
 
     @GET
-    @Path("/partners")
     public Response getWebPartners(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
                                    @HeaderParam(WOR_PARTNER_TOKEN) String worToken,
                                    @QueryParam("url") String url) {
@@ -42,23 +43,34 @@ public class PartnerResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addNewPartner(@Context HttpServletRequest request,
-                                  @HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
                                   RegistryPartner partner) {
 
         WebPartners webPartners = new WebPartners();
         RegistryPartner result;
-        String url = null;
-        String userId = null;
+        String userId = getUserId();
 
         // where the request is coming from
-        if (StringUtils.isEmpty(sessionId)) {
-            url = request.getRemoteHost();
+        // assumes that if no session information (or invalid user) then this is
+        // a request coming remotely
+        // todo : consider making /rest/partners/remote ... the
+        if (StringUtils.isEmpty(userId)) {
+            String url = request.getRemoteHost();
             Logger.info("Received partner add request from " + url);
-        } else {
-            userId = getUserId(sessionId);
+            webPartners.processRemoteWebPartnerAdd(url, partner);
         }
 
-        result = webPartners.addNewPartner(userId, url, partner);
+        // local request
+        result = webPartners.addNewPartner(userId, partner);
         return super.respond(result);
+    }
+
+    @POST
+    @Path("/{id}/transfer")
+    public Response transferEntries(@PathParam("id") final long remoteId,
+                                    final EntrySelection entrySelection) {
+        final String userId = super.getUserId();
+        RemoteEntries remoteEntries = new RemoteEntries();
+        remoteEntries.transferEntries(userId, remoteId, entrySelection);
+        return super.respond(Response.Status.OK);
     }
 }

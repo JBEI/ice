@@ -11,7 +11,7 @@
         </button>
 
         <div class=" margin-top-10 panel panel-default font-95em" ng-show="showAddRegistryForm">
-            <form class="panel-body" role="form" ng-submit="addPartner()">
+            <form class="panel-body" role="form" ng-submit="addWebPartner()">
                 <div class="col-md-2 pad-top-5">
                     <span style="white-space:nowrap">Registry Name <span class="required">*</span> </span>
                 </div>
@@ -80,6 +80,10 @@
                             </li>
                         </ul>
                     </div>
+                    &nbsp;
+                    <i ng-if="partner.status == 'NOT_CONTACTED'" uib-tooltip="Retry"
+                       ng-click="retryRemotePartnerContact()"
+                       class="fa fa-fw fa-refresh fa-spin blue cursor_pointer opacity_hover"></i>
                 </td>
                 <td class="font-12em" style="vertical-align: middle">
                     <span uib-tooltip="Delete partner">
