@@ -175,7 +175,8 @@ public class RemoteTransfer {
                 Logger.error(e);
                 sequenceString = sequence.getSequenceUser();
             }
-            if (StringUtils.isEmpty(sequenceString))
+
+            if (!StringUtils.isEmpty(sequenceString))
                 remoteContact.transferSequence(url, data.getRecordId(), data.getType(), sequence.getSequence());
         }
 
