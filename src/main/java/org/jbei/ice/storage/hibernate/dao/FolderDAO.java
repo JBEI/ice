@@ -72,14 +72,16 @@ public class FolderDAO extends HibernateRepository<Folder> {
      * Currently, it is assumed that the contents of folders are only entries. The entries
      * that are counted are those that have a visibility of "OK"
      *
-     * @param id     unique folder identifier
-     * @param filter optional filter for entry fields
+     * @param id          unique folder identifier
+     * @param filter      optional filter for entry fields
+     * @param visibleOnly if true, counts only entries with visibility "OK"
      * @return number of child contents in the folder
      */
-    public Long getFolderSize(long id, String filter) {
+    public Long getFolderSize(long id, String filter, boolean visibleOnly) {
         try {
             Criteria criteria = currentSession().createCriteria(Entry.class);
-            criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
+            if (visibleOnly)
+                criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
             criteria.createAlias("folders", "f");
             criteria.add(Restrictions.eq("f.id", id));
 

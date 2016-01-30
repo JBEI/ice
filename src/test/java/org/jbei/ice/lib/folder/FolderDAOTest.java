@@ -113,7 +113,7 @@ public class FolderDAOTest {
 
         // add entries to folder
         folder = dao.addFolderContents(folder, entries);
-        Assert.assertEquals(10, dao.getFolderSize(folder.getId(), null).intValue());
+        Assert.assertEquals(10, dao.getFolderSize(folder.getId(), null, true).intValue());
     }
 
     @Test
