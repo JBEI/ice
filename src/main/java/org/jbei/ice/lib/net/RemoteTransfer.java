@@ -18,6 +18,7 @@ import org.jbei.ice.storage.model.RemotePartner;
 import org.jbei.ice.storage.model.Sequence;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Hector Plahar
@@ -115,7 +116,10 @@ public class RemoteTransfer {
                 }
 
                 remoteIds.add(object.getId());
-                performTransfer(partner, data);
+                if (data.getLinkedParts() != null) {
+                    remoteIds.addAll(object.getLinkedParts().stream().map(PartData::getId).collect(Collectors.toList()));
+                }
+                performTransfer(partner, data); // transfers attachments and sequences
             } catch (Exception e) {
                 exceptionCount += 1;
                 if (exceptionCount >= 5) {
