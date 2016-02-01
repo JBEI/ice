@@ -7,7 +7,6 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebEntries;
-import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.WoRController;
@@ -75,15 +74,6 @@ public class WebResource extends RestResource {
                                                @PathParam("entryId") final long partId) {
         final String userId = getUserId();
         return remoteEntries.getEntryAttachments(userId, partnerId, partId);
-    }
-
-    @POST
-    @Path("/{id}/transfer")
-    public Response transferEntries(@PathParam("id") final long remoteId,
-                                    final EntrySelection entrySelection) {
-        final String userId = super.getUserId();
-        remoteEntries.transferEntries(userId, remoteId, entrySelection);
-        return super.respond(Response.Status.OK);
     }
 
     @GET
