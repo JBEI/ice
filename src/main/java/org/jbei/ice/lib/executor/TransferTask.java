@@ -49,6 +49,7 @@ public class TransferTask extends Task {
         // create remoteFolder
         long folderId = Long.decode(this.entrySelection.getFolderId());
         Folder folder = DAOFactory.getFolderDAO().get(folderId);
+        Logger.info("Adding " + remoteIds.size() + " transferred entries to remote folder");
         transfer.transferFolder(remoteId, folder.toDataTransferObject(), remoteIds);
     }
 }
