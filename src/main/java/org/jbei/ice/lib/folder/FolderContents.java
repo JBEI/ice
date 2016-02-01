@@ -152,7 +152,7 @@ public class FolderContents {
                 addEntryPermission(userId, folderPermissions, entryModelList);
             }
 
-            details.setCount(folderDAO.getFolderSize(folder.getId(), null));
+            details.setCount(folderDAO.getFolderSize(folder.getId(), null, true));
         }
         return folders;
     }
@@ -179,7 +179,9 @@ public class FolderContents {
         folderAuthorization.expectRead(userId, folder);
 
         FolderDetails details = folder.toDataTransferObject();
-        long folderSize = folderDAO.getFolderSize(folderId, filter);
+        boolean visibleOnly = folder.getType() != FolderType.TRANSFERRED;
+
+        long folderSize = folderDAO.getFolderSize(folderId, filter, visibleOnly);
         details.setCount(folderSize);
 
         if (userId != null) {
@@ -195,7 +197,6 @@ public class FolderContents {
             details.setOwner(owner.toDataTransferObject());
 
         // retrieve folder contents
-        boolean visibleOnly = folder.getType() != FolderType.TRANSFERRED;
         List<Entry> results = folderDAO.retrieveFolderContents(folderId, sort, asc, start, limit, filter, visibleOnly);
         for (Entry entry : results) {
             PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);

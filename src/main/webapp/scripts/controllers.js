@@ -315,7 +315,7 @@ iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $u
         var entrySelection = getEntrySelection();
         angular.forEach($scope.registryPartners.partners, function (partner) {
             if (partner.selected) {
-                Util.post('rest/web/' + partner.id + '/transfer', entrySelection, function (result) {
+                Util.post('rest/partners/' + partner.id + '/entries', entrySelection, function (result) {
                     Selection.reset();
                     $scope.closeModal();
                 });

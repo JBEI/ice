@@ -65,7 +65,7 @@ public class FolderController {
         ArrayList<FolderDetails> list = new ArrayList<>();
         for (Folder folder : folders) {
             FolderDetails details = folder.toDataTransferObject();
-            long folderSize = dao.getFolderSize(folder.getId(), null);
+            long folderSize = dao.getFolderSize(folder.getId(), null, true);
             details.setCount(folderSize);
             details.setType(FolderType.PUBLIC);
             details.setCanEdit(isAdmin);
@@ -87,7 +87,7 @@ public class FolderController {
         ArrayList<FolderDetails> list = new ArrayList<>();
         for (Folder folder : folders) {
             FolderDetails details = folder.toDataTransferObject();
-            long folderSize = dao.getFolderSize(folder.getId(), null);
+            long folderSize = dao.getFolderSize(folder.getId(), null, true);
             details.setCount(folderSize);
             list.add(details);
         }
@@ -245,7 +245,7 @@ public class FolderController {
                 }
 
                 details = folder.toDataTransferObject();
-                long folderSize = dao.getFolderSize(folderId, null);
+                long folderSize = dao.getFolderSize(folderId, null, true);
                 details.setCount(folderSize);
 
                 dao.delete(folder);
@@ -298,7 +298,7 @@ public class FolderController {
                 continue;
 
             FolderDetails details = new FolderDetails(folder.getId(), folder.getName());
-            long folderSize = dao.getFolderSize(folder.getId(), null);
+            long folderSize = dao.getFolderSize(folder.getId(), null, true);
             details.setCount(folderSize);
             details.setType(folder.getType());
             details.setCanEdit(true);
@@ -347,7 +347,7 @@ public class FolderController {
         for (Folder folder : sharedFolders) {
             FolderDetails details = folder.toDataTransferObject();
             details.setType(FolderType.SHARED);
-            long folderSize = dao.getFolderSize(folder.getId(), null);
+            long folderSize = dao.getFolderSize(folder.getId(), null, true);
             details.setCount(folderSize);
             folderDetails.add(details);
         }
@@ -364,7 +364,7 @@ public class FolderController {
 
         for (Folder folder : transferredFolders) {
             FolderDetails details = folder.toDataTransferObject();
-            long folderSize = dao.getFolderSize(folder.getId(), null);
+            long folderSize = dao.getFolderSize(folder.getId(), null, false);
             details.setCount(folderSize);
             folderDetails.add(details);
         }
