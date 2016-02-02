@@ -280,16 +280,21 @@ angular.module('ice.entry.controller', [])
             });
         }
     })
-    .controller('PartHistoryController', function ($scope, $window, $cookieStore, $stateParams, Entry) {
+    .controller('PartHistoryController', function ($scope, $window, $cookieStore, $stateParams, Entry, Util) {
         var entryId = $stateParams.id;
         var sid = $cookieStore.get("sessionId");
         var entry = Entry(sid);
+        $scope.historyParams = {offset: 0, limit: 10, currentPage: 1, maxSize: 5};
 
-        entry.history({
-            partId: entryId
-        }, function (result) {
-            $scope.history = result;
-        });
+        $scope.historyPageChanged = function () {
+            $scope.historyParams.offset = ($scope.historyParams.currentPage - 1) * $scope.historyParams.limit;
+            Util.get("rest/parts/" + entryId + "/history", function (result) {
+                if (history)
+                    $scope.history = result;
+                //$scope.history = result;
+            }, $scope.historyParams);
+        };
+        $scope.historyPageChanged(); // init
 
         $scope.deleteHistory = function (history) {
             entry.deleteHistory({partId: entryId, historyId: history.id}, function (result) {

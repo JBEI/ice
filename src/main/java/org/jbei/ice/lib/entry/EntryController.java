@@ -9,7 +9,6 @@ import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.AuditType;
 import org.jbei.ice.lib.dto.DNASequence;
-import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -229,38 +228,6 @@ public class EntryController {
 
     protected boolean canEdit(String userId, String depositor, Entry entry) {
         return userId.equalsIgnoreCase(depositor) || authorization.canWriteThoroughCheck(userId, entry);
-    }
-
-    public ArrayList<History> getHistory(String userId, long entryId) {
-        Entry entry = dao.get(entryId);
-        if (entry == null)
-            return null;
-
-        authorization.expectWrite(userId, entry);
-        List<Audit> list = auditDAO.getAuditsForEntry(entry);
-        ArrayList<History> result = new ArrayList<>();
-        for (Audit audit : list) {
-            History history = audit.toDataTransferObject();
-            if (history.isLocalUser()) {
-                history.setAccount(accountController.getByEmail(history.getUserId()).toDataTransferObject());
-            }
-            result.add(history);
-        }
-        return result;
-    }
-
-    public boolean deleteHistory(String userId, long entryId, long historyId) {
-        Entry entry = dao.get(entryId);
-        if (entry == null)
-            return false;
-
-        authorization.expectWrite(userId, entry);
-        Audit audit = auditDAO.get(historyId);
-        if (audit == null)
-            return true;
-
-        auditDAO.delete(audit);
-        return true;
     }
 
     public PartStatistics retrieveEntryStatistics(String userId, long entryId) {

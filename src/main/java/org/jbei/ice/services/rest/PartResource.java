@@ -12,7 +12,6 @@ import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
-import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.ShotgunSequenceDTO;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.common.Results;
@@ -281,13 +280,15 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/history")
-    public ArrayList<History> getHistory(@Context final UriInfo info,
-                                         @PathParam("id") final long partId,
-                                         @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-                                         @QueryParam("sid") final String sid) {
-        String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
-        final String userId = getUserId(sessionId);
-        return controller.getHistory(userId, partId);
+    public Response getHistory(
+            @PathParam("id") long partId,
+            @QueryParam("limit") int limit,
+            @QueryParam("offset") int offset,
+            @QueryParam("asc") boolean asc,
+            @QueryParam("sort") String sort) {
+        String userId = requireUserId();
+        EntryHistory entryHistory = new EntryHistory(userId, partId);
+        return super.respond(entryHistory.get(limit, offset, asc, sort));
     }
 
     @DELETE
@@ -296,8 +297,8 @@ public class PartResource extends RestResource {
     public Response delete(@PathParam("id") final long partId,
                            @PathParam("historyId") final long historyId) {
         final String userId = getUserId();
-        final boolean success = controller.deleteHistory(userId, partId, historyId);
-        return super.respond(success);
+        EntryHistory entryHistory = new EntryHistory(userId, partId);
+        return super.respond(entryHistory.delete(historyId));
     }
 
     /**
@@ -309,7 +310,7 @@ public class PartResource extends RestResource {
     public Response getTraces(
             @Context final UriInfo info,
             @PathParam("id") final long partId,
-            @DefaultValue("1000") @QueryParam("limit") int limit,
+            @DefaultValue("10") @QueryParam("limit") int limit,
             @DefaultValue("0") @QueryParam("start") int start,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
             @QueryParam("sid") final String sid) {
