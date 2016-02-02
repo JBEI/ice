@@ -349,28 +349,20 @@ angular.module('ice.profile.controller', [])
                 });
         }
     })
-    .controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, User, Group) {
+    .controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, User,
+                                                     Group, Util) {
         var profileId = $stateParams.id;
         $location.path("profile/" + profileId + "/groups", false);
         $scope.selectedUsers = [];
         $scope.selectedRemoteUsers = [];
-        $scope.myGroups = [];
-        $scope.groupsIBelong = [];
         $scope.enteredUser = undefined;
-        $scope.showCreateGroup = false;
+        $scope.privateGroupsParams = {offset: 0, limit: 10, currentPage: 1, maxSize: 5};
 
         var user = User($cookieStore.get('sessionId'));
         var group = Group();
 
         // init: retrieve groups user belongs to and created
-        user.getGroups({userId: profileId}, function (result) {
-            angular.forEach(result, function (item) {
-                if (item.ownerEmail && item.ownerEmail === $rootScope.user.email)
-                    $scope.myGroups.push(item);
-                else
-                    $scope.groupsIBelong.push(item);
-            });
-
+        Util.get("rest/users/" + profileId + "/groups", function (result) {
             $scope.userGroups = result;
         });
 

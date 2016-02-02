@@ -5,10 +5,12 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.GroupDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Group;
@@ -69,42 +71,36 @@ public class GroupController {
      * Retrieves groups that user is either a member of. Users are implicit members of the groups
      * that they create so call also returns those groups
      *
-     * @param userIdString       user account  identifier of user making request
-     * @param userId             id of account whose groups are being requested
-     * @param includePublicGroup whether to include the public group that everyone is implicitly a member of
+     * @param userIdString user account  identifier of user making request
+     * @param userId       id of account whose groups are being requested
      * @return list of groups that user is a member of
      */
-    public ArrayList<UserGroup> retrieveUserGroups(String userIdString, long userId, boolean includePublicGroup) {
-        Account requester = accountController.getByEmail(userIdString);
-        Account account = accountController.get(userId);
+    public Results<UserGroup> retrieveUserGroups(String userIdString, long userId) {
+        AccountDAO accountDAO = DAOFactory.getAccountDAO();
+        Account requester = accountDAO.getByEmail(userIdString);
+        Account account = accountDAO.get(userId);
+
         // TODO : account authorization
         if (!accountController.isAdministrator(userIdString) && !account.equals(requester))
             return null;
 
         Set<Group> result = dao.retrieveMemberGroups(account);
-        ArrayList<UserGroup> userGroups = new ArrayList<>();
-        if (includePublicGroup) {
-            Group publicGroup = createOrRetrievePublicGroup();
-            userGroups.add(publicGroup.toDataTransferObject());
-        }
+        Results<UserGroup> groupResults = new Results<>();
 
         for (Group group : result) {
             UserGroup user = group.toDataTransferObject();
             long count = dao.getMemberCount(group.getUuid());
             user.setMemberCount(count);
-            userGroups.add(user);
+            groupResults.getData().add(user);
         }
-        return userGroups;
+        return groupResults;
     }
 
     public Set<String> retrieveAccountGroupUUIDs(String userId) {
         Account account = accountController.getByEmail(userId);
         Set<String> uuids = new HashSet<>();
         if (account != null) {
-            Set<Group> groups = dao.retrieveMemberGroups(account);
-            for (Group group : groups) {
-                uuids.add(group.getUuid());
-            }
+            uuids.addAll(dao.getMemberGroupUUIDs(account));
         }
         uuids.add(PUBLIC_GROUP_UUID);
         return uuids;

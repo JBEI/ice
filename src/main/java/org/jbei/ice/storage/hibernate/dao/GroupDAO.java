@@ -33,13 +33,10 @@ public class GroupDAO extends HibernateRepository<Group> {
      * @throws DAOException
      */
     public Group get(String uuid) throws DAOException {
-        Session session = currentSession();
-
         try {
-            Query query = session.createQuery("from " + Group.class.getName() + " where uuid = :uuid");
-            query.setString("uuid", uuid);
-            return (Group) query.uniqueResult();
-
+            return (Group) currentSession().createCriteria(Group.class)
+                    .add(Restrictions.eq("uuid", uuid))
+                    .uniqueResult();
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException(e);
@@ -47,7 +44,12 @@ public class GroupDAO extends HibernateRepository<Group> {
     }
 
     public long getMemberCount(String uuid) throws DAOException {
-        return get(uuid).getMembers().size();
+        Number number = (Number) currentSession().createCriteria(Group.class)
+                .add(Restrictions.eq("uuid", uuid))
+                .createAlias("members", "member")
+                .setProjection(Projections.rowCount())
+                .uniqueResult();
+        return number.longValue();
     }
 
     /**
@@ -113,18 +115,35 @@ public class GroupDAO extends HibernateRepository<Group> {
     }
 
     public Set<Group> retrieveMemberGroups(Account account) throws DAOException {
-        Criteria criteria = currentSession().createCriteria(Group.class);
-        // groups created
-        List list = criteria.add(Restrictions.eq("owner", account)).list();
-        HashSet<Group> groups = new HashSet<>(list);
+        try {
+            Criteria criteria = currentSession().createCriteria(Group.class)
+                    .createAlias("members", "member")
+                    .add(Restrictions.disjunction(Restrictions.eq("owner", account),
+                            Restrictions.eq("member.email", account.getEmail())));
+            return new HashSet<>(criteria.list());
+        } catch (HibernateException he) {
+            throw new DAOException(he);
+        }
+    }
 
-        criteria = currentSession().createCriteria(Group.class);
-        criteria.createAlias("members", "m");
-        criteria.add(Restrictions.eq("m.email", account.getEmail()));
-        list = criteria.list();
-        if (list != null)
-            groups.addAll(list);
-        return groups;
+    /**
+     * Retrieves all UUIDs that the specified account either owns or is a member of
+     *
+     * @param account account
+     * @return list of UUIDs matching the query
+     * @throws DAOException on hibernate exception
+     */
+    public Set<String> getMemberGroupUUIDs(Account account) throws DAOException {
+        try {
+            Criteria criteria = currentSession().createCriteria(Group.class)
+                    .createAlias("members", "member")
+                    .add(Restrictions.disjunction(Restrictions.eq("owner", account),
+                            Restrictions.eq("member.email", account.getEmail())))
+                    .setProjection(Projections.property("uuid"));
+            return new HashSet<>(criteria.list());
+        } catch (HibernateException he) {
+            throw new DAOException(he);
+        }
     }
 
     public List<Group> getGroupsByType(GroupType type, int offset, int limit) throws DAOException {

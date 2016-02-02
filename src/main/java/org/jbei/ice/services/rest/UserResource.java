@@ -24,7 +24,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,13 +45,12 @@ public class UserResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response get(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
             @DefaultValue("0") @QueryParam("offset") final int offset,
             @DefaultValue("15") @QueryParam("limit") final int limit,
             @DefaultValue("lastName") @QueryParam("sort") final String sort,
             @DefaultValue("true") @QueryParam("asc") final boolean asc,
             @QueryParam("filter") String filter) {
-        final String userId = getUserId(sessionId);
+        final String userId = getUserId();
         log(userId, "retrieving available accounts");
         try {
             Accounts accounts = new Accounts();
@@ -86,7 +84,7 @@ public class UserResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public AccountTransfer read(@Context final UriInfo info, @PathParam("id") final String userId) {
+    public AccountTransfer read(@PathParam("id") final String userId) {
         Account account;
         if (userId.matches("\\d+(\\.\\d+)?")) {
             account = controller.get(Long.decode(userId));
@@ -106,10 +104,8 @@ public class UserResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/groups")
-    public ArrayList<UserGroup> getProfileGroups(@Context final UriInfo info,
-                                                 @PathParam("id") final long userId) {
-        final String userIdString = getUserId();
-        return groupController.retrieveUserGroups(userIdString, userId, false);
+    public Response getProfileGroups(@PathParam("id") final long userId) {
+        return super.respond(groupController.retrieveUserGroups(getUserId(), userId));
     }
 
     /**
@@ -118,7 +114,8 @@ public class UserResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/groups")
-    public UserGroup createGroup(@PathParam("id") final long userId, final UserGroup userGroup) {
+    public UserGroup createGroup(@PathParam("id") final long userId,
+                                 final UserGroup userGroup) {
         final String userIdString = getUserId();
         return groupController.createGroup(userIdString, userGroup);
     }
