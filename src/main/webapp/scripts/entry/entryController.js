@@ -174,11 +174,14 @@ angular.module('ice.entry.controller', [])
             });
 
             modalInstance.result.then(function () {
+                $scope.tracesParams.start = 0;
+
                 Util.get("/rest/parts/" + entryId + "/traces", function (result) {
+                    Util.setFeedback("", "success");
                     $scope.traces = result;
                     $scope.showUploadOptions = false;
                     $scope.traceUploadError = false;
-                });
+                }, $scope.tracesParams);
             });
         };
 
