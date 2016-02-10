@@ -2,6 +2,7 @@ package org.jbei.ice.lib.net;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.AccessTokens;
+import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -111,5 +112,15 @@ public class RemoteContact {
     @SuppressWarnings("unchecked")
     public List<RegistryPartner> getPartners(String url, String token) {
         return restClient.getWor(url, "/rest/partners", ArrayList.class, null, token);
+    }
+
+    public AccountTransfer getUser(String url, String email) {
+        return restClient.get(url, "/rest/users/" + email, AccountTransfer.class, null);
+    }
+
+    public static void main(String[] args) {
+        RemoteContact contact = new RemoteContact();
+        AccountTransfer accountTransfer = contact.getUser("public-registry.jbei.org", "haplahar@lbl.gov");
+        System.out.println(accountTransfer);
     }
 }

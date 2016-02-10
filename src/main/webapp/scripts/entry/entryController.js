@@ -749,7 +749,7 @@ angular.module('ice.entry.controller', [])
         };
     })
     .controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group,
-                                                       filterFilter, Permission) {
+                                                       filterFilter, Permission, Util) {
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
         var panes = $scope.panes = [];
@@ -811,35 +811,40 @@ angular.module('ice.entry.controller', [])
         };
 
         var removePermission = function (permissionId) {
-            entry.removePermission({partId: $scope.entry.id, permissionId: permissionId},
-                function (result) {
-                    if (!result)
-                        return;
+            Util.remove("rest/parts/" + $scope.entry.id + "/permissions/" + permissionId, {}, function (result) {
+                if (!result)
+                    return;
 
-                    // check which pane is selected
-                    var pane;
-                    if ($scope.panes[0].selected)
-                        pane = $scope.panes[0];
-                    else
-                        pane = $scope.panes[1];
+                // check which pane is selected
+                var pane;
+                if ($scope.panes[0].selected)
+                    pane = $scope.panes[0];
+                else
+                    pane = $scope.panes[1];
 
-                    var i = -1;
+                var i = -1;
 
-                    for (var idx = 0; idx < $scope.activePermissions.length; idx += 1) {
-                        if (permissionId == $scope.activePermissions[idx].id) {
-                            i = idx;
-                            break;
-                        }
+                for (var idx = 0; idx < $scope.activePermissions.length; idx += 1) {
+                    if (permissionId == $scope.activePermissions[idx].id) {
+                        i = idx;
+                        break;
                     }
+                }
 
-                    if (i == -1) {
-                        console.log("not found");
-                        return;
-                    }
+                if (i == -1) {
+                    return;
+                }
 
-                    $scope.activePermissions.splice(i, 1);
-                    pane.count = $scope.activePermissions.length;
-                });
+                $scope.activePermissions.splice(i, 1);
+                pane.count = $scope.activePermissions.length;
+            });
+
+            //addPermission: {
+            //    method: 'POST',
+            //        responseType: 'json',
+            //        url: 'rest/parts/:partId/permissions',
+            //        headers: {'X-ICE-Authentication-SessionId': sessionId}
+            //},
         };
 
         //

@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.dto.permission;
 
+import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.storage.IDataTransferModel;
 
 public class AccessPermission implements IDataTransferModel {
@@ -10,6 +12,8 @@ public class AccessPermission implements IDataTransferModel {
     private long typeId;      // id for type of permission (entry or folder)
     private long articleId;   // id for article being acted on (group or account)
     private String display;   // account or group name
+    private AccountTransfer account;
+    private UserGroup group;
 
     public AccessPermission() {
     }
@@ -60,6 +64,22 @@ public class AccessPermission implements IDataTransferModel {
 
     public void setArticle(Article article) {
         this.article = article;
+    }
+
+    public AccountTransfer getAccount() {
+        return account;
+    }
+
+    public void setAccount(AccountTransfer account) {
+        this.account = account;
+    }
+
+    public UserGroup getGroup() {
+        return group;
+    }
+
+    public void setGroup(UserGroup group) {
+        this.group = group;
     }
 
     public boolean isCanRead() {

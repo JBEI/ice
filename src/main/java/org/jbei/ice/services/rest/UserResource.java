@@ -12,9 +12,11 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.user.UserPreferences;
+import org.jbei.ice.lib.dto.web.RemoteUsers;
 import org.jbei.ice.lib.entry.OwnerEntries;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.lib.group.UserGroups;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.Account;
@@ -62,6 +64,25 @@ public class UserResource extends RestResource {
     }
 
     /**
+     * Retrieves a remote user using the specified userId
+     * and partner id
+     *
+     * @param userEmail email of user to retrieve. must match exactly on the remote partner
+     * @param partnerId unique identifier for add partner
+     * @return todo
+     */
+    @GET
+    @Path("/remote")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getRemoteUser(
+            @QueryParam("email") String userEmail,
+            @QueryParam("pid") long partnerId) {
+        String userId = requireUserId();
+        RemoteUsers remoteUsers = new RemoteUsers(userId);
+        return super.respond(remoteUsers.get(partnerId, userEmail));
+    }
+
+    /**
      * Retrieves (up to specified limit), the list of users that match the value
      *
      * @param val   text to match against users
@@ -75,7 +96,8 @@ public class UserResource extends RestResource {
             @QueryParam("val") final String val,
             @DefaultValue("8") @QueryParam("limit") final int limit) {
         final String userId = getUserId();
-        return controller.getMatchingAccounts(userId, val, limit);
+        Accounts accounts = new Accounts();
+        return accounts.filterAccount(userId, val, limit);
     }
 
     /**
@@ -85,6 +107,7 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     public AccountTransfer read(@PathParam("id") final String userId) {
+        // todo : lock to partners only
         Account account;
         if (userId.matches("\\d+(\\.\\d+)?")) {
             account = controller.get(Long.decode(userId));
@@ -105,7 +128,10 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/groups")
     public Response getProfileGroups(@PathParam("id") final long userId) {
-        return super.respond(groupController.retrieveUserGroups(getUserId(), userId));
+        String userIdStr = requireUserId();
+        log(userIdStr, " get profile groups");
+        UserGroups userGroups = new UserGroups(userIdStr);
+        return super.respond(userGroups.get(userId));
     }
 
     /**
@@ -165,7 +191,8 @@ public class UserResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/preferences/{key}")
     public PreferenceInfo updatePreference(@PathParam("id") final long userId,
-                                           @PathParam("key") final String key, @QueryParam("value") final String value) {
+                                           @PathParam("key") final String key,
+                                           @QueryParam("value") final String value) {
         final String userIdString = getUserId();
         final PreferencesController preferencesController = new PreferencesController();
         return preferencesController.updatePreference(userIdString, userId, key, value);

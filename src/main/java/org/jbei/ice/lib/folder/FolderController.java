@@ -378,51 +378,8 @@ public class FolderController {
         permission.setTypeId(folderId);
         permission.setArticle(AccessPermission.Article.GROUP);
         permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
-        return createFolderPermission(userId, folderId, permission) != null;
-    }
-
-    public AccessPermission createFolderPermission(String userId, long folderId, AccessPermission accessPermission) {
-        if (accessPermission == null)
-            return null;
-
-        Folder folder = dao.get(folderId);
-        if (folder == null)
-            return null;
-
-        authorization.expectWrite(userId, folder);
-
-        Permission permission = new Permission();
-        permission.setFolder(folder);
-        if (accessPermission.getArticle() == AccessPermission.Article.GROUP) {
-            Group group = DAOFactory.getGroupDAO().get(accessPermission.getArticleId());
-            if (group == null) {
-                Logger.error("Could not assign group with id " + accessPermission.getArticleId() + " to folder");
-                return null;
-            }
-            permission.setGroup(group);
-        } else {
-            Account account = DAOFactory.getAccountDAO().get(accessPermission.getArticleId());
-            if (account == null) {
-                Logger.error("Could not assign account with id " + accessPermission.getArticleId() + " to folder");
-                return null;
-            }
-            permission.setAccount(account);
-        }
-
-        permission.setCanRead(accessPermission.isCanRead());
-        permission.setCanWrite(accessPermission.isCanWrite());
-        AccessPermission created = permissionDAO.create(permission).toDataTransferObject();
-        if (folder.getType() == FolderType.PRIVATE) {
-            folder.setType(FolderType.SHARED);
-            folder.setModificationTime(new Date());
-            dao.update(folder);
-        }
-
-        // propagate permission
-        if (folder.isPropagatePermissions()) {
-            permissionsController.propagateFolderPermissions(userId, folder, true);
-        }
-        return created;
+        FolderPermissions folderPermissions = new FolderPermissions(folderId);
+        return folderPermissions.createFolderPermission(userId, permission) != null;
     }
 
     public boolean disablePublicReadAccess(String userId, long folderId) {

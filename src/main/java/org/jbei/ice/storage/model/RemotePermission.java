@@ -12,7 +12,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "REMOTE_PERMISSION")
-@SequenceGenerator(name = "sequence", sequenceName = "permission_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "sequence", sequenceName = "remote_permission_id_seq", allocationSize = 1)
 
 public class RemotePermission implements DataModel {
 
@@ -20,18 +20,21 @@ public class RemotePermission implements DataModel {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
-    private Account account;    // local account performing the share
-
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "remote_partner_id", nullable = false)
-    private RemotePartner remotePartner;
-
-    private String userId; // id of user on "remotePartner" who is recipient of share
-
+    @Column(name = "secret")
     private String secret; // private secret used to validate remote secret
 
     @Enumerated(value = EnumType.STRING)
-    private org.jbei.ice.lib.access.AccessType accessType; //read or write
+    private AccessType accessType; //read or write
+
+    @Column(name = "can_read")
+    private boolean canRead;
+
+    @Column(name = "can_write")
+    private boolean canWrite;
+
+    @OneToOne
+    @JoinColumn(name = "client_id", nullable = false)
+    private ClientModel client;
 
     @Override
     public long getId() {
@@ -43,22 +46,6 @@ public class RemotePermission implements DataModel {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
-    public RemotePartner getRemotePartner() {
-        return remotePartner;
-    }
-
-    public void setRemotePartner(RemotePartner remotePartner) {
-        this.remotePartner = remotePartner;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
     public String getSecret() {
         return secret;
     }
@@ -67,11 +54,35 @@ public class RemotePermission implements DataModel {
         this.secret = secret;
     }
 
-    public org.jbei.ice.lib.access.AccessType getAccessType() {
+    public AccessType getAccessType() {
         return accessType;
     }
 
-    public void setAccessType(org.jbei.ice.lib.access.AccessType accessType) {
+    public void setAccessType(AccessType accessType) {
         this.accessType = accessType;
+    }
+
+    public ClientModel getClient() {
+        return client;
+    }
+
+    public void setClient(ClientModel client) {
+        this.client = client;
+    }
+
+    public boolean isCanRead() {
+        return canRead;
+    }
+
+    public void setCanRead(boolean canRead) {
+        this.canRead = canRead;
+    }
+
+    public boolean isCanWrite() {
+        return canWrite;
+    }
+
+    public void setCanWrite(boolean canWrite) {
+        this.canWrite = canWrite;
     }
 }

@@ -350,7 +350,7 @@ angular.module('ice.profile.controller', [])
         }
     })
     .controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, User,
-                                                     Group, Util) {
+                                                     Group, $uibModal, Util) {
         var profileId = $stateParams.id;
         $location.path("profile/" + profileId + "/groups", false);
         $scope.selectedUsers = [];
@@ -436,6 +436,68 @@ angular.module('ice.profile.controller', [])
             }, function (error) {
                 console.error(error);
             });
+        };
+
+        $scope.openCreateGroupModal = function (group) {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/profile/modal/edit-group.html',
+                controller: 'ProfileGroupsModalController',
+                backdrop: "static",
+                //size: "lg",
+                resolve: {
+                    currentGroup: function () {
+                        return group;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (result) {
+                if (!result)
+                    return;
+
+                Util.setFeedback("Group successfully created", "success");
+                $scope.groupListPageChanged();
+            })
+        };
+
+        $scope.deleteUserGroup = function (group) {
+            Util.remove("rest/groups/" + group.id, {}, function (result) {
+                var i = $scope.userGroups.data.indexOf(group);
+                if (i >= 0)
+                    $scope.userGroups.data.splice(i, 1);
+                console.log(result);
+            })
         }
+    })
+    .controller('ProfileGroupsModalController', function ($scope, Util, currentGroup, $uibModalInstance) {
+        $scope.headerMessage = currentGroup ? "Update \"" + currentGroup.label + "\"" : "Create New Group";
+
+        $scope.closeGroupModal = function () {
+            $uibModalInstance.close();
+        };
+
+        $scope.newGroup = {remoteMembers: [], members: []};
+
+        // adds a remote user to the new group object
+        $scope.addRemoteUser = function () {
+            Util.get("rest/users/remote", function (result) {
+                $scope.newGroup.remoteMembers.push(result);
+            }, {pid: 34, email: $scope.remoteUser}, function (error) {
+                console.log(error);
+                if (error.status == 404) {
+                    // show to user
+                } else {
+                    // other error
+                }
+            });
+        };
+
+        $scope.createNewGroup = function () {
+            Util.post("rest/groups", $scope.newGroup, function (result) {
+                console.log(result);
+            }, {}, function (error) {
+
+            })
+        };
     })
 ;

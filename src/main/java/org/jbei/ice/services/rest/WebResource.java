@@ -142,7 +142,7 @@ public class WebResource extends RestResource {
         if (StringUtils.isEmpty(sessionId))
             return super.respond(controller.getWebPartners(worToken, url));
         final String userId = getUserId();
-        return super.respond(controller.getWebPartners(userId));
+        return super.respond(controller.getWebPartners());
     }
 
     @PUT

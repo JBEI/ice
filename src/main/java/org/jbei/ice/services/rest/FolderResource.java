@@ -8,6 +8,7 @@ import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.folder.FolderContents;
 import org.jbei.ice.lib.folder.FolderController;
+import org.jbei.ice.lib.folder.FolderPermissions;
 import org.jbei.ice.lib.folder.UserFolder;
 import org.jbei.ice.lib.shared.ColumnField;
 
@@ -222,11 +223,12 @@ public class FolderResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
-    public AccessPermission addPermission(@Context final UriInfo info,
-                                          @PathParam("id") final long folderId,
-                                          final AccessPermission permission) {
-        final String userId = getUserId();
-        return controller.createFolderPermission(userId, folderId, permission);
+    public Response addPermission(@Context final UriInfo info,
+                                  @PathParam("id") final long folderId,
+                                  final AccessPermission permission) {
+        final String userId = requireUserId();
+        FolderPermissions folderPermissions = new FolderPermissions(folderId);
+        return super.respond(folderPermissions.createFolderPermission(userId, permission));
     }
 
     @DELETE

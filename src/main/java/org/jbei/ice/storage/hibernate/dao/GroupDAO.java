@@ -6,6 +6,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.group.GroupController;
@@ -114,13 +115,15 @@ public class GroupDAO extends HibernateRepository<Group> {
         }
     }
 
-    public Set<Group> retrieveMemberGroups(Account account) throws DAOException {
+    public List<Group> retrieveMemberGroups(Account account) throws DAOException {
         try {
             Criteria criteria = currentSession().createCriteria(Group.class)
-                    .createAlias("members", "member")
-                    .add(Restrictions.disjunction(Restrictions.eq("owner", account),
+                    .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+                    .createAlias("members", "member", JoinType.LEFT_OUTER_JOIN)
+                    .add(Restrictions.disjunction(
+                            Restrictions.eq("owner", account),
                             Restrictions.eq("member.email", account.getEmail())));
-            return new HashSet<>(criteria.list());
+            return criteria.list();
         } catch (HibernateException he) {
             throw new DAOException(he);
         }
@@ -136,7 +139,7 @@ public class GroupDAO extends HibernateRepository<Group> {
     public Set<String> getMemberGroupUUIDs(Account account) throws DAOException {
         try {
             Criteria criteria = currentSession().createCriteria(Group.class)
-                    .createAlias("members", "member")
+                    .createAlias("members", "member", JoinType.LEFT_OUTER_JOIN)
                     .add(Restrictions.disjunction(Restrictions.eq("owner", account),
                             Restrictions.eq("member.email", account.getEmail())))
                     .setProjection(Projections.property("uuid"));

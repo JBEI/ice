@@ -99,10 +99,7 @@ public class RemoteAccessController {
                 // local record
                 RemotePermission remotePermission = new RemotePermission();
                 RemotePartner remotePartner = remotePartnerDAO.getByUrl(url);
-                remotePermission.setRemotePartner(remotePartner);
-                remotePermission.setUserId(permission.getUserId());
                 remotePermission.setSecret(privateSecret);
-                remotePermission.setAccessType(permission.getAccessType());
                 dao.create(remotePermission);
             } catch (Exception e) {
                 Logger.error(e);

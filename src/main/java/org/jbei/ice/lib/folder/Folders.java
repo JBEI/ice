@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.folder;
 
+import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.storage.DAOFactory;
@@ -19,9 +20,13 @@ import java.util.Set;
 public class Folders {
 
     private final FolderDAO dao;
+    private final FolderAuthorization authorization;
+    private final String userId;
 
-    public Folders() {
+    public Folders(String userId) {
         this.dao = DAOFactory.getFolderDAO();
+        this.authorization = new FolderAuthorization();
+        this.userId = userId;
     }
 
     /**
@@ -45,4 +50,6 @@ public class Folders {
 
         return result;
     }
+
+
 }

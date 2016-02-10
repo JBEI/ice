@@ -155,13 +155,10 @@ public class WoRController {
         return getWebPartners();
     }
 
-    public List<RegistryPartner> getWebPartners(String userId) {
-        if (!isInWebOfRegistries() || !new AccountController().isAdministrator(userId))
+    public List<RegistryPartner> getWebPartners() {
+        if (!isInWebOfRegistries())
             return null;
-        return getWebPartners();
-    }
 
-    protected List<RegistryPartner> getWebPartners() {
         List<RemotePartner> partners = DAOFactory.getRemotePartnerDAO().getRegistryPartners();
         List<RegistryPartner> registryPartners = new ArrayList<>();
         if (partners == null)

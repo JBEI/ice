@@ -120,10 +120,12 @@ public class Permission implements DataModel {
         if (group != null) {
             access.setArticle(AccessPermission.Article.GROUP);
             access.setArticleId(group.getId());
+            access.setGroup(group.toDataTransferObject());
             access.setDisplay(group.getLabel());
         } else if (account != null) {
             access.setArticle(AccessPermission.Article.ACCOUNT);
             access.setArticleId(account.getId());
+            access.setAccount(account.toDataTransferObject());
             access.setDisplay(getAccount().getFullName());
         }
 

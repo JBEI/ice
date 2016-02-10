@@ -1,58 +1,6 @@
 <div ng-controller="ProfileGroupsController">
     <div class="pad_top">
-        <button type="button" ng-click="showCreateGroup=true" class="ice-button">Create Private Group</button>
-    </div>
-
-    <div class="margin-top-10 panel panel-default" ng-if="showCreateGroup" style="background-color: #ededed">
-        <form class="panel-body" ng-submit="createGroup(groupName, groupDescription)">
-            <div class="col-md-4 pad-top-5 form-group">
-                <input type="text" class="login_input" placeholder="Group Name" size="35" maxlength="35"
-                       ng-model="groupName"/>
-                <br>
-                <input type="text" class="login_input" placeholder="Group Description" size="35" maxlength="45"
-                       ng-model="groupDescription"/>
-            </div>
-
-            <div class="col-md-8 pad-top-5">
-                <b class="font-75em">SELECT OR ADD USERS</b><br>
-                <input class="input_box" type="text" ng-model="enteredUser" placeHolder="Enter Email or Name"
-                       ng-change="filterUsers(enteredUser)" style="width: 210px"/>
-
-                <br><br>
-
-                <div style="background-color: #fff; height: 200px; overflow: auto; width: 400px">
-
-                    <div ng-if="!filtering && !userMatches" style="opacity: 0.7;" class="small pad-8">
-                        <i>To manually add a registered user, enter the email and click "Add"</i>
-                    </div>
-
-                    <table class="table table-condensed striped table-hover">
-                        <tr ng-repeat="user in userMatches | orderBy:'firstName' | orderBy:'fullName'">
-                            <td ng-click="selectUser(user)" class="font-80em no_wrap hover_icon_visible cursor_pointer">
-                                <i class="fa" ng-class="{'fa-circle-o': selectedUsers.indexOf(user) == -1,
-                                   'fa-circle green': selectedUsers.indexOf(user)!=-1}"
-                                   style="font-size: 14px"></i>&nbsp; {{user.firstName}} {{user.lastName}}
-                                <small class="opacity_4 pad-left-8">{{user.email}}</small>
-
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-
-                <small ng-if="(selectedUsers.length+selectedRemoteUsers.length) > 0"
-                       style="margin-top: 15px; color: #777">{{selectedUsers.length}} selected
-                    <button ng-click="resetSelectedUsers()" class="btn-xs btn-link">
-                        <i class="fa fa-fw fa-times"></i>Reset
-                    </button>
-                </small>
-                <small ng-if="!selectedUsers.length" style="margin-top: 15px; color: #777">0 users selected</small>
-            </div>
-
-            <div class="col-xs-offset-1 col-md-11">
-                <button type="submit" ng-disabled="!groupName" class="btn btn-primary">Submit</button>
-                <button type="reset" ng-click="cancelGroupCreate()" class="btn btn-default">Cancel</button>
-            </div>
-        </form>
+        <button type="button" ng-click="openCreateGroupModal()" class="ice-button">Create Private Group</button>
     </div>
 
     <table class="table table-hover margin-top-10 table-border-bottom">
@@ -82,11 +30,14 @@
                           'label-default': group.memberCount == 0}">{{group.memberCount | number}}
                     </span>
             </td>
-            <td style="width:180px">{{group.creationTime | date:'MMM d, yyyy'}}</td>
-            <td style="width:150px; white-space:nowrap; vertical-align: middle">
+            <td style="width:180px">
+                {{group.ownerEmail}} <br>
+                <small class="text-muted">{{group.creationTime | date:'MMM d, yyyy'}}</small>
+            </td>
+            <td style="width:150px; white-space:nowrap; vertical-align: middle" ng-if="user.email==group.ownerEmail">
                 <div ng-if="!group.confirmDeleteGroup">
                     <i class="fa fa-fw fa-pencil font-14em edit_icon" uib-tooltip="Edit"
-                       ng-click="openCreatePublicGroupModal(group)"></i>
+                       ng-click="openCreateGroupModal(group)"></i>
                     &nbsp;
                     <i class="fa fa-fw fa-trash font-14em delete_icon" ng-click="group.confirmDeleteGroup = true"
                        uib-tooltip="Delete"></i>
@@ -94,28 +45,31 @@
 
                 <div ng-if="group.confirmDeleteGroup">
                     Delete?
-                    <button class="btn btn-primary btn-xs">Yes</button>
+                    <button class="btn btn-primary btn-xs" ng-click="deleteUserGroup(group)">Yes</button>
                     <button class="btn btn-default btn-xs" ng-click="group.confirmDeleteGroup=false">No</button>
                 </div>
+            </td>
+            <td style="width:150px;" ng-if="user.email!=group.ownerEmail">
+                <i class="fa fa-fw fa-user-times font-14em delete_icon" uib-tooltip="Leave"></i>
             </td>
         </tr>
         </tbody>
     </table>
 
-    <div class="col-md-5" style="padding-left: 0">
-        <uib-pagination total-items="userGroups.resultCount" ng-change="groupListPageChanged()"
-                        ng-model="privateGroupsParams.currentPage"
-                        max-size="privateGroupsParams.maxSize" class="pagination-sm"
-                        items-per-page="privateGroupsParams.limit"
-                        boundary-links="true"></uib-pagination>
-    </div>
+    <!--<div class="col-md-5" style="padding-left: 0">-->
+    <!--<uib-pagination total-items="userGroups.resultCount" ng-change="groupListPageChanged()"-->
+    <!--ng-model="privateGroupsParams.currentPage"-->
+    <!--max-size="privateGroupsParams.maxSize" class="pagination-sm"-->
+    <!--items-per-page="privateGroupsParams.limit"-->
+    <!--boundary-links="true"></uib-pagination>-->
+    <!--</div>-->
 
-    <div class="col-md-7" style="margin-top: 25px;">
-        <strong class="small">
-            <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
-            {{pageCounts(adminGroupsPagingParams.currentPage, adminGroupsPagingParams.available)}}
-        </strong>
-    </div>
-</div>
+    <!--<div class="col-md-7" style="margin-top: 25px;">-->
+    <!--<strong class="small">-->
+    <!--<i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>-->
+    <!--{{pageCounts(adminGroupsPagingParams.currentPage, adminGroupsPagingParams.available)}}-->
+    <!--</strong>-->
+    <!--</div>-->
+    <!--</div>-->
 </div>
 

@@ -31,6 +31,7 @@ public class DAOFactory {
     private static ExperimentDAO experimentDAO;
     private static ParameterDAO parameterDAO;
     private static ApiKeyDAO apiKeyDAO;
+    private static ClientModelDAO clientModelDAO;
 
     public static AccountDAO getAccountDAO() {
         if (accountDAO == null)
@@ -146,7 +147,6 @@ public class DAOFactory {
         return traceSequenceDAO;
     }
 
-
     public static ShotgunSequenceDAO getShotgunSequenceDAO() {
         if (shotgunSequenceDAO == null)
             shotgunSequenceDAO = new ShotgunSequenceDAO();
@@ -175,5 +175,11 @@ public class DAOFactory {
         if (apiKeyDAO == null)
             apiKeyDAO = new ApiKeyDAO();
         return apiKeyDAO;
+    }
+
+    public static ClientModelDAO getClientModelDAO() {
+        if (clientModelDAO == null)
+            clientModelDAO = new ClientModelDAO();
+        return clientModelDAO;
     }
 }
