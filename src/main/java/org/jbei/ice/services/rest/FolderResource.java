@@ -2,9 +2,9 @@ package org.jbei.ice.services.rest;
 
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.folder.FolderContents;
 import org.jbei.ice.lib.folder.FolderController;

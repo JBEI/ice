@@ -1,4 +1,4 @@
-package org.jbei.ice.lib.dto.permission;
+package org.jbei.ice.lib.dto.access;
 
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dto.group.UserGroup;

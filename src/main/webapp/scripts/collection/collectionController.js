@@ -146,7 +146,7 @@ angular.module('ice.collection.controller', [])
         $scope.folder = folder;
         $scope.userFilterInput = undefined;
         var folders = Folders();
-        $scope.newPermission = {canWrite: false, canRead: true, type: 'account', typeId: folder.id};
+        $scope.newPermission = {canWrite: false, canRead: true, article: 'ACCOUNT', typeId: folder.id};
         $scope.permissions = [];
         $scope.placeHolder = "Enter user name or email";
         $scope.resultSubField = "email";

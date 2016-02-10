@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.dto.entry;
 
-import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.ArrayList;

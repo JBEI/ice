@@ -471,12 +471,20 @@ angular.module('ice.profile.controller', [])
     })
     .controller('ProfileGroupsModalController', function ($scope, Util, currentGroup, $uibModalInstance) {
         $scope.headerMessage = currentGroup ? "Update \"" + currentGroup.label + "\"" : "Create New Group";
+        $scope.webPartners = [];
 
         $scope.closeGroupModal = function () {
             $uibModalInstance.close();
         };
 
         $scope.newGroup = {remoteMembers: [], members: []};
+
+        var getWebPartners = function () {
+            Util.list("rest/partners", function (result) {
+                $scope.webPartners = result;
+            });
+        };
+        getWebPartners();
 
         // adds a remote user to the new group object
         $scope.addRemoteUser = function () {

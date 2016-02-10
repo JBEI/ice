@@ -4,7 +4,7 @@ import org.hibernate.search.annotations.Analyze;
 import org.hibernate.search.annotations.ClassBridge;
 import org.hibernate.search.annotations.ContainedIn;
 import org.jbei.ice.lib.access.PermissionEntryBridge;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
