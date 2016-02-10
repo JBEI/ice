@@ -254,8 +254,7 @@ angular.module('ice.wor.controller', [])
         };
     })
     .controller('WebOfRegistriesController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
-                                                       $stateParams, WebOfRegistries, Remote, Util, Settings) {
-        var setting = Settings($cookieStore.get("sessionId"));
+                                                       $stateParams, WebOfRegistries, Remote, Util) {
         $scope.newPartner = undefined;
         $scope.partnerStatusList = [
             {status: 'BLOCKED', action: 'Block'},
