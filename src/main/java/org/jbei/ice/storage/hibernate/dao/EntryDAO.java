@@ -385,7 +385,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         criteria.add(Restrictions.eq("entry.ownerEmail", owner));
 
         // sort
-        String fieldName = sortField == ColumnField.CREATED ? "entry.id" : columnFieldToString(sortField);
+        String fieldName = sortField == ColumnField.CREATED ? "entry.id" : "entry." + columnFieldToString(sortField);
         criteria.addOrder(asc ? Order.asc(fieldName) : Order.desc(fieldName));
         checkAddFilter(criteria, filter, "entry");
         criteria.setFirstResult(start);
