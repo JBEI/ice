@@ -245,9 +245,8 @@ public class FolderResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions/public")
-    public Response enablePublicAccess(@Context final UriInfo info,
-                                       @PathParam("id") final long folderId) {
-        final String userId = getUserId();
+    public Response enablePublicAccess(@PathParam("id") final long folderId) {
+        final String userId = requireUserId();
         if (controller.enablePublicReadAccess(userId, folderId)) {
             return respond(Response.Status.OK);
         }
@@ -262,7 +261,7 @@ public class FolderResource extends RestResource {
     @Path("/{id}/permissions/public")
     public Response disablePublicAccess(@Context final UriInfo info,
                                         @PathParam("id") final long folderId) {
-        final String userId = getUserId();
+        final String userId = requireUserId();
         if (controller.disablePublicReadAccess(userId, folderId)) {
             return respond(Response.Status.OK);
         }
