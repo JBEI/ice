@@ -491,7 +491,7 @@ angular.module('ice.profile.controller', [])
             Util.get("rest/users/remote", function (result) {
                 $scope.newGroup.remoteMembers.push(result);
             }, {pid: 34, email: $scope.remoteUser}, function (error) {
-                console.log(error);
+                console.log("error fetching remote user");
                 if (error.status == 404) {
                     // show to user
                 } else {

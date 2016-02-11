@@ -187,19 +187,25 @@ angular.module('ice.collection.controller', [])
             $uibModalInstance.close('cancel'); // todo : pass object to inform if folder is shared or cleared
         };
 
-        $scope.setPermissionType = function (type) {
+        $scope.setPermissionArticle = function (type) {
             $scope.newPermission.article = type.toUpperCase();
             $scope.newPermission.articleId = undefined;
 
-            if (type == "account") {
-                $scope.placeHolder = "Enter user name or email";
-                $scope.resultSubField = "email";
-            } else if (type == "group") {
-                $scope.placeHolder = "Enter group name";
-                $scope.resultSubField = "label";
-            } else if (type == 'remote') {
-                getWebPartners();
-                $scope.placeHolder = "Enter remote user email";
+            switch (type.toLowerCase()) {
+                case "account":
+                    $scope.placeHolder = "Enter user name or email";
+                    $scope.resultSubField = "email";
+                    break;
+
+                case "group":
+                    $scope.placeHolder = "Enter group name";
+                    $scope.resultSubField = "label";
+                    break;
+
+                case "remote":
+                    getWebPartners();
+                    $scope.placeHolder = "Enter remote user email";
+                    break;
             }
         };
 
@@ -238,16 +244,18 @@ angular.module('ice.collection.controller', [])
             });
         };
 
-        $scope.enablePublicRead = function (folder) {
-            Folders().enablePublicReadAccess({id: folder.id}, function (result) {
-                folder.publicReadAccess = true;
-            });
-        };
-
-        $scope.disablePublicRead = function (folder) {
-            Folders().disablePublicReadAccess({folderId: folder.id}, function (result) {
-                folder.publicReadAccess = false;
-            })
+        $scope.enableDisablePublicRead = function () {
+            if (!$scope.folder.publicReadAccess) {
+                //enable
+                Util.update("rest/folders/" + folder.id + "/permissions/public", {}, {}, function (result) {
+                    folder.publicReadAccess = true;
+                })
+            } else {
+                // disable
+                Util.remove("rest/folders/" + folder.id + "/permissions/public", {}, function (result) {
+                    folder.publicReadAccess = false;
+                });
+            }
         };
 
         $scope.filter = function (val) {
