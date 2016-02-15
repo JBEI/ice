@@ -52,6 +52,9 @@ public class Permission implements DataModel {
     @JoinColumn(name = "upload_id")
     private BulkUpload upload;
 
+    @OneToOne(cascade = CascadeType.PERSIST)
+    private RemoteShareModel remoteShare;
+
     public long getId() {
         return id;
     }
@@ -110,6 +113,14 @@ public class Permission implements DataModel {
 
     public void setFolder(Folder folder) {
         this.folder = folder;
+    }
+
+    public RemoteShareModel getRemoteShare() {
+        return remoteShare;
+    }
+
+    public void setRemoteShare(RemoteShareModel remoteShare) {
+        this.remoteShare = remoteShare;
     }
 
     @Override

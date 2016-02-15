@@ -20,10 +20,6 @@ public class ClientModel implements DataModel {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
-    @OneToOne
-    @JoinColumn(name = "account_id", nullable = true)
-    private Account localAccount;
-
     @Column(name = "email")
     private String email;
 
@@ -38,14 +34,6 @@ public class ClientModel implements DataModel {
     @Override
     public long getId() {
         return id;
-    }
-
-    public Account getLocalAccount() {
-        return localAccount;
-    }
-
-    public void setLocalAccount(Account localAccount) {
-        this.localAccount = localAccount;
     }
 
     public String getEmail() {

@@ -5,6 +5,7 @@ import org.jbei.auth.hmac.HmacSignature;
 import org.jbei.ice.lib.access.TokenVerification;
 import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HeaderParam;
@@ -122,11 +123,17 @@ public class RestResource {
         return userId;
     }
 
-    protected void verifyWebPartnerUrl() {
+    protected RegistryPartner verifyWebPartner() {
+        RegistryPartner partner = getWebPartner();
+        if (partner == null)
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        return partner;
+    }
+
+    protected RegistryPartner getWebPartner() {
         String clientId = !StringUtils.isEmpty(apiClientId) ? apiClientId : request.getRemoteHost();
         TokenVerification tokenVerification = new TokenVerification();
-        if (!tokenVerification.verifyPartnerToken(clientId, worPartnerToken))
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        return tokenVerification.verifyPartnerToken(clientId, worPartnerToken);
     }
 
     /**

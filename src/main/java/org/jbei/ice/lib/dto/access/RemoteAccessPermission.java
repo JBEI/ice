@@ -1,48 +1,21 @@
 package org.jbei.ice.lib.dto.access;
 
-import org.jbei.ice.lib.access.AccessType;
-import org.jbei.ice.lib.access.Article;
-import org.jbei.ice.storage.IDataTransferModel;
+import org.jbei.ice.lib.dto.folder.FolderDetails;
 
 /**
+ * Access permission for remote access. Includes more information than the regular access permission object
+ *
  * @author Hector Plahar
  */
-public class RemoteAccessPermission implements IDataTransferModel {
+public class RemoteAccessPermission extends AccessPermission {
 
-    private String userId;
-    private AccessType accessType;
-    private Article article;
-    private String secret;
+    private FolderDetails folderDetails;
 
-    public String getUserId() {
-        return userId;
+    public FolderDetails getFolderDetails() {
+        return folderDetails;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public AccessType getAccessType() {
-        return accessType;
-    }
-
-    public void setAccessType(AccessType accessType) {
-        this.accessType = accessType;
-    }
-
-    public Article getArticle() {
-        return article;
-    }
-
-    public void setArticle(Article article) {
-        this.article = article;
-    }
-
-    public String getSecret() {
-        return secret;
-    }
-
-    public void setSecret(String secret) {
-        this.secret = secret;
+    public void setFolderDetails(FolderDetails folderDetails) {
+        this.folderDetails = folderDetails;
     }
 }

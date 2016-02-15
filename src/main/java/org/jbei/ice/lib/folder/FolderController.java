@@ -21,7 +21,10 @@ import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.FolderDAO;
 import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
-import org.jbei.ice.storage.model.*;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.Folder;
+import org.jbei.ice.storage.model.Group;
 
 import java.util.*;
 
@@ -307,27 +310,6 @@ public class FolderController {
         return folderDetails;
     }
 
-    public ArrayList<AccessPermission> getPermissions(String userId, long folderId) {
-        Folder folder = dao.get(folderId);
-        if (folder == null)
-            return null;
-
-        authorization.expectWrite(userId, folder);
-
-        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
-        Set<Permission> permissions = permissionDAO.getFolderPermissions(folder);
-
-        for (Permission permission : permissions) {
-            if (permission.getGroup() != null && permission.getGroup().getUuid().equals(
-                    GroupController.PUBLIC_GROUP_UUID))
-                continue;
-
-            accessPermissions.add(permission.toDataTransferObject());
-        }
-
-        return accessPermissions;
-    }
-
     /**
      * Retrieves folders that have been shared with specified user as an individual or as part of a group.
      *
@@ -379,7 +361,7 @@ public class FolderController {
         permission.setArticle(AccessPermission.Article.GROUP);
         permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
         FolderPermissions folderPermissions = new FolderPermissions(folderId);
-        return folderPermissions.createFolderPermission(userId, permission) != null;
+        return folderPermissions.createPermission(userId, permission) != null;
     }
 
     public boolean disablePublicReadAccess(String userId, long folderId) {

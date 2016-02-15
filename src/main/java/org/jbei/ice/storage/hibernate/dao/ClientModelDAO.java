@@ -7,8 +7,7 @@ import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.ClientModel;
 import org.jbei.ice.storage.model.Group;
-
-import java.util.List;
+import org.jbei.ice.storage.model.RemotePartner;
 
 /**
  * @author Hector Plahar
@@ -40,13 +39,11 @@ public class ClientModelDAO extends HibernateRepository<ClientModel> {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public List<ClientModel> getForGroup(Group group) throws DAOException {
+    public ClientModel getModel(String email, RemotePartner remotePartner) throws DAOException {
         try {
-            return currentSession().createCriteria(ClientModel.class)
-                    .add(Restrictions.eq("group", group))
-                    .add(Restrictions.isNotNull("email"))
-                    .list();
+            return (ClientModel) currentSession().createCriteria(ClientModel.class)
+                    .add(Restrictions.eq("email", email))
+                    .add(Restrictions.eq("remotePartner", remotePartner)).uniqueResult();
         } catch (HibernateException he) {
             throw new DAOException(he);
         }

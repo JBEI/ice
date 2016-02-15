@@ -5,6 +5,7 @@ import org.jbei.ice.lib.access.AccessTokens;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
@@ -118,9 +119,15 @@ public class RemoteContact {
         return restClient.get(url, "/rest/users/" + email, AccountTransfer.class, null);
     }
 
-    public static void main(String[] args) {
-        RemoteContact contact = new RemoteContact();
-        AccountTransfer accountTransfer = contact.getUser("public-registry.jbei.org", "haplahar@lbl.gov");
-        System.out.println(accountTransfer);
+    public AccessPermission shareFolder(String url, AccessPermission permission, String token) {
+        return restClient.postWor(url, "rest/permissions/remote", permission, AccessPermission.class, null, token);
+    }
+
+    public FolderDetails getRemoteContents(String url, String userId, long folderId, String token) {
+        // todo : paging params
+        Map<String, Object> queryParams = new HashMap<>();
+        queryParams.put("token", token);
+        queryParams.put("userId", userId);
+        return restClient.get(url, "rest/folders/" + folderId + "/entries", FolderDetails.class, queryParams);
     }
 }

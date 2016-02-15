@@ -160,7 +160,6 @@ angular.module('ice.collection.controller', [])
                 permission.canRead = perm.type == 'READ_FOLDER';
                 $scope.permissions.push(permission);
             });
-            console.log(result);
         });
 
         var getWebPartners = function () {
@@ -190,6 +189,7 @@ angular.module('ice.collection.controller', [])
         $scope.setPermissionArticle = function (type) {
             $scope.newPermission.article = type.toUpperCase();
             $scope.newPermission.articleId = undefined;
+            $scope.newPermission.partner = undefined;
 
             switch (type.toLowerCase()) {
                 case "account":
@@ -222,7 +222,11 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.removePermission = function (permission) {
-            Util.remove("rest/folders/" + folder.id + "/permissions/" + permission.id, {}, function (result) {
+            var pid = permission.id;
+            if (permission.article == "REMOTE")
+                pid = permission.articleId;
+
+            Util.remove("rest/folders/" + folder.id + "/permissions/" + pid, {}, function (result) {
                 var idx = $scope.permissions.indexOf(permission);
                 if (idx < 0)
                     return;
@@ -231,12 +235,18 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.addNewPermission = function () {
+            console.log($scope.newPermission);
+
             if ($scope.newPermission.canWrite) {
                 $scope.newPermission.type = 'WRITE_FOLDER';
             } else {
                 $scope.newPermission.type = 'READ_FOLDER';
             }
             $scope.newPermission.typeId = folder.id;
+
+            if ($scope.newPermission.article.toLowerCase() == "remote") {
+                $scope.newPermission.userId = $scope.userFilterInput;
+            }
 
             Util.post("rest/folders/" + folder.id + "/permissions", $scope.newPermission, function (result) {
                 $scope.permissions.push(result);
@@ -259,8 +269,8 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.filter = function (val) {
-            switch ($scope.newPermission.article) {
-                case "ACCOUNT":
+            switch ($scope.newPermission.article.toLowerCase()) {
+                case "account":
                 default :
                     return $http.get('rest/users/autocomplete', {
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
@@ -271,7 +281,7 @@ angular.module('ice.collection.controller', [])
                         return res.data;
                     });
 
-                case "GROUP":
+                case "group":
                     return $http.get('rest/groups/autocomplete', {
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
                         params: {
@@ -279,7 +289,10 @@ angular.module('ice.collection.controller', [])
                         }
                     }).then(function (res) {
                         return res.data;
-                    })
+                    });
+
+                case "remote":
+                    return;
             }
         };
     })
