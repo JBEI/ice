@@ -233,10 +233,11 @@ public class FolderContents {
         details.setRemotePartner(remotePartner.toDataTransferObject());
 
         String token = model.getToken();
+        long remoteFolderId = Long.decode(model.getIdentifier());
 
         // retrieve entries from remote partner (ends up in the call below)
         RemoteContact remoteContact = new RemoteContact();
-        return remoteContact.getRemoteContents(remotePartner.getUrl(), userId, details.getId(), token);
+        return remoteContact.getRemoteContents(remotePartner.getUrl(), userId, remoteFolderId, token);
     }
 
     // remote request for shared contents

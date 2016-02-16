@@ -16,6 +16,7 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
 import org.jbei.ice.storage.model.RemotePartner;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -126,8 +127,14 @@ public class RemoteContact {
     public FolderDetails getRemoteContents(String url, String userId, long folderId, String token) {
         // todo : paging params
         Map<String, Object> queryParams = new HashMap<>();
-        queryParams.put("token", token);
-        queryParams.put("userId", userId);
-        return restClient.get(url, "rest/folders/" + folderId + "/entries", FolderDetails.class, queryParams);
+        try {
+            String encodedToken = URLEncoder.encode(token, "UTF-8");
+            queryParams.put("token", encodedToken);
+            queryParams.put("userId", userId);
+            return restClient.get(url, "rest/folders/" + folderId + "/entries", FolderDetails.class, queryParams);
+        } catch (Exception e) {
+            Logger.error(e);
+            return null;
+        }
     }
 }
