@@ -211,19 +211,15 @@ public class FolderPermissions {
         return true;
     }
 
-    // todo
     protected boolean sendToken(AccessPermission accessPermission, RemotePartner partner) {
         RemoteContact remoteContact = new RemoteContact();
-        remoteContact.shareFolder(partner.getUrl(), accessPermission, partner.getApiKey());
-
         // send to remote partner at POST /rest/permissions/remote
+        remoteContact.shareFolder(partner.getUrl(), accessPermission, partner.getApiKey());
         return true;
-
     }
 
     // todo : remove shared token from user
     protected void removeToken() {
-
     }
 
     protected Permission createPermissionModel(AccessPermission accessPermission, RemoteShareModel remoteShare) {

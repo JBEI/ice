@@ -36,9 +36,12 @@
                        ng-class="{'fa-square-o':!folder.isSelected, 'fa-check-square-o':folder.isSelected}"></i>
                 </td>
                 <td>
-                    {{folder.name}}
+                    {{folder.folderName}}
                     <br>
                     <small class="text-muted">{{folder.type}}</small>
+                    <small ng-if="folder.type == 'REMOTE'">(Shared by {{folder.owner.email}} on
+                        <a ng-href="{{folder.partner.url}}">{{folder.remotePartner.name}}</a>)
+                    </small>
                 </td>
             </tr>
         </table>

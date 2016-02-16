@@ -8,10 +8,7 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntrySelection;
-import org.jbei.ice.lib.folder.FolderContents;
-import org.jbei.ice.lib.folder.FolderController;
-import org.jbei.ice.lib.folder.FolderPermissions;
-import org.jbei.ice.lib.folder.UserFolder;
+import org.jbei.ice.lib.folder.*;
 import org.jbei.ice.lib.shared.ColumnField;
 
 import javax.ws.rs.*;
@@ -36,6 +33,14 @@ public class FolderResource extends RestResource {
 
     private FolderController controller = new FolderController();
     private PermissionsController permissionsController = new PermissionsController();
+
+    @GET
+    public Response getFolders(
+            @DefaultValue("false") @QueryParam("canEdit") boolean editOnly) {
+        String userId = requireUserId();
+        Folders folders = new Folders(userId);
+        return super.respond(folders.getCanEditFolders());
+    }
 
     /**
      * Creates a new folder with the details specified in the parameter. The folder

@@ -28,6 +28,7 @@ import java.util.Map;
  *
  * @author Hector Plahar
  */
+@SuppressWarnings("unchecked")
 public class RemoteContact {
 
     private final RemotePartnerDAO dao;
@@ -110,7 +111,6 @@ public class RemoteContact {
         restClient.put(url, "/rest/folders/entries", entrySelection, FolderDetails.class);
     }
 
-    @SuppressWarnings("unchecked")
     public List<RegistryPartner> getPartners(String url, String token) {
         return restClient.getWor(url, "/rest/partners", ArrayList.class, null, token);
     }

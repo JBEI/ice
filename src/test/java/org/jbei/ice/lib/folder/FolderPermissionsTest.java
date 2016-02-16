@@ -54,9 +54,4 @@ public class FolderPermissionsTest {
 
         Assert.assertNotNull(folderPermissions.createPermission(userId, accessPermission));
     }
-
-    @Test
-    public void testGenerateSecretForRemote() throws Exception {
-
-    }
 }

@@ -5,7 +5,6 @@ import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
 import org.jbei.ice.storage.hibernate.dao.*;
 import org.jbei.ice.storage.model.*;
 
@@ -86,24 +85,5 @@ public class RemoteAccess {
         permission.setCanRead(accessPermission.isCanRead());
         permission.setAccount(account);
         return this.permissionDAO.create(permission);
-    }
-
-    public static void main(String[] args) {
-        HibernateUtil.beginTransaction();
-        RemoteAccess remoteAccess = new RemoteAccess();
-        RegistryPartner partner = new RegistryPartner();
-        partner.setUrl("registry-test2.jbei.org");
-
-        // create permission to share with this user
-        AccessPermission permission = new AccessPermission();
-        AccountTransfer accountTransfer = new AccountTransfer();
-        accountTransfer.setEmail("haplahar@lbl.gov");
-        permission.setAccount(accountTransfer);
-        permission.setDisplay("Remote from RegTest");
-        permission.setUserId("haplahar@lbl.gov");
-        permission.setType(AccessPermission.Type.WRITE_FOLDER);
-
-        remoteAccess.add(partner, permission);
-        HibernateUtil.commitTransaction();
     }
 }
