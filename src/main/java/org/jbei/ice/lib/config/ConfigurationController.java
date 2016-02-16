@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.config;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -95,11 +96,11 @@ public class ConfigurationController {
     public Setting updateSetting(String userId, Setting setting, String url) {
         AccountController accountController = new AccountController();
         if (!accountController.isAdministrator(userId))
-            return null;
+            throw new PermissionException("Cannot update system setting without admin privileges");
 
         ConfigurationKey key = ConfigurationKey.valueOf(setting.getKey());
         if (key == null)
-            return null;
+            throw new IllegalArgumentException("Invalid system key " + setting.getKey());
 
         Configuration configuration = setPropertyValue(key, setting.getValue());
 
@@ -107,7 +108,7 @@ public class ConfigurationController {
         if (key == ConfigurationKey.JOIN_WEB_OF_REGISTRIES) {
             WoRController woRController = new WoRController();
             boolean enable = "yes".equalsIgnoreCase(setting.getValue()) || "true".equalsIgnoreCase(setting.getValue());
-            woRController.setEnable(enable, url);
+            woRController.setEnable(userId, enable, url);
         }
 
         return configuration.toDataTransferObject();

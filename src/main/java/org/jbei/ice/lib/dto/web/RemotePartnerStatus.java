@@ -22,5 +22,8 @@ public enum RemotePartnerStatus implements IDataTransferModel {
     PENDING,
 
     // request received; pending admin approval
-    PENDING_APPROVAL
+    PENDING_APPROVAL,
+
+    // attempted contact failed
+    CONTACT_FAILED
 }

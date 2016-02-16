@@ -17,7 +17,8 @@ import org.jbei.ice.storage.model.AccountPreferences;
 import org.jbei.ice.storage.model.Group;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * ABI to manipulate {@link Account} objects.
@@ -463,28 +464,6 @@ public class AccountController {
      */
     public void saveAccountPreferences(final AccountPreferences accountPreferences) {
         accountPreferencesDAO.create(accountPreferences);
-    }
-
-    /**
-     * @param userId
-     * @param query
-     * @param limit
-     * @return accounts matching the query
-     */
-    public List<AccountTransfer> getMatchingAccounts(final String userId, final String query,
-                                                     final int limit) {
-        // TODO account object is never used?
-        getByEmail(userId);
-        final Set<Account> matches = dao.getMatchingAccounts(query, limit);
-        final ArrayList<AccountTransfer> result = new ArrayList<>();
-        for (final Account match : matches) {
-            final AccountTransfer info = new AccountTransfer();
-            info.setEmail(match.getEmail());
-            info.setFirstName(match.getFirstName());
-            info.setLastName(match.getLastName());
-            result.add(info);
-        }
-        return result;
     }
 
     /**

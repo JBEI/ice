@@ -3,11 +3,11 @@ package org.jbei.ice.lib.access;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.bulkupload.BulkUploadAuthorization;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.storage.DAOException;
@@ -441,61 +441,5 @@ public class PermissionsController {
             return;
 
         dao.delete(permission);
-    }
-
-    public void removeFolderPermission(String userId, long folderId, long permissionId) {
-        Folder folder = folderDAO.get(folderId);
-        if (folder == null)
-            return;
-
-        Permission permission = dao.get(permissionId);
-        if (permission == null)
-            return;
-
-        FolderAuthorization folderAuthorization = new FolderAuthorization();
-        folderAuthorization.expectWrite(userId, folder);
-
-        if (permission.getFolder().getId() != folderId)
-            return;
-
-        dao.delete(permission);
-    }
-
-    public ArrayList<AccessPermission> getMatchingGroupsOrUsers(String userId, String val, int limit) {
-        // groups have higher priority
-        Set<Group> groups = groupController.getMatchingGroups(userId, val, limit);
-        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
-
-        int accountLimit;
-        if (groups == null)
-            accountLimit = limit;
-        else {
-            for (Group group : groups) {
-                AccessPermission permission = new AccessPermission();
-                permission.setDisplay(group.getLabel());
-                permission.setArticle(AccessPermission.Article.GROUP);
-                permission.setArticleId(group.getId());
-                accessPermissions.add(permission);
-            }
-            accountLimit = (limit - groups.size());
-        }
-
-        if (accountLimit == 0)
-            return accessPermissions;
-
-        // check account match
-        Set<Account> accounts = DAOFactory.getAccountDAO().getMatchingAccounts(val, accountLimit);
-        if (accounts == null)
-            return accessPermissions;
-
-        for (Account userAccount : accounts) {
-            AccessPermission permission = new AccessPermission();
-            permission.setDisplay(userAccount.getFullName());
-            permission.setArticle(AccessPermission.Article.ACCOUNT);
-            permission.setArticleId(userAccount.getId());
-            accessPermissions.add(permission);
-        }
-
-        return accessPermissions;
     }
 }

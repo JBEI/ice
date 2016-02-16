@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.search.filter;
 
+import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.storage.model.ArabidopsisSeed;
 import org.jbei.ice.storage.model.Part;
@@ -113,5 +114,31 @@ public class SearchFieldFactory {
             }
         }
         return classes;
+    }
+
+    /**
+     * Determines the search field for the specified entry field
+     *
+     * @param entryField entry field
+     * @return corresponding lucene search field for defined entry field; empty string if no field is found
+     */
+    public static String searchFieldForEntryField(EntryField entryField) {
+        if (entryField == null)
+            return "";
+
+        switch (entryField) {
+            default:
+                return "";
+
+            case NAME:
+                return "name";
+
+            case ALIAS:
+                return "alias";
+
+            case EXISTING_PART_NUMBER:
+            case PART_NUMBER:
+                return "partNumber";
+        }
     }
 }

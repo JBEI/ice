@@ -1,0 +1,76 @@
+<div ng-controller="AdminGroupsController">
+    <div class="pad_top">
+        <button type="button" ng-click="openCreatePublicGroupModal()" class="ice-button">
+            Create Public Group
+        </button>
+    </div>
+
+    <div class="pad_top" ng-init="groupListPageChanged()">
+        <table cellspacing="0" class="table table-hover table-border-bottom" ng-class="{'opacity_4':loadingPage}">
+            <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>Label</th>
+                <th>Members</th>
+                <th>Created</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr data-ng-repeat="group in groups">
+                <td style="vertical-align: middle; line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"
+                    class="font-14em">
+                    <b>{{$index+1}}</b>
+                </td>
+                <td>{{group.label}}
+                    <br>
+                    <i class="small text-muted">{{group.description}}</i>
+                </td>
+                <td style="width:180px; white-space:nowrap; vertical-align: middle">
+                    <span class="label"
+                          ng-class="{
+                          'label-primary': group.memberCount,
+                          'label-default': group.memberCount == 0}">{{group.memberCount | number}}
+                    </span>
+                </td>
+                <td style="width:180px">
+                    {{group.ownerEmail}} <br>
+                    <small class="text-muted">{{group.creationTime | date:'MMM d, yyyy'}}</small>
+                </td>
+                <td style="width:150px; white-space:nowrap; vertical-align: middle">
+                    <div ng-if="!group.confirmDeleteGroup">
+                        <i class="fa fa-fw fa-pencil font-14em edit_icon" uib-tooltip="Edit"
+                           ng-click="openCreatePublicGroupModal(group)"></i>
+                        &nbsp;
+                        <i class="fa fa-fw fa-trash font-14em delete_icon" ng-click="group.confirmDeleteGroup = true"
+                           uib-tooltip="Delete"></i>
+                    </div>
+
+                    <div ng-if="group.confirmDeleteGroup">
+                        Delete?
+                        <button class="btn btn-primary btn-xs">Yes</button>
+                        <button class="btn btn-default btn-xs" ng-click="group.confirmDeleteGroup=false">No</button>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div>
+            <div class="col-md-5" style="padding-left: 0">
+                <uib-pagination total-items="adminGroupsPagingParams.available" ng-change="groupListPageChanged()"
+                                ng-model="adminGroupsPagingParams.currentPage"
+                                max-size="adminGroupsPagingParams.maxSize" class="pagination-sm"
+                                items-per-page="adminGroupsPagingParams.limit"
+                                boundary-links="true"></uib-pagination>
+            </div>
+
+            <div class="col-md-7" style="margin-top: 25px;">
+                <strong class="small">
+                    <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
+                    {{pageCounts(adminGroupsPagingParams.currentPage, adminGroupsPagingParams.available)}}
+                </strong>
+            </div>
+        </div>
+    </div>
+</div>

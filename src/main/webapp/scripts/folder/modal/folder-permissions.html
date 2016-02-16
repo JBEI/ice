@@ -2,7 +2,7 @@
     <button type="button" class="close" ng-click="closeModal()">&times;</button>
     <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
         <i class="fa fa-share-alt"></i> &nbsp;Share <span
-            style="color:#000000;">{{folder.folderName}}</span></span>
+            style="color:#000000;">{{folder.folderName}}</span> With Others</span>
 </div>
 
 <div class="modal-body">
@@ -16,89 +16,132 @@
 
     <br><br>
 
-    <table cellpadding="0" cellspacing="0" style="width: 560px">
+    <span class="text-muted font-90em">Current permissions: {{permissions.length | number}}</span>
+
+    <div class="pull-right cursor_pointer" ng-class="{'opacity_4': !folder.publicReadAccess}" style="margin-right: 10px"
+         ng-click="enableDisablePublicRead()">
+        <i class=" fa fa-fw fa-globe"></i>
+        <small>Public Access</small>
+        <i class="fa fa-fw font-12em"
+           ng-class="{'fa-toggle-off': !folder.publicReadAccess, 'fa-toggle-on green': folder.publicReadAccess}"></i>
+    </div>
+
+    <table cellpadding="0" cellspacing="0" style="width: 560px; border-top: 1px solid #CCCCCC">
         <tr>
             <td>
-                <table width="100%" style="border-top: 1px solid #e1e1e1">
-                    <tr>
-                        <td ng-repeat="pane in panes">
-                            <div ng-click="activateTab(pane)" class="font-95em"
-                                 ng-class="{folder_permission_tab_active:pane.selected, folder_permission_tab_inactive:!pane.selected}">
-                                {{pane.title}}
-            <span style="float: right">
-                <div ng-show="pane.selected" class="edit_icon font-12em">
-                    <i ng-click="showAddPermissionOptionsClick()" class="fa fa-plus-circle"></i></div>
-                <div ng-hide="pane.selected" class="edit_icon font-12em">{{pane.count || 0}}</div>
-            </span>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" style="border-left: 1px solid #e1e1e1">
-                            <div class="tab-pane" ng-show="selected"></div>
-                        </td>
-                    </tr>
-                </table>
+                <div style="overflow: auto; max-height: 200px; border-bottom: 1px solid #CCCCCC">
+
+                    <table class="table table-hover">
+                        <tr ng-repeat="permission in permissions">
+                            <td style="vertical-align: middle; width: 45px;">
+                                <i class="fa font-14em"
+                                   ng-class="{'fa-user': permission.article=='ACCOUNT',
+                                   'fa-group dark-orange':permission.article=='GROUP',
+                                   'fa-globe blue':permission.article=='REMOTE'}"></i>
+                            </td>
+                            <td style="vertical-align: middle; line-height: 120%">
+                                {{permission.display}}<br>
+                                <small class="text-muted" ng-if="permission.account && !permission.partner">
+                                    {{permission.account.email}}
+                                </small>
+                                <small class="text-muted" ng-if="permission.group">{{permission.group.description |
+                                    truncate:30}}
+                                </small>
+                                <small class="text-muted" ng-if="permission.partner">{{permission.partner.url}}
+                                </small>
+                            </td>
+                            <td style="text-align: center; line-height: 90%">
+                                <span>
+                                   <i class="fa fa-fw  font-14em"
+                                      ng-class="{'fa-eye': permission.canRead, 'fa-pencil': permission.canWrite}"></i>
+                                    <br>
+                                    <small class="text-muted" ng-if="permission.canWrite">Can edit
+                                    </small>
+                                    <small class="text-muted" ng-if="permission.canRead">Can view
+                                    </small>
+                                    <!--<span class="caret" ng-if="folder.canEdit"></span>-->
+                                </span>
+                            </td>
+                            <td style="width: 45px; vertical-align: middle">
+                                <i class="fa fa-times delete_icon" ng-if="folder.canEdit"
+                                   ng-click="removePermission(permission)"></i>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
             </td>
         </tr>
 
         <tr>
-            <td>
-                <!--user select filter-->
-                <div ng-if="showPermissionInput">
-                    <input type="text" placeholder="Enter name or email" ng-model="userFilterInput"
-                           ng-change="filter(userFilterInput)" style="width: 220px;">
+            <td class="permission_footer" style="border-left: 0; background-color: #f9f9f9">
+                <span class="text-muted font-75em">Add {{newPermission.article.toLowerCase()}} permission</span> <br>
 
-                    <div style="overflow: auto; max-height: 120px;" class="pad-8">
+                <div class="btn-group" uib-dropdown>
+                    <button class="btn btn-sm btn-default" uib-dropdown-toggle>
+                        <i class="fa fa-fw font-14em"
+                           ng-class="{'fa-user':newPermission.article =='ACCOUNT', 'fa-group':newPermission.article=='GROUP',
+                            'fa-globe':newPermission.article=='REMOTE'}"></i>
+                        <span class="caret"></span>
+                    </button>
 
-                        <div ng-if="!filtering && !accessPermissions" style="opacity: 0.7; padding: 3px 0 3px 0">
-                            <i>No matches found</i>
-                        </div>
-
-                        <div ng-repeat="permission in accessPermissions | orderBy:'display'">
-                           <span ng-click="addRemovePermission(permission)" class="cursor_pointer">
-                            <i class="fa opacity_hover"
-                               ng-class="{'fa-square-o':!permission.selected, 'fa-check-square-o':permission.selected}"></i>
-                            <i class="fa" ng-class="{'fa-group permission_group':permission.article==='GROUP',
-                            'fa-user permission_user':permission.article==='ACCOUNT'}"></i> {{permission.display}}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div style="background-color: #f9f9f9; height: 24px">
-                        <button type="button" class="btn btn-xs btn-default pull-right"
-                                ng-click="closePermissionOptions()">Close
-                        </button>
-                    </div>
+                    <ul uib-dropdown-menu>
+                        <li><a href="#" ng-click="setPermissionArticle('account')"><i class="fa fa-fw fa-user"></i>
+                            Account</a>
+                        </li>
+                        <li><a href="#" ng-click="setPermissionArticle('group')"><i
+                                class="fa fa-fw fa-group dark-orange"></i> Group</a></li>
+                        <li><a href="#" ng-click="setPermissionArticle('remote')"><i
+                                class="fa fa-fw fa-globe dark_blue"></i> Remote Account</a></li>
+                    </ul>
                 </div>
 
-                <div style="width: 100%; font-size: 0.90em; overflow: auto; padding: 3px;"
-                     ng-repeat="permission in activePermissions | orderBy:'display'">
-                    &nbsp;
-                    <span ng-if="permission.article=='GROUP'"><i class="fa fa-group permission_group"></i> {{permission.display}}</span>
-                <span ng-if="permission.article=='ACCOUNT'"><i class="fa fa-user permission_user"></i> <a
-                        ng-href="profile/{{permission.articleId}}">{{permission.display}}</a></span>
-                    <i ng-click="deletePermission($index, permission)" style="padding-top: 3px"
-                       class="fa fa-trash-o delete_icon"></i>
-                </div>
-                <div ng-if="activePermissions.length == 0">&nbsp;</div>
-            </td>
-        </tr>
-        <tr>
-            <td class="pad_top"></td>
-        </tr>
-        <tr>
-            <td class="permission_footer" ng-if="!folder.publicReadAccess">
-                <div class="permission_footer_link" ng-click="enablePublicRead(folder)"><i class="fa fa-globe"></i>
-                    Enable Public Read Access
-                </div>
-            </td>
+                <input type="text" class="input_box" style="width: 200px; padding: 6px"
+                       placeholder="{{placeHolder}}" ng-model="userFilterInput"
+                       typeahead-loading="loadingAddExistingData"
+                       uib-typeahead="result[resultSubField] for result in filter($viewValue)"
+                       typeahead-editable="true"
+                       typeahead-on-select="userSelectionForPermissionAdd($item, $model, $label)">
 
-            <td class="permission_footer" ng-if="folder.publicReadAccess"
-                style="border-left: 0; background-color: #f9f9f9">
-                <div class="permission_footer_link" ng-click="disablePublicRead(folder)">
-                    <i class="fa fa-globe blue"></i> Disable Public Read Access
+                <div class="btn-group font-80em" style="border: 1px solid #fcfcfc">
+                    <span class="cursor_pointer" ng-click="setPermission(false)">
+                        <i class="fa fa-fw"
+                           ng-class="{'fa-circle-o': !newPermission.canRead, 'fa-check-circle' : newPermission.canRead}"></i>
+                    Can view</span>
+                    <br>
+
+                    <span class="cursor_pointer" ng-click="setPermission(true)">
+                        <i class="fa fa-fw" ng-class="{'fa-circle-o': !newPermission.canWrite,
+                        'fa-check-circle' : newPermission.canWrite}"></i> Can edit
+                    </span>
                 </div>
+
+                &nbsp;
+
+                <div class="btn-group" ng-if="webPartners.length && newPermission.article.toLowerCase() == 'remote'"
+                     uib-dropdown>
+                    <button type="button" class="btn btn-sm btn-link" style="line-height: 98%; text-align: left"
+                            uib-dropdown-toggle>
+                        <span ng-if="!newPermission.partner">Select Registry <span class="caret"></span></span>
+                        <span ng-if="newPermission.partner">{{newPermission.partner.name}}
+                            <span class="caret" style="color: black"></span><br>
+                            <small>{{newPermission.partner.url}}</small></span>
+                    </button>
+
+                    <ul uib-dropdown-menu>
+                        <li ng-repeat="partner in webPartners">
+                            <a href="#" class="font-85em" ng-click="newPermission.partner=partner"
+                               style="line-height: 95%">{{partner.name}}<br>
+                                <small class="text-muted">{{partner.url}}</small>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <button type="button" ng-click="addNewPermission()"
+                        class="btn btn-sm btn-primary pull-right">Add
+                </button>
+
+                <!--ng-disabled="!newPermission.articleId"-->
             </td>
         </tr>
     </table>

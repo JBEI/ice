@@ -1,0 +1,84 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="closeGroupModal()">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-group"></i> &nbsp;
+        {{headerMessage}}
+    </span>
+</div>
+
+<div class="modal-body">
+    <div class="margin-top-10 panel panel-default" style="background-color: #ededed">
+        <form class="panel-body" ng-submit="createNewPublicGroup()">
+            <div class="pad-top-5 form-group">
+                <input type="text" class="login_input" placeholder="Group Name" size="35" maxlength="35"
+                       ng-model="newGroup.label"/>
+
+                <input type="text" class="login_input" placeholder="Group Description" size="35" maxlength="45"
+                       ng-model="newGroup.description"/>
+            </div>
+
+            <div class="pad-top-5">
+                <b class="font-75em">SELECT EXISTING USERS</b><br>
+                <input class="input_box" type="text" ng-model="enteredUser" placeHolder="User name or email"
+                       ng-change="filterUsers(enteredUser)" style="width: 210px"/>
+
+                <br><br>
+
+                <b class="font-75em">SELECT REMOTE USERS</b><br>
+                <input class="input_box" ng-model="remoteUser" placeholder="Add Remote user email">
+
+                <div class="btn-group" ng-if="webPartners.length" uib-dropdown>
+                    <button type="button" class="btn btn-sm btn-link" uib-dropdown-toggle>
+                        Select Registry <span class="caret"></span>
+                    </button>
+
+                    <ul uib-dropdown-menu>
+                        <li ng-repeat="partner in webPartners">
+                            <a href="#" class="font-85em" style="line-height: 95%">{{partner.name}}<br>
+                                <small class="text-muted">{{partner.url}}</small>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <button class="btn btn-xs btn-primary" ng-click="addRemoteUser()">Add</button>
+
+                <br><br>
+
+                <div style="background-color: #fff; height: 200px; overflow: auto; width: 400px">
+
+                    <div ng-if="!filtering && !userMatches" style="opacity: 0.7;" class="small pad-8">
+                        <i>No user matches</i>
+                    </div>
+
+                    <table class="table table-condensed table-hover">
+                        <tr ng-repeat="user in userMatches | orderBy:'firstName' | orderBy:'fullName'">
+                            <td ng-click="selectUser(user)" class="font-80em no_wrap hover_icon_visible cursor_pointer">
+                                <i class="fa"
+                                   ng-class="{'fa-circle-o': selectedUsers.indexOf(user) == -1, 'fa-circle green': selectedUsers.indexOf(user)!=-1}"
+                                   style="font-size: 14px"></i>&nbsp; {{user.firstName}} {{user.lastName}}
+                                <small class="opacity_4 pad-left-8">{{user.email}}</small>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <small ng-if="(selectedUsers.length+selectedRemoteUsers.length) > 0"
+                       style="margin-top: 15px; color: #777">{{selectedUsers.length}} selected
+                    <button ng-click="resetSelectedUsers()" class="btn-xs btn-link pull-right"
+                            style="margin-right: 130px">
+                        <i class="fa fa-fw fa-times"></i>Reset Selection
+                    </button>
+                </small>
+                <small ng-if="!selectedUsers.length" style="margin-top: 15px; color: #777">0 users selected</small>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="submit" ng-disabled="!newGroup.label" class="btn btn-primary"
+            ng-click="createNewGroup()">Create
+    </button>
+    <button type="reset" ng-click="closeGroupModal()" class="btn btn-default">Cancel</button>
+</div>

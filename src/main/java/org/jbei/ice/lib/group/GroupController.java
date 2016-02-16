@@ -65,46 +65,11 @@ public class GroupController {
         return list;
     }
 
-    /**
-     * Retrieves groups that user is either a member of. Users are implicit members of the groups
-     * that they create so call also returns those groups
-     *
-     * @param userIdString       user account  identifier of user making request
-     * @param userId             id of account whose groups are being requested
-     * @param includePublicGroup whether to include the public group that everyone is implicitly a member of
-     * @return list of groups that user is a member of
-     */
-    public ArrayList<UserGroup> retrieveUserGroups(String userIdString, long userId, boolean includePublicGroup) {
-        Account requester = accountController.getByEmail(userIdString);
-        Account account = accountController.get(userId);
-        // TODO : account authorization
-        if (!accountController.isAdministrator(userIdString) && !account.equals(requester))
-            return null;
-
-        Set<Group> result = dao.retrieveMemberGroups(account);
-        ArrayList<UserGroup> userGroups = new ArrayList<>();
-        if (includePublicGroup) {
-            Group publicGroup = createOrRetrievePublicGroup();
-            userGroups.add(publicGroup.toDataTransferObject());
-        }
-
-        for (Group group : result) {
-            UserGroup user = group.toDataTransferObject();
-            long count = dao.getMemberCount(group.getUuid());
-            user.setMemberCount(count);
-            userGroups.add(user);
-        }
-        return userGroups;
-    }
-
     public Set<String> retrieveAccountGroupUUIDs(String userId) {
         Account account = accountController.getByEmail(userId);
         Set<String> uuids = new HashSet<>();
         if (account != null) {
-            Set<Group> groups = dao.retrieveMemberGroups(account);
-            for (Group group : groups) {
-                uuids.add(group.getUuid());
-            }
+            uuids.addAll(dao.getMemberGroupUUIDs(account));
         }
         uuids.add(PUBLIC_GROUP_UUID);
         return uuids;
@@ -176,16 +141,16 @@ public class GroupController {
         return group != null;
     }
 
-    public UserGroup deleteGroup(Account account, UserGroup user) {
-        if (user.getType() == GroupType.PUBLIC && account.getType() != AccountType.ADMIN) {
+    public boolean deleteGroup(String userIdStr, long groupId) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userIdStr);
+        Group group = dao.get(groupId);
+        if (group == null)
+            return false;
+
+        if (group.getType() == GroupType.PUBLIC && account.getType() != AccountType.ADMIN) {
             String errMsg = "Non admin " + account.getEmail() + " attempting to delete public group";
             Logger.error(errMsg);
             throw new PermissionException(errMsg);
-        }
-
-        Group group = dao.get(user.getId());
-        if (group == null) {
-            throw new IllegalArgumentException("Could not find group to delete");
         }
 
         if (group.getMembers() != null) {
@@ -193,10 +158,10 @@ public class GroupController {
                 accountController.removeMemberFromGroup(group.getId(), member.getEmail());
             }
         }
+
         DAOFactory.getPermissionDAO().clearPermissions(group);
-        UserGroup userGroup = group.toDataTransferObject();
         dao.delete(group);
-        return userGroup;
+        return true;
     }
 
     public Group createOrRetrievePublicGroup() {

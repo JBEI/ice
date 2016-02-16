@@ -1,8 +1,8 @@
 package org.jbei.ice.lib.bulkupload;
 
 import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.folder.AbstractFolder;
 
 import java.util.ArrayList;

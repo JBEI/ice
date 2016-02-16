@@ -349,28 +349,20 @@ angular.module('ice.profile.controller', [])
                 });
         }
     })
-    .controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, User, Group) {
+    .controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, User,
+                                                     Group, $uibModal, Util) {
         var profileId = $stateParams.id;
         $location.path("profile/" + profileId + "/groups", false);
         $scope.selectedUsers = [];
         $scope.selectedRemoteUsers = [];
-        $scope.myGroups = [];
-        $scope.groupsIBelong = [];
         $scope.enteredUser = undefined;
-        $scope.showCreateGroup = false;
+        $scope.privateGroupsParams = {offset: 0, limit: 10, currentPage: 1, maxSize: 5};
 
         var user = User($cookieStore.get('sessionId'));
         var group = Group();
 
         // init: retrieve groups user belongs to and created
-        user.getGroups({userId: profileId}, function (result) {
-            angular.forEach(result, function (item) {
-                if (item.ownerEmail && item.ownerEmail === $rootScope.user.email)
-                    $scope.myGroups.push(item);
-                else
-                    $scope.groupsIBelong.push(item);
-            });
-
+        Util.get("rest/users/" + profileId + "/groups", function (result) {
             $scope.userGroups = result;
         });
 
@@ -444,6 +436,76 @@ angular.module('ice.profile.controller', [])
             }, function (error) {
                 console.error(error);
             });
+        };
+
+        $scope.openCreateGroupModal = function (group) {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/profile/modal/edit-group.html',
+                controller: 'ProfileGroupsModalController',
+                backdrop: "static",
+                //size: "lg",
+                resolve: {
+                    currentGroup: function () {
+                        return group;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (result) {
+                if (!result)
+                    return;
+
+                Util.setFeedback("Group successfully created", "success");
+                $scope.groupListPageChanged();
+            })
+        };
+
+        $scope.deleteUserGroup = function (group) {
+            Util.remove("rest/groups/" + group.id, {}, function (result) {
+                var i = $scope.userGroups.data.indexOf(group);
+                if (i >= 0)
+                    $scope.userGroups.data.splice(i, 1);
+                console.log(result);
+            })
         }
+    })
+    .controller('ProfileGroupsModalController', function ($scope, Util, currentGroup, $uibModalInstance) {
+        $scope.headerMessage = currentGroup ? "Update \"" + currentGroup.label + "\"" : "Create New Group";
+        $scope.webPartners = [];
+
+        $scope.closeGroupModal = function () {
+            $uibModalInstance.close();
+        };
+
+        $scope.newGroup = {remoteMembers: [], members: []};
+
+        var getWebPartners = function () {
+            Util.list("rest/partners", function (result) {
+                $scope.webPartners = result;
+            });
+        };
+        getWebPartners();
+
+        // adds a remote user to the new group object
+        $scope.addRemoteUser = function () {
+            Util.get("rest/users/remote", function (result) {
+                $scope.newGroup.remoteMembers.push(result);
+            }, {pid: 34, email: $scope.remoteUser}, function (error) {
+                console.log("error fetching remote user");
+                if (error.status == 404) {
+                    // show to user
+                } else {
+                    // other error
+                }
+            });
+        };
+
+        $scope.createNewGroup = function () {
+            Util.post("rest/groups", $scope.newGroup, function (result) {
+                console.log(result);
+            }, {}, function (error) {
+
+            })
+        };
     })
 ;

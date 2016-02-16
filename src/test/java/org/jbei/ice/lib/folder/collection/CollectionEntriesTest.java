@@ -61,9 +61,9 @@ public class CollectionEntriesTest {
         Assert.assertNotNull(account);
         long id = TestEntryCreator.createTestPart(account.getEmail());
         Entry entry = DAOFactory.getEntryDAO().get(id);
-        entry.setVisibility(Visibility.PENDING.getValue());
+        entry.setVisibility(Visibility.DRAFT.getValue());
         DAOFactory.getEntryDAO().update(entry);
-        CollectionEntries collectionEntries = new CollectionEntries(account.getEmail(), CollectionType.PENDING);
+        CollectionEntries collectionEntries = new CollectionEntries(account.getEmail(), CollectionType.DRAFTS);
         Results<PartData> results = collectionEntries.getEntries(ColumnField.CREATED, true, 0, 13);
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.getData().size());

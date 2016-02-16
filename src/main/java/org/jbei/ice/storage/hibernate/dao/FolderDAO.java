@@ -2,6 +2,7 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.*;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -71,14 +72,16 @@ public class FolderDAO extends HibernateRepository<Folder> {
      * Currently, it is assumed that the contents of folders are only entries. The entries
      * that are counted are those that have a visibility of "OK"
      *
-     * @param id     unique folder identifier
-     * @param filter optional filter for entry fields
+     * @param id          unique folder identifier
+     * @param filter      optional filter for entry fields
+     * @param visibleOnly if true, counts only entries with visibility "OK"
      * @return number of child contents in the folder
      */
-    public Long getFolderSize(long id, String filter) {
+    public Long getFolderSize(long id, String filter, boolean visibleOnly) {
         try {
             Criteria criteria = currentSession().createCriteria(Entry.class);
-            criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
+            if (visibleOnly)
+                criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
             criteria.createAlias("folders", "f");
             criteria.add(Restrictions.eq("f.id", id));
 
@@ -100,11 +103,12 @@ public class FolderDAO extends HibernateRepository<Folder> {
      * @return List of entry ids found in the folder with the filter applied if applicable and which have
      * a visibility of "OK"
      */
-    public List<Long> getFolderContentIds(long folderId, EntryType type) {
+    public List<Long> getFolderContentIds(long folderId, EntryType type, boolean visibleOnly) {
         Criteria criteria = currentSession().createCriteria(Folder.class)
                 .add(Restrictions.eq("id", folderId))
-                .createAlias("contents", "entry")
-                .add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()));
+                .createAlias("contents", "entry");
+        if (visibleOnly)
+            criteria.add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()));
 
         if (type != null) {
             criteria.add(Restrictions.eq("entry.recordType", type.getName()));
@@ -113,7 +117,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
     }
 
     public List<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit,
-                                              String filterText) {
+                                              String filterText, boolean visibleOnly) {
         try {
             String sortString;
             switch (sort) {
@@ -140,7 +144,8 @@ public class FolderDAO extends HibernateRepository<Folder> {
             }
 
             Criteria criteria = currentSession().createCriteria(Entry.class);
-            criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
+            if (visibleOnly)
+                criteria.add(Restrictions.eq("visibility", Visibility.OK.getValue()));
             criteria.createAlias("folders", "folder");
             criteria.add(Restrictions.eq("folder.id", folderId));
 
@@ -192,7 +197,8 @@ public class FolderDAO extends HibernateRepository<Folder> {
     public List<Folder> getFoldersByOwner(Account account) {
         try {
             Criteria criteria = currentSession().createCriteria(Folder.class)
-                    .add(Restrictions.eq("ownerEmail", account.getEmail()).ignoreCase());
+                    .add(Restrictions.eq("ownerEmail", account.getEmail()).ignoreCase())
+                    .add(Restrictions.ne("type", FolderType.REMOTE));
             criteria.addOrder(Order.desc("creationTime"));
             return criteria.list();
         } catch (HibernateException e) {
@@ -238,5 +244,19 @@ public class FolderDAO extends HibernateRepository<Folder> {
 
         Criteria criteria = currentSession().createCriteria(Folder.class).add(disjunction);
         return criteria.list();
+    }
+
+    public int setFolderEntryVisibility(long folderId, Visibility ok) {
+        Criteria criteria = currentSession().createCriteria(Folder.class)
+                .add(Restrictions.eq("id", folderId))
+                .createAlias("contents", "entry").setProjection(Projections.property("entry.id"));
+        List list = criteria.list();
+
+        // update entries where folder id in
+        Query query = currentSession().createQuery("update " + Entry.class.getName()
+                + " e set e.visibility=:v where e.id in :ids");
+        query.setParameter("v", ok.getValue());
+        query.setParameterList("ids", list);
+        return query.executeUpdate();
     }
 }

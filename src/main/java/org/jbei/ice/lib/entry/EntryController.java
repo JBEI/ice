@@ -2,20 +2,20 @@ package org.jbei.ice.lib.entry;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.AuditType;
 import org.jbei.ice.lib.dto.DNASequence;
-import org.jbei.ice.lib.dto.History;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
@@ -230,38 +230,6 @@ public class EntryController {
         return userId.equalsIgnoreCase(depositor) || authorization.canWriteThoroughCheck(userId, entry);
     }
 
-    public ArrayList<History> getHistory(String userId, long entryId) {
-        Entry entry = dao.get(entryId);
-        if (entry == null)
-            return null;
-
-        authorization.expectWrite(userId, entry);
-        List<Audit> list = auditDAO.getAuditsForEntry(entry);
-        ArrayList<History> result = new ArrayList<>();
-        for (Audit audit : list) {
-            History history = audit.toDataTransferObject();
-            if (history.isLocalUser()) {
-                history.setAccount(accountController.getByEmail(history.getUserId()).toDataTransferObject());
-            }
-            result.add(history);
-        }
-        return result;
-    }
-
-    public boolean deleteHistory(String userId, long entryId, long historyId) {
-        Entry entry = dao.get(entryId);
-        if (entry == null)
-            return false;
-
-        authorization.expectWrite(userId, entry);
-        Audit audit = auditDAO.get(historyId);
-        if (audit == null)
-            return true;
-
-        auditDAO.delete(audit);
-        return true;
-    }
-
     public PartStatistics retrieveEntryStatistics(String userId, long entryId) {
         Entry entry = dao.get(entryId);
         if (entry == null)
@@ -348,16 +316,11 @@ public class EntryController {
     }
 
     public PartData retrieveEntryDetails(String userId, String id) {
-        try {
-            Entry entry = getEntry(id);
-            if (entry == null)
-                return null;
-
-            return retrieveEntryDetails(userId, entry);
-        } catch (Exception e) {
-            Logger.error(e);
+        Entry entry = getEntry(id);
+        if (entry == null)
             return null;
-        }
+
+        return retrieveEntryDetails(userId, entry);
     }
 
     /**
@@ -404,7 +367,7 @@ public class EntryController {
         return EntryUtil.setPartDefaults(partData);
     }
 
-    protected PartData retrieveEntryDetails(String userId, Entry entry) {
+    protected PartData retrieveEntryDetails(String userId, Entry entry) throws PermissionException {
         // user must be able to read if not public entry
         if (!permissionsController.isPubliclyVisible(entry))
             authorization.expectRead(userId, entry);

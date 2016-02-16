@@ -113,7 +113,7 @@ public class FolderDAOTest {
 
         // add entries to folder
         folder = dao.addFolderContents(folder, entries);
-        Assert.assertEquals(10, dao.getFolderSize(folder.getId(), null).intValue());
+        Assert.assertEquals(10, dao.getFolderSize(folder.getId(), null, true).intValue());
     }
 
     @Test
@@ -215,7 +215,7 @@ public class FolderDAOTest {
         folder = dao.addFolderContents(folder, entries);
         Assert.assertNotNull(folder);
 
-        List<Entry> result = dao.retrieveFolderContents(folder.getId(), ColumnField.NAME, true, 0, 15, null);
+        List<Entry> result = dao.retrieveFolderContents(folder.getId(), ColumnField.NAME, true, 0, 15, null, false);
         Assert.assertNotNull(result);
         for (int i = 1; i <= 9; i += 1) {
             Entry entry = result.get(i - 1);

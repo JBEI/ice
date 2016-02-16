@@ -5,6 +5,7 @@ import org.jbei.auth.hmac.HmacSignature;
 import org.jbei.ice.lib.access.TokenVerification;
 import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HeaderParam;
@@ -27,7 +28,7 @@ public class RestResource {
     protected final String API_KEY_CLIENT_ID = "X-ICE-API-Token-Client"; // client id
 
     @HeaderParam(value = WOR_PARTNER_TOKEN)
-    private String worPartnerToken;
+    protected String worPartnerToken;
 
     @HeaderParam(value = API_KEY_CLIENT_ID)
     private String apiClientId;
@@ -70,6 +71,23 @@ public class RestResource {
         return userId;
     }
 
+    // returns the  name and port for this server
+    protected String getThisServer(boolean includeContext) {
+        String url = request.getServerName();
+        int port = request.getServerPort();
+        // exclude invalid and default http(s) ports
+        if (port > 0 && port != 443 && port != 80) {
+            url += (":" + Integer.toString(port));
+        }
+
+        if (includeContext) {
+            String context = request.getContextPath();
+            if (!StringUtils.isEmpty(context))
+                url += "/" + context;
+        }
+        return url;
+    }
+
     /**
      * Extract the User ID from a query parameter value or header values in the resource request.
      */
@@ -105,11 +123,17 @@ public class RestResource {
         return userId;
     }
 
-    protected void verifyWebPartnerUrl() {
+    protected RegistryPartner verifyWebPartner() {
+        RegistryPartner partner = getWebPartner();
+        if (partner == null)
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        return partner;
+    }
+
+    protected RegistryPartner getWebPartner() {
         String clientId = !StringUtils.isEmpty(apiClientId) ? apiClientId : request.getRemoteHost();
         TokenVerification tokenVerification = new TokenVerification();
-        if (!tokenVerification.verifyPartnerToken(clientId, worPartnerToken))
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        return tokenVerification.verifyPartnerToken(clientId, worPartnerToken);
     }
 
     /**

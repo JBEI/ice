@@ -507,9 +507,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
         return (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
     }
 
-    public long getPendingCount() throws DAOException {
+    public long getByVisibilityCount(Visibility visibility) throws DAOException {
         Criteria criteria = currentSession().createCriteria(Entry.class)
-                .add(Restrictions.eq("visibility", Visibility.PENDING.getValue()));
+                .add(Restrictions.eq("visibility", visibility.getValue()));
         return (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
     }
 
