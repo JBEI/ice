@@ -58,11 +58,6 @@ public class IceRestClient extends RestClient {
         return target.request(MediaType.APPLICATION_JSON_TYPE).buildGet().invoke(clazz);
     }
 
-//    public Object get(String url, String path) {
-//        WebTarget target = client.target("https://" + url).path(path);
-//        return target.request(MediaType.APPLICATION_JSON_TYPE).buildGet().invoke();
-//    }
-
     @Override
     public <T> T post(String url, String resourcePath, Object object, Class<T> responseClass,
                       Map<String, Object> queryParams) {

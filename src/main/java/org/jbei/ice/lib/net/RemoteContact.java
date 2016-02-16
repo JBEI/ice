@@ -124,14 +124,14 @@ public class RemoteContact {
         return restClient.postWor(url, "rest/permissions/remote", permission, AccessPermission.class, null, token);
     }
 
-    public FolderDetails getRemoteContents(String url, String userId, long folderId, String token) {
+    public FolderDetails getRemoteContents(String url, String userId, long folderId, String token, String worToken) {
         // todo : paging params
         Map<String, Object> queryParams = new HashMap<>();
         try {
             String encodedToken = URLEncoder.encode(token, "UTF-8");
             queryParams.put("token", encodedToken);
             queryParams.put("userId", userId);
-            return restClient.get(url, "rest/folders/" + folderId + "/entries", FolderDetails.class, queryParams);
+            return restClient.getWor(url, "rest/folders/" + folderId + "/entries", FolderDetails.class, queryParams, worToken);
         } catch (Exception e) {
             Logger.error(e);
             return null;
