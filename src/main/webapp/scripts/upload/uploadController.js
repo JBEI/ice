@@ -1073,7 +1073,8 @@ angular.module('ice.upload.controller', [])
                 url += "?link=" + linkedAddType;
             $window.open(url, "_self");
         }
-    }).controller('BulkUploadPermissionsController', function ($scope, $cookieStore, $location, $uibModalInstance, upload, Upload, Folders, Permission) {
+    }).controller('BulkUploadPermissionsController', function ($scope, $cookieStore, $location, $uibModalInstance,
+                                                               upload, Upload, Folders, Permission) {
         $scope.cancel = function () {
             $uibModalInstance.dismiss('cancel');
         };

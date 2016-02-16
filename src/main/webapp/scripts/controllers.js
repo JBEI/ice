@@ -343,12 +343,12 @@ iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $u
 
 iceControllers.controller('AddToFolderController', function ($rootScope, $scope, $uibModalInstance, Util, FolderSelection,
                                                              Selection, move, selectedFolder, $stateParams) {
+
+    // get folders that I can edit
+
     $scope.getPersonalFolders = function () {
-        Util.list("rest/collections/PERSONAL/folders", function (result) {
-            $scope.userFolders = [];
-            for (var i = 0; i < result.length; i += 1) {
-                $scope.userFolders.push({id: result[i].id, name: result[i].folderName, type: result[i].type});
-            }
+        Util.list("rest/folders", function (result) {
+            $scope.userFolders = result;
         }, {canEdit: 'true'});
     };
 

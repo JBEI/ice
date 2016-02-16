@@ -197,7 +197,8 @@ public class FolderDAO extends HibernateRepository<Folder> {
     public List<Folder> getFoldersByOwner(Account account) {
         try {
             Criteria criteria = currentSession().createCriteria(Folder.class)
-                    .add(Restrictions.eq("ownerEmail", account.getEmail()).ignoreCase());
+                    .add(Restrictions.eq("ownerEmail", account.getEmail()).ignoreCase())
+                    .add(Restrictions.ne("type", FolderType.REMOTE));
             criteria.addOrder(Order.desc("creationTime"));
             return criteria.list();
         } catch (HibernateException e) {

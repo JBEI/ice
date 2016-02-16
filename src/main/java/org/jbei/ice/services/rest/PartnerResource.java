@@ -27,7 +27,7 @@ public class PartnerResource extends RestResource {
         WoRController controller = new WoRController();
         if (StringUtils.isEmpty(userId))
             return super.respond(controller.getWebPartners(worPartnerToken, url));
-        return super.respond(controller.getWebPartners(userId));
+        return super.respond(controller.getWebPartners());
     }
 
     /**

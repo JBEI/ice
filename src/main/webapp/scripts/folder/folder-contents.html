@@ -26,12 +26,16 @@
                             </span>
 
                             <div class="no_wrap">
+                                <small class="font-65em" ng-if="folder.type=='REMOTE'">
+                                    Shared by <i>{{folder.owner.email}}</i> on <a
+                                        ng-href="https://{{folder.remotePartner.url}}">{{folder.remotePartner.name}}</a>
+                                </small>
                                 <small class="font-65em" ng-if="folder.type==='SHARED'">
                                     Shared by <a ng-href="profile/{{folder.owner.id}}">{{folder.owner.firstName}}
                                     {{folder.owner.lastName}}</a>
                                     <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
                                 </small>
-                                <small class="font-65em">
+                                <small class="font-65em" ng-if="folder.type != 'REMOTE'">
                                     {{folder.creationTime | date:'short'}}
                                 </small>
                                 <small ng-if="folder.type==='SHARED'" style="color: #333">

@@ -2,8 +2,8 @@ package org.jbei.ice.lib.folder;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.access.PermissionsController;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateUtil;

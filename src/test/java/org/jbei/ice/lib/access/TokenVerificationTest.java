@@ -65,6 +65,6 @@ public class TokenVerificationTest {
         remotePartner.setApiKey("foo");
         remotePartner.setAdded(new Date());
         Assert.assertNotNull(DAOFactory.getRemotePartnerDAO().create(remotePartner));
-        Assert.assertTrue(verification.verifyPartnerToken(remotePartner.getUrl(), token));
+        Assert.assertNotNull(verification.verifyPartnerToken(remotePartner.getUrl(), token));
     }
 }

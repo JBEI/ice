@@ -14,6 +14,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.search.FieldFilter;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
 import org.jbei.ice.lib.dto.search.SearchResults;
@@ -84,13 +85,25 @@ public class HibernateSearch {
         Query visibilityQuery = qb.keyword().onField("visibility").matching(Visibility.OK.getValue()).createQuery();
         builder.add(visibilityQuery, BooleanClause.Occur.FILTER);
 
-        // biosafety
+        // bio safety level
         BioSafetyOption option = searchQuery.getBioSafetyOption();
         if (option != null) {
             TermContext bslContext = qb.keyword();
             Query biosafetyQuery =
                     bslContext.onField("bioSafetyLevel").ignoreFieldBridge().matching(option.getIntValue()).createQuery();
             builder.add(biosafetyQuery, BooleanClause.Occur.FILTER);
+        }
+
+        // check filter filters
+        if (searchQuery.getFieldFilters() != null && !searchQuery.getFieldFilters().isEmpty()) {
+            for (FieldFilter fieldFilter : searchQuery.getFieldFilters()) {
+                String searchField = SearchFieldFactory.searchFieldForEntryField(fieldFilter.getField());
+                if (StringUtils.isEmpty(searchField))
+                    continue;
+
+                Query filterQuery = qb.keyword().onField(searchField).matching(fieldFilter.getFilter()).createQuery();
+                builder.add(filterQuery, BooleanClause.Occur.MUST);
+            }
         }
 
         // check if there is a blast results

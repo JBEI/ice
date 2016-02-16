@@ -1,14 +1,14 @@
 package org.jbei.ice.services.rest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntrySelection;
-import org.jbei.ice.lib.folder.FolderContents;
-import org.jbei.ice.lib.folder.FolderController;
-import org.jbei.ice.lib.folder.UserFolder;
+import org.jbei.ice.lib.folder.*;
 import org.jbei.ice.lib.shared.ColumnField;
 
 import javax.ws.rs.*;
@@ -33,6 +33,14 @@ public class FolderResource extends RestResource {
 
     private FolderController controller = new FolderController();
     private PermissionsController permissionsController = new PermissionsController();
+
+    @GET
+    public Response getFolders(
+            @DefaultValue("false") @QueryParam("canEdit") boolean editOnly) {
+        String userId = requireUserId();
+        Folders folders = new Folders(userId);
+        return super.respond(folders.getCanEditFolders());
+    }
 
     /**
      * Creates a new folder with the details specified in the parameter. The folder
@@ -167,6 +175,8 @@ public class FolderResource extends RestResource {
                               @DefaultValue("created") @QueryParam("sort") final String sort,
                               @DefaultValue("false") @QueryParam("asc") final boolean asc,
                               @DefaultValue("") @QueryParam("filter") String filter,
+                              @QueryParam("token") String token,
+                              @QueryParam("userId") String remoteUserId,
                               @QueryParam("fields") List<String> queryParam) {
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
         if (folderId.equalsIgnoreCase("public")) {
@@ -176,16 +186,26 @@ public class FolderResource extends RestResource {
         }
 
         // userId can be empty for public folders
-        final String userId = super.getUserId();
-
+        String userId = super.getUserId();
         try {
             final long id = Long.decode(folderId);
             String message = "retrieving folder " + id + " entries";
             if (filter.length() > 0)
                 message += " filtered by \"" + filter + "\"";
-            log(userId, message);
             FolderContents folderContents = new FolderContents();
-            return folderContents.getContents(userId, id, field, asc, offset, limit, filter);
+
+            if (StringUtils.isEmpty(userId)) {
+                // get registry partner
+                if (StringUtils.isEmpty(token))
+                    return null;
+                RegistryPartner partner = getWebPartner();
+                log(partner.getUrl(), message);
+                return folderContents.getRemotelySharedContents(remoteUserId, token, partner, id, field, asc, offset,
+                        limit, filter);
+            } else {
+                log(userId, message);
+                return folderContents.getContents(userId, id, field, asc, offset, limit, filter);
+            }
         } catch (final NumberFormatException nfe) {
             Logger.error("Passed folder id " + folderId + " is not a number");
             return null;
@@ -200,7 +220,8 @@ public class FolderResource extends RestResource {
     @Path("/{id}/permissions")
     public Response getFolderPermissions(@PathParam("id") final long folderId) {
         final String userId = getUserId();
-        return respond(controller.getPermissions(userId, folderId));
+        FolderPermissions folderPermissions = new FolderPermissions(folderId);
+        return respond(folderPermissions.get(userId));
     }
 
     /**
@@ -209,8 +230,7 @@ public class FolderResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
-    public FolderDetails setPermissions(@Context final UriInfo info,
-                                        @PathParam("id") final long folderId,
+    public FolderDetails setPermissions(@PathParam("id") final long folderId,
                                         final ArrayList<AccessPermission> permissions) {
         final String userId = getUserId();
         return permissionsController.setFolderPermissions(userId, folderId, permissions);
@@ -222,30 +242,30 @@ public class FolderResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
-    public AccessPermission addPermission(@Context final UriInfo info,
-                                          @PathParam("id") final long folderId,
-                                          final AccessPermission permission) {
-        final String userId = getUserId();
-        return controller.createFolderPermission(userId, folderId, permission);
+    public Response addPermission(@Context final UriInfo info,
+                                  @PathParam("id") final long folderId,
+                                  final AccessPermission permission) {
+        final String userId = requireUserId();
+        FolderPermissions folderPermissions = new FolderPermissions(folderId);
+        return super.respond(folderPermissions.createPermission(userId, permission));
     }
 
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions/{permissionId}")
-    public Response removePermission(@Context final UriInfo info,
-                                     @PathParam("id") final long partId,
-                                     @PathParam("permissionId") final long permissionId) {
-        final String userId = getUserId();
-        permissionsController.removeFolderPermission(userId, partId, permissionId);
-        return Response.ok().build();
+    public Response removePermission(@PathParam("id") long folderId,
+                                     @PathParam("permissionId") long permissionId) {
+        final String userId = requireUserId();
+        FolderPermissions folderPermissions = new FolderPermissions(folderId);
+        boolean success = folderPermissions.remove(userId, permissionId);
+        return super.respond(success);
     }
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions/public")
-    public Response enablePublicAccess(@Context final UriInfo info,
-                                       @PathParam("id") final long folderId) {
-        final String userId = getUserId();
+    public Response enablePublicAccess(@PathParam("id") final long folderId) {
+        final String userId = requireUserId();
         if (controller.enablePublicReadAccess(userId, folderId)) {
             return respond(Response.Status.OK);
         }
@@ -260,7 +280,7 @@ public class FolderResource extends RestResource {
     @Path("/{id}/permissions/public")
     public Response disablePublicAccess(@Context final UriInfo info,
                                         @PathParam("id") final long folderId) {
-        final String userId = getUserId();
+        final String userId = requireUserId();
         if (controller.disablePublicReadAccess(userId, folderId)) {
             return respond(Response.Status.OK);
         }

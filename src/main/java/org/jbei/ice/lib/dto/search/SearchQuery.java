@@ -21,6 +21,7 @@ public class SearchQuery implements IDataTransferModel {
     private BioSafetyOption bioSafetyOption;
     private ArrayList<EntryType> entryTypes;
     private Parameters parameters;
+    private ArrayList<FieldFilter> fieldFilters;
 
     /**
      * set the query default values
@@ -35,7 +36,9 @@ public class SearchQuery implements IDataTransferModel {
     }
 
     public boolean hasFilter() {
-        return parameters != null && (parameters.getHasAttachment() || parameters.getHasSample() || parameters.getHasSequence() || bioSafetyOption != null);
+        return parameters != null && (fieldFilters == null || fieldFilters.isEmpty()) &&
+                (parameters.getHasAttachment() || parameters.getHasSample() ||
+                        parameters.getHasSequence() || bioSafetyOption != null);
     }
 
     public String getQueryString() {
@@ -64,6 +67,14 @@ public class SearchQuery implements IDataTransferModel {
 
     public ArrayList<EntryType> getEntryTypes() {
         return entryTypes;
+    }
+
+    public ArrayList<FieldFilter> getFieldFilters() {
+        return fieldFilters;
+    }
+
+    public void setFieldFilters(ArrayList<FieldFilter> fieldFilters) {
+        this.fieldFilters = fieldFilters;
     }
 
     public void setEntryTypes(List<EntryType> entryTypes) {

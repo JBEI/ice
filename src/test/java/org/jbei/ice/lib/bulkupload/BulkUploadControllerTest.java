@@ -1,10 +1,10 @@
 package org.jbei.ice.lib.bulkupload;
 
 import org.jbei.ice.lib.AccountCreator;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.StatusType;
 import org.jbei.ice.storage.DAOFactory;

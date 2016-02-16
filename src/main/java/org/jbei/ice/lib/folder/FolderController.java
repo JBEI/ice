@@ -7,12 +7,12 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
@@ -21,7 +21,10 @@ import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.FolderDAO;
 import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
-import org.jbei.ice.storage.model.*;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.Folder;
+import org.jbei.ice.storage.model.Group;
 
 import java.util.*;
 
@@ -307,27 +310,6 @@ public class FolderController {
         return folderDetails;
     }
 
-    public ArrayList<AccessPermission> getPermissions(String userId, long folderId) {
-        Folder folder = dao.get(folderId);
-        if (folder == null)
-            return null;
-
-        authorization.expectWrite(userId, folder);
-
-        ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
-        Set<Permission> permissions = permissionDAO.getFolderPermissions(folder);
-
-        for (Permission permission : permissions) {
-            if (permission.getGroup() != null && permission.getGroup().getUuid().equals(
-                    GroupController.PUBLIC_GROUP_UUID))
-                continue;
-
-            accessPermissions.add(permission.toDataTransferObject());
-        }
-
-        return accessPermissions;
-    }
-
     /**
      * Retrieves folders that have been shared with specified user as an individual or as part of a group.
      *
@@ -378,51 +360,8 @@ public class FolderController {
         permission.setTypeId(folderId);
         permission.setArticle(AccessPermission.Article.GROUP);
         permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
-        return createFolderPermission(userId, folderId, permission) != null;
-    }
-
-    public AccessPermission createFolderPermission(String userId, long folderId, AccessPermission accessPermission) {
-        if (accessPermission == null)
-            return null;
-
-        Folder folder = dao.get(folderId);
-        if (folder == null)
-            return null;
-
-        authorization.expectWrite(userId, folder);
-
-        Permission permission = new Permission();
-        permission.setFolder(folder);
-        if (accessPermission.getArticle() == AccessPermission.Article.GROUP) {
-            Group group = DAOFactory.getGroupDAO().get(accessPermission.getArticleId());
-            if (group == null) {
-                Logger.error("Could not assign group with id " + accessPermission.getArticleId() + " to folder");
-                return null;
-            }
-            permission.setGroup(group);
-        } else {
-            Account account = DAOFactory.getAccountDAO().get(accessPermission.getArticleId());
-            if (account == null) {
-                Logger.error("Could not assign account with id " + accessPermission.getArticleId() + " to folder");
-                return null;
-            }
-            permission.setAccount(account);
-        }
-
-        permission.setCanRead(accessPermission.isCanRead());
-        permission.setCanWrite(accessPermission.isCanWrite());
-        AccessPermission created = permissionDAO.create(permission).toDataTransferObject();
-        if (folder.getType() == FolderType.PRIVATE) {
-            folder.setType(FolderType.SHARED);
-            folder.setModificationTime(new Date());
-            dao.update(folder);
-        }
-
-        // propagate permission
-        if (folder.isPropagatePermissions()) {
-            permissionsController.propagateFolderPermissions(userId, folder, true);
-        }
-        return created;
+        FolderPermissions folderPermissions = new FolderPermissions(folderId);
+        return folderPermissions.createPermission(userId, permission) != null;
     }
 
     public boolean disablePublicReadAccess(String userId, long folderId) {

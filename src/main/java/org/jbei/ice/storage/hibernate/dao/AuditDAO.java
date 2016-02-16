@@ -1,7 +1,7 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -10,7 +10,7 @@ import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Audit;
 import org.jbei.ice.storage.model.Entry;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Accessor for {@link Audit} objects
@@ -31,11 +31,13 @@ public class AuditDAO extends HibernateRepository<Audit> {
         return super.get(Audit.class, id);
     }
 
-    public ArrayList<Audit> getAuditsForEntry(Entry entry) {
+    public List<Audit> getAuditsForEntry(Entry entry, int limit, int offset, boolean asc, String sort) {
         try {
-            Query query = currentSession().createQuery("from " + Audit.class.getName() + " where entry=:entry");
-            query.setParameter("entry", entry);
-            return new ArrayList<Audit>(query.list());
+            Criteria criteria = currentSession().createCriteria(Audit.class)
+                    .add(Restrictions.eq("entry", entry));
+            criteria.setMaxResults(limit);
+            criteria.setFirstResult(offset);
+            return criteria.list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

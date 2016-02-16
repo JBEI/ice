@@ -6,8 +6,7 @@
     </div>
 
     <div class="pad_top" ng-init="groupListPageChanged()">
-        <table cellspacing="0" class="table table-con table-hover table-border-bottom"
-               ng-class="{'opacity_4':loadingPage}">
+        <table cellspacing="0" class="table table-hover table-border-bottom" ng-class="{'opacity_4':loadingPage}">
             <thead>
             <tr>
                 <th>&nbsp;</th>
@@ -34,7 +33,10 @@
                           'label-default': group.memberCount == 0}">{{group.memberCount | number}}
                     </span>
                 </td>
-                <td style="width:180px">{{group.creationTime | date:'MMM d, yyyy'}}</td>
+                <td style="width:180px">
+                    {{group.ownerEmail}} <br>
+                    <small class="text-muted">{{group.creationTime | date:'MMM d, yyyy'}}</small>
+                </td>
                 <td style="width:150px; white-space:nowrap; vertical-align: middle">
                     <div ng-if="!group.confirmDeleteGroup">
                         <i class="fa fa-fw fa-pencil font-14em edit_icon" uib-tooltip="Edit"

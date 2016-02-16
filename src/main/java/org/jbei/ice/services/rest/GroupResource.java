@@ -34,6 +34,16 @@ public class GroupResource extends RestResource {
         return super.respond(groups.get(groupType, offset, limit));
     }
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/autocomplete")
+    public Response matchGroupNames(@QueryParam("token") String token,
+                                    @DefaultValue("8") @QueryParam("limit") int limit) {
+        String userId = requireUserId();
+        Groups groups = new Groups(userId);
+        return super.respond(groups.getMatchingGroups(token, limit));
+    }
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Response createGroup(UserGroup userGroup) {
@@ -59,6 +69,16 @@ public class GroupResource extends RestResource {
         final String userId = getUserId();
         final UserGroup group = groupController.getGroupById(userId, id);
         return respond(group);
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}")
+    public Response deleteUserGroup(@PathParam("id") long groupId) {
+        String userIdStr = requireUserId();
+        log(userIdStr, "deleting group " + groupId);
+        boolean success = groupController.deleteGroup(userIdStr, groupId);
+        return super.respond(success);
     }
 
     /**
