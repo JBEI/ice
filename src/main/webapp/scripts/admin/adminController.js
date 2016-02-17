@@ -68,6 +68,13 @@ angular.module('ice.admin.controller', [])
                 display: 'API Keys',
                 selected: false,
                 icon: 'fa-key'
+            },
+            {
+                id: 'manuscripts',
+                url: 'scripts/admin/manuscripts.html',
+                display: 'Editor Tools',
+                selected: false,
+                icon: 'fa-newspaper-o'
             }
         ];
 
@@ -394,4 +401,49 @@ angular.module('ice.admin.controller', [])
             else
                 $scope.selectedUsers.splice(index, 1);
         };
-    });
+    })
+    .controller('AdminManuscriptsController', function ($scope, $uibModal, Util) {
+        $scope.manuscripts = [];
+        Util.get("rest/manuscripts", function (result) {
+            $scope.manuscripts = result.data;
+        });
+
+        $scope.openManuscriptAddRequest = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/admin/modal/manuscript-create.html',
+                controller: 'CreateManuscriptController'
+            })
+        };
+
+        $scope.updatePaperStatus = function (manuscript, status) {
+            if (manuscript.status == status)
+                return;
+            manuscript.status = status;
+        };
+
+        $scope.deleteManuscript = function (manuscript) {
+            Util.remove("rest/manuscripts/" + manuscript.id, {}, function (result) {
+                var i = $scope.manuscripts.indexOf(manuscript);
+                $scope.manuscripts.splice(1, i);
+            });
+        }
+    })
+    .controller('CreateManuscriptController', function ($scope, $uibModalInstance, Util) {
+        $scope.newManuscript = {status: "UNDER_REVIEW"};
+
+        $scope.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+        // get folders I can edit or see (or shared with me?)
+
+        $scope.createNewPaper = function () {
+            console.log($scope.newManuscript);
+            Util.post("rest/manuscripts", $scope.newManuscript, function (result) {
+                console.log(result);
+                $scope.cancel();
+            }, {}, function (error) {
+
+            });
+        };
+    })
+;

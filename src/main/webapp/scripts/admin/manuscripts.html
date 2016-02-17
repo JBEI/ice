@@ -1,0 +1,68 @@
+<div ng-controller="AdminManuscriptsController">
+    <div class="pad_top">
+        <button type="button" class="ice-button" ng-click="openManuscriptAddRequest()">Add New Paper</button>
+    </div>
+
+    <div class="pad_top" ng-if="!manuscripts || !manuscripts.length">
+        No manuscripts available
+    </div>
+
+    <div class="pad_top" ng-if="manuscripts && manuscripts.length">
+        <table class="table table-border-bottom table-hover">
+            <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Paragon plus url</th>
+                <th>Added</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="manuscript in manuscripts">
+                <td style="vertical-align: middle; line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"
+                    class="font-14em">
+                    <b>{{$index+1}}</b>
+                </td>
+                <td>
+                    {{manuscript.title}} <br>
+                    <small class="text-muted">{{manuscript.authors}}</small>
+                </td>
+                <td style="width:180px; white-space:nowrap; vertical-align: middle;">
+                    <!-- Single button -->
+                    <div class="btn-group" uib-dropdown>
+                        <button type="button" class="btn btn-xs uib-dropdown-toggle" uib-dropdown-toggle
+                                ng-class="{'btn-success': manuscript.status == 'ACCEPTED',
+                                'btn-danger':manuscript.status == 'REJECTED',
+                                'btn-default':manuscript.status == 'UNDER_REVIEW'}">
+                            {{manuscript.status | capitalize}} <span class="caret"></span>
+                        </button>
+                        <ul class="uib-dropdown-menu">
+                            <li ng-if="manuscript.status != 'ACCEPTED'"
+                                ng-click="updatePaperStatus(manuscript, 'ACCEPTED')"><a href="#">Accept</a></li>
+                            <li ng-if="manuscript.status != 'REJECTED'"
+                                ng-click="updatePaperStatus(manuscript, 'REJECTED')"><a href="#">Reject</a></li>
+                            <li ng-if="manuscript.status != 'UNDER_REVIEW'"
+                                ng-click="updatePaperStatus(manuscript, 'UNDER_REVIEW')"><a href="#">Under Review</a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+                <td style="vertical-align: middle;">
+                    <a ng-href="{{manuscript.paragonUrl}}" target="_blank">{{manuscript.paragonUrl}}</a>
+                </td>
+                <td style="vertical-align: middle" class="small">{{manuscript.creationTime | date:'MMM d, yyyy hh:mm
+                    a'}}
+                </td>
+                <td style="vertical-align: middle">
+                    <i class="fa fa-pencil edit_icon font-14em" uib-tooltip="Edit"></i> &nbsp;
+                    <i class="fa fa-cloud-download opacity_hover blue font-14em" uib-tooltip="Export"></i> &nbsp;
+                    <i class="fa fa-trash-o delete_icon font-14em" ng-click="deleteManuscript(manuscript)"
+                       uib-tooltip="Delete"></i>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

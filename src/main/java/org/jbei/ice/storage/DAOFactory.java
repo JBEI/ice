@@ -33,6 +33,7 @@ public class DAOFactory {
     private static ClientModelDAO clientModelDAO;
     private static RemoteShareModelDAO remoteShareModelDAO;
     private static RemoteAccessModelDAO remoteAccessModelDAO;
+    private static ManuscriptModelDAO manuscriptModelDAO;
 
     public static AccountDAO getAccountDAO() {
         if (accountDAO == null)
@@ -188,5 +189,11 @@ public class DAOFactory {
         if (remoteAccessModelDAO == null)
             remoteAccessModelDAO = new RemoteAccessModelDAO();
         return remoteAccessModelDAO;
+    }
+
+    public static ManuscriptModelDAO getManuscriptModelDAO() {
+        if (manuscriptModelDAO == null)
+            manuscriptModelDAO = new ManuscriptModelDAO();
+        return manuscriptModelDAO;
     }
 }

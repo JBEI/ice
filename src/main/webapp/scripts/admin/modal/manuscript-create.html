@@ -1,0 +1,68 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-newspaper-o"></i> &nbsp;Add New Paper</span>
+</div>
+
+<div class="modal-body" ng-if="!apiKey">
+    <div class="alert alert-info" style="padding: 9px">
+        <i style="font-size:60px; float: left;padding-right:10px; color: #3a87ad" class="fa fa-info-circle"></i>
+        <span class="font-90em">
+            <b>Potential space for instructions.</b>
+            Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an
+            unknown printer took a galley of type and scrambled it to make a type specimen book.
+            It has survived not only five centuries.
+        </span>
+    </div>
+
+    <form>
+        <div class="form-group row">
+            <label class="col-sm-3 form-control-label">Title</label>
+
+            <div class="col-sm-9">
+                <input type="text" style="width: 423px" ng-model="newManuscript.title">
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-3 form-control-label">Author(s)</label>
+
+            <div class="col-sm-9">
+                <input type="text" style="width: 423px" ng-model="newManuscript.authors">
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-3 form-control-label">Folder</label>
+
+            <div class="col-sm-9">
+                <input type="text" style="width: 423px" ng-model="newManuscript.folder">
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-3 form-control-label">Status</label>
+
+            <div class="col-sm-9">
+                <select ng-model="newManuscript.status" style="width: 150px; padding: 6px; border: 1px solid #f1f1f1">
+                    <option value="UNDER_REVIEW">Under Review</option>
+                    <option value="ACCEPTED">Accepted</option>
+                    <option value="REJECTED">Rejected</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-3 form-control-label">Paragon Plus url</label>
+
+            <div class="col-sm-9">
+                <input type="text" style="width: 423px" ng-model="newManuscript.paragonUrl">
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-default btn-sm" ng-click="cancel()">Cancel</button>
+    <button class="btn btn-primary btn-sm" ng-click="createNewPaper()">Create</button>
+</div>
