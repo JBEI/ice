@@ -137,4 +137,16 @@ public class RemoteContact {
             return null;
         }
     }
+
+    public void addTransferredEntriesToFolder(String url, String userId, EntrySelection entrySelection, String token, String worToken) {
+        try {
+            String encodedToken = URLEncoder.encode(token, "UTF-8");
+            Map<String, Object> queryParams = new HashMap<>();
+            queryParams.put("token", encodedToken);
+            queryParams.put("userId", userId);
+            restClient.putWor(url, "/rest/folders/entries", entrySelection, FolderDetails.class, queryParams, worToken);
+        } catch (Exception e) {
+            Logger.error(e);
+        }
+    }
 }

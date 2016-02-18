@@ -36,7 +36,14 @@
             <label class="col-sm-3 form-control-label">Folder</label>
 
             <div class="col-sm-9">
-                <input type="text" style="width: 423px" ng-model="newManuscript.folder">
+                <input type="text" class="input_box" style="width: 200px; padding: 6px"
+                       placeholder="Enter folder name" ng-model="newManuscript.selectedFolderName"
+                       typeahead-loading="loadingAddExistingData"
+                       uib-typeahead="result.folderName for result in filterFolders($viewValue)"
+                       typeahead-editable="true"
+                       typeahead-on-select="folderSelection($item, $model, $label)">
+
+                <!--<input type="text" style="width: 423px" ng-model="newManuscript.folder" placeholder="Enter folder name">-->
             </div>
         </div>
 

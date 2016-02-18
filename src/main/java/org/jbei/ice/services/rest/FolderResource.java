@@ -35,6 +35,17 @@ public class FolderResource extends RestResource {
     private PermissionsController permissionsController = new PermissionsController();
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/autocomplete")
+    public Response getAutoCompleteForAvailableFolders(
+            @QueryParam("val") final String val,
+            @DefaultValue("8") @QueryParam("limit") final int limit) {
+        final String userId = requireUserId();
+        Folders folders = new Folders(userId);
+        return super.respond(folders.filter(val, limit));
+    }
+
+    @GET
     public Response getFolders(
             @DefaultValue("false") @QueryParam("canEdit") boolean editOnly) {
         String userId = requireUserId();

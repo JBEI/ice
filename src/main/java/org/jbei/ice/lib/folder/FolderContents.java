@@ -16,8 +16,10 @@ import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntrySelection;
+import org.jbei.ice.lib.entry.EntrySelectionType;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.net.RemoteContact;
+import org.jbei.ice.lib.net.RemoteTransfer;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
@@ -152,16 +154,51 @@ public class FolderContents {
                 continue;
             }
 
-            List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);
-            folderDAO.addFolderContents(folder, entryModelList);
-            if (folder.isPropagatePermissions()) {
-                Set<Permission> folderPermissions = permissionDAO.getFolderPermissions(folder);
-                addEntryPermission(userId, folderPermissions, entryModelList);
-            }
+            // check if the folder is remote or local
+            if (folder.getType() == FolderType.REMOTE) {
+                Logger.info("Adding entries to remote folder " + folder.getId());
+                addToRemoteFolder(account, folder, entries);
+            } else {
+                List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);
+                folderDAO.addFolderContents(folder, entryModelList);
+                if (folder.isPropagatePermissions()) {
+                    Set<Permission> folderPermissions = permissionDAO.getFolderPermissions(folder);
+                    addEntryPermission(userId, folderPermissions, entryModelList);
+                }
 
-            details.setCount(folderDAO.getFolderSize(folder.getId(), null, true));
+                details.setCount(folderDAO.getFolderSize(folder.getId(), null, true));
+            }
         }
         return folders;
+    }
+
+    // transfer entries to remote partner and add to folder
+    protected void addToRemoteFolder(Account account, Folder folder, List<Long> entries) {
+        RemoteAccessModel remoteAccessModel = remoteAccessModelDAO.getByFolder(account, folder);
+        if (remoteAccessModel == null) {
+            Logger.error("Could not retrieve remote access for folder " + folder.getId());
+            return;
+        }
+
+        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
+        RemoteTransfer remoteTransfer = new RemoteTransfer();
+        List<PartData> results = remoteTransfer.getPartsForTransfer(entries);
+        remoteTransfer.transferEntries(remotePartner.getId(), results);
+
+        FolderDetails remoteFolder = new FolderDetails();
+        remoteFolder.setId(Long.decode(remoteAccessModel.getIdentifier()));
+
+        // add transferred entries to the folder
+        EntrySelection selection = new EntrySelection();
+        selection.getEntries().addAll(entries);
+
+        selection.getDestination().add(remoteFolder);
+        selection.setSelectionType(EntrySelectionType.FOLDER);
+
+        RemoteContact remoteContact = new RemoteContact();
+        String token = remoteAccessModel.getToken();
+        remoteContact.addTransferredEntriesToFolder(remotePartner.getUrl(), account.getEmail(), selection, token,
+                remotePartner.getApiKey());
     }
 
     /**

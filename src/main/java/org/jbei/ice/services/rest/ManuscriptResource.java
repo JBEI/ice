@@ -26,6 +26,14 @@ public class ManuscriptResource extends RestResource {
         return super.respond(manuscripts.add(manuscript));
     }
 
+    @PUT
+    @Path("/{id}")
+    public Response update(@PathParam("id") long id,
+                           Manuscript manuscript) {
+        Manuscripts manuscripts = new Manuscripts(requireUserId());
+        return super.respond(manuscripts.update(id, manuscript));
+    }
+
     @DELETE
     @Path("/{id}")
     public Response delete(@PathParam("id") long id) {

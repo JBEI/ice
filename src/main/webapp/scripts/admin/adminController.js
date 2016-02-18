@@ -412,26 +412,36 @@ angular.module('ice.admin.controller', [])
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/admin/modal/manuscript-create.html',
                 controller: 'CreateManuscriptController'
-            })
+            });
+
+            modalInstance.result.then(function (selectedItem) {
+                console.log("closed", selectedItem);
+                Util.get("rest/manuscripts", function (result) {
+                    $scope.manuscripts = result.data;
+                });
+            });
         };
 
         $scope.updatePaperStatus = function (manuscript, status) {
             if (manuscript.status == status)
                 return;
-            manuscript.status = status;
+            Util.update("rest/manuscripts/" + manuscript.id, {status: status}, function (result) {
+                manuscript.status = status;
+            })
         };
 
         $scope.deleteManuscript = function (manuscript) {
             Util.remove("rest/manuscripts/" + manuscript.id, {}, function (result) {
                 var i = $scope.manuscripts.indexOf(manuscript);
-                $scope.manuscripts.splice(1, i);
+                $scope.manuscripts.splice(i, 1);
             });
         }
     })
-    .controller('CreateManuscriptController', function ($scope, $uibModalInstance, Util) {
+    .controller('CreateManuscriptController', function ($scope, $uibModalInstance, $cookieStore, $http, Util) {
         $scope.newManuscript = {status: "UNDER_REVIEW"};
 
         $scope.cancel = function () {
+            $uibModalInstance.close();
             $uibModalInstance.dismiss('cancel');
         };
         // get folders I can edit or see (or shared with me?)
@@ -439,11 +449,25 @@ angular.module('ice.admin.controller', [])
         $scope.createNewPaper = function () {
             console.log($scope.newManuscript);
             Util.post("rest/manuscripts", $scope.newManuscript, function (result) {
-                console.log(result);
                 $scope.cancel();
             }, {}, function (error) {
 
             });
         };
+
+        $scope.filterFolders = function (token) {
+            return $http.get('rest/folders/autocomplete', {
+                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                params: {
+                    val: token
+                }
+            }).then(function (res) {
+                return res.data;
+            });
+        };
+
+        $scope.folderSelection = function ($item, $model, $label) {
+            $scope.newManuscript.folder = $item;
+        }
     })
 ;
