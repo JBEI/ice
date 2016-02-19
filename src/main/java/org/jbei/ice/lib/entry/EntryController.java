@@ -156,7 +156,7 @@ public class EntryController {
         String url = remotePartner.getUrl();
         String token = remoteAccessModel.getToken();
         RemoteContact remoteContact = new RemoteContact();
-        return remoteContact.getToolTipDetails(url, userId, partId, token, url);
+        return remoteContact.getToolTipDetails(url, userId, partId, token, remotePartner.getApiKey());
     }
 
     public ArrayList<UserComment> retrieveEntryComments(String userId, long partId) {

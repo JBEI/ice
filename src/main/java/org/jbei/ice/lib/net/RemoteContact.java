@@ -156,7 +156,7 @@ public class RemoteContact {
             Map<String, Object> queryParams = new HashMap<>();
             queryParams.put("token", encodedToken);
             queryParams.put("userId", userId);
-            return restClient.getWor(url, "rest/parts/" + partId, PartData.class, null, worToken);
+            return restClient.getWor(url, "rest/parts/" + partId + "/tooltip", PartData.class, queryParams, worToken);
         } catch (Exception e) {
             Logger.error(e);
             return null;
