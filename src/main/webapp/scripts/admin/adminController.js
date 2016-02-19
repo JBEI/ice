@@ -430,10 +430,15 @@ angular.module('ice.admin.controller', [])
             $scope.getManuscripts();
         };
 
-        $scope.openManuscriptAddRequest = function () {
+        $scope.openManuscriptAddRequest = function (selectedManuscript) {
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/admin/modal/manuscript-create.html',
-                controller: 'CreateManuscriptController'
+                controller: 'CreateManuscriptController',
+                resolve: {
+                    manuscript: function () {
+                        return selectedManuscript;
+                    }
+                }
             });
 
             modalInstance.result.then(function (selectedItem) {
@@ -456,8 +461,14 @@ angular.module('ice.admin.controller', [])
             });
         }
     })
-    .controller('CreateManuscriptController', function ($scope, $uibModalInstance, $cookieStore, $http, Util) {
-        $scope.newManuscript = {status: "UNDER_REVIEW"};
+    .controller('CreateManuscriptController', function ($scope, $uibModalInstance, $cookieStore, $http, manuscript, Util) {
+        $scope.submitButtonText = "Create";
+        if (manuscript) {
+            $scope.newManuscript = manuscript;
+            $scope.submitButtonText = "Update";
+            $scope.newManuscript.selectedFolderName = $scope.newManuscript.folder.folderName;
+        } else
+            $scope.newManuscript = {status: "UNDER_REVIEW"};
 
         $scope.cancel = function () {
             $uibModalInstance.close();
@@ -467,11 +478,17 @@ angular.module('ice.admin.controller', [])
 
         $scope.createNewPaper = function () {
             console.log($scope.newManuscript);
-            Util.post("rest/manuscripts", $scope.newManuscript, function (result) {
-                $scope.cancel();
-            }, {}, function (error) {
+            if ($scope.newManuscript.id) {
+                Util.update("rest/manuscripts/" + $scope.newManuscript.id, $scope.newManuscript, {}, function (result) {
+                    $scope.cancel();
+                });
+            } else {
+                Util.post("rest/manuscripts", $scope.newManuscript, function (result) {
+                    $scope.cancel();
+                }, {}, function (error) {
 
-            });
+                });
+            }
         };
 
         $scope.filterFolders = function (token) {

@@ -6,12 +6,10 @@
 
 <div class="modal-body" ng-if="!apiKey">
     <div class="alert alert-info" style="padding: 9px">
-        <i style="font-size:60px; float: left;padding-right:10px; color: #3a87ad" class="fa fa-info-circle"></i>
+        <i style="font-size:40px; float: left;padding-right:10px; color: #3a87ad" class="fa fa-info-circle"></i>
         <span class="font-90em">
-            <b>Potential space for instructions.</b>
-            Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an
-            unknown printer took a galley of type and scrambled it to make a type specimen book.
-            It has survived not only five centuries.
+            Enter or edit details of the paper. To associate it with a folder, either paste
+            the url of the folder or enter the folder name.
         </span>
     </div>
 
@@ -71,5 +69,5 @@
 
 <div class="modal-footer">
     <button class="btn btn-default btn-sm" ng-click="cancel()">Cancel</button>
-    <button class="btn btn-primary btn-sm" ng-click="createNewPaper()">Create</button>
+    <button class="btn btn-primary btn-sm" ng-click="createNewPaper()">{{submitButtonText}}</button>
 </div>
