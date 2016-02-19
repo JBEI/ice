@@ -36,9 +36,14 @@
              <i class="fa fa-exchange fa-stack-1x" style="margin-left: 2px; color: #f1f1f1"></i>  &nbsp;
         </span>
 
+        <span class="fa-stack" style="margin-left: 7px; font-size: 8px;" ng-if="folder.type==='REMOTE'">
+            <i class="fa fa-folder fa-stack-2x" style="color: #999;"></i>
+             <i class="fa fa-cloud fa-stack-1x" style="margin-left: 2px; margin-top: 1px; color: #f1f1f1"></i>  &nbsp;
+        </span>
+
         <span ng-if="folder.folderName" style="font-size: 12px;" title="{{folder.folderName}}">{{folder.folderName | truncate:22}}</span>&nbsp;
         <i ng-if="!folder.folderName" class="color-888" style="font-size: 13px">Untitled</i>&nbsp;
-        <span ng-show="!showSubMenu && !showTransferOptions" class="menu_count">{{folder.count | number}}</span>
+        <span ng-show="!showSubMenu && !showTransferOptions && folder.type!=='REMOTE'" class="menu_count">{{folder.count | number}}</span>
 
         <!--submenu options-->
         <span ng-show="showSubMenu && !showTransferOptions" class="menu_count" style="font-size: 14px">

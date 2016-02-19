@@ -108,9 +108,20 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/tooltip")
-    public PartData getTooltipDetails(@PathParam("id") final String id) {
+    public PartData getTooltipDetails(@PathParam("id") final String id,
+                                      @DefaultValue("false") @QueryParam("remote") boolean isRemote,
+                                      @QueryParam("folderId") long fid) {
         final String userId = getUserId();
-        return controller.retrieveEntryTipDetails(userId, id);
+        if (isRemote) {
+            log(userId, " get remote tooltip");
+            long partId = Long.decode(id);
+            return controller.retrieveRemoteToolTip(userId, fid, partId);
+        }
+
+        if (StringUtils.isEmpty(userId)) {
+            verifyWebPartner();
+        }
+        return controller.retrieveEntryTipDetails(id);
     }
 
     @GET

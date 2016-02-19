@@ -30,7 +30,9 @@
         <tr>
             <td>
                 <div style="overflow: auto; max-height: 200px; border-bottom: 1px solid #CCCCCC">
-
+                    <div ng-if="permissions.length == 0" class="pad-8">
+                        <i>No available permissions</i>
+                    </div>
                     <table class="table table-hover">
                         <tr ng-repeat="permission in permissions">
                             <td style="vertical-align: middle; width: 45px;">

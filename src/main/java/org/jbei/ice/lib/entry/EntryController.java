@@ -19,6 +19,7 @@ import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
+import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
@@ -129,15 +130,33 @@ public class EntryController {
         }
     }
 
-    public PartData retrieveEntryTipDetails(String userId, String id) {
+    public PartData retrieveEntryTipDetails(String id) {
         Entry entry = getEntry(id);
         if (entry == null)
             return null;
 
-        if (!permissionsController.isPubliclyVisible(entry) && !authorization.canRead(userId, entry))
-            return null;
+//        if (!permissionsController.isPubliclyVisible(entry) && !authorization.canRead(userId, entry))
+//            return null;
 
         return ModelToInfoFactory.createTipView(entry);
+    }
+
+    // contact the remote partner to get the tool tip
+    public PartData retrieveRemoteToolTip(String userId, long folderId, long partId) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);
+
+        RemoteAccessModel remoteAccessModel = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
+        if (remoteAccessModel == null) {
+            Logger.error("Could not retrieve remote access for folder " + folder.getId());
+            return null;
+        }
+
+        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
+        String url = remotePartner.getUrl();
+        String token = remoteAccessModel.getToken();
+        RemoteContact remoteContact = new RemoteContact();
+        return remoteContact.getToolTipDetails(url, userId, partId, token, url);
     }
 
     public ArrayList<UserComment> retrieveEntryComments(String userId, long partId) {
