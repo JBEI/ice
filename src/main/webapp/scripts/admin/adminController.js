@@ -404,9 +404,14 @@ angular.module('ice.admin.controller', [])
     })
     .controller('AdminManuscriptsController', function ($scope, $uibModal, Util) {
         $scope.manuscripts = [];
-        Util.get("rest/manuscripts", function (result) {
-            $scope.manuscripts = result.data;
-        });
+        $scope.manuscriptsParams = {sort: 'creationTime', asc: true, currentPage: 1, maxCount: 5, offset: 0, limit: 15};
+
+        $scope.getManuscripts = function () {
+            Util.get("rest/manuscripts", function (result) {
+                $scope.manuscripts = result;
+            }, $scope.manuscriptsParams);
+        };
+        $scope.getManuscripts();
 
         $scope.openManuscriptAddRequest = function () {
             var modalInstance = $uibModal.open({
@@ -415,10 +420,7 @@ angular.module('ice.admin.controller', [])
             });
 
             modalInstance.result.then(function (selectedItem) {
-                console.log("closed", selectedItem);
-                Util.get("rest/manuscripts", function (result) {
-                    $scope.manuscripts = result.data;
-                });
+                $scope.getManuscripts();
             });
         };
 

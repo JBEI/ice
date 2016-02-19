@@ -15,9 +15,12 @@ public class ManuscriptResource extends RestResource {
     @GET
     public Response getList(
             @DefaultValue("0") @QueryParam("offset") int offset,
-            @DefaultValue("15") @QueryParam("size") int size) {
+            @DefaultValue("15") @QueryParam("size") int size,
+            @DefaultValue("creationTime") @QueryParam("sort") String sort,
+            @DefaultValue("true") @QueryParam("asc") boolean asc,
+            @QueryParam("filter") String filter) {
         Manuscripts manuscripts = new Manuscripts(requireUserId());
-        return super.respond(manuscripts.get(offset, size));
+        return super.respond(manuscripts.get(sort, asc, offset, size, filter));
     }
 
     @POST

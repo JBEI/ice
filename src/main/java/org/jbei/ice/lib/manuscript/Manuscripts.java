@@ -53,9 +53,10 @@ public class Manuscripts {
         return dao.create(model).toDataTransferObject();
     }
 
-    public Results<Manuscript> get(int offset, int size) {
+    public Results<Manuscript> get(String sort, boolean asc, int offset, int size, String filter) {
         Results<Manuscript> results = new Results<>();
-        List<ManuscriptModel> list = dao.list(offset, size);
+        results.setResultCount(dao.getTotalCount(filter));
+        List<ManuscriptModel> list = dao.list(sort, asc, offset, size, filter);
         if (!list.isEmpty()) {
             for (ManuscriptModel manuscriptModel : list)
                 results.getData().add(manuscriptModel.toDataTransferObject());
