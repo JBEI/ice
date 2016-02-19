@@ -34,9 +34,10 @@
             <label class="col-sm-3 form-control-label">Folder</label>
 
             <div class="col-sm-9">
-                <input type="text" class="input_box" style="width: 200px; padding: 6px"
+                <input type="text" class="input_box" style="width: 300px; padding: 6px"
                        placeholder="Enter folder name" ng-model="newManuscript.selectedFolderName"
                        typeahead-loading="loadingAddExistingData"
+                       ng-paste="pasteFolder($event)"
                        uib-typeahead="result.folderName for result in filterFolders($viewValue)"
                        typeahead-editable="true"
                        typeahead-on-select="folderSelection($item, $model, $label)">
@@ -69,5 +70,7 @@
 
 <div class="modal-footer">
     <button class="btn btn-default btn-sm" ng-click="cancel()">Cancel</button>
-    <button class="btn btn-primary btn-sm" ng-click="createNewPaper()">{{submitButtonText}}</button>
+    <button class="btn btn-primary btn-sm" ng-disabled="!newManuscript.folder" ng-click="createNewPaper()">
+        {{submitButtonText}}
+    </button>
 </div>

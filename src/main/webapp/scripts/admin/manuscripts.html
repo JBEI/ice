@@ -57,7 +57,7 @@
                     {{manuscript.title}} <br>
                     <small class="text-muted">{{manuscript.authors}}</small>
                 </td>
-                <td style="width:180px; white-space:nowrap; vertical-align: middle;">
+                <td style="width:130px; white-space:nowrap; vertical-align: middle;">
                     <!-- Single button -->
                     <div class="btn-group" uib-dropdown>
                         <button type="button" class="btn btn-xs uib-dropdown-toggle" uib-dropdown-toggle
@@ -78,16 +78,25 @@
                     </div>
                 </td>
                 <td style="vertical-align: middle;">
-                    <a ng-href="{{manuscript.paragonUrl}}" target="_blank">{{manuscript.paragonUrl}}</a>
+                    <a ng-href="{{manuscript.paragonUrl | externalLink }}" target="_blank">{{manuscript.paragonUrl}}</a>
                 </td>
-                <td style="vertical-align: middle" class="small">{{manuscript.creationTime | date:'MMM d, yyyy hh:mm'}}
+                <td style="vertical-align: middle; width: 130px" class="small">
+                    {{manuscript.creationTime | date:'MMM d, yyyy hh:mm'}}
                 </td>
-                <td style="vertical-align: middle">
-                    <i class="fa fa-pencil edit_icon font-14em" ng-click="openManuscriptAddRequest(manuscript)"
-                       uib-tooltip="Edit"></i> &nbsp;
-                    <i class="fa fa-cloud-download opacity_hover blue font-14em" uib-tooltip="Export"></i> &nbsp;
-                    <i class="fa fa-trash-o delete_icon font-14em" ng-click="deleteManuscript(manuscript)"
-                       uib-tooltip="Delete"></i>
+                <td style="vertical-align: middle; width: 180px">
+                    <div ng-if="manuscript.deleteRequest">
+                        <i class="fa fa-exclamation-triangle dark-orange"></i>
+                        <i>Delete?</i> &nbsp;
+                        <button class="btn-default btn-xs btn" ng-click="manuscript.deleteRequest = false">No</button>
+                        <button class="btn-primary btn-xs btn" ng-click="deleteManuscript(manuscript)">Yes</button>
+                    </div>
+                    <div ng-if="!manuscript.deleteRequest">
+                        <i class="fa fa-pencil edit_icon font-14em" ng-click="openManuscriptAddRequest(manuscript)"
+                           uib-tooltip="Edit"></i> &nbsp;
+                        <i class="fa fa-cloud-download opacity_hover blue font-14em" uib-tooltip="Export"></i> &nbsp;
+                        <i class="fa fa-trash-o delete_icon font-14em" ng-click="manuscript.deleteRequest = true"
+                           uib-tooltip="Delete"></i>
+                    </div>
                 </td>
             </tr>
             </tbody>

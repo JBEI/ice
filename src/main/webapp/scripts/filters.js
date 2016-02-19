@@ -73,3 +73,12 @@ iceFilters.filter('arrayDisplay', function () {
     }
 });
 
+iceFilters.filter("externalLink", function () {
+    return function (link) {
+        if (link.indexOf("http") == 0)
+            return link;
+        else
+            return "http://" + link;
+    }
+});
+

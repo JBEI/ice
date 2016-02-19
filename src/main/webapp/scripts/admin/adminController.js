@@ -449,7 +449,7 @@ angular.module('ice.admin.controller', [])
         $scope.updatePaperStatus = function (manuscript, status) {
             if (manuscript.status == status)
                 return;
-            Util.update("rest/manuscripts/" + manuscript.id, {status: status}, function (result) {
+            Util.update("rest/manuscripts/" + manuscript.id, {status: status}, {}, function (result) {
                 manuscript.status = status;
             })
         };
@@ -477,7 +477,6 @@ angular.module('ice.admin.controller', [])
         // get folders I can edit or see (or shared with me?)
 
         $scope.createNewPaper = function () {
-            console.log($scope.newManuscript);
             if ($scope.newManuscript.id) {
                 Util.update("rest/manuscripts/" + $scope.newManuscript.id, $scope.newManuscript, {}, function (result) {
                     $scope.cancel();
@@ -504,6 +503,28 @@ angular.module('ice.admin.controller', [])
 
         $scope.folderSelection = function ($item, $model, $label) {
             $scope.newManuscript.folder = $item;
-        }
+        };
+
+        $scope.pasteFolder = function (event) {
+            var pasted = event.originalEvent.clipboardData.getData('text/plain');
+            var replace = event.currentTarget.baseURI + "folders/";
+            var idx = pasted.indexOf(replace);
+
+            if (idx != 0) {
+                console.error("Could not parse pasted");
+                return;
+            }
+
+            pasted = pasted.slice(idx + replace.length);
+            if (isNaN(pasted)) {
+                console.error(pasted + " is not a number");
+                return;
+            }
+
+            Util.get("rest/folders/" + pasted, function (result) {
+                $scope.newManuscript.folder = result;
+                $scope.newManuscript.selectedFolderName = result.folderName;
+            });
+        };
     })
 ;
