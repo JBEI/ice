@@ -274,7 +274,10 @@ public class FolderContents {
 
         // retrieve entries from remote partner (ends up in the call below)
         RemoteContact remoteContact = new RemoteContact();
-        return remoteContact.getRemoteContents(remotePartner.getUrl(), userId, remoteFolderId, token, remotePartner.getApiKey());
+        FolderDetails remoteDetails = remoteContact.getRemoteContents(remotePartner.getUrl(), userId, remoteFolderId, token, remotePartner.getApiKey());
+        details.setCount(remoteDetails.getCount());
+        details.setEntries(remoteDetails.getEntries());
+        return details;
     }
 
     // remote request for shared contents
