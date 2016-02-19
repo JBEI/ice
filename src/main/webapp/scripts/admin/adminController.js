@@ -463,6 +463,8 @@ angular.module('ice.admin.controller', [])
     })
     .controller('CreateManuscriptController', function ($scope, $uibModalInstance, $cookieStore, $http, manuscript, Util) {
         $scope.submitButtonText = "Create";
+        $scope.invalidFolder = false;
+
         if (manuscript) {
             $scope.newManuscript = manuscript;
             $scope.submitButtonText = "Update";
@@ -502,6 +504,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.folderSelection = function ($item, $model, $label) {
+            $scope.invalidFolder = false;
             $scope.newManuscript.folder = $item;
         };
 
@@ -512,11 +515,13 @@ angular.module('ice.admin.controller', [])
 
             if (idx != 0) {
                 console.error("Could not parse pasted");
+                $scope.invalidFolder = true;
                 return;
             }
 
             pasted = pasted.slice(idx + replace.length);
             if (isNaN(pasted)) {
+                $scope.invalidFolder = true;
                 console.error(pasted + " is not a number");
                 return;
             }
