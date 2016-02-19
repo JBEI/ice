@@ -20,10 +20,30 @@
             <thead>
             <tr>
                 <th>&nbsp;</th>
-                <th>Title</th>
-                <th>Status</th>
-                <th>Paragon plus url</th>
-                <th>Added</th>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('title')">Title </span>
+                    <i ng-if="manuscriptsParams.sort!=='title'" class="sortable fa fa-angle-down"></i>
+                    <i ng-show="manuscriptsParams.sort=='title'" style="font-size: 14px" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':manuscriptsParams.asc==false, 'fa-angle-up':manuscriptsParams.asc==true}"></i>
+                </th>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('status')">Status </span>
+                    <i ng-if="manuscriptsParams.sort!=='status'" class="sortable fa fa-angle-down"></i>
+                    <i ng-show="manuscriptsParams.sort=='status'" style="font-size: 14px" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':manuscriptsParams.asc==false, 'fa-angle-up':manuscriptsParams.asc==true}"></i>
+                </th>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('paragonUrl')">Paragon plus url </span>
+                    <i ng-if="manuscriptsParams.sort!=='paragonUrl'" class="sortable fa fa-angle-down"></i>
+                    <i ng-show="manuscriptsParams.sort=='paragonUrl'" style="font-size: 14px" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':manuscriptsParams.asc==false, 'fa-angle-up':manuscriptsParams.asc==true}"></i>
+                </th>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('creationTime')">Added </span>
+                    <i ng-if="manuscriptsParams.sort!=='creationTime'" class="sortable fa fa-angle-down"></i>
+                    <i ng-show="manuscriptsParams.sort=='creationTime'" style="font-size: 14px" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':manuscriptsParams.asc==false, 'fa-angle-up':manuscriptsParams.asc==true}"></i>
+                </th>
                 <th></th>
             </tr>
             </thead>

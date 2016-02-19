@@ -17,7 +17,7 @@ public class ManuscriptResource extends RestResource {
             @DefaultValue("0") @QueryParam("offset") int offset,
             @DefaultValue("15") @QueryParam("size") int size,
             @DefaultValue("creationTime") @QueryParam("sort") String sort,
-            @DefaultValue("true") @QueryParam("asc") boolean asc,
+            @DefaultValue("false") @QueryParam("asc") boolean asc,
             @QueryParam("filter") String filter) {
         Manuscripts manuscripts = new Manuscripts(requireUserId());
         return super.respond(manuscripts.get(sort, asc, offset, size, filter));

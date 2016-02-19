@@ -404,7 +404,14 @@ angular.module('ice.admin.controller', [])
     })
     .controller('AdminManuscriptsController', function ($scope, $uibModal, Util) {
         $scope.manuscripts = [];
-        $scope.manuscriptsParams = {sort: 'creationTime', asc: true, currentPage: 1, maxCount: 5, offset: 0, limit: 15};
+        $scope.manuscriptsParams = {
+            sort: 'creationTime',
+            asc: false,
+            currentPage: 1,
+            maxCount: 5,
+            offset: 0,
+            limit: 15
+        };
 
         $scope.getManuscripts = function () {
             Util.get("rest/manuscripts", function (result) {
@@ -412,6 +419,16 @@ angular.module('ice.admin.controller', [])
             }, $scope.manuscriptsParams);
         };
         $scope.getManuscripts();
+
+        $scope.sort = function (field) {
+            $scope.manuscriptsParams.offset = 0;
+            if ($scope.manuscriptsParams.sort == field)
+                $scope.manuscriptsParams.asc = !$scope.manuscriptsParams.asc;
+            else
+                $scope.manuscriptsParams.asc = false;
+            $scope.manuscriptsParams.sort = field;
+            $scope.getManuscripts();
+        };
 
         $scope.openManuscriptAddRequest = function () {
             var modalInstance = $uibModal.open({
