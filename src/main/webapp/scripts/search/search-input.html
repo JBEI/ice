@@ -79,8 +79,9 @@
                     <strong style="letter-spacing:-1px; color:#555;">FIELD FILTERS</strong>
 
                     <div ng-if="!fieldFilters.length">
-                        <small class="text-muted">Add field filter <i class="fa fa-plus-circle opacity_hover"
-                                                                      ng-click="addFieldFilter()"></i></small>
+                        <small class="text-muted opacity_hover" ng-click="addFieldFilter()">
+                            Add filter <i class="fa fa-plus-circle"></i>
+                        </small>
                     </div>
 
                     <div ng-repeat="filterFilter in fieldFilters">
@@ -91,9 +92,9 @@
                             <option value="PART_NUMBER">Part Number</option>
                         </select>
 
-                        <input class="input_box" ng-model="fieldFilters[$index].filter"/>
-                        <i class="fa fa-fw fa-plus" ng-click="addFieldFilter()"></i>
-                        <i class="fa fa-fw fa-minus" ng-click="removeFieldFilter($index)"></i>
+                        <input class="input_box" style="width: 200px" ng-model="fieldFilters[$index].filter"/>
+                        <i class="fa fa-fw fa-plus opacity_hover" ng-click="addFieldFilter()"></i>
+                        <i class="fa fa-fw fa-minus opacity_hover" ng-click="removeFieldFilter($index)"></i>
                     </div>
 
                     <div class="divider"></div>
