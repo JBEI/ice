@@ -402,7 +402,7 @@ angular.module('ice.admin.controller', [])
                 $scope.selectedUsers.splice(index, 1);
         };
     })
-    .controller('AdminManuscriptsController', function ($scope, $uibModal, Util) {
+    .controller('AdminManuscriptsController', function ($scope, $uibModal, $window, Util) {
         $scope.manuscripts = [];
         $scope.manuscriptsParams = {
             sort: 'creationTime',
@@ -444,6 +444,14 @@ angular.module('ice.admin.controller', [])
             modalInstance.result.then(function (selectedItem) {
                 $scope.getManuscripts();
             });
+        };
+
+        $scope.downloadManuscriptFiles = function (manuscript) {
+            Util.post("rest/manuscripts/" + manuscript.id + "/files/zip", {}, function (result) {
+                if (result && result.value) {
+                    $window.open("rest/file/tmp/" + result.value, "_self");
+                }
+            })
         };
 
         $scope.updatePaperStatus = function (manuscript, status) {

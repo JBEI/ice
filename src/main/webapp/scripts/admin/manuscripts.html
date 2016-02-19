@@ -93,7 +93,8 @@
                     <div ng-if="!manuscript.deleteRequest">
                         <i class="fa fa-pencil edit_icon font-14em" ng-click="openManuscriptAddRequest(manuscript)"
                            uib-tooltip="Edit"></i> &nbsp;
-                        <i class="fa fa-cloud-download opacity_hover blue font-14em" uib-tooltip="Export"></i> &nbsp;
+                        <i class="fa fa-cloud-download opacity_hover blue font-14em"
+                           ng-click="downloadManuscriptFiles(manuscript)" uib-tooltip="Export"></i> &nbsp;
                         <i class="fa fa-trash-o delete_icon font-14em" ng-click="manuscript.deleteRequest = true"
                            uib-tooltip="Delete"></i>
                     </div>

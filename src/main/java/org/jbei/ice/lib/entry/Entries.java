@@ -93,6 +93,9 @@ public class Entries extends HasEntry {
         boolean all = context.isAll();
         EntryType entryType = context.getEntryType();
 
+        if (context.getSelectionType() == null)
+            return context.getEntries();
+
         switch (context.getSelectionType()) {
             default:
             case FOLDER:
