@@ -9,6 +9,7 @@ import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
@@ -74,8 +75,11 @@ public class FolderContents {
             throw new PermissionException("Secret does not match");
         }
 
+        List<Long> entries = selection.getEntries();
+        DAOFactory.getEntryDAO().setEntryVisibility(entries, Visibility.OK);
+
         // good to go?
-        FolderDetails details = addEntriesToTransferredFolder(selection.getEntries(), folder);
+        FolderDetails details = addEntriesToTransferredFolder(entries, folder);
         return details != null;
     }
 
