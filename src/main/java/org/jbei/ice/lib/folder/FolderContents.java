@@ -234,8 +234,8 @@ public class FolderContents {
 
         RemoteContact remoteContact = new RemoteContact();
         String token = remoteAccessModel.getToken();
-        remoteContact.addTransferredEntriesToFolder(remotePartner.getUrl(), account.getEmail(), selection, token,
-                remotePartner.getApiKey());
+        remoteContact.addTransferredEntriesToFolder(remotePartner.getUrl(), account.getEmail(), selection,
+                remoteFolder.getId(), token, remotePartner.getApiKey());
     }
 
     /**
