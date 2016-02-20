@@ -46,6 +46,39 @@ public class FolderContents {
     private PermissionsController permissionsController = new PermissionsController();
     private AccountController accountController = new AccountController();
 
+    // adds a specified entry to a folder. The entry was transferred earlier so already exists
+    public boolean remotelyAddEntrySelection(String remoteUserId, long folderId, String remoteUserToken,
+                                             EntrySelection selection, RegistryPartner requestingPartner) {
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);      // folder that the entry is contained in
+        if (folder == null)
+            return false;
+
+        RemotePartner remotePartner = DAOFactory.getRemotePartnerDAO().getByUrl(requestingPartner.getUrl());
+
+        // check that the remote user has the right token
+        RemoteShareModel shareModel = DAOFactory.getRemoteShareModelDAO().get(remoteUserId, remotePartner, folder);
+        if (shareModel == null) {
+            Logger.error("Could not retrieve share model");
+            return false;
+        }
+
+        Permission permission = shareModel.getPermission(); // folder must match
+        if (permission.getFolder().getId() != folderId || !permission.isCanWrite()) {
+            throw new PermissionException("permission could not be verified");
+        }
+
+        // validate access token
+        TokenHash tokenHash = new TokenHash();
+        String secret = tokenHash.encryptPassword(remotePartner.getUrl() + remoteUserId, remoteUserToken);
+        if (!secret.equals(shareModel.getSecret())) {
+            throw new PermissionException("Secret does not match");
+        }
+
+        // good to go?
+        FolderDetails details = addEntriesToTransferredFolder(selection.getEntries(), folder);
+        return details != null;
+    }
+
     /**
      * Adds entries in the selection context, to specified folders
      *

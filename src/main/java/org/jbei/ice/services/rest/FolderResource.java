@@ -143,12 +143,23 @@ public class FolderResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/entries")
-    public Response addSelectedEntriesToFolders(final EntrySelection entrySelection) {
+    public Response addSelectedEntriesToFolders(final EntrySelection entrySelection,
+                                                @QueryParam("token") String remoteUserToken,
+                                                @QueryParam("userId") String remoteUserId,
+                                                @QueryParam("folderId") long fid) {
         final String userId = getUserId();
-        log(userId, "adding entries to folders");
         final FolderContents folderContents = new FolderContents();
-        folderContents.addEntrySelection(userId, entrySelection);
-        return super.respond(true);
+        if (StringUtils.isEmpty(userId) && !StringUtils.isEmpty(remoteUserToken)) {
+            // check others
+            log(remoteUserToken, " remotely adding entries to folders");
+            RegistryPartner registryPartner = verifyWebPartner();
+            return super.respond(folderContents.remotelyAddEntrySelection(remoteUserId, fid, remoteUserToken,
+                    entrySelection, registryPartner));
+        } else {
+            log(userId, "adding entries to folders");
+            folderContents.addEntrySelection(userId, entrySelection);
+            return super.respond(true);
+        }
     }
 
     /**
