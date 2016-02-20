@@ -162,4 +162,17 @@ public class RemoteContact {
             return null;
         }
     }
+
+    public PartData getRemoteEntry(String url, String userId, long partId, String token, String worToken) {
+        try {
+            String encodedToken = URLEncoder.encode(token, "UTF-8");
+            Map<String, Object> queryParams = new HashMap<>();
+            queryParams.put("token", encodedToken);
+            queryParams.put("userId", userId);
+            return restClient.getWor(url, "rest/parts/" + partId, PartData.class, queryParams, worToken);
+        } catch (Exception e) {
+            Logger.error(e);
+            return null;
+        }
+    }
 }

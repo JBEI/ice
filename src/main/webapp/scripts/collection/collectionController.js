@@ -302,7 +302,7 @@ angular.module('ice.collection.controller', [])
     .
     controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
                                                        $stateParams, Folders, Entry, EntryContextUtil,
-                                                       Selection, Util, localStorageService, FolderSelection) {
+                                                       Selection, Util, localStorageService) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
         var entry = Entry(sessionId);
@@ -320,7 +320,6 @@ angular.module('ice.collection.controller', [])
                 } else {
                     // retrieved folders
                     $scope.folder = result;
-                    console.log($scope.folder, FolderSelection.getSelectedFolder());
                     $scope.params.count = result.count;
                     if (result.canEdit)
                         $scope.folderNameTooltip = "Click to rename";
@@ -475,7 +474,6 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.showEntryDetails = function (entry, index) {
-
             if (!$scope.params.offset) {
                 $scope.params.offset = index;
             }
