@@ -220,14 +220,14 @@ public class FolderContents {
         RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
         RemoteTransfer remoteTransfer = new RemoteTransfer();
         List<PartData> results = remoteTransfer.getPartsForTransfer(entries);
-        remoteTransfer.transferEntries(remotePartner.getId(), results);
+        List<Long> remoteIds = remoteTransfer.transferEntries(remotePartner.getId(), results);
 
         FolderDetails remoteFolder = new FolderDetails();
         remoteFolder.setId(Long.decode(remoteAccessModel.getIdentifier()));
 
         // add transferred entries to the folder
         EntrySelection selection = new EntrySelection();
-        selection.getEntries().addAll(entries);
+        selection.getEntries().addAll(remoteIds);
 
         selection.getDestination().add(remoteFolder);
         selection.setSelectionType(EntrySelectionType.FOLDER);
