@@ -493,6 +493,7 @@ angular.module('ice.collection.controller', [])
                 }, $scope.params);
             }, $scope.params.count, offset, "folders/" + $scope.params.folderId, $scope.params.sort);
 
+            //$location.search("fid", $scope.folder.id);
             $location.path("entry/" + entry.id);
         };
 

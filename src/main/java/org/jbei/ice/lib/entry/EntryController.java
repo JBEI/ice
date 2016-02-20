@@ -346,13 +346,14 @@ public class EntryController {
         RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
         String url = remotePartner.getUrl();
         String token = remoteAccessModel.getToken();
+        long remoteFolderId = Long.decode(remoteAccessModel.getIdentifier());
         RemoteContact remoteContact = new RemoteContact();
-        return remoteContact.getRemoteEntry(url, userId, partId, token, remotePartner.getApiKey());
+        return remoteContact.getRemoteEntry(url, userId, partId, remoteFolderId, token, remotePartner.getApiKey());
     }
 
     public PartData getRemoteRequestedEntry(String remoteUserId, String token, String entryId,
                                             long folderId, RegistryPartner requestingPartner) {
-        // see folderContents.getRemoteSharedCoontents
+        // see folderContents.getRemoteSharedContents
         Folder folder = DAOFactory.getFolderDAO().get(folderId);      // folder that the entry is contained in
         if (folder == null)
             return null;

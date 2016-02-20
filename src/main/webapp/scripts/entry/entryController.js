@@ -927,7 +927,7 @@ angular.module('ice.entry.controller', [])
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
                                              FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection,
-                                             CustomField, Util, Authentication) {
+                                             CustomField, Util, Authentication, FolderSelection) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
@@ -1216,7 +1216,13 @@ angular.module('ice.entry.controller', [])
         //        headers: {'X-ICE-Authentication-SessionId': sessionId}
         //},
 
-        console.log($location.search());
+        var params = {};
+        if (FolderSelection.getSelectedFolder() && FolderSelection.getSelectedFolder().type == 'REMOTE') {
+            params.remote = true;
+            params.folderId = FolderSelection.getSelectedFolder().id;
+            //$location.search("fid", ) // todo : if the page is refreshed
+        }
+
         Util.get("rest/parts/" + $stateParams.id,
             function (result) {
                 Selection.reset();
@@ -1230,7 +1236,7 @@ angular.module('ice.entry.controller', [])
                 entry.statistics({partId: $stateParams.id}, function (stats) {
                     $scope.entryStatistics = stats;
                 });
-            }, function (error) {
+            }, params, function (error) {
                 if (error.status === 404)
                     $scope.notFound = true;
                 else if (error.status === 403)
