@@ -66,7 +66,8 @@ public class Manuscripts {
         model.setStatus(manuscript.getStatus());
         model.setParagonUrl(manuscript.getParagonUrl());
         model.setTitle(manuscript.getTitle());
-        model.setAuthors(manuscript.getAuthors());
+        model.setAuthorFirstName(manuscript.getAuthorFirstName());
+        model.setAuthorLastName(manuscript.getAuthorLastName());
         FolderDetails details = manuscript.getFolder();
         Folder folder = DAOFactory.getFolderDAO().get(details.getId());
         model.setFolder(folder);
@@ -92,8 +93,11 @@ public class Manuscripts {
         if (!StringUtils.isEmpty(manuscript.getTitle()))
             model.setTitle(manuscript.getTitle());
 
-        if (!StringUtils.isEmpty(manuscript.getAuthors()))
-            model.setAuthors(manuscript.getAuthors());
+        if (!StringUtils.isEmpty(manuscript.getAuthorFirstName()))
+            model.setAuthorFirstName(manuscript.getAuthorFirstName());
+
+        if (!StringUtils.isEmpty(manuscript.getAuthorLastName()))
+            model.setAuthorLastName(manuscript.getAuthorLastName());
 
         if (!StringUtils.isEmpty(manuscript.getParagonUrl()))
             model.setParagonUrl(manuscript.getParagonUrl());

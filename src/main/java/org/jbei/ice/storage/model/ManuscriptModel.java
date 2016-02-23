@@ -28,8 +28,11 @@ public class ManuscriptModel implements DataModel {
     @Column(name = "paragonUrl")
     private String paragonUrl;
 
-    @Column(name = "authors")
-    private String authors;
+    @Column(name = "author_first_name")
+    private String authorFirstName;
+
+    @Column(name = "author_last_name")
+    private String authorLastName;
 
     @Enumerated(value = EnumType.STRING)
     private ManuscriptStatus status;
@@ -37,14 +40,6 @@ public class ManuscriptModel implements DataModel {
     @Column(name = "creation_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
-
-    public String getAuthors() {
-        return authors;
-    }
-
-    public void setAuthors(String authors) {
-        this.authors = authors;
-    }
 
     @Override
     public long getId() {
@@ -91,13 +86,30 @@ public class ManuscriptModel implements DataModel {
         this.creationTime = creationTime;
     }
 
+    public String getAuthorFirstName() {
+        return authorFirstName;
+    }
+
+    public void setAuthorFirstName(String authorFirstName) {
+        this.authorFirstName = authorFirstName;
+    }
+
+    public String getAuthorLastName() {
+        return authorLastName;
+    }
+
+    public void setAuthorLastName(String authorLastName) {
+        this.authorLastName = authorLastName;
+    }
+
     @Override
     public Manuscript toDataTransferObject() {
         Manuscript manuscript = new Manuscript();
         manuscript.setId(this.id);
         manuscript.setCreationTime(this.creationTime.getTime());
         manuscript.setTitle(this.title);
-        manuscript.setAuthors(this.authors);
+        manuscript.setAuthorFirstName(this.authorFirstName);
+        manuscript.setAuthorLastName(this.authorLastName);
         manuscript.setParagonUrl(this.paragonUrl);
         manuscript.setStatus(this.status);
         if (folder != null)

@@ -10,7 +10,8 @@ public class Manuscript implements IDataTransferModel {
 
     private long id;
     private String title;
-    private String authors;
+    private String authorFirstName;
+    private String authorLastName;
     private FolderDetails folder;
     private String paragonUrl;
     private ManuscriptStatus status;
@@ -32,12 +33,20 @@ public class Manuscript implements IDataTransferModel {
         this.title = title;
     }
 
-    public String getAuthors() {
-        return authors;
+    public String getAuthorFirstName() {
+        return authorFirstName;
     }
 
-    public void setAuthors(String authors) {
-        this.authors = authors;
+    public void setAuthorFirstName(String authorFirstName) {
+        this.authorFirstName = authorFirstName;
+    }
+
+    public String getAuthorLastName() {
+        return authorLastName;
+    }
+
+    public void setAuthorLastName(String authorLastName) {
+        this.authorLastName = authorLastName;
     }
 
     public FolderDetails getFolder() {

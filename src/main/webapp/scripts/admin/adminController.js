@@ -536,7 +536,7 @@ angular.module('ice.admin.controller', [])
 
             Util.get("rest/folders/" + pasted, function (result) {
                 $scope.newManuscript.folder = result;
-                $scope.newManuscript.selectedFolderName = result.folderName;
+                //$scope.newManuscript.selectedFolderName = result.folderName;
             });
         };
     })

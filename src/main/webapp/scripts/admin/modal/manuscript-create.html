@@ -4,7 +4,7 @@
         <i class="fa fa-newspaper-o"></i> &nbsp;Add New Paper</span>
 </div>
 
-<div class="modal-body" ng-if="!apiKey">
+<div class="modal-body">
     <div class="alert alert-info" style="padding: 9px">
         <i style="font-size:40px; float: left;padding-right:10px; color: #3a87ad" class="fa fa-info-circle"></i>
         <span class="font-90em">
@@ -23,10 +23,20 @@
         </div>
 
         <div class="form-group row">
-            <label class="col-sm-3 form-control-label">Author(s)</label>
+            <label class="col-sm-3 form-control-label">First name</label>
 
             <div class="col-sm-9">
-                <input type="text" style="width: 423px" ng-model="newManuscript.authors">
+                <input type="text" placeholder="Corresponding author's first name" style="width: 350px"
+                       ng-model="newManuscript.authorFirstName">
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label class="col-sm-3 form-control-label">Last name</label>
+
+            <div class="col-sm-9">
+                <input type="text" placeholder="Corresponding author's last name" style="width: 350px"
+                       ng-model="newManuscript.authorLastName">
             </div>
         </div>
 
