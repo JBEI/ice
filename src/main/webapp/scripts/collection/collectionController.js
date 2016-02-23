@@ -249,8 +249,9 @@ angular.module('ice.collection.controller', [])
             }
 
             Util.post("rest/folders/" + folder.id + "/permissions", $scope.newPermission, function (result) {
+                result.canWrite = result.type == 'WRITE_FOLDER';
+                result.canRead = result.type == 'READ_FOLDER';
                 $scope.permissions.push(result);
-                console.log($scope.permissions);
             });
         };
 
