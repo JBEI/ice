@@ -151,7 +151,7 @@ public class FolderResource extends RestResource {
         final FolderContents folderContents = new FolderContents();
         if (StringUtils.isEmpty(userId) && !StringUtils.isEmpty(remoteUserToken)) {
             // check others
-            log(remoteUserToken, " remotely adding entries to folders");
+            log(remoteUserId, " remotely adding entries to folders");
             RegistryPartner registryPartner = verifyWebPartner();
             return super.respond(folderContents.remotelyAddEntrySelection(remoteUserId, fid, remoteUserToken,
                     entrySelection, registryPartner));
