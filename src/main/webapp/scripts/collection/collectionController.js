@@ -218,7 +218,6 @@ angular.module('ice.collection.controller', [])
 
         $scope.userSelectionForPermissionAdd = function (item, model, label) {
             $scope.newPermission.articleId = item.id;
-            console.log("selected", item, model, label);
         };
 
         $scope.removePermission = function (permission) {
@@ -235,8 +234,6 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.addNewPermission = function () {
-            console.log($scope.newPermission);
-
             if ($scope.newPermission.canWrite) {
                 $scope.newPermission.type = 'WRITE_FOLDER';
             } else {
@@ -308,8 +305,6 @@ angular.module('ice.collection.controller', [])
         var folders = Folders();
         var entry = Entry(sessionId);
         var resource = "collections";
-
-        console.log($stateParams);
 
         $scope.folderPageChange = function () {
             $scope.loadingPage = true;
