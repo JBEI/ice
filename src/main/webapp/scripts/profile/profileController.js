@@ -194,8 +194,7 @@ angular.module('ice.profile.controller', [])
                 url: 'scripts/profile/api-keys.html',
                 display: 'API Keys',
                 selected: false,
-                icon: 'fa-key',
-                open: true
+                icon: 'fa-key'
             }
         ];
 
