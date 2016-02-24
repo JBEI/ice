@@ -23,7 +23,6 @@ public class CollectionCounts implements IDataTransferModel {
 
     public void setAvailable(long available) {
         this.available = available;
-        this.shared = available;
     }
 
     public long getPersonal() {
