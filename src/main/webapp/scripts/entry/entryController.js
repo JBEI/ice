@@ -174,11 +174,14 @@ angular.module('ice.entry.controller', [])
             });
 
             modalInstance.result.then(function () {
+                $scope.tracesParams.start = 0;
+
                 Util.get("/rest/parts/" + entryId + "/traces", function (result) {
+                    Util.setFeedback("", "success");
                     $scope.traces = result;
                     $scope.showUploadOptions = false;
                     $scope.traceUploadError = false;
-                });
+                }, $scope.tracesParams);
             });
         };
 
@@ -186,8 +189,8 @@ angular.module('ice.entry.controller', [])
             var foundTrace;
             var foundIndex;
 
-            for (var i = 0; i < $scope.traceSequences.length; i++) {
-                var trace = $scope.traceSequences[i];
+            for (var i = 0; i < $scope.traces.data.length; i++) {
+                var trace = $scope.traces.data[i];
                 if (trace.fileId === fileId && trace.fileId != undefined) {
                     foundTrace = trace;
                     foundIndex = i;
@@ -197,8 +200,8 @@ angular.module('ice.entry.controller', [])
 
             if (foundTrace != undefined) {
                 Util.remove("rest/parts/" + entryId + "/traces/" + foundTrace.id, {}, function (result) {
-                    $scope.traceSequences.splice(foundIndex, 1);
-                    $scope.entryStatistics.sequenceCount = $scope.traceSequences.length;
+                    $scope.traces.data.splice(foundIndex, 1);
+                    $scope.entryStatistics.sequenceCount = $scope.traces.data.length;
                 });
             }
         };
@@ -277,16 +280,21 @@ angular.module('ice.entry.controller', [])
             });
         }
     })
-    .controller('PartHistoryController', function ($scope, $window, $cookieStore, $stateParams, Entry) {
+    .controller('PartHistoryController', function ($scope, $window, $cookieStore, $stateParams, Entry, Util) {
         var entryId = $stateParams.id;
         var sid = $cookieStore.get("sessionId");
         var entry = Entry(sid);
+        $scope.historyParams = {offset: 0, limit: 10, currentPage: 1, maxSize: 5};
 
-        entry.history({
-            partId: entryId
-        }, function (result) {
-            $scope.history = result;
-        });
+        $scope.historyPageChanged = function () {
+            $scope.historyParams.offset = ($scope.historyParams.currentPage - 1) * $scope.historyParams.limit;
+            Util.get("rest/parts/" + entryId + "/history", function (result) {
+                if (history)
+                    $scope.history = result;
+                //$scope.history = result;
+            }, $scope.historyParams);
+        };
+        $scope.historyPageChanged(); // init
 
         $scope.deleteHistory = function (history) {
             entry.deleteHistory({partId: entryId, historyId: history.id}, function (result) {
@@ -741,7 +749,7 @@ angular.module('ice.entry.controller', [])
         };
     })
     .controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group,
-                                                       filterFilter, Permission) {
+                                                       filterFilter, Permission, Util) {
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
         var panes = $scope.panes = [];
@@ -803,35 +811,40 @@ angular.module('ice.entry.controller', [])
         };
 
         var removePermission = function (permissionId) {
-            entry.removePermission({partId: $scope.entry.id, permissionId: permissionId},
-                function (result) {
-                    if (!result)
-                        return;
+            Util.remove("rest/parts/" + $scope.entry.id + "/permissions/" + permissionId, {}, function (result) {
+                if (!result)
+                    return;
 
-                    // check which pane is selected
-                    var pane;
-                    if ($scope.panes[0].selected)
-                        pane = $scope.panes[0];
-                    else
-                        pane = $scope.panes[1];
+                // check which pane is selected
+                var pane;
+                if ($scope.panes[0].selected)
+                    pane = $scope.panes[0];
+                else
+                    pane = $scope.panes[1];
 
-                    var i = -1;
+                var i = -1;
 
-                    for (var idx = 0; idx < $scope.activePermissions.length; idx += 1) {
-                        if (permissionId == $scope.activePermissions[idx].id) {
-                            i = idx;
-                            break;
-                        }
+                for (var idx = 0; idx < $scope.activePermissions.length; idx += 1) {
+                    if (permissionId == $scope.activePermissions[idx].id) {
+                        i = idx;
+                        break;
                     }
+                }
 
-                    if (i == -1) {
-                        console.log("not found");
-                        return;
-                    }
+                if (i == -1) {
+                    return;
+                }
 
-                    $scope.activePermissions.splice(i, 1);
-                    pane.count = $scope.activePermissions.length;
-                });
+                $scope.activePermissions.splice(i, 1);
+                pane.count = $scope.activePermissions.length;
+            });
+
+            //addPermission: {
+            //    method: 'POST',
+            //        responseType: 'json',
+            //        url: 'rest/parts/:partId/permissions',
+            //        headers: {'X-ICE-Authentication-SessionId': sessionId}
+            //},
         };
 
         //
@@ -914,7 +927,7 @@ angular.module('ice.entry.controller', [])
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
                                              FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection,
-                                             CustomField, Util, Authentication) {
+                                             CustomField, Util, Authentication, FolderSelection) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
@@ -1195,7 +1208,22 @@ angular.module('ice.entry.controller', [])
         $scope.notFound = undefined;
         $scope.noAccess = undefined;
 
-        entry.query({partId: $stateParams.id},
+
+        //query: {
+        //    method: 'GET',
+        //        responseType: "json",
+        //        url: "rest/parts/:partId",
+        //        headers: {'X-ICE-Authentication-SessionId': sessionId}
+        //},
+
+        var params = {};
+        if (FolderSelection.getSelectedFolder() && FolderSelection.getSelectedFolder().type == 'REMOTE') {
+            params.remote = true;
+            params.folderId = FolderSelection.getSelectedFolder().id;
+            //$location.search("fid", ) // todo : if the page is refreshed
+        }
+
+        Util.get("rest/parts/" + $stateParams.id,
             function (result) {
                 Selection.reset();
                 Selection.selectEntry(result);
@@ -1208,61 +1236,14 @@ angular.module('ice.entry.controller', [])
                 entry.statistics({partId: $stateParams.id}, function (stats) {
                     $scope.entryStatistics = stats;
                 });
-            }, function (error) {
+            }, params, function (error) {
                 if (error.status === 404)
                     $scope.notFound = true;
                 else if (error.status === 403)
                     $scope.noAccess = true;
             });
 
-        var menuSubDetails = $scope.subDetails = [
-            {
-                url: 'scripts/entry/general-information.html',
-                display: 'General Information',
-                isPrivileged: false,
-                icon: 'fa-exclamation-circle'
-            },
-            {
-                id: 'sequences',
-                url: 'scripts/entry/sequence-analysis.html',
-                display: 'Sequence Analysis',
-                isPrivileged: false,
-                countName: 'sequenceCount',
-                icon: 'fa-search-plus'
-            },
-            {
-                id: 'comments',
-                url: 'scripts/entry/comments.html',
-                display: 'Comments',
-                isPrivileged: false,
-                countName: 'commentCount',
-                icon: 'fa-comments-o'
-            },
-            {
-                id: 'samples',
-                url: 'scripts/entry/samples.html',
-                display: 'Samples',
-                isPrivileged: false,
-                countName: 'sampleCount',
-                icon: 'fa-flask'
-            },
-            {
-                id: 'history',
-                url: 'scripts/entry/history.html',
-                display: 'History',
-                isPrivileged: true,
-                countName: 'historyCount',
-                icon: 'fa-history'
-            },
-            {
-                id: 'experiments',
-                url: 'scripts/entry/experiments.html',
-                display: 'Experimental Data',
-                isPrivileged: false,
-                countName: 'experimentalDataCount',
-                icon: 'fa-magic'
-            }
-        ];
+        var menuSubDetails = $scope.subDetails = EntryService.getMenuSubDetails();
 
         $scope.showSelection = function (index) {
             angular.forEach(menuSubDetails, function (details) {

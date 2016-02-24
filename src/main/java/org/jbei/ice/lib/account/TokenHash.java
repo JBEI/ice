@@ -9,14 +9,13 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 
 /**
- *
  * @author Hector Plahar
  */
 public class TokenHash {
 
     private static final int HASH_BYTE_SIZE = 160;
     private static final int SALT_BYTE_SIZE = 32;
-    private static final int TOKEN_BYTE_SIZE = 256;
+    private static final int TOKEN_BYTE_SIZE = 128;
     private static final int PBKDF2_ITERATIONS = 20000;
 
     public String encryptPassword(String password, String salt) {

@@ -2,10 +2,11 @@ package org.jbei.ice.lib.entry;
 
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountType;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
@@ -92,6 +93,9 @@ public class Entries extends HasEntry {
         boolean all = context.isAll();
         EntryType entryType = context.getEntryType();
 
+        if (context.getSelectionType() == null)
+            return context.getEntries();
+
         switch (context.getSelectionType()) {
             default:
             case FOLDER:
@@ -146,6 +150,8 @@ public class Entries extends HasEntry {
 
         if (all)
             type = null;
-        return DAOFactory.getFolderDAO().getFolderContentIds(folderId, type);
+
+        boolean visibleOnly = folder.getType() != FolderType.TRANSFERRED;
+        return DAOFactory.getFolderDAO().getFolderContentIds(folderId, type, visibleOnly);
     }
 }

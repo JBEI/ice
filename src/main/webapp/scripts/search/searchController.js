@@ -131,8 +131,17 @@ angular.module('ice.search.controller', [])
             runAdvancedSearch($scope.params);
         };
     })
-    .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location, Search) {
+    .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {
         $scope.searchTypes = {all: true, strain: true, plasmid: true, part: true, arabidopsis: true};
+        $scope.fieldFilters = [];
+
+        $scope.addFieldFilter = function () {
+            $scope.fieldFilters.push({field: "", filter: ""});
+        };
+
+        $scope.removeFieldFilter = function (index) {
+            $scope.fieldFilters.splice(1, index);
+        };
 
         $scope.check = function (selection) {
             var allTrue = true;
@@ -181,6 +190,8 @@ angular.module('ice.search.controller', [])
             if ($scope.bioSafetyLevelOption) {
                 searchQuery.bioSafetyOption = $scope.bioSafetyLevelOption == "1" ? "LEVEL_ONE" : "LEVEL_TWO";
             }
+            // todo include above with fieldFilters
+            searchQuery.fieldFilters = $scope.fieldFilters;
 
             //sequence
             if ($scope.sequenceText) {
@@ -199,11 +210,12 @@ angular.module('ice.search.controller', [])
 
             var searchUrl = "/search";
             if ($location.path().slice(0, searchUrl.length) != searchUrl) {
-                // triggers search controller which uses searchfilters to perform search
+                // triggers search controller which uses search filters to perform search
                 $location.path(searchUrl, false);
             } else {
                 $scope.$broadcast("RunSearch", $scope.searchFilters);
             }
+            $scope.advancedMenu.isOpen = false;
         };
 
         $scope.isWebSearch = function () {
@@ -234,7 +246,7 @@ angular.module('ice.search.controller', [])
                 }
             }
 
-            return false;
+            return $scope.fieldFilters.length;
         };
 
         //
@@ -243,6 +255,7 @@ angular.module('ice.search.controller', [])
         $scope.reset = function () {
             $scope.sequenceText = "";
             $scope.queryText = "";
+            $scope.fieldFilters = [];
             $location.url($location.path());
             $scope.blastSearchType = "";
             $scope.bioSafetyLevelOption = "";

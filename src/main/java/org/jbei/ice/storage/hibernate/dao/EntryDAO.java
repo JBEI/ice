@@ -507,9 +507,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
         return (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
     }
 
-    public long getPendingCount() throws DAOException {
+    public long getByVisibilityCount(Visibility visibility) throws DAOException {
         Criteria criteria = currentSession().createCriteria(Entry.class)
-                .add(Restrictions.eq("visibility", Visibility.PENDING.getValue()));
+                .add(Restrictions.eq("visibility", visibility.getValue()));
         return (Long) criteria.setProjection(Projections.rowCount()).uniqueResult();
     }
 
@@ -715,5 +715,13 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 .add(Restrictions.eq("visibility", Visibility.DELETED.getValue()))
                 .uniqueResult();
         return itemCount.intValue();
+    }
+
+    public int setEntryVisibility(List<Long> list, Visibility ok) {
+        Query query = currentSession().createQuery("update " + Entry.class.getName()
+                + " e set e.visibility=:v where e.id in :ids");
+        query.setParameter("v", ok.getValue());
+        query.setParameterList("ids", list);
+        return query.executeUpdate();
     }
 }

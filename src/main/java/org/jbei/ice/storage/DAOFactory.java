@@ -27,10 +27,13 @@ public class DAOFactory {
     private static TraceSequenceDAO traceSequenceDAO;
     private static ShotgunSequenceDAO shotgunSequenceDAO;
     private static AuditDAO auditDAO;
-    private static RemotePermissionDAO remotePermissionDAO;
     private static ExperimentDAO experimentDAO;
     private static ParameterDAO parameterDAO;
     private static ApiKeyDAO apiKeyDAO;
+    private static ClientModelDAO clientModelDAO;
+    private static RemoteShareModelDAO remoteShareModelDAO;
+    private static RemoteAccessModelDAO remoteAccessModelDAO;
+    private static ManuscriptModelDAO manuscriptModelDAO;
 
     public static AccountDAO getAccountDAO() {
         if (accountDAO == null)
@@ -146,17 +149,10 @@ public class DAOFactory {
         return traceSequenceDAO;
     }
 
-
     public static ShotgunSequenceDAO getShotgunSequenceDAO() {
         if (shotgunSequenceDAO == null)
             shotgunSequenceDAO = new ShotgunSequenceDAO();
         return shotgunSequenceDAO;
-    }
-
-    public static RemotePermissionDAO getRemotePermissionDAO() {
-        if (remotePermissionDAO == null)
-            remotePermissionDAO = new RemotePermissionDAO();
-        return remotePermissionDAO;
     }
 
     public static ExperimentDAO getExperimentDAO() {
@@ -175,5 +171,29 @@ public class DAOFactory {
         if (apiKeyDAO == null)
             apiKeyDAO = new ApiKeyDAO();
         return apiKeyDAO;
+    }
+
+    public static ClientModelDAO getClientModelDAO() {
+        if (clientModelDAO == null)
+            clientModelDAO = new ClientModelDAO();
+        return clientModelDAO;
+    }
+
+    public static RemoteShareModelDAO getRemoteShareModelDAO() {
+        if (remoteShareModelDAO == null)
+            remoteShareModelDAO = new RemoteShareModelDAO();
+        return remoteShareModelDAO;
+    }
+
+    public static RemoteAccessModelDAO getRemoteAccessModelDAO() {
+        if (remoteAccessModelDAO == null)
+            remoteAccessModelDAO = new RemoteAccessModelDAO();
+        return remoteAccessModelDAO;
+    }
+
+    public static ManuscriptModelDAO getManuscriptModelDAO() {
+        if (manuscriptModelDAO == null)
+            manuscriptModelDAO = new ManuscriptModelDAO();
+        return manuscriptModelDAO;
     }
 }

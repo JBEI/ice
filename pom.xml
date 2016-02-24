@@ -4,7 +4,7 @@
     <groupId>org.jbei</groupId>
     <artifactId>ice</artifactId>
     <packaging>war</packaging>
-    <version>4.6.5</version>
+    <version>4.7.0</version>
     <name>ice</name>
     <description>Inventory of Composable Elements (ICE) for Synthetic Biology</description>
     <repositories>
@@ -56,12 +56,12 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>5.0.5.Final</version>
+            <version>5.0.7.Final</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-search-orm</artifactId>
-            <version>5.5.1.Final</version>
+            <version>5.5.2.Final</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
@@ -76,7 +76,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-c3p0</artifactId>
-            <version>5.0.4.Final</version>
+            <version>5.0.7.Final</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>

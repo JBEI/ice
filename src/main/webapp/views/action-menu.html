@@ -53,10 +53,18 @@
 
     <!--transfer-->
     <div class="btn-group" style="margin-left: 20px" ng-if="user.isAdmin">
-        <button class="btn btn-default action-menu" ng-disabled="addToDisabled" ng-click="openTransferEntriesModal()">
+        <button class="btn btn-default action-menu" ng-disabled="!transferAvailable()"
+                ng-click="openTransferEntriesModal()">
             <i class="fa fa-share font-12em"></i>
             <br>
             <small class="text-uppercase font-55em">Transfer</small>
+        </button>
+
+        <!--accept transferred entries-->
+        <button class="btn btn-default action-menu" ng-disabled="!canAccept()" ng-click="acceptTransferredEntries()">
+            <i class="fa fa-save font-12em"></i>
+            <br>
+            <small class="text-uppercase font-55em">Accept</small>
         </button>
     </div>
 

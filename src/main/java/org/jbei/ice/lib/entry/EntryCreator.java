@@ -2,9 +2,9 @@ package org.jbei.ice.lib.entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.blast.BlastPlus;

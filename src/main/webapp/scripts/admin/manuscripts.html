@@ -1,0 +1,123 @@
+<div ng-controller="AdminManuscriptsController">
+    <div class="pad_top">
+        <button type="button" class="ice-button" ng-click="openManuscriptAddRequest()">Add New Paper</button>
+
+        <span class="pull-right" style="border: 1px solid #ccc">
+            <i class="fa fa-filter" style="background-color: #d9d9d9; padding: 5px; opacity: 0.7"></i>
+            <input type="text" placeHolder="Filter by title" class="font-90em no_border"
+                   ng-model="manuscriptsParams.filter"
+                   ng-change="getManuscripts()"/>
+        </span>
+    </div>
+
+    <div class="pad_top" ng-if="!manuscripts.data || !manuscripts.data.length">
+        <span ng-if="!manuscriptsParams.filter">No manuscripts available</span>
+        <span ng-if="manuscriptsParams.filter">No matching manuscripts found</span>
+    </div>
+
+    <div class="pad_top" ng-if="manuscripts.data && manuscripts.data.length">
+        <table class="table table-border-bottom table-hover">
+            <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('title')">Title </span>
+                    <i ng-if="manuscriptsParams.sort!=='title'" class="sortable fa fa-angle-down"></i>
+                    <i ng-show="manuscriptsParams.sort=='title'" style="font-size: 14px" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':manuscriptsParams.asc==false, 'fa-angle-up':manuscriptsParams.asc==true}"></i>
+                </th>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('status')">Status </span>
+                    <i ng-if="manuscriptsParams.sort!=='status'" class="sortable fa fa-angle-down"></i>
+                    <i ng-show="manuscriptsParams.sort=='status'" style="font-size: 14px" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':manuscriptsParams.asc==false, 'fa-angle-up':manuscriptsParams.asc==true}"></i>
+                </th>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('paragonUrl')">Paragon plus url </span>
+                    <i ng-if="manuscriptsParams.sort!=='paragonUrl'" class="sortable fa fa-angle-down"></i>
+                    <i ng-show="manuscriptsParams.sort=='paragonUrl'" style="font-size: 14px" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':manuscriptsParams.asc==false, 'fa-angle-up':manuscriptsParams.asc==true}"></i>
+                </th>
+                <th>
+                    <span class="entry-table-header" ng-click="sort('creationTime')">Added </span>
+                    <i ng-if="manuscriptsParams.sort!=='creationTime'" class="sortable fa fa-angle-down"></i>
+                    <i ng-show="manuscriptsParams.sort=='creationTime'" style="font-size: 14px" class="fa opacity_4"
+                       ng-class="{'fa-angle-down':manuscriptsParams.asc==false, 'fa-angle-up':manuscriptsParams.asc==true}"></i>
+                </th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="manuscript in manuscripts.data">
+                <td style="vertical-align: middle; line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"
+                    class="font-14em">
+                    <b>{{$index+1}}</b>
+                </td>
+                <td>
+                    {{manuscript.title}} <br>
+                    <small class="text-muted">{{manuscript.authorLastName}}, {{manuscript.authorFirstName}}</small>
+                </td>
+                <td style="width:130px; white-space:nowrap; vertical-align: middle;">
+                    <!-- Single button -->
+                    <div class="btn-group" uib-dropdown>
+                        <button type="button" class="btn btn-xs uib-dropdown-toggle" uib-dropdown-toggle
+                                ng-class="{'btn-success': manuscript.status == 'ACCEPTED',
+                                'btn-danger':manuscript.status == 'REJECTED',
+                                'btn-default':manuscript.status == 'UNDER_REVIEW'}">
+                            {{manuscript.status | capitalize}} <span class="caret"></span>
+                        </button>
+                        <ul class="uib-dropdown-menu">
+                            <li ng-if="manuscript.status != 'ACCEPTED'"
+                                ng-click="updatePaperStatus(manuscript, 'ACCEPTED')"><a href="#">Accept</a></li>
+                            <li ng-if="manuscript.status != 'REJECTED'"
+                                ng-click="updatePaperStatus(manuscript, 'REJECTED')"><a href="#">Reject</a></li>
+                            <li ng-if="manuscript.status != 'UNDER_REVIEW'"
+                                ng-click="updatePaperStatus(manuscript, 'UNDER_REVIEW')"><a href="#">Under Review</a>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+                <td style="vertical-align: middle;">
+                    <a ng-href="{{manuscript.paragonUrl | externalLink }}" target="_blank">{{manuscript.paragonUrl}}</a>
+                </td>
+                <td style="vertical-align: middle; width: 130px" class="small">
+                    {{manuscript.creationTime | date:'MMM d, yyyy hh:mm'}}
+                </td>
+                <td style="vertical-align: middle; width: 180px">
+                    <div ng-if="manuscript.deleteRequest">
+                        <i class="fa fa-question-circle dark-orange"></i>
+                        <i>Delete?</i> &nbsp;
+                        <button class="btn-default btn-xs btn" ng-click="manuscript.deleteRequest = false">No</button>
+                        <button class="btn-primary btn-xs btn" ng-click="deleteManuscript(manuscript)">Yes</button>
+                    </div>
+                    <div ng-if="!manuscript.deleteRequest">
+                        <i class="fa fa-pencil edit_icon font-14em" ng-click="openManuscriptAddRequest(manuscript)"
+                           uib-tooltip="Edit"></i> &nbsp;
+                        <i class="fa fa-cloud-download opacity_hover blue font-14em"
+                           ng-click="downloadManuscriptFiles(manuscript)" uib-tooltip="Export"></i> &nbsp;
+                        <i class="fa fa-trash-o delete_icon font-14em" ng-click="manuscript.deleteRequest = true"
+                           uib-tooltip="Delete"></i>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div ng-if="manuscripts.data && manuscripts.data.length">
+        <div class="col-md-5" style="padding-left: 0">
+            <uib-pagination total-items="manuscripts.resultCount" ng-change="userListPageChanged()"
+                            ng-model="manuscriptsParams.currentPage"
+                            max-size="manuscriptsParams.maxSize" class="pagination-sm" items-per-page="15"
+                            boundary-links="true"></uib-pagination>
+        </div>
+
+        <div class="col-md-7" style="margin-top: 25px;">
+            <strong class="small">
+                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
+                {{pageCounts(manuscriptsParams.currentPage, manuscripts.resultCount)}}
+            </strong>
+        </div>
+
+    </div>
+</div>

@@ -254,8 +254,7 @@ angular.module('ice.wor.controller', [])
         };
     })
     .controller('WebOfRegistriesController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
-                                                       $stateParams, WebOfRegistries, Remote, Util, Settings) {
-        var setting = Settings($cookieStore.get("sessionId"));
+                                                       $stateParams, WebOfRegistries, Remote, Util) {
         $scope.newPartner = undefined;
         $scope.partnerStatusList = [
             {status: 'BLOCKED', action: 'Block'},
@@ -286,34 +285,31 @@ angular.module('ice.wor.controller', [])
         //
         $scope.enableDisableWor = function () {
             var value = $scope.isWorEnabled ? 'no' : 'yes';
-            setting.update({}, {key: 'JOIN_WEB_OF_REGISTRIES', value: value},
-                function (result) {
-                    var joined = result.value === 'yes';
-                    $scope.isWorEnabled = joined;
-                    if (!$rootScope.settings)
-                        $rootScope.settings = {};
-                    $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = joined;
-                }, function (error) {
-                    console.error(error);
-                });
+            Util.update("rest/config", {key: 'JOIN_WEB_OF_REGISTRIES', value: value}, {}, function (result) {
+                var joined = result.value === 'yes';
+                $scope.isWorEnabled = joined;
+                if (!$rootScope.settings)
+                    $rootScope.settings = {};
+                $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = joined;
+            });
         };
 
         //
         // add remote partner to web of registries
         //
-        $scope.addPartner = function () {
-            wor.addPartner({}, $scope.newPartner, function (result) {
+        $scope.addWebPartner = function () {
+            Util.post("rest/partners", $scope.newPartner, function (result) {
                 if (!result) {
-                    console.error("Error adding");
+                    Util.setFeedback('Error adding web partner', 'danger');
                     return;
                 }
 
                 $scope.showAddRegistryForm = false;
                 $scope.newPartner = undefined;
 
-                wor.query({approved_only: false}, function (result) {
+                Util.get("rest/web", function (result) {
                     $scope.wor = result;
-                });
+                }, {approved_only: false});
             });
         };
 
@@ -344,6 +340,10 @@ angular.module('ice.wor.controller', [])
             Util.list("rest/remote/" + partner.id + "/available", function (result) {
                 $scope.selectedPartnerFolders = result;
             });
+        };
+
+        $scope.retryRemotePartnerContact = function () {
+            // todo
         }
     })
     .controller('WebOfRegistriesMenuController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,

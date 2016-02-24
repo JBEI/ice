@@ -12,13 +12,13 @@ import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
-import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.ShotgunSequenceDTO;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.entry.*;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
 import org.jbei.ice.lib.dto.sample.PartSample;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sample.SampleService;
@@ -70,21 +70,36 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public Response read(@PathParam("id") final String id) {
+    public Response read(@PathParam("id") final String id,
+                         @DefaultValue("false") @QueryParam("remote") boolean isRemote,
+                         @QueryParam("token") String remoteUserToken,
+                         @QueryParam("userId") String remoteUserId,
+                         @QueryParam("folderId") long fid) {
         String userId = getUserId();
-        try {
-            log(userId, "retrieving details for " + id);
-            final EntryType type = EntryType.nameToType(id);
-            PartData data;
-            if (type != null) {
-                data = controller.getPartDefaults(userId, type);
-            } else {
-                data = controller.retrieveEntryDetails(userId, id);
-            }
+        final EntryType type = EntryType.nameToType(id);
+        if (type != null) {
+            return super.respond(controller.getPartDefaults(userId, type));
+        }
+
+        if (isRemote) {
+            log(userId, " get remote entry");
+            long partId = Long.decode(id);
+            PartData data = controller.retrieveRemoteEntryDetails(userId, fid, partId);
             return super.respond(data);
-        } catch (final PermissionException pe) {
-            // todo : have a generic error entity returned
-            return Response.status(Response.Status.FORBIDDEN).build();
+        } else {
+            try {
+                if (StringUtils.isEmpty(userId)) {
+                    RegistryPartner partner = verifyWebPartner();
+                    log(partner.getUrl(), "retrieving details for " + id);
+                    return super.respond(controller.getRemoteRequestedEntry(remoteUserId, remoteUserToken, id, fid, partner));
+                } else {
+                    log(userId, "retrieving details for " + id);
+                    return super.respond(controller.retrieveEntryDetails(userId, id));
+                }
+            } catch (final PermissionException pe) {
+                // todo : have a generic error entity returned
+                return Response.status(Response.Status.FORBIDDEN).build();
+            }
         }
     }
 
@@ -109,9 +124,20 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/tooltip")
-    public PartData getTooltipDetails(@PathParam("id") final String id) {
+    public PartData getTooltipDetails(@PathParam("id") final String id,
+                                      @DefaultValue("false") @QueryParam("remote") boolean isRemote,
+                                      @QueryParam("folderId") long fid) {
         final String userId = getUserId();
-        return controller.retrieveEntryTipDetails(userId, id);
+        if (isRemote) {
+            log(userId, " get remote tooltip");
+            long partId = Long.decode(id);
+            return controller.retrieveRemoteToolTip(userId, fid, partId);
+        }
+
+        if (StringUtils.isEmpty(userId)) {
+            verifyWebPartner();
+        }
+        return controller.retrieveEntryTipDetails(id);
     }
 
     @GET
@@ -281,13 +307,15 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/history")
-    public ArrayList<History> getHistory(@Context final UriInfo info,
-                                         @PathParam("id") final long partId,
-                                         @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-                                         @QueryParam("sid") final String sid) {
-        String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
-        final String userId = getUserId(sessionId);
-        return controller.getHistory(userId, partId);
+    public Response getHistory(
+            @PathParam("id") long partId,
+            @QueryParam("limit") int limit,
+            @QueryParam("offset") int offset,
+            @QueryParam("asc") boolean asc,
+            @QueryParam("sort") String sort) {
+        String userId = requireUserId();
+        EntryHistory entryHistory = new EntryHistory(userId, partId);
+        return super.respond(entryHistory.get(limit, offset, asc, sort));
     }
 
     @DELETE
@@ -296,8 +324,8 @@ public class PartResource extends RestResource {
     public Response delete(@PathParam("id") final long partId,
                            @PathParam("historyId") final long historyId) {
         final String userId = getUserId();
-        final boolean success = controller.deleteHistory(userId, partId, historyId);
-        return super.respond(success);
+        EntryHistory entryHistory = new EntryHistory(userId, partId);
+        return super.respond(entryHistory.delete(historyId));
     }
 
     /**
@@ -309,7 +337,7 @@ public class PartResource extends RestResource {
     public Response getTraces(
             @Context final UriInfo info,
             @PathParam("id") final long partId,
-            @DefaultValue("1000") @QueryParam("limit") int limit,
+            @DefaultValue("10") @QueryParam("limit") int limit,
             @DefaultValue("0") @QueryParam("start") int start,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
             @QueryParam("sid") final String sid) {

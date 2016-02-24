@@ -89,6 +89,12 @@ angular.module('ice.collection.controller', [])
             $location.path(type + "/" + folder.id);
         };
 
+        // todo :
+        $scope.acceptTransferredFolder = function (folder) {
+            console.log(folder);
+            // update folder status
+        };
+
         //
         // called when a collection is selected. Collections are pre-defined ['Featured', 'Deleted', etc]
         // and some allow folders and when that is selected then the selectCollectionFolder() is called
@@ -134,184 +140,167 @@ angular.module('ice.collection.controller', [])
             }
         });
     })
-    .controller('FolderPermissionsController', function ($scope, $uibModalInstance, $cookieStore, Folders, Permission, User, folder) {
+    .controller('FolderPermissionsController', function ($scope, $http, $uibModalInstance, $cookieStore, Folders, Permission,
+                                                         Util, User, folder) {
         var sessionId = $cookieStore.get("sessionId");
-        var panes = $scope.panes = [];
         $scope.folder = folder;
         $scope.userFilterInput = undefined;
         var folders = Folders();
+        $scope.newPermission = {canWrite: false, canRead: true, article: 'ACCOUNT', typeId: folder.id};
+        $scope.permissions = [];
+        $scope.placeHolder = "Enter user name or email";
+        $scope.resultSubField = "email";
+        $scope.webPartners = [];
 
-        $scope.activateTab = function (pane) {
-            angular.forEach(panes, function (pane) {
-                pane.selected = false;
+        // retrieve permissions for folder
+        Util.list("rest/folders/" + folder.id + "/permissions", function (result) {
+            angular.forEach(result, function (perm) {
+                var permission = angular.copy(perm);
+                permission.canWrite = perm.type == 'WRITE_FOLDER';
+                permission.canRead = perm.type == 'READ_FOLDER';
+                $scope.permissions.push(permission);
             });
-            pane.selected = true;
-            if (pane.title === 'Read')
-                $scope.activePermissions = $scope.readPermissions;
-            else
-                $scope.activePermissions = $scope.writePermissions;
+        });
 
-            angular.forEach($scope.users, function (item) {
-                for (var i = 0; i < $scope.activePermissions.length; i += 1) {
-                    item.selected = (item.id !== undefined && item.id === $scope.activePermissions[i].articleId);
-                }
+        var getWebPartners = function () {
+            Util.list("rest/partners", function (result) {
+                $scope.webPartners = result;
             });
         };
 
-        // retrieve permissions for folder
-        folders.permissions({folderId: folder.id}, function (result) {
-            $scope.readPermissions = [];
-            $scope.writePermissions = [];
-
-            angular.forEach(result, function (item) {
-                if (item.type === 'WRITE_FOLDER')
-                    $scope.writePermissions.push(item);
-                else
-                    $scope.readPermissions.push(item);
-            });
-
-            $scope.panes.push({title: 'Read', count: $scope.readPermissions.length, selected: true});
-            $scope.panes.push({title: 'Write', count: $scope.writePermissions.length});
-
-            $scope.activePermissions = $scope.readPermissions;
-        });
-
-        this.addPane = function (pane) {
-            // activate the first pane that is added
-            if (panes.length == 0)
-                $scope.activateTab(pane);
-            panes.push(pane);
+        $scope.setPermission = function (isWrite) {
+            if (isWrite) {
+                $scope.newPermission.canWrite = !$scope.newPermission.canWrite;
+                if ($scope.newPermission.canWrite) {
+                    $scope.newPermission.canRead = false;
+                }
+            } else {
+                $scope.newPermission.canRead = !$scope.newPermission.canRead;
+                if ($scope.newPermission.canRead) {
+                    $scope.newPermission.canWrite = false;
+                }
+            }
         };
 
         $scope.closeModal = function () {
             $uibModalInstance.close('cancel'); // todo : pass object to inform if folder is shared or cleared
         };
 
-        $scope.showAddPermissionOptionsClick = function () {
-            $scope.showPermissionInput = true;
-        };
+        $scope.setPermissionArticle = function (type) {
+            $scope.newPermission.article = type.toUpperCase();
+            $scope.newPermission.articleId = undefined;
+            $scope.newPermission.partner = undefined;
 
-        $scope.closePermissionOptions = function () {
-            $scope.users = undefined;
-            $scope.showPermissionInput = false;
-        };
+            switch (type.toLowerCase()) {
+                case "account":
+                    $scope.placeHolder = "Enter user name or email";
+                    $scope.resultSubField = "email";
+                    break;
 
-        var removePermission = function (permissionId) {
-            folders.removePermission({folderId: folder.id, permissionId: permissionId},
-                function (result) {
-                    if (!result)
-                        return;
+                case "group":
+                    $scope.placeHolder = "Enter group name";
+                    $scope.resultSubField = "label";
+                    break;
 
-                    // check which pane is selected
-                    var pane;
-                    if ($scope.panes[0].selected)
-                        pane = $scope.panes[0];
-                    else
-                        pane = $scope.panes[1];
-
-                    var i = -1;
-
-                    for (var idx = 0; idx < $scope.activePermissions.length; idx += 1) {
-                        if (permissionId != $scope.activePermissions[idx].id) {
-                            i = idx;
-                            break;
-                        }
-                    }
-
-                    if (i == -1)
-                        return;
-
-                    $scope.activePermissions.splice(i, 1);
-                    pane.count = $scope.activePermissions.length;
-                });
+                case "remote":
+                    getWebPartners();
+                    $scope.placeHolder = "Enter remote user email";
+                    break;
+            }
         };
 
         $scope.setPropagatePermission = function (folder) {
             folder.propagatePermission = !folder.propagatePermission;
             folders.update({folderId: folder.id}, folder, function (result) {
 
-            }, function (error) {
-
             })
         };
 
-        $scope.addRemovePermission = function (permission) {
-            permission.selected = !permission.selected;
-            if (!permission.selected) {
-                removePermission(permission.id);
-                return;
-            }
+        $scope.userSelectionForPermissionAdd = function (item, model, label) {
+            $scope.newPermission.articleId = item.id;
+        };
 
-            // add permission
-            var pane;
-            for (var i = 0; i < panes.length; i += 1) {
-                if (panes[i].selected) {
-                    permission.type = panes[i].title.toUpperCase() + "_FOLDER";
-                    pane = panes[i];
-                    break;
-                }
-            }
-            permission.typeId = folder.id;
+        $scope.removePermission = function (permission) {
+            var pid = permission.id;
+            if (permission.article == "REMOTE")
+                pid = permission.articleId;
 
-            folders.addPermission({folderId: folder.id}, permission, function (result) {
-                // result is the permission object
-                if (result.type == 'READ_FOLDER') {
-                    $scope.readPermissions.push(result);
-                    $scope.activePermissions = $scope.readPermissions;
-                }
-                else {
-                    $scope.writePermissions.push(result);
-                    $scope.activePermissions = $scope.writePermissions;
-                }
-
-                permission.id = result.id;
-                pane.count = $scope.activePermissions.length;
+            Util.remove("rest/folders/" + folder.id + "/permissions/" + pid, {}, function (result) {
+                var idx = $scope.permissions.indexOf(permission);
+                if (idx < 0)
+                    return;
+                $scope.permissions.splice(idx, 1);
             });
         };
 
-        $scope.enablePublicRead = function (folder) {
-            Folders().enablePublicReadAccess({id: folder.id}, function (result) {
-                folder.publicReadAccess = true;
-            }, function (error) {
+        $scope.addNewPermission = function () {
+            if ($scope.newPermission.canWrite) {
+                $scope.newPermission.type = 'WRITE_FOLDER';
+            } else {
+                $scope.newPermission.type = 'READ_FOLDER';
+            }
+            $scope.newPermission.typeId = folder.id;
 
+            if ($scope.newPermission.article.toLowerCase() == "remote") {
+                $scope.newPermission.userId = $scope.userFilterInput;
+            }
+
+            Util.post("rest/folders/" + folder.id + "/permissions", $scope.newPermission, function (result) {
+                result.canWrite = result.type == 'WRITE_FOLDER';
+                result.canRead = result.type == 'READ_FOLDER';
+                $scope.permissions.push(result);
             });
         };
 
-        $scope.disablePublicRead = function (folder) {
-            Folders().disablePublicReadAccess({folderId: folder.id}, function (result) {
-                folder.publicReadAccess = false;
-            }, function (error) {
-
-            })
-        };
-
-        $scope.deletePermission = function (index, permission) {
-            removePermission(permission.id);
+        $scope.enableDisablePublicRead = function () {
+            if (!$scope.folder.publicReadAccess) {
+                //enable
+                Util.update("rest/folders/" + folder.id + "/permissions/public", {}, {}, function (result) {
+                    folder.publicReadAccess = true;
+                })
+            } else {
+                // disable
+                Util.remove("rest/folders/" + folder.id + "/permissions/public", {}, function (result) {
+                    folder.publicReadAccess = false;
+                });
+            }
         };
 
         $scope.filter = function (val) {
-            if (!val) {
-                $scope.accessPermissions = undefined;
-                return;
-            }
+            switch ($scope.newPermission.article.toLowerCase()) {
+                case "account":
+                default :
+                    return $http.get('rest/users/autocomplete', {
+                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                        params: {
+                            val: val
+                        }
+                    }).then(function (res) {
+                        return res.data;
+                    });
 
-            $scope.filtering = true;
-            Permission().filterUsersAndGroups({limit: 10, val: val},
-                function (result) {
-                    $scope.accessPermissions = result;
-                    $scope.filtering = false;
-                }, function (error) {
-                    $scope.filtering = false;
-                    $scope.accessPermissions = undefined;
-                });
+                case "group":
+                    return $http.get('rest/groups/autocomplete', {
+                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                        params: {
+                            token: val
+                        }
+                    }).then(function (res) {
+                        return res.data;
+                    });
+
+                case "remote":
+                    return;
+            }
         };
     })
 
 // deals with sub collections e.g. /folders/:id
 // retrieves the contents of folders
-    .controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
-                                                        $stateParams, Folders, Entry, EntryContextUtil,
-                                                        Selection, Util, localStorageService) {
+    .
+    controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
+                                                       $stateParams, Folders, Entry, EntryContextUtil,
+                                                       Selection, Util, localStorageService) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
         var entry = Entry(sessionId);
@@ -500,14 +489,21 @@ angular.module('ice.collection.controller', [])
                 }, $scope.params);
             }, $scope.params.count, offset, "folders/" + $scope.params.folderId, $scope.params.sort);
 
+            //$location.search("fid", $scope.folder.id);
             $location.path("entry/" + entry.id);
         };
 
         $scope.tooltipDetails = function (e) {
             $scope.currentTooltip = undefined;
+            var params = {};
+            if ($scope.folder && $scope.folder.type == 'REMOTE') {
+                params.remote = true;
+                params.folderId = $scope.folder.id;
+            }
+
             Util.get("rest/parts/" + e.id + "/tooltip", function (result) {
                 $scope.currentTooltip = result;
-            });
+            }, params);
         };
 
         $scope.folderPopupTemplateUrl = "scripts/folder/template.html";
@@ -550,15 +546,12 @@ angular.module('ice.collection.controller', [])
 
         $scope.changeFolderType = function (newType) {
             var tmp = {id: $scope.folder.id, type: newType};
-            folders.update({id: tmp.id}, tmp, function (result) {
+            Util.update('rest/folders/' + $scope.folder.id, tmp, function (result) {
                 $scope.folder.type = result.type;
                 if (newType === 'PUBLIC')
                     $location.path('folders/available');
                 else
                     $location.path('folders/personal');
-                // todo : send message to be received by the collection menu
-            }, function (error) {
-                console.error(error);
             });
         };
 

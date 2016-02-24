@@ -110,7 +110,13 @@ public class PermissionDAO extends HibernateRepository<Permission> {
                                          boolean canWrite) {
         try {
             Criteria criteria = createPermissionCriteria(entry, folder, upload, account, group, canRead, canWrite);
-            return (Permission) criteria.uniqueResult();
+            List list = criteria.list();
+            if (list == null || list.isEmpty())
+                return null;
+            if (list.size() > 1)
+                Logger.error("query did not return unique result");
+
+            return (Permission) list.get(0);
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException(e);

@@ -59,10 +59,6 @@ angular.module('ice.admin.controller', [])
                 icon: 'fa-group'
             },
             {
-                id: 'transferred', url: 'scripts/admin/transferred.html', display: 'Transferred Entries',
-                selected: false, icon: 'fa-list'
-            },
-            {
                 id: 'samples', url: 'scripts/admin/sample-requests.html', display: 'Sample Requests', selected: false,
                 icon: 'fa-shopping-cart'
             },
@@ -72,6 +68,13 @@ angular.module('ice.admin.controller', [])
                 display: 'API Keys',
                 selected: false,
                 icon: 'fa-key'
+            },
+            {
+                id: 'manuscripts',
+                url: 'scripts/admin/manuscripts.html',
+                display: 'Editor Tools',
+                selected: false,
+                icon: 'fa-newspaper-o'
             }
         ];
 
@@ -143,91 +146,6 @@ angular.module('ice.admin.controller', [])
 
             $scope.submitSetting(booleanSetting);
         }
-    })
-    .controller('AdminTransferredEntriesController', function ($rootScope, $cookieStore, $filter, $location, $scope,
-                                                               Folders, Entry, Util) {
-        $scope.maxSize = 5;
-        $scope.currentPage = 1;
-        $scope.selectedTransferredEntries = [];
-
-        var params = {folderId: 'transferred'};
-
-        // get all entries that are transferred
-        $scope.transferredEntries = undefined;
-
-        var getTransferredEntries = function () {
-            Util.get("rest/collections/TRANSFERRED/entries", function (result) {
-                $scope.transferredEntries = result;
-                $scope.selectedTransferredEntries = [];
-            }, params);
-        };
-
-        getTransferredEntries();
-
-        $scope.setPage = function (pageNo) {
-            if (pageNo == undefined || isNaN(pageNo))
-                pageNo = 1;
-
-            $scope.loadingPage = true;
-            params.offset = (pageNo - 1) * 15;
-            getTransferredEntries();
-        };
-
-        $scope.acceptEntries = function () {
-            var successHandler = function (result) {
-                getTransferredEntries();
-            };
-
-            Util.update("rest/parts", $scope.selectedTransferredEntries, {visibility: "OK"}, successHandler);
-        };
-
-        $scope.rejectEntries = function () {
-            var successHandler = function (result) {
-                getTransferredEntries();
-            };
-
-            Util.update("rest/parts", $scope.selectedTransferredEntries, {visibility: "DELETED"}, successHandler);
-        };
-
-        $scope.selectTransferredEntry = function (entry) {
-            var index = $scope.selectedTransferredEntries.indexOf(entry.id);
-            if (index != -1) {
-                $scope.selectedTransferredEntries.splice(index, 1);
-                return;
-            }
-
-            // add to selected
-            $scope.selectedTransferredEntries.push(entry.id);
-        };
-
-        $scope.showEntryDetails = function (entry, index) {
-            if (!params.offset) {
-                params.offset = index;
-            }
-            $rootScope.collectionContext = params;
-            $location.path("entry/" + entry.id);
-        };
-
-        $scope.tranferredPopupTooltip = "scripts/admin/transferred-tooltip.html";
-
-        $scope.transferredTooltip = function (entry) {
-            $scope.tooltip = undefined;
-            Entry($cookieStore.get("sessionId")).tooltip({partId: entry.id},
-                function (result) {
-                    $scope.tooltip = result;
-                }, function (error) {
-                    console.error(error);
-                });
-        };
-
-        $scope.pageCounts = function (currentPage, resultCount) {
-            var maxPageCount = 15;
-            var pageNum = ((currentPage - 1) * maxPageCount) + 1;
-
-            // number on this page
-            var pageCount = (currentPage * maxPageCount) > resultCount ? resultCount : (currentPage * maxPageCount);
-            return pageNum + " - " + $filter('number')(pageCount) + " of " + $filter('number')(resultCount);
-        };
     })
     .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, Samples,
                                                           $uibModal) {
@@ -398,4 +316,228 @@ angular.module('ice.admin.controller', [])
 
         // init
         $scope.retrieveKeys();
-    });
+    })
+    .controller('AdminGroupsController', function ($scope, $uibModal, Util) {
+        $scope.groups = undefined;
+
+        $scope.adminGroupsPagingParams = {
+            offset: 0,
+            limit: 10,
+            available: 0,
+            currentPage: 1,
+            maxSize: 5,
+            type: 'PUBLIC'
+        };
+
+        $scope.groupListPageChanged = function () {
+            Util.get("rest/groups", function (result) {
+                $scope.groups = result.data;
+                $scope.adminGroupsPagingParams.available = result.resultCount;
+            }, $scope.adminGroupsPagingParams);
+        };
+
+        $scope.openCreatePublicGroupModal = function (group) {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/admin/modal/create-public-group.html',
+                controller: 'AdminGroupsModalController',
+                backdrop: "static",
+                //size: "lg",
+                resolve: {
+                    currentGroup: function () {
+                        return group;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (result) {
+                if (!result)
+                    return;
+
+                Util.setFeedback("Public group successfully created", "success");
+                $scope.groupListPageChanged();
+            })
+        }
+    })
+    .controller('AdminGroupsModalController', function ($scope, $uibModalInstance, currentGroup, Util) {
+        $scope.selectedUsers = [];
+
+        if (currentGroup)
+            $scope.newPublicGroup = currentGroup;
+        else
+            $scope.newPublicGroup = {type: 'PUBLIC'};
+
+        $scope.closeCreatePublicGroupModal = function () {
+            $uibModalInstance.close();
+        };
+
+        $scope.createNewPublicGroup = function () {
+            $scope.newPublicGroup.members = $scope.selectedUsers;
+            Util.post("rest/groups", $scope.newPublicGroup, function (result) {
+                $uibModalInstance.close(result);
+            });
+        };
+
+        $scope.filterUsers = function (val) {
+            if (!val) {
+                $scope.userMatches = undefined;
+                return;
+            }
+
+            $scope.filtering = true;
+
+            Util.list("rest/users/autocomplete", function (result) {
+                $scope.userMatches = result;
+                $scope.filtering = false;
+            }, {limit: 10, val: val}, function (error) {
+                $scope.filtering = false;
+                $scope.userMatches = undefined;
+            });
+        };
+
+        $scope.selectUser = function (user) {
+            var index = $scope.selectedUsers.indexOf(user);
+            if (index == -1)
+                $scope.selectedUsers.push(user);
+            else
+                $scope.selectedUsers.splice(index, 1);
+        };
+    })
+    .controller('AdminManuscriptsController', function ($scope, $uibModal, $window, Util) {
+        $scope.manuscripts = [];
+        $scope.manuscriptsParams = {
+            sort: 'creationTime',
+            asc: false,
+            currentPage: 1,
+            maxCount: 5,
+            offset: 0,
+            limit: 15
+        };
+
+        $scope.getManuscripts = function () {
+            Util.get("rest/manuscripts", function (result) {
+                $scope.manuscripts = result;
+            }, $scope.manuscriptsParams);
+        };
+        $scope.getManuscripts();
+
+        $scope.sort = function (field) {
+            $scope.manuscriptsParams.offset = 0;
+            if ($scope.manuscriptsParams.sort == field)
+                $scope.manuscriptsParams.asc = !$scope.manuscriptsParams.asc;
+            else
+                $scope.manuscriptsParams.asc = false;
+            $scope.manuscriptsParams.sort = field;
+            $scope.getManuscripts();
+        };
+
+        $scope.openManuscriptAddRequest = function (selectedManuscript) {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/admin/modal/manuscript-create.html',
+                controller: 'CreateManuscriptController',
+                resolve: {
+                    manuscript: function () {
+                        return selectedManuscript;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (selectedItem) {
+                $scope.getManuscripts();
+            });
+        };
+
+        $scope.downloadManuscriptFiles = function (manuscript) {
+            Util.post("rest/manuscripts/" + manuscript.id + "/files/zip", {}, function (result) {
+                if (result && result.value) {
+                    $window.open("rest/file/tmp/" + result.value, "_self");
+                }
+            })
+        };
+
+        $scope.updatePaperStatus = function (manuscript, status) {
+            if (manuscript.status == status)
+                return;
+            Util.update("rest/manuscripts/" + manuscript.id, {status: status}, {}, function (result) {
+                manuscript.status = status;
+            })
+        };
+
+        $scope.deleteManuscript = function (manuscript) {
+            Util.remove("rest/manuscripts/" + manuscript.id, {}, function (result) {
+                var i = $scope.manuscripts.indexOf(manuscript);
+                $scope.manuscripts.splice(i, 1);
+            });
+        }
+    })
+    .controller('CreateManuscriptController', function ($scope, $uibModalInstance, $cookieStore, $http, manuscript, Util) {
+        $scope.submitButtonText = "Create";
+        $scope.invalidFolder = false;
+
+        if (manuscript) {
+            $scope.newManuscript = manuscript;
+            $scope.submitButtonText = "Update";
+            $scope.newManuscript.selectedFolderName = $scope.newManuscript.folder.folderName;
+        } else
+            $scope.newManuscript = {status: "UNDER_REVIEW"};
+
+        $scope.cancel = function () {
+            $uibModalInstance.close();
+            $uibModalInstance.dismiss('cancel');
+        };
+        // get folders I can edit or see (or shared with me?)
+
+        $scope.createNewPaper = function () {
+            if ($scope.newManuscript.id) {
+                Util.update("rest/manuscripts/" + $scope.newManuscript.id, $scope.newManuscript, {}, function (result) {
+                    $scope.cancel();
+                });
+            } else {
+                Util.post("rest/manuscripts", $scope.newManuscript, function (result) {
+                    $scope.cancel();
+                }, {}, function (error) {
+
+                });
+            }
+        };
+
+        $scope.filterFolders = function (token) {
+            return $http.get('rest/folders/autocomplete', {
+                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                params: {
+                    val: token
+                }
+            }).then(function (res) {
+                return res.data;
+            });
+        };
+
+        $scope.folderSelection = function ($item, $model, $label) {
+            $scope.invalidFolder = false;
+            $scope.newManuscript.folder = $item;
+        };
+
+        $scope.pasteFolder = function (event) {
+            var pasted = event.originalEvent.clipboardData.getData('text/plain');
+            var replace = event.currentTarget.baseURI + "folders/";
+            var idx = pasted.indexOf(replace);
+
+            if (idx != 0) {
+                console.error("Could not parse pasted");
+                $scope.invalidFolder = true;
+                return;
+            }
+
+            pasted = pasted.slice(idx + replace.length);
+            if (isNaN(pasted)) {
+                $scope.invalidFolder = true;
+                console.error(pasted + " is not a number");
+                return;
+            }
+
+            Util.get("rest/folders/" + pasted, function (result) {
+                $scope.newManuscript.folder = result;
+                //$scope.newManuscript.selectedFolderName = result.folderName;
+            });
+        };
+    })
+;

@@ -9,10 +9,6 @@ import org.jbei.ice.storage.model.Account;
 
 /**
  * Used in instances where access permissions are to be enforced.
- * <p>
- * Currently, the only rule is that a user must belong to the same
- * group as the owner of the object being accessed, in order to be able to
- * read it.
  *
  * @author Hector Plahar
  */

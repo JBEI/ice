@@ -1,23 +1,33 @@
 package org.jbei.ice.lib.folder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.dto.permission.AccessPermission;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntrySelection;
+import org.jbei.ice.lib.entry.EntrySelectionType;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.lib.net.RemoteContact;
+import org.jbei.ice.lib.net.RemoteTransfer;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.FolderDAO;
 import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
+import org.jbei.ice.storage.hibernate.dao.RemoteAccessModelDAO;
+import org.jbei.ice.storage.hibernate.dao.RemoteShareModelDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
@@ -32,9 +42,46 @@ import java.util.Set;
 public class FolderContents {
 
     private FolderDAO folderDAO = DAOFactory.getFolderDAO();
+    private RemoteAccessModelDAO remoteAccessModelDAO = DAOFactory.getRemoteAccessModelDAO();
     private FolderAuthorization folderAuthorization = new FolderAuthorization();
     private PermissionsController permissionsController = new PermissionsController();
     private AccountController accountController = new AccountController();
+
+    // adds a specified entry to a folder. The entry was transferred earlier so already exists
+    public boolean remotelyAddEntrySelection(String remoteUserId, long folderId, String remoteUserToken,
+                                             EntrySelection selection, RegistryPartner requestingPartner) {
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);      // folder that the entry is contained in
+        if (folder == null)
+            return false;
+
+        RemotePartner remotePartner = DAOFactory.getRemotePartnerDAO().getByUrl(requestingPartner.getUrl());
+
+        // check that the remote user has the right token
+        RemoteShareModel shareModel = DAOFactory.getRemoteShareModelDAO().get(remoteUserId, remotePartner, folder);
+        if (shareModel == null) {
+            Logger.error("Could not retrieve share model");
+            return false;
+        }
+
+        Permission permission = shareModel.getPermission(); // folder must match
+        if (permission.getFolder().getId() != folderId || !permission.isCanWrite()) {
+            throw new PermissionException("permission could not be verified");
+        }
+
+        // validate access token
+        TokenHash tokenHash = new TokenHash();
+        String secret = tokenHash.encryptPassword(remotePartner.getUrl() + remoteUserId, remoteUserToken);
+        if (!secret.equals(shareModel.getSecret())) {
+            throw new PermissionException("Secret does not match");
+        }
+
+        List<Long> entries = selection.getEntries();
+        DAOFactory.getEntryDAO().setEntryVisibility(entries, Visibility.OK);
+
+        // good to go?
+        FolderDetails details = addEntriesToTransferredFolder(entries, folder);
+        return details != null;
+    }
 
     /**
      * Adds entries in the selection context, to specified folders
@@ -48,7 +95,33 @@ public class FolderContents {
     public List<FolderDetails> addEntrySelection(String userId, EntrySelection entryLocation) {
         Entries retriever = new Entries();
         List<Long> entries = retriever.getEntriesFromSelectionContext(userId, entryLocation);
+        if (StringUtils.isEmpty(userId)) {
+            ArrayList<FolderDetails> destination = entryLocation.getDestination();
+
+            // check that folder is transferred before rejecting
+            if (destination == null || destination.isEmpty())
+                throw new IllegalArgumentException("Cannot add without valid user id or destination");
+
+            Folder folder = folderDAO.get(destination.get(0).getId());
+            if (folder == null)
+                throw new IllegalArgumentException("Cannot find folder");
+
+            if (folder.getType() != FolderType.TRANSFERRED)
+                throw new PermissionException("Can only add to transferred folder without id");
+
+            FolderDetails details = addEntriesToTransferredFolder(entries, folder);
+            List<FolderDetails> result = new ArrayList<>();
+            result.add(details);
+            return result;
+        }
         return addEntriesToFolders(userId, entries, entryLocation.getDestination());
+    }
+
+    protected FolderDetails addEntriesToTransferredFolder(List<Long> entries, Folder folder) {
+        List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);  // todo : performance
+        Logger.info("Adding " + entryModelList.size() + " transferred entries to folder " + folder.getId());
+        folderDAO.addFolderContents(folder, entryModelList);
+        return folder.toDataTransferObject();
     }
 
     /**
@@ -118,16 +191,51 @@ public class FolderContents {
                 continue;
             }
 
-            List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);
-            folderDAO.addFolderContents(folder, entryModelList);
-            if (folder.isPropagatePermissions()) {
-                Set<Permission> folderPermissions = permissionDAO.getFolderPermissions(folder);
-                addEntryPermission(userId, folderPermissions, entryModelList);
-            }
+            // check if the folder is remote or local
+            if (folder.getType() == FolderType.REMOTE) {
+                Logger.info("Adding entries to remote folder " + folder.getId());
+                addToRemoteFolder(account, folder, entries);
+            } else {
+                List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);
+                folderDAO.addFolderContents(folder, entryModelList);
+                if (folder.isPropagatePermissions()) {
+                    Set<Permission> folderPermissions = permissionDAO.getFolderPermissions(folder);
+                    addEntryPermission(userId, folderPermissions, entryModelList);
+                }
 
-            details.setCount(folderDAO.getFolderSize(folder.getId(), null));
+                details.setCount(folderDAO.getFolderSize(folder.getId(), null, true));
+            }
         }
         return folders;
+    }
+
+    // transfer entries to remote partner and add to folder
+    protected void addToRemoteFolder(Account account, Folder folder, List<Long> entries) {
+        RemoteAccessModel remoteAccessModel = remoteAccessModelDAO.getByFolder(account, folder);
+        if (remoteAccessModel == null) {
+            Logger.error("Could not retrieve remote access for folder " + folder.getId());
+            return;
+        }
+
+        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
+        RemoteTransfer remoteTransfer = new RemoteTransfer();
+        List<PartData> results = remoteTransfer.getPartsForTransfer(entries);
+        List<Long> remoteIds = remoteTransfer.transferEntries(remotePartner.getId(), results);
+
+        FolderDetails remoteFolder = new FolderDetails();
+        remoteFolder.setId(Long.decode(remoteAccessModel.getIdentifier()));
+
+        // add transferred entries to the folder
+        EntrySelection selection = new EntrySelection();
+        selection.getEntries().addAll(remoteIds);
+
+        selection.getDestination().add(remoteFolder);
+        selection.setSelectionType(EntrySelectionType.FOLDER);
+
+        RemoteContact remoteContact = new RemoteContact();
+        String token = remoteAccessModel.getToken();
+        remoteContact.addTransferredEntriesToFolder(remotePartner.getUrl(), account.getEmail(), selection,
+                remoteFolder.getId(), token, remotePartner.getApiKey());
     }
 
     /**
@@ -152,7 +260,12 @@ public class FolderContents {
         folderAuthorization.expectRead(userId, folder);
 
         FolderDetails details = folder.toDataTransferObject();
-        long folderSize = folderDAO.getFolderSize(folderId, filter);
+        boolean visibleOnly = folder.getType() != FolderType.TRANSFERRED;
+        if (folder.getType() == FolderType.REMOTE)
+            return getRemoteContents(userId, folder);
+
+        // all local entries at this point
+        long folderSize = folderDAO.getFolderSize(folderId, filter, visibleOnly);
         details.setCount(folderSize);
 
         if (userId != null) {
@@ -168,9 +281,82 @@ public class FolderContents {
             details.setOwner(owner.toDataTransferObject());
 
         // retrieve folder contents
-        List<Entry> results = folderDAO.retrieveFolderContents(folderId, sort, asc, start, limit, filter);
+        List<Entry> results = folderDAO.retrieveFolderContents(folderId, sort, asc, start, limit, filter, visibleOnly);
         for (Entry entry : results) {
             PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
+            details.getEntries().add(info);
+        }
+        return details;
+    }
+
+    /**
+     * @param userId user folder is shared with
+     * @param folder remote shared folder
+     * @return
+     */
+    protected FolderDetails getRemoteContents(String userId, Folder folder) {
+        // get remote access
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        RemoteAccessModel model = remoteAccessModelDAO.getByFolder(account, folder);
+
+        FolderDetails details = folder.toDataTransferObject();
+        AccountTransfer owner = new AccountTransfer();
+        owner.setEmail(model.getClientModel().getEmail());
+        details.setOwner(owner);
+        RemotePartner remotePartner = model.getClientModel().getRemotePartner();
+        details.setRemotePartner(remotePartner.toDataTransferObject());
+
+        String token = model.getToken();
+        long remoteFolderId = Long.decode(model.getIdentifier());
+
+        // retrieve entries from remote partner (ends up in the call below)
+        RemoteContact remoteContact = new RemoteContact();
+        FolderDetails remoteDetails = remoteContact.getRemoteContents(remotePartner.getUrl(), userId, remoteFolderId, token, remotePartner.getApiKey());
+        details.setCount(remoteDetails.getCount());
+        details.setEntries(remoteDetails.getEntries());
+        return details;
+    }
+
+    // remote request for shared contents
+    public FolderDetails getRemotelySharedContents(String remoteUserId, String token, RegistryPartner partner,
+                                                   long folderId, ColumnField sort, boolean asc,
+                                                   int start, int limit, String filter) {
+        RemotePartner remotePartner = DAOFactory.getRemotePartnerDAO().getByUrl(partner.getUrl());
+        if (remotePartner == null) {
+            Logger.error("Cannot retrieve remote partner " + partner.getUrl());
+            return null;
+        }
+
+        Folder folder = folderDAO.get(folderId);
+        if (folder == null) {
+            Logger.error("Cannot retrieve folder with id " + folderId);
+            return null;
+        }
+
+        RemoteShareModelDAO shareModelDAO = DAOFactory.getRemoteShareModelDAO();
+        RemoteShareModel shareModel = shareModelDAO.get(remoteUserId, remotePartner, folder);
+        if (shareModel == null) {
+            Logger.error("Could not retrieve share model");
+            return null;
+        }
+
+        //verify access
+        TokenHash tokenHash = new TokenHash();
+        String secret = tokenHash.encryptPassword(remotePartner.getUrl() + remoteUserId, token);
+        if (!secret.equalsIgnoreCase(shareModel.getSecret())) {
+            Logger.error("Authorization failed for remote folder retrieve");
+            return null;
+        }
+        // todo : move everything above to folder permissions
+        FolderDetails details = folder.toDataTransferObject();
+
+        long folderSize = folderDAO.getFolderSize(folderId, filter, true);
+        details.setCount(folderSize);
+
+        // retrieve folder contents
+        List<Entry> results = folderDAO.retrieveFolderContents(folderId, sort, asc, start, limit, filter, true);
+        for (Entry entry : results) {
+            PartData info = ModelToInfoFactory.createTableViewData(null, entry, false);
             details.getEntries().add(info);
         }
         return details;

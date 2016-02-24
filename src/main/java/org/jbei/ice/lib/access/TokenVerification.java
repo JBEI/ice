@@ -2,6 +2,7 @@ package org.jbei.ice.lib.access;
 
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.TokenHash;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.ApiKey;
@@ -43,12 +44,14 @@ public class TokenVerification {
         return key.getOwnerEmail();
     }
 
-    public boolean verifyPartnerToken(String url, String token) {
+    public RegistryPartner verifyPartnerToken(String url, String token) {
         RemotePartner remotePartner = DAOFactory.getRemotePartnerDAO().getByUrl(url);
         if (remotePartner == null)
-            return false;
+            return null;
 
         String hash = this.tokenHash.encryptPassword(token + url, remotePartner.getSalt());
-        return hash.equals(remotePartner.getAuthenticationToken());
+        if (!hash.equals(remotePartner.getAuthenticationToken()))
+            return null;
+        return remotePartner.toDataTransferObject();
     }
 }

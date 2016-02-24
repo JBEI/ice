@@ -15,6 +15,7 @@ public class CollectionCounts implements IDataTransferModel {
     private long deleted;
     private long drafts;
     private long pending;
+    private long transferred;
 
     public long getAvailable() {
         return available;
@@ -22,7 +23,6 @@ public class CollectionCounts implements IDataTransferModel {
 
     public void setAvailable(long available) {
         this.available = available;
-        this.shared = available;
     }
 
     public long getPersonal() {
@@ -63,5 +63,13 @@ public class CollectionCounts implements IDataTransferModel {
 
     public void setPending(long pending) {
         this.pending = pending;
+    }
+
+    public long getTransferred() {
+        return transferred;
+    }
+
+    public void setTransferred(long transferred) {
+        this.transferred = transferred;
     }
 }

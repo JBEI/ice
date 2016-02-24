@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.executor;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -8,6 +9,7 @@ import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.net.RemoteTransfer;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Folder;
 
 import java.util.List;
 
@@ -36,8 +38,18 @@ public class TransferTask extends Task {
 
         Entries retriever = new Entries();
         List<Long> entries = retriever.getEntriesFromSelectionContext(account.getEmail(), entrySelection);
-        Logger.info(userId + ": requesting transfer of " + entries.size() + " entries to " + remoteId);
+        Logger.info(userId + ": requesting transfer to " + remoteId);
         List<PartData> dataList = transfer.getPartsForTransfer(entries);
-        transfer.transferEntries(remoteId, dataList);
+        List<Long> remoteIds = transfer.transferEntries(remoteId, dataList);
+
+        // check folder
+        if (StringUtils.isEmpty(this.entrySelection.getFolderId()))
+            return;
+
+        // create remoteFolder
+        long folderId = Long.decode(this.entrySelection.getFolderId());
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);
+        Logger.info("Adding " + remoteIds.size() + " transferred entries to remote folder");
+        transfer.transferFolder(remoteId, folder.toDataTransferObject(), remoteIds);
     }
 }

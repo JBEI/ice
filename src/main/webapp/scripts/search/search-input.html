@@ -1,6 +1,5 @@
 <form ng-submit="search(false)">
-    <table cellpadding="0" cellspacing="0"
-           style="white-space: nowrap;">
+    <table cellpadding="0" cellspacing="0" style="white-space: nowrap;" stop-event='click'>
         <tr>
             <td class="quick_search uib-dropdown" uib-dropdown is-open="advancedMenu.isOpen">
                 <i class="fa fa-fw fa-search search-indicator" ng-hide="canReset()"></i>
@@ -42,15 +41,15 @@
 
                     <span style="letter-spacing:-1px; color:#555;"><b>BLAST</b></span>
 
-                    <select class="pull_down" stop-event='click' ng-model="blastSearchType">
+                    <select class="pull_down" ng-model="blastSearchType">
                         <option value="">Choose one</option>
                         <option value="BLAST_N">Nucleotide Search (blastn)</option>
                         <option value="TBLAST_X">Nucleotide Translated Search (tblastx)</option>
                     </select>
 
                     <br>
-                    <textarea class="margin-top-5" rows="9" placeholder="Enter Sequence" style="width: 100%"
-                              stop-event='click' class="input-sm" ng-model="sequenceText"></textarea>
+                    <textarea class="margin-top-5" rows="6" placeholder="Enter Sequence" style="width: 100%"
+                              class="input-sm" ng-model="sequenceText"></textarea>
 
                     <div class="divider"></div>
 
@@ -70,11 +69,33 @@
 
                     <span style="letter-spacing:-1px; color:#555;"><b>BIO SAFETY LEVEL</b></span>
 
-                    <select class="pull_down" stop-event='click' ng-model="bioSafetyLevelOption">
+                    <select class="pull_down" ng-model="bioSafetyLevelOption">
                         <option value="">Choose one</option>
                         <option value="1">Level 1</option>
                         <option value="2">Level 2</option>
                     </select>
+
+                    <div class="divider"></div>
+                    <strong style="letter-spacing:-1px; color:#555;">FIELD FILTERS</strong>
+
+                    <div ng-if="!fieldFilters.length">
+                        <small class="text-muted opacity_hover" ng-click="addFieldFilter()">
+                            Add filter <i class="fa fa-plus-circle"></i>
+                        </small>
+                    </div>
+
+                    <div ng-repeat="filterFilter in fieldFilters">
+                        <select class="pull_down" ng-model="fieldFilters[$index].field">
+                            <option value="">Select Filter</option>
+                            <option value="NAME">Name</option>
+                            <option value="ALIAS">Alias</option>
+                            <option value="PART_NUMBER">Part Number</option>
+                        </select>
+
+                        <input class="input_box" style="width: 200px" ng-model="fieldFilters[$index].filter"/>
+                        <i class="fa fa-fw fa-plus opacity_hover" ng-click="addFieldFilter()"></i>
+                        <i class="fa fa-fw fa-minus opacity_hover" ng-click="removeFieldFilter($index)"></i>
+                    </div>
 
                     <div class="divider"></div>
 
@@ -91,6 +112,7 @@
                             </button>
                         </span>
                     </div>
+
                 </div>
             </td>
             <td> &nbsp;

@@ -7,7 +7,6 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebEntries;
-import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.WoRController;
@@ -34,8 +33,7 @@ public class WebResource extends RestResource {
      * Retrieves information on other ice instances that is in a web of registries configuration
      * with this instance; also know as registry partners
      *
-     * @param approvedOnly
-     *            if true, only instances that have been approved are returned; defaults to true
+     * @param approvedOnly if true, only instances that have been approved are returned; defaults to true
      * @return wrapper around the list of registry partners
      */
     @GET
@@ -53,7 +51,6 @@ public class WebResource extends RestResource {
      * @param limit     maximum number of entries to retrieve
      * @param sort      field to sort on
      * @param asc       sort order
-     *
      * @return Response with public entries from registry partners
      */
     @GET
@@ -70,39 +67,15 @@ public class WebResource extends RestResource {
         return super.respond(Response.Status.OK, result);
     }
 
-    /**
-     * @param partnerId
-     * @param partId
-     * @return attachment info on a registry partner entry
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}/attachments")
     public List<AttachmentInfo> getAttachments(@PathParam("id") final long partnerId,
-            @PathParam("entryId") final long partId) {
+                                               @PathParam("entryId") final long partId) {
         final String userId = getUserId();
         return remoteEntries.getEntryAttachments(userId, partnerId, partId);
     }
 
-    /**
-     * @param remoteId
-     * @param entrySelection
-     * @return Response for success
-     */
-    @POST
-    @Path("/{id}/transfer")
-    public Response transferEntries(@PathParam("id") final long remoteId,
-            final EntrySelection entrySelection) {
-        final String userId = super.getUserId();
-        remoteEntries.transferEntries(userId, remoteId, entrySelection);
-        return super.respond(Response.Status.OK);
-    }
-
-    /**
-     * @param partnerId
-     * @param entryId
-     * @return Response with a specific entry for a registry partner
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}")
@@ -114,11 +87,6 @@ public class WebResource extends RestResource {
         return super.respond(Response.Status.OK, result);
     }
 
-    /**
-     * @param partnerId
-     * @param entryId
-     * @return Response with a specific entry tooltip for a registry partner
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}/tooltip")
@@ -129,26 +97,16 @@ public class WebResource extends RestResource {
         return super.respond(Response.Status.OK, result);
     }
 
-    /**
-     * @param partnerId
-     * @param entryId
-     * @return Response with statistics on a specific entry for a registry partner
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}/statistics")
     public Response getStatistics(@PathParam("id") final long partnerId,
-            @PathParam("entryId") final long entryId) {
+                                  @PathParam("entryId") final long entryId) {
         final String userId = super.getUserId();
         final PartStatistics statistics = remoteEntries.getPublicEntryStatistics(userId, partnerId, entryId);
         return super.respond(statistics);
     }
 
-    /**
-     * @param partnerId
-     * @param entryId
-     * @return Response with a sequence on a registry partner entry
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}/sequence")
@@ -159,42 +117,12 @@ public class WebResource extends RestResource {
         return super.respond(Response.Status.OK, result);
     }
 
-    /**
-     * @param partner
-     * @return Response with an added registry partner
-     */
-    @POST
-    @Path("/partner")
-    // admin function
-    public Response addWebPartner(final RegistryPartner partner) {
-        final String userId = getUserId();
-        final RemoteContact contactRemote = new RemoteContact();
-        final RegistryPartner registryPartner = contactRemote.addWebPartner(userId, partner);
-        return respond(Response.Status.OK, registryPartner);
-    }
-
-    /**
-     * @param info
-     * @param partnerId
-     * @return Response with registry partner info
-     */
     @GET
     @Path("/partner/{id}")
     public Response getWebPartner(@Context final UriInfo info, @PathParam("id") final long partnerId) {
         final String userId = getUserId();
         final RegistryPartner partner = controller.getWebPartner(userId, partnerId);
         return super.respond(Response.Status.OK, partner);
-    }
-
-    /**
-     * @param partner
-     * @return Response for success or failure
-     */
-    @POST
-    @Path("/partner/remote")
-    public Response remoteWebPartnerRequest(RegistryPartner partner) {
-        RemoteContact remoteContact = new RemoteContact();
-        return super.respond(remoteContact.handleRemoteAddRequest(partner));
     }
 
     @DELETE
@@ -214,18 +142,13 @@ public class WebResource extends RestResource {
         if (StringUtils.isEmpty(sessionId))
             return super.respond(controller.getWebPartners(worToken, url));
         final String userId = getUserId();
-        return super.respond(controller.getWebPartners(userId));
+        return super.respond(controller.getWebPartners());
     }
 
-    /**
-     * @param url
-     * @param partner
-     * @return Response for success or failure
-     */
     @PUT
     @Path("/partner/{url}")
     public Response updateWebPartner(@PathParam("url") final String url,
-            final RegistryPartner partner) {
+                                     final RegistryPartner partner) {
         final String userId = getUserId();
         if (controller.updateWebPartner(userId, url, partner)) {
             return respond(Response.Status.OK);
@@ -233,10 +156,6 @@ public class WebResource extends RestResource {
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
-    /**
-     * @param url
-     * @return Response for success or failure
-     */
     @DELETE
     @Path("/partner/{url}")
     public Response removeWebPartner(@PathParam("url") final String url) {
