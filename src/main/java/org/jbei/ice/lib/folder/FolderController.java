@@ -328,7 +328,7 @@ public class FolderController {
 
         for (Folder folder : sharedFolders) {
             FolderDetails details = folder.toDataTransferObject();
-            details.setType(FolderType.SHARED);
+            details.setType(folder.getType());
             long folderSize = dao.getFolderSize(folder.getId(), null, true);
             details.setCount(folderSize);
             folderDetails.add(details);

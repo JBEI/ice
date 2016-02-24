@@ -100,7 +100,8 @@ public class FileResource extends RestResource {
      */
     @GET
     @Path("tmp/{fileId}")
-    public Response getTmpFile(@PathParam("fileId") final String fileId) {
+    public Response getTmpFile(@PathParam("fileId") final String fileId,
+                               @QueryParam("filename") String fileName) {
         final File tmpFile = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY),
                 fileId).toFile();
         if (tmpFile == null || !tmpFile.exists()) {

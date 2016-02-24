@@ -18,6 +18,7 @@ import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.sample.PartSample;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sample.SampleService;
@@ -69,21 +70,36 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public Response read(@PathParam("id") final String id) {
+    public Response read(@PathParam("id") final String id,
+                         @DefaultValue("false") @QueryParam("remote") boolean isRemote,
+                         @QueryParam("token") String remoteUserToken,
+                         @QueryParam("userId") String remoteUserId,
+                         @QueryParam("folderId") long fid) {
         String userId = getUserId();
-        try {
-            log(userId, "retrieving details for " + id);
-            final EntryType type = EntryType.nameToType(id);
-            PartData data;
-            if (type != null) {
-                data = controller.getPartDefaults(userId, type);
-            } else {
-                data = controller.retrieveEntryDetails(userId, id);
-            }
+        final EntryType type = EntryType.nameToType(id);
+        if (type != null) {
+            return super.respond(controller.getPartDefaults(userId, type));
+        }
+
+        if (isRemote) {
+            log(userId, " get remote entry");
+            long partId = Long.decode(id);
+            PartData data = controller.retrieveRemoteEntryDetails(userId, fid, partId);
             return super.respond(data);
-        } catch (final PermissionException pe) {
-            // todo : have a generic error entity returned
-            return Response.status(Response.Status.FORBIDDEN).build();
+        } else {
+            try {
+                if (StringUtils.isEmpty(userId)) {
+                    RegistryPartner partner = verifyWebPartner();
+                    log(partner.getUrl(), "retrieving details for " + id);
+                    return super.respond(controller.getRemoteRequestedEntry(remoteUserId, remoteUserToken, id, fid, partner));
+                } else {
+                    log(userId, "retrieving details for " + id);
+                    return super.respond(controller.retrieveEntryDetails(userId, id));
+                }
+            } catch (final PermissionException pe) {
+                // todo : have a generic error entity returned
+                return Response.status(Response.Status.FORBIDDEN).build();
+            }
         }
     }
 
@@ -108,9 +124,20 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/tooltip")
-    public PartData getTooltipDetails(@PathParam("id") final String id) {
+    public PartData getTooltipDetails(@PathParam("id") final String id,
+                                      @DefaultValue("false") @QueryParam("remote") boolean isRemote,
+                                      @QueryParam("folderId") long fid) {
         final String userId = getUserId();
-        return controller.retrieveEntryTipDetails(userId, id);
+        if (isRemote) {
+            log(userId, " get remote tooltip");
+            long partId = Long.decode(id);
+            return controller.retrieveRemoteToolTip(userId, fid, partId);
+        }
+
+        if (StringUtils.isEmpty(userId)) {
+            verifyWebPartner();
+        }
+        return controller.retrieveEntryTipDetails(id);
     }
 
     @GET

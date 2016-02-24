@@ -53,8 +53,4 @@ public class RemoteAccessTest {
         List<FolderDetails> subFolders = collections.getSubFolders(CollectionType.SHARED);
         Assert.assertEquals(1, subFolders.size());
     }
-
-    @Test
-    public void testCreatePermissionModel() throws Exception {
-    }
 }

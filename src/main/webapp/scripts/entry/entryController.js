@@ -927,7 +927,7 @@ angular.module('ice.entry.controller', [])
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
                                              FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection,
-                                             CustomField, Util, Authentication) {
+                                             CustomField, Util, Authentication, FolderSelection) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
@@ -1208,7 +1208,22 @@ angular.module('ice.entry.controller', [])
         $scope.notFound = undefined;
         $scope.noAccess = undefined;
 
-        entry.query({partId: $stateParams.id},
+
+        //query: {
+        //    method: 'GET',
+        //        responseType: "json",
+        //        url: "rest/parts/:partId",
+        //        headers: {'X-ICE-Authentication-SessionId': sessionId}
+        //},
+
+        var params = {};
+        if (FolderSelection.getSelectedFolder() && FolderSelection.getSelectedFolder().type == 'REMOTE') {
+            params.remote = true;
+            params.folderId = FolderSelection.getSelectedFolder().id;
+            //$location.search("fid", ) // todo : if the page is refreshed
+        }
+
+        Util.get("rest/parts/" + $stateParams.id,
             function (result) {
                 Selection.reset();
                 Selection.selectEntry(result);
@@ -1221,61 +1236,14 @@ angular.module('ice.entry.controller', [])
                 entry.statistics({partId: $stateParams.id}, function (stats) {
                     $scope.entryStatistics = stats;
                 });
-            }, function (error) {
+            }, params, function (error) {
                 if (error.status === 404)
                     $scope.notFound = true;
                 else if (error.status === 403)
                     $scope.noAccess = true;
             });
 
-        var menuSubDetails = $scope.subDetails = [
-            {
-                url: 'scripts/entry/general-information.html',
-                display: 'General Information',
-                isPrivileged: false,
-                icon: 'fa-exclamation-circle'
-            },
-            {
-                id: 'sequences',
-                url: 'scripts/entry/sequence-analysis.html',
-                display: 'Sequence Analysis',
-                isPrivileged: false,
-                countName: 'sequenceCount',
-                icon: 'fa-search-plus'
-            },
-            {
-                id: 'comments',
-                url: 'scripts/entry/comments.html',
-                display: 'Comments',
-                isPrivileged: false,
-                countName: 'commentCount',
-                icon: 'fa-comments-o'
-            },
-            {
-                id: 'samples',
-                url: 'scripts/entry/samples.html',
-                display: 'Samples',
-                isPrivileged: false,
-                countName: 'sampleCount',
-                icon: 'fa-flask'
-            },
-            {
-                id: 'history',
-                url: 'scripts/entry/history.html',
-                display: 'History',
-                isPrivileged: true,
-                countName: 'historyCount',
-                icon: 'fa-history'
-            },
-            {
-                id: 'experiments',
-                url: 'scripts/entry/experiments.html',
-                display: 'Experimental Data',
-                isPrivileged: false,
-                countName: 'experimentalDataCount',
-                icon: 'fa-magic'
-            }
-        ];
+        var menuSubDetails = $scope.subDetails = EntryService.getMenuSubDetails();
 
         $scope.showSelection = function (index) {
             angular.forEach(menuSubDetails, function (details) {

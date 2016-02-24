@@ -65,4 +65,13 @@ public class Folders {
 
         return result;
     }
+
+    public List<FolderDetails> filter(String token, int limit) {
+        List<Folder> list = dao.filterByName(token, limit);
+        List<FolderDetails> results = new ArrayList<>();
+        for (Folder folder : list) {
+            results.add(folder.toDataTransferObject());
+        }
+        return results;
+    }
 }

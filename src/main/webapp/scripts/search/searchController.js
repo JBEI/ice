@@ -215,6 +215,7 @@ angular.module('ice.search.controller', [])
             } else {
                 $scope.$broadcast("RunSearch", $scope.searchFilters);
             }
+            $scope.advancedMenu.isOpen = false;
         };
 
         $scope.isWebSearch = function () {

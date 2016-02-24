@@ -31,19 +31,19 @@ public class RestResource {
     protected String worPartnerToken;
 
     @HeaderParam(value = API_KEY_CLIENT_ID)
-    private String apiClientId;
+    protected String apiClientId;
 
     @HeaderParam(value = API_KEY_USER)
-    private String apiUser;
+    protected String apiUser;
 
     @HeaderParam(value = API_KEY_TOKEN)
-    private String apiToken;
+    protected String apiToken;
 
     @HeaderParam(value = AUTHENTICATION_PARAM_NAME)
-    private String sessionId;
+    protected String sessionId;
 
     @HeaderParam(value = "Authorization")
-    private String hmacHeader;
+    protected String hmacHeader;
 
     @Context
     protected HttpServletRequest request;

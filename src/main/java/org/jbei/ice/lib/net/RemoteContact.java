@@ -16,6 +16,7 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
 import org.jbei.ice.storage.model.RemotePartner;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -123,11 +124,58 @@ public class RemoteContact {
         return restClient.postWor(url, "rest/permissions/remote", permission, AccessPermission.class, null, token);
     }
 
-    public FolderDetails getRemoteContents(String url, String userId, long folderId, String token) {
+    public FolderDetails getRemoteContents(String url, String userId, long folderId, String token, String worToken) {
         // todo : paging params
         Map<String, Object> queryParams = new HashMap<>();
-        queryParams.put("token", token);
-        queryParams.put("userId", userId);
-        return restClient.get(url, "rest/folders/" + folderId + "/entries", FolderDetails.class, queryParams);
+        try {
+            String encodedToken = URLEncoder.encode(token, "UTF-8");
+            queryParams.put("token", encodedToken);
+            queryParams.put("userId", userId);
+            return restClient.getWor(url, "rest/folders/" + folderId + "/entries", FolderDetails.class, queryParams, worToken);
+        } catch (Exception e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
+    public void addTransferredEntriesToFolder(String url, String userId, EntrySelection entrySelection, long folderId,
+                                              String token, String worToken) {
+        try {
+            String encodedToken = URLEncoder.encode(token, "UTF-8");
+            Map<String, Object> queryParams = new HashMap<>();
+            queryParams.put("token", encodedToken);
+            queryParams.put("userId", userId);
+            queryParams.put("folderId", folderId);
+            restClient.putWor(url, "rest/folders/entries", entrySelection, FolderDetails.class, queryParams, worToken);
+        } catch (Exception e) {
+            Logger.error(e);
+        }
+    }
+
+    public PartData getToolTipDetails(String url, String userId, long partId, String token, String worToken) {
+        try {
+            String encodedToken = URLEncoder.encode(token, "UTF-8");
+            Map<String, Object> queryParams = new HashMap<>();
+            queryParams.put("token", encodedToken);
+            queryParams.put("userId", userId);
+            return restClient.getWor(url, "rest/parts/" + partId + "/tooltip", PartData.class, queryParams, worToken);
+        } catch (Exception e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
+    public PartData getRemoteEntry(String url, String userId, long partId, long folderId, String token, String worToken) {
+        try {
+            String encodedToken = URLEncoder.encode(token, "UTF-8");
+            Map<String, Object> queryParams = new HashMap<>();
+            queryParams.put("token", encodedToken);
+            queryParams.put("userId", userId);
+            queryParams.put("folderId", folderId);
+            return restClient.getWor(url, "rest/parts/" + partId, PartData.class, queryParams, worToken);
+        } catch (Exception e) {
+            Logger.error(e);
+            return null;
+        }
     }
 }

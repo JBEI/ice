@@ -26,7 +26,7 @@ public class RemoteAccessModelDAO extends HibernateRepository<RemoteAccessModel>
                 .add(Restrictions.eq("permission.account", account))
                 .list();
         if (!list.isEmpty()) {
-            if (list.size() > 0)
+            if (list.size() > 1)
                 Logger.warn("Found " + list.size() + " access models for folder " + folder.getId());
             return (RemoteAccessModel) list.get(0);
         }

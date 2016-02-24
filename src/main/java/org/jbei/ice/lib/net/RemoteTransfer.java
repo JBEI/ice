@@ -84,7 +84,6 @@ public class RemoteTransfer {
             }
 
             toTransfer.put(data.getId(), data);
-
         }
         return new LinkedList<>(toTransfer.values());
     }
@@ -96,7 +95,7 @@ public class RemoteTransfer {
      * @param remoteId unique identifier for remote partner the parts are to be transferred to
      * @param entries  list of entries to be transferred. Note that the entries contain the linked
      *                 entries as well and these may or may not already exist on the recipient
-     * @return list of ids of the transferred entries. These are the ids on the remote recipient and this ice instance
+     * @return list of ids of the transferred entries. These are the ids on the remote recipient and not this ice instance
      */
     public List<Long> transferEntries(long remoteId, List<PartData> entries) {
         RemotePartner partner = this.remotePartnerDAO.get(remoteId);

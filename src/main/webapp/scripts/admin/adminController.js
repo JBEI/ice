@@ -68,6 +68,13 @@ angular.module('ice.admin.controller', [])
                 display: 'API Keys',
                 selected: false,
                 icon: 'fa-key'
+            },
+            {
+                id: 'manuscripts',
+                url: 'scripts/admin/manuscripts.html',
+                display: 'Editor Tools',
+                selected: false,
+                icon: 'fa-newspaper-o'
             }
         ];
 
@@ -394,4 +401,143 @@ angular.module('ice.admin.controller', [])
             else
                 $scope.selectedUsers.splice(index, 1);
         };
-    });
+    })
+    .controller('AdminManuscriptsController', function ($scope, $uibModal, $window, Util) {
+        $scope.manuscripts = [];
+        $scope.manuscriptsParams = {
+            sort: 'creationTime',
+            asc: false,
+            currentPage: 1,
+            maxCount: 5,
+            offset: 0,
+            limit: 15
+        };
+
+        $scope.getManuscripts = function () {
+            Util.get("rest/manuscripts", function (result) {
+                $scope.manuscripts = result;
+            }, $scope.manuscriptsParams);
+        };
+        $scope.getManuscripts();
+
+        $scope.sort = function (field) {
+            $scope.manuscriptsParams.offset = 0;
+            if ($scope.manuscriptsParams.sort == field)
+                $scope.manuscriptsParams.asc = !$scope.manuscriptsParams.asc;
+            else
+                $scope.manuscriptsParams.asc = false;
+            $scope.manuscriptsParams.sort = field;
+            $scope.getManuscripts();
+        };
+
+        $scope.openManuscriptAddRequest = function (selectedManuscript) {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/admin/modal/manuscript-create.html',
+                controller: 'CreateManuscriptController',
+                resolve: {
+                    manuscript: function () {
+                        return selectedManuscript;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (selectedItem) {
+                $scope.getManuscripts();
+            });
+        };
+
+        $scope.downloadManuscriptFiles = function (manuscript) {
+            Util.post("rest/manuscripts/" + manuscript.id + "/files/zip", {}, function (result) {
+                if (result && result.value) {
+                    $window.open("rest/file/tmp/" + result.value, "_self");
+                }
+            })
+        };
+
+        $scope.updatePaperStatus = function (manuscript, status) {
+            if (manuscript.status == status)
+                return;
+            Util.update("rest/manuscripts/" + manuscript.id, {status: status}, {}, function (result) {
+                manuscript.status = status;
+            })
+        };
+
+        $scope.deleteManuscript = function (manuscript) {
+            Util.remove("rest/manuscripts/" + manuscript.id, {}, function (result) {
+                var i = $scope.manuscripts.indexOf(manuscript);
+                $scope.manuscripts.splice(i, 1);
+            });
+        }
+    })
+    .controller('CreateManuscriptController', function ($scope, $uibModalInstance, $cookieStore, $http, manuscript, Util) {
+        $scope.submitButtonText = "Create";
+        $scope.invalidFolder = false;
+
+        if (manuscript) {
+            $scope.newManuscript = manuscript;
+            $scope.submitButtonText = "Update";
+            $scope.newManuscript.selectedFolderName = $scope.newManuscript.folder.folderName;
+        } else
+            $scope.newManuscript = {status: "UNDER_REVIEW"};
+
+        $scope.cancel = function () {
+            $uibModalInstance.close();
+            $uibModalInstance.dismiss('cancel');
+        };
+        // get folders I can edit or see (or shared with me?)
+
+        $scope.createNewPaper = function () {
+            if ($scope.newManuscript.id) {
+                Util.update("rest/manuscripts/" + $scope.newManuscript.id, $scope.newManuscript, {}, function (result) {
+                    $scope.cancel();
+                });
+            } else {
+                Util.post("rest/manuscripts", $scope.newManuscript, function (result) {
+                    $scope.cancel();
+                }, {}, function (error) {
+
+                });
+            }
+        };
+
+        $scope.filterFolders = function (token) {
+            return $http.get('rest/folders/autocomplete', {
+                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                params: {
+                    val: token
+                }
+            }).then(function (res) {
+                return res.data;
+            });
+        };
+
+        $scope.folderSelection = function ($item, $model, $label) {
+            $scope.invalidFolder = false;
+            $scope.newManuscript.folder = $item;
+        };
+
+        $scope.pasteFolder = function (event) {
+            var pasted = event.originalEvent.clipboardData.getData('text/plain');
+            var replace = event.currentTarget.baseURI + "folders/";
+            var idx = pasted.indexOf(replace);
+
+            if (idx != 0) {
+                console.error("Could not parse pasted");
+                $scope.invalidFolder = true;
+                return;
+            }
+
+            pasted = pasted.slice(idx + replace.length);
+            if (isNaN(pasted)) {
+                $scope.invalidFolder = true;
+                console.error(pasted + " is not a number");
+                return;
+            }
+
+            Util.get("rest/folders/" + pasted, function (result) {
+                $scope.newManuscript.folder = result;
+                //$scope.newManuscript.selectedFolderName = result.folderName;
+            });
+        };
+    })
+;

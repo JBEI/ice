@@ -29,6 +29,7 @@ public class EntriesAsCSV {
 
     private Set<EntryType> entryTypes;
     private Path csvPath;
+    private List<Long> entries;
 
     public EntriesAsCSV() {
         entryTypes = new HashSet<>();
@@ -37,11 +38,11 @@ public class EntriesAsCSV {
     public final boolean setSelectedEntries(String userId, EntrySelection selection) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         Entries retriever = new Entries();
-        List<Long> entries = retriever.getEntriesFromSelectionContext(account.getEmail(), selection);
-        return writeList(entries);
+        entries = retriever.getEntriesFromSelectionContext(account.getEmail(), selection);
+        return writeList();
     }
 
-    private boolean writeList(List<Long> entries) {
+    private boolean writeList() {
         EntryDAO dao = DAOFactory.getEntryDAO();
         List<EntryField> fields = BulkCSVUploadHeaders.getCommonFields();
         List<String[]> lines = new LinkedList<>();  // lines in the csv file
@@ -129,5 +130,9 @@ public class EntriesAsCSV {
 
     public Path getFilePath() {
         return csvPath;
+    }
+
+    public List<Long> getEntryIds() {
+        return this.entries;
     }
 }

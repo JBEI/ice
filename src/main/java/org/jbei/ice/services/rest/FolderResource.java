@@ -35,6 +35,17 @@ public class FolderResource extends RestResource {
     private PermissionsController permissionsController = new PermissionsController();
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/autocomplete")
+    public Response getAutoCompleteForAvailableFolders(
+            @QueryParam("val") final String val,
+            @DefaultValue("8") @QueryParam("limit") final int limit) {
+        final String userId = requireUserId();
+        Folders folders = new Folders(userId);
+        return super.respond(folders.filter(val, limit));
+    }
+
+    @GET
     public Response getFolders(
             @DefaultValue("false") @QueryParam("canEdit") boolean editOnly) {
         String userId = requireUserId();
@@ -132,12 +143,23 @@ public class FolderResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/entries")
-    public Response addSelectedEntriesToFolders(final EntrySelection entrySelection) {
+    public Response addSelectedEntriesToFolders(final EntrySelection entrySelection,
+                                                @QueryParam("token") String remoteUserToken,
+                                                @QueryParam("userId") String remoteUserId,
+                                                @QueryParam("folderId") long fid) {
         final String userId = getUserId();
-        log(userId, "adding entries to folders");
         final FolderContents folderContents = new FolderContents();
-        folderContents.addEntrySelection(userId, entrySelection);
-        return super.respond(true);
+        if (StringUtils.isEmpty(userId) && !StringUtils.isEmpty(remoteUserToken)) {
+            // check others
+            log(remoteUserId, " remotely adding entries to folders");
+            RegistryPartner registryPartner = verifyWebPartner();
+            return super.respond(folderContents.remotelyAddEntrySelection(remoteUserId, fid, remoteUserToken,
+                    entrySelection, registryPartner));
+        } else {
+            log(userId, "adding entries to folders");
+            folderContents.addEntrySelection(userId, entrySelection);
+            return super.respond(true);
+        }
     }
 
     /**
@@ -198,7 +220,7 @@ public class FolderResource extends RestResource {
                 // get registry partner
                 if (StringUtils.isEmpty(token))
                     return null;
-                RegistryPartner partner = getWebPartner();
+                RegistryPartner partner = verifyWebPartner();
                 log(partner.getUrl(), message);
                 return folderContents.getRemotelySharedContents(remoteUserId, token, partner, id, field, asc, offset,
                         limit, filter);

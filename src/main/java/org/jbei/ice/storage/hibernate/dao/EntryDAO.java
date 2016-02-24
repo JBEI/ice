@@ -716,4 +716,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 .uniqueResult();
         return itemCount.intValue();
     }
+
+    public int setEntryVisibility(List<Long> list, Visibility ok) {
+        Query query = currentSession().createQuery("update " + Entry.class.getName()
+                + " e set e.visibility=:v where e.id in :ids");
+        query.setParameter("v", ok.getValue());
+        query.setParameterList("ids", list);
+        return query.executeUpdate();
+    }
 }

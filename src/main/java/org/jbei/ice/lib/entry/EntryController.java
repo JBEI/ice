@@ -6,6 +6,7 @@ import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.PreferencesController;
+import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.AuditType;
 import org.jbei.ice.lib.dto.DNASequence;
@@ -18,7 +19,9 @@ import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
+import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
@@ -129,15 +132,30 @@ public class EntryController {
         }
     }
 
-    public PartData retrieveEntryTipDetails(String userId, String id) {
+    public PartData retrieveEntryTipDetails(String id) {
         Entry entry = getEntry(id);
         if (entry == null)
             return null;
 
-        if (!permissionsController.isPubliclyVisible(entry) && !authorization.canRead(userId, entry))
-            return null;
-
         return ModelToInfoFactory.createTipView(entry);
+    }
+
+    // contact the remote partner to get the tool tip
+    public PartData retrieveRemoteToolTip(String userId, long folderId, long partId) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);
+
+        RemoteAccessModel remoteAccessModel = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
+        if (remoteAccessModel == null) {
+            Logger.error("Could not retrieve remote access for folder " + folder.getId());
+            return null;
+        }
+
+        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
+        String url = remotePartner.getUrl();
+        String token = remoteAccessModel.getToken();
+        RemoteContact remoteContact = new RemoteContact();
+        return remoteContact.getToolTipDetails(url, userId, partId, token, remotePartner.getApiKey());
     }
 
     public ArrayList<UserComment> retrieveEntryComments(String userId, long partId) {
@@ -315,12 +333,70 @@ public class EntryController {
         return entry;
     }
 
+    public PartData retrieveRemoteEntryDetails(String userId, long folderId, long partId) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);
+
+        RemoteAccessModel remoteAccessModel = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
+        if (remoteAccessModel == null) {
+            Logger.error("Could not retrieve remote access for folder " + folder.getId());
+            return null;
+        }
+
+        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
+        String url = remotePartner.getUrl();
+        String token = remoteAccessModel.getToken();
+        long remoteFolderId = Long.decode(remoteAccessModel.getIdentifier());
+        RemoteContact remoteContact = new RemoteContact();
+        return remoteContact.getRemoteEntry(url, userId, partId, remoteFolderId, token, remotePartner.getApiKey());
+    }
+
+    public PartData getRemoteRequestedEntry(String remoteUserId, String token, String entryId,
+                                            long folderId, RegistryPartner requestingPartner) {
+        // see folderContents.getRemoteSharedContents
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);      // folder that the entry is contained in
+        if (folder == null)
+            return null;
+
+        RemotePartner remotePartner = DAOFactory.getRemotePartnerDAO().getByUrl(requestingPartner.getUrl());
+
+        // check that the remote user has the right token
+        RemoteShareModel shareModel = DAOFactory.getRemoteShareModelDAO().get(remoteUserId, remotePartner, folder);
+        if (shareModel == null) {
+            Logger.error("Could not retrieve share model");
+            return null;
+        }
+
+        Permission permission = shareModel.getPermission(); // folder must match
+
+        // validate access token
+        TokenHash tokenHash = new TokenHash();
+        String secret = tokenHash.encryptPassword(remotePartner.getUrl() + remoteUserId, token);
+        if (!secret.equals(shareModel.getSecret())) {
+            throw new PermissionException("Secret does not match");
+        }
+
+        Entry entry = getEntry(entryId);
+        if (entry == null)
+            return null;
+
+        // check that entry id is contained in folder
+        return retrieveEntryDetails(null, entry);
+    }
+
     public PartData retrieveEntryDetails(String userId, String id) {
         Entry entry = getEntry(id);
         if (entry == null)
             return null;
 
-        return retrieveEntryDetails(userId, entry);
+        // user must be able to read if not public entry
+        if (!permissionsController.isPubliclyVisible(entry))
+            authorization.expectRead(userId, entry);
+
+        PartData partData = retrieveEntryDetails(userId, entry);
+        partData.setCanEdit(authorization.canWriteThoroughCheck(userId, entry));
+        partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
+        return partData;
     }
 
     /**
@@ -368,10 +444,6 @@ public class EntryController {
     }
 
     protected PartData retrieveEntryDetails(String userId, Entry entry) throws PermissionException {
-        // user must be able to read if not public entry
-        if (!permissionsController.isPubliclyVisible(entry))
-            authorization.expectRead(userId, entry);
-
         PartData partData = ModelToInfoFactory.getInfo(entry);
         if (partData == null)
             return null;
@@ -380,10 +452,6 @@ public class EntryController {
         partData.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
         partData.setHasOriginalSequence(hasOriginalSequence);
-
-        // permissions
-        partData.setCanEdit(authorization.canWriteThoroughCheck(userId, entry));
-        partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
 
         // create audit event if not owner
         // todo : remote access check

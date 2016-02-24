@@ -259,4 +259,16 @@ public class FolderDAO extends HibernateRepository<Folder> {
         query.setParameterList("ids", list);
         return query.executeUpdate();
     }
+
+    public List<Folder> filterByName(String token, int limit) {
+        try {
+            return currentSession().createCriteria(Folder.class)
+                    .add(Restrictions.ilike("name", token, MatchMode.ANYWHERE))
+                    .setMaxResults(limit)
+                    .list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
 }

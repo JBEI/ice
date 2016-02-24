@@ -218,7 +218,6 @@ angular.module('ice.collection.controller', [])
 
         $scope.userSelectionForPermissionAdd = function (item, model, label) {
             $scope.newPermission.articleId = item.id;
-            console.log("selected", item, model, label);
         };
 
         $scope.removePermission = function (permission) {
@@ -235,8 +234,6 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.addNewPermission = function () {
-            console.log($scope.newPermission);
-
             if ($scope.newPermission.canWrite) {
                 $scope.newPermission.type = 'WRITE_FOLDER';
             } else {
@@ -249,8 +246,9 @@ angular.module('ice.collection.controller', [])
             }
 
             Util.post("rest/folders/" + folder.id + "/permissions", $scope.newPermission, function (result) {
+                result.canWrite = result.type == 'WRITE_FOLDER';
+                result.canRead = result.type == 'READ_FOLDER';
                 $scope.permissions.push(result);
-                console.log($scope.permissions);
             });
         };
 
@@ -307,8 +305,6 @@ angular.module('ice.collection.controller', [])
         var folders = Folders();
         var entry = Entry(sessionId);
         var resource = "collections";
-
-        console.log($stateParams);
 
         $scope.folderPageChange = function () {
             $scope.loadingPage = true;
@@ -493,14 +489,21 @@ angular.module('ice.collection.controller', [])
                 }, $scope.params);
             }, $scope.params.count, offset, "folders/" + $scope.params.folderId, $scope.params.sort);
 
+            //$location.search("fid", $scope.folder.id);
             $location.path("entry/" + entry.id);
         };
 
         $scope.tooltipDetails = function (e) {
             $scope.currentTooltip = undefined;
+            var params = {};
+            if ($scope.folder && $scope.folder.type == 'REMOTE') {
+                params.remote = true;
+                params.folderId = $scope.folder.id;
+            }
+
             Util.get("rest/parts/" + e.id + "/tooltip", function (result) {
                 $scope.currentTooltip = result;
-            });
+            }, params);
         };
 
         $scope.folderPopupTemplateUrl = "scripts/folder/template.html";

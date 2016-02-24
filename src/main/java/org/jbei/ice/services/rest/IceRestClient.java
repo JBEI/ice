@@ -58,11 +58,6 @@ public class IceRestClient extends RestClient {
         return target.request(MediaType.APPLICATION_JSON_TYPE).buildGet().invoke(clazz);
     }
 
-//    public Object get(String url, String path) {
-//        WebTarget target = client.target("https://" + url).path(path);
-//        return target.request(MediaType.APPLICATION_JSON_TYPE).buildGet().invoke();
-//    }
-
     @Override
     public <T> T post(String url, String resourcePath, Object object, Class<T> responseClass,
                       Map<String, Object> queryParams) {
@@ -101,6 +96,29 @@ public class IceRestClient extends RestClient {
     public <T> T put(String url, String resourcePath, Object object, Class<T> responseClass) {
         WebTarget target = client.target("https://" + url).path(resourcePath);
         Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
+        Response putResponse = invocationBuilder.put(Entity.entity(object, MediaType.APPLICATION_JSON_TYPE));
+        if (putResponse.getStatus() != Response.Status.OK.getStatusCode()) {
+            Logger.error("PUT call to " + url + "/" + resourcePath + " returned status of " + putResponse.getStatus());
+            return null;
+        }
+
+        if (responseClass != null && putResponse.hasEntity()
+                && putResponse.getStatus() == Response.Status.OK.getStatusCode())
+            return putResponse.readEntity(responseClass);
+        return null;
+    }
+
+    public <T> T putWor(String url, String resourcePath, Object object, Class<T> responseClass,
+                        Map<String, Object> queryParams, String worToken) {
+        WebTarget target = client.target("https://" + url).path(resourcePath);
+        if (queryParams != null) {
+            for (Map.Entry<String, Object> entry : queryParams.entrySet()) {
+                target = target.queryParam(entry.getKey(), entry.getValue());
+            }
+        }
+
+        Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
+        setHeaders(invocationBuilder, worToken);
         Response putResponse = invocationBuilder.put(Entity.entity(object, MediaType.APPLICATION_JSON_TYPE));
         if (putResponse.getStatus() != Response.Status.OK.getStatusCode()) {
             Logger.error("PUT call to " + url + "/" + resourcePath + " returned status of " + putResponse.getStatus());
