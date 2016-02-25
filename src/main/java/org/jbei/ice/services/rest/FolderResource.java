@@ -217,9 +217,10 @@ public class FolderResource extends RestResource {
             FolderContents folderContents = new FolderContents();
 
             if (StringUtils.isEmpty(userId)) {
-                // get registry partner
                 if (StringUtils.isEmpty(token))
-                    return null;
+                    return folderContents.getContents(userId, id, field, asc, offset, limit, filter);
+
+                // get registry partner
                 RegistryPartner partner = verifyWebPartner();
                 log(partner.getUrl(), message);
                 return folderContents.getRemotelySharedContents(remoteUserId, token, partner, id, field, asc, offset,

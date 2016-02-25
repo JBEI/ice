@@ -119,7 +119,7 @@ public class RemoteEntries {
         if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
             return null;
 
-        return iceRestClient.get(partner.getUrl(), "/rest/parts/" + entryId, PartData.class);
+        return iceRestClient.getWor(partner.getUrl(), "rest/parts/" + entryId, PartData.class, null, partner.getApiKey());
     }
 
     public PartData getPublicEntryTooltip(String userId, long remoteId, long entryId) {
@@ -130,8 +130,8 @@ public class RemoteEntries {
         if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
             return null;
 
-        String path = "/rest/parts/" + entryId + "/tooltip";
-        return iceRestClient.get(partner.getUrl(), path, PartData.class);
+        String path = "rest/parts/" + entryId + "/tooltip";
+        return iceRestClient.getWor(partner.getUrl(), path, PartData.class, null, partner.getApiKey());
     }
 
     public PartStatistics getPublicEntryStatistics(String userId, long remoteId, long entryId) {

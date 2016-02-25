@@ -118,8 +118,12 @@ public class PartResource extends RestResource {
     }
 
     /**
-     * Retrieves the information shown in the tooltip view
-     * for entries
+     * Retrieves either a remote or local tooltip
+     *
+     * @param id       unique identifier for entry whose tooltip is to be retrieved
+     * @param isRemote if true, a remote tooltip is being retrieved, false, local
+     * @param fid      required if <code>isRemote</code>  is true. The remote entry should be shared in this folder
+     * @return PartData information about the entry with enough information to show the tooltip
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

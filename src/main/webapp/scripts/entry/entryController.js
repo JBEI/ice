@@ -480,6 +480,9 @@ angular.module('ice.entry.controller', [])
                     $scope.part.linkedParts = [];
                     $scope.activePart = $scope.part;
                     $scope.part.fields = EntryService.getFieldsForType($scope.createType);
+                    angular.forEach($scope.activePart.fields, function (field) {
+                        field.invalid = false;
+                    })
                 } else {
                     var newPart = result;
                     newPart = EntryService.setNewEntryFields(newPart);
