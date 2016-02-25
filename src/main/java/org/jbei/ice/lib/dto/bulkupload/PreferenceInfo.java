@@ -16,12 +16,6 @@ public class PreferenceInfo implements IDataTransferModel {
     public PreferenceInfo() {
     }
 
-    public PreferenceInfo(boolean add, String key, String value) {
-        this.isAdd = add;
-        this.key = key;
-        this.value = value;
-    }
-
     public String getKey() {
         return key;
     }

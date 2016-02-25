@@ -353,10 +353,19 @@ public class EntryController {
 
     public PartData getRemoteRequestedEntry(String remoteUserId, String token, String entryId,
                                             long folderId, RegistryPartner requestingPartner) {
+        Entry entry = getEntry(entryId);
+        if (entry == null)
+            return null;
+
         // see folderContents.getRemoteSharedContents
         Folder folder = DAOFactory.getFolderDAO().get(folderId);      // folder that the entry is contained in
-        if (folder == null)
-            return null;
+        if (folder == null) {
+            // must be a public entry (todo : move to separate method
+            if (!permissionsController.isPubliclyVisible(entry))
+                throw new PermissionException("Not a public entry");
+
+            return retrieveEntryDetails(null, entry);
+        }
 
         RemotePartner remotePartner = DAOFactory.getRemotePartnerDAO().getByUrl(requestingPartner.getUrl());
 
@@ -375,10 +384,6 @@ public class EntryController {
         if (!secret.equals(shareModel.getSecret())) {
             throw new PermissionException("Secret does not match");
         }
-
-        Entry entry = getEntry(entryId);
-        if (entry == null)
-            return null;
 
         // check that entry id is contained in folder
         return retrieveEntryDetails(null, entry);

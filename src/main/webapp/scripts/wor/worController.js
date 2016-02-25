@@ -78,7 +78,7 @@ angular.module('ice.wor.controller', [])
         };
     })
     .controller('WorFolderContentController', function ($location, $rootScope, $scope, $stateParams, Remote,
-                                                        WorService, WebOfRegistries) {
+                                                        WorService, WebOfRegistries, Util) {
         var id;
         $scope.remoteRetrieveError = undefined;
         if ($stateParams.folderId === undefined)
@@ -92,7 +92,7 @@ angular.module('ice.wor.controller', [])
         $scope.params = {folderId: id, id: $stateParams.partner, offset: 0, currentPage: 1};
 
         var getRemoteFolderEntries = function () {
-            Remote().getFolderEntries($scope.params, function (result) {
+            Util.get('rest/remote/' + $stateParams.partner + '/folders/' + id, function (result) {
                 $scope.selectedPartnerFolder = result;
                 $scope.selectedPartner = WorService.getSelectedPartner();
                 if ($scope.selectedPartner == undefined) {
@@ -100,8 +100,7 @@ angular.module('ice.wor.controller', [])
                     WorService.setSelectedPartner($scope.selectedPartner)
                 }
                 $scope.loadingPage = false;
-            }, function (error) {
-                console.error(error);
+            }, $scope.params, function (error) {
                 $scope.selectedPartnerFolder = undefined;
                 $scope.remoteRetrieveError = true;
                 $scope.loadingPage = false;
@@ -120,9 +119,9 @@ angular.module('ice.wor.controller', [])
         $scope.worFolderContentsPopoverTemplate = "scripts/folder/template.html";
 
         $scope.tooltipDetails = function (entry) {
-            WebOfRegistries().getToolTip({partnerId: $stateParams.partner, entryId: entry.id}, function (result) {
+            Util.get("rest/web/" + $stateParams.partner + "/entries/" + entry.id + "/tooltip", function (result) {
                 $scope.currentTooltip = result;
-            })
+            });
         };
 
         $scope.getRemoteEntryDetails = function (partnerId, entryId, index) {
@@ -144,30 +143,28 @@ angular.module('ice.wor.controller', [])
         };
     })
     .controller('WorEntryController', function ($location, $scope, $window, WebOfRegistries, $stateParams,
-                                                EntryService, WorService) {
+                                                EntryService, WorService, Util) {
         var web = WebOfRegistries();
         $scope.notFound = undefined;
         $scope.remoteEntry = undefined;
 
-        web.getPartner({partnerId: $stateParams.partner}, function (result) {
+        Util.get('rest/web/partner/' + $stateParams.partner, function (result) {
             $scope.currentPartner = result;
-        }, function (error) {
-            console.error(error);
         });
 
         // retrieve specified entry
         var retrieveEntry = function (entryId) {
-            web.getPublicEntry({partnerId: $stateParams.partner, entryId: entryId}, function (result) {
+
+            Util.get('rest/web/' + $stateParams.partner + '/entries/' + entryId, function (result) {
                 $scope.remoteEntry = EntryService.convertToUIForm(result);
                 $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
                 $scope.remoteEntry.partnerId = $stateParams.partner;
 
-                web.getPublicEntryStatistics({partnerId: $stateParams.partner, entryId: entryId}, function (stats) {
+                Util.get('rest/web/' + $stateParams.partner + '/entries/' + entryId + '/statistics', function (stats) {
                     $scope.remoteEntryStatistics = stats;
                 });
 
-            }, function (error) {
-                console.error(error);
+            }, {}, function (error) {
                 if (error)
                     $scope.notFound = true;
             });
