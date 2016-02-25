@@ -3,7 +3,6 @@ package org.jbei.ice.lib.manuscript;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -13,6 +12,7 @@ import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.utils.EntriesAsCSV;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -29,7 +29,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -106,9 +105,15 @@ public class Manuscripts {
             // update status
             model.setStatus(manuscript.getStatus());
 
+            FolderController folderController = new FolderController();
             if (model.getStatus() == ManuscriptStatus.ACCEPTED) {
                 // make public
-                update(model.getFolder());
+                setFolderType(model.getFolder(), FolderType.PUBLIC);
+                folderController.enablePublicReadAccess(this.userId, model.getFolder().getId());
+            } else {
+                // remove public
+                setFolderType(model.getFolder(), FolderType.PRIVATE);
+                folderController.disablePublicReadAccess(this.userId, model.getFolder().getId());
             }
         }
 
@@ -131,7 +136,8 @@ public class Manuscripts {
         SequenceController sequenceController = new SequenceController();
 
         File tmpDir = new File(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY));
-        Path zipPath = Paths.get(tmpDir.getAbsolutePath(), UUID.randomUUID().toString() + ".zip");
+        String prefix = model.getAuthorFirstName() + "_" + model.getAuthorLastName();
+        Path zipPath = Paths.get(tmpDir.getAbsolutePath(), prefix + "_collection.zip");
 
         try {
             FileOutputStream fos = new FileOutputStream(zipPath.toFile());
@@ -179,15 +185,12 @@ public class Manuscripts {
         }
     }
 
-
-    protected void update(Folder folder) {
+    // makes folder featured
+    protected void setFolderType(Folder folder, FolderType type) {
         if (folder == null)
             return;
-        folder.setType(FolderType.PUBLIC);
+        folder.setType(type);
         folder.setModificationTime(new Date());
-        PermissionsController permissionsController = new PermissionsController();
-        permissionsController.propagateFolderPermissions(this.userId, folder, true);
-        folder.setPropagatePermissions(true);
         DAOFactory.getFolderDAO().update(folder);
     }
 }
