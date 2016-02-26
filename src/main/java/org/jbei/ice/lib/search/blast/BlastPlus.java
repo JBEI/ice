@@ -145,8 +145,6 @@ public class BlastPlus {
                 i += 1;
                 line = lines.get(i);
                 if (line.startsWith("Length")) {
-//                    int sequenceLength = Integer.valueOf(line.substring(7).trim());
-//                    System.out.println(info.getQueryLength() + ", " + sequenceLength / 2);
                     continue;
                 }
 
@@ -175,9 +173,6 @@ public class BlastPlus {
                     String[] split = line.split("=");
                     String aligned = split[1].substring(1, split[1].indexOf(","));
                     info.setAlignment(aligned);
-//                    if (!aligned.trim().isEmpty()) {
-//                        info.setAlignmentLength(Integer.valueOf(aligned).intValue());
-//                    }
                 }
 
                 info.getMatchDetails().add(line);
@@ -187,11 +182,6 @@ public class BlastPlus {
                 // if there is an existing record for same entry with a lower relative score then replace
                 if (currentResult == null)
                     hashMap.put(idString, info);
-//                else {
-//                    if (info.getScore() > currentResult.getRelativeScore()) {
-//                        hashMap.put(idString, info);
-//                    }
-//                }
             }
         }
 
