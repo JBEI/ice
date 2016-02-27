@@ -438,10 +438,7 @@ public class BlastPlus {
         while (offset < count) {
             Sequence sequence = sequenceDAO.getSequence(offset++);
             long id = sequence.getEntry().getId();
-//            boolean circular = false;
-//            if (sequence.getEntry() instanceof Plasmid) {
-//                circular = ((Plasmid) sequence.getEntry()).getCircular();
-//            }
+
             String sequenceString = "";
             String temp = sequence.getSequence();
 //            int sequenceLength = 0;
