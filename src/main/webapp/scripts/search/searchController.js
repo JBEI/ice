@@ -2,7 +2,7 @@
 
 angular.module('ice.search.controller', [])
     .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil,
-                                              Selection, WebOfRegistries) {
+                                              Selection, WebOfRegistries, Util) {
 
         $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
@@ -17,17 +17,32 @@ angular.module('ice.search.controller', [])
         var runAdvancedSearch = function (filters) {
             $scope.loadingSearchResults = true;
 
-            Search().runAdvancedSearch({webSearch: filters.webSearch}, filters,
-                function (result) {
-                    $scope.searchResults = result;
-                    $scope.loadingSearchResults = false;
-                },
-                function (error) {
-                    $scope.loadingSearchResults = false;
-                    $scope.searchResults = undefined;
-                    console.log(error);
-                }
-            );
+            //runAdvancedSearch: {
+            //    method:'POST',
+            //        responseType:"json",
+            //        headers:{'X-ICE-Authentication-SessionId':sessionId}
+            //}
+
+
+            Util.post("rest/search", filters, function (result) {
+                $scope.searchResults = result;
+                $scope.loadingSearchResults = false;
+            }, {webSearch: filters.webSearch}, function (error) {
+                $scope.loadingSearchResults = false;
+                $scope.searchResults = undefined;
+            });
+
+            //Search().runAdvancedSearch({webSearch: filters.webSearch}, filters,
+            //    function (result) {
+            //        $scope.searchResults = result;
+            //        $scope.loadingSearchResults = false;
+            //    },
+            //    function (error) {
+            //        $scope.loadingSearchResults = false;
+            //        $scope.searchResults = undefined;
+            //        console.log(error);
+            //    }
+            //);
         };
 
         $scope.searchResultPageChanged = function () {
@@ -128,7 +143,18 @@ angular.module('ice.search.controller', [])
 
         $scope.hStepChanged = function () {
             $scope.params.currentPage = 1;
-            runAdvancedSearch($scope.params);
+            //$scope.searchResultPageChanged();
+            $scope.searchFilters.parameters.retrieveCount = $scope.params.limit;
+            $scope.searchFilters.parameters.start = 0;
+
+            //console.log($scope.searchFilters);
+            //console.log($scope.params);
+            //var offset = (($scope.params.currentPage - 1) * $scope.params.limit) + index;
+            //EntryContextUtil.setContextCallback(function (offset, callback) {
+            //    $scope.searchFilters.parameters.start = offset;
+            //    $scope.searchFilters.parameters.retrieveCount = 1;
+
+            runAdvancedSearch($scope.searchFilters);
         };
     })
     .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {
