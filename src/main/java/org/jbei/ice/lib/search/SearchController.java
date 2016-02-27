@@ -23,6 +23,8 @@ import java.util.*;
  */
 public class SearchController {
 
+    private AccountController accountController = new AccountController();
+
     public SearchResults runSearch(String userId, SearchQuery query, boolean searchWeb) {
         if (searchWeb)
             return runWebSearch(query);
@@ -122,9 +124,10 @@ public class SearchController {
         if (StringUtils.isEmpty(queryString) && blastResults != null && !query.hasFilter()) {
             if (blastResults.isEmpty())
                 return new SearchResults();
+
             int start = query.getParameters().getStart();
             int count = query.getParameters().getRetrieveCount();
-            return HibernateSearch.getInstance().filterBlastResults(userId, start, count, blastResults);
+            return HibernateSearch.getInstance().filterBlastResults(userId, start, count, query, blastResults);
         }
 
         // text query (may also include blast)
@@ -147,7 +150,6 @@ public class SearchController {
      * @return true is index rebuild is started successfully, false otherwise
      */
     public boolean rebuildIndexes(String userId, IndexType type) {
-        AccountController accountController = new AccountController();
         if (!accountController.isAdministrator(userId)) {
             Logger.warn(userId + " attempting to rebuild search index " + type + " without admin privs");
             return false;
