@@ -25,7 +25,7 @@ public class ManuscriptResource extends RestResource {
         return super.respond(manuscripts.get(sort, asc, offset, size, filter));
     }
 
-    @POST
+    @GET
     @Path("{id}/files/zip")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)

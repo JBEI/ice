@@ -447,7 +447,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.downloadManuscriptFiles = function (manuscript) {
-            Util.post("rest/manuscripts/" + manuscript.id + "/files/zip", {}, function (result) {
+            Util.get("rest/manuscripts/" + manuscript.id + "/files/zip", function (result) {
                 if (result && result.value) {
                     $window.open("rest/file/tmp/" + result.value, "_self");
                 }

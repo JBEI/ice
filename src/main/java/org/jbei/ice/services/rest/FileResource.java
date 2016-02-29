@@ -299,9 +299,10 @@ public class FileResource extends RestResource {
     @Path("csv")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response downloadCSV(EntrySelection selection) {
+    public Response downloadCSV(@QueryParam("addSequences") boolean includeSequences,
+                                EntrySelection selection) {
         String userId = super.getUserId();
-        EntriesAsCSV entriesAsCSV = new EntriesAsCSV();
+        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(includeSequences, null, "genbank");
         boolean success = entriesAsCSV.setSelectedEntries(userId, selection);
         if (!success)
             return super.respond(false);

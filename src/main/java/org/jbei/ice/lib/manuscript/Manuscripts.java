@@ -1,36 +1,22 @@
 package org.jbei.ice.lib.manuscript;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.entry.EntrySelection;
-import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.lib.utils.EntriesAsCSV;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.FolderDAO;
 import org.jbei.ice.storage.hibernate.dao.ManuscriptModelDAO;
 import org.jbei.ice.storage.model.Folder;
 import org.jbei.ice.storage.model.ManuscriptModel;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 /**
  * @author Hector Plahar
@@ -127,62 +113,12 @@ public class Manuscripts {
 
         // get folder
         List<Long> entryIds = this.folderDAO.getFolderContentIds(model.getFolder().getId(), null, true);
-        EntrySelection entrySelection = new EntrySelection();
-        entrySelection.getEntries().addAll(entryIds);
-
-        EntriesAsCSV entriesAsCSV = new EntriesAsCSV();
-        entriesAsCSV.setSelectedEntries(this.userId, entrySelection);
-        entryIds = entriesAsCSV.getEntryIds();
-        SequenceController sequenceController = new SequenceController();
-
-        File tmpDir = new File(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY));
         String prefix = model.getAuthorFirstName() + "_" + model.getAuthorLastName();
-        Path zipPath = Paths.get(tmpDir.getAbsolutePath(), prefix + "_collection.zip");
+        String fileName = prefix + "_collection.zip";
 
-        try {
-            FileOutputStream fos = new FileOutputStream(zipPath.toFile());
-            ZipOutputStream zos = new ZipOutputStream(fos);
-
-            // get sbol and genbank formats
-            for (long entryId : entryIds) {
-
-                // get genbank
-                ByteArrayWrapper wrapper = sequenceController.getSequenceFile(this.userId, entryId, "genbank");
-                putZipEntry(wrapper, zos);
-
-                // get sbol
-                wrapper = sequenceController.getSequenceFile(this.userId, entryId, "sbol");
-                putZipEntry(wrapper, zos);
-            }
-
-            Path csvPath = entriesAsCSV.getFilePath();
-            FileInputStream fis = new FileInputStream(csvPath.toFile());
-            ByteArrayWrapper wrapper = new ByteArrayWrapper(IOUtils.toByteArray(fis), "entries.csv");
-            putZipEntry(wrapper, zos);
-            zos.close();
-            return zipPath;
-        } catch (Exception e) {
-            Logger.error(e);
-            return null;
-        }
-    }
-
-    protected void putZipEntry(ByteArrayWrapper wrapper, ZipOutputStream zos) {
-        try {
-            byte[] buffer = new byte[1024];
-
-            zos.putNextEntry(new ZipEntry(wrapper.getName()));
-
-            ByteArrayInputStream bis = new ByteArrayInputStream(wrapper.getBytes());
-            int length;
-            while ((length = bis.read(buffer)) > 0) {
-                zos.write(buffer, 0, length);
-            }
-            bis.close();
-            zos.closeEntry();
-        } catch (Exception e) {
-            Logger.error(e);
-        }
+        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(true, fileName);
+        entriesAsCSV.setEntries(this.userId, entryIds);
+        return entriesAsCSV.getFilePath();
     }
 
     // makes folder featured
