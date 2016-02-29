@@ -134,15 +134,9 @@ angular.module('ice.profile.controller', [])
         var profileId = $scope.userId = $stateParams.id;
 
         $scope.savePreference = function (pref) {
-            if (!$scope.preferences[pref.id]) {
-                pref.invalid = true;
-                return;
-            }
-
-            user.updatePreference({userId: profileId, value: $scope.preferences[pref.id]}, {preferenceKey: pref.id},
-                function (result) {
-                    pref.edit = false;
-                });
+            Util.post("rest/users/" + profileId + "/preferences/" + pref.id, {}, function (result) {
+                pref.edit = false;
+            }, {value: $scope.preferences[pref.id]});
         };
 
         var menuOptions = $scope.profileMenuOptions = [
