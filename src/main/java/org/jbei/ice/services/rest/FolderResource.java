@@ -190,8 +190,7 @@ public class FolderResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries")
-    public FolderDetails read(@Context final UriInfo uriInfo,
-                              @PathParam("id") final String folderId,
+    public FolderDetails read(@PathParam("id") final String folderId,
                               @DefaultValue("0") @QueryParam("offset") final int offset,
                               @DefaultValue("15") @QueryParam("limit") final int limit,
                               @DefaultValue("created") @QueryParam("sort") final String sort,
@@ -202,8 +201,9 @@ public class FolderResource extends RestResource {
                               @QueryParam("fields") List<String> queryParam) {
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
         if (folderId.equalsIgnoreCase("public")) {
+            RegistryPartner registryPartner = verifyWebPartner();
             // return public entries
-            log(uriInfo.getBaseUri().toString(), "requesting public entries");
+            log(registryPartner.getUrl(), "requesting public entries");
             return controller.getPublicEntries(field, offset, limit, asc);
         }
 
@@ -235,9 +235,6 @@ public class FolderResource extends RestResource {
         }
     }
 
-    /**
-     * @return Response with permissions on a collection
-     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
@@ -295,9 +292,6 @@ public class FolderResource extends RestResource {
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
-    /**
-     * @return Response for success or failure
-     */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions/public")
