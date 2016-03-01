@@ -402,7 +402,7 @@ angular.module('ice.admin.controller', [])
                 $scope.selectedUsers.splice(index, 1);
         };
     })
-    .controller('AdminManuscriptsController', function ($scope, $uibModal, $window, Util) {
+    .controller('AdminManuscriptsController', function ($scope, $uibModal, $window, $location, Util) {
         $scope.manuscriptsParams = {
             sort: 'creationTime',
             asc: false,
@@ -411,6 +411,9 @@ angular.module('ice.admin.controller', [])
             offset: 0,
             limit: 15
         };
+
+        // todo : not
+        $scope.baseUrl = $location.absUrl().replace($location.path(), '');
 
         $scope.getManuscripts = function () {
             Util.get("rest/manuscripts", function (result) {
@@ -436,6 +439,10 @@ angular.module('ice.admin.controller', [])
                 resolve: {
                     manuscript: function () {
                         return selectedManuscript;
+                    },
+
+                    baseUrl: function () {
+                        return $scope.baseUrl;
                     }
                 }
             });
@@ -479,14 +486,16 @@ angular.module('ice.admin.controller', [])
         };
     })
     .controller('CreateManuscriptController', function ($scope, $uibModalInstance, $cookieStore, $http, manuscript,
-                                                        Util) {
+                                                        baseUrl, Util) {
         $scope.submitButtonText = "Create";
+        $scope.modalHeaderTitle = "Add New Paper";
         $scope.invalidFolder = false;
 
         if (manuscript) {
             $scope.newManuscript = manuscript;
             $scope.submitButtonText = "Update";
-            $scope.newManuscript.selectedFolderName = $scope.newManuscript.folder.folderName;
+            $scope.modalHeaderTitle = "Update Paper";
+            $scope.newManuscript.selectedFolderName = baseUrl + '/folders/' + $scope.newManuscript.folder.id;
         } else
             $scope.newManuscript = {status: "UNDER_REVIEW"};
 
