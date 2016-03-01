@@ -83,19 +83,13 @@
                 <td style="vertical-align: middle; width: 130px" class="small">
                     {{manuscript.creationTime | date:'MMM d, yyyy hh:mm'}}
                 </td>
-                <td style="vertical-align: middle; width: 180px">
-                    <div ng-if="manuscript.deleteRequest">
-                        <i class="fa fa-question-circle dark-orange"></i>
-                        <i>Delete?</i> &nbsp;
-                        <button class="btn-default btn-xs btn" ng-click="manuscript.deleteRequest = false">No</button>
-                        <button class="btn-primary btn-xs btn" ng-click="deleteManuscript(manuscript)">Yes</button>
-                    </div>
-                    <div ng-if="!manuscript.deleteRequest">
+                <td style="vertical-align: middle; width: 100px">
+                    <div>
                         <i class="fa fa-pencil edit_icon font-14em" ng-click="openManuscriptAddRequest(manuscript)"
                            uib-tooltip="Edit"></i> &nbsp;
                         <i class="fa fa-cloud-download opacity_hover blue font-14em"
                            ng-click="downloadManuscriptFiles(manuscript)" uib-tooltip="Export"></i> &nbsp;
-                        <i class="fa fa-trash-o delete_icon font-14em" ng-click="manuscript.deleteRequest = true"
+                        <i class="fa fa-trash-o delete_icon font-14em" ng-click="confirmManuscriptDelete(manuscript)"
                            uib-tooltip="Delete"></i>
                     </div>
                 </td>
