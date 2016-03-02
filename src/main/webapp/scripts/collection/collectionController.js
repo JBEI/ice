@@ -546,7 +546,7 @@ angular.module('ice.collection.controller', [])
 
         $scope.changeFolderType = function (newType) {
             var tmp = {id: $scope.folder.id, type: newType};
-            Util.update('rest/folders/' + $scope.folder.id, tmp, function (result) {
+            Util.update('rest/folders/' + $scope.folder.id, tmp, {}, function (result) {
                 $scope.folder.type = result.type;
                 if (newType === 'PUBLIC')
                     $location.path('folders/available');
