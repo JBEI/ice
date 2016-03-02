@@ -184,7 +184,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
                 $window.open("rest/file/tmp/" + result.value, "_self");
                 Selection.reset();
             }
-        }, {addSequences: includeSequences});
+        }, {sequenceFormats: ["genbank"]});
     };
 
     $rootScope.$on("CollectionSelected", function (event, data) {

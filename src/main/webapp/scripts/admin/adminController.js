@@ -470,9 +470,12 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.downloadManuscriptFiles = function (manuscript) {
+            manuscript.downloading = true;
             Util.get("rest/manuscripts/" + manuscript.id + "/files/zip", function (result) {
-                if (result && result.value) {
-                    $window.open("rest/file/tmp/" + result.value, "_self");
+                manuscript.downloading = false;
+                if (result && result.zipFileName) {
+                    $window.open("rest/file/tmp/" + result.zipFileName + "?filename=" + manuscript.authorFirstName + "_"
+                        + manuscript.authorLastName + "_collection.zip", "_self");
                 }
             })
         };

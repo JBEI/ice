@@ -6,15 +6,14 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
+import org.jbei.ice.lib.entry.EntriesAsCSV;
 import org.jbei.ice.lib.folder.FolderController;
-import org.jbei.ice.lib.utils.EntriesAsCSV;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.FolderDAO;
 import org.jbei.ice.storage.hibernate.dao.ManuscriptModelDAO;
 import org.jbei.ice.storage.model.Folder;
 import org.jbei.ice.storage.model.ManuscriptModel;
 
-import java.nio.file.Path;
 import java.util.Date;
 import java.util.List;
 
@@ -106,19 +105,18 @@ public class Manuscripts {
         return dao.update(model).toDataTransferObject();
     }
 
-    public Path generateZip(long id) {
+    public Manuscript generateZip(long id) {
         ManuscriptModel model = dao.get(id);
         if (model == null)
             return null;
 
         // get folder
         List<Long> entryIds = this.folderDAO.getFolderContentIds(model.getFolder().getId(), null, true);
-        String prefix = model.getAuthorFirstName() + "_" + model.getAuthorLastName();
-        String fileName = prefix + "_collection.zip";
-
-        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(true, fileName);
+        EntriesAsCSV entriesAsCSV = new EntriesAsCSV("GENBANK", "SBOL");
         entriesAsCSV.setEntries(this.userId, entryIds);
-        return entriesAsCSV.getFilePath();
+        Manuscript manuscript = model.toDataTransferObject();
+        manuscript.setZipFileName(entriesAsCSV.getFilePath().getFileName().toString());
+        return manuscript;
     }
 
     // makes folder featured

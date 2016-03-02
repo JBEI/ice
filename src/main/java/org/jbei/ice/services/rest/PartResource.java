@@ -360,7 +360,6 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/shotgunsequences")
     public ArrayList<ShotgunSequenceDTO> getShotgunSequences(
-            @Context final UriInfo info,
             @PathParam("id") final long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
             @QueryParam("sid") final String sid) {

@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.bulkupload;
 
-import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryField;
 
 /**
  * @author Hector Plahar

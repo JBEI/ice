@@ -2,7 +2,6 @@ package org.jbei.ice.lib.entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.utils.Utils;

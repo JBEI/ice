@@ -14,6 +14,7 @@ import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
+import org.jbei.ice.lib.entry.EntriesAsCSV;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
@@ -21,7 +22,6 @@ import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.net.RemoteEntries;
-import org.jbei.ice.lib.utils.EntriesAsCSV;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
@@ -36,6 +36,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -65,8 +66,7 @@ public class FileResource extends RestResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
     public Response post(@FormDataParam("file") InputStream fileInputStream,
-                         @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
-                         @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                         @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
         try {
             final String fileName = contentDispositionHeader.getFileName();
             final String fileId = Utils.generateUUID();
@@ -107,14 +107,16 @@ public class FileResource extends RestResource {
         if (tmpFile == null || !tmpFile.exists()) {
             return super.respond(Response.Status.NOT_FOUND);
         }
-        return addHeaders(Response.ok(tmpFile), tmpFile.getName());
+        if (StringUtils.isEmpty(fileName))
+            fileName = tmpFile.getName();
+
+        return addHeaders(Response.ok(tmpFile), fileName);
     }
 
     @GET
     @Path("attachment/{fileId}")
     public Response getAttachment(@PathParam("fileId") String fileId,
-                                  @QueryParam("sid") String sid,
-                                  @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                                  @QueryParam("sid") String sid) {
         if (StringUtils.isEmpty(sessionId))
             sessionId = sid;
 
@@ -132,8 +134,7 @@ public class FileResource extends RestResource {
     @Path("remote/{id}/attachment/{fileId}")
     public Response getRemoteAttachment(@PathParam("id") long partnerId,
                                         @PathParam("fileId") String fileId,
-                                        @QueryParam("sid") String sid,
-                                        @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                                        @QueryParam("sid") String sid) {
         String userId = getUserId(sessionId);
         RemoteEntries entries = new RemoteEntries();
         File file = entries.getPublicAttachment(userId, partnerId, fileId);
@@ -178,8 +179,7 @@ public class FileResource extends RestResource {
     public Response downloadSequence(
             @PathParam("partId") final long partId,
             @PathParam("type") final String downloadType,
-            @QueryParam("sid") String sid,
-            @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+            @QueryParam("sid") String sid) {
         if (StringUtils.isEmpty(sessionId))
             sessionId = sid;
 
@@ -201,8 +201,7 @@ public class FileResource extends RestResource {
     @GET
     @Path("trace/{fileId}")
     public Response getTraceSequenceFile(@PathParam("fileId") String fileId,
-                                         @QueryParam("sid") String sid,
-                                         @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                                         @QueryParam("sid") String sid) {
         final SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
         final TraceSequence traceSequence = sequenceAnalysisController.getTraceSequenceByFileId(fileId);
         if (traceSequence != null) {
@@ -215,8 +214,7 @@ public class FileResource extends RestResource {
     @GET
     @Path("shotgunsequence/{fileId}")
     public Response getShotgunSequenceFile(@PathParam("fileId") String fileId,
-                                           @QueryParam("sid") String sid,
-                                           @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                                           @QueryParam("sid") String sid) {
         ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
 
         try {
@@ -231,8 +229,7 @@ public class FileResource extends RestResource {
     @GET
     @Produces("image/png")
     @Path("sbolVisual/{rid}")
-    public Response getSBOLVisual(@PathParam("rid") String recordId,
-                                  @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+    public Response getSBOLVisual(@PathParam("rid") String recordId) {
         final String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         final Entry entry = DAOFactory.getEntryDAO().getByRecordId(recordId);
         final Sequence sequence = entry.getSequence();
@@ -268,8 +265,7 @@ public class FileResource extends RestResource {
     public Response uploadSequence(@FormDataParam("file") InputStream fileInputStream,
                                    @FormDataParam("entryRecordId") String recordId,
                                    @FormDataParam("entryType") String entryType,
-                                   @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
-                                   @HeaderParam("X-ICE-Authentication-SessionId") String sessionId) {
+                                   @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
         try {
             if (entryType == null) {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -299,10 +295,10 @@ public class FileResource extends RestResource {
     @Path("csv")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response downloadCSV(@QueryParam("addSequences") boolean includeSequences,
+    public Response downloadCSV(@QueryParam("sequenceFormats") final List<String> sequenceFormats,
                                 EntrySelection selection) {
-        String userId = super.getUserId();
-        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(includeSequences, null, "genbank");
+        String userId = super.requireUserId();
+        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(sequenceFormats.toArray(new String[sequenceFormats.size()]));
         boolean success = entriesAsCSV.setSelectedEntries(userId, selection);
         if (!success)
             return super.respond(false);

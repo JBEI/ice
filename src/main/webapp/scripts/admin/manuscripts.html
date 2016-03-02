@@ -90,12 +90,19 @@
                        ng-mouseleave="manuscript.open=false"><i class="fa fa-fw font-14em dark_blue"
                                                                 ng-class="{'fa-folder': !manuscript.open, 'fa-folder-open':manuscript.open}"></i></a>
                 </td>
-                <td style="vertical-align: middle; width: 100px">
+                <td style="vertical-align: middle; width: 200px">
                     <div>
                         <i class="fa fa-pencil edit_icon font-14em" ng-click="openManuscriptAddRequest(manuscript)"
                            uib-tooltip="Edit"></i> &nbsp;
-                        <i class="fa fa-cloud-download opacity_hover blue font-14em"
-                           ng-click="downloadManuscriptFiles(manuscript)" uib-tooltip="Export"></i> &nbsp;
+                        <i class="fa fa-cloud-download opacity_hover blue font-14em" ng-show="!manuscript.downloading"
+                           ng-click="downloadManuscriptFiles(manuscript)" uib-tooltip="Export"></i>
+
+                        <span class="fa-stack fa-lg font-95em" ng-show="manuscript.downloading">
+                            <i class="fa fa-cloud-download fa-stack-1x opacity_hover blue"></i>
+                            <i class="fa fa-spinner fa-pulse fa-stack-2x" style="color: #c1c1c1"></i>
+                        </span>
+
+                        &nbsp;
                         <i class="fa fa-trash-o delete_icon font-14em" ng-click="confirmManuscriptDelete(manuscript)"
                            uib-tooltip="Delete"></i>
                     </div>
