@@ -2,7 +2,7 @@
 
 angular.module('ice.admin.controller', [])
     .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, $cookieStore, Settings,
-                                             AdminSettings) {
+                                             AdminSettings, Util) {
 
         // retrieve general setting
         $scope.getSetting = function () {
@@ -118,12 +118,12 @@ angular.module('ice.admin.controller', [])
         var setting = Settings($cookieStore.get("sessionId"));
 
         $scope.rebuildBlastIndex = function () {
-            setting.rebuildBlast({}, function () {
+            Util.update("rest/search/indexes/blast", {}, {}, function (result) {
             });
         };
 
         $scope.rebuildLuceneIndex = function () {
-            setting.rebuildLucene({}, function () {
+            Util.update("rest/search/indexes/lucene", {}, {}, function (result) {
             });
         };
 

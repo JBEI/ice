@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.AutoCompleteFieldValues;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.search.IndexType;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.search.SearchController;
@@ -102,5 +103,23 @@ public class SearchResource extends RestResource {
         final List<EntryType> types = Arrays.asList(EntryType.values());
         query.setEntryTypes(types);
         return super.respond(controller.runSearch(userId, query, searchWeb));
+    }
+
+    @PUT
+    @Path("/indexes/lucene")
+    public Response updateLuceneIndex() {
+        final String userId = requireUserId();
+        SearchController searchController = new SearchController();
+        final boolean success = searchController.rebuildIndexes(userId, IndexType.LUCENE);
+        return super.respond(success);
+    }
+
+    @PUT
+    @Path("/indexes/blast")
+    public Response updateBlastIndex() {
+        final String userId = requireUserId();
+        SearchController searchController = new SearchController();
+        final boolean success = searchController.rebuildIndexes(userId, IndexType.BLAST);
+        return super.respond(success);
     }
 }
