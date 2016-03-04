@@ -22,19 +22,6 @@ angular.module('ice.wor.service', [])
                     headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
                 },
 
-                removePartner: {
-                    method: 'DELETE',
-                    url: 'rest/web/partner/:url',
-                    headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
-                },
-
-                updatePartner: {
-                    method: 'PUT',
-                    url: 'rest/web/partner/:url',
-                    responseType: 'json',
-                    headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
-                },
-
                 getPublicEntries: {
                     method: 'GET',
                     url: 'rest/web/:partnerId/entries',

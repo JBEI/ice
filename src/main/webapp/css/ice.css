@@ -609,6 +609,10 @@ a:hover {
     opacity: 0.4;
 }
 
+.opacity_3 {
+    opacity: 0.3;
+}
+
 .opacity_normal {
     opacity: 1;
 }

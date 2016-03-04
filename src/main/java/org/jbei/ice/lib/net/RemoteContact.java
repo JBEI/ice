@@ -44,13 +44,16 @@ public class RemoteContact {
 
     // exchange api key with remote partner
     // send to remote in order to trigger an api exchange. Note that the remote partner will
-    // request validation of the api key at GET /rest/accesstokens/web
     public RegistryPartner contactPotentialPartner(RegistryPartner thisPartner, String remotePartnerUrl) {
         AccessTokens.setToken(remotePartnerUrl, thisPartner.getApiKey());
         RegistryPartner newPartner = restClient.post(remotePartnerUrl, "/rest/partners",
                 thisPartner, RegistryPartner.class, null);
         AccessTokens.removeToken(remotePartnerUrl);
         return newPartner;
+    }
+
+    public RegistryPartner refreshPartnerKey(RegistryPartner partner, String url, String worToken) {
+        return restClient.putWor(url, "rest/partners", partner, RegistryPartner.class, null, worToken);
     }
 
     /**

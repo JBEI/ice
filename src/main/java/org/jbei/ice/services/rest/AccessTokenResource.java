@@ -73,11 +73,9 @@ public class AccessTokenResource extends RestResource {
      */
     @GET
     @Path("/web")
-    public Response getWebPartner(@HeaderParam(WOR_PARTNER_TOKEN) String token,
-                                  @QueryParam("url") String url) {
-        Logger.info("validati");
+    public Response getWebPartner(@QueryParam("url") String url) {
         WebPartners partners = new WebPartners();
-        RegistryPartner partner = partners.get(token, url);
+        RegistryPartner partner = partners.get(worPartnerToken, url);
         return super.respond(partner);
     }
 }

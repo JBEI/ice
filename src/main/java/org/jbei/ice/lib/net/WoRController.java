@@ -86,8 +86,7 @@ public class WoRController {
         if (existing == null)
             return false;
 
-        RemotePartnerStatus newStatus = RemotePartnerStatus.valueOf(partner.getStatus());
-        if (newStatus == existing.getPartnerStatus())
+        if (partner.getStatus() == existing.getPartnerStatus())
             return true;
 
         // contact remote with new api key that allows them to contact this instance
@@ -103,7 +102,7 @@ public class WoRController {
         IceRestClient client = IceRestClient.getInstance();
         try {
             client.post(partner.getUrl(), "/rest/web/partner/remote", thisPartner, RegistryPartner.class, null);
-            existing.setPartnerStatus(newStatus);
+            existing.setPartnerStatus(partner.getStatus());
             existing.setAuthenticationToken(apiKey);
             dao.update(existing);
             return true;

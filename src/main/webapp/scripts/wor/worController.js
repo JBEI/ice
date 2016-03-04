@@ -310,26 +310,31 @@ angular.module('ice.wor.controller', [])
             });
         };
 
-        //
+        // update the keys
+        $scope.refreshPartner = function (partner) {
+            partner.refreshing = true;
+            Util.update("rest/partners/" + partner.id + "/apiKey", {}, {}, function (result) {
+
+            })
+        };
+
         // remove web of registries partner
-        //
         $scope.removePartner = function (partner, index) {
-            wor.removePartner({url: partner.url}, function (result) {
+            Util.remove("rest/partners/" + partner.id, {}, function (result) {
                 $scope.wor.partners.splice(index, 1);
             });
         };
 
-        //
         // set the status of a partner
-        //
         $scope.setPartnerStatus = function (partner, newStatus) {
-            partner.status = newStatus;
-            wor.updatePartner({url: partner.url}, partner, function (result) {
+            if (partner.status == newStatus)
+                return;
+
+            Util.update("rest/partners/" + partner.id, {status: newStatus}, {}, function (result) {
+                partner = result;
             });
         };
 
-        //
-        //
         //
         $scope.selectPartner = function (partner) {
             $location.path("web/" + partner.id);
