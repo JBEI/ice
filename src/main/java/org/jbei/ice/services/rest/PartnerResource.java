@@ -101,9 +101,16 @@ public class PartnerResource extends RestResource {
 
     @DELETE
     @Path("/{id}")
-    public Response removeWebPartner(@PathParam("id") long partnerId) {
-        String userId = requireUserId();
-        WebPartners partners = new WebPartners();
-        return super.respond(partners.remove(userId, partnerId));
+    public Response removeWebPartner(@PathParam("id") String partnerId) {
+        try {
+            long id = Long.decode(partnerId);
+            String userId = requireUserId();
+            WebPartners partners = new WebPartners();
+            return super.respond(partners.remove(userId, id));
+        } catch (NumberFormatException nfe) {
+            RegistryPartner registryPartner = verifyWebPartner();
+            WebPartners partners = new WebPartners();
+            return super.respond(partners.removeRemotePartner(registryPartner.getId(), partnerId));
+        }
     }
 }

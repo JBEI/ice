@@ -181,4 +181,13 @@ public class RemoteContact {
             return null;
         }
     }
+
+    /**
+     * Deletes this instance of ICE from the web of registries master list
+     *
+     * @return true, if the master reports correct execution of the request. false otherwise
+     */
+    public boolean deleteInstanceFromMaster(String url, String apiKey, String thisUrl) {
+        return restClient.delete(apiKey, url, "rest/partners/" + thisUrl);
+    }
 }
