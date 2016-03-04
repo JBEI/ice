@@ -62,11 +62,6 @@ public class WebPartnersTest {
     }
 
     @Test
-    public void testGet() throws Exception {
-
-    }
-
-    @Test
     public void testAddNewPartner() throws Exception {
         Account admin = AccountCreator.createTestAccount("WebPartnersTest.testAddNewPartner", true);
         String adminUser = admin.getEmail();
@@ -100,13 +95,6 @@ public class WebPartnersTest {
         RegistryPartner partner2 = webPartners.updateAPIKey(adminUser, added.getId());
         Assert.assertNotNull(partner2);
     }
-//
-//    @Test
-//    public void testUpdate() throws Exception {
-//        Account admin = AccountCreator.createTestAccount("WebPartnersTest.testUpdate", true);
-//        String adminUser = admin.getEmail();
-//
-//    }
 
     private RemoteContact createRemoteContact() {
         return new RemoteContact() {
