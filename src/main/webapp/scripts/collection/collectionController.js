@@ -2,8 +2,8 @@
 
 angular.module('ice.collection.controller', [])
     // controller for <ice.menu.collections> directive
-    .controller('CollectionMenuController', function ($cookieStore, $scope, $uibModal, $rootScope, $location, $stateParams,
-                                                      Folders, FolderSelection, EntryContextUtil, Util) {
+    .controller('CollectionMenuController', function ($cookieStore, $scope, $uibModal, $rootScope, $location,
+                                                      $stateParams, Folders, FolderSelection, EntryContextUtil, Util) {
         var folders = Folders();
 
         // retrieve (to refresh the information such as part counts) all the sub folders under
