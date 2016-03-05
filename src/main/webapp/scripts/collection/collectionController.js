@@ -3,7 +3,8 @@
 angular.module('ice.collection.controller', [])
     // controller for <ice.menu.collections> directive
     .controller('CollectionMenuController', function ($cookieStore, $scope, $uibModal, $rootScope, $location,
-                                                      $stateParams, Folders, FolderSelection, EntryContextUtil, Util) {
+                                                      $stateParams, Folders, FolderSelection, EntryContextUtil, Util,
+                                                      localStorageService) {
         var folders = Folders();
 
         // retrieve (to refresh the information such as part counts) all the sub folders under
@@ -16,6 +17,28 @@ angular.module('ice.collection.controller', [])
             Util.list("rest/collections/" + folder.toUpperCase() + "/folders", function (result) {
                 $scope.selectedCollectionFolders = result;
             });
+        };
+
+        $scope.sortParams = localStorageService.get('collectionFolderSortParams');
+        if (!$scope.sortParams) {
+            $scope.sortParams = {field: 'creationTime', asc: true};
+            console.log("setting defaults")
+        }
+
+        $scope.sortCollectionFolders = function () {
+            if ($scope.sortParams.field == 'creationTime') {
+                if (!$scope.sortParams.asc) {
+                    $scope.sortParams.field = 'folderName';
+                }
+                $scope.sortParams.asc = false;
+            } else {
+                // sort by name
+                if ($scope.sortParams.asc) {
+                    $scope.sortParams.field = 'creationTime';
+                }
+                $scope.sortParams.asc = true;
+            }
+            localStorageService.set('collectionFolderSortParams', $scope.sortParams);
         };
 
         //

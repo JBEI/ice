@@ -304,6 +304,8 @@ public class FolderController {
             long folderSize = dao.getFolderSize(folder.getId(), null, true);
             details.setCount(folderSize);
             details.setType(folder.getType());
+            if (folder.getCreationTime() != null)
+                details.setCreationTime(folder.getCreationTime().getTime());
             details.setCanEdit(true);
             folderDetails.add(details);
         }
@@ -331,6 +333,8 @@ public class FolderController {
             details.setType(folder.getType());
             long folderSize = dao.getFolderSize(folder.getId(), null, true);
             details.setCount(folderSize);
+            if (folder.getCreationTime() != null)
+                details.setCreationTime(folder.getCreationTime().getTime());
             folderDetails.add(details);
         }
 
@@ -348,6 +352,8 @@ public class FolderController {
             FolderDetails details = folder.toDataTransferObject();
             long folderSize = dao.getFolderSize(folder.getId(), null, false);
             details.setCount(folderSize);
+            if (folder.getCreationTime() != null)
+                details.setCreationTime(folder.getCreationTime().getTime());
             folderDetails.add(details);
         }
 
