@@ -213,6 +213,7 @@ angular.module('ice.collection.controller', [])
             $scope.newPermission.article = type.toUpperCase();
             $scope.newPermission.articleId = undefined;
             $scope.newPermission.partner = undefined;
+            $scope.userFilterInput = undefined;
 
             switch (type.toLowerCase()) {
                 case "account":
@@ -237,6 +238,21 @@ angular.module('ice.collection.controller', [])
             folders.update({folderId: folder.id}, folder, function (result) {
 
             })
+        };
+
+        $scope.disablePermissionAdd = function () {
+            if (!$scope.newPermission.article)
+                return true;
+
+            switch ($scope.newPermission.article.toLowerCase()) {
+                case "account":
+                case "group":
+                    return $scope.newPermission.articleId == undefined;
+
+                case "remote":
+                    return $scope.userFilterInput == undefined || $scope.newPermission.partner == undefined;
+            }
+            return true;
         };
 
         $scope.userSelectionForPermissionAdd = function (item, model, label) {
