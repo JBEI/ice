@@ -5,9 +5,12 @@ import org.jbei.ice.lib.access.AccessTokens;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.access.AccessPermission;
+import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntrySelection;
@@ -141,6 +144,15 @@ public class RemoteContact {
         }
     }
 
+    public FolderDetails getFolderEntries(String url, String resourcePath, Map<String, Object> queryParams, String apiKey) {
+        return restClient.getWor(url, resourcePath, FolderDetails.class, queryParams, apiKey);
+    }
+
+    public List<AttachmentInfo> getAttachmentList(String url, long entryId, String apiKey) {
+        String path = "rest/parts/" + entryId + "/attachments";
+        return restClient.getWor(url, path, ArrayList.class, null, apiKey);
+    }
+
     public void addTransferredEntriesToFolder(String url, String userId, EntrySelection entrySelection, long folderId,
                                               String token, String worToken) {
         try {
@@ -168,6 +180,21 @@ public class RemoteContact {
         }
     }
 
+    public PartData getPublicTooltipDetails(String url, long partId, String apiKey) {
+        String path = "rest/parts/" + partId + "/tooltip";
+        return restClient.getWor(url, path, PartData.class, null, apiKey);
+    }
+
+    public PartStatistics getPublicEntryStatistics(String url, long partId, String apiKey) {
+        String path = "/rest/parts/" + partId + "/statistics";
+        return restClient.getWor(url, path, PartStatistics.class, null, apiKey);
+    }
+
+    public FeaturedDNASequence getPublicEntrySequence(String url, long partId, String apiKey) {
+        String path = "/rest/parts/" + partId + "/sequence";
+        return restClient.getWor(url, path, FeaturedDNASequence.class, null, apiKey);
+    }
+
     public PartData getRemoteEntry(String url, String userId, long partId, long folderId, String token, String worToken) {
         try {
             String encodedToken = URLEncoder.encode(token, "UTF-8");
@@ -180,6 +207,10 @@ public class RemoteContact {
             Logger.error(e);
             return null;
         }
+    }
+
+    public PartData getPublicEntry(String url, long entryId, String apiKey) {
+        return restClient.getWor(url, "rest/parts/" + entryId, PartData.class, null, apiKey);
     }
 
     /**
