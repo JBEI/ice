@@ -4,8 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.entry.EntryAuthorization;
+import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.ExperimentDAO;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Experiment;
@@ -19,16 +19,14 @@ import java.util.List;
  *
  * @author Hector Plahar
  */
-public class Experiments {
+public class Experiments extends HasEntry {
 
     private final ExperimentDAO dao;
-    private final EntryDAO entryDAO;
     private final EntryAuthorization entryAuthorization;
 
     public Experiments() {
         dao = DAOFactory.getExperimentDAO();
         entryAuthorization = new EntryAuthorization();
-        entryDAO = DAOFactory.getEntryDAO();
     }
 
     /**
@@ -41,14 +39,14 @@ public class Experiments {
      * @throws PermissionException if the specified user does not have read privileges on the
      *                             specified entry
      */
-    public ArrayList<Study> getPartStudies(String userId, long partId) {
-        Entry entry = entryDAO.get(partId);
+    public ArrayList<Study> getPartStudies(String userId, String partId) {
+        Entry entry = getEntry(partId);
         if (entry == null)
             return null;
 
         entryAuthorization.expectRead(userId, entry);
 
-        List<Experiment> experimentList = dao.getExperimentList(partId);
+        List<Experiment> experimentList = dao.getExperimentList(entry.getId());
         if (experimentList == null)
             return null;
 
@@ -69,8 +67,8 @@ public class Experiments {
      * @param study  data for study
      * @return saved study (including unique identifier)
      */
-    public Study createOrUpdateStudy(String userId, long partId, Study study) {
-        Entry entry = entryDAO.get(partId);
+    public Study createOrUpdateStudy(String userId, String partId, Study study) {
+        Entry entry = getEntry(partId);
         if (entry == null)
             return null;
 
@@ -114,12 +112,12 @@ public class Experiments {
      * @param studyId id of study to be deleted
      * @return true if study is found and deleted successfully, false otherwise
      */
-    public boolean deleteStudy(String userId, long partId, long studyId) {
+    public boolean deleteStudy(String userId, String partId, long studyId) {
         Experiment experiment = dao.get(studyId);
         if (experiment == null)
             return false;
 
-        Entry entry = entryDAO.get(partId);
+        Entry entry = getEntry(partId);
         if (entry == null) {
             Logger.error("Could not retrieve entry with id " + partId);
             return false;
