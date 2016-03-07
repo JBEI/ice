@@ -193,11 +193,18 @@ angular.module('ice.collection.controller', [])
 
         $scope.setPermission = function (isWrite) {
             if (isWrite) {
+                // write is clicked
+                if (!$scope.newPermission.canRead)
+                    return;
+
                 $scope.newPermission.canWrite = !$scope.newPermission.canWrite;
                 if ($scope.newPermission.canWrite) {
                     $scope.newPermission.canRead = false;
                 }
             } else {
+                if (!$scope.newPermission.canWrite)
+                    return;
+
                 $scope.newPermission.canRead = !$scope.newPermission.canRead;
                 if ($scope.newPermission.canRead) {
                     $scope.newPermission.canWrite = false;
