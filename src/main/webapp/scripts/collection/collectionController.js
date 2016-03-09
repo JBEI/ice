@@ -254,10 +254,10 @@ angular.module('ice.collection.controller', [])
             switch ($scope.newPermission.article.toLowerCase()) {
                 case "account":
                 case "group":
-                    return $scope.newPermission.articleId == undefined;
+                    return !$scope.newPermission.articleId;
 
                 case "remote":
-                    return $scope.userFilterInput == undefined || $scope.newPermission.partner == undefined;
+                    return !$scope.userFilterInput || !$scope.newPermission.partner;
             }
             return true;
         };
@@ -279,6 +279,8 @@ angular.module('ice.collection.controller', [])
             });
         };
 
+        // converts the permission object to a form the backend expects and
+        // adds a new access privilege for the current folder
         $scope.addNewPermission = function () {
             if ($scope.newPermission.canWrite) {
                 $scope.newPermission.type = 'WRITE_FOLDER';

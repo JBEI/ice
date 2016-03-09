@@ -5,6 +5,9 @@ import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.storage.IDataTransferModel;
 
+/**
+ * Data transfer object for permissions
+ */
 public class AccessPermission implements IDataTransferModel {
 
     private long id;

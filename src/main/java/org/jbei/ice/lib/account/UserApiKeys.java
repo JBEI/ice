@@ -29,7 +29,7 @@ public class UserApiKeys {
         TokenHash hash = new TokenHash();
         String token = hash.generateRandomToken(32);
         String salt = hash.generateSalt();
-        String hash_token = hash.encryptPassword(token, clientId + salt + clientId);
+        String hash_token = hash.encrypt(token, clientId + salt + clientId);
 
         ApiKey apiKey = new ApiKey();
         apiKey.setCreationTime(new Date());

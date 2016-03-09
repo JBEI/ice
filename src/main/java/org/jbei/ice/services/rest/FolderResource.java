@@ -1,6 +1,7 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.access.AccessPermission;
@@ -235,11 +236,18 @@ public class FolderResource extends RestResource {
         }
     }
 
+    /**
+     * Retrieves list of permissions available for the specified folder. This action
+     * is restricted to users who have write privileges on the folder
+     *
+     * @param folderId unique local folder identifier
+     * @return list of permissions for folder
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
     public Response getFolderPermissions(@PathParam("id") final long folderId) {
-        final String userId = getUserId();
+        final String userId = requireUserId();
         FolderPermissions folderPermissions = new FolderPermissions(folderId);
         return respond(folderPermissions.get(userId));
     }
@@ -257,17 +265,27 @@ public class FolderResource extends RestResource {
     }
 
     /**
-     * @return the added permission
+     * Add new permission to list of permissions for specified folder
+     *
+     * @param folderId   unique local folder identifier
+     * @param permission details about access privilege for folder
+     * @return details about access privilege for folder with a local unique identifier
+     * which can be used to remove the privilege
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
-    public Response addPermission(@Context final UriInfo info,
-                                  @PathParam("id") final long folderId,
+    public Response addPermission(@PathParam("id") final long folderId,
                                   final AccessPermission permission) {
-        final String userId = requireUserId();
-        FolderPermissions folderPermissions = new FolderPermissions(folderId);
-        return super.respond(folderPermissions.createPermission(userId, permission));
+        try {
+            final String userId = requireUserId();
+            FolderPermissions folderPermissions = new FolderPermissions(folderId);
+            return super.respond(folderPermissions.createPermission(userId, permission));
+        } catch (PermissionException pe) {
+            return super.respond(Response.Status.FORBIDDEN);
+        } catch (IllegalArgumentException ile) {
+            return respond(Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DELETE

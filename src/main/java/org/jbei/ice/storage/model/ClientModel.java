@@ -4,10 +4,19 @@ import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.IDataTransferModel;
 
 import javax.persistence.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
- * Model of a client that could exist locally or remotely and could be a member of a group
- * The client is considered local if it links to a
+ * Abstract notion of a client. Represents an account that could exist remotely and could be a member of a group.
+ * Whereas users are required to identify and the remote users, only a single instance is kepy
+ * <p>Fields:</p>
+ * <ul>
+ * <li><code><b>email</b></code>: Unique account identifier. Can conflict with a local account email</li>
+ * <li><code><b>remotePartner</b></code>: Remote partner where the account resides. Must be in a web of registries
+ * configuration with this ICE instance (api key exchanged etc)</li>
+ * <li><code><b>groups</b></code>: Optional list of local groups if this client belongs to any local group</li>
+ * </ul>
  *
  * @author Hector Plahar
  */
@@ -27,9 +36,10 @@ public class ClientModel implements DataModel {
     @JoinColumn(name = "remote_partner_id", nullable = true)
     private RemotePartner remotePartner;
 
-    @OneToOne
-    @JoinColumn(name = "group_id", nullable = true)
-    private Group group;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "client_group", joinColumns = @JoinColumn(name = "account_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id"))
+    private Set<Group> groups = new LinkedHashSet<>();
 
     @Override
     public long getId() {
@@ -52,16 +62,12 @@ public class ClientModel implements DataModel {
         this.remotePartner = remotePartner;
     }
 
-    public Group getGroup() {
-        return group;
-    }
-
-    public void setGroup(Group group) {
-        this.group = group;
+    public Set<Group> getGroups() {
+        return groups;
     }
 
     @Override
     public IDataTransferModel toDataTransferObject() {
         return null;
-    }
+    }       // todo
 }

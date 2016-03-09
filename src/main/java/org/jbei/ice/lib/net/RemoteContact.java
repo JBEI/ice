@@ -90,7 +90,7 @@ public class RemoteContact {
         if (partner == null)
             return false;
 
-        if (!partner.getAuthenticationToken().equals(tokenHash.encryptPassword(worToken, partner.getSalt()))) {
+        if (!partner.getAuthenticationToken().equals(tokenHash.encrypt(worToken, partner.getSalt()))) {
             Logger.error("Attempt to remove remote partner " + url + " with invalid worToken " + worToken);
             return false;
         }

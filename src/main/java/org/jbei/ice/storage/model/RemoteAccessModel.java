@@ -30,8 +30,11 @@ public class RemoteAccessModel implements DataModel {
     @JoinColumn(name = "permission_id", nullable = true)
     private Permission permission;
 
+    /**
+     * unique identifier for what is being shared. currently the folder id
+     */
     @Column(name = "identifier")
-    private String identifier;     // unique identifier for what is being shared
+    private String identifier;
 
     @Override
     public long getId() {

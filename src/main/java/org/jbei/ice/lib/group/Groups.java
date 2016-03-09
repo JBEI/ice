@@ -116,7 +116,7 @@ public class Groups {
 
             ClientModel clientModel = new ClientModel();
             clientModel.setEmail(accountTransfer.getEmail());
-            clientModel.setGroup(group);
+            clientModel.getGroups().add(group);
             clientModel.setRemotePartner(remotePartner);
             DAOFactory.getClientModelDAO().create(clientModel); // todo : check and retrieve first
         }

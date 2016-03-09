@@ -376,7 +376,7 @@ public class EntryController {
 
         // validate access token
         TokenHash tokenHash = new TokenHash();
-        String secret = tokenHash.encryptPassword(remotePartner.getUrl() + remoteUserId, token);
+        String secret = tokenHash.encrypt(remotePartner.getUrl() + remoteUserId, token);
         if (!secret.equals(shareModel.getSecret())) {
             throw new PermissionException("Secret does not match");
         }

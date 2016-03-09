@@ -168,7 +168,7 @@ public class WebPartners {
 
         // contact succeeded with return of api key, generate new salt
         partner.setSalt(tokenHash.generateSalt());
-        String hash = tokenHash.encryptPassword(thisPartner.getApiKey() + remotePartner.getUrl(), partner.getSalt());
+        String hash = tokenHash.encrypt(thisPartner.getApiKey() + remotePartner.getUrl(), partner.getSalt());
         partner.setAuthenticationToken(hash);
         partner.setApiKey(remotePartner.getApiKey()); // todo : check api key (validate?)
         partner = dao.update(partner);
@@ -198,7 +198,7 @@ public class WebPartners {
         remotePartnerModel.setApiKey(remotePartner.getApiKey()); // todo : no need to validate since url is authenticated
         String salt = tokenHash.generateSalt();
         remotePartnerModel.setSalt(salt);
-        String hash = tokenHash.encryptPassword(thisInstance.getApiKey() + remotePartner.getUrl(), salt);
+        String hash = tokenHash.encrypt(thisInstance.getApiKey() + remotePartner.getUrl(), salt);
         remotePartnerModel.setAuthenticationToken(hash);
         dao.update(remotePartnerModel);
 
@@ -323,7 +323,7 @@ public class WebPartners {
             // validated. update the authorization token
             partner.setApiKey(request.getApiKey());
             partner.setSalt(tokenHash.generateSalt());
-            partner.setAuthenticationToken(tokenHash.encryptPassword(thisInstance.getApiKey() +
+            partner.setAuthenticationToken(tokenHash.encrypt(thisInstance.getApiKey() +
                     request.getUrl(), partner.getSalt()));
             dao.update(partner);
         } else {
@@ -368,7 +368,7 @@ public class WebPartners {
         remotePartner.setPartnerStatus(newPartner.getStatus());
         if (newPartner.getStatus() == RemotePartnerStatus.APPROVED) {
             remotePartner.setSalt(tokenHash.generateSalt());
-            String hash = tokenHash.encryptPassword(token + newPartner.getUrl(), remotePartner.getSalt());
+            String hash = tokenHash.encrypt(token + newPartner.getUrl(), remotePartner.getSalt());
             remotePartner.setAuthenticationToken(hash);
             remotePartner.setApiKey(newPartner.getApiKey());
         }

@@ -29,7 +29,7 @@ public class TokenVerification {
         if (key == null)
             throw new PermissionException("Invalid client Id " + clientId);
 
-        String hash_token = tokenHash.encryptPassword(token, clientId + key.getSecret() + clientId);
+        String hash_token = tokenHash.encrypt(token, clientId + key.getSecret() + clientId);
         if (!hash_token.equalsIgnoreCase(key.getHashedToken()))
             throw new PermissionException("Invalid token");
 
@@ -49,7 +49,7 @@ public class TokenVerification {
         if (remotePartner == null)
             return null;
 
-        String hash = this.tokenHash.encryptPassword(token + url, remotePartner.getSalt());
+        String hash = this.tokenHash.encrypt(token + url, remotePartner.getSalt());
         if (!hash.equals(remotePartner.getAuthenticationToken()))
             return null;
         return remotePartner.toDataTransferObject();
