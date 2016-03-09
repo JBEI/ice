@@ -12,9 +12,8 @@
                     <span class="collection_user_menu">{{partner.name}}</span>
 
                     <span class="menu_count">
-                        <!--shown only for personal collection-->
-
-                        <i stop-event="click" class="opacity_hover fa fa-fw" ng-class="
+                        <i ng-show="selectedPartner==partner.id" stop-event="click" class="opacity_hover fa fa-fw"
+                           ng-class="
                         {'fa-sort-alpha-asc': !worMenuSortParams.asc && worMenuSortParams.field=='folderName',
                         'fa-sort-alpha-desc': worMenuSortParams.asc && worMenuSortParams.field=='folderName',
                         'fa-sort-amount-asc': !worMenuSortParams.asc && worMenuSortParams.field=='creationTime',
