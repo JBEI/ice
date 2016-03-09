@@ -585,7 +585,7 @@ public class BulkEntryCreator {
                 InputStream attachmentStream = files.get(attachmentName);
 
                 // clear
-                ArrayList<Attachment> attachments = DAOFactory.getAttachmentDAO().getByEntry(entry);
+                List<Attachment> attachments = DAOFactory.getAttachmentDAO().getByEntry(entry);
                 if (attachments != null && !attachments.isEmpty()) {
                     for (Attachment attachment : attachments) {
                         String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
