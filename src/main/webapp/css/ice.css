@@ -924,6 +924,10 @@ td.selected i.font-awesome {
     color: #888;
 }
 
+.bg_permission_remote {
+    background-color: #007dbc;
+}
+
 .permission_group {
     color: #bf984c;
 }

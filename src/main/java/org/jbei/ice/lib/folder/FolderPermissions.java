@@ -257,10 +257,6 @@ public class FolderPermissions {
         return remoteContact.shareFolder(partner.getUrl(), accessPermission, partner.getApiKey()) != null;
     }
 
-    // todo : remove shared token from user
-    protected void removeToken() {
-    }
-
     protected Permission createPermissionModel(AccessPermission accessPermission, RemoteShareModel remoteShare) {
         Permission permission = new Permission();
         permission.setFolder(folder);

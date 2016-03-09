@@ -213,7 +213,7 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.closeModal = function () {
-            $uibModalInstance.close('cancel'); // todo : pass object to inform if folder is shared or cleared
+            $uibModalInstance.close($scope.permissions);
         };
 
         $scope.setPermissionArticle = function (type) {
@@ -568,6 +568,12 @@ angular.module('ice.collection.controller', [])
                     }
                 }
             });
+
+            modalInstance.result.then(function (updatedPermissions) {
+                if (updatedPermissions) {
+                    $scope.folder.accessPermissions = updatedPermissions;
+                }
+            });
         };
 
         $scope.getDisplay = function (permission) {
@@ -575,7 +581,10 @@ angular.module('ice.collection.controller', [])
                 return permission.display.replace(/[^A-Z]/g, '');
 
             // group
-            return permission.display;
+            if (permission.article === 'GROUP')
+                return permission.display;
+
+            return "Remote";
         };
 
         $scope.shareText = function (permission) {
