@@ -1,7 +1,7 @@
 package org.jbei.ice.storage.model;
 
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.storage.DataModel;
-import org.jbei.ice.storage.IDataTransferModel;
 
 import javax.persistence.*;
 
@@ -74,7 +74,7 @@ public class RemoteAccessModel implements DataModel {
     }
 
     @Override
-    public IDataTransferModel toDataTransferObject() {
-        return null;
+    public AccessPermission toDataTransferObject() {
+        return permission.toDataTransferObject();
     }
 }

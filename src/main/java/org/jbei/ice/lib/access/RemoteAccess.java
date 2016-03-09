@@ -42,7 +42,7 @@ public class RemoteAccess {
      * @throws IllegalArgumentException if the permission details is missing some required information or has invalid
      *                                  information. e.g. the specified user does not exist on this ICE instance
      */
-    public void add(RegistryPartner partner, AccessPermission accessPermission) {
+    public AccessPermission add(RegistryPartner partner, AccessPermission accessPermission) {
         // todo : must be in web of registries to accept add remote permission
 
         // person on this site that the permission is for
@@ -84,7 +84,8 @@ public class RemoteAccess {
         // ass
         Permission permission = createPermissionModel(accessPermission, folder, account);
 
-        createRemoteAccessModel(accessPermission, clientModel, permission);
+        RemoteAccessModel remoteAccessModel = createRemoteAccessModel(accessPermission, clientModel, permission);
+        return remoteAccessModel.toDataTransferObject();
     }
 
     /**

@@ -30,7 +30,6 @@ public class PermissionResource extends RestResource {
     public Response addRemoteAccess(RemoteAccessPermission accessPermission) {
         RegistryPartner partner = verifyWebPartner();
         RemoteAccess remoteAccess = new RemoteAccess();
-        remoteAccess.add(partner, accessPermission);
-        return super.respond(true);
+        return super.respond(remoteAccess.add(partner, accessPermission));
     }
 }
