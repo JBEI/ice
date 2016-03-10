@@ -61,12 +61,27 @@ angular.module('ice.collection.controller', [])
         } else {
             // selected folder is a number. folder selected, need collection it is contained in
             Util.get("rest/folders/" + $scope.selectedFolder, function (result) {
-                if (result.type == 'PUBLIC')
-                    $scope.selectedFolder = "available";
-                else
-                    $scope.selectedFolder = 'personal';
+                switch (result.type) {
+                    case 'PUBLIC':
+                        $scope.selectedFolder = "available";
+                        break;
+
+                    case 'PRIVATE':
+                    default:
+                        $scope.selectedFolder = 'personal';
+                        break;
+
+                    case 'TRANSFERRED':
+                        $scope.selectedFolder = 'transferred';
+                        break;
+
+                    case 'SHARED':
+                        $scope.selectedFolder = 'shared';
+                        break;
+                }
 
                 FolderSelection.selectCollection($scope.selectedFolder);
+                FolderSelection.selectFolder(result);
                 $scope.updateSelectedCollectionFolders();
             });
         }
@@ -101,6 +116,7 @@ angular.module('ice.collection.controller', [])
         // simply changes state to folder and allows the controller for that to handle it
         //
         $scope.selectCollectionFolder = function (folder) {
+
             // type on server is PUBLIC, PRIVATE, SHARED, UPLOAD
             EntryContextUtil.resetContext();
             var type = folder.type.toLowerCase();
@@ -781,121 +797,12 @@ angular.module('ice.collection.controller', [])
         $rootScope.$on('SamplesInCart', function (event, data) {
             $scope.shoppingCartContents = data;
         });
-
-        // table
-        $scope.alignmentGraph = function (searchResult) {
-            var ptsPerPixel = searchResult.queryLength / 100;
-            var start = Number.MAX_VALUE;
-            var end = Number.MIN_VALUE;
-            var stripes = {};
-
-            var started = false;
-            var matchDetails = searchResult.matchDetails;
-            $scope.headers = {};
-            $scope.sequences = {}; //setup scope for query alignment
-
-            for (var i = 0; i < matchDetails.length; i++) {
-                var line = matchDetails[i].replace(/"/g, ' ').trim();
-
-                //parse Query for score, gaps, & strand data
-                if (line.lastIndexOf("Query", 0) === 0) {
-                    $scope.headers.score = e;
-                    var s = matchDetails[1].split(",");
-                    var c = s[0];
-                    var o = c.split("=");
-                    var e = o[1].trim(); //score data
-                    $scope.headers.gaps = d;
-                    var g = matchDetails[2].split(",");
-                    var a = g[1];
-                    var p = a.split("=");
-                    var d = p[1].trim();//gaps data
-                    $scope.headers.strand = r;
-                    var t = matchDetails[3].split("=");
-                    var r = (t[1]); //strand data
-                }
-
-                if (line.lastIndexOf("Strand", 0) === 0) {
-                    started = true;
-                    var l = []; //empty array filled with the following contents
-                    l = line.split(" "); //separate Query alignment by spaces;
-                    var tmp = (l[2]); //last nucleotide location for Query alignment
-                    if (tmp < start) //tmp will always be less than MAX_NUMBER
-                        start = tmp;
-
-                    tmp = (l[l.length - 1]); //nucleotide bases
-                    if (tmp > end)
-                        end = tmp;
-                } else if (line.lastIndexOf("Score", 0) === 0) {
-                    if (started) {
-                        stripes[start] = end;
-                        start = Number.MAX_VALUE;
-                        end = Number.MIN_VALUE;
-                    }
-                }
-            }
-
-            var prevStart = 0;
-            var defColor = "#444";
-            var stripColor = "";
-
-            // stripe color is based on alignment score
-            if (searchResult.score >= 200)
-                stripColor = "orange";
-            else if (searchResult.score < 200 && searchResult.score >= 80)
-                stripColor = "green";
-            else if (searchResult.score < 80 && searchResult.score >= 50)
-                stripColor = "blue";
-            else
-                stripColor = "red";
-
-            var fillEnd = 100;
-            var html = "<table cellpadding=0 cellspacing=0><tr>";
-            var results = [];
-
-            for (var key in stripes) {
-                if (!stripes.hasOwnProperty(key))
-                    continue;
-
-                var stripeStart = key;
-                var stripeEnd = stripes[key];
-
-                var stripeBlockLength = (Math.round((stripeEnd - stripeStart) / ptsPerPixel));
-                var fillStart = (Math.round(stripeStart / ptsPerPixel));
-
-                var width;
-                if (prevStart >= fillStart && prevStart != 0)
-                    width = 1;
-                else
-                    width = fillStart - prevStart;
-
-                results.push(width);
-
-                html += "<td><hr style=\"background-color: " + defColor + "; border: 0px; width: "
-                    + width + "px; height: 10px\"></hr></td>";
-
-                // mark stripe
-                prevStart = (fillStart - prevStart) + stripeBlockLength;
-                html += "<td><hr style=\"background-color: " + stripColor + "; border: 0px; width: "
-                    + stripeBlockLength + "px; height: 10px\"></hr></td>";
-                fillEnd = fillStart + stripeBlockLength;
-            }
-
-            if (fillEnd < 100) {
-                html += "<td><hr style=\"background-color: " + defColor + "; border: 0px; width: "
-                    + (100 - fillEnd) + "px; height: 10px\"></hr></td>";
-            }
-
-            html += "</tr></table>";
-
-//        $scope.stripes = stripes;
-
-            return results;
-        };
     })
     .controller('CollectionDetailController', function ($scope, $cookieStore, Folders, $stateParams, $location, Util) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
         $scope.hideAddCollection = true;
+        //console.log("folder", $stateParams.collection);
 
         $scope.$on("ShowCollectionFolderAdd", function (e) {
             $scope.hideAddCollection = false;
@@ -932,6 +839,3 @@ angular.module('ice.collection.controller', [])
         }
     })
 ;
-
-
-
