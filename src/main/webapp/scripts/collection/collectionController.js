@@ -528,7 +528,7 @@ angular.module('ice.collection.controller', [])
             Selection.selectEntry(entry);
         };
 
-        $scope.showEntryDetails = function (entry, index) {
+        $scope.showEntryDetails = function (entry, index, sub) {
             if (!$scope.params.offset) {
                 $scope.params.offset = index;
             }
@@ -549,7 +549,10 @@ angular.module('ice.collection.controller', [])
             }, $scope.params.count, offset, "folders/" + $scope.params.folderId, $scope.params.sort);
 
             //$location.search("fid", $scope.folder.id);
-            $location.path("entry/" + entry.id);
+            var url = "entry/" + entry.id;
+            if (sub)
+                url += '/' + sub;
+            $location.path(url);
         };
 
         $scope.tooltipDetails = function (e) {

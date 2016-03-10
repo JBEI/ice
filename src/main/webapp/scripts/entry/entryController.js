@@ -752,7 +752,7 @@ angular.module('ice.entry.controller', [])
         };
     })
     .controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group,
-                                                       filterFilter, Permission, Util) {
+                                                       filterFilter, Util) {
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
         var panes = $scope.panes = [];

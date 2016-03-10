@@ -223,12 +223,13 @@
                     </div>
                 </td>
                 <td style="vertical-align: middle">
-                    <small style="opacity: 0.4">
+                    <a ng-click="showEntryDetails(entry, $index, 'history')" style="opacity: 0.4"
+                       class="small cursor_pointer">
                         <ng-pluralize count="entry.viewCount"
                                       when="{'0': '',
                                   '1': '1 view',
                                   'other':'{} views'}"></ng-pluralize>
-                    </small>
+                    </a>
                 </td>
                 <td style="vertical-align: middle; width:100px; white-space:nowrap"
                     ng-if="entryHeaders.status.selected">
