@@ -128,12 +128,6 @@ angular.module('ice.collection.controller', [])
             $location.path(type + "/" + folder.id);
         };
 
-        // todo :
-        $scope.acceptTransferredFolder = function (folder) {
-            console.log(folder);
-            // update folder status
-        };
-
         //
         // called when a collection is selected. Collections are pre-defined ['Featured', 'Deleted', etc]
         // and some allow folders and when that is selected then the selectCollectionFolder() is called

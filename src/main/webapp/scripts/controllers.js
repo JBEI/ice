@@ -125,7 +125,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
 
     // used to enable/disable the transfer action menu button
     $scope.transferAvailable = function () {
-        //console.log(FolderSelection.getSelectedFolder());
         return FolderSelection.getSelectedFolder() != undefined;
     };
 

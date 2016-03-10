@@ -28,7 +28,7 @@
                     <span ng-if="entry.visible!=='OK'">
                     <small class="label " ng-class="{
                     'label-danger':entry.visible=='DELETED',
-                    'label-info':TRANSFERRED=='TRANSFERRED',
+                    'label-info':entry.visible=='TRANSFERRED',
                     'label-warning':entry.visible=='PENDING' || entry.visible=='DRAFT'}"
                            style="font-size: 9px; position: relative; top: -4px">{{entry.visible}}
                     </small>
