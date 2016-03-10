@@ -7,6 +7,7 @@ import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.access.AccessPermission;
+import org.jbei.ice.lib.dto.common.PageParameters;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -130,13 +131,17 @@ public class RemoteContact {
         return restClient.postWor(url, "rest/permissions/remote", permission, AccessPermission.class, null, token);
     }
 
-    public FolderDetails getRemoteContents(String url, String userId, long folderId, String token, String worToken) {
-        // todo : paging params
+    public FolderDetails getRemoteContents(String url, String userId, long folderId, String token, PageParameters pageParameters,
+                                           String worToken) {
         Map<String, Object> queryParams = new HashMap<>();
         try {
             String encodedToken = URLEncoder.encode(token, "UTF-8");
             queryParams.put("token", encodedToken);
             queryParams.put("userId", userId);
+            queryParams.put("sort", pageParameters.getSortField().name());
+            queryParams.put("asc", Boolean.toString(pageParameters.isAscending()));
+            queryParams.put("offset", pageParameters.getOffset());
+            queryParams.put("limit", pageParameters.getLimit());
             return restClient.getWor(url, "rest/folders/" + folderId + "/entries", FolderDetails.class, queryParams, worToken);
         } catch (Exception e) {
             Logger.error(e);

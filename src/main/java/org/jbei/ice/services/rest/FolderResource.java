@@ -5,6 +5,7 @@ import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.access.AccessPermission;
+import org.jbei.ice.lib.dto.common.PageParameters;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
@@ -216,19 +217,24 @@ public class FolderResource extends RestResource {
             if (filter.length() > 0)
                 message += " filtered by \"" + filter + "\"";
             FolderContents folderContents = new FolderContents();
+            PageParameters pageParameters = new PageParameters();
+            pageParameters.setAscending(asc);
+            pageParameters.setFilter(filter);
+            pageParameters.setLimit(limit);
+            pageParameters.setOffset(offset);
+            pageParameters.setSortField(field);
 
             if (StringUtils.isEmpty(userId)) {
                 if (StringUtils.isEmpty(token))
-                    return folderContents.getContents(userId, id, field, asc, offset, limit, filter);
+                    return folderContents.getContents(userId, id, pageParameters);
 
                 // get registry partner
                 RegistryPartner partner = verifyWebPartner();
                 log(partner.getUrl(), message);
-                return folderContents.getRemotelySharedContents(remoteUserId, token, partner, id, field, asc, offset,
-                        limit, filter);
+                return folderContents.getRemotelySharedContents(remoteUserId, token, partner, id, pageParameters);
             } else {
                 log(userId, message);
-                return folderContents.getContents(userId, id, field, asc, offset, limit, filter);
+                return folderContents.getContents(userId, id, pageParameters);
             }
         } catch (final NumberFormatException nfe) {
             Logger.error("Passed folder id " + folderId + " is not a number");
