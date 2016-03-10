@@ -76,6 +76,7 @@ angular.module('ice.collection.controller', [])
                         break;
 
                     case 'SHARED':
+                    case 'REMOTE':
                         $scope.selectedFolder = 'shared';
                         break;
                 }
