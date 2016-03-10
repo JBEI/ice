@@ -187,7 +187,10 @@ public class FolderResource extends RestResource {
     }
 
     /**
-     * @return details of the selected collection
+     * Retrieves the entries for specified folder. Handles request
+     * from a local client (ui) or from a remote ice instance
+     *
+     * @return list of retrieved entries wrapped in folder object
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -198,8 +201,8 @@ public class FolderResource extends RestResource {
                               @DefaultValue("created") @QueryParam("sort") final String sort,
                               @DefaultValue("false") @QueryParam("asc") final boolean asc,
                               @DefaultValue("") @QueryParam("filter") String filter,
-                              @QueryParam("token") String token,
-                              @QueryParam("userId") String remoteUserId,
+                              @QueryParam("token") String token,   // todo: move to headers
+                              @QueryParam("userId") String remoteUserId,                   // todo : ditto
                               @QueryParam("fields") List<String> queryParam) {
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
         if (folderId.equalsIgnoreCase("public")) {
@@ -225,7 +228,7 @@ public class FolderResource extends RestResource {
             pageParameters.setSortField(field);
 
             if (StringUtils.isEmpty(userId)) {
-                if (StringUtils.isEmpty(token))
+                if (StringUtils.isEmpty(token))  // todo :verify partner?
                     return folderContents.getContents(userId, id, pageParameters);
 
                 // get registry partner

@@ -23,11 +23,11 @@ public class RemoteAccessModel implements DataModel {
     private String token;   // for access
 
     @OneToOne
-    @JoinColumn(name = "client_id", nullable = true)
+    @JoinColumn(name = "client_id", nullable = false)
     private ClientModel clientModel;  // who is doing the sharing on the remote end
 
     @OneToOne(orphanRemoval = true)
-    @JoinColumn(name = "permission_id", nullable = true)
+    @JoinColumn(name = "permission_id", nullable = false)
     private Permission permission;
 
     /**

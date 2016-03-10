@@ -116,6 +116,15 @@ public class FolderDAO extends HibernateRepository<Folder> {
         return criteria.setProjection(Projections.property("entry.id")).list();
     }
 
+    /**
+     * Retrieves list of entries that conforms to the parameters
+     *
+     * @param folderId       unique identifier for folder whose entries are being retrieved
+     * @param pageParameters paging params
+     * @param visibleOnly    whether to only include entries with "OK" visibility
+     * @return list of found entries
+     * @throws DAOException on HibernateException retrieving
+     */
     public List<Entry> retrieveFolderContents(long folderId, PageParameters pageParameters, boolean visibleOnly) {
         try {
             String sortString;

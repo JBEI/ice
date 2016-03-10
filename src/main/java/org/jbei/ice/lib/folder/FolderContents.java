@@ -241,8 +241,9 @@ public class FolderContents {
     /**
      * Retrieves the folder specified in the parameter and contents
      *
-     * @param userId   unique identifier for user making request. If null, folder must have public read privs
-     * @param folderId unique identifier for folder to be retrieved
+     * @param userId         unique identifier for user making request. If null, folder must have public read privs
+     * @param folderId       unique identifier for folder to be retrieved
+     * @param pageParameters paging parameters
      * @return wrapper around list of folder entries if folder is found, null otherwise
      * @throws PermissionException if user does not have read permissions on folder
      */
@@ -251,13 +252,14 @@ public class FolderContents {
         if (folder == null)
             return null;
 
-        // should have permission to read folder (folder should be public, you should be an admin, or owner)
+        // should have permission to read folder
         folderAuthorization.expectRead(userId, folder);
 
-        FolderDetails details = folder.toDataTransferObject();
-        boolean visibleOnly = folder.getType() != FolderType.TRANSFERRED;
         if (folder.getType() == FolderType.REMOTE)
             return getRemoteContents(userId, folder, pageParameters);
+
+        boolean visibleOnly = folder.getType() != FolderType.TRANSFERRED;
+        FolderDetails details = folder.toDataTransferObject();
 
         // all local entries at this point
         long folderSize = folderDAO.getFolderSize(folderId, pageParameters.getFilter(), visibleOnly);
@@ -294,23 +296,29 @@ public class FolderContents {
      */
     protected FolderDetails getRemoteContents(String userId, Folder folder, PageParameters pageParameters) {
         if (folder.getType() != FolderType.REMOTE) {
-            Logger.error("Folder " + folder.getId() + " is not remote and therefore cannot retrieve contents");
-            return null;
+            String errorMessage = "Folder " + folder.getId() + " is not remote and therefore cannot retrieve contents";
+            Logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
         }
 
         // get remote access
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         RemoteAccessModel model = remoteAccessModelDAO.getByFolder(account, folder);
+        if (model == null) {
+            Logger.error("Could not find access model for folder " + folder.getId() + " and user " + userId);
+            return null;
+        }
 
         FolderDetails details = folder.toDataTransferObject();
+        ClientModel clientModel = model.getClientModel();
         AccountTransfer owner = new AccountTransfer();
-        owner.setEmail(model.getClientModel().getEmail());
+        owner.setEmail(clientModel.getEmail());
         details.setOwner(owner);
-        RemotePartner remotePartner = model.getClientModel().getRemotePartner();
+        RemotePartner remotePartner = clientModel.getRemotePartner();
         details.setRemotePartner(remotePartner.toDataTransferObject());
 
         String token = model.getToken();
-        long remoteFolderId = Long.decode(model.getIdentifier());
+        long remoteFolderId = Long.decode(model.getIdentifier());  // todo : currently folder id only
 
         // retrieve entries from remote partner (ends up in the call below)
         FolderDetails remoteDetails = remoteContact.getRemoteContents(remotePartner.getUrl(), userId, remoteFolderId,
@@ -353,8 +361,11 @@ public class FolderContents {
             Logger.error("Authorization failed for remote folder retrieve");
             return null;
         }
+
+        boolean canEdit = shareModel.getPermission().isCanWrite();
         // todo : move everything above to folder permissions
         FolderDetails details = folder.toDataTransferObject();
+        details.setCanEdit(canEdit);
 
         long folderSize = folderDAO.getFolderSize(folderId, pageParameters.getFilter(), true);
         details.setCount(folderSize);
@@ -363,6 +374,7 @@ public class FolderContents {
         List<Entry> results = folderDAO.retrieveFolderContents(folderId, pageParameters, true);
         for (Entry entry : results) {
             PartData info = ModelToInfoFactory.createTableViewData(null, entry, false);
+            info.setCanEdit(canEdit);
             details.getEntries().add(info);
         }
         return details;
