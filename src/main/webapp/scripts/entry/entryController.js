@@ -752,7 +752,7 @@ angular.module('ice.entry.controller', [])
         };
     })
     .controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group,
-                                                       filterFilter, Permission, Util) {
+                                                       filterFilter, Util) {
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
         var panes = $scope.panes = [];
@@ -795,14 +795,14 @@ angular.module('ice.entry.controller', [])
             }
 
             $scope.filtering = true;
-            Permission().filterUsersAndGroups({limit: 10, val: val},
-                function (result) {
-                    $scope.accessPermissions = result;
-                    $scope.filtering = false;
-                }, function (error) {
-                    $scope.filtering = false;
-                    $scope.accessPermissions = undefined;
-                });
+            Util.list("rest/users/autocomplete", function (result) {
+                $scope.accessPermissions = result;
+                $scope.filtering = false;
+            }, {limit: 10, val: val}, function (error) {
+                $scope.filtering = false;
+                $scope.accessPermissions = undefined;
+            });
+
         };
 
         $scope.showAddPermissionOptionsClick = function () {
@@ -841,13 +841,6 @@ angular.module('ice.entry.controller', [])
                 $scope.activePermissions.splice(i, 1);
                 pane.count = $scope.activePermissions.length;
             });
-
-            //addPermission: {
-            //    method: 'POST',
-            //        responseType: 'json',
-            //        url: 'rest/parts/:partId/permissions',
-            //        headers: {'X-ICE-Authentication-SessionId': sessionId}
-            //},
         };
 
         //

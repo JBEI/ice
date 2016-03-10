@@ -166,7 +166,7 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/experiments")
-    public Response getPartExperiments(@PathParam("id") final long partId) {
+    public Response getPartExperiments(@PathParam("id") final String partId) {
         final String userId = requireUserId();
         final List<Study> studies = experiments.getPartStudies(userId, partId);
         if (studies == null) {
@@ -178,7 +178,7 @@ public class PartResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/experiments")
-    public Response createPartExperiment(@PathParam("id") final long partId,
+    public Response createPartExperiment(@PathParam("id") final String partId,
                                          final Study study) {
         final String userId = requireUserId();
         final Study created = experiments.createOrUpdateStudy(userId, partId, study);
@@ -188,7 +188,7 @@ public class PartResource extends RestResource {
     @DELETE
     @Path("/{id}/experiments/{eid}")
     public Response deletePartExperiment(
-            @PathParam("id") final long partId,
+            @PathParam("id") final String partId,
             @PathParam("eid") final long experimentId) {
         String userId = requireUserId();
         return super.respond(experiments.deleteStudy(userId, partId, experimentId));
@@ -360,7 +360,6 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/shotgunsequences")
     public ArrayList<ShotgunSequenceDTO> getShotgunSequences(
-            @Context final UriInfo info,
             @PathParam("id") final long partId,
             @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
             @QueryParam("sid") final String sid) {

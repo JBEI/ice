@@ -425,7 +425,7 @@ public class SequenceController {
         String sequenceString;
 
         try {
-            switch (type) {
+            switch (type.toLowerCase()) {
                 case "original":
                     sequenceString = sequence.getSequenceUser();
                     name = entry.getName() + ".seq";
@@ -451,7 +451,7 @@ public class SequenceController {
                     name = entry.getName() + ".xml";
                     break;
 
-                case "pigeonI":
+                case "pigeoni":
                     try {
                         URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
                         byte[] bytes = IOUtils.toByteArray(uri.toURL().openStream());
@@ -461,7 +461,7 @@ public class SequenceController {
                         return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
                     }
 
-                case "pigeonS":
+                case "pigeons":
                     sequenceString = PigeonSBOLv.generatePigeonScript(sequence);
                     name = entry.getName() + ".txt";
                     break;

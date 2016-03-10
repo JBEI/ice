@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.access;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderType;
@@ -9,6 +10,8 @@ import org.jbei.ice.storage.hibernate.dao.*;
 import org.jbei.ice.storage.model.*;
 
 /**
+ * Access privileges for remote resources
+ *
  * @author Hector Plahar
  */
 public class RemoteAccess {
@@ -29,53 +32,79 @@ public class RemoteAccess {
         this.permissionDAO = DAOFactory.getPermissionDAO();
     }
 
-    // only supports folders for now
-    public void add(RegistryPartner partner, AccessPermission accessPermission) {
-
-        // todo : must be in web of registries to add remote permission
+    /**
+     * Add access privileges for a user on this instance to enable access
+     * to a (currently folder only) resource on a remote ICE instance
+     *
+     * @param partner          remote partner requesting add
+     * @param accessPermission details of access privilege, including access token and user on this instance
+     *                         that the permission is for
+     * @throws IllegalArgumentException if the permission details is missing some required information or has invalid
+     *                                  information. e.g. the specified user does not exist on this ICE instance
+     */
+    public AccessPermission add(RegistryPartner partner, AccessPermission accessPermission) {
+        // todo : must be in web of registries to accept add remote permission
 
         // person on this site that the permission is for
         String userId = accessPermission.getUserId();
+
+        // verify that it is valid
+        Account account = accountDAO.getByEmail(userId);   // todo : if null
+        if (account == null)
+            throw new IllegalArgumentException("Email address " + userId + " not on this registry instance");
 
         // remote person doing the sharing
         AccountTransfer accountTransfer = accessPermission.getAccount();
         if (accountTransfer == null)
             throw new IllegalArgumentException("No account for remote permission add");
 
+        // read of write permission
         if (!accessPermission.isCanRead() && !accessPermission.isCanWrite())
             throw new IllegalArgumentException("Invalid read/write values for permission");
 
+        // verify secret token
+        if (StringUtils.isEmpty(accessPermission.getSecret()))
+            throw new IllegalArgumentException("No access token sent with permission");
+
         String remoteEmail = accountTransfer.getEmail();
 
+        // create a local folder instance that references a remote folder (also acts like a cache)
         Folder folder = new Folder();
         folder.setType(FolderType.REMOTE);
         folder.setName(accessPermission.getDisplay());
         folder.setOwnerEmail(remoteEmail);
         folder = this.folderDAO.create(folder);
 
-        // folder
+        // get the remote partner object
         RemotePartner remotePartner = remotePartnerDAO.getByUrl(partner.getUrl());
 
-        ClientModel clientModel = clientModelDAO.getModel(remoteEmail, remotePartner);
+        // get or create the client for the remote user who is sharing the folder
+        ClientModel clientModel = getOrCreateRemoteClient(remoteEmail, remotePartner);
+
+        // ass
+        Permission permission = createPermissionModel(accessPermission, folder, account);
+
+        RemoteAccessModel remoteAccessModel = createRemoteAccessModel(accessPermission, clientModel, permission);
+        return remoteAccessModel.toDataTransferObject();
+    }
+
+    /**
+     * Checks if there is an existing client for the specified userId and remote partner.
+     * Retrieves and returns if so, or creates a new record if not
+     *
+     * @param remoteUserId  email address of remote user
+     * @param remotePartner remote partner
+     * @return client model stored in the database with specified user id and partner
+     */
+    protected ClientModel getOrCreateRemoteClient(String remoteUserId, RemotePartner remotePartner) {
+        ClientModel clientModel = clientModelDAO.getModel(remoteUserId, remotePartner);
         if (clientModel == null) {
             clientModel = new ClientModel();
             clientModel.setRemotePartner(remotePartner);
-            clientModel.setEmail(remoteEmail);
+            clientModel.setEmail(remoteUserId);
             clientModel = clientModelDAO.create(clientModel);
         }
-
-        // if null, then the email address entered by the user on the remote partner is not available here
-        Account account = accountDAO.getByEmail(userId);   // todo : if null
-        if (account == null)
-            throw new IllegalArgumentException("Email address " + userId + " not on this registry instance");
-
-        Permission permission = createPermissionModel(accessPermission, folder, account);
-        RemoteAccessModel remoteAccessModel = new RemoteAccessModel();
-        remoteAccessModel.setToken(accessPermission.getSecret());
-        remoteAccessModel.setClientModel(clientModel);
-        remoteAccessModel.setIdentifier(accessPermission.getTypeId() + "");
-        remoteAccessModel.setPermission(permission);
-        remoteAccessModelDAO.create(remoteAccessModel);
+        return clientModel;
     }
 
     protected Permission createPermissionModel(AccessPermission accessPermission, Folder folder, Account account) {
@@ -85,5 +114,15 @@ public class RemoteAccess {
         permission.setCanRead(accessPermission.isCanRead());
         permission.setAccount(account);
         return this.permissionDAO.create(permission);
+    }
+
+    protected RemoteAccessModel createRemoteAccessModel(AccessPermission accessPermission, ClientModel clientModel,
+                                                        Permission permission) {
+        RemoteAccessModel remoteAccessModel = new RemoteAccessModel();
+        remoteAccessModel.setToken(accessPermission.getSecret());
+        remoteAccessModel.setClientModel(clientModel);
+        remoteAccessModel.setIdentifier(accessPermission.getTypeId() + "");
+        remoteAccessModel.setPermission(permission);
+        return remoteAccessModelDAO.create(remoteAccessModel);
     }
 }

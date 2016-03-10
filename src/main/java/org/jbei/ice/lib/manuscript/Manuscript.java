@@ -16,6 +16,7 @@ public class Manuscript implements IDataTransferModel {
     private String paragonUrl;
     private ManuscriptStatus status;
     private long creationTime;
+    private String zipFileName;
 
     public long getId() {
         return id;
@@ -79,5 +80,13 @@ public class Manuscript implements IDataTransferModel {
 
     public void setCreationTime(long creationTime) {
         this.creationTime = creationTime;
+    }
+
+    public String getZipFileName() {
+        return zipFileName;
+    }
+
+    public void setZipFileName(String zipFileName) {
+        this.zipFileName = zipFileName;
     }
 }

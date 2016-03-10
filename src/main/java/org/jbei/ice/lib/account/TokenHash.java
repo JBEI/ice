@@ -18,11 +18,11 @@ public class TokenHash {
     private static final int TOKEN_BYTE_SIZE = 128;
     private static final int PBKDF2_ITERATIONS = 20000;
 
-    public String encryptPassword(String password, String salt) {
-        if (password == null || password.trim().isEmpty() || salt == null || salt.trim().isEmpty())
-            throw new NullPointerException("Password and/or salt cannot be empty");
+    public String encrypt(String value, String salt) {
+        if (value == null || value.trim().isEmpty() || salt == null || salt.trim().isEmpty())
+            throw new NullPointerException("Cannot encrypt null value or salt");
 
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), PBKDF2_ITERATIONS, HASH_BYTE_SIZE);
+        KeySpec spec = new PBEKeySpec(value.toCharArray(), salt.getBytes(), PBKDF2_ITERATIONS, HASH_BYTE_SIZE);
 
         try {
             SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
@@ -33,6 +33,12 @@ public class TokenHash {
         }
     }
 
+    /**
+     * Uses {@link SecureRandom} to generate a random bytes of size 32
+     * which is converted to a string containing a lexical base64 representation
+     *
+     * @return random bytes converted to a string
+     */
     public String generateSalt() {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[SALT_BYTE_SIZE];

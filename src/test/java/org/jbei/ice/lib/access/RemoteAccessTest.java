@@ -46,6 +46,7 @@ public class RemoteAccessTest {
         permission.setDisplay("Folder Name");
         permission.setUserId(account.getEmail());
         permission.setType(AccessPermission.Type.READ_FOLDER);
+        permission.setSecret("supersekrit");
 
         remoteAccess.add(partner, permission);
 

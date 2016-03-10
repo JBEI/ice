@@ -60,7 +60,7 @@ public class TokenVerificationTest {
         TokenHash tokenHash = new TokenHash();
         remotePartner.setSalt(tokenHash.generateSalt());
         String token = tokenHash.generateRandomToken();
-        String hash = tokenHash.encryptPassword(token + remotePartner.getUrl(), remotePartner.getSalt());
+        String hash = tokenHash.encrypt(token + remotePartner.getUrl(), remotePartner.getSalt());
         remotePartner.setAuthenticationToken(hash);
         remotePartner.setApiKey("foo");
         remotePartner.setAdded(new Date());

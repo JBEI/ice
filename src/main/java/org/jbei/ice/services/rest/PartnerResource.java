@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntrySelection;
-import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.WebPartners;
 import org.jbei.ice.lib.net.WoRController;
@@ -40,7 +39,7 @@ public class PartnerResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addNewPartner(RegistryPartner partner) {
-        WebPartners webPartners = new WebPartners(new RemoteContact());
+        WebPartners webPartners = new WebPartners();
         RegistryPartner result;
         String userId = getUserId();
 
@@ -66,5 +65,52 @@ public class PartnerResource extends RestResource {
         RemoteEntries remoteEntries = new RemoteEntries();
         remoteEntries.transferEntries(userId, remoteId, entrySelection);
         return super.respond(Response.Status.OK);
+    }
+
+    @PUT
+    @Path("/{id}")
+    public Response updateWebPartner(@PathParam("id") long partnerId,
+                                     final RegistryPartner partner) {
+        String userId = requireUserId();
+        WebPartners partners = new WebPartners();
+        return super.respond(partners.update(userId, partnerId, partner));
+    }
+
+    @PUT
+    @Path("/{id}/apiKey")
+    public Response updateWebPartnerAPIKey(@PathParam("id") long partnerId) {
+        String userId = requireUserId();
+        WebPartners partners = new WebPartners();
+        return super.respond(partners.updateAPIKey(userId, partnerId));
+    }
+
+    /**
+     * Request from a remote ICE instance to update it's api key
+     * Verification uses the existing API key. Similar to updating password
+     * by sending the old password
+     *
+     * @param partner remote partner information (including new api key)
+     * @return information about this instance with the new token remote partner
+     */
+    @PUT
+    public Response updateRemotePartnerAPIKey(RegistryPartner partner) {
+        RegistryPartner registryPartner = verifyWebPartner();
+        WebPartners partners = new WebPartners();
+        return super.respond(partners.updateRemoteAPIKey(registryPartner.getUrl(), partner));
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response removeWebPartner(@PathParam("id") String partnerId) {
+        try {
+            long id = Long.decode(partnerId);
+            String userId = requireUserId();
+            WebPartners partners = new WebPartners();
+            return super.respond(partners.remove(userId, id));
+        } catch (NumberFormatException nfe) {
+            RegistryPartner registryPartner = verifyWebPartner();
+            WebPartners partners = new WebPartners();
+            return super.respond(partners.removeRemotePartner(registryPartner.getId(), partnerId));
+        }
     }
 }

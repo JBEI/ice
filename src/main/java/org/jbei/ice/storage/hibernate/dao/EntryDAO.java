@@ -408,6 +408,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             Number number = (Number) criteria.uniqueResult();
             return number.longValue();
         } catch (HibernateException he) {
+            Logger.error(he);
             throw new DAOException(he);
         }
     }
@@ -723,5 +724,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
         query.setParameter("v", ok.getValue());
         query.setParameterList("ids", list);
         return query.executeUpdate();
+    }
+
+    public List<String> getRecordTypes(List<Long> list) {
+        return currentSession().createCriteria(Entry.class)
+                .add(Restrictions.in("id", list))
+                .setProjection(Projections.distinct(Projections.property("recordType")))
+                .list();
     }
 }

@@ -5,7 +5,7 @@
             style="color:#000000;">{{folder.folderName}}</span> With Others</span>
 </div>
 
-<div class="modal-body">
+<div class="modal-body" style="background-color: #f1f1f1">
     <span class="cursor_pointer" ng-click="setPropagatePermission(folder)">
         <i class="fa fa-fw"
            ng-class="{'fa-square-o':!folder.propagatePermission, 'fa-check-square-o':folder.propagatePermission}"></i> Propagate permissions to contained parts
@@ -16,22 +16,23 @@
 
     <br><br>
 
-    <span class="text-muted font-90em">Current permissions: {{permissions.length | number}}</span>
+    <span class="text-muted font-90em"
+          ng-if="permissions.length">Current permissions: {{permissions.length | number}}</span>
 
-    <div class="pull-right cursor_pointer" ng-class="{'opacity_4': !folder.publicReadAccess}" style="margin-right: 10px"
-         ng-click="enableDisablePublicRead()">
+    <div class="pull-right cursor_pointer font-12em" ng-class="{'opacity_4': !folder.publicReadAccess}"
+         style="margin-right: 10px" ng-click="enableDisablePublicRead()">
         <i class=" fa fa-fw fa-globe"></i>
         <small>Public Access</small>
-        <i class="fa fa-fw font-12em"
+        <i class="fa fa-fw font-11em"
            ng-class="{'fa-toggle-off': !folder.publicReadAccess, 'fa-toggle-on green': folder.publicReadAccess}"></i>
     </div>
 
-    <table cellpadding="0" cellspacing="0" style="width: 560px; border-top: 1px solid #CCCCCC">
+    <table cellpadding="0" cellspacing="0" style="width: 560px; border-top: 1px solid #CCCCCC; background-color: white">
         <tr>
             <td>
                 <div style="overflow: auto; max-height: 200px; border-bottom: 1px solid #CCCCCC">
                     <div ng-if="permissions.length == 0" class="pad-8">
-                        <i>No available permissions</i>
+                        <i class="text-muted">No available permissions</i>
                     </div>
                     <table class="table table-hover">
                         <tr ng-repeat="permission in permissions">
@@ -57,9 +58,9 @@
                                    <i class="fa fa-fw  font-14em"
                                       ng-class="{'fa-eye': permission.canRead, 'fa-pencil': permission.canWrite}"></i>
                                     <br>
-                                    <small class="text-muted" ng-if="permission.canWrite">Can edit
+                                    <small class="text-muted" ng-if="permission.canWrite">can edit
                                     </small>
-                                    <small class="text-muted" ng-if="permission.canRead">Can view
+                                    <small class="text-muted" ng-if="permission.canRead">can view
                                     </small>
                                     <!--<span class="caret" ng-if="folder.canEdit"></span>-->
                                 </span>
@@ -75,14 +76,15 @@
         </tr>
 
         <tr>
-            <td class="permission_footer" style="border-left: 0; background-color: #f9f9f9">
+            <td class="permission_footer" style="border-left: 0;">
                 <span class="text-muted font-75em">Add {{newPermission.article.toLowerCase()}} permission</span> <br>
 
                 <div class="btn-group" uib-dropdown>
                     <button class="btn btn-sm btn-default" uib-dropdown-toggle>
                         <i class="fa fa-fw font-14em"
-                           ng-class="{'fa-user':newPermission.article =='ACCOUNT', 'fa-group':newPermission.article=='GROUP',
-                            'fa-globe':newPermission.article=='REMOTE'}"></i>
+                           ng-class="{'fa-user':newPermission.article =='ACCOUNT',
+                           'fa-group dark-orange':newPermission.article=='GROUP',
+                            'fa-globe dark_blue':newPermission.article=='REMOTE'}"></i>
                         <span class="caret"></span>
                     </button>
 
@@ -104,16 +106,16 @@
                        typeahead-editable="true"
                        typeahead-on-select="userSelectionForPermissionAdd($item, $model, $label)">
 
-                <div class="btn-group font-80em" style="border: 1px solid #fcfcfc">
+                <div class="btn-group font-80em">
                     <span class="cursor_pointer" ng-click="setPermission(false)">
                         <i class="fa fa-fw"
                            ng-class="{'fa-circle-o': !newPermission.canRead, 'fa-check-circle' : newPermission.canRead}"></i>
-                    Can view</span>
+                    can view</span>
                     <br>
 
                     <span class="cursor_pointer" ng-click="setPermission(true)">
                         <i class="fa fa-fw" ng-class="{'fa-circle-o': !newPermission.canWrite,
-                        'fa-check-circle' : newPermission.canWrite}"></i> Can edit
+                        'fa-check-circle' : newPermission.canWrite}"></i> can edit
                     </span>
                 </div>
 
@@ -139,7 +141,7 @@
                     </ul>
                 </div>
 
-                <button type="button" ng-click="addNewPermission()"
+                <button type="button" ng-click="addNewPermission()" ng-disabled="disablePermissionAdd()"
                         class="btn btn-sm btn-primary pull-right">Add
                 </button>
 

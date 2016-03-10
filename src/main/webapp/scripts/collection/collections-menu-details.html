@@ -11,7 +11,7 @@
     </form>
 </div>
 
-<div data-ng-repeat="folder in selectedCollectionFolders">
+<div data-ng-repeat="folder in selectedCollectionFolders | orderBy:sortParams.field:sortParams.asc">
     <div class="collection-menu-sub-folder" ng-hide="folder.deleteRequested" ng-click="selectCollectionFolder(folder)"
          ng-mouseover="showSubMenu=folder.canEdit; showTransferOptions=folder.type=='TRANSFERRED'"
          ng-mouseleave="showSubMenu=false; showTransferOptions=false">
@@ -52,8 +52,6 @@
         </span>
 
         <span class="menu_count" ng-show="showTransferOptions">
-             <i class="fa fa-check add_icon" uib-tooltip="Accept" ng-click="acceptTransferredFolder(folder)"
-                stop-event="click"></i>
             <i class="fa fa-times delete_icon" uib-tooltip="Reject"
                ng-click="folder.deleteRequested=true" stop-event="click"></i>
         </span>

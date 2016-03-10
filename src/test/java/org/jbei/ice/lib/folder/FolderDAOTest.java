@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.folder;
 
 import org.jbei.ice.lib.AccountCreator;
+import org.jbei.ice.lib.dto.common.PageParameters;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
@@ -215,7 +216,7 @@ public class FolderDAOTest {
         folder = dao.addFolderContents(folder, entries);
         Assert.assertNotNull(folder);
 
-        List<Entry> result = dao.retrieveFolderContents(folder.getId(), ColumnField.NAME, true, 0, 15, null, false);
+        List<Entry> result = dao.retrieveFolderContents(folder.getId(), new PageParameters(0, 15, ColumnField.NAME, true, null), false);
         Assert.assertNotNull(result);
         for (int i = 1; i <= 9; i += 1) {
             Entry entry = result.get(i - 1);

@@ -2,6 +2,7 @@ package org.jbei.ice.lib.folder;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.TestEntryCreator;
+import org.jbei.ice.lib.dto.common.PageParameters;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
@@ -84,8 +85,9 @@ public class FolderContentsTest {
     public void testGetContents() throws Exception {
         FolderContents folderContents = new FolderContents();
 
+
         // test with null id
-        folderContents.getContents(null, 0, ColumnField.PART_ID, false, 0, 10, null);
+        folderContents.getContents(null, 0, new PageParameters(0, 10, ColumnField.PART_ID, false, null));
 
         Account account = AccountCreator.createTestAccount("testRetrieveFolderContents", false);
         String userId = account.getEmail();
@@ -120,7 +122,7 @@ public class FolderContentsTest {
 
         // retrieve (supported sort types created, status, name, part_id, type)
         FolderDetails details = folderContents.getContents(account.getEmail(), folder.getId(),
-                ColumnField.PART_ID, false, 0, 15, null);
+                new PageParameters(0, 15, ColumnField.PART_ID, false, null));
         Assert.assertNotNull(details);
 
         short pageSize = 15;
@@ -135,8 +137,8 @@ public class FolderContentsTest {
             }
             // check remaining
             Assert.assertEquals((size - (it * pageSize)), parts.size());
-            details = folderContents.getContents(account.getEmail(), folder.getId(), ColumnField.PART_ID, false,
-                    pageSize * it, pageSize, null);
+            details = folderContents.getContents(account.getEmail(), folder.getId(),
+                    new PageParameters(pageSize * it, pageSize, ColumnField.PART_ID, false, null));
             it += 1;
         }
     }

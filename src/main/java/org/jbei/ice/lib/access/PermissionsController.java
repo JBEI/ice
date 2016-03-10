@@ -15,10 +15,12 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.FolderDAO;
 import org.jbei.ice.storage.hibernate.dao.GroupDAO;
 import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
+import org.jbei.ice.storage.hibernate.dao.RemoteShareModelDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -295,6 +297,13 @@ public class PermissionsController {
                     group.getLabel()));
         }
 
+        // remote accounts
+        RemoteShareModelDAO remoteShareModelDAO = DAOFactory.getRemoteShareModelDAO();
+        List<RemoteShareModel> remoteAccessModelList = remoteShareModelDAO.getByFolder(folder);
+        for (RemoteShareModel remoteShareModel : remoteAccessModelList) {
+            accessPermissions.add(remoteShareModel.toDataTransferObject());
+        }
+
         return accessPermissions;
     }
 
@@ -302,8 +311,8 @@ public class PermissionsController {
      * Propagates the permissions for the folder to the contained entries
      *
      * @param userId unique identifier for account of user requesting action that led to this call
-     * @param folder  folder user permissions are being propagated
-     * @param add     true if folder is to be added, false otherwise
+     * @param folder folder user permissions are being propagated
+     * @param add    true if folder is to be added, false otherwise
      * @return true if action permission was propagated successfully
      */
     public boolean propagateFolderPermissions(String userId, Folder folder, boolean add) {

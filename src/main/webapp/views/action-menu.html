@@ -43,13 +43,20 @@
     </div>
 
     <!--download-->
-    <button class="btn btn-default action-menu" ng-disabled="addToDisabled" ng-click="csvExport()"
-            style="margin-left: 20px">
-        <i class="fa fa-cloud-download font-12em"></i>
-        <br>
-        <small class="text-uppercase font-55em">Export</small>
-    </button>
+    <div class="btn-group" style="margin-left: 20px" uib-dropdown>
+        <button class="btn btn-default action-menu" ng-disabled="addToDisabled" uib-dropdown-toggle>
+            <i class="fa fa-cloud-download font-12em"></i>
+            <br>
+            <small class="text-uppercase font-55em">Export <span class="caret"></span></small>
+        </button>
 
+        <ul class="uib-dropdown-menu">
+            <li><a href="#" class="font-90em" ng-click="csvExport(false)">CSV Only</a></li>
+            <li><a href="#" class="font-90em" ng-click="csvExport(true)">CSV & sequences</a></li>
+            <!--<li class="divider"></li>-->
+            <!--<li><a href="#" class="font-90em">Customize</a></li>-->
+        </ul>
+    </div>
 
     <!--transfer-->
     <div class="btn-group" style="margin-left: 20px" ng-if="user.isAdmin">

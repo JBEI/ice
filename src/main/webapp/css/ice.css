@@ -609,6 +609,10 @@ a:hover {
     opacity: 0.4;
 }
 
+.opacity_3 {
+    opacity: 0.3;
+}
+
 .opacity_normal {
     opacity: 1;
 }
@@ -918,6 +922,10 @@ td.selected i.font-awesome {
     font-size: 0.75em;
     cursor: pointer;
     color: #888;
+}
+
+.bg_permission_remote {
+    background-color: #007dbc;
 }
 
 .permission_group {

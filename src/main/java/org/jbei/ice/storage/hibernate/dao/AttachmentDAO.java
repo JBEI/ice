@@ -1,8 +1,10 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -14,17 +16,18 @@ import org.jbei.ice.storage.model.Entry;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
+ * Data accessor object for {@link Attachment}s
+ *
+ * @author Hector Plahar
  */
 public class AttachmentDAO extends HibernateRepository<Attachment> {
 
     public Attachment save(File attDir, Attachment attachment, InputStream inputStream) throws DAOException {
         try {
-            create(attachment);
+            attachment = create(attachment);
             if (inputStream != null)
                 FileUtils.writeFile(attDir, attachment.getFileId(), inputStream);
         } catch (HibernateException e) {
@@ -57,33 +60,23 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
      * @throws DAOException
      */
     @SuppressWarnings("unchecked, rawtypes")
-    public ArrayList<Attachment> getByEntry(Entry entry) throws DAOException {
-        ArrayList<Attachment> attachments = null;
-
-        Session session = currentSession();
+    public List<Attachment> getByEntry(Entry entry) throws DAOException {
         try {
-            String queryString = "from " + Attachment.class.getName()
-                    + " as attachment where attachment.entry = :entry order by attachment.id desc";
-
-            Query query = session.createQuery(queryString);
-            query.setEntity("entry", entry);
-            List list = query.list();
-            if (list != null) {
-                attachments = (ArrayList<Attachment>) list;
-            }
+            Criteria criteria = currentSession().createCriteria(Attachment.class)
+                    .add(Restrictions.eq("entry", entry));
+            criteria.addOrder(Order.desc("id"));
+            return criteria.list();
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve attachment by entry: " + entry.getId(), e);
         }
-
-        return attachments;
     }
 
     public boolean hasAttachment(Entry entry) throws DAOException {
         Session session = currentSession();
         try {
             Number itemCount = (Number) session.createCriteria(Attachment.class)
-                                               .setProjection(Projections.countDistinct("id"))
-                                               .add(Restrictions.eq("entry", entry)).uniqueResult();
+                    .setProjection(Projections.countDistinct("id"))
+                    .add(Restrictions.eq("entry", entry)).uniqueResult();
             return itemCount.longValue() > 0;
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve attachment by entry: " + entry.getId(), e);
@@ -95,7 +88,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
      *
      * @param fileId unique file identifier
      * @return retrieved attachment; null if none is found or there is a problem retrieving
-     *         attachment
+     * attachment
      * @throws DAOException on Hibernate exception
      */
     public Attachment getByFileId(String fileId) throws DAOException {

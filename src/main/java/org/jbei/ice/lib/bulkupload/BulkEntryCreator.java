@@ -8,7 +8,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.bulkupload.EditMode;
-import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
@@ -585,7 +585,7 @@ public class BulkEntryCreator {
                 InputStream attachmentStream = files.get(attachmentName);
 
                 // clear
-                ArrayList<Attachment> attachments = DAOFactory.getAttachmentDAO().getByEntry(entry);
+                List<Attachment> attachments = DAOFactory.getAttachmentDAO().getByEntry(entry);
                 if (attachments != null && !attachments.isEmpty()) {
                     for (Attachment attachment : attachments) {
                         String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);

@@ -310,26 +310,31 @@ angular.module('ice.wor.controller', [])
             });
         };
 
-        //
+        // update the keys
+        $scope.refreshPartner = function (partner) {
+            partner.refreshing = true;
+            Util.update("rest/partners/" + partner.id + "/apiKey", {}, {}, function (result) {
+
+            })
+        };
+
         // remove web of registries partner
-        //
         $scope.removePartner = function (partner, index) {
-            wor.removePartner({url: partner.url}, function (result) {
+            Util.remove("rest/partners/" + partner.id, {}, function (result) {
                 $scope.wor.partners.splice(index, 1);
             });
         };
 
-        //
         // set the status of a partner
-        //
         $scope.setPartnerStatus = function (partner, newStatus) {
-            partner.status = newStatus;
-            wor.updatePartner({url: partner.url}, partner, function (result) {
+            if (partner.status == newStatus)
+                return;
+
+            Util.update("rest/partners/" + partner.id, {status: newStatus}, {}, function (result) {
+                partner = result;
             });
         };
 
-        //
-        //
         //
         $scope.selectPartner = function (partner) {
             $location.path("web/" + partner.id);
@@ -344,7 +349,8 @@ angular.module('ice.wor.controller', [])
         }
     })
     .controller('WebOfRegistriesMenuController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
-                                                           $stateParams, WebOfRegistries, Remote, Settings, Util) {
+                                                           $stateParams, WebOfRegistries, Remote, Settings, Util,
+                                                           localStorageService) {
         // retrieve web of registries partners
         $scope.wor = WebOfRegistries().query({approved_only: true});
         $scope.selectedPartner = $stateParams.partner;
@@ -354,6 +360,27 @@ angular.module('ice.wor.controller', [])
                 $scope.selectedPartnerFolders = result;
             });
         }
+
+        $scope.worMenuSortParams = localStorageService.get('worCollectionFolderSortParams');
+        if (!$scope.worMenuSortParams) {
+            $scope.worMenuSortParams = {field: 'creationTime', asc: true};
+        }
+
+        $scope.sortWorCollectionFolders = function () {
+            if ($scope.worMenuSortParams.field == 'creationTime') {
+                if (!$scope.worMenuSortParams.asc) {
+                    $scope.worMenuSortParams.field = 'folderName';
+                }
+                $scope.worMenuSortParams.asc = false;
+            } else {
+                // sort by name
+                if ($scope.worMenuSortParams.asc) {
+                    $scope.worMenuSortParams.field = 'creationTime';
+                }
+                $scope.worMenuSortParams.asc = true;
+            }
+            localStorageService.set('worCollectionFolderSortParams', $scope.worMenuSortParams);
+        };
 
         // retrieve web of registries setting
         var sessionId = $cookieStore.get("sessionId");

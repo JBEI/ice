@@ -402,8 +402,7 @@ angular.module('ice.admin.controller', [])
                 $scope.selectedUsers.splice(index, 1);
         };
     })
-    .controller('AdminManuscriptsController', function ($scope, $uibModal, $window, Util) {
-        $scope.manuscripts = [];
+    .controller('AdminManuscriptsController', function ($scope, $uibModal, $window, $location, Util) {
         $scope.manuscriptsParams = {
             sort: 'creationTime',
             asc: false,
@@ -412,6 +411,9 @@ angular.module('ice.admin.controller', [])
             offset: 0,
             limit: 15
         };
+
+        // todo : not
+        $scope.baseUrl = $location.absUrl().replace($location.path(), '');
 
         $scope.getManuscripts = function () {
             Util.get("rest/manuscripts", function (result) {
@@ -437,6 +439,10 @@ angular.module('ice.admin.controller', [])
                 resolve: {
                     manuscript: function () {
                         return selectedManuscript;
+                    },
+
+                    baseUrl: function () {
+                        return $scope.baseUrl;
                     }
                 }
             });
@@ -446,10 +452,30 @@ angular.module('ice.admin.controller', [])
             });
         };
 
+        $scope.confirmManuscriptDelete = function (manuscript) {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/admin/modal/manuscript-delete.html',
+                controller: 'DeleteManuscriptController',
+                resolve: {
+                    manuscript: function () {
+                        return manuscript;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (deletedManuscript) {
+                var i = $scope.manuscripts.data.indexOf(deletedManuscript);
+                $scope.manuscripts.data.splice(i, 1);
+            });
+        };
+
         $scope.downloadManuscriptFiles = function (manuscript) {
-            Util.post("rest/manuscripts/" + manuscript.id + "/files/zip", {}, function (result) {
-                if (result && result.value) {
-                    $window.open("rest/file/tmp/" + result.value, "_self");
+            manuscript.downloading = true;
+            Util.get("rest/manuscripts/" + manuscript.id + "/files/zip", function (result) {
+                manuscript.downloading = false;
+                if (result && result.zipFileName) {
+                    $window.open("rest/file/tmp/" + result.zipFileName + "?filename=" + manuscript.authorFirstName + "_"
+                        + manuscript.authorLastName + "_collection.zip", "_self");
                 }
             })
         };
@@ -461,22 +487,18 @@ angular.module('ice.admin.controller', [])
                 manuscript.status = status;
             })
         };
-
-        $scope.deleteManuscript = function (manuscript) {
-            Util.remove("rest/manuscripts/" + manuscript.id, {}, function (result) {
-                var i = $scope.manuscripts.indexOf(manuscript);
-                $scope.manuscripts.splice(i, 1);
-            });
-        }
     })
-    .controller('CreateManuscriptController', function ($scope, $uibModalInstance, $cookieStore, $http, manuscript, Util) {
+    .controller('CreateManuscriptController', function ($scope, $uibModalInstance, $cookieStore, $http, manuscript,
+                                                        baseUrl, Util) {
         $scope.submitButtonText = "Create";
+        $scope.modalHeaderTitle = "Add New Paper";
         $scope.invalidFolder = false;
 
         if (manuscript) {
             $scope.newManuscript = manuscript;
             $scope.submitButtonText = "Update";
-            $scope.newManuscript.selectedFolderName = $scope.newManuscript.folder.folderName;
+            $scope.modalHeaderTitle = "Update Paper";
+            $scope.newManuscript.selectedFolderName = baseUrl + '/folders/' + $scope.newManuscript.folder.id;
         } else
             $scope.newManuscript = {status: "UNDER_REVIEW"};
 
@@ -536,8 +558,25 @@ angular.module('ice.admin.controller', [])
 
             Util.get("rest/folders/" + pasted, function (result) {
                 $scope.newManuscript.folder = result;
-                //$scope.newManuscript.selectedFolderName = result.folderName;
             });
         };
+    })
+    .controller('DeleteManuscriptController', function ($scope, $uibModalInstance, manuscript, Util) {
+        $scope.manuscript = manuscript;
+        $scope.errorDeleting = undefined;
+
+        $scope.cancelDeleteRequest = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.deleteManuscript = function () {
+            $scope.errorDeleting = undefined;
+            Util.remove("rest/manuscripts/" + manuscript.id, {}, function (result) {
+                $uibModalInstance.close(manuscript);
+            }, function (error) {
+                $scope.errorDeleting = true;
+                console.log(error);
+            });
+        }
     })
 ;

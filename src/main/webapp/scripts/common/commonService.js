@@ -146,18 +146,22 @@ angular.module('ice.common.service', [])
                 }).update(obj, successHandler, errorCallback);
             },
 
-            remove: function (url, params, successHandler) {
+            remove: function (url, params, successHandler, errHandler) {
                 if (!successHandler) {
                     successHandler = function (resp) {
                     }
                 }
+
+                var errorCallback = this.handleError;
+                if (errHandler)
+                    errorCallback = errHandler;
 
                 $resource(url, params, {
                     'delete': {
                         method: 'DELETE',
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
                     }
-                }).delete(successHandler, this.handleError)
+                }).delete(successHandler, errorCallback)
             }
         }
     });

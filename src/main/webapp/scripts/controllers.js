@@ -125,7 +125,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
 
     // used to enable/disable the transfer action menu button
     $scope.transferAvailable = function () {
-        //console.log(FolderSelection.getSelectedFolder());
         return FolderSelection.getSelectedFolder() != undefined;
     };
 
@@ -175,20 +174,16 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     };
 
     // todo : getEntrySelection() should be moved to Selection
-    $scope.csvExport = function () {
+    $scope.csvExport = function (includeSequences) {
         var selection = getEntrySelection();
-        var files = Files();
 
         // retrieve from server
-        files.getCSV(selection,
-            function (result) {
-                if (result && result.value) {
-                    $window.open("rest/file/tmp/" + result.value, "_self");
-                    Selection.reset();
-                }
-            }, function (error) {
-                console.log(error);
-            });
+        Util.post("rest/file/csv", selection, function (result) {
+            if (result && result.value) {
+                $window.open("rest/file/tmp/" + result.value, "_self");
+                Selection.reset();
+            }
+        }, {sequenceFormats: ["genbank"]});
     };
 
     $rootScope.$on("CollectionSelected", function (event, data) {

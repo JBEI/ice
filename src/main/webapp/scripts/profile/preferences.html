@@ -1,46 +1,40 @@
 <div class="pad_top">
-    <uib-tabset>
-        <uib-tab heading="Entry Defaults">
-            <div class="alert alert-info" style="margin-bottom: 15px; margin-top: 10px; width: 600px">
-                <i style="font-size: 18px" class="fa fa-info-circle"></i> Enter default values for new entries.
+    <div class="alert alert-info" style="margin-bottom: 15px; margin-top: 10px; width: 600px">
+        <i style="font-size: 18px" class="fa fa-info-circle"></i> Enter default values for new entries.
+    </div>
+
+    <div class="pad_top" ng-repeat="preference in preferenceEntryDefaults">
+        <div class="col-md-2 entryLabel">
+            <span ng-class="{'entryEditLabel':field.edit}">{{preference.display}}</span>
+        </div>
+
+        <div class="col-md-10" ng-mouseover="showEdit=true" ng-mouseout="showEdit=false">
+            <!--not in edit mode-->
+            <div ng-if="!preference.edit">
+                <!--if value exists and not in edit mode-->
+                <span ng-if="preferences[preference.id]">{{preferences[preference.id]}}</span>
+
+                <!--if no value and not in edit mode-->
+                <i ng-if="!preferences[preference.id]">None specified</i>
+
+                <span ng-click="preference.edit=true">
+                    <i ng-show="showEdit" class="fa fa-pencil edit_icon" style="margin-left: 5px"></i>
+                </span>
             </div>
 
-            <div class="pad_top" ng-repeat="preference in preferenceEntryDefaults">
-                <div class="col-md-2 entryLabel">
-                    <span ng-class="{'entryEditLabel':field.edit}">{{preference.display}}</span>
-                </div>
+            <!--if in edit mode-->
+            <div ng-if="preference.edit">
+                <form ng-submit="savePreference(preference)">
+                    <input type="text" class="input_box" ng-model="preferences[preference.id]" ng-trim="true"
+                           ng-focus="preference.edit" placeHolder="{{preference.help}}"
+                           ng-blur="preference.edit==false" maxlength="125" style="width: 205px;">
 
-                <div class="col-md-10" ng-mouseover="showEdit=true" ng-mouseout="showEdit=false">
-                    <!--not in edit mode-->
-                    <div ng-if="!preference.edit">
-                        <!--if value exists and not in edit mode-->
-                        <span ng-if="preferences[preference.id]">{{preferences[preference.id]}}</span>
-
-                        <!--if no value and not in edit mode-->
-                        <i ng-if="!preferences[preference.id]">None specified</i>
-
-                        <span ng-click="preference.edit=true">
-                            <i ng-show="showEdit" class="fa fa-pencil edit_icon" style="margin-left: 5px"></i>
-                        </span>
-                    </div>
-
-                    <!--if in edit mode-->
-                    <div ng-if="preference.edit">
-                        <form ng-submit="savePreference(preference)">
-                            <input type="text" ng-model="preferences[preference.id]" ng-trim="true"
-                                   ng-focus="preference.edit" placeHolder="{{preference.help}}"
-                                   ng-blur="preference.edit==false" ng-change="preference.invalid=false"
-                                   ng-class="{'input_box':!preference.invalid, 'input_box_error':preference.invalid}"
-                                   maxlength="125" style="width: 205px;">
-
-                            <button type="submit" class="btn btn-primary btn-xs">Save</button>
-                            <button type="button" class="btn btn-default btn-xs"
-                                    ng-click="preference.edit=false;preference.invalid=false">Cancel
-                            </button>
-                        </form>
-                    </div>
-                </div>
+                    <button type="submit" class="btn btn-primary btn-xs">Save</button>
+                    <button type="button" class="btn btn-default btn-xs"
+                            ng-click="preference.edit=false;preference.invalid=false">Cancel
+                    </button>
+                </form>
             </div>
-        </uib-tab>
-    </uib-tabset>
+        </div>
+    </div>
 </div>

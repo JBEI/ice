@@ -2,7 +2,6 @@ package org.jbei.ice.services.rest;
 
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.Setting;
-import org.jbei.ice.lib.search.SearchController;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 public class ConfigResource extends RestResource {
 
     private ConfigurationController controller = new ConfigurationController();
-    private SearchController searchController = new SearchController();
 
     /**
      * Retrieves list of system settings available
@@ -60,10 +58,9 @@ public class ConfigResource extends RestResource {
     @GET
     @Path("/{key}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Setting getConfig(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
-                             @PathParam("key") final String key) {
+    public Setting getConfig(@PathParam("key") final String key) {
         if (!"NEW_REGISTRATION_ALLOWED".equalsIgnoreCase(key) && !"PASSWORD_CHANGE_ALLOWED".equalsIgnoreCase(key)) {
-            getUserId(sessionId);
+            requireUserId();
         }
         return controller.getPropertyValue(key);
     }

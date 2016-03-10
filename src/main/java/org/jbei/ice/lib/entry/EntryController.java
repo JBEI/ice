@@ -11,12 +11,8 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.AuditType;
 import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.comment.UserComment;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.PartStatistics;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
@@ -380,7 +376,7 @@ public class EntryController {
 
         // validate access token
         TokenHash tokenHash = new TokenHash();
-        String secret = tokenHash.encryptPassword(remotePartner.getUrl() + remoteUserId, token);
+        String secret = tokenHash.encrypt(remotePartner.getUrl() + remoteUserId, token);
         if (!secret.equals(shareModel.getSecret())) {
             throw new PermissionException("Secret does not match");
         }

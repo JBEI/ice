@@ -1074,7 +1074,7 @@ angular.module('ice.upload.controller', [])
             $window.open(url, "_self");
         }
     }).controller('BulkUploadPermissionsController', function ($scope, $cookieStore, $location, $uibModalInstance,
-                                                               upload, Upload, Folders, Permission) {
+                                                               upload, Upload, Folders) {
         $scope.cancel = function () {
             $uibModalInstance.dismiss('cancel');
         };
@@ -1228,14 +1228,15 @@ angular.module('ice.upload.controller', [])
             }
 
             $scope.filtering = true;
-            Permission().filterUsersAndGroups({limit: 10, val: val},
-                function (result) {
-                    $scope.accessPermissions = result;
-                    $scope.filtering = false;
-                }, function (error) {
-                    console.error(error);
-                    $scope.filtering = false;
-                    $scope.accessPermissions = undefined;
-                });
+            // todo
+            //Permission().filterUsersAndGroups({limit: 10, val: val},
+            //    function (result) {
+            //        $scope.accessPermissions = result;
+            //        $scope.filtering = false;
+            //    }, function (error) {
+            //        console.error(error);
+            //        $scope.filtering = false;
+            //        $scope.accessPermissions = undefined;
+            //    });
         };
     });
