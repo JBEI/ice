@@ -15,6 +15,9 @@ import org.jbei.ice.lib.executor.TransferTask;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Folder;
+import org.jbei.ice.storage.model.RemoteAccessModel;
 import org.jbei.ice.storage.model.RemotePartner;
 
 import java.io.File;
@@ -24,6 +27,7 @@ import java.util.List;
 /**
  * Entries that are on other registry instances other than this instance.
  * An account is generally required to be able to access other instances through this instances
+ * // todo : cleanup . lot of common elements in each method
  *
  * @author Hector Plahar
  */
@@ -91,17 +95,54 @@ public class RemoteEntries {
         return this.remoteContact.getAttachmentList(partner.getUrl(), entryId, partner.getApiKey());
     }
 
-//    public FeaturedDNASequence getEntrySequence(String userId, long remoteId, long entryId) {
-//        if (!hasRemoteAccessEnabled())
-//            return null;
-//
-//        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
-//        if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
-//            return null;
-//
-//        String path = "/rest/parts/" + entryId + "/sequence";
-//        return iceRestClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
-//    }
+    public PartData getEntryDetails(String userId, long folderId, long partId) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);
+
+        RemoteAccessModel remoteAccessModel = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
+        if (remoteAccessModel == null) {
+            Logger.error("Could not retrieve remote access for folder " + folder.getId());
+            return null;
+        }
+
+        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
+        String url = remotePartner.getUrl();
+        String token = remoteAccessModel.getToken();
+        long remoteFolderId = Long.decode(remoteAccessModel.getIdentifier());
+        return remoteContact.getRemoteEntry(url, userId, partId, remoteFolderId, token, remotePartner.getApiKey());
+    }
+
+    // contact the remote partner to get the tool tip
+    public PartData retrieveRemoteToolTip(String userId, long folderId, long partId) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);
+
+        RemoteAccessModel remoteAccessModel = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
+        if (remoteAccessModel == null) {
+            Logger.error("Could not retrieve remote access for folder " + folder.getId());
+            return null;
+        }
+
+        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
+        String url = remotePartner.getUrl();
+        String token = remoteAccessModel.getToken();
+        return remoteContact.getToolTipDetails(url, userId, partId, token, remotePartner.getApiKey());
+    }
+
+    public FeaturedDNASequence getSequence(String userId, long folderId, long entryId) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);
+
+        RemoteAccessModel remoteAccessModel = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
+        if (remoteAccessModel == null) {
+            Logger.error("Could not retrieve remote access for folder " + folder.getId());
+            return null;
+        }
+
+        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
+        String token = remoteAccessModel.getToken();
+        return remoteContact.getSequence(remotePartner.getUrl(), userId, entryId, token, remotePartner.getApiKey());
+    }
 
     public void transferEntries(String userId, long remoteId, EntrySelection selection) {
         TransferTask task = new TransferTask(userId, remoteId, selection);

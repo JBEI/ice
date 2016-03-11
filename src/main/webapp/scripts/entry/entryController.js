@@ -1204,20 +1204,7 @@ angular.module('ice.entry.controller', [])
         $scope.notFound = undefined;
         $scope.noAccess = undefined;
 
-
-        //query: {
-        //    method: 'GET',
-        //        responseType: "json",
-        //        url: "rest/parts/:partId",
-        //        headers: {'X-ICE-Authentication-SessionId': sessionId}
-        //},
-
-        var params = {};
-        if (FolderSelection.getSelectedFolder() && FolderSelection.getSelectedFolder().type == 'REMOTE') {
-            params.remote = true;
-            params.folderId = FolderSelection.getSelectedFolder().id;
-            //$location.search("fid", ) // todo : if the page is refreshed
-        }
+        var params = $location.search();
 
         Util.get("rest/parts/" + $stateParams.id,
             function (result) {
@@ -1228,10 +1215,13 @@ angular.module('ice.entry.controller', [])
                 if ($scope.entry.canEdit)
                     $scope.newParameter = {edit: false};
                 $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
+                $scope.entry.remote = params.remote;
 
-                entry.statistics({partId: $stateParams.id}, function (stats) {
+                // get sample count, comment count etc
+                Util.get("rest/parts/" + $stateParams.id + "/statistics", function (stats) {
                     $scope.entryStatistics = stats;
-                });
+                }, params);
+
             }, params, function (error) {
                 if (error.status === 404)
                     $scope.notFound = true;

@@ -136,6 +136,7 @@ angular.module('ice.collection.controller', [])
         $scope.selectCollection = function (name) {
             EntryContextUtil.resetContext();
             FolderSelection.selectCollection(name);
+            $location.search({});
             $location.path("folders/" + name);
             $scope.selectedFolder = name;
 
@@ -174,7 +175,7 @@ angular.module('ice.collection.controller', [])
             }
         });
     })
-    .controller('FolderPermissionsController', function ($scope, $http, $uibModalInstance, $cookieStore, Folders, Permission,
+    .controller('FolderPermissionsController', function ($scope, $http, $uibModalInstance, $cookieStore, Folders,
                                                          Util, User, folder) {
         var sessionId = $cookieStore.get("sessionId");
         $scope.folder = folder;
@@ -274,6 +275,7 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.userSelectionForPermissionAdd = function (item, model, label) {
+            //console.log(item, model, label);
             $scope.newPermission.articleId = item.id;
         };
 
@@ -328,7 +330,6 @@ angular.module('ice.collection.controller', [])
         $scope.filter = function (val) {
             switch ($scope.newPermission.article.toLowerCase()) {
                 case "account":
-                default :
                     return $http.get('rest/users/autocomplete', {
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
                         params: {
@@ -552,7 +553,14 @@ angular.module('ice.collection.controller', [])
             var url = "entry/" + entry.id;
             if (sub)
                 url += '/' + sub;
+
             $location.path(url);
+            $location.search({});
+
+            if ($scope.folder && $scope.folder.type == 'REMOTE') {
+                $location.search("folderId", $scope.folder.id);
+                $location.search("remote", true);
+            }
         };
 
         $scope.tooltipDetails = function (e) {

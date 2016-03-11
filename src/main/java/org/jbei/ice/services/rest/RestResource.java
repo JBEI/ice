@@ -9,6 +9,7 @@ import org.jbei.ice.lib.dto.web.RegistryPartner;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -44,6 +45,9 @@ public class RestResource {
 
     @HeaderParam(value = "Authorization")
     protected String hmacHeader;
+
+    @QueryParam(value = "sid")
+    protected String querySessionId;
 
     @Context
     protected HttpServletRequest request;
@@ -91,7 +95,10 @@ public class RestResource {
     /**
      * Extract the User ID from a query parameter value or header values in the resource request.
      */
-    protected String getUserId(final String sessionId) {
+    protected String getUserId(String sessionId) {
+        if (StringUtils.isEmpty(sessionId) && !StringUtils.isEmpty(querySessionId))
+            sessionId = querySessionId;
+
         String userId = UserSessions.getUserIdBySession(sessionId);
         if (!StringUtils.isEmpty(userId))
             return userId;
