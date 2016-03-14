@@ -512,7 +512,7 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.addExistingPartLink = function ($item, $model) {
-            entry.query({partId: $model.id}, function (result) {
+            Util.get("rest/parts/" + $model, function (result) {
                 $scope.activePart = result;
                 $scope.activePart.isExistingPart = true;
                 if (!$scope.activePart.parameters)
@@ -654,7 +654,6 @@ angular.module('ice.entry.controller', [])
                     field: 'PART_NUMBER'
                 }
             }).then(function (res) {
-                console.log(res);
                 return res.data;
             });
         };
