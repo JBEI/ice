@@ -24,7 +24,7 @@ public class RemoteAccessModel implements DataModel {
 
     @OneToOne
     @JoinColumn(name = "client_id", nullable = false)
-    private ClientModel clientModel;  // who is doing the sharing on the remote end
+    private RemoteClientModel remoteClientModel;  // who is doing the sharing on the remote end
 
     @OneToOne(orphanRemoval = true)
     @JoinColumn(name = "permission_id", nullable = false)
@@ -49,12 +49,12 @@ public class RemoteAccessModel implements DataModel {
         this.token = token;
     }
 
-    public ClientModel getClientModel() {
-        return clientModel;
+    public RemoteClientModel getRemoteClientModel() {
+        return remoteClientModel;
     }
 
-    public void setClientModel(ClientModel clientModel) {
-        this.clientModel = clientModel;
+    public void setRemoteClientModel(RemoteClientModel remoteClientModel) {
+        this.remoteClientModel = remoteClientModel;
     }
 
     public Permission getPermission() {

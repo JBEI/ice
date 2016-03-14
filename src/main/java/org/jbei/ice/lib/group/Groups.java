@@ -16,8 +16,8 @@ import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.GroupDAO;
 import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
 import org.jbei.ice.storage.model.Account;
-import org.jbei.ice.storage.model.ClientModel;
 import org.jbei.ice.storage.model.Group;
+import org.jbei.ice.storage.model.RemoteClientModel;
 import org.jbei.ice.storage.model.RemotePartner;
 
 import java.util.ArrayList;
@@ -114,11 +114,11 @@ public class Groups {
             if (accountTransfer == null || StringUtils.isEmpty(accountTransfer.getEmail()))
                 continue;
 
-            ClientModel clientModel = new ClientModel();
-            clientModel.setEmail(accountTransfer.getEmail());
-            clientModel.getGroups().add(group);
-            clientModel.setRemotePartner(remotePartner);
-            DAOFactory.getClientModelDAO().create(clientModel); // todo : check and retrieve first
+            RemoteClientModel remoteClientModel = new RemoteClientModel();
+            remoteClientModel.setEmail(accountTransfer.getEmail());
+            remoteClientModel.getGroups().add(group);
+            remoteClientModel.setRemotePartner(remotePartner);
+            DAOFactory.getRemoteClientModelDAO().create(remoteClientModel); // todo : check and retrieve first
         }
 
         return group.toDataTransferObject();

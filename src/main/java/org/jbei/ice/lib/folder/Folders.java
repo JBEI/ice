@@ -54,9 +54,9 @@ public class Folders {
                 }
 
                 AccountTransfer owner = new AccountTransfer();
-                owner.setEmail(model.getClientModel().getEmail());
+                owner.setEmail(model.getRemoteClientModel().getEmail());
                 details.setOwner(owner);
-                RemotePartner remotePartner = model.getClientModel().getRemotePartner();
+                RemotePartner remotePartner = model.getRemoteClientModel().getRemotePartner();
                 details.setRemotePartner(remotePartner.toDataTransferObject());
             }
 

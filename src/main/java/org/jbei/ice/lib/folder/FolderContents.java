@@ -218,7 +218,7 @@ public class FolderContents {
             return;
         }
 
-        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
+        RemotePartner remotePartner = remoteAccessModel.getRemoteClientModel().getRemotePartner();
         RemoteTransfer remoteTransfer = new RemoteTransfer();
         List<PartData> results = remoteTransfer.getPartsForTransfer(entries);
         List<Long> remoteIds = remoteTransfer.transferEntries(remotePartner.getId(), results);
@@ -310,11 +310,11 @@ public class FolderContents {
         }
 
         FolderDetails details = folder.toDataTransferObject();
-        ClientModel clientModel = remoteAccessModel.getClientModel();
+        RemoteClientModel remoteClientModel = remoteAccessModel.getRemoteClientModel();
         AccountTransfer owner = new AccountTransfer();
-        owner.setEmail(clientModel.getEmail());
+        owner.setEmail(remoteClientModel.getEmail());
         details.setOwner(owner);
-        RemotePartner remotePartner = clientModel.getRemotePartner();
+        RemotePartner remotePartner = remoteClientModel.getRemotePartner();
         details.setRemotePartner(remotePartner.toDataTransferObject());
 
         String token = remoteAccessModel.getToken();

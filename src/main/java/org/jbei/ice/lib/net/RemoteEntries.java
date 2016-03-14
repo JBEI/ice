@@ -105,7 +105,7 @@ public class RemoteEntries {
             return null;
         }
 
-        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
+        RemotePartner remotePartner = remoteAccessModel.getRemoteClientModel().getRemotePartner();
         String url = remotePartner.getUrl();
         String token = remoteAccessModel.getToken();
         long remoteFolderId = Long.decode(remoteAccessModel.getIdentifier());
@@ -123,7 +123,7 @@ public class RemoteEntries {
             return null;
         }
 
-        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
+        RemotePartner remotePartner = remoteAccessModel.getRemoteClientModel().getRemotePartner();
         String url = remotePartner.getUrl();
         String token = remoteAccessModel.getToken();
         return remoteContact.getToolTipDetails(url, userId, partId, token, remotePartner.getApiKey());
@@ -139,7 +139,7 @@ public class RemoteEntries {
             return null;
         }
 
-        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
+        RemotePartner remotePartner = remoteAccessModel.getRemoteClientModel().getRemotePartner();
         String token = remoteAccessModel.getToken();
         return remoteContact.getSequence(remotePartner.getUrl(), userId, entryId, token, remotePartner.getApiKey());
     }

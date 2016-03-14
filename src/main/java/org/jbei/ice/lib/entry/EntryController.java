@@ -8,7 +8,6 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.AuditType;
 import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.comment.UserComment;
@@ -34,12 +33,11 @@ import java.util.zip.ZipInputStream;
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
-public class EntryController {
+public class EntryController extends HasEntry {
 
     private EntryDAO dao;
     private CommentDAO commentDAO;
     private SequenceDAO sequenceDAO;
-    private AuditDAO auditDAO;
     private PermissionsController permissionsController;
     private AccountController accountController;
     private final EntryAuthorization authorization;
@@ -53,7 +51,6 @@ public class EntryController {
         accountController = new AccountController();
         authorization = new EntryAuthorization();
         sequenceDAO = DAOFactory.getSequenceDAO();
-        auditDAO = DAOFactory.getAuditDAO();
     }
 
     /**
@@ -279,37 +276,6 @@ public class EntryController {
         return true;
     }
 
-    protected Entry getEntry(String id) {
-        Entry entry = null;
-
-        // check if numeric
-        try {
-            entry = dao.get(Long.decode(id));
-        } catch (NumberFormatException nfe) {
-            // fine to ignore
-        }
-
-        // check for part Id
-        if (entry == null)
-            entry = dao.getByPartNumber(id);
-
-        // check for global unique id
-        if (entry == null)
-            entry = dao.getByRecordId(id);
-
-        // get by unique name
-        if (entry == null) {
-            try {
-                return dao.getByUniqueName(id);
-            } catch (DAOException de) {
-                // fine to ignore
-                return null;
-            }
-        }
-
-        return entry;
-    }
-
     public PartData getRequestedEntry(String remoteUserId, String token, String entryId,
                                       long folderId, RegistryPartner requestingPartner) {
         Entry entry = getEntry(entryId);
@@ -420,17 +386,8 @@ public class EntryController {
         // create audit event if not owner
         // todo : remote access check
         if (userId != null && authorization.getOwner(entry) != null && !authorization.getOwner(entry).equalsIgnoreCase(userId)) {
-            try {
-                Audit audit = new Audit();
-                audit.setAction(AuditType.READ.getAbbrev());
-                audit.setEntry(entry);
-                audit.setUserId(userId);
-                audit.setLocalUser(true);
-                audit.setTime(new Date(System.currentTimeMillis()));
-                auditDAO.create(audit);
-            } catch (Exception e) {
-                Logger.error(e);
-            }
+            EntryHistory entryHistory = new EntryHistory(userId, entry.getId());
+            entryHistory.add();
         }
 
         // retrieve more information about linked entries if any (default only contains id)

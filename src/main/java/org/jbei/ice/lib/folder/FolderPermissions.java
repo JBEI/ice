@@ -33,7 +33,7 @@ public class FolderPermissions {
     private final PermissionDAO permissionDAO;
     private final AccountDAO accountDAO;
     private final RemoteShareModelDAO remoteShareModelDAO;
-    private final ClientModelDAO clientModelDAO;
+    private final RemoteClientModelDAO remoteClientModelDAO;
     private final RemotePartnerDAO remotePartnerDAO;
 
     public FolderPermissions(long folderId) {
@@ -41,7 +41,7 @@ public class FolderPermissions {
         this.permissionDAO = DAOFactory.getPermissionDAO();
         this.accountDAO = DAOFactory.getAccountDAO();
         this.remoteShareModelDAO = DAOFactory.getRemoteShareModelDAO();
-        this.clientModelDAO = DAOFactory.getClientModelDAO();
+        this.remoteClientModelDAO = DAOFactory.getRemoteClientModelDAO();
         this.remotePartnerDAO = DAOFactory.getRemotePartnerDAO();
         this.folder = this.dao.get(folderId);
         if (folder == null)
@@ -187,13 +187,13 @@ public class FolderPermissions {
             return null; // something happened with the send; likely user id is invalid
 
         // create local client record mapping to remote
-        ClientModel clientModel = getOrCreateRemoteClient(remoteUserId, remotePartner);
+        RemoteClientModel remoteClientModel = getOrCreateRemoteClient(remoteUserId, remotePartner);
 
         // create remote share record storing the secret
         // todo : use folder uuid instead of folder id ?
         String secret = tokenHash.encrypt(folder.getId() + remotePartner.getUrl() + remoteUserId, token);
         RemoteShareModel remoteShare = new RemoteShareModel();
-        remoteShare.setClient(clientModel);
+        remoteShare.setClient(remoteClientModel);
         remoteShare.setSecret(secret);
         Account account = accountDAO.getByEmail(userId);
         remoteShare.setSharer(account);
@@ -221,15 +221,15 @@ public class FolderPermissions {
      * @param remotePartner remote partner
      * @return client model stored in the database with specified user id and partner
      */
-    protected ClientModel getOrCreateRemoteClient(String remoteUserId, RemotePartner remotePartner) {
-        ClientModel clientModel = clientModelDAO.getModel(remoteUserId, remotePartner);
-        if (clientModel == null) {
-            clientModel = new ClientModel();
-            clientModel.setRemotePartner(remotePartner);
-            clientModel.setEmail(remoteUserId);
-            clientModel = clientModelDAO.create(clientModel);
+    protected RemoteClientModel getOrCreateRemoteClient(String remoteUserId, RemotePartner remotePartner) {
+        RemoteClientModel remoteClientModel = remoteClientModelDAO.getModel(remoteUserId, remotePartner);
+        if (remoteClientModel == null) {
+            remoteClientModel = new RemoteClientModel();
+            remoteClientModel.setRemotePartner(remotePartner);
+            remoteClientModel.setEmail(remoteUserId);
+            remoteClientModel = remoteClientModelDAO.create(remoteClientModel);
         }
-        return clientModel;
+        return remoteClientModel;
     }
 
     public boolean remove(String userId, long permissionId) {

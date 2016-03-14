@@ -49,7 +49,7 @@ public class UserGroups {
             long count = dao.getMemberCount(group.getUuid());
 
             // get clients
-            count += DAOFactory.getClientModelDAO().getClientCount(group);
+            count += DAOFactory.getRemoteClientModelDAO().getClientCount(group);
             user.setMemberCount(count);
             groupResults.getData().add(user);
         }

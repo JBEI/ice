@@ -114,7 +114,7 @@ public class HibernateUtil {
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.ShotgunSequence.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.Configuration.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.ApiKey.class);
-                configuration.addAnnotatedClass(org.jbei.ice.storage.model.ClientModel.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.RemoteClientModel.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.RemoteShareModel.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.RemoteAccessModel.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.ManuscriptModel.class);
