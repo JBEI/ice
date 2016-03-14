@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.entry;
 
+import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.dto.AuditType;
 import org.jbei.ice.lib.dto.History;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.storage.DAOFactory;
@@ -10,6 +12,7 @@ import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Audit;
 import org.jbei.ice.storage.model.Entry;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -28,9 +31,9 @@ public class EntryHistory {
     /**
      * @param userId  unique identifier for user making requests
      * @param entryId unique identifier for entry whose history is of interest
-     * @throws IllegalArgumentException                    if the entry specified by id <code>entryId</code> is not located
-     * @throws org.jbei.ice.lib.access.PermissionException if the specified user does not have write privileges for the
-     *                                                     entry
+     * @throws IllegalArgumentException if the entry specified by id <code>entryId</code> is not located
+     * @throws PermissionException      if the specified user does not have write privileges for the
+     *                                  entry
      */
     public EntryHistory(String userId, long entryId) {
         this.dao = DAOFactory.getAuditDAO();
@@ -52,7 +55,7 @@ public class EntryHistory {
 
         for (Audit audit : list) {
             History history = audit.toDataTransferObject();
-            if (history.isLocalUser()) {
+            if (history.getPartner() == null) {
                 Account account = accountDAO.getByEmail(history.getUserId());
                 if (account != null)
                     history.setAccount(account.toDataTransferObject());
@@ -71,5 +74,29 @@ public class EntryHistory {
 
         dao.delete(audit);
         return true;
+    }
+
+    public boolean add() {
+        Audit audit = new Audit();
+        audit.setAction(AuditType.READ.getAbbrev());
+        audit.setEntry(entry);
+        audit.setUserId(userId);
+        audit.setTime(new Date());
+        return dao.create(audit) != null;
+    }
+
+    /**
+     * Delete all available history for a specified entry
+     * Due to the destructive nature, it is required that the user be
+     * the owner or an administrator
+     *
+     * @return the number of audit objects that were deleted
+     * @throws PermissionException if the user performing action is neither an admin nor owner of the entry
+     */
+    public int deleteAll() {
+        if (!entryAuthorization.isAdmin(this.userId) &&
+                !entryAuthorization.getOwner(this.entry).equalsIgnoreCase(this.userId))
+            throw new PermissionException(this.userId + " cannot delete all history for entry " + this.entry.getId());
+        return dao.deleteAll(this.entry);
     }
 }
