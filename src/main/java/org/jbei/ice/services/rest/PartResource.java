@@ -74,7 +74,7 @@ public class PartResource extends RestResource {
     @Path("/{id}")
     public Response read(@PathParam("id") final String id,
                          @DefaultValue("false") @QueryParam("remote") boolean isRemote,
-                         @QueryParam("token") String remoteUserToken,
+                         @QueryParam("token") String remoteUserToken,      // todo : move to header
                          @QueryParam("userId") String remoteUserId,
                          @QueryParam("folderId") long fid) {
         String userId = getUserId();

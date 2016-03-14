@@ -81,7 +81,7 @@ public class RemoteAccess {
         // get or create the client for the remote user who is sharing the folder
         ClientModel clientModel = getOrCreateRemoteClient(remoteEmail, remotePartner);
 
-        // ass
+        // store access
         Permission permission = createPermissionModel(accessPermission, folder, account);
 
         RemoteAccessModel remoteAccessModel = createRemoteAccessModel(accessPermission, clientModel, permission);
