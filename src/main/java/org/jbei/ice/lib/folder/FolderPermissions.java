@@ -191,7 +191,7 @@ public class FolderPermissions {
 
         // create remote share record storing the secret
         // todo : use folder uuid instead of folder id ?
-        String secret = tokenHash.encrypt(folder.getId() + remoteUserId, token);
+        String secret = tokenHash.encrypt(folder.getId() + remotePartner.getUrl() + remoteUserId, token);
         RemoteShareModel remoteShare = new RemoteShareModel();
         remoteShare.setClient(clientModel);
         remoteShare.setSecret(secret);
