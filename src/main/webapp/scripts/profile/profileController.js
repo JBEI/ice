@@ -436,6 +436,7 @@ angular.module('ice.profile.controller', [])
                 templateUrl: 'scripts/profile/modal/edit-group.html',
                 controller: 'ProfileGroupsModalController',
                 backdrop: "static",
+                keyboard: false,
                 //size: "lg",
                 resolve: {
                     currentGroup: function () {
@@ -462,7 +463,7 @@ angular.module('ice.profile.controller', [])
             })
         }
     })
-    .controller('ProfileGroupsModalController', function ($scope, Util, currentGroup, $uibModalInstance) {
+    .controller('ProfileGroupsModalController', function ($scope, $http, Util, currentGroup, $cookieStore, $uibModalInstance) {
         $scope.headerMessage = currentGroup ? "Update \"" + currentGroup.label + "\"" : "Create New Group";
         $scope.webPartners = [];
 
@@ -470,17 +471,36 @@ angular.module('ice.profile.controller', [])
             $uibModalInstance.close();
         };
 
-        $scope.newGroup = {remoteMembers: [], members: []};
+        $scope.newGroup = {members: [], type: 'ACCOUNT'};
 
-        var getWebPartners = function () {
+        $scope.getWebPartners = function () {
             Util.list("rest/partners", function (result) {
                 $scope.webPartners = result;
             });
         };
-        getWebPartners();
+
+        $scope.filter = function (val) {
+            return $http.get('rest/users/autocomplete', {
+                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                params: {
+                    val: val
+                }
+            }).then(function (res) {
+                return res.data;
+            });
+        };
+
+        $scope.userSelectionForGroupAdd = function ($item, $model, $label) {
+            $scope.newUserName = $item.firstName + ' ' + $item.lastName;
+            if ($scope.newGroup.type == 'ACCOUNT') {
+                $scope.newGroup.members.push($item);
+            } else {
+                // todo
+            }
+        };
 
         // adds a remote user to the new group object
-        $scope.addRemoteUser = function () {
+        $scope.selectRemoteUser = function () {
             Util.get("rest/users/remote", function (result) {
                 $scope.newGroup.remoteMembers.push(result);
             }, {pid: 34, email: $scope.remoteUser}, function (error) {
