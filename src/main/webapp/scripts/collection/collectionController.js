@@ -275,8 +275,8 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.userSelectionForPermissionAdd = function (item, model, label) {
-            //console.log(item, model, label);
             $scope.newPermission.articleId = item.id;
+            $scope.userFilterInput = $scope.userFilterInput.firstName + " " + $scope.userFilterInput.lastName;
         };
 
         $scope.removePermission = function (permission) {
@@ -310,6 +310,10 @@ angular.module('ice.collection.controller', [])
                 result.canWrite = result.type == 'WRITE_FOLDER';
                 result.canRead = result.type == 'READ_FOLDER';
                 $scope.permissions.push(result);
+
+                $scope.newPermission.articleId = undefined;
+                $scope.newPermission.partner = undefined;
+                $scope.userFilterInput = undefined;
             });
         };
 
