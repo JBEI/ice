@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * ICE Folders
+ *
  * @author Hector Plahar
  */
 public class Folders {
