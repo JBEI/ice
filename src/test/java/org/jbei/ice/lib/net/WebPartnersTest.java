@@ -45,7 +45,7 @@ public class WebPartnersTest {
             }
 
             protected RegistryPartner getThisInstanceWithNewApiKey() {
-                String myURL = "registry-test2.jbei.org";
+                String myURL = "registry-test20.jbei.org";
                 RegistryPartner thisPartner = new RegistryPartner();
                 String myName = "Registry test2";
                 thisPartner.setName(myName);
@@ -69,10 +69,10 @@ public class WebPartnersTest {
 
         // create registryPartner for add
         RegistryPartner partner = new RegistryPartner();
-        partner.setUrl("registry-test2.jbei.org");
+        partner.setUrl("registry-test20.jbei.org");
         RegistryPartner added = partners.addNewPartner(adminUser, partner);
         Assert.assertNotNull(added);
-        Assert.assertEquals(partner.getUrl(), "registry-test2.jbei.org");
+        Assert.assertEquals(partner.getUrl(), "registry-test20.jbei.org");
         Assert.assertEquals(added.getStatus(), RemotePartnerStatus.APPROVED);
     }
 
@@ -83,7 +83,7 @@ public class WebPartnersTest {
 
         // add reg-test2 as new partner
         RegistryPartner partner = new RegistryPartner();
-        partner.setUrl("registry-test2.jbei.org");
+        partner.setUrl("registry-test20.jbei.org");
         WebPartners webPartners = createThisPartnerObject();
         RegistryPartner added = webPartners.addNewPartner(adminUser, partner);
         Assert.assertNotNull(added);
@@ -123,7 +123,7 @@ public class WebPartnersTest {
             }
 
             protected RegistryPartner getThisInstanceWithNewApiKey() {
-                String myURL = "registry-test.jbei.org";
+                String myURL = "registry-test10.jbei.org";
                 RegistryPartner thisPartner = new RegistryPartner();
                 String myName = "Registry test";
                 thisPartner.setName(myName);

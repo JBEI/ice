@@ -64,7 +64,7 @@ public class GroupsTest {
 
         // create remote partner
         RemotePartner partner = new RemotePartner();
-        partner.setUrl("registry.jbei.org");
+        partner.setUrl("registry-test3.jbei.org");
         partner = DAOFactory.getRemotePartnerDAO().create(partner);
         remoteUser.setPartner(partner.toDataTransferObject());
 
@@ -96,7 +96,7 @@ public class GroupsTest {
 
         // create remote test accounts
         RemotePartner partner = new RemotePartner();
-        partner.setUrl("registry.jbei.org");
+        partner.setUrl("registry-test2.jbei.org");
         partner = DAOFactory.getRemotePartnerDAO().create(partner);
 
         RemoteUser remoteUser1 = new RemoteUser();
