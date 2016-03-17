@@ -94,7 +94,7 @@ public class PartnerResource extends RestResource {
      */
     @PUT
     public Response updateRemotePartnerAPIKey(RegistryPartner partner) {
-        RegistryPartner registryPartner = verifyWebPartner();
+        RegistryPartner registryPartner = requireWebPartner();
         WebPartners partners = new WebPartners();
         return super.respond(partners.updateRemoteAPIKey(registryPartner.getUrl(), partner));
     }
@@ -108,7 +108,7 @@ public class PartnerResource extends RestResource {
             WebPartners partners = new WebPartners();
             return super.respond(partners.remove(userId, id));
         } catch (NumberFormatException nfe) {
-            RegistryPartner registryPartner = verifyWebPartner();
+            RegistryPartner registryPartner = requireWebPartner();
             WebPartners partners = new WebPartners();
             return super.respond(partners.removeRemotePartner(registryPartner.getId(), partnerId));
         }

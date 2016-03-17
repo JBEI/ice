@@ -1,7 +1,9 @@
 package org.jbei.ice.storage.model;
 
+import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.lib.dto.web.RemoteUser;
 import org.jbei.ice.storage.DataModel;
-import org.jbei.ice.storage.IDataTransferModel;
 
 import javax.persistence.*;
 import java.util.LinkedHashSet;
@@ -33,7 +35,7 @@ public class RemoteClientModel implements DataModel {
     private String email;
 
     @OneToOne
-    @JoinColumn(name = "remote_partner_id", nullable = true)
+    @JoinColumn(name = "remote_partner_id", nullable = false)
     private RemotePartner remotePartner;
 
     @ManyToMany(fetch = FetchType.LAZY)
@@ -67,7 +69,15 @@ public class RemoteClientModel implements DataModel {
     }
 
     @Override
-    public IDataTransferModel toDataTransferObject() {
-        return null;
-    }       // todo
+    public RemoteUser toDataTransferObject() {
+        RemoteUser remoteUser = new RemoteUser();
+        RegistryPartner partner = new RegistryPartner();
+        partner.setId(remotePartner.getId());
+        partner.setUrl(remotePartner.getUrl());
+        partner.setName(remotePartner.getName());
+        AccountTransfer accountTransfer = new AccountTransfer();
+        accountTransfer.setEmail(email);
+        remoteUser.setUser(accountTransfer);
+        return remoteUser;
+    }
 }

@@ -130,7 +130,7 @@ public class RestResource {
         return userId;
     }
 
-    protected RegistryPartner verifyWebPartner() {
+    protected RegistryPartner requireWebPartner() {
         RegistryPartner partner = getWebPartner();
         if (partner == null)
             throw new WebApplicationException(Response.Status.FORBIDDEN);

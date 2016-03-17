@@ -11,8 +11,7 @@ import org.jbei.ice.storage.model.RemotePartner;
  */
 public class RemoteUsers {
 
-    public RemoteUsers(String userId) {
-
+    public RemoteUsers() {
     }
 
     public RemoteUser get(long partnerId, String email) {
@@ -22,7 +21,7 @@ public class RemoteUsers {
             return null;
 
         RemoteContact remoteContact = new RemoteContact();
-        AccountTransfer accountTransfer = remoteContact.getUser(remotePartner.getUrl(), email);
+        AccountTransfer accountTransfer = remoteContact.getUser(remotePartner.getUrl(), email, remotePartner.getApiKey());
         if (accountTransfer == null)
             return null;
         RemoteUser remoteUser = new RemoteUser();

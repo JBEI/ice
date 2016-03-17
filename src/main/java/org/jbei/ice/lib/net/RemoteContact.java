@@ -123,8 +123,8 @@ public class RemoteContact {
         return restClient.getWor(url, "/rest/partners", ArrayList.class, null, token);
     }
 
-    public AccountTransfer getUser(String url, String email) {
-        return restClient.get(url, "/rest/users/" + email, AccountTransfer.class, null);
+    public AccountTransfer getUser(String url, String email, String token) {
+        return restClient.getWor(url, "rest/users/" + email, AccountTransfer.class, null, token);
     }
 
     public AccessPermission shareFolder(String url, AccessPermission permission, String token) {

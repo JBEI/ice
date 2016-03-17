@@ -51,20 +51,6 @@ public class GroupController {
         return isOwner || accountController.isAdministrator(userId);
     }
 
-    public ArrayList<AccountTransfer> getGroupMembers(String userId, long id) {
-        Group group = dao.get(id);
-        if (group == null || !canAccessGroup(userId, group))
-            return null;
-
-        // todo : add paging
-        ArrayList<AccountTransfer> list = new ArrayList<>();
-        for (Account account : group.getMembers()) {
-            list.add(account.toDataTransferObject());
-        }
-
-        return list;
-    }
-
     public Set<String> retrieveAccountGroupUUIDs(String userId) {
         Account account = accountController.getByEmail(userId);
         Set<String> uuids = new HashSet<>();
@@ -119,26 +105,6 @@ public class GroupController {
         }
         info.setMemberCount(info.getMembers().size());
         return info;
-    }
-
-    public boolean updateGroup(String userId, UserGroup user) {
-        if (user.getType() == GroupType.PUBLIC && !accountController.isAdministrator(userId)) {
-            String errMsg = "Non admin " + userId + " attempting to update public group";
-            Logger.error(errMsg);
-            return false;
-        }
-
-        Group group = dao.get(user.getId());
-        if (group == null) {
-            return false;
-        }
-
-        group.setLabel(user.getLabel());
-        group.setDescription(user.getDescription());
-        group = dao.update(group);
-
-        setGroupMembers(group, user.getMembers());
-        return group != null;
     }
 
     public boolean deleteGroup(String userIdStr, long groupId) {
@@ -250,37 +216,5 @@ public class GroupController {
         }
 
         return groupIds;
-    }
-
-    protected void setGroupMembers(Group group, ArrayList<AccountTransfer> members) {
-        // is there an easier way to do this?
-        // remove
-        for (Account member : group.getMembers()) {
-            Account memberAccount = accountController.getByEmail(member.getEmail());
-            if (memberAccount == null)
-                continue;
-            memberAccount.getGroups().remove(group);
-            accountController.save(memberAccount);
-        }
-
-        // add
-        ArrayList<Account> accounts = new ArrayList<>();
-        for (AccountTransfer accountTransfer : members) {
-            Account memberAccount = accountController.getByEmail(accountTransfer.getEmail());
-            if (memberAccount == null)
-                continue;
-            memberAccount.getGroups().add(group);
-            accountController.save(memberAccount);
-            accounts.add(memberAccount);
-        }
-
-        group.getMembers().clear();
-        group.getMembers().addAll(accounts);
-        dao.update(group);
-
-        members.clear();
-        for (Account addedAccount : accounts) {
-            members.add(addedAccount.toDataTransferObject());
-        }
     }
 }

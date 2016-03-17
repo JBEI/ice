@@ -154,7 +154,7 @@ public class FolderResource extends RestResource {
         if (StringUtils.isEmpty(userId) && !StringUtils.isEmpty(remoteUserToken)) {
             // check others
             log(remoteUserId, " remotely adding entries to folders");
-            RegistryPartner registryPartner = verifyWebPartner();
+            RegistryPartner registryPartner = requireWebPartner();
             return super.respond(folderContents.remotelyAddEntrySelection(remoteUserId, fid, remoteUserToken,
                     entrySelection, registryPartner));
         } else {
@@ -206,7 +206,7 @@ public class FolderResource extends RestResource {
                               @QueryParam("fields") List<String> queryParam) {
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
         if (folderId.equalsIgnoreCase("public")) {   // todo : move to separate rest resource path
-            RegistryPartner registryPartner = verifyWebPartner();
+            RegistryPartner registryPartner = requireWebPartner();
             // return public entries
             log(registryPartner.getUrl(), "requesting public entries");
             return this.controller.getPublicEntries(field, offset, limit, asc);
@@ -227,7 +227,7 @@ public class FolderResource extends RestResource {
                     return folderContents.getContents(userId, id, pageParameters);
 
                 // get registry partner
-                RegistryPartner partner = verifyWebPartner();
+                RegistryPartner partner = requireWebPartner();
                 log(partner.getUrl(), message);
                 return folderContents.getRemotelySharedContents(remoteUserId, token, partner, id, pageParameters);
             } else {

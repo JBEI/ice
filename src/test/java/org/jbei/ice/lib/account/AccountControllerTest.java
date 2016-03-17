@@ -33,33 +33,6 @@ public class AccountControllerTest {
     }
 
     @Test
-    public void testGet() throws Exception {
-        Account account = controller.get(0);
-        Assert.assertNull(account);
-
-        // create new account
-        account = new Account();
-        account.setFirstName("First");
-        account.setLastName("Last");
-        account.setDescription("Desc");
-        account.setInitials("FL");
-        account.setPassword("plom");
-        account.setIp("");
-        account.setInstitution("");
-        account.setEmail("testGet@TEST");
-        Assert.assertNotNull(controller.save(account));
-
-        // test get
-        account = controller.get(account.getId());
-        Assert.assertNotNull(account);
-        Assert.assertEquals("First", account.getFirstName());
-        Assert.assertEquals("Last", account.getLastName());
-        Assert.assertEquals("Desc", account.getDescription());
-        Assert.assertEquals("testGet@TEST", account.getEmail());
-        Assert.assertEquals("FL", account.getInitials());
-    }
-
-    @Test
     public void testResetPassword() throws Exception {
         Account account = AccountCreator.createTestAccount("testResetPassword", false);
         String oldPassword = account.getPassword();

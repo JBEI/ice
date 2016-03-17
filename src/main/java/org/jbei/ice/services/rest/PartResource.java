@@ -91,7 +91,7 @@ public class PartResource extends RestResource {
         } else {
             try {
                 if (StringUtils.isEmpty(userId)) {
-                    RegistryPartner partner = verifyWebPartner();
+                    RegistryPartner partner = requireWebPartner();
                     log(partner.getUrl(), "retrieving details for " + id);
                     return super.respond(controller.getRequestedEntry(remoteUserId, remoteUserToken, id, fid, partner));
                 } else {
@@ -141,7 +141,7 @@ public class PartResource extends RestResource {
         }
 
         if (StringUtils.isEmpty(userId)) {
-            verifyWebPartner();
+            requireWebPartner();
         }
         return controller.retrieveEntryTipDetails(id);
     }
@@ -480,7 +480,7 @@ public class PartResource extends RestResource {
         } else {
             // what request is being responded to (local or remote)
             if (StringUtils.isEmpty(userId)) {
-                RegistryPartner partner = verifyWebPartner();
+                RegistryPartner partner = requireWebPartner();
                 sequence = sequenceController.getRequestedSequence(partner, remoteUserId, remoteUserToken, partId, fid);
             } else {
                 sequence = sequenceController.retrievePartSequence(userId, partId);

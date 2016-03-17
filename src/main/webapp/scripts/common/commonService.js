@@ -79,7 +79,7 @@ angular.module('ice.common.service', [])
                     }
                 }
 
-                queryParams.sid = $cookieStore.get("sessionId");
+                //queryParams.sid = $cookieStore.get("sessionId");
                 $resource(url, queryParams, {
                     'get': {
                         method: 'GET',
@@ -102,7 +102,7 @@ angular.module('ice.common.service', [])
                 if (errorHandler)
                     errorCallback = errorHandler;
 
-                queryParams.sid = $cookieStore.get('sessionId');
+                //queryParams.sid = $cookieStore.get('sessionId');
                 $resource(url, queryParams, {
                     'list': {
                         method: 'GET',

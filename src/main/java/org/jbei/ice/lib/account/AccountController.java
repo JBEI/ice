@@ -88,16 +88,6 @@ public class AccountController {
     }
 
     /**
-     * Retrieve account from the database by database id.
-     *
-     * @param id Database id of account
-     * @return Account for the id
-     */
-    public Account get(final long id) {
-        return dao.get(id);
-    }
-
-    /**
      * Reset a user's password
      *
      * @param targetEmail email address of user account to be changed
@@ -171,7 +161,7 @@ public class AccountController {
      *                             the same but the <code>userId</code> does not have administrative privileges
      */
     public AccountTransfer updatePassword(String userId, long id, AccountTransfer transfer) throws PermissionException {
-        Account account = get(id);
+        Account account = dao.get(id);
         if (account == null) {
             throw new IllegalArgumentException("Could not retrieve account by id " + id);
         }

@@ -466,20 +466,42 @@ angular.module('ice.profile.controller', [])
     .controller('ProfileGroupsModalController', function ($scope, $http, Util, currentGroup, $cookieStore, $uibModalInstance) {
         $scope.headerMessage = currentGroup ? "Update \"" + currentGroup.label + "\"" : "Create New Group";
         $scope.webPartners = [];
+        $scope.placeHolder = 'User name or email';
 
         $scope.closeGroupModal = function () {
             $uibModalInstance.close();
         };
 
-        $scope.newGroup = {members: [], type: 'ACCOUNT'};
+        if (currentGroup && currentGroup.id) {
+            Util.get("rest/groups/" + currentGroup.id + "/members", function (result) {
+                currentGroup.type = 'ACCOUNT';
+                $scope.newGroup = currentGroup;
+
+                angular.forEach(result.members, function (member) {
+                    member.type = 'ACCOUNT';
+                    $scope.newGroup.members.push(member);
+                });
+
+                angular.forEach(result.remoteMembers, function (member) {
+                    member.type = 'REMOTE';
+                    $scope.newGroup.members.push(member);
+                });
+            });
+        } else {
+            $scope.newGroup = {members: [], type: 'ACCOUNT'};
+        }
 
         $scope.getWebPartners = function () {
+            $scope.placeHolder = 'Enter remote user\'s email';
             Util.list("rest/partners", function (result) {
                 $scope.webPartners = result;
             });
         };
 
         $scope.filter = function (val) {
+            if ($scope.newGroup.type == 'REMOTE')
+                return;
+
             return $http.get('rest/users/autocomplete', {
                 headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
                 params: {
@@ -491,34 +513,55 @@ angular.module('ice.profile.controller', [])
         };
 
         $scope.userSelectionForGroupAdd = function ($item, $model, $label) {
-            $scope.newUserName = $item.firstName + ' ' + $item.lastName;
-            if ($scope.newGroup.type == 'ACCOUNT') {
-                $scope.newGroup.members.push($item);
+            if ($scope.newGroup.type == 'REMOTE') {
+                $scope.newGroup.members.push({
+                    type: $scope.newGroup.type,
+                    email: $item,
+                    partner: $scope.newGroup.partner
+                });
             } else {
-                // todo
+                $item.type = $scope.newGroup.type;
+                $scope.newGroup.members.push($item);
+            }
+
+            // reset
+            $scope.newUserName = undefined;
+            $scope.newGroup.partner = undefined;
+            $scope.newGroup.type = 'ACCOUNT';
+        };
+
+        $scope.createOrUpdateGroup = function () {
+            var members = [];
+            var remoteMembers = [];
+
+            for (var i = 0; i < $scope.newGroup.members.length; i += 1) {
+                var member = $scope.newGroup.members[i];
+                if (member.type == 'REMOTE') {
+                    remoteMembers.push({user: {email: member.email}, partner: member.partner});
+                } else {
+                    members.push(member);
+                }
+            }
+
+            $scope.newGroup.members = members;
+            $scope.newGroup.remoteMembers = remoteMembers;
+
+            if ($scope.newGroup.id) {
+                Util.update("rest/groups/" + $scope.newGroup.id, $scope.newGroup, {}, function (result) {
+                }, function (error) {
+                    console.log(error);
+                });
+            } else {
+                Util.post("rest/groups", $scope.newGroup, function (result) {
+                    console.log(result);
+                }, {}, function (error) {
+                    console.log(error);
+                })
             }
         };
 
-        // adds a remote user to the new group object
-        $scope.selectRemoteUser = function () {
-            Util.get("rest/users/remote", function (result) {
-                $scope.newGroup.remoteMembers.push(result);
-            }, {pid: 34, email: $scope.remoteUser}, function (error) {
-                console.log("error fetching remote user");
-                if (error.status == 404) {
-                    // show to user
-                } else {
-                    // other error
-                }
-            });
-        };
-
-        $scope.createNewGroup = function () {
-            Util.post("rest/groups", $scope.newGroup, function (result) {
-                console.log(result);
-            }, {}, function (error) {
-
-            })
+        $scope.selectPartnerForGroupAdd = function (partner) {
+            $scope.newGroup.partner = {id: partner.id, url: partner.url};
         };
     })
 ;
