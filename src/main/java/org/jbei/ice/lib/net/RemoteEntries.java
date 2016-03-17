@@ -141,7 +141,8 @@ public class RemoteEntries {
 
         RemotePartner remotePartner = remoteAccessModel.getRemoteClientModel().getRemotePartner();
         String token = remoteAccessModel.getToken();
-        return remoteContact.getSequence(remotePartner.getUrl(), userId, entryId, token, remotePartner.getApiKey());
+        long remoteFolderId = Long.decode(remoteAccessModel.getIdentifier());
+        return remoteContact.getSequence(remotePartner.getUrl(), userId, entryId, remoteFolderId, token, remotePartner.getApiKey());
     }
 
     public void transferEntries(String userId, long remoteId, EntrySelection selection) {
