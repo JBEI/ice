@@ -355,9 +355,12 @@ angular.module('ice.profile.controller', [])
         var group = Group();
 
         // init: retrieve groups user belongs to and created
-        Util.get("rest/users/" + profileId + "/groups", function (result) {
-            $scope.userGroups = result;
-        });
+        var getGroups = function () {
+            Util.get("rest/users/" + profileId + "/groups", function (result) {
+                $scope.userGroups = result;
+            });
+        };
+        getGroups();
 
         $scope.switchToEditMode = function (selectedGroup) {
             selectedGroup.edit = true;
@@ -450,7 +453,7 @@ angular.module('ice.profile.controller', [])
                     return;
 
                 Util.setFeedback("Group successfully created", "success");
-                $scope.groupListPageChanged();
+                getGroups();
             })
         };
 
@@ -469,7 +472,7 @@ angular.module('ice.profile.controller', [])
         $scope.placeHolder = 'User name or email';
 
         $scope.closeGroupModal = function () {
-            $uibModalInstance.close();
+            $uibModalInstance.dismiss('cancel');
         };
 
         if (currentGroup && currentGroup.id) {
@@ -548,12 +551,14 @@ angular.module('ice.profile.controller', [])
 
             if ($scope.newGroup.id) {
                 Util.update("rest/groups/" + $scope.newGroup.id, $scope.newGroup, {}, function (result) {
+                    $uibModalInstance.close(result);
                 }, function (error) {
                     console.log(error);
                 });
             } else {
                 Util.post("rest/groups", $scope.newGroup, function (result) {
                     console.log(result);
+                    $uibModalInstance.close(result);
                 }, {}, function (error) {
                     console.log(error);
                 })
