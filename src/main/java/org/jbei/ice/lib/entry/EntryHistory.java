@@ -32,8 +32,6 @@ public class EntryHistory {
      * @param userId  unique identifier for user making requests
      * @param entryId unique identifier for entry whose history is of interest
      * @throws IllegalArgumentException if the entry specified by id <code>entryId</code> is not located
-     * @throws PermissionException      if the specified user does not have write privileges for the
-     *                                  entry
      */
     public EntryHistory(String userId, long entryId) {
         this.dao = DAOFactory.getAuditDAO();
@@ -43,7 +41,6 @@ public class EntryHistory {
         if (this.entry == null)
             throw new IllegalArgumentException("Cannot retrieve entry with id " + entryId);
         this.entryAuthorization = new EntryAuthorization();
-        this.entryAuthorization.expectWrite(userId, this.entry);
     }
 
     public Results<History> get(int limit, int offset, boolean asc, String sort) {
