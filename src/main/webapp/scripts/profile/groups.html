@@ -7,7 +7,8 @@
         <i class="text-muted">You have not created any private groups</i>
     </div>
 
-    <table class="table table-hover margin-top-10 table-border-bottom" ng-if="userGroups.data.length">
+    <table class="table table-hover margin-top-10 table-border-bottom" ng-if="userGroups.data.length"
+           style="width: 98%;">
         <thead>
         <tr>
             <th>&nbsp;</th>
@@ -63,21 +64,5 @@
         </tr>
         </tbody>
     </table>
-
-    <!--<div class="col-md-5" style="padding-left: 0">-->
-    <!--<uib-pagination total-items="userGroups.resultCount" ng-change="groupListPageChanged()"-->
-    <!--ng-model="privateGroupsParams.currentPage"-->
-    <!--max-size="privateGroupsParams.maxSize" class="pagination-sm"-->
-    <!--items-per-page="privateGroupsParams.limit"-->
-    <!--boundary-links="true"></uib-pagination>-->
-    <!--</div>-->
-
-    <!--<div class="col-md-7" style="margin-top: 25px;">-->
-    <!--<strong class="small">-->
-    <!--<i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>-->
-    <!--{{pageCounts(adminGroupsPagingParams.currentPage, adminGroupsPagingParams.available)}}-->
-    <!--</strong>-->
-    <!--</div>-->
-    <!--</div>-->
 </div>
 
