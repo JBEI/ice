@@ -345,7 +345,7 @@ public class PartResource extends RestResource {
         Results<TraceSequenceAnalysis> results = traceSequences.getTraces(start, limit);
 
         // hack for trace sequence viewer without having to modify it
-        if (StringUtils.isEmpty(userId))
+        if (StringUtils.isEmpty(sessionId))
             return super.respond(new ArrayList<>(results.getData()));
         return super.respond(results);
     }
