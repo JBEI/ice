@@ -1,13 +1,80 @@
 'use strict';
 
 angular.module('ice.profile.controller', [])
-    .controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
-        var message = Message($cookieStore.get('sessionId'));
-        var profileId = $stateParams.id;
-        $location.path("profile/" + profileId + "/messages", false);
-        message.query(function (result) {
+    .controller('MessageController', function ($scope, $uibModal, $stateParams, Util) {
+        $scope.selectedMessage = undefined;
+
+        $scope.selectMessage = function (message) {
+            Util.get("rest/messages/" + message.id, function (result) {
+                message.selected = true;
+                //result.message = result.message.replace(/(?:\r\n|\r|\n)/g, '<br />');
+                $scope.selectedMessage = result;
+            });
+        };
+
+        // get all messages
+        Util.get("rest/messages", function (result) {
             $scope.messages = result;
+            if (result.data.length) {
+                $scope.selectMessage(result.data[0]);
+            }
         });
+
+        $scope.replyMessage = function () {
+
+        };
+
+        $scope.openCreateMessageModal = function () {
+            $uibModal.open({
+                templateUrl: 'scripts/profile/modal/create-message.html',
+                backdrop: "static",
+                keyboard: false,
+                controller: 'CreateMessageController'
+            })
+        };
+    })
+    .controller('CreateMessageController', function ($scope, $uibModalInstance, $http, $cookieStore, Util) {
+        $scope.newMessage = {accounts: [], userGroups: []};
+
+        $scope.createNewMessage = function () {
+            Util.post("rest/messages", $scope.newMessage, function (result) {
+                $uibModalInstance.close();
+            })
+        };
+
+        $scope.closeGroupModal = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.setMessageRecipient = function (a, b, c) {
+            $scope.newMessage.accounts.push(a);
+            $scope.addedUser = undefined;
+        };
+
+        $scope.removeMessageRecipient = function (account, group) {
+            if (account) {
+                var accountIdx = $scope.newMessage.accounts.indexOf(account);
+                if (accountIdx != -1)
+                    $scope.newMessage.accounts.splice(accountIdx, 1);
+            }
+
+            if (group) {
+                var groupIdx = $scope.newMessage.userGroups.indexOf(gr);
+                if (groupIdx != -1)
+                    $scope.newMessage.userGroups.splice(groupIdx, 1);
+            }
+        };
+
+        $scope.filter = function (val) {
+            return $http.get('rest/users/autocomplete', {
+                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                params: {
+                    val: val
+                }
+            }).then(function (res) {
+                return res.data;
+            });
+        };
     })
     .controller('ApiKeysController', function ($scope, $uibModal, Util) {
         $scope.apiKeys = undefined;

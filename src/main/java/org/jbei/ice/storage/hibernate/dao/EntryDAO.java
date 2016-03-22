@@ -222,6 +222,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
+    // todo : or entry is in a folder that is public
     public long visibleEntryCount(Account account, Set<Group> groups, String filter) throws DAOException {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Permission.class);

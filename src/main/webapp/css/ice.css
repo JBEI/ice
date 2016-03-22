@@ -1277,3 +1277,29 @@ button[disabled].action-menu:hover {
     text-shadow: 0 1px 0 #fff;
 }
 
+.message {
+    border: 1px solid #f1f1f1;
+    background-color: #FEFEFE;
+    padding: 12px;
+}
+
+.message > small {
+    color: #c1c1c1;
+}
+
+.message:hover {
+    background-color: #657B83;
+    color: white;
+    cursor: pointer;
+}
+
+.message-selected {
+    background-color: #285e8e;
+    color: white;
+}
+
+.message-details {
+    width: 65%;
+    padding: 12px;
+    vertical-align: top
+}
