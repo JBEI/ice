@@ -795,9 +795,10 @@ angular.module('ice.entry.controller', [])
 
             $scope.filtering = true;
             Util.list("rest/users/autocomplete", function (result) {
+                console.log(result);
                 $scope.accessPermissions = result;
                 $scope.filtering = false;
-            }, {limit: 10, val: val}, function (error) {
+            }, {limit: 8, val: val}, function (error) {
                 $scope.filtering = false;
                 $scope.accessPermissions = undefined;
             });
@@ -846,6 +847,8 @@ angular.module('ice.entry.controller', [])
         // when user clicks on the check box, removes permission if exists or adds if not
         //
         $scope.addRemovePermission = function (permission) {
+            permission.article = "ACCOUNT";
+            permission.articleId = permission.id;
             permission.selected = !permission.selected;
             if (!permission.selected) {
                 removePermission(permission.id);
