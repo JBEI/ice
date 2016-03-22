@@ -22,10 +22,11 @@ public class RemoteShareModel implements DataModel {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
 
+    // access verification token
     @Column(name = "secret")
     private String secret;
 
-    // who is sharing
+    // who is sharing (must be a local account)
     @OneToOne
     @JoinColumn(name = "sharer_id", nullable = true)
     private Account sharer;
@@ -37,8 +38,8 @@ public class RemoteShareModel implements DataModel {
 
     // who is being shared with
     @OneToOne
-    @JoinColumn(name = "client_id", nullable = true)
-    private ClientModel client;
+    @JoinColumn(name = "client_id", nullable = false)
+    private RemoteClientModel client;
 
     @Override
     public long getId() {
@@ -69,11 +70,11 @@ public class RemoteShareModel implements DataModel {
         this.permission = permission;
     }
 
-    public ClientModel getClient() {
+    public RemoteClientModel getClient() {
         return client;
     }
 
-    public void setClient(ClientModel client) {
+    public void setClient(RemoteClientModel client) {
         this.client = client;
     }
 

@@ -1,6 +1,5 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.manuscript.Manuscript;
 import org.jbei.ice.lib.manuscript.Manuscripts;
 
@@ -25,7 +24,7 @@ public class ManuscriptResource extends RestResource {
         return super.respond(manuscripts.get(sort, asc, offset, size, filter));
     }
 
-    @POST
+    @GET
     @Path("{id}/files/zip")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
@@ -33,11 +32,7 @@ public class ManuscriptResource extends RestResource {
         String userId = requireUserId();
         log(userId, "creating zip for manuscript " + id);
         Manuscripts manuscripts = new Manuscripts(userId);
-        java.nio.file.Path path = manuscripts.generateZip(id);
-        if (path == null)
-            return Response.serverError().build();
-
-        return Response.ok(new Setting("key", path.getFileName().toString())).build();
+        return super.respond(manuscripts.generateZip(id));
     }
 
     @POST

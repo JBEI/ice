@@ -26,9 +26,9 @@
 
                 <h4>
                     <span ng-if="entry.visible!=='OK'">
-                    <small class="label" ng-class="{
+                    <small class="label " ng-class="{
                     'label-danger':entry.visible=='DELETED',
-                    'label-info':entry.visible='TRANSFERRED',
+                    'label-info':entry.visible=='TRANSFERRED',
                     'label-warning':entry.visible=='PENDING' || entry.visible=='DRAFT'}"
                            style="font-size: 9px; position: relative; top: -4px">{{entry.visible}}
                     </small>
@@ -63,10 +63,10 @@
                     &nbsp;<a ng-href="entry/{{parent.id}}" uib-tooltip="{{parent.name}}"
                              tooltip-trigger="mouseenter"
                              style="font-size: 12px; color: white; position: relative; top: -4px"
-                             class="label cursor_pointer"
+                             class="label cursor_pointer "
                              ng-class="{'label-default':parent.visible=='OK',
                              'label-warning': parent.visible=='PENDING' || parent.visible == 'DRAFT',
-                             'label-info':parent.visible='TRANSFERRED',
+                             'label-info':parent.visible=='TRANSFERRED',
                              'label-danger': parent.visible=='DELETED'}">
                         {{parent.type | capitalize}} <i class="fa fa-level-up"></i></a>
                     </span>

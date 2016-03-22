@@ -1,9 +1,11 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.access.AccessPermission;
+import org.jbei.ice.lib.dto.common.PageParameters;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
@@ -152,7 +154,7 @@ public class FolderResource extends RestResource {
         if (StringUtils.isEmpty(userId) && !StringUtils.isEmpty(remoteUserToken)) {
             // check others
             log(remoteUserId, " remotely adding entries to folders");
-            RegistryPartner registryPartner = verifyWebPartner();
+            RegistryPartner registryPartner = requireWebPartner();
             return super.respond(folderContents.remotelyAddEntrySelection(remoteUserId, fid, remoteUserToken,
                     entrySelection, registryPartner));
         } else {
@@ -185,26 +187,29 @@ public class FolderResource extends RestResource {
     }
 
     /**
-     * @return details of the selected collection
+     * Retrieves the entries for specified folder. Handles request
+     * from a local client (ui) or from a remote ice instance
+     *
+     * @return list of retrieved entries wrapped in folder object
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries")
-    public FolderDetails read(@Context final UriInfo uriInfo,
-                              @PathParam("id") final String folderId,
+    public FolderDetails read(@PathParam("id") final String folderId,
                               @DefaultValue("0") @QueryParam("offset") final int offset,
                               @DefaultValue("15") @QueryParam("limit") final int limit,
                               @DefaultValue("created") @QueryParam("sort") final String sort,
                               @DefaultValue("false") @QueryParam("asc") final boolean asc,
                               @DefaultValue("") @QueryParam("filter") String filter,
-                              @QueryParam("token") String token,
-                              @QueryParam("userId") String remoteUserId,
+                              @QueryParam("token") String token,   // todo: move to headers
+                              @QueryParam("userId") String remoteUserId,                   // todo : ditto
                               @QueryParam("fields") List<String> queryParam) {
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
-        if (folderId.equalsIgnoreCase("public")) {
+        if (folderId.equalsIgnoreCase("public")) {   // todo : move to separate rest resource path
+            RegistryPartner registryPartner = requireWebPartner();
             // return public entries
-            log(uriInfo.getBaseUri().toString(), "requesting public entries");
-            return controller.getPublicEntries(field, offset, limit, asc);
+            log(registryPartner.getUrl(), "requesting public entries");
+            return this.controller.getPublicEntries(field, offset, limit, asc);
         }
 
         // userId can be empty for public folders
@@ -215,19 +220,19 @@ public class FolderResource extends RestResource {
             if (filter.length() > 0)
                 message += " filtered by \"" + filter + "\"";
             FolderContents folderContents = new FolderContents();
+            PageParameters pageParameters = new PageParameters(offset, limit, field, asc, filter);
 
             if (StringUtils.isEmpty(userId)) {
-                if (StringUtils.isEmpty(token))
-                    return folderContents.getContents(userId, id, field, asc, offset, limit, filter);
+                if (StringUtils.isEmpty(token))  // todo :verify partner?
+                    return folderContents.getContents(userId, id, pageParameters);
 
                 // get registry partner
-                RegistryPartner partner = verifyWebPartner();
+                RegistryPartner partner = requireWebPartner();
                 log(partner.getUrl(), message);
-                return folderContents.getRemotelySharedContents(remoteUserId, token, partner, id, field, asc, offset,
-                        limit, filter);
+                return folderContents.getRemotelySharedContents(remoteUserId, token, partner, id, pageParameters);
             } else {
                 log(userId, message);
-                return folderContents.getContents(userId, id, field, asc, offset, limit, filter);
+                return folderContents.getContents(userId, id, pageParameters);
             }
         } catch (final NumberFormatException nfe) {
             Logger.error("Passed folder id " + folderId + " is not a number");
@@ -236,13 +241,17 @@ public class FolderResource extends RestResource {
     }
 
     /**
-     * @return Response with permissions on a collection
+     * Retrieves list of permissions available for the specified folder. This action
+     * is restricted to users who have write privileges on the folder
+     *
+     * @param folderId unique local folder identifier
+     * @return list of permissions for folder
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
     public Response getFolderPermissions(@PathParam("id") final long folderId) {
-        final String userId = getUserId();
+        final String userId = requireUserId();
         FolderPermissions folderPermissions = new FolderPermissions(folderId);
         return respond(folderPermissions.get(userId));
     }
@@ -260,17 +269,27 @@ public class FolderResource extends RestResource {
     }
 
     /**
-     * @return the added permission
+     * Add new permission to list of permissions for specified folder
+     *
+     * @param folderId   unique local folder identifier
+     * @param permission details about access privilege for folder
+     * @return details about access privilege for folder with a local unique identifier
+     * which can be used to remove the privilege
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
-    public Response addPermission(@Context final UriInfo info,
-                                  @PathParam("id") final long folderId,
+    public Response addPermission(@PathParam("id") final long folderId,
                                   final AccessPermission permission) {
-        final String userId = requireUserId();
-        FolderPermissions folderPermissions = new FolderPermissions(folderId);
-        return super.respond(folderPermissions.createPermission(userId, permission));
+        try {
+            final String userId = requireUserId();
+            FolderPermissions folderPermissions = new FolderPermissions(folderId);
+            return super.respond(folderPermissions.createPermission(userId, permission));
+        } catch (PermissionException pe) {
+            return super.respond(Response.Status.FORBIDDEN);
+        } catch (IllegalArgumentException ile) {
+            return respond(Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DELETE
@@ -295,9 +314,6 @@ public class FolderResource extends RestResource {
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
-    /**
-     * @return Response for success or failure
-     */
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions/public")

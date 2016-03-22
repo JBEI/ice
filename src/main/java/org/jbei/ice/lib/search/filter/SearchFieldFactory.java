@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.search.filter;
 
-import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.storage.model.ArabidopsisSeed;
 import org.jbei.ice.storage.model.Part;

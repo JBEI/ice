@@ -2,6 +2,8 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
+import org.hibernate.Query;
+import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -51,5 +53,17 @@ public class AuditDAO extends HibernateRepository<Audit> {
         if (itemCount != null)
             return itemCount.intValue();
         return 0;
+    }
+
+    public int deleteAll(Entry entry) {
+        try {
+            Session session = currentSession();
+            Query query = session.createQuery("delete from " + Audit.class.getName() + " where entry=:entry");
+            query.setParameter("entry", entry);
+            return query.executeUpdate();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 }

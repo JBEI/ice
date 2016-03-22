@@ -40,9 +40,9 @@ public class ExperimentsTest {
         String url = "http://edd-test.jbei.org";
 
         // create entries
-        long partId1 = TestEntryCreator.createTestPart(userId1);
-        long partId12 = TestEntryCreator.createTestPart(userId1);
-        long partId2 = TestEntryCreator.createTestPart(userId2);
+        String partId1 = Long.toString(TestEntryCreator.createTestPart(userId1));
+        String partId12 = Long.toString(TestEntryCreator.createTestPart(userId1));
+        String partId2 = Long.toString(TestEntryCreator.createTestPart(userId2));
 
         // create studies for part 1
         Assert.assertNotNull(experiments.createOrUpdateStudy(userId1, partId1, new Study("1", url + "1")));
@@ -78,7 +78,7 @@ public class ExperimentsTest {
     public void testCreateStudy() throws Exception {
         Account account = AccountCreator.createTestAccount("testCreateStudy", false);
         String userId = account.getEmail();
-        long partId = TestEntryCreator.createTestPart(userId);
+        String partId = Long.toString(TestEntryCreator.createTestPart(userId));
         Study study = new Study();
         study.setUrl("http://edd-test.jbei.org/foo/bar");
         study.setLabel("test create");
@@ -104,7 +104,7 @@ public class ExperimentsTest {
     @Test
     public void testDeleteStudy() throws Exception {
         String userId = AccountCreator.createTestAccount("testDeleteStudy", false).getEmail();
-        long partId = TestEntryCreator.createTestPart(userId);
+        String partId = Long.toString(TestEntryCreator.createTestPart(userId));
         Study study = new Study("test create", "http://edd-test.jbei.org/foo/bar");
         Study created = experiments.createOrUpdateStudy(userId, partId, study);
         Assert.assertNotNull(created);

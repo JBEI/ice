@@ -7,7 +7,6 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.executor.Task;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.services.rest.IceRestClient;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.RemotePartner;
 
@@ -47,9 +46,9 @@ public class WebOfRegistriesTask extends Task {
         }
 
         if (!this.enable) {
+            // delete from the node master
             RemotePartner masterPartner = DAOFactory.getRemotePartnerDAO().getByUrl(NODE_MASTER);
-            IceRestClient restClient = IceRestClient.getInstance();
-            restClient.delete(masterPartner.getApiKey(), NODE_MASTER, "/rest/web/partners");
+            this.remoteContact.deleteInstanceFromMaster(NODE_MASTER, masterPartner.getApiKey(), this.myUrl);
             return;
         }
 

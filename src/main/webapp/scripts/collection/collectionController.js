@@ -2,8 +2,9 @@
 
 angular.module('ice.collection.controller', [])
     // controller for <ice.menu.collections> directive
-    .controller('CollectionMenuController', function ($cookieStore, $scope, $uibModal, $rootScope, $location, $stateParams,
-                                                      Folders, FolderSelection, EntryContextUtil, Util) {
+    .controller('CollectionMenuController', function ($cookieStore, $scope, $uibModal, $rootScope, $location,
+                                                      $stateParams, Folders, FolderSelection, EntryContextUtil, Util,
+                                                      localStorageService) {
         var folders = Folders();
 
         // retrieve (to refresh the information such as part counts) all the sub folders under
@@ -16,6 +17,28 @@ angular.module('ice.collection.controller', [])
             Util.list("rest/collections/" + folder.toUpperCase() + "/folders", function (result) {
                 $scope.selectedCollectionFolders = result;
             });
+        };
+
+        $scope.sortParams = localStorageService.get('collectionFolderSortParams');
+        if (!$scope.sortParams) {
+            $scope.sortParams = {field: 'creationTime', asc: true};
+            console.log("setting defaults")
+        }
+
+        $scope.sortCollectionFolders = function () {
+            if ($scope.sortParams.field == 'creationTime') {
+                if (!$scope.sortParams.asc) {
+                    $scope.sortParams.field = 'folderName';
+                }
+                $scope.sortParams.asc = false;
+            } else {
+                // sort by name
+                if ($scope.sortParams.asc) {
+                    $scope.sortParams.field = 'creationTime';
+                }
+                $scope.sortParams.asc = true;
+            }
+            localStorageService.set('collectionFolderSortParams', $scope.sortParams);
         };
 
         //
@@ -38,12 +61,28 @@ angular.module('ice.collection.controller', [])
         } else {
             // selected folder is a number. folder selected, need collection it is contained in
             Util.get("rest/folders/" + $scope.selectedFolder, function (result) {
-                if (result.type == 'PUBLIC')
-                    $scope.selectedFolder = "available";
-                else
-                    $scope.selectedFolder = 'personal';
+                switch (result.type) {
+                    case 'PUBLIC':
+                        $scope.selectedFolder = "available";
+                        break;
+
+                    case 'PRIVATE':
+                    default:
+                        $scope.selectedFolder = 'personal';
+                        break;
+
+                    case 'TRANSFERRED':
+                        $scope.selectedFolder = 'transferred';
+                        break;
+
+                    case 'SHARED':
+                    case 'REMOTE':
+                        $scope.selectedFolder = 'shared';
+                        break;
+                }
 
                 FolderSelection.selectCollection($scope.selectedFolder);
+                FolderSelection.selectFolder(result);
                 $scope.updateSelectedCollectionFolders();
             });
         }
@@ -78,6 +117,7 @@ angular.module('ice.collection.controller', [])
         // simply changes state to folder and allows the controller for that to handle it
         //
         $scope.selectCollectionFolder = function (folder) {
+
             // type on server is PUBLIC, PRIVATE, SHARED, UPLOAD
             EntryContextUtil.resetContext();
             var type = folder.type.toLowerCase();
@@ -89,12 +129,6 @@ angular.module('ice.collection.controller', [])
             $location.path(type + "/" + folder.id);
         };
 
-        // todo :
-        $scope.acceptTransferredFolder = function (folder) {
-            console.log(folder);
-            // update folder status
-        };
-
         //
         // called when a collection is selected. Collections are pre-defined ['Featured', 'Deleted', etc]
         // and some allow folders and when that is selected then the selectCollectionFolder() is called
@@ -102,6 +136,7 @@ angular.module('ice.collection.controller', [])
         $scope.selectCollection = function (name) {
             EntryContextUtil.resetContext();
             FolderSelection.selectCollection(name);
+            $location.search({});
             $location.path("folders/" + name);
             $scope.selectedFolder = name;
 
@@ -140,7 +175,7 @@ angular.module('ice.collection.controller', [])
             }
         });
     })
-    .controller('FolderPermissionsController', function ($scope, $http, $uibModalInstance, $cookieStore, Folders, Permission,
+    .controller('FolderPermissionsController', function ($scope, $http, $uibModalInstance, $cookieStore, Folders,
                                                          Util, User, folder) {
         var sessionId = $cookieStore.get("sessionId");
         $scope.folder = folder;
@@ -170,11 +205,18 @@ angular.module('ice.collection.controller', [])
 
         $scope.setPermission = function (isWrite) {
             if (isWrite) {
+                // write is clicked
+                if (!$scope.newPermission.canRead)
+                    return;
+
                 $scope.newPermission.canWrite = !$scope.newPermission.canWrite;
                 if ($scope.newPermission.canWrite) {
                     $scope.newPermission.canRead = false;
                 }
             } else {
+                if (!$scope.newPermission.canWrite)
+                    return;
+
                 $scope.newPermission.canRead = !$scope.newPermission.canRead;
                 if ($scope.newPermission.canRead) {
                     $scope.newPermission.canWrite = false;
@@ -183,13 +225,14 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.closeModal = function () {
-            $uibModalInstance.close('cancel'); // todo : pass object to inform if folder is shared or cleared
+            $uibModalInstance.close($scope.permissions);
         };
 
         $scope.setPermissionArticle = function (type) {
             $scope.newPermission.article = type.toUpperCase();
             $scope.newPermission.articleId = undefined;
             $scope.newPermission.partner = undefined;
+            $scope.userFilterInput = undefined;
 
             switch (type.toLowerCase()) {
                 case "account":
@@ -216,8 +259,24 @@ angular.module('ice.collection.controller', [])
             })
         };
 
+        $scope.disablePermissionAdd = function () {
+            if (!$scope.newPermission.article)
+                return true;
+
+            switch ($scope.newPermission.article.toLowerCase()) {
+                case "account":
+                case "group":
+                    return !$scope.newPermission.articleId;
+
+                case "remote":
+                    return !$scope.userFilterInput || !$scope.newPermission.partner;
+            }
+            return true;
+        };
+
         $scope.userSelectionForPermissionAdd = function (item, model, label) {
             $scope.newPermission.articleId = item.id;
+            $scope.userFilterInput = $scope.userFilterInput.firstName + " " + $scope.userFilterInput.lastName;
         };
 
         $scope.removePermission = function (permission) {
@@ -233,6 +292,8 @@ angular.module('ice.collection.controller', [])
             });
         };
 
+        // converts the permission object to a form the backend expects and
+        // adds a new access privilege for the current folder
         $scope.addNewPermission = function () {
             if ($scope.newPermission.canWrite) {
                 $scope.newPermission.type = 'WRITE_FOLDER';
@@ -249,6 +310,10 @@ angular.module('ice.collection.controller', [])
                 result.canWrite = result.type == 'WRITE_FOLDER';
                 result.canRead = result.type == 'READ_FOLDER';
                 $scope.permissions.push(result);
+
+                $scope.newPermission.articleId = undefined;
+                $scope.newPermission.partner = undefined;
+                $scope.userFilterInput = undefined;
             });
         };
 
@@ -269,7 +334,6 @@ angular.module('ice.collection.controller', [])
         $scope.filter = function (val) {
             switch ($scope.newPermission.article.toLowerCase()) {
                 case "account":
-                default :
                     return $http.get('rest/users/autocomplete', {
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
                         params: {
@@ -469,7 +533,7 @@ angular.module('ice.collection.controller', [])
             Selection.selectEntry(entry);
         };
 
-        $scope.showEntryDetails = function (entry, index) {
+        $scope.showEntryDetails = function (entry, index, sub) {
             if (!$scope.params.offset) {
                 $scope.params.offset = index;
             }
@@ -490,7 +554,17 @@ angular.module('ice.collection.controller', [])
             }, $scope.params.count, offset, "folders/" + $scope.params.folderId, $scope.params.sort);
 
             //$location.search("fid", $scope.folder.id);
-            $location.path("entry/" + entry.id);
+            var url = "entry/" + entry.id;
+            if (sub)
+                url += '/' + sub;
+
+            $location.path(url);
+            $location.search({});
+
+            if ($scope.folder && $scope.folder.type == 'REMOTE') {
+                $location.search("folderId", $scope.folder.id);
+                $location.search("remote", true);
+            }
         };
 
         $scope.tooltipDetails = function (e) {
@@ -520,6 +594,12 @@ angular.module('ice.collection.controller', [])
                     }
                 }
             });
+
+            modalInstance.result.then(function (updatedPermissions) {
+                if (updatedPermissions) {
+                    $scope.folder.accessPermissions = updatedPermissions;
+                }
+            });
         };
 
         $scope.getDisplay = function (permission) {
@@ -527,7 +607,10 @@ angular.module('ice.collection.controller', [])
                 return permission.display.replace(/[^A-Z]/g, '');
 
             // group
-            return permission.display;
+            if (permission.article === 'GROUP')
+                return permission.display;
+
+            return "Remote";
         };
 
         $scope.shareText = function (permission) {
@@ -546,7 +629,7 @@ angular.module('ice.collection.controller', [])
 
         $scope.changeFolderType = function (newType) {
             var tmp = {id: $scope.folder.id, type: newType};
-            Util.update('rest/folders/' + $scope.folder.id, tmp, function (result) {
+            Util.update('rest/folders/' + $scope.folder.id, tmp, {}, function (result) {
                 $scope.folder.type = result.type;
                 if (newType === 'PUBLIC')
                     $location.path('folders/available');
@@ -724,121 +807,12 @@ angular.module('ice.collection.controller', [])
         $rootScope.$on('SamplesInCart', function (event, data) {
             $scope.shoppingCartContents = data;
         });
-
-        // table
-        $scope.alignmentGraph = function (searchResult) {
-            var ptsPerPixel = searchResult.queryLength / 100;
-            var start = Number.MAX_VALUE;
-            var end = Number.MIN_VALUE;
-            var stripes = {};
-
-            var started = false;
-            var matchDetails = searchResult.matchDetails;
-            $scope.headers = {};
-            $scope.sequences = {}; //setup scope for query alignment
-
-            for (var i = 0; i < matchDetails.length; i++) {
-                var line = matchDetails[i].replace(/"/g, ' ').trim();
-
-                //parse Query for score, gaps, & strand data
-                if (line.lastIndexOf("Query", 0) === 0) {
-                    $scope.headers.score = e;
-                    var s = matchDetails[1].split(",");
-                    var c = s[0];
-                    var o = c.split("=");
-                    var e = o[1].trim(); //score data
-                    $scope.headers.gaps = d;
-                    var g = matchDetails[2].split(",");
-                    var a = g[1];
-                    var p = a.split("=");
-                    var d = p[1].trim();//gaps data
-                    $scope.headers.strand = r;
-                    var t = matchDetails[3].split("=");
-                    var r = (t[1]); //strand data
-                }
-
-                if (line.lastIndexOf("Strand", 0) === 0) {
-                    started = true;
-                    var l = []; //empty array filled with the following contents
-                    l = line.split(" "); //separate Query alignment by spaces;
-                    var tmp = (l[2]); //last nucleotide location for Query alignment
-                    if (tmp < start) //tmp will always be less than MAX_NUMBER
-                        start = tmp;
-
-                    tmp = (l[l.length - 1]); //nucleotide bases
-                    if (tmp > end)
-                        end = tmp;
-                } else if (line.lastIndexOf("Score", 0) === 0) {
-                    if (started) {
-                        stripes[start] = end;
-                        start = Number.MAX_VALUE;
-                        end = Number.MIN_VALUE;
-                    }
-                }
-            }
-
-            var prevStart = 0;
-            var defColor = "#444";
-            var stripColor = "";
-
-            // stripe color is based on alignment score
-            if (searchResult.score >= 200)
-                stripColor = "orange";
-            else if (searchResult.score < 200 && searchResult.score >= 80)
-                stripColor = "green";
-            else if (searchResult.score < 80 && searchResult.score >= 50)
-                stripColor = "blue";
-            else
-                stripColor = "red";
-
-            var fillEnd = 100;
-            var html = "<table cellpadding=0 cellspacing=0><tr>";
-            var results = [];
-
-            for (var key in stripes) {
-                if (!stripes.hasOwnProperty(key))
-                    continue;
-
-                var stripeStart = key;
-                var stripeEnd = stripes[key];
-
-                var stripeBlockLength = (Math.round((stripeEnd - stripeStart) / ptsPerPixel));
-                var fillStart = (Math.round(stripeStart / ptsPerPixel));
-
-                var width;
-                if (prevStart >= fillStart && prevStart != 0)
-                    width = 1;
-                else
-                    width = fillStart - prevStart;
-
-                results.push(width);
-
-                html += "<td><hr style=\"background-color: " + defColor + "; border: 0px; width: "
-                    + width + "px; height: 10px\"></hr></td>";
-
-                // mark stripe
-                prevStart = (fillStart - prevStart) + stripeBlockLength;
-                html += "<td><hr style=\"background-color: " + stripColor + "; border: 0px; width: "
-                    + stripeBlockLength + "px; height: 10px\"></hr></td>";
-                fillEnd = fillStart + stripeBlockLength;
-            }
-
-            if (fillEnd < 100) {
-                html += "<td><hr style=\"background-color: " + defColor + "; border: 0px; width: "
-                    + (100 - fillEnd) + "px; height: 10px\"></hr></td>";
-            }
-
-            html += "</tr></table>";
-
-//        $scope.stripes = stripes;
-
-            return results;
-        };
     })
     .controller('CollectionDetailController', function ($scope, $cookieStore, Folders, $stateParams, $location, Util) {
         var sessionId = $cookieStore.get("sessionId");
         var folders = Folders();
         $scope.hideAddCollection = true;
+        //console.log("folder", $stateParams.collection);
 
         $scope.$on("ShowCollectionFolderAdd", function (e) {
             $scope.hideAddCollection = false;
@@ -875,6 +849,3 @@ angular.module('ice.collection.controller', [])
         }
     })
 ;
-
-
-

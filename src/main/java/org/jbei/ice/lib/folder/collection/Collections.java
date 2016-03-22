@@ -35,9 +35,10 @@ public class Collections {
         collection.setAvailable(visibleEntries.getEntryCount());
         collection.setDeleted(entryDAO.getDeletedCount(userId));
 
-        collection.setPersonal(getNumberOfOwnerEntries(userId));
+        long ownerEntryCount = DAOFactory.getEntryDAO().ownerEntryCount(userId);
+        collection.setPersonal(ownerEntryCount);
         SharedEntries sharedEntries = new SharedEntries(userId);
-        collection.setShared(sharedEntries.getNumberofEntries(null));
+        collection.setShared(sharedEntries.getNumberOfEntries(null));
         collection.setDrafts(entryDAO.getByVisibilityCount(userId, Visibility.DRAFT, null));
 
         if (account.getType() != AccountType.ADMIN)
@@ -85,9 +86,5 @@ public class Collections {
             default:
                 throw new IllegalArgumentException("Unknown collection type " + type);
         }
-    }
-
-    protected long getNumberOfOwnerEntries(String ownerEmail) {
-        return DAOFactory.getEntryDAO().ownerEntryCount(ownerEmail);
     }
 }

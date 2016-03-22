@@ -512,7 +512,7 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.addExistingPartLink = function ($item, $model) {
-            entry.query({partId: $model.id}, function (result) {
+            Util.get("rest/parts/" + $model, function (result) {
                 $scope.activePart = result;
                 $scope.activePart.isExistingPart = true;
                 if (!$scope.activePart.parameters)
@@ -654,7 +654,6 @@ angular.module('ice.entry.controller', [])
                     field: 'PART_NUMBER'
                 }
             }).then(function (res) {
-                console.log(res);
                 return res.data;
             });
         };
@@ -752,7 +751,7 @@ angular.module('ice.entry.controller', [])
         };
     })
     .controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group,
-                                                       filterFilter, Permission, Util) {
+                                                       filterFilter, Util) {
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
         var panes = $scope.panes = [];
@@ -795,14 +794,15 @@ angular.module('ice.entry.controller', [])
             }
 
             $scope.filtering = true;
-            Permission().filterUsersAndGroups({limit: 10, val: val},
-                function (result) {
-                    $scope.accessPermissions = result;
-                    $scope.filtering = false;
-                }, function (error) {
-                    $scope.filtering = false;
-                    $scope.accessPermissions = undefined;
-                });
+            Util.list("rest/users/autocomplete", function (result) {
+                console.log(result);
+                $scope.accessPermissions = result;
+                $scope.filtering = false;
+            }, {limit: 8, val: val}, function (error) {
+                $scope.filtering = false;
+                $scope.accessPermissions = undefined;
+            });
+
         };
 
         $scope.showAddPermissionOptionsClick = function () {
@@ -841,19 +841,14 @@ angular.module('ice.entry.controller', [])
                 $scope.activePermissions.splice(i, 1);
                 pane.count = $scope.activePermissions.length;
             });
-
-            //addPermission: {
-            //    method: 'POST',
-            //        responseType: 'json',
-            //        url: 'rest/parts/:partId/permissions',
-            //        headers: {'X-ICE-Authentication-SessionId': sessionId}
-            //},
         };
 
         //
         // when user clicks on the check box, removes permission if exists or adds if not
         //
         $scope.addRemovePermission = function (permission) {
+            permission.article = "ACCOUNT";
+            permission.articleId = permission.id;
             permission.selected = !permission.selected;
             if (!permission.selected) {
                 removePermission(permission.id);
@@ -1211,20 +1206,7 @@ angular.module('ice.entry.controller', [])
         $scope.notFound = undefined;
         $scope.noAccess = undefined;
 
-
-        //query: {
-        //    method: 'GET',
-        //        responseType: "json",
-        //        url: "rest/parts/:partId",
-        //        headers: {'X-ICE-Authentication-SessionId': sessionId}
-        //},
-
-        var params = {};
-        if (FolderSelection.getSelectedFolder() && FolderSelection.getSelectedFolder().type == 'REMOTE') {
-            params.remote = true;
-            params.folderId = FolderSelection.getSelectedFolder().id;
-            //$location.search("fid", ) // todo : if the page is refreshed
-        }
+        var params = $location.search();
 
         Util.get("rest/parts/" + $stateParams.id,
             function (result) {
@@ -1235,10 +1217,13 @@ angular.module('ice.entry.controller', [])
                 if ($scope.entry.canEdit)
                     $scope.newParameter = {edit: false};
                 $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
+                $scope.entry.remote = params.remote;
 
-                entry.statistics({partId: $stateParams.id}, function (stats) {
+                // get sample count, comment count etc
+                Util.get("rest/parts/" + $stateParams.id + "/statistics", function (stats) {
                     $scope.entryStatistics = stats;
-                });
+                }, params);
+
             }, params, function (error) {
                 if (error.status === 404)
                     $scope.notFound = true;

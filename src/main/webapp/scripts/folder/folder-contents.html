@@ -38,14 +38,19 @@
                                 <small class="font-65em" ng-if="folder.type != 'REMOTE'">
                                     {{folder.creationTime | date:'short'}}
                                 </small>
-                                <small ng-if="folder.type==='SHARED'" style="color: #333">
+                                <small ng-if="folder.accessPermissions.length" style="color: #333">
                                     <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
 
                                     <span ng-repeat="permission in folder.accessPermissions" style="margin-right: 3px">
                                         <span class="label" uib-tooltip="{{shareText(permission)}}"
-                                              ng-class="{'bg_permission_group':permission.article==='GROUP', 'bg_permission_user':permission.article==='ACCOUNT'}">
+                                              ng-class="{'bg_permission_group':permission.article==='GROUP',
+                                              'bg_permission_user':permission.article==='ACCOUNT',
+                                              'bg_permission_remote':permission.article==='REMOTE'}">
                                              <i class="fa"
-                                                ng-class="{'fa-group':permission.article==='GROUP', 'fa-user':permission.article==='ACCOUNT'}"></i> {{getDisplay(permission)}}
+                                                ng-class="{'fa-group':permission.article==='GROUP',
+                                                'fa-user':permission.article==='ACCOUNT',
+                                                'fa-globe':permission.article==='REMOTE'}"></i>
+                                            {{getDisplay(permission)}}
                                         </span>
                                     </span>
                                 </small>
@@ -218,12 +223,13 @@
                     </div>
                 </td>
                 <td style="vertical-align: middle">
-                    <small style="opacity: 0.4">
+                    <a ng-click="showEntryDetails(entry, $index, 'history')" style="opacity: 0.4"
+                       class="small cursor_pointer">
                         <ng-pluralize count="entry.viewCount"
                                       when="{'0': '',
                                   '1': '1 view',
                                   'other':'{} views'}"></ng-pluralize>
-                    </small>
+                    </a>
                 </td>
                 <td style="vertical-align: middle; width:100px; white-space:nowrap"
                     ng-if="entryHeaders.status.selected">

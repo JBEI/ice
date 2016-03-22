@@ -2,13 +2,16 @@ package org.jbei.ice.lib.entry.sequence;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
+import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryCreator;
@@ -224,6 +227,42 @@ public class SequenceController {
         return byteStream.toString();
     }
 
+    // responds to remote requested entry sequence
+    public FeaturedDNASequence getRequestedSequence(RegistryPartner requestingPartner, String remoteUserId,
+                                                    String token, long entryId, long folderId) {
+        Entry entry = DAOFactory.getEntryDAO().get(entryId);
+        if (entry == null)
+            return null;
+
+        // see folderContents.getRemoteSharedContents
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);      // folder that the entry is contained in
+        RemotePartner remotePartner = DAOFactory.getRemotePartnerDAO().getByUrl(requestingPartner.getUrl());
+
+        // check that the remote user has the right token
+        RemoteShareModel shareModel = DAOFactory.getRemoteShareModelDAO().get(remoteUserId, remotePartner, folder);
+        if (shareModel == null) {
+            Logger.error("Could not retrieve share model");
+            return null;
+        }
+
+        Permission permission = shareModel.getPermission(); // folder must match
+        if (permission.getFolder().getId() != folderId) {
+            String msg = "Shared folder does not match folder being requested";
+            Logger.error(msg);
+            throw new PermissionException(msg);
+        }
+
+        // validate access token
+        TokenHash tokenHash = new TokenHash();
+        String secret = tokenHash.encrypt(folderId + remotePartner.getUrl() + remoteUserId, token);
+        if (!secret.equals(shareModel.getSecret())) {
+            throw new PermissionException("Secret does not match");
+        }
+
+        // check that entry id is contained in folder
+        return getFeaturedSequence(entry, permission.isCanWrite());
+    }
+
     public FeaturedDNASequence retrievePartSequence(String userId, long recordId) {
         Entry entry = DAOFactory.getEntryDAO().get(recordId);
         if (entry == null)
@@ -232,12 +271,16 @@ public class SequenceController {
         if (!new PermissionsController().isPubliclyVisible(entry))
             authorization.expectRead(userId, entry);
 
+        boolean canEdit = authorization.canWriteThoroughCheck(userId, entry);
+        return getFeaturedSequence(entry, canEdit);
+    }
+
+    protected FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {
         Sequence sequence = dao.getByEntry(entry);
         if (sequence == null)
             return null;
 
         FeaturedDNASequence featuredDNASequence = sequenceToDNASequence(sequence);
-        boolean canEdit = authorization.canWriteThoroughCheck(userId, entry);
         featuredDNASequence.setCanEdit(canEdit);
         featuredDNASequence.setIdentifier(entry.getPartNumber());
         String uriPrefix = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX).getValue();
@@ -425,7 +468,7 @@ public class SequenceController {
         String sequenceString;
 
         try {
-            switch (type) {
+            switch (type.toLowerCase()) {
                 case "original":
                     sequenceString = sequence.getSequenceUser();
                     name = entry.getName() + ".seq";
@@ -451,7 +494,7 @@ public class SequenceController {
                     name = entry.getName() + ".xml";
                     break;
 
-                case "pigeonI":
+                case "pigeoni":
                     try {
                         URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
                         byte[] bytes = IOUtils.toByteArray(uri.toURL().openStream());
@@ -461,7 +504,7 @@ public class SequenceController {
                         return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
                     }
 
-                case "pigeonS":
+                case "pigeons":
                     sequenceString = PigeonSBOLv.generatePigeonScript(sequence);
                     name = entry.getName() + ".txt";
                     break;

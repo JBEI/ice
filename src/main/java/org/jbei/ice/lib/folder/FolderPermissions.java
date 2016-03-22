@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.folder;
 
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.TokenHash;
@@ -19,6 +20,8 @@ import java.util.Date;
 import java.util.Set;
 
 /**
+ * Represents permissions for a specified folder with methods to manipulate them
+ *
  * @author Hector Plahar
  */
 public class FolderPermissions {
@@ -30,14 +33,16 @@ public class FolderPermissions {
     private final PermissionDAO permissionDAO;
     private final AccountDAO accountDAO;
     private final RemoteShareModelDAO remoteShareModelDAO;
-    private final ClientModelDAO clientModelDAO;
+    private final RemoteClientModelDAO remoteClientModelDAO;
+    private final RemotePartnerDAO remotePartnerDAO;
 
     public FolderPermissions(long folderId) {
         this.dao = DAOFactory.getFolderDAO();
         this.permissionDAO = DAOFactory.getPermissionDAO();
         this.accountDAO = DAOFactory.getAccountDAO();
         this.remoteShareModelDAO = DAOFactory.getRemoteShareModelDAO();
-        this.clientModelDAO = DAOFactory.getClientModelDAO();
+        this.remoteClientModelDAO = DAOFactory.getRemoteClientModelDAO();
+        this.remotePartnerDAO = DAOFactory.getRemotePartnerDAO();
         this.folder = this.dao.get(folderId);
         if (folder == null)
             throw new IllegalArgumentException("Cannot retrieve folder with id " + folderId);
@@ -82,15 +87,27 @@ public class FolderPermissions {
         return accessPermissions;
     }
 
-    // folder for local
+    /**
+     * Creates a new access permission record to enable read or write privileges for a folder.
+     * User initiating request must have write privileges for the folder
+     *
+     * @param userId           unique identifier for user creating record
+     * @param accessPermission details about access permissions to create
+     * @return access permission data transfer object with unique record identifier
+     * @throws IllegalArgumentException if the <code>accessPermission</code> object is null
+     * @throws PermissionException      if specified user does not have write privileges
+     *                                  on specified folder.
+     */
     public AccessPermission createPermission(String userId, AccessPermission accessPermission) {
         if (accessPermission == null)
             throw new IllegalArgumentException("Cannot add null permission");
 
+        // check if permission for remote folder is being created
         if (accessPermission.getArticle() == AccessPermission.Article.REMOTE) {
             return createRemotePermission(userId, accessPermission);
         }
 
+        // verify write authorization
         authorization.expectWrite(userId, folder);
 
         // permission object
@@ -137,18 +154,20 @@ public class FolderPermissions {
     }
 
     /**
-     * Creates folder permission for a remote user
+     * Creates an access folder permission for a remote user
      *
      * @param userId           unique identifier of user sharing the folder
      * @param accessPermission access details
      * @return wrapper around the unique identifier for the remote permission created
+     * @throws IllegalArgumentException if the partner record cannot be retrieved
      */
     public AccessPermission createRemotePermission(String userId, AccessPermission accessPermission) {
         RegistryPartner partner = accessPermission.getPartner();
-        RemotePartner remotePartner = DAOFactory.getRemotePartnerDAO().get(partner.getId());
+        RemotePartner remotePartner = remotePartnerDAO.get(partner.getId());
         if (remotePartner == null) {
-            Logger.error("Could not find remote partner for remote permission");
-            return null;
+            String errorMessage = "Could not find remote partner for remote permission";
+            Logger.error(errorMessage);
+            throw new IllegalArgumentException(errorMessage);
         }
 
         // todo : must be owner?
@@ -156,7 +175,6 @@ public class FolderPermissions {
 
         String remoteUserId = accessPermission.getUserId();
         String token = tokenHash.generateSalt();
-        String secret = tokenHash.encryptPassword(remotePartner.getUrl() + remoteUserId, token);
 
         // send token and also verify user Id
         accessPermission.setSecret(token);
@@ -168,18 +186,14 @@ public class FolderPermissions {
         if (!sendToken(accessPermission, remotePartner))
             return null; // something happened with the send; likely user id is invalid
 
-        // get create local client record mapping to remote
-        ClientModel clientModel = clientModelDAO.getModel(remoteUserId, remotePartner);
-        if (clientModel == null) {
-            clientModel = new ClientModel();
-            clientModel.setRemotePartner(remotePartner);
-            clientModel.setEmail(remoteUserId);
-            clientModel = clientModelDAO.create(clientModel);
-        }
+        // create local client record mapping to remote
+        RemoteClientModel remoteClientModel = getOrCreateRemoteClient(remoteUserId, remotePartner);
 
         // create remote share record storing the secret
+        // todo : use folder uuid instead of folder id ?
+        String secret = tokenHash.encrypt(folder.getId() + remotePartner.getUrl() + remoteUserId, token);
         RemoteShareModel remoteShare = new RemoteShareModel();
-        remoteShare.setClient(clientModel);
+        remoteShare.setClient(remoteClientModel);
         remoteShare.setSecret(secret);
         Account account = accountDAO.getByEmail(userId);
         remoteShare.setSharer(account);
@@ -199,6 +213,25 @@ public class FolderPermissions {
         return accessPermission;
     }
 
+    /**
+     * Checks if there is an existing client for the specified userId and remote partner.
+     * Retrieves and returns if so, or creates a new record if not
+     *
+     * @param remoteUserId  email address of remote user
+     * @param remotePartner remote partner
+     * @return client model stored in the database with specified user id and partner
+     */
+    protected RemoteClientModel getOrCreateRemoteClient(String remoteUserId, RemotePartner remotePartner) {
+        RemoteClientModel remoteClientModel = remoteClientModelDAO.getModel(remoteUserId, remotePartner);
+        if (remoteClientModel == null) {
+            remoteClientModel = new RemoteClientModel();
+            remoteClientModel.setRemotePartner(remotePartner);
+            remoteClientModel.setEmail(remoteUserId);
+            remoteClientModel = remoteClientModelDAO.create(remoteClientModel);
+        }
+        return remoteClientModel;
+    }
+
     public boolean remove(String userId, long permissionId) {
         authorization.expectWrite(userId, this.folder);
 
@@ -211,15 +244,17 @@ public class FolderPermissions {
         return true;
     }
 
+    /**
+     * Send access permission to a remote partner with a "secret"
+     *
+     * @param accessPermission permission details including secret token
+     * @param partner          remote ICE partner to send information to
+     * @return true if permission is successfully sent with a reply received, false otherwise
+     */
     protected boolean sendToken(AccessPermission accessPermission, RemotePartner partner) {
         RemoteContact remoteContact = new RemoteContact();
         // send to remote partner at POST /rest/permissions/remote
-        remoteContact.shareFolder(partner.getUrl(), accessPermission, partner.getApiKey());
-        return true;
-    }
-
-    // todo : remove shared token from user
-    protected void removeToken() {
+        return remoteContact.shareFolder(partner.getUrl(), accessPermission, partner.getApiKey()) != null;
     }
 
     protected Permission createPermissionModel(AccessPermission accessPermission, RemoteShareModel remoteShare) {

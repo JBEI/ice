@@ -30,7 +30,7 @@ public class DAOFactory {
     private static ExperimentDAO experimentDAO;
     private static ParameterDAO parameterDAO;
     private static ApiKeyDAO apiKeyDAO;
-    private static ClientModelDAO clientModelDAO;
+    private static RemoteClientModelDAO remoteClientModelDAO;
     private static RemoteShareModelDAO remoteShareModelDAO;
     private static RemoteAccessModelDAO remoteAccessModelDAO;
     private static ManuscriptModelDAO manuscriptModelDAO;
@@ -173,10 +173,10 @@ public class DAOFactory {
         return apiKeyDAO;
     }
 
-    public static ClientModelDAO getClientModelDAO() {
-        if (clientModelDAO == null)
-            clientModelDAO = new ClientModelDAO();
-        return clientModelDAO;
+    public static RemoteClientModelDAO getRemoteClientModelDAO() {
+        if (remoteClientModelDAO == null)
+            remoteClientModelDAO = new RemoteClientModelDAO();
+        return remoteClientModelDAO;
     }
 
     public static RemoteShareModelDAO getRemoteShareModelDAO() {

@@ -1,7 +1,7 @@
 <div class="modal-header">
     <button type="button" class="close" ng-click="cancel()">&times;</button>
     <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
-        <i class="fa fa-newspaper-o"></i> &nbsp;Add New Paper</span>
+        <i class="fa fa-newspaper-o"></i> &nbsp;{{modalHeaderTitle}}</span>
 </div>
 
 <div class="modal-body">
@@ -23,7 +23,7 @@
         </div>
 
         <div class="form-group row">
-            <label class="col-sm-3 form-control-label">First name</label>
+            <label class="col-sm-3 form-control-label">Author first name</label>
 
             <div class="col-sm-9">
                 <input type="text" placeholder="Corresponding author's first name" style="width: 350px"
@@ -32,7 +32,7 @@
         </div>
 
         <div class="form-group row">
-            <label class="col-sm-3 form-control-label">Last name</label>
+            <label class="col-sm-3 form-control-label">Author last name</label>
 
             <div class="col-sm-9">
                 <input type="text" placeholder="Corresponding author's last name" style="width: 350px"
@@ -45,7 +45,7 @@
 
             <div class="col-sm-9">
                 <input type="text" class="input_box" style="width: 260px; padding: 6px"
-                       placeholder="Enter folder name" ng-model="newManuscript.selectedFolderName"
+                       placeholder="Paste folder url or type folder name" ng-model="newManuscript.selectedFolderName"
                        typeahead-loading="loadingAddExistingData"
                        ng-paste="pasteFolder($event)"
                        uib-typeahead="result.folderName for result in filterFolders($viewValue)"

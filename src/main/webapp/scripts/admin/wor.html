@@ -46,10 +46,12 @@
             <thead>
             <tr>
                 <th>&nbsp;</th>
-                <th>Partner</th>
-                <th>Added</th>
-                <th>Status</th>
-                <th>&nbsp;</th>
+                <th>
+                    <span class="entry-table-header">Partner</span>
+                </th>
+                <th><span class="entry-table-header">Added</span></th>
+                <th style="width: 150px"><span class="entry-table-header">Status</span></th>
+                <th style="width: 120px">&nbsp;</th>
             </tr>
             </thead>
             <tbody>
@@ -74,9 +76,11 @@
                             {{partner.status |capitalize}} <span class="caret"></span>
                         </button>
                         <ul class="uib-dropdown-menu">
-                            <li ng-repeat="listObject in partnerStatusList" class="font-90em"
-                                ng-click="setPartnerStatus(partner, listObject.status)">
-                                <a href="#">{{listObject.action | capitalize}}</a>
+                            <li ng-if="partner.status != 'BLOCKED'" ng-click="setPartnerStatus(partner, 'BLOCKED')">
+                                <a class="font-90em" href="#">Block</a>
+                            </li>
+                            <li ng-if="partner.status != 'APPROVED'" ng-click="setPartnerStatus(partner, 'APPROVED')">
+                                <a class="font-90em" href="#">Approve</a>
                             </li>
                         </ul>
                     </div>
@@ -85,10 +89,17 @@
                        ng-click="retryRemotePartnerContact()"
                        class="fa fa-fw fa-refresh fa-spin blue cursor_pointer opacity_hover"></i>
                 </td>
-                <td class="font-12em" style="vertical-align: middle">
-                    <span uib-tooltip="Delete">
-                    <i class="fa fa-trash-o fa-fw delete_icon" ng-click="removePartner(partner, $index)"></i>
-                    </span>
+                <td class="font-14em" style="vertical-align: middle">
+                    <div class="pull-right">
+                        <i class="fa fa-fw fa-refresh edit_icon"
+                           ng-if="partner.status=='APPROVED' && !partner.refreshing"
+                           ng-click="refreshPartner(partner)" uib-tooltip="Refresh"></i>
+                        <i class="fa fa-fw fa-refresh opacity_3 fa-spin"
+                           ng-if="partner.status=='APPROVED' && partner.refreshing"></i>
+                        &nbsp;
+                        <i class="fa fa-fw fa-trash-o fa-fw delete_icon" uib-tooltip="Delete"
+                           ng-click="removePartner(partner, $index)"></i>
+                    </div>
                 </td>
             </tr>
             </tbody>

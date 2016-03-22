@@ -27,23 +27,6 @@ iceServices.factory('Group', function ($resource, $cookieStore) {
     }
 });
 
-iceServices.factory('Permission', function ($resource, $cookieStore) {
-    return function () {
-
-        var sessionId = $cookieStore.get("sessionId");
-
-        return $resource('rest/permission', {}, {
-            filterUsersAndGroups: {
-                method: 'GET',
-                responseType: "json",
-                isArray: true,
-                url: "rest/permission/autocomplete",
-                headers: {'X-ICE-Authentication-SessionId': sessionId}
-            }
-        });
-    }
-});
-
 iceServices.factory('User', function ($resource) {
     return function (sessionId) {
         return $resource('rest/users', {userId: '@userId', preferenceKey: '@preferenceKey', sendEmail: '@sendEmail'}, {
@@ -136,18 +119,6 @@ iceServices.factory('User', function ($resource) {
                 method: 'GET',
                 url: 'rest/users/:userId/samples',
                 responseType: 'json',
-                headers: {'X-ICE-Authentication-SessionId': sessionId}
-            }
-        });
-    }
-});
-
-iceServices.factory('Message', function ($resource) {
-    return function (sessionId) {
-        return $resource('rest/messages', {messageId: '@id'}, {
-            query: {
-                method: 'GET',
-                responseType: "json",
                 headers: {'X-ICE-Authentication-SessionId': sessionId}
             }
         });
@@ -649,12 +620,6 @@ iceServices.factory('Files', function ($resource, $cookieStore) {
             getTraceSequenceFile: {
                 method: 'GET',
                 url: 'rest/file/trace/:fileId',
-                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
-            },
-
-            getCSV: {
-                method: 'POST',
-                url: 'rest/file/csv',
                 headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")}
             }
         });

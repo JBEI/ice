@@ -19,7 +19,6 @@ public class PermissionDAOTest {
     Account adminAccount, regularAccount;
     PermissionDAO dao;
 
-
     @Before
     public void setUp() throws Exception {
         HibernateUtil.initializeMock();
@@ -41,7 +40,7 @@ public class PermissionDAOTest {
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.rollbackTransaction();
+        HibernateUtil.commitTransaction();
     }
 
     @Test

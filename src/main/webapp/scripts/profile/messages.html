@@ -1,20 +1,40 @@
 <div ng-controller="MessageController">
     <div class="pad_top">
-        <button type="button" class="ice-button"><i style="font-size: 14px" class="blue fa fa-envelope"></i><i
-                style="vertical-align: sub; font-size: 8px;" class="fa fa-plus"></i>&nbsp; Compose
-        </button>
+        <button type="button" class="ice-button" ng-click="openCreateMessageModal()">Compose</button>
     </div>
 
     <div class="pad_top">
         <strong>Inbox</strong>
-        <table class="table table-condensed striped table-hover">
-            <tr ng-repeat="message in messages.list" class="font-90em cursor_pointer">
-                <td>{{message.from}}</td>
-                <td>{{message.title}}</td>
-                <td>{{message.message}}</td>
-                <td>{{message.sent}}</td>
+
+        <table style="width: 98%;">
+            <tr>
+                <td style="width: 35%; vertical-align: top;">
+                    <div ng-repeat="message in messages.data" class="message"
+                         ng-class="{'message-selected': message.id == selectedMessage.id}"
+                         ng-click="selectMessage(message)">
+                        <span class="font-12em">{{message.from}}</span>
+                        <small class="pull-right">{{message.sent | date : 'short'}}</small>
+                        <div class="pad_top font-95em">{{message.title}}</div>
+                    </div>
+                </td>
+                <td class="message-details">
+                    <table>
+                        <tr>
+                            <td>
+                                <div style="white-space:pre-line; padding: 10px; background-color: lightgrey"
+                                     class="font-90em">{{selectedMessage.message}}
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div>
+                        <textarea placeholder="Reply"></textarea>
+                        <br>
+                        <button class="btn btn-sm btn-info" ng-click="replyMessage()">Send</button>
+                    </div>
+                </td>
             </tr>
         </table>
     </div>
-
 </div>

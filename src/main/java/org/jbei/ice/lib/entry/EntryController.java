@@ -8,20 +8,14 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.AuditType;
 import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.comment.UserComment;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.PartStatistics;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
@@ -39,12 +33,11 @@ import java.util.zip.ZipInputStream;
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
-public class EntryController {
+public class EntryController extends HasEntry {
 
     private EntryDAO dao;
     private CommentDAO commentDAO;
     private SequenceDAO sequenceDAO;
-    private AuditDAO auditDAO;
     private PermissionsController permissionsController;
     private AccountController accountController;
     private final EntryAuthorization authorization;
@@ -58,7 +51,6 @@ public class EntryController {
         accountController = new AccountController();
         authorization = new EntryAuthorization();
         sequenceDAO = DAOFactory.getSequenceDAO();
-        auditDAO = DAOFactory.getAuditDAO();
     }
 
     /**
@@ -138,24 +130,6 @@ public class EntryController {
             return null;
 
         return ModelToInfoFactory.createTipView(entry);
-    }
-
-    // contact the remote partner to get the tool tip
-    public PartData retrieveRemoteToolTip(String userId, long folderId, long partId) {
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        Folder folder = DAOFactory.getFolderDAO().get(folderId);
-
-        RemoteAccessModel remoteAccessModel = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
-        if (remoteAccessModel == null) {
-            Logger.error("Could not retrieve remote access for folder " + folder.getId());
-            return null;
-        }
-
-        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
-        String url = remotePartner.getUrl();
-        String token = remoteAccessModel.getToken();
-        RemoteContact remoteContact = new RemoteContact();
-        return remoteContact.getToolTipDetails(url, userId, partId, token, remotePartner.getApiKey());
     }
 
     public ArrayList<UserComment> retrieveEntryComments(String userId, long partId) {
@@ -302,57 +276,8 @@ public class EntryController {
         return true;
     }
 
-    protected Entry getEntry(String id) {
-        Entry entry = null;
-
-        // check if numeric
-        try {
-            entry = dao.get(Long.decode(id));
-        } catch (NumberFormatException nfe) {
-            // fine to ignore
-        }
-
-        // check for part Id
-        if (entry == null)
-            entry = dao.getByPartNumber(id);
-
-        // check for global unique id
-        if (entry == null)
-            entry = dao.getByRecordId(id);
-
-        // get by unique name
-        if (entry == null) {
-            try {
-                return dao.getByUniqueName(id);
-            } catch (DAOException de) {
-                // fine to ignore
-                return null;
-            }
-        }
-
-        return entry;
-    }
-
-    public PartData retrieveRemoteEntryDetails(String userId, long folderId, long partId) {
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        Folder folder = DAOFactory.getFolderDAO().get(folderId);
-
-        RemoteAccessModel remoteAccessModel = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
-        if (remoteAccessModel == null) {
-            Logger.error("Could not retrieve remote access for folder " + folder.getId());
-            return null;
-        }
-
-        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
-        String url = remotePartner.getUrl();
-        String token = remoteAccessModel.getToken();
-        long remoteFolderId = Long.decode(remoteAccessModel.getIdentifier());
-        RemoteContact remoteContact = new RemoteContact();
-        return remoteContact.getRemoteEntry(url, userId, partId, remoteFolderId, token, remotePartner.getApiKey());
-    }
-
-    public PartData getRemoteRequestedEntry(String remoteUserId, String token, String entryId,
-                                            long folderId, RegistryPartner requestingPartner) {
+    public PartData getRequestedEntry(String remoteUserId, String token, String entryId,
+                                      long folderId, RegistryPartner requestingPartner) {
         Entry entry = getEntry(entryId);
         if (entry == null)
             return null;
@@ -380,7 +305,7 @@ public class EntryController {
 
         // validate access token
         TokenHash tokenHash = new TokenHash();
-        String secret = tokenHash.encryptPassword(remotePartner.getUrl() + remoteUserId, token);
+        String secret = tokenHash.encrypt(folderId + remotePartner.getUrl() + remoteUserId, token);
         if (!secret.equals(shareModel.getSecret())) {
             throw new PermissionException("Secret does not match");
         }
@@ -461,17 +386,8 @@ public class EntryController {
         // create audit event if not owner
         // todo : remote access check
         if (userId != null && authorization.getOwner(entry) != null && !authorization.getOwner(entry).equalsIgnoreCase(userId)) {
-            try {
-                Audit audit = new Audit();
-                audit.setAction(AuditType.READ.getAbbrev());
-                audit.setEntry(entry);
-                audit.setUserId(userId);
-                audit.setLocalUser(true);
-                audit.setTime(new Date(System.currentTimeMillis()));
-                auditDAO.create(audit);
-            } catch (Exception e) {
-                Logger.error(e);
-            }
+            EntryHistory entryHistory = new EntryHistory(userId, entry.getId());
+            entryHistory.add();
         }
 
         // retrieve more information about linked entries if any (default only contains id)

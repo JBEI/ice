@@ -10,6 +10,16 @@
                     <i class="fa fa-fw color-888" style="font-weight: 800; font-size: 17px"
                        ng-class="{'fa-angle-right':selectedPartner!=partner.id, 'fa-angle-down':selectedPartner==partner.id}"></i>
                     <span class="collection_user_menu">{{partner.name}}</span>
+
+                    <span class="menu_count">
+                        <i ng-show="selectedPartner==partner.id" stop-event="click" class="opacity_hover fa fa-fw"
+                           ng-class="
+                        {'fa-sort-alpha-asc': !worMenuSortParams.asc && worMenuSortParams.field=='folderName',
+                        'fa-sort-alpha-desc': worMenuSortParams.asc && worMenuSortParams.field=='folderName',
+                        'fa-sort-amount-asc': !worMenuSortParams.asc && worMenuSortParams.field=='creationTime',
+                        'fa-sort-amount-desc': worMenuSortParams.asc && worMenuSortParams.field=='creationTime'}
+                        " ng-click="sortWorCollectionFolders()"></i>
+                    </span>
                 </div>
 
                 <ice.menu.wor.details ng-show="selectedPartner==partner.id"></ice.menu.wor.details>

@@ -7,8 +7,6 @@ angular.module('ice.common.service', [])
                 var errorMsg;
                 var type;
 
-                //console.error(response);
-
                 switch (response.status) {
                     case 401:
                         if ($location.path() != '/login') {
@@ -19,6 +17,11 @@ angular.module('ice.common.service', [])
                         } else {
                             errorMsg = response.data.errorMessage;
                         }
+                        break;
+
+                    case 403:
+                        errorMsg = "Access to resource has been denied";
+                        type = "warning";
                         break;
 
                     case 404:
@@ -76,7 +79,7 @@ angular.module('ice.common.service', [])
                     }
                 }
 
-                queryParams.sid = $cookieStore.get("sessionId");
+                //queryParams.sid = $cookieStore.get("sessionId");
                 $resource(url, queryParams, {
                     'get': {
                         method: 'GET',
@@ -99,7 +102,7 @@ angular.module('ice.common.service', [])
                 if (errorHandler)
                     errorCallback = errorHandler;
 
-                queryParams.sid = $cookieStore.get('sessionId');
+                //queryParams.sid = $cookieStore.get('sessionId');
                 $resource(url, queryParams, {
                     'list': {
                         method: 'GET',
@@ -116,11 +119,11 @@ angular.module('ice.common.service', [])
 
                 if (!params)
                     params = {};
-                params.sid = $cookieStore.get('sessionId');
+                //params.sid = $cookieStore.get('sessionId');
                 $resource(url, params, {
                     'post': {
                         method: 'POST',
-                        headers: {'X-ICE-Authentication-SessionId': params.sid}
+                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
                     }
                 }).post(obj, successHandler, errorCallback);
             },
@@ -146,18 +149,22 @@ angular.module('ice.common.service', [])
                 }).update(obj, successHandler, errorCallback);
             },
 
-            remove: function (url, params, successHandler) {
+            remove: function (url, params, successHandler, errHandler) {
                 if (!successHandler) {
                     successHandler = function (resp) {
                     }
                 }
+
+                var errorCallback = this.handleError;
+                if (errHandler)
+                    errorCallback = errHandler;
 
                 $resource(url, params, {
                     'delete': {
                         method: 'DELETE',
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
                     }
-                }).delete(successHandler, this.handleError)
+                }).delete(successHandler, errorCallback)
             }
         }
     });
