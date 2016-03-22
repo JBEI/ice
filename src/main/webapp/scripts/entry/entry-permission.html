@@ -44,8 +44,9 @@
                        <span ng-click="addRemovePermission(permission)" class="cursor_pointer">
                         <i class="fa opacity_hover"
                            ng-class="{'fa-square-o':!permission.selected, 'fa-check-square-o':permission.selected}"></i>
-                        <i class="fa" ng-class="{'fa-group permission_group':permission.article==='GROUP',
-                        'fa-user permission_user':permission.article==='ACCOUNT'}"></i> {{permission.display}}
+                        <i class="fa fa-group permission_group" ng-if="permission.article==='GROUP'"></i> {{permission.display}}
+                           <i class="fa fa-user permission_user" ng-if="permission.article!='GROUP'"></i>
+                           {{permission.firstName}} {{permission.lastName}}
                         </span>
                     </div>
                 </div>

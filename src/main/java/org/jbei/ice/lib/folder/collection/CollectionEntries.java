@@ -146,7 +146,7 @@ public class CollectionEntries {
     protected Results<PartData> getSharedEntries(ColumnField field, boolean asc, int offset, int limit, String filter) {
         SharedEntries sharedEntries = new SharedEntries(this.userId);
         List<PartData> entries = sharedEntries.getEntries(field, asc, offset, limit, filter);
-        final long count = sharedEntries.getNumberofEntries(filter);
+        final long count = sharedEntries.getNumberOfEntries(filter);
         Results<PartData> results = new Results<>();
         results.setResultCount(count);
         results.setData(entries);

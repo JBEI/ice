@@ -12,10 +12,7 @@ import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.dao.FolderDAO;
-import org.jbei.ice.storage.hibernate.dao.GroupDAO;
-import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
-import org.jbei.ice.storage.hibernate.dao.RemoteShareModelDAO;
+import org.jbei.ice.storage.hibernate.dao.*;
 import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
@@ -35,6 +32,7 @@ public class PermissionsController {
     private final FolderDAO folderDAO;
     private final PermissionDAO dao;
     private final GroupDAO groupDAO;
+    private final AccountDAO accountDAO;
 
     public PermissionsController() {
         accountController = new AccountController();
@@ -42,6 +40,7 @@ public class PermissionsController {
         folderDAO = DAOFactory.getFolderDAO();
         dao = DAOFactory.getPermissionDAO();
         groupDAO = DAOFactory.getGroupDAO();
+        accountDAO = DAOFactory.getAccountDAO();
     }
 
     public Permission addPermission(String userId, AccessPermission access) {
@@ -91,7 +90,7 @@ public class PermissionsController {
         switch (access.getArticle()) {
             case ACCOUNT:
             default:
-                account = accountController.get(access.getArticleId());
+                account = accountDAO.get(access.getArticleId());
                 break;
 
             case GROUP:
@@ -165,7 +164,7 @@ public class PermissionsController {
         switch (access.getArticle()) {
             case ACCOUNT:
             default:
-                account = accountController.get(access.getArticleId());
+                account = accountDAO.get(access.getArticleId());
                 break;
 
             case GROUP:

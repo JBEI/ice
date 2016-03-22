@@ -25,14 +25,13 @@ public class Audit implements DataModel {
     @Column(name = "action", length = 12, nullable = false)
     private String action;
 
-    // who (using userId since it could come from somewhere else)
+    // who
     @Column(name = "userId", length = 127, nullable = false)
     private String userId;
 
-    // whether the audit event is from a local user; note that
-    // that the user id could match a local one but the user could be remote
-    @Column(name = "localUser")
-    private boolean localUser;
+    @OneToOne
+    @JoinColumn(name = "remote_client_id", nullable = true)
+    private RemoteClientModel remoteClientModel;
 
     @Column(name = "institution", length = 255)
     private String institution;
@@ -89,14 +88,6 @@ public class Audit implements DataModel {
         this.entry = entry;
     }
 
-    public boolean isLocalUser() {
-        return localUser;
-    }
-
-    public void setLocalUser(boolean localUser) {
-        this.localUser = localUser;
-    }
-
     public String getInstitution() {
         return institution;
     }
@@ -121,14 +112,24 @@ public class Audit implements DataModel {
         this.lastName = lastName;
     }
 
+    public RemoteClientModel getRemoteClientModel() {
+        return remoteClientModel;
+    }
+
+    public void setRemoteClientModel(RemoteClientModel remoteClientModel) {
+        this.remoteClientModel = remoteClientModel;
+    }
+
     @Override
     public History toDataTransferObject() {
         History history = new History();
         history.setId(id);
         history.setAction(action);
         history.setTime(time.getTime());
-        history.setLocalUser(localUser);
         history.setUserId(userId);
+        if (remoteClientModel != null) {
+            history.setPartner(remoteClientModel.getRemotePartner().toDataTransferObject());
+        }
         return history;
     }
 }

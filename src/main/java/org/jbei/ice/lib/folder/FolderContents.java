@@ -218,7 +218,7 @@ public class FolderContents {
             return;
         }
 
-        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
+        RemotePartner remotePartner = remoteAccessModel.getRemoteClientModel().getRemotePartner();
         RemoteTransfer remoteTransfer = new RemoteTransfer();
         List<PartData> results = remoteTransfer.getPartsForTransfer(entries);
         List<Long> remoteIds = remoteTransfer.transferEntries(remotePartner.getId(), results);
@@ -303,22 +303,22 @@ public class FolderContents {
 
         // get remote access
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        RemoteAccessModel model = remoteAccessModelDAO.getByFolder(account, folder);
-        if (model == null) {
+        RemoteAccessModel remoteAccessModel = remoteAccessModelDAO.getByFolder(account, folder);
+        if (remoteAccessModel == null) {
             Logger.error("Could not find access model for folder " + folder.getId() + " and user " + userId);
             return null;
         }
 
         FolderDetails details = folder.toDataTransferObject();
-        ClientModel clientModel = model.getClientModel();
+        RemoteClientModel remoteClientModel = remoteAccessModel.getRemoteClientModel();
         AccountTransfer owner = new AccountTransfer();
-        owner.setEmail(clientModel.getEmail());
+        owner.setEmail(remoteClientModel.getEmail());
         details.setOwner(owner);
-        RemotePartner remotePartner = clientModel.getRemotePartner();
+        RemotePartner remotePartner = remoteClientModel.getRemotePartner();
         details.setRemotePartner(remotePartner.toDataTransferObject());
 
-        String token = model.getToken();
-        long remoteFolderId = Long.decode(model.getIdentifier());  // todo : currently folder id only
+        String token = remoteAccessModel.getToken();
+        long remoteFolderId = Long.decode(remoteAccessModel.getIdentifier());  // todo : currently folder id only
 
         // retrieve entries from remote partner (ends up in the call below)
         FolderDetails remoteDetails = remoteContact.getRemoteContents(remotePartner.getUrl(), userId, remoteFolderId,
@@ -356,14 +356,14 @@ public class FolderContents {
 
         //verify access
         TokenHash tokenHash = new TokenHash();
-        String secret = tokenHash.encrypt(remotePartner.getUrl() + remoteUserId, token);
-        if (!secret.equalsIgnoreCase(shareModel.getSecret())) {
+        String secret = tokenHash.encrypt(folderId + remotePartner.getUrl() + remoteUserId, token);
+        if (!secret.equals(shareModel.getSecret())) {
             Logger.error("Authorization failed for remote folder retrieve");
             return null;
         }
 
         boolean canEdit = shareModel.getPermission().isCanWrite();
-        // todo : move everything above to folder permissions
+        // todo : move everything above to folder permissions and folder authorization
         FolderDetails details = folder.toDataTransferObject();
         details.setCanEdit(canEdit);
 

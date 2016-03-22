@@ -154,7 +154,7 @@ public class FolderResource extends RestResource {
         if (StringUtils.isEmpty(userId) && !StringUtils.isEmpty(remoteUserToken)) {
             // check others
             log(remoteUserId, " remotely adding entries to folders");
-            RegistryPartner registryPartner = verifyWebPartner();
+            RegistryPartner registryPartner = requireWebPartner();
             return super.respond(folderContents.remotelyAddEntrySelection(remoteUserId, fid, remoteUserToken,
                     entrySelection, registryPartner));
         } else {
@@ -205,11 +205,11 @@ public class FolderResource extends RestResource {
                               @QueryParam("userId") String remoteUserId,                   // todo : ditto
                               @QueryParam("fields") List<String> queryParam) {
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
-        if (folderId.equalsIgnoreCase("public")) {
-            RegistryPartner registryPartner = verifyWebPartner();
+        if (folderId.equalsIgnoreCase("public")) {   // todo : move to separate rest resource path
+            RegistryPartner registryPartner = requireWebPartner();
             // return public entries
             log(registryPartner.getUrl(), "requesting public entries");
-            return controller.getPublicEntries(field, offset, limit, asc);
+            return this.controller.getPublicEntries(field, offset, limit, asc);
         }
 
         // userId can be empty for public folders
@@ -220,19 +220,14 @@ public class FolderResource extends RestResource {
             if (filter.length() > 0)
                 message += " filtered by \"" + filter + "\"";
             FolderContents folderContents = new FolderContents();
-            PageParameters pageParameters = new PageParameters();
-            pageParameters.setAscending(asc);
-            pageParameters.setFilter(filter);
-            pageParameters.setLimit(limit);
-            pageParameters.setOffset(offset);
-            pageParameters.setSortField(field);
+            PageParameters pageParameters = new PageParameters(offset, limit, field, asc, filter);
 
             if (StringUtils.isEmpty(userId)) {
                 if (StringUtils.isEmpty(token))  // todo :verify partner?
                     return folderContents.getContents(userId, id, pageParameters);
 
                 // get registry partner
-                RegistryPartner partner = verifyWebPartner();
+                RegistryPartner partner = requireWebPartner();
                 log(partner.getUrl(), message);
                 return folderContents.getRemotelySharedContents(remoteUserId, token, partner, id, pageParameters);
             } else {

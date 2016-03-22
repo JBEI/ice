@@ -1,5 +1,7 @@
 <div class="modal-header">
-    <button type="button" class="close" ng-click="closeModal()">&times;</button>
+    <button type="button" class="close" ng-click="closeModal()">&times;
+        <small class="font-75em" style="font-weight: normal">Close</small>
+    </button>
     <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
         <i class="fa fa-share-alt"></i> &nbsp;Share <span
             style="color:#000000;">{{folder.folderName}}</span> With Others</span>
@@ -38,9 +40,9 @@
                         <tr ng-repeat="permission in permissions">
                             <td style="vertical-align: middle; width: 45px;">
                                 <i class="fa font-14em"
-                                   ng-class="{'fa-user': permission.article=='ACCOUNT',
+                                   ng-class="{'fa-user dark-gray': permission.article=='ACCOUNT',
                                    'fa-group dark-orange':permission.article=='GROUP',
-                                   'fa-globe blue':permission.article=='REMOTE'}"></i>
+                                   'fa-globe dark_blue':permission.article=='REMOTE'}"></i>
                             </td>
                             <td style="vertical-align: middle; line-height: 120%">
                                 {{permission.display}}<br>
@@ -66,7 +68,7 @@
                                 </span>
                             </td>
                             <td style="width: 45px; vertical-align: middle">
-                                <i class="fa fa-times delete_icon" ng-if="folder.canEdit"
+                                <i class="fa fa-trash-o delete_icon" ng-if="folder.canEdit"
                                    ng-click="removePermission(permission)"></i>
                             </td>
                         </tr>
@@ -82,16 +84,15 @@
                 <div class="btn-group" uib-dropdown>
                     <button class="btn btn-sm btn-default" uib-dropdown-toggle>
                         <i class="fa fa-fw font-14em"
-                           ng-class="{'fa-user':newPermission.article =='ACCOUNT',
+                           ng-class="{'fa-user dark-gray':newPermission.article =='ACCOUNT',
                            'fa-group dark-orange':newPermission.article=='GROUP',
                             'fa-globe dark_blue':newPermission.article=='REMOTE'}"></i>
                         <span class="caret"></span>
                     </button>
 
                     <ul uib-dropdown-menu>
-                        <li><a href="#" ng-click="setPermissionArticle('account')"><i class="fa fa-fw fa-user"></i>
-                            Account</a>
-                        </li>
+                        <li><a href="#" ng-click="setPermissionArticle('account')"><i
+                                class="fa fa-fw fa-user dark-gray"></i> Account</a></li>
                         <li><a href="#" ng-click="setPermissionArticle('group')"><i
                                 class="fa fa-fw fa-group dark-orange"></i> Group</a></li>
                         <li><a href="#" ng-click="setPermissionArticle('remote')"><i
@@ -99,11 +100,19 @@
                     </ul>
                 </div>
 
+                <script type="text/ng-template" id="customTemplate.html">
+                    <a class="font-90em">
+                        <span ng-bind-html="match.model.firstName + ' ' + match.model.lastName | uibTypeaheadHighlight:query"></span>
+
+                        <div ng-bind-html="match.model.email | uibTypeaheadHighlight:query"
+                             style="font-size: 12px; color: #aaa; margin-top: -3px;"></div>
+                    </a>
+                </script>
                 <input type="text" class="input_box" style="width: 200px; padding: 6px"
                        placeholder="{{placeHolder}}" ng-model="userFilterInput"
                        typeahead-loading="loadingAddExistingData"
-                       uib-typeahead="result[resultSubField] for result in filter($viewValue)"
-                       typeahead-editable="true"
+                       uib-typeahead="result for result in filter($viewValue)"
+                       typeahead-editable="true" typeahead-template-url="customTemplate.html"
                        typeahead-on-select="userSelectionForPermissionAdd($item, $model, $label)">
 
                 <div class="btn-group font-80em">

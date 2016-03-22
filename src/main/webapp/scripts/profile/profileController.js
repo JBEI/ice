@@ -1,13 +1,80 @@
 'use strict';
 
 angular.module('ice.profile.controller', [])
-    .controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
-        var message = Message($cookieStore.get('sessionId'));
-        var profileId = $stateParams.id;
-        $location.path("profile/" + profileId + "/messages", false);
-        message.query(function (result) {
+    .controller('MessageController', function ($scope, $uibModal, $stateParams, Util) {
+        $scope.selectedMessage = undefined;
+
+        $scope.selectMessage = function (message) {
+            Util.get("rest/messages/" + message.id, function (result) {
+                message.selected = true;
+                //result.message = result.message.replace(/(?:\r\n|\r|\n)/g, '<br />');
+                $scope.selectedMessage = result;
+            });
+        };
+
+        // get all messages
+        Util.get("rest/messages", function (result) {
             $scope.messages = result;
+            if (result.data.length) {
+                $scope.selectMessage(result.data[0]);
+            }
         });
+
+        $scope.replyMessage = function () {
+
+        };
+
+        $scope.openCreateMessageModal = function () {
+            $uibModal.open({
+                templateUrl: 'scripts/profile/modal/create-message.html',
+                backdrop: "static",
+                keyboard: false,
+                controller: 'CreateMessageController'
+            })
+        };
+    })
+    .controller('CreateMessageController', function ($scope, $uibModalInstance, $http, $cookieStore, Util) {
+        $scope.newMessage = {accounts: [], userGroups: []};
+
+        $scope.createNewMessage = function () {
+            Util.post("rest/messages", $scope.newMessage, function (result) {
+                $uibModalInstance.close();
+            })
+        };
+
+        $scope.closeGroupModal = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.setMessageRecipient = function (a, b, c) {
+            $scope.newMessage.accounts.push(a);
+            $scope.addedUser = undefined;
+        };
+
+        $scope.removeMessageRecipient = function (account, group) {
+            if (account) {
+                var accountIdx = $scope.newMessage.accounts.indexOf(account);
+                if (accountIdx != -1)
+                    $scope.newMessage.accounts.splice(accountIdx, 1);
+            }
+
+            if (group) {
+                var groupIdx = $scope.newMessage.userGroups.indexOf(gr);
+                if (groupIdx != -1)
+                    $scope.newMessage.userGroups.splice(groupIdx, 1);
+            }
+        };
+
+        $scope.filter = function (val) {
+            return $http.get('rest/users/autocomplete', {
+                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                params: {
+                    val: val
+                }
+            }).then(function (res) {
+                return res.data;
+            });
+        };
     })
     .controller('ApiKeysController', function ($scope, $uibModal, Util) {
         $scope.apiKeys = undefined;
@@ -355,9 +422,12 @@ angular.module('ice.profile.controller', [])
         var group = Group();
 
         // init: retrieve groups user belongs to and created
-        Util.get("rest/users/" + profileId + "/groups", function (result) {
-            $scope.userGroups = result;
-        });
+        var getGroups = function () {
+            Util.get("rest/users/" + profileId + "/groups", function (result) {
+                $scope.userGroups = result;
+            });
+        };
+        getGroups();
 
         $scope.switchToEditMode = function (selectedGroup) {
             selectedGroup.edit = true;
@@ -436,6 +506,7 @@ angular.module('ice.profile.controller', [])
                 templateUrl: 'scripts/profile/modal/edit-group.html',
                 controller: 'ProfileGroupsModalController',
                 backdrop: "static",
+                keyboard: false,
                 //size: "lg",
                 resolve: {
                     currentGroup: function () {
@@ -449,7 +520,7 @@ angular.module('ice.profile.controller', [])
                     return;
 
                 Util.setFeedback("Group successfully created", "success");
-                $scope.groupListPageChanged();
+                getGroups();
             })
         };
 
@@ -462,43 +533,107 @@ angular.module('ice.profile.controller', [])
             })
         }
     })
-    .controller('ProfileGroupsModalController', function ($scope, Util, currentGroup, $uibModalInstance) {
+    .controller('ProfileGroupsModalController', function ($scope, $http, Util, currentGroup, $cookieStore, $uibModalInstance) {
         $scope.headerMessage = currentGroup ? "Update \"" + currentGroup.label + "\"" : "Create New Group";
         $scope.webPartners = [];
+        $scope.placeHolder = 'User name or email';
 
         $scope.closeGroupModal = function () {
-            $uibModalInstance.close();
+            $uibModalInstance.dismiss('cancel');
         };
 
-        $scope.newGroup = {remoteMembers: [], members: []};
+        if (currentGroup && currentGroup.id) {
+            Util.get("rest/groups/" + currentGroup.id + "/members", function (result) {
+                currentGroup.type = 'ACCOUNT';
+                $scope.newGroup = currentGroup;
 
-        var getWebPartners = function () {
+                angular.forEach(result.members, function (member) {
+                    member.type = 'ACCOUNT';
+                    $scope.newGroup.members.push(member);
+                });
+
+                angular.forEach(result.remoteMembers, function (member) {
+                    member.type = 'REMOTE';
+                    $scope.newGroup.members.push(member);
+                });
+            });
+        } else {
+            $scope.newGroup = {members: [], type: 'ACCOUNT'};
+        }
+
+        $scope.getWebPartners = function () {
+            $scope.placeHolder = 'Enter remote user\'s email';
             Util.list("rest/partners", function (result) {
                 $scope.webPartners = result;
             });
         };
-        getWebPartners();
 
-        // adds a remote user to the new group object
-        $scope.addRemoteUser = function () {
-            Util.get("rest/users/remote", function (result) {
-                $scope.newGroup.remoteMembers.push(result);
-            }, {pid: 34, email: $scope.remoteUser}, function (error) {
-                console.log("error fetching remote user");
-                if (error.status == 404) {
-                    // show to user
-                } else {
-                    // other error
+        $scope.filter = function (val) {
+            if ($scope.newGroup.type == 'REMOTE')
+                return;
+
+            return $http.get('rest/users/autocomplete', {
+                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                params: {
+                    val: val
                 }
+            }).then(function (res) {
+                return res.data;
             });
         };
 
-        $scope.createNewGroup = function () {
-            Util.post("rest/groups", $scope.newGroup, function (result) {
-                console.log(result);
-            }, {}, function (error) {
+        $scope.userSelectionForGroupAdd = function ($item, $model, $label) {
+            if ($scope.newGroup.type == 'REMOTE') {
+                $scope.newGroup.members.push({
+                    type: $scope.newGroup.type,
+                    email: $item,
+                    partner: $scope.newGroup.partner
+                });
+            } else {
+                $item.type = $scope.newGroup.type;
+                $scope.newGroup.members.push($item);
+            }
 
-            })
+            // reset
+            $scope.newUserName = undefined;
+            $scope.newGroup.partner = undefined;
+            $scope.newGroup.type = 'ACCOUNT';
+        };
+
+        $scope.createOrUpdateGroup = function () {
+            var members = [];
+            var remoteMembers = [];
+
+            for (var i = 0; i < $scope.newGroup.members.length; i += 1) {
+                var member = $scope.newGroup.members[i];
+                if (member.type == 'REMOTE') {
+                    remoteMembers.push({user: {email: member.email}, partner: member.partner});
+                } else {
+                    members.push(member);
+                }
+            }
+
+            $scope.newGroup.members = members;
+            $scope.newGroup.remoteMembers = remoteMembers;
+
+            if ($scope.newGroup.id) {
+                Util.update("rest/groups/" + $scope.newGroup.id, $scope.newGroup, {}, function (result) {
+                    $uibModalInstance.close(result);
+                }, function (error) {
+                    console.log(error);
+                });
+            } else {
+                Util.post("rest/groups", $scope.newGroup, function (result) {
+                    console.log(result);
+                    $uibModalInstance.close(result);
+                }, {}, function (error) {
+                    console.log(error);
+                })
+            }
+        };
+
+        $scope.selectPartnerForGroupAdd = function (partner) {
+            $scope.newGroup.partner = {id: partner.id, url: partner.url};
         };
     })
 ;

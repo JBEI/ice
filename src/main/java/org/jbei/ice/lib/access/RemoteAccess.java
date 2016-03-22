@@ -17,7 +17,7 @@ import org.jbei.ice.storage.model.*;
 public class RemoteAccess {
 
     private final FolderDAO folderDAO;
-    private final ClientModelDAO clientModelDAO;
+    private final RemoteClientModelDAO remoteClientModelDAO;
     private final RemotePartnerDAO remotePartnerDAO;
     private final AccountDAO accountDAO;
     private final RemoteAccessModelDAO remoteAccessModelDAO;
@@ -25,7 +25,7 @@ public class RemoteAccess {
 
     public RemoteAccess() {
         this.folderDAO = DAOFactory.getFolderDAO();
-        this.clientModelDAO = DAOFactory.getClientModelDAO();
+        this.remoteClientModelDAO = DAOFactory.getRemoteClientModelDAO();
         this.remotePartnerDAO = DAOFactory.getRemotePartnerDAO();
         this.accountDAO = DAOFactory.getAccountDAO();
         this.remoteAccessModelDAO = DAOFactory.getRemoteAccessModelDAO();
@@ -79,12 +79,12 @@ public class RemoteAccess {
         RemotePartner remotePartner = remotePartnerDAO.getByUrl(partner.getUrl());
 
         // get or create the client for the remote user who is sharing the folder
-        ClientModel clientModel = getOrCreateRemoteClient(remoteEmail, remotePartner);
+        RemoteClientModel remoteClientModel = getOrCreateRemoteClient(remoteEmail, remotePartner);
 
-        // ass
+        // store access
         Permission permission = createPermissionModel(accessPermission, folder, account);
 
-        RemoteAccessModel remoteAccessModel = createRemoteAccessModel(accessPermission, clientModel, permission);
+        RemoteAccessModel remoteAccessModel = createRemoteAccessModel(accessPermission, remoteClientModel, permission);
         return remoteAccessModel.toDataTransferObject();
     }
 
@@ -96,15 +96,15 @@ public class RemoteAccess {
      * @param remotePartner remote partner
      * @return client model stored in the database with specified user id and partner
      */
-    protected ClientModel getOrCreateRemoteClient(String remoteUserId, RemotePartner remotePartner) {
-        ClientModel clientModel = clientModelDAO.getModel(remoteUserId, remotePartner);
-        if (clientModel == null) {
-            clientModel = new ClientModel();
-            clientModel.setRemotePartner(remotePartner);
-            clientModel.setEmail(remoteUserId);
-            clientModel = clientModelDAO.create(clientModel);
+    protected RemoteClientModel getOrCreateRemoteClient(String remoteUserId, RemotePartner remotePartner) {
+        RemoteClientModel remoteClientModel = remoteClientModelDAO.getModel(remoteUserId, remotePartner);
+        if (remoteClientModel == null) {
+            remoteClientModel = new RemoteClientModel();
+            remoteClientModel.setRemotePartner(remotePartner);
+            remoteClientModel.setEmail(remoteUserId);
+            remoteClientModel = remoteClientModelDAO.create(remoteClientModel);
         }
-        return clientModel;
+        return remoteClientModel;
     }
 
     protected Permission createPermissionModel(AccessPermission accessPermission, Folder folder, Account account) {
@@ -116,11 +116,11 @@ public class RemoteAccess {
         return this.permissionDAO.create(permission);
     }
 
-    protected RemoteAccessModel createRemoteAccessModel(AccessPermission accessPermission, ClientModel clientModel,
+    protected RemoteAccessModel createRemoteAccessModel(AccessPermission accessPermission, RemoteClientModel remoteClientModel,
                                                         Permission permission) {
         RemoteAccessModel remoteAccessModel = new RemoteAccessModel();
         remoteAccessModel.setToken(accessPermission.getSecret());
-        remoteAccessModel.setClientModel(clientModel);
+        remoteAccessModel.setRemoteClientModel(remoteClientModel);
         remoteAccessModel.setIdentifier(accessPermission.getTypeId() + "");
         remoteAccessModel.setPermission(permission);
         return remoteAccessModelDAO.create(remoteAccessModel);

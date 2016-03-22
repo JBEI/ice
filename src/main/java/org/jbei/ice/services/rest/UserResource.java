@@ -12,11 +12,10 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.user.UserPreferences;
-import org.jbei.ice.lib.dto.web.RemoteUsers;
 import org.jbei.ice.lib.entry.OwnerEntries;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.group.UserGroups;
+import org.jbei.ice.lib.group.Groups;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.Account;
@@ -71,16 +70,16 @@ public class UserResource extends RestResource {
      * @param partnerId unique identifier for add partner
      * @return todo
      */
-    @GET
-    @Path("/remote")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getRemoteUser(
-            @QueryParam("email") String userEmail,
-            @QueryParam("pid") long partnerId) {
-        String userId = requireUserId();
-        RemoteUsers remoteUsers = new RemoteUsers(userId);
-        return super.respond(remoteUsers.get(partnerId, userEmail));
-    }
+//    @GET
+//    @Path("/remote")
+//    @Produces(MediaType.APPLICATION_JSON)
+//    public Response getRemoteUser(
+//            @QueryParam("email") String userEmail,
+//            @QueryParam("pid") long partnerId) {
+//        requireUserId();
+//        RemoteUsers remoteUsers = new RemoteUsers();
+//        return super.respond(remoteUsers.get(partnerId, userEmail));
+//    }
 
     /**
      * Retrieves (up to specified limit), the list of users that match the value
@@ -106,19 +105,10 @@ public class UserResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public AccountTransfer read(@PathParam("id") final String userId) {
-        // todo : lock to partners only
-        Account account;
-        if (userId.matches("\\d+(\\.\\d+)?")) {
-            account = controller.get(Long.decode(userId));
-        } else {
-            account = controller.getByEmail(userId);
-        }
-
-        if (account != null) {
-            return account.toDataTransferObject();
-        }
-        return null;
+    public Response read(@PathParam("id") final String userId) {
+        String user = requireUserId();
+        Accounts accounts = new Accounts();
+        return super.respond(accounts.getAccount(user, userId));
     }
 
     /**
@@ -130,7 +120,7 @@ public class UserResource extends RestResource {
     public Response getProfileGroups(@PathParam("id") final long userId) {
         String userIdStr = requireUserId();
         log(userIdStr, " get profile groups");
-        UserGroups userGroups = new UserGroups(userIdStr);
+        Groups userGroups = new Groups(userIdStr);
         return super.respond(userGroups.get(userId));
     }
 

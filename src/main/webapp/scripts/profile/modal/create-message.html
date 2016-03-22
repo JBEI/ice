@@ -1,0 +1,46 @@
+<div class="modal-header">
+    <!--<button type="button" class="close" ng-click="closeGroupModal()">&times;</button>-->
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-envelope"></i> &nbsp; Create New Message
+    </span>
+</div>
+
+<div class="modal-body" style="background-color: #ededed;">
+    <div class="margin-top-10">
+        <b class="font-75em">TO</b>
+        <small ng-repeat="recipient in newMessage.accounts">{{recipient.email}}
+            <i class="fa fa-times opacity_hover" ng-click="removeMessageRecipient(recipient)"></i>
+        </small>
+        <!--<i class="fa fa-fw fa-user dark-gray"></i>-->
+
+        <script type="text/ng-template" id="customTemplate.html">
+            <a class="font-90em">
+                <span ng-bind-html="match.model.firstName + ' ' + match.model.lastName | uibTypeaheadHighlight:query"></span>
+
+                <div ng-bind-html="match.model.email | uibTypeaheadHighlight:query"
+                     style="font-size: 12px; color: #aaa; margin-top: -3px;"></div>
+            </a>
+        </script>
+
+        <input class="login_input" type="text" placeHolder="{{placeHolder}}"
+               style="width: 200px; padding: 5px;" ng-model="addedUser"
+               typeahead-loading="loadingAddExistingData"
+               uib-typeahead="result for result in filter($viewValue)"
+               typeahead-editable="true" typeahead-template-url="customTemplate.html"
+               typeahead-on-select="setMessageRecipient($item, $model, $label)"/> <img
+            ng-if="loadingAddExistingData" src="img/loader-mini.gif"/>
+    </div>
+
+    <div class="pad-top-5">
+        <input type="text" class="login_input" placeholder="Subject"
+               style="width: 100%; padding: 12px; border-bottom: 0"
+               maxlength="45" ng-model="newMessage.title"/>
+            <textarea placeholder="Message" rows="15" style="width: 100%; padding: 12px;" class="input_box"
+                      ng-model="newMessage.message"></textarea>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button type="submit" class="btn btn-primary" ng-click="createNewMessage()">Send</button>
+    <button type="reset" ng-click="closeGroupModal()" class="btn btn-default">Cancel</button>
+</div>

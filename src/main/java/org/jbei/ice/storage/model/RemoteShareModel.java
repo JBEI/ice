@@ -39,7 +39,7 @@ public class RemoteShareModel implements DataModel {
     // who is being shared with
     @OneToOne
     @JoinColumn(name = "client_id", nullable = false)
-    private ClientModel client;
+    private RemoteClientModel client;
 
     @Override
     public long getId() {
@@ -70,11 +70,11 @@ public class RemoteShareModel implements DataModel {
         this.permission = permission;
     }
 
-    public ClientModel getClient() {
+    public RemoteClientModel getClient() {
         return client;
     }
 
-    public void setClient(ClientModel client) {
+    public void setClient(RemoteClientModel client) {
         this.client = client;
     }
 

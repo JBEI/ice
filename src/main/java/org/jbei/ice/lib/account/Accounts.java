@@ -75,6 +75,19 @@ public class Accounts {
         return accountTransfers;
     }
 
+    public AccountTransfer getAccount(String requester, String userId) {
+        // todo : who can request the account information?  if in a public group together then can return
+        Account account;
+        if (userId.matches("\\d+(\\.\\d+)?")) {
+            account = this.accountDAO.get(Long.decode(userId));
+        } else {
+            account = this.accountDAO.getByEmail(userId);
+        }
+        if (account == null)
+            return null;
+        return account.toDataTransferObject();
+    }
+
     protected long getNumberOfOwnerEntries(Account account, String ownerEmail) {
         Set<Group> accountGroups = new HashSet<>(account.getGroups());
         return DAOFactory.getEntryDAO().ownerEntryCount(account, ownerEmail, accountGroups);

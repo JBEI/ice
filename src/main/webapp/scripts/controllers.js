@@ -539,15 +539,6 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
     }
 });
 
-iceControllers.controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
-    var message = Message($cookieStore.get('sessionId'));
-    var profileId = $stateParams.id;
-    $location.path("profile/" + profileId + "/messages", false);
-    message.query(function (result) {
-        $scope.messages = result;
-    });
-});
-
 iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope,
                                                        Authentication, Settings, Util) {
 

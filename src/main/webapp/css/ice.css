@@ -47,6 +47,10 @@ html, body {
     color: #285e8e;
 }
 
+.dark-gray {
+    color: #657B83;
+}
+
 .brown {
     color: #a52a2a;
 }
@@ -1266,3 +1270,36 @@ button[disabled].action-menu:hover {
     display: none !important;
 }
 
+.table-row-index {
+    vertical-align: middle;
+    line-height: 1;
+    opacity: 0.2;
+    text-shadow: 0 1px 0 #fff;
+}
+
+.message {
+    border: 1px solid #f1f1f1;
+    background-color: #FEFEFE;
+    padding: 12px;
+}
+
+.message > small {
+    color: #c1c1c1;
+}
+
+.message:hover {
+    background-color: #657B83;
+    color: white;
+    cursor: pointer;
+}
+
+.message-selected {
+    background-color: #285e8e;
+    color: white;
+}
+
+.message-details {
+    width: 65%;
+    padding: 12px;
+    vertical-align: top
+}

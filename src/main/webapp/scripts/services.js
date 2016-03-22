@@ -125,18 +125,6 @@ iceServices.factory('User', function ($resource) {
     }
 });
 
-iceServices.factory('Message', function ($resource) {
-    return function (sessionId) {
-        return $resource('rest/messages', {messageId: '@id'}, {
-            query: {
-                method: 'GET',
-                responseType: "json",
-                headers: {'X-ICE-Authentication-SessionId': sessionId}
-            }
-        });
-    }
-});
-
 iceServices.factory('Samples', function ($resource) {
     return function (sessionId) {
         return $resource('rest/samples', {

@@ -4,11 +4,12 @@ import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
-import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.folder.collection.CollectionType;
 import org.jbei.ice.lib.folder.collection.Collections;
+import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
 import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.RemotePartner;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -36,7 +37,9 @@ public class RemoteAccessTest {
     public void testAdd() throws Exception {
         Account account = AccountCreator.createTestAccount("RemoteAccessTest.testAdd", false);
         RemoteAccess remoteAccess = new RemoteAccess();
-        RegistryPartner partner = new RegistryPartner();
+        RemotePartner partner = new RemotePartner();
+        partner.setUrl("registry.jbei.org");
+        partner = DAOFactory.getRemotePartnerDAO().create(partner);
 
         // create permission to share with this user
         AccessPermission permission = new AccessPermission();
@@ -48,7 +51,7 @@ public class RemoteAccessTest {
         permission.setType(AccessPermission.Type.READ_FOLDER);
         permission.setSecret("supersekrit");
 
-        remoteAccess.add(partner, permission);
+        remoteAccess.add(partner.toDataTransferObject(), permission);
 
         Collections collections = new Collections(account.getEmail());
         List<FolderDetails> subFolders = collections.getSubFolders(CollectionType.SHARED);

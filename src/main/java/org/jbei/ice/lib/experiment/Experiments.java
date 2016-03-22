@@ -60,9 +60,12 @@ public class Experiments extends HasEntry {
 
     /**
      * Creates a new study for a particular entry. If a unique identifier is associated with the {@link Study} object
-     * then an update occurs instead of a new object being created
+     * then an update occurs instead of a new object being created.
+     * <p>
+     * Only read access is required to create a new study. To update an existing study
+     * the user must be the creator or must have write access on the entry the study is associated with
      *
-     * @param userId id of user making request. Must have write privileges on the entry
+     * @param userId id of user making request.
      * @param partId id of entry the study is being created for
      * @param study  data for study
      * @return saved study (including unique identifier)
@@ -75,7 +78,6 @@ public class Experiments extends HasEntry {
         if (StringUtils.isEmpty(study.getUrl()))
             return null;
 
-        entryAuthorization.expectWrite(userId, entry);
         Experiment experiment = null;
 
         if (study.getId() > 0) {
@@ -86,6 +88,7 @@ public class Experiments extends HasEntry {
             experiment = dao.getByUrl(study.getUrl());
 
         if (experiment == null) {
+            entryAuthorization.expectRead(userId, entry);
             experiment = new Experiment();
             experiment.setCreationTime(new Date());
             experiment.setUrl(study.getUrl());
@@ -96,6 +99,8 @@ public class Experiments extends HasEntry {
             return experiment.toDataTransferObject();
         }
 
+        if (!userId.equalsIgnoreCase(study.getOwnerEmail()))
+            entryAuthorization.expectWrite(userId, entry);
         experiment.setUrl(study.getUrl());
         experiment.setLabel(study.getLabel());
         experiment.getSubjects().add(entry);
@@ -123,8 +128,8 @@ public class Experiments extends HasEntry {
             return false;
         }
 
-        if (!entryAuthorization.canWriteThoroughCheck(userId, entry) &&
-                !experiment.getOwnerEmail().equalsIgnoreCase(userId)) {
+        if (!experiment.getOwnerEmail().equalsIgnoreCase(userId) &&
+                !entryAuthorization.canWriteThoroughCheck(userId, entry)) {
             throw new PermissionException("Cannot delete experiment");
         }
 

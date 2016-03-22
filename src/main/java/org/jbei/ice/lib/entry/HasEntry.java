@@ -1,8 +1,11 @@
 package org.jbei.ice.lib.entry;
 
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Entry;
+
+import java.util.List;
 
 /**
  * Parent class for all objects that have an entry, or need to retrieve one
@@ -39,6 +42,21 @@ public class HasEntry {
         // check for global unique id
         if (entry == null)
             entry = entryDAO.getByRecordId(id);
+
+        // get by unique name
+        if (entry == null) {
+            List<Entry> result = entryDAO.getByName(id);
+            if (result == null || result.isEmpty())
+                return null;
+
+            if (result.size() == 1)
+                return result.get(0);
+
+            if (result.size() > 1) {
+                Logger.error("Multiple entries found with name " + id);
+                return null;
+            }
+        }
 
         return entry;
     }

@@ -155,32 +155,21 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     /**
-     * Retrieve an {@link Entry} by it's name.The name must be unique to the entry
+     * Retrieve an {@link Entry} by it's name. Note that name is not a unique field
+     * so this could return more than one entry
      *
      * @param name name associated with entry
      * @return Entry.
      * @throws DAOException
      */
-    public Entry getByUniqueName(String name) throws DAOException {
+    public List<Entry> getByName(String name) throws DAOException {
         Session session = currentSession();
 
         try {
             Query query = session.createQuery("from " + Entry.class.getName() + " where name=:name AND visibility=:v");
             query.setParameter("name", name);
             query.setParameter("v", Visibility.OK.getValue());
-
-            List queryResult = query.list();
-            if (queryResult == null || queryResult.isEmpty()) {
-                return null;
-            }
-
-            if (queryResult.size() > 1) {
-                String msg = "Duplicate entries found for name " + name;
-                Logger.error(msg);
-                throw new DAOException(msg);
-            }
-
-            return (Entry) queryResult.get(0);
+            return query.list();
         } catch (HibernateException e) {
             Logger.error("Failed to retrieve entry by name: " + name, e);
             throw new DAOException("Failed to retrieve entry by name: " + name, e);
@@ -233,6 +222,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
+    // todo : or entry is in a folder that is public
     public long visibleEntryCount(Account account, Set<Group> groups, String filter) throws DAOException {
         Session session = currentSession();
         Criteria criteria = session.createCriteria(Permission.class);

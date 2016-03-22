@@ -123,8 +123,8 @@ public class RemoteContact {
         return restClient.getWor(url, "/rest/partners", ArrayList.class, null, token);
     }
 
-    public AccountTransfer getUser(String url, String email) {
-        return restClient.get(url, "/rest/users/" + email, AccountTransfer.class, null);
+    public AccountTransfer getUser(String url, String email, String token) {
+        return restClient.getWor(url, "rest/users/" + email, AccountTransfer.class, null, token);
     }
 
     public AccessPermission shareFolder(String url, AccessPermission permission, String token) {
@@ -198,6 +198,21 @@ public class RemoteContact {
     public FeaturedDNASequence getPublicEntrySequence(String url, long partId, String apiKey) {
         String path = "/rest/parts/" + partId + "/sequence";
         return restClient.getWor(url, path, FeaturedDNASequence.class, null, apiKey);
+    }
+
+    public FeaturedDNASequence getSequence(String url, String userId, long partId, long folderId, String token, String apiKey) {
+        try {
+            String path = "rest/parts/" + partId + "/sequence";
+            String encodedToken = URLEncoder.encode(token, "UTF-8");
+            Map<String, Object> queryParams = new HashMap<>();
+            queryParams.put("token", encodedToken);
+            queryParams.put("userId", userId);
+            queryParams.put("folderId", folderId);
+            return restClient.getWor(url, path, FeaturedDNASequence.class, queryParams, apiKey);
+        } catch (Exception e) {
+            Logger.error(e);
+            return null;
+        }
     }
 
     public PartData getRemoteEntry(String url, String userId, long partId, long folderId, String token, String worToken) {

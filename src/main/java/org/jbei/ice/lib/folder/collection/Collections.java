@@ -38,7 +38,7 @@ public class Collections {
         long ownerEntryCount = DAOFactory.getEntryDAO().ownerEntryCount(userId);
         collection.setPersonal(ownerEntryCount);
         SharedEntries sharedEntries = new SharedEntries(userId);
-        collection.setShared(sharedEntries.getNumberofEntries(null));
+        collection.setShared(sharedEntries.getNumberOfEntries(null));
         collection.setDrafts(entryDAO.getByVisibilityCount(userId, Visibility.DRAFT, null));
 
         if (account.getType() != AccountType.ADMIN)

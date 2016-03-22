@@ -5,7 +5,6 @@ import org.jbei.ice.lib.dto.group.UserGroup;
 import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * DTO for message object
@@ -15,7 +14,7 @@ import java.util.Date;
 public class MessageInfo implements IDataTransferModel {
 
     private long id;
-    private Date sent;
+    private long sent;
     private String from;
     private String message;
     private String title;
@@ -36,11 +35,11 @@ public class MessageInfo implements IDataTransferModel {
         return this.id;
     }
 
-    public Date getSent() {
+    public long getSent() {
         return sent;
     }
 
-    public void setSent(Date sent) {
+    public void setSent(long sent) {
         this.sent = sent;
     }
 
