@@ -1261,7 +1261,7 @@ button[disabled].action-menu:hover {
     text-transform: uppercase;
 }
 
-.entry-table-header:hover {
+.entry-table-header > span:hover {
     text-decoration: underline;
     cursor: pointer;
 }
@@ -1302,4 +1302,11 @@ button[disabled].action-menu:hover {
     width: 65%;
     padding: 12px;
     vertical-align: top
+}
+
+.table-index-label {
+    vertical-align: middle;
+    line-height: 1;
+    opacity: 0.2;
+    text-shadow: 0 1px 0 #fff;
 }
