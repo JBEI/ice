@@ -32,9 +32,18 @@
                                style="border-right: 0; width: 173px"/>
 
                         <span class="input-group-addon" style="padding:3px; border-radius: 0;
-                        background-color: #fff; width: 20px">
+                        background-color: #fff; width: 20px" ng-if="!login.passwordError">
                             <a href="forgot-password" class="font-80em">Forgot?</a>
                          </span>
+
+                        <span class="input-group-addon" style="padding:3px; border-radius: 0;
+                        background-color: #fcc; border: 1px solid #cc3333; border-left: 0;width: 20px"
+                              ng-if="login.passwordError">
+                            <a href="forgot-password" class="font-80em">Forgot?</a>
+                         </span>
+
+                        <!--width: 20px border : 1 px solid #cc3333;-->
+                        <!--background-color: #fcc;-->
                     </div>
                 </div>
 
