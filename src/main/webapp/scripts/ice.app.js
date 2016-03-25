@@ -4,6 +4,7 @@
 var iceApp = angular.module('iceApp', ['ice.dependencies']);
 
 iceApp.run(function (Authentication, $route, $location, $rootScope, Util) {
+    // change path without re-loading
     var original = $location.path;
     $location.path = function (path, reload) {
         if (reload === false) {

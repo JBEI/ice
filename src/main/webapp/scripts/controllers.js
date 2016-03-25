@@ -5,7 +5,7 @@ var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'u
 
 iceControllers.controller('ActionMenuController', function ($stateParams, $uibModal, $scope, $window, $rootScope,
                                                             $location, $cookieStore, Folders, Entry, WebOfRegistries,
-                                                            Files, Selection, Upload, FolderSelection, Util) {
+                                                            Files, Selection, FolderSelection, Util) {
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
     $scope.entrySelected = false;
 
@@ -147,7 +147,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     // function that handles "edit" click
     $scope.editEntry = function () {
         var selectedEntries = Selection.getSelectedEntries();
-        var upload = Upload(sid);
 
         if (selectedEntries.length > 1) {
             var type;
@@ -156,16 +155,14 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
             }
 
             // first create bulk upload
-            upload.create({
+            Util.update("rest/uploads", {
                 name: "Bulk Edit",
                 type: type,
                 status: 'BULK_EDIT',
                 entryList: selectedEntries
-            }, function (result) {
+            }, {}, function (result) {
                 console.log(result);
                 $location.path("upload/" + result.id);
-            }, function (error) {
-                console.error("error creating bulk upload", error);
             });
         } else {
             $location.path('entry/edit/' + selectedEntries[0].id);
