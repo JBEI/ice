@@ -17,14 +17,10 @@ import org.jbei.ice.lib.entry.sample.RequestRetriever;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.group.Groups;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.model.Account;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import java.util.List;
 
 /**
@@ -142,8 +138,7 @@ public class UserResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries")
-    public FolderDetails getProfileEntries(@Context final UriInfo info,
-                                           @PathParam("id") final long userId,
+    public FolderDetails getProfileEntries(@PathParam("id") final long userId,
                                            @DefaultValue("0") @QueryParam("offset") final int offset,
                                            @DefaultValue("15") @QueryParam("limit") final int limit,
                                            @DefaultValue("created") @QueryParam("sort") final String sort,
@@ -151,8 +146,7 @@ public class UserResource extends RestResource {
                                            @DefaultValue("") @QueryParam("filter") String filter) {
         final String userIdString = getUserId();
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
-        final Account requestAccount = DAOFactory.getAccountDAO().get(userId);
-        OwnerEntries ownerEntries = new OwnerEntries(userIdString, requestAccount.getEmail());
+        OwnerEntries ownerEntries = new OwnerEntries(userIdString, userId);
         final List<PartData> entries = ownerEntries.retrieveOwnerEntries(field, asc, offset, limit, filter);
         final long count = ownerEntries.getNumberOfOwnerEntries();
         final FolderDetails details = new FolderDetails();
@@ -167,8 +161,7 @@ public class UserResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/preferences")
-    public UserPreferences getUserPreferences(@Context final UriInfo info,
-                                              @PathParam("id") final long userId) {
+    public UserPreferences getUserPreferences(@PathParam("id") final long userId) {
         final String userIdString = getUserId();
         final PreferencesController preferencesController = new PreferencesController();
         return preferencesController.getUserPreferences(userIdString, userId);
@@ -195,9 +188,9 @@ public class UserResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public AccountTransfer update(@Context final UriInfo info, @PathParam("id") final long userId,
+    public AccountTransfer update(@PathParam("id") final long userId,
                                   final AccountTransfer transfer) {
-        final String user = getUserId();
+        final String user = requireUserId();
         return controller.updateAccount(user, userId, transfer);
     }
 
@@ -205,7 +198,7 @@ public class UserResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/password")
-    public Response resetPassword(@Context final UriInfo info, final AccountTransfer transfer) {
+    public Response resetPassword(final AccountTransfer transfer) {
         final boolean success = controller.resetPassword(transfer.getEmail());
         if (!success) {
             return super.respond(Response.Status.NOT_FOUND);
@@ -253,7 +246,7 @@ public class UserResource extends RestResource {
                                         @DefaultValue("false") @QueryParam("asc") final boolean asc,
                                         @PathParam("userId") final long uid,
                                         @DefaultValue("") @QueryParam("status") final SampleRequestStatus status) {
-        final String user = getUserId();
+        final String user = requireUserId();
         return super.respond(Response.Status.OK,
                 requestRetriever.getUserSamples(user, status, offset, limit, sort, asc));
     }
