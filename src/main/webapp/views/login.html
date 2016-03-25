@@ -63,9 +63,10 @@
                 <button type="submit" class="btn btn-sm btn-primary" ng-disabled="login.processing&&!errMsg">
                     <strong>Sign in</strong>
                 </button>
-                <button type="button" ng-if="canCreateAccount" ng-click="goToRegister()"
-                        class="btn btn-default btn-sm">Create account
-                </button>
+
+                <div class="btn-group" ng-if="canCreateAccount">
+                    <a href="register" class="btn btn-default btn-sm">Create account</a>
+                </div>
             </form>
 
             <!--<div style="margin-top: 38px;" ng-if="canChangePassword">-->

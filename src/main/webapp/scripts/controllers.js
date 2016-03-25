@@ -536,8 +536,7 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
     }
 });
 
-iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope,
-                                                       Authentication, Settings, Util) {
+iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Util) {
 
     // init
     $scope.login = {};
@@ -594,14 +593,10 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
                 $scope.errMsg = error.statusText;
             });
     };
-
-    $scope.goToRegister = function () {
-        $location.path("register");
-    };
 });
 
 // turning out to be pretty specific to the permissions
-iceControllers.controller('GenericTabsController', function ($scope, $cookieStore, User) {
+iceControllers.controller('GenericTabsController', function ($scope, $cookieStore) {
     console.log("GenericTabsController");
     var panes = $scope.panes = [];
     var sessionId = $cookieStore.get("sessionId");
