@@ -4,15 +4,15 @@
     </div>
 
     <div class="pad_top" ng-if="!apiKeys || !apiKeys.length">
-        No api keys created
+        <i class="text-muted">You have not created any api keys</i>
     </div>
 
     <div class="pad_top" ng-if="apiKeys && apiKeys.length">
-        <table class="table table-border-bottom table-hover">
+        <table class="table table-border-bottom table-hover" style="width: 98%">
             <thead>
             <tr>
-                <th>ClientId</th>
-                <th>Creation Time</th>
+                <th class="entry-table-header">Client Id</th>
+                <th class="entry-table-header">Creation Time</th>
                 <th></th>
             </tr>
             </thead>

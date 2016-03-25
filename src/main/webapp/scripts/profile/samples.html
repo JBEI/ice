@@ -1,14 +1,10 @@
 <div ng-controller="ProfileSamplesController">
-    <div ng-if="!userSamples">
-        <img src="img/loader-mini.gif"> Loading...
+    <div class="pad_top" ng-if="!userSamples.requests || !userSamples.requests.length">
+        <i class="text-muted"> No requested samples available</i>
     </div>
 
-    <div ng-if="userSamples.requests.length=== 0">
-        No requested samples available
-    </div>
-
-    <table cellspacing="0"
-           class="table table-responsive table-hover table-condensed table-striped table-border-bottom font-95em"
+    <table cellspacing="0" style="width: 98%"
+           class="table table-hover table-condensed table-border-bottom font-95em"
            ng-class="{'opacity_4':loadingPage}">
         <thead>
         <tr data-ng-if='userSamples && userSamples.requests.length > 0'>
@@ -53,7 +49,7 @@
     <div ng-if='userSamples && userSamples.requests.length > 0' style="margin-top: -15px">
         <div class="col-md-6" style="padding-left: 0">
             <uib-pagination total-items="userSamples.count" ng-change="profileSamplesPageChanged()"
-                        ng-model="params.currentPage"
+                            ng-model="params.currentPage"
                             max-size="maxSize" class="pagination-sm" items-per-page="15"
                             boundary-links="true"></uib-pagination>
         </div>
