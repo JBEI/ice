@@ -3,30 +3,6 @@
 /* Services */
 var iceServices = angular.module('iceApp.services', ['ngCookies', 'ngResource']);
 
-iceServices.factory('Group', function ($resource, $cookieStore) {
-    return function () {
-
-        var sessionId = $cookieStore.get("sessionId");
-
-        return $resource('rest/groups', {groupId: '@groupId'}, {
-            members: {
-                method: 'GET',
-                responseType: 'json',
-                isArray: true,
-                url: "rest/groups/:groupId/members",
-                headers: {'X-ICE-Authentication-SessionId': sessionId}
-            },
-
-            update: {
-                method: 'PUT',
-                responseType: 'json',
-                url: "rest/groups/:groupId",
-                headers: {'X-ICE-Authentication-SessionId': sessionId}
-            }
-        });
-    }
-});
-
 iceServices.factory('User', function ($resource) {
     return function (sessionId) {
         return $resource('rest/users', {userId: '@userId', preferenceKey: '@preferenceKey', sendEmail: '@sendEmail'}, {

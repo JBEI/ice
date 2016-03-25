@@ -410,7 +410,7 @@ angular.module('ice.profile.controller', [])
         }
     })
     .controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams, User,
-                                                     Group, $uibModal, Util) {
+                                                     $uibModal, Util) {
         var profileId = $stateParams.id;
         $location.path("profile/" + profileId + "/groups", false);
         $scope.selectedUsers = [];
@@ -419,7 +419,6 @@ angular.module('ice.profile.controller', [])
         $scope.privateGroupsParams = {offset: 0, limit: 10, currentPage: 1, maxSize: 5};
 
         var user = User($cookieStore.get('sessionId'));
-        var group = Group();
 
         // init: retrieve groups user belongs to and created
         var getGroups = function () {
@@ -431,10 +430,9 @@ angular.module('ice.profile.controller', [])
 
         $scope.switchToEditMode = function (selectedGroup) {
             selectedGroup.edit = true;
-            group.members({groupId: selectedGroup.id}, function (result) {
+            Util.list("rest/groups/" + selectedGroup.id + "/members", function (result) {
                 selectedGroup.members = result;
-            }, function (error) {
-                console.error(error);
+            }, {}, function (error) {
                 selectedGroup.members = undefined;
             });
         };
@@ -493,11 +491,9 @@ angular.module('ice.profile.controller', [])
         };
 
         $scope.updateGroup = function (selectedGroup) {
-            group.update({groupId: selectedGroup.id}, selectedGroup, function (result) {
+            Util.update("rest/groups/" + selectedGroup.id, selectedGroup, {}, function (result) {
                 selectedGroup.memberCount = selectedGroup.members.length;
                 selectedGroup.edit = false;
-            }, function (error) {
-                console.error(error);
             });
         };
 
