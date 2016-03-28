@@ -750,8 +750,7 @@ angular.module('ice.entry.controller', [])
             $scope.serverError = false;
         };
     })
-    .controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group,
-                                                       filterFilter, Util) {
+    .controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, Entry, filterFilter, Util) {
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
         var panes = $scope.panes = [];
@@ -782,7 +781,6 @@ angular.module('ice.entry.controller', [])
 
             $scope.panes.push({title: 'Read', count: $scope.readPermissions.length, selected: true});
             $scope.panes.push({title: 'Write', count: $scope.writePermissions.length});
-
             $scope.activePermissions = $scope.readPermissions;
         });
 
@@ -795,14 +793,12 @@ angular.module('ice.entry.controller', [])
 
             $scope.filtering = true;
             Util.list("rest/users/autocomplete", function (result) {
-                console.log(result);
                 $scope.accessPermissions = result;
                 $scope.filtering = false;
             }, {limit: 8, val: val}, function (error) {
                 $scope.filtering = false;
                 $scope.accessPermissions = undefined;
             });
-
         };
 
         $scope.showAddPermissionOptionsClick = function () {

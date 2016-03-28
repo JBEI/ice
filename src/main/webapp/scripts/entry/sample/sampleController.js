@@ -1,21 +1,21 @@
 'use strict';
 
 angular.module('ice.entry.sample.controller', [])
-    .controller('DisplaySampleController', function ($rootScope, $scope) {
-        $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-        $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+    .controller('DisplaySampleController', function ($rootScope, $scope, SampleService) {
+        $scope.Plate96Rows = SampleService.getPlate96Rows();
+        $scope.Plate96Cols = SampleService.getPlate96Cols();
 
         $scope.canDelete = function () {
             return !$scope.remote && $rootScope.user && $rootScope.user.isAdmin;
         }
     })
-    .controller('EntrySampleController', function ($location, $rootScope, $scope, $uibModal, $cookieStore, $stateParams, Entry, Samples) {
+    .controller('EntrySampleController', function ($location, $rootScope, $scope, $uibModal, $cookieStore, $stateParams, Entry, Util, SampleService) {
         var sessionId = $cookieStore.get("sessionId");
         var entry = Entry(sessionId);
         var partId = $stateParams.id;
 
-        $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-        $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+        $scope.Plate96Rows = SampleService.getPlate96Rows();
+        $scope.Plate96Cols = SampleService.getPlate96Cols();
 
         // retrieve samples for partId
         entry.samples({
@@ -92,7 +92,7 @@ angular.module('ice.entry.sample.controller', [])
                         };
 
                         // add selection to shopping cart
-                        Samples(sessionId).addRequestToCart({}, sampleSelection, function (result) {
+                        Util.post("rest/samples/requests", sampleSelection, function (result) {
                             $rootScope.$emit("SamplesInCart", result);
                             setInCart(result);
                             modalInstance.close('');
@@ -136,8 +136,6 @@ angular.module('ice.entry.sample.controller', [])
                 var idx = $scope.samples.indexOf(sample);
                 $scope.samples.splice(idx, 1);
                 console.log("deleted", sample, idx);
-            }, function (error) {
-                console.log(error);
             });
         };
 
@@ -168,8 +166,6 @@ angular.module('ice.entry.sample.controller', [])
                     },
                     location: {}
                 };
-            }, function (error) {
-                console.error(error);
             });
         };
 

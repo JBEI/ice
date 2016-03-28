@@ -11,6 +11,7 @@
         <table class="table table-border-bottom table-hover" style="width: 98%">
             <thead>
             <tr>
+                <th>&nbsp;</th>
                 <th class="entry-table-header">Client Id</th>
                 <th class="entry-table-header">Creation Time</th>
                 <th></th>
@@ -18,6 +19,9 @@
             </thead>
             <tbody>
             <tr ng-repeat="apiKey in apiKeys">
+                <td class="font-14em table-row-index">
+                    <b>{{$index+1}}</b>
+                </td>
                 <td>{{apiKey.clientId}}</td>
                 <td>{{apiKey.creationTime | date:'MMM d, yyyy hh:mm a'}}</td>
                 <td><i class="fa fa-trash-o delete_icon" ng-click="deleteAPIKey(apiKey)"></i></td>

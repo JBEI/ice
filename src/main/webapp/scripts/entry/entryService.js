@@ -488,7 +488,7 @@ angular.module('ice.entry.service', [])
                         display: 'Experimental Data',
                         isPrivileged: false,
                         countName: 'experimentalDataCount',
-                        icon: 'fa-magic'
+                        icon: 'fa-database'
                     }
                 ];
             }

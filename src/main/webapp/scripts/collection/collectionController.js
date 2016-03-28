@@ -176,7 +176,7 @@ angular.module('ice.collection.controller', [])
         });
     })
     .controller('FolderPermissionsController', function ($scope, $http, $uibModalInstance, $cookieStore, Folders,
-                                                         Util, User, folder) {
+                                                         Util, folder) {
         var sessionId = $cookieStore.get("sessionId");
         $scope.folder = folder;
         $scope.userFilterInput = undefined;
@@ -669,7 +669,7 @@ angular.module('ice.collection.controller', [])
     })
     // also the main controller
     .controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope,
-                                                  Folders, Settings, Search, Authentication, Samples,
+                                                  Folders, Settings, Search, Authentication,
                                                   CollectionMenuOptions, Util) {
         // todo : set on all
         var searchUrl = "search";
@@ -710,8 +710,6 @@ angular.module('ice.collection.controller', [])
             // change state to trigger collection-selection.html (see ice.app.js)
             $location.path("folders/personal");
         }
-
-        var samples = Samples(sessionId);
 
         // selected entries
         $scope.selection = [];
@@ -771,16 +769,13 @@ angular.module('ice.collection.controller', [])
             }
 
             if (content) {
-                var contentId = content.id;
-                samples.removeRequestFromCart({requestId: contentId}, function (result) {
+                Util.remove("rest/samples/requests/" + content.id, function (result) {
                     var idx = $scope.shoppingCartContents.indexOf(content);
                     if (idx >= 0) {
                         $scope.shoppingCartContents.splice(idx, 1);
                     } else {
                         // todo : manual scan and remove
                     }
-                }, function (error) {
-                    console.error(error);
                 });
             }
         };

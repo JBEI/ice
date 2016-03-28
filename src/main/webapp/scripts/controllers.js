@@ -449,7 +449,7 @@ iceControllers.controller('AddToFolderController', function ($rootScope, $scope,
     };
 });
 
-iceControllers.controller('RegisterController', function ($scope, $resource, $location, User) {
+iceControllers.controller('RegisterController', function ($scope, $resource, $location, Util) {
     $scope.errMsg = undefined;
     $scope.registerSuccess = undefined;
     $scope.newUser = {
@@ -493,13 +493,12 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
         if (!validates)
             return;
 
-        User().createUser($scope.newUser, function (data) {
+        Util.post("rest/users", $scope.newUser, function (data) {
             if (data.length != 0)
                 $scope.registerSuccess = true;
             else
                 $scope.errMsg = "Could not create account";
-
-        }, function (error) {
+        }, {}, function (error) {
             $scope.errMsg = "Error creating account";
         });
     };
@@ -509,7 +508,7 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
     }
 });
 
-iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location, $rootScope, $sce, User) {
+iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location, Util) {
     $scope.user = {};
 
     $scope.resetPassword = function () {
@@ -521,11 +520,10 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
             return;
         }
 
-        User().resetPassword({}, $scope.user, function (success) {
+        Util.post("rest/users/password", $scope.user, function (data) {
             $scope.user.processing = false;
             $scope.user.processed = true;
-        }, function (error) {
-            console.error(error);
+        }, {}, function (error) {
             $scope.user.error = true;
             $scope.user.processing = false;
         });
