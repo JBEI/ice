@@ -4,8 +4,7 @@ var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'u
     'angularMoment']);
 
 iceControllers.controller('ActionMenuController', function ($stateParams, $uibModal, $scope, $window, $rootScope,
-                                                            $location, $cookieStore, Folders, Entry, WebOfRegistries,
-                                                            Files, Selection, Upload, FolderSelection, Util) {
+                                                            $location, $cookieStore, Selection, FolderSelection, Util) {
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
     $scope.entrySelected = false;
 
@@ -17,9 +16,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         Selection.reset();
     });
 
-    var sid = $cookieStore.get("sessionId");
-    var folders = Folders();
-    var entry = Entry(sid);
     $scope.selectedFolders = [];
 
     $scope.closeFeedbackAlert = function () {
@@ -147,7 +143,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     // function that handles "edit" click
     $scope.editEntry = function () {
         var selectedEntries = Selection.getSelectedEntries();
-        var upload = Upload(sid);
 
         if (selectedEntries.length > 1) {
             var type;
@@ -156,16 +151,14 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
             }
 
             // first create bulk upload
-            upload.create({
+            Util.update("rest/uploads", {
                 name: "Bulk Edit",
                 type: type,
                 status: 'BULK_EDIT',
                 entryList: selectedEntries
-            }, function (result) {
+            }, {}, function (result) {
                 console.log(result);
                 $location.path("upload/" + result.id);
-            }, function (error) {
-                console.error("error creating bulk upload", error);
             });
         } else {
             $location.path('entry/edit/' + selectedEntries[0].id);
@@ -455,7 +448,7 @@ iceControllers.controller('AddToFolderController', function ($rootScope, $scope,
     };
 });
 
-iceControllers.controller('RegisterController', function ($scope, $resource, $location, User) {
+iceControllers.controller('RegisterController', function ($scope, $resource, $location, Util) {
     $scope.errMsg = undefined;
     $scope.registerSuccess = undefined;
     $scope.newUser = {
@@ -499,13 +492,12 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
         if (!validates)
             return;
 
-        User().createUser($scope.newUser, function (data) {
+        Util.post("rest/users", $scope.newUser, function (data) {
             if (data.length != 0)
                 $scope.registerSuccess = true;
             else
                 $scope.errMsg = "Could not create account";
-
-        }, function (error) {
+        }, {}, function (error) {
             $scope.errMsg = "Error creating account";
         });
     };
@@ -515,7 +507,7 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
     }
 });
 
-iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location, $rootScope, $sce, User) {
+iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location, Util) {
     $scope.user = {};
 
     $scope.resetPassword = function () {
@@ -527,11 +519,10 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
             return;
         }
 
-        User().resetPassword({}, $scope.user, function (success) {
+        Util.post("rest/users/password", $scope.user, function (data) {
             $scope.user.processing = false;
             $scope.user.processed = true;
-        }, function (error) {
-            console.error(error);
+        }, {}, function (error) {
             $scope.user.error = true;
             $scope.user.processing = false;
         });
@@ -542,8 +533,7 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
     }
 });
 
-iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope,
-                                                       Authentication, Settings, Util) {
+iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Util) {
 
     // init
     $scope.login = {};
@@ -600,14 +590,10 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
                 $scope.errMsg = error.statusText;
             });
     };
-
-    $scope.goToRegister = function () {
-        $location.path("register");
-    };
 });
 
 // turning out to be pretty specific to the permissions
-iceControllers.controller('GenericTabsController', function ($scope, $cookieStore, User) {
+iceControllers.controller('GenericTabsController', function ($scope, $cookieStore) {
     console.log("GenericTabsController");
     var panes = $scope.panes = [];
     var sessionId = $cookieStore.get("sessionId");

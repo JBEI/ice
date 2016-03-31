@@ -32,9 +32,18 @@
                                style="border-right: 0; width: 173px"/>
 
                         <span class="input-group-addon" style="padding:3px; border-radius: 0;
-                        background-color: #fff; width: 20px">
+                        background-color: #fff; width: 20px" ng-if="!login.passwordError">
                             <a href="forgot-password" class="font-80em">Forgot?</a>
                          </span>
+
+                        <span class="input-group-addon" style="padding:3px; border-radius: 0;
+                        background-color: #fcc; border: 1px solid #cc3333; border-left: 0;width: 20px"
+                              ng-if="login.passwordError">
+                            <a href="forgot-password" class="font-80em">Forgot?</a>
+                         </span>
+
+                        <!--width: 20px border : 1 px solid #cc3333;-->
+                        <!--background-color: #fcc;-->
                     </div>
                 </div>
 
@@ -63,9 +72,10 @@
                 <button type="submit" class="btn btn-sm btn-primary" ng-disabled="login.processing&&!errMsg">
                     <strong>Sign in</strong>
                 </button>
-                <button type="button" ng-if="canCreateAccount" ng-click="goToRegister()"
-                        class="btn btn-default btn-sm">Create account
-                </button>
+
+                <div class="btn-group" ng-if="canCreateAccount">
+                    <a href="register" class="btn btn-default btn-sm">Create account</a>
+                </div>
             </form>
 
             <!--<div style="margin-top: 38px;" ng-if="canChangePassword">-->

@@ -184,8 +184,35 @@ angular.module('ice.upload.service', [])
                     case "part":
                         return entry[dataSchema[index]];
                 }
-
                 return undefined;
+            },
+
+            generateLinkOptions: function (type) {
+                switch (type) {
+                    case 'plasmid':
+                        return [
+                            {type: 'part', display: 'Part'},
+                            {type: 'plasmid', display: 'Plasmid'}
+                        ];
+
+                    case 'part':
+                        return [
+                            {type: 'part', display: 'Part'}
+                        ];
+
+                    case 'strain':
+                        return [
+                            {type: 'part', display: 'Part'},
+                            {type: 'plasmid', display: 'Plasmid'},
+                            {type: 'strain', display: 'Strain'}
+                        ];
+
+                    case 'arabidopsis':
+                        return [
+                            {type: 'part', display: 'Part'},
+                            {type: 'arabidopsis', display: 'Arabidopsis Seed'}
+                        ];
+                }
             }
         }
     });

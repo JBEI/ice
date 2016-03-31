@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.admin.controller', [])
-    .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, $cookieStore, Settings,
+    .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, $cookieStore,
                                              AdminSettings, Util) {
 
         // retrieve general setting
@@ -14,9 +14,7 @@ angular.module('ice.admin.controller', [])
                 'PROFILE_EDIT_ALLOWED', 'SEND_EMAIL_ON_ERRORS'];
 
             // retrieve site wide settings
-            var settings = Settings(sessionId);
-            settings.get(function (result) {
-
+            Util.list('rest/config', function (result) {
                 angular.forEach(result, function (setting) {
                     if (AdminSettings.generalSettingKeys().indexOf(setting.key) != -1) {
                         $scope.generalSettings.push({
@@ -115,8 +113,6 @@ angular.module('ice.admin.controller', [])
             }
         }
 
-        var setting = Settings($cookieStore.get("sessionId"));
-
         $scope.rebuildBlastIndex = function () {
             Util.update("rest/search/indexes/blast", {}, {}, function (result) {
             });
@@ -131,7 +127,7 @@ angular.module('ice.admin.controller', [])
             var visualKey = newSetting.key;
             newSetting.key = (newSetting.key.replace(/ /g, '_')).toUpperCase();
 
-            setting.update({}, newSetting, function (result) {
+            Util.update("rest/config", newSetting, {}, function (result) {
                 newSetting.key = visualKey;
                 newSetting.value = result.value;
                 newSetting.editMode = false;
@@ -147,15 +143,12 @@ angular.module('ice.admin.controller', [])
             $scope.submitSetting(booleanSetting);
         }
     })
-    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, Samples,
-                                                          $uibModal) {
+    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, $uibModal, Util) {
         $rootScope.error = undefined;
 
         $scope.selectOptions = ['ALL', 'PENDING', 'FULFILLED', 'REJECTED'];
-
-        var samples = Samples($cookieStore.get("sessionId"));
         $scope.maxSize = 5;
-        $scope.params = {sort: 'requested', asc: false, currentPage: 1, status: undefined};
+        $scope.params = {sort: 'requested', asc: false, currentPage: 1, status: 'ALL'};
 
         $scope.requestSamples = function () {
             $scope.loadingPage = true;
@@ -163,15 +156,11 @@ angular.module('ice.admin.controller', [])
             if (params.status == 'ALL')
                 params.status = undefined;
 
-            samples.requests(params, function (result) {
+            Util.get("rest/samples/requests", function (result) {
                 $scope.sampleRequests = result;
                 $scope.loadingPage = false;
                 $scope.indexStart = ($scope.currentPage - 1) * 15;
-            }, function (data) {
-                if (data.status === 401) {
-                    $location.path('/login');
-                    return;
-                }
+            }, params, function (error) {
                 $scope.loadingPage = false;
             });
         };
@@ -189,7 +178,8 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.updateStatus = function (request, newStatus) {
-            samples.update({requestId: request.id, status: newStatus}, function (result) {
+            var obj = {requestId: request.id, status: newStatus};
+            Util.update("rest/samples/requests/" + request.id, obj, {}, function (result) {
                 if (result === undefined || result.id != request.id)
                     return;
 
@@ -197,8 +187,6 @@ angular.module('ice.admin.controller', [])
                 if (i != -1) {
                     $scope.sampleRequests.requests[i].status = result.status;
                 }
-            }, function (error) {
-
             });
         };
 
@@ -253,19 +241,19 @@ angular.module('ice.admin.controller', [])
             })
         }
     })
-    .controller('AdminUserController', function ($rootScope, $scope, $stateParams, $cookieStore, User) {
+    .controller('AdminUserController', function ($rootScope, $scope, Util) {
         $scope.maxSize = 5;
         $scope.currentPage = 1;
         $scope.newProfile = {show: false};
         $scope.userListParams = {sort: 'lastName', asc: true, currentPage: 1, status: undefined};
 
-        var user = User($cookieStore.get("sessionId"));
         var getUsers = function () {
             $scope.loadingPage = true;
-            user.list($scope.userListParams, function (result) {
+
+            Util.get("rest/users", function (result) {
                 $scope.userList = result;
                 $scope.loadingPage = false;
-            }, function (error) {
+            }, $scope.userListParams, function (error) {
                 $scope.loadingPage = false;
             });
         };
@@ -279,7 +267,7 @@ angular.module('ice.admin.controller', [])
 
         $scope.createProfile = function () {
             $scope.newProfile.sendEmail = false;
-            user.createUser($scope.newProfile, function (result) {
+            Util.post("rest/users", $scope.newProfile, function (result) {
                 $scope.newProfile.password = result.password;
                 getUsers();
             })
@@ -292,12 +280,10 @@ angular.module('ice.admin.controller', [])
             var userCopy = angular.copy(userItem);
             userCopy.accountType = accountType;
 
-            user.update({userId: userItem.id}, userCopy, function (result) {
+            Util.update("rest/users/" + userItem.id, userCopy, {}, function (result) {
                 userItem.accountType = result.accountType;
                 userItem.isAdmin = result.isAdmin;
-            }, function (error) {
-                console.log(error);
-            });
+            })
         };
 
         $scope.filterChanged = function () {
@@ -578,5 +564,4 @@ angular.module('ice.admin.controller', [])
                 console.log(error);
             });
         }
-    })
-;
+    });

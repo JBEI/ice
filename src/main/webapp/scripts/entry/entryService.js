@@ -488,31 +488,10 @@ angular.module('ice.entry.service', [])
                         display: 'Experimental Data',
                         isPrivileged: false,
                         countName: 'experimentalDataCount',
-                        icon: 'fa-magic'
+                        icon: 'fa-database'
                     }
                 ];
             }
-        }
-    })
-    .factory('CustomField', function ($resource, $cookieStore) {
-        return function () {
-
-            var sessionId = $cookieStore.get("sessionId");
-
-            return $resource('rest/custom-fields', {id: '@id'}, {
-                createNewCustomField: {
-                    method: 'POST',
-                    responseType: "json",
-                    headers: {'X-ICE-Authentication-SessionId': sessionId}
-                },
-
-                deleteCustomField: {
-                    method: 'DELETE',
-                    responseType: "json",
-                    url: "rest/custom-fields/:id",
-                    headers: {'X-ICE-Authentication-SessionId': sessionId}
-                }
-            });
         }
     })
 ;

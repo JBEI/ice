@@ -1,13 +1,7 @@
 <div ng-controller="EntryExperimentController">
     <div class="row pad_top">
         <div class="col-sm-12">
-            <button type="button" ng-click="addExperiment=true" class="ice-button">
-                <i style="font-size: 14px; color: #007dbc" class="fa fa-magic"></i> Add Experiment
-            </button>
-
-            <!--<span class="opacity_hover edit_icon font-90em" ng-click="addExperiment=true">-->
-            <!--<i style="font-size: 14px; color: #555" class="fa fa-magic"></i> Add Experiment-->
-            <!--</span>-->
+            <button type="button" ng-click="addExperiment=true" class="ice-button">Add Experiment</button>
 
             <div class="pad-top margin-top-10 panel panel-default" data-ng-show="addExperiment">
                 <form class="panel-body" name="createExperimentForm" data-ng-submit="createExperiment()">

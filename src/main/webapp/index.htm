@@ -8,8 +8,8 @@
 
     <link href="css/font-awesome.min.css" rel="stylesheet">
     <link href="css/ice.css" rel="stylesheet">
-    <link rel="stylesheet" href="scripts/lib/handsontable-0.21.0/pikaday.css">
-    <link rel="stylesheet" media="screen" href="scripts/lib/handsontable-0.21.0/handsontable.full.min.css">
+    <link rel="stylesheet" href="scripts/lib/handsontable-0.24.1/pikaday.css">
+    <link rel="stylesheet" media="screen" href="scripts/lib/handsontable-0.24.1/handsontable.full.min.css">
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
     <script src="scripts/lib/jquery/jquery-1.11.3.min.js"></script>
@@ -25,12 +25,13 @@
 
     <script src="scripts/lib/angular-file-upload-2.2.0/angular-file-upload.min.js"></script>
 
-    <script src="scripts/lib/handsontable-0.21.0/handsontable.full.min.js"></script>
-    <script src="scripts/lib/handsontable-0.21.0/pikaday.js"></script>
+    <script src="scripts/lib/handsontable-0.24.1/handsontable.full.min.js"></script>
+    <script src="scripts/lib/handsontable-0.24.1/pikaday.js"></script>
 
     <script src="scripts/lib/momentjs/moment.min.js"></script>
     <script src="scripts/lib/angular-moment/angular-moment.min.js"></script>
     <script src="scripts/lib/angular-local-storage-0.2.3/angular-local-storage.min.js"></script>
+    <script src="scripts/lib/ng-file-upload-12.0.4/ng-file-upload.min.js"></script>
 
     <!-- GRUNT START -->
     <script src="scripts/ice.app.js"></script>
@@ -55,6 +56,7 @@
     <script src="scripts/upload/uploadController.js"></script>
     <script src="scripts/entry/entryController.js"></script>
     <script src="scripts/entry/sample/sampleController.js"></script>
+    <script src="scripts/entry/sample/sampleService.js"></script>
     <script src="scripts/entry/entryService.js"></script>
     <script src="scripts/entry/entryDirectives.js"></script>
     <script src="scripts/collection/collectionController.js"></script>
@@ -75,7 +77,7 @@
     <!-- GRUNT END -->
 </head>
 
-<body >
+<body>
 <div id="container">
     <div id="body" ui-view></div>
     <ng-include src="siteSettings.footer"></ng-include>
