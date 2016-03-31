@@ -3,10 +3,8 @@
 angular.module('ice.collection.controller', [])
     // controller for <ice.menu.collections> directive
     .controller('CollectionMenuController', function ($cookieStore, $scope, $uibModal, $rootScope, $location,
-                                                      $stateParams, Folders, FolderSelection, EntryContextUtil, Util,
+                                                      $stateParams, FolderSelection, EntryContextUtil, Util,
                                                       localStorageService) {
-        var folders = Folders();
-
         // retrieve (to refresh the information such as part counts) all the sub folders under
         // $scope.selectedFolder (defaults to "personal" if not set)
         $scope.updateSelectedCollectionFolders = function () {
@@ -22,7 +20,6 @@ angular.module('ice.collection.controller', [])
         $scope.sortParams = localStorageService.get('collectionFolderSortParams');
         if (!$scope.sortParams) {
             $scope.sortParams = {field: 'creationTime', asc: true};
-            console.log("setting defaults")
         }
 
         $scope.sortCollectionFolders = function () {
@@ -175,12 +172,10 @@ angular.module('ice.collection.controller', [])
             }
         });
     })
-    .controller('FolderPermissionsController', function ($scope, $http, $uibModalInstance, $cookieStore, Folders,
+    .controller('FolderPermissionsController', function ($scope, $http, $uibModalInstance, $cookieStore,
                                                          Util, folder) {
-        var sessionId = $cookieStore.get("sessionId");
         $scope.folder = folder;
         $scope.userFilterInput = undefined;
-        var folders = Folders();
         $scope.newPermission = {canWrite: false, canRead: true, article: 'ACCOUNT', typeId: folder.id};
         $scope.permissions = [];
         $scope.placeHolder = "Enter user name or email";
@@ -254,9 +249,7 @@ angular.module('ice.collection.controller', [])
 
         $scope.setPropagatePermission = function (folder) {
             folder.propagatePermission = !folder.propagatePermission;
-            folders.update({folderId: folder.id}, folder, function (result) {
-
-            })
+            Util.update("rest/folders/" + folder.id, folder, {});
         };
 
         $scope.disablePermissionAdd = function () {
@@ -363,11 +356,9 @@ angular.module('ice.collection.controller', [])
 // retrieves the contents of folders
     .
     controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
-                                                       $stateParams, Folders, Entry, EntryContextUtil,
+                                                       $stateParams, EntryContextUtil,
                                                        Selection, Util, localStorageService) {
         var sessionId = $cookieStore.get("sessionId");
-        var folders = Folders();
-        var entry = Entry(sessionId);
         var resource = "collections";
 
         $scope.folderPageChange = function () {
@@ -661,7 +652,7 @@ angular.module('ice.collection.controller', [])
                     return;
 
                 var tmp = {id: $scope.folder.id, folderName: newName};
-                folders.update({id: tmp.id}, tmp, function (result) {
+                Util.update("rest/folders/" + tmp.id, tmp, {}, function (result) {
                     $scope.folder.folderName = result.folderName;
                 })
             })
@@ -669,8 +660,7 @@ angular.module('ice.collection.controller', [])
     })
     // also the main controller
     .controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope,
-                                                  Folders, Settings, Search, Authentication,
-                                                  CollectionMenuOptions, Util) {
+                                                  Authentication, CollectionMenuOptions, Util) {
         // todo : set on all
         var searchUrl = "search";
         if ($location.path().slice(0, searchUrl.length) != searchUrl) {
@@ -784,12 +774,12 @@ angular.module('ice.collection.controller', [])
         $scope.runUserSearch = function (filters) {
             $scope.loadingSearchResults = true;
 
-            Search().runAdvancedSearch(filters,
+            Util.post("rest/search", filters,
                 function (result) {
                     $scope.searchResults = result;
                     $scope.loadingSearchResults = false;
 //                $scope.$broadcast("SearchResultsAvailable", result);
-                },
+                }, {},
                 function (error) {
                     $scope.loadingSearchResults = false;
 //                $scope.$broadcast("SearchResultsAvailable", undefined);
@@ -803,11 +793,8 @@ angular.module('ice.collection.controller', [])
             $scope.shoppingCartContents = data;
         });
     })
-    .controller('CollectionDetailController', function ($scope, $cookieStore, Folders, $stateParams, $location, Util) {
-        var sessionId = $cookieStore.get("sessionId");
-        var folders = Folders();
+    .controller('CollectionDetailController', function ($scope, $cookieStore, $stateParams, $location, Util) {
         $scope.hideAddCollection = true;
-        //console.log("folder", $stateParams.collection);
 
         $scope.$on("ShowCollectionFolderAdd", function (e) {
             $scope.hideAddCollection = false;
@@ -825,7 +812,7 @@ angular.module('ice.collection.controller', [])
 
         $scope.deleteCollection = function (folder) {
             // expected folders that can be deleted have type "PRIVATE" and "UPLOAD"
-            folders.delete({folderId: folder.id, type: folder.type}, function (result) {
+            Util.remove("rest/folders/" + folder.id, {type: folder.type}, function (result) {
                 var l = $scope.selectedCollectionFolders.length;
                 for (var j = 0; j < l; j += 1) {
                     if ($scope.selectedCollectionFolders[j].id === result.id) {
@@ -838,8 +825,6 @@ angular.module('ice.collection.controller', [])
                 if (folder.id == $stateParams.collection) {
                     $location.path("folders/personal");
                 }
-            }, function (error) {
-                console.error(error);
             });
         }
     })

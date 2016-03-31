@@ -9,18 +9,16 @@ angular.module('ice.entry.sample.controller', [])
             return !$scope.remote && $rootScope.user && $rootScope.user.isAdmin;
         }
     })
-    .controller('EntrySampleController', function ($location, $rootScope, $scope, $uibModal, $cookieStore, $stateParams, Entry, Util, SampleService) {
+    .controller('EntrySampleController', function ($location, $rootScope, $scope, $uibModal, $cookieStore, $stateParams,
+                                                   Util, SampleService) {
         var sessionId = $cookieStore.get("sessionId");
-        var entry = Entry(sessionId);
         var partId = $stateParams.id;
 
         $scope.Plate96Rows = SampleService.getPlate96Rows();
         $scope.Plate96Cols = SampleService.getPlate96Cols();
 
         // retrieve samples for partId
-        entry.samples({
-            partId: partId
-        }, function (result) {
+        Util.list('rest/parts/' + partId + '/samples', function () {
             $scope.samples = result;
         });
 
@@ -131,11 +129,9 @@ angular.module('ice.entry.sample.controller', [])
         };
 
         $scope.delete = function (sample) {
-            entry.deleteSample({partId: partId, sampleId: sample.id}, function (result) {
-                console.log(result);
+            Util.remove('rest/parts/' + partId + '/samples/' + sample.id, function () {
                 var idx = $scope.samples.indexOf(sample);
                 $scope.samples.splice(idx, 1);
-                console.log("deleted", sample, idx);
             });
         };
 
@@ -156,7 +152,7 @@ angular.module('ice.entry.sample.controller', [])
 
         $scope.createNewSample = function () {
             // create sample
-            entry.addSample({partId: partId}, $scope.newSample, function (result) {
+            Util.post('rest/parts/' + partId + '/samples', $scope.newSample, function (result) {
                 $scope.samples = result;
                 $scope.newSample = {
                     open: {},

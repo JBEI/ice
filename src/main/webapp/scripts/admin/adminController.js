@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.admin.controller', [])
-    .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, $cookieStore, Settings,
+    .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, $cookieStore,
                                              AdminSettings, Util) {
 
         // retrieve general setting
@@ -14,9 +14,7 @@ angular.module('ice.admin.controller', [])
                 'PROFILE_EDIT_ALLOWED', 'SEND_EMAIL_ON_ERRORS'];
 
             // retrieve site wide settings
-            var settings = Settings(sessionId);
-            settings.get(function (result) {
-
+            Util.list('rest/config', function (result) {
                 angular.forEach(result, function (setting) {
                     if (AdminSettings.generalSettingKeys().indexOf(setting.key) != -1) {
                         $scope.generalSettings.push({
@@ -115,8 +113,6 @@ angular.module('ice.admin.controller', [])
             }
         }
 
-        var setting = Settings($cookieStore.get("sessionId"));
-
         $scope.rebuildBlastIndex = function () {
             Util.update("rest/search/indexes/blast", {}, {}, function (result) {
             });
@@ -131,7 +127,7 @@ angular.module('ice.admin.controller', [])
             var visualKey = newSetting.key;
             newSetting.key = (newSetting.key.replace(/ /g, '_')).toUpperCase();
 
-            setting.update({}, newSetting, function (result) {
+            Util.update("rest/config", newSetting, {}, function (result) {
                 newSetting.key = visualKey;
                 newSetting.value = result.value;
                 newSetting.editMode = false;
@@ -568,5 +564,4 @@ angular.module('ice.admin.controller', [])
                 console.log(error);
             });
         }
-    })
-;
+    });

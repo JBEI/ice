@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.search.controller', [])
-    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil,
+    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Search, EntryContextUtil,
                                               Selection, WebOfRegistries, Util) {
 
         $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
@@ -17,32 +17,13 @@ angular.module('ice.search.controller', [])
         var runAdvancedSearch = function (filters) {
             $scope.loadingSearchResults = true;
 
-            //runAdvancedSearch: {
-            //    method:'POST',
-            //        responseType:"json",
-            //        headers:{'X-ICE-Authentication-SessionId':sessionId}
-            //}
-
-
             Util.post("rest/search", filters, function (result) {
                 $scope.searchResults = result;
                 $scope.loadingSearchResults = false;
-            }, {webSearch: filters.webSearch}, function (error) {
+            }, {webSearch: filters.webSearch}, function () {
                 $scope.loadingSearchResults = false;
                 $scope.searchResults = undefined;
             });
-
-            //Search().runAdvancedSearch({webSearch: filters.webSearch}, filters,
-            //    function (result) {
-            //        $scope.searchResults = result;
-            //        $scope.loadingSearchResults = false;
-            //    },
-            //    function (error) {
-            //        $scope.loadingSearchResults = false;
-            //        $scope.searchResults = undefined;
-            //        console.log(error);
-            //    }
-            //);
         };
 
         $scope.searchResultPageChanged = function () {
@@ -90,14 +71,9 @@ angular.module('ice.search.controller', [])
 
         $scope.tooltipDetails = function (entry) {
             $scope.currentTooltip = undefined;
-            var sessionId = $cookieStore.get("sessionId");
-
-            Entry(sessionId).tooltip({partId: entry.id},
-                function (result) {
-                    $scope.currentTooltip = result;
-                }, function (error) {
-                    console.error(error);
-                });
+            Util.get("rest/parts/" + entry.id + "/tooltip", function (result) {
+                $scope.currentTooltip = result;
+            });
         };
 
         $scope.remoteTooltipDetails = function (result) {

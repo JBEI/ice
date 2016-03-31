@@ -946,7 +946,7 @@ angular.module('ice.upload.controller', [])
         };
     })
     .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, uploadId,
-                                                       $uibModalInstance, FileUploader, addType, linkedAddType, Folders) {
+                                                       $uibModalInstance, FileUploader, addType, linkedAddType, Util) {
         var sid = $cookieStore.get("sessionId");
         $scope.addType = addType;
 
@@ -955,7 +955,7 @@ angular.module('ice.upload.controller', [])
         //
         $scope.resetBulkUpload = function () {
             // expected folders that can be deleted have type "PRIVATE" and "UPLOAD"
-            Folders().delete({folderId: uploadId, type: "UPLOAD"}, function (result) {
+            Util.remove("rest/folders/" + uploadId, {folderId: uploadId, type: "UPLOAD"}, function () {
                 $location.path("/upload/" + addType);
                 $uibModalInstance.dismiss('cancel');
             }, function (error) {
@@ -1037,7 +1037,7 @@ angular.module('ice.upload.controller', [])
             $window.open(url, "_self");
         }
     }).controller('BulkUploadPermissionsController', function ($scope, $cookieStore, $location, $uibModalInstance,
-                                                               upload, Folders, Util) {
+                                                               upload, Util) {
         $scope.cancel = function () {
             $uibModalInstance.dismiss('cancel');
         };

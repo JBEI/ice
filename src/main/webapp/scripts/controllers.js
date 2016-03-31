@@ -4,8 +4,7 @@ var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'u
     'angularMoment']);
 
 iceControllers.controller('ActionMenuController', function ($stateParams, $uibModal, $scope, $window, $rootScope,
-                                                            $location, $cookieStore, Folders, Entry, WebOfRegistries,
-                                                            Files, Selection, FolderSelection, Util) {
+                                                            $location, $cookieStore, Selection, FolderSelection, Util) {
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
     $scope.entrySelected = false;
 
@@ -17,9 +16,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         Selection.reset();
     });
 
-    var sid = $cookieStore.get("sessionId");
-    var folders = Folders();
-    var entry = Entry(sid);
     $scope.selectedFolders = [];
 
     $scope.closeFeedbackAlert = function () {

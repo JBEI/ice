@@ -50,27 +50,6 @@ public class SequenceController {
         retriever = new Entries();
     }
 
-    public boolean parseAndSaveSequence(String userId, long partId, String sequenceString) {
-        DNASequence dnaSequence = parse(sequenceString);
-
-        if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
-            String errorMsg = "Couldn't parse sequence file! Supported formats: "
-                    + GeneralParser.getInstance().availableParsersToString()
-                    + ". "
-                    + "If you believe this is an error, please contact the administrator with your file";
-            throw new IllegalArgumentException(errorMsg);
-        }
-
-        Sequence sequence = dnaSequenceToSequence(dnaSequence);
-        sequence.setSequenceUser(sequenceString);
-        Entry entry = DAOFactory.getEntryDAO().get(partId);
-        if (entry == null)
-            return false;
-
-        sequence.setEntry(entry);
-        return save(userId, sequence) != null;
-    }
-
     // either or both recordId and entryType has to have a value
     public SequenceInfo parseSequence(String userId, String recordId, String entryType, String sequenceString,
                                       String name) {
