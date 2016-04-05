@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.search.blast;
 
+import com.opencsv.CSVReader;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -10,16 +11,21 @@ import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.bio.symbol.SymbolList;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.DNAFeature;
+import org.jbei.ice.lib.dto.DNAFeatureLocation;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.search.BlastProgram;
 import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
+import org.jbei.ice.lib.entry.sequence.annotation.AutoAnnotationBlastDbBuildTask;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.FeatureDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
+import org.jbei.ice.storage.model.Feature;
 import org.jbei.ice.storage.model.Sequence;
 
 import java.io.*;
@@ -28,10 +34,7 @@ import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,6 +48,7 @@ public class BlastPlus {
     private static final String BLAST_DB_NAME = "ice";
     private static final String DELIMITER = ",";
     private static final String LOCK_FILE_NAME = "write.lock";
+    private static final String AUTO_ANNOTATION_FOLDER_NAME = "auto-annotation";
 
     public static HashMap<String, SearchResult> runBlast(BlastQuery query) throws BlastException {
         try {
@@ -90,6 +94,92 @@ public class BlastPlus {
         } catch (Exception e) {
             Logger.error(e);
             throw new BlastException(e);
+        }
+    }
+
+    public static List<DNAFeature> runCheckFeatures(BlastQuery query) throws BlastException {
+        try {
+            String command = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
+                    + query.getBlastProgram().getName();
+            String blastDb = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), AUTO_ANNOTATION_FOLDER_NAME,
+                    BLAST_DB_NAME).toString();
+            if (!Files.exists(Paths.get(blastDb + ".nsq"))) {
+                Logger.warn("No blast database for auto annotation");
+                return null;
+            }
+
+            String[] blastCommand = new String[]{command, "-db", blastDb, "-perc_identity", "100",
+                    "-outfmt", "10 stitle qstart qend sstart send sstrand"};
+//            Logger.info("Blast: " + blastCommand);
+
+            Process process = Runtime.getRuntime().exec(blastCommand);
+            ProcessResultReader reader = new ProcessResultReader(process.getInputStream(), "STD_OUT");
+            ProcessResultReader error = new ProcessResultReader(process.getInputStream(), "STD_ERR");
+            reader.start();
+            BufferedWriter programInputWriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+
+            programInputWriter.write(query.getSequence());
+            programInputWriter.flush();
+            programInputWriter.close();
+            process.getOutputStream().close();
+
+            //TODO this should go into the thread itself & have future wait on it
+            final int exitValue = process.waitFor();
+            switch (exitValue) {
+                case 0:
+                    return processFeaturesBlastOutput(reader.toString());
+
+                case 1:
+                    Logger.error("Error in query sequence(s) or BLAST options: " + error.toString());
+                    break;
+
+                case 2:
+                    Logger.error("Error in BLAST database: " + error.toString());
+                    break;
+
+                default:
+                    Logger.error("Unknown exit value " + exitValue);
+            }
+            return null;
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new BlastException(e);
+        }
+    }
+
+    public static List<DNAFeature> processFeaturesBlastOutput(String blastOutput) {
+        List<DNAFeature> hashMap = new ArrayList<>();
+        CSVReader reader = new CSVReader(new StringReader(blastOutput));
+        HashSet<String> duplicates = new HashSet<>();
+
+        try {
+            List<String[]> lines = reader.readAll();
+            for (String[] line : lines) {
+                String type = line[2];
+                String start = line[4];
+                String end = line[5];
+                if (!duplicates.add(type + ":" + start + ":" + end)) {
+//                    Logger.info("duplicate " + line[3]);
+                    continue;
+                }
+
+                DNAFeature dnaFeature = new DNAFeature();
+                dnaFeature.setId(Long.decode(line[0]));
+                dnaFeature.setName(line[1]);
+                dnaFeature.setType(type);
+                dnaFeature.setIdentifier(line[3]);
+                DNAFeatureLocation location = new DNAFeatureLocation();
+                location.setGenbankStart(Integer.decode(start));
+                location.setEnd(Integer.decode(end));
+                dnaFeature.getLocations().add(location);
+                dnaFeature.setStrand("plus".equalsIgnoreCase(line[8]) ? 1 : -1);
+                hashMap.add(dnaFeature);
+            }
+
+            return hashMap;
+        } catch (IOException e) {
+            Logger.error(e);
+            return null;
         }
     }
 
@@ -194,6 +284,62 @@ public class BlastPlus {
         return Files.exists(path, LinkOption.NOFOLLOW_LINKS);
     }
 
+    // todo: does not delete for lock file to allow for 4 hours
+    public static void rebuildFeaturesBlastDatabase(String featureFolder) throws IOException {
+        String blastInstallDir = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR);
+        if (StringUtils.isEmpty(blastInstallDir)) {
+            Logger.warn("Blast install directory not available. Aborting blast rebuild");
+            return;
+        }
+        Path blastDir = Paths.get(blastInstallDir);
+        if (!Files.exists(blastDir))
+            throw new IOException("Could not locate Blast installation in " + blastInstallDir);
+
+        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        final Path blastFolder = Paths.get(dataDir, featureFolder);
+        File lockFile = Paths.get(blastFolder.toString(), LOCK_FILE_NAME).toFile();
+        if (lockFile.exists()) {
+            if (lockFile.lastModified() <= (System.currentTimeMillis() - (1000 * 60 * 60 * 24)))
+                if (!lockFile.delete()) {
+                    Logger.warn("Could not delete outdated features blast lockfile. Delete the following file manually: "
+                            + lockFile.getAbsolutePath());
+                } else {
+                    Logger.info("Features blast db locked (lockfile - " + lockFile.getAbsolutePath() + "). Rebuild aborted!");
+                    return;
+                }
+        }
+
+        try {
+            if (!Files.exists(blastFolder)) {
+                Logger.info("Features blast folder (" + blastFolder.toString() + ") does not exist. Creating...");
+                try {
+                    Files.createDirectories(blastFolder);
+                } catch (Exception e) {
+                    Logger.warn("Could not create features blast folder. Create it manually or all blast runs will fail");
+                    return;
+                }
+            }
+
+            if (!lockFile.createNewFile()) {
+                Logger.warn("Could not create lock file for features blast rebuild");
+                return;
+            }
+
+            FileOutputStream fos = new FileOutputStream(lockFile);
+            try (FileLock lock = fos.getChannel().tryLock()) {
+                if (lock == null)
+                    return;
+                Logger.info("Rebuilding features blast database");
+                rebuildSequenceDatabase(blastDir, blastFolder, true);
+                Logger.info("Blast database rebuild complete");
+            }
+        } catch (OverlappingFileLockException l) {
+            Logger.warn("Could not obtain lock file for blast at " + blastFolder.toString());
+        } catch (BlastException be) {
+            Logger.error(be);
+        }
+    }
+
     public static void rebuildDatabase(boolean force) throws BlastException {
         String blastInstallDir = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR);
         if (StringUtils.isEmpty(blastInstallDir)) {
@@ -245,7 +391,7 @@ public class BlastPlus {
                 if (lock == null)
                     return;
                 Logger.info("Rebuilding blast database");
-                rebuildSequenceDatabase(blastDir);
+                rebuildSequenceDatabase(blastDir, blastFolder, false);
                 Logger.info("Blast database rebuild complete");
             }
         } catch (OverlappingFileLockException l) {
@@ -278,7 +424,7 @@ public class BlastPlus {
 
             StringBuilder command = new StringBuilder();
             String blastN = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
-                + BlastProgram.BLAST_N.getName();
+                    + BlastProgram.BLAST_N.getName();
             command.append(blastN)
                     .append(" -query ")
                     .append(queryFilePath.toString())
@@ -303,6 +449,8 @@ public class BlastPlus {
     public static void scheduleBlastIndexRebuildTask(boolean force) {
         RebuildBlastIndexTask task = new RebuildBlastIndexTask(force);
         IceExecutorService.getInstance().runTask(task);
+        AutoAnnotationBlastDbBuildTask autoAnnotationBlastDbBuildTask = new AutoAnnotationBlastDbBuildTask();
+        IceExecutorService.getInstance().runTask(autoAnnotationBlastDbBuildTask);
     }
 
     /**
@@ -339,11 +487,10 @@ public class BlastPlus {
      * database by calling formatBlastDb.
      *
      * @param blastInstall the installation directory path for blast
+     * @param blastDb      folder location for the blast database
      * @throws BlastException
      */
-    private static void rebuildSequenceDatabase(Path blastInstall) throws BlastException {
-        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-        final Path blastDb = Paths.get(dataDir, BLAST_DB_FOLDER);
+    private static void rebuildSequenceDatabase(Path blastInstall, Path blastDb, boolean isFeatures) throws BlastException {
 
         Path newFastaFile = Paths.get(blastDb.toString(), "bigfastafile.new");
 
@@ -364,14 +511,17 @@ public class BlastPlus {
 
         try (BufferedWriter write = Files.newBufferedWriter(newFastaFile, Charset.defaultCharset(),
                 StandardOpenOption.CREATE_NEW)) {
-            writeBigFastaFile(write);
+            if (isFeatures)
+                writeBigFastaFileForFeatures(write);
+            else
+                writeBigFastaFile(write);
         } catch (IOException ioe) {
             throw new BlastException(ioe);
         }
 
         formatBlastDb(blastDb, blastInstall);
         try {
-            Path fastaFile = Paths.get(dataDir, BLAST_DB_FOLDER, "bigfastafile");
+            Path fastaFile = Paths.get(blastDb.toString(), "bigfastafile");
             Files.move(newFastaFile, fastaFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ioe) {
             Logger.error(ioe);
@@ -477,6 +627,32 @@ public class BlastPlus {
                 } catch (IOException e) {
                     throw new BlastException(e);
                 }
+            }
+        }
+    }
+
+    private static void writeBigFastaFileForFeatures(BufferedWriter writer) throws BlastException {
+        FeatureDAO featureDAO = DAOFactory.getFeatureDAO();
+        long count = featureDAO.getFeatureCount();
+        if (count <= 0)
+            return;
+
+        int offset = 0;
+        while (offset < count) {
+            List<Feature> features = featureDAO.getFeatures(offset++, 1);
+            Feature feature = features.get(0);
+            String sequenceString = feature.getSequence().trim();
+            try {
+                String idString = ">"
+                        + feature.getId() + DELIMITER
+                        + feature.getName() + DELIMITER
+                        + feature.getGenbankType() + DELIMITER
+                        + feature.getHash();
+                idString += "\n";
+                writer.write(idString);
+                writer.write(sequenceString + "\n");
+            } catch (IOException e) {
+                throw new BlastException(e);
             }
         }
     }

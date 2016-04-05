@@ -1,0 +1,108 @@
+<div class="modal-header" style="border-bottom: 0">
+    <button type="button" class="close" ng-click="$close()">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+    <i class="fa fa-fw fa-magic"></i> &nbsp;Automatic Sequence Annotation
+    </span>
+</div>
+
+<div class="modal-body">
+
+    <div style="max-height: 120px;overflow-y: auto; padding: 2px;overflow-x: hidden">
+        <table width="100%" ng-repeat="selectedFeature in selectedFeatures" style="margin-bottom: 2px">
+            <tr>
+                <td ng-style="getFirstStyle(selectedFeature)"></td>
+                <td ng-style="getSecondStyle(selectedFeature)">
+                    <div uib-tooltip="{{selectedFeature.name}}"
+                         ng-class="[selectedFeature.className, {'reverse-strand': selectedFeature.strand == -1, 'forward-strand':selectedFeature.strand == 1}]"></div>
+                </td>
+                <td ng-style="getThirdStyle(selectedFeature)"></td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="height: 6px; width: 100%; border: 1px solid #ccc; background-color: #FFFFB3;"></div>
+
+    <table width="100%">
+        <tr>
+            <td style="width: 10px">
+                <small class="text-muted font-75em" style="padding-right: 5px">1</small>
+            </td>
+            <td>&nbsp;</td>
+            <td style="width: 30px;">
+                <small class="text-muted font-75em" style="padding-left: 5px">{{annotations.length | number}}</small>
+            </td>
+        </tr>
+    </table>
+
+    <table class="pad_top table table-hover table-border-bottom">
+        <thead>
+        <tr>
+            <th style="width: 60px"></th>
+            <th style="width: 170px" class="entry-table-header"><span ng-click="pagingParams.sort='type'">Type</span>
+            </th>
+            <th class="entry-table-header">Label</th>
+            <th style="width: 65px; text-align: right" class="entry-table-header">Start</th>
+            <th style="width: 100px;"></th>
+            <th style="width: 65px;" class="entry-table-header">End</th>
+            <th style="padding: 5px; text-align: right">
+                <i class="fa fa-fw font-11em"
+                   ng-class="{'fa-square-o': !allSelected, 'fa-check-square-o': allSelected}"
+                   ng-click="selectAll()"></i>
+            </th>
+        </tr>
+        </thead>
+        <tr ng-repeat="feature in annotations.features | startFrom:pagingParams.currentPage*pagingParams.pageSize | limitTo:pagingParams.pageSize">
+            <td class="table-row-index">{{(pagingParams.currentPage*pagingParams.pageSize) + $index + 1 | number}}</td>
+            <td class="font-85em">{{feature.type}}</td>
+            <td class="font-85em">{{feature.name}}</td>
+            <td style="vertical-align:middle">
+                <div class="small text-muted pull-right">{{feature.locations[0].genbankStart | number}}</div>
+            </td>
+            <td ng-init="setClassName(feature)" style="vertical-align:middle">
+                <div style="width: 100px; height: 8px;" ng-style="getBgStyle(feature)"
+                     ng-class="[feature.className, {'reverse-strand': feature.strand == -1, 'forward-strand':feature.strand == 1}]"></div>
+            </td>
+            <td style="vertical-align:middle">
+                <div class="small text-muted">{{feature.locations[0].end | number}}</div>
+            </td>
+            <td style="text-align: right">
+                <i class="fa fa-fw font-11em"
+                   ng-class="{'fa-square-o': !feature.selected && !allSelected, 'fa-check-square-o': feature.selected || allSelected}"
+                   ng-click="checkFeature(feature)"></i></td>
+        </tr>
+    </table>
+
+    <div ng-if="annotations && annotations.features.length > 0" class="row">
+        <div class="col-sm-10">
+            <button class="btn btn-sm btn-default" ng-disabled="pagingParams.currentPage == 0"
+                    ng-click="pagingParams.currentPage=pagingParams.currentPage-1">
+                Previous
+            </button>
+            <b class="font-90em">{{pagingParams.currentPage+1}} / {{pagingParams.numberOfPages}}</b>
+            <button class="btn btn-sm btn-default"
+                    ng-disabled="pagingParams.currentPage >= pagingParams.resultCount/pagingParams.pageSize - 1"
+                    ng-click="pagingParams.currentPage=pagingParams.currentPage+1">
+                Next
+            </button>
+        </div>
+
+        <div class="pull-right col-sm-2" style="text-align: right">
+            <small class="text-muted">{{selectedFeatures.length}} selected</small>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <div class="col-sm-5 red" ng-if="errorSaving">
+        Error saving annotations
+    </div>
+
+    <div>
+        <button class="btn btn-default btn-sm" ng-click="$close()">Cancel</button>
+        <button type="button" ng-disabled="!selectedFeatures.length" ng-click="saveAnnotations()"
+                class="btn btn-sm btn-primary">Save
+        </button>
+    </div>
+
+
+</div>

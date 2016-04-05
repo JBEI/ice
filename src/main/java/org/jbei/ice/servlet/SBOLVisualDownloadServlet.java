@@ -61,9 +61,9 @@ public class SBOLVisualDownloadServlet extends HttpServlet {
 
         String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         String hash = sequence.getFwdHash();
-        if (Paths.get(tmpDir, hash + ".png").toFile().exists()) {
-            fileId = hash + ".png";
-        } else {
+//        if (Paths.get(tmpDir, hash + ".png").toFile().exists()) {
+//            fileId = hash + ".png";
+//        } else {
             URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
             if (uri != null) {
                 try {
@@ -75,7 +75,7 @@ public class SBOLVisualDownloadServlet extends HttpServlet {
                     return;
                 }
             }
-        }
+//        }
 
         response.setContentType("image/png");
         if (fileId == null)

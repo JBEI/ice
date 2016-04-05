@@ -108,13 +108,23 @@ public class SequenceController {
         return result;
     }
 
-    public FeaturedDNASequence updateSequence(String userId, long entryId, FeaturedDNASequence featuredDNASequence) {
+    public FeaturedDNASequence updateSequence(String userId, long entryId, FeaturedDNASequence featuredDNASequence,
+                                              boolean addFeatures) {
         Entry entry = retriever.get(userId, entryId);
         if (entry == null) {
             return null;
         }
 
-        featuredDNASequence.setSequence(featuredDNASequence.getSequence().replaceAll("[^A-Za-z]", ""));
+        if (addFeatures) {
+            // expect existing sequence
+            Sequence existingSequence = dao.getByEntry(entry);
+            FeaturedDNASequence dnaSequence = sequenceToDNASequence(existingSequence);
+            featuredDNASequence.getFeatures().addAll(dnaSequence.getFeatures());
+            featuredDNASequence.setSequence(dnaSequence.getSequence());
+        } else {
+            featuredDNASequence.setSequence(featuredDNASequence.getSequence().replaceAll("[^A-Za-z]", ""));
+        }
+
         Sequence sequence = dnaSequenceToSequence(featuredDNASequence);
         sequence.setEntry(entry);
         if (!deleteSequence(userId, entryId))
@@ -134,7 +144,6 @@ public class SequenceController {
      * @param sequence sequence to be updated
      * @return Saved Sequence.
      */
-
     protected Sequence update(String userId, Sequence sequence) {
         authorization.expectWrite(userId, sequence.getEntry());
         Sequence result;
