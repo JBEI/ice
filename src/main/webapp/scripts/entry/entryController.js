@@ -63,7 +63,7 @@ angular.module('ice.entry.controller', [])
         var entryId = $stateParams.id;
         $scope.newComment = {samples: []};
 
-        Util.get('rest/parts/' + entryId + '/comments', function (result) {
+        Util.list('rest/parts/' + entryId + '/comments', function (result) {
             $scope.entryComments = result;
         });
 
@@ -251,12 +251,12 @@ angular.module('ice.entry.controller', [])
     })
     .controller('PartHistoryController', function ($scope, $window, $cookieStore, $stateParams, Util) {
         var entryId = $stateParams.id;
-        var sid = $cookieStore.get("sessionId");
         $scope.historyParams = {offset: 0, limit: 10, currentPage: 1, maxSize: 5};
 
         $scope.historyPageChanged = function () {
             $scope.historyParams.offset = ($scope.historyParams.currentPage - 1) * $scope.historyParams.limit;
             Util.get("rest/parts/" + entryId + "/history", function (result) {
+                console.log(result);
                 if (history)
                     $scope.history = result;
                 //$scope.history = result;
