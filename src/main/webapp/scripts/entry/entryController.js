@@ -1409,6 +1409,7 @@ angular.module('ice.entry.controller', [])
                 controller: function ($scope, $uibModalInstance, part, Util) {
                     $scope.selectedFeatures = [];
                     $scope.allSelected = false;
+                    $scope.part = part;
                     $scope.pagingParams = {currentPage: 0, pageSize: 10, sort: "id"};
 
                     Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
