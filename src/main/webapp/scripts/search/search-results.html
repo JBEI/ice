@@ -222,31 +222,30 @@
             <tr data-ng-show="searchResults.results.length>0">
                 <th style="width: 12px">
                 </th>
-                <th ng-click="sortResults('TYPE')" class="cursor_pointer">
-                    <span style="font-size: 12px; text-transform: uppercase">TYPE</span>
+                <th class="entry-table-header">
+                    <span ng-click="sortResults('TYPE')">TYPE</span>
                     <i ng-if="searchFilters.parameters.sortField!=='TYPE'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='TYPE'" style="font-size: 14px;"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                 </th>
-                <th ng-click="sortResults('PART_ID')" class="cursor_pointer"
-                    style="font-size: 12px; text-transform: uppercase">
-                    <span style="font-size: 12px; text-transform: uppercase">Part ID</span>
+                <th class="entry-table-header">
+                    <span ng-click="sortResults('PART_ID')">Part ID</span>
                     <i ng-if="searchFilters.parameters.sortField!=='PART_ID'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='PART_ID'" style="font-size: 14px"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                 </th>
-                <th data-ng-click="sortResults('NAME')" class="cursor_pointer"
-                    style="font-size: 12px; text-transform: uppercase">
-                    <span style="font-size: 12px; text-transform: uppercase">Name</span>
+                <th class="entry-table-header">
+                    <span ng-click="sortResults('NAME')">Name</span>
                     <i ng-if="searchFilters.parameters.sortField!=='NAME'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='NAME'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                 </th>
                 <th></th>
-                <th style="width: 210px;"><span style="font-size: 12px; text-transform: uppercase">Alignment</span></th>
-                <th style="width: 80px;"><span style="font-size: 12px; text-transform: uppercase">E-Value</span></th>
+                <th style="width: 100px;" class="entry-table-header">Alignment</th>
+                <th style="width: 110px;" class="entry-table-header">E-Value</th>
+                <th style="width: 80px;" class="entry-table-header">Score</th>
             </tr>
             <tr data-ng-show='!searchResults'>
                 <td colspan="11"><i class="fa fa-gear fa-spin"></i> Loading...</td>
@@ -281,9 +280,12 @@
                 </td>
                 <td></td>
                 <td>
-                    <div style="width:200px;">{{result.alignment}}</div>
+                    {{result.alignment/result.queryLength * 100}}%
+                    <br>
+                    <small class="text-muted">{{result.alignment}}/{{result.queryLength}}</small>
                 </td>
                 <td>{{result.eValue}}</td>
+                <td>{{result.score}}</td>
             </tr>
             <tr ng-repeat-end ng-if="showDetails">
                 <td colspan="8">
@@ -409,8 +411,8 @@
     <div class="row" data-ng-if="searchResults && searchResults.results.length > 0" style="margin-top: -15px">
         <div class="col-md-6" style="padding-left: 0">
             <uib-pagination total-items="searchResults.resultCount" ng-change="searchResultPageChanged()"
-                        ng-model="params.currentPage" max-size="maxSize"
-                        class="pagination-sm" items-per-page="params.limit" boundary-links="true">
+                            ng-model="params.currentPage" max-size="maxSize"
+                            class="pagination-sm" items-per-page="params.limit" boundary-links="true">
             </uib-pagination>
         </div>
         <div class="col-md-4" style="margin: 22px 0;">

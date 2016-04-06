@@ -4,7 +4,6 @@ import com.opencsv.CSVReader;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.RNATools;
 import org.biojava.bio.symbol.IllegalSymbolException;
@@ -50,18 +49,22 @@ public class BlastPlus {
     private static final String LOCK_FILE_NAME = "write.lock";
     private static final String AUTO_ANNOTATION_FOLDER_NAME = "auto-annotation";
 
-    public static HashMap<String, SearchResult> runBlast(BlastQuery query) throws BlastException {
+    public static String runBlastQuery(String dbFolder, BlastQuery query, String... options) throws BlastException {
         try {
             String command = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
                     + query.getBlastProgram().getName();
-            String blastDb = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), BLAST_DB_FOLDER,
+            String blastDb = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), dbFolder,
                     BLAST_DB_NAME).toString();
             if (!Files.exists(Paths.get(blastDb + ".nsq"))) {
-                return new HashMap<>();
+                return "";
             }
 
-            String blastCommand = (command + " -db " + blastDb);
-            Logger.info("Blast: " + blastCommand);
+            String[] blastCommand = new String[3 + options.length];
+            blastCommand[0] = command;
+            blastCommand[1] = "-db";
+            blastCommand[2] = blastDb;
+            System.arraycopy(options, 0, blastCommand, 3, options.length);
+
             Process process = Runtime.getRuntime().exec(blastCommand);
             ProcessResultReader reader = new ProcessResultReader(process.getInputStream(), "STD_OUT");
             ProcessResultReader error = new ProcessResultReader(process.getInputStream(), "STD_ERR");
@@ -77,7 +80,7 @@ public class BlastPlus {
             final int exitValue = process.waitFor();
             switch (exitValue) {
                 case 0:
-                    return processBlastOutput(reader.toString(), query.getSequence().length());
+                    return reader.toString();
 
                 case 1:
                     Logger.error("Error in query sequence(s) or BLAST options: " + error.toString());
@@ -97,69 +100,53 @@ public class BlastPlus {
         }
     }
 
+    /**
+     * Run a blast query using the following output format options
+     * <ul>
+     * <li><code>stitle</code> - subject title</li>
+     * <li><code>qstart</code> - query start</li>
+     * <li><code>qend</code></li>
+     * <li><code>sstart</code></li>
+     * <li><code>send</code></li>
+     * <li><code>sstrand</code></li>
+     * <li><code>evalue</code></li>
+     * <li><code>bitscore</code></li>
+     * <li><code>length</code> - alignment length</li>
+     * <li><code>nident</code> - number of identical matches</li>
+     * </ul>
+     *
+     * @param query wrapper around blast query
+     * @return map of unique entry identifier (whose sequence was a subject) to the search result hit details
+     * @throws BlastException
+     */
+    public static HashMap<String, SearchResult> runBlast(BlastQuery query) throws BlastException {
+        String result = runBlastQuery(BLAST_DB_FOLDER, query, "-perc_identity", "95", "-outfmt",
+                "10 stitle qstart qend sstart send sstrand evalue bitscore score length nident");
+        if (result == null)
+            throw new BlastException("Exception running blast");
+        return processBlastOutput(result, query.getSequence().length());
+    }
+
     public static List<DNAFeature> runCheckFeatures(BlastQuery query) throws BlastException {
-        try {
-            String command = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
-                    + query.getBlastProgram().getName();
-            String blastDb = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), AUTO_ANNOTATION_FOLDER_NAME,
-                    BLAST_DB_NAME).toString();
-            if (!Files.exists(Paths.get(blastDb + ".nsq"))) {
-                Logger.warn("No blast database for auto annotation");
-                return null;
-            }
-
-            String[] blastCommand = new String[]{command, "-db", blastDb, "-perc_identity", "100",
-                    "-outfmt", "10 stitle qstart qend sstart send sstrand"};
-//            Logger.info("Blast: " + blastCommand);
-
-            Process process = Runtime.getRuntime().exec(blastCommand);
-            ProcessResultReader reader = new ProcessResultReader(process.getInputStream(), "STD_OUT");
-            ProcessResultReader error = new ProcessResultReader(process.getInputStream(), "STD_ERR");
-            reader.start();
-            BufferedWriter programInputWriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
-
-            programInputWriter.write(query.getSequence());
-            programInputWriter.flush();
-            programInputWriter.close();
-            process.getOutputStream().close();
-
-            //TODO this should go into the thread itself & have future wait on it
-            final int exitValue = process.waitFor();
-            switch (exitValue) {
-                case 0:
-                    return processFeaturesBlastOutput(reader.toString());
-
-                case 1:
-                    Logger.error("Error in query sequence(s) or BLAST options: " + error.toString());
-                    break;
-
-                case 2:
-                    Logger.error("Error in BLAST database: " + error.toString());
-                    break;
-
-                default:
-                    Logger.error("Unknown exit value " + exitValue);
-            }
-            return null;
-        } catch (Exception e) {
-            Logger.error(e);
-            throw new BlastException(e);
-        }
+        String result = runBlastQuery(AUTO_ANNOTATION_FOLDER_NAME, query, "-perc_identity", "100",
+                "-outfmt", "10 stitle qstart qend sstart send sstrand");
+        if (result == null)
+            throw new BlastException("Exception running blast");
+        return processFeaturesBlastOutput(result);
     }
 
     public static List<DNAFeature> processFeaturesBlastOutput(String blastOutput) {
         List<DNAFeature> hashMap = new ArrayList<>();
-        CSVReader reader = new CSVReader(new StringReader(blastOutput));
         HashSet<String> duplicates = new HashSet<>();
 
-        try {
+        try (CSVReader reader = new CSVReader(new StringReader(blastOutput))) {
             List<String[]> lines = reader.readAll();
+
             for (String[] line : lines) {
                 String type = line[2];
                 String start = line[4];
                 String end = line[5];
                 if (!duplicates.add(type + ":" + start + ":" + end)) {
-//                    Logger.info("duplicate " + line[3]);
                     continue;
                 }
 
@@ -183,96 +170,47 @@ public class BlastPlus {
         }
     }
 
-    private static SearchResult parseSequenceIdentifier(String line) {
-        long id;
-        EntryType recordType;
-        String name;
-        String partNumber;
-        SearchResult info = null;
+    private static SearchResult parseBlastOutputLine(String[] line) {
 
-        // new record
-        String[] idLineFields = line.substring(1).split(DELIMITER);
-        if (idLineFields.length == 4) {
-            id = Long.decode(idLineFields[0]);
-            recordType = EntryType.nameToType(idLineFields[1]);
-            name = idLineFields[2];
-            partNumber = idLineFields[3];
+        // extract part information
+        PartData view = new PartData(EntryType.nameToType(line[1]));
+        view.setId(Long.decode(line[0]));
+        view.setName(line[2]);
+        view.setPartId(line[3]);
+        String summary = DAOFactory.getEntryDAO().getEntrySummary(view.getId());
+        view.setShortDescription(summary);
 
-            PartData view = new PartData(recordType);
-            view.setId(id);
-            view.setPartId(partNumber);
-            view.setName(name);
-
-            info = new SearchResult();
-            info.setEntryInfo(view);
-
-            String summary = DAOFactory.getEntryDAO().getEntrySummary(info.getEntryInfo().getId());
-            info.getEntryInfo().setShortDescription(summary);
-//                searchResult.setAlignmentLength(alignmentLength);
-//                searchResult.setPercentId(percentId);
-        }
-        return info;
+        //search result object
+        SearchResult searchResult = new SearchResult();
+        searchResult.setEntryInfo(view);
+        searchResult.seteValue(line[9]);
+        searchResult.setScore(Float.valueOf(line[11]));
+        searchResult.setAlignment(line[13]);
+        searchResult.setQueryLength(Integer.valueOf(line[12]));
+        searchResult.setNident(Integer.valueOf(line[13]));
+        return searchResult;
     }
 
     private static LinkedHashMap<String, SearchResult> processBlastOutput(String blastOutput, int queryLength) {
         LinkedHashMap<String, SearchResult> hashMap = new LinkedHashMap<>();
 
-        ArrayList<String> lines = new ArrayList<>(Arrays.asList(blastOutput.split("\n")));
+        try (CSVReader reader = new CSVReader(new StringReader(blastOutput))) {
+            List<String[]> lines = reader.readAll();
+            reader.close();
 
-        for (int i = 0; i < lines.size(); i += 1) {
-            String line = lines.get(i);
+            for (String[] line : lines) {
+                SearchResult info = parseBlastOutputLine(line);
 
-            if (line.trim().isEmpty() || !line.startsWith(">"))
-                continue;
-
-            // process alignment details for above match
-            SearchResult info = parseSequenceIdentifier(line.substring(1));
-            if (info == null)
-                continue;
-
-            info.setQueryLength(queryLength);
-            while (i < lines.size() - 1) {
-                i += 1;
-                line = lines.get(i);
-                if (line.startsWith("Length")) {
-                    continue;
-                }
-
-                // next result encountered
-                if (line.startsWith(">")) {
-                    i -= 1;
-                    break;
-                }
-
-                // bit score and e-value
-                // eg. Score = 3131 bits (1695),  Expect = 0.0
-                if (line.contains("Score")) {
-                    String[] split = line.split("=");
-                    String evalue = split[2].trim();
-                    info.seteValue(evalue);
-
-                    String scoreString = split[1].substring(1, split[1].indexOf(",")).split(" ")[0];
-                    if (NumberUtils.isNumber(scoreString)) {
-                        info.setScore(Float.valueOf(scoreString));
-                    }
-                }
-
-                // aligned bp and aligned identity %
-                // e.g. Identities = 1692/1692 (100%), Gaps = 0/1692 (0%)
-                if (line.contains("Identities")) {
-                    String[] split = line.split("=");
-                    String aligned = split[1].substring(1, split[1].indexOf(","));
-                    info.setAlignment(aligned);
-                }
-
-                info.getMatchDetails().add(line);
-
+                info.setQueryLength(queryLength);
                 String idString = Long.toString(info.getEntryInfo().getId());
                 SearchResult currentResult = hashMap.get(idString);
                 // if there is an existing record for same entry with a lower relative score then replace
                 if (currentResult == null)
                     hashMap.put(idString, info);
             }
+        } catch (IOException e) {
+            Logger.error(e);
+            return null;
         }
 
         return hashMap;
@@ -658,7 +596,6 @@ public class BlastPlus {
     }
 
     static class ProcessResultReader extends Thread {
-
         final InputStream inputStream;
         final String type;
         final StringBuilder sb;
