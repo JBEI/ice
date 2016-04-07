@@ -217,10 +217,11 @@
                 </td>
                 <td>
                     <div title="{{entry.name}}" class="ellipsis" style="width: 350px">{{entry.name}}</div>
-                    <div title="{{entry.shortDescription}}" class="small"
-                         style="opacity: 0.6; width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
+                    <div ng-if="entry.shortDescription" title="{{entry.shortDescription}}" class="small text-muted"
+                         style="width: 350px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">
                         {{entry.shortDescription}}
                     </div>
+                    <i ng-if="!entry.shortDescription" class="small text-muted">No description provided</i>
                 </td>
                 <td style="vertical-align: middle">
                     <a ng-click="showEntryDetails(entry, $index, 'history')" style="opacity: 0.4"
