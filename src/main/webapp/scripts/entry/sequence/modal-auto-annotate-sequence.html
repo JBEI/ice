@@ -7,7 +7,7 @@
 
 <div class="modal-body">
 
-    <div style="max-height: 120px;overflow-y: auto; padding: 2px;overflow-x: hidden">
+    <div style="max-height: 120px;overflow-y: auto; padding: 0 6px 0 6px;overflow-x: hidden">
         <table width="100%" ng-repeat="selectedFeature in selectedFeatures" style="margin-bottom: 2px">
             <tr>
                 <td ng-style="getFirstStyle(selectedFeature)"></td>
@@ -38,28 +38,47 @@
         <thead>
         <tr>
             <th style="width: 60px"></th>
-            <th style="width: 170px" class="entry-table-header"><span ng-click="pagingParams.sort='type'">Type</span>
+            <th style="width: 170px" class="entry-table-header">
+                <span ng-click="sort('type')">Type
+                    <i class="fa" ng-show="pagingParams.sort == 'type'"
+                       ng-class="{'fa-caret-down':pagingParams.asc, 'fa-caret-up':!pagingParams.asc}"></i>
+                </span>
             </th>
-            <th class="entry-table-header">Label</th>
-            <th style="width: 65px; text-align: right" class="entry-table-header">Start</th>
+            <th class="entry-table-header">
+                <span ng-click="sort('name')">Label
+                    <i class="fa" ng-show="pagingParams.sort == 'name'"
+                       ng-class="{'fa-caret-down':pagingParams.asc, 'fa-caret-up':!pagingParams.asc}"></i>
+                </span>
+            </th>
+            <th style="width: 75px; text-align: right" class="entry-table-header">
+                <span ng-click="sort('locations[0].genbankStart')">Start
+                    <i class="fa" ng-show="pagingParams.sort == 'locations[0].genbankStart'"
+                       ng-class="{'fa-caret-down':pagingParams.asc, 'fa-caret-up':!pagingParams.asc}"></i>
+                </span>
+            </th>
             <th style="width: 100px;"></th>
-            <th style="width: 65px;" class="entry-table-header">End</th>
-            <th style="padding: 5px; text-align: right">
-                <i class="fa fa-fw font-11em"
+            <th style="width: 75px;" class="entry-table-header">
+                <span ng-click="sort('locations[0].end')">End
+                    <i class="fa" ng-show="pagingParams.sort == 'locations[0].end'"
+                       ng-class="{'fa-caret-down':pagingParams.asc, 'fa-caret-up':!pagingParams.asc}"></i>
+                </span>
+            </th>
+            <th width="20px" style="padding: 4px; text-align: center">
+                <i class="fa font-11em"
                    ng-class="{'fa-square-o': !allSelected, 'fa-check-square-o': allSelected}"
                    ng-click="selectAll()"></i>
             </th>
         </tr>
         </thead>
-        <tr ng-repeat="feature in annotations.features | startFrom:pagingParams.currentPage*pagingParams.pageSize | limitTo:pagingParams.pageSize">
+        <tr ng-repeat="feature in annotations.features | orderBy:pagingParams.sort:!pagingParams.asc | startFrom:pagingParams.currentPage*pagingParams.pageSize | limitTo:pagingParams.pageSize ">
             <td class="table-row-index">{{(pagingParams.currentPage*pagingParams.pageSize) + $index + 1 | number}}</td>
             <td class="font-85em">{{feature.type}}</td>
             <td class="font-85em">{{feature.name}}</td>
             <td style="vertical-align:middle">
-                <div class="small text-muted pull-right">{{feature.locations[0].genbankStart | number}}</div>
+                <span class="small text-muted pull-right">{{feature.locations[0].genbankStart | number}}</span>
             </td>
             <td ng-init="setClassName(feature)" style="vertical-align:middle">
-                <div style="width: 100px; height: 8px;" ng-style="getBgStyle(feature)"
+                <div style="width: 80px; height: 8px;" ng-style="getBgStyle(feature)"
                      ng-class="[feature.className, {'reverse-strand': feature.strand == -1, 'forward-strand':feature.strand == 1}]"></div>
             </td>
             <td style="vertical-align:middle">

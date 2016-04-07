@@ -1410,13 +1410,22 @@ angular.module('ice.entry.controller', [])
                     $scope.selectedFeatures = [];
                     $scope.allSelected = false;
                     $scope.part = part;
-                    $scope.pagingParams = {currentPage: 0, pageSize: 10, sort: "id"};
+                    $scope.pagingParams = {currentPage: 0, pageSize: 10, sort: "locations[0].genbankStart", asc: true};
 
                     Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
                         $scope.annotations = result;
                         $scope.pagingParams.resultCount = result.features.length;
                         $scope.pagingParams.numberOfPages = Math.ceil(result.features.length / $scope.pagingParams.pageSize);
                     });
+
+                    $scope.sort = function (field) {
+                        if ($scope.pagingParams.sort == field) {
+                            $scope.pagingParams.asc = !$scope.pagingParams.asc;
+                        } else {
+                            $scope.pagingParams.sort = field;
+                            $scope.pagingParams.asc = true;
+                        }
+                    };
 
                     $scope.selectAll = function () {
                         $scope.allSelected = !$scope.allSelected;
