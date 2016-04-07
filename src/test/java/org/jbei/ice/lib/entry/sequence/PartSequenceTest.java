@@ -33,7 +33,7 @@ public class PartSequenceTest {
         Strain strain = TestEntryCreator.createTestStrain(account);
         PartSequence partSequence = new PartSequence(strain.getRecordId());
         FeaturedDNASequence sequence = partSequence.get(account.getEmail());
-        Assert.assertNotNull(sequence);
+        Assert.assertNull(sequence);
     }
 
     @Test
