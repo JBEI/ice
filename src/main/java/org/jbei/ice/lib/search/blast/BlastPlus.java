@@ -269,13 +269,15 @@ public class BlastPlus {
                     return;
                 Logger.info("Rebuilding features blast database");
                 rebuildSequenceDatabase(blastDir, blastFolder, true);
-                Logger.info("Blast database rebuild complete");
+                Logger.info("Blast features database rebuild complete");
             }
         } catch (OverlappingFileLockException l) {
             Logger.warn("Could not obtain lock file for blast at " + blastFolder.toString());
         } catch (BlastException be) {
+            FileUtils.deleteQuietly(lockFile);
             Logger.error(be);
         }
+        FileUtils.deleteQuietly(lockFile);
     }
 
     public static void rebuildDatabase(boolean force) throws BlastException {
