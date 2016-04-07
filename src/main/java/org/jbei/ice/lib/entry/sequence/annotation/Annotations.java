@@ -19,22 +19,21 @@ import java.util.List;
  */
 public class Annotations {
 
-    private final Entry entry;
-    private final EntryDAO entryDAO;
     private final SequenceDAO sequenceDAO;
 
-    public Annotations(long entryId) {
-        entryDAO = DAOFactory.getEntryDAO();
-        this.entry = entryDAO.get(entryId);
-        if (this.entry == null)
-            throw new IllegalArgumentException("Could not retrieve entry for " + entryId);
+    public Annotations() {
         this.sequenceDAO = DAOFactory.getSequenceDAO();
     }
 
     /**
      * Auto generate annotations
      */
-    public FeaturedDNASequence generate() {
+    public FeaturedDNASequence generate(long entryId) {
+        EntryDAO entryDAO = DAOFactory.getEntryDAO();
+        Entry entry = entryDAO.get(entryId);
+        if (entry == null)
+            throw new IllegalArgumentException("Could not retrieve entry for " + entryId);
+
         Sequence sequence = sequenceDAO.getByEntry(entry);
         if (sequence == null)
             return null;
@@ -49,6 +48,20 @@ public class Annotations {
             dnaSequence.setLength(sequenceString.length());
             dnaSequence.setFeatures(features);
             return dnaSequence;
+        } catch (BlastException e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
+    public FeaturedDNASequence generate(FeaturedDNASequence sequence) {
+        BlastQuery query = new BlastQuery();
+        query.setSequence(sequence.getSequence());
+
+        try {
+            List<DNAFeature> features = BlastPlus.runCheckFeatures(query);
+            sequence.getFeatures().addAll(features);
+            return sequence;
         } catch (BlastException e) {
             Logger.error(e);
             return null;

@@ -70,6 +70,7 @@ public class AutoAnnotationBlastDbBuildTask extends Task {
 //        int min = calendar.get(Calendar.MINUTE);
 //        calendar.set(Calendar.MINUTE, 5 * (min / 5 + 1));
         calendar.set(Calendar.HOUR_OF_DAY, RUN_HOUR);
+        calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
