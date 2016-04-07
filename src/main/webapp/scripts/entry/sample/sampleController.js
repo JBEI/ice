@@ -18,7 +18,7 @@ angular.module('ice.entry.sample.controller', [])
         $scope.Plate96Cols = SampleService.getPlate96Cols();
 
         // retrieve samples for partId
-        Util.list('rest/parts/' + partId + '/samples', function () {
+        Util.list('rest/parts/' + partId + '/samples', function (result) {
             $scope.samples = result;
         });
 

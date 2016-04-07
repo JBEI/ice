@@ -2,6 +2,7 @@ package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.net.RemoteEntries;
@@ -66,6 +67,18 @@ public class PartnerResource extends RestResource {
         remoteEntries.transferEntries(userId, remoteId, entrySelection);
         return super.respond(Response.Status.OK);
     }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entries/{entryId}/tooltip")
+    public Response getWebEntryTooltip(
+            @PathParam("id") final long partnerId, @PathParam("entryId") final long entryId) {
+        final String userId = super.getUserId();
+        RemoteEntries remoteEntries = new RemoteEntries();
+        final PartData result = remoteEntries.getPublicEntryTooltip(userId, partnerId, entryId);
+        return super.respond(Response.Status.OK, result);
+    }
+
 
     @PUT
     @Path("/{id}")

@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ice.search.controller', [])
-    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Search, EntryContextUtil,
-                                              Selection, WebOfRegistries, Util) {
+    .controller('SearchController', function ($scope, $http, $cookieStore, $location, EntryContextUtil,
+                                              Selection, Util) {
 
         $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
@@ -78,11 +78,9 @@ angular.module('ice.search.controller', [])
 
         $scope.remoteTooltipDetails = function (result) {
             $scope.currentTooltip = undefined;
-            WebOfRegistries().getToolTip({partnerId: result.partner.id, entryId: result.entryInfo.id},
+            Util.get("rest/partners/" + result.partner.id + "/entries/" + entryInfo.id + "/tooltip",
                 function (result) {
                     $scope.currentTooltip = result;
-                }, function (error) {
-                    console.error(error);
                 });
         };
 
@@ -95,11 +93,10 @@ angular.module('ice.search.controller', [])
             EntryContextUtil.setContextCallback(function (offset, callback) {
                 $scope.searchFilters.parameters.start = offset;
                 $scope.searchFilters.parameters.retrieveCount = 1;
-
-                Search().runAdvancedSearch({webSearch: $scope.searchFilters.webSearch}, $scope.searchFilters,
+                Util.post("rest/search", $scope.searchFilters,
                     function (result) {
                         callback(result.results[0].entryInfo.id);
-                    }
+                    }, {webSearch: $scope.searchFilters.webSearch}
                 );
             }, $scope.searchResults.resultCount, offset, "/search", $scope.searchResults.sortField);
 

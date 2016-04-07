@@ -24,6 +24,7 @@ import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.TraceSequences;
+import org.jbei.ice.lib.entry.sequence.annotation.Annotations;
 import org.jbei.ice.lib.experiment.Experiments;
 import org.jbei.ice.lib.experiment.Study;
 import org.jbei.ice.lib.net.RemoteEntries;
@@ -489,25 +490,27 @@ public class PartResource extends RestResource {
         return Response.status(Response.Status.OK).entity(sequence).build();
     }
 
+    // put should be used to update when the new vector editor implementation is in place
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/sequence")
-    public FeaturedDNASequence updateSequence(@PathParam("id") final long partId,
-                                              FeaturedDNASequence sequence) {
-        final String userId = getUserId();
-        if (userId == null)
-            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-        return sequenceController.updateSequence(userId, partId, sequence);
+    public Response updateSequence(@PathParam("id") final long partId,
+                                   @DefaultValue("false") @QueryParam("add") boolean add,
+                                   FeaturedDNASequence sequence) {
+        final String userId = requireUserId();
+        return super.respond(sequenceController.updateSequence(userId, partId, sequence, add));
     }
 
     @DELETE
     @Path("/{id}/sequence")
     public Response deleteSequence(@PathParam("id") final long partId) {
-        final String userId = getUserId();
-        if (sequenceController.deleteSequence(userId, partId)) {
-            return Response.ok().build();
+        final String userId = requireUserId();
+        try {
+            return super.respond(sequenceController.deleteSequence(userId, partId));
+        } catch (PermissionException e) {
+            Logger.error(e);
+            throw new WebApplicationException(e.getMessage(), Response.Status.FORBIDDEN);
         }
-        return Response.serverError().build();
     }
 
     /**
@@ -635,5 +638,15 @@ public class PartResource extends RestResource {
             arrayList.add(id.longValue());
         boolean success = entries.updateVisibility(userId, arrayList, visibility);
         return super.respond(success);
+    }
+
+    @GET
+    @Path("/{id}/annotations/auto")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAutoAnnotations(@PathParam("id") long partId) {
+        String userId = getUserId();
+        log(userId, "requesting auto annotations for entry " + partId);
+        Annotations annotations = new Annotations(partId);
+        return super.respond(annotations.generate());
     }
 }

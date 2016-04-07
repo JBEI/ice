@@ -23,8 +23,6 @@ import java.util.Set;
 @SequenceGenerator(name = "sequence", sequenceName = "sequence_feature_id_seq", allocationSize = 1)
 public class SequenceFeature implements DataModel {
 
-    public static final String DESCRIPTION = "description";
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
@@ -42,11 +40,11 @@ public class SequenceFeature implements DataModel {
 
     @Deprecated
     @Column(name = "feature_start")
-    private int genbankStart;
+    private Integer genbankStart;
 
     @Deprecated
     @Column(name = "feature_end")
-    private int end;
+    private Integer end;
 
     /**
      * +1 or -1

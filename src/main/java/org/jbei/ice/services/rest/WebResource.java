@@ -12,10 +12,8 @@ import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.WoRController;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import java.util.List;
 
 /**
@@ -119,7 +117,7 @@ public class WebResource extends RestResource {
 
     @GET
     @Path("/partner/{id}")
-    public Response getWebPartner(@Context final UriInfo info, @PathParam("id") final long partnerId) {
+    public Response getWebPartner(@PathParam("id") final long partnerId) {
         final String userId = getUserId();
         final RegistryPartner partner = controller.getWebPartner(userId, partnerId);
         return super.respond(Response.Status.OK, partner);
