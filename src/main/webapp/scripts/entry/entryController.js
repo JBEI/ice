@@ -1413,6 +1413,9 @@ angular.module('ice.entry.controller', [])
                     $scope.pagingParams = {currentPage: 0, pageSize: 10, sort: "locations[0].genbankStart", asc: true};
 
                     Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
+                        angular.forEach(result.features, function (feature) {
+                            feature.length = (feature.locations[0].end - feature.locations[0].genbankStart) + 1;
+                        });
                         $scope.annotations = result;
                         $scope.pagingParams.resultCount = result.features.length;
                         $scope.pagingParams.numberOfPages = Math.ceil(result.features.length / $scope.pagingParams.pageSize);

@@ -57,7 +57,12 @@
                        ng-class="{'fa-caret-down':pagingParams.asc, 'fa-caret-up':!pagingParams.asc}"></i>
                 </span>
             </th>
-            <th style="width: 100px;"></th>
+            <th style="width: 100px; text-align: center" class="entry-table-header">
+                <span ng-click="sort('length')">Length
+                <i class="fa" ng-show="pagingParams.sort == 'length'"
+                   ng-class="{'fa-caret-down':pagingParams.asc, 'fa-caret-up':!pagingParams.asc}"></i>
+                </span>
+            </th>
             <th style="width: 75px;" class="entry-table-header">
                 <span ng-click="sort('locations[0].end')">End
                     <i class="fa" ng-show="pagingParams.sort == 'locations[0].end'"
@@ -79,8 +84,10 @@
                 <span class="small text-muted pull-right">{{feature.locations[0].genbankStart | number}}</span>
             </td>
             <td ng-init="setClassName(feature)" style="vertical-align:middle">
-                <div style="width: 80px; height: 8px;" ng-style="getBgStyle(feature)"
-                     ng-class="[feature.className, {'reverse-strand': feature.strand == -1, 'forward-strand':feature.strand == 1}]"></div>
+                <div style="width: 80px; font-family: tahoma, Arial, sans-serif" ng-style="getBgStyle(feature)"
+                     ng-class="[feature.className, {'reverse-strand': feature.strand == -1, 'forward-strand':feature.strand == 1}]">
+                    {{feature.length}} bps
+                </div>
             </td>
             <td style="vertical-align:middle">
                 <div class="small text-muted">{{feature.locations[0].end | number}}</div>
