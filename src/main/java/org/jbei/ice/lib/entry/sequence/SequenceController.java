@@ -184,7 +184,7 @@ public class SequenceController {
 
         String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         dao.deleteSequence(sequence, tmpDir);
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
+//        BlastPlus.scheduleBlastIndexRebuildTask(true);  // todo : update is delete and save which is not right
         return true;
     }
 

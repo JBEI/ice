@@ -17,7 +17,6 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.search.BlastProgram;
 import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
-import org.jbei.ice.lib.entry.sequence.annotation.AutoAnnotationBlastDbBuildTask;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
@@ -389,8 +388,6 @@ public class BlastPlus {
     public static void scheduleBlastIndexRebuildTask(boolean force) {
         RebuildBlastIndexTask task = new RebuildBlastIndexTask(force);
         IceExecutorService.getInstance().runTask(task);
-        AutoAnnotationBlastDbBuildTask autoAnnotationBlastDbBuildTask = new AutoAnnotationBlastDbBuildTask();
-        IceExecutorService.getInstance().runTask(autoAnnotationBlastDbBuildTask);
     }
 
     /**
