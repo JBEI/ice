@@ -1477,6 +1477,10 @@ angular.module('ice.entry.controller', [])
                             case "rep_origin":
                                 bgColor = "#878787";
                                 break;
+
+                            case "misc_marker":
+                                bgColor = "#8DCEB1";
+                                break;
                         }
                         return {'background-color': bgColor};
                     };

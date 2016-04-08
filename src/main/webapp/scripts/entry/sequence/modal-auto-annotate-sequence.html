@@ -7,8 +7,9 @@
 
 <div class="modal-body">
 
-    <div style="max-height: 120px;overflow-y: auto; padding: 0 6px 0 6px;overflow-x: hidden">
-        <table width="100%" ng-repeat="selectedFeature in selectedFeatures" style="margin-bottom: 2px">
+    <div style="max-height: 120px;overflow-y: auto; overflow-x: hidden">
+        <table width="100%" ng-repeat="selectedFeature in selectedFeatures" style="margin-bottom: 2px"
+               ng-class="{'margin-left-4': selectedFeature.strand == -1, 'margin-right-4':selectedFeature.strand == 1}">
             <tr>
                 <td ng-style="getFirstStyle(selectedFeature)"></td>
                 <td ng-style="getSecondStyle(selectedFeature)">

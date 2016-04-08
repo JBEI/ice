@@ -1379,6 +1379,22 @@ button[disabled].action-menu:hover {
     border-left: 4px solid #878787;
 }
 
-.reverse-strand-rep_origin:before {
+.reverse-strand-misc_marker:before {
     border-right: 4px solid #878787;
+}
+
+.forward-strand-misc_marker:after {
+    border-left: 4px solid #8DCEB1;
+}
+
+.reverse-strand-misc_marker:before {
+    border-right: 4px solid #8DCEB1;
+}
+
+.margin-left-4 {
+    margin-left: 4px;
+}
+
+.margin-right-4 {
+    margin-right: 4px;
 }
