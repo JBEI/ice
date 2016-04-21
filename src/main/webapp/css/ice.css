@@ -1313,8 +1313,8 @@ button[disabled].action-menu:hover {
 
 .reverse-strand, .forward-strand {
     position: relative;
-    font-size: 10px;
-    height: 8px;
+    font-size: 8px;
+    height: 10px;
     color: #FFFFFF;
     text-align: center;
 }
@@ -1326,9 +1326,9 @@ button[disabled].action-menu:hover {
     top: 0;
     width: 0;
     height: 0;
-    border-top: 4px solid transparent;
-    border-right: 4px solid #CCCCCC;
-    border-bottom: 4px solid transparent;
+    border-top: 5px solid transparent;
+    border-right: 5px solid #CCCCCC;
+    border-bottom: 5px solid transparent;
 }
 
 .forward-strand:after {
@@ -1338,9 +1338,9 @@ button[disabled].action-menu:hover {
     top: 0;
     width: 0;
     height: 0;
-    border-top: 4px solid transparent;
-    border-left: 4px solid #CCCCCC;
-    border-bottom: 4px solid transparent;
+    border-top: 5px solid transparent;
+    border-left: 5px solid #CCCCCC;
+    border-bottom: 5px solid transparent;
 }
 
 .forward-strand-cds:after {
@@ -1379,7 +1379,7 @@ button[disabled].action-menu:hover {
     border-left: 4px solid #878787;
 }
 
-.reverse-strand-misc_marker:before {
+.reverse-strand-rep_origin:before {
     border-right: 4px solid #878787;
 }
 
@@ -1397,4 +1397,16 @@ button[disabled].action-menu:hover {
 
 .margin-right-4 {
     margin-right: 4px;
+}
+
+.dont-break-out {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    -ms-word-break: break-all;
+    word-break: break-all;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
 }
