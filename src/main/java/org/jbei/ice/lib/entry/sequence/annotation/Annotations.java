@@ -1,14 +1,18 @@
 package org.jbei.ice.lib.entry.sequence.annotation;
 
+import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.DNAFeature;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.search.BlastQuery;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
+import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Sequence;
 
@@ -20,9 +24,11 @@ import java.util.List;
 public class Annotations {
 
     private final SequenceDAO sequenceDAO;
+    private final String userId;
 
-    public Annotations() {
+    public Annotations(String userId) {
         this.sequenceDAO = DAOFactory.getSequenceDAO();
+        this.userId = userId;
     }
 
     /**
@@ -66,5 +72,26 @@ public class Annotations {
             Logger.error(e);
             return null;
         }
+    }
+
+    /**
+     * Rebuild the annotations blast database
+     *
+     * @throws PermissionException if the specified user does not have administrator privileges
+     */
+    public void rebuild() {
+        Account account = DAOFactory.getAccountDAO().getByEmail(this.userId);
+        if (account == null)
+            throw new IllegalArgumentException("Could not retrieve account");
+
+        if (account.getType() != AccountType.ADMIN)
+            throw new PermissionException("Administrative privileges required to rebuild blast features");
+
+        AutoAnnotationBlastDbBuildTask autoAnnotationBlastDbBuildTask = new AutoAnnotationBlastDbBuildTask(true);
+        IceExecutorService.getInstance().runTask(autoAnnotationBlastDbBuildTask);
+    }
+
+    protected boolean isAdministrator(Account account) {
+        return account != null && account.getType() == AccountType.ADMIN;
     }
 }
