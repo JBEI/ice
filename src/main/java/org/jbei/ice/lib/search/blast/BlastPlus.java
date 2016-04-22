@@ -134,6 +134,16 @@ public class BlastPlus {
         return processFeaturesBlastOutput(result);
     }
 
+    /**
+     * Process the output of the blast run for features
+     * into a list of feature objects
+     * <br>
+     * Expected format for the output (per line) is
+     * <code>feature_id, label, type, qstart, qend, sstart, send, sstrand</code>
+     *
+     * @param blastOutput blast program output
+     * @return list of feature objects resulting from processing the blast output
+     */
     public static List<DNAFeature> processFeaturesBlastOutput(String blastOutput) {
         List<DNAFeature> hashMap = new ArrayList<>();
         HashSet<String> duplicates = new HashSet<>();
@@ -143,11 +153,11 @@ public class BlastPlus {
 
             for (String[] line : lines) {
                 String type = line[2];
-                String start = line[4];
-                String end = line[5];
-                if (!duplicates.add(type + ":" + start + ":" + end)) {
-                    continue;
-                }
+                String start = line[5];
+                String end = line[6];
+//                if (!duplicates.add(type + ":" + start + ":" + end)) {
+//                    continue;
+//                }
 
                 DNAFeature dnaFeature = new DNAFeature();
                 dnaFeature.setId(Long.decode(line[0]));
@@ -158,7 +168,7 @@ public class BlastPlus {
                 location.setGenbankStart(Integer.decode(start));
                 location.setEnd(Integer.decode(end));
                 dnaFeature.getLocations().add(location);
-                dnaFeature.setStrand("plus".equalsIgnoreCase(line[8]) ? 1 : -1);
+                dnaFeature.setStrand("plus".equalsIgnoreCase(line[7]) ? 1 : -1);
                 hashMap.add(dnaFeature);
             }
 
@@ -221,7 +231,6 @@ public class BlastPlus {
         return Files.exists(path, LinkOption.NOFOLLOW_LINKS);
     }
 
-    // todo: does not delete for lock file to allow for 4 hours
     public static void rebuildFeaturesBlastDatabase(String featureFolder) throws IOException {
         String blastInstallDir = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR);
         if (StringUtils.isEmpty(blastInstallDir)) {
@@ -266,7 +275,7 @@ public class BlastPlus {
             try (FileLock lock = fos.getChannel().tryLock()) {
                 if (lock == null)
                     return;
-                Logger.info("Rebuilding features blast database");
+                Logger.info("Rebuilding features blast database.....");
                 rebuildSequenceDatabase(blastDir, blastFolder, true);
                 Logger.info("Blast features database rebuild complete");
             }
@@ -351,9 +360,8 @@ public class BlastPlus {
      * @param subject query sequence.
      * @return List of output string from bl2seq program.
      * @throws BlastException
-     * @throws ProgramTookTooLongException
      */
-    public static String runBlast2Seq(String query, String subject) throws BlastException, ProgramTookTooLongException {
+    public static String runBlast2Seq(String query, String subject) throws BlastException {
         String result;
         try {
             Path queryFilePath = Files.write(Files.createTempFile("query-", ".seq"), query.getBytes());
@@ -575,19 +583,27 @@ public class BlastPlus {
             return;
 
         int offset = 0;
+        int processed = 0;
         while (offset < count) {
             List<Feature> features = featureDAO.getFeatures(offset++, 1);
             Feature feature = features.get(0);
+            if (feature.getName().trim().isEmpty())
+                continue;
+
+            if (feature.getCuration() != null && feature.getCuration().isExclude())
+                continue;
+
             String sequenceString = feature.getSequence().trim();
             try {
                 String idString = ">"
                         + feature.getId() + DELIMITER
                         + feature.getName() + DELIMITER
-                        + feature.getGenbankType() + DELIMITER
-                        + feature.getHash();
+                        + feature.getGenbankType();//+ DELIMITER
                 idString += "\n";
                 writer.write(idString);
                 writer.write(sequenceString + "\n");
+                if (processed++ % 100 == 0)
+                    Logger.info(processed + " features processed");
             } catch (IOException e) {
                 throw new BlastException(e);
             }
