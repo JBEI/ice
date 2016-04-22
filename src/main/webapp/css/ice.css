@@ -1275,6 +1275,7 @@ button[disabled].action-menu:hover {
     line-height: 1;
     opacity: 0.2;
     text-shadow: 0 1px 0 #fff;
+    font-weight: bold;
 }
 
 .message {
