@@ -6,7 +6,6 @@ import org.jbei.ice.lib.parsers.genbank.IceGenbankParser;
 import org.jbei.ice.lib.parsers.sbol.SBOLParser;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * Helper class to set up a list of parsers to iterate over, to try to parse the input file.
@@ -16,7 +15,7 @@ import java.util.Iterator;
 public class GeneralParser {
 
     private static GeneralParser instance = null;
-    private final ArrayList<AbstractParser> parsers = new ArrayList<AbstractParser>();
+    private final ArrayList<AbstractParser> parsers = new ArrayList<>();
 
     protected GeneralParser() {
         registerParsers();
@@ -58,28 +57,6 @@ public class GeneralParser {
         }
 
         return parsedSequence;
-    }
-
-    public Iterator<AbstractParser> parsersIterator() {
-        return parsers.iterator();
-    }
-
-    public String availableParsersToString() {
-        return availableParsersToString(", ");
-    }
-
-    public String availableParsersToString(String delimiter) {
-        StringBuilder stringBuilder = new StringBuilder();
-
-        Iterator<AbstractParser> iterator = parsersIterator();
-        while (iterator.hasNext()) {
-            stringBuilder.append(iterator.next().getName());
-            if (iterator.hasNext()) {
-                stringBuilder.append(delimiter);
-            }
-        }
-
-        return stringBuilder.toString();
     }
 
     private void registerParsers() {
