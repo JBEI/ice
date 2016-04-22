@@ -61,11 +61,12 @@ angular.module('ice.admin.controller', [])
                 icon: 'fa-shopping-cart'
             },
             {
-                id: 'api-keys',
-                url: 'scripts/admin/all-api-keys.html',
-                display: 'API Keys',
+                id: 'annotations-curation',
+                url: 'scripts/admin/curation.html',
+                display: 'Annotations Curation',
+                description: 'Curate annotations for auto annotations',
                 selected: false,
-                icon: 'fa-key'
+                icon: 'fa-language'
             },
             {
                 id: 'manuscripts',
@@ -83,7 +84,7 @@ angular.module('ice.admin.controller', [])
 
             menuOptions[index].selected = true;
             $scope.adminOptionSelection = menuOptions[index].url;
-            $scope.selectedDisplay = menuOptions[index].display;
+            $scope.selectedOption = menuOptions[index];
             if (menuOptions[index].id) {
                 $location.path("admin/" + menuOptions[index].id);
             } else {
@@ -94,14 +95,14 @@ angular.module('ice.admin.controller', [])
         if (menuOption === undefined) {
             $scope.adminOptionSelection = menuOptions[0].url;
             menuOptions[0].selected = true;
-            $scope.selectedDisplay = menuOptions[0].display;
+            $scope.selectedOption = menuOptions[0];
         } else {
             menuOptions[0].selected = false;
             for (var i = 1; i < menuOptions.length; i += 1) {
                 if (menuOptions[i].id === menuOption) {
                     $scope.adminOptionSelection = menuOptions[i].url;
                     menuOptions[i].selected = true;
-                    $scope.selectedDisplay = menuOptions[i].display;
+                    $scope.selectedOption = menuOptions[i];
                     break;
                 }
             }
@@ -109,18 +110,21 @@ angular.module('ice.admin.controller', [])
             if ($scope.adminOptionSelection === undefined) {
                 $scope.adminOptionSelection = menuOptions[0].url;
                 menuOptions[0].selected = true;
-                $scope.selectedDisplay = menuOptions[0].display;
+                $scope.selectedOption = menuOptions[0];
             }
         }
 
         $scope.rebuildBlastIndex = function () {
-            Util.update("rest/search/indexes/blast", {}, {}, function (result) {
-            });
+            Util.update("rest/search/indexes/blast");
         };
 
         $scope.rebuildLuceneIndex = function () {
-            Util.update("rest/search/indexes/lucene", {}, {}, function (result) {
-            });
+            Util.update("rest/search/indexes/lucene");
+        };
+
+        $scope.rebuildFeatures = function () {
+            Util.update("rest/annotations/indexes");
+
         };
 
         $scope.submitSetting = function (newSetting) {
