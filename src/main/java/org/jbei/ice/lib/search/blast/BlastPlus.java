@@ -155,9 +155,9 @@ public class BlastPlus {
                 String type = line[2];
                 String start = line[5];
                 String end = line[6];
-//                if (!duplicates.add(type + ":" + start + ":" + end)) {
-//                    continue;
-//                }
+                if (!duplicates.add(type + ":" + start + ":" + end)) {
+                    continue;
+                }
 
                 DNAFeature dnaFeature = new DNAFeature();
                 dnaFeature.setId(Long.decode(line[0]));
@@ -275,7 +275,7 @@ public class BlastPlus {
             try (FileLock lock = fos.getChannel().tryLock()) {
                 if (lock == null)
                     return;
-                Logger.info("Rebuilding features blast database.....");
+                Logger.info("Rebuilding features blast database...");
                 rebuildSequenceDatabase(blastDir, blastFolder, true);
                 Logger.info("Blast features database rebuild complete");
             }
@@ -583,7 +583,6 @@ public class BlastPlus {
             return;
 
         int offset = 0;
-        int processed = 0;
         while (offset < count) {
             List<Feature> features = featureDAO.getFeatures(offset++, 1);
             Feature feature = features.get(0);
@@ -602,8 +601,6 @@ public class BlastPlus {
                 idString += "\n";
                 writer.write(idString);
                 writer.write(sequenceString + "\n");
-                if (processed++ % 100 == 0)
-                    Logger.info(processed + " features processed");
             } catch (IOException e) {
                 throw new BlastException(e);
             }
