@@ -589,8 +589,8 @@ public class BlastPlus {
             if (feature.getName().trim().isEmpty())
                 continue;
 
-            if (feature.getCuration() != null && feature.getCuration().isExclude())
-                continue;
+//            if (feature.getCuration() != null && feature.getCuration().isExclude())
+//                continue;
 
             String sequenceString = feature.getSequence().trim();
             try {
