@@ -45,7 +45,7 @@ public class SequenceController {
     private final Entries retriever;
 
     public SequenceController() {
-        dao = new SequenceDAO();
+        dao = DAOFactory.getSequenceDAO();
         authorization = new EntryAuthorization();
         retriever = new Entries();
     }
@@ -184,7 +184,7 @@ public class SequenceController {
 
         String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         dao.deleteSequence(sequence, tmpDir);
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
+//        BlastPlus.scheduleBlastIndexRebuildTask(true);  // todo : update is delete and save which is not right
         return true;
     }
 
@@ -477,8 +477,13 @@ public class SequenceController {
                     name = entry.getName() + ".fasta";
                     break;
 
-                case "sbol":
-                    sequenceString = compose(sequence, new SBOLFormatter());
+                case "sbol1":
+                    sequenceString = compose(sequence, new SBOLFormatter(true));
+                    name = entry.getName() + ".xml";
+                    break;
+
+                case "sbol2":
+                    sequenceString = compose(sequence, new SBOLFormatter(false));
                     name = entry.getName() + ".xml";
                     break;
 

@@ -1,4 +1,4 @@
-<div ng-controller="AdminUserController">
+<div ng-controller="AdminUserController" style="height: 1100px">
     <div class="pad_top">
 
         <button type="button" ng-click="newProfile.show=true" class="ice-button">
@@ -97,9 +97,8 @@
             </thead>
             <tbody>
             <tr data-ng-repeat="userItem in userList.users">
-                <td style="vertical-align: middle; line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"
-                    class="font-14em">
-                    <b>{{$index+1}}</b>
+                <td class="table-row-index">
+                    {{((userListParams.currentPage - 1) * userListParams.limit) + $index + 1 | number}}
                 </td>
                 <td class="no_wrap">
                     <a ng-href="profile/{{userItem.id}}">
@@ -143,7 +142,7 @@
     <div ng-if="userList && userList.users.length > 0">
         <div class="col-md-5" style="padding-left: 0">
             <uib-pagination total-items="userList.resultCount" ng-change="userListPageChanged()"
-                        ng-model="userListParams.currentPage"
+                            ng-model="userListParams.currentPage"
                             max-size="maxSize" class="pagination-sm" items-per-page="15"
                             boundary-links="true"></uib-pagination>
         </div>
@@ -151,7 +150,7 @@
         <div class="col-md-7" style="margin-top: 25px;">
             <strong class="small">
                 <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
-                {{pageCounts(userListParams.currentPage, userList.resultCount)}}
+                {{pageCounts(userListParams.currentPage, userList.resultCount, userListParams.limit)}}
             </strong>
         </div>
 

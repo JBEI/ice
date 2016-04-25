@@ -306,7 +306,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
     public long sharedEntryCount(Account requester, Set<Group> accountGroups, String filter) throws DAOException {
         try {
             Criteria criteria = getSharedWithUserCriteria(requester, accountGroups);
-            criteria.setProjection(Projections.rowCount());
+            criteria.setProjection(Projections.countDistinct("entry.id"));
             checkAddFilter(criteria, filter, "entry");
             Number rowCount = (Number) criteria.uniqueResult();
             return rowCount.longValue();

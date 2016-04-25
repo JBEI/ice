@@ -1,6 +1,7 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Feature;
 
@@ -20,6 +21,7 @@ public class FeatureDAO extends HibernateRepository<Feature> {
 
     public long getFeatureCount() {
         Number number = (Number) currentSession().createCriteria(Feature.class)
+                .add(Restrictions.neOrIsNotNull("name", ""))
                 .setProjection(Projections.count("id"))
                 .uniqueResult();
         return number.longValue();
@@ -28,6 +30,7 @@ public class FeatureDAO extends HibernateRepository<Feature> {
     @SuppressWarnings("unchecked")
     public List<Feature> getFeatures(int offset, int size) {
         return currentSession().createCriteria(Feature.class)
+                .add(Restrictions.neOrIsNotNull("name", ""))
                 .setFirstResult(offset)
                 .setMaxResults(size)
                 .list();

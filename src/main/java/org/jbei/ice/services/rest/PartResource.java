@@ -644,9 +644,9 @@ public class PartResource extends RestResource {
     @Path("/{id}/annotations/auto")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAutoAnnotations(@PathParam("id") long partId) {
-        String userId = getUserId();
+        String userId = requireUserId();
         log(userId, "requesting auto annotations for entry " + partId);
-        Annotations annotations = new Annotations();
+        Annotations annotations = new Annotations(userId);
         return super.respond(annotations.generate(partId));
     }
 }

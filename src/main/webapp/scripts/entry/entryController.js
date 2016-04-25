@@ -1413,6 +1413,13 @@ angular.module('ice.entry.controller', [])
                     $scope.pagingParams = {currentPage: 0, pageSize: 10, sort: "locations[0].genbankStart", asc: true};
 
                     Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
+                        angular.forEach(result.features, function (feature) {
+                                if (feature.strand == 1)
+                                    feature.length = (feature.locations[0].end - feature.locations[0].genbankStart) + 1;
+                                else
+                                    feature.length = (feature.locations[0].genbankStart - feature.locations[0].end) + 1;
+                            }
+                        );
                         $scope.annotations = result;
                         $scope.pagingParams.resultCount = result.features.length;
                         $scope.pagingParams.numberOfPages = Math.ceil(result.features.length / $scope.pagingParams.pageSize);
@@ -1477,6 +1484,10 @@ angular.module('ice.entry.controller', [])
                             case "rep_origin":
                                 bgColor = "#878787";
                                 break;
+
+                            case "misc_marker":
+                                bgColor = "#8DCEB1";
+                                break;
                         }
                         return {'background-color': bgColor};
                     };
@@ -1512,7 +1523,8 @@ angular.module('ice.entry.controller', [])
                     part: function () {
                         return $scope.entry;
                     }
-                },
+                }
+                ,
                 backdrop: "static"
             });
 

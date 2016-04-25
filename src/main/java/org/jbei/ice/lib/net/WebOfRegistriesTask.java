@@ -48,7 +48,8 @@ public class WebOfRegistriesTask extends Task {
         if (!this.enable) {
             // delete from the node master
             RemotePartner masterPartner = DAOFactory.getRemotePartnerDAO().getByUrl(NODE_MASTER);
-            this.remoteContact.deleteInstanceFromMaster(NODE_MASTER, masterPartner.getApiKey(), this.myUrl);
+            if (masterPartner != null)
+                this.remoteContact.deleteInstanceFromMaster(NODE_MASTER, masterPartner.getApiKey(), this.myUrl);
             return;
         }
 

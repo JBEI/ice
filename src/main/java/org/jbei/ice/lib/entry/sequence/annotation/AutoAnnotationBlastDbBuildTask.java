@@ -25,6 +25,15 @@ public class AutoAnnotationBlastDbBuildTask extends Task {
     private final Object LOCK_OBJECT = new Object();
     private int exceptionCount;
     private final int RUN_HOUR = 1;    // make config param
+    private final boolean runOnce;
+
+    public AutoAnnotationBlastDbBuildTask(boolean runOnce) {
+        this.runOnce = runOnce;
+    }
+
+    public AutoAnnotationBlastDbBuildTask() {
+        this(false);
+    }
 
     @Override
     public void execute() {
@@ -37,6 +46,9 @@ public class AutoAnnotationBlastDbBuildTask extends Task {
             Logger.error(e);
             exceptionCount += 1;
         }
+
+        if (this.runOnce)
+            return;
 
         while (!stopped) {
             waitUntil(timeTillRun());
