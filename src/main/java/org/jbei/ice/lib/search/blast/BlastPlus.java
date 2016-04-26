@@ -155,12 +155,13 @@ public class BlastPlus {
                 String type = line[2];
                 String start = line[5];
                 String end = line[6];
-                if (!duplicates.add(type + ":" + start + ":" + end)) {
+                String idString = line[0];
+                if (!duplicates.add(idString)) {
                     continue;
                 }
 
                 DNAFeature dnaFeature = new DNAFeature();
-                dnaFeature.setId(Long.decode(line[0]));
+                dnaFeature.setId(Long.decode(idString));
                 dnaFeature.setName(line[1]);
                 dnaFeature.setType(type);
                 dnaFeature.setIdentifier(line[3]);
