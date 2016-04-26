@@ -83,24 +83,22 @@ public class Annotations {
             FeaturedDNASequence dnaSequence = new FeaturedDNASequence();
 
             // check permissions
-            if (!isAdministrator()) {
-                Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-                Set<Group> groups = new HashSet<>(this.groupDAO.retrieveMemberGroups(account));
-                for (DNAFeature dnaFeature : features) {
-                    Feature feature = this.featureDAO.get(dnaFeature.getId());
-                    if (feature == null)
-                        continue;
-                    List<Long> entries = this.sequenceFeatureDAO.getEntryIdsByFeature(feature);
-                    if (entries != null && !entries.isEmpty()) {
-                        List<Long> filtered = this.permissionDAO.getCanReadEntries(account, groups, entries);
-                        if (filtered.isEmpty()) {
-                            continue;
-                        }
-                        dnaSequence.getFeatures().add(dnaFeature);
-                    }
+            Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+            Set<Group> groups = new HashSet<>(this.groupDAO.retrieveMemberGroups(account));
+
+            for (DNAFeature dnaFeature : features) {
+                Feature feature = this.featureDAO.get(dnaFeature.getId());
+                if (feature == null)
+                    continue;
+                List<Long> entries = this.sequenceFeatureDAO.getEntryIdsByFeature(feature);
+                if (!isAdministrator()) {
+                    entries = this.permissionDAO.getCanReadEntries(account, groups, entries);
                 }
-            } else {
-                dnaSequence.setFeatures(features);
+
+                if (entries != null && !entries.isEmpty()) {
+                    dnaFeature.getEntries().addAll(entries);
+                    dnaSequence.getFeatures().add(dnaFeature);
+                }
             }
 
             dnaSequence.setLength(sequenceString.length());

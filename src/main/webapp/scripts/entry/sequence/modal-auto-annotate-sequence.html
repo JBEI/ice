@@ -83,7 +83,18 @@
         <tr ng-repeat="feature in annotations.features | orderBy:pagingParams.sort:!pagingParams.asc | startFrom:pagingParams.currentPage*pagingParams.pageSize | limitTo:pagingParams.pageSize ">
             <td class="table-row-index">{{(pagingParams.currentPage*pagingParams.pageSize) + $index + 1 | number}}</td>
             <td class="font-85em">{{feature.type}}</td>
-            <td class="font-85em">{{feature.name}}</td>
+            <td class="font-85em" style="vertical-align: middle">
+                {{feature.name}}
+                <a ng-click="showEntryDetails(feature, $index)" style="opacity: 0.7"
+                   class="small cursor_pointer pull-right">
+                    <ng-pluralize count="feature.entries.length"
+                                  when="{
+                                  '1': '1 entry',
+                                  'other':'{} entries'}"></ng-pluralize>
+                </a>
+
+                <!--<small class="pull-right text-muted">{{feature.entries.length}} entries</small>-->
+            </td>
             <td style="vertical-align:middle">
                 <span class="small text-muted pull-right">{{feature.locations[0].genbankStart | number}}</span>
             </td>
