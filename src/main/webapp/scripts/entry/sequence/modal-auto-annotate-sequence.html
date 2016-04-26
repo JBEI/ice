@@ -35,7 +35,11 @@
         </tr>
     </table>
 
-    <table class="pad_top table table-hover table-border-bottom">
+    <div ng-if="!annotations" class="pad_top">
+        <img src="img/loader-mini.gif"> <i class="small text-muted">Generating annotations. Please wait...</i>
+    </div>
+
+    <table class="pad_top table table-hover table-border-bottom" ng-if="annotations">
         <thead>
         <tr>
             <th style="width: 60px"></th>
