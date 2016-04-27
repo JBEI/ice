@@ -249,7 +249,7 @@ angular.module('ice.admin.controller', [])
         $scope.maxSize = 5;
         $scope.currentPage = 1;
         $scope.newProfile = {show: false};
-        $scope.userListParams = {sort: 'lastName', asc: true, currentPage: 1, status: undefined};
+        $scope.userListParams = {sort: 'lastName', asc: true, currentPage: 1, limit: 15, status: undefined};
 
         var getUsers = function () {
             $scope.loadingPage = true;
@@ -257,15 +257,12 @@ angular.module('ice.admin.controller', [])
             Util.get("rest/users", function (result) {
                 $scope.userList = result;
                 $scope.loadingPage = false;
-            }, $scope.userListParams, function (error) {
-                $scope.loadingPage = false;
-            });
+            }, $scope.userListParams);
         };
 
         getUsers();
         $scope.userListPageChanged = function () {
-            $scope.loadingPage = true;
-            $scope.userListParams.offset = ($scope.userListParams.currentPage - 1) * 15;
+            $scope.userListParams.offset = ($scope.userListParams.currentPage - 1) * $scope.userListParams.limit;
             getUsers();
         };
 
@@ -293,19 +290,6 @@ angular.module('ice.admin.controller', [])
         $scope.filterChanged = function () {
             getUsers();
         }
-    })
-    .controller('AdminApiKeysController', function ($scope, Util) {
-        $scope.apiKeys = undefined;
-
-        // retrieve existing api keys for current user
-        $scope.retrieveKeys = function () {
-            Util.get("rest/api-keys", function (result) {
-                $scope.apiKeys = result.data;
-            }, {getAll: true});
-        };
-
-        // init
-        $scope.retrieveKeys();
     })
     .controller('AdminGroupsController', function ($scope, $uibModal, Util) {
         $scope.groups = undefined;
@@ -567,5 +551,24 @@ angular.module('ice.admin.controller', [])
                 $scope.errorDeleting = true;
                 console.log(error);
             });
+        }
+    })
+    .controller('AdminCurationController', function ($scope, Util) {
+        $scope.curationTableParams = {offset: 0, limit: 15, currentPage: 1, maxSize: 5};
+
+        var getFeatures = function () {
+            $scope.loadingCurationTableData = true;
+            Util.get("rest/annotations", function (result) {
+                console.log(result);
+                $scope.features = result.data;
+                $scope.curationTableParams.available = result.resultCount;
+                $scope.loadingCurationTableData = false;
+            }, $scope.curationTableParams)
+        };
+        getFeatures();
+
+        $scope.featureListPageChanged = function () {
+            $scope.curationTableParams.offset = ($scope.curationTableParams.currentPage - 1) * $scope.curationTableParams.limit;
+            getFeatures();
         }
     });
