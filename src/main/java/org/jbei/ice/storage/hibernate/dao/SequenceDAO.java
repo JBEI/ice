@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -201,6 +202,13 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         return sequence;
     }
 
+    public String getSequenceString(Entry entry) {
+        return (String) currentSession().createCriteria(Sequence.class)
+                .add(Restrictions.eq("entry", entry))
+                .setProjection(Projections.property("sequence"))
+                .uniqueResult();
+    }
+
     public boolean hasSequence(long entryId) {
         Session session = currentSession();
         try {
@@ -348,6 +356,11 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         if (sequence == null) {
             return null;
         }
+
+        if (sequence.getSequenceFeatures() == null) {
+            return sequence;
+        }
+
         int length = sequence.getSequence().length();
         boolean wholeSequence;
         for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
@@ -366,6 +379,13 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             }
         }
         return sequence;
+    }
+
+    public Set<Long> getEntriesForFeatures(List<Feature> features) {
+        return new HashSet<>(currentSession().createCriteria(Sequence.class).createAlias("sequenceFeatures", "sf")
+                .add(Restrictions.in("sf.feature", features))
+                .setProjection(Projections.property("entry.id"))
+                .list());
     }
 
     @Override
