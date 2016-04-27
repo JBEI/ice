@@ -152,7 +152,7 @@ angular.module('ice.admin.controller', [])
 
         $scope.selectOptions = ['ALL', 'PENDING', 'FULFILLED', 'REJECTED'];
         $scope.maxSize = 5;
-        $scope.params = {sort: 'requested', asc: false, currentPage: 1, status: 'ALL'};
+        $scope.params = {sort: 'requested', asc: false, currentPage: 1, status: 'ALL', limit: 15};
 
         $scope.requestSamples = function () {
             $scope.loadingPage = true;
@@ -163,7 +163,7 @@ angular.module('ice.admin.controller', [])
             Util.get("rest/samples/requests", function (result) {
                 $scope.sampleRequests = result;
                 $scope.loadingPage = false;
-                $scope.indexStart = ($scope.currentPage - 1) * 15;
+                $scope.indexStart = ($scope.currentPage - 1) * $scope.params.limit;
             }, params, function (error) {
                 $scope.loadingPage = false;
             });
@@ -173,7 +173,7 @@ angular.module('ice.admin.controller', [])
         $scope.requestSamples();
 
         $scope.sampleRequestPageChanged = function () {
-            $scope.params.offset = ($scope.params.currentPage - 1) * 15;
+            $scope.params.offset = ($scope.params.currentPage - 1) * $scope.params.limit;
             if ($scope.filter) {
                 $scope.params.filter = $scope.filter;
             }
