@@ -30,8 +30,15 @@
                                     Shared by <i>{{folder.owner.email}}</i> on <a
                                         ng-href="https://{{folder.remotePartner.url}}">{{folder.remotePartner.name}}</a>
                                 </small>
-                                <small class="font-65em" ng-if="folder.type==='SHARED'">
+                                <small class="font-65em"
+                                       ng-if="folder.type==='SHARED'  && user.email != folder.owner.email">
                                     Shared by <a ng-href="profile/{{folder.owner.id}}">{{folder.owner.firstName}}
+                                    {{folder.owner.lastName}}</a>
+                                    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+                                </small>
+                                <small class="font-65em"
+                                       ng-if="folder.type==='PRIVATE' && user.email != folder.owner.email">
+                                    <a ng-href="profile/{{folder.owner.id}}">{{folder.owner.firstName}}
                                     {{folder.owner.lastName}}</a>
                                     <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
                                 </small>
