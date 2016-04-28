@@ -21,11 +21,6 @@ public class SequenceFeatureDAO extends HibernateRepository<SequenceFeature> {
         return get(SequenceFeature.class, id);
     }
 
-    public List<SequenceFeature> getAll() {
-        return currentSession().createCriteria(SequenceFeature.class)
-                .list();
-    }
-
     public List<Long> getEntryIdsByFeature(Feature feature) {
         return currentSession().createCriteria(SequenceFeature.class)
                 .createAlias("sequence", "sequence")
@@ -49,5 +44,12 @@ public class SequenceFeatureDAO extends HibernateRepository<SequenceFeature> {
         if (number != null)
             return number.intValue();
         return -1;
+    }
+
+    public List<SequenceFeature> getEntrySequenceFeatures(Entry entry) {
+        return currentSession().createCriteria(SequenceFeature.class)
+                .createAlias("sequence", "sequence")
+                .add(Restrictions.eq("sequence.entry", entry))
+                .list();
     }
 }
