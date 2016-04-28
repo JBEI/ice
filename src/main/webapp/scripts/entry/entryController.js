@@ -603,8 +603,16 @@ angular.module('ice.entry.controller', [])
             } else {
                 Util.post("rest/parts", $scope.part, function (result) {
                     $scope.$emit("UpdateCollectionCounts");
-                    $location.path('/entry/' + result.id);
-                    $scope.showSBOL = false;
+                    if ($scope.part.pastedSequence) {
+                        // todo : also handle linked parts
+                        Util.post("rest/parts/" + result.id + "/sequence", {sequence: $scope.part.pastedSequence}, function () {
+                            $location.path('/entry/' + result.id);
+                            $scope.showSBOL = false;
+                        })
+                    } else {
+                        $location.path('/entry/' + result.id);
+                        $scope.showSBOL = false;
+                    }
                 });
             }
         };
@@ -975,8 +983,6 @@ angular.module('ice.entry.controller', [])
                     };
 
                     var linkPartToMainEntry = function (item) {
-                        console.log("link", item, "to", $scope.mainEntry.id);
-
                         Util.post('rest/parts/' + $scope.mainEntry.id + '/links', item, function () {
                             $scope.links.push(item);   // todo
                             $scope.addExistingPartNumber = undefined;
