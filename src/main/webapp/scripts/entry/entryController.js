@@ -891,7 +891,7 @@ angular.module('ice.entry.controller', [])
     })
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
-                                             FileUploader, EntryService, EntryContextUtil, Selection,
+                                             $route, $window, FileUploader, EntryService, EntryContextUtil, Selection,
                                              Util, Authentication) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
@@ -1535,7 +1535,7 @@ angular.module('ice.entry.controller', [])
             });
 
             modalInstance.result.then(function () {
-                // todo : reload page
+                $window.location.reload();
             });
         };
     });
