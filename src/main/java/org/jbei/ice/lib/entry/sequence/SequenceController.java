@@ -121,11 +121,13 @@ public class SequenceController {
             FeaturedDNASequence dnaSequence = sequenceToDNASequence(existingSequence);
             featuredDNASequence.getFeatures().addAll(dnaSequence.getFeatures());
             featuredDNASequence.setSequence(dnaSequence.getSequence());
-        } else {
-            featuredDNASequence.setSequence(featuredDNASequence.getSequence().replaceAll("[^A-Za-z]", ""));
         }
 
         Sequence sequence = dnaSequenceToSequence(featuredDNASequence);
+        if (sequence.getSequenceFeatures() == null || sequence.getSequenceFeatures().isEmpty()) {
+            DNASequence dnaSequence = GeneralParser.getInstance().parse(featuredDNASequence.getSequence());
+            sequence = dnaSequenceToSequence(dnaSequence);
+        }
         sequence.setEntry(entry);
         if (!deleteSequence(userId, entryId))
             return null;
@@ -156,11 +158,13 @@ public class SequenceController {
             result = dao.create(sequence);
         } else {
             String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-            String hash = oldSequence.getFwdHash();
-            try {
-                Files.deleteIfExists(Paths.get(tmpDir, hash + ".png"));
-            } catch (IOException e) {
-                Logger.warn(e.getMessage());
+            if (!StringUtils.isEmpty(tmpDir)) {
+                String hash = oldSequence.getFwdHash();
+                try {
+                    Files.deleteIfExists(Paths.get(tmpDir, hash + ".png"));
+                } catch (IOException e) {
+                    Logger.warn(e.getMessage());
+                }
             }
 
             oldSequence.setSequenceUser(sequence.getSequenceUser());
@@ -408,7 +412,7 @@ public class SequenceController {
 
                     String name = dnaFeature.getName().length() < 127 ? dnaFeature.getName()
                             : dnaFeature.getName().substring(0, 123) + "...";
-                    Feature feature = new Feature(name, dnaFeature.getIdentifier(), featureSequence, 0,
+                    Feature feature = new Feature(name, dnaFeature.getIdentifier(), featureSequence,
                             dnaFeature.getType());
                     if (dnaFeature.getLocations() != null && !dnaFeature.getLocations().isEmpty())
                         feature.setUri(dnaFeature.getLocations().get(0).getUri());
