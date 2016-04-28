@@ -5,16 +5,15 @@ import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.parsers.GeneralParser;
+import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
-import org.jbei.ice.storage.model.Account;
-import org.jbei.ice.storage.model.Sequence;
-import org.jbei.ice.storage.model.SequenceFeature;
-import org.jbei.ice.storage.model.Strain;
+import org.jbei.ice.storage.model.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -22,8 +21,11 @@ import java.util.List;
  */
 public class SequenceDAOTest {
 
+    private SequenceDAO sequenceDAO;
+
     @Before
     public void setUp() throws Exception {
+        sequenceDAO = new SequenceDAO();
         HibernateUtil.initializeMock();
         HibernateUtil.beginTransaction();
     }
@@ -38,33 +40,60 @@ public class SequenceDAOTest {
         Account account = AccountCreator.createTestAccount("SequenceDAOTest.testSaveSequence", false);
         Strain strain = TestEntryCreator.createTestStrain(account);
 
+        // parse sequence and associate with strain
         DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
         Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(strain);
 
-        SequenceDAO sequenceDAO = new SequenceDAO();
         Assert.assertNotNull(sequenceDAO.saveSequence(sequence));
 
+        // create second strain and associate with same sequence
         Strain strain2 = TestEntryCreator.createTestStrain(account);
         dnaSequence = GeneralParser.getInstance().parse(sequenceString);
         sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(strain2);
         Assert.assertNotNull(sequenceDAO.saveSequence(sequence));
 
-        SequenceFeatureDAO sequenceFeatureDAO = new SequenceFeatureDAO();
-        List<SequenceFeature> list = sequenceFeatureDAO.getAll();
-        Assert.assertNotNull(list);
-
-        // separate sequence features
-        Assert.assertEquals(2, list.size());
+        // same sequence so same number of features
+        List<SequenceFeature> sequence1Feature = DAOFactory.getSequenceFeatureDAO().getEntrySequenceFeatures(strain);
+        List<SequenceFeature> sequence2Feature = DAOFactory.getSequenceFeatureDAO().getEntrySequenceFeatures(strain2);
+        Assert.assertEquals(sequence1Feature.size(), sequence2Feature.size());
 
         // same feature
-        Assert.assertEquals(list.get(0).getFeature().getId(), list.get(1).getFeature().getId());
+        Assert.assertEquals(sequence1Feature.get(0).getFeature(), sequence2Feature.get(0).getFeature());
     }
 
     @Test
     public void testUpdateSequence() throws Exception {
+        // create account and sequence
+        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testUpdateSequence", false);
+        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
+        DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        sequence.setEntry(plasmid);
+        sequence = sequenceDAO.saveSequence(sequence);
+        Assert.assertNotNull(sequence);
 
+        // update to add new sequence feature
+        List<SequenceFeature> newFeatures = DAOFactory.getSequenceFeatureDAO().getEntrySequenceFeatures(plasmid);
+        SequenceFeature sequenceFeature = new SequenceFeature();
+        Feature feature = new Feature();
+        feature.setSequence("atgtcgaaag");
+        feature.setName("test");
+        feature.setHash("hash");
+        sequenceFeature.setFeature(feature);
+        AnnotationLocation location = new AnnotationLocation();
+        location.setGenbankStart(1);
+        location.setEnd(feature.getSequence().length());
+        sequenceFeature.getAnnotationLocations().clear();
+        sequenceFeature.getAnnotationLocations().add(location);
+        newFeatures.add(sequenceFeature);
+
+        sequence = sequenceDAO.updateSequence(sequence, new HashSet<>(newFeatures));
+        Assert.assertNotNull(sequence);
+        newFeatures = DAOFactory.getSequenceFeatureDAO().getEntrySequenceFeatures(plasmid);
+        Assert.assertEquals(2, newFeatures.size());
+        Assert.assertNotEquals(newFeatures.get(0).getFeature(), newFeatures.get(1).getFeature());
     }
 
     @Test
@@ -79,12 +108,32 @@ public class SequenceDAOTest {
 
     @Test
     public void testGetByEntry() throws Exception {
-
+        // create account and sequence
+        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testGetByEntry", false);
+        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
+        DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        sequence.setEntry(plasmid);
+        sequence = sequenceDAO.saveSequence(sequence);
+        Assert.assertNotNull(sequence);
+        Assert.assertNotNull(sequenceDAO.getByEntry(plasmid));
     }
 
     @Test
     public void testHasSequence() throws Exception {
+        // create account and sequence
+        Account account = AccountCreator.createTestAccount("SequenceDAOTest.testHasSequence", false);
+        Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
 
+        Assert.assertFalse(sequenceDAO.hasSequence(plasmid.getId()));
+
+        DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        sequence.setEntry(plasmid);
+        sequence = sequenceDAO.saveSequence(sequence);
+        Assert.assertNotNull(sequence);
+
+        Assert.assertTrue(sequenceDAO.hasSequence(plasmid.getId()));
     }
 
     @Test
@@ -108,7 +157,7 @@ public class SequenceDAOTest {
                     "VERSION     pj5_00001.1\n" +
                     "KEYWORDS    .\n" +
                     "FEATURES             Location/Qualifiers\n" +
-                    "     misc_feature    1..804\n" +
+                    "     misc_feature    156..804\n" +
                     "                     /label=pSMR0100\n" +
                     "ORIGIN      \n" +
                     "        1 atgtcgaaag ctacatataa ggaacgtgct gctactcatc ctagtcctgt tgctgccaag\n" +
