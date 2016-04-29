@@ -183,12 +183,12 @@
                     <i ng-if="params.sort!=='created'" class="sortable fa fa-angle-down"></i>
                 </th>
                 <th uib-dropdown-toggle class="text-muted opacity_hover" uib-dropdown
-                    style="width: 14px; border-left: 1px solid #efefef; padding: 0; vertical-align: middle">
-                    <i class="fa fa-fw fa-ellipsis-v pull-right font-11em"></i>
+                    style="width: 12px; padding: 0; vertical-align: middle; opacity: 1">
+                    <i class="fa fa-fw fa-ellipsis-v"></i>
 
-                    <div class="uib-dropdown-menu pull-right" uib-dropdown-menu>
+                    <div class="uib-dropdown-menu pull-right" style="background-color: #f1f1f1" uib-dropdown-menu>
                         <strong class="pad-8 small">Show/Hide fields</strong>
-                        <table class="small no_wrap table table-condensed font-85em" style="font-weight: normal"
+                        <table class=" no_wrap table table-condensed font-75em" style="font-weight: normal"
                                stop-event="click">
                             <tr ng-click="selectedHeaderField(header, $event)" ng-repeat="header in entryHeaders">
                                 <td class="check-box-table-cell">
