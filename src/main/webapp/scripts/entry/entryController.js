@@ -1518,7 +1518,7 @@ angular.module('ice.entry.controller', [])
                     $scope.saveAnnotations = function () {
                         //url, obj, successHandler, params, errHandler
                         Util.post("rest/parts/" + part.id + "/sequence", {features: $scope.selectedFeatures}, function (result) {
-                            $uibModalInstance.close();
+                            $uibModalInstance.close(true);
                         }, {add: true}, function (error) {
 
                         })
@@ -1534,8 +1534,10 @@ angular.module('ice.entry.controller', [])
                 backdrop: "static"
             });
 
-            modalInstance.result.then(function () {
-                $window.location.reload();
+            modalInstance.result.then(function (reload) {
+                if (reload) {
+                    $window.location.reload();
+                }
             });
         };
     });
