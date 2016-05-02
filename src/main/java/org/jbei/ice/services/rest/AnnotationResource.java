@@ -5,10 +5,8 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.entry.sequence.annotation.Annotations;
 
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
@@ -18,6 +16,17 @@ import javax.ws.rs.core.Response;
  */
 @Path("/annotations")
 public class AnnotationResource extends RestResource {
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getFeatures(@DefaultValue("0") @QueryParam("offset") final int offset,
+                                @DefaultValue("15") @QueryParam("limit") final int limit,
+                                @DefaultValue("created") @QueryParam("sort") final String sort,
+                                @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+        String userId = requireUserId();
+        Annotations annotations = new Annotations(userId);
+        return super.respond(annotations.get(offset, limit, sort));
+    }
 
     /**
      * Generates annotations for the passed sequence

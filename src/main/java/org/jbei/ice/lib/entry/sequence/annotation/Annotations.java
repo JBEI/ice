@@ -4,6 +4,7 @@ import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.DNAFeature;
+import org.jbei.ice.lib.dto.DNAFeatures;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.search.BlastQuery;
@@ -16,6 +17,7 @@ import org.jbei.ice.storage.model.*;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -41,22 +43,28 @@ public class Annotations {
         this.userId = userId;
     }
 
-    public Results<DNAFeature> get(int offset, int limit) {
+    public Results<DNAFeatures> get(int offset, int limit, String sort) {
         if (!isAdministrator())
             throw new PermissionException("Administrative privileges required to retrieve features");
 
-        long count = this.featureDAO.getFeatureCount();
-        Results<DNAFeature> results = new Results<>();
+        long count = this.featureDAO.getFeaturesGroupByCount();
+        Results<DNAFeatures> results = new Results<>();
         results.setResultCount(count);
 
-        List<Feature> features = this.featureDAO.getFeatures(offset, limit);
-        for (Feature feature : features) {
-            DNAFeature dnaFeature = feature.toDataTransferObject();
-            dnaFeature.setSequence(feature.getSequence());
-            List<Long> entries = this.sequenceFeatureDAO.getEntryIdsByFeature(feature);
-            if (entries != null)
-                dnaFeature.getEntries().addAll(entries);
-            results.getData().add(dnaFeature);
+        Map<String, List<Feature>> map = this.featureDAO.getFeaturesGroupBy(offset, limit);
+
+        for (String key : map.keySet()) {
+            DNAFeatures features = new DNAFeatures(key);
+
+            for (Feature feature : map.get(key)) {
+                DNAFeature dnaFeature = feature.toDataTransferObject();
+                dnaFeature.setSequence(feature.getSequence());
+                List<Long> entries = this.sequenceFeatureDAO.getEntryIdsByFeature(feature);
+                if (entries != null)
+                    dnaFeature.getEntries().addAll(entries);
+                features.getFeatures().add(dnaFeature);
+            }
+            results.getData().add(features);
         }
         return results;
     }
