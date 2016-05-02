@@ -1314,8 +1314,8 @@ button[disabled].action-menu:hover {
 
 .reverse-strand, .forward-strand {
     position: relative;
-    font-size: 8px;
-    height: 10px;
+    font-size: 9px;
+    height: 12px;
     color: #FFFFFF;
     text-align: center;
 }
@@ -1327,9 +1327,9 @@ button[disabled].action-menu:hover {
     top: 0;
     width: 0;
     height: 0;
-    border-top: 5px solid transparent;
-    border-right: 5px solid #CCCCCC;
-    border-bottom: 5px solid transparent;
+    border-top: 6px solid transparent;
+    border-right: 6px solid #CCCCCC;
+    border-bottom: 6px solid transparent;
 }
 
 .forward-strand:after {
@@ -1339,9 +1339,9 @@ button[disabled].action-menu:hover {
     top: 0;
     width: 0;
     height: 0;
-    border-top: 5px solid transparent;
-    border-left: 5px solid #CCCCCC;
-    border-bottom: 5px solid transparent;
+    border-top: 6px solid transparent;
+    border-left: 6px solid #CCCCCC;
+    border-bottom: 6px solid transparent;
 }
 
 .forward-strand-cds:after {
