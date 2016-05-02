@@ -151,7 +151,7 @@ public class BlastPlus {
      */
     public static List<DNAFeature> processFeaturesBlastOutput(String blastOutput) {
         List<DNAFeature> hashMap = new ArrayList<>();
-        HashSet<Long> duplicates = new HashSet<>();
+        HashSet<String> duplicates = new HashSet<>();
 
         try (CSVReader reader = new CSVReader(new StringReader(blastOutput))) {
             List<String[]> lines = reader.readAll();
@@ -166,7 +166,7 @@ public class BlastPlus {
                 int subjectEnd = Integer.decode(line[6]);
                 int strand = "plus".equalsIgnoreCase(line[7]) ? 1 : -1;
 
-                if (!duplicates.add(id)) {
+                if (!duplicates.add(label + ":" + queryStart + ":" + queryEnd)) {
                     continue;
                 }
 
@@ -178,7 +178,6 @@ public class BlastPlus {
                 dnaFeature.setId(id);
                 dnaFeature.setName(label);
                 dnaFeature.setType(type);
-//                dnaFeature.setIdentifier(line[3]);
                 DNAFeatureLocation location = new DNAFeatureLocation();
                 location.setGenbankStart(queryStart);
                 location.setEnd(queryEnd);
@@ -604,8 +603,8 @@ public class BlastPlus {
             if (feature.getName().trim().isEmpty())
                 continue;
 
-//            if (feature.getCuration() != null && feature.getCuration().isExclude())
-//                continue;
+            if (feature.getCuration() != null && feature.getCuration().isExclude())
+                continue;
 
             String sequenceString = feature.getSequence().trim();
             try {
