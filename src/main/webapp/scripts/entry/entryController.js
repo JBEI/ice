@@ -1416,7 +1416,7 @@ angular.module('ice.entry.controller', [])
                     $scope.selectedFeatures = [];
                     $scope.allSelected = false;
                     $scope.part = part;
-                    $scope.pagingParams = {currentPage: 0, pageSize: 10, sort: "locations[0].genbankStart", asc: true};
+                    $scope.pagingParams = {currentPage: 0, pageSize: 8, sort: "locations[0].genbankStart", asc: true};
 
                     Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
                         angular.forEach(result.features, function (feature) {
@@ -1516,12 +1516,22 @@ angular.module('ice.entry.controller', [])
                     };
 
                     $scope.saveAnnotations = function () {
+                        $scope.errorSavingAnnotations = false;
+                        $scope.savingAnnotations = true;
+
                         //url, obj, successHandler, params, errHandler
-                        Util.post("rest/parts/" + part.id + "/sequence", {features: $scope.selectedFeatures}, function (result) {
+                        Util.post("rest/parts/" + part.id + "/sequence", {features: $scope.selectedFeatures}, function () {
                             $uibModalInstance.close(true);
                         }, {add: true}, function (error) {
-
+                            $scope.savingAnnotations = false;
+                            $scope.errorSavingAnnotations = true;
                         })
+                    };
+
+                    // used to show, in table of features, the selected feature
+                    $scope.showAnnotationInTable = function (selectedFeature) {
+                        var index = $scope.annotations.features.indexOf(selectedFeature);
+                        $scope.pagingParams.currentPage = parseInt(index / $scope.pagingParams.pageSize);
                     }
                 },
                 size: 'lg',
