@@ -1,8 +1,7 @@
-package org.jbei.ice.lib.config;
+package org.jbei.ice.storage.hibernate.dao;
 
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
-import org.jbei.ice.storage.hibernate.dao.ConfigurationDAO;
 import org.jbei.ice.storage.model.Configuration;
 import org.junit.*;
 

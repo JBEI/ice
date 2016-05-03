@@ -1,11 +1,10 @@
-package org.jbei.ice.lib.folder;
+package org.jbei.ice.storage.hibernate.dao;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.dto.common.PageParameters;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
-import org.jbei.ice.storage.hibernate.dao.FolderDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Folder;
