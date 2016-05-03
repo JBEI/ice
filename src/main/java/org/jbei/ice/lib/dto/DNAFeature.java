@@ -25,6 +25,7 @@ public class DNAFeature implements IDataTransferModel {
     private List<DNAFeatureLocation> locations = new LinkedList<>();
     private String sequence;
     private List<Long> entries = new ArrayList<>();
+    private Curation curation;
 
     public DNAFeature() {
         super();
@@ -116,5 +117,13 @@ public class DNAFeature implements IDataTransferModel {
 
     public List<Long> getEntries() {
         return entries;
+    }
+
+    public Curation getCuration() {
+        return curation;
+    }
+
+    public void setCuration(Curation curation) {
+        this.curation = curation;
     }
 }

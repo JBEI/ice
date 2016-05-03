@@ -551,12 +551,24 @@ angular.module('ice.admin.controller', [])
         $scope.curationTableParams = {offset: 0, limit: 15, currentPage: 1, maxSize: 5};
         $scope.curationFeaturesParams = {offset: 0, limit: 8, currentPage: 1};
         $scope.selectedFeature = undefined;
+        $scope.dynamicPopover = {templateUrl: 'entryPopoverTemplate.html'}
 
         var getFeatures = function () {
             $scope.loadingCurationTableData = true;
             Util.get("rest/annotations", function (result) {
-                console.log(result);
                 $scope.features = result.data;
+
+                angular.forEach($scope.features, function (feature) {
+                    for (var i = 0; i < feature.features.length; i += 1) {
+                        var f = feature.features[i];
+                        if (f.curation == undefined || !f.curation.exclude) {
+                            feature.allSelected = false;
+                            return;
+                        }
+                    }
+                    feature.allSelected = true;
+                });
+
                 $scope.curationTableParams.available = result.resultCount;
                 $scope.loadingCurationTableData = false;
             }, $scope.curationTableParams)
@@ -577,13 +589,17 @@ angular.module('ice.admin.controller', [])
             $scope.curationFeaturesParams = {offset: 0, limit: 8, currentPage: 1};
         };
 
-        $scope.sortFeature = function () {
-
-        };
-
         $scope.selectAllFeatures = function (feature) {
-            feature.allSelected = !feature.allSelected;
-            $scope.selectedFeature = feature;
+            var features = [];
+            for (var i = 0; i < feature.features.length; i += 1) {
+                var f = feature.features[i];
+                features.push({id: f.id, curation: {exclude: !feature.allSelected}});
+            }
+
+            Util.update("rest/annotations", features, {}, function (result) {
+                feature.allSelected = !feature.allSelected;
+                $scope.selectedFeature = feature;
+            })
         };
 
         $scope.checkFeatureItem = function (feature, featureItem) {
@@ -596,6 +612,6 @@ angular.module('ice.admin.controller', [])
 
         $scope.rebuildFeatures = function () {
             Util.update("rest/annotations/indexes");
-
         };
-    });
+    }
+);

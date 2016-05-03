@@ -33,6 +33,7 @@ public class Annotations {
     private final SequenceFeatureDAO sequenceFeatureDAO;
     private final PermissionDAO permissionDAO;
     private final GroupDAO groupDAO;
+    private final FeatureCurationModelDAO curationModelDAO;
 
     public Annotations(String userId) {
         this.sequenceDAO = DAOFactory.getSequenceDAO();
@@ -41,6 +42,7 @@ public class Annotations {
         this.permissionDAO = DAOFactory.getPermissionDAO();
         this.groupDAO = DAOFactory.getGroupDAO();
         this.userId = userId;
+        this.curationModelDAO = DAOFactory.getFeatureCurationModelDAO();
     }
 
     public Results<DNAFeatures> get(int offset, int limit, String sort) {
@@ -59,6 +61,7 @@ public class Annotations {
             for (Feature feature : map.get(key)) {
                 DNAFeature dnaFeature = feature.toDataTransferObject();
                 dnaFeature.setSequence(feature.getSequence());
+
                 List<Long> entries = this.sequenceFeatureDAO.getEntryIdsByFeature(feature);
                 if (entries != null)
                     dnaFeature.getEntries().addAll(entries);
@@ -147,5 +150,38 @@ public class Annotations {
     protected boolean isAdministrator() {
         Account account = DAOFactory.getAccountDAO().getByEmail(this.userId);
         return account != null && account.getType() == AccountType.ADMIN;
+    }
+
+    public void curate(List<DNAFeature> features) {
+        if (!isAdministrator())
+            throw new PermissionException("Administrative privileges required to curate features");
+
+        for (DNAFeature dnaFeature : features) {
+            if (dnaFeature.getCuration() == null)
+                continue;
+
+            Feature feature = featureDAO.get(dnaFeature.getId());
+            if (feature == null)
+                continue;
+
+            FeatureCurationModel curationModel = feature.getCuration();
+
+            if (feature.getCuration() == null) {
+                if (dnaFeature.getCuration().isExclude()) {
+                    curationModel = new FeatureCurationModel();
+                    curationModel.setFeature(feature);
+                    curationModel.setExclude(true);
+                    curationModel = curationModelDAO.create(curationModel);
+                }
+            } else {
+                curationModel.setExclude(dnaFeature.getCuration().isExclude());
+                curationModel = curationModelDAO.update(curationModel);
+            }
+
+            if (curationModel != null) {
+                feature.setCuration(curationModel);
+                featureDAO.update(feature);
+            }
+        }
     }
 }
