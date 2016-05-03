@@ -122,11 +122,6 @@ angular.module('ice.admin.controller', [])
             Util.update("rest/search/indexes/lucene");
         };
 
-        $scope.rebuildFeatures = function () {
-            Util.update("rest/annotations/indexes");
-
-        };
-
         $scope.submitSetting = function (newSetting) {
             var visualKey = newSetting.key;
             newSetting.key = (newSetting.key.replace(/ /g, '_')).toUpperCase();
@@ -549,12 +544,13 @@ angular.module('ice.admin.controller', [])
                 $uibModalInstance.close(manuscript);
             }, function (error) {
                 $scope.errorDeleting = true;
-                console.log(error);
             });
         }
     })
     .controller('AdminCurationController', function ($scope, Util) {
         $scope.curationTableParams = {offset: 0, limit: 15, currentPage: 1, maxSize: 5};
+        $scope.curationFeaturesParams = {offset: 0, limit: 8, currentPage: 1};
+        $scope.selectedFeature = undefined;
 
         var getFeatures = function () {
             $scope.loadingCurationTableData = true;
@@ -570,5 +566,36 @@ angular.module('ice.admin.controller', [])
         $scope.featureListPageChanged = function () {
             $scope.curationTableParams.offset = ($scope.curationTableParams.currentPage - 1) * $scope.curationTableParams.limit;
             getFeatures();
-        }
+        };
+
+        $scope.selectFeature = function (feature) {
+            if ($scope.selectedFeature == feature)
+                $scope.selectedFeature = undefined;
+            else
+                $scope.selectedFeature = feature;
+
+            $scope.curationFeaturesParams = {offset: 0, limit: 8, currentPage: 1};
+        };
+
+        $scope.sortFeature = function () {
+
+        };
+
+        $scope.selectAllFeatures = function (feature) {
+            feature.allSelected = !feature.allSelected;
+            $scope.selectedFeature = feature;
+        };
+
+        $scope.checkFeatureItem = function (feature, featureItem) {
+            featureItem.selected = !featureItem.selected;
+            if (featureItem.selected)
+                feature.selectCount += 1;
+            else
+                feature.selectCount -= 1;
+        };
+
+        $scope.rebuildFeatures = function () {
+            Util.update("rest/annotations/indexes");
+
+        };
     });
