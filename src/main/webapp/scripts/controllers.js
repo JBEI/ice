@@ -47,11 +47,17 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         else
             folderSelected = folderSelected.id;
 
+        var searchQuery = Selection.getSearch();
+
         var selectionType;
         if (!isNaN(folderSelected))
             selectionType = 'FOLDER';
-        else
-            selectionType = 'COLLECTION';
+        else {
+            if (searchQuery)
+                selectionType = 'SEARCH';
+            else
+                selectionType = 'COLLECTION';
+        }
 
         var entrySelection = {
             all: Selection.getSelection().type == 'ALL',
@@ -59,8 +65,11 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
             selectionType: selectionType,
             entryType: Selection.getSelection().type,
             entries: [],
+            searchQuery: searchQuery,
             destination: angular.copy($scope.selectedFolders)
         };
+
+        console.log(entrySelection);
 
         var selectedEntriesObjectArray = Selection.getSelectedEntries();
         for (var i = 0; i < selectedEntriesObjectArray.length; i += 1) {
