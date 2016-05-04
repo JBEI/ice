@@ -63,7 +63,7 @@ angular.module('ice.entry.controller', [])
         var entryId = $stateParams.id;
         $scope.newComment = {samples: []};
 
-        Util.get('rest/parts/' + entryId + '/comments', function (result) {
+        Util.list('rest/parts/' + entryId + '/comments', function (result) {
             $scope.entryComments = result;
         });
 
@@ -251,12 +251,12 @@ angular.module('ice.entry.controller', [])
     })
     .controller('PartHistoryController', function ($scope, $window, $cookieStore, $stateParams, Util) {
         var entryId = $stateParams.id;
-        var sid = $cookieStore.get("sessionId");
         $scope.historyParams = {offset: 0, limit: 10, currentPage: 1, maxSize: 5};
 
         $scope.historyPageChanged = function () {
             $scope.historyParams.offset = ($scope.historyParams.currentPage - 1) * $scope.historyParams.limit;
             Util.get("rest/parts/" + entryId + "/history", function (result) {
+                console.log(result);
                 if (history)
                     $scope.history = result;
                 //$scope.history = result;
@@ -603,8 +603,16 @@ angular.module('ice.entry.controller', [])
             } else {
                 Util.post("rest/parts", $scope.part, function (result) {
                     $scope.$emit("UpdateCollectionCounts");
-                    $location.path('/entry/' + result.id);
-                    $scope.showSBOL = false;
+                    if ($scope.part.pastedSequence) {
+                        // todo : also handle linked parts
+                        Util.post("rest/parts/" + result.id + "/sequence", {sequence: $scope.part.pastedSequence}, function () {
+                            $location.path('/entry/' + result.id);
+                            $scope.showSBOL = false;
+                        })
+                    } else {
+                        $location.path('/entry/' + result.id);
+                        $scope.showSBOL = false;
+                    }
                 });
             }
         };
@@ -883,7 +891,7 @@ angular.module('ice.entry.controller', [])
     })
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
-                                             FileUploader, EntryService, EntryContextUtil, Selection,
+                                             $route, $window, FileUploader, EntryService, EntryContextUtil, Selection,
                                              Util, Authentication) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
@@ -943,7 +951,6 @@ angular.module('ice.entry.controller', [])
             modalInstance.result.then(function (part) {
                 if (part)
                     part.hasSequence = false;
-            }, function () {
             });
         };
 
@@ -976,8 +983,6 @@ angular.module('ice.entry.controller', [])
                     };
 
                     var linkPartToMainEntry = function (item) {
-                        console.log("link", item, "to", $scope.mainEntry.id);
-
                         Util.post('rest/parts/' + $scope.mainEntry.id + '/links', item, function () {
                             $scope.links.push(item);   // todo
                             $scope.addExistingPartNumber = undefined;
@@ -1402,6 +1407,148 @@ angular.module('ice.entry.controller', [])
                 $scope.entry.parameters.push(result);
                 $scope.newParameter.edit = false;
             })
-        }
+        };
+
+        $scope.showAutoAnnotationPopup = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/entry/sequence/modal-auto-annotate-sequence.html',
+                controller: function ($scope, $uibModalInstance, part, Util) {
+                    $scope.selectedFeatures = [];
+                    $scope.allSelected = false;
+                    $scope.part = part;
+                    $scope.pagingParams = {currentPage: 0, pageSize: 8, sort: "locations[0].genbankStart", asc: true};
+
+                    Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
+                        angular.forEach(result.features, function (feature) {
+                                if (feature.strand == 1)
+                                    feature.length = (feature.locations[0].end - feature.locations[0].genbankStart) + 1;
+                                else
+                                    feature.length = (feature.locations[0].genbankStart - feature.locations[0].end) + 1;
+                            }
+                        );
+                        $scope.annotations = result;
+                        $scope.pagingParams.resultCount = result.features.length;
+                        $scope.pagingParams.numberOfPages = Math.ceil(result.features.length / $scope.pagingParams.pageSize);
+                    });
+
+                    $scope.sort = function (field) {
+                        if ($scope.pagingParams.sort == field) {
+                            $scope.pagingParams.asc = !$scope.pagingParams.asc;
+                        } else {
+                            $scope.pagingParams.sort = field;
+                            $scope.pagingParams.asc = true;
+                        }
+                    };
+
+                    $scope.selectAll = function () {
+                        $scope.allSelected = !$scope.allSelected;
+                        if ($scope.allSelected) {
+                            $scope.selectedFeatures = $scope.annotations.features;
+                        } else {
+                            $scope.selectedFeatures = [];
+                        }
+                    };
+
+                    $scope.checkFeature = function (feature) {
+                        feature.selected = !feature.selected;
+                        var i = $scope.selectedFeatures.indexOf(feature);
+                        if (i == -1) {
+                            $scope.selectedFeatures.push(feature);
+                        }
+                        else {
+                            $scope.selectedFeatures.splice(i, 1);
+                        }
+
+                        $scope.allSelected = ($scope.selectedFeatures.length == $scope.annotations.features.length);
+                    };
+
+                    $scope.setClassName = function (feature) {
+                        var classPrefix = feature.strand == -1 ? "reverse-strand-" : "forward-strand-";
+                        feature.className = classPrefix + feature.type.toLowerCase();
+                    };
+
+                    $scope.getBgStyle = function (feature) {
+                        var bgColor = "#CCC";
+
+                        switch (feature.type.toLowerCase()) {
+                            case 'cds':
+                                bgColor = "#EF6500";
+                                break;
+
+                            case "misc_feature":
+                                bgColor = "#006FEF";
+                                break;
+
+                            case "promoter":
+                                bgColor = "#31B440";
+                                break;
+
+                            case "terminator":
+                                bgColor = "red";
+                                break;
+
+                            case "rep_origin":
+                                bgColor = "#878787";
+                                break;
+
+                            case "misc_marker":
+                                bgColor = "#8DCEB1";
+                                break;
+                        }
+                        return {'background-color': bgColor};
+                    };
+
+                    $scope.getFirstStyle = function (selectedFeature) {
+                        var width = (selectedFeature.locations[0].genbankStart / $scope.annotations.length) * 100;
+                        return {"width": (Math.floor(width)) + '%'};
+                    };
+
+                    $scope.getSecondStyle = function (selectedFeature) {
+                        var width = ((selectedFeature.locations[0].end - selectedFeature.locations[0].genbankStart) / $scope.annotations.length) * 100;
+                        var style = $scope.getBgStyle(selectedFeature);
+                        style.width = (Math.ceil(width)) + '%';
+                        return style;
+                    };
+
+                    $scope.getThirdStyle = function (selectedFeature) {
+                        var w = (($scope.annotations.length - selectedFeature.locations[0].end) / $scope.annotations.length) * 100;
+                        return {"width": (Math.floor(w)) + '%'};
+                    };
+
+                    $scope.saveAnnotations = function () {
+                        $scope.errorSavingAnnotations = false;
+                        $scope.savingAnnotations = true;
+
+                        //url, obj, successHandler, params, errHandler
+                        Util.post("rest/parts/" + part.id + "/sequence", {features: $scope.selectedFeatures}, function () {
+                            $uibModalInstance.close(true);
+                        }, {add: true}, function (error) {
+                            $scope.savingAnnotations = false;
+                            $scope.errorSavingAnnotations = true;
+                        })
+                    };
+
+                    // used to show, in table of features, the selected feature
+                    $scope.showAnnotationInTable = function (selectedFeature) {
+                        var index = $scope.annotations.features.indexOf(selectedFeature);
+                        $scope.pagingParams.currentPage = parseInt(index / $scope.pagingParams.pageSize);
+                    }
+                },
+                size: 'lg',
+                resolve: {
+                    part: function () {
+                        return $scope.entry;
+                    }
+                }
+                ,
+                backdrop: "static"
+            });
+
+            modalInstance.result.then(function (reload) {
+                if (reload) {
+                    $window.location.reload();
+                }
+            });
+        };
     });
 

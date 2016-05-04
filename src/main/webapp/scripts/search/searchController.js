@@ -1,13 +1,15 @@
 'use strict';
 
 angular.module('ice.search.controller', [])
-    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Search, EntryContextUtil,
-                                              Selection, WebOfRegistries, Util) {
+    .controller('SearchController', function ($scope, $http, $cookieStore, $location, EntryContextUtil,
+                                              Selection, Util) {
 
         $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
+        var query = {entryTypes: ['STRAIN', 'PLASMID', 'PART', 'ARABIDOPSIS'], queryString: undefined};
 
         $scope.$on("RunSearch", function (event, filters) {
+            query = filters;
             $scope.searchResults = undefined;
             $scope.searchFilters = filters;
             $scope.params.currentPage = 1;
@@ -24,6 +26,27 @@ angular.module('ice.search.controller', [])
                 $scope.loadingSearchResults = false;
                 $scope.searchResults = undefined;
             });
+        };
+
+        $scope.selectAllClass = function () {
+            if (Selection.allSelected()) // || $scope.folder.entries.length === Selection.getSelectedEntries().length)
+                return 'fa-check-square-o';
+
+            if (Selection.hasSelection())
+                return 'fa-minus-square';
+            return 'fa-square-o';
+        };
+
+        $scope.selectAllSearchResults = function () {
+            if (Selection.allSelected()) {
+                Selection.setTypeSelection('none');
+                Selection.setSearch(undefined);
+            }
+            else {
+                Selection.setTypeSelection('all');
+                Selection.setSearch(query);
+                console.log(query);
+            }
         };
 
         $scope.searchResultPageChanged = function () {
@@ -78,11 +101,9 @@ angular.module('ice.search.controller', [])
 
         $scope.remoteTooltipDetails = function (result) {
             $scope.currentTooltip = undefined;
-            WebOfRegistries().getToolTip({partnerId: result.partner.id, entryId: result.entryInfo.id},
+            Util.get("rest/partners/" + result.partner.id + "/entries/" + entryInfo.id + "/tooltip",
                 function (result) {
                     $scope.currentTooltip = result;
-                }, function (error) {
-                    console.error(error);
                 });
         };
 
@@ -95,11 +116,10 @@ angular.module('ice.search.controller', [])
             EntryContextUtil.setContextCallback(function (offset, callback) {
                 $scope.searchFilters.parameters.start = offset;
                 $scope.searchFilters.parameters.retrieveCount = 1;
-
-                Search().runAdvancedSearch({webSearch: $scope.searchFilters.webSearch}, $scope.searchFilters,
+                Util.post("rest/search", $scope.searchFilters,
                     function (result) {
                         callback(result.results[0].entryInfo.id);
-                    }
+                    }, {webSearch: $scope.searchFilters.webSearch}
                 );
             }, $scope.searchResults.resultCount, offset, "/search", $scope.searchResults.sortField);
 
@@ -114,6 +134,9 @@ angular.module('ice.search.controller', [])
         };
 
         $scope.searchEntrySelected = function (entry) {
+            if (Selection.isSelected(entry))
+                return true;
+
             return Selection.searchEntrySelected(entry);
         };
 

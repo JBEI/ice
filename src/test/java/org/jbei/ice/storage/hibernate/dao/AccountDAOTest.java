@@ -1,8 +1,7 @@
-package org.jbei.ice.lib.account;
+package org.jbei.ice.storage.hibernate.dao;
 
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
-import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.model.Account;
 import org.junit.*;
 

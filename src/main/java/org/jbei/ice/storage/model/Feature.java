@@ -1,16 +1,15 @@
 package org.jbei.ice.storage.model;
 
 import org.hibernate.annotations.Type;
+import org.jbei.ice.lib.dto.DNAFeature;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.storage.DataModel;
-import org.jbei.ice.storage.IDataTransferModel;
 
 import javax.persistence.*;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  * Represents a unique sequence annotation known to this instance of gd-ice.
- * <p/>
+ * <p>
  * Annotated sequences associated with entries are parsed, and their fields are saved into the
  * database as Features. These features have unique identifiers via hash. In the future, select set
  * of Features will be hand annotated with proper name, identification, genbankType, and then used
@@ -41,25 +40,21 @@ public class Feature implements DataModel {
     @Type(type = "org.hibernate.type.TextType")
     private String sequence;
 
-    @Column(name = "auto_find")
-    private int autoFind;
-
     @Column(name = "genbank_type", length = 127)
     private String genbankType;
 
     @Column(name = "uri")
     private String uri;
 
+    @OneToOne
+    private FeatureCurationModel curation;
+
     public Feature() {
-        super();
     }
 
-    public Feature(String name, String identification, String sequence, int autoFind, String genbankType) {
-        super();
-
+    public Feature(String name, String identification, String sequence, String genbankType) {
         this.name = name;
         this.identification = identification;
-        this.autoFind = autoFind;
         this.genbankType = genbankType;
         setSequence(sequence);
         hash = SequenceUtils.calculateSequenceHash(sequence);
@@ -81,15 +76,6 @@ public class Feature implements DataModel {
         this.identification = identification;
     }
 
-    @XmlTransient
-    public int getAutoFind() {
-        return autoFind;
-    }
-
-    public void setAutoFind(int autoFind) {
-        this.autoFind = autoFind;
-    }
-
     public String getGenbankType() {
         return genbankType;
     }
@@ -102,7 +88,6 @@ public class Feature implements DataModel {
         this.id = id;
     }
 
-    @XmlTransient
     public long getId() {
         return id;
     }
@@ -133,8 +118,25 @@ public class Feature implements DataModel {
         this.uri = uri;
     }
 
+    public FeatureCurationModel getCuration() {
+        return curation;
+    }
+
+    public void setCuration(FeatureCurationModel curation) {
+        this.curation = curation;
+    }
+
     @Override
-    public IDataTransferModel toDataTransferObject() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public DNAFeature toDataTransferObject() {
+        DNAFeature dnaFeature = new DNAFeature();
+        dnaFeature.setId(this.id);
+        dnaFeature.setAnnotationType(this.genbankType);
+        dnaFeature.setName(this.name);
+        dnaFeature.setUri(this.uri);
+
+        if (this.curation != null) {
+            dnaFeature.setCuration(this.curation.toDataTransferObject());
+        }
+        return dnaFeature;
     }
 }

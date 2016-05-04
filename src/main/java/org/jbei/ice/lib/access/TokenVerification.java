@@ -39,7 +39,7 @@ public class TokenVerification {
             userId = account.getEmail();
 
         if (account.getType() == AccountType.ADMIN)
-            return userId;
+            return userId;                          // todo : verify that this account actually exists on this instance
 
         return key.getOwnerEmail();
     }

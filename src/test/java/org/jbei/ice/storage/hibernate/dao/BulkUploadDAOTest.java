@@ -1,7 +1,6 @@
-package org.jbei.ice.lib.bulkupload;
+package org.jbei.ice.storage.hibernate.dao;
 
 import org.jbei.ice.storage.hibernate.HibernateUtil;
-import org.jbei.ice.storage.hibernate.dao.BulkUploadDAO;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;

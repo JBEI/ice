@@ -1,4 +1,4 @@
-<div ng-controller="AdminSampleRequestController">
+<div ng-controller="AdminSampleRequestController" style="height: 970px">
     <div class="pad_top" ng-if="sampleRequests.requests.length">
         <button type="button" ng-click="searchSampleLocations()" class="ice-button">
             Search Sample Locations
@@ -66,7 +66,7 @@
             <tbody>
             <tr data-ng-repeat="request in sampleRequests.requests" class="highlight-row-icons">
                 <td class="table-row-index">
-                    <b>{{$index+1}}</b>
+                    {{((params.currentPage - 1) * params.limit) + $index + 1 | number}}
                 </td>
 
                 <td><a ng-href="entry/{{request.partData.id}}">{{request.partData.name}}</a>
@@ -82,7 +82,7 @@
                     </span>
 
                     <div class="small" ng-if="request.growthTemperature">
-                        <span class="opacity_4">growth Temp:</span> {{request.growthTemperature}} &deg;C
+                        <span class="opacity_4">growth temp:</span> {{request.growthTemperature}} &deg;C
                     </div>
                 </td>
                 <td>
@@ -155,7 +155,7 @@
         </div>
         <div class="col-md-4" style="margin-top: 20px;"><strong class="small">
             <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(params.currentPage,
-            sampleRequests.count)}}</strong>
+            sampleRequests.count, params.limit)}}</strong>
         </div>
     </div>
 </div>

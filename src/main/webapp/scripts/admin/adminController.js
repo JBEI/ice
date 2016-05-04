@@ -61,11 +61,12 @@ angular.module('ice.admin.controller', [])
                 icon: 'fa-shopping-cart'
             },
             {
-                id: 'api-keys',
-                url: 'scripts/admin/all-api-keys.html',
-                display: 'API Keys',
+                id: 'annotations-curation',
+                url: 'scripts/admin/curation.html',
+                display: 'Annotations Curation',
+                description: 'Curate annotations for auto annotations',
                 selected: false,
-                icon: 'fa-key'
+                icon: 'fa-language'
             },
             {
                 id: 'manuscripts',
@@ -83,7 +84,7 @@ angular.module('ice.admin.controller', [])
 
             menuOptions[index].selected = true;
             $scope.adminOptionSelection = menuOptions[index].url;
-            $scope.selectedDisplay = menuOptions[index].display;
+            $scope.selectedOption = menuOptions[index];
             if (menuOptions[index].id) {
                 $location.path("admin/" + menuOptions[index].id);
             } else {
@@ -94,14 +95,14 @@ angular.module('ice.admin.controller', [])
         if (menuOption === undefined) {
             $scope.adminOptionSelection = menuOptions[0].url;
             menuOptions[0].selected = true;
-            $scope.selectedDisplay = menuOptions[0].display;
+            $scope.selectedOption = menuOptions[0];
         } else {
             menuOptions[0].selected = false;
             for (var i = 1; i < menuOptions.length; i += 1) {
                 if (menuOptions[i].id === menuOption) {
                     $scope.adminOptionSelection = menuOptions[i].url;
                     menuOptions[i].selected = true;
-                    $scope.selectedDisplay = menuOptions[i].display;
+                    $scope.selectedOption = menuOptions[i];
                     break;
                 }
             }
@@ -109,18 +110,16 @@ angular.module('ice.admin.controller', [])
             if ($scope.adminOptionSelection === undefined) {
                 $scope.adminOptionSelection = menuOptions[0].url;
                 menuOptions[0].selected = true;
-                $scope.selectedDisplay = menuOptions[0].display;
+                $scope.selectedOption = menuOptions[0];
             }
         }
 
         $scope.rebuildBlastIndex = function () {
-            Util.update("rest/search/indexes/blast", {}, {}, function (result) {
-            });
+            Util.update("rest/search/indexes/blast");
         };
 
         $scope.rebuildLuceneIndex = function () {
-            Util.update("rest/search/indexes/lucene", {}, {}, function (result) {
-            });
+            Util.update("rest/search/indexes/lucene");
         };
 
         $scope.submitSetting = function (newSetting) {
@@ -148,7 +147,7 @@ angular.module('ice.admin.controller', [])
 
         $scope.selectOptions = ['ALL', 'PENDING', 'FULFILLED', 'REJECTED'];
         $scope.maxSize = 5;
-        $scope.params = {sort: 'requested', asc: false, currentPage: 1, status: 'ALL'};
+        $scope.params = {sort: 'requested', asc: false, currentPage: 1, status: 'ALL', limit: 15};
 
         $scope.requestSamples = function () {
             $scope.loadingPage = true;
@@ -159,7 +158,7 @@ angular.module('ice.admin.controller', [])
             Util.get("rest/samples/requests", function (result) {
                 $scope.sampleRequests = result;
                 $scope.loadingPage = false;
-                $scope.indexStart = ($scope.currentPage - 1) * 15;
+                $scope.indexStart = ($scope.currentPage - 1) * $scope.params.limit;
             }, params, function (error) {
                 $scope.loadingPage = false;
             });
@@ -169,7 +168,7 @@ angular.module('ice.admin.controller', [])
         $scope.requestSamples();
 
         $scope.sampleRequestPageChanged = function () {
-            $scope.params.offset = ($scope.params.currentPage - 1) * 15;
+            $scope.params.offset = ($scope.params.currentPage - 1) * $scope.params.limit;
             if ($scope.filter) {
                 $scope.params.filter = $scope.filter;
             }
@@ -245,7 +244,7 @@ angular.module('ice.admin.controller', [])
         $scope.maxSize = 5;
         $scope.currentPage = 1;
         $scope.newProfile = {show: false};
-        $scope.userListParams = {sort: 'lastName', asc: true, currentPage: 1, status: undefined};
+        $scope.userListParams = {sort: 'lastName', asc: true, currentPage: 1, limit: 15, status: undefined};
 
         var getUsers = function () {
             $scope.loadingPage = true;
@@ -253,15 +252,12 @@ angular.module('ice.admin.controller', [])
             Util.get("rest/users", function (result) {
                 $scope.userList = result;
                 $scope.loadingPage = false;
-            }, $scope.userListParams, function (error) {
-                $scope.loadingPage = false;
-            });
+            }, $scope.userListParams);
         };
 
         getUsers();
         $scope.userListPageChanged = function () {
-            $scope.loadingPage = true;
-            $scope.userListParams.offset = ($scope.userListParams.currentPage - 1) * 15;
+            $scope.userListParams.offset = ($scope.userListParams.currentPage - 1) * $scope.userListParams.limit;
             getUsers();
         };
 
@@ -289,19 +285,6 @@ angular.module('ice.admin.controller', [])
         $scope.filterChanged = function () {
             getUsers();
         }
-    })
-    .controller('AdminApiKeysController', function ($scope, Util) {
-        $scope.apiKeys = undefined;
-
-        // retrieve existing api keys for current user
-        $scope.retrieveKeys = function () {
-            Util.get("rest/api-keys", function (result) {
-                $scope.apiKeys = result.data;
-            }, {getAll: true});
-        };
-
-        // init
-        $scope.retrieveKeys();
     })
     .controller('AdminGroupsController', function ($scope, $uibModal, Util) {
         $scope.groups = undefined;
@@ -561,7 +544,74 @@ angular.module('ice.admin.controller', [])
                 $uibModalInstance.close(manuscript);
             }, function (error) {
                 $scope.errorDeleting = true;
-                console.log(error);
             });
         }
-    });
+    })
+    .controller('AdminCurationController', function ($scope, Util) {
+        $scope.curationTableParams = {offset: 0, limit: 15, currentPage: 1, maxSize: 5};
+        $scope.curationFeaturesParams = {offset: 0, limit: 8, currentPage: 1};
+        $scope.selectedFeature = undefined;
+        $scope.dynamicPopover = {templateUrl: 'entryPopoverTemplate.html'}
+
+        var getFeatures = function () {
+            $scope.loadingCurationTableData = true;
+            Util.get("rest/annotations", function (result) {
+                $scope.features = result.data;
+
+                angular.forEach($scope.features, function (feature) {
+                    for (var i = 0; i < feature.features.length; i += 1) {
+                        var f = feature.features[i];
+                        if (f.curation == undefined || !f.curation.exclude) {
+                            feature.allSelected = false;
+                            return;
+                        }
+                    }
+                    feature.allSelected = true;
+                });
+
+                $scope.curationTableParams.available = result.resultCount;
+                $scope.loadingCurationTableData = false;
+            }, $scope.curationTableParams)
+        };
+        getFeatures();
+
+        $scope.featureListPageChanged = function () {
+            $scope.curationTableParams.offset = ($scope.curationTableParams.currentPage - 1) * $scope.curationTableParams.limit;
+            getFeatures();
+        };
+
+        $scope.selectFeature = function (feature) {
+            if ($scope.selectedFeature == feature)
+                $scope.selectedFeature = undefined;
+            else
+                $scope.selectedFeature = feature;
+
+            $scope.curationFeaturesParams = {offset: 0, limit: 8, currentPage: 1};
+        };
+
+        $scope.selectAllFeatures = function (feature) {
+            var features = [];
+            for (var i = 0; i < feature.features.length; i += 1) {
+                var f = feature.features[i];
+                features.push({id: f.id, curation: {exclude: !feature.allSelected}});
+            }
+
+            Util.update("rest/annotations", features, {}, function (result) {
+                feature.allSelected = !feature.allSelected;
+                $scope.selectedFeature = feature;
+            })
+        };
+
+        $scope.checkFeatureItem = function (feature, featureItem) {
+            featureItem.selected = !featureItem.selected;
+            if (featureItem.selected)
+                feature.selectCount += 1;
+            else
+                feature.selectCount -= 1;
+        };
+
+        $scope.rebuildFeatures = function () {
+            Util.update("rest/annotations/indexes");
+        };
+    }
+);

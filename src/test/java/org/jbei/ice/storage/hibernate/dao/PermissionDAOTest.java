@@ -1,10 +1,9 @@
-package org.jbei.ice.lib.dao.hibernate;
+package org.jbei.ice.storage.hibernate.dao;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
-import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Strain;
 import org.junit.After;

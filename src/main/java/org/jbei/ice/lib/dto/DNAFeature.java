@@ -2,6 +2,7 @@ package org.jbei.ice.lib.dto;
 
 import org.jbei.ice.storage.IDataTransferModel;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,8 +14,6 @@ import java.util.List;
  */
 public class DNAFeature implements IDataTransferModel {
 
-    private static final long serialVersionUID = 1L;
-
     private long id;
     private String type = "";
     private String name = "";
@@ -24,6 +23,9 @@ public class DNAFeature implements IDataTransferModel {
     private String identifier;
     private List<DNAFeatureNote> notes = new LinkedList<>();
     private List<DNAFeatureLocation> locations = new LinkedList<>();
+    private String sequence;
+    private List<Long> entries = new ArrayList<>();
+    private Curation curation;
 
     public DNAFeature() {
         super();
@@ -103,5 +105,25 @@ public class DNAFeature implements IDataTransferModel {
 
     public void setIdentifier(String identifier) {
         this.identifier = identifier;
+    }
+
+    public String getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(String sequence) {
+        this.sequence = sequence;
+    }
+
+    public List<Long> getEntries() {
+        return entries;
+    }
+
+    public Curation getCuration() {
+        return curation;
+    }
+
+    public void setCuration(Curation curation) {
+        this.curation = curation;
     }
 }

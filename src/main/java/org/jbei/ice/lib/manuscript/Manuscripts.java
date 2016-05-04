@@ -112,7 +112,7 @@ public class Manuscripts {
 
         // get folder
         List<Long> entryIds = this.folderDAO.getFolderContentIds(model.getFolder().getId(), null, true);
-        EntriesAsCSV entriesAsCSV = new EntriesAsCSV("GENBANK", "SBOL");
+        EntriesAsCSV entriesAsCSV = new EntriesAsCSV("GENBANK", "SBOL2");
         entriesAsCSV.setEntries(this.userId, entryIds);
         Manuscript manuscript = model.toDataTransferObject();
         manuscript.setZipFileName(entriesAsCSV.getFilePath().getFileName().toString());

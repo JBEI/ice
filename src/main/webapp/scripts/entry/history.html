@@ -1,5 +1,5 @@
 <div ng-controller="PartHistoryController">
-    <div class="row pad_top" ng-if="history.length===0">
+    <div class="row pad_top" ng-if="history.data.length===0">
         <div class="col-md-12">
             <i class="text-muted">No history available</i>
         </div>
@@ -10,11 +10,11 @@
             <table cellspacing="0" class="table table-condensed table-hover table-border-bottom font-95em">
                 <thead>
                 <tr>
-                    <td></td>
-                    <td><b>Action</b></td>
-                    <td><b>By</b></td>
-                    <td><b>On</b></td>
-                    <td>&nbsp;</td>
+                    <th></th>
+                    <th class="entry-table-header"><b>Action</b></th>
+                    <th class="entry-table-header"><b>By</b></th>
+                    <th class="entry-table-header"><b>On</b></th>
+                    <th ng-if="user.isAdmin">&nbsp;</th>
                 </tr>
                 </thead>
                 <tbody>
