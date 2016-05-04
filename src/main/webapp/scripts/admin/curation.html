@@ -1,0 +1,104 @@
+<div ng-controller="AdminCurationController" style="height: 1050px">
+    <div class="pad_top">
+        <button type="button" ng-click="rebuildFeatures()" class="ice-button">
+            Rebuild Annotations
+        </button>
+    </div>
+
+    <div ng-if="!features.length && !loadingCurationTableData" class="pad_top">
+        <i>No annotations available</i>
+    </div>
+
+    <div ng-if="features.length" class="pad_top table-border-bottom" style="width: 98%"
+         ng-class="{'opacity_4': loadingCurationTableData}">
+
+        <div ng-repeat="feature in features" style="padding: 10px; border-top: 1px solid #dedede;">
+
+            <span ng-click="selectFeature(feature)" class="cursor_pointer">
+                <i class="fa fa-fw"
+                   ng-class="{'fa-chevron-right': selectedFeature!= feature, 'fa-chevron-down': selectedFeature==feature}"></i>
+                <strong ng-class="{'line-through':feature.allSelected}">{{feature.label}}</strong>
+            </span>
+            <i class="fa fa-fw pull-right font-14em" uib-tooltip="Exclude" style="cursor: default"
+               ng-class="{'fa-square-o': !feature.allSelected, 'fa-check-square': feature.allSelected,
+               'fa-minus-square': feature.selectCount && !feature.allSelected}"
+               ng-click="selectAllFeatures(feature)"></i>
+            &nbsp;
+            <span class="badge">{{feature.features.length}}</span>
+
+            <div style="max-height: 240px;overflow-y: auto; overflow-x: hidden">
+                <table class="pad_top table table-hover table-border-bottom" ng-if="selectedFeature==feature">
+                    <thead>
+                    <tr>
+                        <th style="width: 80px"></th>
+                        <th style="width: 170px" class="entry-table-header">
+                        <span ng-click="sort('type')">
+                        <i class="fa" ng-show="curationFeaturesParams.sort == 'type'"
+                           ng-class="{'fa-caret-down':curationFeaturesParams.asc, 'fa-caret-up':!curationFeaturesParams.asc}"></i>
+                        </span>
+                        </th>
+
+                        <th></th>
+                        <th style="width: 100px; text-align: center" class="entry-table-header">
+                            <span ng-click="sort('length')">
+                            <i class="fa" ng-show="curationFeaturesParams.sort == 'length'"
+                               ng-class="{'fa-caret-down':curationFeaturesParams.asc, 'fa-caret-up':!curationFeaturesParams.asc}"></i>
+                            </span>
+                        </th>
+                        <th style="width: 95px;" class="entry-table-header">
+                        </th>
+                    </tr>
+                    </thead>
+                    <tr ng-repeat="item in feature.features">
+                        <td class="table-row-index pull-right">{{((curationFeaturesParams.currentPage - 1) *
+                            curationFeaturesParams.limit) + $index + 1 | number}}
+                        </td>
+                        <td class="font-85em" style="vertical-align: middle">
+                            <span ng-class="{'line-through': feature.allSelected || item.selected}">{{item.annotationType}}</span>
+                        </td>
+                        <td class="font-85em" style="vertical-align: middle">
+                            <script type="text/ng-template" id="entryPopoverTemplate.html">
+                                <div ng-repeat="entry in item.entries">
+                                    <a ng-href="/entry/{{entry}}" target="_blank">Part {{entry}}</a>
+                                </div>
+                            </script>
+
+                            <i uib-popover-template="dynamicPopover.templateUrl" class="cursor_pointer"
+                               ng-class="{'line-through': feature.allSelected || item.selected}" style="opacity: 0.7">
+                                <ng-pluralize count="item.entries.length" when="{'1': '1 entry', 'other':'{} entries'}">
+                                </ng-pluralize>
+                            </i>
+                        </td>
+                        <td class="font-85em" style="vertical-align: middle">
+                            <span ng-class="{'line-through': feature.allSelected
+                            || item.selected}">{{item.sequence.length | number}} bps</span>
+                        </td>
+                        <td style="vertical-align: middle">
+                            <i class="fa fa-fw font-11em pull-right"
+                               ng-class="{'fa-square-o': !item.selected && !feature.allSelected, 'fa-check-square-o': item.selected || feature.allSelected}"
+                               ng-click="checkFeatureItem(feature, item)"></i>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div ng-if="features.length > 0">
+            <div class="col-md-7" style="padding-left: 0">
+                <uib-pagination total-items="curationTableParams.available" ng-change="featureListPageChanged()"
+                                ng-model="curationTableParams.currentPage"
+                                max-size="curationTableParams.maxSize" class="pagination-sm"
+                                items-per-page="curationTableParams.limit"
+                                boundary-links="true"></uib-pagination>
+            </div>
+
+            <div class="col-md-5" style="margin-top: 25px;">
+                <strong class="small">
+                    <i ng-show="loadingCurationTableData" class="fa fa-spin fa-gear opacity_4"></i>
+                    {{pageCounts(curationTableParams.currentPage, curationTableParams.available,
+                    curationTableParams.limit)}}
+                </strong>
+            </div>
+        </div>
+    </div>
+</div>

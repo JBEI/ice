@@ -6,8 +6,10 @@ angular.module('ice.search.controller', [])
 
         $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
+        var query = {entryTypes: ['STRAIN', 'PLASMID', 'PART', 'ARABIDOPSIS'], queryString: undefined};
 
         $scope.$on("RunSearch", function (event, filters) {
+            query = filters;
             $scope.searchResults = undefined;
             $scope.searchFilters = filters;
             $scope.params.currentPage = 1;
@@ -24,6 +26,27 @@ angular.module('ice.search.controller', [])
                 $scope.loadingSearchResults = false;
                 $scope.searchResults = undefined;
             });
+        };
+
+        $scope.selectAllClass = function () {
+            if (Selection.allSelected()) // || $scope.folder.entries.length === Selection.getSelectedEntries().length)
+                return 'fa-check-square-o';
+
+            if (Selection.hasSelection())
+                return 'fa-minus-square';
+            return 'fa-square-o';
+        };
+
+        $scope.selectAllSearchResults = function () {
+            if (Selection.allSelected()) {
+                Selection.setTypeSelection('none');
+                Selection.setSearch(undefined);
+            }
+            else {
+                Selection.setTypeSelection('all');
+                Selection.setSearch(query);
+                console.log(query);
+            }
         };
 
         $scope.searchResultPageChanged = function () {
@@ -111,6 +134,9 @@ angular.module('ice.search.controller', [])
         };
 
         $scope.searchEntrySelected = function (entry) {
+            if (Selection.isSelected(entry))
+                return true;
+
             return Selection.searchEntrySelected(entry);
         };
 

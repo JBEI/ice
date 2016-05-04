@@ -25,26 +25,10 @@ public enum Visibility {
     }
 
     public static Visibility valueToEnum(Integer value) {
-        // this is for legacy reasons. Visibility was abandoned for a while
-        if (value == null)
-            return OK;
-
-        switch (value) {
-            case -1:
-                return DELETED;
-
-            case 0:
-                return DRAFT;
-
-            case 1:
-                return PENDING;
-
-            case 2:
-                return TRANSFERRED;
-
-            case 9:
-            default:
-                return OK;
+        for (Visibility visibility : Visibility.values()) {
+            if (value == visibility.getValue())
+                return visibility;
         }
+        return OK;
     }
 }

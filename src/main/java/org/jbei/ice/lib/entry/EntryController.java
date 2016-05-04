@@ -399,10 +399,11 @@ public class EntryController extends HasEntry {
                     continue;
 
                 link = ModelToInfoFactory.createTipView(linkedEntry);
-                Sequence sequence = sequenceDAO.getByEntry(linkedEntry);
-                if (sequence != null) {
-                    link.setBasePairCount(sequence.getSequence().length());
-                    link.setFeatureCount(sequence.getSequenceFeatures().size());
+                String sequenceString = sequenceDAO.getSequenceString(linkedEntry);
+
+                if (sequenceString != null) {
+                    link.setBasePairCount(sequenceString.length());
+                    link.setFeatureCount(DAOFactory.getSequenceFeatureDAO().getFeatureCount(linkedEntry));
                 }
 
                 newLinks.add(link);

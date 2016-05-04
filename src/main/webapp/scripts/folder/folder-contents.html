@@ -30,8 +30,15 @@
                                     Shared by <i>{{folder.owner.email}}</i> on <a
                                         ng-href="https://{{folder.remotePartner.url}}">{{folder.remotePartner.name}}</a>
                                 </small>
-                                <small class="font-65em" ng-if="folder.type==='SHARED'">
+                                <small class="font-65em"
+                                       ng-if="folder.type==='SHARED'  && user.email != folder.owner.email">
                                     Shared by <a ng-href="profile/{{folder.owner.id}}">{{folder.owner.firstName}}
+                                    {{folder.owner.lastName}}</a>
+                                    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+                                </small>
+                                <small class="font-65em"
+                                       ng-if="folder.type==='PRIVATE' && user.email != folder.owner.email">
+                                    <a ng-href="profile/{{folder.owner.id}}">{{folder.owner.firstName}}
                                     {{folder.owner.lastName}}</a>
                                     <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
                                 </small>
@@ -81,7 +88,7 @@
     <!--collections like 'personal', 'available' do not have a folderName-->
     <div class="row" ng-if="!folder.type">
         <div class="col-md-9 entry_general_header_td">
-            <h4><img alt="Loading..." ng-if="loadingPage" src="img/loader-mini.gif"/>
+            <h4><img alt="Loading&hellip;" ng-if="loadingPage" src="img/loader-mini.gif"/>
                 <strong style="color: #888;text-transform: uppercase;">{{selectedFolder}}</strong>
                 <!--<br><small class="font-65em">Folder Description</small>-->
             </h4>
@@ -104,7 +111,7 @@
 
     <div class="row">
         <div class="pad_top" data-ng-show='!folder'>
-            <img alt="Loading..." src="img/loader-mini.gif"/> Loading...
+            <img alt="Loading..." src="img/loader-mini.gif"/> Loading&hellip;
         </div>
 
         <div class="pad_top" ng-show="folder && folder.entries.length == 0">
@@ -176,12 +183,12 @@
                     <i ng-if="params.sort!=='created'" class="sortable fa fa-angle-down"></i>
                 </th>
                 <th uib-dropdown-toggle class="text-muted opacity_hover" uib-dropdown
-                    style="width: 14px; border-left: 1px solid #efefef; padding: 0; vertical-align: middle">
-                    <i class="fa fa-fw fa-ellipsis-v pull-right font-11em"></i>
+                    style="width: 12px; padding: 0; vertical-align: middle; opacity: 1">
+                    <i class="fa fa-fw fa-ellipsis-v"></i>
 
-                    <div class="uib-dropdown-menu pull-right" uib-dropdown-menu>
+                    <div class="uib-dropdown-menu pull-right" style="background-color: #f1f1f1" uib-dropdown-menu>
                         <strong class="pad-8 small">Show/Hide fields</strong>
-                        <table class="small no_wrap table table-condensed font-85em" style="font-weight: normal"
+                        <table class=" no_wrap table table-condensed font-75em" style="font-weight: normal"
                                stop-event="click">
                             <tr ng-click="selectedHeaderField(header, $event)" ng-repeat="header in entryHeaders">
                                 <td class="check-box-table-cell">

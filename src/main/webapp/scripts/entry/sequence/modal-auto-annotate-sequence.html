@@ -1,5 +1,5 @@
 <div class="modal-header" style="border-bottom: 0">
-    <button type="button" class="close" ng-click="$close()">&times;</button>
+    <button type="button" class="close" ng-click="$dismiss()">&times;</button>
     <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
     <i class="fa fa-fw fa-magic"></i> &nbsp;Automatic Sequence Annotation
     </span>
@@ -8,12 +8,12 @@
 <div class="modal-body">
 
     <div style="max-height: 120px;overflow-y: auto; overflow-x: hidden">
-        <table width="100%" ng-repeat="selectedFeature in selectedFeatures" style="margin-bottom: 2px"
+        <table width="99%" ng-repeat="selectedFeature in selectedFeatures" style="margin-bottom: 2px"
                ng-class="{'margin-left-4': selectedFeature.strand == -1, 'margin-right-4':selectedFeature.strand == 1}">
             <tr>
                 <td ng-style="getFirstStyle(selectedFeature)"></td>
                 <td ng-style="getSecondStyle(selectedFeature)">
-                    <div uib-tooltip="{{selectedFeature.name}}"
+                    <div uib-tooltip="{{selectedFeature.name}}" ng-click="showAnnotationInTable(selectedFeature)"
                          ng-class="[selectedFeature.className, {'reverse-strand': selectedFeature.strand == -1, 'forward-strand':selectedFeature.strand == 1}]"></div>
                 </td>
                 <td ng-style="getThirdStyle(selectedFeature)"></td>
@@ -35,7 +35,15 @@
         </tr>
     </table>
 
-    <table class="pad_top table table-hover table-border-bottom">
+    <div ng-if="!annotations" class="pad_top">
+        <img src="img/loader-mini.gif"> <i class="small text-muted">Generating annotations. Please wait&hellip;</i>
+    </div>
+
+    <div ng-if="annotations && !annotations.features.length" class="pad_top">
+        <i>No annotations found.</i>
+    </div>
+
+    <table class="pad_top table table-hover table-border-bottom" ng-if="annotations && annotations.features.length">
         <thead>
         <tr>
             <th style="width: 60px"></th>
@@ -79,7 +87,16 @@
         <tr ng-repeat="feature in annotations.features | orderBy:pagingParams.sort:!pagingParams.asc | startFrom:pagingParams.currentPage*pagingParams.pageSize | limitTo:pagingParams.pageSize ">
             <td class="table-row-index">{{(pagingParams.currentPage*pagingParams.pageSize) + $index + 1 | number}}</td>
             <td class="font-85em">{{feature.type}}</td>
-            <td class="font-85em">{{feature.name}}</td>
+            <td class="font-85em" style="vertical-align: middle">
+                {{feature.name}}
+                <i ng-click="showEntryDetails(feature, $index)" style="opacity: 0.7"
+                   class="pull-right small">
+                    <ng-pluralize count="feature.entries.length"
+                                  when="{
+                                  '1': '1 entry',
+                                  'other':'{} entries'}"></ng-pluralize>
+                </i>
+            </td>
             <td style="vertical-align:middle">
                 <span class="small text-muted pull-right">{{feature.locations[0].genbankStart | number}}</span>
             </td>
@@ -120,16 +137,18 @@
 </div>
 
 <div class="modal-footer">
-    <div class="col-sm-5 red" ng-if="errorSaving">
-        Error saving annotations
+    <div class="pull-left red" ng-if="errorSavingAnnotations && !savingAnnotations">
+        <i class="fa fa-fw fa-exclamation-triangle red"></i> Server error saving annotations
     </div>
 
-    <div>
-        <button class="btn btn-default btn-sm" ng-click="$close()">Close</button>
+    <div ng-if="!savingAnnotations">
+        <button class="btn btn-default btn-sm" ng-click="$dismiss()">Close</button>
         <button ng-show="part.canEdit" type="button" ng-disabled="!selectedFeatures.length" ng-click="saveAnnotations()"
                 class="btn btn-sm btn-primary">Save
         </button>
     </div>
 
-
+    <div ng-if="savingAnnotations">
+        <img src="img/loader-mini.gif"> Saving annotations&hellip;
+    </div>
 </div>

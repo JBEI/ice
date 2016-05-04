@@ -103,9 +103,9 @@ public class BlastPlus {
      * Run a blast query using the following output format options
      * <ul>
      * <li><code>stitle</code> - subject title</li>
-     * <li><code>qstart</code> - query start</li>
-     * <li><code>qend</code></li>
-     * <li><code>sstart</code></li>
+     * <li><code>qstart</code> - query match start index</li>
+     * <li><code>qend</code> - query match end index</li>
+     * <li><code>sstart</code> - subject match start index</li>
      * <li><code>send</code></li>
      * <li><code>sstrand</code></li>
      * <li><code>evalue</code></li>
@@ -140,6 +140,11 @@ public class BlastPlus {
      * <br>
      * Expected format for the output (per line) is
      * <code>feature_id, label, type, qstart, qend, sstart, send, sstrand</code>
+     * Therefore line[0] is feature_id, line[1] is label etc
+     * <br>Since we are only interested in features that have a full match (covers entire feature) some matches are
+     * manually eliminated. The results returned by blast can cover only a subset of the sequence. e.g.
+     * given query = 'ATGC' and feature1 = 'ATG' and feature2 = 'TATGT', the query will return
+     * 1,3,1,3 and 1,3,2,4.
      *
      * @param blastOutput blast program output
      * @return list of feature objects resulting from processing the blast output
@@ -152,23 +157,32 @@ public class BlastPlus {
             List<String[]> lines = reader.readAll();
 
             for (String[] line : lines) {
+                long id = Long.decode(line[0]);
+                String label = line[1];
                 String type = line[2];
-                String start = line[5];
-                String end = line[6];
-                if (!duplicates.add(type + ":" + start + ":" + end)) {
+                int queryStart = Integer.decode(line[3]);
+                int queryEnd = Integer.decode(line[4]);
+                int subjectStart = Integer.decode(line[5]);
+                int subjectEnd = Integer.decode(line[6]);
+                int strand = "plus".equalsIgnoreCase(line[7]) ? 1 : -1;
+
+                if (!duplicates.add(label + ":" + queryStart + ":" + queryEnd)) {
                     continue;
                 }
 
+                if (subjectStart != 1 && (queryEnd - queryStart) + 1 != subjectEnd)
+                    continue;
+
+                // check for full feature coverage
                 DNAFeature dnaFeature = new DNAFeature();
-                dnaFeature.setId(Long.decode(line[0]));
-                dnaFeature.setName(line[1]);
+                dnaFeature.setId(id);
+                dnaFeature.setName(label);
                 dnaFeature.setType(type);
-                dnaFeature.setIdentifier(line[3]);
                 DNAFeatureLocation location = new DNAFeatureLocation();
-                location.setGenbankStart(Integer.decode(start));
-                location.setEnd(Integer.decode(end));
+                location.setGenbankStart(queryStart);
+                location.setEnd(queryEnd);
                 dnaFeature.getLocations().add(location);
-                dnaFeature.setStrand("plus".equalsIgnoreCase(line[7]) ? 1 : -1);
+                dnaFeature.setStrand(strand);
                 hashMap.add(dnaFeature);
             }
 
@@ -589,8 +603,8 @@ public class BlastPlus {
             if (feature.getName().trim().isEmpty())
                 continue;
 
-//            if (feature.getCuration() != null && feature.getCuration().isExclude())
-//                continue;
+            if (feature.getCuration() != null && feature.getCuration().isExclude())
+                continue;
 
             String sequenceString = feature.getSequence().trim();
             try {

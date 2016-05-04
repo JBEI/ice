@@ -603,8 +603,16 @@ angular.module('ice.entry.controller', [])
             } else {
                 Util.post("rest/parts", $scope.part, function (result) {
                     $scope.$emit("UpdateCollectionCounts");
-                    $location.path('/entry/' + result.id);
-                    $scope.showSBOL = false;
+                    if ($scope.part.pastedSequence) {
+                        // todo : also handle linked parts
+                        Util.post("rest/parts/" + result.id + "/sequence", {sequence: $scope.part.pastedSequence}, function () {
+                            $location.path('/entry/' + result.id);
+                            $scope.showSBOL = false;
+                        })
+                    } else {
+                        $location.path('/entry/' + result.id);
+                        $scope.showSBOL = false;
+                    }
                 });
             }
         };
@@ -883,7 +891,7 @@ angular.module('ice.entry.controller', [])
     })
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
-                                             FileUploader, EntryService, EntryContextUtil, Selection,
+                                             $route, $window, FileUploader, EntryService, EntryContextUtil, Selection,
                                              Util, Authentication) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
@@ -975,8 +983,6 @@ angular.module('ice.entry.controller', [])
                     };
 
                     var linkPartToMainEntry = function (item) {
-                        console.log("link", item, "to", $scope.mainEntry.id);
-
                         Util.post('rest/parts/' + $scope.mainEntry.id + '/links', item, function () {
                             $scope.links.push(item);   // todo
                             $scope.addExistingPartNumber = undefined;
@@ -1410,7 +1416,7 @@ angular.module('ice.entry.controller', [])
                     $scope.selectedFeatures = [];
                     $scope.allSelected = false;
                     $scope.part = part;
-                    $scope.pagingParams = {currentPage: 0, pageSize: 10, sort: "locations[0].genbankStart", asc: true};
+                    $scope.pagingParams = {currentPage: 0, pageSize: 8, sort: "locations[0].genbankStart", asc: true};
 
                     Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
                         angular.forEach(result.features, function (feature) {
@@ -1510,12 +1516,22 @@ angular.module('ice.entry.controller', [])
                     };
 
                     $scope.saveAnnotations = function () {
-                        //url, obj, successHandler, params, errHandler
-                        Util.post("rest/parts/" + part.id + "/sequence", {features: $scope.selectedFeatures}, function (result) {
-                            $uibModalInstance.close();
-                        }, {add: true}, function (error) {
+                        $scope.errorSavingAnnotations = false;
+                        $scope.savingAnnotations = true;
 
+                        //url, obj, successHandler, params, errHandler
+                        Util.post("rest/parts/" + part.id + "/sequence", {features: $scope.selectedFeatures}, function () {
+                            $uibModalInstance.close(true);
+                        }, {add: true}, function (error) {
+                            $scope.savingAnnotations = false;
+                            $scope.errorSavingAnnotations = true;
                         })
+                    };
+
+                    // used to show, in table of features, the selected feature
+                    $scope.showAnnotationInTable = function (selectedFeature) {
+                        var index = $scope.annotations.features.indexOf(selectedFeature);
+                        $scope.pagingParams.currentPage = parseInt(index / $scope.pagingParams.pageSize);
                     }
                 },
                 size: 'lg',
@@ -1528,8 +1544,10 @@ angular.module('ice.entry.controller', [])
                 backdrop: "static"
             });
 
-            modalInstance.result.then(function () {
-                // todo : reload page
+            modalInstance.result.then(function (reload) {
+                if (reload) {
+                    $window.location.reload();
+                }
             });
         };
     });
