@@ -173,4 +173,25 @@ public class GroupDAO extends HibernateRepository<Group> {
             throw new DAOException(he);
         }
     }
+
+    /**
+     * Retrieves groups by type and <code>autoJoin</code> value
+     *
+     * @param type       type of groups to retrieve
+     * @param isAutoJoin auto join status
+     * @return list of groups found that match the parameters
+     * @throws DAOException on HibernateException retrieving groups
+     */
+    public List<Group> getGroupsBy(GroupType type, boolean isAutoJoin) {
+        try {
+            return currentSession().createCriteria(Group.class)
+                    .add(Restrictions.eq("type", type))
+                    .add(Restrictions.eq("autoJoin", isAutoJoin))
+                    .list();
+
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
 }

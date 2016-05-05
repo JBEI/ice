@@ -96,9 +96,6 @@ public class GroupController {
             accountController.save(memberAccount);
         }
 
-//        group.getMembers().addAll(accounts);
-//        group = dao.update(group);
-
         info = group.toDataTransferObject();
         for (Account addedAccount : group.getMembers()) {
             info.getMembers().add(addedAccount.toDataTransferObject());

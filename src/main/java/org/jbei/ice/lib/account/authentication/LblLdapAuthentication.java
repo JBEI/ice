@@ -4,7 +4,6 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.Account;
-import org.jbei.ice.storage.model.Group;
 
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -36,8 +35,6 @@ public class LblLdapAuthentication implements IAuthentication {
     public String email;
     public String organization;
     public String description;
-
-    private final static long JBEI_GROUP_ID = 1;
 
     public LblLdapAuthentication() {
         initialize();
@@ -77,16 +74,6 @@ public class LblLdapAuthentication implements IAuthentication {
         }
     }
 
-    private Group getLblJbeiGroup() {
-        Group group = null;
-        try {
-            group = DAOFactory.getGroupDAO().get(JBEI_GROUP_ID);
-        } catch (RuntimeException re) {
-            Logger.error("Error retrieving JBEI group " + JBEI_GROUP_ID, re);
-        }
-        return group;
-    }
-
     /**
      * Intended to be called when the credentials successfully authenticate with ldap.
      * Ensures an account exists with the login specified in the parameter which also belongs to the
@@ -101,13 +88,10 @@ public class LblLdapAuthentication implements IAuthentication {
         AccountController retriever = new AccountController();
         Account account = retriever.getByEmail(loginId);
 
-        Group group = getLblJbeiGroup();
-
         if (account == null) {
             account = new Account();
             Date currentTime = Calendar.getInstance().getTime();
             account.setCreationTime(currentTime);
-
             account.setEmail(getEmail().toLowerCase());
             account.setFirstName(getGivenName());
             account.setLastName(getSirName());
@@ -117,16 +101,7 @@ public class LblLdapAuthentication implements IAuthentication {
             account.setIp("");
             account.setInstitution("Lawrence Berkeley Laboratory");
             account.setModificationTime(currentTime);
-
-            if (group != null)
-                account.getGroups().add(group);
-
             account = DAOFactory.getAccountDAO().create(account);
-        } else {
-            if (group != null && !account.getGroups().contains(group)) {
-                account.getGroups().add(group);
-                DAOFactory.getAccountDAO().update(account);
-            }
         }
 
         return account;
