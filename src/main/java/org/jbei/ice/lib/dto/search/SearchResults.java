@@ -6,6 +6,7 @@ import org.jbei.ice.storage.IDataTransferModel;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Wrapper around a list of search results which also contains information about the search.
@@ -29,7 +30,7 @@ public class SearchResults implements IDataTransferModel {
         return this.results;
     }
 
-    public void setResults(LinkedList<SearchResult> results) {
+    public void setResults(List<SearchResult> results) {
         if (this.results == null)
             this.results = new LinkedList<>();
 

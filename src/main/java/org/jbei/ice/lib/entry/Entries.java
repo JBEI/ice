@@ -159,7 +159,7 @@ public class Entries extends HasEntry {
 
     protected List<Long> getSearchResults(String userId, SearchQuery searchQuery) {
         SearchController searchController = new SearchController();
-        SearchResults searchResults = searchController.runLocalSearch(userId, searchQuery);
+        SearchResults searchResults = searchController.runSearch(userId, searchQuery);
         // todo : inefficient: have search return ids only
         List<Long> results = new LinkedList<>();
         for (SearchResult result : searchResults.getResults()) {
