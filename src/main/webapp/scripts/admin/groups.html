@@ -9,7 +9,7 @@
         <i class="text-muted">No public groups available</i>
     </div>
 
-    <div class="pad_top" ng-init="groupListPageChanged()" ng-if="groups.length">
+    <div class="pad_top" ng-if="groups.length" style="width: 98%">
         <table cellspacing="0" class="table table-hover table-border-bottom" ng-class="{'opacity_4':loadingPage}">
             <thead>
             <tr>
@@ -60,21 +60,19 @@
             </tbody>
         </table>
 
-        <div>
-            <div class="col-md-5" style="padding-left: 0">
-                <uib-pagination total-items="adminGroupsPagingParams.available" ng-change="groupListPageChanged()"
-                                ng-model="adminGroupsPagingParams.currentPage"
-                                max-size="adminGroupsPagingParams.maxSize" class="pagination-sm"
-                                items-per-page="adminGroupsPagingParams.limit"
-                                boundary-links="true"></uib-pagination>
-            </div>
+        <div class="col-md-5" style="padding-left: 0">
+            <uib-pagination total-items="adminGroupsPagingParams.available" ng-change="groupListPageChanged()"
+                            ng-model="adminGroupsPagingParams.currentPage"
+                            max-size="adminGroupsPagingParams.maxSize" class="pagination-sm"
+                            items-per-page="adminGroupsPagingParams.limit"
+                            boundary-links="true"></uib-pagination>
+        </div>
 
-            <div class="col-md-7" style="margin-top: 25px;">
-                <strong class="small">
-                    <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
-                    {{pageCounts(adminGroupsPagingParams.currentPage, adminGroupsPagingParams.available)}}
-                </strong>
-            </div>
+        <div class="col-md-7" style="margin-top: 25px;">
+            <strong class="small">
+                <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
+                {{pageCounts(adminGroupsPagingParams.currentPage, adminGroupsPagingParams.available)}}
+            </strong>
         </div>
     </div>
 </div>

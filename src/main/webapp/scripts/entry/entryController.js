@@ -745,6 +745,9 @@ angular.module('ice.entry.controller', [])
             $scope.writePermissions = [];
 
             angular.forEach(result, function (item) {
+                console.log($rootScope.user.isAdmin, (item.group && !item.group.autoJoin));
+                item.canEdit = $rootScope.user.isAdmin || (item.group && !item.group.autoJoin);
+
                 if (item.type === 'WRITE_ENTRY')
                     $scope.writePermissions.push(item);
                 else
@@ -754,6 +757,7 @@ angular.module('ice.entry.controller', [])
             $scope.panes.push({title: 'Read', count: $scope.readPermissions.length, selected: true});
             $scope.panes.push({title: 'Write', count: $scope.writePermissions.length});
             $scope.activePermissions = $scope.readPermissions;
+            console.log($scope.activePermissions);
         });
 
         $scope.filter = function () {

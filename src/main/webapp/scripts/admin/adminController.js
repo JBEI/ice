@@ -301,9 +301,11 @@ angular.module('ice.admin.controller', [])
         $scope.groupListPageChanged = function () {
             Util.get("rest/groups", function (result) {
                 $scope.groups = result.data;
+                console.log(result);
                 $scope.adminGroupsPagingParams.available = result.resultCount;
             }, $scope.adminGroupsPagingParams);
         };
+        $scope.groupListPageChanged();
 
         $scope.openCreatePublicGroupModal = function (group) {
             var modalInstance = $uibModal.open({
