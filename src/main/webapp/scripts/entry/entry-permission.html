@@ -65,7 +65,7 @@
                 <span ng-if="permission.article=='GROUP'"><i class="fa fa-group permission_group"></i> {{permission.display}}</span>
                 <span ng-if="permission.article=='ACCOUNT'"><i class="fa fa-user permission_user"></i> <a
                         ng-href="profile/{{permission.articleId}}">{{permission.display}}</a></span>
-                <i ng-click="deletePermission($index, permission)" style="padding-top: 3px"
+                <i ng-if="permission.canEdit" ng-click="deletePermission($index, permission)" style="padding-top: 3px"
                    class="fa fa-times pull-right delete_icon"></i>
             </div>
             <div ng-if="activePermissions.length == 0">&nbsp;</div>
