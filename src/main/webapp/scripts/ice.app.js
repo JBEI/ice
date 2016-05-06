@@ -29,8 +29,6 @@ angular
         };
 
         Util.get("rest/config/site", function (result) {
-            console.log(result);
-
             if (!result || !result.assetName)
                 return;
 
@@ -44,8 +42,6 @@ angular
                 $rootScope.siteSettings.footer = "rest/file/" + result.assetName + "/footer.html";
 
             $rootScope.siteSettings.version = result.version;
-
-            console.log($rootScope.siteSettings);
         });
     })
 
