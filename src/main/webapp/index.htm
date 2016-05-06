@@ -80,7 +80,11 @@
 <body>
 <div id="container">
     <div id="body" ui-view></div>
-    <ng-include src="siteSettings.footer"></ng-include>
+    <div class="navbar-fixed-bottom" style="border-top: 1px solid #BBBAAA; background-color: white;">
+        <div class="container-fluid font-90em" style="margin-top: 3px">
+            <ng-include src="siteSettings.footer"></ng-include>
+        </div>
+    </div>
 </div>
 
 </body>
