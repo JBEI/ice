@@ -172,7 +172,7 @@ angular.module('ice.collection.controller', [])
             }
         });
     })
-    .controller('FolderPermissionsController', function ($scope, $http, $uibModalInstance, $cookieStore,
+    .controller('FolderPermissionsController', function ($rootScope, $scope, $http, $uibModalInstance, $cookieStore,
                                                          Util, folder) {
         $scope.folder = folder;
         $scope.userFilterInput = undefined;
@@ -181,6 +181,20 @@ angular.module('ice.collection.controller', [])
         $scope.placeHolder = "Enter user name or email";
         $scope.resultSubField = "email";
         $scope.webPartners = [];
+
+        $scope.canSetPublicPermission = undefined;
+        if (!$rootScope.settings || !$rootScope.settings['RESTRICT_PUBLIC_ENABLE']) {
+            Util.get("rest/config/RESTRICT_PUBLIC_ENABLE", function (result) {
+                if (!result)
+                    return;
+                if (!$rootScope.settings)
+                    $rootScope.settings = {};
+                $rootScope.settings['RESTRICT_PUBLIC_ENABLE'] = result.value;
+                $scope.canSetPublicPermission = (result.value == "no") || $rootScope.user.isAdmin;
+            });
+        } else {
+            $scope.canSetPublicPermission = ($rootScope.settings['RESTRICT_PUBLIC_ENABLE'].value == "no") || $rootScope.user.isAdmin;
+        }
 
         // retrieve permissions for folder
         Util.list("rest/folders/" + folder.id + "/permissions", function (result) {
@@ -705,18 +719,10 @@ angular.module('ice.collection.controller', [])
         $scope.selection = [];
         $scope.shoppingCartContents = [];
 
-        if (!$rootScope.user) {
-            Util.get("rest/accesstokens", function (result) {
-                $rootScope.user = result;
-                Util.get("rest/samples/requests/" + $rootScope.user.id, function (result) {
-                    $scope.shoppingCartContents = result.requests;
-                })
-            });
-        } else {
-            Util.get("rest/samples/requests/" + $rootScope.user.id, function (result) {
-                $scope.shoppingCartContents = result.requests;
-            })
-        }
+        // get any sample requests
+        Util.get("rest/samples/requests/" + $rootScope.user.id, function (result) {
+            $scope.shoppingCartContents = result.requests;
+        });
 
         $scope.createEntry = {
             isOpen: false
@@ -746,8 +752,23 @@ angular.module('ice.collection.controller', [])
 
         $scope.shoppingCartTemplate = "scripts/collection/popover/shopping-cart-template.html";
 
-        // remove sample request
+        $scope.entrySampleInCart = function (entry) {
+            if (!entry)
+                return false;
+
+            for (var idx = 0; idx < $scope.shoppingCartContents.length; idx += 1) {
+                if ($scope.shoppingCartContents[idx].partData.id == entry.id) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        // remove sample request from cart
         $scope.removeFromCart = function (content, entry) {
+            console.log("remote from cart", content, entry);
+
             if (entry) {
                 var partId = entry.id;
                 for (var idx = 0; idx < $scope.shoppingCartContents.length; idx += 1) {
@@ -759,13 +780,9 @@ angular.module('ice.collection.controller', [])
             }
 
             if (content) {
-                Util.remove("rest/samples/requests/" + content.id, function (result) {
+                Util.remove("rest/samples/requests/" + content.id, {}, function () {
                     var idx = $scope.shoppingCartContents.indexOf(content);
-                    if (idx >= 0) {
-                        $scope.shoppingCartContents.splice(idx, 1);
-                    } else {
-                        // todo : manual scan and remove
-                    }
+                    $scope.shoppingCartContents.splice(idx, 1);
                 });
             }
         };
@@ -778,19 +795,18 @@ angular.module('ice.collection.controller', [])
                 function (result) {
                     $scope.searchResults = result;
                     $scope.loadingSearchResults = false;
-//                $scope.$broadcast("SearchResultsAvailable", result);
                 }, {},
-                function (error) {
+                function () {
                     $scope.loadingSearchResults = false;
-//                $scope.$broadcast("SearchResultsAvailable", undefined);
                     $scope.searchResults = undefined;
-                    console.log(error);
                 }
             );
         };
 
-        $rootScope.$on('SamplesInCart', function (event, data) {
-            $scope.shoppingCartContents = data;
+        $rootScope.$on('SamplesInCart', function () {
+            Util.get("rest/samples/requests/" + $rootScope.user.id, function (result) {
+                $scope.shoppingCartContents = result.requests;
+            }, {limit: 1000, status: 'IN_CART'});
         });
     })
     .controller('CollectionDetailController', function ($scope, $cookieStore, $stateParams, $location, Util) {

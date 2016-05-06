@@ -46,7 +46,8 @@ angular.module('ice.admin.controller', [])
                 url: 'scripts/admin/wor.html',
                 display: 'Web of Registries',
                 selected: false,
-                icon: 'fa-globe'
+                icon: 'fa-globe',
+                description: 'Share/access entries with/on other ICE instances'
             },
             {id: 'users', url: 'scripts/admin/users.html', display: 'Users', selected: false, icon: 'fa-user'},
             {

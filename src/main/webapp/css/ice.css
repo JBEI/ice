@@ -1415,3 +1415,11 @@ button[disabled].action-menu:hover {
     -webkit-hyphens: auto;
     hyphens: auto;
 }
+
+.wor-admin-only {
+    padding: 3px;
+    border: 1px solid #ccc;
+    background-color: #fdfdfd;
+    margin-right: 21px;
+    cursor: pointer;
+}

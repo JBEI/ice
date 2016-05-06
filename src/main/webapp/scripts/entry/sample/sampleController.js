@@ -24,24 +24,24 @@ angular.module('ice.entry.sample.controller', [])
 
         // marks the sample object "inCart" field if the data
         // contains the entry id of current part being viewed
-        var setInCart = function (data) {
-            if (!data || !data.length) {
-                $scope.samples[0].inCart = false;
-                return;
-            }
-
-            // check specific values added to cart
-            for (var idx = 0; idx < data.length; idx += 1) {
-                // using "==" instead of "===" since partId is a string
-                if (data[idx].partData.id == partId) {
-                    $scope.samples[0].inCart = true;
-                    return;
-                }
-            }
-
-            // assuming not found
-            $scope.samples[0].inCart = false;
-        };
+        //var setInCart = function (data) {
+        //    if (!data || !data.length) {
+        //        $scope.samples[0].inCart = false;
+        //        return;
+        //    }
+        //
+        //    // check specific values added to cart
+        //    for (var idx = 0; idx < data.length; idx += 1) {
+        //        // using "==" instead of "===" since partId is a string
+        //        if (data[idx].partData.id == partId) {
+        //            $scope.samples[0].inCart = true;
+        //            return;
+        //        }
+        //    }
+        //
+        //    // assuming not found
+        //    $scope.samples[0].inCart = false;
+        //};
 
         $scope.isAddGene = function (samples) {
             if (!samples || !samples.length)
@@ -90,9 +90,8 @@ angular.module('ice.entry.sample.controller', [])
                         };
 
                         // add selection to shopping cart
-                        Util.post("rest/samples/requests", sampleSelection, function (result) {
-                            $rootScope.$emit("SamplesInCart", result);
-                            setInCart(result);
+                        Util.post("rest/samples/requests", sampleSelection, function () {
+                            $rootScope.$emit("SamplesInCart");
                             modalInstance.close('');
                         });
                     }

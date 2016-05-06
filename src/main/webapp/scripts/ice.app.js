@@ -28,23 +28,29 @@ angular
             footer: "views/footer.html"
         };
 
-        Util.list("rest/config/site", function (result) {
-            // todo : should have a separate call for version
-            for (var i = 0; i < result.length; i++) {
-                var key = result[i].key;
-                if (key == "version")
-                    $rootScope.siteSettings[result[i].key] = result[i].value;
-                else if (key == "UI_ASSET") {
-                    if (result[i].value) {
-                        var value = result[i].value;
+        Util.get("rest/config/site", function (result) {
+            if (!result || !result.assetName)
+                return;
 
-                        $rootScope.siteSettings.logo = "rest/file/" + value + "/logo.png";
-                        $rootScope.siteSettings.loginMessage = "rest/file/" + value + "/institution.html";
-                        $rootScope.siteSettings.footer = "rest/file/" + value + "/footer.html";
-                    }
-                }
-            }
+            if (result.hasLogo)
+                $rootScope.siteSettings.logo = "rest/file/" + result.assetName + "/logo.png";
+
+            if (result.hasLoginMessage)
+                $rootScope.siteSettings.loginMessage = "rest/file/" + result.assetName + "/institution.html";
+
+            if (result.hasFooter)
+                $rootScope.siteSettings.footer = "rest/file/" + result.assetName + "/footer.html";
+
+            $rootScope.siteSettings.version = result.version;
         });
+
+        // check user on rootscope (which is cleared when the page is refreshed)
+        if (!$rootScope.user) {
+            console.log("getting user from server");
+            Util.get("rest/accesstokens", function (result) {
+                $rootScope.user = result;
+            });
+        }
     })
 
     // this is run first

@@ -56,12 +56,11 @@ public class AccessTokenResource extends RestResource {
     /**
      * Retrieve account information for user referenced by session id
      *
-     * @param sessionId unique session identifier for logged in user
      * @return account information for session if session is valid, null otherwise
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response get(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
+    public Response get() {
         String userId = requireUserId();
         AccountTransfer transfer = accountController.getByEmail(userId).toDataTransferObject();
         transfer.setAdmin(accountController.isAdministrator(userId));

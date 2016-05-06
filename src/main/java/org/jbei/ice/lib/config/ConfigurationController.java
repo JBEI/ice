@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -128,19 +127,18 @@ public class ConfigurationController {
         }
     }
 
-    public List<Setting> getSiteSettings() {
+    public SiteSettings getSiteSettings() {
+        SiteSettings settings = new SiteSettings();
         String dataDirectory = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-        Path path = Paths.get(dataDirectory, UI_CONFIG_DIR);
-        ArrayList<Setting> settings = new ArrayList<>();
-        settings.add(new Setting("version", "4.9.0"));
-        Setting setting;
+        final String LOGO_NAME = "logo.png";
+        final String LOGIN_MESSAGE_FILENAME = "institution.html";
+        final String FOOTER_FILENAME = "footer.html";
 
-        // todo: also check if all the required files are in there
-        if (Files.exists(path))
-            setting = new Setting("UI_ASSET", UI_CONFIG_DIR);
-        else
-            setting = new Setting("UI_ASSET", "");
-        settings.add(setting);
+        settings.setHasLogo(Files.exists(Paths.get(dataDirectory, UI_CONFIG_DIR, LOGO_NAME)));
+        settings.setHasLoginMessage(Files.exists(Paths.get(dataDirectory, UI_CONFIG_DIR, LOGIN_MESSAGE_FILENAME)));
+        settings.setHasFooter(Files.exists(Paths.get(dataDirectory, UI_CONFIG_DIR, FOOTER_FILENAME)));
+        settings.setAssetName(UI_CONFIG_DIR);
+
         return settings;
     }
 

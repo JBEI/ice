@@ -252,6 +252,7 @@ angular.module('ice.wor.controller', [])
         //
         $scope.wor = undefined;
         $scope.isWorEnabled = false;
+        $scope.restrictPublic = false;
 
         Util.get('/rest/config/JOIN_WEB_OF_REGISTRIES', function (result) {
             var joined = result.value === 'yes';
@@ -264,6 +265,19 @@ angular.module('ice.wor.controller', [])
         Util.get("rest/web", function (result) {
             $scope.wor = result;
         }, {approved_only: false});
+
+        // get admin only setting
+        Util.get("rest/config/RESTRICT_PUBLIC_ENABLE", function (result) {
+            $scope.restrictPublic = result.value.toLowerCase() == "yes";
+        });
+
+        $scope.restrictPublicEnable = function () {
+            $scope.restrictPublic = !$scope.restrictPublic;
+            var setting = {key: 'RESTRICT_PUBLIC_ENABLE', value: $scope.restrictPublic ? "yes" : "no"};
+            Util.update("rest/config", setting, {}, function (result) {
+                console.log(result);
+            })
+        };
 
         //
         // enable or disable web of registries functionality

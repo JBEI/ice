@@ -10,6 +10,13 @@
             Add Partner
         </button>
 
+        <div class="pull-right wor-admin-only" ng-click="restrictPublicEnable()">
+            <i class="fa fa-fw fa-question-circle cursor_default"
+               uib-tooltip="Only admins can make an entry/folder public"></i>
+            <small>Admins only</small>
+            <i class="fa fa-fw" ng-class="{'fa-toggle-on green':restrictPublic, 'fa-toggle-off':!restrictPublic}"></i>
+        </div>
+
         <div class=" margin-top-10 panel panel-default font-95em" ng-show="showAddRegistryForm">
             <form class="panel-body" role="form" ng-submit="addWebPartner()">
                 <div class="col-md-2 pad-top-5">
