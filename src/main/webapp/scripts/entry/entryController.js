@@ -727,6 +727,19 @@ angular.module('ice.entry.controller', [])
         var sessionId = $cookieStore.get("sessionId");
         var panes = $scope.panes = [];
         $scope.userFilterInput = undefined;
+        $scope.canSetPublicPermission = undefined;
+        if (!$rootScope.settings || !$rootScope.settings['RESTRICT_PUBLIC_ENABLE']) {
+            Util.get("rest/config/RESTRICT_PUBLIC_ENABLE", function (result) {
+                if (!result)
+                    return;
+                if (!$rootScope.settings)
+                    $rootScope.settings = {};
+                $rootScope.settings['RESTRICT_PUBLIC_ENABLE'] = result.value;
+                $scope.canSetPublicPermission = (result.value == "no") || $rootScope.user.isAdmin;
+            });
+        } else {
+            $scope.canSetPublicPermission = (result.value == "no") || $rootScope.user.isAdmin;
+        }
 
         $scope.activateTab = function (pane) {
             angular.forEach(panes, function (pane) {
@@ -745,7 +758,6 @@ angular.module('ice.entry.controller', [])
             $scope.writePermissions = [];
 
             angular.forEach(result, function (item) {
-                console.log($rootScope.user.isAdmin, (item.group && !item.group.autoJoin));
                 item.canEdit = $rootScope.user.isAdmin || (item.group && !item.group.autoJoin);
 
                 if (item.type === 'WRITE_ENTRY')
@@ -757,7 +769,6 @@ angular.module('ice.entry.controller', [])
             $scope.panes.push({title: 'Read', count: $scope.readPermissions.length, selected: true});
             $scope.panes.push({title: 'Write', count: $scope.writePermissions.length});
             $scope.activePermissions = $scope.readPermissions;
-            console.log($scope.activePermissions);
         });
 
         $scope.filter = function () {

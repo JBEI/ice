@@ -31,6 +31,7 @@ public enum ConfigurationKey implements IDataTransferModel {
     PASSWORD_CHANGE_ALLOWED("YES"),
     PROFILE_EDIT_ALLOWED("YES"),
     JOIN_WEB_OF_REGISTRIES("NO"),
+    RESTRICT_PUBLIC_ENABLE("NO"),
     WEB_OF_REGISTRIES_MASTER("registry.jbei.org");
 
     private String defaultValue;

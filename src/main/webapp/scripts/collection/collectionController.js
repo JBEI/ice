@@ -172,7 +172,7 @@ angular.module('ice.collection.controller', [])
             }
         });
     })
-    .controller('FolderPermissionsController', function ($scope, $http, $uibModalInstance, $cookieStore,
+    .controller('FolderPermissionsController', function ($rootScope, $scope, $http, $uibModalInstance, $cookieStore,
                                                          Util, folder) {
         $scope.folder = folder;
         $scope.userFilterInput = undefined;
@@ -181,6 +181,20 @@ angular.module('ice.collection.controller', [])
         $scope.placeHolder = "Enter user name or email";
         $scope.resultSubField = "email";
         $scope.webPartners = [];
+
+        $scope.canSetPublicPermission = undefined;
+        if (!$rootScope.settings || !$rootScope.settings['RESTRICT_PUBLIC_ENABLE']) {
+            Util.get("rest/config/RESTRICT_PUBLIC_ENABLE", function (result) {
+                if (!result)
+                    return;
+                if (!$rootScope.settings)
+                    $rootScope.settings = {};
+                $rootScope.settings['RESTRICT_PUBLIC_ENABLE'] = result.value;
+                $scope.canSetPublicPermission = (result.value == "no") || $rootScope.user.isAdmin;
+            });
+        } else {
+            $scope.canSetPublicPermission = (result.value == "no") || $rootScope.user.isAdmin;
+        }
 
         // retrieve permissions for folder
         Util.list("rest/folders/" + folder.id + "/permissions", function (result) {

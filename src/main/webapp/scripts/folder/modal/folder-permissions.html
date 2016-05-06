@@ -21,7 +21,8 @@
     <span class="text-muted font-90em"
           ng-if="permissions.length">Current permissions: {{permissions.length | number}}</span>
 
-    <div class="pull-right cursor_pointer font-12em" ng-class="{'opacity_4': !folder.publicReadAccess}"
+    <div ng-if="canSetPublicPermission" class="pull-right cursor_pointer font-12em"
+         ng-class="{'opacity_4': !folder.publicReadAccess}"
          style="margin-right: 10px" ng-click="enableDisablePublicRead()">
         <i class=" fa fa-fw fa-globe"></i>
         <small>Public Access</small>
@@ -60,10 +61,8 @@
                                    <i class="fa fa-fw  font-14em"
                                       ng-class="{'fa-eye': permission.canRead, 'fa-pencil': permission.canWrite}"></i>
                                     <br>
-                                    <small class="text-muted" ng-if="permission.canWrite">can edit
-                                    </small>
-                                    <small class="text-muted" ng-if="permission.canRead">can view
-                                    </small>
+                                    <small class="text-muted" ng-if="permission.canWrite">can edit</small>
+                                    <small class="text-muted" ng-if="permission.canRead">can view</small>
                                     <!--<span class="caret" ng-if="folder.canEdit"></span>-->
                                 </span>
                             </td>
