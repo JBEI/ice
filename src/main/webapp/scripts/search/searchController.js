@@ -101,7 +101,7 @@ angular.module('ice.search.controller', [])
 
         $scope.remoteTooltipDetails = function (result) {
             $scope.currentTooltip = undefined;
-            Util.get("rest/partners/" + result.partner.id + "/entries/" + entryInfo.id + "/tooltip",
+            Util.get("rest/partners/" + result.partner.id + "/entries/" + result.entryInfo.id + "/tooltip",
                 function (result) {
                     $scope.currentTooltip = result;
                 });
