@@ -265,12 +265,13 @@ angular.module('ice.entry.controller', [])
         $scope.historyPageChanged(); // init
 
         $scope.deleteHistory = function (history) {
-            Util.remove('rest/parts/' + entryId + '/history/:historyId', {}, function (result) {
-                var idx = $scope.history.indexOf(history);
+            Util.remove('rest/parts/' + entryId + '/history/' + history.id, {}, function (result) {
+                var idx = $scope.history.data.indexOf(history);
                 if (idx == -1)
                     return;
 
-                $scope.history.splice(idx, 1);
+                $scope.history.data.splice(idx, 1);
+                $scope.history.resultCount -= 1;
             });
         }
     })
