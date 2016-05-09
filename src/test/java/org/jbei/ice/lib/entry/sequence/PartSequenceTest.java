@@ -36,13 +36,19 @@ public class PartSequenceTest {
         Assert.assertNull(sequence);
     }
 
-    @Test
-    public void testGetFeaturedSequence() throws Exception {
-
-    }
-
-    @Test
-    public void testSequenceToDNASequence() throws Exception {
-
-    }
+    private static String genbank =
+            "LOCUS       pTrc                     234 bp    DNA     linear\n" +
+                    "ACCESSION   pTrc\n" +
+                    "VERSION     pTrc.1\n" +
+                    "KEYWORDS    .\n" +
+                    "FEATURES             Location/Qualifiers\n" +
+                    "     promoter        1..234\n" +
+                    "                     /label=pTrc promoter\n" +
+                    "                     /vntifkey=\"30\"\n" +
+                    "ORIGIN\n" +
+                    "        1 cgactgcacg gtgcaccaat gcttctggcg tcaggcagcc atcggaagct gtggtatggc\n" +
+                    "       61 tgtgcaggtc gtaaatcact gcataattcg tgtcgctcaa ggcgcactcc cgttctggat\n" +
+                    "      121 aatgtttttt gcgccgacat cataacggtt ctggcaaata ttctgaaatg agctgttgac\n" +
+                    "      181 aattaatcat ccggctcgta taatgtgtgg aattgtgagc ggataacaat ttca\n" +
+                    "//";
 }

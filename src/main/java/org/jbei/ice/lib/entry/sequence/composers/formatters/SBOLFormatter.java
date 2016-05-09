@@ -6,9 +6,7 @@ import org.sbolstandard.core.SBOLDocument;
 import org.sbolstandard.core.SBOLFactory;
 import org.sbolstandard.core2.SBOLReader;
 import org.sbolstandard.core2.SBOLWriter;
-import uk.ac.ncl.intbio.core.io.CoreIoException;
 
-import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -45,7 +43,7 @@ public class SBOLFormatter extends AbstractFormatter {
             ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(out.toByteArray());
             org.sbolstandard.core2.SBOLDocument v2 = SBOLReader.read(byteArrayInputStream);
             SBOLWriter.write(v2, outputStream);
-        } catch (CoreIoException | XMLStreamException e) {
+        } catch (Exception e) {
             throw new IOException(e);
         }
     }
