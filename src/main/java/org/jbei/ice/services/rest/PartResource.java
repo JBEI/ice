@@ -325,7 +325,7 @@ public class PartResource extends RestResource {
     @Path("/{id}/history/{historyId}")
     public Response delete(@PathParam("id") final long partId,
                            @PathParam("historyId") final long historyId) {
-        final String userId = getUserId();
+        final String userId = requireUserId();
         EntryHistory entryHistory = new EntryHistory(userId, partId);
         return super.respond(entryHistory.delete(historyId));
     }

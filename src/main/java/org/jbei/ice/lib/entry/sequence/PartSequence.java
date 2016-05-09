@@ -4,8 +4,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.HasEntry;
+import org.jbei.ice.lib.parsers.GeneralParser;
+import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.*;
@@ -37,6 +40,54 @@ public class PartSequence extends HasEntry {
 
         boolean canEdit = entryAuthorization.canWriteThoroughCheck(userId, entry);
         return getFeaturedSequence(entry, canEdit);
+    }
+
+    /**
+     * Parses a sequence as a string and assigns it to the entry
+     *
+     * @param sequenceString sequence as string to be parsed
+     * @param name           optional filename
+     * @return sequence information
+     */
+    public SequenceInfo parseSequence(String sequenceString, String name) {
+//        EntryType type = EntryType.nameToType(entryType);
+
+//        Entry entry;
+//        if (StringUtils.isBlank(recordId)) {
+//            EntryCreator creator = new EntryCreator();
+//            Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+//
+//            entry = EntryFactory.buildEntry(type);
+//            String entryName = account.getFullName();
+//            String entryEmail = account.getEmail();
+//            entry.setOwner(entryName);
+//            entry.setOwnerEmail(entryEmail);
+//            entry.setCreator(entryName);
+//            entry.setCreatorEmail(entryEmail);
+//            entry.setVisibility(Visibility.DRAFT.getValue());
+//            entry = creator.createEntry(account, entry, null);
+//        } else {
+//            entry = DAOFactory.getEntryDAO().getByRecordId(recordId);
+//            if (entry == null)
+//                return null;
+//        }
+
+        // parse actual sequence
+        DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+        if (dnaSequence == null)
+            return null;
+
+        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        sequence.setSequenceUser(sequenceString);
+        sequence.setEntry(entry);
+        if (!StringUtils.isBlank(name))
+            sequence.setFileName(name);
+
+        Sequence result = sequenceDAO.saveSequence(sequence);
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
+        SequenceInfo info = result.toDataTransferObject();
+        info.setSequence(dnaSequence);
+        return info;
     }
 
     protected FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {
