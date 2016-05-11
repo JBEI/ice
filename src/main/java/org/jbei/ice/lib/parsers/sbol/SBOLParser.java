@@ -7,6 +7,7 @@ import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.genbank.IceGenbankParser;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLReader;
+import org.sbolstandard.core2.SBOLValidate;
 import org.sbolstandard.core2.SBOLWriter;
 
 import java.io.ByteArrayInputStream;
@@ -32,6 +33,7 @@ public class SBOLParser extends AbstractParser {
     public DNASequence parse(String textSequence) throws InvalidFormatParserException {
         try {
             SBOLDocument sbolDocument = SBOLReader.read(new ByteArrayInputStream(textSequence.getBytes()));
+            SBOLValidate.validateSBOL(sbolDocument, true, true, false);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             SBOLWriter.write(sbolDocument, out, "GENBANK");
             IceGenbankParser parser = new IceGenbankParser();
