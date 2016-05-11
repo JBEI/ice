@@ -2,7 +2,7 @@
 
 angular.module('ice.search.controller', [])
     .controller('SearchController', function ($scope, $http, $cookieStore, $location, EntryContextUtil,
-                                              Selection, Util) {
+                                              Selection, Util, localStorageService) {
 
         $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
@@ -154,6 +154,64 @@ angular.module('ice.search.controller', [])
             //    $scope.searchFilters.parameters.retrieveCount = 1;
 
             runAdvancedSearch($scope.searchFilters);
+        };
+
+        $scope.resultsHeaders = {
+            relevance: {field: "relevance", display: "Relevance", selected: true},
+            hasSample: {field: "hasSample", display: "Has Sample", selected: true},
+            hasSequence: {field: "hasSequence", display: "Has Sequence", selected: true},
+            //alias: {field: "alias", display: "Alias"},
+            created: {field: "creationTime", display: "Created", selected: true}
+        };
+
+        var storedFields = localStorageService.get('searchResultsHeaderFields');
+        if (!storedFields) {
+            // set default headers
+            var searchResultsHeaderFields = [];
+            for (var key in $scope.resultsHeaders) {
+                if (!$scope.resultsHeaders.hasOwnProperty(key))
+                    continue;
+
+                var header = $scope.resultsHeaders[key];
+                if (header.selected) {
+                    searchResultsHeaderFields.push(header.field);
+                }
+            }
+
+            // and store
+            localStorageService.set('searchResultsHeaderFields', searchResultsHeaderFields);
+        } else {
+            console.log($scope.resultsHeaders);
+            // set user selected
+            for (var key in $scope.resultsHeaders) {
+                if (!$scope.resultsHeaders.hasOwnProperty(key))
+                    continue;
+
+                var header = $scope.resultsHeaders[key];
+                header.selected = (storedFields.indexOf(header.field) != -1);
+            }
+        }
+
+        $scope.selectedHeaderField = function (header, $event) {
+            if ($event) {
+                $event.preventDefault();
+                $event.stopPropagation();
+            }
+            header.selected = !header.selected;
+            var storedFields = localStorageService.get('searchResultsHeaderFields');
+
+            if (header.selected) {
+                // selected by user, add to stored list
+                storedFields.push(header.field);
+                localStorageService.set('searchResultsHeaderFields', storedFields);
+            } else {
+                // not selected by user, remove from stored list
+                var i = storedFields.indexOf(header.field);
+                if (i != -1) {
+                    storedFields.splice(i, 1);
+                    localStorageService.set('searchResultsHeaderFields', storedFields);
+                }
+            }
         };
     })
     .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {

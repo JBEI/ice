@@ -13,10 +13,6 @@
             <name>BioJava repository</name>
             <url>http://www.biojava.org/download/maven/</url>
         </repository>
-        <!--<repository>-->
-        <!--<id>project.local</id>-->
-        <!--<url>file://${project.basedir}/lib</url>-->
-        <!--</repository>-->
     </repositories>
     <dependencies>
         <dependency>

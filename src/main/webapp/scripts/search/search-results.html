@@ -293,11 +293,8 @@
                     <i class="fa fa-fw cursor_default" ng-class="selectAllClass()" ng-click="selectAllSearchResults()"
                        stop-event="click"></i>
                 </th>
-                <th class="entry-table-header">
+                <th class="entry-table-header" ng-if="resultsHeaders.relevance.selected">
                     RELEVANCE
-                    <!--<i ng-if="searchFilters.parameters.sortField!=='RELEVANCE'" class="sortable fa fa-angle-down"></i>-->
-                    <!--<i ng-show="searchFilters.parameters.sortField=='RELEVANCE'" style="font-size: 14px;" class="fa opacity_4"-->
-                    <!--ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>-->
                 </th>
                 <th>
                     <span class="entry-table-header" ng-click="sortResults('TYPE')">TYPE</span>
@@ -322,15 +319,31 @@
                 <th></th>
                 <th style="width: 250px" class="entry-table-header">OWNER</th>
                 <th style="width:100px">
-                    <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
-                    <img src="img/dna.svg" width="15px" alt="has dna"/>
+                    <i class="fa fa-flask fa-fw" style="font-size: 14px" ng-if="resultsHeaders.hasSample.selected"></i>
+                    <img src="img/dna.svg" width="15px" ng-if="resultsHeaders.hasSequence.selected" alt="has dna"/>
                 </th>
-                <th>
+                <th ng-if="resultsHeaders.created.selected">
                     <span class="entry-table-header" ng-click="sortResults('created')">CREATED</span>
                     <i ng-show="searchFilters.parameters.sortField==='CREATED'" style="font-size: 14px"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':!searchFilters.parameters.sortAscending, 'fa-angle-up':searchFilters.parameters.sortAscending}"></i>
                     <i ng-if="searchFilters.parameters.sortField!=='CREATED'" class="sortable fa fa-angle-down"></i>
+                </th>
+                <th uib-dropdown-toggle class="text-muted opacity_hover" uib-dropdown
+                    style="width: 12px; padding: 0; vertical-align: middle; opacity: 1">
+                    <i class="fa fa-fw fa-ellipsis-v"></i>
+
+                    <div class="uib-dropdown-menu pull-right" style="background-color: #f1f1f1" uib-dropdown-menu>
+                        <strong class="pad-8 small">Show/Hide fields</strong>
+                        <table class=" no_wrap table table-condensed font-75em" style="font-weight: normal"
+                               stop-event="click">
+                            <tr ng-click="selectedHeaderField(header, $event)" ng-repeat="header in resultsHeaders">
+                                <td class="check-box-table-cell">
+                                    <input type="checkbox" ng-model="header.selected"> {{header.display}}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
                 </th>
             </tr>
             </thead>
@@ -341,7 +354,7 @@
                        ng-click="selectSearchResult(result.entryInfo)"
                        ng-class="{'fa-square-o':!searchEntrySelected(result.entryInfo), 'fa-check-square-o':searchEntrySelected(result.entryInfo)}"></i>
                 </td>
-                <td ng-init="val=(result.score/result.maxScore)*100">
+                <td ng-if="resultsHeaders.relevance.selected" ng-init="val=(result.score/result.maxScore)*100">
                     <div style="width: 75px">
                         <uib-progressbar animate='false' value='val' type='{{getType(val)}}'
                                          style="margin-bottom: 0"></uib-progressbar>
@@ -376,13 +389,19 @@
                     </div>
                 </td>
                 <td style="vertical-align: middle">
-                    <i ng-show="result.entryInfo.hasSample" class="fa fa-flask fa-fw"
-                       style="color: #555; font-size: 14px;"></i>
-                    <i ng-show="!result.entryInfo.hasSample" class="fa fa-square fa-fw"
-                       style="opacity: 0; font-size: 14px;"></i>
-                    <img ng-show="result.entryInfo.hasSequence" src="img/dna.svg" width="15px"/>
+                    <span ng-if="resultsHeaders.hasSample.selected">
+                        <i ng-show="result.entryInfo.hasSample" class="fa fa-flask fa-fw"
+                           style="color: #555; font-size: 14px;"></i>
+                        <i ng-show="!result.entryInfo.hasSample" class="fa fa-square fa-fw"
+                           style="opacity: 0; font-size: 14px;"></i>
+                    </span>
+                    <img ng-show="result.entryInfo.hasSequence && resultsHeaders.hasSequence.selected" src="img/dna.svg"
+                         width="15px"/>
                 </td>
-                <td style="width:110px; white-space:nowrap">{{result.entryInfo.creationTime | date:'MMM d, yyyy'}}</td>
+                <td style="width:110px; white-space:nowrap" ng-if="resultsHeaders.created.selected">
+                    {{result.entryInfo.creationTime | date:'MMM d, yyyy'}}
+                </td>
+                <td></td>
             </tr>
             </tbody>
         </table>
