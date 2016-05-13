@@ -2,7 +2,7 @@ package org.jbei.ice.lib.parsers;
 
 import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.parsers.fasta.FastaParser;
-import org.jbei.ice.lib.parsers.genbank.IceGenbankParser;
+import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.lib.parsers.sbol.SBOLParser;
 
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class GeneralParser {
     }
 
     private void registerParsers() {
-        parsers.add(new IceGenbankParser());
+        parsers.add(new GenBankParser());
         parsers.add(new FastaParser());
         parsers.add(new SBOLParser());
         parsers.add(new PlainParser());

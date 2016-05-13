@@ -4,7 +4,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
-import org.jbei.ice.lib.parsers.genbank.IceGenbankParser;
+import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.sbolstandard.core2.SBOLDocument;
 import org.sbolstandard.core2.SBOLReader;
 import org.sbolstandard.core2.SBOLValidate;
@@ -36,7 +36,7 @@ public class SBOLParser extends AbstractParser {
             SBOLValidate.validateSBOL(sbolDocument, true, true, false);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             SBOLWriter.write(sbolDocument, out, "GENBANK");
-            IceGenbankParser parser = new IceGenbankParser();
+            GenBankParser parser = new GenBankParser();
             return parser.parse(new String(out.toByteArray()));
         } catch (Exception e) {
             Logger.error(e);

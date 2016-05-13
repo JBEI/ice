@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  *
  * @author Timothy Ham
  */
-public class IceGenbankParser extends AbstractParser {
+public class GenBankParser extends AbstractParser {
 
     private static final String ICE_GENBANK_PARSER = "IceGenbank";
 
@@ -77,8 +77,8 @@ public class IceGenbankParser extends AbstractParser {
     @Override
     public DNASequence parse(final File file) throws IOException, InvalidFormatParserException {
         final String s = IOUtils.toString(new FileInputStream(file));
-        final IceGenbankParser iceGenbankParser = new IceGenbankParser();
-        return iceGenbankParser.parse(s);
+        final GenBankParser genBankParser = new GenBankParser();
+        return genBankParser.parse(s);
     }
 
     // TODO parse source feature tag with xdb_ref
@@ -247,131 +247,92 @@ public class IceGenbankParser extends AbstractParser {
         return result;
     }
 
-    private FeaturesTag parseFeaturesTag(final Tag tag) throws InvalidFormatParserException {
+    protected FeaturesTag parseFeaturesTag(final Tag tag) throws InvalidFormatParserException {
         final FeaturesTag result = new FeaturesTag();
         result.setKey(tag.getKey());
         result.setRawBody(tag.getRawBody());
 
-        int apparentFeatureKeyColumn;
         final String[] lines = tag.getRawBody().split("\n");
-        String[] chunks;
 
+        // todo : check first line should be "FEATURES....Location/Qualifiers
+
+        // check for empty features
         if (lines.length == 1) {
-            // empty features tag
             result.setValue("");
             return result;
-        } else {
-            // first line should be first feature with location
-            chunks = lines[1].trim().split(" +");
-            if (chunks.length > 1) {
-                apparentFeatureKeyColumn = lines[1].indexOf(chunks[0]);
-            } else {
-                return result; // could not determine key/value columns
-            }
         }
 
-        String line;
-        String[] chunk;
-        DNAFeature dnaFeature = null;
         StringBuilder qualifierBlock = new StringBuilder();
-        String type;
-        boolean complement;
+        DNAFeature dnaFeature = null;
 
-        for (int i = 1; i < lines.length; i++) {
-            line = lines[i];
-            if (!(' ' == (line.charAt(apparentFeatureKeyColumn)))) {
-                // start new key
-                if (dnaFeature != null) {
-                    dnaFeature = parseQualifiers(qualifierBlock.toString(), dnaFeature);
-                    result.getFeatures().add(dnaFeature);
-                }
-                // start a new feature
-                dnaFeature = new DNAFeature();
-                qualifierBlock = new StringBuilder();
-
-                /*
-                 * Locations are generated differently by different implementations. Given the
-                 * following two features: feature1: (1..3, 5..10) on the + strand |-|.|---->
-                 * feature2: (1..3, 5..10) on the - strand <-|.|----|
-                 * 
-                 * biojava follows the letter of the standard (gbrel.txt) feature1: join(1..3,5..10)
-                 * feature2: complement(join(5..10,1..3))
-                 * 
-                 * However, VectorNTI generates the following feature1: join(1..3,5..10) feature2:
-                 * complement(1..3,5..10)
-                 * 
-                 * This of course is incorrect, but we must parse them.
-                 */
-
-                // grab type, genbankStart, end, and strand
-                List<GenbankLocation> genbankLocations;
-                complement = false;
-                try {
-                    chunk = line.trim().split(" +");
-                    if (chunk.length < 2)
-                        continue;
-
-                    type = chunk[0].trim();
-                    String locationString = chunk[1].trim();
-                    /*
-                     * peak at the next line. If next line doesn't start with a key, append next
-                     * line to locationString
-                     */
-                    while (true) {
-                        final String nextLine = lines[i + 1].trim();
-                        if (nextLine.startsWith("/")) {
-                            break;
-                        } else {
-                            i++;
-                            line = lines[i];
-                            locationString += line.trim();
-                        }
-                    }
-
-                    boolean reversedLocations = false;
-                    if (locationString.startsWith("complement(join")) {
-                        reversedLocations = true; // standard compliant complement(join(location, location))
-                    }
-                    if (locationString.startsWith("complement")) {
-                        complement = true;
-                        locationString = locationString.trim();
-                        locationString = locationString.substring(11, locationString.length() - 1)
-                                .trim();
-                    }
-
-                    genbankLocations = parseGenbankLocation(locationString);
-                    if (reversedLocations) {
-                        Collections.reverse(genbankLocations);
-                    }
-                } catch (final NumberFormatException e) {
-                    getErrors().add("Could not parse feature " + line);
-                    continue;
-                }
-
-                final LinkedList<DNAFeatureLocation> dnaFeatureLocations = new LinkedList<>();
-                for (final GenbankLocation genbankLocation : genbankLocations) {
-                    final DNAFeatureLocation dnaFeatureLocation = new DNAFeatureLocation(
-                            genbankLocation.getGenbankStart(), genbankLocation.getEnd());
-                    dnaFeatureLocations.add(dnaFeatureLocation);
-                }
-
-                dnaFeature.getLocations().addAll(dnaFeatureLocations);
-                dnaFeature.setType(type);
-
-                if (complement) {
-                    dnaFeature.setStrand(-1);
-                } else {
-                    dnaFeature.setStrand(1);
-                }
-            } else {
+        for (int i = 1; i < lines.length; i += 1) {
+            String line = lines[i].trim();
+            boolean isQualifier = (line.startsWith("/") && line.contains("="));
+            if (isQualifier) {
+                if (!qualifierBlock.toString().isEmpty() && !qualifierBlock.toString().endsWith("\n"))  // and is not an empty string
+                    qualifierBlock.append("\n");
                 qualifierBlock.append(line);
-                qualifierBlock.append("\n");
+//                .append("\n");
+                continue;
+            }
+
+            // expect format to be TYPE\\s+location
+            String[] chunks = line.trim().split("\\s+");
+            if (chunks.length < 2) {
+                qualifierBlock.append(line);
+                continue;
+            }
+
+            if (dnaFeature != null) {
+                dnaFeature = parseQualifiers(qualifierBlock.toString(), dnaFeature);
+                result.getFeatures().add(dnaFeature);
+                qualifierBlock = new StringBuilder();
+            }
+
+            dnaFeature = new DNAFeature();
+            String type = chunks[0].trim();
+
+            // get location string
+            String locationString = chunks[1].trim();
+            boolean reversedLocations = false;
+            if (locationString.startsWith("complement(join")) {
+                reversedLocations = true; // standard compliant complement(join(location, location))
+            }
+
+            boolean complement = false;
+            if (locationString.startsWith("complement")) {
+                complement = true;
+                locationString = locationString.trim();
+                locationString = locationString.substring(11, locationString.length() - 1).trim();
+            }
+
+            // get location from string
+            List<GenbankLocation> genbankLocations = parseGenbankLocation(locationString);
+            if (reversedLocations) {
+                Collections.reverse(genbankLocations);
+            }
+
+            final LinkedList<DNAFeatureLocation> dnaFeatureLocations = new LinkedList<>();
+            for (final GenbankLocation genbankLocation : genbankLocations) {
+                final DNAFeatureLocation dnaFeatureLocation = new DNAFeatureLocation(
+                        genbankLocation.getGenbankStart(), genbankLocation.getEnd());
+                dnaFeatureLocations.add(dnaFeatureLocation);
+            }
+
+            dnaFeature.getLocations().addAll(dnaFeatureLocations);
+            dnaFeature.setType(type);
+
+            if (complement) {
+                dnaFeature.setStrand(-1);
+            } else {
+                dnaFeature.setStrand(1);
             }
         }
-        // last qualifier
-        dnaFeature = parseQualifiers(qualifierBlock.toString(), dnaFeature);
-        result.getFeatures().add(dnaFeature);
 
+        if (dnaFeature != null) {
+            dnaFeature = parseQualifiers(qualifierBlock.toString(), dnaFeature);
+            result.getFeatures().add(dnaFeature);
+        }
         return result;
     }
 
