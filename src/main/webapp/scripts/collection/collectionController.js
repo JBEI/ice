@@ -720,9 +720,11 @@ angular.module('ice.collection.controller', [])
         $scope.shoppingCartContents = [];
 
         // get any sample requests
-        Util.get("rest/samples/requests/" + $rootScope.user.id, function (result) {
-            $scope.shoppingCartContents = result.requests;
-        });
+        if ($rootScope.user) {
+            Util.get("rest/samples/requests/" + $rootScope.user.id, function (result) {
+                $scope.shoppingCartContents = result.requests;
+            });
+        }
 
         $scope.createEntry = {
             isOpen: false
