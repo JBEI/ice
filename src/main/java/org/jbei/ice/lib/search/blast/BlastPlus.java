@@ -546,6 +546,8 @@ public class BlastPlus {
         int offset = 0;
         while (offset < count) {
             Sequence sequence = sequenceDAO.getSequence(offset++);
+            if (sequence == null || sequence.getEntry() == null)
+                continue;
             long id = sequence.getEntry().getId();
 
             String sequenceString = "";
