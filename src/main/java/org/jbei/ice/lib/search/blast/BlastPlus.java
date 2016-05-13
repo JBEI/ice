@@ -169,6 +169,10 @@ public class BlastPlus {
             List<String[]> lines = reader.readAll();
 
             for (String[] line : lines) {
+                if (line.length != 8) {
+                    continue;
+                }
+
                 long id = Long.decode(line[0]);
                 String label = line[1];
                 String type = line[2];
