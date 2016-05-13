@@ -22,13 +22,6 @@ import java.io.ByteArrayOutputStream;
  */
 public class SBOLParser extends AbstractParser {
 
-    private static final String SBOL_PARSER = "SBOL";
-
-    @Override
-    public String getName() {
-        return SBOL_PARSER;
-    }
-
     @Override
     public DNASequence parse(String textSequence) throws InvalidFormatParserException {
         try {
@@ -42,10 +35,5 @@ public class SBOLParser extends AbstractParser {
             Logger.error(e);
             throw new InvalidFormatParserException("Could not parse SBOL file!", e);
         }
-    }
-
-    @Override
-    public DNASequence parse(byte[] bytes) throws InvalidFormatParserException {
-        return parse(new String(bytes));
     }
 }

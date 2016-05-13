@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.parsers.genbank;
 
-import org.apache.commons.io.IOUtils;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
@@ -8,9 +7,6 @@ import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,8 +20,6 @@ import java.util.regex.Pattern;
  * @author Timothy Ham
  */
 public class GenBankParser extends AbstractParser {
-
-    private static final String ICE_GENBANK_PARSER = "IceGenbank";
 
     // genbank tags
     public static final String LOCUS_TAG = "LOCUS";
@@ -60,25 +54,8 @@ public class GenBankParser extends AbstractParser {
 
     private List<String> errors = new ArrayList<>();
 
-    @Override
-    public String getName() {
-        return ICE_GENBANK_PARSER;
-    }
-
     public List<String> getErrors() {
         return errors;
-    }
-
-    @Override
-    public DNASequence parse(final byte[] bytes) throws InvalidFormatParserException {
-        return parse(new String(bytes));
-    }
-
-    @Override
-    public DNASequence parse(final File file) throws IOException, InvalidFormatParserException {
-        final String s = IOUtils.toString(new FileInputStream(file));
-        final GenBankParser genBankParser = new GenBankParser();
-        return genBankParser.parse(s);
     }
 
     // TODO parse source feature tag with xdb_ref
