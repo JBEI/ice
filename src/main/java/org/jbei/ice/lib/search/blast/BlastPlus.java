@@ -36,7 +36,9 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Blast Search functionality for BLAST+
+ * Enables (command line) interaction with BLAST+
+ * <p>
+ * Current usage is for blast searches and auto-annotation support
  *
  * @author Hector Plahar
  */
@@ -48,7 +50,18 @@ public class BlastPlus {
     private static final String LOCK_FILE_NAME = "write.lock";
     private static final String AUTO_ANNOTATION_FOLDER_NAME = "auto-annotation";
 
-    public static String runBlastQuery(String dbFolder, BlastQuery query, String... options) throws BlastException {
+    /**
+     * Runs a blast query in the specified database folder
+     * using the specified options
+     *
+     * @param dbFolder location of the blast database
+     * @param query    wrapper around blast query including options such as blast type
+     * @param options  command line options for blast
+     * @return results of the query run. An empty string is returned if the specified blast database does not exist
+     * in the ice data directory
+     * @throws BlastException on exception running blast on the command line
+     */
+    static String runBlastQuery(String dbFolder, BlastQuery query, String... options) throws BlastException {
         try {
             String command = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
                     + query.getBlastProgram().getName();
@@ -65,8 +78,7 @@ public class BlastPlus {
             System.arraycopy(options, 0, blastCommand, 3, options.length);
 
             Process process = Runtime.getRuntime().exec(blastCommand);
-            ProcessResultReader reader = new ProcessResultReader(process.getInputStream(), "STD_OUT");
-            ProcessResultReader error = new ProcessResultReader(process.getInputStream(), "STD_ERR");
+            ProcessResultReader reader = new ProcessResultReader(process.getInputStream());
             reader.start();
             BufferedWriter programInputWriter = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 
@@ -82,11 +94,11 @@ public class BlastPlus {
                     return reader.toString();
 
                 case 1:
-                    Logger.error("Error in query sequence(s) or BLAST options: " + error.toString());
+                    Logger.error("Error in query sequence(s) or BLAST options");
                     break;
 
                 case 2:
-                    Logger.error("Error in BLAST database: " + error.toString());
+                    Logger.error("Error in BLAST database");
                     break;
 
                 default:
@@ -193,6 +205,12 @@ public class BlastPlus {
         }
     }
 
+    /**
+     * Parses a blast output that represents a single hit
+     *
+     * @param line blast output for hit
+     * @return object wrapper around details of the hit
+     */
     private static SearchResult parseBlastOutputLine(String[] line) {
 
         // extract part information
@@ -214,6 +232,13 @@ public class BlastPlus {
         return searchResult;
     }
 
+    /**
+     * Processes the result of a blast search
+     *
+     * @param blastOutput result output from running blast on the command line
+     * @param queryLength length of query sequence
+     * @return mapping of entryId to search result object containing information about the blast search for that particular hit
+     */
     private static LinkedHashMap<String, SearchResult> processBlastOutput(String blastOutput, int queryLength) {
         LinkedHashMap<String, SearchResult> hashMap = new LinkedHashMap<>();
 
@@ -239,6 +264,12 @@ public class BlastPlus {
         return hashMap;
     }
 
+    /**
+     * Checks if a database exists for blast searches exists by checking for the existence of
+     * the blast database name (currently <code>ice</code>) with <code>.nsq</code> extension
+     *
+     * @return true is a blast database is found, false otherwise
+     */
     private static boolean blastDatabaseExists() {
         String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
         Path path = FileSystems.getDefault().getPath(dataDir, BLAST_DB_FOLDER, BLAST_DB_NAME + ".nsq");
@@ -623,14 +654,15 @@ public class BlastPlus {
         }
     }
 
+    /**
+     * Thread that reads the result of a command line process execution
+     */
     static class ProcessResultReader extends Thread {
         final InputStream inputStream;
-        final String type;
         final StringBuilder sb;
 
-        ProcessResultReader(final InputStream is, String type) {
+        ProcessResultReader(final InputStream is) {
             this.inputStream = is;
-            this.type = type;
             this.sb = new StringBuilder();
         }
 

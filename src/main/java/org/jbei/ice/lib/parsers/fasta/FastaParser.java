@@ -4,7 +4,6 @@ import org.biojava.bio.BioException;
 import org.biojavax.bio.seq.RichSequence;
 import org.biojavax.bio.seq.RichSequence.IOTools;
 import org.biojavax.bio.seq.RichSequenceIterator;
-import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
@@ -19,12 +18,6 @@ import java.util.LinkedList;
  * @author Zinovii Dmytriv, Timothy Ham
  */
 public class FastaParser extends AbstractParser {
-    private static final String FASTA_PARSER = "FASTA";
-
-    @Override
-    public String getName() {
-        return FASTA_PARSER;
-    }
 
     @Override
     public FeaturedDNASequence parse(String textSequence) throws InvalidFormatParserException {
@@ -48,10 +41,5 @@ public class FastaParser extends AbstractParser {
         }
 
         return sequence;
-    }
-
-    @Override
-    public DNASequence parse(byte[] bytes) throws InvalidFormatParserException {
-        return parse(new String(bytes));
     }
 }
