@@ -1434,6 +1434,7 @@ angular.module('ice.entry.controller', [])
                     $scope.part = part;
                     $scope.pagingParams = {currentPage: 0, pageSize: 8, sort: "locations[0].genbankStart", asc: true};
 
+                    // retrieves "suggested" annotations for current entry
                     Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
                         angular.forEach(result.features, function (feature) {
                                 if (feature.strand == 1)
@@ -1447,6 +1448,10 @@ angular.module('ice.entry.controller', [])
                         $scope.pagingParams.numberOfPages = Math.ceil(result.features.length / $scope.pagingParams.pageSize);
                     });
 
+                    /**
+                     * Support for sorting
+                     * @param field field to sort on
+                     */
                     $scope.sort = function (field) {
                         if ($scope.pagingParams.sort == field) {
                             $scope.pagingParams.asc = !$scope.pagingParams.asc;
@@ -1456,6 +1461,9 @@ angular.module('ice.entry.controller', [])
                         }
                     };
 
+                    /**
+                     * Select all features on the UI
+                     */
                     $scope.selectAll = function () {
                         $scope.allSelected = !$scope.allSelected;
                         if ($scope.allSelected) {
@@ -1465,6 +1473,10 @@ angular.module('ice.entry.controller', [])
                         }
                     };
 
+                    /**
+                     * Check or un-check (on UI) specific feature
+                     * @param feature
+                     */
                     $scope.checkFeature = function (feature) {
                         feature.selected = !feature.selected;
                         var i = $scope.selectedFeatures.indexOf(feature);
@@ -1483,6 +1495,11 @@ angular.module('ice.entry.controller', [])
                         feature.className = classPrefix + feature.type.toLowerCase();
                     };
 
+                    /**
+                     *  Determine background color based on feature type
+                     * @param feature
+                     * @returns {{background-color: string}}
+                     */
                     $scope.getBgStyle = function (feature) {
                         var bgColor = "#CCC";
 
