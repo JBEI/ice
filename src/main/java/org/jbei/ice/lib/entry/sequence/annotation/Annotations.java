@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * ICE Annotations with support for generation potential annotations for a specified entry
+ * ICE Annotations with support for generating potential annotations for a specified entry
  *
  * @author Hector Plahar
  */
@@ -73,7 +73,10 @@ public class Annotations {
     }
 
     /**
-     * Auto generate annotations
+     * Auto generate annotations for specified entry
+     *
+     * @param entryId unique (local) identifier for entry
+     * @return wrapper around generated annotations, if any are found
      */
     public FeaturedDNASequence generate(long entryId) {
         EntryDAO entryDAO = DAOFactory.getEntryDAO();
@@ -120,6 +123,13 @@ public class Annotations {
         }
     }
 
+    /**
+     * Using existing and potentially curated annotations on this ICE instance,
+     * this generates matching features for the passed sequence
+     *
+     * @param sequence wrapper around dna sequence
+     * @return wrapper around passed sequence and now with list if annotations for that sequence
+     */
     public FeaturedDNASequence generate(FeaturedDNASequence sequence) {
         BlastQuery query = new BlastQuery();
         query.setSequence(sequence.getSequence());
@@ -152,6 +162,12 @@ public class Annotations {
         return account != null && account.getType() == AccountType.ADMIN;
     }
 
+    /**
+     * Curates a specified set of annotations. The curation properties are contained in each annotation (feature)
+     * object
+     *
+     * @param features set of features to be curated
+     */
     public void curate(List<DNAFeature> features) {
         if (!isAdministrator())
             throw new PermissionException("Administrative privileges required to curate features");
