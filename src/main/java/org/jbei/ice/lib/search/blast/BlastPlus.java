@@ -333,6 +333,15 @@ public class BlastPlus {
         FileUtils.deleteQuietly(lockFile);
     }
 
+    /**
+     * Re-builds the blast database, using a lock file to prevent concurrent rebuilds.
+     * The lock file has a "life-span" of 1 day after which it is deleted.
+     * <p>
+     * Also, a rebuild can be forced even if a lock file exists which is less than a day old
+     *
+     * @param force set to true to force a rebuild. Use with caution
+     * @throws BlastException
+     */
     public static void rebuildDatabase(boolean force) throws BlastException {
         String blastInstallDir = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR);
         if (StringUtils.isEmpty(blastInstallDir)) {
@@ -471,13 +480,15 @@ public class BlastPlus {
     }
 
     /**
-     * Build the blast database.
+     * Build the blast search or sequence database database.
      * <p>
      * <p/>First dump the sequences from the sql database into a fasta file, than create the blast
      * database by calling formatBlastDb.
      *
      * @param blastInstall the installation directory path for blast
      * @param blastDb      folder location for the blast database
+     * @param isFeatures   determines which database to rebuild. True for sequence features database, false for
+     *                     blast search database
      * @throws BlastException
      */
     private static void rebuildSequenceDatabase(Path blastInstall, Path blastDb, boolean isFeatures) throws BlastException {
@@ -623,6 +634,13 @@ public class BlastPlus {
         }
     }
 
+    /**
+     * Writes the fasta file (part of the blast database) that contains all the features that exists on this system.
+     * This routine is expected to be called as part of the blast sequence feature database rebuild
+     *
+     * @param writer writer for fasta file
+     * @throws BlastException
+     */
     private static void writeBigFastaFileForFeatures(BufferedWriter writer) throws BlastException {
         FeatureDAO featureDAO = DAOFactory.getFeatureDAO();
         long count = featureDAO.getFeatureCount();
