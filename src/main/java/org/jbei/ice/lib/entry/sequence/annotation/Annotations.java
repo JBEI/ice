@@ -34,6 +34,8 @@ public class Annotations {
     private final PermissionDAO permissionDAO;
     private final GroupDAO groupDAO;
     private final FeatureCurationModelDAO curationModelDAO;
+    private final EntryDAO entryDAO;
+    private final AccountDAO accountDAO;
 
     public Annotations(String userId) {
         this.sequenceDAO = DAOFactory.getSequenceDAO();
@@ -43,6 +45,8 @@ public class Annotations {
         this.groupDAO = DAOFactory.getGroupDAO();
         this.userId = userId;
         this.curationModelDAO = DAOFactory.getFeatureCurationModelDAO();
+        this.entryDAO = DAOFactory.getEntryDAO();
+        this.accountDAO = DAOFactory.getAccountDAO();
     }
 
     public Results<DNAFeatures> get(int offset, int limit, String sort) {
@@ -79,10 +83,9 @@ public class Annotations {
      * @return wrapper around generated annotations, if any are found
      */
     public FeaturedDNASequence generate(long entryId) {
-        EntryDAO entryDAO = DAOFactory.getEntryDAO();
         Entry entry = entryDAO.get(entryId);
         if (entry == null)
-            throw new IllegalArgumentException("Could not retrieve entry for " + entryId);
+            throw new IllegalArgumentException("Could not retrieve entry with id \"" + entryId + "\"");
 
         Sequence sequence = sequenceDAO.getByEntry(entry);
         if (sequence == null)
@@ -97,7 +100,7 @@ public class Annotations {
             FeaturedDNASequence dnaSequence = new FeaturedDNASequence();
 
             // check permissions
-            Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+            Account account = accountDAO.getByEmail(userId);
             Set<Group> groups = new HashSet<>(this.groupDAO.retrieveMemberGroups(account));
 
             for (DNAFeature dnaFeature : features) {
