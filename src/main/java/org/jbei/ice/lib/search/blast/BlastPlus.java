@@ -138,7 +138,14 @@ public class BlastPlus {
         return processBlastOutput(result, query.getSequence().length());
     }
 
-    public static List<DNAFeature> runCheckFeatures(BlastQuery query) throws BlastException {
+    /**
+     * Run a blast query against the sequence features blast database.
+     *
+     * @param query wrapper around sequence to blast
+     * @return list of DNA features that match the query according to the parameters
+     * @throws BlastException on null result or exception processing the result
+     */
+    public static List<DNAFeature> runCheckFeatures(BlastQuery query) throws BlastException {   // todo add evalue
         String result = runBlastQuery(AUTO_ANNOTATION_FOLDER_NAME, query, "-perc_identity", "100",
                 "-outfmt", "10 stitle qstart qend sstart send sstrand");
         if (result == null)
@@ -283,7 +290,7 @@ public class BlastPlus {
     public static void rebuildFeaturesBlastDatabase(String featureFolder) throws IOException {
         String blastInstallDir = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR);
         if (StringUtils.isEmpty(blastInstallDir)) {
-            Logger.warn("Blast install directory not available. Aborting blast rebuild");
+            Logger.warn("Blast install directory not available. Aborting blast features rebuild");
             return;
         }
         Path blastDir = Paths.get(blastInstallDir);
@@ -310,7 +317,7 @@ public class BlastPlus {
                 try {
                     Files.createDirectories(blastFolder);
                 } catch (Exception e) {
-                    Logger.warn("Could not create features blast folder. Create it manually or all blast runs will fail");
+                    Logger.warn("Could not create features blast folder. Create it manually or all blast features runs will fail");
                     return;
                 }
             }
@@ -655,7 +662,8 @@ public class BlastPlus {
         while (offset < count) {
             List<Feature> features = featureDAO.getFeatures(offset++, 1);
             Feature feature = features.get(0);
-            if (feature.getName().trim().isEmpty())
+            String featureName = feature.getName();
+            if (featureName == null || featureName.trim().isEmpty())
                 continue;
 
             if (feature.getCuration() != null && feature.getCuration().isExclude())
