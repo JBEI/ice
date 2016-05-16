@@ -4,7 +4,6 @@ import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
-import org.jbei.ice.lib.utils.SequenceFeatureCollection;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.storage.DataModel;
@@ -12,6 +11,7 @@ import org.jbei.ice.storage.hibernate.bridge.EntryBooleanPropertiesBridge;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -74,7 +74,7 @@ public class Sequence implements DataModel {
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "sequence")
     @OrderBy("id")
-    private Set<SequenceFeature> sequenceFeatures = new SequenceFeatureCollection();
+    private Set<SequenceFeature> sequenceFeatures = new HashSet<>();
 
     public Sequence() {
     }
@@ -150,18 +150,18 @@ public class Sequence implements DataModel {
 
     public Set<SequenceFeature> getSequenceFeatures() {
 
-        /* Hibernate hack.
-        To use costum collections with Hibernate, I have to implement all sorts
-        of hibernate methods to do this correctly. Instead, I just replace this set
-        when I do a get method here with the SequenceFeatureCollection.
-        */
-        if (sequenceFeatures instanceof SequenceFeatureCollection) {
-
-        } else {
-            SequenceFeatureCollection newSequenceFeatures = new SequenceFeatureCollection();
-            newSequenceFeatures.addAll(sequenceFeatures);
-            sequenceFeatures = newSequenceFeatures;
-        }
+//        /* Hibernate hack.
+//        To use custom collections with Hibernate, I have to implement all sorts
+//        of hibernate methods to do this correctly. Instead, I just replace this set
+//        when I do a get method here with the SequenceFeatureCollection.
+//        */
+//        if (sequenceFeatures instanceof SequenceFeatureCollection) {
+//
+//        } else {
+//            SequenceFeatureCollection newSequenceFeatures = new SequenceFeatureCollection();
+//            newSequenceFeatures.addAll(sequenceFeatures);
+//            sequenceFeatures = newSequenceFeatures;
+//        }
         return sequenceFeatures;
     }
 

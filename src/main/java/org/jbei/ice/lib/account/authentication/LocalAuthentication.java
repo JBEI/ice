@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.account.authentication;
 
 import org.jbei.ice.lib.account.AccountUtils;
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.Account;
 
@@ -11,8 +10,6 @@ import org.jbei.ice.storage.model.Account;
  * @author Hector Plahar
  */
 public class LocalAuthentication implements IAuthentication {
-
-    private static final String DEPRECATED_SECRET_KEY = "o6-v(yay5w@0!64e6-+ylbhcd9g03rv#@ezqh7axchds=q=$n+";
 
     public LocalAuthentication() {
     }
@@ -42,27 +39,6 @@ public class LocalAuthentication implements IAuthentication {
         }
 
         // first check using the stronger encryption scheme
-        boolean valid = account.getPassword().equals(AccountUtils.encryptNewUserPassword(password, account.getSalt()));
-        if (valid)
-            return valid;
-
-        // invalid check for deprecated salt using older encryption scheme
-        valid = account.getPassword().equals(AccountUtils.encryptPassword(password, DEPRECATED_SECRET_KEY));
-        if (!valid) {
-            // check old encryption scheme using user salt
-            valid = account.getPassword().equals(AccountUtils.encryptPassword(password, account.getSalt()));
-            if (!valid)
-                return false;
-        }
-
-        // at this stage then password is valid, upgrade to new version
-        String newEncrypted = AccountUtils.encryptNewUserPassword(password, account.getSalt());
-        account.setPassword(newEncrypted);
-        try {
-            DAOFactory.getAccountDAO().update(account);
-        } catch (Exception e) {
-            Logger.error(e);
-        }
-        return true;
+        return account.getPassword().equals(AccountUtils.encryptNewUserPassword(password, account.getSalt()));
     }
 }

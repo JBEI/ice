@@ -9,6 +9,7 @@ angular.module('ice.entry.service', [])
         var allSelection = {};
         var canDelete = false;
         var selectedTypes = {};
+        var searchQuery = undefined;
         var userId = $cookieStore.get('userId');
 
         return {
@@ -134,6 +135,14 @@ angular.module('ice.entry.service', [])
                 return allSelection.type == 'ALL';
             },
 
+            setSearch: function (query) {
+                searchQuery = query;
+            },
+
+            getSearch: function () {
+                return searchQuery;
+            },
+
             // resets all selected and send notifications
             reset: function () {
                 selectedEntries = {};
@@ -143,6 +152,7 @@ angular.module('ice.entry.service', [])
                 allSelection = {};
                 canEdit = false;
                 canDelete = false;
+                searchQuery = undefined;
                 $rootScope.$emit("EntrySelected", selectedSearchResultsCount);
             }
         }
@@ -488,31 +498,10 @@ angular.module('ice.entry.service', [])
                         display: 'Experimental Data',
                         isPrivileged: false,
                         countName: 'experimentalDataCount',
-                        icon: 'fa-magic'
+                        icon: 'fa-database'
                     }
                 ];
             }
-        }
-    })
-    .factory('CustomField', function ($resource, $cookieStore) {
-        return function () {
-
-            var sessionId = $cookieStore.get("sessionId");
-
-            return $resource('rest/custom-fields', {id: '@id'}, {
-                createNewCustomField: {
-                    method: 'POST',
-                    responseType: "json",
-                    headers: {'X-ICE-Authentication-SessionId': sessionId}
-                },
-
-                deleteCustomField: {
-                    method: 'DELETE',
-                    responseType: "json",
-                    url: "rest/custom-fields/:id",
-                    headers: {'X-ICE-Authentication-SessionId': sessionId}
-                }
-            });
         }
     })
 ;

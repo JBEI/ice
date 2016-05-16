@@ -7,13 +7,18 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderType;
+import org.jbei.ice.lib.dto.search.SearchQuery;
+import org.jbei.ice.lib.dto.search.SearchResult;
+import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -107,8 +112,7 @@ public class Entries extends HasEntry {
                 }
 
             case SEARCH:
-                // todo
-                break;
+                return getSearchResults(userId, context.getSearchQuery());
 
             case COLLECTION:
                 if (!context.getEntries().isEmpty()) {
@@ -117,8 +121,6 @@ public class Entries extends HasEntry {
                     return getCollectionEntries(userId, context.getFolderId(), all, entryType);
                 }
         }
-
-        return null;
     }
 
     protected List<Long> getCollectionEntries(String userId, String collection, boolean all, EntryType type) {
@@ -153,5 +155,16 @@ public class Entries extends HasEntry {
 
         boolean visibleOnly = folder.getType() != FolderType.TRANSFERRED;
         return DAOFactory.getFolderDAO().getFolderContentIds(folderId, type, visibleOnly);
+    }
+
+    protected List<Long> getSearchResults(String userId, SearchQuery searchQuery) {
+        SearchController searchController = new SearchController();
+        SearchResults searchResults = searchController.runSearch(userId, searchQuery);
+        // todo : inefficient: have search return ids only
+        List<Long> results = new LinkedList<>();
+        for (SearchResult result : searchResults.getResults()) {
+            results.add(result.getEntryInfo().getId());
+        }
+        return results;
     }
 }

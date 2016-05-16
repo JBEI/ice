@@ -4,7 +4,7 @@
     <groupId>org.jbei</groupId>
     <artifactId>ice</artifactId>
     <packaging>war</packaging>
-    <version>4.8.1</version>
+    <version>5.0.0</version>
     <name>ice</name>
     <description>Inventory of Composable Elements (ICE) for Synthetic Biology</description>
     <repositories>
@@ -138,14 +138,14 @@
             <version>1.4.1</version>
         </dependency>
         <dependency>
-            <groupId>org.sbolstandard</groupId>
-            <artifactId>libSBOLj</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>
             <groupId>javax.transaction</groupId>
             <artifactId>jta</artifactId>
             <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sbolstandard</groupId>
+            <artifactId>libSBOLj</artifactId>
+            <version>2.0.1-SNAPSHOT-withDependencies</version>
         </dependency>
     </dependencies>
     <build>
@@ -208,9 +208,9 @@
                 </configuration>
             </plugin>
             <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-war-plugin</artifactId>
-              <version>2.6</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.6</version>
             </plugin>
         </plugins>
     </build>

@@ -4,17 +4,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.search.*;
-import org.jbei.ice.lib.dto.web.RegistryPartner;
-import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
-import org.jbei.ice.services.rest.IceRestClient;
-import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.search.HibernateSearch;
-import org.jbei.ice.storage.model.RemotePartner;
 
-import java.util.*;
+import java.util.HashMap;
 
 /**
  * Controller for running searches on the ice platform
@@ -25,77 +20,6 @@ public class SearchController {
 
     private AccountController accountController = new AccountController();
 
-    public SearchResults runSearch(String userId, SearchQuery query, boolean searchWeb) {
-        if (searchWeb)
-            return runWebSearch(query);
-        return runLocalSearch(userId, query);
-    }
-
-    /**
-     * Searches all registries in the web of registries configuration with this
-     * registry. Without some sort of indexing locally or in some central location,
-     * this will be slow for large numbers of results
-     *
-     * @param query wrapper around search query
-     * @return list of search results
-     */
-    public SearchResults runWebSearch(SearchQuery query) {
-        IceRestClient client = IceRestClient.getInstance();
-        List<RemotePartner> partners = DAOFactory.getRemotePartnerDAO().getRegistryPartners();
-
-        if (partners == null)
-            return null;
-
-        int offset = query.getParameters().getStart();
-        int limit = query.getParameters().getRetrieveCount();
-
-        // limit to 50
-        query.getParameters().setRetrieveCount(50);
-        query.getParameters().setStart(0);
-
-        LinkedList<SearchResult> resultsList = new LinkedList<>();
-        long total = 0;
-
-        for (RemotePartner partner : partners) {
-            if (partner.getUrl() == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
-                continue;
-
-            try {
-                SearchResults results = client.post(partner.getUrl(), "/rest/search", query, SearchResults.class, null);
-                if (results == null)
-                    continue;
-
-                RegistryPartner registryPartner = partner.toDataTransferObject();
-                for (SearchResult result : results.getResults()) {
-                    result.setPartner(registryPartner);
-                    resultsList.add(result);
-                }
-
-                // up to 50 returned from each partner, but total size may be greater
-                total += results.getResultCount();
-            } catch (Exception e) {
-                Logger.warn("Exception contacting partner " + partner.getUrl() + " : " + e.getMessage());
-            }
-        }
-
-        // sort the results
-        Collections.sort(resultsList, new Comparator<SearchResult>() {
-            @Override
-            public int compare(SearchResult o1, SearchResult o2) {
-                return Double.compare(o2.getScore(), o1.getScore());
-            }
-        });
-
-        int toIndex = offset + limit;
-        if (toIndex > resultsList.size())
-            toIndex = resultsList.size();
-
-        SearchResults searchResults = new SearchResults();
-        searchResults.getResults().addAll(resultsList.subList(offset, toIndex));
-        searchResults.setResultCount(total);
-        return searchResults;
-    }
-
     /**
      * Executes search using parameters specified in the query.
      *
@@ -104,7 +28,7 @@ public class SearchController {
      * @param query  wrapper around search query
      * @return wrapper around the list of search results
      */
-    public SearchResults runLocalSearch(String userId, SearchQuery query) {
+    public SearchResults runSearch(String userId, SearchQuery query) {
         String queryString = query.getQueryString();
         HashMap<String, SearchResult> blastResults = null;
 

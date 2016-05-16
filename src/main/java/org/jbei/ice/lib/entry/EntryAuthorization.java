@@ -108,6 +108,8 @@ public class EntryAuthorization extends Authorization<Entry> {
             return true;
 
         Set<Folder> entryFolders = entry.getFolders();
+        if (entryFolders == null || entryFolders.isEmpty())
+            return false;
 
         // can any group that account belongs to read any folder that entry is contained in?
         if (permissionDAO.hasPermissionMulti(null, entryFolders, null, accountGroups, false, true))

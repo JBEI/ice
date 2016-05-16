@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.common.service', [])
-    .factory('Util', function ($rootScope, $location, $cookieStore, $resource) {
+    .factory('Util', function ($rootScope, $location, $cookieStore, $cookies, $resource) {
         return {
             handleError: function (response) {
                 var errorMsg;
@@ -12,6 +12,7 @@ angular.module('ice.common.service', [])
                         if ($location.path() != '/login') {
                             $cookieStore.remove('user');
                             $rootScope.user = undefined;
+                            $cookies.loginDestination = $location.path();
                             $location.path('/login');
                             errorMsg = "Your session has expired. Please login again";
                         } else {

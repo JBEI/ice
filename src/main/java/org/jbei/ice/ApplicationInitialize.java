@@ -2,6 +2,8 @@ package org.jbei.ice;
 
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.entry.sequence.annotation.AutoAnnotationBlastDbBuildTask;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 
@@ -32,5 +34,8 @@ public class ApplicationInitialize {
 
         // check blast
         BlastPlus.scheduleBlastIndexRebuildTask(false);
+
+        AutoAnnotationBlastDbBuildTask autoAnnotationBlastDbBuildTask = new AutoAnnotationBlastDbBuildTask();
+        IceExecutorService.getInstance().runTask(autoAnnotationBlastDbBuildTask);
     }
 }

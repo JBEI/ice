@@ -5,6 +5,7 @@ import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
@@ -27,14 +28,28 @@ public class OwnerEntries {
     private final EntryDAO entryDAO;
     private final boolean isAdmin;
     private final boolean isSelf;       // requester is same as owner
+    private final AccountDAO accountDAO;
+
+    public OwnerEntries(String userId, long id) {
+        this.accountDAO = DAOFactory.getAccountDAO();
+        this.account = this.accountDAO.getByEmail(userId);
+        this.ownerAccount = this.accountDAO.get(id);
+        if (this.ownerAccount == null)
+            throw new IllegalArgumentException("Cannot retrieve account with id  \"" + id + "\"");
+        this.entryDAO = DAOFactory.getEntryDAO();
+        EntryAuthorization entryAuthorization = new EntryAuthorization();
+        this.isAdmin = entryAuthorization.isAdmin(userId);
+        this.isSelf = userId.equalsIgnoreCase(this.ownerAccount.getEmail());
+    }
 
     /**
      * @param userId     userId for account making request
      * @param ownerEmail userId for account whose entries are to be retrieved
      */
     public OwnerEntries(String userId, String ownerEmail) {
-        this.account = DAOFactory.getAccountDAO().getByEmail(userId);
-        this.ownerAccount = DAOFactory.getAccountDAO().getByEmail(ownerEmail);
+        this.accountDAO = DAOFactory.getAccountDAO();
+        this.account = this.accountDAO.getByEmail(userId);
+        this.ownerAccount = this.accountDAO.getByEmail(ownerEmail);
         if (this.ownerAccount == null)
             throw new IllegalArgumentException("Cannot retrieve account for \"" + ownerEmail + "\"");
         this.entryDAO = DAOFactory.getEntryDAO();

@@ -1,49 +1,47 @@
 'use strict';
 
 angular.module('ice.entry.sample.controller', [])
-    .controller('DisplaySampleController', function ($rootScope, $scope) {
-        $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-        $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+    .controller('DisplaySampleController', function ($rootScope, $scope, SampleService) {
+        $scope.Plate96Rows = SampleService.getPlate96Rows();
+        $scope.Plate96Cols = SampleService.getPlate96Cols();
 
         $scope.canDelete = function () {
             return !$scope.remote && $rootScope.user && $rootScope.user.isAdmin;
         }
     })
-    .controller('EntrySampleController', function ($location, $rootScope, $scope, $uibModal, $cookieStore, $stateParams, Entry, Samples) {
+    .controller('EntrySampleController', function ($location, $rootScope, $scope, $uibModal, $cookieStore, $stateParams,
+                                                   Util, SampleService) {
         var sessionId = $cookieStore.get("sessionId");
-        var entry = Entry(sessionId);
         var partId = $stateParams.id;
 
-        $scope.Plate96Rows = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-        $scope.Plate96Cols = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
+        $scope.Plate96Rows = SampleService.getPlate96Rows();
+        $scope.Plate96Cols = SampleService.getPlate96Cols();
 
         // retrieve samples for partId
-        entry.samples({
-            partId: partId
-        }, function (result) {
+        Util.list('rest/parts/' + partId + '/samples', function (result) {
             $scope.samples = result;
         });
 
         // marks the sample object "inCart" field if the data
         // contains the entry id of current part being viewed
-        var setInCart = function (data) {
-            if (!data || !data.length) {
-                $scope.samples[0].inCart = false;
-                return;
-            }
-
-            // check specific values added to cart
-            for (var idx = 0; idx < data.length; idx += 1) {
-                // using "==" instead of "===" since partId is a string
-                if (data[idx].partData.id == partId) {
-                    $scope.samples[0].inCart = true;
-                    return;
-                }
-            }
-
-            // assuming not found
-            $scope.samples[0].inCart = false;
-        };
+        //var setInCart = function (data) {
+        //    if (!data || !data.length) {
+        //        $scope.samples[0].inCart = false;
+        //        return;
+        //    }
+        //
+        //    // check specific values added to cart
+        //    for (var idx = 0; idx < data.length; idx += 1) {
+        //        // using "==" instead of "===" since partId is a string
+        //        if (data[idx].partData.id == partId) {
+        //            $scope.samples[0].inCart = true;
+        //            return;
+        //        }
+        //    }
+        //
+        //    // assuming not found
+        //    $scope.samples[0].inCart = false;
+        //};
 
         $scope.isAddGene = function (samples) {
             if (!samples || !samples.length)
@@ -92,9 +90,8 @@ angular.module('ice.entry.sample.controller', [])
                         };
 
                         // add selection to shopping cart
-                        Samples(sessionId).addRequestToCart({}, sampleSelection, function (result) {
-                            $rootScope.$emit("SamplesInCart", result);
-                            setInCart(result);
+                        Util.post("rest/samples/requests", sampleSelection, function () {
+                            $rootScope.$emit("SamplesInCart");
                             modalInstance.close('');
                         });
                     }
@@ -131,13 +128,9 @@ angular.module('ice.entry.sample.controller', [])
         };
 
         $scope.delete = function (sample) {
-            entry.deleteSample({partId: partId, sampleId: sample.id}, function (result) {
-                console.log(result);
+            Util.remove('rest/parts/' + partId + '/samples/' + sample.id, function () {
                 var idx = $scope.samples.indexOf(sample);
                 $scope.samples.splice(idx, 1);
-                console.log("deleted", sample, idx);
-            }, function (error) {
-                console.log(error);
             });
         };
 
@@ -158,7 +151,7 @@ angular.module('ice.entry.sample.controller', [])
 
         $scope.createNewSample = function () {
             // create sample
-            entry.addSample({partId: partId}, $scope.newSample, function (result) {
+            Util.post('rest/parts/' + partId + '/samples', $scope.newSample, function (result) {
                 $scope.samples = result;
                 $scope.newSample = {
                     open: {},
@@ -168,8 +161,6 @@ angular.module('ice.entry.sample.controller', [])
                     },
                     location: {}
                 };
-            }, function (error) {
-                console.error(error);
             });
         };
 

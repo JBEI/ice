@@ -73,6 +73,11 @@ public class EntryHistory {
         return true;
     }
 
+    /**
+     * Adds a read history object for the specified user and entry
+     *
+     * @return true if the object was successfully added, false otherwise
+     */
     public boolean add() {
         Audit audit = new Audit();
         audit.setAction(AuditType.READ.getAbbrev());

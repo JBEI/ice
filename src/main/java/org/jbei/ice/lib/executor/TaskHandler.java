@@ -19,12 +19,15 @@ class TaskHandler implements Runnable {
     @Override
     public void run() {
         try {
+            this.task.setStatus(TaskStatus.IN_PROGRESS);
             HibernateUtil.beginTransaction();
             task.execute();
             HibernateUtil.commitTransaction();
+            this.task.setStatus(TaskStatus.COMPLETED);
         } catch (Throwable caught) {
             Logger.error(caught);
             HibernateUtil.rollbackTransaction();
+            this.task.setStatus(TaskStatus.EXCEPTION);
         }
     }
 }

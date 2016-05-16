@@ -45,30 +45,9 @@ public class SequenceController {
     private final Entries retriever;
 
     public SequenceController() {
-        dao = new SequenceDAO();
+        dao = DAOFactory.getSequenceDAO();
         authorization = new EntryAuthorization();
         retriever = new Entries();
-    }
-
-    public boolean parseAndSaveSequence(String userId, long partId, String sequenceString) {
-        DNASequence dnaSequence = parse(sequenceString);
-
-        if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
-            String errorMsg = "Couldn't parse sequence file! Supported formats: "
-                    + GeneralParser.getInstance().availableParsersToString()
-                    + ". "
-                    + "If you believe this is an error, please contact the administrator with your file";
-            throw new IllegalArgumentException(errorMsg);
-        }
-
-        Sequence sequence = dnaSequenceToSequence(dnaSequence);
-        sequence.setSequenceUser(sequenceString);
-        Entry entry = DAOFactory.getEntryDAO().get(partId);
-        if (entry == null)
-            return false;
-
-        sequence.setEntry(entry);
-        return save(userId, sequence) != null;
     }
 
     // either or both recordId and entryType has to have a value
@@ -129,14 +108,26 @@ public class SequenceController {
         return result;
     }
 
-    public FeaturedDNASequence updateSequence(String userId, long entryId, FeaturedDNASequence featuredDNASequence) {
+    public FeaturedDNASequence updateSequence(String userId, long entryId, FeaturedDNASequence featuredDNASequence,
+                                              boolean addFeatures) {
         Entry entry = retriever.get(userId, entryId);
         if (entry == null) {
             return null;
         }
 
-        featuredDNASequence.setSequence(featuredDNASequence.getSequence().replaceAll("[^A-Za-z]", ""));
+        if (addFeatures) {
+            // expect existing sequence
+            Sequence existingSequence = dao.getByEntry(entry);
+            FeaturedDNASequence dnaSequence = sequenceToDNASequence(existingSequence);
+            featuredDNASequence.getFeatures().addAll(dnaSequence.getFeatures());
+            featuredDNASequence.setSequence(dnaSequence.getSequence());
+        }
+
         Sequence sequence = dnaSequenceToSequence(featuredDNASequence);
+        if (sequence.getSequenceFeatures() == null || sequence.getSequenceFeatures().isEmpty()) {
+            DNASequence dnaSequence = GeneralParser.getInstance().parse(featuredDNASequence.getSequence());
+            sequence = dnaSequenceToSequence(dnaSequence);
+        }
         sequence.setEntry(entry);
         if (!deleteSequence(userId, entryId))
             return null;
@@ -155,7 +146,6 @@ public class SequenceController {
      * @param sequence sequence to be updated
      * @return Saved Sequence.
      */
-
     protected Sequence update(String userId, Sequence sequence) {
         authorization.expectWrite(userId, sequence.getEntry());
         Sequence result;
@@ -168,11 +158,13 @@ public class SequenceController {
             result = dao.create(sequence);
         } else {
             String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-            String hash = oldSequence.getFwdHash();
-            try {
-                Files.deleteIfExists(Paths.get(tmpDir, hash + ".png"));
-            } catch (IOException e) {
-                Logger.warn(e.getMessage());
+            if (!StringUtils.isEmpty(tmpDir)) {
+                String hash = oldSequence.getFwdHash();
+                try {
+                    Files.deleteIfExists(Paths.get(tmpDir, hash + ".png"));
+                } catch (IOException e) {
+                    Logger.warn(e.getMessage());
+                }
             }
 
             oldSequence.setSequenceUser(sequence.getSequenceUser());
@@ -196,7 +188,7 @@ public class SequenceController {
 
         String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         dao.deleteSequence(sequence, tmpDir);
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
+//        BlastPlus.scheduleBlastIndexRebuildTask(true);  // todo : update is delete and save which is not right
         return true;
     }
 
@@ -420,7 +412,7 @@ public class SequenceController {
 
                     String name = dnaFeature.getName().length() < 127 ? dnaFeature.getName()
                             : dnaFeature.getName().substring(0, 123) + "...";
-                    Feature feature = new Feature(name, dnaFeature.getIdentifier(), featureSequence, 0,
+                    Feature feature = new Feature(name, dnaFeature.getIdentifier(), featureSequence,
                             dnaFeature.getType());
                     if (dnaFeature.getLocations() != null && !dnaFeature.getLocations().isEmpty())
                         feature.setUri(dnaFeature.getLocations().get(0).getUri());
@@ -489,8 +481,13 @@ public class SequenceController {
                     name = entry.getName() + ".fasta";
                     break;
 
-                case "sbol":
-                    sequenceString = compose(sequence, new SBOLFormatter());
+                case "sbol1":
+                    sequenceString = compose(sequence, new SBOLFormatter(true));
+                    name = entry.getName() + ".xml";
+                    break;
+
+                case "sbol2":
+                    sequenceString = compose(sequence, new SBOLFormatter(false));
                     name = entry.getName() + ".xml";
                     break;
 

@@ -25,12 +25,13 @@ public enum ConfigurationKey implements IDataTransferModel {
     PART_NUMBER_DIGITAL_SUFFIX("000001"),
     PART_NUMBER_DELIMITER("_"),
 
-    BLAST_INSTALL_DIR("/usr/bin"),
+    BLAST_INSTALL_DIR(""),
 
     NEW_REGISTRATION_ALLOWED("NO"),
     PASSWORD_CHANGE_ALLOWED("YES"),
     PROFILE_EDIT_ALLOWED("YES"),
     JOIN_WEB_OF_REGISTRIES("NO"),
+    RESTRICT_PUBLIC_ENABLE("NO"),
     WEB_OF_REGISTRIES_MASTER("registry.jbei.org");
 
     private String defaultValue;

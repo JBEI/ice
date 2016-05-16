@@ -34,6 +34,9 @@ public class DAOFactory {
     private static RemoteShareModelDAO remoteShareModelDAO;
     private static RemoteAccessModelDAO remoteAccessModelDAO;
     private static ManuscriptModelDAO manuscriptModelDAO;
+    private static SequenceFeatureDAO sequenceFeatureDAO;
+    private static FeatureDAO featureDAO;
+    private static FeatureCurationModelDAO featureCurationModelDAO;
 
     public static AccountDAO getAccountDAO() {
         if (accountDAO == null)
@@ -195,5 +198,23 @@ public class DAOFactory {
         if (manuscriptModelDAO == null)
             manuscriptModelDAO = new ManuscriptModelDAO();
         return manuscriptModelDAO;
+    }
+
+    public static SequenceFeatureDAO getSequenceFeatureDAO() {
+        if (sequenceFeatureDAO == null)
+            sequenceFeatureDAO = new SequenceFeatureDAO();
+        return sequenceFeatureDAO;
+    }
+
+    public static FeatureDAO getFeatureDAO() {
+        if (featureDAO == null)
+            featureDAO = new FeatureDAO();
+        return featureDAO;
+    }
+
+    public static FeatureCurationModelDAO getFeatureCurationModelDAO() {
+        if (featureCurationModelDAO == null)
+            featureCurationModelDAO = new FeatureCurationModelDAO();
+        return featureCurationModelDAO;
     }
 }

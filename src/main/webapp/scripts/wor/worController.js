@@ -2,10 +2,9 @@
 
 angular.module('ice.wor.controller', [])
     .controller('WorContentController', function ($rootScope, $scope, $location, $uibModal, $cookieStore, $stateParams,
-                                                  WebOfRegistries, WorService, Util) {
+                                                  WorService, Util) {
         $scope.selectedPartner = $stateParams.partner;
         $scope.loadingPage = true;
-        var wor = WebOfRegistries();
         $scope.queryParams = {
             limit: 15,
             offset: 0,
@@ -18,12 +17,11 @@ angular.module('ice.wor.controller', [])
         $scope.webResults = undefined;
 
         // init: retrieve first page of all public entries
-        wor.getPublicEntries($scope.queryParams, function (result) {
+        Util.get('rest/web/' + $scope.queryParams.partnerId + '/entries', function (result) {
             $scope.loadingPage = false;
             $scope.webResults = result;
             WorService.setSelectedPartner($scope.webResults.registryPartner);
-        }, function (error) {
-            console.error(error);
+        }, $scope.queryParams, function () {
             $scope.loadingPage = false;
             WorService.setSelectedPartner(undefined);
             Util.setFeedback("Error retrieving entries", "danger");
@@ -36,11 +34,10 @@ angular.module('ice.wor.controller', [])
             $scope.loadingPage = true;
             $scope.queryParams.offset = ($scope.queryParams.currentPage - 1) * $scope.queryParams.limit;
 
-            wor.getPublicEntries($scope.queryParams, function (result) {
+            Util.get('rest/web/' + $scope.queryParams.partnerId + '/entries', function (result) {
                 $scope.webResults = result;
                 $scope.loadingPage = false;
-            }, function (error) {
-                console.error(error);
+            }, $scope.queryParams, function () {
                 $scope.loadingPage = false;
                 $scope.webResults = undefined;
             });
@@ -53,19 +50,18 @@ angular.module('ice.wor.controller', [])
             $scope.queryParams.asc = !$scope.queryParams.asc;
             $scope.loadingPage = false;
 
-            wor.getPublicEntries($scope.queryParams, function (result) {
+            Util.get('rest/web/' + $scope.queryParams.partnerId + '/entries', function (result) {
                 $scope.loadingPage = false;
                 $scope.webResults = result;
                 $scope.queryParams.currentPage = 1;
-            }, function (error) {
-                console.log(error);
+            }, $scope.queryParams, function () {
                 $scope.webResults = null;
                 $scope.loadingPage = false;
             });
         };
 
         $scope.tooltipDetails = function (entry) {
-            wor.getToolTip({partnerId: $stateParams.partner, entryId: entry.id}, function (result) {
+            Util.get('rest/web/' + $stateParams.partner + '/entries/' + entry.id + '/tooltip', function (result) {
                 $scope.currentTooltip = result;
             })
         };
@@ -77,8 +73,8 @@ angular.module('ice.wor.controller', [])
             }, $scope.queryParams);
         };
     })
-    .controller('WorFolderContentController', function ($location, $rootScope, $scope, $stateParams, Remote,
-                                                        WorService, WebOfRegistries, Util) {
+    .controller('WorFolderContentController', function ($location, $rootScope, $scope, $stateParams,
+                                                        WorService, Util) {
         var id;
         $scope.remoteRetrieveError = undefined;
         if ($stateParams.folderId === undefined)
@@ -100,7 +96,7 @@ angular.module('ice.wor.controller', [])
                     WorService.setSelectedPartner($scope.selectedPartner)
                 }
                 $scope.loadingPage = false;
-            }, $scope.params, function (error) {
+            }, $scope.params, function () {
                 $scope.selectedPartnerFolder = undefined;
                 $scope.remoteRetrieveError = true;
                 $scope.loadingPage = false;
@@ -134,17 +130,16 @@ angular.module('ice.wor.controller', [])
                 $scope.params.offset = offset;
                 $scope.params.limit = 1;
 
-                Remote().getFolderEntries($scope.params, function (result) {
+                Util.get('rest/remote/' + partnerId + '/folders/' + $scope.params.folderId, function (result) {
                     callback(result.entries[0].id);
-                });
+                }, $scope.params)
             }, $scope.selectedPartnerFolder.count, position, url);
 
             $location.path("web/" + partnerId + "/entry/" + entryId, true);
         };
     })
-    .controller('WorEntryController', function ($location, $scope, $window, WebOfRegistries, $stateParams,
+    .controller('WorEntryController', function ($location, $scope, $window, $stateParams,
                                                 EntryService, WorService, Util) {
-        var web = WebOfRegistries();
         $scope.notFound = undefined;
         $scope.remoteEntry = undefined;
 
@@ -228,14 +223,10 @@ angular.module('ice.wor.controller', [])
         }
 
         $scope.getAttachments = function () {
-            web.getPublicEntryAttachments({
-                partnerId: $stateParams.partner,
-                entryId: $stateParams.entryId
-            }, function (result) {
-                $scope.remoteAttachments = result;
-            }, function (error) {
-                console.error(error);
-            });
+            Util.list('rest/web/' + $stateParams.partner + '/entries/' + $stateParams.entryId + '/attachments',
+                function (result) {
+                    $scope.remoteAttachments = result;
+                });
         };
 
         $scope.downloadRemoteAttachment = function (attachment) {
@@ -243,15 +234,13 @@ angular.module('ice.wor.controller', [])
         };
     })
     .controller('WebOfRegistriesDetailController', function ($scope, $cookieStore, $location, $stateParams) {
-        var sessionId = $cookieStore.get("sessionId");
-
         $scope.selectRemotePartnerFolder = function (folder) {
             $scope.partnerId = $stateParams.partner;
             $location.path('web/' + $stateParams.partner + "/folder/" + folder.id);
         };
     })
     .controller('WebOfRegistriesController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
-                                                       $stateParams, WebOfRegistries, Remote, Util) {
+                                                       $stateParams, Util) {
         $scope.newPartner = undefined;
         $scope.partnerStatusList = [
             {status: 'BLOCKED', action: 'Block'},
@@ -263,6 +252,7 @@ angular.module('ice.wor.controller', [])
         //
         $scope.wor = undefined;
         $scope.isWorEnabled = false;
+        $scope.restrictPublic = false;
 
         Util.get('/rest/config/JOIN_WEB_OF_REGISTRIES', function (result) {
             var joined = result.value === 'yes';
@@ -272,10 +262,22 @@ angular.module('ice.wor.controller', [])
             $rootScope.settings['JOIN_WEB_OF_REGISTRIES'] = joined;
         });
 
-        var wor = WebOfRegistries();
-        wor.query({approved_only: false}, function (result) {
+        Util.get("rest/web", function (result) {
             $scope.wor = result;
+        }, {approved_only: false});
+
+        // get admin only setting
+        Util.get("rest/config/RESTRICT_PUBLIC_ENABLE", function (result) {
+            $scope.restrictPublic = result.value.toLowerCase() == "yes";
         });
+
+        $scope.restrictPublicEnable = function () {
+            $scope.restrictPublic = !$scope.restrictPublic;
+            var setting = {key: 'RESTRICT_PUBLIC_ENABLE', value: $scope.restrictPublic ? "yes" : "no"};
+            Util.update("rest/config", setting, {}, function (result) {
+                console.log(result);
+            })
+        };
 
         //
         // enable or disable web of registries functionality
@@ -320,7 +322,7 @@ angular.module('ice.wor.controller', [])
 
         // remove web of registries partner
         $scope.removePartner = function (partner, index) {
-            Util.remove("rest/partners/" + partner.id, {}, function (result) {
+            Util.remove("rest/partners/" + partner.id, {}, function () {
                 $scope.wor.partners.splice(index, 1);
             });
         };
@@ -349,10 +351,11 @@ angular.module('ice.wor.controller', [])
         }
     })
     .controller('WebOfRegistriesMenuController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
-                                                           $stateParams, WebOfRegistries, Remote, Settings, Util,
-                                                           localStorageService) {
+                                                           $stateParams, Util, localStorageService) {
         // retrieve web of registries partners
-        $scope.wor = WebOfRegistries().query({approved_only: true});
+        Util.get("rest/web", function (result) {
+            $scope.wor = result;
+        }, {approved_only: true})
         $scope.selectedPartner = $stateParams.partner;
 
         if ($scope.selectedPartner) {
@@ -383,7 +386,6 @@ angular.module('ice.wor.controller', [])
         };
 
         // retrieve web of registries setting
-        var sessionId = $cookieStore.get("sessionId");
         Util.get('/rest/config/JOIN_WEB_OF_REGISTRIES', function (result) {
             if (!$scope.settings)
                 $scope.settings = {};
@@ -406,38 +408,30 @@ angular.module('ice.wor.controller', [])
             });
         }
     })
-    .controller('WorEntrySamplesController', function ($scope, $stateParams, Remote) {
-
-        // retrieve remote samples
-        var remote = Remote();
+    .controller('WorEntrySamplesController', function ($scope, $stateParams, Util) {
         $scope.samples = undefined;
-
-        remote.samples({id: $stateParams.partner, partId: $stateParams.entryId}, function (result) {
-            $scope.samples = result;
-        }, function (error) {
-            console.error(error);
-        });
+        Util.list('rest/remote/' + $stateParams.partner.id + '/parts/' + $stateParams.entryId + '/samples',
+            function (result) {
+                $scope.samples = result;
+            });
     })
-    .controller('WorEntryCommentController', function ($scope, $stateParams, Remote) {
+    .controller('WorEntryCommentController', function ($scope, $stateParams, Util) {
         // retrieve remote samples
-        var remote = Remote();
         $scope.entryComments = undefined;
 
-        remote.comments({id: $stateParams.partner, partId: $stateParams.entryId}, function (result) {
-            $scope.entryComments = result;
-        }, function (error) {
-            console.error(error);
-        });
+        Util.get('rest/remote/' + $stateParams.partner.id + '/parts/' + $stateParams.entryId + '/comments',
+            function (result) {
+                $scope.entryComments = result;
+            });
     })
-    .controller('WorEntryTracesController', function ($scope, $stateParams, Remote) {
+    .controller('WorEntryTracesController', function ($scope, $stateParams, Util) {
         // retrieve remote samples
-        var remote = Remote();
         $scope.traceSequences = undefined;
 
-        remote.traces({id: $stateParams.partner, partId: $stateParams.entryId}, function (result) {
-            $scope.traceSequences = result;
-        }, function (error) {
-            console.error(error);
-            $scope.traceSequences = undefined;
-        });
+        Util.get("rest/remote/" + $stateParams.partner.id + "/parts/" + $stateParams.entryId + "/traces",
+            function (result) {
+                $scope.traceSequences = result;
+            }, {}, function () {
+                $scope.traceSequences = undefined;
+            });
     });

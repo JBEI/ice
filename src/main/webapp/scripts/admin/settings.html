@@ -8,7 +8,7 @@
     </button>
 </div>
 
-<div class="pad_top" ng-init="getSetting()">
+<div class="pad_top" ng-init="getSetting()" style="width: 98%; height: 543px">
     <uib-tabset>
         <uib-tab>
             <uib-tab-heading><i class="fa fa-gear"></i> General Settings</uib-tab-heading>
@@ -66,7 +66,7 @@
                 <!--for non boolean fields-->
                 <div class="col-md-9" ng-if="!setting.isBoolean" ng-mouseover="partIdEdit=true"
                      ng-mouseout="partIdEdit=false">
-                    <div data-ng-if="!setting.editMode"><span ng-if="setting.value&&!setting.value.trim()==''">{{setting.value}}</span>
+                    <div data-ng-if="!setting.editMode"><span ng-if="setting.value&&setting.value.trim()!=''">{{setting.value}}</span>
                         <i class='opacity_4' ng-if="!setting.value">No value entered</i><span
                                 ng-click="setting.editMode=true">
                          <i ng-show="partIdEdit" class="fa fa-pencil edit_icon"

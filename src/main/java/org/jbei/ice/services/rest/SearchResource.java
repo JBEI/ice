@@ -8,6 +8,7 @@ import org.jbei.ice.lib.dto.search.IndexType;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.search.SearchController;
+import org.jbei.ice.lib.search.WebSearch;
 import org.jbei.ice.lib.shared.ColumnField;
 
 import javax.ws.rs.*;
@@ -58,7 +59,12 @@ public class SearchResource extends RestResource {
                            final SearchQuery query) {
         final String userId = getUserId();
         try {
-            final SearchResults results = controller.runSearch(userId, query, searchWeb);
+            if (searchWeb) {
+                WebSearch webSearch = new WebSearch();
+                return super.respond(webSearch.run(query));
+            }
+
+            final SearchResults results = controller.runSearch(userId, query);
             return super.respond(Response.Status.OK, results);
         } catch (final Exception e) {
             Logger.error(e);
@@ -102,7 +108,7 @@ public class SearchResource extends RestResource {
 
         final List<EntryType> types = Arrays.asList(EntryType.values());
         query.setEntryTypes(types);
-        return super.respond(controller.runSearch(userId, query, searchWeb));
+        return super.respond(controller.runSearch(userId, query));
     }
 
     @PUT
