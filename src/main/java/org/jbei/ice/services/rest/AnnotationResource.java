@@ -24,6 +24,15 @@ import java.util.List;
 @Path("/annotations")
 public class AnnotationResource extends RestResource {
 
+    /**
+     * Retrieve list of annotations available.
+     * Administrative privileges required
+     *
+     * @param offset paging start
+     * @param limit  maximum number of results to return
+     * @param sort   sort field
+     * @param asc    sort order
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFeatures(@DefaultValue("0") @QueryParam("offset") final int offset,
