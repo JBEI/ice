@@ -48,9 +48,9 @@ public class FolderResource extends RestResource {
     }
 
     @GET
-    public Response getFolders(
-            @DefaultValue("false") @QueryParam("canEdit") boolean editOnly) {
+    public Response getFolders() {
         String userId = requireUserId();
+        log(userId, "retrieving folders");
         Folders folders = new Folders(userId);
         return super.respond(folders.getCanEditFolders());
     }

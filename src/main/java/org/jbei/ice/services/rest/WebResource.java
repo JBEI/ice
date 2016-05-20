@@ -1,6 +1,5 @@
 package org.jbei.ice.services.rest;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
@@ -18,6 +17,9 @@ import java.util.List;
 
 /**
  * Resource for web of registries requests
+ * <p>
+ * This is particularly useful for third party tools to tap into the web of
+ * registries functionality without having specific API keys to each of the instances
  *
  * @author Hector Plahar
  */
@@ -132,16 +134,16 @@ public class WebResource extends RestResource {
         return super.respond(remoteContact.handleRemoteRemoveRequest(worToken, url));
     }
 
-    @GET
-    @Path("/partners")
-    public Response getWebPartners(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-                                   @HeaderParam(WOR_PARTNER_TOKEN) String worToken,
-                                   @QueryParam("url") String url) {
-        if (StringUtils.isEmpty(sessionId))
-            return super.respond(controller.getWebPartners(worToken, url));
-        final String userId = getUserId();
-        return super.respond(controller.getWebPartners());
-    }
+//    @GET
+//    @Path("/partners")
+//    public Response getWebPartners(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
+//                                   @HeaderParam(WOR_PARTNER_TOKEN) String worToken,
+//                                   @QueryParam("url") String url) {
+//        if (StringUtils.isEmpty(sessionId))
+//            return super.respond(controller.getWebPartners(worToken, url));
+//        final String userId = getUserId();
+//        return super.respond(controller.getWebPartners());
+//    }
 
     @PUT
     @Path("/partner/{url}")

@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.net;
 
+import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
@@ -145,7 +147,18 @@ public class RemoteEntries {
         return remoteContact.getSequence(remotePartner.getUrl(), userId, entryId, remoteFolderId, token, remotePartner.getApiKey());
     }
 
+    /**
+     * Schedules a task to handle the transfer
+     *
+     * @param userId    identifier of user making request
+     * @param remoteId  local unique identifier for partner to transfer to
+     * @param selection context for generating entries to transfer or list of entries
+     * @throws PermissionException if user making request is not an administrator
+     */
     public void transferEntries(String userId, long remoteId, EntrySelection selection) {
+        AccountController accountController = new AccountController();
+        if (!accountController.isAdministrator(userId))
+            throw new PermissionException("Administrative privileges required to transfer entries");
         TransferTask task = new TransferTask(userId, remoteId, selection);
         IceExecutorService.getInstance().runTask(task);
     }
