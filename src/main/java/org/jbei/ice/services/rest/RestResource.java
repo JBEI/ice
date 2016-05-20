@@ -24,9 +24,11 @@ public class RestResource {
 
     protected final String AUTHENTICATION_PARAM_NAME = "X-ICE-Authentication-SessionId";
     protected final String WOR_PARTNER_TOKEN = "X-ICE-WOR-Token";
-    protected final String API_KEY_TOKEN = "X-ICE-API-Token";        // token for validation
-    protected final String API_KEY_USER = "X-ICE-API-Token-User";    // optional user
-    protected final String API_KEY_CLIENT_ID = "X-ICE-API-Token-Client"; // client id
+    protected final String API_KEY_TOKEN = "X-ICE-API-Token";               // token for validation
+    protected final String API_KEY_USER = "X-ICE-API-Token-User";           // optional user. system checks and uses assigned token user if not specified
+    protected final String API_KEY_CLIENT_ID = "X-ICE-API-Token-Client";    // client id
+    protected final String REMOTE_USER_TOKEN = "X-ICE-Remote-User-Token";   // token for remote user
+    protected final String REMOTE_USER_ID = "X-ICE-Remote-User-ID";         // id for remote user
 
     @HeaderParam(value = WOR_PARTNER_TOKEN)
     protected String worPartnerToken;
@@ -42,6 +44,12 @@ public class RestResource {
 
     @HeaderParam(value = AUTHENTICATION_PARAM_NAME)
     protected String sessionId;
+
+    @HeaderParam(value = REMOTE_USER_TOKEN)
+    protected String remoteUserToken;
+
+    @HeaderParam(value = REMOTE_USER_ID)
+    protected String remoteUserId;
 
     @HeaderParam(value = "Authorization")
     protected String hmacHeader;

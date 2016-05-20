@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.jbei.ice.lib.access.AccessTokens;
 import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.access.TokenVerification;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -15,7 +16,9 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
 import org.jbei.ice.storage.model.RemotePartner;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Partners for web of registries
@@ -28,17 +31,66 @@ public class WebPartners {
     private final TokenHash tokenHash;
     private RemoteContact remoteContact;
     private final AccountController accountController;
+    private final TokenVerification tokenVerification;
+
 
     public WebPartners() {
         this.dao = DAOFactory.getRemotePartnerDAO();
         this.tokenHash = new TokenHash();
         this.remoteContact = new RemoteContact();
         this.accountController = new AccountController();
+        this.tokenVerification = new TokenVerification();
     }
 
     public WebPartners(RemoteContact remoteContact) {
         this();
         this.remoteContact = remoteContact;
+    }
+
+    /**
+     * Request for the list of partners that this instance has, from other partners.
+     * If this instance is not in web of registries, an empty list is returned
+     *
+     * @param apiKey authentication token that this instance previously provided to instance at <code>url</code>
+     * @param url    location of ICE instance (partner) making request
+     * @return list of registry partners that this instance has, an empty list if this ICE instance is not in web
+     * of registries
+     * @throws IllegalArgumentException if the partner with specified url could not be located
+     * @throws PermissionException      if the api key could not be verified
+     */
+    public List<RegistryPartner> getPartners(String apiKey, String url) {
+        if (!isInWebOfRegistries())
+            return new ArrayList<>();
+
+        RemotePartner partner = dao.getByUrl(url);
+        if (partner == null)
+            throw new IllegalArgumentException("Could not retrieve partner with url \"" + url + "\"");
+
+        if (tokenVerification.verifyPartnerToken(url, apiKey) == null)
+            throw new PermissionException("Could not verify api key for partner \"" + url + "\"");
+        return getPartners();
+    }
+
+    /**
+     * Retrieves list of partners for this instance
+     *
+     * @return list of partners available for this ICE instance or an empty list if this instance is not in web of
+     * registries
+     */
+    public List<RegistryPartner> getPartners() {
+        if (!isInWebOfRegistries())
+            return new ArrayList<>();
+
+        List<RemotePartner> partners = dao.getRegistryPartners();
+        List<RegistryPartner> registryPartners = new ArrayList<>();
+        if (partners == null)
+            return registryPartners;
+
+        for (RemotePartner remotePartner : partners) {
+            registryPartners.add(remotePartner.toDataTransferObject());
+        }
+
+        return registryPartners;
     }
 
     /**

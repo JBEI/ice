@@ -68,7 +68,10 @@ public class PartResource extends RestResource {
 
     /**
      * Retrieves a part using any of the unique identifiers. e.g. Part number, synthetic id, or
-     * global unique identifier
+     * global unique identifier.
+     * <p>
+     * Optionally pass the type of entry i.e. <code>PLASMID</code>, <code>PART</code>, <code>STRAIN</code> or
+     * <code>ARABIDOPSIS</code> to retrieve the default values for that entry
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

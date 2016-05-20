@@ -171,7 +171,7 @@ public class RemotePartner implements DataModel {
         registryPartner.setStatus(this.partnerStatus);
         registryPartner.setSent(getSent());
         registryPartner.setFetched(fetched);
-        registryPartner.setApiKey(apiKey);
+//        registryPartner.setApiKey(apiKey);
         return registryPartner;
     }
 }

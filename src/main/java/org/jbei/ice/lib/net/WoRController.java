@@ -135,40 +135,6 @@ public class WoRController {
         return dao.get(partnerId).toDataTransferObject();
     }
 
-    /**
-     * Request for the list of partners that this instance has, from other partners
-     *
-     * @param apiKey authentication token that this instance previously provided to instance at <code>url</code>
-     * @param url    location of ICE instance (partner) making request
-     * @return list of registry partners that this instance has, null if apiKey could not be authenticated
-     */
-    public List<RegistryPartner> getWebPartners(String apiKey, String url) {
-        if (!isInWebOfRegistries())
-            return null;
-
-        RemotePartner partner = dao.getByUrl(url);
-        if (partner == null)
-            return null;
-
-        tokenVerification.verifyPartnerToken(url, apiKey);
-        return getWebPartners();
-    }
-
-    public List<RegistryPartner> getWebPartners() {
-        if (!isInWebOfRegistries())
-            return null;
-
-        List<RemotePartner> partners = DAOFactory.getRemotePartnerDAO().getRegistryPartners();
-        List<RegistryPartner> registryPartners = new ArrayList<>();
-        if (partners == null)
-            return registryPartners;
-
-        for (RemotePartner remotePartner : partners) {
-            registryPartners.add(remotePartner.toDataTransferObject());
-        }
-
-        return registryPartners;
-    }
 
     /**
      * Checks if the web of registries admin config value has been set to enable this ICE instance

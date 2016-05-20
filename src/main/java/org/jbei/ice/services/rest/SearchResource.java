@@ -83,7 +83,6 @@ public class SearchResource extends RestResource {
      * @param asc         true if return results in ascending order, false otherwise
      * @return wrapper around list of search results conforming to query params
      */
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response search(@QueryParam("q") final String queryString,
@@ -111,21 +110,27 @@ public class SearchResource extends RestResource {
         return super.respond(controller.runSearch(userId, query));
     }
 
+    /**
+     * Rebuild the lucene indexes used for searching
+     */
     @PUT
     @Path("/indexes/lucene")
     public Response updateLuceneIndex() {
         final String userId = requireUserId();
-        SearchController searchController = new SearchController();
-        final boolean success = searchController.rebuildIndexes(userId, IndexType.LUCENE);
-        return super.respond(success);
+        log(userId, "rebuilding lucene indexes");
+        controller.rebuildIndexes(userId, IndexType.LUCENE);
+        return super.respond(Response.Status.OK);
     }
 
+    /**
+     * Rebuild the blast database
+     */
     @PUT
     @Path("/indexes/blast")
     public Response updateBlastIndex() {
         final String userId = requireUserId();
-        SearchController searchController = new SearchController();
-        final boolean success = searchController.rebuildIndexes(userId, IndexType.BLAST);
-        return super.respond(success);
+        log(userId, "rebuilding blast database");
+        controller.rebuildIndexes(userId, IndexType.BLAST);
+        return super.respond(Response.Status.OK);
     }
 }
