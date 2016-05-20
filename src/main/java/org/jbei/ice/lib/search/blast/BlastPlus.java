@@ -18,6 +18,7 @@ import org.jbei.ice.lib.dto.search.BlastProgram;
 import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
 import org.jbei.ice.lib.executor.IceExecutorService;
+import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -426,33 +427,52 @@ public class BlastPlus {
      * @return List of output string from bl2seq program.
      * @throws BlastException
      */
-    public static String runBlast2Seq(String query, String subject) throws BlastException {
-        String result;
+    public static List<Bl2SeqResult> runBlast2Seq(String query, String subject) throws BlastException {
         try {
             Path queryFilePath = Files.write(Files.createTempFile("query-", ".seq"), query.getBytes());
             Path subjectFilePath = Files.write(Files.createTempFile("subject-", ".seq"), subject.getBytes());
+
             if (queryFilePath == null || subjectFilePath == null)
                 throw new BlastException("Subject or query is null");
 
-            StringBuilder command = new StringBuilder();
             String blastN = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
                     + BlastProgram.BLAST_N.getName();
-            command.append(blastN)
-                    .append(" -query ")
-                    .append(queryFilePath.toString())
-                    .append(" -subject ")
-                    .append(subjectFilePath.toString())
-                    .append(" -dust no");
 
-            Logger.info("Blast-2-seq query: " + command.toString());
-            result = runSimpleExternalProgram(command.toString());
+            String[] command = new String[]{
+                    blastN, "-query", queryFilePath.toString(), "-subject", subjectFilePath.toString(),
+                    "-outfmt", "10 score qstart qend qseq sstart send sseq sstrand"
+            };
+
+            Process process = Runtime.getRuntime().exec(command);
+            BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+
+            List<Bl2SeqResult> results = new ArrayList<>();
+            while ((line = input.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length != 8) {
+                    Logger.error("Invalid bl2seq result line obtained. skipping");
+                    continue;
+                }
+
+                int score = Integer.decode(data[0]);
+                int queryStart = Integer.decode(data[1]);
+                int queryEnd = Integer.decode(data[2]);
+                int subjectStart = Integer.decode(data[4]);
+                int subjectEnd = Integer.decode(data[5]);
+                int orientation = "plus".equalsIgnoreCase(data[7]) ? 0 : 1;
+                Bl2SeqResult result = new Bl2SeqResult(score, queryStart, queryEnd, data[3], subjectStart, subjectEnd,
+                        data[6], orientation);
+                results.add(result);
+            }
+
+            input.close();
             Files.deleteIfExists(subjectFilePath);
             Files.deleteIfExists(queryFilePath);
+            return results;
         } catch (IOException e) {
             throw new BlastException(e);
         }
-
-        return result;
     }
 
     /**
@@ -461,33 +481,6 @@ public class BlastPlus {
     public static void scheduleBlastIndexRebuildTask(boolean force) {
         RebuildBlastIndexTask task = new RebuildBlastIndexTask(force);
         IceExecutorService.getInstance().runTask(task);
-    }
-
-    /**
-     * Wrapper to run an external program, and collect its output.
-     *
-     * @param commandString command to run.
-     * @return Output string from the program.
-     * @throws BlastException
-     */
-    private static String runSimpleExternalProgram(String commandString) throws BlastException {
-        StringBuilder output = new StringBuilder();
-
-        try {
-            Process p = Runtime.getRuntime().exec(commandString);
-            BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String line;
-
-            while ((line = input.readLine()) != null) {
-                output.append(line).append("\n");
-            }
-
-            input.close();
-        } catch (Exception e) {
-            throw new BlastException(e);
-        }
-
-        return output.toString();
     }
 
     /**

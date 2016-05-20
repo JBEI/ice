@@ -1,7 +1,9 @@
 package org.jbei.ice.services.rest;
 
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.net.WebPartners;
@@ -62,9 +64,12 @@ public class AccessTokenResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response get() {
         String userId = requireUserId();
-        AccountTransfer transfer = accountController.getByEmail(userId).toDataTransferObject();
-        transfer.setAdmin(accountController.isAdministrator(userId));
-        return super.respond(transfer);
+        try {
+            AccountTransfer accountTransfer = UserSessions.getUserAccount(userId, sessionId);
+            return super.respond(accountTransfer);
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
     }
 
     /**
