@@ -46,7 +46,6 @@ angular
 
         // check user on rootscope (which is cleared when the page is refreshed)
         if (!$rootScope.user) {
-            console.log("getting user from server");
             Util.get("rest/accesstokens", function (result) {
                 $rootScope.user = result;
             });

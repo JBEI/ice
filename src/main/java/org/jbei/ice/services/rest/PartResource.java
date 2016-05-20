@@ -51,7 +51,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Rest resource for biological parts
+ * Rest resource for interacting representations of biological parts on ICE
  *
  * @author Hector Plahar
  */

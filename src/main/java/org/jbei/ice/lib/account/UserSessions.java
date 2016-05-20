@@ -1,6 +1,10 @@
 package org.jbei.ice.lib.account;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Account;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -75,5 +79,36 @@ public class UserSessions {
         if (userId == null)
             return;
         userSessionMap.remove(userId);
+    }
+
+    /**
+     * Retrieves the account object associated with the session identifier.
+     * If the requesting user is not the same as the user associated with the session, then the requesting
+     * user is required to have administrative privileges on their account
+     *
+     * @param requestingUser unique identifier for user making request
+     * @param token          unique session identifier
+     * @return account associated with the session token/identifier  or null if no account is located
+     * @throws PermissionException if the user Id associated with the session token is not the same as the requesting
+     *                             user but the requesting user's account does not have administrative privileges
+     */
+    public static AccountTransfer getUserAccount(String requestingUser, String token) {
+        String userId = getUserIdBySession(token);
+        if (StringUtils.isEmpty(userId))
+            return null;
+
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        if (account == null) {
+            Logger.error("Account for userId returned by session (\"" + userId + "\") cannot be found");
+            return null;
+        }
+        AccountController accountController = new AccountController();
+
+        if (!requestingUser.equalsIgnoreCase(userId) && !accountController.isAdministrator(requestingUser))
+            throw new PermissionException();
+
+        AccountTransfer accountTransfer = account.toDataTransferObject();
+        accountTransfer.setAdmin(accountController.isAdministrator(userId));
+        return accountTransfer;
     }
 }

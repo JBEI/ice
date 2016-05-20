@@ -2,6 +2,7 @@ package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.auth.hmac.HmacSignature;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.TokenVerification;
 import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -115,8 +116,12 @@ public class RestResource {
         if (!StringUtils.isEmpty(apiToken)) {
             String clientId = !StringUtils.isEmpty(apiClientId) ? apiClientId : request.getRemoteHost();
 
-            TokenVerification tokenVerification = new TokenVerification();
-            userId = tokenVerification.verifyAPIKey(apiToken, clientId, apiUser);
+            try {
+                TokenVerification tokenVerification = new TokenVerification();
+                userId = tokenVerification.verifyAPIKey(apiToken, clientId, apiUser);
+            } catch (PermissionException pe) {
+                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+            }
 
             // being a bit generous in terms of allowing other auth methods to be attempted even though apiToken is set
             if (userId != null)
