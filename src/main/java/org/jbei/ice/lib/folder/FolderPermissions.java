@@ -9,6 +9,7 @@ import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.lib.entry.EntryPermissions;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.storage.DAOFactory;
@@ -30,13 +31,14 @@ public class FolderPermissions {
     private final FolderAuthorization authorization;
     private final FolderDAO dao;
     private final TokenHash tokenHash;
+    private final String userId;
     private final PermissionDAO permissionDAO;
     private final AccountDAO accountDAO;
     private final RemoteShareModelDAO remoteShareModelDAO;
     private final RemoteClientModelDAO remoteClientModelDAO;
     private final RemotePartnerDAO remotePartnerDAO;
 
-    public FolderPermissions(long folderId) {
+    public FolderPermissions(String userId, long folderId) {
         this.dao = DAOFactory.getFolderDAO();
         this.permissionDAO = DAOFactory.getPermissionDAO();
         this.accountDAO = DAOFactory.getAccountDAO();
@@ -48,15 +50,15 @@ public class FolderPermissions {
             throw new IllegalArgumentException("Cannot retrieve folder with id " + folderId);
         this.authorization = new FolderAuthorization();
         this.tokenHash = new TokenHash();
+        this.userId = userId;
     }
 
     /**
      * Retrieves list of available folder permissions (both local and remote)
      *
-     * @param userId unique identifier for user requesting the permission. Must have write privileges on the folder
      * @return list available folders
      */
-    public ArrayList<AccessPermission> get(String userId) {
+    public ArrayList<AccessPermission> get() {
         authorization.expectWrite(userId, folder);
         ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
 
@@ -91,20 +93,19 @@ public class FolderPermissions {
      * Creates a new access permission record to enable read or write privileges for a folder.
      * User initiating request must have write privileges for the folder
      *
-     * @param userId           unique identifier for user creating record
      * @param accessPermission details about access permissions to create
      * @return access permission data transfer object with unique record identifier
      * @throws IllegalArgumentException if the <code>accessPermission</code> object is null
      * @throws PermissionException      if specified user does not have write privileges
      *                                  on specified folder.
      */
-    public AccessPermission createPermission(String userId, AccessPermission accessPermission) {
+    public AccessPermission createPermission(AccessPermission accessPermission) {
         if (accessPermission == null)
             throw new IllegalArgumentException("Cannot add null permission");
 
         // check if permission for remote folder is being created
         if (accessPermission.getArticle() == AccessPermission.Article.REMOTE) {
-            return createRemotePermission(userId, accessPermission);
+            return createRemotePermission(accessPermission);
         }
 
         // verify write authorization
@@ -122,7 +123,7 @@ public class FolderPermissions {
             }
             permission.setGroup(group);
         } else {
-            Account account = DAOFactory.getAccountDAO().get(accessPermission.getArticleId());
+            Account account = accountDAO.get(accessPermission.getArticleId());
             if (account == null) {
                 String errorMessage = "Could not assign account with id " + accessPermission.getArticleId() + " to folder";
                 Logger.error(errorMessage);
@@ -132,7 +133,6 @@ public class FolderPermissions {
             permission.setAccount(account);
         }
 
-        PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
         permission.setCanRead(accessPermission.isCanRead());
         permission.setCanWrite(accessPermission.isCanWrite());
         AccessPermission created = permissionDAO.create(permission).toDataTransferObject();
@@ -153,15 +153,40 @@ public class FolderPermissions {
         return created;
     }
 
+    public boolean enablePublicReadAccess() {
+        AccessPermission permission = new AccessPermission();
+        permission.setType(AccessPermission.Type.READ_FOLDER);
+        permission.setTypeId(folder.getId());
+        permission.setArticle(AccessPermission.Article.GROUP);
+        GroupController groupController = new GroupController();
+        permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
+        return createPermission(permission) != null;
+    }
+
+    public boolean disablePublicReadAccess() {
+        authorization.expectWrite(userId, folder);
+
+        GroupController groupController = new GroupController();
+        Group publicGroup = groupController.createOrRetrievePublicGroup();
+
+        permissionDAO.removePermission(null, folder, null, null, publicGroup, true, false);
+        if (folder.isPropagatePermissions()) {
+            for (Entry folderContent : folder.getContents()) {
+                EntryPermissions entryPermissions = new EntryPermissions(Long.toString(folderContent.getId()), userId);
+                entryPermissions.disablePublicReadAccess();
+            }
+        }
+        return true;
+    }
+
     /**
      * Creates an access folder permission for a remote user
      *
-     * @param userId           unique identifier of user sharing the folder
      * @param accessPermission access details
      * @return wrapper around the unique identifier for the remote permission created
      * @throws IllegalArgumentException if the partner record cannot be retrieved
      */
-    public AccessPermission createRemotePermission(String userId, AccessPermission accessPermission) {
+    public AccessPermission createRemotePermission(AccessPermission accessPermission) {
         RegistryPartner partner = accessPermission.getPartner();
         RemotePartner remotePartner = remotePartnerDAO.get(partner.getId());
         if (remotePartner == null) {
@@ -232,7 +257,7 @@ public class FolderPermissions {
         return remoteClientModel;
     }
 
-    public boolean remove(String userId, long permissionId) {
+    public boolean remove(long permissionId) {
         authorization.expectWrite(userId, this.folder);
 
         // get the permission

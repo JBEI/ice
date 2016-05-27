@@ -2,6 +2,7 @@ package org.jbei.ice.lib.entry;
 
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Entry;
 
@@ -20,9 +21,11 @@ import java.util.List;
 public class HasEntry {
 
     protected final EntryDAO entryDAO;
+    protected final AccountDAO accountDAO;
 
     public HasEntry() {
         this.entryDAO = DAOFactory.getEntryDAO();
+        this.accountDAO = DAOFactory.getAccountDAO();
     }
 
     protected Entry getEntry(String id) {

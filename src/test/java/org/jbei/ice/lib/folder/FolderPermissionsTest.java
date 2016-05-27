@@ -40,7 +40,7 @@ public class FolderPermissionsTest {
         folder = DAOFactory.getFolderDAO().create(folder);
         Assert.assertNotNull(folder);
 
-        FolderPermissions folderPermissions = new FolderPermissions(folder.getId());
+        FolderPermissions folderPermissions = new FolderPermissions(userId, folder.getId());
         AccessPermission accessPermission = new AccessPermission();
 
         // create a new account
@@ -52,6 +52,6 @@ public class FolderPermissionsTest {
         accessPermission.setArticleId(account2.getId());
         accessPermission.setTypeId(folder.getId());
 
-        Assert.assertNotNull(folderPermissions.createPermission(userId, accessPermission));
+        Assert.assertNotNull(folderPermissions.createPermission(accessPermission));
     }
 }

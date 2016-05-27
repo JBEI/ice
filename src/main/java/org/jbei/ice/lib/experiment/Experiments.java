@@ -2,7 +2,6 @@ package org.jbei.ice.lib.experiment;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.storage.DAOFactory;
@@ -23,32 +22,35 @@ public class Experiments extends HasEntry {
 
     private final ExperimentDAO dao;
     private final EntryAuthorization entryAuthorization;
+    private final Entry entry;
+    private final String userId;
 
-    public Experiments() {
+    /**
+     * @param userId unique identifier for user making request
+     * @param partId unique identifier for entry whose experiment links are being retrieved. The user making the request
+     *               must have read privileges on the entry
+     * @throws IllegalArgumentException if the entry associated with the part identifier cannot be located
+     */
+    public Experiments(String userId, String partId) {
         dao = DAOFactory.getExperimentDAO();
         entryAuthorization = new EntryAuthorization();
+        entry = getEntry(partId);
+        if (entry == null)
+            throw new IllegalArgumentException("Could not retrieve entry associated with " + partId);
+        this.userId = userId;
     }
 
     /**
      * Retrieves experiment data associated with a specific entry
      *
-     * @param userId unique identifier for user making request
-     * @param partId unique identifier for entry whose experiment links are being retrieved. The user making the request
-     *               must have read privileges on the entry
      * @return list of experiment studies associated with the specified entry, or null if the entry does not exist
      * @throws PermissionException if the specified user does not have read privileges on the
      *                             specified entry
      */
-    public ArrayList<Study> getPartStudies(String userId, String partId) {
-        Entry entry = getEntry(partId);
-        if (entry == null)
-            return null;
-
+    public ArrayList<Study> getPartStudies() {
         entryAuthorization.expectRead(userId, entry);
 
         List<Experiment> experimentList = dao.getExperimentList(entry.getId());
-        if (experimentList == null)
-            return null;
 
         ArrayList<Study> studies = new ArrayList<>();
         for (Experiment experiment : experimentList) {
@@ -65,16 +67,10 @@ public class Experiments extends HasEntry {
      * Only read access is required to create a new study. To update an existing study
      * the user must be the creator or must have write access on the entry the study is associated with
      *
-     * @param userId id of user making request.
-     * @param partId id of entry the study is being created for
      * @param study  data for study
      * @return saved study (including unique identifier)
      */
-    public Study createOrUpdateStudy(String userId, String partId, Study study) {
-        Entry entry = getEntry(partId);
-        if (entry == null)
-            return null;
-
+    public Study createOrUpdateStudy(Study study) {
         if (StringUtils.isEmpty(study.getUrl()))
             return null;
 
@@ -112,21 +108,13 @@ public class Experiments extends HasEntry {
      * User making request must have created the study ({@see createOrUpdateStudy()}) or must have write
      * permissions for the part that the study is associated with
      *
-     * @param userId  id of user making request
-     * @param partId  id of part study is associated with
      * @param studyId id of study to be deleted
      * @return true if study is found and deleted successfully, false otherwise
      */
-    public boolean deleteStudy(String userId, String partId, long studyId) {
+    public boolean deleteStudy(long studyId) {
         Experiment experiment = dao.get(studyId);
         if (experiment == null)
             return false;
-
-        Entry entry = getEntry(partId);
-        if (entry == null) {
-            Logger.error("Could not retrieve entry with id " + partId);
-            return false;
-        }
 
         if (!userId.equalsIgnoreCase(experiment.getOwnerEmail()) &&
                 !entryAuthorization.canWriteThoroughCheck(userId, entry)) {

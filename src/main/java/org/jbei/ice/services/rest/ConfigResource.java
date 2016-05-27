@@ -27,7 +27,7 @@ public class ConfigResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public ArrayList<Setting> get() {
-        final String userId = getUserId();
+        final String userId = requireUserId();
         return controller.retrieveSystemSettings(userId);
     }
 

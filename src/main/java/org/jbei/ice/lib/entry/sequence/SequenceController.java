@@ -12,7 +12,6 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
-import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryFactory;
@@ -23,6 +22,7 @@ import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.*;
 
@@ -41,13 +41,13 @@ import java.util.*;
 public class SequenceController {
 
     private final SequenceDAO dao;
+    private final EntryDAO entryDAO;
     private final EntryAuthorization authorization;
-    private final Entries retriever;
 
     public SequenceController() {
         dao = DAOFactory.getSequenceDAO();
+        entryDAO = DAOFactory.getEntryDAO();
         authorization = new EntryAuthorization();
-        retriever = new Entries();
     }
 
     // either or both recordId and entryType has to have a value
@@ -110,10 +110,12 @@ public class SequenceController {
 
     public FeaturedDNASequence updateSequence(String userId, long entryId, FeaturedDNASequence featuredDNASequence,
                                               boolean addFeatures) {
-        Entry entry = retriever.get(userId, entryId);
+        Entry entry = entryDAO.get(entryId);
         if (entry == null) {
             return null;
         }
+
+        authorization.expectRead(userId, entry);
 
         if (addFeatures) {
             // expect existing sequence
@@ -451,7 +453,9 @@ public class SequenceController {
     }
 
     public ByteArrayWrapper getSequenceFile(String userId, long partId, String type) {
-        Entry entry = retriever.get(userId, partId);
+        Entry entry = entryDAO.get(partId);
+        authorization.expectRead(userId, entry);
+
         Sequence sequence = dao.getByEntry(entry);
         if (sequence == null)
             return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
