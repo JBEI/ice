@@ -485,9 +485,8 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
-    public ArrayList<PartSample> getSamples(@Context UriInfo info,
-                                            @PathParam("id") long partId) {
-        String userId = getUserId();
+    public ArrayList<PartSample> getSamples(@PathParam("id") long partId) {
+        String userId = requireUserId();
         return sampleService.retrieveEntrySamples(userId, partId);
     }
 
@@ -516,7 +515,7 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/sequence")
-    public Response getSequence(@PathParam("id") final long partId,
+    public Response getSequence(@PathParam("id") final String partId,
                                 @DefaultValue("false") @QueryParam("remote") boolean isRemote,
                                 @QueryParam("token") String remoteUserToken,
                                 @QueryParam("userId") String remoteUserId,
@@ -524,19 +523,28 @@ public class PartResource extends RestResource {
         final FeaturedDNASequence sequence;
         final String userId = getUserId();
 
-        if (isRemote) {
-            // entry exists remotely
-            sequence = remoteEntries.getSequence(userId, fid, partId);
-        } else {
-            // what request is being responded to (local or remote)
-            if (StringUtils.isEmpty(userId)) {
-                RegistryPartner partner = requireWebPartner();
-                sequence = sequenceController.getRequestedSequence(partner, remoteUserId, remoteUserToken, partId, fid);
+        try {
+            if (isRemote) {
+                // entry exists remotely
+                sequence = remoteEntries.getSequence(userId, fid, partId);
             } else {
-                sequence = sequenceController.retrievePartSequence(userId, partId);
+                // what request is being responded to (local or remote)
+                if (StringUtils.isEmpty(userId)) {
+                    RegistryPartner partner = requireWebPartner();
+                    if (StringUtils.isEmpty(remoteUserToken) || fid == 0) {
+                        sequence = sequenceController.retrievePartSequence(userId, partId);
+                    } else {
+                        sequence = sequenceController.getRequestedSequence(partner, remoteUserId, remoteUserToken, partId, fid);
+                    }
+                } else {
+                    // user id can be null if partId is public
+                    sequence = sequenceController.retrievePartSequence(userId, partId);
+                }
             }
+            return Response.status(Response.Status.OK).entity(sequence).build();
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
-        return Response.status(Response.Status.OK).entity(sequence).build();
     }
 
     // put should be used to update when the new vector editor implementation is in place
@@ -576,20 +584,21 @@ public class PartResource extends RestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public PartData create(@QueryParam("source") String sourceId,
+    public Response create(@QueryParam("source") String sourceId,
                            PartData partData) {
         final String userId = requireUserId();
         final EntryCreator creator = new EntryCreator();
-        long id;
         if (StringUtils.isEmpty(sourceId)) {
             log(userId, "created new " + partData.getType().getDisplay());
-            return creator.createPart(userId, partData);
+            return super.respond(creator.createPart(userId, partData));
         }
 
-        id = creator.copyPart(userId, sourceId);
-        log(userId, "created copy of entry " + sourceId + " at " + id);
-        partData.setId(id);
-        return partData;
+        try {
+            log(userId, "creating copy of entry " + sourceId);
+            return super.respond(creator.copyPart(userId, sourceId));
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
+        }
     }
 
     @PUT
@@ -615,29 +624,33 @@ public class PartResource extends RestResource {
     public Response update(@PathParam("id") final long partId,
                            final PartData partData) {
         final String userId = requireUserId();
-        final long id = controller.updatePart(userId, partId, partData);
-        log(userId, "update entry " + id);
-        partData.setId(id);
-        return super.respond(partData);
-    }
-
-    @DELETE
-    @Path("/{id}")
-    public void delete(@PathParam("id") final long id) {
-        Logger.info("Deleting part " + id);
+        try {
+            final long id = controller.updatePart(userId, partId, partData);
+            log(userId, "update entry " + id);
+            partData.setId(id);
+            return super.respond(partData);
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
     }
 
     @POST
     @Path("/trash")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response moveToTrash(final ArrayList<PartData> list) {
-        final String userId = getUserId();
-        final Type fooType = new TypeToken<ArrayList<PartData>>() {
-        }.getType();
-        final Gson gson = new GsonBuilder().create();
-        final ArrayList<PartData> data = gson.fromJson(gson.toJsonTree(list), fooType);
-        final boolean success = controller.moveEntriesToTrash(userId, data);
-        return respond(success);
+        try {
+            final String userId = getUserId();
+            final Type fooType = new TypeToken<ArrayList<PartData>>() {
+            }.getType();
+            final Gson gson = new GsonBuilder().create();
+            final ArrayList<PartData> data = gson.fromJson(gson.toJsonTree(list), fooType);
+            final boolean success = controller.moveEntriesToTrash(userId, data);
+            return respond(success);
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
     }
 
     /**
@@ -666,7 +679,7 @@ public class PartResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createLink(@PathParam("id") long partId,
-                               @QueryParam("linkType") @DefaultValue("CHILD") LinkType type,
+                               @DefaultValue("CHILD") @QueryParam("linkType") LinkType type,
                                PartData partData) {
         String userId = getUserId();
         log(userId, "adding entry link " + partData.getId() + " to " + partId);

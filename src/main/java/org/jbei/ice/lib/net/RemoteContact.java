@@ -200,7 +200,7 @@ public class RemoteContact {
         return restClient.getWor(url, path, FeaturedDNASequence.class, null, apiKey);
     }
 
-    public FeaturedDNASequence getSequence(String url, String userId, long partId, long folderId, String token, String apiKey) {
+    public FeaturedDNASequence getSequence(String url, String userId, String partId, long folderId, String token, String apiKey) {
         try {
             String path = "rest/parts/" + partId + "/sequence";
             String encodedToken = URLEncoder.encode(token, "UTF-8");

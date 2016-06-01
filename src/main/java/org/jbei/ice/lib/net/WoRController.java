@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.net;
 
-import org.jbei.ice.lib.access.TokenVerification;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
@@ -26,11 +25,9 @@ import java.util.List;
 public class WoRController {
 
     private final RemotePartnerDAO dao;
-    private final TokenVerification tokenVerification;
 
     public WoRController() {
         dao = DAOFactory.getRemotePartnerDAO();
-        this.tokenVerification = new TokenVerification();
     }
 
     /**
@@ -133,17 +130,5 @@ public class WoRController {
 
     public RegistryPartner getWebPartner(String userId, long partnerId) {
         return dao.get(partnerId).toDataTransferObject();
-    }
-
-
-    /**
-     * Checks if the web of registries admin config value has been set to enable this ICE instance
-     * to join the web of registries configuration
-     *
-     * @return true if value has been set to the affirmative, false otherwise
-     */
-    private boolean isInWebOfRegistries() {
-        String value = Utils.getConfigValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
-        return ("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
     }
 }

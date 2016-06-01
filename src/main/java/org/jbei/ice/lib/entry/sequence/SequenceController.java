@@ -15,6 +15,7 @@ import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryFactory;
+import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.parsers.GeneralParser;
@@ -38,7 +39,7 @@ import java.util.*;
  *
  * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
-public class SequenceController {
+public class SequenceController extends HasEntry {
 
     private final SequenceDAO dao;
     private final EntryDAO entryDAO;
@@ -223,8 +224,8 @@ public class SequenceController {
 
     // responds to remote requested entry sequence
     public FeaturedDNASequence getRequestedSequence(RegistryPartner requestingPartner, String remoteUserId,
-                                                    String token, long entryId, long folderId) {
-        Entry entry = DAOFactory.getEntryDAO().get(entryId);
+                                                    String token, String entryId, long folderId) {
+        Entry entry = getEntry(entryId);
         if (entry == null)
             return null;
 
@@ -257,8 +258,8 @@ public class SequenceController {
         return getFeaturedSequence(entry, permission.isCanWrite());
     }
 
-    public FeaturedDNASequence retrievePartSequence(String userId, long recordId) {
-        Entry entry = DAOFactory.getEntryDAO().get(recordId);
+    public FeaturedDNASequence retrievePartSequence(String userId, String recordId) {
+        Entry entry = getEntry(recordId);
         if (entry == null)
             throw new IllegalArgumentException("The part " + recordId + " could not be located");
 

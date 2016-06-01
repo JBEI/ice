@@ -47,6 +47,10 @@ public class WebPartners {
         this.remoteContact = remoteContact;
     }
 
+    public RegistryPartner get(long partnerId) {
+        return dao.get(partnerId).toDataTransferObject();
+    }
+
     /**
      * Request for the list of partners that this instance has, from other partners.
      * If this instance is not in web of registries, an empty list is returned

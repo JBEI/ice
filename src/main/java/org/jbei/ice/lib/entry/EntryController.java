@@ -62,9 +62,13 @@ public class EntryController extends HasEntry {
      * @param partId unique identifier for part being updated. This overrides the id in the partData object
      * @param part   information to update part with
      * @return unique identifier for part that was updated
+     * @throws IllegalArgumentException if the entry associated with the partId cannot be located
      */
     public long updatePart(String userId, long partId, PartData part) {
         Entry existing = dao.get(partId);
+        if (existing == null)
+            throw new IllegalArgumentException();
+
         authorization.expectWrite(userId, existing);
 
         Entry entry = InfoToModelFactory.updateEntryField(part, existing);

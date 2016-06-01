@@ -40,6 +40,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
+ * Resource for accessing files both locally and remotely
+ *
  * @author Hector Plahar
  */
 @Path("/file")
@@ -82,17 +84,6 @@ public class FileResource extends RestResource {
             Logger.error(e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
-    }
-
-    protected Response addHeaders(Response.ResponseBuilder response, String fileName) {
-        response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
-        int dotIndex = fileName.lastIndexOf('.') + 1;
-        if (dotIndex == 0)
-            return response.build();
-
-        String mimeType = ExtensionToMimeType.getMimeType(fileName.substring(dotIndex));
-        response.header("Content-Type", mimeType + "; name=\"" + fileName + "\"");
-        return response.build();
     }
 
     /**
