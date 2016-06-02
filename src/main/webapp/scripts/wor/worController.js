@@ -139,9 +139,10 @@ angular.module('ice.wor.controller', [])
         };
     })
     .controller('WorEntryController', function ($location, $scope, $window, $stateParams,
-                                                EntryService, WorService, Util) {
+                                                $cookieStore, EntryService, WorService, Util) {
         $scope.notFound = undefined;
         $scope.remoteEntry = undefined;
+        $scope.sessionId = $cookieStore.get("sessionId");
 
         Util.get('rest/partners/' + $stateParams.partner, function (result) {
             $scope.currentPartner = result;

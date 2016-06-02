@@ -22,6 +22,7 @@ import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.net.RemoteEntries;
+import org.jbei.ice.lib.net.RemoteSequence;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
@@ -170,12 +171,19 @@ public class FileResource extends RestResource {
     public Response downloadSequence(
             @PathParam("partId") final long partId,
             @PathParam("type") final String downloadType,
+            @DefaultValue("-1") @QueryParam("remoteId") long remoteId,
             @QueryParam("sid") String sid) {
         if (StringUtils.isEmpty(sessionId))
             sessionId = sid;
 
         final String userId = getUserId(sessionId);
-        final ByteArrayWrapper wrapper = sequenceController.getSequenceFile(userId, partId, downloadType);
+        final ByteArrayWrapper wrapper;
+        if (remoteId != -1) {
+            RemoteSequence sequence = new RemoteSequence();
+            wrapper = sequence.get(remoteId, partId, downloadType);
+        } else {
+            wrapper = sequenceController.getSequenceFile(userId, partId, downloadType);
+        }
 
         StreamingOutput stream = new StreamingOutput() {
             @Override
