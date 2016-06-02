@@ -175,11 +175,10 @@ angular.module('ice.collection.controller', [])
     .controller('FolderPermissionsController', function ($rootScope, $scope, $http, $uibModalInstance, $cookieStore,
                                                          Util, folder) {
         $scope.folder = folder;
-        $scope.userFilterInput = undefined;
+        $scope.selectedPermission = undefined;
         $scope.newPermission = {canWrite: false, canRead: true, article: 'ACCOUNT', typeId: folder.id};
         $scope.permissions = [];
         $scope.placeHolder = "Enter user name or email";
-        $scope.resultSubField = "email";
         $scope.webPartners = [];
 
         $scope.canSetPublicPermission = undefined;
@@ -241,17 +240,14 @@ angular.module('ice.collection.controller', [])
             $scope.newPermission.article = type.toUpperCase();
             $scope.newPermission.articleId = undefined;
             $scope.newPermission.partner = undefined;
-            $scope.userFilterInput = undefined;
 
             switch (type.toLowerCase()) {
                 case "account":
                     $scope.placeHolder = "Enter user name or email";
-                    $scope.resultSubField = "email";
                     break;
 
                 case "group":
                     $scope.placeHolder = "Enter group name";
-                    $scope.resultSubField = "label";
                     break;
 
                 case "remote":
@@ -276,14 +272,13 @@ angular.module('ice.collection.controller', [])
                     return !$scope.newPermission.articleId;
 
                 case "remote":
-                    return !$scope.userFilterInput || !$scope.newPermission.partner;
+                    return !$scope.selectedPermission || !$scope.newPermission.partner;
             }
             return true;
         };
 
         $scope.userSelectionForPermissionAdd = function (item, model, label) {
             $scope.newPermission.articleId = item.id;
-            $scope.userFilterInput = $scope.userFilterInput.firstName + " " + $scope.userFilterInput.lastName;
         };
 
         $scope.removePermission = function (permission) {
@@ -310,8 +305,10 @@ angular.module('ice.collection.controller', [])
             $scope.newPermission.typeId = folder.id;
 
             if ($scope.newPermission.article.toLowerCase() == "remote") {
-                $scope.newPermission.userId = $scope.userFilterInput;
+                $scope.newPermission.userId = $scope.selectedPermission;
             }
+
+            console.log($scope.newPermission);
 
             Util.post("rest/folders/" + folder.id + "/permissions", $scope.newPermission, function (result) {
                 result.canWrite = result.type == 'WRITE_FOLDER';
@@ -320,7 +317,7 @@ angular.module('ice.collection.controller', [])
 
                 $scope.newPermission.articleId = undefined;
                 $scope.newPermission.partner = undefined;
-                $scope.userFilterInput = undefined;
+                $scope.selectedPermission = undefined;
             });
         };
 
@@ -347,7 +344,16 @@ angular.module('ice.collection.controller', [])
                             val: val
                         }
                     }).then(function (res) {
-                        return res.data;
+                        if (!res || !res.data)
+                            return [];
+
+                        var arr = [];
+                        var length = res.data.length;
+                        for (var i = 0; i < length; i++) {
+                            var val = res.data[i];
+                            arr.push({id: val.id, label: val.firstName + " " + val.lastName, description: val.email});
+                        }
+                        return arr;
                     });
 
                 case "group":
