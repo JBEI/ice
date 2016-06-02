@@ -101,16 +101,17 @@
 
                 <script type="text/ng-template" id="customTemplate.html">
                     <a class="font-90em">
-                        <span ng-bind-html="match.model.firstName + ' ' + match.model.lastName | uibTypeaheadHighlight:query"></span>
+                        <span ng-bind-html="match.model.label | uibTypeaheadHighlight:query"></span>
 
-                        <div ng-bind-html="match.model.email | uibTypeaheadHighlight:query"
+                        <div ng-bind-html="match.model.description | uibTypeaheadHighlight:query"
                              style="font-size: 12px; color: #aaa; margin-top: -3px;"></div>
                     </a>
                 </script>
+
                 <input type="text" class="input_box" style="width: 200px; padding: 6px"
-                       placeholder="{{placeHolder}}" ng-model="userFilterInput"
+                       placeholder="{{placeHolder}}" ng-model="selectedPermission"
                        typeahead-loading="loadingAddExistingData"
-                       uib-typeahead="result for result in filter($viewValue)"
+                       uib-typeahead="result as result.label for result in filter($viewValue)"
                        typeahead-editable="true" typeahead-template-url="customTemplate.html"
                        typeahead-on-select="userSelectionForPermissionAdd($item, $model, $label)">
 
