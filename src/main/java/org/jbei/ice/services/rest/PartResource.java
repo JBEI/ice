@@ -288,7 +288,7 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/statistics")
     public PartStatistics getStatistics(@PathParam("id") final long partId) {
-        final String userId = requireUserId();
+        final String userId = getUserId();
         try {
             return controller.retrieveEntryStatistics(userId, partId);
         } catch (PermissionException pe) {
