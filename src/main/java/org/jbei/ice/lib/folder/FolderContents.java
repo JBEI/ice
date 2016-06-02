@@ -94,8 +94,8 @@ public class FolderContents {
      * folders in the selection context
      */
     public List<FolderDetails> addEntrySelection(String userId, EntrySelection entryLocation) {
-        Entries retriever = new Entries();
-        List<Long> entries = retriever.getEntriesFromSelectionContext(userId, entryLocation);
+        Entries retriever = new Entries(userId);
+        List<Long> entries = retriever.getEntriesFromSelectionContext(entryLocation);
         if (StringUtils.isEmpty(userId)) {
             ArrayList<FolderDetails> destination = entryLocation.getDestination();
 
@@ -145,8 +145,8 @@ public class FolderContents {
             throw new PermissionException(errMsg);
         }
 
-        Entries entries = new Entries();
-        List<Long> entryIds = entries.getEntriesFromSelectionContext(userId, selection);
+        Entries entries = new Entries(userId);
+        List<Long> entryIds = entries.getEntriesFromSelectionContext(selection);
         boolean successRemove = folderDAO.removeFolderEntries(folder, entryIds) != null;
         if (!move)
             return successRemove;

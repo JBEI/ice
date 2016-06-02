@@ -12,10 +12,10 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
-import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryFactory;
+import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.parsers.GeneralParser;
@@ -23,6 +23,7 @@ import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.*;
 
@@ -38,16 +39,16 @@ import java.util.*;
  *
  * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
  */
-public class SequenceController {
+public class SequenceController extends HasEntry {
 
     private final SequenceDAO dao;
+    private final EntryDAO entryDAO;
     private final EntryAuthorization authorization;
-    private final Entries retriever;
 
     public SequenceController() {
         dao = DAOFactory.getSequenceDAO();
+        entryDAO = DAOFactory.getEntryDAO();
         authorization = new EntryAuthorization();
-        retriever = new Entries();
     }
 
     // either or both recordId and entryType has to have a value
@@ -110,10 +111,12 @@ public class SequenceController {
 
     public FeaturedDNASequence updateSequence(String userId, long entryId, FeaturedDNASequence featuredDNASequence,
                                               boolean addFeatures) {
-        Entry entry = retriever.get(userId, entryId);
+        Entry entry = entryDAO.get(entryId);
         if (entry == null) {
             return null;
         }
+
+        authorization.expectRead(userId, entry);
 
         if (addFeatures) {
             // expect existing sequence
@@ -221,8 +224,8 @@ public class SequenceController {
 
     // responds to remote requested entry sequence
     public FeaturedDNASequence getRequestedSequence(RegistryPartner requestingPartner, String remoteUserId,
-                                                    String token, long entryId, long folderId) {
-        Entry entry = DAOFactory.getEntryDAO().get(entryId);
+                                                    String token, String entryId, long folderId) {
+        Entry entry = getEntry(entryId);
         if (entry == null)
             return null;
 
@@ -255,8 +258,8 @@ public class SequenceController {
         return getFeaturedSequence(entry, permission.isCanWrite());
     }
 
-    public FeaturedDNASequence retrievePartSequence(String userId, long recordId) {
-        Entry entry = DAOFactory.getEntryDAO().get(recordId);
+    public FeaturedDNASequence retrievePartSequence(String userId, String recordId) {
+        Entry entry = getEntry(recordId);
         if (entry == null)
             throw new IllegalArgumentException("The part " + recordId + " could not be located");
 
@@ -451,7 +454,9 @@ public class SequenceController {
     }
 
     public ByteArrayWrapper getSequenceFile(String userId, long partId, String type) {
-        Entry entry = retriever.get(userId, partId);
+        Entry entry = entryDAO.get(partId);
+        authorization.expectRead(userId, entry);
+
         Sequence sequence = dao.getByEntry(entry);
         if (sequence == null)
             return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");

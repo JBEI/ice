@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.DNASequence;
@@ -13,7 +12,6 @@ import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.sample.PartSample;
-import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.servlet.InfoToModelFactory;
@@ -64,9 +62,13 @@ public class EntryController extends HasEntry {
      * @param partId unique identifier for part being updated. This overrides the id in the partData object
      * @param part   information to update part with
      * @return unique identifier for part that was updated
+     * @throws IllegalArgumentException if the entry associated with the partId cannot be located
      */
     public long updatePart(String userId, long partId, PartData part) {
         Entry existing = dao.get(partId);
+        if (existing == null)
+            throw new IllegalArgumentException();
+
         authorization.expectWrite(userId, existing);
 
         Entry entry = InfoToModelFactory.updateEntryField(part, existing);
@@ -327,50 +329,6 @@ public class EntryController extends HasEntry {
         partData.setCanEdit(authorization.canWriteThoroughCheck(userId, entry));
         partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
         return partData;
-    }
-
-    /**
-     * Retrieves and sets the default values for the entry. Some of these values (e.g. PI, and Funding Source)
-     * are set by individual users as part of their personal preferences
-     *
-     * @param userId Unique identifier for user requesting the values.
-     * @param type   entry type
-     * @return PartData object with the retrieve part defaults
-     */
-    public PartData getPartDefaults(String userId, EntryType type) {
-        PartData partData = new PartData(type);
-        PreferencesController preferencesController = new PreferencesController();
-
-        // pi defaults
-        String value = preferencesController.getPreferenceValue(userId, PreferenceKey.PRINCIPAL_INVESTIGATOR.name());
-        if (value != null) {
-            Account piAccount = accountController.getByEmail(value);
-            if (piAccount == null) {
-                partData.setPrincipalInvestigator(value);
-            } else {
-                partData.setPrincipalInvestigator(piAccount.getFullName());
-                partData.setPrincipalInvestigatorEmail(piAccount.getEmail());
-                partData.setPrincipalInvestigatorId(piAccount.getId());
-            }
-        }
-
-        // funding source defaults
-        value = preferencesController.getPreferenceValue(userId, PreferenceKey.FUNDING_SOURCE.name());
-        if (value != null) {
-            partData.setFundingSource(value);
-        }
-
-        // owner and creator details
-        Account account = accountController.getByEmail(userId);
-        if (account != null) {
-            partData.setOwner(account.getFullName());
-            partData.setOwnerEmail(account.getEmail());
-            partData.setCreator(partData.getOwner());
-            partData.setCreatorEmail(partData.getOwnerEmail());
-        }
-
-        // set the entry type defaults
-        return EntryUtil.setPartDefaults(partData);
     }
 
     protected PartData retrieveEntryDetails(String userId, Entry entry) throws PermissionException {

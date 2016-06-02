@@ -439,7 +439,7 @@ angular.module('ice.entry.controller', [])
         // retrieves the defaults for the specified type. Note that $scope.part is the main part
         var getPartDefaults = function (type, isMain) {
             //entry.query({partId: type}, function (result) {
-            Util.get("rest/parts/" + type, function (result) {
+            Util.get("rest/parts/defaults/" + type, function (result) {
                 if (isMain) { // or if !$scope.part
                     $scope.part = result;
                     $scope.part = EntryService.setNewEntryFields($scope.part);

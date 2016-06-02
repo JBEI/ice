@@ -3,6 +3,7 @@ package org.jbei.ice.services.rest;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntrySelection;
@@ -12,6 +13,7 @@ import org.jbei.ice.lib.net.WebPartners;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
  * Resource for interacting with partners in the web of registries configuration with this instance
@@ -20,6 +22,15 @@ import javax.ws.rs.core.Response;
  */
 @Path("/partners")
 public class PartnerResource extends RestResource {
+
+    @GET
+    @Path("{id}")
+    public Response getWebPartner(@PathParam("id") final long partnerId) {
+        requireUserId();
+        WebPartners webPartners = new WebPartners();
+        final RegistryPartner partner = webPartners.get(partnerId);
+        return super.respond(Response.Status.OK, partner);
+    }
 
     /**
      * Retrieves list of available web partners requested by user or an ICE instance
@@ -104,6 +115,16 @@ public class PartnerResource extends RestResource {
         RemoteEntries remoteEntries = new RemoteEntries();
         final PartData result = remoteEntries.getPublicEntryTooltip(userId, partnerId, entryId);
         return super.respond(Response.Status.OK, result);
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entries/{entryId}/attachments")
+    public List<AttachmentInfo> getAttachments(@PathParam("id") final long partnerId,
+                                               @PathParam("entryId") final long partId) {
+        final String userId = requireUserId();
+        RemoteEntries remoteEntries = new RemoteEntries();
+        return remoteEntries.getEntryAttachments(userId, partnerId, partId);
     }
 
     @PUT

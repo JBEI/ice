@@ -41,9 +41,18 @@ public class AnnotationResource extends RestResource {
                                 @DefaultValue("false") @QueryParam("asc") final boolean asc) {
         String userId = requireUserId();
         Annotations annotations = new Annotations(userId);
-        return super.respond(annotations.get(offset, limit, sort));
+        try {
+            return super.respond(annotations.get(offset, limit, sort));
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
     }
 
+    /**
+     * Curate available annotations to include or exclude them from auto-annotation feature
+     *
+     * @param list list of annotations each with specified curate
+     */
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     public Response curate(List<DNAFeature> list) {
@@ -70,10 +79,13 @@ public class AnnotationResource extends RestResource {
      * @return annotations for sequence
      */
     @POST
-    public Response getAnnotations(FeaturedDNASequence sequence) {
+    public Response getAnnotationsForSequence(FeaturedDNASequence sequence) {
         String userId = getUserId();
         Annotations annotations = new Annotations(userId);
-        return super.respond(annotations.generate(sequence));
+        FeaturedDNASequence annotatedSequence = annotations.generate(sequence);
+        if (annotatedSequence == null)
+            throw new WebApplicationException();
+        return super.respond(annotatedSequence);
     }
 
     @PUT

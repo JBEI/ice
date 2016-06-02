@@ -92,20 +92,20 @@
                             class="caret"></span>
                     </div>
                     <ul class="uib-dropdown-menu">
-                        <li class="cursor_pointer font-80em" ng-if="remoteEntry.hasOriginalSequence">
-                            <a ng-href="https://{{currentPartner.url}}/rest/file/{{remoteEntry.id}}/sequence/original"
-                               target="_self">Original</a>
-                        </li>
+                        <!--<li class="cursor_pointer font-80em" ng-if="remoteEntry.hasOriginalSequence">-->
+                        <!--<a ng-href="https://{{currentPartner.url}}/rest/file/{{remoteEntry.id}}/sequence/original"-->
+                        <!--target="_self">Original</a>-->
+                        <!--</li>-->
                         <li class="cursor_pointer font-80em">
-                            <a ng-href="https://{{currentPartner.url}}/rest/file/{{remoteEntry.id}}/sequence/genbank"
+                            <a ng-href="rest/file/{{remoteEntry.id}}/sequence/genbank?remoteId={{currentPartner.id}}&sid={{sessionId}}"
                                target="_self"><i>Genbank</i></a>
                         </li>
                         <li class="cursor_pointer font-80em">
-                            <a ng-href="https://{{currentPartner.url}}/rest/file/{{remoteEntry.id}}/sequence/fasta"
+                            <a ng-href="rest/file/{{remoteEntry.id}}/sequence/fasta?remoteId={{currentPartner.id}}&sid={{sessionId}}"
                                target="_self"><i>FASTA</i></a>
                         </li>
                         <li class="cursor_pointer font-80em">
-                            <a ng-href="https://{{currentPartner.url}}/rest/file/{{remoteEntry.id}}/sequence/sbol"
+                            <a ng-href="rest/file/{{remoteEntry.id}}/sequence/sbol?remoteId={{currentPartner.id}}&sid={{sessionId}}"
                                target="_self"><i>SBOL</i></a>
                         </li>
                     </ul>

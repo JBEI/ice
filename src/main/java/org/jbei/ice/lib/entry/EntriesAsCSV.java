@@ -55,8 +55,8 @@ public class EntriesAsCSV {
      * false otherwise
      */
     public boolean setSelectedEntries(String userId, EntrySelection selection) {
-        Entries retriever = new Entries();
-        this.entries = retriever.getEntriesFromSelectionContext(userId, selection);
+        Entries retriever = new Entries(userId);
+        this.entries = retriever.getEntriesFromSelectionContext(selection);
         try {
             writeList(userId);
             return true;

@@ -219,4 +219,15 @@ public class RestResource {
         final String who = (userId == null) ? "Unknown" : userId;
         Logger.info(who + ": " + message);
     }
+
+    protected Response addHeaders(Response.ResponseBuilder response, String fileName) {
+        response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+        int dotIndex = fileName.lastIndexOf('.') + 1;
+        if (dotIndex == 0)
+            return response.build();
+
+        String mimeType = ExtensionToMimeType.getMimeType(fileName.substring(dotIndex));
+        response.header("Content-Type", mimeType + "; name=\"" + fileName + "\"");
+        return response.build();
+    }
 }
