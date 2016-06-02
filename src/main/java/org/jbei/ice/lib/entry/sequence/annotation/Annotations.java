@@ -49,6 +49,15 @@ public class Annotations {
         this.accountDAO = DAOFactory.getAccountDAO();
     }
 
+    /**
+     * Retrieves list of annotations that are available
+     *
+     * @param offset paging start
+     * @param limit  maximum number of annotations to return
+     * @param sort   paging sort
+     * @return available annotations that conform to parameters along with the total number that are available
+     * @throws PermissionException if the requesting user's account does not have administrative privileges
+     */
     public Results<DNAFeatures> get(int offset, int limit, String sort) {
         if (!isAdministrator())
             throw new PermissionException("Administrative privileges required to retrieve features");

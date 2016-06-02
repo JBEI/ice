@@ -4,8 +4,8 @@ angular.module('ice.common.service', [])
     .factory('Util', function ($rootScope, $location, $cookieStore, $cookies, $resource) {
         return {
             handleError: function (response) {
-                var errorMsg;
                 var type;
+                var errorMsg = response.data.errorMessage;
 
                 switch (response.status) {
                     case 401:
@@ -21,7 +21,7 @@ angular.module('ice.common.service', [])
                         break;
 
                     case 403:
-                        errorMsg = "Access to resource has been denied";
+                        errorMsg = "Access to requested resource has been denied";
                         type = "warning";
                         break;
 
@@ -31,7 +31,6 @@ angular.module('ice.common.service', [])
                         break;
 
                     case 500:
-                        errorMsg = response.data.errorMessage;
                         type = "danger";
                         break;
 

@@ -69,8 +69,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
             destination: angular.copy($scope.selectedFolders)
         };
 
-        console.log(entrySelection);
-
         var selectedEntriesObjectArray = Selection.getSelectedEntries();
         for (var i = 0; i < selectedEntriesObjectArray.length; i += 1) {
             entrySelection.entries.push(selectedEntriesObjectArray[i].id);

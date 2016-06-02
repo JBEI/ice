@@ -29,7 +29,6 @@ import java.util.List;
 /**
  * Entries that are on other registry instances other than this instance.
  * An account is generally required to be able to access other instances through this instances
- * // todo : cleanup . lot of common elements in each method
  *
  * @author Hector Plahar
  */
@@ -54,7 +53,7 @@ public class RemoteEntries {
         return ("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
     }
 
-    public WebEntries getPublicEntries(String userId, long remoteId, int offset, int limit, String sort, boolean asc) {
+    public WebEntries getPublicEntries(long remoteId, int offset, int limit, String sort, boolean asc) {
         if (!hasRemoteAccessEnabled())
             return null;
 
@@ -131,7 +130,7 @@ public class RemoteEntries {
         return remoteContact.getToolTipDetails(url, userId, partId, token, remotePartner.getApiKey());
     }
 
-    public FeaturedDNASequence getSequence(String userId, long folderId, long entryId) {
+    public FeaturedDNASequence getSequence(String userId, long folderId, String entryId) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         Folder folder = DAOFactory.getFolderDAO().get(folderId);
 
@@ -196,7 +195,7 @@ public class RemoteEntries {
         return remoteContact.getPublicEntryStatistics(partner.getUrl(), entryId, partner.getApiKey());
     }
 
-    public FeaturedDNASequence getPublicEntrySequence(String userId, long remoteId, long entryId) {
+    public FeaturedDNASequence getPublicEntrySequence(long remoteId, long entryId) {
         if (!hasRemoteAccessEnabled())
             return null;
 

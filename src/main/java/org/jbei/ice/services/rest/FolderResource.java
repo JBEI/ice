@@ -14,10 +14,8 @@ import org.jbei.ice.lib.folder.*;
 import org.jbei.ice.lib.shared.ColumnField;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -252,8 +250,8 @@ public class FolderResource extends RestResource {
     @Path("/{id}/permissions")
     public Response getFolderPermissions(@PathParam("id") final long folderId) {
         final String userId = requireUserId();
-        FolderPermissions folderPermissions = new FolderPermissions(folderId);
-        return respond(folderPermissions.get(userId));
+        FolderPermissions folderPermissions = new FolderPermissions(userId, folderId);
+        return respond(folderPermissions.get());
     }
 
     /**
@@ -283,8 +281,8 @@ public class FolderResource extends RestResource {
                                   final AccessPermission permission) {
         try {
             final String userId = requireUserId();
-            FolderPermissions folderPermissions = new FolderPermissions(folderId);
-            return super.respond(folderPermissions.createPermission(userId, permission));
+            FolderPermissions folderPermissions = new FolderPermissions(userId, folderId);
+            return super.respond(folderPermissions.createPermission(permission));
         } catch (PermissionException pe) {
             return super.respond(Response.Status.FORBIDDEN);
         } catch (IllegalArgumentException ile) {
@@ -298,8 +296,8 @@ public class FolderResource extends RestResource {
     public Response removePermission(@PathParam("id") long folderId,
                                      @PathParam("permissionId") long permissionId) {
         final String userId = requireUserId();
-        FolderPermissions folderPermissions = new FolderPermissions(folderId);
-        boolean success = folderPermissions.remove(userId, permissionId);
+        FolderPermissions folderPermissions = new FolderPermissions(userId, folderId);
+        boolean success = folderPermissions.remove(permissionId);
         return super.respond(success);
     }
 
@@ -308,21 +306,28 @@ public class FolderResource extends RestResource {
     @Path("/{id}/permissions/public")
     public Response enablePublicAccess(@PathParam("id") final long folderId) {
         final String userId = requireUserId();
-        if (controller.enablePublicReadAccess(userId, folderId)) {
-            return respond(Response.Status.OK);
+        log(userId, "adding public read access to folder " + folderId);
+        FolderPermissions folderPermissions = new FolderPermissions(userId, folderId);
+        try {
+            folderPermissions.enablePublicReadAccess();
+            return Response.ok().build();
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
-        return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions/public")
-    public Response disablePublicAccess(@Context final UriInfo info,
-                                        @PathParam("id") final long folderId) {
+    public Response disablePublicAccess(@PathParam("id") final long folderId) {
         final String userId = requireUserId();
-        if (controller.disablePublicReadAccess(userId, folderId)) {
-            return respond(Response.Status.OK);
+        log(userId, "removing public read access from folder " + folderId);
+        FolderPermissions folderPermissions = new FolderPermissions(userId, folderId);
+        try {
+            folderPermissions.disablePublicReadAccess();
+            return Response.ok().build();
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
-        return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 }

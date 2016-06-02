@@ -7,7 +7,7 @@ import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.entry.EntriesAsCSV;
-import org.jbei.ice.lib.folder.FolderController;
+import org.jbei.ice.lib.folder.FolderPermissions;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.FolderDAO;
 import org.jbei.ice.storage.hibernate.dao.ManuscriptModelDAO;
@@ -89,16 +89,16 @@ public class Manuscripts {
         if (manuscript.getStatus() != null && manuscript.getStatus() != model.getStatus()) {
             // update status
             model.setStatus(manuscript.getStatus());
+            FolderPermissions folderPermissions = new FolderPermissions(this.userId, model.getFolder().getId());
 
-            FolderController folderController = new FolderController();
             if (model.getStatus() == ManuscriptStatus.ACCEPTED) {
                 // make public
                 setFolderType(model.getFolder(), FolderType.PUBLIC);
-                folderController.enablePublicReadAccess(this.userId, model.getFolder().getId());
+                folderPermissions.enablePublicReadAccess();
             } else {
                 // remove public
                 setFolderType(model.getFolder(), FolderType.PRIVATE);
-                folderController.disablePublicReadAccess(this.userId, model.getFolder().getId());
+                folderPermissions.disablePublicReadAccess();
             }
         }
 

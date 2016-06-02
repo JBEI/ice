@@ -71,4 +71,9 @@ public class Study implements IDataTransferModel {
     public void setOwnerEmail(String ownerEmail) {
         this.ownerEmail = ownerEmail;
     }
+
+    @Override
+    public String toString() {
+        return "[" + label + ", " + url + "]";
+    }
 }

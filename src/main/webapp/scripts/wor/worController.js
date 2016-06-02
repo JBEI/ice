@@ -139,11 +139,12 @@ angular.module('ice.wor.controller', [])
         };
     })
     .controller('WorEntryController', function ($location, $scope, $window, $stateParams,
-                                                EntryService, WorService, Util) {
+                                                $cookieStore, EntryService, WorService, Util) {
         $scope.notFound = undefined;
         $scope.remoteEntry = undefined;
+        $scope.sessionId = $cookieStore.get("sessionId");
 
-        Util.get('rest/web/partner/' + $stateParams.partner, function (result) {
+        Util.get('rest/partners/' + $stateParams.partner, function (result) {
             $scope.currentPartner = result;
         });
 
@@ -223,7 +224,7 @@ angular.module('ice.wor.controller', [])
         }
 
         $scope.getAttachments = function () {
-            Util.list('rest/web/' + $stateParams.partner + '/entries/' + $stateParams.entryId + '/attachments',
+            Util.list('rest/partners/' + $stateParams.partner + '/entries/' + $stateParams.entryId + '/attachments',
                 function (result) {
                     $scope.remoteAttachments = result;
                 });
