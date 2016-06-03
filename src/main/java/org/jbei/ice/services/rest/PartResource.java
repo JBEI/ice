@@ -388,7 +388,7 @@ public class PartResource extends RestResource {
     public Response getTraces(
             @Context final UriInfo info,
             @PathParam("id") final long partId,
-            @DefaultValue("10") @QueryParam("limit") int limit,
+            @DefaultValue("100") @QueryParam("limit") int limit,
             @DefaultValue("0") @QueryParam("start") int start) {
         final String userId = getUserId();
         TraceSequences traceSequences = new TraceSequences(userId, partId);
