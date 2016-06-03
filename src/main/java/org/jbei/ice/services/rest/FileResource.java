@@ -179,8 +179,8 @@ public class FileResource extends RestResource {
         final String userId = getUserId(sessionId);
         final ByteArrayWrapper wrapper;
         if (remoteId != -1) {
-            RemoteSequence sequence = new RemoteSequence();
-            wrapper = sequence.get(remoteId, partId, downloadType);
+            RemoteSequence sequence = new RemoteSequence(remoteId, partId);
+            wrapper = sequence.get(downloadType);
         } else {
             wrapper = sequenceController.getSequenceFile(userId, partId, downloadType);
         }

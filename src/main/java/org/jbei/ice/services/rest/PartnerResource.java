@@ -2,13 +2,16 @@ package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.access.RemoteAccess;
+import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntrySelection;
-import org.jbei.ice.lib.net.RemoteEntries;
-import org.jbei.ice.lib.net.WebPartners;
+import org.jbei.ice.lib.net.*;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -73,8 +76,7 @@ public class PartnerResource extends RestResource {
 
         // where the request is coming from
         // assumes that if no session information (or invalid user or request server is different from local?
-        // or contains token?) then this is
-        // a request coming remotely
+        // or contains token?) then this is a request coming remotely
         if (StringUtils.isEmpty(userId) && !StringUtils.isEmpty(partner.getApiKey())) {
             Logger.info("Received remote partner add request from " + partner.getUrl());
             result = webPartners.processRemoteWebPartnerAdd(partner);
@@ -171,6 +173,132 @@ public class PartnerResource extends RestResource {
             RegistryPartner registryPartner = requireWebPartner();
             WebPartners partners = new WebPartners();
             return super.respond(partners.removeRemotePartner(registryPartner.getId(), partnerId));
+        }
+    }
+
+    /**
+     * Retrieves available folders from the specified remote ice partner
+     *
+     * @param remoteId unique identifier for remote partner being accessed
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}/available")
+    public Response readRemoteUser(@PathParam("id") long remoteId) {
+        requireUserId();
+        try {
+            RemoteFolders remoteFolders = new RemoteFolders(remoteId);
+            return super.respond(remoteFolders.getAvailableFolders());
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}/users/{email}")
+    public Response getRemoteUser(@PathParam("id") final long remoteId,
+                                  @PathParam("email") final String email) {
+        requireUserId();
+        RemoteAccess remoteAccess = new RemoteAccess();
+        AccountTransfer accountTransfer = remoteAccess.getRemoteUser(remoteId, email);
+        return super.respond(accountTransfer);
+    }
+
+    /**
+     * @return sequence from remote ICE
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}/{entryId}/sequence")
+    public Response getSequence(@PathParam("id") final long remoteId,
+                                @PathParam("entryId") final long partId) {
+        requireUserId();
+        try {
+            RemoteSequence remoteSequence = new RemoteSequence(remoteId, partId);
+            final FeaturedDNASequence sequence = remoteSequence.getRemoteSequence();
+            if (sequence == null) {
+                return Response.status(Response.Status.NO_CONTENT).build();
+            }
+            return Response.status(Response.Status.OK).entity(sequence).build();
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+    }
+
+    /**
+     * @return traces from remote ICE
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}/parts/{entryId}/traces")
+    public Response getSequenceTraces(@PathParam("id") long remoteId,
+                                      @PathParam("entryId") long partId) {
+        try {
+            requireUserId();
+            RemoteEntry remoteEntry = new RemoteEntry(remoteId, partId);
+            List<TraceSequenceAnalysis> traces = remoteEntry.getTraces();
+            if (traces == null) {
+                return Response.status(Response.Status.NO_CONTENT).build();
+            }
+            return Response.status(Response.Status.OK).entity(traces).build();
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+    }
+
+    /**
+     * @return public folders from remote ICE
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}/folders/{folderId}")
+    public Response getPublicFolderEntries(@PathParam("id") final long remoteId,
+                                           @PathParam("folderId") final long folderId,
+                                           @DefaultValue("0") @QueryParam("offset") final int offset,
+                                           @DefaultValue("15") @QueryParam("limit") final int limit,
+                                           @DefaultValue("created") @QueryParam("sort") final String sort,
+                                           @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+        requireUserId();
+        try {
+            RemoteFolder remoteFolder = new RemoteFolder(remoteId, folderId);
+            return super.respond(remoteFolder.getEntries(sort, asc, offset, limit));
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+    }
+
+    /**
+     * @return part samples from remote ICE
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/parts/{partId}/samples")
+    public Response getRemotePartSamples(@PathParam("id") long remoteId,
+                                         @PathParam("partId") long partId) {
+        requireUserId();
+        try {
+            RemoteEntry remoteEntry = new RemoteEntry(remoteId, partId);
+            return super.respond(remoteEntry.getSamples());
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+    }
+
+    /**
+     * @return comments from remote ICE
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}/parts/{partId}/comments")
+    public Response getRemotePartComments(@PathParam("id") long remoteId,
+                                          @PathParam("partId") long partId) {
+        requireUserId();
+        try {
+            RemoteEntry remoteEntry = new RemoteEntry(remoteId, partId);
+            return super.respond(remoteEntry.getComments());
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
     }
 }

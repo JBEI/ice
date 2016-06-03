@@ -88,7 +88,7 @@ angular.module('ice.wor.controller', [])
         $scope.params = {folderId: id, id: $stateParams.partner, offset: 0, currentPage: 1};
 
         var getRemoteFolderEntries = function () {
-            Util.get('rest/remote/' + $stateParams.partner + '/folders/' + id, function (result) {
+            Util.get('rest/partners/' + $stateParams.partner + '/folders/' + id, function (result) {
                 $scope.selectedPartnerFolder = result;
                 $scope.selectedPartner = WorService.getSelectedPartner();
                 if ($scope.selectedPartner == undefined) {
@@ -130,7 +130,7 @@ angular.module('ice.wor.controller', [])
                 $scope.params.offset = offset;
                 $scope.params.limit = 1;
 
-                Util.get('rest/remote/' + partnerId + '/folders/' + $scope.params.folderId, function (result) {
+                Util.get('rest/partners/' + partnerId + '/folders/' + $scope.params.folderId, function (result) {
                     callback(result.entries[0].id);
                 }, $scope.params)
             }, $scope.selectedPartnerFolder.count, position, url);
@@ -342,7 +342,7 @@ angular.module('ice.wor.controller', [])
         $scope.selectPartner = function (partner) {
             $location.path("web/" + partner.id);
             $scope.selectedPartner = partner.id;
-            Util.list("rest/remote/" + partner.id + "/available", function (result) {
+            Util.list("rest/partners/" + partner.id + "/available", function (result) {
                 $scope.selectedPartnerFolders = result;
             });
         };
@@ -360,7 +360,7 @@ angular.module('ice.wor.controller', [])
         $scope.selectedPartner = $stateParams.partner;
 
         if ($scope.selectedPartner) {
-            Util.list("rest/remote/" + $scope.selectedPartner + "/available", function (result) {
+            Util.list("rest/partners/" + $scope.selectedPartner + "/available", function (result) {
                 $scope.selectedPartnerFolders = result;
             });
         }
@@ -420,7 +420,7 @@ angular.module('ice.wor.controller', [])
         // retrieve remote samples
         $scope.entryComments = undefined;
 
-        Util.get('rest/remote/' + $stateParams.partner.id + '/parts/' + $stateParams.entryId + '/comments',
+        Util.get('rest/partners/' + $stateParams.partner.id + '/parts/' + $stateParams.entryId + '/comments',
             function (result) {
                 $scope.entryComments = result;
             });
@@ -429,7 +429,7 @@ angular.module('ice.wor.controller', [])
         // retrieve remote samples
         $scope.traceSequences = undefined;
 
-        Util.get("rest/remote/" + $stateParams.partner.id + "/parts/" + $stateParams.entryId + "/traces",
+        Util.get("rest/partners/" + $stateParams.partner.id + "/parts/" + $stateParams.entryId + "/traces",
             function (result) {
                 $scope.traceSequences = result;
             }, {}, function () {

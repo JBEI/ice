@@ -42,11 +42,6 @@ public class IceRestClient extends RestClient {
         client = ClientBuilder.newClient(clientConfig);
     }
 
-    public <T> T get(String url, String path, Class<T> clazz) {
-        WebTarget target = client.target("https://" + url).path(path);
-        return target.request(MediaType.APPLICATION_JSON_TYPE).buildGet().invoke(clazz);
-    }
-
     @Override
     public <T> T get(String url, String path, Class<T> clazz, Map<String, Object> queryParams) {
         WebTarget target = client.target("https://" + url).path(path);
