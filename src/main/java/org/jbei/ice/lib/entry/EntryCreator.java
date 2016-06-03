@@ -228,6 +228,8 @@ public class EntryCreator extends HasEntry {
         entry.setName(entry.getName() + " (copy)");
         entry.setRecordId(Utils.generateUUID());
         entry.setVersionId(entry.getRecordId());
+        entry.setOwnerEmail(account.getEmail());
+        entry.setOwner(account.getFullName());
         entry = createEntry(account, entry, new ArrayList<>());
 
         // check sequence
