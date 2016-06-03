@@ -100,8 +100,12 @@ public class FolderResource extends RestResource {
     public Response getFolder(@PathParam("id") long folderId) {
         String userId = requireUserId();
         log(userId, "get folder \"" + folderId + "\"");
-        UserFolder folder = new UserFolder(userId);
-        return super.respond(folder.getFolder(folderId));
+        try {
+            UserFolder folder = new UserFolder(userId);
+            return super.respond(folder.getFolder(folderId));
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
+        }
     }
 
     /**

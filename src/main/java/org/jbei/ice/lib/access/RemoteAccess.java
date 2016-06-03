@@ -5,6 +5,7 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.services.rest.IceRestClient;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.*;
 import org.jbei.ice.storage.model.*;
@@ -86,6 +87,19 @@ public class RemoteAccess {
 
         RemoteAccessModel remoteAccessModel = createRemoteAccessModel(accessPermission, remoteClientModel, permission);
         return remoteAccessModel.toDataTransferObject();
+    }
+
+    public AccountTransfer getRemoteUser(long remoteId, String email) {
+        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
+        if (partner == null)
+            return null;
+
+        AccountTransfer result = IceRestClient.getInstance().getWor(partner.getUrl(), "rest/users/" + email,
+                AccountTransfer.class, null, partner.getApiKey());
+        if (result == null)
+            return null;
+
+        return result;
     }
 
     /**

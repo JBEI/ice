@@ -1,6 +1,7 @@
 package org.jbei.ice.services.rest;
 
 import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.folder.collection.Collection;
 import org.jbei.ice.lib.folder.collection.CollectionEntries;
 import org.jbei.ice.lib.folder.collection.CollectionType;
@@ -52,8 +53,13 @@ public class CollectionResource extends RestResource {
     public Response getCollectionSubFolders(
             @DefaultValue("PERSONAL") @PathParam("type") CollectionType type) {
         final String userId = super.requireUserId();
-        Collections collections = new Collections(userId);
-        return super.respond(collections.getSubFolders(type));
+        try {
+            Collections collections = new Collections(userId);
+            return super.respond(collections.getSubFolders(type));
+        } catch (IllegalArgumentException ile) {
+            Logger.error(ile);
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
     }
 
     /**
@@ -61,8 +67,6 @@ public class CollectionResource extends RestResource {
      * Since the folder is intended to be retrieved from a
      * specified resource's context, this may not always return a result
      * even the folder with the specified id exists
-     *
-     * @return
      */
     @GET
     @Path("/{type}/folders/{id}")
@@ -87,16 +91,19 @@ public class CollectionResource extends RestResource {
                          @DefaultValue("false") @QueryParam("asc") final boolean asc,
                          @DefaultValue("") @QueryParam("filter") String filter,
                          @QueryParam("fields") List<String> queryParam) {
-        CollectionType type = CollectionType.valueOf(collectionType.toUpperCase());
-        ColumnField sortField = ColumnField.valueOf(sort.toUpperCase());
-
-        String userId = requireUserId();
-        log(userId, "retrieving entries for collection " + type);
-        CollectionEntries entries = new CollectionEntries(userId, type);
         try {
+            CollectionType type = CollectionType.valueOf(collectionType.toUpperCase());
+            ColumnField sortField = ColumnField.valueOf(sort.toUpperCase());
+
+            String userId = requireUserId();
+            log(userId, "retrieving entries for collection " + type);
+            CollectionEntries entries = new CollectionEntries(userId, type);
+
             return super.respond(entries.getEntries(sortField, asc, offset, limit, filter));
         } catch (PermissionException pe) {
             return super.respond(Response.Status.FORBIDDEN);
+        } catch (IllegalArgumentException ie) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
     }
 }

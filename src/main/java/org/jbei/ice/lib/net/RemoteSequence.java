@@ -4,7 +4,6 @@ import org.apache.commons.io.IOUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
-import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.AbstractFormatter;
@@ -13,6 +12,7 @@ import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.SBOLFormatter;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.utils.Utils;
+import org.jbei.ice.services.rest.IceRestClient;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
 import org.jbei.ice.storage.model.RemotePartner;
@@ -28,12 +28,23 @@ import java.net.URI;
  */
 public class RemoteSequence {
 
-    private final RemotePartnerDAO partnerDAO;
     private final RemoteContact remoteContact;
+    private final RemotePartner partner;
+    private final long remotePartId;
+    private final IceRestClient iceRestClient;
 
-    public RemoteSequence() {
-        this.partnerDAO = DAOFactory.getRemotePartnerDAO();
+    public RemoteSequence(long remoteId, long remotePartId) {
+        if (!hasRemoteAccessEnabled())
+            throw new IllegalArgumentException("Not a member of web of registries");
+
+        RemotePartnerDAO partnerDAO = DAOFactory.getRemotePartnerDAO();
+        partner = partnerDAO.get(remoteId);
+        if (partner == null)
+            throw new IllegalArgumentException("Cannot retrieve partner with id " + remoteId);
+
         this.remoteContact = new RemoteContact();
+        this.remotePartId = remotePartId;
+        this.iceRestClient = IceRestClient.getInstance();
     }
 
     /**
@@ -47,15 +58,22 @@ public class RemoteSequence {
         return ("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
     }
 
-    public ByteArrayWrapper get(long partnerId, long entryId, String type) {
-        if (!hasRemoteAccessEnabled())
-            return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
+    public FeaturedDNASequence getRemoteSequence() {
+        try {
+            String restPath = "rest/parts/" + remotePartId + "/sequence";
+            Object result = iceRestClient.getWor(partner.getUrl(), restPath, FeaturedDNASequence.class, null, partner.getApiKey());
+            if (result == null)
+                return null;
 
-        RemotePartner partner = this.partnerDAO.get(partnerId);
-        if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
-            return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
+            return (FeaturedDNASequence) result;
+        } catch (Exception e) {
+            Logger.error(e.getMessage());
+            return null;
+        }
+    }
 
-        FeaturedDNASequence featuredDNASequence = remoteContact.getPublicEntrySequence(partner.getUrl(), entryId,
+    public ByteArrayWrapper get(String type) {
+        FeaturedDNASequence featuredDNASequence = remoteContact.getPublicEntrySequence(partner.getUrl(), remotePartId,
                 partner.getApiKey());
         if (featuredDNASequence == null)
             return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");

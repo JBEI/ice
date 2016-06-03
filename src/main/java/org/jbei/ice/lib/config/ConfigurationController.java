@@ -6,7 +6,6 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
-import org.jbei.ice.lib.net.RemoteAccessController;
 import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -34,17 +33,7 @@ public class ConfigurationController {
 
     public Setting getSystemVersion(String url) {
         String version = getPropertyValue(ConfigurationKey.APPLICATION_VERSION);
-
-        if (url.equalsIgnoreCase(getPropertyValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER))) {
-            return new Setting("version", version);
-        }
-
-        // request version from master
-        try {
-            return new RemoteAccessController().getMasterVersion();
-        } catch (Exception e) {
-            return new Setting("version", version);
-        }
+        return new Setting("version", version);
     }
 
     public String getPropertyValue(ConfigurationKey key) {
