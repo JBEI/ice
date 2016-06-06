@@ -1459,6 +1459,7 @@ angular.module('ice.entry.controller', [])
                             $scope.pagingParams.sort = field;
                             $scope.pagingParams.asc = true;
                         }
+                        $scope.pagingParams.currentPage = 0;
                     };
 
                     /**
