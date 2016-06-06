@@ -256,7 +256,6 @@ angular.module('ice.entry.controller', [])
         $scope.historyPageChanged = function () {
             $scope.historyParams.offset = ($scope.historyParams.currentPage - 1) * $scope.historyParams.limit;
             Util.get("rest/parts/" + entryId + "/history", function (result) {
-                console.log(result);
                 if (history)
                     $scope.history = result;
                 //$scope.history = result;
@@ -729,6 +728,8 @@ angular.module('ice.entry.controller', [])
         var panes = $scope.panes = [];
         $scope.userFilterInput = undefined;
         $scope.canSetPublicPermission = undefined;
+        $scope.selectedArticle = {type: 'ACCOUNT', placeHolder: "Enter name or email"}
+
         if (!$rootScope.settings || !$rootScope.settings['RESTRICT_PUBLIC_ENABLE']) {
             Util.get("rest/config/RESTRICT_PUBLIC_ENABLE", function (result) {
                 if (!result)
@@ -741,6 +742,12 @@ angular.module('ice.entry.controller', [])
         } else {
             $scope.canSetPublicPermission = ($rootScope.settings['RESTRICT_PUBLIC_ENABLE'].value == "no") || $rootScope.user.isAdmin;
         }
+
+        $scope.setPermissionArticle = function (type) {
+            $scope.selectedArticle.type = type;
+            $scope.autoCompleteUsersOrGroups = undefined;
+            $scope.userFilterInput = undefined;
+        };
 
         $scope.activateTab = function (pane) {
             angular.forEach(panes, function (pane) {
@@ -775,17 +782,35 @@ angular.module('ice.entry.controller', [])
         $scope.filter = function () {
             var val = $scope.userFilterInput;
             if (!val) {
-                $scope.accessPermissions = undefined;
+                $scope.autoCompleteUsersOrGroups = undefined;
                 return;
             }
 
             $scope.filtering = true;
-            Util.list("rest/users/autocomplete", function (result) {
-                $scope.accessPermissions = result;
+            var resource;
+            var queryParams;
+
+            if ($scope.selectedArticle.type == 'ACCOUNT') {
+                resource = "users";
+                queryParams = {limit: 8, val: val};
+            } else {
+                resource = "groups";
+                queryParams = {limit: 8, token: val};
+            }
+
+            Util.list("rest/" + resource + "/autocomplete", function (result) {
+                if ($scope.selectedArticle.type == "ACCOUNT") {
+                    angular.forEach(result, function (item) {
+                        item.label = item.firstName + " " + item.lastName;
+                    });
+                }
+
+                $scope.autoCompleteUsersOrGroups = result;
                 $scope.filtering = false;
-            }, {limit: 8, val: val}, function (error) {
+
+            }, queryParams, function (error) {
                 $scope.filtering = false;
-                $scope.accessPermissions = undefined;
+                $scope.autoCompleteUsersOrGroups = undefined;
             });
         };
 
@@ -830,14 +855,16 @@ angular.module('ice.entry.controller', [])
         //
         // when user clicks on the check box, removes permission if exists or adds if not
         //
-        $scope.addRemovePermission = function (permission) {
-            permission.article = "ACCOUNT";
-            permission.articleId = permission.id;
-            permission.selected = !permission.selected;
-            if (!permission.selected) {
-                removePermission(permission.id);
+        $scope.addRemovePermission = function (userOrGroup) {
+            if (userOrGroup.selected) {
+                removePermission(userOrGroup.permissionId);
+                userOrGroup.selected = false;
                 return;
             }
+
+            var permission = {};
+            permission.article = $scope.selectedArticle.type;
+            permission.articleId = userOrGroup.id;
 
             // add permission
             for (var i = 0; i < panes.length; i += 1) {
@@ -861,7 +888,8 @@ angular.module('ice.entry.controller', [])
                     $scope.activePermissions = $scope.writePermissions;
                 }
 
-                permission.id = result.id;
+                userOrGroup.permissionId = result.id;
+                userOrGroup.selected = true;
             });
         };
 
@@ -1459,6 +1487,7 @@ angular.module('ice.entry.controller', [])
                             $scope.pagingParams.sort = field;
                             $scope.pagingParams.asc = true;
                         }
+                        $scope.pagingParams.currentPage = 0;
                     };
 
                     /**
