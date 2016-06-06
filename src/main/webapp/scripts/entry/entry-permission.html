@@ -31,23 +31,40 @@
         <td>
             <!--user select filter-->
             <div ng-show="showPermissionInput">
+                <div class="btn-group" uib-dropdown>
+                    <button class="btn btn-xs btn-default" uib-dropdown-toggle>
+                        <i class="fa fa-fw"
+                           ng-class="{'fa-user dark-gray': selectedArticle.type == 'ACCOUNT',
+                           'fa-group dark-orange': selectedArticle.type == 'GROUP'}"></i>
+                        <span class="caret"></span>
+                    </button>
+
+                    <ul uib-dropdown-menu>
+                        <li ng-if="selectedArticle.type == 'GROUP'">
+                            <a href="#" ng-click="setPermissionArticle('ACCOUNT')"><i
+                                    class="fa fa-fw fa-user dark-gray"></i> Account</a></li>
+                        <li ng-if="selectedArticle.type == 'ACCOUNT'">
+                            <a href="#" ng-click="setPermissionArticle('GROUP')"><i
+                                    class="fa fa-fw fa-group dark-orange"></i> Group</a></li>
+                    </ul>
+                </div>
+
                 <input type="text" placeholder="Enter name or email" ng-model="userFilterInput" ng-change="filter()"
-                       style="width: 180px; font-size: 0.80em">
+                       style="width: 136px; font-size: 0.80em">
 
                 <div style="overflow: auto; height: 80px;" class="font-75em">
 
-                    <div ng-if="!filtering && !accessPermissions" style="opacity: 0.7; padding: 3px 0 3px 0">
+                    <div ng-if="!filtering && !autoCompleteUsersOrGroups" style="opacity: 0.7; padding: 3px 0 3px 0">
                         <i>No matches found</i>
                     </div>
 
-                    <div ng-repeat="permission in accessPermissions | orderBy:'display'">
-                       <span ng-click="addRemovePermission(permission)" class="cursor_pointer">
+                    <div ng-repeat="userOrGroup in autoCompleteUsersOrGroups">
+                    <span ng-click="addRemovePermission(userOrGroup)" class="cursor_pointer">
                         <i class="fa opacity_hover"
-                           ng-class="{'fa-square-o':!permission.selected, 'fa-check-square-o':permission.selected}"></i>
-                        <i class="fa fa-group permission_group" ng-if="permission.article==='GROUP'"></i> {{permission.display}}
-                           <i class="fa fa-user permission_user" ng-if="permission.article!='GROUP'"></i>
-                           {{permission.firstName}} {{permission.lastName}}
-                        </span>
+                           ng-class="{'fa-square-o':!userOrGroup.selected, 'fa-check-square-o':userOrGroup.selected}"></i>
+                        <i class="fa"
+                           ng-class="{'permission_group fa-group': selectedArticle.type==='GROUP', 'permission_user fa-user': selectedArticle.type!='GROUP'}"></i> {{userOrGroup.label}}
+                    </span>
                     </div>
                 </div>
 
