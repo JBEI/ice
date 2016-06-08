@@ -178,8 +178,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.updateStatus = function (request, newStatus) {
-            var obj = {requestId: request.id, status: newStatus};
-            Util.update("rest/samples/requests/" + request.id, obj, {}, function (result) {
+            Util.update("rest/samples/requests/" + request.id + "?status=" + newStatus, {}, {}, function (result) {
                 if (result === undefined || result.id != request.id)
                     return;
 
