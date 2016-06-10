@@ -722,4 +722,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 .setProjection(Projections.distinct(Projections.property("recordType")))
                 .list();
     }
+
+    public List<Long> filterByUserId(String userId, List<Long> entries) {
+        return currentSession().createCriteria(Entry.class)
+                .add(Restrictions.in("id", entries))
+                .add(Restrictions.eq("ownerEmail", userId))
+                .setProjection(Projections.distinct(Projections.property("id")))
+                .list();
+    }
 }
