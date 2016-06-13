@@ -404,14 +404,16 @@ angular.module('ice.wor.controller', [])
 
             $location.path("web/" + partner.id);
             $scope.selectedPartner = partner.id;
-            Util.list("rest/remote/" + partner.id + "/available", function (result) {
+
+            Util.list("rest/partners/" + partner.id + "/available", function (result) {
                 $scope.selectedPartnerFolders = result;
             });
         }
     })
     .controller('WorEntrySamplesController', function ($scope, $stateParams, Util) {
         $scope.samples = undefined;
-        Util.list('rest/remote/' + $stateParams.partner.id + '/parts/' + $stateParams.entryId + '/samples',
+
+        Util.list('rest/partners/' + $stateParams.partner.id + '/parts/' + $stateParams.entryId + '/samples',
             function (result) {
                 $scope.samples = result;
             });

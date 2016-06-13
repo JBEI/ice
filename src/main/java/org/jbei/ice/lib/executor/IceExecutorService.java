@@ -1,11 +1,10 @@
 package org.jbei.ice.lib.executor;
 
+import org.jbei.ice.lib.common.logging.Logger;
+
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-
-import org.jbei.ice.lib.common.logging.Logger;
 
 /**
  * @author Hector Plahar
@@ -16,13 +15,10 @@ public class IceExecutorService {
     private final ExecutorService pool;
 
     private IceExecutorService() {
-        pool = Executors.newFixedThreadPool(5, new ThreadFactory() {
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread thread = new Thread(r);
-                thread.setPriority(Thread.MIN_PRIORITY);
-                return thread;
-            }
+        pool = Executors.newFixedThreadPool(5, r -> {
+            Thread thread = new Thread(r);
+            thread.setPriority(Thread.MIN_PRIORITY);
+            return thread;
         });
     }
 
@@ -50,10 +46,10 @@ public class IceExecutorService {
     }
 
     public void runTask(Task task) {
-        Logger.info("Adding task");
         if (task == null)
             return;
 
+        Logger.info("Adding task to executor service");
         pool.execute(new TaskHandler(task));
     }
 }

@@ -63,6 +63,8 @@ public class WebSearch {
         do {
             query.getParameters().setStart(perPageOffset);
             results = runSearch(partners, query);
+            if (results.getResultCount() == 0)
+                break;
             offsetCount += results.getResults().size();
             perPageOffset += RETRIEVE_COUNT_LIMIT_PER_INSTANCE;
         } while (offsetCount <= offset);
