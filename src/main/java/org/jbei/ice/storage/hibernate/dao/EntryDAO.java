@@ -521,6 +521,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
             case NAME:
                 return "name";
 
+            case ALIAS:
+                return "alias";
+
             case SUMMARY:
                 return "shortDescription";
 
