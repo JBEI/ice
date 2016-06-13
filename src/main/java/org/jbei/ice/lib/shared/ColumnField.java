@@ -17,6 +17,7 @@ public enum ColumnField implements IDataTransferModel {
     SUMMARY,
     REGISTRY_NAME,
     OWNER,
+    ALIAS,
     STATUS,
     BIT_SCORE,
     E_VALUE,
