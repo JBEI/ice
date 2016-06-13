@@ -88,10 +88,11 @@ public class Annotations {
     /**
      * Auto generate annotations for specified entry
      *
-     * @param entryId unique (local) identifier for entry
+     * @param entryId       unique (local) identifier for entry
+     * @param ownerFeatures whether to only include the features created by the requesting user
      * @return wrapper around generated annotations, if any are found
      */
-    public FeaturedDNASequence generate(long entryId) {
+    public FeaturedDNASequence generate(long entryId, boolean ownerFeatures) {
         Entry entry = entryDAO.get(entryId);
         if (entry == null)
             throw new IllegalArgumentException("Could not retrieve entry with id \"" + entryId + "\"");
@@ -117,8 +118,15 @@ public class Annotations {
                 if (feature == null)
                     continue;
                 List<Long> entries = this.sequenceFeatureDAO.getEntryIdsByFeature(feature);
+                if (entries.isEmpty())
+                    continue;
+
                 if (!isAdministrator()) {
                     entries = this.permissionDAO.getCanReadEntries(account, groups, entries);
+                }
+
+                if (ownerFeatures) {
+                    entries = this.entryDAO.filterByUserId(this.userId, entries);
                 }
 
                 if (entries != null && !entries.isEmpty()) {

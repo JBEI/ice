@@ -118,15 +118,15 @@
 
     <div ng-if="annotations && annotations.features.length > 0" class="row">
         <div class="col-sm-10">
-            <button class="btn btn-sm btn-default" ng-disabled="pagingParams.currentPage == 0"
-                    ng-click="pagingParams.currentPage=pagingParams.currentPage-1">
-                Previous
+            <button type="button" class="btn btn-sm btn-default" ng-disabled="pagingParams.currentPage == 0"
+                    style="padding: 2px 4px" ng-click="pagingParams.currentPage=pagingParams.currentPage-1">
+                <i class="fa fa-fw fa-chevron-left"></i>
             </button>
             <b class="font-90em">{{pagingParams.currentPage+1}} / {{pagingParams.numberOfPages}}</b>
-            <button class="btn btn-sm btn-default"
+            <button type="button" class="btn btn-sm btn-default" style="padding: 2px 4px"
                     ng-disabled="pagingParams.currentPage >= pagingParams.resultCount/pagingParams.pageSize - 1"
                     ng-click="pagingParams.currentPage=pagingParams.currentPage+1">
-                Next
+                <i class="fa fa-fw fa-chevron-right"></i>
             </button>
         </div>
 
@@ -137,6 +137,10 @@
 </div>
 
 <div class="modal-footer">
+    <small class="text-muted pull-left">Show: <select ng-change="fetchAnnotations()" ng-model="options.selection"
+                                                      ng-options="opt.display for opt in options.values"></select>
+    </small>
+
     <div class="pull-left red" ng-if="errorSavingAnnotations && !savingAnnotations">
         <i class="fa fa-fw fa-exclamation-triangle red"></i> Server error saving annotations
     </div>

@@ -1461,20 +1461,26 @@ angular.module('ice.entry.controller', [])
                     $scope.allSelected = false;
                     $scope.part = part;
                     $scope.pagingParams = {currentPage: 0, pageSize: 8, sort: "locations[0].genbankStart", asc: true};
+                    var displayOptions = [{display: "All features", key: "all"}, {display: "My features", key: "mine"}];
+                    $scope.options = {values: displayOptions, selection: displayOptions[0]};
 
                     // retrieves "suggested" annotations for current entry
-                    Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
-                        angular.forEach(result.features, function (feature) {
-                                if (feature.strand == 1)
-                                    feature.length = (feature.locations[0].end - feature.locations[0].genbankStart) + 1;
-                                else
-                                    feature.length = (feature.locations[0].genbankStart - feature.locations[0].end) + 1;
-                            }
-                        );
-                        $scope.annotations = result;
-                        $scope.pagingParams.resultCount = result.features.length;
-                        $scope.pagingParams.numberOfPages = Math.ceil(result.features.length / $scope.pagingParams.pageSize);
-                    });
+                    $scope.fetchAnnotations = function () {
+                        $scope.annotations = undefined;
+                        Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
+                            angular.forEach(result.features, function (feature) {
+                                    if (feature.strand == 1)
+                                        feature.length = (feature.locations[0].end - feature.locations[0].genbankStart) + 1;
+                                    else
+                                        feature.length = (feature.locations[0].genbankStart - feature.locations[0].end) + 1;
+                                }
+                            );
+                            $scope.annotations = result;
+                            $scope.pagingParams.resultCount = result.features.length;
+                            $scope.pagingParams.numberOfPages = Math.ceil(result.features.length / $scope.pagingParams.pageSize);
+                        }, {ownerFeatures: $scope.options.selection.key == "mine"});
+                    };
+                    $scope.fetchAnnotations();
 
                     /**
                      * Support for sorting

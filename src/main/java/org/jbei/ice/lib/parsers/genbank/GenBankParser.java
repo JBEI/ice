@@ -90,7 +90,7 @@ public class GenBankParser extends AbstractParser {
      */
     private void recordParsingError(final String fileText, final Exception e)
             throws InvalidFormatParserException {
-        final String message = "Error parsing genbank file. Please examine the recorded file.";
+        final String message = "Error parsing genBank file. Please examine the recorded file.";
         try {
             FileUtils.recordAndReportFile(message, fileText, e);
         } catch (final UtilityException e1) {
@@ -370,6 +370,8 @@ public class GenBankParser extends AbstractParser {
         String[] chunk;
         StringBuilder qualifierItem = new StringBuilder();
         final int apparentQualifierColumn = lines[0].indexOf("/");
+        if (apparentQualifierColumn == -1)
+            return dnaFeature;
 
         for (final String line2 : lines) {
             line = line2;
