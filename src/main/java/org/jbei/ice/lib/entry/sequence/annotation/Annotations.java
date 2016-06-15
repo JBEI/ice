@@ -123,6 +123,8 @@ public class Annotations {
 
                 if (!isAdministrator()) {
                     entries = this.permissionDAO.getCanReadEntries(account, groups, entries);
+                    if (entries.isEmpty())
+                        continue;
                 }
 
                 if (ownerFeatures) {
