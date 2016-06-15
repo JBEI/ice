@@ -510,7 +510,7 @@ public class PartResource extends RestResource {
     @Path("/{id}/samples/{sampleId}")
     public Response deleteSample(@Context UriInfo info, @PathParam("id") long partId,
                                  @PathParam("sampleId") long sampleId) {
-        String userId = getUserId();
+        String userId = requireUserId();
         boolean success = sampleService.delete(userId, partId, sampleId);
         return super.respond(success);
     }
