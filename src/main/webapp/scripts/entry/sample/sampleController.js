@@ -152,7 +152,7 @@ angular.module('ice.entry.sample.controller', [])
         $scope.createNewSample = function () {
             // create sample
             Util.post('rest/parts/' + partId + '/samples', $scope.newSample, function (result) {
-                $scope.samples = result;
+                $scope.samples = result.data;
                 $scope.newSample = {
                     open: {},
                     depositor: {
