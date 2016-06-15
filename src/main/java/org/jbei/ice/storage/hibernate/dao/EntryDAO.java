@@ -712,6 +712,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     public int setEntryVisibility(List<Long> list, Visibility ok) {
+        if (list.isEmpty())
+            return 0;
+
         Query query = currentSession().createQuery("update " + Entry.class.getName()
                 + " e set e.visibility=:v where e.id in :ids");
         query.setParameter("v", ok.getValue());
@@ -720,6 +723,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     public List<String> getRecordTypes(List<Long> list) {
+        if (list.isEmpty())
+            return new ArrayList<>();
+
         return currentSession().createCriteria(Entry.class)
                 .add(Restrictions.in("id", list))
                 .setProjection(Projections.distinct(Projections.property("recordType")))
@@ -727,6 +733,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     public List<Long> filterByUserId(String userId, List<Long> entries) {
+        if (entries.isEmpty())
+            return new ArrayList<>();
+
         return currentSession().createCriteria(Entry.class)
                 .add(Restrictions.in("id", entries))
                 .add(Restrictions.eq("ownerEmail", userId))
