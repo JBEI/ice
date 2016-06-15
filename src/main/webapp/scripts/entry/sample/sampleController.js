@@ -128,7 +128,7 @@ angular.module('ice.entry.sample.controller', [])
         };
 
         $scope.delete = function (sample) {
-            Util.remove('rest/parts/' + partId + '/samples/' + sample.id, function () {
+            Util.remove('rest/parts/' + partId + '/samples/' + sample.id, {}, function () {
                 var idx = $scope.samples.indexOf(sample);
                 $scope.samples.splice(idx, 1);
             });
@@ -152,7 +152,7 @@ angular.module('ice.entry.sample.controller', [])
         $scope.createNewSample = function () {
             // create sample
             Util.post('rest/parts/' + partId + '/samples', $scope.newSample, function (result) {
-                $scope.samples = result;
+                $scope.samples = result.data;
                 $scope.newSample = {
                     open: {},
                     depositor: {
