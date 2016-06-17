@@ -143,7 +143,15 @@ public class PartnerResource extends RestResource {
     public Response updateWebPartnerAPIKey(@PathParam("id") long partnerId) {
         String userId = requireUserId();
         WebPartners partners = new WebPartners();
-        return super.respond(partners.updateAPIKey(userId, partnerId));
+        try {
+            return super.respond(partners.updateAPIKey(userId, partnerId));
+        } catch (PermissionException pe) {
+            Logger.error(pe);
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        } catch (IllegalArgumentException pe) {
+            Logger.error(pe);
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
     }
 
     /**

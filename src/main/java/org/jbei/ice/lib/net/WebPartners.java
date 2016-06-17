@@ -195,6 +195,16 @@ public class WebPartners {
         return Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
     }
 
+    /**
+     * Refreshes the API key for the referenced partner
+     *
+     * @param userId identifier for user making request. Must have administrative privileges
+     * @param id     unique (local) identifier for remote partner whose API key is being refreshed
+     * @return null if this instance is not in web of registries
+     * @throws PermissionException      if user making request does not have administrative privileges
+     * @throws IllegalArgumentException if the partner identifier is invalid (cannot be used to retrieve a valid
+     *                                  partner)
+     */
     public RegistryPartner updateAPIKey(String userId, long id) {
         if (!isInWebOfRegistries())
             return null;
@@ -202,15 +212,15 @@ public class WebPartners {
         if (!accountController.isAdministrator(userId))
             throw new PermissionException(userId + " is not an admin");
 
+        RemotePartner partner = dao.get(id);
+        if (partner == null) {
+            throw new IllegalArgumentException("Cannot retrieve partner with id " + id);
+        }
+
         RegistryPartner thisPartner = getThisInstanceWithNewApiKey();
         if (thisPartner == null) {
             Logger.error("Cannot exchange api token with remote host due to invalid local url");
             return null;
-        }
-
-        RemotePartner partner = dao.get(id);
-        if (partner == null) {
-            throw new IllegalArgumentException("Cannot retrieve partner with id " + id);
         }
 
         // contact partner (with new key) to refresh its api key for this partner
@@ -393,6 +403,13 @@ public class WebPartners {
         return thisInstance;
     }
 
+    /**
+     * Generates a new partner object representing this ICE instance
+     * with a new API key
+     *
+     * @return null if the URL for this partner is invalid (e.g. localhost)
+     * RegistryPartner object otherwise
+     */
     protected RegistryPartner getThisInstanceWithNewApiKey() {
         String myURL = getThisUri();
         if (!isValidUrl(myURL))

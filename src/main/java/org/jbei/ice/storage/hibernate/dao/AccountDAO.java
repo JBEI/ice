@@ -74,7 +74,7 @@ public class AccountDAO extends HibernateRepository<Account> {
 
         try {
             return (Account) currentSession().createCriteria(Account.class)
-                    .add(Restrictions.eq("email", email).ignoreCase())
+                    .add(Restrictions.eq("email", email.trim()).ignoreCase())
                     .uniqueResult();
         } catch (HibernateException e) {
             Logger.error(e);
