@@ -127,12 +127,12 @@ public class ModelToInfoFactory {
         if (owner.trim().isEmpty())
             owner = entry.getOwnerEmail();
         info.setOwner(owner);
-        info.setOwnerEmail(entry.getOwnerEmail().trim());
+        info.setOwnerEmail(entry.getOwnerEmail());
         Account ownerAccount = DAOFactory.getAccountDAO().getByEmail(info.getOwnerEmail());
         if (ownerAccount != null)
             info.setOwnerId(ownerAccount.getId());
         info.setCreator(entry.getCreator());
-        info.setCreatorEmail(entry.getCreatorEmail().trim());
+        info.setCreatorEmail(entry.getCreatorEmail());
         Account creatorAccount = DAOFactory.getAccountDAO().getByEmail(info.getCreatorEmail());
         if (creatorAccount != null)
             info.setCreatorId(creatorAccount.getId());
