@@ -3,7 +3,7 @@
 angular.module('ice.upload.controller', [])
     .controller('UploadController', function ($rootScope, $location, $scope, $uibModal, $cookieStore, $resource,
                                               $stateParams, FileUploader, $http, UploadUtil, Util) {
-        //var sid = $cookieStore.get("sessionId");
+        var sid = $cookieStore.get("sessionId");
         //var upload = Upload(sid);
         var sheetData = [
             []
@@ -206,10 +206,10 @@ angular.module('ice.upload.controller', [])
             };
 
             var autoComplete = function (field, query, process) {
-                $http.get('rest/parts/autocomplete', {
+                $http.get('rest/search/filter', {
                     headers: {'X-ICE-Authentication-SessionId': sid},
                     params: {
-                        val: query,
+                        token: query,
                         field: field
                     }
                 }).then(function (res) {

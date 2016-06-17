@@ -23,13 +23,13 @@ import javax.ws.rs.core.Response;
  */
 public class RestResource {
 
-    protected final String AUTHENTICATION_PARAM_NAME = "X-ICE-Authentication-SessionId";
-    protected final String WOR_PARTNER_TOKEN = "X-ICE-WOR-Token";
-    protected final String API_KEY_TOKEN = "X-ICE-API-Token";               // token for validation
-    protected final String API_KEY_USER = "X-ICE-API-Token-User";           // optional user. system checks and uses assigned token user if not specified
-    protected final String API_KEY_CLIENT_ID = "X-ICE-API-Token-Client";    // client id
-    protected final String REMOTE_USER_TOKEN = "X-ICE-Remote-User-Token";   // token for remote user
-    protected final String REMOTE_USER_ID = "X-ICE-Remote-User-ID";         // id for remote user
+    protected final String AUTHENTICATION_PARAM_NAME = Headers.AUTHENTICATION_PARAM_NAME;
+    protected final String WOR_PARTNER_TOKEN = Headers.WOR_PARTNER_TOKEN;
+    protected final String API_KEY_TOKEN = Headers.API_KEY_TOKEN;               // token for validation
+    protected final String API_KEY_USER = Headers.API_KEY_USER;           // optional user. system checks and uses assigned token user if not specified
+    protected final String API_KEY_CLIENT_ID = Headers.API_KEY_CLIENT_ID;    // client id
+    protected final String REMOTE_USER_TOKEN = Headers.REMOTE_USER_TOKEN;   // token for remote user
+    protected final String REMOTE_USER_ID = Headers.REMOTE_USER_ID;         // id for remote user
 
     @HeaderParam(value = WOR_PARTNER_TOKEN)
     protected String worPartnerToken;
