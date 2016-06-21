@@ -72,11 +72,12 @@ public class FileBulkUpload {
      * @param linked         optional type that is linked to this entry. Should be one of {@link EntryType} or null
      * @param linkToExisting true, if <code>addType</code> is to be linked to an existing entry
      * @return byte array of the template or null if the headers for the type cannot be retrieved/is unsupported
+     * @throws IllegalArgumentException if the addType is invalid
      */
     public static byte[] getCSVTemplateBytes(EntryType addType, EntryType linked, boolean linkToExisting) {
         List<EntryField> headers = BulkCSVUploadHeaders.getHeadersForType(addType);
         if (headers == null)
-            return null;
+            throw new IllegalArgumentException("Could not retrieve headers for type " + addType);
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < headers.size(); i++) {

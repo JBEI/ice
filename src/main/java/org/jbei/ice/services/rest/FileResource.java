@@ -242,7 +242,7 @@ public class FileResource extends RestResource {
         final URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
         if (uri != null) {
             try (final InputStream in = uri.toURL().openStream();
-                 final OutputStream out = new FileOutputStream(png);) {
+                 final OutputStream out = new FileOutputStream(png)) {
                 IOUtils.copy(in, out);
             } catch (IOException e) {
                 Logger.error(e);
