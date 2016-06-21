@@ -98,7 +98,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         Util.post("rest/parts/trash", entries, function () {
             $rootScope.$broadcast("RefreshAfterDeletion");
             $scope.$broadcast("UpdateCollectionCounts");
-            $location.path("folders/personal");
+            $location.path("folders/deleted");
         });
     };
 
