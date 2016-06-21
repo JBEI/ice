@@ -267,7 +267,7 @@ public class FileResource extends RestResource {
                                    @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
         try {
             if (entryType == null) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+                return Response.status(Response.Status.BAD_REQUEST).build();
             }
 
             final String fileName = contentDispositionHeader.getFileName();
