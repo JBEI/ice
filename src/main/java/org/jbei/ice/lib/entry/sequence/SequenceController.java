@@ -212,7 +212,7 @@ public class SequenceController extends HasEntry {
      * @param formatter
      * @return Text of a formatted sequence.
      */
-    public String compose(Sequence sequence, IFormatter formatter) {
+    protected String compose(Sequence sequence, IFormatter formatter) {
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         try {
             formatter.format(sequence, byteStream);
