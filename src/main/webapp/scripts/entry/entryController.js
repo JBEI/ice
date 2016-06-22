@@ -377,7 +377,7 @@ angular.module('ice.entry.controller', [])
             return $http.get('rest/search/filter', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
-                    val: val,
+                    token: val,
                     field: inputField
                 }
             }).then(function (res) {
@@ -535,7 +535,7 @@ angular.module('ice.entry.controller', [])
             return $http.get('rest/search/filter', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
-                    val: val,
+                    token: val,
                     field: inputField
                 }
             }).then(function (res) {
