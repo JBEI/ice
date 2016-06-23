@@ -279,7 +279,7 @@ public class FileResource extends RestResource {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             }
             return Response.status(Response.Status.OK).entity(sequenceInfo).build();
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             Logger.error(e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
