@@ -1,7 +1,6 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.AutoCompleteFieldValues;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.search.IndexType;
@@ -57,19 +56,14 @@ public class SearchResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response search(@DefaultValue("false") @QueryParam("webSearch") final boolean searchWeb,
                            final SearchQuery query) {
-        try {
-            if (searchWeb) {
-                WebSearch webSearch = new WebSearch();
-                return super.respond(webSearch.run(query));
-            }
-
-            final String userId = requireUserId();
-            final SearchResults results = controller.runSearch(userId, query);
-            return super.respond(Response.Status.OK, results);
-        } catch (final Exception e) {
-            Logger.error(e);
-            return super.respond(Response.Status.INTERNAL_SERVER_ERROR);
+        if (searchWeb) {
+            WebSearch webSearch = new WebSearch();
+            return super.respond(webSearch.run(query));
         }
+
+        final String userId = requireUserId();
+        final SearchResults results = controller.runSearch(userId, query);
+        return super.respond(Response.Status.OK, results);
     }
 
     /**
