@@ -94,11 +94,21 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     // deletes the selected entries (or current entry)
     // "select all" cannot be used to delete entries. they have to be explicitly selected
     $scope.deleteSelectedEntries = function () {
+        var currLocation = "folders/";
+
+        if (FolderSelection.getSelectedFolder() == null) {
+            currLocation = currLocation.concat(FolderSelection.getSelectedCollection());
+        } else {
+            currLocation = currLocation.concat(FolderSelection.getSelectedFolder().id);
+        }
+
         var entries = Selection.getSelectedEntries();
+
         Util.post("rest/parts/trash", entries, function () {
             $rootScope.$broadcast("RefreshAfterDeletion");
             $scope.$broadcast("UpdateCollectionCounts");
-            $location.path("folders/personal");
+            $location.path(currLocation);
+            Util.setFeedback('Selected entries successfully deleted', 'success');
         });
     };
 
