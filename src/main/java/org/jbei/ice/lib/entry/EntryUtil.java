@@ -112,6 +112,12 @@ public class EntryUtil {
             case SELECTION_MARKERS:
                 return entry.getSelectionMarkersAsString();
 
+            case CREATOR:
+                return entry.getCreator();
+
+            case CREATOR_EMAIL:
+                return entry.getCreatorEmail();
+
             default:
                 return null;
         }

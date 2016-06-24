@@ -6,7 +6,6 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.EntrySelectionType;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
@@ -17,6 +16,7 @@ import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.RemotePartner;
 import org.jbei.ice.storage.model.Sequence;
 
+import java.io.ByteArrayOutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,11 +28,13 @@ public class RemoteTransfer {
     private final RemotePartnerDAO remotePartnerDAO;
     private final EntryDAO entryDAO;
     private final RemoteContact remoteContact;
+    private final SequenceDAO sequenceDAO;
 
     public RemoteTransfer() {
         this.remotePartnerDAO = DAOFactory.getRemotePartnerDAO();
         this.remoteContact = new RemoteContact();
         this.entryDAO = DAOFactory.getEntryDAO();
+        this.sequenceDAO = DAOFactory.getSequenceDAO();
     }
 
     /**
@@ -161,32 +163,35 @@ public class RemoteTransfer {
     }
 
     /**
-     * Transfers the sequence files for the part and any parts that are linked to it
+     * Transfers the sequence file for the part and any parts that are linked to it
      *
      * @param partner destination for the sequence transfer
      * @param data    data for part whose sequences are to be transferred
      */
     protected void performTransfer(RemotePartner partner, PartData data) {
-        SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
         String url = partner.getUrl();
 
         // check main entry for sequence
         if (sequenceDAO.hasSequence(data.getId())) {
             Entry entry = entryDAO.get(data.getId());
-            Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
-            SequenceController controller = new SequenceController();
-            GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
-            genbankFormatter.setCircular(true);
-            String sequenceString;
-            try {
-                sequenceString = controller.compose(sequence, genbankFormatter);
-            } catch (Exception e) {
-                Logger.error(e);
-                sequenceString = sequence.getSequenceUser();
+            Sequence sequence = sequenceDAO.getByEntry(entry);
+            String sequenceString = sequence.getSequenceUser();
+            if (StringUtils.isEmpty(sequenceString)) {
+                GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
+                genbankFormatter.setCircular(true);
+
+                try {
+                    ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                    genbankFormatter.format(sequence, byteStream);
+                    sequenceString = byteStream.toString();
+                } catch (Exception e) {
+                    Logger.error(e);
+                    sequenceString = sequence.getSequence();
+                }
             }
 
             if (!StringUtils.isEmpty(sequenceString))
-                remoteContact.transferSequence(url, data.getRecordId(), data.getType(), sequence.getSequence());
+                remoteContact.transferSequence(url, data.getRecordId(), data.getType(), sequenceString);
         }
 
         // todo : check main entry for attachments

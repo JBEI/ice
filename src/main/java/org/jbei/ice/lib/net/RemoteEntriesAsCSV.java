@@ -22,6 +22,7 @@ import org.jbei.ice.storage.model.Sequence;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -55,6 +56,21 @@ public class RemoteEntriesAsCSV {
         }
     }
 
+    protected String[] getCSVHeaders(List<EntryField> fields) {
+        String[] headers = new String[fields.size() + 4];
+        headers[0] = "Registry";
+        headers[1] = "Created";
+        headers[2] = "Part ID";
+
+        int i = 2;
+        for (EntryField field : fields) {
+            i += 1;
+            headers[i] = field.getLabel();
+        }
+        headers[i + 1] = "Sequence File";
+        return headers;
+    }
+
     private boolean writeList(List<RemotePartner> partners) throws IOException {
         Path tmpPath = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY));
         File tmpFile = File.createTempFile("remote-ice-", ".csv", tmpPath.toFile());
@@ -62,19 +78,9 @@ public class RemoteEntriesAsCSV {
 
         FileWriter fileWriter = new FileWriter(tmpFile);
         List<EntryField> fields = getEntryFields();
+        String[] headers = getCSVHeaders(fields);
 
         // csv file headers
-        String[] headers = new String[fields.size() + 3];
-        headers[0] = "Registry";
-        headers[1] = "Part ID";
-
-        int i = 1;
-        for (EntryField field : fields) {
-            i += 1;
-            headers[i] = field.getLabel();
-        }
-        headers[i + 1] = "Sequence File";
-
         File tmpZip = File.createTempFile("zip-", ".zip", tmpPath.toFile());
         FileOutputStream fos = new FileOutputStream(tmpZip);
 
@@ -91,11 +97,12 @@ public class RemoteEntriesAsCSV {
 
                 // go through entries for each partner
                 for (PartData partData : webEntries.getEntries()) {
-                    String[] line = new String[fields.size() + 3];
+                    String[] line = new String[fields.size() + 4];
                     line[0] = partner.getUrl();
-                    line[1] = partData.getPartId();
+                    line[1] = new Date(partData.getCreationTime()).toString();
+                    line[2] = partData.getPartId();
 
-                    i = 1;
+                    int i = 2;
                     for (EntryField field : fields) {
                         line[i + 1] = PartDataUtil.entryFieldToValue(partData, field);
                         i += 1;
@@ -105,12 +112,12 @@ public class RemoteEntriesAsCSV {
                     if (partData.isHasSequence()) {
                         try {
 
-//                        // get remote sequence
+                            // get remote sequence
                             FeaturedDNASequence featuredDNASequence = remoteEntries.getPublicEntrySequence(partner.getId(),
                                     partData.getId());
 
                             if (featuredDNASequence != null) {
-                                String name = featuredDNASequence.getName() + ".gb";
+                                String name = partData.getPartId() + ".gb";
 
                                 // write sequence to zip
                                 line[i + 1] = name;

@@ -242,7 +242,7 @@ public class FileResource extends RestResource {
         final URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
         if (uri != null) {
             try (final InputStream in = uri.toURL().openStream();
-                 final OutputStream out = new FileOutputStream(png);) {
+                 final OutputStream out = new FileOutputStream(png)) {
                 IOUtils.copy(in, out);
             } catch (IOException e) {
                 Logger.error(e);
@@ -267,7 +267,7 @@ public class FileResource extends RestResource {
                                    @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
         try {
             if (entryType == null) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+                return Response.status(Response.Status.BAD_REQUEST).build();
             }
 
             final String fileName = contentDispositionHeader.getFileName();
@@ -279,7 +279,7 @@ public class FileResource extends RestResource {
                 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
             }
             return Response.status(Response.Status.OK).entity(sequenceInfo).build();
-        } catch (final Exception e) {
+        } catch (final IOException e) {
             Logger.error(e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }

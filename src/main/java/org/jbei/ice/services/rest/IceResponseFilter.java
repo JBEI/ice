@@ -26,11 +26,11 @@ public class IceResponseFilter implements ContainerResponseFilter {
         // 204 = no content ???
         int status = responseContext.getStatus();
         if (status != 401) {
-            if(status == 500)
+            if (status == 500)
                 HibernateUtil.rollbackTransaction();
             else {
                 try {
-                HibernateUtil.commitTransaction();
+                    HibernateUtil.commitTransaction();
                 } catch (Exception e) {
 //                    Logger.error(e);
                     responseContext.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
