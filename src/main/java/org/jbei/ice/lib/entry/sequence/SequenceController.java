@@ -212,7 +212,7 @@ public class SequenceController extends HasEntry {
      * @param formatter
      * @return Text of a formatted sequence.
      */
-    public String compose(Sequence sequence, IFormatter formatter) {
+    protected String compose(Sequence sequence, IFormatter formatter) {
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         try {
             formatter.format(sequence, byteStream);
@@ -468,7 +468,7 @@ public class SequenceController extends HasEntry {
             switch (type.toLowerCase()) {
                 case "original":
                     sequenceString = sequence.getSequenceUser();
-                    name = entry.getName() + ".seq";
+                    name = sequence.getFileName();
                     break;
 
                 case "genbank":
@@ -477,43 +477,43 @@ public class SequenceController extends HasEntry {
                     // TODO
                     genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular() : false);
                     sequenceString = compose(sequence, genbankFormatter);
-                    name = entry.getName() + ".gb";
+                    name = entry.getPartNumber() + ".gb";
                     break;
 
                 case "fasta":
                     FastaFormatter formatter = new FastaFormatter(sequence.getEntry().getName());
                     sequenceString = compose(sequence, formatter);
-                    name = entry.getName() + ".fasta";
+                    name = entry.getPartNumber() + ".fasta";
                     break;
 
                 case "sbol1":
                     sequenceString = compose(sequence, new SBOLFormatter(true));
-                    name = entry.getName() + ".xml";
+                    name = entry.getPartNumber() + ".xml";
                     break;
 
                 case "sbol2":
                     sequenceString = compose(sequence, new SBOLFormatter(false));
-                    name = entry.getName() + ".xml";
+                    name = entry.getPartNumber() + ".xml";
                     break;
 
                 case "pigeoni":
                     try {
                         URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
                         byte[] bytes = IOUtils.toByteArray(uri.toURL().openStream());
-                        return new ByteArrayWrapper(bytes, entry.getName() + ".png");
+                        return new ByteArrayWrapper(bytes, entry.getPartNumber() + ".png");
                     } catch (Exception e) {
                         Logger.error(e);
-                        return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
+                        return new ByteArrayWrapper(new byte[]{'\0'}, "sequence_error");
                     }
 
                 case "pigeons":
                     sequenceString = PigeonSBOLv.generatePigeonScript(sequence);
-                    name = entry.getName() + ".txt";
+                    name = entry.getPartNumber() + ".txt";
                     break;
             }
         } catch (Exception e) {
             Logger.error("Failed to generate genbank file for download!", e);
-            return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
+            return new ByteArrayWrapper(new byte[]{'\0'}, "sequence_error");
         }
 
         return new ByteArrayWrapper(sequenceString.getBytes(), name);

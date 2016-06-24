@@ -151,19 +151,14 @@ public class BulkUploadResource extends RestResource {
                                          @FormDataParam("file") InputStream fileInputStream,
                                          @FormDataParam("entryId") long entryId,
                                          @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
-        try {
-            String fileName = contentDispositionHeader.getFileName();
-            String userId = requireUserId();
-            AttachmentInfo attachmentInfo = controller.addAttachment(userId, uploadId,
-                    entryId, fileInputStream, fileName);
-            if (attachmentInfo == null) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-            }
-            return Response.status(Response.Status.OK).entity(attachmentInfo).build();
-        } catch (Exception e) {
-            Logger.error(e);
+        String fileName = contentDispositionHeader.getFileName();
+        String userId = requireUserId();
+        AttachmentInfo attachmentInfo = controller.addAttachment(userId, uploadId,
+                entryId, fileInputStream, fileName);
+        if (attachmentInfo == null) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
+        return Response.status(Response.Status.OK).entity(attachmentInfo).build();
     }
 
     /**
@@ -329,15 +324,11 @@ public class BulkUploadResource extends RestResource {
     @Path("/{id}/entry/{entryId}")
     public Response deleteEntry(@PathParam("id") long uploadId,
                                 @PathParam("entryId") long entryId) {
-        try {
-            String userId = getUserId();
-            if (controller.deleteEntry(userId, uploadId, entryId)) {
-                return Response.ok().build();
-            }
-            return Response.serverError().build();
-        } catch (Exception e) {
-            return super.respond(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
+        String userId = getUserId();
+        if (controller.deleteEntry(userId, uploadId, entryId)) {
+            return Response.ok().build();
         }
+        return Response.serverError().build();
     }
 
     /**
@@ -350,15 +341,11 @@ public class BulkUploadResource extends RestResource {
     @Path("/{id}/entry/{entryId}/sequence")
     public Response deleteEntrySequence(@PathParam("id") long uploadId,
                                         @PathParam("entryId") long entryId) {
-        try {
-            String userId = getUserId();
-            if (new SequenceController().deleteSequence(userId, entryId)) {
-                return Response.ok().build();
-            }
-            return Response.serverError().build();
-        } catch (Exception e) {
-            return super.respond(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
+        String userId = getUserId();
+        if (new SequenceController().deleteSequence(userId, entryId)) {
+            return Response.ok().build();
         }
+        return Response.serverError().build();
     }
 
     /**
@@ -371,14 +358,10 @@ public class BulkUploadResource extends RestResource {
     @Path("/{id}/entry/{entryId}/attachment")
     public Response deleteEntryAttachment(@PathParam("id") long uploadId,
                                           @PathParam("entryId") long entryId) {
-        try {
-            String userId = getUserId();
-            if (controller.deleteAttachment(userId, uploadId, entryId)) {
-                return Response.ok().build();
-            }
-            return Response.serverError().build();
-        } catch (Exception e) {
-            return super.respond(Response.Status.INTERNAL_SERVER_ERROR, e.getMessage());
+        String userId = getUserId();
+        if (controller.deleteAttachment(userId, uploadId, entryId)) {
+            return Response.ok().build();
         }
+        return Response.serverError().build();
     }
 }

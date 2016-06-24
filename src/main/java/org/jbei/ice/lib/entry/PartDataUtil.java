@@ -104,6 +104,12 @@ public class PartDataUtil {
             case SELECTION_MARKERS:
                 return join(data.getSelectionMarkers());
 
+            case CREATOR:
+                return data.getCreator();
+
+            case CREATOR_EMAIL:
+                return data.getCreatorEmail();
+
             default:
                 return null;
         }

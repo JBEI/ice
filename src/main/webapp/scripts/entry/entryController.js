@@ -377,7 +377,7 @@ angular.module('ice.entry.controller', [])
             return $http.get('rest/search/filter', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
-                    val: val,
+                    token: val,
                     field: inputField
                 }
             }).then(function (res) {
@@ -535,7 +535,7 @@ angular.module('ice.entry.controller', [])
             return $http.get('rest/search/filter', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
-                    val: val,
+                    token: val,
                     field: inputField
                 }
             }).then(function (res) {
@@ -728,7 +728,7 @@ angular.module('ice.entry.controller', [])
         var panes = $scope.panes = [];
         $scope.userFilterInput = undefined;
         $scope.canSetPublicPermission = undefined;
-        $scope.selectedArticle = {type: 'ACCOUNT', placeHolder: "Enter name or email"}
+        $scope.selectedArticle = {type: 'ACCOUNT', placeHolder: "Enter name or email"};
 
         if (!$rootScope.settings || !$rootScope.settings['RESTRICT_PUBLIC_ENABLE']) {
             Util.get("rest/config/RESTRICT_PUBLIC_ENABLE", function (result) {
@@ -879,6 +879,8 @@ angular.module('ice.entry.controller', [])
             Util.post('rest/parts/' + $scope.entry.id + '/permissions', permission, function (result) {
                 // result is the permission object
                 $scope.entry.id = result.typeId;
+                result.canEdit = $rootScope.user.isAdmin || (result.group && !result.group.autoJoin);
+
                 if (result.type == 'READ_ENTRY') {
                     $scope.readPermissions.push(result);
                     $scope.activePermissions = $scope.readPermissions;
