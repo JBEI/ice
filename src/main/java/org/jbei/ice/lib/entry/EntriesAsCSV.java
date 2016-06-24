@@ -97,6 +97,22 @@ public class EntriesAsCSV {
         }
     }
 
+    protected String[] getCSVHeaders(List<EntryField> fields) {
+
+        // get headers
+        String[] headers = new String[fields.size() + 3];
+        headers[0] = "Created";
+        headers[1] = "Part ID";
+
+        int i = 1;
+        for (EntryField field : fields) {
+            i += 1;
+            headers[i] = field.getLabel();
+        }
+        headers[i + 1] = "Sequence File";
+        return headers;
+    }
+
     /**
      * Iterate through list of entries and extract values
      *
@@ -122,21 +138,11 @@ public class EntriesAsCSV {
         csvPath = tmpFile.toPath();
         FileWriter fileWriter = new FileWriter(tmpFile);
 
+        List<EntryField> fields = getEntryFields();
+        String[] headers = getCSVHeaders(fields);
+
         try (CSVWriter writer = new CSVWriter(fileWriter)) {
 
-            List<EntryField> fields = getEntryFields();
-
-            // get headers
-            String[] headers = new String[fields.size() + 3];
-            headers[0] = "Created";
-            headers[1] = "Part ID";
-
-            int i = 1;
-            for (EntryField field : fields) {
-                i += 1;
-                headers[i] = field.getLabel();
-            }
-            headers[i + 1] = "Sequence File";
             writer.writeNext(headers);
 
             Set<Long> sequenceSet = new HashSet<>();
@@ -149,7 +155,7 @@ public class EntriesAsCSV {
                 String[] line = new String[fields.size() + 3];
                 line[0] = entry.getCreationTime().toString();
                 line[1] = entry.getPartNumber();
-                i = 1;
+                int i = 1;
                 for (EntryField field : fields) {
                     line[i + 1] = EntryUtil.entryFieldToValue(entry, field);
                     i += 1;
