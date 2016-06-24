@@ -90,8 +90,13 @@ angular.module('ice.profile.controller', [])
         $scope.openApiKeyRequest = function () {
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/profile/modal/api-key-request.html',
-                controller: 'GenerateApiKeyController'
-            })
+                controller: 'GenerateApiKeyController',
+                backdrop: "static"
+            });
+
+            modalInstance.result.then(function (result) {
+                $scope.retrieveProfileApiKeys();
+            });
         };
 
         $scope.deleteAPIKey = function (key) {
@@ -109,7 +114,7 @@ angular.module('ice.profile.controller', [])
         $scope.client = {};
 
         $scope.cancel = function () {
-            $uibModalInstance.dismiss('cancel');
+            $uibModalInstance.close();
         };
 
         $scope.generateToken = function () {
