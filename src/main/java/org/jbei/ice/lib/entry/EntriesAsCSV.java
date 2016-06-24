@@ -12,11 +12,14 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
+import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Group;
+import org.jbei.ice.storage.model.Sequence;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -28,7 +31,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
- * Representation of a list of entries as a CSV file
+ * Representation of a list of entries as a CSV file with option to include associated sequences
  *
  * @author Hector Plahar
  */
@@ -39,11 +42,20 @@ public class EntriesAsCSV {
     private boolean includeSequences;
     private String[] formats;
     private EntryDAO dao;
+    private SequenceDAO sequenceDAO;
+    private AccountDAO accountDAO;
+    private PermissionDAO permissionDAO;
 
+    /**
+     * @param formats optional list of formats of sequences to include
+     */
     public EntriesAsCSV(String... formats) {
         this.includeSequences = formats.length > 0;
         this.formats = formats;
-        dao = DAOFactory.getEntryDAO();
+        this.dao = DAOFactory.getEntryDAO();
+        this.sequenceDAO = DAOFactory.getSequenceDAO();
+        this.accountDAO = DAOFactory.getAccountDAO();
+        this.permissionDAO = DAOFactory.getPermissionDAO();
     }
 
     /**
@@ -94,8 +106,7 @@ public class EntriesAsCSV {
     private void writeList(String userId) throws IOException {
 
         // filter entries based on what the user is allowed to see if the user is not an admin
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
+        Account account = this.accountDAO.getByEmail(userId);
         Set<Group> accountGroups = new GroupController().getAllGroups(account);
         if (account.getType() != AccountType.ADMIN)
             entries = permissionDAO.getCanReadEntries(account, accountGroups, entries);
@@ -116,9 +127,11 @@ public class EntriesAsCSV {
             List<EntryField> fields = getEntryFields();
 
             // get headers
-            String[] headers = new String[fields.size() + 2];
-            int i = 0;
-            headers[i] = "Part ID";
+            String[] headers = new String[fields.size() + 3];
+            headers[0] = "Created";
+            headers[1] = "Part ID";
+
+            int i = 1;
             for (EntryField field : fields) {
                 i += 1;
                 headers[i] = field.getLabel();
@@ -133,17 +146,17 @@ public class EntriesAsCSV {
                 Entry entry = dao.get(entryId);
 
                 //  get contents and write data out
-                String[] line = new String[fields.size() + 2];
-                line[0] = entry.getPartNumber();
-                i = 0;
+                String[] line = new String[fields.size() + 3];
+                line[0] = entry.getCreationTime().toString();
+                line[1] = entry.getPartNumber();
+                i = 1;
                 for (EntryField field : fields) {
                     line[i + 1] = EntryUtil.entryFieldToValue(entry, field);
                     i += 1;
                 }
 
-                if (this.includeSequences && DAOFactory.getSequenceDAO().hasSequence(entryId)) {
-                    line[i + 1] = DAOFactory.getSequenceDAO().getSequenceFilename(entry);
-                    // todo : get sequences
+                if (this.includeSequences && sequenceDAO.hasSequence(entryId)) {
+                    line[i + 1] = getSequenceName(entry);
                     sequenceSet.add(entryId);
                 } else {
                     line[i + 1] = "";
@@ -154,6 +167,34 @@ public class EntriesAsCSV {
 
             writer.close();
             writeZip(userId, sequenceSet);
+        }
+    }
+
+    private String getSequenceName(Entry entry) {
+        String format;
+        if (formats == null || formats.length == 0) {
+            format = "original";
+        } else {
+            format = formats[0].toLowerCase();
+        }
+
+        switch (format.toLowerCase()) {
+            case "original":
+                Sequence sequence = sequenceDAO.getByEntry(entry);
+                if (sequence == null)
+                    return "";
+                return sequence.getFileName();
+
+            case "genbank":
+            default:
+                return entry.getPartNumber() + ".gb";
+
+            case "fasta":
+                return entry.getPartNumber() + ".fasta";
+
+            case "sbol1":
+            case "sbol2":
+                return entry.getPartNumber() + ".xml";
         }
     }
 
