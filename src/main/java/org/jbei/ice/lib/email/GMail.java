@@ -1,9 +1,9 @@
-package org.jbei.ice.lib.utils;
+package org.jbei.ice.lib.email;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.model.Configuration;
+import org.jbei.ice.lib.utils.Utils;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -15,7 +15,7 @@ import java.util.Properties;
  *
  * @author Hector Plahar
  */
-public class GMailer {
+public class GMail extends Email {
 
     /**
      * Sends an email to the specified recipient with a carbon copy send to the specified ccEmail.
@@ -26,12 +26,11 @@ public class GMailer {
      * @param subject       Text of subject.
      * @param body          Text of body.
      */
-    public static boolean send(String receiverEmail, String ccEmail, String subject, String body) {
+    public boolean send(String receiverEmail, String ccEmail, String subject, String body) {
         Properties props = new Properties();
         props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.socketFactory.port", "465");
-        props.put("mail.smtp.socketFactory.class",
-                "javax.net.ssl.SSLSocketFactory");
+        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.port", "465");
 
@@ -39,10 +38,11 @@ public class GMailer {
                 new javax.mail.Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
                         String adminEmail = Utils.getConfigValue(ConfigurationKey.ADMIN_EMAIL);
-                        Configuration config = DAOFactory.getConfigurationDAO().get("GMAIL_APPLICATION_PASSWORD");
-                        if (config == null)
+                        String password = Utils.getConfigValue(ConfigurationKey.GMAIL_APPLICATION_PASSWORD);
+                        if (StringUtils.isEmpty(password))
                             return null;
-                        return new PasswordAuthentication(adminEmail, config.getValue());
+
+                        return new PasswordAuthentication(adminEmail, password);
                     }
                 });
 
@@ -70,7 +70,7 @@ public class GMailer {
      * @param subject       Subject text.
      * @param body          Body text.
      */
-    public static boolean send(String receiverEmail, String subject, String body) {
+    public boolean send(String receiverEmail, String subject, String body) {
         return send(receiverEmail, Utils.getConfigValue(ConfigurationKey.ADMIN_EMAIL), subject, body);
     }
 
@@ -80,7 +80,7 @@ public class GMailer {
      * @param subject Subject text.
      * @param body    Body text.
      */
-    public static void error(String subject, String body) {
+    public void sendError(String subject, String body) {
         send(Utils.getConfigValue(ConfigurationKey.ADMIN_EMAIL), subject, body);
     }
 }

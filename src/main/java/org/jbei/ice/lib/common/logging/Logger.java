@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.common.logging;
 
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.utils.Emailer;
+import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.utils.Utils;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ public class Logger {
             String body = "System Time: " + dateFormatter.format((new Date())) + "\n\n";
             body = body + message;
             String subject = "Error";
-            Emailer.error( prefix + " " + subject, body);
+            EmailFactory.getEmail().sendError(prefix + " " + subject, body);
         }
     }
 

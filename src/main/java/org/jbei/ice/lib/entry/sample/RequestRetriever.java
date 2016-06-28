@@ -5,7 +5,7 @@ import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.sample.*;
-import org.jbei.ice.lib.utils.Emailer;
+import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
@@ -172,7 +172,7 @@ public class RequestRetriever {
                     body += " samples";
                 body += "\n\nPlease go to the following link to review pending requests.\n\n";
                 body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/admin/samples";
-                Emailer.send(email, subject, body);
+                EmailFactory.getEmail().send(email, subject, body);
             }
         }
 

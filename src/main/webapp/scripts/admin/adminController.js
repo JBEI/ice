@@ -4,14 +4,35 @@ angular.module('ice.admin.controller', [])
     .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, $cookieStore,
                                              AdminSettings, Util) {
 
+        // save email type settings
+        $scope.selectEmailType = function (type) {
+            if (!$scope.emailConfig.edit) {
+                $scope.emailConfig.edit = true;
+            }
+
+            $scope.emailConfig.type = type;
+        };
+
+        $scope.saveEmailConfig = function () {
+            $scope.submitSetting({key: "EMAILER", value: $scope.emailConfig.type});
+
+            if ($scope.emailConfig.type == "GMAIL") {
+                $scope.submitSetting({key: "GMAIL_APPLICATION_PASSWORD", value: $scope.emailConfig.pass});
+                $scope.submitSetting({key: "SMTP_HOST", value: ""});
+            } else {
+                $scope.submitSetting({key: "GMAIL_APPLICATION_PASSWORD", value: ""});
+                $scope.submitSetting({key: "SMTP_HOST", value: $scope.emailConfig.smtp});
+            }
+            $scope.emailConfig.edit = false;
+        };
+
         // retrieve general setting
         $scope.getSetting = function () {
             var sessionId = $cookieStore.get("sessionId");
 
             $scope.generalSettings = [];
             $scope.emailSettings = [];
-            $scope.booleanSettings = ['NEW_REGISTRATION_ALLOWED', 'PASSWORD_CHANGE_ALLOWED',
-                'PROFILE_EDIT_ALLOWED', 'SEND_EMAIL_ON_ERRORS'];
+            $scope.emailConfig = {type: "", smtp: "", pass: "", edit: false, showEdit: false, showPass: false};
 
             // retrieve site wide settings
             Util.list('rest/config', function (result) {
@@ -21,7 +42,7 @@ angular.module('ice.admin.controller', [])
                             'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
                             'value': setting.value,
                             'editMode': false,
-                            'isBoolean': $scope.booleanSettings.indexOf(setting.key) != -1
+                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) != -1
                         });
                     }
 
@@ -30,8 +51,24 @@ angular.module('ice.admin.controller', [])
                             'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
                             'value': setting.value,
                             'editMode': false,
-                            'isBoolean': $scope.booleanSettings.indexOf(setting.key) != -1
+                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) != -1
                         });
+                    }
+
+                    if (AdminSettings.getEmailTypeKeys().indexOf(setting.key) != -1) {
+                        switch (setting.key) {
+                            case 'EMAILER':
+                                $scope.emailConfig.type = setting.value;
+                                break;
+
+                            case 'GMAIL_APPLICATION_PASSWORD':
+                                $scope.emailConfig.pass = setting.value;
+                                break;
+
+                            case 'SMTP_HOST':
+                                $scope.emailConfig.smtp = setting.value;
+                                break;
+                        }
                     }
                 });
             });
