@@ -158,6 +158,10 @@ angular.module('ice.upload.service', [])
                     var val = entry[dataSchema[index]];
                     if (dataSchema[index] == "bioSafetyLevel" && val == 0)
                         return '';
+
+                    if (dataSchema[index] == "selectionMarkers")
+                        return val.toString();
+
                     return val;
                 }
 
@@ -170,6 +174,7 @@ angular.module('ice.upload.service', [])
 
                     case "plasmid":
                         //console.log(entry);
+
                         // 6 custom fields
                         if (index >= 21)
                             return entry[this.getDataSchema("part")[index - 6]];
