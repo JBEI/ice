@@ -157,5 +157,11 @@
             <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(params.currentPage,
             sampleRequests.count, params.limit)}}</strong>
         </div>
+
+        <div class="col-md-2" style="margin-top: 25px;">
+            <small class="text-muted pull-right">Show:
+                <select ng-change="requestSamples()" ng-model="params.limit"
+                        ng-options="opt for opt in params.hstep"></select></small>
+        </div>
     </div>
 </div>

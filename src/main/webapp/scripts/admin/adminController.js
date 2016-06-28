@@ -185,7 +185,14 @@ angular.module('ice.admin.controller', [])
 
         $scope.selectOptions = ['ALL', 'PENDING', 'FULFILLED', 'REJECTED'];
         $scope.maxSize = 5;
-        $scope.params = {sort: 'requested', asc: false, currentPage: 1, status: 'ALL', limit: 15};
+        $scope.params = {
+            sort: 'requested',
+            asc: false,
+            currentPage: 1,
+            status: 'ALL',
+            limit: 15,
+            hstep: [15, 30, 50, 100]
+        };
 
         $scope.requestSamples = function () {
             $scope.loadingPage = true;
