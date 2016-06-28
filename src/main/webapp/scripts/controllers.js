@@ -174,7 +174,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
                 status: 'BULK_EDIT',
                 entryList: selectedEntries
             }, {}, function (result) {
-                console.log(result);
                 $location.path("upload/" + result.id);
             });
         } else {

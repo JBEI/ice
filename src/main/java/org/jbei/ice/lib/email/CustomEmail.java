@@ -1,20 +1,16 @@
-package org.jbei.ice.lib.utils;
+package org.jbei.ice.lib.email;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.utils.Utils;
 
 /**
- * Utility methods for email.
- * <p/>
- * The SMTP server is specified in the configuration file and the admin email is also used for all communications
- *
- * @author Hector Plahar, Zinovii Dmytriv, Timothy Ham
+ * @author Hector Plahar
  */
-public class Emailer {
+public class CustomEmail extends Email {
 
     /**
      * Sends an email to the specified recipient with a carbon copy send to the specified ccEmail.
@@ -25,13 +21,13 @@ public class Emailer {
      * @param subject       Text of subject.
      * @param body          Text of body.
      */
-    public static boolean send(String receiverEmail, String ccEmail, String subject, String body) {
+    public boolean send(String receiverEmail, String ccEmail, String subject, String body) {
         String hostName = Utils.getConfigValue(ConfigurationKey.SMTP_HOST);
         if (StringUtils.isEmpty(hostName)) {
             return false;
         }
 
-        Email email = new SimpleEmail();
+        org.apache.commons.mail.Email email = new SimpleEmail();
         email.setHostName(hostName);
         try {
             email.setFrom(Utils.getConfigValue(ConfigurationKey.ADMIN_EMAIL));
@@ -54,7 +50,7 @@ public class Emailer {
      * @param subject       Subject text.
      * @param body          Body text.
      */
-    public static boolean send(String receiverEmail, String subject, String body) {
+    public boolean send(String receiverEmail, String subject, String body) {
         return send(receiverEmail, Utils.getConfigValue(ConfigurationKey.ADMIN_EMAIL), subject, body);
     }
 
@@ -64,7 +60,7 @@ public class Emailer {
      * @param subject Subject text.
      * @param body    Body text.
      */
-    public static void error(String subject, String body) {
+    public void sendError(String subject, String body) {
         send(Utils.getConfigValue(ConfigurationKey.ADMIN_EMAIL), subject, body);
     }
 }

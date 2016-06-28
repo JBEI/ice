@@ -8,7 +8,7 @@ import org.jbei.ice.lib.account.authentication.LocalAuthentication;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.group.GroupType;
-import org.jbei.ice.lib.utils.Emailer;
+import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.AccountDAO;
@@ -146,7 +146,7 @@ public class AccountController {
                     .append("https://").append(url).append("/profile/").append(account.getId())
                     .append("\n\nThank you.");
 
-            Emailer.send(account.getEmail(), subject, builder.toString());
+            EmailFactory.getEmail().send(account.getEmail(), subject, builder.toString());
         } catch (final Exception ex) {
             Logger.error(ex);
             return false;
@@ -250,7 +250,7 @@ public class AccountController {
                 .append("https://").append(server).append("/profile/").append(account.getId())
                 .append("\n\nThank you.");
 
-        Emailer.send(info.getEmail(), subject, stringBuilder.toString());
+        EmailFactory.getEmail().send(info.getEmail(), subject, stringBuilder.toString());
         info.setPassword(newPassword);
         return info;
     }
@@ -271,8 +271,7 @@ public class AccountController {
         adminAccount.setInitials("");
         adminAccount.setInstitution("");
         adminAccount.setSalt(Utils.generateSaltForUserAccount());
-        adminAccount.setPassword(AccountUtils.encryptNewUserPassword(ADMIN_ACCOUNT_PASSWORD,
-                adminAccount.getSalt()));
+        adminAccount.setPassword(AccountUtils.encryptNewUserPassword(ADMIN_ACCOUNT_PASSWORD, adminAccount.getSalt()));
         adminAccount.setDescription("Administrator Account");
 
         adminAccount.setIp("");
