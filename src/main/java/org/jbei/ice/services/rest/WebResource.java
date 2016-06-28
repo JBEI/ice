@@ -175,18 +175,13 @@ public class WebResource extends RestResource {
                                   @QueryParam("limit") int limit,
                                   @QueryParam("offset") int offset) {
         String userId = requireUserId();
-        if (download) {
-            log(userId, "downloading web entries");
-            RemoteEntriesAsCSV remoteEntriesAsCSV = new RemoteEntriesAsCSV();
-            remoteEntriesAsCSV.getEntries(offset, limit);
-            final File file = remoteEntriesAsCSV.getFilePath().toFile();
-            if (file.exists()) {
-                return Response.ok(new Setting("fileName", file.getName())).build();
-            }
-//            return addHeaders(null, null);
+        log(userId, "downloading web entries");
+        RemoteEntriesAsCSV remoteEntriesAsCSV = new RemoteEntriesAsCSV(true);
+        remoteEntriesAsCSV.getEntries(offset, limit);
+        final File file = remoteEntriesAsCSV.getFilePath().toFile();
+        if (file.exists()) {
+            return Response.ok(new Setting("fileName", file.getName())).build();
         }
-
-//        RemoteEntries remoteEntries = new RemoteEntries();
-        return null;
+        return super.respond(false);
     }
 }
