@@ -81,7 +81,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         Util.post("rest/folders/" + $scope.collectionFolderSelected.id + "/entries",
             entrySelection, function (result) {
                 if (result) {
-                    $rootScope.$broadcast("RefreshAfterDeletion");  // todo
+                    $rootScope.$broadcast("RefreshAfterDeletion");
                     $scope.$broadcast("UpdateCollectionCounts");
                     $scope.updateSelectedCollectionFolders();
                     Selection.reset();
@@ -135,23 +135,43 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
 
     $scope.restoreSelectedEntries = function () {
         var entrySelection = Selection.getSelectedEntries();
+        var entryIds = [];
 
         for (var i = 0; i < entrySelection.length; i++) {
-            Util.update("rest/parts", [parseInt(entrySelection[i].id)], {visibility:"OK"}, function () {
-                $rootScope.$broadcast("RefreshAfterDeletion");
-                $scope.$broadcast("UpdateCollectionCounts");
-                $location.path("folders/deleted");
-            });
+            entryIds.push(parseInt(entrySelection[i].id));
         }
 
-        Selection.reset();  
-        var word = entrySelection.length == 1 ? 'Entry' : "Entries";
-        Util.setFeedback(word + ' successfully restored', 'success');
+        Util.update("rest/parts", entryIds, {visibility: "OK"}, function () {
+            $rootScope.$broadcast("RefreshAfterDeletion");
+            $scope.$broadcast("UpdateCollectionCounts");
+            $location.path("folders/deleted");
+
+            Selection.reset();
+            var word = entryIds.length == 1 ? 'Entry' : entryIds.length + " entries";
+            Util.setFeedback(word + ' successfully restored', 'success');
+        });
+    };
+
+    $scope.submitSelectedImportEntry = function () {
+        var entrySelection = Selection.getSelectedEntries();
+
+        Util.update("rest/parts", [parseInt(entrySelection[0].id)], {visibility: "OK"}, function () {
+            $rootScope.$broadcast("RefreshAfterDeletion");
+            $scope.$broadcast("UpdateCollectionCounts");
+            $rootScope.$emit("CollectionSelection", "pending");
+            $location.path("folders/pending");
+            Selection.reset();
+            Util.setFeedback('Entry successfully approved', 'success');
+        });
     };
 
     $rootScope.$on("EntrySelected", function (event, count) {
         $scope.addToDisabled = !count;
     });
+
+    $scope.canAddToFolder = function () {
+        return !$scope.addToDisabled && !this.isDealingWithDeleted();
+    };
 
     $scope.canEdit = function () {
         return Selection.canEdit();
@@ -160,42 +180,33 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     $scope.canDelete = function () {
         return Selection.canDelete();
     };
-    
-    $scope.canDeleteNotErase = function () {
-        if (Selection.getSelectedEntries().length == 0) {
-            return $stateParams.collection != 'deleted';
-        } else {
-            return Selection.getSelectedEntries()[0].visible != "DELETED";
-        }
-        // return $stateParams.collection != 'deleted' && Selection.getSelectedEntries()[0].visible != "DELETED";
-    };
-    
-    $scope.canEraseNotDelete = function () {
+
+// Working in "deleted" collection or with deleted entry
+    $scope.isDealingWithDeleted = function () {
         if (Selection.getSelectedEntries().length == 0) {
             return $stateParams.collection == 'deleted';
         } else {
             return Selection.getSelectedEntries()[0].visible == "DELETED";
         }
-        // return $stateParams.collection == 'deleted' || Selection.getSelectedEntries()[0].visible == "DELETED";
     };
 
     $scope.canRestore = function () {
         return Selection.canRestore();
     };
 
-    $scope.canAccept = function () {
-        if ($scope.collectionSelected != 'transferred')
-            return false;
-
-        // check that something is actually selected
-        if ($scope.collectionFolderSelected && $scope.collectionFolderSelected.type == 'TRANSFERRED') {
-            return true;
-        }
-
-        return Selection.hasSelection();
+    $scope.canApprovePending = function () {
+        return Selection.isAdmin();
     };
 
-    // used to enable/disable the transfer action menu button
+    $scope.canAcceptTransfer = function () {
+        if (Selection.getSelectedEntries().length != 0) {
+            return Selection.getSelectedEntries()[0].visible == "TRANSFERRED" && Selection.isAdmin();
+        } else {
+            return false;
+        }
+    };
+
+// used to enable/disable the transfer action menu button
     $scope.transferAvailable = function () {
         return FolderSelection.getSelectedFolder() != undefined;
     };
@@ -216,7 +227,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         return true;
     };
 
-    // function that handles "edit" click
+// function that handles "edit" click
     $scope.editEntry = function () {
         var selectedEntries = Selection.getSelectedEntries();
 
@@ -241,7 +252,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         $scope.editDisabled = true;
     };
 
-    // todo : getEntrySelection() should be moved to Selection
+// todo : getEntrySelection() should be moved to Selection
     $scope.csvExport = function (includeSequences) {
         var selection = getEntrySelection();
         var formats = {sequenceFormats: []};
@@ -316,8 +327,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
 
     $scope.acceptTransferredEntries = function () {
         var selection = getEntrySelection();
-        console.log(selection);
-        if (selection.folderId) {
+        if (selection.folderId && !Selection.hasSelection()) {
             // approve folder
             Util.update("/rest/folders/" + selection.folderId, {
                 id: selection.folderId,
@@ -326,10 +336,23 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
                 console.log(result);
             })
         } else {
-            // todo : accept individual entries
+            var entrySelection = Selection.getSelectedEntries();
+
+            for (var i = 0; i < entrySelection.length; i++) {
+                Util.update("rest/parts", [parseInt(entrySelection[i].id)], {visibility: "OK"}, function () {
+                    $rootScope.$broadcast("RefreshAfterDeletion");
+                    $scope.$broadcast("UpdateCollectionCounts");
+                    $location.path("folders/transferred");
+                });
+            }
+
+            Selection.reset();
+            var word = entrySelection.length == 1 ? 'Entry' : "Entries";
+            Util.setFeedback(word + ' transfer successfully accepted', 'success');
         }
     }
-});
+})
+;
 
 iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $uibModalInstance, Util, FolderSelection,
                                                                       $stateParams, Selection, selectedFolder) {
@@ -705,7 +728,7 @@ iceControllers.controller('PermanentEntryDeletionConfirmationModalController', f
     $scope.closeModal = function () {
         $uibModalInstance.close();
     };
-    
+
     $scope.performAction = function () {
         Util.post("rest/parts/trash", allEntries, function () {
             // retrieve sub folders for selected collection

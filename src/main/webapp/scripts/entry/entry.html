@@ -25,37 +25,61 @@
                 </i>
 
                 <h4>
-                    <span ng-if="entry.visible!=='OK' && entry.visible!=='DELETED'">
+                    <span ng-if="entry.visible=='OK' && entry.visible=='DRAFT'">
                     <small class="label " ng-class="{
-                    'label-info':entry.visible=='TRANSFERRED',
-                    'label-warning':entry.visible=='PENDING' || entry.visible=='DRAFT'}"
+                    'label-warning':entry.visible=='DRAFT'}"
                            style="font-size: 9px; position: relative; top: -4px">{{entry.visible}}
                     </small>
                     </span>
 
-                    <span ng-if="entry.visible=='DELETED'">
+                    <span ng-if="entry.visible=='DELETED' || entry.visible=='TRANSFERRED' || entry.visible=='PENDING'">
                     <small class="label " ng-class="{
-                    'label-danger':entry.visible=='DELETED'}"
+                    'label-danger':entry.visible=='DELETED',
+                    'label-info':entry.visible=='TRANSFERRED',
+                    'label-warning':entry.visible=='PENDING'}"
                            style="font-size: 9px; position: relative; top: -4px;
                            border-radius: 0.25em 0 0 0.25em; padding-right: 3px">{{entry.visible}}
                     </small>
                     </span>
 
-                    <span ng-if="entry.visible!='DELETED'">
-                        &nbsp;
-                    </span>
-
-                    <span class="ng-scope" ng-if="entry.visible=='DELETED'">
+                    <!--restore/accept/approve button invariants (for admins)-->
+                    <span class="ng-scope" ng-show="canRestore()" ng-if="entry.visible=='DELETED'">
                         <span ng-click="restoreSelectedEntries()" class="label label-danger"
                               uib-tooltip="Restore this entry"
                               type="button" style="font-size: 9px; position: relative;
                               top: -4px; background-color: #d9534f; color: #ffffff;
-                              padding-right: 5px; cursor: pointer;
+                              padding-right: 3px; cursor: pointer;
                               border-left: 1px solid whitesmoke; border-radius: 0 0.25em 0.25em 0">
-                            X
+                            <span style="font-size: 10px">&#10008;</span>
                         </span>
+                    </span>
 
-                    &nbsp;</span>
+                    <span class="ng-scope" ng-show="canAcceptTransfer()" ng-if="entry.visible=='TRANSFERRED'">
+                        <span ng-click="acceptTransferredEntries()" class="label label-info" type="button"
+                              uib-tooltip="Accept this transfer"
+                              style="font-size: 9px; position: relative;
+                              top: -4px; background-color: #5bc0de; color: #ffffff;
+                              padding-right: 3px; cursor: pointer;
+                              border-left: 1px solid whitesmoke; border-radius: 0 0.25em 0.25em 0">
+                            <span style="font-size: 11px">&#10004;</span>
+                        </span>
+                    </span>
+
+                    <span class="ng-scope" ng-show="canApprovePending()" ng-if="entry.visible=='PENDING'">
+                        <span ng-click="submitSelectedImportEntry()" class="label label-warning" type="button"
+                              uib-tooltip="Approve this entry"
+                              style="font-size: 9px; position: relative;
+                              top: -4px; background-color: #f0ad4e; color: #ffffff;
+                              padding-right: 3px; cursor: pointer;
+                              border-left: 1px solid whitesmoke; border-radius: 0 0.25em 0.25em 0">
+                            <span style="font-size: 11px">&#10004;</span>
+                        </span>
+                    </span>
+                    <!--end of button invariants-->
+
+                    <span ng-if="entry.visible!='DRAFT' && entry.visible!='OK'">
+                        &nbsp;
+                    </span>
 
                     <strong style="color: #888;">{{entry.type}}</strong>
                     <strong>{{entry.name}}</strong>&nbsp;

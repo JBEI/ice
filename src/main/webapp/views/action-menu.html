@@ -3,7 +3,7 @@
     <div class="btn-group" style="margin-left: 20px">
 
         <!--add to folder-->
-        <button class="btn btn-default action-menu" ng-disabled="addToDisabled" ng-click="openAddToFolderModal(false)">
+        <button class="btn btn-default action-menu" ng-disabled="!canAddToFolder()" ng-click="openAddToFolderModal(false)">
             <i class="fa fa-fw fa-folder font-12em"></i>
             <br>
             <small class="text-uppercase font-55em">Add To</small>
@@ -35,19 +35,19 @@
             <small class="text-uppercase font-55em">Edit</small>
         </button>
 
-        <button class="btn btn-default action-menu" ng-show="canDeleteNotErase()" ng-disabled="!canDelete()" ng-click="deleteSelectedEntries()">
+        <button class="btn btn-default action-menu" ng-show="!isDealingWithDeleted()" ng-disabled="!canDelete()" ng-click="deleteSelectedEntries()">
             <i class="fa fa-trash-o font-12em"></i>
             <br>
             <small class="text-uppercase font-55em">Delete</small>
         </button>
 
-        <button class="btn btn-default action-menu" ng-hide="!canEraseNotDelete()" ng-disabled="!canDelete()" ng-click="deleteSelectedEntries()">
+        <button class="btn btn-default action-menu" ng-show="isDealingWithDeleted()" ng-disabled="!canDelete()" ng-click="deleteSelectedEntries()">
             <i class="fa fa-trash font-12em"></i>
             <br>
             <small class="text-uppercase font-55em">Permanent</small>
         </button>
 
-        <button class="btn btn-default action-menu" ng-show="canRestore()" ng-disabled="!canDelete()" ng-click="restoreSelectedEntries()">
+        <button class="btn btn-default action-menu" ng-if="canRestore()" ng-click="restoreSelectedEntries()">
             <i class="fa fa-undo font-12em"></i>
             <br>
             <small class="text-uppercase font-55em">Restore</small>
@@ -80,7 +80,7 @@
         </button>
 
         <!--accept transferred entries-->
-        <button class="btn btn-default action-menu" ng-disabled="!canAccept()" ng-click="acceptTransferredEntries()">
+        <button class="btn btn-default action-menu" ng-disabled="!canAcceptTransfer()" ng-click="acceptTransferredEntries()">
             <i class="fa fa-save font-12em"></i>
             <br>
             <small class="text-uppercase font-55em">Accept</small>
