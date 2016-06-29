@@ -29,7 +29,7 @@ import java.util.zip.ZipInputStream;
 /**
  * ABI to manipulate {@link Entry}s.
  *
- * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar, Elena Aravina
  */
 public class EntryController extends HasEntry {
 
@@ -247,7 +247,10 @@ public class EntryController extends HasEntry {
     }
 
     /**
-     * Moves the specified list of entries to the deleted folder
+     * Moves the specified list of entries to the deleted folder.
+     * If an already deleted entry (list of entries) is being deleted then
+     * the status "permanently deleted" is assigned, and these entries
+     * become invisible to everyone.
      *
      * @param userId unique identifier for user making the request. Must have write access privileges on the
      *               entries in the list
@@ -267,7 +270,12 @@ public class EntryController extends HasEntry {
         // add to bin
         try {
             for (Entry entry : toTrash) {
-                entry.setVisibility(Visibility.DELETED.getValue());
+                if (entry.getVisibility() == Visibility.DELETED.getValue()) {
+                    entry.setVisibility(Visibility.PERMANENTLY_DELETED.getValue());
+                } else {
+                    entry.setVisibility(Visibility.DELETED.getValue());
+                }
+
                 dao.update(entry);
             }
         } catch (DAOException de) {

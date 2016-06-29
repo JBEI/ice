@@ -27,7 +27,7 @@
     </div>
 
 
-    <!--edit and delete-->
+    <!--edit, delete/erase, and restore-->
     <div class="btn-group" style="margin-left: 20px">
         <button class="btn btn-default action-menu" ng-disabled="!canEdit()" ng-click="editEntry()">
             <i class="fa fa-pencil font-12em"></i>
@@ -35,10 +35,22 @@
             <small class="text-uppercase font-55em">Edit</small>
         </button>
 
-        <button class="btn btn-default action-menu" ng-disabled="!canDelete()" ng-click="deleteSelectedEntries()">
+        <button class="btn btn-default action-menu" ng-show="canDeleteNotErase()" ng-disabled="!canDelete()" ng-click="deleteSelectedEntries()">
             <i class="fa fa-trash-o font-12em"></i>
             <br>
             <small class="text-uppercase font-55em">Delete</small>
+        </button>
+
+        <button class="btn btn-default action-menu" ng-hide="!canEraseNotDelete()" ng-disabled="!canDelete()" ng-click="deleteSelectedEntries()">
+            <i class="fa fa-trash font-12em"></i>
+            <br>
+            <small class="text-uppercase font-55em">Permanent</small>
+        </button>
+
+        <button class="btn btn-default action-menu" ng-show="canRestore()" ng-disabled="!canDelete()" ng-click="restoreSelectedEntries()">
+            <i class="fa fa-undo font-12em"></i>
+            <br>
+            <small class="text-uppercase font-55em">Restore</small>
         </button>
     </div>
 
