@@ -34,7 +34,7 @@ import java.util.*;
  * Apache Lucene full text library functionality in Hibernate.
  * Implemented as a singleton
  *
- * @author Hector Plahar
+ * @author Hector Plahar, Elena Aravina
  */
 @SuppressWarnings("unchecked")
 public class HibernateSearch {
@@ -355,6 +355,11 @@ public class HibernateSearch {
             Query visibilityQuery2 = qb.keyword().onField("visibility")
                     .matching(Visibility.DELETED.getValue()).createQuery();
             builder.add(visibilityQuery2, BooleanClause.Occur.MUST_NOT);
+
+            Query visibilityQuery3 = qb.keyword().onField("visibility")
+                    .matching(Visibility.PERMANENTLY_DELETED.getValue()).createQuery();
+            builder.add(visibilityQuery3, BooleanClause.Occur.MUST_NOT);
+
 
             // bio-safety level
             if (option != null) {

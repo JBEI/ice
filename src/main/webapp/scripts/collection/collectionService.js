@@ -21,6 +21,10 @@ angular.module('ice.collection.service', [])
                 selectedFolder = undefined;
                 $rootScope.$emit("CollectionSelected", collection);
             },
+            
+            getSelectedCollection: function() {
+                return selectedCollection;
+            },
 
             canEditSelectedFolder: function () {
                 if (selectedCollection === "personal")
