@@ -72,6 +72,7 @@ public class WebOfRegistriesTask extends Task {
             return;
         }
 
+        Logger.info("Received " + partners.size() + " partner(s) from master");
         // for potential, check already in partner list and add if not by performing exchange
         for (RegistryPartner registryPartner : partners) {
             if (registryPartner.getUrl().equalsIgnoreCase(myUrl))
