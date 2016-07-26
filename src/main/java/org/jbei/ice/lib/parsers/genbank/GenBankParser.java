@@ -61,6 +61,9 @@ public class GenBankParser extends AbstractParser {
     // TODO parse source feature tag with xdb_ref
     @Override
     public DNASequence parse(String textSequence) throws InvalidFormatParserException {
+        if (textSequence == null || textSequence.isEmpty())
+            throw new InvalidFormatParserException("Cannot parse empty genbank sequence");
+
         FeaturedDNASequence sequence = null;
         try {
             textSequence = cleanSequence(textSequence);

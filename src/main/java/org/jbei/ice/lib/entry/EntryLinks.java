@@ -51,6 +51,7 @@ public class EntryLinks {
         long linkId = partData.getId();
         Entry linkedEntry = this.entryDAO.get(linkId);
         if (linkedEntry == null) {
+            // todo : create a new entry
             Logger.error("Could not retrieve entry for linking: " + linkId);
             return false;
         }

@@ -4,6 +4,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.Field;
 import org.hibernate.search.annotations.FieldBridge;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
+import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.storage.DataModel;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 /**
  * Stores the unique sequence for an {@link Entry} object.
- * <p/>
+ * <p>
  * <ul>
  * <li><b>sequence: </b>Normalized (lower cased, trimmed) sequence for {@link Entry}.</li>
  * <li><b>sequenceUser: </b>Original sequence uploaded by the user. For example, the unparsed
@@ -64,6 +65,10 @@ public class Sequence implements DataModel {
 
     @Column(name = "file_name")
     private String fileName;
+
+    @Column(name = "format")
+    @Enumerated(value = EnumType.STRING)
+    private SequenceFormat format;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "entries_id", nullable = true, unique = true)
@@ -202,6 +207,14 @@ public class Sequence implements DataModel {
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public void setFormat(SequenceFormat format) {
+        this.format = format;
+    }
+
+    public SequenceFormat getFormat() {
+        return this.format;
     }
 
     @Override

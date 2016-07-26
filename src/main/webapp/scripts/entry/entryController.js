@@ -713,6 +713,7 @@ angular.module('ice.entry.controller', [])
 
         uploader.onErrorItem = function (item, response, status, headers) {
             item.remove();
+            console.log(item, response, status, headers);
             $scope.serverError = true;
             $scope.processingFile = undefined;
             uploader.resetAll();
@@ -1206,6 +1207,12 @@ angular.module('ice.entry.controller', [])
             $scope.showSBOL = !$scope.showSBOL;
         };
 
+        $scope.getSequenceSectionHeader = function () {
+            if ($scope.entry.hasSequence && !$scope.entry.basePairCount)
+                return "SBOL INFORMATION";
+            return "SEQUENCE";
+        };
+
         $scope.entryFields = undefined;
         $scope.entry = undefined;
         $scope.notFound = undefined;
@@ -1435,7 +1442,7 @@ angular.module('ice.entry.controller', [])
         };
 
         uploader.onErrorItem = function (item, response, status, headers) {
-            $scope.serverError = true;
+            $scope.serverError = response.message;
         };
 
 // customer parameter add for entry view
