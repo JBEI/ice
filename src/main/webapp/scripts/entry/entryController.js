@@ -1429,6 +1429,9 @@ angular.module('ice.entry.controller', [])
         };
 
         uploader.onSuccessItem = function (item, response, status, header) {
+            if (response && response.sequence) {
+                $scope.entry.basePairCount = response.sequence.sequence.length;
+            }
             $scope.entry.hasSequence = true;
         };
 
