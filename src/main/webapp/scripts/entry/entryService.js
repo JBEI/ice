@@ -120,11 +120,13 @@ angular.module('ice.entry.service', [])
             },
 
             canRestore: function () {
-                return this.hasSelection() && this.getSelectedEntries()[0].visible == 'DELETED' && $rootScope.user;
+                if (allSelection.type && allSelection.type == 'ALL')
+                    return false;
+                return this.hasSelection() && this.getSelectedEntries()[0].visible == 'DELETED';
             },
-            
+
             isAdmin: function () {
-                return $rootScope.user && $rootScope.user.isAdmin;  
+                return $rootScope.user && $rootScope.user.isAdmin;
             },
 
             // determines if an entry has been selected

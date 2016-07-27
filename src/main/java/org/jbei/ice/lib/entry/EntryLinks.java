@@ -1,10 +1,12 @@
 package org.jbei.ice.lib.entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.Entry;
 
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ import java.util.List;
 public class EntryLinks {
 
     private final EntryDAO entryDAO;
+    private final SequenceDAO sequenceDAO;
     private final Entry entry;
     private final EntryAuthorization entryAuthorization;
     private final String userId;
@@ -30,6 +33,7 @@ public class EntryLinks {
         if (this.entry == null)
             throw new IllegalArgumentException("Could not retrieve part with id " + partId);
         this.userId = userId;
+        this.sequenceDAO = DAOFactory.getSequenceDAO();
         this.entryAuthorization = new EntryAuthorization();
         this.entryAuthorization.expectRead(userId, this.entry);
     }
@@ -168,5 +172,51 @@ public class EntryLinks {
             parentData.add(parent.toDataTransferObject());
         }
         return parentData;
+    }
+
+    /**
+     * Retrieves entry links that are parents or children depending on specified type
+     *
+     * @param type specified type of links to return
+     * @return list of links that match specified type. These are filtered based on user permissions
+     */
+    public List<PartData> get(LinkType type) {
+        List<Entry> entries;
+        if (type == LinkType.CHILD) {
+            entries = new ArrayList<>(this.entry.getLinkedEntries());
+        } else {
+            entries = this.entryDAO.getParents(this.entry.getId());
+        }
+
+        // get sequence and other summary information
+        List<PartData> results = new ArrayList<>(entries.size());
+        for (Entry entry : entries) {
+            if (!this.entryAuthorization.canRead(this.userId, entry))
+                continue;
+
+            PartData partData = new PartData(EntryType.nameToType(entry.getRecordType()));
+            partData.setId(entry.getId());
+            partData.setName(entry.getName());
+            partData.setPartId(entry.getPartNumber());
+            partData.setShortDescription(entry.getShortDescription());
+
+            boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
+            partData.setHasSequence(hasSequence);
+            boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
+            partData.setHasOriginalSequence(hasOriginalSequence);
+            String sequenceString = sequenceDAO.getSequenceString(entry);
+            if (StringUtils.isEmpty(sequenceString))
+                partData.setBasePairCount(0);
+            else
+                partData.setBasePairCount(sequenceString.trim().length());
+
+            if (!StringUtils.isEmpty(sequenceString)) {
+                partData.setFeatureCount(DAOFactory.getSequenceFeatureDAO().getFeatureCount(entry));
+            }
+
+            results.add(partData);
+        }
+
+        return results;
     }
 }

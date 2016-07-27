@@ -284,11 +284,11 @@
                         </div>
 
                         <div style="background-color: #999; color: #fff; padding: 3px; text-align: center">
-                            <span ng-if="entry.linkedParts[$index+0].basePairCount">
+                            <span ng-if="entry.linkedParts[$index+0].basePairCount > 0">
                             Sequence with {{entry.linkedParts[$index+0].basePairCount | number}} base pairs <span
                                     ng-if="entry.linkedParts[$index+0].featureCount">& {{entry.linkedParts[$index+0].featureCount}} features</span>
                                 </span>
-                            <span ng-if="!entry.linkedParts[$index+0].basePairCount">
+                            <span ng-if="!entry.linkedParts[$index+0].basePairCount || entry.linkedParts[$index+0].basePairCount == 0">
                                 <i>No sequence data</i>
                                 </span>
                         </div>
@@ -314,10 +314,15 @@
                         </div>
 
                         <div style="background-color: #999; color: #fff; padding: 3px; text-align: center">
+                            <span ng-if="entry.linkedParts[$index+1].basePairCount > 0">
                             Sequence with {{entry.linkedParts[$index+1].basePairCount | number}} base pairs <span
-                                ng-if="entry.linkedParts[$index+1].featureCount">& {{entry.linkedParts[$index+1].featureCount}} features</span>
+                                    ng-if="entry.linkedParts[$index+1].featureCount">& {{entry.linkedParts[$index+1].featureCount}} features</span>
+                                </span>
+                            <span ng-if="!entry.linkedParts[$index+1].basePairCount || entry.linkedParts[$index+1].basePairCount == 0">
+                                <i>No sequence data</i>
+                                </span>
                         </div>
-                        <p style="clear: both; margin: 0; color: rgba(0,0,0,.45);padding: .75em .5em;">
+                        <p style="clear: both; margin: 0; color: #888; padding: .75em .5em;">
                             {{entry.linkedParts[$index+1].shortDescription}}</p>
                     </div>
                 </div>
@@ -329,7 +334,7 @@
 <div class="row margin-top-10">
     <div class="col-md-12">
         <div class="entry-details-subheader">
-            <strong style="color: #233559;">{{getSequenceSectionHeader() || "SEQUENCE"}}</strong>
+            <strong style="color: #233559">{{getSequenceSectionHeader() || "SEQUENCE"}}</strong>
 
             <!-- menu if no sequence then [Create in VE | Upload File | Paste -->
             <div class="pull-right" ng-if='!entry.hasSequence&&entry.canEdit'>

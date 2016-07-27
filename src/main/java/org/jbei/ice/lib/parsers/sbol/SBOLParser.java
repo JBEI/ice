@@ -9,7 +9,6 @@ import org.jbei.ice.lib.entry.EntryLinks;
 import org.jbei.ice.lib.entry.LinkType;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
-import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.storage.DAOFactory;
@@ -32,7 +31,7 @@ import java.util.Map;
  *
  * @author Hector Plahar
  */
-public class SBOLParser extends AbstractParser {
+public class SBOLParser {
 
     private final PartData partData;
     private final String userId;
@@ -51,7 +50,7 @@ public class SBOLParser extends AbstractParser {
             document = SBOLReader.read(inputStream);
         } catch (SBOLValidationException e) {
             Logger.error(e);
-            throw new InvalidFormatParserException("Invalid SBOL file");
+            throw new InvalidFormatParserException("Invalid SBOL file: " + e.getMessage());
         } catch (IOException e) {
             Logger.error(e);
             throw new InvalidFormatParserException("Server error parsing file");
@@ -141,8 +140,10 @@ public class SBOLParser extends AbstractParser {
         part.setPrincipalInvestigator(partData.getPrincipalInvestigator());
         part.setPrincipalInvestigatorEmail(partData.getPrincipalInvestigatorEmail());
         part.setBioSafetyLevel(partData.getBioSafetyLevel());
-        String desc = StringUtils.isEmpty(description) ? partData.getShortDescription() : description;
-        part.setShortDescription(desc);
+        part.setStatus(partData.getStatus());
+        description = StringUtils.isEmpty(description) ? partData.getShortDescription() : description;
+        name = StringUtils.isEmpty(name) ? moduleDefinition.getDisplayId() : name;
+        part.setShortDescription(description);
         part.setName(name);
 
         EntryCreator entryCreator = new EntryCreator();
@@ -162,12 +163,12 @@ public class SBOLParser extends AbstractParser {
 
     public void createICEModuleDefinitionRecord(SBOLDocument document, ModuleDefinition moduleDefinition) throws SBOLValidationException {
         SBOLDocument rootedDocument = document.createRecursiveCopy(moduleDefinition);
-        System.out.println("Creating ICE record for ModuleDefinition: " + moduleDefinition.getIdentity());
+        Logger.debug("Creating ICE record for ModuleDefinition: " + moduleDefinition.getIdentity());
         String identity = moduleDefinition.getIdentity().toString();
 
         Long partId = identityEntryMap.get(identity);
         if (partId == null) {
-            Logger.info("Creating " + moduleDefinition.getDisplayId());
+            Logger.debug("Creating " + moduleDefinition.getDisplayId());
             createNewEntry(moduleDefinition, rootedDocument);
         }
 
@@ -203,14 +204,13 @@ public class SBOLParser extends AbstractParser {
 
             EntryLinks links = new EntryLinks(userId, moduleId);
             links.addLink(this.partData, LinkType.PARENT);
-            System.out.println("    Link to ModuleDefinition: " + module.getDefinition().getIdentity());
+            Logger.debug("    Link to ModuleDefinition: " + module.getDefinition().getIdentity());
         }
     }
 
     public void createICEComponentDefinitionRecord(SBOLDocument document, ComponentDefinition componentDefinition)
             throws SBOLValidationException {
         SBOLDocument rootedDocument = document.createRecursiveCopy(componentDefinition);
-        System.out.println("Creating ICE record for ComponentDefinition: " + componentDefinition.getIdentity());
         String identity = componentDefinition.getIdentity().toString();
 
         Long partId = identityEntryMap.get(identity);
@@ -231,12 +231,7 @@ public class SBOLParser extends AbstractParser {
 
             EntryLinks links = new EntryLinks(userId, componentId);
             links.addLink(this.partData, LinkType.PARENT);
-            System.out.println("    Link to ComponentDefinition: " + component.getDefinition().getIdentity());
+            Logger.debug("    Link to ComponentDefinition: " + component.getDefinition().getIdentity());
         }
-    }
-
-    @Override
-    public DNASequence parse(String textSequence) throws InvalidFormatParserException {
-        return null;
     }
 }
