@@ -144,7 +144,8 @@ public class WebSearch {
         public void execute() {
             try {
                 IceRestClient client = IceRestClient.getInstance();
-                SearchResults results = client.post(partner.getUrl(), "/rest/search", query, SearchResults.class, null);
+                SearchResults results = client.postWor(partner.getUrl(), "/rest/search", query,
+                        SearchResults.class, null, partner.getApiKey());
                 if (results == null)
                     return;
 
