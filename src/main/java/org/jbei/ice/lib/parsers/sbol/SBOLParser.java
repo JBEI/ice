@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryLinks;
 import org.jbei.ice.lib.entry.LinkType;
@@ -44,7 +45,7 @@ public class SBOLParser {
     // map of component identity to entry id
     private Map<String, Long> identityEntryMap = new HashMap<>();
 
-    public void parse(InputStream inputStream, String fileName) throws InvalidFormatParserException {
+    public SequenceInfo parse(InputStream inputStream, String fileName) throws InvalidFormatParserException {
         SBOLDocument document;
         try {
             document = SBOLReader.read(inputStream);
@@ -60,12 +61,8 @@ public class SBOLParser {
         }
 
         // parse raw document and return
-        Sequence sequence = parseToGenBank(document);
         Entry entry = DAOFactory.getEntryDAO().get(partData.getId());
-        sequence.setEntry(entry);
-        sequence.setFileName(fileName);
-
-        DAOFactory.getSequenceDAO().saveSequence(sequence);
+        SequenceInfo sequenceInfo = parseToGenBank(document, fileName, entry, null);
 
         // document parsed successfully, go through module definitions
         for (ModuleDefinition moduleDefinition : document.getModuleDefinitions()) {
@@ -84,13 +81,24 @@ public class SBOLParser {
                 Logger.error("Could not import component definition", e);
             }
         }
+
+        return sequenceInfo;
     }
 
-    protected Sequence parseToGenBank(SBOLDocument sbolDocument) {
+    /**
+     * Parse the SBOL document to genbank format, save and associate with entry
+     *
+     * @param sbolDocument SBOL document to parse
+     * @param fileName     name of file that was parsed to extract the SBOL information
+     * @param entry        ICE entry to associate sequence document with
+     * @param uri          optional uri to associate with sequence
+     * @return Sequence info data transfer object for saved sequence
+     */
+    protected SequenceInfo parseToGenBank(SBOLDocument sbolDocument, String fileName, Entry entry, String uri) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         String rdf;
 
-        // convert to rdf string
+        // convert to rdf string to save raw document
         try {
             sbolDocument.write(out);
             rdf = out.toString();
@@ -100,6 +108,8 @@ public class SBOLParser {
 
         // convert to genbank
         Sequence sequence = null;
+        DNASequence dnaSequence = null;
+
         try {
             out.reset();
             SBOLWriter.write(sbolDocument, out, "GENBANK");
@@ -107,7 +117,7 @@ public class SBOLParser {
                 GenBankParser parser = new GenBankParser();
 
                 String genBankString = out.toString();
-                DNASequence dnaSequence = parser.parse(genBankString);
+                dnaSequence = parser.parse(genBankString);
                 sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
             }
         } catch (InvalidFormatParserException e) {
@@ -124,7 +134,18 @@ public class SBOLParser {
         if (!StringUtils.isEmpty(rdf))
             sequence.setSequenceUser(rdf);
         sequence.setFormat(SequenceFormat.SBOL2);
-        return sequence;
+        sequence.setEntry(entry);
+        sequence.setFileName(fileName);
+        if (!StringUtils.isEmpty(uri))
+            sequence.setUri(uri);
+
+        sequence = DAOFactory.getSequenceDAO().saveSequence(sequence);
+        SequenceInfo sequenceInfo = new SequenceInfo();
+        sequenceInfo.setEntryId(entry.getId());
+        sequenceInfo.setSequence(dnaSequence);
+        sequenceInfo.setFormat(sequence.getFormat());
+        sequenceInfo.setFilename(fileName);
+        return sequenceInfo;
     }
 
     protected long createNewEntry(TopLevel moduleDefinition, SBOLDocument document) {
@@ -149,14 +170,14 @@ public class SBOLParser {
         EntryCreator entryCreator = new EntryCreator();
         Account account = DAOFactory.getAccountDAO().getByEmail(part.getCreatorEmail());
         Entry entry = entryCreator.createEntry(account, part, null);
-        Sequence sequence = parseToGenBank(document);
-        sequence.setEntry(entry);
-        if (!StringUtils.isBlank(entry.getName()))
-            sequence.setFileName(entry.getName());
+        parseToGenBank(document, entry.getName(), entry, moduleDefinition.getIdentity().toString());
+//        sequence.setEntry(entry);
+//        if (!StringUtils.isBlank(entry.getName()))
+//            sequence.setFileName(entry.getName());
 
-        sequence.setUri(moduleDefinition.getIdentity().toString());
-        sequence.setIdentifier(moduleDefinition.getDisplayId());
-        DAOFactory.getSequenceDAO().saveSequence(sequence);
+//        sequence.setUri(moduleDefinition.getIdentity().toString());    // tODO
+//        sequence.setIdentifier(moduleDefinition.getDisplayId());
+//        DAOFactory.getSequenceDAO().saveSequence(sequence);
         identityEntryMap.put(identity, entry.getId());
         return entry.getId();
     }
