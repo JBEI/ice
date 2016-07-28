@@ -1,40 +1,76 @@
 package org.jbei.ice.lib.entry.sequence;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.EntryAuthorization;
+import org.jbei.ice.lib.entry.EntryCreator;
+import org.jbei.ice.lib.entry.EntryFactory;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.parsers.GeneralParser;
+import org.jbei.ice.lib.parsers.InvalidFormatParserException;
+import org.jbei.ice.lib.parsers.sbol.SBOLParser;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
 /**
+ * Biological part with associated sequence information
+ *
  * @author Hector Plahar
  */
 public class PartSequence extends HasEntry {
 
     private final Entry entry;
+    private final String userId;
     private SequenceDAO sequenceDAO;
     private EntryAuthorization entryAuthorization;
 
-    public PartSequence(String entryId) {
+    /**
+     * Constructor for creating a new part to associate a sequence with
+     *
+     * @param userId unique identifier for user creating new part
+     * @param type   type of part to create.
+     */
+    public PartSequence(String userId, EntryType type) {
+        this.userId = userId;
+        Entry newEntry = EntryFactory.buildEntry(type);
+
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        String entryName = account.getFullName();
+        String entryEmail = account.getEmail();
+        newEntry.setOwner(entryName);
+        newEntry.setOwnerEmail(entryEmail);
+        newEntry.setCreator(entryName);
+        newEntry.setCreatorEmail(entryEmail);
+        newEntry.setVisibility(Visibility.DRAFT.getValue());
+        EntryCreator creator = new EntryCreator();
+        entry = creator.createEntry(account, newEntry, null);
+    }
+
+    public PartSequence(String userId, String entryId) {
         this.entry = super.getEntry(entryId);
         if (this.entry == null)
             throw new IllegalArgumentException("Could not retrieve entry with identifier " + entryId);
         this.sequenceDAO = DAOFactory.getSequenceDAO();
         this.entryAuthorization = new EntryAuthorization();
+        this.userId = userId;
     }
 
-    public FeaturedDNASequence get(String userId) {
+    public FeaturedDNASequence get() {
         if (!new PermissionsController().isPubliclyVisible(entry))
             entryAuthorization.expectRead(userId, entry);
 
@@ -42,52 +78,40 @@ public class PartSequence extends HasEntry {
         return getFeaturedSequence(entry, canEdit);
     }
 
-    /**
-     * Parses a sequence as a string and assigns it to the entry
-     *
-     * @param sequenceString sequence as string to be parsed
-     * @param name           optional filename
-     * @return sequence information
-     */
-    public SequenceInfo parseSequence(String sequenceString, String name) {
-//        EntryType type = EntryType.nameToType(entryType);
+    public SequenceInfo parseSequenceFile(InputStream inputStream, String fileName) throws InvalidFormatParserException {
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex != -1) {
+            String ext = fileName.substring(dotIndex + 1);
 
-//        Entry entry;
-//        if (StringUtils.isBlank(recordId)) {
-//            EntryCreator creator = new EntryCreator();
-//            Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-//
-//            entry = EntryFactory.buildEntry(type);
-//            String entryName = account.getFullName();
-//            String entryEmail = account.getEmail();
-//            entry.setOwner(entryName);
-//            entry.setOwnerEmail(entryEmail);
-//            entry.setCreator(entryName);
-//            entry.setCreatorEmail(entryEmail);
-//            entry.setVisibility(Visibility.DRAFT.getValue());
-//            entry = creator.createEntry(account, entry, null);
-//        } else {
-//            entry = DAOFactory.getEntryDAO().getByRecordId(recordId);
-//            if (entry == null)
-//                return null;
-//        }
+            // unique case for sbol since it can result in multiple entries created
+            if ("rdf".equalsIgnoreCase(ext) || "xml".equalsIgnoreCase(ext) || "sbol".equalsIgnoreCase(ext)) {
+                PartData partData = ModelToInfoFactory.getInfo(entry);
+                SBOLParser sbolParser = new SBOLParser(partData);
+                return sbolParser.parse(inputStream, fileName);
+            }
+        }
 
         // parse actual sequence
-        DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
-        if (dnaSequence == null)
-            return null;
+        try {
+            String sequenceString = IOUtils.toString(inputStream);
+            DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+            if (dnaSequence == null)
+                throw new InvalidFormatParserException("Could not parse sequence string");
 
-        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-        sequence.setSequenceUser(sequenceString);
-        sequence.setEntry(entry);
-        if (!StringUtils.isBlank(name))
-            sequence.setFileName(name);
+            Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+            sequence.setSequenceUser(sequenceString);
+            sequence.setEntry(entry);
+            if (!StringUtils.isBlank(fileName))
+                sequence.setFileName(fileName);
 
-        Sequence result = sequenceDAO.saveSequence(sequence);
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
-        SequenceInfo info = result.toDataTransferObject();
-        info.setSequence(dnaSequence);
-        return info;
+            Sequence result = sequenceDAO.saveSequence(sequence);
+            BlastPlus.scheduleBlastIndexRebuildTask(true);
+            SequenceInfo info = result.toDataTransferObject();
+            info.setSequence(dnaSequence);
+            return info;
+        } catch (IOException e) {
+            throw new InvalidFormatParserException(e);
+        }
     }
 
     protected FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {

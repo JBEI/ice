@@ -94,7 +94,7 @@ angular.module('ice.entry.service', [])
                 var selected = [];
                 for (var k in selectedEntries) {
                     if (selectedEntries.hasOwnProperty(k) && selectedEntries[k]) {
-                        selected.push({id: k});
+                        selected.push({id: k, visible: selectedEntries[k].visible});
                     }
                 }
                 return selected;
@@ -112,11 +112,21 @@ angular.module('ice.entry.service', [])
                 var count = 0;
                 // selectedTypes is the type of entries selected
                 for (var k in selectedTypes) if (selectedTypes.hasOwnProperty(k)) ++count;
-                return !this.allSelected() && canEdit && selectedSearchResultsCount > 0 && count == 1;
+                return !this.allSelected() && canEdit && selectedSearchResultsCount > 0 && count == 1 && !this.canRestore();
             },
 
             canDelete: function () {
                 return !this.allSelected() && (($rootScope.user && $rootScope.user.isAdmin) || canDelete) && selectedSearchResultsCount > 0;
+            },
+
+            canRestore: function () {
+                if (allSelection.type && allSelection.type == 'ALL')
+                    return false;
+                return this.hasSelection() && this.getSelectedEntries()[0].visible == 'DELETED';
+            },
+
+            isAdmin: function () {
+                return $rootScope.user && $rootScope.user.isAdmin;
             },
 
             // determines if an entry has been selected

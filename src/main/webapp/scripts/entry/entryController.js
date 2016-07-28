@@ -713,6 +713,7 @@ angular.module('ice.entry.controller', [])
 
         uploader.onErrorItem = function (item, response, status, headers) {
             item.remove();
+            console.log(item, response, status, headers);
             $scope.serverError = true;
             $scope.processingFile = undefined;
             uploader.resetAll();
@@ -1206,6 +1207,12 @@ angular.module('ice.entry.controller', [])
             $scope.showSBOL = !$scope.showSBOL;
         };
 
+        $scope.getSequenceSectionHeader = function () {
+            if ($scope.entry.hasSequence && !$scope.entry.basePairCount)
+                return "SBOL INFORMATION";
+            return "SEQUENCE";
+        };
+
         $scope.entryFields = undefined;
         $scope.entry = undefined;
         $scope.notFound = undefined;
@@ -1422,6 +1429,21 @@ angular.module('ice.entry.controller', [])
         };
 
         uploader.onSuccessItem = function (item, response, status, header) {
+            if (!response)
+                return;
+
+            if (response.sequence) {
+                $scope.entry.basePairCount = response.sequence.sequence.length;
+            }
+
+            if (response.format && response.format.indexOf("SBOL") > -1) {
+                Util.list("rest/parts/" + $scope.entry.id + "/links", function (result) {
+                    if (!result)
+                        return;
+                    $scope.entry.linkedParts = result;
+                });
+            }
+
             $scope.entry.hasSequence = true;
         };
 
@@ -1435,7 +1457,7 @@ angular.module('ice.entry.controller', [])
         };
 
         uploader.onErrorItem = function (item, response, status, headers) {
-            $scope.serverError = true;
+            $scope.serverError = response.message;
         };
 
 // customer parameter add for entry view
@@ -1462,8 +1484,16 @@ angular.module('ice.entry.controller', [])
                     $scope.selectedFeatures = [];
                     $scope.allSelected = false;
                     $scope.part = part;
-                    $scope.pagingParams = {currentPage: 0, pageSize: 8, sort: "locations[0].genbankStart", asc: true};
-                    var displayOptions = [{display: "All features", key: "all"}, {display: "My features", key: "mine"}];
+                    $scope.pagingParams = {
+                        currentPage: 0,
+                        pageSize: 8,
+                        sort: "locations[0].genbankStart",
+                        asc: true
+                    };
+                    var displayOptions = [{display: "All features", key: "all"}, {
+                        display: "My features",
+                        key: "mine"
+                    }];
                     $scope.options = {values: displayOptions, selection: displayOptions[0]};
 
                     // retrieves "suggested" annotations for current entry
@@ -1620,5 +1650,7 @@ angular.module('ice.entry.controller', [])
                 }
             });
         };
-    });
+    }
+)
+;
 

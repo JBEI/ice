@@ -81,7 +81,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         Util.post("rest/folders/" + $scope.collectionFolderSelected.id + "/entries",
             entrySelection, function (result) {
                 if (result) {
-                    $rootScope.$broadcast("RefreshAfterDeletion");  // todo
+                    $rootScope.$broadcast("RefreshAfterDeletion");
                     $scope.$broadcast("UpdateCollectionCounts");
                     $scope.updateSelectedCollectionFolders();
                     Selection.reset();
@@ -95,16 +95,83 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     // "select all" cannot be used to delete entries. they have to be explicitly selected
     $scope.deleteSelectedEntries = function () {
         var entries = Selection.getSelectedEntries();
-        Util.post("rest/parts/trash", entries, function () {
+        if (entries[0].visible == 'DELETED') { //if deleted THEN PROMPT
+            var modalInstance = $uibModal.open({
+                templateUrl: 'views/modal/user-deletion-prompt-modal.html',
+                controller: "PermanentEntryDeletionConfirmationModalController",
+                backdrop: "static",
+                resolve: {
+                    allEntries: function () {
+                        return entries;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (result) {
+                if (result) {
+                    $scope.$broadcast("UpdateCollectionCounts");
+                    $scope.updateSelectedCollectionFolders();
+                    Selection.reset();
+                }
+            });
+        } else {
+            var currLocation = "folders/";
+            if (FolderSelection.getSelectedFolder() == null) {
+                currLocation = currLocation.concat(FolderSelection.getSelectedCollection());
+            } else {
+                currLocation = currLocation.concat(FolderSelection.getSelectedFolder().id);
+            }
+
+            Util.post("rest/parts/trash", entries, function () {
+                $rootScope.$broadcast("RefreshAfterDeletion");
+                $scope.$broadcast("UpdateCollectionCounts");
+                $location.path(currLocation);
+                Selection.reset();
+                var word = entries.length == 1 ? 'Entry' : "Entries";
+                Util.setFeedback(word + ' successfully deleted', 'success');
+            });
+        }
+    };
+
+    $scope.restoreSelectedEntries = function () {
+        var entrySelection = Selection.getSelectedEntries();
+        var entryIds = [];
+
+        for (var i = 0; i < entrySelection.length; i++) {
+            entryIds.push(parseInt(entrySelection[i].id));
+        }
+
+        Util.update("rest/parts", entryIds, {visibility: "OK"}, function () {
             $rootScope.$broadcast("RefreshAfterDeletion");
             $scope.$broadcast("UpdateCollectionCounts");
-            $location.path("folders/personal");
+            $location.path("folders/deleted");
+
+            Selection.reset();
+            var word = entryIds.length == 1 ? 'Entry' : entryIds.length + " entries";
+            Util.setFeedback(word + ' successfully restored', 'success');
+        });
+    };
+
+    $scope.submitSelectedImportEntry = function () {
+        var entrySelection = Selection.getSelectedEntries();
+
+        Util.update("rest/parts", [parseInt(entrySelection[0].id)], {visibility: "OK"}, function () {
+            $rootScope.$broadcast("RefreshAfterDeletion");
+            $scope.$broadcast("UpdateCollectionCounts");
+            $rootScope.$emit("CollectionSelection", "pending");
+            $location.path("folders/pending");
+            Selection.reset();
+            Util.setFeedback('Entry successfully approved', 'success');
         });
     };
 
     $rootScope.$on("EntrySelected", function (event, count) {
         $scope.addToDisabled = !count;
     });
+
+    $scope.canAddToFolder = function () {
+        return !$scope.addToDisabled && !this.isDealingWithDeleted();
+    };
 
     $scope.canEdit = function () {
         return Selection.canEdit();
@@ -114,19 +181,32 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         return Selection.canDelete();
     };
 
-    $scope.canAccept = function () {
-        if ($scope.collectionSelected != 'transferred')
-            return false;
-
-        // check that something is actually selected
-        if ($scope.collectionFolderSelected && $scope.collectionFolderSelected.type == 'TRANSFERRED') {
-            return true;
+// Working in "deleted" collection or with deleted entry
+    $scope.isDealingWithDeleted = function () {
+        if (Selection.getSelectedEntries().length == 0) {
+            return $stateParams.collection == 'deleted';
+        } else {
+            return Selection.getSelectedEntries()[0].visible == "DELETED";
         }
-
-        return Selection.hasSelection();
     };
 
-    // used to enable/disable the transfer action menu button
+    $scope.canRestore = function () {
+        return Selection.canRestore();
+    };
+
+    $scope.canApprovePending = function () {
+        return Selection.isAdmin();
+    };
+
+    $scope.canAcceptTransfer = function () {
+        if (Selection.getSelectedEntries().length != 0) {
+            return Selection.getSelectedEntries()[0].visible == "TRANSFERRED" && Selection.isAdmin();
+        } else {
+            return false;
+        }
+    };
+
+// used to enable/disable the transfer action menu button
     $scope.transferAvailable = function () {
         return FolderSelection.getSelectedFolder() != undefined;
     };
@@ -147,7 +227,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         return true;
     };
 
-    // function that handles "edit" click
+// function that handles "edit" click
     $scope.editEntry = function () {
         var selectedEntries = Selection.getSelectedEntries();
 
@@ -172,7 +252,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         $scope.editDisabled = true;
     };
 
-    // todo : getEntrySelection() should be moved to Selection
+// todo : getEntrySelection() should be moved to Selection
     $scope.csvExport = function (includeSequences) {
         var selection = getEntrySelection();
         var formats = {sequenceFormats: []};
@@ -247,8 +327,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
 
     $scope.acceptTransferredEntries = function () {
         var selection = getEntrySelection();
-        console.log(selection);
-        if (selection.folderId) {
+        if (selection.folderId && !Selection.hasSelection()) {
             // approve folder
             Util.update("/rest/folders/" + selection.folderId, {
                 id: selection.folderId,
@@ -257,10 +336,23 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
                 console.log(result);
             })
         } else {
-            // todo : accept individual entries
+            var entrySelection = Selection.getSelectedEntries();
+
+            for (var i = 0; i < entrySelection.length; i++) {
+                Util.update("rest/parts", [parseInt(entrySelection[i].id)], {visibility: "OK"}, function () {
+                    $rootScope.$broadcast("RefreshAfterDeletion");
+                    $scope.$broadcast("UpdateCollectionCounts");
+                    $location.path("folders/transferred");
+                });
+            }
+
+            Selection.reset();
+            var word = entrySelection.length == 1 ? 'Entry' : "Entries";
+            Util.setFeedback(word + ' transfer successfully accepted', 'success');
         }
     }
-});
+})
+;
 
 iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $uibModalInstance, Util, FolderSelection,
                                                                       $stateParams, Selection, selectedFolder) {
@@ -628,5 +720,24 @@ iceControllers.controller('FullScreenFlashController', function ($scope, $stateP
         var height = $(this).height();
         $('#vectoreditor').height(height - 100);
     });
+});
+
+iceControllers.controller('PermanentEntryDeletionConfirmationModalController', function (EntryContextUtil, $rootScope, $scope, $location, Util, $uibModalInstance, FolderSelection, Selection, allEntries) {
+    $scope.allEntries = allEntries;
+
+    $scope.closeModal = function () {
+        $uibModalInstance.close();
+    };
+
+    $scope.performAction = function () {
+        Util.post("rest/parts/trash", allEntries, function () {
+            // retrieve sub folders for selected collection
+            $rootScope.$broadcast("RefreshAfterDeletion");
+            $scope.closeModal();
+            var word = allEntries.length == 1 ? 'Entry' : "Entries";
+            Util.setFeedback(word + ' successfully deleted', 'success');
+            $rootScope.$emit("CollectionSelection", "deleted");
+        });
+    }
 });
 

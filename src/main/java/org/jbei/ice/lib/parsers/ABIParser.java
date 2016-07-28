@@ -9,9 +9,8 @@ import org.jbei.ice.lib.parsers.abi.ABITrace;
  *
  * @author Zinovii Dmytriv, Timothy Ham
  */
-public class ABIParser extends AbstractParser {
+public class ABIParser {
 
-    @Override
     public DNASequence parse(byte[] bytes) throws InvalidFormatParserException {
         DNASequence DNASequence = null;
 
@@ -26,10 +25,5 @@ public class ABIParser extends AbstractParser {
         }
 
         return DNASequence;
-    }
-
-    @Override
-    public DNASequence parse(String textSequence) throws InvalidFormatParserException {
-        throw new NoSuchMethodError("ABI file can't be presented as string!");
     }
 }

@@ -1,5 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
@@ -19,7 +20,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -335,6 +335,9 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             return sequence;
         }
 
+        if (StringUtils.isEmpty(sequence.getSequence()))
+            return sequence;
+
         int length = sequence.getSequence().length();
         boolean wholeSequence;
         for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
@@ -353,13 +356,6 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
             }
         }
         return sequence;
-    }
-
-    public Set<Long> getEntriesForFeatures(List<Feature> features) {
-        return new HashSet<>(currentSession().createCriteria(Sequence.class).createAlias("sequenceFeatures", "sf")
-                .add(Restrictions.in("sf.feature", features))
-                .setProjection(Projections.property("entry.id"))
-                .list());
     }
 
     @Override

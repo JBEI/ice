@@ -4,10 +4,7 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.*;
 import org.hibernate.sql.JoinType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.Visibility;
@@ -361,22 +358,23 @@ public class PermissionDAO extends HibernateRepository<Permission> {
      */
     public boolean canWrite(Account account, Set<Group> groups, List<Long> entries) {
         Criteria criteria = currentSession().createCriteria(Permission.class);
+        criteria.add(Restrictions.in("entry.id", entries));
+        criteria.add(Restrictions.or(Restrictions.eq("entry.ownerEmail", account.getEmail())));
+
         Disjunction disjunction = Restrictions.disjunction();
-        disjunction.add(Restrictions.and(Restrictions.eq("account", account), Restrictions.eq("canWrite", true)));
-        disjunction.add(Restrictions.eq("entry.ownerEmail", account.getEmail()));
 
         if (!groups.isEmpty()) {
-            disjunction.add(Restrictions.and(Restrictions.in("group", groups), Restrictions.eq("canWrite", true)));
+            disjunction.add(Restrictions.in("group", groups));
         }
 
-        criteria.createAlias("entry", "entry", JoinType.LEFT_OUTER_JOIN)
-                .add(Restrictions.in("entry.id", entries))
-                .add(Restrictions.eq("entry.visibility", Visibility.OK.getValue()));
+        disjunction.add(Restrictions.eq("account", account));
+        criteria.createAlias("entry", "entry", JoinType.LEFT_OUTER_JOIN);
 
-        criteria.add(disjunction);
-        criteria.setProjection(Projections.distinct(Projections.property("entry.id")));
+        LogicalExpression logicalExpression = Restrictions.and(disjunction, Restrictions.eq("canWrite", true));
 
-        Number number = (Number) criteria.setProjection(Projections.rowCount()).uniqueResult();
+        criteria.add(logicalExpression);
+        criteria.setProjection(Projections.countDistinct("entry.id"));
+        Number number = (Number) criteria.uniqueResult();
         return number.intValue() == entries.size();
     }
 

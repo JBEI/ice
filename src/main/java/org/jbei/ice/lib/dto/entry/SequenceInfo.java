@@ -1,9 +1,12 @@
 package org.jbei.ice.lib.dto.entry;
 
 import org.jbei.ice.lib.dto.DNASequence;
+import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.storage.IDataTransferModel;
 
 /**
+ * Data transfer object for sequence
+ *
  * @author Hector Plahar
  */
 public class SequenceInfo implements IDataTransferModel {
@@ -12,6 +15,7 @@ public class SequenceInfo implements IDataTransferModel {
     private String fileId;
     private DNASequence sequence;
     private long entryId;
+    private SequenceFormat format;
 
     public String getFilename() {
         return filename;
@@ -43,5 +47,13 @@ public class SequenceInfo implements IDataTransferModel {
 
     public void setEntryId(long entryId) {
         this.entryId = entryId;
+    }
+
+    public SequenceFormat getFormat() {
+        return format;
+    }
+
+    public void setFormat(SequenceFormat format) {
+        this.format = format;
     }
 }

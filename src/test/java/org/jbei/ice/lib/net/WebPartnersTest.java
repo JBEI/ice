@@ -40,18 +40,23 @@ public class WebPartnersTest {
         };
 
         otherPartner = new WebPartners(remoteContact) {
+            final String myURL = "registry-test20.jbei.org";
+
             protected boolean isInWebOfRegistries() {
                 return true;
             }
 
             protected RegistryPartner getThisInstanceWithNewApiKey() {
-                String myURL = "registry-test20.jbei.org";
                 RegistryPartner thisPartner = new RegistryPartner();
                 String myName = "Registry test2";
                 thisPartner.setName(myName);
                 thisPartner.setUrl(myURL);
                 thisPartner.setApiKey("abc");
                 return thisPartner;
+            }
+
+            protected String getThisUri() {
+                return myURL;
             }
         };
     }
@@ -74,6 +79,12 @@ public class WebPartnersTest {
         Assert.assertNotNull(added);
         Assert.assertEquals(partner.getUrl(), "registry-test20.jbei.org");
         Assert.assertEquals(added.getStatus(), RemotePartnerStatus.APPROVED);
+
+        // try to add the same partner again: list of partners should remain the same
+        // (at two since both remote and local are implemented here)
+        long size = partners.getPartners().size();
+        partners.addNewPartner(adminUser, partner);
+        Assert.assertEquals(size, partners.getPartners().size());
     }
 
     @Test
@@ -117,19 +128,24 @@ public class WebPartnersTest {
     }
 
     private WebPartners createThisPartnerObject() {
+        final String myURL = "registry-test10.jbei.org";
+
         return new WebPartners(createRemoteContact()) {
             protected boolean isInWebOfRegistries() {
                 return true;
             }
 
             protected RegistryPartner getThisInstanceWithNewApiKey() {
-                String myURL = "registry-test10.jbei.org";
                 RegistryPartner thisPartner = new RegistryPartner();
                 String myName = "Registry test";
                 thisPartner.setName(myName);
                 thisPartner.setUrl(myURL);
                 thisPartner.setApiKey("efg");
                 return thisPartner;
+            }
+
+            protected String getThisUri() {
+                return myURL;
             }
         };
     }

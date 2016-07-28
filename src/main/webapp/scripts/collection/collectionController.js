@@ -46,7 +46,7 @@ angular.module('ice.collection.controller', [])
         $scope.selectedCollectionFolders = undefined;
 
         // can either be a collection ("shared") or a folder id (34)
-        $scope.selectedFolder = $stateParams.collection === undefined ? 'personal' : $stateParams.collection;
+        $scope.selectedFolder = $stateParams.collection;
 
         // retrieve collections contained in the selectedFolder (only if a collection)
         if (isNaN($scope.selectedFolder)) {
@@ -107,6 +107,10 @@ angular.module('ice.collection.controller', [])
         // Menu count change handler
         $scope.$on("UpdateCollectionCounts", function (event) {
             $scope.updateCollectionCounts();
+        });
+
+        $rootScope.$on("CollectionSelection", function(event, data) {
+            $scope.selectCollection(data);
         });
 
         //
