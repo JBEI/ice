@@ -18,11 +18,13 @@ import org.jbei.ice.lib.entry.EntriesAsCSV;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
+import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.RemoteSequence;
+import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
@@ -272,16 +274,26 @@ public class FileResource extends RestResource {
 
             final String fileName = contentDispositionHeader.getFileName();
             final String userId = UserSessions.getUserIdBySession(sessionId);
-            final String sequence = IOUtils.toString(fileInputStream);
-            final SequenceInfo sequenceInfo = sequenceController.parseSequence(userId, recordId,
-                    entryType, sequence, fileName);
-            if (sequenceInfo == null) {
-                return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+
+            PartSequence partSequence;
+            if (StringUtils.isEmpty(recordId)) {
+                EntryType type = EntryType.nameToType(entryType);
+                if (type == null)
+                    throw new WebApplicationException("Invalid entry type: " + entryType, Response.Status.BAD_REQUEST);
+                partSequence = new PartSequence(userId, type);
+            } else {
+                partSequence = new PartSequence(userId, recordId);
             }
-            return Response.status(Response.Status.OK).entity(sequenceInfo).build();
-        } catch (final IOException e) {
+
+            SequenceInfo info = partSequence.parseSequenceFile(fileInputStream, fileName);
+            if (info == null)
+                throw new WebApplicationException(Response.serverError().build());
+            return Response.status(Response.Status.OK).entity(info).build();
+        } catch (final InvalidFormatParserException e) {
             Logger.error(e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            ErrorResponse response = new ErrorResponse();
+            response.setMessage(e.getMessage());
+            throw new WebApplicationException(Response.serverError().entity(response).build());
         }
     }
 

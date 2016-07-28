@@ -31,8 +31,8 @@ public class PartSequenceTest {
     public void testGet() throws Exception {
         Account account = AccountCreator.createTestAccount("PartSequenceTest.testGet", false);
         Strain strain = TestEntryCreator.createTestStrain(account);
-        PartSequence partSequence = new PartSequence(strain.getRecordId());
-        FeaturedDNASequence sequence = partSequence.get(account.getEmail());
+        PartSequence partSequence = new PartSequence(account.getEmail(), strain.getRecordId());
+        FeaturedDNASequence sequence = partSequence.get();
         Assert.assertNull(sequence);
     }
 

@@ -9,12 +9,8 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.SequenceInfo;
-import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntryAuthorization;
-import org.jbei.ice.lib.entry.EntryCreator;
-import org.jbei.ice.lib.entry.EntryFactory;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
@@ -49,49 +45,6 @@ public class SequenceController extends HasEntry {
         dao = DAOFactory.getSequenceDAO();
         entryDAO = DAOFactory.getEntryDAO();
         authorization = new EntryAuthorization();
-    }
-
-    // either or both recordId and entryType has to have a value
-    public SequenceInfo parseSequence(String userId, String recordId, String entryType, String sequenceString,
-                                      String name) {
-        EntryType type = EntryType.nameToType(entryType);
-
-        Entry entry;
-        if (StringUtils.isBlank(recordId)) {
-            EntryCreator creator = new EntryCreator();
-            Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-
-            entry = EntryFactory.buildEntry(type);
-            String entryName = account.getFullName();
-            String entryEmail = account.getEmail();
-            entry.setOwner(entryName);
-            entry.setOwnerEmail(entryEmail);
-            entry.setCreator(entryName);
-            entry.setCreatorEmail(entryEmail);
-            entry.setVisibility(Visibility.DRAFT.getValue());
-            entry = creator.createEntry(account, entry, null);
-        } else {
-            entry = DAOFactory.getEntryDAO().getByRecordId(recordId);
-            if (entry == null)
-                return null;
-        }
-
-        // parse actual sequence
-        DNASequence dnaSequence = parse(sequenceString);
-        if (dnaSequence == null)
-            return null;
-
-        Sequence sequence = dnaSequenceToSequence(dnaSequence);
-        sequence.setSequenceUser(sequenceString);
-        sequence.setEntry(entry);
-        if (!StringUtils.isBlank(name))
-            sequence.setFileName(name);
-
-        Sequence result = dao.saveSequence(sequence);
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
-        SequenceInfo info = result.toDataTransferObject();
-        info.setSequence(dnaSequence);
-        return info;
     }
 
     /**
@@ -352,13 +305,17 @@ public class SequenceController extends HasEntry {
             return null;
         }
 
-        String sequenceString = dnaSequence.getSequence().toLowerCase();
-        String fwdHash = SequenceUtils.calculateSequenceHash(sequenceString);
-        String revHash;
-        try {
-            revHash = SequenceUtils.calculateSequenceHash(SequenceUtils.reverseComplement(sequenceString));
-        } catch (UtilityException e) {
-            revHash = "";
+        String fwdHash = "";
+        String revHash = "";
+
+        String sequenceString = dnaSequence.getSequence();
+        if (!StringUtils.isEmpty(sequenceString)) {
+            fwdHash = SequenceUtils.calculateSequenceHash(sequenceString);
+            try {
+                revHash = SequenceUtils.calculateSequenceHash(SequenceUtils.reverseComplement(sequenceString));
+            } catch (UtilityException e) {
+                revHash = "";
+            }
         }
 
         Sequence sequence = new Sequence(sequenceString, "", fwdHash, revHash, null);

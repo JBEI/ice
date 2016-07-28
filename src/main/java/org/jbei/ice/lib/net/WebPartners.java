@@ -124,7 +124,8 @@ public class WebPartners {
     /**
      * Process a web partner add request from a remote instance
      *
-     * @param newPartner information about partner
+     * @param newPartner information about partner that should include an api token to be
+     *                   used when contacting that partner
      * @return information about this ICE instance (name, url) with a token that is to be sent
      * as a response
      */
@@ -144,6 +145,62 @@ public class WebPartners {
             return null;
         }
         return handleRemoteAddRequest(newPartner);
+    }
+
+    /**
+     * Handles requests from remote ice instances that will like to be in a WoR config with this instance
+     * Serves the dual purpose of:
+     * <ul>
+     * <li>please add me as a partner to your list with token</li>
+     * <li>add accepted; use this as the authorization token</li>
+     * </ul>
+     * <p>
+     * Note that the request is rejected if this ICE instance has not opted to be a member of web of
+     * registries
+     *
+     * @param request partner request object containing all information needed with a validated url
+     * @return information about this instance to be sent to the remote
+     */
+    protected RegistryPartner handleRemoteAddRequest(RegistryPartner request) {
+        if (request == null || StringUtils.isEmpty(request.getApiKey())) {
+            Logger.error("Received invalid partner add request");
+            return null;
+        }
+
+        Logger.info("Processing request to connect by " + request.getUrl());
+
+        String myURL = getThisUri();
+        if (request.getUrl().equalsIgnoreCase(myURL))
+            return null;
+
+        boolean apiKeyValidates = remoteContact.apiKeyValidates(myURL, request);
+        if (!apiKeyValidates) {
+            Logger.error("Received api token could not be validated");
+            return null;
+        }
+
+        // request should contain api key for use to contact third party
+        RemotePartner partner = dao.getByUrl(request.getUrl());
+        RegistryPartner thisInstance = getThisInstanceWithNewApiKey();
+
+        // create new partner object or update existing with new token hash
+        if (partner != null) {
+            Logger.info("Updating authentication for existing");
+            // validated. update the authorization token
+            partner.setApiKey(request.getApiKey());
+            partner.setSalt(tokenHash.generateSalt());
+            partner.setAuthenticationToken(tokenHash.encrypt(thisInstance.getApiKey() +
+                    request.getUrl(), partner.getSalt()));
+            dao.update(partner);
+        } else {
+            // save in db
+            request.setStatus(RemotePartnerStatus.APPROVED);
+            createRemotePartnerObject(request, thisInstance.getApiKey());
+        }
+        Logger.info("Successfully added remote partner " + request.getUrl());
+
+        // send information about this instance (with token) as response
+        return thisInstance;
     }
 
     /**
@@ -324,7 +381,6 @@ public class WebPartners {
         // including a random token for use when contacting this instance
         RegistryPartner thisPartner = getThisInstanceWithNewApiKey();
 
-        // check that url is valid (rest client pre-prepends https so do the same)
         if (thisPartner == null) {
             // will not contact
             Logger.error("Cannot exchange api token with remote host due to invalid local url");
@@ -338,7 +394,7 @@ public class WebPartners {
             } else {
                 // contact succeeded with return of api key
                 partner.setStatus(RemotePartnerStatus.APPROVED);
-                partner.setApiKey(newPartner.getApiKey()); // todo : check api key (validate?)
+                partner.setApiKey(newPartner.getApiKey());
             }
         }
 
@@ -346,61 +402,6 @@ public class WebPartners {
         // successfully transmitted
         String apiKey = thisPartner != null ? thisPartner.getApiKey() : null;
         return createRemotePartnerObject(partner, apiKey);
-    }
-
-    /**
-     * Handles requests from remote ice instances that will like to be in a WoR config with this instance
-     * Serves the dual purpose of:
-     * <ul>
-     * <li>please add me as a partner to your list with token</li>
-     * <li>add accepted; use this as the authorization token</li>
-     * </ul>
-     * <p>
-     * Note that the request is rejected if this ICE instance has not opted to be a member of web of
-     * registries
-     *
-     * @param request partner request object containing all information needed with a validated url
-     * @return information about this instance to be sent to the remote
-     */
-    protected RegistryPartner handleRemoteAddRequest(RegistryPartner request) {
-        if (request == null || StringUtils.isEmpty(request.getApiKey())) {
-            Logger.error("Received invalid partner add request");
-            return null;
-        }
-
-        Logger.info("Processing request to connect by " + request.getUrl());
-
-        String myURL = getThisUri();
-        if (request.getUrl().equalsIgnoreCase(myURL))
-            return null;
-        boolean apiKeyValidates = remoteContact.apiKeyValidates(myURL, request);
-        if (!apiKeyValidates) {
-            Logger.error("Received api token could not be validated");
-            return null;
-        }
-
-        // request should contain api key for use to contact third party
-        RemotePartner partner = dao.getByUrl(request.getUrl());
-        RegistryPartner thisInstance = getThisInstanceWithNewApiKey();
-
-        // create new partner object or update existing with new token hash
-        if (partner != null) {
-            Logger.info("Updating authentication for existing");
-            // validated. update the authorization token
-            partner.setApiKey(request.getApiKey());
-            partner.setSalt(tokenHash.generateSalt());
-            partner.setAuthenticationToken(tokenHash.encrypt(thisInstance.getApiKey() +
-                    request.getUrl(), partner.getSalt()));
-            dao.update(partner);
-        } else {
-            // save in db
-            request.setStatus(RemotePartnerStatus.APPROVED);
-            createRemotePartnerObject(request, thisInstance.getApiKey());
-        }
-        Logger.info("Successfully added remote partner " + request.getUrl());
-
-        // send information about this instance (with token) as response
-        return thisInstance;
     }
 
     /**

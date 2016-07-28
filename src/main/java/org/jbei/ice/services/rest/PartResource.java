@@ -657,6 +657,21 @@ public class PartResource extends RestResource {
     }
 
     /**
+     * Get linked parts
+     *
+     * @param partId unique identifier for part whose links are to be retrieved
+     * @return list of {@link PartData} that represent links
+     */
+    @GET
+    @Path("/{id}/links")
+    public Response getLinkedParts(@PathParam("id") long partId,
+                                   @DefaultValue("CHILD") @QueryParam("linkType") LinkType linkType) {
+        final String userId = requireUserId();
+        EntryLinks entryLinks = new EntryLinks(userId, partId);
+        return super.respond(entryLinks.get(linkType));
+    }
+
+    /**
      * Removes the linkId from id
      */
     @DELETE

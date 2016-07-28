@@ -2,17 +2,10 @@ package org.jbei.ice.lib.parsers;
 
 import org.jbei.ice.lib.dto.DNASequence;
 
-/**
- * This class provides skeletal implementation of {@link IDNAParser} interface.
- *
- * @author Zinovii Dmytriv, Timothy Ham
- */
-public abstract class AbstractParser implements IDNAParser {
+public abstract class AbstractParser {
 
-    @Override
     public abstract DNASequence parse(String textSequence) throws InvalidFormatParserException;
 
-    @Override
     public DNASequence parse(byte[] bytes) throws InvalidFormatParserException {
         return parse(new String(bytes));
     }

@@ -343,11 +343,17 @@ public class EntryController extends HasEntry {
         PartData partData = ModelToInfoFactory.getInfo(entry);
         if (partData == null)
             return null;
-        boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
 
+        // retrieve sequence information
+        boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
         partData.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
         partData.setHasOriginalSequence(hasOriginalSequence);
+        String sequenceString = sequenceDAO.getSequenceString(entry);
+        if (StringUtils.isEmpty(sequenceString))
+            partData.setBasePairCount(0);
+        else
+            partData.setBasePairCount(sequenceString.trim().length());
 
         // create audit event if not owner
         // todo : remote access check
@@ -365,10 +371,10 @@ public class EntryController extends HasEntry {
                     continue;
 
                 link = ModelToInfoFactory.createTipView(linkedEntry);
-                String sequenceString = sequenceDAO.getSequenceString(linkedEntry);
+                String linkedSequenceString = sequenceDAO.getSequenceString(linkedEntry);
 
-                if (sequenceString != null) {
-                    link.setBasePairCount(sequenceString.length());
+                if (!StringUtils.isEmpty(linkedSequenceString)) {
+                    link.setBasePairCount(linkedSequenceString.length());
                     link.setFeatureCount(DAOFactory.getSequenceFeatureDAO().getFeatureCount(linkedEntry));
                 }
 
