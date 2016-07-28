@@ -87,11 +87,7 @@ public class PartSequence extends HasEntry {
             if ("rdf".equalsIgnoreCase(ext) || "xml".equalsIgnoreCase(ext) || "sbol".equalsIgnoreCase(ext)) {
                 PartData partData = ModelToInfoFactory.getInfo(entry);
                 SBOLParser sbolParser = new SBOLParser(partData);
-                sbolParser.parse(inputStream, fileName);
-                SequenceInfo info = new SequenceInfo();
-                info.setFormat(SequenceFormat.SBOL2);
-                info.setEntryId(partData.getId());
-                return info;
+                return sbolParser.parse(inputStream, fileName);
             }
         }
 
