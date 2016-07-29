@@ -85,8 +85,8 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
                     $scope.$broadcast("UpdateCollectionCounts");
                     $scope.updateSelectedCollectionFolders();
                     Selection.reset();
-                    var word = entrySelection.entries.length == 1 ? 'Entry' : "Entries";
-                    Util.setFeedback(word + ' successfully removed', 'success');
+                    var word = entrySelection.entries.length == 1 ? 'Entry' : entrySelection.entries.length + " entries";
+                    Util.setFeedback(word + ' successfully removed from folder', 'success');
                 }
             }, {move: false});
     };
@@ -127,7 +127,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
                 $scope.$broadcast("UpdateCollectionCounts");
                 $location.path(currLocation);
                 Selection.reset();
-                var word = entries.length == 1 ? 'Entry' : "Entries";
+                var word = entries.length == 1 ? 'Entry' : entries.length + " entries";
                 Util.setFeedback(word + ' successfully deleted', 'success');
             });
         }
@@ -347,8 +347,8 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
             }
 
             Selection.reset();
-            var word = entrySelection.length == 1 ? 'Entry' : "Entries";
-            Util.setFeedback(word + ' transfer successfully accepted', 'success');
+            var word = entrySelection.length == 1 ? ' entry' : ' entries';
+            Util.setFeedback('Transfer of ' + entrySelection.length + word + ' successfully accepted', 'success');
         }
     }
 })
@@ -734,7 +734,7 @@ iceControllers.controller('PermanentEntryDeletionConfirmationModalController', f
             // retrieve sub folders for selected collection
             $rootScope.$broadcast("RefreshAfterDeletion");
             $scope.closeModal();
-            var word = allEntries.length == 1 ? 'Entry' : "Entries";
+            var word = allEntries.length == 1 ? 'Entry' : allEntries.length + " entries";
             Util.setFeedback(word + ' successfully deleted', 'success');
             $rootScope.$emit("CollectionSelection", "deleted");
         });
