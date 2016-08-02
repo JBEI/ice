@@ -111,6 +111,10 @@ public class SampleService {
     /**
      * Creates location records for a sample contained in a 96 well plate
      * Provides support for 2-D barcoded systems. Validates the storage hierarchy before creating.
+     *
+     * @param sampleDepositor userID - unique identifier for user performing action
+     * @param mainLocation 96 well plate location
+     * @return sample storage with a complete hierachy or null
      */
     protected Storage createPlate96Location(String sampleDepositor, StorageLocation mainLocation) {
         // validate: expected format is [PLATE96, WELL, (optional - TUBE)]
@@ -149,8 +153,11 @@ public class SampleService {
         }
 
         // create storage locations
-        Storage currentStorage = storageDAO.get(mainLocation.getId());
-        if (currentStorage == null) {
+        Storage currentStorage;
+        List<Storage> storageList = storageDAO.retrieveStorageByIndex(mainLocation.getDisplay(), SampleType.PLATE96);
+        if (storageList != null && storageList.size() > 0) {
+            currentStorage = storageList.get(0);
+        } else {
             currentStorage = createStorage(sampleDepositor, mainLocation.getDisplay(), mainLocation.getType());
             currentStorage = storageDAO.create(currentStorage);
         }
@@ -299,7 +306,7 @@ public class SampleService {
      * @param sampleId unique identifier for sample being deleted
      * @return true is deletion successful, false otherwise
      */
-    public boolean delete(String userId, long partId, long sampleId) {
+    public boolean delete(String userId, long partId, long sampleId) { // TODO: 8/2/16 doesn't work with the bug fixed 
         Sample sample = dao.get(sampleId);
         if (sample == null)
             return true;
