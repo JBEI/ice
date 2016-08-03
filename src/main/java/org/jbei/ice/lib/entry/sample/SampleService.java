@@ -149,7 +149,8 @@ public class SampleService {
         }
 
         // create storage locations
-        Storage currentStorage = storageDAO.get(mainLocation.getId());
+        List<Storage> plates = storageDAO.retrieveStorageByIndex(mainLocation.getDisplay(), SampleType.PLATE96);
+        Storage currentStorage = (plates == null || plates.isEmpty()) ? null : plates.get(0);
         if (currentStorage == null) {
             currentStorage = createStorage(sampleDepositor, mainLocation.getDisplay(), mainLocation.getType());
             currentStorage = storageDAO.create(currentStorage);
@@ -186,7 +187,7 @@ public class SampleService {
      *
      * @param currentLocation storage location
      * @param currentStorage
-     * @param depositor userID - unique identifier for user performing action
+     * @param depositor       userID - unique identifier for user performing action
      * @return updated storage
      */
     protected Storage createChildrenStorage(StorageLocation currentLocation, Storage currentStorage, String depositor) {
