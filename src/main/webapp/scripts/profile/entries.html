@@ -1,31 +1,31 @@
 <div ng-controller="ProfileEntryController">
-    <table cellspacing="0"
+    <table cellspacing="0" style="width: 98%"
            class="table table-hover table-condensed table-border-bottom font-95em"
            ng-class="{'opacity_4':loadingPage}">
         <thead>
         <tr data-ng-if='folder && folder.entries.length > 0'>
-            <th ng-click="sort('type')" class="cursor_pointer">
-                <span style="font-size: 12px; text-transform: uppercase">TYPE</span>
+            <th ng-click="sort('type')" class="entry-table-header">
+                <span>TYPE</span>
                 <i ng-if="params.sort!=='type'" class="sortable fa fa-angle-down"></i>
                 <i ng-show="params.sort=='type'" style="font-size: 14px;" class="fa opacity_4"
                    ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
             </th>
-            <th ng-click="sort('part_id')" class="cursor_pointer"
-                style="font-size: 12px; text-transform: uppercase">
-                <span style="font-size: 12px; text-transform: uppercase">Part ID</span>
+            <th ng-click="sort('part_id')" class="entry-table-header"
+                    >
+                <span>Part ID</span>
                 <i ng-if="params.sort!=='part_id'" class="sortable fa fa-angle-down"></i>
                 <i ng-show="params.sort=='part_id'" style="font-size: 14px" class="fa opacity_4"
                    ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
             </th>
-            <th data-ng-click="sort('name')" class="cursor_pointer"
-                style="font-size: 12px; text-transform: uppercase">
-                <span style="font-size: 12px; text-transform: uppercase">Name</span>
+            <th data-ng-click="sort('name')" class="entry-table-header"
+                    >
+                <span>Name</span>
                 <i ng-if="params.sort!=='name'" class="sortable fa fa-angle-down"></i>
                 <i ng-show="params.sort=='name'" style="font-size: 14px" class="fa opacity_4"
                    ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
             </th>
             <th></th>
-            <th ng-click="sort('status')" class="cursor_pointer">
+            <th ng-click="sort('status')" class="entry-table-header">
                 <span style="font-size: 11px; text-transform: uppercase">Status</span>
                 <i ng-if="params.sort!=='status'" class="sortable fa fa-angle-down"></i>
                 <i ng-show="params.sort=='status'" style="font-size: 14px" class="fa opacity_4"
@@ -35,7 +35,7 @@
                 <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
                 <img src="img/dna.svg" width="15px" alt="has dna"/>
             </th>
-            <th ng-click="sort('created')" class="cursor_pointer">
+            <th ng-click="sort('created')" class="entry-table-header">
                 <span style="font-size: 11px; text-transform: uppercase">Created</span>
                 <i ng-show="params.sort=='created'" style="font-size: 14px" class="fa opacity_4"
                    ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>

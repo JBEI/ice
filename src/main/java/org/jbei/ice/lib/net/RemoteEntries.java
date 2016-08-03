@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.net;
 
+import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
@@ -13,13 +15,14 @@ import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.executor.TransferTask;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.services.rest.IceRestClient;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Folder;
+import org.jbei.ice.storage.model.RemoteAccessModel;
 import org.jbei.ice.storage.model.RemotePartner;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -32,11 +35,11 @@ import java.util.List;
 public class RemoteEntries {
 
     private final RemotePartnerDAO remotePartnerDAO;
-    private final IceRestClient iceRestClient;
+    private final RemoteContact remoteContact;
 
     public RemoteEntries() {
         this.remotePartnerDAO = DAOFactory.getRemotePartnerDAO();
-        this.iceRestClient = IceRestClient.getInstance();
+        this.remoteContact = new RemoteContact();
     }
 
     /**
@@ -50,7 +53,7 @@ public class RemoteEntries {
         return ("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
     }
 
-    public WebEntries getPublicEntries(String userId, long remoteId, int offset, int limit, String sort, boolean asc) {
+    public WebEntries getPublicEntries(long remoteId, int offset, int limit, String sort, boolean asc) {
         if (!hasRemoteAccessEnabled())
             return null;
 
@@ -60,13 +63,13 @@ public class RemoteEntries {
 
         FolderDetails details;
         try {
-            final String restPath = "/rest/folders/public/entries";
+            final String restPath = "rest/folders/public/entries";
             HashMap<String, Object> queryParams = new HashMap<>();
             queryParams.put("offset", offset);
             queryParams.put("limit", limit);
             queryParams.put("asc", asc);
             queryParams.put("sort", sort);
-            details = iceRestClient.get(partner.getUrl(), restPath, FolderDetails.class, queryParams);
+            details = this.remoteContact.getFolderEntries(partner.getUrl(), restPath, queryParams, partner.getApiKey());
             if (details == null)
                 return null;
         } catch (Exception e) {
@@ -90,23 +93,71 @@ public class RemoteEntries {
         if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
             return null;
 
-        String path = "/rest/parts/" + entryId + "/attachments";
-        return iceRestClient.get(partner.getUrl(), path, ArrayList.class);
+        return this.remoteContact.getAttachmentList(partner.getUrl(), entryId, partner.getApiKey());
     }
 
-    public FeaturedDNASequence getEntrySequence(String userId, long remoteId, long entryId) {
-        if (!hasRemoteAccessEnabled())
-            return null;
+    public PartData getEntryDetails(String userId, long folderId, long partId) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);
 
-        RemotePartner partner = this.remotePartnerDAO.get(remoteId);
-        if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+        RemoteAccessModel remoteAccessModel = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
+        if (remoteAccessModel == null) {
+            Logger.error("Could not retrieve remote access for folder " + folder.getId());
             return null;
+        }
 
-        String path = "/rest/parts/" + entryId + "/sequence";
-        return iceRestClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
+        RemotePartner remotePartner = remoteAccessModel.getRemoteClientModel().getRemotePartner();
+        String url = remotePartner.getUrl();
+        String token = remoteAccessModel.getToken();
+        long remoteFolderId = Long.decode(remoteAccessModel.getIdentifier());
+        return remoteContact.getRemoteEntry(url, userId, partId, remoteFolderId, token, remotePartner.getApiKey());
     }
 
+    // contact the remote partner to get the tool tip
+    public PartData retrieveRemoteToolTip(String userId, long folderId, long partId) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);
+
+        RemoteAccessModel remoteAccessModel = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
+        if (remoteAccessModel == null) {
+            Logger.error("Could not retrieve remote access for folder " + folder.getId());
+            return null;
+        }
+
+        RemotePartner remotePartner = remoteAccessModel.getRemoteClientModel().getRemotePartner();
+        String url = remotePartner.getUrl();
+        String token = remoteAccessModel.getToken();
+        return remoteContact.getToolTipDetails(url, userId, partId, token, remotePartner.getApiKey());
+    }
+
+    public FeaturedDNASequence getSequence(String userId, long folderId, String entryId) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        Folder folder = DAOFactory.getFolderDAO().get(folderId);
+
+        RemoteAccessModel remoteAccessModel = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
+        if (remoteAccessModel == null) {
+            Logger.error("Could not retrieve remote access for folder " + folder.getId());
+            return null;
+        }
+
+        RemotePartner remotePartner = remoteAccessModel.getRemoteClientModel().getRemotePartner();
+        String token = remoteAccessModel.getToken();
+        long remoteFolderId = Long.decode(remoteAccessModel.getIdentifier());
+        return remoteContact.getSequence(remotePartner.getUrl(), userId, entryId, remoteFolderId, token, remotePartner.getApiKey());
+    }
+
+    /**
+     * Schedules a task to handle the transfer
+     *
+     * @param userId    identifier of user making request
+     * @param remoteId  local unique identifier for partner to transfer to
+     * @param selection context for generating entries to transfer or list of entries
+     * @throws PermissionException if user making request is not an administrator
+     */
     public void transferEntries(String userId, long remoteId, EntrySelection selection) {
+        AccountController accountController = new AccountController();
+        if (!accountController.isAdministrator(userId))
+            throw new PermissionException("Administrative privileges required to transfer entries");
         TransferTask task = new TransferTask(userId, remoteId, selection);
         IceExecutorService.getInstance().runTask(task);
     }
@@ -119,7 +170,7 @@ public class RemoteEntries {
         if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
             return null;
 
-        return iceRestClient.getWor(partner.getUrl(), "rest/parts/" + entryId, PartData.class, null, partner.getApiKey());
+        return remoteContact.getPublicEntry(partner.getUrl(), entryId, partner.getApiKey());
     }
 
     public PartData getPublicEntryTooltip(String userId, long remoteId, long entryId) {
@@ -130,8 +181,7 @@ public class RemoteEntries {
         if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
             return null;
 
-        String path = "rest/parts/" + entryId + "/tooltip";
-        return iceRestClient.getWor(partner.getUrl(), path, PartData.class, null, partner.getApiKey());
+        return remoteContact.getPublicTooltipDetails(partner.getUrl(), entryId, partner.getApiKey());
     }
 
     public PartStatistics getPublicEntryStatistics(String userId, long remoteId, long entryId) {
@@ -142,11 +192,10 @@ public class RemoteEntries {
         if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
             return null;
 
-        String path = "/rest/parts/" + entryId + "/statistics";
-        return iceRestClient.get(partner.getUrl(), path, PartStatistics.class);
+        return remoteContact.getPublicEntryStatistics(partner.getUrl(), entryId, partner.getApiKey());
     }
 
-    public FeaturedDNASequence getPublicEntrySequence(String userId, long remoteId, long entryId) {
+    public FeaturedDNASequence getPublicEntrySequence(long remoteId, long entryId) {
         if (!hasRemoteAccessEnabled())
             return null;
 
@@ -154,8 +203,7 @@ public class RemoteEntries {
         if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
             return null;
 
-        String path = "/rest/parts/" + entryId + "/sequence";
-        return iceRestClient.get(partner.getUrl(), path, FeaturedDNASequence.class);
+        return remoteContact.getPublicEntrySequence(partner.getUrl(), entryId, partner.getApiKey());
     }
 
     public File getPublicAttachment(String userId, long remoteId, String fileId) {

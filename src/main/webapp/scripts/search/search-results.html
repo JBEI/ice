@@ -126,45 +126,35 @@
 
         <!-- remote blast results -->
         <table cellspacing="0"
-               class="table table-bordered table-condensed table-border-bottom table-hover font-95em"
+               class="table table-condensed table-border-bottom table-hover font-95em"
                ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
             <tr data-ng-show="searchResults.results.length>0">
-                <th style="width: 12px">
-
-                    <!--<i class="fa cursor_pointer" ng-class="{'fa-square-o':!allSelected, 'fa-check-square-o': allSelected}"-->
-                    <!--style="color: #999; font-size: 14px;" ng-click="selectAll()"></i>-->
-
-                    <!--<input type="checkbox" ng-model="allSelected"/>-->
-                    <!--<sup style="font-size: 9px; font-weight: normal"-->
-                    <!--ng-show="selection.length>0">{{selection.length}}</sup>-->
-                </th>
-                <th ng-click="sortResults('TYPE')" class="cursor_pointer">
-                    <span style="font-size: 12px; text-transform: uppercase">TYPE</span>
+                <th class="entry-table-header">
+                    <span ng-click="sortResults('TYPE')">TYPE</span>
                     <i ng-if="searchFilters.parameters.sortField!=='TYPE'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='TYPE'" style="font-size: 14px;"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                 </th>
-                <th ng-click="sortResults('PART_ID')" class="cursor_pointer"
-                    style="font-size: 12px; text-transform: uppercase">
-                    <span style="font-size: 12px; text-transform: uppercase">Part ID</span>
+                <th class="entry-table-header">
+                    <span ng-click="sortResults('PART_ID')">Part ID</span>
                     <i ng-if="searchFilters.parameters.sortField!=='PART_ID'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='PART_ID'" style="font-size: 14px"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                 </th>
-                <th data-ng-click="sortResults('NAME')" class="cursor_pointer"
-                    style="font-size: 12px; text-transform: uppercase">
-                    <span style="font-size: 12px; text-transform: uppercase">Name</span>
+                <th class="entry-table-header">
+                    <span ng-click="sortResults('NAME')">Name</span>
                     <i ng-if="searchFilters.parameters.sortField!=='NAME'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='NAME'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                 </th>
-                <th></th>
-                <th style="width: 210px;"><span style="font-size: 12px; text-transform: uppercase">Alignment</span></th>
-                <th style="width: 80px;"><span style="font-size: 12px; text-transform: uppercase">E-Value</span></th>
+                <th class="entry-table-header">REGISTRY</th>
+                <th style="width: 100px;" class="entry-table-header">Alignment</th>
+                <th style="width: 110px;" class="entry-table-header">E-Value</th>
+                <th style="width: 80px;" class="entry-table-header">Score</th>
             </tr>
             <tr data-ng-show='!searchResults'>
                 <td colspan="11"><i class="fa fa-gear fa-spin"></i> Loading...</td>
@@ -174,7 +164,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr data-ng-repeat-start="result in searchResults.results">
+            <tr ng-repeat="result in searchResults.results">
                 <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
                     {{result.entryInfo.type | uppercase}}
                 </td>
@@ -197,16 +187,13 @@
                     <a ng-href="https://{{result.partner.url}}/entry/{{result.entryInfo.id}}"
                        target="_blank">{{result.partner.name}}</a>
                 </td>
-                <td></td>
                 <td>
-                    <div style="width:200px;">{{result.alignment}}</div>
+                    {{result.alignment/result.queryLength * 100}}%
+                    <br>
+                    <small class="text-muted">{{result.alignment}}/{{result.queryLength}}</small>
                 </td>
                 <td>{{result.eValue}}</td>
-            </tr>
-            <tr data-ng-repeat-end ng-if="showDetails">
-                <td colspan="8">
-                    <pre>{{result.matchDetails | json}}</pre>
-                </td>
+                <td>{{result.score}}</td>
             </tr>
             </tbody>
         </table>
@@ -222,31 +209,30 @@
             <tr data-ng-show="searchResults.results.length>0">
                 <th style="width: 12px">
                 </th>
-                <th ng-click="sortResults('TYPE')" class="cursor_pointer">
-                    <span style="font-size: 12px; text-transform: uppercase">TYPE</span>
+                <th class="entry-table-header">
+                    <span ng-click="sortResults('TYPE')">TYPE</span>
                     <i ng-if="searchFilters.parameters.sortField!=='TYPE'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='TYPE'" style="font-size: 14px;"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                 </th>
-                <th ng-click="sortResults('PART_ID')" class="cursor_pointer"
-                    style="font-size: 12px; text-transform: uppercase">
-                    <span style="font-size: 12px; text-transform: uppercase">Part ID</span>
+                <th class="entry-table-header">
+                    <span ng-click="sortResults('PART_ID')">Part ID</span>
                     <i ng-if="searchFilters.parameters.sortField!=='PART_ID'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='PART_ID'" style="font-size: 14px"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                 </th>
-                <th data-ng-click="sortResults('NAME')" class="cursor_pointer"
-                    style="font-size: 12px; text-transform: uppercase">
-                    <span style="font-size: 12px; text-transform: uppercase">Name</span>
+                <th class="entry-table-header">
+                    <span ng-click="sortResults('NAME')">Name</span>
                     <i ng-if="searchFilters.parameters.sortField!=='NAME'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='NAME'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                 </th>
                 <th></th>
-                <th style="width: 210px;"><span style="font-size: 12px; text-transform: uppercase">Alignment</span></th>
-                <th style="width: 80px;"><span style="font-size: 12px; text-transform: uppercase">E-Value</span></th>
+                <th style="width: 100px;" class="entry-table-header">Alignment</th>
+                <th style="width: 110px;" class="entry-table-header">E-Value</th>
+                <th style="width: 80px;" class="entry-table-header">Score</th>
             </tr>
             <tr data-ng-show='!searchResults'>
                 <td colspan="11"><i class="fa fa-gear fa-spin"></i> Loading...</td>
@@ -256,7 +242,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr ng-repeat-start="result in searchResults.results">
+            <tr ng-repeat="result in searchResults.results">
                 <td width="40px">
                     <i class="fa fa-fw cursor_default" style="font-size: 15px"
                        ng-click="selectSearchResult(result.entryInfo)"
@@ -281,85 +267,94 @@
                 </td>
                 <td></td>
                 <td>
-                    <div style="width:200px;">{{result.alignment}}</div>
+                    {{result.alignment/result.queryLength * 100}}%
+                    <br>
+                    <small class="text-muted">{{result.alignment}}/{{result.queryLength}}</small>
                 </td>
                 <td>{{result.eValue}}</td>
-            </tr>
-            <tr ng-repeat-end ng-if="showDetails">
-                <td colspan="8">
-                    <pre>{{result.matchDetails | json}}</pre>
-                </td>
+                <td>{{result.score}}</td>
             </tr>
             </tbody>
         </table>
 
         <!--local non-blast search results-->
-        <table cellspacing="0"
-               class="table table-hover table-condensed font-95em table-border-bottom"
+        <table cellspacing="0" class="table table-hover table-condensed font-95em table-border-bottom"
                ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
             <tr data-ng-show='!searchResults'>
-                <td colspan="11"><img src="img/loader-mini.gif"> Loading...</td>
+                <td colspan="11"><img src="img/loader-mini.gif"> Loading&hellip;</td>
             </tr>
             <tr data-ng-show="searchResults.results.length == 0">
                 <td colspan="11">No results found for your query</td>
             </tr>
             <tr ng-show="searchResults.results.length>0">
-                <th>
+                <th style="width: 30px; font-size: 15px; vertical-align: middle">
+                    <i class="fa fa-fw cursor_default" ng-class="selectAllClass()" ng-click="selectAllSearchResults()"
+                       stop-event="click"></i>
+                </th>
+                <th class="entry-table-header" ng-if="resultsHeaders.relevance.selected">
+                    RELEVANCE
                 </th>
                 <th>
-                    <span style="font-size: 12px; text-transform: uppercase">RELEVANCE</span>
-                    <!--<i ng-if="searchFilters.parameters.sortField!=='RELEVANCE'" class="sortable fa fa-angle-down"></i>-->
-                    <!--<i ng-show="searchFilters.parameters.sortField=='RELEVANCE'" style="font-size: 14px;" class="fa opacity_4"-->
-                    <!--ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>-->
-                </th>
-                <th ng-click="sortResults('TYPE')" class="cursor_pointer">
-                    <span style="font-size: 12px">TYPE</span>
+                    <span class="entry-table-header" ng-click="sortResults('TYPE')">TYPE</span>
                     <i ng-if="searchFilters.parameters.sortField!=='TYPE'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='TYPE'" style="font-size: 14px;"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                 </th>
-                <th ng-click="sortResults('PART_ID')" class="cursor_pointer"
-                    style="font-size: 12px; text-transform: uppercase">
-                    <span style="font-size: 12px; text-transform: uppercase">Part ID</span>
+                <th>
+                    <span class="entry-table-header" ng-click="sortResults('PART_ID')">Part ID</span>
                     <i ng-if="searchFilters.parameters.sortField!=='PART_ID'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='PART_ID'" style="font-size: 14px"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                 </th>
-                <th data-ng-click="sortResults('NAME')" class="cursor_pointer"
-                    style="font-size: 12px; text-transform: uppercase">
-                    <span style="font-size: 12px; text-transform: uppercase">Name</span>
+                <th>
+                    <span class="entry-table-header" ng-click="sortResults('NAME')">Name</span>
                     <i ng-if="searchFilters.parameters.sortField!=='NAME'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='NAME'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
                 </th>
                 <th></th>
-                <th style="width: 250px"><span style="font-size: 12px">OWNER</span></th>
+                <th style="width: 250px" class="entry-table-header">OWNER</th>
                 <th style="width:100px">
-                    <!--<i class="fa fa-paperclip fa-fw" style="font-size: 14px;"></i>-->
-                    <i class="fa fa-flask fa-fw" style="font-size: 14px; "></i>
-                    <img src="img/dna.svg" width="15px" alt="has dna"/>
+                    <i class="fa fa-flask fa-fw" style="font-size: 14px" ng-if="resultsHeaders.hasSample.selected"></i>
+                    <img src="img/dna.svg" width="15px" ng-if="resultsHeaders.hasSequence.selected" alt="has dna"/>
                 </th>
-                <th ng-click="sortResults('created')" class="cursor_pointer">
-                    <span style="font-size: 11px">CREATED</span>
+                <th ng-if="resultsHeaders.created.selected">
+                    <span class="entry-table-header" ng-click="sortResults('created')">CREATED</span>
                     <i ng-show="searchFilters.parameters.sortField==='CREATED'" style="font-size: 14px"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':!searchFilters.parameters.sortAscending, 'fa-angle-up':searchFilters.parameters.sortAscending}"></i>
                     <i ng-if="searchFilters.parameters.sortField!=='CREATED'" class="sortable fa fa-angle-down"></i>
                 </th>
+                <th uib-dropdown-toggle class="text-muted opacity_hover" uib-dropdown
+                    style="width: 12px; padding: 0; vertical-align: middle; opacity: 1">
+                    <i class="fa fa-fw fa-ellipsis-v"></i>
+
+                    <div class="uib-dropdown-menu pull-right" style="background-color: #f1f1f1" uib-dropdown-menu>
+                        <strong class="pad-8 small">Show/Hide fields</strong>
+                        <table class=" no_wrap table table-condensed font-75em" style="font-weight: normal"
+                               stop-event="click">
+                            <tr ng-click="selectedHeaderField(header, $event)" ng-repeat="header in resultsHeaders">
+                                <td class="check-box-table-cell">
+                                    <input type="checkbox" ng-model="header.selected"> {{header.display}}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </th>
             </tr>
             </thead>
             <tbody>
             <tr data-ng-repeat="result in searchResults.results">
-                <td width="40px">
+                <td>
                     <i class="fa fa-fw cursor_default" style="font-size: 15px"
                        ng-click="selectSearchResult(result.entryInfo)"
                        ng-class="{'fa-square-o':!searchEntrySelected(result.entryInfo), 'fa-check-square-o':searchEntrySelected(result.entryInfo)}"></i>
                 </td>
-                <td ng-init="val=(result.score/result.maxScore)*100">
+                <td ng-if="resultsHeaders.relevance.selected" ng-init="val=(result.score/result.maxScore)*100">
                     <div style="width: 75px">
                         <uib-progressbar animate='false' value='val' type='{{getType(val)}}'
                                          style="margin-bottom: 0"></uib-progressbar>
@@ -394,13 +389,19 @@
                     </div>
                 </td>
                 <td style="vertical-align: middle">
-                    <i ng-show="result.entryInfo.hasSample" class="fa fa-flask fa-fw"
-                       style="color: #555; font-size: 14px;"></i>
-                    <i ng-show="!result.entryInfo.hasSample" class="fa fa-square fa-fw"
-                       style="opacity: 0; font-size: 14px;"></i>
-                    <img ng-show="result.entryInfo.hasSequence" src="img/dna.svg" width="15px"/>
+                    <span ng-if="resultsHeaders.hasSample.selected">
+                        <i ng-show="result.entryInfo.hasSample" class="fa fa-flask fa-fw"
+                           style="color: #555; font-size: 14px;"></i>
+                        <i ng-show="!result.entryInfo.hasSample" class="fa fa-square fa-fw"
+                           style="opacity: 0; font-size: 14px;"></i>
+                    </span>
+                    <img ng-show="result.entryInfo.hasSequence && resultsHeaders.hasSequence.selected" src="img/dna.svg"
+                         width="15px"/>
                 </td>
-                <td style="width:110px; white-space:nowrap">{{result.entryInfo.creationTime | date:'MMM d, yyyy'}}</td>
+                <td style="width:110px; white-space:nowrap" ng-if="resultsHeaders.created.selected">
+                    {{result.entryInfo.creationTime | date:'MMM d, yyyy'}}
+                </td>
+                <td></td>
             </tr>
             </tbody>
         </table>
@@ -409,14 +410,14 @@
     <div class="row" data-ng-if="searchResults && searchResults.results.length > 0" style="margin-top: -15px">
         <div class="col-md-6" style="padding-left: 0">
             <uib-pagination total-items="searchResults.resultCount" ng-change="searchResultPageChanged()"
-                        ng-model="params.currentPage" max-size="maxSize"
-                        class="pagination-sm" items-per-page="params.limit" boundary-links="true">
+                            ng-model="params.currentPage" max-size="maxSize"
+                            class="pagination-sm" items-per-page="params.limit" boundary-links="true">
             </uib-pagination>
         </div>
         <div class="col-md-4" style="margin: 22px 0;">
             <strong class="small">
                 <i ng-show="loadingSearchResults" class="fa fa-spin fa-gear opacity_4"></i>
-                {{pageCounts(params.currentPage, searchResults.resultCount)}}
+                {{pageCounts(params.currentPage, searchResults.resultCount, params.limit)}}
             </strong>
         </div>
         <div class="col-md-2" style="margin-top: 25px;">

@@ -18,11 +18,24 @@ adminService.factory('AdminSettings', function () {
     ];
 
     var emailSettingKeys = [
-        'SMTP_HOST',
         'ADMIN_EMAIL',
         'BULK_UPLOAD_APPROVER_EMAIL',
         'SEND_EMAIL_ON_ERRORS',
         'ERROR_EMAIL_EXCEPTION_PREFIX'
+    ];
+
+    var emailTypeKeys = [
+        'EMAILER',
+        'GMAIL_APPLICATION_PASSWORD',
+        'SMTP_HOST'
+    ];
+
+    // indicates which of the keys are boolean
+    var booleanKeys = [
+        'NEW_REGISTRATION_ALLOWED',
+        'PASSWORD_CHANGE_ALLOWED',
+        'PROFILE_EDIT_ALLOWED',
+        'SEND_EMAIL_ON_ERRORS'
     ];
 
     return {
@@ -32,6 +45,14 @@ adminService.factory('AdminSettings', function () {
 
         getEmailKeys: function () {
             return emailSettingKeys;
+        },
+
+        getEmailTypeKeys: function () {
+            return emailTypeKeys;
+        },
+
+        getBooleanKeys: function () {
+            return booleanKeys;
         }
     }
 });

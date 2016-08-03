@@ -1,4 +1,4 @@
-<div ng-controller="WebOfRegistriesController" ng-init="showAddRegistryForm=false">
+<div ng-controller="WebOfRegistriesController" ng-init="showAddRegistryForm=false" style="height: 580px">
     <div class="pad_top">
         <button type="button" class="ice-button" ng-click="enableDisableWor()">
             <span ng-if="isWorEnabled">Disable</span>
@@ -9,6 +9,13 @@
         <button type="button" class="ice-button" ng-click="showAddRegistryForm=true" ng-show="isWorEnabled">
             Add Partner
         </button>
+
+        <div class="pull-right wor-admin-only" ng-click="restrictPublicEnable()">
+            <i class="fa fa-fw fa-question-circle cursor_default"
+               uib-tooltip="Only admins can make an entry/folder public"></i>
+            <small>Admins only</small>
+            <i class="fa fa-fw" ng-class="{'fa-toggle-on green':restrictPublic, 'fa-toggle-off':!restrictPublic}"></i>
+        </div>
 
         <div class=" margin-top-10 panel panel-default font-95em" ng-show="showAddRegistryForm">
             <form class="panel-body" role="form" ng-submit="addWebPartner()">
@@ -42,14 +49,16 @@
     </div>
 
     <div class="pad_top" ng-if="isWorEnabled && wor && wor.partners.length">
-        <table cellspacing="0" class="table table-hover table-border-bottom font-95em">
+        <table cellspacing="0" class="table table-hover table-border-bottom font-95em" style="width: 98%">
             <thead>
             <tr>
                 <th>&nbsp;</th>
-                <th>Partner</th>
-                <th>Added</th>
-                <th>Status</th>
-                <th>&nbsp;</th>
+                <th>
+                    <span class="entry-table-header">Partner</span>
+                </th>
+                <th><span class="entry-table-header">Added</span></th>
+                <th style="width: 150px"><span class="entry-table-header">Status</span></th>
+                <th style="width: 120px">&nbsp;</th>
             </tr>
             </thead>
             <tbody>
@@ -74,9 +83,11 @@
                             {{partner.status |capitalize}} <span class="caret"></span>
                         </button>
                         <ul class="uib-dropdown-menu">
-                            <li ng-repeat="listObject in partnerStatusList" class="font-90em"
-                                ng-click="setPartnerStatus(partner, listObject.status)">
-                                <a href="#">{{listObject.action | capitalize}}</a>
+                            <li ng-if="partner.status != 'BLOCKED'" ng-click="setPartnerStatus(partner, 'BLOCKED')">
+                                <a class="font-90em" href="#">Block</a>
+                            </li>
+                            <li ng-if="partner.status != 'APPROVED'" ng-click="setPartnerStatus(partner, 'APPROVED')">
+                                <a class="font-90em" href="#">Approve</a>
                             </li>
                         </ul>
                     </div>
@@ -85,10 +96,17 @@
                        ng-click="retryRemotePartnerContact()"
                        class="fa fa-fw fa-refresh fa-spin blue cursor_pointer opacity_hover"></i>
                 </td>
-                <td class="font-12em" style="vertical-align: middle">
-                    <span uib-tooltip="Delete">
-                    <i class="fa fa-trash-o fa-fw delete_icon" ng-click="removePartner(partner, $index)"></i>
-                    </span>
+                <td class="font-14em" style="vertical-align: middle">
+                    <div class="pull-right">
+                        <i class="fa fa-fw fa-refresh edit_icon"
+                           ng-if="partner.status=='APPROVED' && !partner.refreshing"
+                           ng-click="refreshPartner(partner)" uib-tooltip="Refresh"></i>
+                        <i class="fa fa-fw fa-refresh opacity_3 fa-spin"
+                           ng-if="partner.status=='APPROVED' && partner.refreshing"></i>
+                        &nbsp;
+                        <i class="fa fa-fw fa-trash-o fa-fw delete_icon" uib-tooltip="Delete"
+                           ng-click="removePartner(partner, $index)"></i>
+                    </div>
                 </td>
             </tr>
             </tbody>

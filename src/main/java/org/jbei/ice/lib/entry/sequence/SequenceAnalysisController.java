@@ -6,12 +6,9 @@ import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.parsers.ABIParser;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
-import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqException;
-import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqParser;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
-import org.jbei.ice.lib.search.blast.ProgramTookTooLongException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.TraceSequenceDAO;
@@ -212,20 +209,8 @@ public class SequenceAnalysisController {
             entrySequenceString += entrySequenceString;
         }
 
-        String bl2seqOutput;
         try {
-            bl2seqOutput = BlastPlus.runBlast2Seq(entrySequenceString, traceSequenceString);
-        } catch (BlastException | ProgramTookTooLongException e) {
-            Logger.error(e);
-            return;
-        }
-
-        if (bl2seqOutput == null || bl2seqOutput.isEmpty()) {
-            return;
-        }
-
-        try {
-            List<Bl2SeqResult> bl2seqAlignmentResults = Bl2SeqParser.parse(bl2seqOutput);
+            List<Bl2SeqResult> bl2seqAlignmentResults = BlastPlus.runBlast2Seq(entrySequenceString, traceSequenceString);
 
             if (bl2seqAlignmentResults.size() > 0) {
                 int maxAlignedSequenceLength = -1;
@@ -293,7 +278,7 @@ public class SequenceAnalysisController {
                     traceDao.save(traceSequence);
                 }
             }
-        } catch (Bl2SeqException e) {
+        } catch (BlastException e) {
             Logger.error(e);
         }
     }
@@ -306,6 +291,7 @@ public class SequenceAnalysisController {
      *
      * @param entry entry object
      */
+
     public void rebuildAllAlignments(Entry entry) {
         if (entry == null)
             return;

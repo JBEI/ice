@@ -4,21 +4,18 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.bulkupload.BulkUploadAuthorization;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.dao.FolderDAO;
-import org.jbei.ice.storage.hibernate.dao.GroupDAO;
-import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
+import org.jbei.ice.storage.hibernate.dao.*;
 import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,6 +30,7 @@ public class PermissionsController {
     private final FolderDAO folderDAO;
     private final PermissionDAO dao;
     private final GroupDAO groupDAO;
+    private final AccountDAO accountDAO;
 
     public PermissionsController() {
         accountController = new AccountController();
@@ -40,6 +38,7 @@ public class PermissionsController {
         folderDAO = DAOFactory.getFolderDAO();
         dao = DAOFactory.getPermissionDAO();
         groupDAO = DAOFactory.getGroupDAO();
+        accountDAO = DAOFactory.getAccountDAO();
     }
 
     public Permission addPermission(String userId, AccessPermission access) {
@@ -89,7 +88,7 @@ public class PermissionsController {
         switch (access.getArticle()) {
             case ACCOUNT:
             default:
-                account = accountController.get(access.getArticleId());
+                account = accountDAO.get(access.getArticleId());
                 break;
 
             case GROUP:
@@ -163,7 +162,7 @@ public class PermissionsController {
         switch (access.getArticle()) {
             case ACCOUNT:
             default:
-                account = accountController.get(access.getArticleId());
+                account = accountDAO.get(access.getArticleId());
                 break;
 
             case GROUP:
@@ -231,25 +230,6 @@ public class PermissionsController {
         return dao.hasSetWriteFolderPermission(folder, account);
     }
 
-    public boolean enablePublicReadAccess(String userId, long partId) {
-        AccessPermission permission = new AccessPermission();
-        permission.setType(AccessPermission.Type.READ_ENTRY);
-        permission.setTypeId(partId);
-        permission.setArticle(AccessPermission.Article.GROUP);
-        permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
-        return addPermission(userId, permission) != null;
-    }
-
-    public boolean disablePublicReadAccess(String userId, long partId) {
-        AccessPermission permission = new AccessPermission();
-        permission.setType(AccessPermission.Type.READ_ENTRY);
-        permission.setTypeId(partId);
-        permission.setArticle(AccessPermission.Article.GROUP);
-        permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
-        removePermission(userId, permission);
-        return true;
-    }
-
     /**
      * Retrieves permissions that have been explicitly set for the folders with the exception
      * of the public read permission if specified in the parameter. The call for that is a separate method
@@ -295,6 +275,13 @@ public class PermissionsController {
                     group.getLabel()));
         }
 
+        // remote accounts
+        RemoteShareModelDAO remoteShareModelDAO = DAOFactory.getRemoteShareModelDAO();
+        List<RemoteShareModel> remoteAccessModelList = remoteShareModelDAO.getByFolder(folder);
+        for (RemoteShareModel remoteShareModel : remoteAccessModelList) {
+            accessPermissions.add(remoteShareModel.toDataTransferObject());
+        }
+
         return accessPermissions;
     }
 
@@ -302,8 +289,8 @@ public class PermissionsController {
      * Propagates the permissions for the folder to the contained entries
      *
      * @param userId unique identifier for account of user requesting action that led to this call
-     * @param folder  folder user permissions are being propagated
-     * @param add     true if folder is to be added, false otherwise
+     * @param folder folder user permissions are being propagated
+     * @param add    true if folder is to be added, false otherwise
      * @return true if action permission was propagated successfully
      */
     public boolean propagateFolderPermissions(String userId, Folder folder, boolean add) {
@@ -333,46 +320,6 @@ public class PermissionsController {
         return true;
     }
 
-    /**
-     * Sets permissions for the part identified by the part id.
-     * If the part does not exist, then a new one is created and permissions assigned. This
-     * method clears all existing permissions and sets the specified ones
-     *
-     * @param userId      unique identifier for user creating permissions. Must have write privileges on the entry
-     *                    if one exists
-     * @param partId      unique identifier for the part. If a part with this identifier is not located,
-     *                    then one is created
-     * @param permissions list of permissions to set for the part. Null or empty list will clear all permissions
-     * @return part whose permissions have been set. At a minimum it contains the unique identifier for the part
-     */
-    public PartData setEntryPermissions(String userId, long partId, ArrayList<AccessPermission> permissions) {
-        Entry entry = DAOFactory.getEntryDAO().get(partId);
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        EntryType type = EntryType.nameToType(entry.getRecordType());
-        PartData data = new PartData(type);
-
-        EntryAuthorization authorization = new EntryAuthorization();
-        authorization.expectWrite(userId, entry);
-        dao.clearPermissions(entry);
-
-        data.setId(partId);
-
-        if (permissions == null)
-            return data;
-
-        for (AccessPermission access : permissions) {
-            Permission permission = new Permission();
-            permission.setEntry(entry);
-            entry.getPermissions().add(permission);
-            permission.setAccount(account);
-            permission.setCanRead(access.isCanRead());
-            permission.setCanWrite(access.isCanWrite());
-            dao.create(permission);
-        }
-
-        return data;
-    }
-
     public FolderDetails setFolderPermissions(String userId, long folderId, ArrayList<AccessPermission> permissions) {
         Folder folder = folderDAO.get(folderId);
         FolderAuthorization folderAuthorization = new FolderAuthorization();
@@ -395,51 +342,5 @@ public class PermissionsController {
         }
 
         return folder.toDataTransferObject();
-    }
-
-    /**
-     * Adds a new permission to the specified entry. If the entry does not exist, a new one is
-     * created
-     *
-     * @param userId unique identifier for user creating the permission. Must have write privileges on the entry
-     *               if one exists
-     * @param partId unique identifier for the part. If a part with this identifier is not located,
-     *               then one is created
-     * @param access permissions to be added to the entry
-     * @return created permission if successful, null otherwise
-     */
-    public AccessPermission createPermission(String userId, long partId, AccessPermission access) {
-        if (access == null)
-            return null;
-
-        Entry entry = DAOFactory.getEntryDAO().get(partId);
-        EntryAuthorization authorization = new EntryAuthorization();
-        authorization.expectWrite(userId, entry);
-
-        Permission permission = addPermission(access, entry, null, null);
-        if (permission == null)
-            return null;
-
-        return permission.toDataTransferObject();
-    }
-
-    public void removeEntryPermission(String userId, long partId, long permissionId) {
-        Entry entry = DAOFactory.getEntryDAO().get(partId);
-        if (entry == null)
-            return;
-
-        Permission permission = dao.get(permissionId);
-        if (permission == null)
-            return;
-
-        // expect user to be able to modify entry
-        EntryAuthorization authorization = new EntryAuthorization();
-        authorization.expectWrite(userId, entry);
-
-        // permission must be for entry and specified entry
-        if (permission.getEntry() == null || permission.getEntry().getId() != partId)
-            return;
-
-        dao.delete(permission);
     }
 }

@@ -8,7 +8,7 @@
     </button>
 </div>
 
-<div class="pad_top" ng-init="getSetting()">
+<div class="pad_top" ng-init="getSetting()" style="width: 98%; height: 543px">
     <uib-tabset>
         <uib-tab>
             <uib-tab-heading><i class="fa fa-gear"></i> General Settings</uib-tab-heading>
@@ -21,7 +21,7 @@
                 <div class="col-md-9" ng-if="setting.isBoolean">
                     <i class="cursor_pointer fa fa-fw" ng-click="submitBooleanSetting(setting)"
                        ng-class="{'fa-toggle-on green font-14em':setting.value != undefined && setting.value.toLowerCase() === 'yes',
-                       'fa-toggle-off font-14em opacity_hover':setting.value == undefined || setting.value.toLowerCase() !== 'yes'}"></i>
+        'fa-toggle-off font-14em opacity_hover':setting.value == undefined || setting.value.toLowerCase() !== 'yes'}"></i>
                 </div>
 
                 <!--for non boolean fields-->
@@ -30,9 +30,9 @@
                     <div data-ng-if="!setting.editMode">
                         <span ng-if="setting.value.trim() !==''">{{setting.value.trim()}}</span>
                         <i class='opacity_4' ng-if="!setting.value">No value entered</i>
-                        <span ng-click="setting.editMode=true">
-                        <i ng-show="partIdEdit" class="fa fa-pencil edit_icon"
-                           style="margin-left: 5px; font-size: 14px;"></i></span>
+        <span ng-click="setting.editMode=true">
+        <i ng-show="partIdEdit" class="fa fa-pencil edit_icon"
+           style="margin-left: 5px; font-size: 14px;"></i></span>
                     </div>
 
                     <div class="input-group" data-ng-if="setting.editMode">
@@ -41,7 +41,7 @@
                                    style="width: 205px;">
                         </form>
         <span class="input-group-addon" data-ng-click="setting.editMode=false" style="padding:3px; background-color:
-         #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
+        #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
                     </div>
                 </div>
 
@@ -51,6 +51,50 @@
 
         <uib-tab>
             <uib-tab-heading><i class="fa fa-envelope"></i> Email Settings</uib-tab-heading>
+            <div class="pad_top">
+                <div class="col-md-3 entryLabel text-right">
+                    Email Type
+                </div>
+
+                <div class="col-md-9" ng-mouseover="emailConfig.showEdit=true" ng-mouseout="emailConfig.showEdit=false">
+                    <i class="fa fa-fw fa-envelope" ng-click="selectEmailType('CUSTOM')"
+                       ng-class="{'font-12em': emailConfig.type=='CUSTOM', 'opacity_3 cursor_pointer': emailConfig.type!='CUSTOM'}"></i>
+                    <i class="fa fa-fw fa-google" ng-click="selectEmailType('GMAIL')"
+                       ng-class="{'font-12em': emailConfig.type=='GMAIL', 'opacity_3 cursor_pointer': emailConfig.type!='GMAIL'} "></i>
+
+                    <i ng-show="emailConfig.showEdit && !emailConfig.edit" class="fa fa-pencil edit_icon"
+                       uib-tooltip="Change Type"
+                       style="margin-left: 5px; font-size: 14px;" ng-click="emailConfig.edit=true"></i>
+                </div>
+
+                <div class="col-md-3"></div>
+                <div class="col-md-9" ng-if="emailConfig.edit==true">
+                    <input type="password" maxlength="125" style="width: 205px;" ng-model="emailConfig.pass"
+                           ng-if="emailConfig.type=='GMAIL'" placeholder="Gmail application password">
+                    <input type="text" class="input_box_group" maxlength="125" style="width: 205px;"
+                           placeholder="Enter SMTP Host" ng-if="emailConfig.type=='CUSTOM'" ng-model="emailConfig.smtp">
+                    <br>
+                    <button class="btn btn-primary btn-xs" ng-click="saveEmailConfig()">Save</button>
+                    <button class="btn btn-xs btn-default" ng-click="emailConfig.edit=false">Cancel</button>
+                    <br><br>
+                </div>
+
+                <div class="col-md-9" ng-if="emailConfig.edit==false">
+                    <div ng-if="emailConfig.type=='GMAIL'"><i class="fa fa-fw fa-key"></i>
+                        <span ng-if="!emailConfig.showPass">*******
+                            <i class="fa fa-fw fa-eye opacity_hover" ng-click="emailConfig.showPass=true"
+                               uib-tooltip="Show application password"></i></span>
+                        <span ng-if="emailConfig.showPass">{{emailConfig.pass}}
+                            <i class="fa fa-fw fa-eye-slash opacity_hover" ng-click="emailConfig.showPass=false"
+                               uib-tooltip="Hide application password"></i></span>
+                    </div>
+                    <div ng-if="emailConfig.type=='CUSTOM'">{{emailConfig.smtp}}</div>
+                    <br>
+                </div>
+            </div>
+
+            <br><br>
+
             <div class="pad_top" ng-repeat="setting in emailSettings">
                 <div class="col-md-3 entryLabel text-right">
                     <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">{{setting.key}}</span>
@@ -66,7 +110,7 @@
                 <!--for non boolean fields-->
                 <div class="col-md-9" ng-if="!setting.isBoolean" ng-mouseover="partIdEdit=true"
                      ng-mouseout="partIdEdit=false">
-                    <div data-ng-if="!setting.editMode"><span ng-if="setting.value&&!setting.value.trim()==''">{{setting.value}}</span>
+                    <div data-ng-if="!setting.editMode"><span ng-if="setting.value&&setting.value.trim()!=''">{{setting.value}}</span>
                         <i class='opacity_4' ng-if="!setting.value">No value entered</i><span
                                 ng-click="setting.editMode=true">
                          <i ng-show="partIdEdit" class="fa fa-pencil edit_icon"

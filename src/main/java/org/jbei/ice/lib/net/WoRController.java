@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.net;
 
-import org.jbei.ice.lib.access.TokenVerification;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
@@ -26,11 +25,9 @@ import java.util.List;
 public class WoRController {
 
     private final RemotePartnerDAO dao;
-    private final TokenVerification tokenVerification;
 
     public WoRController() {
         dao = DAOFactory.getRemotePartnerDAO();
-        this.tokenVerification = new TokenVerification();
     }
 
     /**
@@ -86,8 +83,7 @@ public class WoRController {
         if (existing == null)
             return false;
 
-        RemotePartnerStatus newStatus = RemotePartnerStatus.valueOf(partner.getStatus());
-        if (newStatus == existing.getPartnerStatus())
+        if (partner.getStatus() == existing.getPartnerStatus())
             return true;
 
         // contact remote with new api key that allows them to contact this instance
@@ -103,7 +99,7 @@ public class WoRController {
         IceRestClient client = IceRestClient.getInstance();
         try {
             client.post(partner.getUrl(), "/rest/web/partner/remote", thisPartner, RegistryPartner.class, null);
-            existing.setPartnerStatus(newStatus);
+            existing.setPartnerStatus(partner.getStatus());
             existing.setAuthenticationToken(apiKey);
             dao.update(existing);
             return true;
@@ -134,51 +130,5 @@ public class WoRController {
 
     public RegistryPartner getWebPartner(String userId, long partnerId) {
         return dao.get(partnerId).toDataTransferObject();
-    }
-
-    /**
-     * Request for the list of partners that this instance has, from other partners
-     *
-     * @param apiKey authentication token that this instance previously provided to instance at <code>url</code>
-     * @param url    location of ICE instance (partner) making request
-     * @return list of registry partners that this instance has, null if apiKey could not be authenticated
-     */
-    public List<RegistryPartner> getWebPartners(String apiKey, String url) {
-        if (!isInWebOfRegistries())
-            return null;
-
-        RemotePartner partner = dao.getByUrl(url);
-        if (partner == null)
-            return null;
-
-        tokenVerification.verifyPartnerToken(url, apiKey);
-        return getWebPartners();
-    }
-
-    public List<RegistryPartner> getWebPartners() {
-        if (!isInWebOfRegistries())
-            return null;
-
-        List<RemotePartner> partners = DAOFactory.getRemotePartnerDAO().getRegistryPartners();
-        List<RegistryPartner> registryPartners = new ArrayList<>();
-        if (partners == null)
-            return registryPartners;
-
-        for (RemotePartner remotePartner : partners) {
-            registryPartners.add(remotePartner.toDataTransferObject());
-        }
-
-        return registryPartners;
-    }
-
-    /**
-     * Checks if the web of registries admin config value has been set to enable this ICE instance
-     * to join the web of registries configuration
-     *
-     * @return true if value has been set to the affirmative, false otherwise
-     */
-    private boolean isInWebOfRegistries() {
-        String value = Utils.getConfigValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
-        return ("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
     }
 }

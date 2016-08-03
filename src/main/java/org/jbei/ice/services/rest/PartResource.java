@@ -8,7 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
@@ -24,8 +23,10 @@ import org.jbei.ice.lib.entry.attachment.AttachmentController;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.TraceSequences;
+import org.jbei.ice.lib.entry.sequence.annotation.Annotations;
 import org.jbei.ice.lib.experiment.Experiments;
 import org.jbei.ice.lib.experiment.Study;
+import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.TransferredParts;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -49,7 +50,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Rest resource for biological parts
+ * Rest resource for interacting representations of biological parts on ICE
  *
  * @author Hector Plahar
  */
@@ -57,61 +58,75 @@ import java.util.List;
 public class PartResource extends RestResource {
 
     private EntryController controller = new EntryController();
-    private PermissionsController permissionsController = new PermissionsController();
     private AttachmentController attachmentController = new AttachmentController();
     private SequenceController sequenceController = new SequenceController();
-    private Experiments experiments = new Experiments();
     private SampleService sampleService = new SampleService();
+    private RemoteEntries remoteEntries = new RemoteEntries();
 
     /**
      * Retrieves a part using any of the unique identifiers. e.g. Part number, synthetic id, or
-     * global unique identifier
+     * global unique identifier.
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
     public Response read(@PathParam("id") final String id,
                          @DefaultValue("false") @QueryParam("remote") boolean isRemote,
-                         @QueryParam("token") String remoteUserToken,
+                         @QueryParam("token") String remoteUserToken,      // todo : move to header
                          @QueryParam("userId") String remoteUserId,
                          @QueryParam("folderId") long fid) {
         String userId = getUserId();
-        final EntryType type = EntryType.nameToType(id);
-        if (type != null) {
-            return super.respond(controller.getPartDefaults(userId, type));
-        }
-
         if (isRemote) {
-            log(userId, " get remote entry");
+            log(userId, "get remote entry");
             long partId = Long.decode(id);
-            PartData data = controller.retrieveRemoteEntryDetails(userId, fid, partId);
+            PartData data = remoteEntries.getEntryDetails(userId, fid, partId);
             return super.respond(data);
         } else {
             try {
                 if (StringUtils.isEmpty(userId)) {
-                    RegistryPartner partner = verifyWebPartner();
+                    RegistryPartner partner = requireWebPartner();
                     log(partner.getUrl(), "retrieving details for " + id);
-                    return super.respond(controller.getRemoteRequestedEntry(remoteUserId, remoteUserToken, id, fid, partner));
+                    return super.respond(controller.getRequestedEntry(remoteUserId, remoteUserToken, id, fid, partner));
                 } else {
                     log(userId, "retrieving details for " + id);
                     return super.respond(controller.retrieveEntryDetails(userId, id));
                 }
             } catch (final PermissionException pe) {
-                // todo : have a generic error entity returned
-                return Response.status(Response.Status.FORBIDDEN).build();
+                throw new WebApplicationException(Response.Status.FORBIDDEN);
             }
         }
     }
 
     /**
+     * Retrieves the defaults for the requested entry types.
+     *
+     * @param type the type of entry i.e. <code>PLASMID</code>, <code>PART</code>, <code>STRAIN</code> or
+     *             <code>ARABIDOPSIS</code>. Used to retrieve the default values for that entry
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/defaults/{type}")
+    public Response get(@PathParam("type") String type) {
+        String userId = requireUserId();
+        final EntryType entryType = EntryType.nameToType(type);
+        if (entryType == null)
+            throw new WebApplicationException();
+
+        PartDefaults partDefaults = new PartDefaults(userId);
+        return super.respond(partDefaults.get(entryType));
+    }
+
+    /**
      * Returns the folders that an entry is contained in (filtered by permissions).
+     *
+     * @param id unique identifier for entry whose containing folders are being returned
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/folders")
     public Response getEntryFolders(@PathParam("id") String id) {
         // user id is allowed to be empty. The entry has to be public in that instance
-        // and only public entries it is contained in is returned
+        // and only public folders it is contained in is returned
         String userId = getUserId();
         EntryFolders entryFolders = new EntryFolders(userId, id);
         return super.respond(entryFolders.getFolders());
@@ -135,11 +150,11 @@ public class PartResource extends RestResource {
         if (isRemote) {
             log(userId, " get remote tooltip");
             long partId = Long.decode(id);
-            return controller.retrieveRemoteToolTip(userId, fid, partId);
+            return remoteEntries.retrieveRemoteToolTip(userId, fid, partId);
         }
 
         if (StringUtils.isEmpty(userId)) {
-            verifyWebPartner();
+            requireWebPartner();
         }
         return controller.retrieveEntryTipDetails(id);
     }
@@ -147,96 +162,126 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
-    public List<AccessPermission> getPermissions(@Context final UriInfo info,
-                                                 @PathParam("id") final String id) {
-        final String userId = getUserId();
-        Entries entries = new Entries();
-        return entries.getEntryPermissions(userId, id);
-    }
-
-    @PUT
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}/permissions")
-    public PartData setPermissions(@Context final UriInfo info, @PathParam("id") final long partId,
-                                   final ArrayList<AccessPermission> permissions) {
-        final String userId = getUserId();
-        return permissionsController.setEntryPermissions(userId, partId, permissions);
-    }
-
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}/experiments")
-    public Response getPartExperiments(@PathParam("id") final long partId) {
+    public Response getPermissions(@PathParam("id") final String id) {
         final String userId = requireUserId();
-        final List<Study> studies = experiments.getPartStudies(userId, partId);
-        if (studies == null) {
-            return respond(Response.Status.INTERNAL_SERVER_ERROR);
+        try {
+            EntryPermissions entryPermissions = new EntryPermissions(id, userId);
+            List<AccessPermission> permissions = entryPermissions.getEntryPermissions();
+            return super.respond(permissions);
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
-        return respond(Response.Status.OK, studies);
-    }
-
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}/experiments")
-    public Response createPartExperiment(@PathParam("id") final long partId,
-                                         final Study study) {
-        final String userId = requireUserId();
-        final Study created = experiments.createOrUpdateStudy(userId, partId, study);
-        return respond(Response.Status.OK, created);
-    }
-
-    @DELETE
-    @Path("/{id}/experiments/{eid}")
-    public Response deletePartExperiment(
-            @PathParam("id") final long partId,
-            @PathParam("eid") final long experimentId) {
-        String userId = requireUserId();
-        return super.respond(experiments.deleteStudy(userId, partId, experimentId));
-    }
-
-    @PUT
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}/permissions/public")
-    public Response enablePublicAccess(@Context final UriInfo info,
-                                       @PathParam("id") final long partId) {
-        final String userId = getUserId();
-        if (permissionsController.enablePublicReadAccess(userId, partId)) {
-            return respond(Response.Status.OK);
-        }
-        return respond(Response.Status.INTERNAL_SERVER_ERROR);
-    }
-
-    @DELETE
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}/permissions/public")
-    public Response disablePublicAccess(@Context final UriInfo info,
-                                        @PathParam("id") final long partId) {
-        final String userId = getUserId();
-        if (permissionsController.disablePublicReadAccess(userId, partId)) {
-            return respond(Response.Status.OK);
-        }
-        return respond(Response.Status.INTERNAL_SERVER_ERROR);
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
-    public AccessPermission createPermission(@Context final UriInfo info,
-                                             @PathParam("id") final long partId,
+    public AccessPermission createPermission(@PathParam("id") final String partId,
                                              final AccessPermission permission) {
-        final String userId = getUserId();
-        return permissionsController.createPermission(userId, partId, permission);
+        final String userId = requireUserId();
+        try {
+            EntryPermissions permissions = new EntryPermissions(partId, userId);
+            return permissions.add(permission);
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
     }
 
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions/{permissionId}")
-    public Response removePermission(@Context final UriInfo info,
-                                     @PathParam("id") final long partId,
+    public Response removePermission(@PathParam("id") final String partId,
                                      @PathParam("permissionId") final long permissionId) {
-        final String userId = getUserId();
-        permissionsController.removeEntryPermission(userId, partId, permissionId);
-        return super.respond(true);
+        final String userId = requireUserId();
+        log(userId, "removing permission " + permissionId + " from entry " + partId);
+        try {
+            EntryPermissions entryPermissions = new EntryPermissions(partId, userId);
+            entryPermissions.removePermission(permissionId);
+            return Response.ok().build();
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/experiments")
+    public Response getPartExperiments(@PathParam("id") final String partId) {
+        final String userId = requireUserId();
+        try {
+            Experiments experiments = new Experiments(userId, partId);
+            final List<Study> studies = experiments.getPartStudies();
+            return respond(Response.Status.OK, studies);
+        } catch (PermissionException e) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        } catch (IllegalArgumentException ile) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/experiments")
+    public Response createPartExperiment(@PathParam("id") final String partId,
+                                         final Study study) {
+        try {
+            final String userId = requireUserId();
+            log(userId, "adding experiment " + study.toString());
+            Experiments experiments = new Experiments(userId, partId);
+            final Study created = experiments.createOrUpdateStudy(study);
+            return respond(Response.Status.OK, created);
+        } catch (PermissionException e) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        } catch (IllegalArgumentException ile) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+    }
+
+    @DELETE
+    @Path("/{id}/experiments/{eid}")
+    public Response deletePartExperiment(
+            @PathParam("id") final String partId,
+            @PathParam("eid") final long experimentId) {
+        try {
+            String userId = requireUserId();
+            log(userId, "deleting experiment " + experimentId + " for entry " + partId);
+            Experiments experiments = new Experiments(userId, partId);
+            return super.respond(experiments.deleteStudy(experimentId));
+        } catch (PermissionException e) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        } catch (IllegalArgumentException ile) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+    }
+
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/permissions/public")
+    public Response enablePublicAccess(@PathParam("id") final String partId) {
+        final String userId = requireUserId();
+        log(userId, "adding public read access for part " + partId);
+        try {
+            EntryPermissions entryPermissions = new EntryPermissions(partId, userId);
+            entryPermissions.enablePublicReadAccess();
+            return Response.ok().build();
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
+    }
+
+    @DELETE
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/permissions/public")
+    public Response disablePublicAccess(@PathParam("id") final String partId) {
+        final String userId = requireUserId();
+        log(userId, "removing public read access for part " + partId);
+        try {
+            EntryPermissions entryPermissions = new EntryPermissions(partId, userId);
+            entryPermissions.disablePublicReadAccess();
+            return Response.ok().build();
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
     }
 
     @GET
@@ -244,14 +289,17 @@ public class PartResource extends RestResource {
     @Path("/{id}/statistics")
     public PartStatistics getStatistics(@PathParam("id") final long partId) {
         final String userId = getUserId();
-        return controller.retrieveEntryStatistics(userId, partId);
+        try {
+            return controller.retrieveEntryStatistics(userId, partId);
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/comments")
-    public List<UserComment> getComments(@Context final UriInfo info,
-                                         @PathParam("id") final long partId) {
+    public List<UserComment> getComments(@PathParam("id") final long partId) {
         final String userId = getUserId();
         return controller.retrieveEntryComments(userId, partId);
     }
@@ -298,8 +346,7 @@ public class PartResource extends RestResource {
 
     @DELETE
     @Path("/{id}/attachments/{attachmentId}")
-    public Response deleteAttachment(@Context final UriInfo info,
-                                     @PathParam("id") final long partId,
+    public Response deleteAttachment(@PathParam("id") final long partId,
                                      @PathParam("attachmentId") final long attachmentId) {
         final String userId = getUserId();
         return super.respond(attachmentController.delete(userId, partId, attachmentId));
@@ -327,7 +374,7 @@ public class PartResource extends RestResource {
     @Path("/{id}/history/{historyId}")
     public Response delete(@PathParam("id") final long partId,
                            @PathParam("historyId") final long historyId) {
-        final String userId = getUserId();
+        final String userId = requireUserId();
         EntryHistory entryHistory = new EntryHistory(userId, partId);
         return super.respond(entryHistory.delete(historyId));
     }
@@ -341,17 +388,14 @@ public class PartResource extends RestResource {
     public Response getTraces(
             @Context final UriInfo info,
             @PathParam("id") final long partId,
-            @DefaultValue("10") @QueryParam("limit") int limit,
-            @DefaultValue("0") @QueryParam("start") int start,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-            @QueryParam("sid") final String sid) {
-        String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
-        final String userId = getUserId(sessionId);
+            @DefaultValue("100") @QueryParam("limit") int limit,
+            @DefaultValue("0") @QueryParam("start") int start) {
+        final String userId = getUserId();
         TraceSequences traceSequences = new TraceSequences(userId, partId);
         Results<TraceSequenceAnalysis> results = traceSequences.getTraces(start, limit);
 
         // hack for trace sequence viewer without having to modify it
-        if (StringUtils.isEmpty(userAgentHeader))
+        if (StringUtils.isEmpty(sessionId))
             return super.respond(new ArrayList<>(results.getData()));
         return super.respond(results);
     }
@@ -360,12 +404,8 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/shotgunsequences")
     public ArrayList<ShotgunSequenceDTO> getShotgunSequences(
-            @Context final UriInfo info,
-            @PathParam("id") final long partId,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-            @QueryParam("sid") final String sid) {
-        String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
-        final String userId = getUserId(sessionId);
+            @PathParam("id") final long partId) {
+        final String userId = getUserId();
         ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
         final EntryDAO entryDAO = DAOFactory.getEntryDAO();
         final Entry entry = entryDAO.get(partId);
@@ -390,11 +430,8 @@ public class PartResource extends RestResource {
     @Path("/{id}/traces")
     public Response addTraceSequence(@PathParam("id") final long partId,
                                      @FormDataParam("file") final InputStream fileInputStream,
-                                     @FormDataParam("file") final FormDataContentDisposition contentDispositionHeader,
-                                     @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-                                     @QueryParam("sid") final String sid) {
-        String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
-        final String userId = getUserId(sessionId);
+                                     @FormDataParam("file") final FormDataContentDisposition contentDispositionHeader) {
+        final String userId = getUserId();
         final String fileName = contentDispositionHeader.getFileName();
         final String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         final File file = Paths.get(tmpDir, fileName).toFile();
@@ -413,11 +450,8 @@ public class PartResource extends RestResource {
     @Path("/{id}/shotgunsequences")
     public Response addShotgunSequence(@PathParam("id") final long partId,
                                        @FormDataParam("file") final InputStream fileInputStream,
-                                       @FormDataParam("file") final FormDataContentDisposition contentDispositionHeader,
-                                       @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-                                       @QueryParam("sid") final String sid) {
-        String sessionId = StringUtils.isEmpty(userAgentHeader) ? sid : userAgentHeader;
-        final String userId = getUserId(sessionId);
+                                       @FormDataParam("file") final FormDataContentDisposition contentDispositionHeader) {
+        final String userId = getUserId();
         final String fileName = contentDispositionHeader.getFileName();
         final EntryDAO entryDAO = DAOFactory.getEntryDAO();
         final Entry entry = entryDAO.get(partId);
@@ -451,31 +485,32 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
-    public ArrayList<PartSample> getSamples(@Context UriInfo info,
-                                            @PathParam("id") long partId) {
-        String userId = getUserId();
+    public ArrayList<PartSample> getSamples(@PathParam("id") long partId) {
+        String userId = requireUserId();
         return sampleService.retrieveEntrySamples(userId, partId);
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
-    public List<PartSample> addSample(@PathParam("id") final long partId,
-                                      @QueryParam("strainNamePrefix") final String strainNamePrefix,
-                                      final PartSample partSample) {
+    public Response addSample(@PathParam("id") final long partId,
+                              @QueryParam("strainNamePrefix") final String strainNamePrefix,
+                              final PartSample partSample) {
         final String userId = getUserId();
         log(userId, "creating sample for part " + partId);
         sampleService.createSample(userId, partId, partSample, strainNamePrefix);
-        return sampleService.retrieveEntrySamples(userId, partId);
+        ArrayList<PartSample> result = sampleService.retrieveEntrySamples(userId, partId);
+        Results<PartSample> results = new Results<>();
+        results.setData(result);
+        return super.respond(results);
     }
 
     @DELETE
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples/{sampleId}")
     public Response deleteSample(@Context UriInfo info, @PathParam("id") long partId,
-                                 @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
                                  @PathParam("sampleId") long sampleId) {
-        String userId = getUserId(userAgentHeader);
+        String userId = requireUserId();
         boolean success = sampleService.delete(userId, partId, sampleId);
         return super.respond(success);
     }
@@ -483,46 +518,59 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/sequence")
-    public Response getSequence(@PathParam("id") final long partId,
-                                @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
-                                @QueryParam("sid") final String sid) {
-        if (StringUtils.isEmpty(sessionId))
-            sessionId = sid;
-        final String userId = getUserId(sessionId);
-        final FeaturedDNASequence sequence = sequenceController.retrievePartSequence(userId, partId);
-        if (sequence == null) {
-            return Response.status(Response.Status.NO_CONTENT).build();
+    public Response getSequence(@PathParam("id") final String partId,
+                                @DefaultValue("false") @QueryParam("remote") boolean isRemote,
+                                @QueryParam("token") String remoteUserToken,
+                                @QueryParam("userId") String remoteUserId,
+                                @QueryParam("folderId") long fid) {
+        final FeaturedDNASequence sequence;
+        final String userId = getUserId();
+
+        try {
+            if (isRemote) {
+                // entry exists remotely
+                sequence = remoteEntries.getSequence(userId, fid, partId);
+            } else {
+                // what request is being responded to (local or remote)
+                if (StringUtils.isEmpty(userId)) {
+                    RegistryPartner partner = requireWebPartner();
+                    if (StringUtils.isEmpty(remoteUserToken) || fid == 0) {
+                        sequence = sequenceController.retrievePartSequence(userId, partId);
+                    } else {
+                        sequence = sequenceController.getRequestedSequence(partner, remoteUserId, remoteUserToken, partId, fid);
+                    }
+                } else {
+                    // user id can be null if partId is public
+                    sequence = sequenceController.retrievePartSequence(userId, partId);
+                }
+            }
+            return Response.status(Response.Status.OK).entity(sequence).build();
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
-        return Response.status(Response.Status.OK).entity(sequence).build();
     }
 
+    // put should be used to update when the new vector editor implementation is in place
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/sequence")
-    public FeaturedDNASequence updateSequence(@PathParam("id") final long partId,
-                                              @HeaderParam(value = "X-ICE-Authentication-SessionId") String sessionId,
-                                              @QueryParam("sid") final String sid,
-                                              FeaturedDNASequence sequence) {
-        if (StringUtils.isEmpty(sessionId))
-            sessionId = sid;
-        final String userId = getUserId(sessionId);
-        if (userId == null)
-            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-        return sequenceController.updateSequence(userId, partId, sequence);
+    public Response updateSequence(@PathParam("id") final long partId,
+                                   @DefaultValue("false") @QueryParam("add") boolean add,
+                                   FeaturedDNASequence sequence) {
+        final String userId = requireUserId();
+        return super.respond(sequenceController.updateSequence(userId, partId, sequence, add));
     }
 
     @DELETE
     @Path("/{id}/sequence")
-    public Response deleteSequence(@PathParam("id") final long partId,
-                                   @HeaderParam(value = "X-ICE-Authentication-SessionId") String sid,
-                                   @QueryParam("sid") final String sessionId) {
-        if (StringUtils.isEmpty(sid))
-            sid = sessionId;
-        final String userId = getUserId(sid);
-        if (sequenceController.deleteSequence(userId, partId)) {
-            return Response.ok().build();
+    public Response deleteSequence(@PathParam("id") final long partId) {
+        final String userId = requireUserId();
+        try {
+            return super.respond(sequenceController.deleteSequence(userId, partId));
+        } catch (PermissionException e) {
+            Logger.error(e);
+            throw new WebApplicationException(e.getMessage(), Response.Status.FORBIDDEN);
         }
-        return Response.serverError().build();
     }
 
     /**
@@ -539,20 +587,21 @@ public class PartResource extends RestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public PartData create(@QueryParam("source") String sourceId,
+    public Response create(@QueryParam("source") String sourceId,
                            PartData partData) {
         final String userId = requireUserId();
         final EntryCreator creator = new EntryCreator();
-        long id;
         if (StringUtils.isEmpty(sourceId)) {
             log(userId, "created new " + partData.getType().getDisplay());
-            return creator.createPart(userId, partData);
+            return super.respond(creator.createPart(userId, partData));
         }
 
-        id = creator.copyPart(userId, sourceId);
-        log(userId, "created copy of entry " + sourceId + " at " + id);
-        partData.setId(id);
-        return partData;
+        try {
+            log(userId, "creating copy of entry " + sourceId);
+            return super.respond(creator.copyPart(userId, sourceId));
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
+        }
     }
 
     @PUT
@@ -578,29 +627,48 @@ public class PartResource extends RestResource {
     public Response update(@PathParam("id") final long partId,
                            final PartData partData) {
         final String userId = requireUserId();
-        final long id = controller.updatePart(userId, partId, partData);
-        log(userId, "update entry " + id);
-        partData.setId(id);
-        return super.respond(partData);
-    }
-
-    @DELETE
-    @Path("/{id}")
-    public void delete(@PathParam("id") final long id) {
-        Logger.info("Deleting part " + id);
+        try {
+            final long id = controller.updatePart(userId, partId, partData);
+            log(userId, "update entry " + id);
+            partData.setId(id);
+            return super.respond(partData);
+        } catch (IllegalArgumentException e) {
+            throw new WebApplicationException(Response.Status.NOT_FOUND);
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
     }
 
     @POST
     @Path("/trash")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response moveToTrash(final ArrayList<PartData> list) {
-        final String userId = getUserId();
-        final Type fooType = new TypeToken<ArrayList<PartData>>() {
-        }.getType();
-        final Gson gson = new GsonBuilder().create();
-        final ArrayList<PartData> data = gson.fromJson(gson.toJsonTree(list), fooType);
-        final boolean success = controller.moveEntriesToTrash(userId, data);
-        return respond(success);
+        try {
+            final String userId = getUserId();
+            final Type fooType = new TypeToken<ArrayList<PartData>>() {
+            }.getType();
+            final Gson gson = new GsonBuilder().create();
+            final ArrayList<PartData> data = gson.fromJson(gson.toJsonTree(list), fooType);
+            final boolean success = controller.moveEntriesToTrash(userId, data);
+            return respond(success);
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
+    }
+
+    /**
+     * Get linked parts
+     *
+     * @param partId unique identifier for part whose links are to be retrieved
+     * @return list of {@link PartData} that represent links
+     */
+    @GET
+    @Path("/{id}/links")
+    public Response getLinkedParts(@PathParam("id") long partId,
+                                   @DefaultValue("CHILD") @QueryParam("linkType") LinkType linkType) {
+        final String userId = requireUserId();
+        EntryLinks entryLinks = new EntryLinks(userId, partId);
+        return super.respond(entryLinks.get(linkType));
     }
 
     /**
@@ -629,7 +697,7 @@ public class PartResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response createLink(@PathParam("id") long partId,
-                               @QueryParam("linkType") @DefaultValue("CHILD") LinkType type,
+                               @DefaultValue("CHILD") @QueryParam("linkType") LinkType type,
                                PartData partData) {
         String userId = getUserId();
         log(userId, "adding entry link " + partData.getId() + " to " + partId);
@@ -644,11 +712,22 @@ public class PartResource extends RestResource {
                                   List<Long> entryIds) {
         String userId = getUserId();
         log(userId, "updating visibility of " + entryIds.size() + " entries to " + visibility);
-        Entries entries = new Entries();
+        Entries entries = new Entries(userId);
         List<Long> arrayList = new ArrayList<>();
         for (Number id : entryIds)
             arrayList.add(id.longValue());
-        boolean success = entries.updateVisibility(userId, arrayList, visibility);
+        boolean success = entries.updateVisibility(arrayList, visibility);
         return super.respond(success);
+    }
+
+    @GET
+    @Path("/{id}/annotations/auto")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAutoAnnotations(@PathParam("id") long partId,
+                                       @QueryParam("ownerFeatures") boolean ownerFeatures) {
+        String userId = requireUserId();
+        log(userId, "requesting auto annotations for entry " + partId);
+        Annotations annotations = new Annotations(userId);
+        return super.respond(annotations.generate(partId, ownerFeatures));
     }
 }

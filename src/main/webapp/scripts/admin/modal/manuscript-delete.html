@@ -1,0 +1,29 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="cancel()">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-exclamation-triangle orange"></i> &nbsp;Confirm Delete Paper</span>
+</div>
+
+<div class="modal-body">
+    <div class="alert alert-danger" style="padding: 9px" ng-if="errorDeleting">
+        <i style="font-size:40px; float: left;padding-right:10px;" class="fa fa-warning red"></i>
+        <span class="font-90em">
+            There was an error deleting the manuscript.<br>
+            Please try again. If this problem persists, consult your administrator.
+        </span>
+
+    </div>
+
+    Please confirm deletion of manuscript <br>
+
+    <div style="margin-left: 20px; padding: 10px"><strong>{{manuscript.title}}</strong><br>
+        <small class="text-muted"><b>by</b> {{manuscript.authorLastName}}, {{manuscript.authorFirstName}}</small>
+    </div>
+    Note that this action cannot be undone.
+</div>
+
+<div class="modal-footer">
+    <i class="pull-left">Continue with deletion?</i>
+    <button class="btn btn-default btn-sm" ng-click="cancelDeleteRequest()">No, Cancel</button>
+    <button class="btn btn-primary btn-sm" ng-click="deleteManuscript()">Yes, Delete</button>
+</div>

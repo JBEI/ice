@@ -1,7 +1,7 @@
 package org.jbei.ice.services.rest;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
+import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
@@ -9,17 +9,20 @@ import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.lib.net.RemoteEntries;
+import org.jbei.ice.lib.net.RemoteEntriesAsCSV;
 import org.jbei.ice.lib.net.WoRController;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import java.io.File;
 import java.util.List;
 
 /**
  * Resource for web of registries requests
+ * <p>
+ * This is particularly useful for third party tools to tap into the web of
+ * registries functionality without having specific API keys to each of the instances
  *
  * @author Hector Plahar
  */
@@ -62,8 +65,8 @@ public class WebResource extends RestResource {
             @DefaultValue("15") @QueryParam("limit") final int limit,
             @DefaultValue("created") @QueryParam("sort") final String sort,
             @DefaultValue("false") @QueryParam("asc") final boolean asc) {
-        final String userId = getUserId();
-        final WebEntries result = remoteEntries.getPublicEntries(userId, partnerId, offset, limit, sort, asc);
+        getUserId();
+        final WebEntries result = remoteEntries.getPublicEntries(partnerId, offset, limit, sort, asc);
         return super.respond(Response.Status.OK, result);
     }
 
@@ -112,14 +115,14 @@ public class WebResource extends RestResource {
     @Path("/{id}/entries/{entryId}/sequence")
     public Response getWebEntrySequence(
             @PathParam("id") final long partnerId, @PathParam("entryId") final long entryId) {
-        final String userId = super.getUserId();
-        final FeaturedDNASequence result = remoteEntries.getPublicEntrySequence(userId, partnerId, entryId);
+        requireUserId();
+        final FeaturedDNASequence result = remoteEntries.getPublicEntrySequence(partnerId, entryId);
         return super.respond(Response.Status.OK, result);
     }
 
     @GET
     @Path("/partner/{id}")
-    public Response getWebPartner(@Context final UriInfo info, @PathParam("id") final long partnerId) {
+    public Response getWebPartner(@PathParam("id") final long partnerId) {
         final String userId = getUserId();
         final RegistryPartner partner = controller.getWebPartner(userId, partnerId);
         return super.respond(Response.Status.OK, partner);
@@ -134,16 +137,16 @@ public class WebResource extends RestResource {
         return super.respond(remoteContact.handleRemoteRemoveRequest(worToken, url));
     }
 
-    @GET
-    @Path("/partners")
-    public Response getWebPartners(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-                                   @HeaderParam(WOR_PARTNER_TOKEN) String worToken,
-                                   @QueryParam("url") String url) {
-        if (StringUtils.isEmpty(sessionId))
-            return super.respond(controller.getWebPartners(worToken, url));
-        final String userId = getUserId();
-        return super.respond(controller.getWebPartners());
-    }
+//    @GET
+//    @Path("/partners")
+//    public Response getWebPartners(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
+//                                   @HeaderParam(WOR_PARTNER_TOKEN) String worToken,
+//                                   @QueryParam("url") String url) {
+//        if (StringUtils.isEmpty(sessionId))
+//            return super.respond(controller.getWebPartners(worToken, url));
+//        final String userId = getUserId();
+//        return super.respond(controller.getWebPartners());
+//    }
 
     @PUT
     @Path("/partner/{url}")
@@ -164,5 +167,21 @@ public class WebResource extends RestResource {
             return respond(Response.Status.OK);
         }
         return respond(Response.Status.INTERNAL_SERVER_ERROR);
+    }
+
+    @GET
+    @Path("/entries")
+    public Response getWebEntries(@QueryParam("download") boolean download,
+                                  @QueryParam("limit") int limit,
+                                  @QueryParam("offset") int offset) {
+        String userId = requireUserId();
+        log(userId, "downloading web entries");
+        RemoteEntriesAsCSV remoteEntriesAsCSV = new RemoteEntriesAsCSV(true);
+        remoteEntriesAsCSV.getEntries(offset, limit);
+        final File file = remoteEntriesAsCSV.getFilePath().toFile();
+        if (file.exists()) {
+            return Response.ok(new Setting("fileName", file.getName())).build();
+        }
+        return super.respond(false);
     }
 }

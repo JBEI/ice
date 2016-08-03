@@ -1,0 +1,158 @@
+<div class="modal-header" style="border-bottom: 0">
+    <button type="button" class="close" ng-click="$dismiss()">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+    <i class="fa fa-fw fa-magic"></i> &nbsp;Automatic Sequence Annotation
+    </span>
+</div>
+
+<div class="modal-body">
+
+    <div style="max-height: 120px;overflow-y: auto; overflow-x: hidden">
+        <table width="99%" ng-repeat="selectedFeature in selectedFeatures" style="margin-bottom: 2px"
+               ng-class="{'margin-left-4': selectedFeature.strand == -1, 'margin-right-4':selectedFeature.strand == 1}">
+            <tr>
+                <td ng-style="getFirstStyle(selectedFeature)"></td>
+                <td ng-style="getSecondStyle(selectedFeature)">
+                    <div uib-tooltip="{{selectedFeature.name}}" ng-click="showAnnotationInTable(selectedFeature)"
+                         ng-class="[selectedFeature.className, {'reverse-strand': selectedFeature.strand == -1, 'forward-strand':selectedFeature.strand == 1}]"></div>
+                </td>
+                <td ng-style="getThirdStyle(selectedFeature)"></td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="height: 6px; width: 100%; border: 1px solid #ccc; background-color: #FFFFB3;"></div>
+
+    <table width="100%">
+        <tr>
+            <td style="width: 10px">
+                <small class="text-muted font-75em" style="padding-right: 5px">1</small>
+            </td>
+            <td>&nbsp;</td>
+            <td style="width: 30px;">
+                <small class="text-muted font-75em" style="padding-left: 5px">{{annotations.length | number}}</small>
+            </td>
+        </tr>
+    </table>
+
+    <div ng-if="!annotations" class="pad_top">
+        <img src="img/loader-mini.gif"> <i class="small text-muted">Generating annotations. Please wait&hellip;</i>
+    </div>
+
+    <div ng-if="annotations && !annotations.features.length" class="pad_top">
+        <i>No annotations found.</i>
+    </div>
+
+    <table class="pad_top table table-hover table-border-bottom" ng-if="annotations && annotations.features.length">
+        <thead>
+        <tr>
+            <th style="width: 60px"></th>
+            <th style="width: 170px" class="entry-table-header">
+                <span ng-click="sort('type')">Type
+                    <i class="fa" ng-show="pagingParams.sort == 'type'"
+                       ng-class="{'fa-caret-down':pagingParams.asc, 'fa-caret-up':!pagingParams.asc}"></i>
+                </span>
+            </th>
+            <th class="entry-table-header">
+                <span ng-click="sort('name')">Label
+                    <i class="fa" ng-show="pagingParams.sort == 'name'"
+                       ng-class="{'fa-caret-down':pagingParams.asc, 'fa-caret-up':!pagingParams.asc}"></i>
+                </span>
+            </th>
+            <th style="width: 75px; text-align: right" class="entry-table-header">
+                <span ng-click="sort('locations[0].genbankStart')">Start
+                    <i class="fa" ng-show="pagingParams.sort == 'locations[0].genbankStart'"
+                       ng-class="{'fa-caret-down':pagingParams.asc, 'fa-caret-up':!pagingParams.asc}"></i>
+                </span>
+            </th>
+            <th style="width: 100px; text-align: center" class="entry-table-header">
+                <span ng-click="sort('length')">Length
+                <i class="fa" ng-show="pagingParams.sort == 'length'"
+                   ng-class="{'fa-caret-down':pagingParams.asc, 'fa-caret-up':!pagingParams.asc}"></i>
+                </span>
+            </th>
+            <th style="width: 75px;" class="entry-table-header">
+                <span ng-click="sort('locations[0].end')">End
+                    <i class="fa" ng-show="pagingParams.sort == 'locations[0].end'"
+                       ng-class="{'fa-caret-down':pagingParams.asc, 'fa-caret-up':!pagingParams.asc}"></i>
+                </span>
+            </th>
+            <th width="20px" style="padding: 4px; text-align: center">
+                <i class="fa font-11em"
+                   ng-class="{'fa-square-o': !allSelected, 'fa-check-square-o': allSelected}"
+                   ng-click="selectAll()"></i>
+            </th>
+        </tr>
+        </thead>
+        <tr ng-repeat="feature in annotations.features | orderBy:pagingParams.sort:!pagingParams.asc | startFrom:pagingParams.currentPage*pagingParams.pageSize | limitTo:pagingParams.pageSize ">
+            <td class="table-row-index">{{(pagingParams.currentPage*pagingParams.pageSize) + $index + 1 | number}}</td>
+            <td class="font-85em">{{feature.type}}</td>
+            <td class="font-85em" style="vertical-align: middle">
+                {{feature.name}}
+                <i ng-click="showEntryDetails(feature, $index)" style="opacity: 0.7"
+                   class="pull-right small">
+                    <ng-pluralize count="feature.entries.length"
+                                  when="{
+                                  '1': '1 entry',
+                                  'other':'{} entries'}"></ng-pluralize>
+                </i>
+            </td>
+            <td style="vertical-align:middle">
+                <span class="small text-muted pull-right">{{feature.locations[0].genbankStart | number}}</span>
+            </td>
+            <td ng-init="setClassName(feature)" style="vertical-align:middle">
+                <div style="width: 80px; font-family: tahoma, Arial, sans-serif" ng-style="getBgStyle(feature)"
+                     ng-class="[feature.className, {'reverse-strand': feature.strand == -1, 'forward-strand':feature.strand == 1}]">
+                    {{feature.length}} bps
+                </div>
+            </td>
+            <td style="vertical-align:middle">
+                <div class="small text-muted">{{feature.locations[0].end | number}}</div>
+            </td>
+            <td style="text-align: right">
+                <i class="fa fa-fw font-11em"
+                   ng-class="{'fa-square-o': !feature.selected && !allSelected, 'fa-check-square-o': feature.selected || allSelected}"
+                   ng-click="checkFeature(feature)"></i></td>
+        </tr>
+    </table>
+
+    <div ng-if="annotations && annotations.features.length > 0" class="row">
+        <div class="col-sm-10">
+            <button type="button" class="btn btn-sm btn-default" ng-disabled="pagingParams.currentPage == 0"
+                    style="padding: 2px 4px" ng-click="pagingParams.currentPage=pagingParams.currentPage-1">
+                <i class="fa fa-fw fa-chevron-left"></i>
+            </button>
+            <b class="font-90em">{{pagingParams.currentPage+1}} / {{pagingParams.numberOfPages}}</b>
+            <button type="button" class="btn btn-sm btn-default" style="padding: 2px 4px"
+                    ng-disabled="pagingParams.currentPage >= pagingParams.resultCount/pagingParams.pageSize - 1"
+                    ng-click="pagingParams.currentPage=pagingParams.currentPage+1">
+                <i class="fa fa-fw fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="pull-right col-sm-2" style="text-align: right">
+            <small class="text-muted">{{selectedFeatures.length}} selected</small>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <small class="text-muted pull-left">Show: <select ng-change="fetchAnnotations()" ng-model="options.selection"
+                                                      ng-options="opt.display for opt in options.values"></select>
+    </small>
+
+    <div class="pull-left red" ng-if="errorSavingAnnotations && !savingAnnotations">
+        <i class="fa fa-fw fa-exclamation-triangle red"></i> Server error saving annotations
+    </div>
+
+    <div ng-if="!savingAnnotations">
+        <button class="btn btn-default btn-sm" ng-click="$dismiss()">Close</button>
+        <button ng-show="part.canEdit" type="button" ng-disabled="!selectedFeatures.length" ng-click="saveAnnotations()"
+                class="btn btn-sm btn-primary">Save
+        </button>
+    </div>
+
+    <div ng-if="savingAnnotations">
+        <img src="img/loader-mini.gif"> Saving annotations&hellip;
+    </div>
+</div>

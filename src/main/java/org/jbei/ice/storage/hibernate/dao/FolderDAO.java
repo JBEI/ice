@@ -6,10 +6,10 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.*;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.common.PageParameters;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.*;
@@ -116,11 +116,19 @@ public class FolderDAO extends HibernateRepository<Folder> {
         return criteria.setProjection(Projections.property("entry.id")).list();
     }
 
-    public List<Entry> retrieveFolderContents(long folderId, ColumnField sort, boolean asc, int start, int limit,
-                                              String filterText, boolean visibleOnly) {
+    /**
+     * Retrieves list of entries that conforms to the parameters
+     *
+     * @param folderId       unique identifier for folder whose entries are being retrieved
+     * @param pageParameters paging params
+     * @param visibleOnly    whether to only include entries with "OK" visibility
+     * @return list of found entries
+     * @throws DAOException on HibernateException retrieving
+     */
+    public List<Entry> retrieveFolderContents(long folderId, PageParameters pageParameters, boolean visibleOnly) {
         try {
             String sortString;
-            switch (sort) {
+            switch (pageParameters.getSortField()) {
                 default:
                 case CREATED:
                     sortString = "id";
@@ -149,11 +157,11 @@ public class FolderDAO extends HibernateRepository<Folder> {
             criteria.createAlias("folders", "folder");
             criteria.add(Restrictions.eq("folder.id", folderId));
 
-            addFilter(criteria, filterText);
+            addFilter(criteria, pageParameters.getFilter());
 
-            criteria.addOrder(asc ? Order.asc(sortString) : Order.desc(sortString));
-            criteria.setMaxResults(limit);
-            criteria.setFirstResult(start);
+            criteria.addOrder(pageParameters.isAscending() ? Order.asc(sortString) : Order.desc(sortString));
+            criteria.setMaxResults(pageParameters.getLimit());
+            criteria.setFirstResult(pageParameters.getOffset());
             return criteria.list();
         } catch (HibernateException he) {
             Logger.error(he);

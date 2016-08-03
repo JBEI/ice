@@ -91,18 +91,7 @@ public class SampleService {
                         currentStorage = storageDAO.create(currentStorage);
                     }
 
-                    while (mainLocation.getChild() != null) {
-                        StorageLocation child = mainLocation.getChild();
-                        Storage childStorage = storageDAO.get(child.getId());
-                        if (childStorage == null) {
-                            childStorage = createStorage(depositor, child.getDisplay(), child.getType());
-                            childStorage.setParent(currentStorage);
-                            childStorage = storageDAO.create(childStorage);
-                        }
-
-                        currentStorage = childStorage;
-                        mainLocation = child;
-                    }
+                    currentStorage = createChildrenStorage(mainLocation, currentStorage, depositor);
             }
             if (currentStorage == null)
                 return null;
@@ -156,16 +145,6 @@ public class SampleService {
                 }
 
                 // check tube
-                // check if there is an existing sample with barcode
-                String barcode = tube.getDisplay();
-                Storage existing = storageDAO.retrieveStorageTube(barcode);
-                if (existing != null) {
-                    ArrayList<Sample> samples = dao.getSamplesByStorage(existing);
-                    if (samples != null && !samples.isEmpty()) {
-                        Logger.error("Barcode \"" + barcode + "\" already has a sample associated with it");
-                        return null;
-                    }
-                }
             }
         }
 
@@ -176,18 +155,7 @@ public class SampleService {
             currentStorage = storageDAO.create(currentStorage);
         }
 
-        while (mainLocation.getChild() != null) {
-            StorageLocation child = mainLocation.getChild();
-            Storage childStorage = storageDAO.get(child.getId());
-            if (childStorage == null) {
-                childStorage = createStorage(sampleDepositor, child.getDisplay(), child.getType());
-                childStorage.setParent(currentStorage);
-                childStorage = storageDAO.create(childStorage);
-            }
-
-            currentStorage = childStorage;
-            mainLocation = child;
-        }
+        currentStorage = createChildrenStorage(mainLocation, currentStorage, sampleDepositor);
 
         return currentStorage;
     }
@@ -207,9 +175,21 @@ public class SampleService {
 
         // create storage locations
         Storage currentStorage = createStorage(depositor, shelf.getDisplay(), shelf.getType());
-        currentStorage = storageDAO.create(currentStorage);
 
-        StorageLocation currentLocation = shelf;
+        currentStorage = createChildrenStorage(shelf, storageDAO.create(currentStorage), depositor);
+
+        return currentStorage;
+    }
+
+    /**
+     * Creates storage for all children of given parent storage
+     *
+     * @param currentLocation storage location
+     * @param currentStorage
+     * @param depositor userID - unique identifier for user performing action
+     * @return updated storage
+     */
+    protected Storage createChildrenStorage(StorageLocation currentLocation, Storage currentStorage, String depositor) {
         while (currentLocation.getChild() != null) {
             StorageLocation child = currentLocation.getChild();
             Storage childStorage = storageDAO.get(child.getId());
@@ -225,6 +205,7 @@ public class SampleService {
 
         return currentStorage;
     }
+
 
     public ArrayList<PartSample> retrieveEntrySamples(String userId, long entryId) {
         Entry entry = DAOFactory.getEntryDAO().get(entryId);

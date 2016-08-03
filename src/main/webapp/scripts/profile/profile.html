@@ -1,22 +1,22 @@
 <div ng-controller="ProfileController">
     <div class="entry_general_header_td" style="height: 60px">
         <div class="col-md-12">
-            <h4><strong style="color: #888;">PROFILE</strong>
+            <h4><strong style="color: #888">PROFILE</strong>
                 <strong>{{profile.firstName}} {{profile.lastName}}</strong><br>
                 <small class="font-65em">{{profile.institution || 'No institution information provided'}}</small>
             </h4>
         </div>
     </div>
 
-    <div class="col-md-10" style="padding-right: 0; padding-left: 0; height: 840px">
+    <div class="col-md-11" style="padding-right: 0; padding-left: 0;">
         <ng-include src="profileOptionSelection"></ng-include>
     </div>
 
-    <div class="col-sm-2" style="padding-right: 0">
+    <div class="col-sm-1" style="padding-right: 0; min-height: 530px">
         <table class="profile_menu pull-right" cellpadding="0" cellspacing="0" style="text-align: center; width: 90px">
             <tr ng-repeat="menuOption in profileMenuOptions" ng-if="menuOption.open || (profile.email === user.email)">
                 <td ng-class="{selected:menuOption.selected}" ng-click="showSelection($index)">
-                    <i class="fa fa-fw {{menuOption.icon}}" style="font-size: 25px;margin-bottom: 6px"></i>
+                    <i class="fa fa-fw {{menuOption.icon}}" style="font-size: 25px; margin-bottom: 6px"></i>
 
                     <p class="font-70em" style="line-height: 100%"><b>{{menuOption.display | uppercase}}</b></p>
                 </td>

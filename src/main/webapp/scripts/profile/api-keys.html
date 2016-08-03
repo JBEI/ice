@@ -1,23 +1,27 @@
 <div ng-controller="ApiKeysController">
     <div class="pad_top">
-        <button type="button" class="ice-button" ng-click="openApiKeyRequest()">Request Key</button>
+        <button type="button" class="ice-button" ng-click="openApiKeyRequest()">Create Key</button>
     </div>
 
     <div class="pad_top" ng-if="!apiKeys || !apiKeys.length">
-        No api keys created
+        <i class="text-muted">You have not created any api keys</i>
     </div>
 
     <div class="pad_top" ng-if="apiKeys && apiKeys.length">
-        <table class="table table-border-bottom table-hover">
+        <table class="table table-border-bottom table-hover" style="width: 98%">
             <thead>
             <tr>
-                <th>ClientId</th>
-                <th>Creation Time</th>
+                <th>&nbsp;</th>
+                <th class="entry-table-header">Client Id</th>
+                <th class="entry-table-header">Creation Time</th>
                 <th></th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="apiKey in apiKeys">
+                <td class="font-14em table-row-index">
+                    <b>{{$index+1}}</b>
+                </td>
                 <td>{{apiKey.clientId}}</td>
                 <td>{{apiKey.creationTime | date:'MMM d, yyyy hh:mm a'}}</td>
                 <td><i class="fa fa-trash-o delete_icon" ng-click="deleteAPIKey(apiKey)"></i></td>

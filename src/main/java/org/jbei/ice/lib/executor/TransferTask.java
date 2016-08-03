@@ -36,8 +36,8 @@ public class TransferTask extends Task {
         if (account.getType() != AccountType.ADMIN)
             return;
 
-        Entries retriever = new Entries();
-        List<Long> entries = retriever.getEntriesFromSelectionContext(account.getEmail(), entrySelection);
+        Entries retriever = new Entries(account.getEmail());
+        List<Long> entries = retriever.getEntriesFromSelectionContext(entrySelection);
         Logger.info(userId + ": requesting transfer to " + remoteId);
         List<PartData> dataList = transfer.getPartsForTransfer(entries);
         List<Long> remoteIds = transfer.transferEntries(remoteId, dataList);

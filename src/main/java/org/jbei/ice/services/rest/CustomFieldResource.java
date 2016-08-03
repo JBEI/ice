@@ -23,13 +23,12 @@ public class CustomFieldResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response getPartByCustomFields(
-            @Context UriInfo uriInfo,
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sid) {
+            @Context UriInfo uriInfo) {
         MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
         if (queryParams.isEmpty())
             return super.respond(new ArrayList<>());
 
-        String userId = getUserId(sid);
+        String userId = requireUserId();
 
         List<CustomField> fieldList = new ArrayList<>();
         for (String key : queryParams.keySet()) {
@@ -52,18 +51,15 @@ public class CustomFieldResource extends RestResource {
      * </ol>
      * If both are set, they must have the same value
      *
-     * @param sid         unique session identifier for using performing action
      * @param partId      optional (as long as value is set in the custom field object) entry part identifier
      * @param customField data for custom fields
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response create(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sid,
-            @QueryParam(value = "partId") long partId,
-            CustomField customField) {
-        String userId = getUserId(sid);
+    public Response create(@QueryParam(value = "partId") long partId,
+                           CustomField customField) {
+        String userId = requireUserId();
         if (partId > 0 && customField.getPartId() > 0 && partId != customField.getPartId()) {
             throw new WebApplicationException("Inconsistent part Ids", Response.Status.BAD_REQUEST);
         }
@@ -80,20 +76,15 @@ public class CustomFieldResource extends RestResource {
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response get(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sid,
-            @PathParam(value = "id") long id) {
-        String userId = getUserId(sid);
+    public Response get(@PathParam(value = "id") long id) {
+        String userId = requireUserId();
         return super.respond(fields.getField(userId, id));
     }
 
     @GET
-    // todo : paging params
     @Produces(MediaType.APPLICATION_JSON)
-    public Response list(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sid,
-            @QueryParam(value = "partId") long partId) {
-        String userId = getUserId(sid);
+    public Response list(@QueryParam(value = "partId") long partId) {
+        String userId = requireUserId();
         List<CustomField> result = fields.getFieldsForPart(userId, partId);
         return super.respond(result);
     }
@@ -102,19 +93,17 @@ public class CustomFieldResource extends RestResource {
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response update(@HeaderParam(value = "X-ICE-Authentication-SessionId") String sid,
-                           @PathParam(value = "id") long id,
+    public Response update(@PathParam(value = "id") long id,
                            CustomField customField) {
-        String userId = getUserId(sid);
+        String userId = requireUserId();
         return respond(fields.updateField(userId, id, customField));
     }
 
     @DELETE
     @Path("/{id}")
     public Response delete(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String sid,
             @PathParam(value = "id") long id) {
-        String userId = getUserId(sid);
+        String userId = requireUserId();
         boolean success = fields.deleteField(userId, id);
         return super.respond(success);
     }

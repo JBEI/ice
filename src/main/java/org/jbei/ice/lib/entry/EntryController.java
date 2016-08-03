@@ -5,23 +5,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.account.PreferencesController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.AuditType;
 import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.bulkupload.EntryField;
 import org.jbei.ice.lib.dto.comment.UserComment;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.PartStatistics;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.sample.PartSample;
-import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
@@ -37,14 +29,13 @@ import java.util.zip.ZipInputStream;
 /**
  * ABI to manipulate {@link Entry}s.
  *
- * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
+ * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar, Elena Aravina
  */
-public class EntryController {
+public class EntryController extends HasEntry {
 
     private EntryDAO dao;
     private CommentDAO commentDAO;
     private SequenceDAO sequenceDAO;
-    private AuditDAO auditDAO;
     private PermissionsController permissionsController;
     private AccountController accountController;
     private final EntryAuthorization authorization;
@@ -58,7 +49,6 @@ public class EntryController {
         accountController = new AccountController();
         authorization = new EntryAuthorization();
         sequenceDAO = DAOFactory.getSequenceDAO();
-        auditDAO = DAOFactory.getAuditDAO();
     }
 
     /**
@@ -72,9 +62,13 @@ public class EntryController {
      * @param partId unique identifier for part being updated. This overrides the id in the partData object
      * @param part   information to update part with
      * @return unique identifier for part that was updated
+     * @throws IllegalArgumentException if the entry associated with the partId cannot be located
      */
     public long updatePart(String userId, long partId, PartData part) {
         Entry existing = dao.get(partId);
+        if (existing == null)
+            throw new IllegalArgumentException();
+
         authorization.expectWrite(userId, existing);
 
         Entry entry = InfoToModelFactory.updateEntryField(part, existing);
@@ -138,24 +132,6 @@ public class EntryController {
             return null;
 
         return ModelToInfoFactory.createTipView(entry);
-    }
-
-    // contact the remote partner to get the tool tip
-    public PartData retrieveRemoteToolTip(String userId, long folderId, long partId) {
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        Folder folder = DAOFactory.getFolderDAO().get(folderId);
-
-        RemoteAccessModel remoteAccessModel = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
-        if (remoteAccessModel == null) {
-            Logger.error("Could not retrieve remote access for folder " + folder.getId());
-            return null;
-        }
-
-        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
-        String url = remotePartner.getUrl();
-        String token = remoteAccessModel.getToken();
-        RemoteContact remoteContact = new RemoteContact();
-        return remoteContact.getToolTipDetails(url, userId, partId, token, remotePartner.getApiKey());
     }
 
     public ArrayList<UserComment> retrieveEntryComments(String userId, long partId) {
@@ -271,7 +247,10 @@ public class EntryController {
     }
 
     /**
-     * Moves the specified list of entries to the deleted folder
+     * Moves the specified list of entries to the deleted folder.
+     * If an already deleted entry (list of entries) is being deleted then
+     * the status "permanently deleted" is assigned, and these entries
+     * become invisible to everyone.
      *
      * @param userId unique identifier for user making the request. Must have write access privileges on the
      *               entries in the list
@@ -291,7 +270,12 @@ public class EntryController {
         // add to bin
         try {
             for (Entry entry : toTrash) {
-                entry.setVisibility(Visibility.DELETED.getValue());
+                if (entry.getVisibility() == Visibility.DELETED.getValue()) {
+                    entry.setVisibility(Visibility.PERMANENTLY_DELETED.getValue());
+                } else {
+                    entry.setVisibility(Visibility.DELETED.getValue());
+                }
+
                 dao.update(entry);
             }
         } catch (DAOException de) {
@@ -302,57 +286,8 @@ public class EntryController {
         return true;
     }
 
-    protected Entry getEntry(String id) {
-        Entry entry = null;
-
-        // check if numeric
-        try {
-            entry = dao.get(Long.decode(id));
-        } catch (NumberFormatException nfe) {
-            // fine to ignore
-        }
-
-        // check for part Id
-        if (entry == null)
-            entry = dao.getByPartNumber(id);
-
-        // check for global unique id
-        if (entry == null)
-            entry = dao.getByRecordId(id);
-
-        // get by unique name
-        if (entry == null) {
-            try {
-                return dao.getByUniqueName(id);
-            } catch (DAOException de) {
-                // fine to ignore
-                return null;
-            }
-        }
-
-        return entry;
-    }
-
-    public PartData retrieveRemoteEntryDetails(String userId, long folderId, long partId) {
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        Folder folder = DAOFactory.getFolderDAO().get(folderId);
-
-        RemoteAccessModel remoteAccessModel = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
-        if (remoteAccessModel == null) {
-            Logger.error("Could not retrieve remote access for folder " + folder.getId());
-            return null;
-        }
-
-        RemotePartner remotePartner = remoteAccessModel.getClientModel().getRemotePartner();
-        String url = remotePartner.getUrl();
-        String token = remoteAccessModel.getToken();
-        long remoteFolderId = Long.decode(remoteAccessModel.getIdentifier());
-        RemoteContact remoteContact = new RemoteContact();
-        return remoteContact.getRemoteEntry(url, userId, partId, remoteFolderId, token, remotePartner.getApiKey());
-    }
-
-    public PartData getRemoteRequestedEntry(String remoteUserId, String token, String entryId,
-                                            long folderId, RegistryPartner requestingPartner) {
+    public PartData getRequestedEntry(String remoteUserId, String token, String entryId,
+                                      long folderId, RegistryPartner requestingPartner) {
         Entry entry = getEntry(entryId);
         if (entry == null)
             return null;
@@ -380,7 +315,7 @@ public class EntryController {
 
         // validate access token
         TokenHash tokenHash = new TokenHash();
-        String secret = tokenHash.encryptPassword(remotePartner.getUrl() + remoteUserId, token);
+        String secret = tokenHash.encrypt(folderId + remotePartner.getUrl() + remoteUserId, token);
         if (!secret.equals(shareModel.getSecret())) {
             throw new PermissionException("Secret does not match");
         }
@@ -404,74 +339,27 @@ public class EntryController {
         return partData;
     }
 
-    /**
-     * Retrieves and sets the default values for the entry. Some of these values (e.g. PI, and Funding Source)
-     * are set by individual users as part of their personal preferences
-     *
-     * @param userId Unique identifier for user requesting the values.
-     * @param type   entry type
-     * @return PartData object with the retrieve part defaults
-     */
-    public PartData getPartDefaults(String userId, EntryType type) {
-        PartData partData = new PartData(type);
-        PreferencesController preferencesController = new PreferencesController();
-
-        // pi defaults
-        String value = preferencesController.getPreferenceValue(userId, PreferenceKey.PRINCIPAL_INVESTIGATOR.name());
-        if (value != null) {
-            Account piAccount = accountController.getByEmail(value);
-            if (piAccount == null) {
-                partData.setPrincipalInvestigator(value);
-            } else {
-                partData.setPrincipalInvestigator(piAccount.getFullName());
-                partData.setPrincipalInvestigatorEmail(piAccount.getEmail());
-                partData.setPrincipalInvestigatorId(piAccount.getId());
-            }
-        }
-
-        // funding source defaults
-        value = preferencesController.getPreferenceValue(userId, PreferenceKey.FUNDING_SOURCE.name());
-        if (value != null) {
-            partData.setFundingSource(value);
-        }
-
-        // owner and creator details
-        Account account = accountController.getByEmail(userId);
-        if (account != null) {
-            partData.setOwner(account.getFullName());
-            partData.setOwnerEmail(account.getEmail());
-            partData.setCreator(partData.getOwner());
-            partData.setCreatorEmail(partData.getOwnerEmail());
-        }
-
-        // set the entry type defaults
-        return EntryUtil.setPartDefaults(partData);
-    }
-
     protected PartData retrieveEntryDetails(String userId, Entry entry) throws PermissionException {
         PartData partData = ModelToInfoFactory.getInfo(entry);
         if (partData == null)
             return null;
-        boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
 
+        // retrieve sequence information
+        boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
         partData.setHasSequence(hasSequence);
         boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
         partData.setHasOriginalSequence(hasOriginalSequence);
+        String sequenceString = sequenceDAO.getSequenceString(entry);
+        if (StringUtils.isEmpty(sequenceString))
+            partData.setBasePairCount(0);
+        else
+            partData.setBasePairCount(sequenceString.trim().length());
 
         // create audit event if not owner
         // todo : remote access check
         if (userId != null && authorization.getOwner(entry) != null && !authorization.getOwner(entry).equalsIgnoreCase(userId)) {
-            try {
-                Audit audit = new Audit();
-                audit.setAction(AuditType.READ.getAbbrev());
-                audit.setEntry(entry);
-                audit.setUserId(userId);
-                audit.setLocalUser(true);
-                audit.setTime(new Date(System.currentTimeMillis()));
-                auditDAO.create(audit);
-            } catch (Exception e) {
-                Logger.error(e);
-            }
+            EntryHistory entryHistory = new EntryHistory(userId, entry.getId());
+            entryHistory.add();
         }
 
         // retrieve more information about linked entries if any (default only contains id)
@@ -483,10 +371,11 @@ public class EntryController {
                     continue;
 
                 link = ModelToInfoFactory.createTipView(linkedEntry);
-                Sequence sequence = sequenceDAO.getByEntry(linkedEntry);
-                if (sequence != null) {
-                    link.setBasePairCount(sequence.getSequence().length());
-                    link.setFeatureCount(sequence.getSequenceFeatures().size());
+                String linkedSequenceString = sequenceDAO.getSequenceString(linkedEntry);
+
+                if (!StringUtils.isEmpty(linkedSequenceString)) {
+                    link.setBasePairCount(linkedSequenceString.length());
+                    link.setFeatureCount(DAOFactory.getSequenceFeatureDAO().getFeatureCount(linkedEntry));
                 }
 
                 newLinks.add(link);

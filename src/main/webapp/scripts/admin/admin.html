@@ -1,18 +1,18 @@
 <div ng-controller="AdminController">
     <div class=" entry_general_header_td" style="height: 60px">
         <div class="col-md-12">
-            <h4 style="text-transform: uppercase;"><strong style="color: #888;">Administration</strong>
-                <strong style="text-transform: capitalize;">{{selectedDisplay}}</strong><br>
-                <small class="font-65em">With great power...</small>
+            <h4><strong style="color: #888; text-transform: uppercase;">Administration</strong>
+                <strong style="text-transform: capitalize;">{{selectedOption.display}}</strong><br>
+                <small class="font-75em">{{selectedOption.description || 'With great power...'}}</small>
             </h4>
         </div>
     </div>
 
-    <div class="col-md-10" style="padding-right: 0; padding-left: 0; height: 622px">
+    <div class="col-md-11" style="padding-right: 0; padding-left: 0;">
         <ng-include src="adminOptionSelection"></ng-include>
     </div>
 
-    <div class="col-sm-2" style="padding-right: 0">
+    <div class="col-sm-1" style="padding-right: 0">
         <table class="profile_menu pull-right" cellpadding="0" cellspacing="0" style="text-align: center; width: 90px">
             <tr ng-repeat="menuOption in adminMenuOptions">
                 <td ng-class="{selected:menuOption.selected}" ng-click="showSelection($index)">

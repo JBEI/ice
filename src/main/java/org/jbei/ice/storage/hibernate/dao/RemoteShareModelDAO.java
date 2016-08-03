@@ -7,6 +7,8 @@ import org.jbei.ice.storage.model.Folder;
 import org.jbei.ice.storage.model.RemotePartner;
 import org.jbei.ice.storage.model.RemoteShareModel;
 
+import java.util.List;
+
 /**
  * @author Hector Plahar
  */
@@ -26,5 +28,12 @@ public class RemoteShareModelDAO extends HibernateRepository<RemoteShareModel> {
                 .add(Restrictions.eq("client.remotePartner", remotePartner))
                 .add(Restrictions.eq("client.email", userId))
                 .uniqueResult();
+    }
+
+    public List<RemoteShareModel> getByFolder(Folder folder) throws DAOException {
+        return currentSession().createCriteria(RemoteShareModel.class)
+                .createAlias("permission", "permission")
+                .add(Restrictions.eq("permission.folder", folder))
+                .list();
     }
 }

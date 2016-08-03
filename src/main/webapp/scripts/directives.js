@@ -257,9 +257,16 @@ iceDirectives.directive("iceVectorViewer", function ($cookieStore) {
         var entryId;
 
         function generateObject() {
-            element.html('<object id="VectorViewer" width="100%" height="100%" data="swf/vv/VectorViewer.swf?entryId='
-                + entryId + '&amp;sessionId=' + sid + '"> \
-                              </object>');
+            var search = $location.search();
+            var s = "<object id='VectorViewer' width='100%' height='100%' data='swf/vv/VectorViewer.swf?entryId="
+                + entryId + "&amp;sessionId=" + sid;
+
+            if (search && search.folderId) {
+                s += "&folderId=" + search.folderId + "&amp;remote=true";
+            }
+            s += "'></object>";
+
+            element.html(s);
         }
 
         scope.$watch('entry', function (value) {

@@ -5,20 +5,12 @@ import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.parsers.abi.ABITrace;
 
 /**
- * Parse ABI sequence trace file by wrappying BioJava.
+ * Parse ABI sequence trace file by wrapping BioJava.
  *
  * @author Zinovii Dmytriv, Timothy Ham
  */
-public class ABIParser extends AbstractParser {
+public class ABIParser {
 
-    private static final String ABI_PARSER = "ABI";
-
-    @Override
-    public String getName() {
-        return ABI_PARSER;
-    }
-
-    @Override
     public DNASequence parse(byte[] bytes) throws InvalidFormatParserException {
         DNASequence DNASequence = null;
 
@@ -33,10 +25,5 @@ public class ABIParser extends AbstractParser {
         }
 
         return DNASequence;
-    }
-
-    @Override
-    public DNASequence parse(String textSequence) throws InvalidFormatParserException {
-        throw new NoSuchMethodError("ABI file can't be presented as string!");
     }
 }

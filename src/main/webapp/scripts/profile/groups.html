@@ -3,36 +3,45 @@
         <button type="button" ng-click="openCreateGroupModal()" class="ice-button">Create Private Group</button>
     </div>
 
-    <table class="table table-hover margin-top-10 table-border-bottom">
+    <div class="pad_top" ng-if="!userGroups.data || !userGroups.data.length">
+        <i class="text-muted">You have not created any private groups</i>
+    </div>
+
+    <table class="table table-hover pad_top table-border-bottom" ng-if="userGroups.data.length"
+           style="width: 98%;">
         <thead>
         <tr>
             <th>&nbsp;</th>
-            <th>Label</th>
-            <th>Members</th>
-            <th>Created</th>
+            <th style="width: 360px">
+                <span class="entry-table-header">Label</span>
+            </th>
+            <th style="width:180px; white-space:nowrap">
+                <span class="entry-table-header">Members</span>
+            </th>
+            <th>
+                <span class="entry-table-header">Created</span>
+            </th>
             <th></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="group in userGroups.data">
-            <td style="vertical-align: middle; line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"
-                class="font-14em">
+            <td class="font-14em table-row-index">
                 <b>{{$index+1}}</b>
             </td>
             <td>{{group.label}}
                 <br>
                 <i class="small text-muted">{{group.description}}</i>
             </td>
-            <td style="width:180px; white-space:nowrap; vertical-align: middle">
-                    <span class="label"
-                          ng-class="{
-                          'label-primary': group.memberCount,
-                          'label-default': group.memberCount == 0}">{{group.memberCount | number}}
-                    </span>
+            <td style="vertical-align: middle">
+                <span class="label"
+                      ng-class="{
+                      'label-primary': group.memberCount,
+                      'label-default': group.memberCount == 0}">{{group.memberCount | number}}
+                </span>
             </td>
-            <td style="width:180px">
-                {{group.ownerEmail}} <br>
-                <small class="text-muted">{{group.creationTime | date:'MMM d, yyyy'}}</small>
+            <td style="width:180px; vertical-align: middle">
+                <small class="text-muted">{{group.creationTime | date:'MMM d, yyyy, h:mm a'}}</small>
             </td>
             <td style="width:150px; white-space:nowrap; vertical-align: middle" ng-if="user.email==group.ownerEmail">
                 <div ng-if="!group.confirmDeleteGroup">
@@ -55,21 +64,5 @@
         </tr>
         </tbody>
     </table>
-
-    <!--<div class="col-md-5" style="padding-left: 0">-->
-    <!--<uib-pagination total-items="userGroups.resultCount" ng-change="groupListPageChanged()"-->
-    <!--ng-model="privateGroupsParams.currentPage"-->
-    <!--max-size="privateGroupsParams.maxSize" class="pagination-sm"-->
-    <!--items-per-page="privateGroupsParams.limit"-->
-    <!--boundary-links="true"></uib-pagination>-->
-    <!--</div>-->
-
-    <!--<div class="col-md-7" style="margin-top: 25px;">-->
-    <!--<strong class="small">-->
-    <!--<i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>-->
-    <!--{{pageCounts(adminGroupsPagingParams.currentPage, adminGroupsPagingParams.available)}}-->
-    <!--</strong>-->
-    <!--</div>-->
-    <!--</div>-->
 </div>
 

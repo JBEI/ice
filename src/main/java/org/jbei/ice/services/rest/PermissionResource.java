@@ -4,7 +4,10 @@ import org.jbei.ice.lib.access.RemoteAccess;
 import org.jbei.ice.lib.dto.access.RemoteAccessPermission;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -25,16 +28,8 @@ public class PermissionResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addRemoteAccess(RemoteAccessPermission accessPermission) {
-        RegistryPartner partner = verifyWebPartner();
+        RegistryPartner partner = requireWebPartner();
         RemoteAccess remoteAccess = new RemoteAccess();
-        remoteAccess.add(partner, accessPermission);
-        return super.respond(true);
-    }
-
-    @DELETE
-    @Path("/remote")
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response deleteRemoteAccess() {
-        return null;
+        return super.respond(remoteAccess.add(partner, accessPermission));
     }
 }

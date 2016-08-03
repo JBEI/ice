@@ -23,10 +23,6 @@ import java.util.Map;
 public class IceRestClient extends RestClient {
 
     private static IceRestClient INSTANCE = new IceRestClient();
-    //    protected final String API_KEY_TOKEN = "X-ICE-API-Token";               // token for validation
-    protected final String API_KEY_CLIENT_ID = "X-ICE-API-Token-Client";    // client id (also url)
-    protected final String WOR_API_KEY_TOKEN = "X-ICE-WOR-Token";           // web of registries api key
-
     private Client client;
 
     public static IceRestClient getInstance() {
@@ -40,11 +36,6 @@ public class IceRestClient extends RestClient {
         clientConfig.register(ArrayDataJSONHandler.class);
         clientConfig.register(MultiPartFeature.class);
         client = ClientBuilder.newClient(clientConfig);
-    }
-
-    public <T> T get(String url, String path, Class<T> clazz) {
-        WebTarget target = client.target("https://" + url).path(path);
-        return target.request(MediaType.APPLICATION_JSON_TYPE).buildGet().invoke(clazz);
     }
 
     @Override
@@ -169,11 +160,11 @@ public class IceRestClient extends RestClient {
     }
 
     protected void setHeaders(Invocation.Builder invocationBuilder, String token) {
-        invocationBuilder.header(WOR_API_KEY_TOKEN, token);
+        invocationBuilder.header(Headers.WOR_API_KEY_TOKEN, token);
 
         String clientId = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
         if (!StringUtils.isEmpty(clientId)) {
-            invocationBuilder.header(API_KEY_CLIENT_ID, clientId);
+            invocationBuilder.header(Headers.API_KEY_CLIENT_ID, clientId);
         }
     }
 }

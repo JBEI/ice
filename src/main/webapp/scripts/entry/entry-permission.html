@@ -10,11 +10,11 @@
                         <div ng-click="activateTab(pane)"
                              ng-class="{permission_tab_active:pane.selected, permission_tab_inactive:!pane.selected}">
                             {{pane.title}}
-                <span style="float: right">
-                    <div ng-show="pane.selected" class="edit_icon font-12em">
-                        <i ng-click="showAddPermissionOptionsClick()" class="fa fa-plus-circle"></i></div>
-                    <div ng-hide="pane.selected" class="edit_icon font-12em">{{pane.count || 0}}</div>
-                </span>
+                            <span style="float: right">
+                                <div ng-show="pane.selected" class="edit_icon font-12em">
+                                    <i ng-click="showAddPermissionOptionsClick()" class="fa fa-plus-circle"></i></div>
+                                <div ng-hide="pane.selected" class="edit_icon font-12em">{{pane.count || 0}}</div>
+                            </span>
                         </div>
                     </td>
                 </tr>
@@ -31,22 +31,40 @@
         <td>
             <!--user select filter-->
             <div ng-show="showPermissionInput">
+                <div class="btn-group" uib-dropdown>
+                    <button class="btn btn-xs btn-default" uib-dropdown-toggle>
+                        <i class="fa fa-fw"
+                           ng-class="{'fa-user dark-gray': selectedArticle.type == 'ACCOUNT',
+                           'fa-group dark-orange': selectedArticle.type == 'GROUP'}"></i>
+                        <span class="caret"></span>
+                    </button>
+
+                    <ul uib-dropdown-menu>
+                        <li ng-if="selectedArticle.type == 'GROUP'">
+                            <a href="#" ng-click="setPermissionArticle('ACCOUNT')"><i
+                                    class="fa fa-fw fa-user dark-gray"></i> Account</a></li>
+                        <li ng-if="selectedArticle.type == 'ACCOUNT'">
+                            <a href="#" ng-click="setPermissionArticle('GROUP')"><i
+                                    class="fa fa-fw fa-group dark-orange"></i> Group</a></li>
+                    </ul>
+                </div>
+
                 <input type="text" placeholder="Enter name or email" ng-model="userFilterInput" ng-change="filter()"
-                       style="width: 180px; font-size: 0.80em">
+                       style="width: 136px; font-size: 0.80em">
 
                 <div style="overflow: auto; height: 80px;" class="font-75em">
 
-                    <div ng-if="!filtering && !accessPermissions" style="opacity: 0.7; padding: 3px 0 3px 0">
+                    <div ng-if="!filtering && !autoCompleteUsersOrGroups" style="opacity: 0.7; padding: 3px 0 3px 0">
                         <i>No matches found</i>
                     </div>
 
-                    <div ng-repeat="permission in accessPermissions | orderBy:'display'">
-                       <span ng-click="addRemovePermission(permission)" class="cursor_pointer">
+                    <div ng-repeat="userOrGroup in autoCompleteUsersOrGroups">
+                    <span ng-click="addRemovePermission(userOrGroup)" class="cursor_pointer">
                         <i class="fa opacity_hover"
-                           ng-class="{'fa-square-o':!permission.selected, 'fa-check-square-o':permission.selected}"></i>
-                        <i class="fa" ng-class="{'fa-group permission_group':permission.article==='GROUP',
-                        'fa-user permission_user':permission.article==='ACCOUNT'}"></i> {{permission.display}}
-                        </span>
+                           ng-class="{'fa-square-o':!userOrGroup.selected, 'fa-check-square-o':userOrGroup.selected}"></i>
+                        <i class="fa"
+                           ng-class="{'permission_group fa-group': selectedArticle.type==='GROUP', 'permission_user fa-user': selectedArticle.type!='GROUP'}"></i> {{userOrGroup.label}}
+                    </span>
                     </div>
                 </div>
 
@@ -64,22 +82,21 @@
                 <span ng-if="permission.article=='GROUP'"><i class="fa fa-group permission_group"></i> {{permission.display}}</span>
                 <span ng-if="permission.article=='ACCOUNT'"><i class="fa fa-user permission_user"></i> <a
                         ng-href="profile/{{permission.articleId}}">{{permission.display}}</a></span>
-                <i ng-click="deletePermission($index, permission)" style="padding-top: 3px"
+                <i ng-if="permission.canEdit" ng-click="deletePermission($index, permission)" style="padding-top: 3px"
                    class="fa fa-times pull-right delete_icon"></i>
             </div>
             <div ng-if="activePermissions.length == 0">&nbsp;</div>
 
         </td>
     </tr>
-    <tr>
+    <tr ng-if="canSetPublicPermission">
         <td class="permission_footer" ng-if="!entry.publicRead">
             <div class="permission_footer_link" ng-click="enablePublicRead(entry)"><i class="fa fa-globe"></i> Enable
                 Public Read Access
             </div>
         </td>
 
-        <td class="permission_footer" ng-if="entry.publicRead"
-            style="border-left: 0; background-color: #f9f9f9">
+        <td class="permission_footer" ng-if="entry.publicRead" style="border-left: 0; background-color: #f9f9f9">
             <div class="permission_footer_link" ng-click="disablePublicRead(entry)">
                 <i class="fa fa-globe blue"></i> Disable Public Read Access
             </div>

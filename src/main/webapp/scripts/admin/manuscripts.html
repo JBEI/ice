@@ -2,7 +2,7 @@
     <div class="pad_top">
         <button type="button" class="ice-button" ng-click="openManuscriptAddRequest()">Add New Paper</button>
 
-        <span class="pull-right" style="border: 1px solid #ccc">
+        <span class="pull-right" style="border: 1px solid #ccc; margin-right: 12px">
             <i class="fa fa-filter" style="background-color: #d9d9d9; padding: 5px; opacity: 0.7"></i>
             <input type="text" placeHolder="Filter by title" class="font-90em no_border"
                    ng-model="manuscriptsParams.filter"
@@ -16,11 +16,11 @@
     </div>
 
     <div class="pad_top" ng-if="manuscripts.data && manuscripts.data.length">
-        <table class="table table-border-bottom table-hover">
+        <table class="table table-border-bottom table-hover" style="width: 98%">
             <thead>
             <tr>
                 <th>&nbsp;</th>
-                <th>
+                <th style="width: 310px">
                     <span class="entry-table-header" ng-click="sort('title')">Title </span>
                     <i ng-if="manuscriptsParams.sort!=='title'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="manuscriptsParams.sort=='title'" style="font-size: 14px" class="fa opacity_4"
@@ -45,13 +45,13 @@
                        ng-class="{'fa-angle-down':manuscriptsParams.asc==false, 'fa-angle-up':manuscriptsParams.asc==true}"></i>
                 </th>
                 <th></th>
+                <th></th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="manuscript in manuscripts.data">
-                <td style="vertical-align: middle; line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"
-                    class="font-14em">
-                    <b>{{$index+1}}</b>
+                <td class="table-index-label">
+                    <b>{{$index+1 | number}}</b>
                 </td>
                 <td>
                     {{manuscript.title}} <br>
@@ -80,22 +80,29 @@
                 <td style="vertical-align: middle;">
                     <a ng-href="{{manuscript.paragonUrl | externalLink }}" target="_blank">{{manuscript.paragonUrl}}</a>
                 </td>
-                <td style="vertical-align: middle; width: 130px" class="small">
+                <td style="vertical-align: middle; width: 150px" class="small">
                     {{manuscript.creationTime | date:'MMM d, yyyy hh:mm'}}
                 </td>
-                <td style="vertical-align: middle; width: 180px">
-                    <div ng-if="manuscript.deleteRequest">
-                        <i class="fa fa-question-circle dark-orange"></i>
-                        <i>Delete?</i> &nbsp;
-                        <button class="btn-default btn-xs btn" ng-click="manuscript.deleteRequest = false">No</button>
-                        <button class="btn-primary btn-xs btn" ng-click="deleteManuscript(manuscript)">Yes</button>
-                    </div>
-                    <div ng-if="!manuscript.deleteRequest">
+                <td style="vertical-align: middle; width: 35px; border-right: 1px dashed #f1f1f1">
+                    <a ng-href="folders/{{manuscript.folder.id}}" ng-mouseover="manuscript.open = true"
+                       uib-tooltip="{{baseUrl}}/folders/{{manuscript.folder.id}}"
+                       ng-mouseleave="manuscript.open=false"><i class="fa fa-fw font-14em dark_blue"
+                                                                ng-class="{'fa-folder': !manuscript.open, 'fa-folder-open':manuscript.open}"></i></a>
+                </td>
+                <td style="vertical-align: middle; width: 110px">
+                    <div>
                         <i class="fa fa-pencil edit_icon font-14em" ng-click="openManuscriptAddRequest(manuscript)"
                            uib-tooltip="Edit"></i> &nbsp;
-                        <i class="fa fa-cloud-download opacity_hover blue font-14em"
-                           ng-click="downloadManuscriptFiles(manuscript)" uib-tooltip="Export"></i> &nbsp;
-                        <i class="fa fa-trash-o delete_icon font-14em" ng-click="manuscript.deleteRequest = true"
+                        <i class="fa fa-cloud-download opacity_hover blue font-14em" ng-show="!manuscript.downloading"
+                           ng-click="downloadManuscriptFiles(manuscript)" uib-tooltip="Export"></i>
+
+                        <span class="fa-stack fa-lg font-95em" ng-show="manuscript.downloading">
+                            <i class="fa fa-cloud-download fa-stack-1x opacity_hover blue"></i>
+                            <i class="fa fa-spinner fa-pulse fa-stack-2x" style="color: #c1c1c1"></i>
+                        </span>
+
+                        &nbsp;
+                        <i class="fa fa-trash-o delete_icon font-14em" ng-click="confirmManuscriptDelete(manuscript)"
                            uib-tooltip="Delete"></i>
                     </div>
                 </td>

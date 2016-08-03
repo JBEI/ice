@@ -1,6 +1,6 @@
 <!-- public folders on the selected remote registry -->
 
-<div data-ng-repeat="folder in selectedPartnerFolders">
+<div data-ng-repeat="folder in selectedPartnerFolders | orderBy:sortParams.field:worMenuSortParams.asc">
     <div class="collection-menu-sub-folder"
          ng-click="selectRemotePartnerFolder(folder)">
         <i class="fa fa-folder-o fa-fw"

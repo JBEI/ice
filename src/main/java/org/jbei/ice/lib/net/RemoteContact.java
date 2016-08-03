@@ -5,9 +5,13 @@ import org.jbei.ice.lib.access.AccessTokens;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.access.AccessPermission;
+import org.jbei.ice.lib.dto.common.PageParameters;
+import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntrySelection;
@@ -44,13 +48,16 @@ public class RemoteContact {
 
     // exchange api key with remote partner
     // send to remote in order to trigger an api exchange. Note that the remote partner will
-    // request validation of the api key at GET /rest/accesstokens/web
     public RegistryPartner contactPotentialPartner(RegistryPartner thisPartner, String remotePartnerUrl) {
         AccessTokens.setToken(remotePartnerUrl, thisPartner.getApiKey());
         RegistryPartner newPartner = restClient.post(remotePartnerUrl, "/rest/partners",
                 thisPartner, RegistryPartner.class, null);
         AccessTokens.removeToken(remotePartnerUrl);
         return newPartner;
+    }
+
+    public RegistryPartner refreshPartnerKey(RegistryPartner partner, String url, String worToken) {
+        return restClient.putWor(url, "rest/partners", partner, RegistryPartner.class, null, worToken);
     }
 
     /**
@@ -84,7 +91,7 @@ public class RemoteContact {
         if (partner == null)
             return false;
 
-        if (!partner.getAuthenticationToken().equals(tokenHash.encryptPassword(worToken, partner.getSalt()))) {
+        if (!partner.getAuthenticationToken().equals(tokenHash.encrypt(worToken, partner.getSalt()))) {
             Logger.error("Attempt to remove remote partner " + url + " with invalid worToken " + worToken);
             return false;
         }
@@ -116,26 +123,39 @@ public class RemoteContact {
         return restClient.getWor(url, "/rest/partners", ArrayList.class, null, token);
     }
 
-    public AccountTransfer getUser(String url, String email) {
-        return restClient.get(url, "/rest/users/" + email, AccountTransfer.class, null);
+    public AccountTransfer getUser(String url, String email, String token) {
+        return restClient.getWor(url, "rest/users/" + email, AccountTransfer.class, null, token);
     }
 
     public AccessPermission shareFolder(String url, AccessPermission permission, String token) {
         return restClient.postWor(url, "rest/permissions/remote", permission, AccessPermission.class, null, token);
     }
 
-    public FolderDetails getRemoteContents(String url, String userId, long folderId, String token, String worToken) {
-        // todo : paging params
+    public FolderDetails getRemoteContents(String url, String userId, long folderId, String token, PageParameters pageParameters,
+                                           String worToken) {
         Map<String, Object> queryParams = new HashMap<>();
         try {
             String encodedToken = URLEncoder.encode(token, "UTF-8");
             queryParams.put("token", encodedToken);
             queryParams.put("userId", userId);
+            queryParams.put("sort", pageParameters.getSortField().name());
+            queryParams.put("asc", Boolean.toString(pageParameters.isAscending()));
+            queryParams.put("offset", pageParameters.getOffset());
+            queryParams.put("limit", pageParameters.getLimit());
             return restClient.getWor(url, "rest/folders/" + folderId + "/entries", FolderDetails.class, queryParams, worToken);
         } catch (Exception e) {
             Logger.error(e);
             return null;
         }
+    }
+
+    public FolderDetails getFolderEntries(String url, String resourcePath, Map<String, Object> queryParams, String apiKey) {
+        return restClient.getWor(url, resourcePath, FolderDetails.class, queryParams, apiKey);
+    }
+
+    public List<AttachmentInfo> getAttachmentList(String url, long entryId, String apiKey) {
+        String path = "rest/parts/" + entryId + "/attachments";
+        return restClient.getWor(url, path, ArrayList.class, null, apiKey);
     }
 
     public void addTransferredEntriesToFolder(String url, String userId, EntrySelection entrySelection, long folderId,
@@ -165,6 +185,37 @@ public class RemoteContact {
         }
     }
 
+    public PartData getPublicTooltipDetails(String url, long partId, String apiKey) {
+        String path = "rest/parts/" + partId + "/tooltip";
+        return restClient.getWor(url, path, PartData.class, null, apiKey);
+    }
+
+    public PartStatistics getPublicEntryStatistics(String url, long partId, String apiKey) {
+        String path = "/rest/parts/" + partId + "/statistics";
+        return restClient.getWor(url, path, PartStatistics.class, null, apiKey);
+    }
+
+    public FeaturedDNASequence getPublicEntrySequence(String url, long partId, String apiKey) {
+        String path = "/rest/parts/" + partId + "/sequence";
+        return restClient.getWor(url, path, FeaturedDNASequence.class, null, apiKey);
+    }
+
+    public FeaturedDNASequence getSequence(String url, String userId, String partId, long folderId, String token,
+                                           String apiKey) {
+        try {
+            String path = "rest/parts/" + partId + "/sequence";
+            String encodedToken = URLEncoder.encode(token, "UTF-8");
+            Map<String, Object> queryParams = new HashMap<>();
+            queryParams.put("token", encodedToken);
+            queryParams.put("userId", userId);
+            queryParams.put("folderId", folderId);
+            return restClient.getWor(url, path, FeaturedDNASequence.class, queryParams, apiKey);
+        } catch (Exception e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
     public PartData getRemoteEntry(String url, String userId, long partId, long folderId, String token, String worToken) {
         try {
             String encodedToken = URLEncoder.encode(token, "UTF-8");
@@ -177,5 +228,18 @@ public class RemoteContact {
             Logger.error(e);
             return null;
         }
+    }
+
+    public PartData getPublicEntry(String url, long entryId, String apiKey) {
+        return restClient.getWor(url, "rest/parts/" + entryId, PartData.class, null, apiKey);
+    }
+
+    /**
+     * Deletes this instance of ICE from the web of registries master list
+     *
+     * @return true, if the master reports correct execution of the request. false otherwise
+     */
+    public boolean deleteInstanceFromMaster(String url, String apiKey, String thisUrl) {
+        return restClient.delete(apiKey, url, "rest/partners/" + thisUrl);
     }
 }

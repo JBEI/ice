@@ -4,8 +4,7 @@ var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'u
     'angularMoment']);
 
 iceControllers.controller('ActionMenuController', function ($stateParams, $uibModal, $scope, $window, $rootScope,
-                                                            $location, $cookieStore, Folders, Entry, WebOfRegistries,
-                                                            Files, Selection, Upload, FolderSelection, Util) {
+                                                            $location, $cookieStore, Selection, FolderSelection, Util) {
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
     $scope.entrySelected = false;
 
@@ -17,9 +16,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         Selection.reset();
     });
 
-    var sid = $cookieStore.get("sessionId");
-    var folders = Folders();
-    var entry = Entry(sid);
     $scope.selectedFolders = [];
 
     $scope.closeFeedbackAlert = function () {
@@ -51,11 +47,17 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         else
             folderSelected = folderSelected.id;
 
+        var searchQuery = Selection.getSearch();
+
         var selectionType;
         if (!isNaN(folderSelected))
             selectionType = 'FOLDER';
-        else
-            selectionType = 'COLLECTION';
+        else {
+            if (searchQuery)
+                selectionType = 'SEARCH';
+            else
+                selectionType = 'COLLECTION';
+        }
 
         var entrySelection = {
             all: Selection.getSelection().type == 'ALL',
@@ -63,6 +65,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
             selectionType: selectionType,
             entryType: Selection.getSelection().type,
             entries: [],
+            searchQuery: searchQuery,
             destination: angular.copy($scope.selectedFolders)
         };
 
@@ -78,7 +81,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         Util.post("rest/folders/" + $scope.collectionFolderSelected.id + "/entries",
             entrySelection, function (result) {
                 if (result) {
-                    $rootScope.$broadcast("RefreshAfterDeletion");  // todo
+                    $rootScope.$broadcast("RefreshAfterDeletion");
                     $scope.$broadcast("UpdateCollectionCounts");
                     $scope.updateSelectedCollectionFolders();
                     Selection.reset();
@@ -92,16 +95,83 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     // "select all" cannot be used to delete entries. they have to be explicitly selected
     $scope.deleteSelectedEntries = function () {
         var entries = Selection.getSelectedEntries();
-        Util.post("rest/parts/trash", entries, function () {
+        if (entries[0].visible == 'DELETED') { //if deleted THEN PROMPT
+            var modalInstance = $uibModal.open({
+                templateUrl: 'views/modal/user-deletion-prompt-modal.html',
+                controller: "PermanentEntryDeletionConfirmationModalController",
+                backdrop: "static",
+                resolve: {
+                    allEntries: function () {
+                        return entries;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (result) {
+                if (result) {
+                    $scope.$broadcast("UpdateCollectionCounts");
+                    $scope.updateSelectedCollectionFolders();
+                    Selection.reset();
+                }
+            });
+        } else {
+            var currLocation = "folders/";
+            if (FolderSelection.getSelectedFolder() == null) {
+                currLocation = currLocation.concat(FolderSelection.getSelectedCollection());
+            } else {
+                currLocation = currLocation.concat(FolderSelection.getSelectedFolder().id);
+            }
+
+            Util.post("rest/parts/trash", entries, function () {
+                $rootScope.$broadcast("RefreshAfterDeletion");
+                $scope.$broadcast("UpdateCollectionCounts");
+                $location.path(currLocation);
+                Selection.reset();
+                var word = entries.length == 1 ? 'Entry' : "Entries";
+                Util.setFeedback(word + ' successfully deleted', 'success');
+            });
+        }
+    };
+
+    $scope.restoreSelectedEntries = function () {
+        var entrySelection = Selection.getSelectedEntries();
+        var entryIds = [];
+
+        for (var i = 0; i < entrySelection.length; i++) {
+            entryIds.push(parseInt(entrySelection[i].id));
+        }
+
+        Util.update("rest/parts", entryIds, {visibility: "OK"}, function () {
             $rootScope.$broadcast("RefreshAfterDeletion");
             $scope.$broadcast("UpdateCollectionCounts");
-            $location.path("folders/personal");
+            $location.path("folders/deleted");
+
+            Selection.reset();
+            var word = entryIds.length == 1 ? 'Entry' : entryIds.length + " entries";
+            Util.setFeedback(word + ' successfully restored', 'success');
+        });
+    };
+
+    $scope.submitSelectedImportEntry = function () {
+        var entrySelection = Selection.getSelectedEntries();
+
+        Util.update("rest/parts", [parseInt(entrySelection[0].id)], {visibility: "OK"}, function () {
+            $rootScope.$broadcast("RefreshAfterDeletion");
+            $scope.$broadcast("UpdateCollectionCounts");
+            $rootScope.$emit("CollectionSelection", "pending");
+            $location.path("folders/pending");
+            Selection.reset();
+            Util.setFeedback('Entry successfully approved', 'success');
         });
     };
 
     $rootScope.$on("EntrySelected", function (event, count) {
         $scope.addToDisabled = !count;
     });
+
+    $scope.canAddToFolder = function () {
+        return !$scope.addToDisabled && !this.isDealingWithDeleted();
+    };
 
     $scope.canEdit = function () {
         return Selection.canEdit();
@@ -111,21 +181,33 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         return Selection.canDelete();
     };
 
-    $scope.canAccept = function () {
-        if ($scope.collectionSelected != 'transferred')
-            return false;
-
-        // check that something is actually selected
-        if ($scope.collectionFolderSelected && $scope.collectionFolderSelected.type == 'TRANSFERRED') {
-            return true;
+// Working in "deleted" collection or with deleted entry
+    $scope.isDealingWithDeleted = function () {
+        if (Selection.getSelectedEntries().length == 0) {
+            return $stateParams.collection == 'deleted';
+        } else {
+            return Selection.getSelectedEntries()[0].visible == "DELETED";
         }
-
-        return Selection.hasSelection();
     };
 
-    // used to enable/disable the transfer action menu button
+    $scope.canRestore = function () {
+        return Selection.canRestore();
+    };
+
+    $scope.canApprovePending = function () {
+        return Selection.isAdmin();
+    };
+
+    $scope.canAcceptTransfer = function () {
+        if (Selection.getSelectedEntries().length != 0) {
+            return Selection.getSelectedEntries()[0].visible == "TRANSFERRED" && Selection.isAdmin();
+        } else {
+            return false;
+        }
+    };
+
+// used to enable/disable the transfer action menu button
     $scope.transferAvailable = function () {
-        //console.log(FolderSelection.getSelectedFolder());
         return FolderSelection.getSelectedFolder() != undefined;
     };
 
@@ -145,10 +227,9 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         return true;
     };
 
-    // function that handles "edit" click
+// function that handles "edit" click
     $scope.editEntry = function () {
         var selectedEntries = Selection.getSelectedEntries();
-        var upload = Upload(sid);
 
         if (selectedEntries.length > 1) {
             var type;
@@ -157,16 +238,13 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
             }
 
             // first create bulk upload
-            upload.create({
+            Util.update("rest/uploads", {
                 name: "Bulk Edit",
                 type: type,
                 status: 'BULK_EDIT',
                 entryList: selectedEntries
-            }, function (result) {
-                console.log(result);
+            }, {}, function (result) {
                 $location.path("upload/" + result.id);
-            }, function (error) {
-                console.error("error creating bulk upload", error);
             });
         } else {
             $location.path('entry/edit/' + selectedEntries[0].id);
@@ -174,21 +252,20 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         $scope.editDisabled = true;
     };
 
-    // todo : getEntrySelection() should be moved to Selection
-    $scope.csvExport = function () {
+// todo : getEntrySelection() should be moved to Selection
+    $scope.csvExport = function (includeSequences) {
         var selection = getEntrySelection();
-        var files = Files();
+        var formats = {sequenceFormats: []};
+        if (includeSequences)
+            formats.sequenceFormats.push("genbank");
 
         // retrieve from server
-        files.getCSV(selection,
-            function (result) {
-                if (result && result.value) {
-                    $window.open("rest/file/tmp/" + result.value, "_self");
-                    Selection.reset();
-                }
-            }, function (error) {
-                console.log(error);
-            });
+        Util.post("rest/file/csv", selection, function (result) {
+            if (result && result.value) {
+                $window.open("rest/file/tmp/" + result.value, "_self");
+                Selection.reset();
+            }
+        }, formats);
     };
 
     $rootScope.$on("CollectionSelected", function (event, data) {
@@ -250,8 +327,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
 
     $scope.acceptTransferredEntries = function () {
         var selection = getEntrySelection();
-        console.log(selection);
-        if (selection.folderId) {
+        if (selection.folderId && !Selection.hasSelection()) {
             // approve folder
             Util.update("/rest/folders/" + selection.folderId, {
                 id: selection.folderId,
@@ -260,10 +336,23 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
                 console.log(result);
             })
         } else {
-            // todo : accept individual entries
+            var entrySelection = Selection.getSelectedEntries();
+
+            for (var i = 0; i < entrySelection.length; i++) {
+                Util.update("rest/parts", [parseInt(entrySelection[i].id)], {visibility: "OK"}, function () {
+                    $rootScope.$broadcast("RefreshAfterDeletion");
+                    $scope.$broadcast("UpdateCollectionCounts");
+                    $location.path("folders/transferred");
+                });
+            }
+
+            Selection.reset();
+            var word = entrySelection.length == 1 ? 'Entry' : "Entries";
+            Util.setFeedback(word + ' transfer successfully accepted', 'success');
         }
     }
-});
+})
+;
 
 iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $uibModalInstance, Util, FolderSelection,
                                                                       $stateParams, Selection, selectedFolder) {
@@ -457,7 +546,7 @@ iceControllers.controller('AddToFolderController', function ($rootScope, $scope,
     };
 });
 
-iceControllers.controller('RegisterController', function ($scope, $resource, $location, User) {
+iceControllers.controller('RegisterController', function ($scope, $resource, $location, Util) {
     $scope.errMsg = undefined;
     $scope.registerSuccess = undefined;
     $scope.newUser = {
@@ -501,13 +590,12 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
         if (!validates)
             return;
 
-        User().createUser($scope.newUser, function (data) {
+        Util.post("rest/users", $scope.newUser, function (data) {
             if (data.length != 0)
                 $scope.registerSuccess = true;
             else
                 $scope.errMsg = "Could not create account";
-
-        }, function (error) {
+        }, {}, function (error) {
             $scope.errMsg = "Error creating account";
         });
     };
@@ -517,7 +605,7 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
     }
 });
 
-iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location, $rootScope, $sce, User) {
+iceControllers.controller('ForgotPasswordController', function ($scope, $resource, $location, Util) {
     $scope.user = {};
 
     $scope.resetPassword = function () {
@@ -529,11 +617,10 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
             return;
         }
 
-        User().resetPassword({}, $scope.user, function (success) {
+        Util.post("rest/users/password", $scope.user, function (data) {
             $scope.user.processing = false;
             $scope.user.processed = true;
-        }, function (error) {
-            console.error(error);
+        }, {}, function (error) {
             $scope.user.error = true;
             $scope.user.processing = false;
         });
@@ -544,17 +631,7 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
     }
 });
 
-iceControllers.controller('MessageController', function ($scope, $location, $cookieStore, $stateParams, Message) {
-    var message = Message($cookieStore.get('sessionId'));
-    var profileId = $stateParams.id;
-    $location.path("profile/" + profileId + "/messages", false);
-    message.query(function (result) {
-        $scope.messages = result;
-    });
-});
-
-iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope,
-                                                       Authentication, Settings, Util) {
+iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Util) {
 
     // init
     $scope.login = {};
@@ -611,14 +688,10 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
                 $scope.errMsg = error.statusText;
             });
     };
-
-    $scope.goToRegister = function () {
-        $location.path("register");
-    };
 });
 
 // turning out to be pretty specific to the permissions
-iceControllers.controller('GenericTabsController', function ($scope, $cookieStore, User) {
+iceControllers.controller('GenericTabsController', function ($scope, $cookieStore) {
     console.log("GenericTabsController");
     var panes = $scope.panes = [];
     var sessionId = $cookieStore.get("sessionId");
@@ -647,5 +720,24 @@ iceControllers.controller('FullScreenFlashController', function ($scope, $stateP
         var height = $(this).height();
         $('#vectoreditor').height(height - 100);
     });
+});
+
+iceControllers.controller('PermanentEntryDeletionConfirmationModalController', function (EntryContextUtil, $rootScope, $scope, $location, Util, $uibModalInstance, FolderSelection, Selection, allEntries) {
+    $scope.allEntries = allEntries;
+
+    $scope.closeModal = function () {
+        $uibModalInstance.close();
+    };
+
+    $scope.performAction = function () {
+        Util.post("rest/parts/trash", allEntries, function () {
+            // retrieve sub folders for selected collection
+            $rootScope.$broadcast("RefreshAfterDeletion");
+            $scope.closeModal();
+            var word = allEntries.length == 1 ? 'Entry' : "Entries";
+            Util.setFeedback(word + ' successfully deleted', 'success');
+            $rootScope.$emit("CollectionSelection", "deleted");
+        });
+    }
 });
 

@@ -158,6 +158,10 @@ angular.module('ice.upload.service', [])
                     var val = entry[dataSchema[index]];
                     if (dataSchema[index] == "bioSafetyLevel" && val == 0)
                         return '';
+
+                    if (dataSchema[index] == "selectionMarkers")
+                        return val.toString();
+
                     return val;
                 }
 
@@ -170,6 +174,7 @@ angular.module('ice.upload.service', [])
 
                     case "plasmid":
                         //console.log(entry);
+
                         // 6 custom fields
                         if (index >= 21)
                             return entry[this.getDataSchema("part")[index - 6]];
@@ -184,8 +189,35 @@ angular.module('ice.upload.service', [])
                     case "part":
                         return entry[dataSchema[index]];
                 }
-
                 return undefined;
+            },
+
+            generateLinkOptions: function (type) {
+                switch (type) {
+                    case 'plasmid':
+                        return [
+                            {type: 'part', display: 'Part'},
+                            {type: 'plasmid', display: 'Plasmid'}
+                        ];
+
+                    case 'part':
+                        return [
+                            {type: 'part', display: 'Part'}
+                        ];
+
+                    case 'strain':
+                        return [
+                            {type: 'part', display: 'Part'},
+                            {type: 'plasmid', display: 'Plasmid'},
+                            {type: 'strain', display: 'Strain'}
+                        ];
+
+                    case 'arabidopsis':
+                        return [
+                            {type: 'part', display: 'Part'},
+                            {type: 'arabidopsis', display: 'Arabidopsis Seed'}
+                        ];
+                }
             }
         }
     });

@@ -6,7 +6,6 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
-import org.jbei.ice.lib.net.RemoteAccessController;
 import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -18,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -35,17 +33,7 @@ public class ConfigurationController {
 
     public Setting getSystemVersion(String url) {
         String version = getPropertyValue(ConfigurationKey.APPLICATION_VERSION);
-
-        if (url.equalsIgnoreCase(getPropertyValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER))) {
-            return new Setting("version", version);
-        }
-
-        // request version from master
-        try {
-            return new RemoteAccessController().getMasterVersion();
-        } catch (Exception e) {
-            return new Setting("version", version);
-        }
+        return new Setting("version", version);
     }
 
     public String getPropertyValue(ConfigurationKey key) {
@@ -128,19 +116,18 @@ public class ConfigurationController {
         }
     }
 
-    public List<Setting> getSiteSettings() {
+    public SiteSettings getSiteSettings() {
+        SiteSettings settings = new SiteSettings();
         String dataDirectory = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-        Path path = Paths.get(dataDirectory, UI_CONFIG_DIR);
-        ArrayList<Setting> settings = new ArrayList<>();
-        settings.add(new Setting("version", "4.7.0"));
-        Setting setting;
+        final String LOGO_NAME = "logo.png";
+        final String LOGIN_MESSAGE_FILENAME = "institution.html";
+        final String FOOTER_FILENAME = "footer.html";
 
-        // todo: also check if all the required files are in there
-        if (Files.exists(path))
-            setting = new Setting("UI_ASSET", UI_CONFIG_DIR);
-        else
-            setting = new Setting("UI_ASSET", "");
-        settings.add(setting);
+        settings.setHasLogo(Files.exists(Paths.get(dataDirectory, UI_CONFIG_DIR, LOGO_NAME)));
+        settings.setHasLoginMessage(Files.exists(Paths.get(dataDirectory, UI_CONFIG_DIR, LOGIN_MESSAGE_FILENAME)));
+        settings.setHasFooter(Files.exists(Paths.get(dataDirectory, UI_CONFIG_DIR, FOOTER_FILENAME)));
+        settings.setAssetName(UI_CONFIG_DIR);
+
         return settings;
     }
 

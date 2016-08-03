@@ -35,11 +35,15 @@ public class AutoCompleteFieldValues {
      * @return list of matching values
      */
     public List<String> getMatchingValues(String token, int limit) {
+        if (token.isEmpty())
+            return new ArrayList<>();
+
         token = token.replaceAll("'", "");
         List<String> results;
         switch (this.autoCompleteField) {
             case SELECTION_MARKERS:
-                return entryDAO.getMatchingSelectionMarkers(token, limit);
+                results = entryDAO.getMatchingSelectionMarkers(token, limit);
+                break;
 
             case ORIGIN_OF_REPLICATION:
             case PROMOTERS:
@@ -59,6 +63,8 @@ public class AutoCompleteFieldValues {
         HashSet<String> individualResults = new HashSet<>();
         for (String result : results) {
             for (String split : result.split(",")) {
+                if (!split.contains(token))
+                    continue;
                 individualResults.add(split.trim());
             }
         }

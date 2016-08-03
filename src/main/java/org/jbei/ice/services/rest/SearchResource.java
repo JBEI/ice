@@ -1,12 +1,13 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.AutoCompleteFieldValues;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.search.IndexType;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.search.SearchController;
+import org.jbei.ice.lib.search.WebSearch;
 import org.jbei.ice.lib.shared.ColumnField;
 
 import javax.ws.rs.*;
@@ -55,14 +56,14 @@ public class SearchResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response search(@DefaultValue("false") @QueryParam("webSearch") final boolean searchWeb,
                            final SearchQuery query) {
-        final String userId = getUserId();
-        try {
-            final SearchResults results = controller.runSearch(userId, query, searchWeb);
-            return super.respond(Response.Status.OK, results);
-        } catch (final Exception e) {
-            Logger.error(e);
-            return super.respond(Response.Status.INTERNAL_SERVER_ERROR);
+        if (searchWeb) {
+            WebSearch webSearch = new WebSearch();
+            return super.respond(webSearch.run(query));
         }
+
+        final String userId = requireUserId();
+        final SearchResults results = controller.runSearch(userId, query);
+        return super.respond(Response.Status.OK, results);
     }
 
     /**
@@ -76,7 +77,6 @@ public class SearchResource extends RestResource {
      * @param asc         true if return results in ascending order, false otherwise
      * @return wrapper around list of search results conforming to query params
      */
-
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response search(@QueryParam("q") final String queryString,
@@ -101,6 +101,30 @@ public class SearchResource extends RestResource {
 
         final List<EntryType> types = Arrays.asList(EntryType.values());
         query.setEntryTypes(types);
-        return super.respond(controller.runSearch(userId, query, searchWeb));
+        return super.respond(controller.runSearch(userId, query));
+    }
+
+    /**
+     * Rebuild the lucene indexes used for searching
+     */
+    @PUT
+    @Path("/indexes/lucene")
+    public Response updateLuceneIndex() {
+        final String userId = requireUserId();
+        log(userId, "rebuilding lucene indexes");
+        controller.rebuildIndexes(userId, IndexType.LUCENE);
+        return super.respond(Response.Status.OK);
+    }
+
+    /**
+     * Rebuild the blast database
+     */
+    @PUT
+    @Path("/indexes/blast")
+    public Response updateBlastIndex() {
+        final String userId = requireUserId();
+        log(userId, "rebuilding blast database");
+        controller.rebuildIndexes(userId, IndexType.BLAST);
+        return super.respond(Response.Status.OK);
     }
 }

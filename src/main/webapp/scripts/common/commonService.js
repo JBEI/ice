@@ -1,24 +1,28 @@
 'use strict';
 
 angular.module('ice.common.service', [])
-    .factory('Util', function ($rootScope, $location, $cookieStore, $resource) {
+    .factory('Util', function ($rootScope, $location, $cookieStore, $cookies, $resource) {
         return {
             handleError: function (response) {
-                var errorMsg;
                 var type;
-
-                //console.error(response);
+                var errorMsg = response.data.errorMessage;
 
                 switch (response.status) {
                     case 401:
                         if ($location.path() != '/login') {
                             $cookieStore.remove('user');
                             $rootScope.user = undefined;
+                            $cookies.loginDestination = $location.path();
                             $location.path('/login');
                             errorMsg = "Your session has expired. Please login again";
                         } else {
                             errorMsg = response.data.errorMessage;
                         }
+                        break;
+
+                    case 403:
+                        errorMsg = "Access to requested resource has been denied";
+                        type = "warning";
                         break;
 
                     case 404:
@@ -27,7 +31,6 @@ angular.module('ice.common.service', [])
                         break;
 
                     case 500:
-                        errorMsg = response.data.errorMessage;
                         type = "danger";
                         break;
 
@@ -76,7 +79,7 @@ angular.module('ice.common.service', [])
                     }
                 }
 
-                queryParams.sid = $cookieStore.get("sessionId");
+                //queryParams.sid = $cookieStore.get("sessionId");
                 $resource(url, queryParams, {
                     'get': {
                         method: 'GET',
@@ -99,7 +102,7 @@ angular.module('ice.common.service', [])
                 if (errorHandler)
                     errorCallback = errorHandler;
 
-                queryParams.sid = $cookieStore.get('sessionId');
+                //queryParams.sid = $cookieStore.get('sessionId');
                 $resource(url, queryParams, {
                     'list': {
                         method: 'GET',
@@ -116,11 +119,11 @@ angular.module('ice.common.service', [])
 
                 if (!params)
                     params = {};
-                params.sid = $cookieStore.get('sessionId');
+                //params.sid = $cookieStore.get('sessionId');
                 $resource(url, params, {
                     'post': {
                         method: 'POST',
-                        headers: {'X-ICE-Authentication-SessionId': params.sid}
+                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
                     }
                 }).post(obj, successHandler, errorCallback);
             },
@@ -146,18 +149,22 @@ angular.module('ice.common.service', [])
                 }).update(obj, successHandler, errorCallback);
             },
 
-            remove: function (url, params, successHandler) {
+            remove: function (url, params, successHandler, errHandler) {
                 if (!successHandler) {
                     successHandler = function (resp) {
                     }
                 }
+
+                var errorCallback = this.handleError;
+                if (errHandler)
+                    errorCallback = errHandler;
 
                 $resource(url, params, {
                     'delete': {
                         method: 'DELETE',
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
                     }
-                }).delete(successHandler, this.handleError)
+                }).delete(successHandler, errorCallback)
             }
         }
     });

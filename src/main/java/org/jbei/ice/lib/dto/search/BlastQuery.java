@@ -19,11 +19,6 @@ public class BlastQuery implements IDataTransferModel {
         blastProgram = BlastProgram.BLAST_N;
     }
 
-    public BlastQuery(BlastProgram program, String sequence) {
-        setBlastProgram(program);
-        setSequence(sequence);
-    }
-
     public BlastProgram getBlastProgram() {
         return blastProgram;
     }

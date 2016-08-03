@@ -3,7 +3,11 @@ package org.jbei.ice.lib.bulkupload;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.parsers.sbol.ICESBOLParserVisitor;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.Sequence;
 import org.sbolstandard.core.SBOLDocument;
 import org.sbolstandard.core.SBOLFactory;
 import org.sbolstandard.core.SBOLRootObject;
@@ -40,7 +44,6 @@ public class BulkFileSBOLUpload {
             for (SBOLRootObject rootObject : document.getContents()) {
                 ICESBOLParserVisitor visitor = new ICESBOLParserVisitor(addType);
                 rootObject.accept(visitor);
-                DNASequence sequence = visitor.getFeaturedDNASequence();
                 BulkUploadAutoUpdate update = visitor.getUpdate();
                 update.setBulkUploadId(bulkUploadId);
                 Logger.info(userId + ": " + update.toString());
@@ -50,10 +53,15 @@ public class BulkFileSBOLUpload {
                     bulkUploadId = update.getBulkUploadId();
 
                 // get "user sequence"
-                String user = getSequenceDocument(rootObject);
-
+                String sequenceUser = getSequenceDocument(rootObject);
                 long entryId = update.getEntryId();
-                PartFileAdd.uploadSequenceToEntry(entryId, userId, sequence, user);
+                DNASequence dnaSequence = visitor.getFeaturedDNASequence();
+                Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+                Entry entry = DAOFactory.getEntryDAO().get(entryId);
+                sequence.setEntry(entry);
+                if (sequenceUser != null)
+                    sequence.setSequenceUser(sequenceUser);
+                new SequenceController().save(userId, sequence);
             }
         } catch (Exception e) {
             Logger.error(e);

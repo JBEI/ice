@@ -1,6 +1,5 @@
 package org.jbei.ice.storage.model;
 
-import org.hibernate.annotations.Type;
 import org.jbei.ice.lib.dto.DNAFeature;
 import org.jbei.ice.storage.DataModel;
 
@@ -23,8 +22,6 @@ import java.util.Set;
 @SequenceGenerator(name = "sequence", sequenceName = "sequence_feature_id_seq", allocationSize = 1)
 public class SequenceFeature implements DataModel {
 
-    public static final String DESCRIPTION = "description";
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
     private long id;
@@ -40,14 +37,6 @@ public class SequenceFeature implements DataModel {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "sequenceFeature", orphanRemoval = true)
     private final Set<AnnotationLocation> annotationLocations = new LinkedHashSet<>();
 
-    @Deprecated
-    @Column(name = "feature_start")
-    private int genbankStart;
-
-    @Deprecated
-    @Column(name = "feature_end")
-    private int end;
-
     /**
      * +1 or -1
      */
@@ -56,15 +45,6 @@ public class SequenceFeature implements DataModel {
 
     @Column(name = "name", length = 127)
     private String name;
-
-    /**
-     * Deprecated since schema 0.8.0. Use SequenceFeatureAttribute with "description" as key
-     */
-    @Deprecated
-    @Column(name = "description")
-    @Lob
-    @Type(type = "org.hibernate.type.TextType")
-    private String description;
 
     @Column(name = "genbank_type", length = 127)
     private String genbankType;

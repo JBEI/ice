@@ -1,12 +1,10 @@
 'use strict';
 
 angular.module('ice.entry.controller', [])
-    .controller('EntryAttachmentController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Attachment) {
+    .controller('EntryAttachmentController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Util) {
 
         // create a uploader with options
         var sid = $cookieStore.get("sessionId");
-        var attachment = Attachment(sid);
-
         var desc = "";
         $scope.$watch('attachmentDescription', function () {
             desc = $scope.attachmentDescription;
@@ -24,13 +22,10 @@ angular.module('ice.entry.controller', [])
 
         uploader.onSuccessItem = function (item, response, status, headers) {
             response.description = desc;
-            attachment.create({
-                    partId: $stateParams.id
-                }, response,
-                function (result) {
-                    $scope.attachments.push(result);
-                    $scope.cancel();
-                });
+            Util.post("rest/parts/" + $stateParams.id + "/attachments", response, function (result) {
+                $scope.attachments.push(result);
+                $scope.cancel();
+            });
         };
 
         $scope.cancel = function () {
@@ -40,9 +35,7 @@ angular.module('ice.entry.controller', [])
             $scope.attachmentDescription = undefined;
         };
 
-        attachment.get({
-            partId: $stateParams.id
-        }, function (result) {
+        Util.list("rest/parts/" + $stateParams.id + "/attachments", function (result) {
             $scope.attachments = result;
         });
 
@@ -51,10 +44,7 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.deleteAttachment = function (index, att) {
-            attachment.delete({
-                partId: $stateParams.id,
-                attachmentId: att.id
-            }, function (result) {
+            Util.remove('rest/parts/' + $stateParams.id + '/attachments/' + att.id, function (result) {
                 confirmObject[index] = false;
                 $scope.attachments.splice(index, 1);
             });
@@ -69,47 +59,33 @@ angular.module('ice.entry.controller', [])
             confirmObject[idx] = value;
         }
     })
-    .controller('EntryCommentController', function ($scope, $cookieStore, $stateParams, Entry) {
+    .controller('EntryCommentController', function ($scope, $cookieStore, $stateParams, Util) {
         var entryId = $stateParams.id;
-        var entry = Entry($cookieStore.get("sessionId"));
         $scope.newComment = {samples: []};
 
-        entry.comments({
-            partId: entryId
-        }, function (result) {
+        Util.list('rest/parts/' + entryId + '/comments', function (result) {
             $scope.entryComments = result;
         });
 
-        entry.samples({
-            partId: entryId
-        }, function (result) {
+        Util.list('rest/parts/' + entryId + '/samples', function (result) {
             $scope.entrySamples = result;
         });
 
         $scope.createComment = function () {
-            entry.createComment({
-                partId: entryId
-            }, $scope.newComment, function (result) {
+            Util.post('rest/parts/' + entryId + '/comments', $scope.newComment, function (result) {
                 $scope.entryComments.splice(0, 0, result);
                 $scope.addComment = false;
                 $scope.entryStatistics.commentCount = $scope.entryComments.length;
-            }, function (error) {
-                console.error("comment create error", error);
             });
         };
 
         $scope.updateComment = function (comment) {
-            entry.updateComment({
-                partId: entryId,
-                commentId: comment.id
-            }, comment, function (result) {
+            Util.update('rest/parts/' + entryId + '/comments/' + comment.id, comment, {}, function (result) {
                 if (result) {
                     comment.edit = false;
                     comment.modified = result.modified;
                 }
-            }, function (error) {
-                console.error(error);
-            })
+            });
         };
 
         /**
@@ -125,15 +101,10 @@ angular.module('ice.entry.controller', [])
                 $scope.newComment.samples.splice(idx, 1);
         }
     })
-    .controller('ShotgunSequenceController', function ($scope, $window, $cookieStore, $stateParams, Entry) {
+    .controller('ShotgunSequenceController', function ($scope, $window, $cookieStore, $stateParams, Util) {
         var entryId = $stateParams.id;
-        var sid = $cookieStore.get("sessionId");
-        var entry = Entry(sid);
         $scope.shotgunUploadError = undefined;
-
-        entry.shotgunSequences({
-            partId: entryId
-        }, function (result) {
+        Util.list('rest/parts/' + entryId + '/shotgunsequences', function (result) {
             $scope.shotgunSequences = result;
         });
 
@@ -141,10 +112,8 @@ angular.module('ice.entry.controller', [])
             $window.open("rest/file/shotgunsequence/" + sequence.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
         };
     })
-    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Entry, $uibModal, Util) {
+    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, $uibModal, Util) {
         var entryId = $stateParams.id;
-        var sid = $cookieStore.get("sessionId");
-        var entry = Entry(sid);
 
         $scope.traceUploadError = undefined;
         $scope.maxSize = 5;
@@ -280,10 +249,8 @@ angular.module('ice.entry.controller', [])
             });
         }
     })
-    .controller('PartHistoryController', function ($scope, $window, $cookieStore, $stateParams, Entry, Util) {
+    .controller('PartHistoryController', function ($scope, $window, $cookieStore, $stateParams, Util) {
         var entryId = $stateParams.id;
-        var sid = $cookieStore.get("sessionId");
-        var entry = Entry(sid);
         $scope.historyParams = {offset: 0, limit: 10, currentPage: 1, maxSize: 5};
 
         $scope.historyPageChanged = function () {
@@ -297,24 +264,23 @@ angular.module('ice.entry.controller', [])
         $scope.historyPageChanged(); // init
 
         $scope.deleteHistory = function (history) {
-            entry.deleteHistory({partId: entryId, historyId: history.id}, function (result) {
-                var idx = $scope.history.indexOf(history);
+            Util.remove('rest/parts/' + entryId + '/history/' + history.id, {}, function (result) {
+                var idx = $scope.history.data.indexOf(history);
                 if (idx == -1)
                     return;
 
-                $scope.history.splice(idx, 1);
+                $scope.history.data.splice(idx, 1);
+                $scope.history.resultCount -= 1;
             });
         }
     })
     .controller('EditEntryController', function ($scope, $http, $location, $cookieStore, $rootScope, FileUploader,
-                                                 $stateParams, Entry, EntryService, Util, $anchorScroll) {
-
+                                                 $stateParams, EntryService, Util, $anchorScroll) {
         var sid = $cookieStore.get("sessionId");
-        var entry = Entry(sid);
         var partLinks;
         $scope.entry = undefined;
 
-        entry.query({partId: $stateParams.id}, function (result) {
+        Util.get("rest/parts/" + $stateParams.id, function (result) {
             $scope.entry = EntryService.convertToUIForm(result);
             partLinks = angular.copy($scope.entry.linkedParts);
             $scope.entry.linkedParts = [];
@@ -411,7 +377,7 @@ angular.module('ice.entry.controller', [])
             return $http.get('rest/search/filter', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
-                    val: val,
+                    token: val,
                     field: inputField
                 }
             }).then(function (res) {
@@ -461,19 +427,18 @@ angular.module('ice.entry.controller', [])
         };
     })
     .controller('CreateEntryController', function ($http, $scope, $uibModal, $rootScope, FileUploader, $location,
-                                                   $stateParams, $cookieStore, Entry, EntryService, Util, $anchorScroll) {
+                                                   $stateParams, $cookieStore, EntryService, Util, $anchorScroll) {
         $scope.createType = $stateParams.type;
         $scope.showMain = true;
 
         // generate the various link options for selected option
         $scope.linkOptions = EntryService.linkOptions($scope.createType.toLowerCase());
         var sid = $cookieStore.get("sessionId");
-        var entry = Entry(sid);
 
         // retrieves the defaults for the specified type. Note that $scope.part is the main part
         var getPartDefaults = function (type, isMain) {
             //entry.query({partId: type}, function (result) {
-            Util.get("rest/parts/" + type, function (result) {
+            Util.get("rest/parts/defaults/" + type, function (result) {
                 if (isMain) { // or if !$scope.part
                     $scope.part = result;
                     $scope.part = EntryService.setNewEntryFields($scope.part);
@@ -512,7 +477,7 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.addExistingPartLink = function ($item, $model) {
-            entry.query({partId: $model.id}, function (result) {
+            Util.get("rest/parts/" + $model, function (result) {
                 $scope.activePart = result;
                 $scope.activePart.isExistingPart = true;
                 if (!$scope.activePart.parameters)
@@ -570,7 +535,7 @@ angular.module('ice.entry.controller', [])
             return $http.get('rest/search/filter', {
                 headers: {'X-ICE-Authentication-SessionId': sid},
                 params: {
-                    val: val,
+                    token: val,
                     field: inputField
                 }
             }).then(function (res) {
@@ -638,8 +603,16 @@ angular.module('ice.entry.controller', [])
             } else {
                 Util.post("rest/parts", $scope.part, function (result) {
                     $scope.$emit("UpdateCollectionCounts");
-                    $location.path('/entry/' + result.id);
-                    $scope.showSBOL = false;
+                    if ($scope.part.pastedSequence) {
+                        // todo : also handle linked parts
+                        Util.post("rest/parts/" + result.id + "/sequence", {sequence: $scope.part.pastedSequence}, function () {
+                            $location.path('/entry/' + result.id);
+                            $scope.showSBOL = false;
+                        })
+                    } else {
+                        $location.path('/entry/' + result.id);
+                        $scope.showSBOL = false;
+                    }
                 });
             }
         };
@@ -654,7 +627,6 @@ angular.module('ice.entry.controller', [])
                     field: 'PART_NUMBER'
                 }
             }).then(function (res) {
-                console.log(res);
                 return res.data;
             });
         };
@@ -741,6 +713,7 @@ angular.module('ice.entry.controller', [])
 
         uploader.onErrorItem = function (item, response, status, headers) {
             item.remove();
+            console.log(item, response, status, headers);
             $scope.serverError = true;
             $scope.processingFile = undefined;
             uploader.resetAll();
@@ -751,12 +724,31 @@ angular.module('ice.entry.controller', [])
             $scope.serverError = false;
         };
     })
-    .controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, User, Entry, Group,
-                                                       filterFilter, Permission, Util) {
+    .controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, filterFilter, Util) {
         var sessionId = $cookieStore.get("sessionId");
-        var entry = Entry(sessionId);
         var panes = $scope.panes = [];
         $scope.userFilterInput = undefined;
+        $scope.canSetPublicPermission = undefined;
+        $scope.selectedArticle = {type: 'ACCOUNT', placeHolder: "Enter name or email"};
+
+        if (!$rootScope.settings || !$rootScope.settings['RESTRICT_PUBLIC_ENABLE']) {
+            Util.get("rest/config/RESTRICT_PUBLIC_ENABLE", function (result) {
+                if (!result)
+                    return;
+                if (!$rootScope.settings)
+                    $rootScope.settings = {};
+                $rootScope.settings['RESTRICT_PUBLIC_ENABLE'] = result.value;
+                $scope.canSetPublicPermission = (result.value == "no") || $rootScope.user.isAdmin;
+            });
+        } else {
+            $scope.canSetPublicPermission = ($rootScope.settings['RESTRICT_PUBLIC_ENABLE'].value == "no") || $rootScope.user.isAdmin;
+        }
+
+        $scope.setPermissionArticle = function (type) {
+            $scope.selectedArticle.type = type;
+            $scope.autoCompleteUsersOrGroups = undefined;
+            $scope.userFilterInput = undefined;
+        };
 
         $scope.activateTab = function (pane) {
             angular.forEach(panes, function (pane) {
@@ -770,11 +762,13 @@ angular.module('ice.entry.controller', [])
         };
 
         // retrieve permissions
-        entry.permissions({partId: $scope.entry.id}, function (result) {
+        Util.list('rest/parts/' + $scope.entry.id + '/permissions', function (result) {
             $scope.readPermissions = [];
             $scope.writePermissions = [];
 
             angular.forEach(result, function (item) {
+                item.canEdit = $rootScope.user.isAdmin || (item.group && !item.group.autoJoin);
+
                 if (item.type === 'WRITE_ENTRY')
                     $scope.writePermissions.push(item);
                 else
@@ -783,26 +777,42 @@ angular.module('ice.entry.controller', [])
 
             $scope.panes.push({title: 'Read', count: $scope.readPermissions.length, selected: true});
             $scope.panes.push({title: 'Write', count: $scope.writePermissions.length});
-
             $scope.activePermissions = $scope.readPermissions;
         });
 
         $scope.filter = function () {
             var val = $scope.userFilterInput;
             if (!val) {
-                $scope.accessPermissions = undefined;
+                $scope.autoCompleteUsersOrGroups = undefined;
                 return;
             }
 
             $scope.filtering = true;
-            Permission().filterUsersAndGroups({limit: 10, val: val},
-                function (result) {
-                    $scope.accessPermissions = result;
-                    $scope.filtering = false;
-                }, function (error) {
-                    $scope.filtering = false;
-                    $scope.accessPermissions = undefined;
-                });
+            var resource;
+            var queryParams;
+
+            if ($scope.selectedArticle.type == 'ACCOUNT') {
+                resource = "users";
+                queryParams = {limit: 8, val: val};
+            } else {
+                resource = "groups";
+                queryParams = {limit: 8, token: val};
+            }
+
+            Util.list("rest/" + resource + "/autocomplete", function (result) {
+                if ($scope.selectedArticle.type == "ACCOUNT") {
+                    angular.forEach(result, function (item) {
+                        item.label = item.firstName + " " + item.lastName;
+                    });
+                }
+
+                $scope.autoCompleteUsersOrGroups = result;
+                $scope.filtering = false;
+
+            }, queryParams, function (error) {
+                $scope.filtering = false;
+                $scope.autoCompleteUsersOrGroups = undefined;
+            });
         };
 
         $scope.showAddPermissionOptionsClick = function () {
@@ -841,24 +851,21 @@ angular.module('ice.entry.controller', [])
                 $scope.activePermissions.splice(i, 1);
                 pane.count = $scope.activePermissions.length;
             });
-
-            //addPermission: {
-            //    method: 'POST',
-            //        responseType: 'json',
-            //        url: 'rest/parts/:partId/permissions',
-            //        headers: {'X-ICE-Authentication-SessionId': sessionId}
-            //},
         };
 
         //
         // when user clicks on the check box, removes permission if exists or adds if not
         //
-        $scope.addRemovePermission = function (permission) {
-            permission.selected = !permission.selected;
-            if (!permission.selected) {
-                removePermission(permission.id);
+        $scope.addRemovePermission = function (userOrGroup) {
+            if (userOrGroup.selected) {
+                removePermission(userOrGroup.permissionId);
+                userOrGroup.selected = false;
                 return;
             }
+
+            var permission = {};
+            permission.article = $scope.selectedArticle.type;
+            permission.articleId = userOrGroup.id;
 
             // add permission
             for (var i = 0; i < panes.length; i += 1) {
@@ -870,9 +877,11 @@ angular.module('ice.entry.controller', [])
 
             permission.typeId = $scope.entry.id;
 
-            entry.addPermission({partId: $scope.entry.id}, permission, function (result) {
+            Util.post('rest/parts/' + $scope.entry.id + '/permissions', permission, function (result) {
                 // result is the permission object
                 $scope.entry.id = result.typeId;
+                result.canEdit = $rootScope.user.isAdmin || (result.group && !result.group.autoJoin);
+
                 if (result.type == 'READ_ENTRY') {
                     $scope.readPermissions.push(result);
                     $scope.activePermissions = $scope.readPermissions;
@@ -882,20 +891,21 @@ angular.module('ice.entry.controller', [])
                     $scope.activePermissions = $scope.writePermissions;
                 }
 
-                permission.id = result.id;
+                userOrGroup.permissionId = result.id;
+                userOrGroup.selected = true;
             });
         };
 
         $scope.enablePublicRead = function (e) {
-            entry.enablePublicRead(e, function (result) {
+            Util.update('rest/parts/' + e.id + '/permissions/public', {}, {}, function () {
                 $scope.entry.publicRead = true;
-            })
+            });
         };
 
         $scope.disablePublicRead = function (e) {
-            entry.disablePublicRead({partId: e.id}, function (result) {
+            Util.remove('rest/parts/' + e.id + '/permissions/public', {}, function () {
                 $scope.entry.publicRead = false;
-            })
+            });
         };
 
         $scope.deletePermission = function (index, permission) {
@@ -909,7 +919,6 @@ angular.module('ice.entry.controller', [])
         });
     })
     .controller('EntryDetailsController', function ($scope) {
-        console.log("EntryDetailsController");
         var entryPanes = $scope.entryPanes = [];
 
         $scope.showPane = function (pane) {
@@ -929,8 +938,8 @@ angular.module('ice.entry.controller', [])
     })
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
-                                             FileUploader, Entry, Folders, EntryService, EntryContextUtil, Selection,
-                                             CustomField, Util, Authentication, FolderSelection) {
+                                             $route, $window, FileUploader, EntryService, EntryContextUtil, Selection,
+                                             Util, Authentication) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
@@ -974,14 +983,13 @@ angular.module('ice.entry.controller', [])
                         $scope.processingDelete = true;
                         $scope.errorDeleting = false;
 
-                        entry.deleteSequence({partId: part.id}, function (result) {
+                        Util.remove('rest/parts/' + part.id + '/sequence', {}, function (result) {
                             $scope.processingDelete = false;
                             $uibModalInstance.close(part);
-                        }, function (error) {
+                        }, function () {
                             $scope.processingDelete = false;
                             $scope.errorDeleting = true;
-                            console.error(error);
-                        })
+                        });
                     }
                 },
                 backdrop: "static"
@@ -990,11 +998,8 @@ angular.module('ice.entry.controller', [])
             modalInstance.result.then(function (part) {
                 if (part)
                     part.hasSequence = false;
-            }, function () {
             });
         };
-
-        var entry = Entry(sessionId);
 
         $scope.addLink = function (part, role) {
 
@@ -1025,17 +1030,13 @@ angular.module('ice.entry.controller', [])
                     };
 
                     var linkPartToMainEntry = function (item) {
-                        console.log("link", item, "to", $scope.mainEntry.id);
-
-                        entry.addLink({partId: $scope.mainEntry.id, linkType: $scope.role}, item,
-                            function (result) {
-                                $scope.links.push(item);   // todo
-                                $scope.addExistingPartNumber = undefined;
-                                $scope.mainEntrySequence = undefined;
-                            }, function (error) {
-                                console.error(error);
-                                $scope.errorMessage = "Error linking this entry to " + item.partId;
-                            });
+                        Util.post('rest/parts/' + $scope.mainEntry.id + '/links', item, function () {
+                            $scope.links.push(item);   // todo
+                            $scope.addExistingPartNumber = undefined;
+                            $scope.mainEntrySequence = undefined;
+                        }, {linkType: $scope.role}, function () {
+                            $scope.errorMessage = "Error linking this entry to " + item.partId;
+                        });
                     };
 
                     // todo : todo
@@ -1206,25 +1207,18 @@ angular.module('ice.entry.controller', [])
             $scope.showSBOL = !$scope.showSBOL;
         };
 
+        $scope.getSequenceSectionHeader = function () {
+            if ($scope.entry.hasSequence && !$scope.entry.basePairCount)
+                return "SBOL INFORMATION";
+            return "SEQUENCE";
+        };
+
         $scope.entryFields = undefined;
         $scope.entry = undefined;
         $scope.notFound = undefined;
         $scope.noAccess = undefined;
 
-
-        //query: {
-        //    method: 'GET',
-        //        responseType: "json",
-        //        url: "rest/parts/:partId",
-        //        headers: {'X-ICE-Authentication-SessionId': sessionId}
-        //},
-
-        var params = {};
-        if (FolderSelection.getSelectedFolder() && FolderSelection.getSelectedFolder().type == 'REMOTE') {
-            params.remote = true;
-            params.folderId = FolderSelection.getSelectedFolder().id;
-            //$location.search("fid", ) // todo : if the page is refreshed
-        }
+        var params = $location.search();
 
         Util.get("rest/parts/" + $stateParams.id,
             function (result) {
@@ -1235,10 +1229,13 @@ angular.module('ice.entry.controller', [])
                 if ($scope.entry.canEdit)
                     $scope.newParameter = {edit: false};
                 $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
+                $scope.entry.remote = params.remote;
 
-                entry.statistics({partId: $stateParams.id}, function (stats) {
+                // get sample count, comment count etc
+                Util.get("rest/parts/" + $stateParams.id + "/statistics", function (stats) {
                     $scope.entryStatistics = stats;
-                });
+                }, params);
+
             }, params, function (error) {
                 if (error.status === 404)
                     $scope.notFound = true;
@@ -1364,10 +1361,8 @@ angular.module('ice.entry.controller', [])
             if (index >= 0) {
                 var currentParam = $scope.entry.parameters[index];
                 if (currentParam.id == parameter.id) {
-                    CustomField().deleteCustomField({id: parameter.id}, function (result) {
+                    Util.remove("rest/custom-fields/" + parameter.id, {}, function (result) {
                         $scope.entry.parameters.splice(index, 1);
-                    }, function (error) {
-                        console.error(error);
                     })
                 }
             }
@@ -1394,13 +1389,11 @@ angular.module('ice.entry.controller', [])
 
 // removes linked parts
         $scope.removeLink = function (mainEntry, linkedEntry) {
-            entry.removeLink({partId: mainEntry.id, linkId: linkedEntry.id}, function (result) {
+            Util.remove('rest/parts/' + mainEntry.id + '/links/' + linkedEntry.id, {}, function () {
                 var idx = mainEntry.linkedParts.indexOf(linkedEntry);
                 if (idx != -1) {
                     mainEntry.linkedParts.splice(idx, 1);
                 }
-            }, function (error) {
-                console.error(error);
             });
         };
 
@@ -1436,6 +1429,21 @@ angular.module('ice.entry.controller', [])
         };
 
         uploader.onSuccessItem = function (item, response, status, header) {
+            if (!response)
+                return;
+
+            if (response.sequence) {
+                $scope.entry.basePairCount = response.sequence.sequence.length;
+            }
+
+            if (response.format && response.format.indexOf("SBOL") > -1) {
+                Util.list("rest/parts/" + $scope.entry.id + "/links", function (result) {
+                    if (!result)
+                        return;
+                    $scope.entry.linkedParts = result;
+                });
+            }
+
             $scope.entry.hasSequence = true;
         };
 
@@ -1449,7 +1457,7 @@ angular.module('ice.entry.controller', [])
         };
 
         uploader.onErrorItem = function (item, response, status, headers) {
-            $scope.serverError = true;
+            $scope.serverError = response.message;
         };
 
 // customer parameter add for entry view
@@ -1460,18 +1468,188 @@ angular.module('ice.entry.controller', [])
                 return;
 
             $scope.newParameter.partId = $scope.entry.id;
-            CustomField().createNewCustomField(
-                $scope.newParameter,
-                function (result) {
-                    if (!result)
-                        return;
+            Util.post("rest/custom-fields", $scope.newParameter, function (result) {
+                if (!result)
+                    return;
 
-                    $scope.entry.parameters.push(result);
-                    $scope.newParameter.edit = false;
-                }, function (error) {
-                    console.error(error);
-                })
-        }
+                $scope.entry.parameters.push(result);
+                $scope.newParameter.edit = false;
+            })
+        };
+
+        $scope.showAutoAnnotationPopup = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/entry/sequence/modal-auto-annotate-sequence.html',
+                controller: function ($scope, $uibModalInstance, part, Util) {
+                    $scope.selectedFeatures = [];
+                    $scope.allSelected = false;
+                    $scope.part = part;
+                    $scope.pagingParams = {
+                        currentPage: 0,
+                        pageSize: 8,
+                        sort: "locations[0].genbankStart",
+                        asc: true
+                    };
+                    var displayOptions = [{display: "All features", key: "all"}, {
+                        display: "My features",
+                        key: "mine"
+                    }];
+                    $scope.options = {values: displayOptions, selection: displayOptions[0]};
+
+                    // retrieves "suggested" annotations for current entry
+                    $scope.fetchAnnotations = function () {
+                        $scope.annotations = undefined;
+                        Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
+                            angular.forEach(result.features, function (feature) {
+                                    if (feature.strand == 1)
+                                        feature.length = (feature.locations[0].end - feature.locations[0].genbankStart) + 1;
+                                    else
+                                        feature.length = (feature.locations[0].genbankStart - feature.locations[0].end) + 1;
+                                }
+                            );
+                            $scope.annotations = result;
+                            $scope.pagingParams.resultCount = result.features.length;
+                            $scope.pagingParams.numberOfPages = Math.ceil(result.features.length / $scope.pagingParams.pageSize);
+                        }, {ownerFeatures: $scope.options.selection.key == "mine"});
+                    };
+                    $scope.fetchAnnotations();
+
+                    /**
+                     * Support for sorting
+                     * @param field field to sort on
+                     */
+                    $scope.sort = function (field) {
+                        if ($scope.pagingParams.sort == field) {
+                            $scope.pagingParams.asc = !$scope.pagingParams.asc;
+                        } else {
+                            $scope.pagingParams.sort = field;
+                            $scope.pagingParams.asc = true;
+                        }
+                        $scope.pagingParams.currentPage = 0;
+                    };
+
+                    /**
+                     * Select all features on the UI
+                     */
+                    $scope.selectAll = function () {
+                        $scope.allSelected = !$scope.allSelected;
+                        if ($scope.allSelected) {
+                            $scope.selectedFeatures = $scope.annotations.features;
+                        } else {
+                            $scope.selectedFeatures = [];
+                        }
+                    };
+
+                    /**
+                     * Check or un-check (on UI) specific feature
+                     * @param feature
+                     */
+                    $scope.checkFeature = function (feature) {
+                        feature.selected = !feature.selected;
+                        var i = $scope.selectedFeatures.indexOf(feature);
+                        if (i == -1) {
+                            $scope.selectedFeatures.push(feature);
+                        }
+                        else {
+                            $scope.selectedFeatures.splice(i, 1);
+                        }
+
+                        $scope.allSelected = ($scope.selectedFeatures.length == $scope.annotations.features.length);
+                    };
+
+                    $scope.setClassName = function (feature) {
+                        var classPrefix = feature.strand == -1 ? "reverse-strand-" : "forward-strand-";
+                        feature.className = classPrefix + feature.type.toLowerCase();
+                    };
+
+                    /**
+                     *  Determine background color based on feature type
+                     * @param feature
+                     * @returns {{background-color: string}}
+                     */
+                    $scope.getBgStyle = function (feature) {
+                        var bgColor = "#CCC";
+
+                        switch (feature.type.toLowerCase()) {
+                            case 'cds':
+                                bgColor = "#EF6500";
+                                break;
+
+                            case "misc_feature":
+                                bgColor = "#006FEF";
+                                break;
+
+                            case "promoter":
+                                bgColor = "#31B440";
+                                break;
+
+                            case "terminator":
+                                bgColor = "red";
+                                break;
+
+                            case "rep_origin":
+                                bgColor = "#878787";
+                                break;
+
+                            case "misc_marker":
+                                bgColor = "#8DCEB1";
+                                break;
+                        }
+                        return {'background-color': bgColor};
+                    };
+
+                    $scope.getFirstStyle = function (selectedFeature) {
+                        var width = (selectedFeature.locations[0].genbankStart / $scope.annotations.length) * 100;
+                        return {"width": (Math.floor(width)) + '%'};
+                    };
+
+                    $scope.getSecondStyle = function (selectedFeature) {
+                        var width = ((selectedFeature.locations[0].end - selectedFeature.locations[0].genbankStart) / $scope.annotations.length) * 100;
+                        var style = $scope.getBgStyle(selectedFeature);
+                        style.width = (Math.ceil(width)) + '%';
+                        return style;
+                    };
+
+                    $scope.getThirdStyle = function (selectedFeature) {
+                        var w = (($scope.annotations.length - selectedFeature.locations[0].end) / $scope.annotations.length) * 100;
+                        return {"width": (Math.floor(w)) + '%'};
+                    };
+
+                    $scope.saveAnnotations = function () {
+                        $scope.errorSavingAnnotations = false;
+                        $scope.savingAnnotations = true;
+
+                        //url, obj, successHandler, params, errHandler
+                        Util.post("rest/parts/" + part.id + "/sequence", {features: $scope.selectedFeatures}, function () {
+                            $uibModalInstance.close(true);
+                        }, {add: true}, function (error) {
+                            $scope.savingAnnotations = false;
+                            $scope.errorSavingAnnotations = true;
+                        })
+                    };
+
+                    // used to show, in table of features, the selected feature
+                    $scope.showAnnotationInTable = function (selectedFeature) {
+                        var index = $scope.annotations.features.indexOf(selectedFeature);
+                        $scope.pagingParams.currentPage = parseInt(index / $scope.pagingParams.pageSize);
+                    }
+                },
+                size: 'lg',
+                resolve: {
+                    part: function () {
+                        return $scope.entry;
+                    }
+                }
+                ,
+                backdrop: "static"
+            });
+
+            modalInstance.result.then(function (reload) {
+                if (reload) {
+                    $window.location.reload();
+                }
+            });
+        };
     }
 )
 ;

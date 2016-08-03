@@ -1,7 +1,9 @@
 package org.jbei.ice.services.rest;
 
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.net.WebPartners;
@@ -56,16 +58,18 @@ public class AccessTokenResource extends RestResource {
     /**
      * Retrieve account information for user referenced by session id
      *
-     * @param sessionId unique session identifier for logged in user
      * @return account information for session if session is valid, null otherwise
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response get(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId) {
+    public Response get() {
         String userId = requireUserId();
-        AccountTransfer transfer = accountController.getByEmail(userId).toDataTransferObject();
-        transfer.setAdmin(accountController.isAdministrator(userId));
-        return super.respond(transfer);
+        try {
+            AccountTransfer accountTransfer = UserSessions.getUserAccount(userId, sessionId);
+            return super.respond(accountTransfer);
+        } catch (PermissionException pe) {
+            throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
     }
 
     /**
@@ -73,11 +77,9 @@ public class AccessTokenResource extends RestResource {
      */
     @GET
     @Path("/web")
-    public Response getWebPartner(@HeaderParam(WOR_PARTNER_TOKEN) String token,
-                                  @QueryParam("url") String url) {
-        Logger.info("validati");
+    public Response getWebPartner(@QueryParam("url") String url) {
         WebPartners partners = new WebPartners();
-        RegistryPartner partner = partners.get(token, url);
+        RegistryPartner partner = partners.get(worPartnerToken, url);
         return super.respond(partner);
     }
 }

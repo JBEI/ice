@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.dto.search;
 
-import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.storage.IDataTransferModel;
 
 /**

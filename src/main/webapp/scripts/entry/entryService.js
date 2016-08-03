@@ -9,6 +9,7 @@ angular.module('ice.entry.service', [])
         var allSelection = {};
         var canDelete = false;
         var selectedTypes = {};
+        var searchQuery = undefined;
         var userId = $cookieStore.get('userId');
 
         return {
@@ -93,7 +94,7 @@ angular.module('ice.entry.service', [])
                 var selected = [];
                 for (var k in selectedEntries) {
                     if (selectedEntries.hasOwnProperty(k) && selectedEntries[k]) {
-                        selected.push({id: k});
+                        selected.push({id: k, visible: selectedEntries[k].visible});
                     }
                 }
                 return selected;
@@ -111,11 +112,21 @@ angular.module('ice.entry.service', [])
                 var count = 0;
                 // selectedTypes is the type of entries selected
                 for (var k in selectedTypes) if (selectedTypes.hasOwnProperty(k)) ++count;
-                return !this.allSelected() && canEdit && selectedSearchResultsCount > 0 && count == 1;
+                return !this.allSelected() && canEdit && selectedSearchResultsCount > 0 && count == 1 && !this.canRestore();
             },
 
             canDelete: function () {
                 return !this.allSelected() && (($rootScope.user && $rootScope.user.isAdmin) || canDelete) && selectedSearchResultsCount > 0;
+            },
+
+            canRestore: function () {
+                if (allSelection.type && allSelection.type == 'ALL')
+                    return false;
+                return this.hasSelection() && this.getSelectedEntries()[0].visible == 'DELETED';
+            },
+
+            isAdmin: function () {
+                return $rootScope.user && $rootScope.user.isAdmin;
             },
 
             // determines if an entry has been selected
@@ -134,6 +145,14 @@ angular.module('ice.entry.service', [])
                 return allSelection.type == 'ALL';
             },
 
+            setSearch: function (query) {
+                searchQuery = query;
+            },
+
+            getSearch: function () {
+                return searchQuery;
+            },
+
             // resets all selected and send notifications
             reset: function () {
                 selectedEntries = {};
@@ -143,6 +162,7 @@ angular.module('ice.entry.service', [])
                 allSelection = {};
                 canEdit = false;
                 canDelete = false;
+                searchQuery = undefined;
                 $rootScope.$emit("EntrySelected", selectedSearchResultsCount);
             }
         }
@@ -488,31 +508,10 @@ angular.module('ice.entry.service', [])
                         display: 'Experimental Data',
                         isPrivileged: false,
                         countName: 'experimentalDataCount',
-                        icon: 'fa-magic'
+                        icon: 'fa-database'
                     }
                 ];
             }
-        }
-    })
-    .factory('CustomField', function ($resource, $cookieStore) {
-        return function () {
-
-            var sessionId = $cookieStore.get("sessionId");
-
-            return $resource('rest/custom-fields', {id: '@id'}, {
-                createNewCustomField: {
-                    method: 'POST',
-                    responseType: "json",
-                    headers: {'X-ICE-Authentication-SessionId': sessionId}
-                },
-
-                deleteCustomField: {
-                    method: 'DELETE',
-                    responseType: "json",
-                    url: "rest/custom-fields/:id",
-                    headers: {'X-ICE-Authentication-SessionId': sessionId}
-                }
-            });
         }
     })
 ;

@@ -5,7 +5,7 @@ import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.sample.*;
-import org.jbei.ice.lib.utils.Emailer;
+import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
@@ -38,7 +38,7 @@ public class RequestRetriever {
      * Creates a new sample request for the specified user and specified entry.
      * The default status is "IN CART"
      */
-    public ArrayList<SampleRequest> placeSampleInCart(String userId, SampleRequest sampleRequest) {
+    public boolean placeSampleInCart(String userId, SampleRequest sampleRequest) {
         long partId = sampleRequest.getPartData().getId();
         Entry entry = entryDAO.get(sampleRequest.getPartData().getId());
 
@@ -51,7 +51,7 @@ public class RequestRetriever {
         try {
             List<Request> requests = dao.getSampleRequestByStatus(account, entry, SampleRequestStatus.IN_CART);
             if (requests != null && !requests.isEmpty())
-                return getSampleRequestsInCart(account);
+                return true;
 
             Request request = new Request();
             request.setAccount(account);
@@ -62,25 +62,11 @@ public class RequestRetriever {
             request.setType(sampleRequest.getRequestType());
             request.setRequested(new Date(System.currentTimeMillis()));
             request.setUpdated(request.getRequested());
-            dao.create(request);
-            return getSampleRequestsInCart(account);
+            return dao.create(request) != null;
         } catch (DAOException e) {
             Logger.error(e);
-            return null;
+            return false;
         }
-    }
-
-    protected ArrayList<SampleRequest> getSampleRequestsInCart(Account account) {
-        int count = dao.getCount(account);
-        String sort = "requested";
-        List<Request> requestList = dao.getAccountRequests(account, SampleRequestStatus.IN_CART, 0, count, sort, false);
-
-        ArrayList<SampleRequest> requests = new ArrayList<>();
-
-        for (Request request : requestList)
-            requests.add(request.toDataTransferObject());
-
-        return requests;
     }
 
     public UserSamples getUserSamples(String userId, SampleRequestStatus status, int start, int limit, String sort,
@@ -186,7 +172,7 @@ public class RequestRetriever {
                     body += " samples";
                 body += "\n\nPlease go to the following link to review pending requests.\n\n";
                 body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/admin/samples";
-                Emailer.send(email, subject, body);
+                EmailFactory.getEmail().send(email, subject, body);
             }
         }
 

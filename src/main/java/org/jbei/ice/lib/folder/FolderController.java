@@ -7,7 +7,6 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
@@ -237,6 +236,7 @@ public class FolderController {
                 return details;
 
             case PRIVATE:
+            case TRANSFERRED:
                 Folder folder = dao.get(folderId);
                 if (folder == null)
                     return null;
@@ -304,6 +304,8 @@ public class FolderController {
             long folderSize = dao.getFolderSize(folder.getId(), null, true);
             details.setCount(folderSize);
             details.setType(folder.getType());
+            if (folder.getCreationTime() != null)
+                details.setCreationTime(folder.getCreationTime().getTime());
             details.setCanEdit(true);
             folderDetails.add(details);
         }
@@ -331,6 +333,8 @@ public class FolderController {
             details.setType(folder.getType());
             long folderSize = dao.getFolderSize(folder.getId(), null, true);
             details.setCount(folderSize);
+            if (folder.getCreationTime() != null)
+                details.setCreationTime(folder.getCreationTime().getTime());
             folderDetails.add(details);
         }
 
@@ -348,39 +352,12 @@ public class FolderController {
             FolderDetails details = folder.toDataTransferObject();
             long folderSize = dao.getFolderSize(folder.getId(), null, false);
             details.setCount(folderSize);
+            if (folder.getCreationTime() != null)
+                details.setCreationTime(folder.getCreationTime().getTime());
             folderDetails.add(details);
         }
 
         return folderDetails;
-    }
-
-    public boolean enablePublicReadAccess(String userId, long folderId) {
-        AccessPermission permission = new AccessPermission();
-        permission.setType(AccessPermission.Type.READ_FOLDER);
-        permission.setTypeId(folderId);
-        permission.setArticle(AccessPermission.Article.GROUP);
-        permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
-        FolderPermissions folderPermissions = new FolderPermissions(folderId);
-        return folderPermissions.createPermission(userId, permission) != null;
-    }
-
-    public boolean disablePublicReadAccess(String userId, long folderId) {
-        Folder folder = dao.get(folderId);
-        if (folder == null)
-            return false;
-
-        authorization.expectWrite(userId, folder);
-
-        GroupController groupController = new GroupController();
-        Group publicGroup = groupController.createOrRetrievePublicGroup();
-
-        permissionDAO.removePermission(null, folder, null, null, publicGroup, true, false);
-        if (folder.isPropagatePermissions()) {
-            for (Entry folderContent : folder.getContents()) {
-                permissionsController.disablePublicReadAccess(userId, folderContent.getId());
-            }
-        }
-        return true;
     }
 
     protected Account getAccount(String userId) {

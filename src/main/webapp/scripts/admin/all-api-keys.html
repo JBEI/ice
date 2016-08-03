@@ -4,17 +4,20 @@
     </div>
 
     <div class="pad_top" ng-if="apiKeys && apiKeys.length">
-        <table class="table table-border-bottom table-hover">
+        <table class="table table-border-bottom table-hover" style="width: 98%;">
             <thead>
             <tr>
-                <th>ClientId</th>
-                <th>Creator</th>
-                <th>Creation Time</th>
-                <!--<th></th>-->
+                <th></th>
+                <th class="entry-table-header">ClientId</th>
+                <th class="entry-table-header">Creator</th>
+                <th class="entry-table-header">Creation Time</th>
             </tr>
             </thead>
             <tbody>
             <tr ng-repeat="apiKey in apiKeys">
+                <td class="table-index-label">
+                    <b>{{$index+1 | number}}</b>
+                </td>
                 <td>{{apiKey.clientId}}</td>
                 <td><a ng-href="profile/{{apiKey.account.id}}">{{apiKey.account.firstName}}
                     {{apiKey.account.lastName}}</a></td>

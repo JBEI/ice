@@ -7,11 +7,11 @@
              ng-init="showAddCollection=false">
 
             <div class="collection-menu" ng-click='selectCollection(collection.name)'
-                 ng-mouseenter="showAddCollection=collection.name==='personal'"
+                 ng-mouseenter="showAddCollection=selectedFolder===collection.name"
                  ng-mouseleave="showAddCollection=false">
 
                 <span ng-show="collection.name!==selectedFolder">
-                <i class="fa fa-fw" style="font-size: 17px; color: #d1d0d0;" ng-class="collection.icon"></i>
+                <i class="fa fa-fw" style="font-size: 16px; color: #d1d0d0;" ng-class="collection.icon"></i>
                     {{collection.display}}
                 </span>
 
@@ -23,9 +23,17 @@
                 <span class="menu_count">
                     <span ng-hide="showAddCollection">{{(collection.count | number) || 0}}</span>
                     <!--shown only for personal collection-->
-                    <i ng-show="showAddCollection" ng-click="addCollectionIconClick()"
-                       class="fa fa-plus edit_icon" style="font-size: 17px" stop-event="click">
+                    <i ng-show="showAddCollection && collection.name==='personal'" ng-click="addCollectionIconClick()"
+                       uib-tooltip="Add"
+                       class="fa fa-fw fa-plus edit_icon" stop-event="click">
                     </i>
+
+                    <i ng-show="showAddCollection" stop-event="click" class="opacity_hover fa fa-fw" ng-class="
+                    {'fa-sort-alpha-asc': !sortParams.asc && sortParams.field=='folderName',
+                    'fa-sort-alpha-desc': sortParams.asc && sortParams.field=='folderName',
+                    'fa-sort-amount-asc': !sortParams.asc && sortParams.field=='creationTime',
+                    'fa-sort-amount-desc': sortParams.asc && sortParams.field=='creationTime'}
+                    " ng-click="sortCollectionFolders()"></i>
                 </span>
             </div>
 

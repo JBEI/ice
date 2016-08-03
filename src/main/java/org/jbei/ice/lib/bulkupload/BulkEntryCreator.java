@@ -8,16 +8,16 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.bulkupload.EditMode;
-import org.jbei.ice.lib.dto.bulkupload.EntryField;
+import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.sample.PartSample;
+import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.search.blast.BlastPlus;
-import org.jbei.ice.lib.utils.Emailer;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
@@ -292,7 +292,7 @@ public class BulkEntryCreator {
                 body += "Please login to the registry at:\n\n";
                 body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
                 body += "\n\nand use the \"Pending Approval\" menu item to approve it\n\nThanks.";
-                Emailer.send(email, subject, body);
+                EmailFactory.getEmail().send(email, subject, body);
             }
             return processedBulkUpload;
         }
@@ -585,7 +585,7 @@ public class BulkEntryCreator {
                 InputStream attachmentStream = files.get(attachmentName);
 
                 // clear
-                ArrayList<Attachment> attachments = DAOFactory.getAttachmentDAO().getByEntry(entry);
+                List<Attachment> attachments = DAOFactory.getAttachmentDAO().getByEntry(entry);
                 if (attachments != null && !attachments.isEmpty()) {
                     for (Attachment attachment : attachments) {
                         String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);

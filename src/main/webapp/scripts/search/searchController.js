@@ -1,13 +1,15 @@
 'use strict';
 
 angular.module('ice.search.controller', [])
-    .controller('SearchController', function ($scope, $http, $cookieStore, $location, Entry, Search, EntryContextUtil,
-                                              Selection, WebOfRegistries) {
+    .controller('SearchController', function ($scope, $http, $cookieStore, $location, EntryContextUtil,
+                                              Selection, Util, localStorageService) {
 
         $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
+        var query = {entryTypes: ['STRAIN', 'PLASMID', 'PART', 'ARABIDOPSIS'], queryString: undefined};
 
         $scope.$on("RunSearch", function (event, filters) {
+            query = filters;
             $scope.searchResults = undefined;
             $scope.searchFilters = filters;
             $scope.params.currentPage = 1;
@@ -17,17 +19,34 @@ angular.module('ice.search.controller', [])
         var runAdvancedSearch = function (filters) {
             $scope.loadingSearchResults = true;
 
-            Search().runAdvancedSearch({webSearch: filters.webSearch}, filters,
-                function (result) {
-                    $scope.searchResults = result;
-                    $scope.loadingSearchResults = false;
-                },
-                function (error) {
-                    $scope.loadingSearchResults = false;
-                    $scope.searchResults = undefined;
-                    console.log(error);
-                }
-            );
+            Util.post("rest/search", filters, function (result) {
+                $scope.searchResults = result;
+                $scope.loadingSearchResults = false;
+            }, {webSearch: filters.webSearch}, function () {
+                $scope.loadingSearchResults = false;
+                $scope.searchResults = undefined;
+            });
+        };
+
+        $scope.selectAllClass = function () {
+            if (Selection.allSelected()) // || $scope.folder.entries.length === Selection.getSelectedEntries().length)
+                return 'fa-check-square-o';
+
+            if (Selection.hasSelection())
+                return 'fa-minus-square';
+            return 'fa-square-o';
+        };
+
+        $scope.selectAllSearchResults = function () {
+            if (Selection.allSelected()) {
+                Selection.setTypeSelection('none');
+                Selection.setSearch(undefined);
+            }
+            else {
+                Selection.setTypeSelection('all');
+                Selection.setSearch(query);
+                console.log(query);
+            }
         };
 
         $scope.searchResultPageChanged = function () {
@@ -75,23 +94,16 @@ angular.module('ice.search.controller', [])
 
         $scope.tooltipDetails = function (entry) {
             $scope.currentTooltip = undefined;
-            var sessionId = $cookieStore.get("sessionId");
-
-            Entry(sessionId).tooltip({partId: entry.id},
-                function (result) {
-                    $scope.currentTooltip = result;
-                }, function (error) {
-                    console.error(error);
-                });
+            Util.get("rest/parts/" + entry.id + "/tooltip", function (result) {
+                $scope.currentTooltip = result;
+            });
         };
 
         $scope.remoteTooltipDetails = function (result) {
             $scope.currentTooltip = undefined;
-            WebOfRegistries().getToolTip({partnerId: result.partner.id, entryId: result.entryInfo.id},
+            Util.get("rest/partners/" + result.partner.id + "/entries/" + result.entryInfo.id + "/tooltip",
                 function (result) {
                     $scope.currentTooltip = result;
-                }, function (error) {
-                    console.error(error);
                 });
         };
 
@@ -104,11 +116,10 @@ angular.module('ice.search.controller', [])
             EntryContextUtil.setContextCallback(function (offset, callback) {
                 $scope.searchFilters.parameters.start = offset;
                 $scope.searchFilters.parameters.retrieveCount = 1;
-
-                Search().runAdvancedSearch({webSearch: $scope.searchFilters.webSearch}, $scope.searchFilters,
+                Util.post("rest/search", $scope.searchFilters,
                     function (result) {
                         callback(result.results[0].entryInfo.id);
-                    }
+                    }, {webSearch: $scope.searchFilters.webSearch}
                 );
             }, $scope.searchResults.resultCount, offset, "/search", $scope.searchResults.sortField);
 
@@ -123,12 +134,84 @@ angular.module('ice.search.controller', [])
         };
 
         $scope.searchEntrySelected = function (entry) {
+            if (Selection.isSelected(entry))
+                return true;
+
             return Selection.searchEntrySelected(entry);
         };
 
         $scope.hStepChanged = function () {
             $scope.params.currentPage = 1;
-            runAdvancedSearch($scope.params);
+            //$scope.searchResultPageChanged();
+            $scope.searchFilters.parameters.retrieveCount = $scope.params.limit;
+            $scope.searchFilters.parameters.start = 0;
+
+            //console.log($scope.searchFilters);
+            //console.log($scope.params);
+            //var offset = (($scope.params.currentPage - 1) * $scope.params.limit) + index;
+            //EntryContextUtil.setContextCallback(function (offset, callback) {
+            //    $scope.searchFilters.parameters.start = offset;
+            //    $scope.searchFilters.parameters.retrieveCount = 1;
+
+            runAdvancedSearch($scope.searchFilters);
+        };
+
+        $scope.resultsHeaders = {
+            relevance: {field: "relevance", display: "Relevance", selected: true},
+            hasSample: {field: "hasSample", display: "Has Sample", selected: true},
+            hasSequence: {field: "hasSequence", display: "Has Sequence", selected: true},
+            //alias: {field: "alias", display: "Alias"},
+            created: {field: "creationTime", display: "Created", selected: true}
+        };
+
+        var storedFields = localStorageService.get('searchResultsHeaderFields');
+        if (!storedFields) {
+            // set default headers
+            var searchResultsHeaderFields = [];
+            for (var key in $scope.resultsHeaders) {
+                if (!$scope.resultsHeaders.hasOwnProperty(key))
+                    continue;
+
+                var header = $scope.resultsHeaders[key];
+                if (header.selected) {
+                    searchResultsHeaderFields.push(header.field);
+                }
+            }
+
+            // and store
+            localStorageService.set('searchResultsHeaderFields', searchResultsHeaderFields);
+        } else {
+            console.log($scope.resultsHeaders);
+            // set user selected
+            for (var key in $scope.resultsHeaders) {
+                if (!$scope.resultsHeaders.hasOwnProperty(key))
+                    continue;
+
+                var header = $scope.resultsHeaders[key];
+                header.selected = (storedFields.indexOf(header.field) != -1);
+            }
+        }
+
+        $scope.selectedHeaderField = function (header, $event) {
+            if ($event) {
+                $event.preventDefault();
+                $event.stopPropagation();
+            }
+            header.selected = !header.selected;
+            var storedFields = localStorageService.get('searchResultsHeaderFields');
+
+            if (header.selected) {
+                // selected by user, add to stored list
+                storedFields.push(header.field);
+                localStorageService.set('searchResultsHeaderFields', storedFields);
+            } else {
+                // not selected by user, remove from stored list
+                var i = storedFields.indexOf(header.field);
+                if (i != -1) {
+                    storedFields.splice(i, 1);
+                    localStorageService.set('searchResultsHeaderFields', storedFields);
+                }
+            }
         };
     })
     .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {
