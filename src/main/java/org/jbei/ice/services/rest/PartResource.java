@@ -511,6 +511,7 @@ public class PartResource extends RestResource {
     public Response deleteSample(@Context UriInfo info, @PathParam("id") long partId,
                                  @PathParam("sampleId") long sampleId) {
         String userId = requireUserId();
+        log(userId, "deleting sample " + sampleId + " for part " + partId);
         boolean success = sampleService.delete(userId, partId, sampleId);
         return super.respond(success);
     }

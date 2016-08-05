@@ -16,6 +16,7 @@ import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Service for dealing with {@link Sample}s
@@ -111,11 +112,15 @@ public class SampleService {
     /**
      * Creates location records for a sample contained in a 96 well plate
      * Provides support for 2-D barcoded systems. Validates the storage hierarchy before creating.
+     *
+     * @param sampleDepositor userID - unique identifier for user performing action
+     * @param mainLocation    96 well plate location
+     * @return sample storage with a complete hierachy or null
      */
     protected Storage createPlate96Location(String sampleDepositor, StorageLocation mainLocation) {
         // validate: expected format is [PLATE96, WELL, (optional - TUBE)]
         StorageLocation well = mainLocation.getChild();
-        StorageLocation tube = null;
+        StorageLocation tube;
         if (well != null) {
             tube = well.getChild();
             if (tube != null) {
@@ -130,28 +135,29 @@ public class SampleService {
                     }
                 }
             }
+        } else {
+            return null;
         }
 
-        if (storageDAO.storageExists(mainLocation.getDisplay(), Storage.StorageType.PLATE96)) {
-            if (well == null)
-                return null;
+        if (tube == null) {
+            return null;
+        }
 
-            if (storageDAO.storageExists(well.getDisplay(), Storage.StorageType.WELL)) {
-                // if well has no tube then duplicate
-                if (tube == null) {
+        // create storage locations
+        Storage currentStorage;
+        List<Storage> storageList = storageDAO.retrieveStorageByIndex(mainLocation.getDisplay(), SampleType.PLATE96);
+        if (storageList != null && storageList.size() > 0) {
+            currentStorage = storageList.get(0);
+
+            Set<Storage> wells = currentStorage.getChildren(); // check if there is a sample in that well
+            for (Storage thisWell : wells) {
+                if (thisWell.getIndex().equals(well.getDisplay()) && thisWell.getChildren() != null) {
                     Logger.error("Plate " + mainLocation.getDisplay()
                             + " already has a well storage at " + well.getDisplay());
                     return null;
                 }
-
-                // check tube
             }
-        }
-
-        // create storage locations
-        List<Storage> plates = storageDAO.retrieveStorageByIndex(mainLocation.getDisplay(), SampleType.PLATE96);
-        Storage currentStorage = (plates == null || plates.isEmpty()) ? null : plates.get(0);
-        if (currentStorage == null) {
+        }  else {
             currentStorage = createStorage(sampleDepositor, mainLocation.getDisplay(), mainLocation.getType());
             currentStorage = storageDAO.create(currentStorage);
         }
@@ -314,8 +320,18 @@ public class SampleService {
         try {
             Storage storage = sample.getStorage();
             while (storage != null) {
-                DAOFactory.getStorageDAO().delete(storage);
-                storage = storage.getParent();
+                Storage parent = storage.getParent();
+
+                if (storage.getChildren().size() == 0) {
+                    DAOFactory.getStorageDAO().delete(storage);
+                }
+
+                if (parent != null) {
+                    parent.getChildren().remove(storage);
+                    storage = parent;
+                } else {
+                    break;
+                }
             }
 
             sample.setStorage(null);
