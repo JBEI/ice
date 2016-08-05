@@ -16,6 +16,7 @@ import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Service for dealing with {@link Sample}s
@@ -134,22 +135,12 @@ public class SampleService {
                     }
                 }
             }
+        } else {
+            return null;
         }
 
-        if (storageDAO.storageExists(mainLocation.getDisplay(), Storage.StorageType.PLATE96)) {
-            if (well == null)
-                return null;
-
-            if (storageDAO.storageExists(well.getDisplay(), Storage.StorageType.WELL)) {
-                // if well has no tube then duplicate
-                if (tube == null) {
-                    Logger.error("Plate " + mainLocation.getDisplay()
-                            + " already has a well storage at " + well.getDisplay());
-                    return null;
-                }
-
-                // check tube
-            }
+        if (tube == null) {
+            return null;
         }
 
         // create storage locations
@@ -157,6 +148,15 @@ public class SampleService {
         List<Storage> storageList = storageDAO.retrieveStorageByIndex(mainLocation.getDisplay(), SampleType.PLATE96);
         if (storageList != null && storageList.size() > 0) {
             currentStorage = storageList.get(0);
+
+            Set<Storage> wells = currentStorage.getChildren(); // check if there is a sample in that well
+            for (Storage thisWell: wells) {
+                if (thisWell.getIndex().equals(well.getDisplay()) && thisWell.getChildren() != null) {
+                    Logger.error("Plate " + mainLocation.getDisplay()
+                            + " already has a well storage at " + well.getDisplay());
+                    return null;
+                }
+            }
         } else {
             currentStorage = createStorage(sampleDepositor, mainLocation.getDisplay(), mainLocation.getType());
             currentStorage = storageDAO.create(currentStorage);
@@ -306,7 +306,7 @@ public class SampleService {
      * @param sampleId unique identifier for sample being deleted
      * @return true is deletion successful, false otherwise
      */
-    public boolean delete(String userId, long partId, long sampleId) { // TODO: 8/2/16 doesn't work with the bug fixed 
+    public boolean delete(String userId, long partId, long sampleId) {
         Sample sample = dao.get(sampleId);
         if (sample == null)
             return true;
@@ -320,8 +320,18 @@ public class SampleService {
         try {
             Storage storage = sample.getStorage();
             while (storage != null) {
-                DAOFactory.getStorageDAO().delete(storage);
-                storage = storage.getParent();
+                Storage parent = storage.getParent();
+
+                if (storage.getChildren().size() == 0) {
+                    DAOFactory.getStorageDAO().delete(storage);
+                }
+
+                if (parent != null) {
+                    parent.getChildren().remove(storage);
+                    storage = parent;
+                } else {
+                    break;
+                }
             }
 
             sample.setStorage(null);

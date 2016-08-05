@@ -96,9 +96,10 @@ public class SampleServiceTest {
         Account account = AccountCreator.createTestAccount("testDelete", false);
         String userId = account.getEmail();
 
-        Strain strain = TestEntryCreator.createTestStrain(account);
-        PartSample partSample = new PartSample();
-        partSample.setLabel("test");
+        // ----- CASE #1 -----
+        Strain strain1 = TestEntryCreator.createTestStrain(account);
+        PartSample partSample1 = new PartSample();
+        partSample1.setLabel("testForShelfScheme1");
 
         // well
         StorageLocation well = new StorageLocation();
@@ -117,19 +118,92 @@ public class SampleServiceTest {
         shelf.setType(SampleType.SHELF);
         shelf.setChild(box);
 
-        partSample.setLocation(shelf);
-        partSample = service.createSample(userId, strain.getId(), partSample, null);
-        Assert.assertNotNull(partSample);
+        partSample1.setLocation(well);
+        partSample1 = service.createSample(userId, strain1.getId(), partSample1, null);
+        Assert.assertNotNull(partSample1);
 
         // fetch
-        List<PartSample> samples = service.retrieveEntrySamples(userId, strain.getId());
-        Assert.assertEquals(1, samples.size());
-        StorageLocation location = samples.get(0).getLocation();
+        List<PartSample> samples1 = service.retrieveEntrySamples(userId, strain1.getId());
+        Assert.assertEquals(1, samples1.size());
+        StorageLocation location1 = samples1.get(0).getLocation();
 
         // delete
-        Assert.assertTrue(service.delete(userId, strain.getId(), samples.get(0).getId()));
+        Assert.assertTrue(service.delete(userId, strain1.getId(), samples1.get(0).getId()));
 
-        Assert.assertNull(DAOFactory.getStorageDAO().get(location.getId()));
+        Assert.assertNull(DAOFactory.getStorageDAO().get(location1.getId()));
+
+        // ----- CASE 2 -----
+
+        Strain strain2 = TestEntryCreator.createTestStrain(account);
+        PartSample partSample2 = new PartSample();
+        partSample2.setLabel("testForPlateScheme2");
+
+        // tube2
+        StorageLocation tube2 = new StorageLocation();
+        tube2.setDisplay("tube2");
+        tube2.setType(SampleType.TUBE);
+
+        // well
+        StorageLocation well2 = new StorageLocation();
+        well2.setDisplay("well2");
+        well2.setType(SampleType.WELL);
+        well2.setChild(tube2);
+
+        // plate2
+        StorageLocation plate2 = new StorageLocation();
+        plate2.setDisplay("plate2");
+        plate2.setType(SampleType.PLATE96);
+        plate2.setChild(well2);
+
+        partSample2.setLocation(tube2);
+        partSample2 = service.createSample(userId, strain2.getId(), partSample2, null);
+        Assert.assertNotNull(partSample2);
+
+        // ----- CASE 3 -----
+        PartSample partSample3 = new PartSample();
+        partSample3.setLabel("testForPlateScheme3");
+
+        // tube2
+        StorageLocation tube3 = new StorageLocation();
+        tube3.setDisplay("tube3");
+        tube3.setType(SampleType.TUBE);
+
+        // well
+        StorageLocation well3 = new StorageLocation();
+        well3.setDisplay("well3");
+        well3.setType(SampleType.WELL);
+        well3.setChild(tube3);
+
+        // plate2
+        StorageLocation plate3 = new StorageLocation();
+        plate3.setDisplay("plate3");
+        plate3.setType(SampleType.PLATE96);
+        plate3.setChild(well3);
+
+        partSample3.setLocation(tube3);
+        partSample3 = service.createSample(userId, strain2.getId(), partSample3, null);
+        Assert.assertNotNull(partSample3);
+
+        // fetch
+        List<PartSample> samples3 = service.retrieveEntrySamples(userId, strain2.getId());
+        Assert.assertEquals(2, samples3.size());
+        StorageLocation location3 = samples3.get(1).getLocation();
+
+        // delete #2 and #3 consequently
+        Assert.assertTrue(service.delete(userId, strain2.getId(), samples3.get(1).getId()));
+
+        Assert.assertNull(DAOFactory.getStorageDAO().get(location3.getId()));
+
+        List<PartSample> samples2 = service.retrieveEntrySamples(userId, strain2.getId());
+        Assert.assertEquals(1, samples2.size());
+        StorageLocation location2 = samples2.get(0).getLocation();
+
+        Assert.assertTrue(service.delete(userId, strain2.getId(), samples2.get(0).getId()));
+
+        Assert.assertNull(DAOFactory.getStorageDAO().get(location2.getId()));
+
+        List<PartSample> samplesEmpty = service.retrieveEntrySamples(userId, strain2.getId());
+        Assert.assertEquals(0, samplesEmpty.size());
     }
 
     @Test
