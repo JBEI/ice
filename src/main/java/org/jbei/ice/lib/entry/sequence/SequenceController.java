@@ -9,12 +9,14 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.parsers.GeneralParser;
+import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
@@ -25,6 +27,7 @@ import org.jbei.ice.storage.model.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -474,5 +477,40 @@ public class SequenceController extends HasEntry {
         }
 
         return new ByteArrayWrapper(sequenceString.getBytes(), name);
+    }
+
+    public SequenceInfo parseSequence(InputStream inputStream, String fileName) throws InvalidFormatParserException {
+        int dotIndex = fileName.lastIndexOf('.');
+        if (dotIndex != -1) {
+            String ext = fileName.substring(dotIndex + 1);
+
+            // unique case for sbol since it can result in multiple entries created
+            if ("rdf".equalsIgnoreCase(ext) || "xml".equalsIgnoreCase(ext) || "sbol".equalsIgnoreCase(ext)) {
+//                PartData partData = ModelToInfoFactory.getInfo(entry);
+//                SBOLParser sbolParser = new SBOLParser(partData);
+//                return sbolParser.parse(inputStream, fileName);
+                // todo : cannot parse sbol yet
+                return null;
+            }
+        }
+
+        // parse actual sequence
+        try {
+            String sequenceString = IOUtils.toString(inputStream);
+            DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+            if (dnaSequence == null)
+                throw new InvalidFormatParserException("Could not parse sequence string");
+
+            Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+            sequence.setSequenceUser(sequenceString);
+            if (!StringUtils.isBlank(fileName))
+                sequence.setFileName(fileName);
+
+            SequenceInfo info = sequence.toDataTransferObject();
+            info.setSequence(dnaSequence);
+            return info;
+        } catch (IOException e) {
+            throw new InvalidFormatParserException(e);
+        }
     }
 }

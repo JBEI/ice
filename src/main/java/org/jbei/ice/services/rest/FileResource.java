@@ -298,6 +298,25 @@ public class FileResource extends RestResource {
     }
 
     /**
+     * Create a model of the uploaded sequence file. Note that this does not associate the sequence
+     * with any existing entry. It just parses the uploaded file
+     */
+    @POST
+    @Path("sequence/model")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createSequenceModel(@FormDataParam("file") InputStream fileInputStream,
+                                        @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
+        final String fileName = contentDispositionHeader.getFileName();
+        SequenceController sequenceController = new SequenceController();
+        try {
+            return super.respond(sequenceController.parseSequence(fileInputStream, fileName));
+        } catch (InvalidFormatParserException e) {
+            throw new WebApplicationException(e.getMessage());
+        }
+    }
+
+    /**
      * Extracts the csv information and writes it to the temp dir and returns the file uuid. Then
      * the client is expected to make another rest call with the uuid in a separate window. This
      * workaround is due to not being able to download files using XHR or sumsuch
