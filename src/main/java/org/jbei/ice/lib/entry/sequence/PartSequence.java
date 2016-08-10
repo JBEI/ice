@@ -59,6 +59,7 @@ public class PartSequence extends HasEntry {
         newEntry.setVisibility(Visibility.DRAFT.getValue());
         EntryCreator creator = new EntryCreator();
         entry = creator.createEntry(account, newEntry, null);
+        this.sequenceDAO = DAOFactory.getSequenceDAO();
     }
 
     public PartSequence(String userId, String entryId) {
