@@ -202,7 +202,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         if (Selection.getSelectedEntries().length != 0) {
             return Selection.getSelectedEntries()[0].visible == "TRANSFERRED" && Selection.isAdmin();
         } else {
-            return false;
+            return (FolderSelection.getSelectedFolder() && FolderSelection.getSelectedFolder().type == "TRANSFERRED");
         }
     };
 
