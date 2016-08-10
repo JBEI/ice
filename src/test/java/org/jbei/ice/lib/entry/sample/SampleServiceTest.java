@@ -2,6 +2,7 @@ package org.jbei.ice.lib.entry.sample;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.TestEntryCreator;
+import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.sample.PartSample;
@@ -9,6 +10,7 @@ import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
 import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Storage;
 import org.jbei.ice.storage.model.Strain;
 import org.junit.After;
 import org.junit.Assert;
@@ -49,11 +51,50 @@ public class SampleServiceTest {
 
         Assert.assertNotNull(partSample);
         Assert.assertNotNull(partSample.getLabel());
+
+        // create samples on plate
+        AccountTransfer accountTransfer = new AccountTransfer();
+        accountTransfer.setEmail(userId);
+
+        for (int i = 1; i <= 9; i += 1) {
+            String location = "A0" + i;
+            String index = "I" + i;
+
+            Strain strainWithSample = TestEntryCreator.createTestStrain(account);
+
+            PartSample plateSample = new PartSample();
+            plateSample.setLabel("Working Copy");
+            plateSample.setDepositor(accountTransfer);
+
+            // plate
+            StorageLocation storageLocation = new StorageLocation();
+            storageLocation.setType(SampleType.PLATE96);
+            storageLocation.setDisplay("0000000004");
+
+            // well
+            StorageLocation well = new StorageLocation();
+            well.setType(SampleType.WELL);
+            well.setDisplay(location);
+            storageLocation.setChild(well);
+
+            // tube
+            StorageLocation tube = new StorageLocation();
+            tube.setType(SampleType.TUBE);
+            tube.setDisplay(index);
+            well.setChild(tube);
+
+            plateSample.setLocation(storageLocation);
+            plateSample = service.createSample(userId, strainWithSample.getId(), plateSample, null);
+            Assert.assertNotNull(plateSample);
+        }
+
+        List<Storage> result = DAOFactory.getStorageDAO().retrieveStorageByIndex("0000000004", SampleType.PLATE96);
+        Assert.assertNotNull(result);
+        Assert.assertEquals(1, result.size());
     }
 
-
     @Test
-    public void testRetrieveEntrySamples() throws Exception{
+    public void testRetrieveEntrySamples() throws Exception {
         Account account = AccountCreator.createTestAccount("SampleServiceTest.testRetrieveEntrySamples", false);
         String userId = account.getEmail();
 
@@ -64,7 +105,7 @@ public class SampleServiceTest {
 
         Assert.assertNotNull(samplesList);
 
-        for (PartSample partSample: samplesList) {
+        for (PartSample partSample : samplesList) {
             Assert.assertNotNull(partSample.getId());
             Assert.assertNotNull(partSample.getCreationTime());
             Assert.assertNotNull(partSample.getLabel());
@@ -83,7 +124,7 @@ public class SampleServiceTest {
             }
 
             if (partSample.getComments() != null) {
-                for (UserComment comment: partSample.getComments()) {
+                for (UserComment comment : partSample.getComments()) {
                     Assert.assertNotNull(comment.getId());
                     Assert.assertNotNull(comment.getMessage());
                 }
@@ -233,6 +274,7 @@ public class SampleServiceTest {
 
         partSample.setLocation(location);
         partSample = service.createSample(userId, strain.getId(), partSample, null);
+        Assert.assertNotNull(partSample);
 
         List<PartSample> partSamples = service.getSamplesByBarcode(userId, location.getDisplay());
         Assert.assertNotNull(partSamples);

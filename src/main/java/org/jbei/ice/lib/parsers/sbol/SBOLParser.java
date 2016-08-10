@@ -171,13 +171,7 @@ public class SBOLParser {
         Account account = DAOFactory.getAccountDAO().getByEmail(part.getCreatorEmail());
         Entry entry = entryCreator.createEntry(account, part, null);
         parseToGenBank(document, entry.getName(), entry, moduleDefinition.getIdentity().toString());
-//        sequence.setEntry(entry);
-//        if (!StringUtils.isBlank(entry.getName()))
-//            sequence.setFileName(entry.getName());
 
-//        sequence.setUri(moduleDefinition.getIdentity().toString());    // tODO
-//        sequence.setIdentifier(moduleDefinition.getDisplayId());
-//        DAOFactory.getSequenceDAO().saveSequence(sequence);
         identityEntryMap.put(identity, entry.getId());
         return entry.getId();
     }

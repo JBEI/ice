@@ -114,13 +114,13 @@ public class SampleService {
      * Provides support for 2-D barcoded systems. Validates the storage hierarchy before creating.
      *
      * @param sampleDepositor userID - unique identifier for user performing action
-     * @param mainLocation 96 well plate location
+     * @param mainLocation    96 well plate location
      * @return sample storage with a complete hierachy or null
      */
     protected Storage createPlate96Location(String sampleDepositor, StorageLocation mainLocation) {
         // validate: expected format is [PLATE96, WELL, (optional - TUBE)]
         StorageLocation well = mainLocation.getChild();
-        StorageLocation tube = null;
+        StorageLocation tube;
         if (well != null) {
             tube = well.getChild();
             if (tube != null) {
@@ -150,14 +150,14 @@ public class SampleService {
             currentStorage = storageList.get(0);
 
             Set<Storage> wells = currentStorage.getChildren(); // check if there is a sample in that well
-            for (Storage thisWell: wells) {
+            for (Storage thisWell : wells) {
                 if (thisWell.getIndex().equals(well.getDisplay()) && thisWell.getChildren() != null) {
                     Logger.error("Plate " + mainLocation.getDisplay()
                             + " already has a well storage at " + well.getDisplay());
                     return null;
                 }
             }
-        } else {
+        }  else {
             currentStorage = createStorage(sampleDepositor, mainLocation.getDisplay(), mainLocation.getType());
             currentStorage = storageDAO.create(currentStorage);
         }
@@ -193,7 +193,7 @@ public class SampleService {
      *
      * @param currentLocation storage location
      * @param currentStorage
-     * @param depositor userID - unique identifier for user performing action
+     * @param depositor       userID - unique identifier for user performing action
      * @return updated storage
      */
     protected Storage createChildrenStorage(StorageLocation currentLocation, Storage currentStorage, String depositor) {
