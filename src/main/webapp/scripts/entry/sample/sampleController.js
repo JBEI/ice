@@ -120,7 +120,7 @@ angular.module('ice.entry.sample.controller', [])
         };
 
         // add sample 96 well plate click
-        $scope.cellBarcodeClick = function (row, col) {
+        $scope.cellBarcodeClick = function (row, col) { //todo: prevent the popover from opening for multiple wells
             var rc = row + (10 + col + '').slice(-2);
             $scope.newSample.open = {
                 cell: rc

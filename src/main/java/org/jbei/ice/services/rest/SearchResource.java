@@ -56,12 +56,19 @@ public class SearchResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response search(@DefaultValue("false") @QueryParam("webSearch") final boolean searchWeb,
                            final SearchQuery query) {
+        String userId = getUserId();
         if (searchWeb) {
+            if (StringUtils.isEmpty(userId))
+                throw new WebApplicationException(Response.Status.FORBIDDEN);
+
             WebSearch webSearch = new WebSearch();
             return super.respond(webSearch.run(query));
         }
 
-        final String userId = requireUserId();
+        if (StringUtils.isEmpty(userId)) {
+            requireWebPartner();
+        }
+
         final SearchResults results = controller.runSearch(userId, query);
         return super.respond(Response.Status.OK, results);
     }
