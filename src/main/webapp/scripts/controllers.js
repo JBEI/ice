@@ -357,7 +357,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
 iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $uibModalInstance, Util, FolderSelection,
                                                                       $stateParams, Selection, selectedFolder) {
     $scope.selectedFolder = selectedFolder;
-    console.log(FolderSelection.getSelectedFolder(), selectedFolder);
+    //console.log(FolderSelection.getSelectedFolder(), selectedFolder);
 
     $scope.closeModal = function () {
         $uibModalInstance.close();
