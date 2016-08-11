@@ -163,7 +163,10 @@ public class RemoteTransfer {
     }
 
     /**
-     * Transfers the sequence file for the part and any parts that are linked to it
+     * Transfers the sequence file for the part and any parts that are linked to it.
+     * If the attached sequence was uploaded as a file or pasted, the system
+     * transfers that. If not if attempts to convert the attached sequence to genbank format
+     * and transfers that
      *
      * @param partner destination for the sequence transfer
      * @param data    data for part whose sequences are to be transferred
@@ -176,6 +179,7 @@ public class RemoteTransfer {
             Entry entry = entryDAO.get(data.getId());
             Sequence sequence = sequenceDAO.getByEntry(entry);
             String sequenceString = sequence.getSequenceUser();
+
             if (StringUtils.isEmpty(sequenceString)) {
                 GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
                 genbankFormatter.setCircular(true);

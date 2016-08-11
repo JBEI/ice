@@ -1501,10 +1501,11 @@ angular.module('ice.entry.controller', [])
                         $scope.annotations = undefined;
                         Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
                             angular.forEach(result.features, function (feature) {
-                                    if (feature.strand == 1)
+                                    //console.log(feature);
+                                    //if (feature.strand == 1)
                                         feature.length = (feature.locations[0].end - feature.locations[0].genbankStart) + 1;
-                                    else
-                                        feature.length = (feature.locations[0].genbankStart - feature.locations[0].end) + 1;
+                                    //else
+                                    //feature.length = (feature.locations[0].genbankStart - feature.locations[0].end) + 1;
                                 }
                             );
                             $scope.annotations = result;

@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.RNATools;
+import org.biojava.bio.symbol.IllegalAlphabetException;
 import org.biojava.bio.symbol.IllegalSymbolException;
 import org.biojava.bio.symbol.SymbolList;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -24,8 +25,10 @@ import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.FeatureDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
+import org.jbei.ice.storage.hibernate.dao.SequenceFeatureDAO;
 import org.jbei.ice.storage.model.Feature;
 import org.jbei.ice.storage.model.Sequence;
+import org.jbei.ice.storage.model.SequenceFeature;
 
 import java.io.*;
 import java.nio.channels.FileLock;
@@ -88,7 +91,7 @@ public class BlastPlus {
             programInputWriter.close();
             process.getOutputStream().close();
 
-            //TODO this should go into the thread itself & have future wait on it
+            // TODO this should go into the thread itself & have future wait on it
             final int exitValue = process.waitFor();
             switch (exitValue) {
                 case 0:
@@ -177,20 +180,21 @@ public class BlastPlus {
             List<String[]> lines = reader.readAll();
 
             for (String[] line : lines) {
-                if (line.length != 8) {
+                if (line.length != 9) {
                     continue;
                 }
 
                 long id = Long.decode(line[0]);
                 String label = line[1];
                 String type = line[2];
-                int queryStart = Integer.decode(line[3]);
-                int queryEnd = Integer.decode(line[4]);
-                int subjectStart = Integer.decode(line[5]);
-                int subjectEnd = Integer.decode(line[6]);
-                int strand = "plus".equalsIgnoreCase(line[7]) ? 1 : -1;
+                int strand = Integer.decode(line[3]);
+                int queryStart = Integer.decode(line[4]);
+                int queryEnd = Integer.decode(line[5]);
+                int subjectStart = Integer.decode(line[6]);
+                int subjectEnd = Integer.decode(line[7]);
+//                int strand = "plus".equalsIgnoreCase(line[7]) ? 1 : -1;
 
-                if (!duplicates.add(label + ":" + queryStart + ":" + queryEnd)) {
+                if (!duplicates.add(label + ":" + queryStart + ":" + queryEnd + ":" + strand)) {
                     continue;
                 }
 
@@ -647,6 +651,8 @@ public class BlastPlus {
      */
     private static void writeBigFastaFileForFeatures(BufferedWriter writer) throws BlastException {
         FeatureDAO featureDAO = DAOFactory.getFeatureDAO();
+        SequenceFeatureDAO sequenceFeatureDAO = DAOFactory.getSequenceFeatureDAO();
+
         long count = featureDAO.getFeatureCount();
         if (count <= 0)
             return;
@@ -662,19 +668,54 @@ public class BlastPlus {
             if (feature.getCuration() != null && feature.getCuration().isExclude())
                 continue;
 
-            String sequenceString = feature.getSequence().trim();
+            boolean hasNegativeStrand = false;
+            boolean hasPositiveStrand = false;
+
+            List<SequenceFeature> sequenceFeatures = sequenceFeatureDAO.getByFeature(feature);
+            if (sequenceFeatures == null || sequenceFeatures.isEmpty()) {
+                hasPositiveStrand = true;
+            } else {
+                for (SequenceFeature sequenceFeature : sequenceFeatures) {
+                    if (sequenceFeature.getStrand() == 1) {
+                        hasPositiveStrand = true;
+                    } else if (sequenceFeature.getStrand() == -1) {
+                        hasNegativeStrand = true;
+                    }
+                }
+            }
+
             try {
-                String idString = ">"
-                        + feature.getId() + DELIMITER
-                        + feature.getName() + DELIMITER
-                        + feature.getGenbankType();//+ DELIMITER
-                idString += "\n";
-                writer.write(idString);
-                writer.write(sequenceString + "\n");
+                String sequenceString = feature.getSequence().trim();
+
+                if (hasNegativeStrand) {
+                    try {
+                        SymbolList symbolList = DNATools.createDNA(sequenceString);
+                        symbolList = DNATools.reverseComplement(symbolList);
+                        writeSequenceString(feature, writer, symbolList.seqString(), -1);
+                    } catch (IllegalSymbolException | IllegalAlphabetException e) {
+                        Logger.warn(e.getMessage());
+                    }
+                }
+
+                if (hasPositiveStrand) {
+                    writeSequenceString(feature, writer, sequenceString, 1);
+                }
             } catch (IOException e) {
                 throw new BlastException(e);
             }
         }
+    }
+
+    private static void writeSequenceString(Feature feature, BufferedWriter writer, String seq, int strand)
+            throws IOException {
+        String idString = ">"
+                + feature.getId() + DELIMITER
+                + feature.getName() + DELIMITER
+                + feature.getGenbankType() + DELIMITER
+                + Integer.toString(strand);
+        idString += "\n";
+        writer.write(idString);
+        writer.write(seq + "\n");
     }
 
     /**
