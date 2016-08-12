@@ -1,5 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import org.hibernate.Criteria;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
@@ -49,6 +50,7 @@ public class SequenceFeatureDAO extends HibernateRepository<SequenceFeature> {
     public List<SequenceFeature> getEntrySequenceFeatures(Entry entry) {
         return currentSession().createCriteria(SequenceFeature.class)
                 .createAlias("sequence", "sequence")
+                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
                 .add(Restrictions.eq("sequence.entry", entry))
                 .list();
     }
