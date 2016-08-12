@@ -59,6 +59,7 @@ public class PartSequence extends HasEntry {
         newEntry.setVisibility(Visibility.DRAFT.getValue());
         EntryCreator creator = new EntryCreator();
         entry = creator.createEntry(account, newEntry, null);
+        this.sequenceDAO = DAOFactory.getSequenceDAO();
     }
 
     public PartSequence(String userId, String entryId) {
@@ -78,6 +79,14 @@ public class PartSequence extends HasEntry {
         return getFeaturedSequence(entry, canEdit);
     }
 
+    /**
+     * Parses a sequence in a file and associates it with the current entry
+     *
+     * @param inputStream input stream of bytes representing the file
+     * @param fileName    name of file being parsed
+     * @return wrapper around the internal model used to represent sequence information
+     * @throws InvalidFormatParserException on Exception parsing the contents of the file
+     */
     public SequenceInfo parseSequenceFile(InputStream inputStream, String fileName) throws InvalidFormatParserException {
         int dotIndex = fileName.lastIndexOf('.');
         if (dotIndex != -1) {
@@ -122,22 +131,25 @@ public class PartSequence extends HasEntry {
         FeaturedDNASequence featuredDNASequence = sequenceToDNASequence(sequence);
         featuredDNASequence.setCanEdit(canEdit);
         featuredDNASequence.setIdentifier(entry.getPartNumber());
-        String uriPrefix = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX).getValue();
-        if (!StringUtils.isEmpty(uriPrefix)) {
+        Configuration configuration = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
+
+        if (configuration != null) {
+            String uriPrefix = configuration.getValue();
             featuredDNASequence.setUri(uriPrefix + "/entry/" + entry.getId());
         }
         return featuredDNASequence;
     }
 
-    public FeaturedDNASequence sequenceToDNASequence(Sequence sequence) {
+    protected FeaturedDNASequence sequenceToDNASequence(Sequence sequence) {
         if (sequence == null) {
             return null;
         }
 
         List<DNAFeature> features = new LinkedList<>();
+        List<SequenceFeature> sequenceFeatures = DAOFactory.getSequenceFeatureDAO().getEntrySequenceFeatures(this.entry);
 
-        if (sequence.getSequenceFeatures() != null && sequence.getSequenceFeatures().size() > 0) {
-            for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
+        if (sequenceFeatures != null && sequenceFeatures.size() > 0) {
+            for (SequenceFeature sequenceFeature : sequenceFeatures) {
                 DNAFeature dnaFeature = new DNAFeature();
                 dnaFeature.setUri(sequenceFeature.getUri());
 
