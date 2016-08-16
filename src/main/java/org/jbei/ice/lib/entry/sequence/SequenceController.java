@@ -444,12 +444,12 @@ public class SequenceController extends HasEntry {
                     break;
 
                 case "sbol1":
-                    sequenceString = compose(sequence, new SBOLFormatter(true));
+                    sequenceString = compose(sequence, new SBOL1Formatter());
                     name = entry.getPartNumber() + ".xml";
                     break;
 
                 case "sbol2":
-                    sequenceString = compose(sequence, new SBOLFormatter(false));
+                    sequenceString = compose(sequence, new SBOL2Formatter());
                     name = entry.getPartNumber() + ".xml";
                     break;
 

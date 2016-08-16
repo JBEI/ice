@@ -16,13 +16,13 @@ import java.util.*;
 /**
  * @author Hector Plahar
  */
-public class SBOLVisitor {
+public class SBOL1Visitor {
 
     private final DnaComponent dnaComponent;
     private final String uriString;
     private Set<String> uris;
 
-    public SBOLVisitor() {
+    public SBOL1Visitor() {
         dnaComponent = SBOLFactory.createDnaComponent();
         uriString = Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/entry";
         uris = new HashSet<>();

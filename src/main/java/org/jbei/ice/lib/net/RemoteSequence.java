@@ -9,7 +9,8 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.AbstractFormatter;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.FastaFormatter;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.SBOLFormatter;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.SBOL1Formatter;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.SBOL2Formatter;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.rest.IceRestClient;
@@ -98,12 +99,12 @@ public class RemoteSequence {
                     break;
 
                 case "sbol1":
-                    formatter = new SBOLFormatter(true);
+                    formatter = new SBOL1Formatter();
                     name = name + ".xml";
                     break;
 
                 case "sbol2":
-                    formatter = new SBOLFormatter(false);
+                    formatter = new SBOL2Formatter();
                     name = name + ".xml";
                     break;
 

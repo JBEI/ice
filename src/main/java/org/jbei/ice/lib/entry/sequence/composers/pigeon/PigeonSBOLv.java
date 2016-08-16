@@ -2,7 +2,7 @@ package org.jbei.ice.lib.entry.sequence.composers.pigeon;
 
 import com.google.gson.Gson;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.SBOLVisitor;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.SBOL1Visitor;
 import org.jbei.ice.storage.model.Sequence;
 import org.sbolstandard.core.DnaComponent;
 import org.sbolstandard.core.SequenceAnnotation;
@@ -105,7 +105,7 @@ public class PigeonSBOLv {
     }
 
     public static URI generatePigeonVisual(Sequence sequence) {
-        SBOLVisitor visitor = new SBOLVisitor();
+        SBOL1Visitor visitor = new SBOL1Visitor();
         visitor.visit(sequence);
 
         StringBuilder sb = new StringBuilder();
@@ -121,7 +121,7 @@ public class PigeonSBOLv {
         if (sequence == null)
             return "# Arcs";
 
-        SBOLVisitor visitor = new SBOLVisitor();
+        SBOL1Visitor visitor = new SBOL1Visitor();
         visitor.visit(sequence);
 
         StringBuilder sb = new StringBuilder();
