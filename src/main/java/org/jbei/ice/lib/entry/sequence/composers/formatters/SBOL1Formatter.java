@@ -17,35 +17,17 @@ import java.io.OutputStream;
  *
  * @author Hector Plahar
  */
-public class SBOLFormatter extends AbstractFormatter {
+public class SBOL1Formatter extends AbstractFormatter {
 
-    private final boolean isVersion1;
-
-    public SBOLFormatter(boolean version1) {
-        this.isVersion1 = version1;
+    public SBOL1Formatter() {
     }
 
     @Override
     public void format(Sequence sequence, OutputStream outputStream) throws FormatterException, IOException {
-        SBOLVisitor visitor = new SBOLVisitor();
+        SBOL1Visitor visitor = new SBOL1Visitor();
         visitor.visit(sequence);
         SBOLDocument sbolDocument = createXmlDocument(visitor.getDnaComponent());
-        if (isVersion1) {
-            SBOLFactory.write(sbolDocument, outputStream);
-            return;
-        }
-
-        // convert to sbol 2
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        SBOLFactory.write(sbolDocument, out);
-
-        try {
-            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(out.toByteArray());
-            org.sbolstandard.core2.SBOLDocument v2 = SBOLReader.read(byteArrayInputStream);
-            SBOLWriter.write(v2, outputStream);
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+        SBOLFactory.write(sbolDocument, outputStream);
     }
 
     private SBOLDocument createXmlDocument(DnaComponent dnaComponent) {

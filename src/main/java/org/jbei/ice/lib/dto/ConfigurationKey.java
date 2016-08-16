@@ -21,7 +21,7 @@ public enum ConfigurationKey implements IDataTransferModel {
     ERROR_EMAIL_EXCEPTION_PREFIX("ERROR"),
     SEND_EMAIL_ON_ERRORS("NO"),
     PROJECT_NAME(""),
-    URI_PREFIX("localhost:8443"),
+    URI_PREFIX("http://localhost:8443"),
     PART_NUMBER_PREFIX("TEST"),
     PART_NUMBER_DIGITAL_SUFFIX("000001"),
     PART_NUMBER_DELIMITER("_"),

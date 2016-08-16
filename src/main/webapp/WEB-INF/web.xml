@@ -4,6 +4,7 @@
          version="2.4">
     <description>Inventory for Composable Elements</description>
 
+    <!--
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>Protected Context</web-resource-name>
@@ -13,6 +14,7 @@
             <transport-guarantee>CONFIDENTIAL</transport-guarantee>
         </user-data-constraint>
     </security-constraint>
+    -->
 
     <display-name>ice</display-name>
 
