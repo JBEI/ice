@@ -686,6 +686,8 @@ public class BlastPlus {
 
             try {
                 String sequenceString = feature.getSequence().trim();
+                if (StringUtils.isEmpty(sequenceString))
+                    continue;
 
                 if (hasNegativeStrand) {
                     try {
@@ -694,6 +696,7 @@ public class BlastPlus {
                         writeSequenceString(feature, writer, symbolList.seqString(), -1);
                     } catch (IllegalSymbolException | IllegalAlphabetException e) {
                         Logger.warn(e.getMessage());
+                        continue;
                     }
                 }
 
