@@ -236,8 +236,9 @@ public class RequestRetriever {
 
                 String email = request.getAccount().getEmail();
                 int index = email.indexOf('@');
+                char typeChar = request.getType() == SampleRequestType.LIQUID_CULTURE ? 'L' : 'A';
 
-                line[1] = plate + " " + well + " " + email.substring(0, index);
+                line[1] = typeChar + " " + plate + " " + well + " " + email.substring(0, index);
                 String markers = "";
 
                 if (entry.getSelectionMarkers() != null && !entry.getSelectionMarkers().isEmpty()) {
