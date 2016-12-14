@@ -165,6 +165,27 @@ angular.module('ice.common.service', [])
                         headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
                     }
                 }).delete(successHandler, errorCallback)
+            },
+
+            download: function (url, a) {
+                var down = $resource(url, {}, {
+                    download: {
+                        method: 'POST',
+                        responseType: 'arraybuffer',
+                        transformResponse: function (data, headers) {
+                            return {
+                                data: data,
+                                filename: function () {
+                                    var header = headers('content-disposition');
+                                    var result = header.split(';')[1].trim().split('=')[1];
+                                    return result.replace(/"/g, '');
+                                }
+                            }
+                        }
+                    }
+                });
+
+                return down.download(a);
             }
         }
     });

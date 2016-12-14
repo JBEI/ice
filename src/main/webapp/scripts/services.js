@@ -23,6 +23,10 @@ angular.module('iceApp.services', ['ngCookies', 'ngResource'])
                     });
             },
 
+            getSessionId: function () {
+                return $cookieStore.get('sessionId');
+            },
+
             getLoggedInUser: function () {
                 if ($rootScope.user) {
                     return $rootScope.user;

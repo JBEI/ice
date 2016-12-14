@@ -100,6 +100,10 @@ public class Request implements DataModel {
         this.growthTemperature = growthTemperature;
     }
 
+    public Integer getGrowthTemperature() {
+        return growthTemperature;
+    }
+
     public Entry getEntry() {
         return entry;
     }

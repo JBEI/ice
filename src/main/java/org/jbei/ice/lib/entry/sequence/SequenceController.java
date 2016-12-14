@@ -426,6 +426,8 @@ public class SequenceController extends HasEntry {
                 case "original":
                     sequenceString = sequence.getSequenceUser();
                     name = sequence.getFileName();
+                    if (StringUtils.isEmpty(name))
+                        name = entry.getPartNumber() + ".gb";
                     break;
 
                 case "genbank":
