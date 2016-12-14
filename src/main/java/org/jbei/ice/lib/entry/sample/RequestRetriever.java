@@ -199,7 +199,7 @@ public class RequestRetriever {
 
                 String[] line = new String[3];
                 Entry entry = request.getEntry();
-                line[0] = entry.getPartNumber();
+                line[0] = entry.getName();
 
                 ArrayList<PartSample> samples = sampleService.retrieveEntrySamples(userId, request.getEntry().getId());
                 String plate = null;
@@ -236,8 +236,9 @@ public class RequestRetriever {
 
                 String email = request.getAccount().getEmail();
                 int index = email.indexOf('@');
+                char typeChar = request.getType() == SampleRequestType.LIQUID_CULTURE ? 'L' : 'A';
 
-                line[1] = plate + " " + well + " " + email.substring(0, index);
+                line[1] = typeChar + " " + plate + " " + well + " " + email.substring(0, index);
                 String markers = "";
 
                 if (entry.getSelectionMarkers() != null && !entry.getSelectionMarkers().isEmpty()) {
