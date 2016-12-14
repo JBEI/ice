@@ -205,30 +205,37 @@ public class RequestRetriever {
                 String plate = null;
                 String well = null;
 
-                for (PartSample partSample : samples) {
-                    if (partSample.getLabel().contains("backup"))
-                        continue;
-
-                    // get plate
-                    StorageLocation location = partSample.getLocation();
-                    if (location == null)
-                        continue;
-
-                    if (location.getType() == SampleType.PLATE96) {
-                        plate = location.getDisplay().replaceFirst("^0+(?!$)", "");
+                if (samples.size() == 1) {
+                    if (samples.get(0).getLocation().getType() == SampleType.GENERIC) {
+                        plate = "generic";
+                        well = "";
                     }
+                } else {
+                    for (PartSample partSample : samples) {
+                        if (partSample.getLabel().contains("backup"))
+                            continue;
 
-                    StorageLocation child = location.getChild();
-                    while (child != null) {
-                        if (child.getType() == SampleType.WELL) {
-                            well = child.getDisplay();
-                            break;
+                        // get plate
+                        StorageLocation location = partSample.getLocation();
+                        if (location == null)
+                            continue;
+
+                        if (location.getType() == SampleType.PLATE96) {
+                            plate = location.getDisplay().replaceFirst("^0+(?!$)", "");
                         }
-                        child = child.getChild();
-                    }
 
-                    if (!StringUtils.isEmpty(well) && !StringUtils.isEmpty(plate))
-                        break;
+                        StorageLocation child = location.getChild();
+                        while (child != null) {
+                            if (child.getType() == SampleType.WELL) {
+                                well = child.getDisplay();
+                                break;
+                            }
+                            child = child.getChild();
+                        }
+
+                        if (!StringUtils.isEmpty(well) && !StringUtils.isEmpty(plate))
+                            break;
+                    }
                 }
 
                 if (plate == null || well == null)
@@ -239,6 +246,7 @@ public class RequestRetriever {
                 char typeChar = request.getType() == SampleRequestType.LIQUID_CULTURE ? 'L' : 'A';
 
                 line[1] = typeChar + " " + plate + " " + well + " " + email.substring(0, index);
+                line[1] = line[1].trim().replaceAll(" +", " ");
                 String markers = "";
 
                 if (entry.getSelectionMarkers() != null && !entry.getSelectionMarkers().isEmpty()) {
@@ -247,7 +255,7 @@ public class RequestRetriever {
                     }
                 }
 
-                line[2] = markers;
+                line[2] = markers.trim().replaceAll(" +", " ");
                 if (request.getGrowthTemperature() != null)
                     line[2] += " " + request.getGrowthTemperature();
 
