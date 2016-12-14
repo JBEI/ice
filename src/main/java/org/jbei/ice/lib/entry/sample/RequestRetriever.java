@@ -1,9 +1,12 @@
 package org.jbei.ice.lib.entry.sample;
 
+import com.opencsv.CSVWriter;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.sample.*;
 import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.utils.Utils;
@@ -14,7 +17,11 @@ import org.jbei.ice.storage.hibernate.dao.RequestDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Request;
+import org.jbei.ice.storage.model.SelectionMarker;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -177,5 +184,75 @@ public class RequestRetriever {
         }
 
         return true;
+    }
+
+    public ByteArrayOutputStream generateCSVFile(String userId, ArrayList<Long> ids) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        OutputStreamWriter streamWriter = new OutputStreamWriter(out);
+        try (CSVWriter writer = new CSVWriter(streamWriter)) {
+            SampleService sampleService = new SampleService();
+
+            for (long id : ids) {
+                Request request = dao.get(id);
+                if (request == null)
+                    continue;
+
+                String[] line = new String[3];
+                Entry entry = request.getEntry();
+                line[0] = entry.getPartNumber();
+
+                ArrayList<PartSample> samples = sampleService.retrieveEntrySamples(userId, request.getEntry().getId());
+                String plate = null;
+                String well = null;
+
+                for (PartSample partSample : samples) {
+                    if (partSample.getLabel().contains("backup"))
+                        continue;
+
+                    // get plate
+                    StorageLocation location = partSample.getLocation();
+                    if (location == null)
+                        continue;
+
+                    if (location.getType() == SampleType.PLATE96) {
+                        plate = location.getDisplay().replaceFirst("^0+(?!$)", "");
+                    }
+
+                    StorageLocation child = location.getChild();
+                    while (child != null) {
+                        if (child.getType() == SampleType.WELL) {
+                            well = child.getDisplay();
+                            break;
+                        }
+                        child = child.getChild();
+                    }
+
+                    if (!StringUtils.isEmpty(well) && !StringUtils.isEmpty(plate))
+                        break;
+                }
+
+                if (plate == null || well == null)
+                    continue;
+
+                String email = request.getAccount().getEmail();
+                int index = email.indexOf('@');
+
+                line[1] = plate + " " + well + " " + email.substring(0, index);
+                String markers = "";
+
+                if (entry.getSelectionMarkers() != null && !entry.getSelectionMarkers().isEmpty()) {
+                    for (SelectionMarker marker : entry.getSelectionMarkers()) {
+                        markers += (marker.getName() + " ");
+                    }
+                }
+
+                line[2] = markers;
+                if (request.getGrowthTemperature() != null)
+                    line[2] += " " + request.getGrowthTemperature();
+
+                writer.writeNext(line);
+            }
+        }
+        return out;
     }
 }

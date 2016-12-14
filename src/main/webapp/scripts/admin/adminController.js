@@ -180,10 +180,12 @@ angular.module('ice.admin.controller', [])
             $scope.submitSetting(booleanSetting);
         }
     })
-    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, $uibModal, Util) {
+    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, $uibModal, Util,
+                                                          Authentication) {
         $rootScope.error = undefined;
 
         $scope.selectOptions = ['ALL', 'PENDING', 'FULFILLED', 'REJECTED'];
+        $scope.selectedRequests = [];
         $scope.maxSize = 5;
         $scope.params = {
             sort: 'requested',
@@ -192,6 +194,38 @@ angular.module('ice.admin.controller', [])
             status: 'ALL',
             limit: 15,
             hstep: [15, 30, 50, 100]
+        };
+
+        $scope.exportSelectedSamples = function () {
+            //console.log($scope.selectedRequests);
+            var selectedIds = [];
+            for (var i = 0; i < $scope.selectedRequests.length; i += 1) {
+                selectedIds.push($scope.selectedRequests[i].id);
+            }
+
+            var clickEvent = new MouseEvent("click", {
+                "view": window,
+                "bubbles": true,
+                "cancelable": false
+            });
+
+            Util.download("rest/samples/requests/file?sid=" + Authentication.getSessionId(), selectedIds).$promise.then(function (result) {
+                var url = URL.createObjectURL(new Blob([result.data]));
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = result.filename();
+                a.target = '_blank';
+                a.dispatchEvent(clickEvent);
+            });
+        };
+
+        $scope.selectRequest = function (request) {
+            var i = $scope.selectedRequests.indexOf(request);
+            if (i == -1) {
+                $scope.selectedRequests.push(request);
+            } else {
+                $scope.selectedRequests.splice(i, 1);
+            }
         };
 
         $scope.requestSamples = function () {
