@@ -199,7 +199,7 @@ public class RequestRetriever {
 
                 String[] line = new String[3];
                 Entry entry = request.getEntry();
-                line[0] = entry.getPartNumber();
+                line[0] = entry.getName();
 
                 ArrayList<PartSample> samples = sampleService.retrieveEntrySamples(userId, request.getEntry().getId());
                 String plate = null;
