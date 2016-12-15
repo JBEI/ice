@@ -69,6 +69,7 @@ public class RequestRetriever {
             request.setType(sampleRequest.getRequestType());
             request.setRequested(new Date(System.currentTimeMillis()));
             request.setUpdated(request.getRequested());
+            request.setPlateDescription(sampleRequest.getPlateDescription());
             return dao.create(request) != null;
         } catch (DAOException e) {
             Logger.error(e);
