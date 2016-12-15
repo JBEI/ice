@@ -154,7 +154,6 @@ angular.module('ice.common.service', [])
                     successHandler = function (resp) {
                     }
                 }
-
                 var errorCallback = this.handleError;
                 if (errHandler)
                     errorCallback = errHandler;

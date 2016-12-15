@@ -12,6 +12,7 @@ import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.TraceSequenceDAO;
+import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.io.File;
@@ -28,11 +29,14 @@ import java.util.List;
 public class SequenceAnalysisController {
 
     private final TraceSequenceDAO traceDao;
+    private final ShotgunSequenceDAO shotgunDao;
 
     public static final String TRACES_DIR_NAME = "traces";
+    public static final String SHOTGUN_DIR_NAME = "shotgunsequences";
 
     public SequenceAnalysisController() {
         traceDao = DAOFactory.getTraceSequenceDAO();
+        shotgunDao = DAOFactory.getShotgunSequenceDAO();
     }
 
     /**
@@ -96,6 +100,14 @@ public class SequenceAnalysisController {
 
         File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), TRACES_DIR_NAME).toFile();
         traceDao.delete(tracesDir, traceSequence);
+    }
+
+    public void removeShotgunSequence(ShotgunSequence shotgunSequence) {
+        if (shotgunSequence == null)
+            return;
+
+        File shotgunDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), SHOTGUN_DIR_NAME).toFile();
+        shotgunDao.delete(shotgunDir, shotgunSequence);
     }
 
     /**

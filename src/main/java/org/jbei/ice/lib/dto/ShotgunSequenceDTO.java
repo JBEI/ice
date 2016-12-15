@@ -14,19 +14,25 @@ import java.nio.file.Paths;
 import java.util.Scanner;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.Date;
 
 public class ShotgunSequenceDTO implements IDataTransferModel {
+
+    public long id;
     public String filename;
     public String call;
     public double score;
     public String fileId;
     public AccountTransfer depositor;
     public long created;
+    private boolean canEdit;
+
 
     public ShotgunSequenceDTO(ShotgunSequence s) {
         created = s.getCreationTime().getTime();
         filename = s.getFilename();
         fileId = s.getFileId();
+        id = s.getId();
         setQuality(fileId);
 
         Account a = DAOFactory.getAccountDAO().getByEmail(s.getDepositor());
@@ -34,6 +40,61 @@ public class ShotgunSequenceDTO implements IDataTransferModel {
         depositor.setEmail(a.getEmail());
         depositor.setFirstName(a.getFirstName());
         depositor.setLastName(a.getLastName());
+    }
+
+    // public ShotgunSequenceDTO() {
+    // }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String name) {
+        this.filename = name;
+    }
+
+    public AccountTransfer getDepositor() {
+        return depositor;
+    }
+
+    public void setDepositor(AccountTransfer depositor) {
+        this.depositor = depositor;
+    }
+
+    public long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created.getTime();
+    }
+
+    public void setCreated(long created) {
+        this.created = created;
+    }
+
+    public String getFileId() {
+        return fileId;
+    }
+
+    public void setFileId(String fileId) {
+        this.fileId = fileId;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public boolean isCanEdit() {
+        return canEdit;
+    }
+
+    public void setCanEdit(boolean canEdit) {
+        this.canEdit = canEdit;
     }
 
     private void setQuality(String fileId) {
@@ -85,4 +146,5 @@ public class ShotgunSequenceDTO implements IDataTransferModel {
             Logger.error(errMsg);
         }
     }
+
 }
