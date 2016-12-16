@@ -123,7 +123,7 @@ public class GenbankFormatter extends AbstractFormatter {
             }
 
             if (sequence.getSequenceFeatures() != null && sequence.getSequenceFeatures().size() > 0) {
-                Set<Feature> featureSet = new LinkedHashSet<Feature>();
+                Set<Feature> featureSet = new LinkedHashSet<>();
 
                 for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
                     if (sequenceFeature.getFeature() == null) {
@@ -156,7 +156,7 @@ public class GenbankFormatter extends AbstractFormatter {
 
                     featureTemplate.source = getDefaultFeatureSource();
                     featureTemplate.type = getFeatureType(sequenceFeature);
-                    featureTemplate.rankedCrossRefs = new TreeSet<Object>();
+                    featureTemplate.rankedCrossRefs = new TreeSet<>();
 
                     SimpleRichFeature simpleRichFeature = new SimpleRichFeature(simpleRichSequence, featureTemplate);
                     featureSet.add(simpleRichFeature);

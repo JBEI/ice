@@ -88,15 +88,17 @@ public class PartSequence extends HasEntry {
      * @throws InvalidFormatParserException on Exception parsing the contents of the file
      */
     public SequenceInfo parseSequenceFile(InputStream inputStream, String fileName) throws InvalidFormatParserException {
-        int dotIndex = fileName.lastIndexOf('.');
-        if (dotIndex != -1) {
-            String ext = fileName.substring(dotIndex + 1);
+        if (fileName != null) {
+            int dotIndex = fileName.lastIndexOf('.');
+            if (dotIndex != -1) {
+                String ext = fileName.substring(dotIndex + 1);
 
-            // unique case for sbol since it can result in multiple entries created
-            if ("rdf".equalsIgnoreCase(ext) || "xml".equalsIgnoreCase(ext) || "sbol".equalsIgnoreCase(ext)) {
-                PartData partData = ModelToInfoFactory.getInfo(entry);
-                SBOLParser sbolParser = new SBOLParser(partData);
-                return sbolParser.parse(inputStream, fileName);
+                // unique case for sbol since it can result in multiple entries created
+                if ("rdf".equalsIgnoreCase(ext) || "xml".equalsIgnoreCase(ext) || "sbol".equalsIgnoreCase(ext)) {
+                    PartData partData = ModelToInfoFactory.getInfo(entry);
+                    SBOLParser sbolParser = new SBOLParser(partData);
+                    return sbolParser.parse(inputStream, fileName);
+                }
             }
         }
 

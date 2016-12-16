@@ -19,6 +19,7 @@ public class SampleRequest implements IDataTransferModel {
     private SampleRequestType requestType;
     private PartData partData;
     private SampleRequestStatus status;
+    private String plateDescription;
     private long requestTime;
     private long updateTime;
     private int growthTemperature;
@@ -97,5 +98,13 @@ public class SampleRequest implements IDataTransferModel {
 
     public void setLocation(List<PartSample> location) {
         this.location = new ArrayList<>(location);
+    }
+
+    public String getPlateDescription() {
+        return plateDescription;
+    }
+
+    public void setPlateDescription(String plateDescription) {
+        this.plateDescription = plateDescription;
     }
 }

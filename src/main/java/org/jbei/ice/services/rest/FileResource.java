@@ -14,6 +14,7 @@ import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
+import org.jbei.ice.lib.dto.ShotgunSequenceDTO;
 import org.jbei.ice.lib.entry.EntriesAsCSV;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -30,6 +31,7 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Sequence;
+import org.jbei.ice.storage.model.ShotgunSequence;
 import org.jbei.ice.storage.model.TraceSequence;
 
 import javax.ws.rs.*;
@@ -217,10 +219,11 @@ public class FileResource extends RestResource {
     public Response getShotgunSequenceFile(@PathParam("fileId") String fileId,
                                            @QueryParam("sid") String sid) {
         ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
+        ShotgunSequence shotgunSequence = dao.getByFileId(fileId);
 
         try {
             final File file = dao.getFile(fileId);
-            return addHeaders(Response.ok(file), "sequence-" + ThreadLocalRandom.current().nextInt(10000, 100001) + ".ss.zip");
+            return addHeaders(Response.ok(file), shotgunSequence.getFilename());
         } catch (Exception e) {
             Logger.error(e);
             return Response.serverError().build();

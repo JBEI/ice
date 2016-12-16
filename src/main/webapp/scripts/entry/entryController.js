@@ -101,15 +101,106 @@ angular.module('ice.entry.controller', [])
                 $scope.newComment.samples.splice(idx, 1);
         }
     })
-    .controller('ShotgunSequenceController', function ($scope, $window, $cookieStore, $stateParams, Util) {
+    .controller('ShotgunSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, $uibModal, Util) {
         var entryId = $stateParams.id;
         $scope.shotgunUploadError = undefined;
+        $scope.maxSize = 5;
+        $scope.shotgunParams = {limit: 5, currentPage: 1, start: 0};
+
         Util.list('rest/parts/' + entryId + '/shotgunsequences', function (result) {
             $scope.shotgunSequences = result;
-        });
+        }, $scope.shotgunParams);
+
+        $scope.shotgunPageChanged = function () {
+            $scope.shotgunParams.start = ($scope.shotgunParams.currentPage - 1) * $scope.shotgunParams.limit;
+            Util.list("/rest/parts/" + entryId + "/shotgunsequences", function (result) {
+                $scope.shotgunSequences = result;
+            }, $scope.shotgunParams);
+        };
+
+        $scope.showAddShotgunSequenceModal = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: "scripts/entry/modal/add-shotgun-sequence.html",
+                controller: 'ShotgunSequenceUploadModalController',
+                backdrop: 'static',
+                resolve: {
+                    entryId: function () {
+                        return $stateParams.id;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function () {
+                $scope.shotgunParams.start = 0;
+
+                Util.list("/rest/parts/" + entryId + "/shotgunsequences", function (result) {
+                    Util.setFeedback("", "success");
+                    $scope.shotgunSequences = result;
+                    $scope.showUploadOptions = false;
+                    $scope.shotgunUploadError = false;
+                }, $scope.shotgunParams);
+            });
+        };
+
+        $scope.deleteShotgunSequenceFile = function (fileId) {
+            var foundSequence;
+            var foundIndex;
+
+            for (var i = 0; i < $scope.shotgunSequences.length; i++) {
+                var shotgunSequence = $scope.shotgunSequences[i];
+                if (shotgunSequence.fileId === fileId && shotgunSequence.fileId != undefined) {
+                    foundSequence = shotgunSequence;
+                    foundIndex = i;
+                    break;
+                }
+            }
+
+            if (foundSequence != undefined) {
+                Util.remove("rest/parts/" + entryId + "/shotgunsequences/" + foundSequence.id, {}, function (result) {
+                    $scope.shotgunSequences.splice(foundIndex, 1);
+                    $scope.entryStatistics.sequenceCount = $scope.shotgunSequences.length;
+                });
+            }
+        };
 
         $scope.downloadShotgunFile = function (sequence) {
             $window.open("rest/file/shotgunsequence/" + sequence.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
+        };
+    })
+    .controller('ShotgunSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId,
+                                                                $cookieStore) {
+        $scope.cancelAddShotgunSequence = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.shotgunSequenceUploader = new FileUploader({
+            scope: $scope, // to automatically update the html. Default: $rootScope
+            url: "rest/parts/" + entryId + "/shotgunsequences",
+            method: 'POST',
+            removeAfterUpload: true,
+            headers: {
+                "X-ICE-Authentication-SessionId": $cookieStore.get("sessionId")
+            },
+            autoUpload: true,
+            queueLimit: 1, // can only upload 1 file
+            formData: [
+                {
+                    entryId: entryId
+                }
+            ]
+        });
+
+        $scope.shotgunSequenceUploader.onSuccessItem = function (item, response, status, headers) {
+            if (status != "200") {
+                $scope.shotgunUploadError = true;
+                return;
+            }
+
+            $uibModalInstance.close();
+        };
+
+        $scope.shotgunSequenceUploader.onErrorItem = function (item, response, status, headers) {
+            $scope.shotgunUploadError = true;
         };
     })
     .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, $uibModal, Util) {
@@ -150,7 +241,7 @@ angular.module('ice.entry.controller', [])
                     $scope.traces = result;
                     $scope.showUploadOptions = false;
                     $scope.traceUploadError = false;
-                }, $scope.tracesParams);
+                });
             });
         };
 
@@ -1654,4 +1745,3 @@ angular.module('ice.entry.controller', [])
     }
 )
 ;
-

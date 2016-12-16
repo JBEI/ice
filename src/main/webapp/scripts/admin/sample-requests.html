@@ -1,5 +1,6 @@
 <div ng-controller="AdminSampleRequestController" style="height: 970px">
     <div class="pad_top" ng-if="sampleRequests.requests.length">
+        <button type="button" class="ice-button" ng-click="exportSelectedSamples()">Export</button>
         <button type="button" ng-click="searchSampleLocations()" class="ice-button">
             Search Sample Locations
         </button>
@@ -65,13 +66,15 @@
             </thead>
             <tbody>
             <tr data-ng-repeat="request in sampleRequests.requests" class="highlight-row-icons">
-                <td class="table-row-index">
-                    {{((params.currentPage - 1) * params.limit) + $index + 1 | number}}
+                <td>
+                    <i class="fa fa-fw cursor_pointer" ng-class="{'fa-square-o': selectedRequests.indexOf(request) == -1,
+                     'fa-check-square-o': selectedRequests.indexOf(request) != -1}"
+                       ng-click="selectRequest(request)"></i>
                 </td>
 
                 <td><a ng-href="entry/{{request.partData.id}}">{{request.partData.name}}</a>
                     <br>
-                    <small>{{request.partData.selectionMarkers.toString()}}</small>
+                    <small>{{request.plateDescription}}</small>
                 </td>
                 <td>
                     <span ng-if="request.requestType==='LIQUID_CULTURE'">
@@ -164,4 +167,6 @@
                         ng-options="opt for opt in params.hstep"></select></small>
         </div>
     </div>
+
+    <br><br><br> <br><br><br> <br>
 </div>

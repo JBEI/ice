@@ -220,6 +220,26 @@ public class EntryController extends HasEntry {
         return true;
     }
 
+    public boolean deleteShotgunSequence(String userId, long entryId, long shotgunId) {
+        Entry entry = dao.get(entryId);
+        if (entry == null)
+            return false;
+
+        ShotgunSequenceDAO shotgunSequenceDAO = DAOFactory.getShotgunSequenceDAO();
+        ShotgunSequence shotgunSequence = shotgunSequenceDAO.get(shotgunId);
+        if (shotgunSequence == null || !canEdit(userId, shotgunSequence.getDepositor(), entry))
+            return false;
+
+        try {
+            new SequenceAnalysisController().removeShotgunSequence(shotgunSequence);
+        } catch (Exception e) {
+            Logger.error(e);
+            return false;
+        }
+
+        return true;
+    }
+
     protected boolean canEdit(String userId, String depositor, Entry entry) {
         return userId.equalsIgnoreCase(depositor) || authorization.canWriteThoroughCheck(userId, entry);
     }
