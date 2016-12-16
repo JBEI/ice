@@ -110,6 +110,25 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
         return path.toFile();
     }
 
+    public ShotgunSequence getByFileId(String fileId) throws DAOException {
+        ShotgunSequence shotgunSequence = null;
+
+        Session session = currentSession();
+        try {
+            Query query = session.createQuery("from " + ShotgunSequence.class.getName() + " where fileId = :fileId");
+            query.setParameter("fileId", fileId);
+            Object queryResult = query.uniqueResult();
+
+            if (queryResult != null) {
+                shotgunSequence = (ShotgunSequence) queryResult;
+            }
+        } catch (HibernateException e) {
+            throw new DAOException("Failed to retrieve entry by fileId: " + fileId, e);
+        }
+
+        return shotgunSequence;
+    }
+
     public int getShotgunSequenceCount(Entry entry) {
         Number itemCount = (Number) currentSession().createCriteria(ShotgunSequence.class)
                 .setProjection(Projections.countDistinct("id"))

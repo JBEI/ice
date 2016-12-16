@@ -42,9 +42,6 @@ public class ShotgunSequenceDTO implements IDataTransferModel {
         depositor.setLastName(a.getLastName());
     }
 
-    // public ShotgunSequenceDTO() {
-    // }
-
     public String getFilename() {
         return filename;
     }
