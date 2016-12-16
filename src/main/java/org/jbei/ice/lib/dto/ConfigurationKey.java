@@ -26,7 +26,7 @@ public enum ConfigurationKey implements IDataTransferModel {
     PART_NUMBER_DIGITAL_SUFFIX("000001"),
     PART_NUMBER_DELIMITER("_"),
 
-    BLAST_INSTALL_DIR("../../Downloads/ncbi-blast-2.5.0+/bin"),
+    BLAST_INSTALL_DIR(""),
 
     NEW_REGISTRATION_ALLOWED("NO"),
     PASSWORD_CHANGE_ALLOWED("YES"),
