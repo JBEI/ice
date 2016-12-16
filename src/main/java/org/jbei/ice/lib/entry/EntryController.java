@@ -227,7 +227,7 @@ public class EntryController extends HasEntry {
 
         ShotgunSequenceDAO shotgunSequenceDAO = DAOFactory.getShotgunSequenceDAO();
         ShotgunSequence shotgunSequence = shotgunSequenceDAO.get(shotgunId);
-        if (shotgunSequence == null)
+        if (shotgunSequence == null || !canEdit(userId, shotgunSequence.getDepositor(), entry))
             return false;
 
         try {
