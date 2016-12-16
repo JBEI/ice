@@ -93,8 +93,18 @@ public class ShotgunSequence implements DataModel {
         this.creationTime = creationTime;
     }
 
+    // @Override
+    // public ShotgunSequenceDTO toDataTransferObject() {
+    //     return null;
+    // }
     @Override
     public ShotgunSequenceDTO toDataTransferObject() {
-        return null;
+        ShotgunSequence info = new ShotgunSequence();
+        info.setId(this.getId());
+        info.setCreationTime(this.getCreationTime());
+        info.setFilename(this.getFilename());
+        info.setFileId(this.getFileId());
+        ShotgunSequenceDTO newShotgunDTO = new ShotgunSequenceDTO(info);
+        return newShotgunDTO;
     }
 }

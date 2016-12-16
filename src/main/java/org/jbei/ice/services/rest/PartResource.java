@@ -404,7 +404,10 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/shotgunsequences")
     public ArrayList<ShotgunSequenceDTO> getShotgunSequences(
-            @PathParam("id") final long partId) {
+            @Context final UriInfo info,
+            @PathParam("id") final long partId,
+            @DefaultValue("100") @QueryParam("limit") int limit,
+            @DefaultValue("0") @QueryParam("start") int start) {
         final String userId = getUserId();
         ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
         final EntryDAO entryDAO = DAOFactory.getEntryDAO();
@@ -479,6 +482,16 @@ public class PartResource extends RestResource {
         if (!controller.deleteTraceSequence(userId, partId, traceId)) {
             return super.respond(Response.Status.UNAUTHORIZED);
         }
+        return super.respond(Response.Status.OK);
+    }
+
+    @DELETE
+    @Path("/{id}/shotgunsequences/{shotgunId}")
+    public Response deleteShotgunSequence(@Context final UriInfo info,
+                                @PathParam("id") final long partId,
+                                @PathParam("shotgunId") final long shotgunId) {
+        final String userId = getUserId();
+        controller.deleteShotgunSequence(userId, partId, shotgunId);
         return super.respond(Response.Status.OK);
     }
 

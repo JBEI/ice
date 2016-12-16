@@ -2,6 +2,7 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
@@ -88,6 +89,20 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
         return result;
     }
 
+    public int getCountByEntry(Entry entry) throws DAOException {
+        try {
+            Criteria criteria = currentSession().createCriteria(ShotgunSequence.class.getName())
+                    .add(Restrictions.eq("entry", entry))
+                    .setProjection(Projections.countDistinct("id"));
+            Number number = (Number) criteria.uniqueResult();
+            if (number == null)
+                return 0;
+            return number.intValue();
+        } catch (HibernateException e) {
+            throw new DAOException("Failed to get shotgun sequence by entry!", e);
+        }
+    }
+
     public File getFile(String fileId) {
         Path path = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
                 SHOTGUN_SEQUENCES_DIR,
@@ -95,11 +110,53 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
         return path.toFile();
     }
 
+    public ShotgunSequence getByFileId(String fileId) throws DAOException {
+        ShotgunSequence shotgunSequence = null;
+
+        Session session = currentSession();
+        try {
+            Query query = session.createQuery("from " + ShotgunSequence.class.getName() + " where fileId = :fileId");
+            query.setParameter("fileId", fileId);
+            Object queryResult = query.uniqueResult();
+
+            if (queryResult != null) {
+                shotgunSequence = (ShotgunSequence) queryResult;
+            }
+        } catch (HibernateException e) {
+            throw new DAOException("Failed to retrieve entry by fileId: " + fileId, e);
+        }
+
+        return shotgunSequence;
+    }
+
     public int getShotgunSequenceCount(Entry entry) {
         Number itemCount = (Number) currentSession().createCriteria(ShotgunSequence.class)
                 .setProjection(Projections.countDistinct("id"))
                 .add(Restrictions.eq("entry", entry)).uniqueResult();
         return itemCount.intValue();
+    }
+
+    public void delete(File shotgunFile, ShotgunSequence shotgunSequence) throws DAOException {
+        if (shotgunSequence == null) {
+            throw new DAOException("Failed to delete null Shotgun Sequence!");
+        }
+
+        try {
+            super.delete(shotgunSequence);
+            deleteShotgunSequenceToFile(shotgunFile, shotgunSequence);
+        } catch (IOException e) {
+            throw new DAOException("Failed to delete Shotgun Sequence file!", e);
+        }
+    }
+
+    private void deleteShotgunSequenceToFile(File shotgunFilesDirectory, ShotgunSequence shotgunSequence) throws IOException,
+            DAOException {
+        try {
+            File file = new File(shotgunFilesDirectory + File.separator + shotgunSequence.getFileId());
+            file.delete();
+        } catch (SecurityException e) {
+            throw new DAOException(e);
+        }
     }
 
     @Override
