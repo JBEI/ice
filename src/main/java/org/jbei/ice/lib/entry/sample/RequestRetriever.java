@@ -17,7 +17,6 @@ import org.jbei.ice.storage.hibernate.dao.RequestDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Request;
-import org.jbei.ice.storage.model.SelectionMarker;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -248,15 +247,7 @@ public class RequestRetriever {
 
                 line[1] = typeChar + " " + plate + " " + well + " " + email.substring(0, index);
                 line[1] = line[1].trim().replaceAll(" +", " ");
-                String markers = "";
-
-                if (entry.getSelectionMarkers() != null && !entry.getSelectionMarkers().isEmpty()) {
-                    for (SelectionMarker marker : entry.getSelectionMarkers()) {
-                        markers += (marker.getName() + " ");
-                    }
-                }
-
-                line[2] = markers.trim().replaceAll(" +", " ");
+                line[2] = request.getPlateDescription().trim().replaceAll(" +", " ");
                 if (request.getGrowthTemperature() != null)
                     line[2] += " " + request.getGrowthTemperature();
 
