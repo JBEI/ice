@@ -89,6 +89,7 @@ public class SequenceController extends HasEntry {
             return null;
 
 //        sequence = update(userId, sequence);
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
         sequence = save(userId, sequence);
         if (sequence != null)
             return sequenceToDNASequence(sequence);
@@ -144,7 +145,7 @@ public class SequenceController extends HasEntry {
 
         String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         dao.deleteSequence(sequence, tmpDir);
-//        BlastPlus.scheduleBlastIndexRebuildTask(true);  // todo : update is delete and save which is not right
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
         return true;
     }
 
