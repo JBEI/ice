@@ -21,9 +21,7 @@ import org.jbei.ice.storage.model.Request;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Handler for sample requests
@@ -192,7 +190,8 @@ public class RequestRetriever {
         try (CSVWriter writer = new CSVWriter(streamWriter)) {
             SampleService sampleService = new SampleService();
 
-            for (long id : ids) {
+            Set<Long> idSet = new HashSet<>(ids);
+            for (long id : idSet) {
                 Request request = dao.get(id);
                 if (request == null)
                     continue;

@@ -197,7 +197,6 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.exportSelectedSamples = function () {
-            //console.log($scope.selectedRequests);
             var selectedIds = [];
             for (var i = 0; i < $scope.selectedRequests.length; i += 1) {
                 selectedIds.push($scope.selectedRequests[i].id);
@@ -216,6 +215,7 @@ angular.module('ice.admin.controller', [])
                 a.download = result.filename();
                 a.target = '_blank';
                 a.dispatchEvent(clickEvent);
+                $scope.selectedRequests = [];
             });
         };
 
