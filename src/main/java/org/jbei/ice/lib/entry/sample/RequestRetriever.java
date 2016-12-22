@@ -104,7 +104,7 @@ public class RequestRetriever {
 
         for (Request request : results) {
             SampleRequest sampleRequest = request.toDataTransferObject();
-            ArrayList<PartSample> location = sampleService.retrieveEntrySamples(userId, request.getEntry().getId());
+            ArrayList<PartSample> location = sampleService.retrieveEntrySamples(userId, Long.toString(request.getEntry().getId()));
             sampleRequest.setLocation(location);
             samples.getRequests().add(sampleRequest);
         }
@@ -200,7 +200,7 @@ public class RequestRetriever {
                 Entry entry = request.getEntry();
                 line[0] = entry.getName();
 
-                ArrayList<PartSample> samples = sampleService.retrieveEntrySamples(userId, request.getEntry().getId());
+                ArrayList<PartSample> samples = sampleService.retrieveEntrySamples(userId, Long.toString(request.getEntry().getId()));
                 String plate = null;
                 String well = null;
 
