@@ -444,7 +444,8 @@ public class PartResource extends RestResource {
             Logger.error(e);
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
-        final boolean success = controller.addTraceSequence(userId, partId, file, fileName);
+        TraceSequences traceSequences = new TraceSequences(userId, partId);
+        final boolean success = traceSequences.addTraceSequence(file, fileName);
         return respond(success);
     }
 
