@@ -16,6 +16,7 @@ import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -233,9 +234,19 @@ public class SampleService {
             inCart = DAOFactory.getRequestDAO().getSampleRequestInCart(userAccount, entry) != null;
         }
 
+        ArrayList<Sample> siblingSamples = new ArrayList<>();
+        for (Sample sample : entrySamples) {
+            Storage storage = sample.getStorage();
+            siblingSamples.addAll(dao.getSamplesByStorage(storage));
+        }
+        entrySamples.addAll(siblingSamples);
+        Set<Sample> unique = new HashSet<Sample>(entrySamples);
+        entrySamples = new ArrayList<Sample>(unique);
+
         for (Sample sample : entrySamples) {
             // convert sample to info
             Storage storage = sample.getStorage();
+
             if (storage == null) {
                 // dealing with sample with no storage
                 PartSample generic = sample.toDataTransferObject();
@@ -283,6 +294,13 @@ public class SampleService {
             samples.add(partSample);
         }
 
+        return samples;
+    }
+
+    public ArrayList<Sample> retrievePlate(String userId, long plateId) {
+
+        List<Storage> plates = storageDAO.retrieveStorageByIndex(String.valueOf(plateId), SampleType.PLATE96);
+        ArrayList<Sample> samples = dao.getSamplesByStorage(plates.get(0));
         return samples;
     }
 

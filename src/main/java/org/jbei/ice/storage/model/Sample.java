@@ -1,5 +1,6 @@
 package org.jbei.ice.storage.model;
 
+import org.jbei.ice.lib.common.logging.Logger;
 import org.hibernate.annotations.Type;
 import org.hibernate.search.annotations.ContainedIn;
 import org.hibernate.search.annotations.Field;
@@ -153,6 +154,8 @@ public class Sample implements DataModel {
         if (entry != null)
             sample.setPartId(entry.getId());
         sample.setCreationTime(creationTime.getTime());
+        sample.setLocation(this.getStorage().toDataTransferObject());
+
         return sample;
     }
 }

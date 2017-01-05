@@ -4,6 +4,7 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.storage.IDataTransferModel;
+import org.jbei.ice.storage.model.Storage;
 
 import java.util.ArrayList;
 
@@ -16,6 +17,7 @@ public class PartSample implements IDataTransferModel {
 
     private long id;
     private AccountTransfer depositor;
+    private Storage parent;
     private String label;
     private long creationTime;
     private boolean inCart;
@@ -42,6 +44,14 @@ public class PartSample implements IDataTransferModel {
 
     public void setDepositor(AccountTransfer depositor) {
         this.depositor = depositor;
+    }
+
+    public Storage getParent() {
+        return parent;
+    }
+
+    public void setParent(Storage parent) {
+        this.parent = parent;
     }
 
     public String getLabel() {

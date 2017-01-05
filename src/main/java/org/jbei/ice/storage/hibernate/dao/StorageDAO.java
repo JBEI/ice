@@ -52,21 +52,19 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * @throws DAOException
      */
     @SuppressWarnings("unchecked")
-    public List<Storage> retrieveStorageByIndex(String index, SampleType type) throws DAOException {
+    public List<Storage> retrieveStorageByIndex(String id, SampleType type) throws DAOException {
         List<Storage> result = null;
         Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName()
-                                                      + " where index = :index and storage_type = :type");
-            query.setString("index", index);
-            query.setString("type", type.name());
-
+                                                      + " where id = :id");
+            query.setString("id", id);
             List<Storage> list = query.list();
             if (list != null) {
                 result = list;
             }
         } catch (Exception e) {
-            String msg = "Could not get Storage by index: " + index + " " + e.toString();
+            String msg = "Could not get Storage by id: " + id + " " + e.toString();
             Logger.error(msg, e);
             throw new DAOException(msg);
         }

@@ -1,11 +1,11 @@
 <div ng-controller="EntrySampleController">
 
-    <div class="row pad_top" ng-if="entry.canEdit||samples.length>0">
+    <div class="row pad_top" ng-if="entry.canEdit||samples.length>0||!distinctPlates.empty">
         <div class="col-md-12">
             <button type="button" ng-click="newSample.add=true" class="ice-button" ng-if="entry.canEdit">
                 Add Sample
             </button>
-        <span ng-if="samples && samples.length">
+        <span ng-if="samples && samples.length || distinctPlates">
             &nbsp;
             <span ng-if="!isAddGene(samples)">
             <button ng-if="!entrySampleInCart(entry)" ng-click="openAddToCart(entry.id, samples)" type="button"
@@ -148,27 +148,26 @@
         </div>
     </div>
 
-    <div class="row pad_top" ng-if="samples.length===0">
+    <div class="row pad_top" ng-if="samples.length===0 && distinctPlates.empty">
         <div class="col-md-12">
             <i class="text-muted">No samples available</i>
+        </div>
+    </div>
+
+    <div class="row pad_top" ng-repeat="(key, value) in distinctPlates" ng-if="!distinctPlates.empty">
+        <div class="col-md-12">
+            <!--widget for plate 96 -->
+            <div class="col-md-6">
+                <ice-plate96 sample="distinctPlates[key]"></ice-plate96>
+            </div>
+
         </div>
     </div>
 
     <div class="row pad_top" ng-repeat="sample in samples track by $index" ng-if="samples.length > 0">
         <div class="col-md-12">
 
-            <!--widget for plate 96 -->
             <div class="row" ng-if="$index % 2 == 0">
-
-                <!--left sample-->
-                <div class="col-md-6" ng-if="samples[$index+0].location.type==='PLATE96'&&samples[$index+0]">
-                    <ice-plate96 sample="samples[$index+0]" on-delete="delete(samples[$index+0])"></ice-plate96>
-                </div>
-
-                <!--right sample-->
-                <div class="col-md-6" ng-if="samples[$index+1].location.type==='PLATE96'&&samples[$index+1]">
-                    <ice-plate96 sample="samples[$index+1]" on-delete="delete(samples[$index+1])"></ice-plate96>
-                </div>
 
                 <!--widget for shelf-->
                 <div class="col-md-6" ng-if="samples[$index+0].location.type==='SHELF'&&samples[$index+0]">

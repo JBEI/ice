@@ -17,31 +17,28 @@ angular.module('ice.entry.sample.controller', [])
         $scope.Plate96Rows = SampleService.getPlate96Rows();
         $scope.Plate96Cols = SampleService.getPlate96Cols();
 
-        // retrieve samples for partId
+        // retrieve samples for partId and all samples for relevent plates
         Util.list('rest/parts/' + partId + '/samples', function (result) {
-            $scope.samples = result;
-        });
+            console.log(result);
+            var samples = [];
+            var distinctPlates = {};
+            for (var i=0; i<result.length; i++) {
+                var sample = result[i];
 
-        // marks the sample object "inCart" field if the data
-        // contains the entry id of current part being viewed
-        //var setInCart = function (data) {
-        //    if (!data || !data.length) {
-        //        $scope.samples[0].inCart = false;
-        //        return;
-        //    }
-        //
-        //    // check specific values added to cart
-        //    for (var idx = 0; idx < data.length; idx += 1) {
-        //        // using "==" instead of "===" since partId is a string
-        //        if (data[idx].partData.id == partId) {
-        //            $scope.samples[0].inCart = true;
-        //            return;
-        //        }
-        //    }
-        //
-        //    // assuming not found
-        //    $scope.samples[0].inCart = false;
-        //};
+                if (sample.location.type === "PLATE96") {
+                    if (distinctPlates[sample.location.id]) {
+                        distinctPlates[sample.location.id].push(sample);
+                    } else {
+                        distinctPlates[sample.location.id] = [sample];
+                    }
+
+                } else {
+                    samples.push(sample);
+                }
+            }
+            $scope.samples = samples;
+            $scope.distinctPlates = distinctPlates;
+        });
 
         $scope.isAddGene = function (samples) {
             if (!samples || !samples.length)
@@ -200,7 +197,6 @@ angular.module('ice.entry.sample.controller', [])
                 recurse = recurse.child;
             }
             return false;
-        }
+        };
+
     });
-
-
