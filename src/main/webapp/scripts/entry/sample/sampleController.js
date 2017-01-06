@@ -40,6 +40,11 @@ angular.module('ice.entry.sample.controller', [])
             $scope.distinctPlates = distinctPlates;
         });
 
+        $scope.select = function(sample) {
+            console.log(sample);
+            $scope.selected = sample;
+        };
+
         $scope.isAddGene = function (samples) {
             if (!samples || !samples.length)
                 return false;

@@ -155,7 +155,6 @@ public class Sample implements DataModel {
             sample.setPartId(entry.getId());
         sample.setCreationTime(creationTime.getTime());
         sample.setLocation(this.getStorage().toDataTransferObject());
-
         return sample;
     }
 }

@@ -146,7 +146,13 @@ public class SampleService {
 
         // create storage locations
         Storage currentStorage;
+        Logger.info("mainLocation " + mainLocation.getId());
         List<Storage> storageList = storageDAO.retrieveStorageByIndex(mainLocation.getDisplay(), SampleType.PLATE96);
+        Logger.info("storage list size " + storageList.size());
+        for (Storage stor : storageList) {
+            Logger.info(stor.getIndex() + " " + stor.getId());
+        }
+
         if (storageList != null && storageList.size() > 0) {
             currentStorage = storageList.get(0);
 
@@ -233,13 +239,15 @@ public class SampleService {
             Account userAccount = DAOFactory.getAccountDAO().getByEmail(userId);
             inCart = DAOFactory.getRequestDAO().getSampleRequestInCart(userAccount, entry) != null;
         }
-
         ArrayList<Sample> siblingSamples = new ArrayList<>();
         for (Sample sample : entrySamples) {
             Storage storage = sample.getStorage();
-            siblingSamples.addAll(dao.getSamplesByStorage(storage));
+            if (storage.getParent() != null && storage.getParent().getParent() != null) {
+                siblingSamples.addAll(dao.getSamplesByStorage(storage.getParent().getParent()));
+            }
         }
         entrySamples.addAll(siblingSamples);
+
         Set<Sample> unique = new HashSet<Sample>(entrySamples);
         entrySamples = new ArrayList<Sample>(unique);
 
@@ -275,6 +283,7 @@ public class SampleService {
             // get specific sample type and details about it
             PartSample partSample = new PartSample();
             partSample.setId(sample.getId());
+            partSample.setPartId(sample.getEntry().getId());
             partSample.setCreationTime(sample.getCreationTime().getTime());
             partSample.setLabel(sample.getLabel());
             partSample.setLocation(storageLocation);

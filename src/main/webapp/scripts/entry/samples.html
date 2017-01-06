@@ -5,24 +5,23 @@
             <button type="button" ng-click="newSample.add=true" class="ice-button" ng-if="entry.canEdit">
                 Add Sample
             </button>
-        <span ng-if="samples && samples.length || distinctPlates">
-            &nbsp;
-            <span ng-if="!isAddGene(samples)">
-            <button ng-if="!entrySampleInCart(entry)" ng-click="openAddToCart(entry.id, samples)" type="button"
-                    class="ice-button">
-                <i style="font-size: 14px; color: #007dbc" class="fa fa-cart-plus"></i> Add to Cart
-            </button>
-            <button ng-if="entrySampleInCart(entry)" ng-click="removeFromCart(null, entry)"
-                    type="button" class="ice-button">
-                <i style="font-size: 14px;" class="fa fa-ban text-danger"></i> Remove From Cart
-            </button>
+            <span ng-if="(samples && samples.length) || distinctPlates">&nbsp;
+                <span ng-if="!isAddGene(samples)">
+                <button ng-if="!entrySampleInCart(entry)" ng-click="openAddToCart(entry.id, samples)" type="button"
+                        class="ice-button">
+                    <i style="font-size: 14px; color: #007dbc" class="fa fa-cart-plus"></i> Add to Cart
+                </button>
+                <button ng-if="entrySampleInCart(entry)" ng-click="removeFromCart(null, entry)"
+                        type="button" class="ice-button">
+                    <i style="font-size: 14px;" class="fa fa-ban text-danger"></i> Remove From Cart
+                </button>
+                    </span>
+                <span ng-if="isAddGene(samples)">
+                <button ng-click="requestFromAddGene(samples)" type="button" class="ice-button">
+                    <i style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Request from Addgene
+                </button>
                 </span>
-            <span ng-if="isAddGene(samples)">
-            <button ng-click="requestFromAddGene(samples)" type="button" class="ice-button">
-                <i style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Request from Addgene
-            </button>
             </span>
-        </span>
         </div>
     </div>
 
@@ -158,7 +157,7 @@
         <div class="col-md-12">
             <!--widget for plate 96 -->
             <div class="col-md-6">
-                <ice-plate96 sample="distinctPlates[key]"></ice-plate96>
+                <ice-plate96 selected="selected" entry="entry" plate="distinctPlates[key]" on-click="select(specificSample)"></ice-plate96>
             </div>
 
         </div>

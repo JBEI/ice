@@ -1,7 +1,8 @@
 <table class="entry_sample_panel">
     <tr>
         <td colspan="{{Plate96Cols.length+1}}">
-            <strong style="color: #a52a2a">PLATE <span class="color_444">{{sample[0].location.display}}</span></strong>
+            <span>{{selected.id}}</span>
+            <strong style="color: #a52a2a">PLATE <span class="color_444">{{plate[0].location.display}}</span></strong>
         </td>
     </tr>
     <tr>
@@ -14,16 +15,25 @@
         <td><strong class="opacity_4">{{row}}</strong>&nbsp;&nbsp;</td>
 
         <td ng-repeat="col in Plate96Cols track by $id(col)">
-            <div ng-repeat="specificSample in sample track by $index" style="position: absolute;">
-                <div ng-if="row + (10+col+'').slice(-2) === sample[$index].location.child.display">
+            <div ng-repeat="sample in plate" style="position: absolute;">
+                <div ng-if="row + (10+col+'').slice(-2) === sample.location.child.display">
                     <i class="fa fa-circle"
-                       ng-class="{'green':sample[$index].location.child.child, 'alert_color':!sample[$index].location.child.child}"
-                       style="font-size: 30px; cursor: default;"
-                       uib-tooltip="{{sample[$index].location.child.child.display}}">
+                       ng-class="{'green':sample.location.child.child, 'alert_color':!sample.location.child.child}"
+                       style="font-size: 30px; cursor: default; color: green;"
+                       uib-tooltip="{{sample.location.child.child.display}}"
+                       ng-click="select(sample)"
+                       ng-if="sample.partId === entry.id">
                    </i>
-               </div>
-           </div>
-           <i class="fa fa-circle-thin" style="font-size: 30px;"></i>
+                    <a class="fa fa-circle"
+                       ng-class="{'green':sample.location.child.child, 'alert_color':!sample.location.child.child}"
+                       style="font-size: 30px; cursor: default; color: #A9A9A9; text-decoration: none; cursor: pointer;"
+                       uib-tooltip="entry/{{sample.partId}}/samples {{sample.location.child.child.display}}"
+                       ng-href="entry/{{sample.partId}}/samples"
+                       ng-if="sample.partId != entry.id">
+                   </a>
+                </div>
+            </div>
+            <i class="fa fa-circle-thin" style="font-size: 30px;"></i>
         </td>
 
     </tr>
@@ -31,24 +41,23 @@
     <tr>
         <td colspan="{{Plate96Cols.length+1}}" class="small">
             <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
-            <i class="fa fa-warning dark-orange font-14em" ng-if="sample.comments.length"
+            <i class="fa fa-warning dark-orange font-14em" ng-if="plate.comments.length"
                uib-tooltip="1 or more comments available"></i>
-            <strong>{{sample[0].label}}</strong><br>
-            <span style="color: #777">{{sample[0].creationTime | date : 'short'}}</span> - <a
-                ng-href="profile/{{sample[0].depositor.id}}">{{sample[0].depositor.firstName}}
-            {{sample[0].depositor.lastName}}</a>
+            <strong>{{selected.label}}</strong><br>
+            <span style="color: #777">{{selected.creationTime | date : 'short'}}</span> - <a
+                  ng-href="profile/{{selected.depositor.id}}">{{selected.depositor.firstName}}
+                  {{selected.depositor.lastName}}</a>
 
-            <div class="display-inline pull-right" ng-if="sample[0].canEdit && sample[0].deleteRequested">
+            <div class="display-inline pull-right" ng-if="selected.canEdit && selected.deleteRequested">
                 <i class="fa fa-exclamation-triangle alert_color fa-fw"></i>
                 <b style="color:#CC3333">Delete?</b>
 
                 <button stop-event="click" class="btn btn-xs btn-primary" ng-click="delete()">Yes</button>
-                <button stop-event="click" class="btn btn-xs btn-default" ng-click="sample[0].deleteRequested=false">No
-                </button>
+                <button stop-event="click" class="btn btn-xs btn-default" ng-click="selected.deleteRequested=false">No</button>
             </div>
 
-            <div class="pull-right" style="font-size: 14px;" ng-if="sample[0].canEdit && !sample[0].deleteRequested">
-                <i class="fa fa-fw delete_icon fa-trash-o" ng-click="sample[0].deleteRequested=true"></i>
+            <div class="pull-right" style="font-size: 14px;" ng-if="selected.canEdit && !selected.deleteRequested">
+                <i class="fa fa-fw delete_icon fa-trash-o" ng-click="selected.deleteRequested=true"></i>
             </div>
         </td>
     </tr>

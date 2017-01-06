@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+  <html ng-app="app">
+
+  <head>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script>
+    <script src="http://angular-ui.github.com/bootstrap/ui-bootstrap-tpls-0.6.0.js"></script>
+    <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.css" rel="stylesheet">
+  </head>
+
+  <body ng-controller="MainCtrl">
+
+    <div ng-controller="TabCtrl">
+      <tabset>
+        <tab ng-repeat="tab in tabs" heading="{{tab.name}}" active="tab.active" select="onTabSelected(tab.slug)">
+          {{ tab.packageId }}
+        </tab>
+      </tabset>
+    </div>
+    <script type="text/javascript" charset="utf-8">
+      angular.module('app', ['ui.bootstrap']).config(['$routeProvider', '$locationProvider',
+      function($routeProvider, $locationProvider) {
+          $routeProvider.when('/', {
+              controller: 'MainCtrl'
+          }).when('/room/:id', {
+              controller: 'RoomCtrl',
+          }).when('/dashboard', {
+              controller: 'DashboardCtrl'
+          }).otherwise({
+              redirectTo: '/'
+          });
+          $locationProvider.html5Mode(false);
+      }]);
+
+      var TabCtrl = function($scope) {
+        $scope.tabs = [{
+          slug: 'dashboard',
+          name: "Package 1",
+          packageId: "some package #1"
+        }, {
+          slug: 'room-1',
+          name: "Package 2",
+          packageId: "some package #2"
+        }, {
+          slug: 'room-2',
+          name: "Package 3",
+          packageId: "some package #3"
+        }];
+      };
+
+      RoomCtrl = function($scope, $location) {
+
+      };
+
+      DashboardCtrl = function($scope, $location) {
+
+      };
+
+      MainCtrl = function($scope, $location) {
+
+        $scope.onTabSelected = function(tab) {
+          var route;
+          if (typeof tab === 'string') {
+            switch (tab) {
+              case 'dashboard':
+                route = tab;
+                break;
+              default:
+                route = 'rooms/' + tab;
+                break;
+            }
+          }
+          $location.path('/' + route);
+        };
+
+      };
+    </script>
+  </body>
+
+</html>
