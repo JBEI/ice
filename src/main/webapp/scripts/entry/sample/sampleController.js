@@ -18,32 +18,36 @@ angular.module('ice.entry.sample.controller', [])
         $scope.Plate96Cols = SampleService.getPlate96Cols();
 
         // retrieve samples for partId and all samples for relevent plates
-        Util.list('rest/parts/' + partId + '/samples', function (result) {
-            console.log(result);
-            var samples = [];
-            var distinctPlates = {};
-            for (var i=0; i<result.length; i++) {
-                var sample = result[i];
-
-                if (sample.location.type === "PLATE96") {
-                    if (distinctPlates[sample.location.id]) {
-                        distinctPlates[sample.location.id].push(sample);
-                    } else {
-                        distinctPlates[sample.location.id] = [sample];
+        var refreshSamples = function() {
+            Util.list('rest/parts/' + partId + '/samples', function (result) {
+                var samples = [];
+                var distinctPlates = {};
+                var totalSamples = 0;
+                for (var i=0; i<result.length; i++) {
+                    var sample = result[i];
+                    if ("" + sample.partId === partId) {
+                        totalSamples += 1;
                     }
 
-                } else {
-                    samples.push(sample);
-                }
-            }
-            $scope.samples = samples;
-            $scope.distinctPlates = distinctPlates;
-        });
+                    if (sample.location.type === "PLATE96") {
+                        if (distinctPlates[sample.location.id]) {
+                            distinctPlates[sample.location.id].push(sample);
+                        } else {
+                            distinctPlates[sample.location.id] = [sample];
+                        }
 
-        $scope.select = function(sample) {
-            console.log(sample);
-            $scope.selected = sample;
+                    } else {
+                        samples.push(sample);
+                    }
+                }
+
+                $scope.samples = samples;
+                $scope.distinctPlates = distinctPlates;
+                $scope.selected = null;
+                $scope.totalSamples = totalSamples;
+            });
         };
+        refreshSamples();
 
         $scope.isAddGene = function (samples) {
             if (!samples || !samples.length)
@@ -131,8 +135,7 @@ angular.module('ice.entry.sample.controller', [])
 
         $scope.delete = function (sample) {
             Util.remove('rest/parts/' + partId + '/samples/' + sample.id, {}, function () {
-                var idx = $scope.samples.indexOf(sample);
-                $scope.samples.splice(idx, 1);
+                refreshSamples();
             });
         };
 
@@ -163,6 +166,7 @@ angular.module('ice.entry.sample.controller', [])
                     },
                     location: {}
                 };
+                refreshSamples();
             });
         };
 

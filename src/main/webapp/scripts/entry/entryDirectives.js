@@ -9,7 +9,6 @@ angular.module('ice.entry.directives', [])
                 remote:"=",
                 entry:"=",
                 plate:"=",
-                select:"&onClick",
                 selected:"="
             },
 

@@ -1,11 +1,11 @@
 <div ng-controller="EntrySampleController">
 
-    <div class="row pad_top" ng-if="entry.canEdit||samples.length>0||!distinctPlates.empty">
+    <div class="row pad_top" ng-if="entry.canEdit || totalSamples > 0">
         <div class="col-md-12">
             <button type="button" ng-click="newSample.add=true" class="ice-button" ng-if="entry.canEdit">
                 Add Sample
             </button>
-            <span ng-if="(samples && samples.length) || distinctPlates">&nbsp;
+            <span ng-if="totalSamples > 0">&nbsp;
                 <span ng-if="!isAddGene(samples)">
                 <button ng-if="!entrySampleInCart(entry)" ng-click="openAddToCart(entry.id, samples)" type="button"
                         class="ice-button">
@@ -146,18 +146,20 @@
             </div>
         </div>
     </div>
-
-    <div class="row pad_top" ng-if="samples.length===0 && distinctPlates.empty">
+    <div class="row pad_top" ng-if="totalSamples === 0">
         <div class="col-md-12">
             <i class="text-muted">No samples available</i>
         </div>
     </div>
-
-    <div class="row pad_top" ng-repeat="(key, value) in distinctPlates" ng-if="!distinctPlates.empty">
+    <div class="row pad_top" ng-repeat="(key, value) in distinctPlates track by $index">
         <div class="col-md-12">
             <!--widget for plate 96 -->
             <div class="col-md-6">
-                <ice-plate96 selected="selected" entry="entry" plate="distinctPlates[key]" on-click="select(specificSample)"></ice-plate96>
+                <ice-plate96 selected="selected"
+                             entry="entry"
+                             plate="distinctPlates[key]"
+                             on-delete="delete(selected)">
+                </ice-plate96>
             </div>
 
         </div>

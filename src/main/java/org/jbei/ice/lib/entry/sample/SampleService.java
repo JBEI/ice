@@ -146,12 +146,7 @@ public class SampleService {
 
         // create storage locations
         Storage currentStorage;
-        Logger.info("mainLocation " + mainLocation.getId());
         List<Storage> storageList = storageDAO.retrieveStorageByIndex(mainLocation.getDisplay(), SampleType.PLATE96);
-        Logger.info("storage list size " + storageList.size());
-        for (Storage stor : storageList) {
-            Logger.info(stor.getIndex() + " " + stor.getId());
-        }
 
         if (storageList != null && storageList.size() > 0) {
             currentStorage = storageList.get(0);
@@ -346,6 +341,7 @@ public class SampleService {
 
         try {
             Storage storage = sample.getStorage();
+            Logger.info("storage id " + storage.getId() + ", storage display " + storage.getName());
             while (storage != null) {
                 Storage parent = storage.getParent();
 
