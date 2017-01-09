@@ -279,21 +279,29 @@ public class SampleService {
             PartSample partSample = new PartSample();
             partSample.setId(sample.getId());
             partSample.setPartId(sample.getEntry().getId());
-            partSample.setCreationTime(sample.getCreationTime().getTime());
-            partSample.setLabel(sample.getLabel());
             partSample.setLocation(storageLocation);
-            partSample.setInCart(inCart);
-            partSample = setAccountInfo(partSample, sample.getDepositor());
-            partSample.setCanEdit(sampleAuthorization.canWrite(userId, sample));
+            partSample.setPartName(sample.getEntry().getName());
+            partSample.setLabel(sample.getLabel());
 
-            if (sample.getComments() != null) {
-                for (Comment comment : sample.getComments()) {
-                    UserComment userComment = new UserComment();
-                    userComment.setId(comment.getId());
-                    userComment.setMessage(comment.getBody());
-                    partSample.getComments().add(userComment);
+            if (sample.getEntry().getId() == entryId) {
+                partSample.setCreationTime(sample.getCreationTime().getTime());
+                partSample.setInCart(inCart);
+                partSample.setCanEdit(sampleAuthorization.canWrite(userId, sample));
+
+                if (sample.getComments() != null) {
+                    for (Comment comment : sample.getComments()) {
+                        UserComment userComment = new UserComment();
+                        userComment.setId(comment.getId());
+                        userComment.setMessage(comment.getBody());
+                        partSample.getComments().add(userComment);
+                    }
                 }
+            } else {
+                partSample.setCanEdit(false);
             }
+
+            partSample = setAccountInfo(partSample, sample.getDepositor());
+
 
             samples.add(partSample);
         }
@@ -341,7 +349,6 @@ public class SampleService {
 
         try {
             Storage storage = sample.getStorage();
-            Logger.info("storage id " + storage.getId() + ", storage display " + storage.getName());
             while (storage != null) {
                 Storage parent = storage.getParent();
 
