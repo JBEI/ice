@@ -69,8 +69,11 @@ public class SampleDAO extends HibernateRepository<Sample> {
     public ArrayList<Sample> getSamplesByStorage(Storage storage) throws DAOException {
         ArrayList<Sample> samples = null;
         Session session = currentSession();
+        String queryString = "from " + Sample.class.getName() + " sample where sample.storage.parent.parent.id = :id";
+        if (storage.getChildren().size() == 0) {
+            queryString = "from " + Sample.class.getName() + " sample where sample.storage.id = :id";
+        }
         try {
-            String queryString = "from " + Sample.class.getName() + " sample where sample.storage.parent.parent.id = :id";
             Query query = session.createQuery(queryString);
             query.setParameter("id", storage.getId());
 

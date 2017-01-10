@@ -393,7 +393,7 @@ public class SampleService {
             Entry entry = sample.getEntry();
             if (entry == null)
                 continue;
-
+            Logger.info(entry.getName());
             if (!entryAuthorization.canRead(userId, entry))
                 continue;
 

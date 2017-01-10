@@ -5,7 +5,6 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Entry;
-import org.jbei.ice.lib.entry.HasEntry;
 
 import java.util.List;
 
