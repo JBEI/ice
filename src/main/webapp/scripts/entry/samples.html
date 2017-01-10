@@ -6,20 +6,20 @@
                 Add Sample
             </button>
             <span ng-if="totalSamples > 0">&nbsp;
-                <span ng-if="!isAddGene(samples)">
-                <button ng-if="!entrySampleInCart(entry)" ng-click="openAddToCart(entry.id, samples)" type="button"
-                        class="ice-button">
-                    <i style="font-size: 14px; color: #007dbc" class="fa fa-cart-plus"></i> Add to Cart
-                </button>
-                <button ng-if="entrySampleInCart(entry)" ng-click="removeFromCart(null, entry)"
-                        type="button" class="ice-button">
-                    <i style="font-size: 14px;" class="fa fa-ban text-danger"></i> Remove From Cart
-                </button>
-                    </span>
-                <span ng-if="isAddGene(samples)">
-                <button ng-click="requestFromAddGene(samples)" type="button" class="ice-button">
-                    <i style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Request from Addgene
-                </button>
+                <span ng-if="!isAddGene(samples) || addToCartDefaultLocal">
+                    <button ng-if="!entrySampleInCart(entry)" ng-click="openAddToCart(entry.id, samples)" type="button"
+                            class="ice-button">
+                        <i style="font-size: 14px; color: #007dbc" class="fa fa-cart-plus"></i> Add to Cart
+                    </button>
+                    <button ng-if="entrySampleInCart(entry)" ng-click="removeFromCart(null, entry)"
+                            type="button" class="ice-button">
+                        <i style="font-size: 14px;" class="fa fa-ban text-danger"></i> Remove From Cart
+                    </button>
+                </span>
+                <span ng-if="isAddGene(samples) && !addToCartDefaultLocal">
+                    <button ng-click="requestFromAddGene(samples)" type="button" class="ice-button">
+                        <i style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Request from Addgene
+                    </button>
                 </span>
             </span>
         </div>

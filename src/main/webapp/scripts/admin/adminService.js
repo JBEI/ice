@@ -14,7 +14,8 @@ adminService.factory('AdminSettings', function () {
         'PASSWORD_CHANGE_ALLOWED',
         'PART_NUMBER_PREFIX',
         'URI_PREFIX',
-        'BLAST_INSTALL_DIR'
+        'BLAST_INSTALL_DIR',
+        'ADD_TO_CART_DEFAULT_SET_TO_LOCAL'
     ];
 
     var emailSettingKeys = [
@@ -35,7 +36,8 @@ adminService.factory('AdminSettings', function () {
         'NEW_REGISTRATION_ALLOWED',
         'PASSWORD_CHANGE_ALLOWED',
         'PROFILE_EDIT_ALLOWED',
-        'SEND_EMAIL_ON_ERRORS'
+        'SEND_EMAIL_ON_ERRORS',
+        'ADD_TO_CART_DEFAULT_SET_TO_LOCAL'
     ];
 
     return {

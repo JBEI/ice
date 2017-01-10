@@ -656,14 +656,12 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
 
         // validate email
         if ($scope.login.email === undefined || $scope.login.email.trim() === "") {
-            // $scope.login.emailError = true;
-            $scope.login.email = "Administrator";
+            $scope.login.emailError = true;
         }
 
         // validate password
         if ($scope.login.password === undefined || $scope.login.password.trim() === "") {
-            // $scope.login.passwordError = true;
-            $scope.login.password = "Administrator";
+            $scope.login.passwordError = true;
         }
 
         if ($scope.login.emailError || $scope.login.passwordError) {

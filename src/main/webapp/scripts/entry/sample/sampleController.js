@@ -16,6 +16,10 @@ angular.module('ice.entry.sample.controller', [])
 
         $scope.Plate96Rows = SampleService.getPlate96Rows();
         $scope.Plate96Cols = SampleService.getPlate96Cols();
+        $scope.addToCartDefaultLocal;
+        Util.get('rest/config/ADD_TO_CART_DEFAULT_SET_TO_LOCAL', function (result) {
+            $scope.addToCartDefaultLocal = result.value.toUpperCase() === "YES" ? true : false;
+        });
 
         // retrieve samples for partId and all samples for relevent plates
         var refreshSamples = function() {
