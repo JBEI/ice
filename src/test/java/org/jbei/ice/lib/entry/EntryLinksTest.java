@@ -53,7 +53,7 @@ public class EntryLinksTest {
         Assert.assertNotNull(permissionsController.addPermission(account.getEmail(), accessPermission));
 
         // add plasmid links to strain
-        EntryLinks entryLinks = new EntryLinks(userId, strain.getId());
+        EntryLinks entryLinks = new EntryLinks(userId, Long.toString(strain.getId()));
 
         // attempt to add as a parent (expected to fail)
         Assert.assertFalse(entryLinks.addLink(plasmid.toDataTransferObject(), LinkType.PARENT));
@@ -76,7 +76,7 @@ public class EntryLinksTest {
 
         // add plasmid links to strain
         Strain strain = TestEntryCreator.createTestStrain(account);
-        EntryLinks entryLinks = new EntryLinks(userId, strain.getId());
+        EntryLinks entryLinks = new EntryLinks(userId, Long.toString(strain.getId()));
 
         Assert.assertEquals(0, entryLinks.getChildren().size());
 
@@ -98,7 +98,7 @@ public class EntryLinksTest {
         Strain alternateStrain = TestEntryCreator.createTestStrain(account2);
 
         // add as child to account's strain
-        EntryLinks alternateLinks = new EntryLinks(account2.getEmail(), strain.getId());
+        EntryLinks alternateLinks = new EntryLinks(account2.getEmail(), Long.toString(strain.getId()));
         Assert.assertTrue(alternateLinks.addLink(alternateStrain.toDataTransferObject(), LinkType.CHILD));
 
         // account2 should see three children (since it is an admin)
@@ -115,7 +115,7 @@ public class EntryLinksTest {
 
         // add plasmid links to strain
         Strain strain = TestEntryCreator.createTestStrain(account);
-        EntryLinks entryLinks = new EntryLinks(userId, strain.getId());
+        EntryLinks entryLinks = new EntryLinks(userId, Long.toString(strain.getId()));
 
         Assert.assertEquals(0, entryLinks.getParents().size());
 
@@ -133,10 +133,10 @@ public class EntryLinksTest {
         List<PartData> children = entryLinks.getChildren();
         Assert.assertEquals(2, children.size());
 
-        EntryLinks plasmidLinks = new EntryLinks(userId, plasmid1.getId());
+        EntryLinks plasmidLinks = new EntryLinks(userId, Long.toString(plasmid1.getId()));
         Assert.assertEquals(1, plasmidLinks.getParents().size());
 
-        EntryLinks plasmid2Links = new EntryLinks(userId, plasmid2.getId());
+        EntryLinks plasmid2Links = new EntryLinks(userId, Long.toString(plasmid2.getId()));
         Assert.assertEquals(1, plasmid2Links.getParents().size());
     }
 }

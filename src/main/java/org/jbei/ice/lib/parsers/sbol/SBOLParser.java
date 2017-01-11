@@ -201,7 +201,7 @@ public class SBOLParser {
                 componentId = createNewEntry(componentDefinition, sbolDocument);
             }
 
-            EntryLinks links = new EntryLinks(userId, componentId);
+            EntryLinks links = new EntryLinks(userId, componentId.toString());
             links.addLink(this.partData, LinkType.PARENT);
         }
 
@@ -217,7 +217,7 @@ public class SBOLParser {
                 moduleId = createNewEntry(module.getDefinition(), moduleDocument);
             }
 
-            EntryLinks links = new EntryLinks(userId, moduleId);
+            EntryLinks links = new EntryLinks(userId, moduleId.toString());
             links.addLink(this.partData, LinkType.PARENT);
             Logger.debug("    Link to ModuleDefinition: " + module.getDefinition().getIdentity());
         }
@@ -244,7 +244,7 @@ public class SBOLParser {
                 componentId = createNewEntry(component.getDefinition(), sbolDocument);
             }
 
-            EntryLinks links = new EntryLinks(userId, componentId);
+            EntryLinks links = new EntryLinks(userId, componentId.toString());
             links.addLink(this.partData, LinkType.PARENT);
             Logger.debug("    Link to ComponentDefinition: " + component.getDefinition().getIdentity());
         }

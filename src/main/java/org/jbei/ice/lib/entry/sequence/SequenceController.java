@@ -88,12 +88,14 @@ public class SequenceController extends HasEntry {
         if (!deleteSequence(userId, entryId))
             return null;
 
-//        sequence = update(userId, sequence);
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
         sequence = save(userId, sequence);
-        if (sequence != null)
-            return sequenceToDNASequence(sequence);
-        return null;
+        if (sequence == null)
+            return null;
+
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
+        sequenceAnalysisController.rebuildAllAlignments(entry);
+        return sequenceToDNASequence(sequence);
     }
 
     /**

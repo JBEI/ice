@@ -7,6 +7,7 @@ import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.lib.entry.EntryAuthorization;
+import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
@@ -23,7 +24,7 @@ import java.util.Set;
  *
  * @author Hector Plahar
  */
-public class SampleService {
+public class SampleService extends HasEntry {
 
     private final SampleDAO dao;
     private final StorageDAO storageDAO;
@@ -48,8 +49,8 @@ public class SampleService {
         return storage;
     }
 
-    public PartSample createSample(String userId, long entryId, PartSample partSample, String strainNamePrefix) {
-        Entry entry = DAOFactory.getEntryDAO().get(entryId);
+    public PartSample createSample(String userId, String entryId, PartSample partSample, String strainNamePrefix) {
+        Entry entry = super.getEntry(entryId);
         if (entry == null) {
             Logger.error("Could not retrieve entry with id " + entryId + ". Skipping sample creation");
             return null;
@@ -214,8 +215,8 @@ public class SampleService {
     }
 
 
-    public ArrayList<PartSample> retrieveEntrySamples(String userId, long entryId) {
-        Entry entry = DAOFactory.getEntryDAO().get(entryId);
+    public ArrayList<PartSample> retrieveEntrySamples(String userId, String entryId) {
+        Entry entry = super.getEntry(entryId);
         if (entry == null)
             return null;
 

@@ -5,7 +5,6 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.Entry;
 
@@ -19,17 +18,15 @@ import java.util.List;
  *
  * @author Hector Plahar
  */
-public class EntryLinks {
+public class EntryLinks extends HasEntry {
 
-    private final EntryDAO entryDAO;
     private final SequenceDAO sequenceDAO;
     private final Entry entry;
     private final EntryAuthorization entryAuthorization;
     private final String userId;
 
-    public EntryLinks(String userId, long partId) {
-        this.entryDAO = DAOFactory.getEntryDAO();
-        this.entry = this.entryDAO.get(partId);
+    public EntryLinks(String userId, String partId) {
+        this.entry = super.getEntry(partId);
         if (this.entry == null)
             throw new IllegalArgumentException("Could not retrieve part with id " + partId);
         this.userId = userId;

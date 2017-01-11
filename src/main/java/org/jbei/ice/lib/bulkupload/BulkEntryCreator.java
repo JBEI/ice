@@ -198,7 +198,7 @@ public class BulkEntryCreator {
             }
         } else {
             // linking to existing
-            EntryLinks entryLinks = new EntryLinks(userId, entry.getId());
+            EntryLinks entryLinks = new EntryLinks(userId, Long.toString(entry.getId()));
             entryLinks.addLink(linkedPartData, LinkType.CHILD);
         }
 
@@ -515,7 +515,7 @@ public class BulkEntryCreator {
                 if (linked.getId() != 0) {
                     Entry linkedEntry = entryDAO.get(linked.getId());
                     if (linkedEntry != null && entryAuthorization.canWriteThoroughCheck(userId, entry)) {
-                        EntryLinks links = new EntryLinks(userId, entry.getId());
+                        EntryLinks links = new EntryLinks(userId, Long.toString(entry.getId()));
                         links.addLink(linked, LinkType.CHILD);
                     }
                 }
@@ -548,7 +548,7 @@ public class BulkEntryCreator {
             if (partSample == null)
                 continue;
 
-            sampleService.createSample(userId, entry.getId(), partSample, null);
+            sampleService.createSample(userId, Long.toString(entry.getId()), partSample, null);
         }
 
         return true;

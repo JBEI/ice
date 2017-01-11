@@ -11,12 +11,11 @@ import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.dao.TraceSequenceDAO;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
+import org.jbei.ice.storage.hibernate.dao.TraceSequenceDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.io.File;
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
@@ -37,56 +36,6 @@ public class SequenceAnalysisController {
     public SequenceAnalysisController() {
         traceDao = DAOFactory.getTraceSequenceDAO();
         shotgunDao = DAOFactory.getShotgunSequenceDAO();
-    }
-
-    /**
-     * Create a new {@link TraceSequence} record and associated with the {@link Entry} entry.
-     * <p>
-     * Creates a database record and write the inputStream to disk.
-     *
-     * @param entry
-     * @param filename
-     * @param depositor
-     * @param sequence
-     * @param uuid
-     * @param date
-     * @param inputStream
-     * @return Saved traceSequence
-     */
-    public TraceSequence importTraceSequence(Entry entry, String filename, String depositor, String sequence,
-                                             String uuid, Date date, InputStream inputStream) {
-        if (entry == null) {
-            throw new IllegalArgumentException("Failed to save trace sequence with null entry!");
-        }
-
-        if (filename == null || filename.isEmpty()) {
-            throw new IllegalArgumentException("Failed to save trace sequence without filename!");
-        }
-
-        if (sequence == null || sequence.isEmpty()) {
-            throw new IllegalArgumentException("Failed to save trace sequence without sequence!");
-        }
-
-        TraceSequence traceSequence = new TraceSequence(entry, uuid, filename, depositor, sequence, date);
-        File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), TRACES_DIR_NAME).toFile();
-        return traceDao.create(tracesDir, traceSequence, inputStream);
-    }
-
-    /**
-     * Create a new {@link TraceSequence} record and associated with the {@link Entry} entry.
-     * <p>
-     * Unlike importTraceSequence this method auto generates uuid and timestamp.
-     *
-     * @param entry       entry information
-     * @param filename    name of the file uploaded by the user
-     * @param depositor   email user depositing the information
-     * @param sequence    sequence string
-     * @param inputStream input stream for uploaded file
-     * @return Saved traceSequence
-     */
-    public TraceSequence uploadTraceSequence(Entry entry, String filename, String depositor,
-                                             String sequence, InputStream inputStream) {
-        return importTraceSequence(entry, filename, depositor, sequence, Utils.generateUUID(), new Date(), inputStream);
     }
 
     /**
@@ -166,7 +115,6 @@ public class SequenceAnalysisController {
 
         // Trying to parse as Fasta, Genbank, etc
         DNASequence dnaSequence = GeneralParser.getInstance().parse(bytes);
-
         if (dnaSequence == null) {
             // Trying to parse as ABI
 
@@ -215,7 +163,7 @@ public class SequenceAnalysisController {
         String entrySequenceString = sequence.getSequence();
 
         int entrySequenceLength = entrySequenceString.length();
-        boolean isCircular = (sequence.getEntry() instanceof Plasmid) && ((Plasmid) sequence.getEntry()).getCircular();
+        boolean isCircular = (sequence.getEntry().getRecordType().equalsIgnoreCase("plasmid")) && ((Plasmid) sequence.getEntry()).getCircular();
 
         if (isCircular) {
             entrySequenceString += entrySequenceString;

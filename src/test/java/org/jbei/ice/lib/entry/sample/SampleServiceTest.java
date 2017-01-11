@@ -47,7 +47,7 @@ public class SampleServiceTest {
         testLocation.setType(SampleType.GENERIC);
         partSample.setLocation(testLocation);
 
-        partSample = service.createSample(userId, strain.getId(), partSample, null);
+        partSample = service.createSample(userId, Long.toString(strain.getId()), partSample, null);
 
         Assert.assertNotNull(partSample);
         Assert.assertNotNull(partSample.getLabel());
@@ -84,7 +84,7 @@ public class SampleServiceTest {
             well.setChild(tube);
 
             plateSample.setLocation(storageLocation);
-            plateSample = service.createSample(userId, strainWithSample.getId(), plateSample, null);
+            plateSample = service.createSample(userId, Long.toString(strainWithSample.getId()), plateSample, null);
             Assert.assertNotNull(plateSample);
         }
 
@@ -101,7 +101,7 @@ public class SampleServiceTest {
         Strain strain = TestEntryCreator.createTestStrain(account);
         long entryId = strain.getId();
 
-        List<PartSample> samplesList = service.retrieveEntrySamples(userId, entryId);
+        List<PartSample> samplesList = service.retrieveEntrySamples(userId, Long.toString(entryId));
 
         Assert.assertNotNull(samplesList);
 
@@ -160,11 +160,11 @@ public class SampleServiceTest {
         shelf.setChild(box);
 
         partSample1.setLocation(well);
-        partSample1 = service.createSample(userId, strain1.getId(), partSample1, null);
+        partSample1 = service.createSample(userId, Long.toString(strain1.getId()), partSample1, null);
         Assert.assertNotNull(partSample1);
 
         // fetch
-        List<PartSample> samples1 = service.retrieveEntrySamples(userId, strain1.getId());
+        List<PartSample> samples1 = service.retrieveEntrySamples(userId, Long.toString(strain1.getId()));
         Assert.assertEquals(1, samples1.size());
         StorageLocation location1 = samples1.get(0).getLocation();
 
@@ -197,7 +197,7 @@ public class SampleServiceTest {
         plate2.setChild(well2);
 
         partSample2.setLocation(tube2);
-        partSample2 = service.createSample(userId, strain2.getId(), partSample2, null);
+        partSample2 = service.createSample(userId, Long.toString(strain2.getId()), partSample2, null);
         Assert.assertNotNull(partSample2);
 
         // ----- CASE 3 -----
@@ -222,11 +222,11 @@ public class SampleServiceTest {
         plate3.setChild(well3);
 
         partSample3.setLocation(tube3);
-        partSample3 = service.createSample(userId, strain2.getId(), partSample3, null);
+        partSample3 = service.createSample(userId, Long.toString(strain2.getId()), partSample3, null);
         Assert.assertNotNull(partSample3);
 
         // fetch
-        List<PartSample> samples3 = service.retrieveEntrySamples(userId, strain2.getId());
+        List<PartSample> samples3 = service.retrieveEntrySamples(userId, Long.toString(strain2.getId()));
         Assert.assertEquals(2, samples3.size());
         StorageLocation location3 = samples3.get(1).getLocation();
 
@@ -235,7 +235,7 @@ public class SampleServiceTest {
 
         Assert.assertNull(DAOFactory.getStorageDAO().get(location3.getId()));
 
-        List<PartSample> samples2 = service.retrieveEntrySamples(userId, strain2.getId());
+        List<PartSample> samples2 = service.retrieveEntrySamples(userId, Long.toString(strain2.getId()));
         Assert.assertEquals(1, samples2.size());
         StorageLocation location2 = samples2.get(0).getLocation();
 
@@ -243,7 +243,7 @@ public class SampleServiceTest {
 
         Assert.assertNull(DAOFactory.getStorageDAO().get(location2.getId()));
 
-        List<PartSample> samplesEmpty = service.retrieveEntrySamples(userId, strain2.getId());
+        List<PartSample> samplesEmpty = service.retrieveEntrySamples(userId, Long.toString(strain2.getId()));
         Assert.assertEquals(0, samplesEmpty.size());
     }
 
@@ -273,7 +273,7 @@ public class SampleServiceTest {
         location.setType(SampleType.TUBE);
 
         partSample.setLocation(location);
-        partSample = service.createSample(userId, strain.getId(), partSample, null);
+        partSample = service.createSample(userId, Long.toString(strain.getId()), partSample, null);
         Assert.assertNotNull(partSample);
 
         List<PartSample> partSamples = service.getSamplesByBarcode(userId, location.getDisplay());
