@@ -4,6 +4,7 @@ import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.bulkupload.BulkUploadStatus;
@@ -89,12 +90,17 @@ public class BulkUploadDAO extends HibernateRepository<BulkUpload> {
 
     @SuppressWarnings("unchecked")
     public List<Entry> retrieveDraftEntries(long id, int start, int limit) throws DAOException {
-        Query query = currentSession().createQuery("select b.contents as entry from " + BulkUpload.class.getName()
-                + " b where b.id=" + id);
-        query.setFirstResult(start);
-        query.setMaxResults(limit);
-        List l = query.list();
-        return new ArrayList<>(l);
+        try {
+            ArrayList<Long> ids = getEntryIds(get(id));
+            Criteria criteria = currentSession().createCriteria(Entry.class).add(Restrictions.in("id", ids));
+            criteria.setFirstResult(start);
+            criteria.setMaxResults(limit);
+            criteria.addOrder(Order.asc("id"));
+            return criteria.list();
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
     }
 
     @SuppressWarnings("unchecked")
