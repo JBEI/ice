@@ -1,13 +1,11 @@
 package org.jbei.ice.lib.entry;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.*;
@@ -21,10 +19,7 @@ import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.*;
 import org.jbei.ice.storage.model.*;
 
-import java.io.*;
 import java.util.*;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * ABI to manipulate {@link Entry}s.
@@ -39,13 +34,11 @@ public class EntryController extends HasEntry {
     private PermissionsController permissionsController;
     private AccountController accountController;
     private final EntryAuthorization authorization;
-    private final SequenceAnalysisController sequenceAnalysisController;
 
     public EntryController() {
         dao = DAOFactory.getEntryDAO();
         commentDAO = DAOFactory.getCommentDAO();
         permissionsController = new PermissionsController();
-        sequenceAnalysisController = new SequenceAnalysisController();
         accountController = new AccountController();
         authorization = new EntryAuthorization();
         sequenceDAO = DAOFactory.getSequenceDAO();
@@ -425,93 +418,5 @@ public class EntryController extends HasEntry {
         }
 
         return partData;
-    }
-
-    public boolean addTraceSequence(String userId, long partId, File file, String uploadFileName) {
-        Entry entry = dao.get(partId);
-        if (entry == null)
-            return false;
-
-        authorization.expectRead(userId, entry);
-
-        FileInputStream inputStream;
-        try {
-            inputStream = new FileInputStream(file);
-        } catch (FileNotFoundException e) {
-            Logger.error(e);
-            return false;
-        }
-
-        if (uploadFileName.toLowerCase().endsWith(".zip")) {
-            try (ZipInputStream zis = new ZipInputStream(inputStream)) {
-                ZipEntry zipEntry;
-                while (true) {
-                    zipEntry = zis.getNextEntry();
-
-                    if (zipEntry != null) {
-                        if (!zipEntry.isDirectory() && !zipEntry.getName().startsWith("__MACOSX")) {
-                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                            int c;
-                            while ((c = zis.read()) != -1) {
-                                byteArrayOutputStream.write(c);
-                            }
-
-                            boolean parsed = parseTraceSequence(userId, entry, zipEntry.getName(),
-                                    byteArrayOutputStream.toByteArray());
-                            if (!parsed) {
-                                String errMsg = ("Could not parse \"" + zipEntry.getName()
-                                        + "\". Only Fasta, GenBank & ABI files are supported.");
-                                Logger.error(errMsg);
-                                return false;
-                            }
-                        }
-                    } else {
-                        break;
-                    }
-                }
-            } catch (IOException e) {
-                String errMsg = ("Could not parse zip file.");
-                Logger.error(errMsg);
-                return false;
-            }
-        } else {
-            try {
-                boolean parsed = parseTraceSequence(userId, entry, uploadFileName, IOUtils.toByteArray(inputStream));
-                if (!parsed) {
-                    String errMsg = ("Could not parse \"" + uploadFileName
-                            + "\". Only Fasta, GenBank & ABI files are supported.");
-                    Logger.error(errMsg);
-                    return false;
-                }
-            } catch (IOException e) {
-                Logger.error(e);
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    // uploads trace sequence file and builds or rebuilds alignment
-    private boolean parseTraceSequence(String userId, Entry entry, String fileName, byte[] bytes) {
-        DNASequence dnaSequence = sequenceAnalysisController.parse(bytes);
-        if (dnaSequence == null || dnaSequence.getSequence() == null) {
-            String errMsg = ("Could not parse \"" + fileName
-                    + "\". Only Fasta, GenBank & ABI files are supported.");
-            Logger.error(errMsg);
-            return false;
-        }
-
-        TraceSequence traceSequence = sequenceAnalysisController.uploadTraceSequence(
-                entry, fileName, userId, dnaSequence.getSequence().toLowerCase(), new ByteArrayInputStream(bytes));
-
-        if (traceSequence == null)
-            return false;
-
-        Sequence sequence = DAOFactory.getSequenceDAO().getByEntry(entry);
-        if (sequence == null)
-            return true;
-        sequenceAnalysisController.buildOrRebuildAlignment(traceSequence, sequence);
-        return true;
     }
 }

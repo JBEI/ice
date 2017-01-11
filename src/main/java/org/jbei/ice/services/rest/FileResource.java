@@ -14,7 +14,6 @@ import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
-import org.jbei.ice.lib.dto.ShotgunSequenceDTO;
 import org.jbei.ice.lib.entry.EntriesAsCSV;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -42,7 +41,6 @@ import java.io.*;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Resource for accessing files both locally and remotely

@@ -21,9 +21,7 @@ import org.jbei.ice.storage.model.Request;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * Handler for sample requests
@@ -106,7 +104,7 @@ public class RequestRetriever {
 
         for (Request request : results) {
             SampleRequest sampleRequest = request.toDataTransferObject();
-            ArrayList<PartSample> location = sampleService.retrieveEntrySamples(userId, request.getEntry().getId());
+            ArrayList<PartSample> location = sampleService.retrieveEntrySamples(userId, Long.toString(request.getEntry().getId()));
             sampleRequest.setLocation(location);
             samples.getRequests().add(sampleRequest);
         }
@@ -192,7 +190,8 @@ public class RequestRetriever {
         try (CSVWriter writer = new CSVWriter(streamWriter)) {
             SampleService sampleService = new SampleService();
 
-            for (long id : ids) {
+            Set<Long> idSet = new HashSet<>(ids);
+            for (long id : idSet) {
                 Request request = dao.get(id);
                 if (request == null)
                     continue;
@@ -201,7 +200,7 @@ public class RequestRetriever {
                 Entry entry = request.getEntry();
                 line[0] = entry.getName();
 
-                ArrayList<PartSample> samples = sampleService.retrieveEntrySamples(userId, request.getEntry().getId());
+                ArrayList<PartSample> samples = sampleService.retrieveEntrySamples(userId, Long.toString(request.getEntry().getId()));
                 String plate = null;
                 String well = null;
 
