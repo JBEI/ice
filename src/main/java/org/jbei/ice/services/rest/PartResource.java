@@ -33,6 +33,7 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
 import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.Sample;
 import org.jbei.ice.storage.model.ShotgunSequence;
 
 import javax.ws.rs.*;
@@ -501,7 +502,8 @@ public class PartResource extends RestResource {
     @Path("/{id}/samples")
     public ArrayList<PartSample> getSamples(@PathParam("id") String partId) {
         String userId = requireUserId();
-        return sampleService.retrieveEntrySamples(userId, partId);
+        ArrayList<PartSample> partSamples = sampleService.retrieveEntrySamples(userId, partId);
+        return partSamples;
     }
 
     @POST

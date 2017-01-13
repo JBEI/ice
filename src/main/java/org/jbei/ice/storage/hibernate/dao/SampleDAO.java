@@ -11,6 +11,8 @@ import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Sample;
 import org.jbei.ice.storage.model.Storage;
+import org.jbei.ice.lib.dto.StorageLocation;
+import org.jbei.ice.lib.dto.sample.PartSample;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,10 +69,13 @@ public class SampleDAO extends HibernateRepository<Sample> {
     public ArrayList<Sample> getSamplesByStorage(Storage storage) throws DAOException {
         ArrayList<Sample> samples = null;
         Session session = currentSession();
+        String queryString = "from " + Sample.class.getName() + " sample where sample.storage.parent.parent.id = :id";
+        if (storage.getChildren().size() == 0) {
+            queryString = "from " + Sample.class.getName() + " sample where sample.storage.id = :id";
+        }
         try {
-            String queryString = "from " + Sample.class.getName() + " as sample where sample.storage = :storage";
             Query query = session.createQuery(queryString);
-            query.setEntity("storage", storage);
+            query.setParameter("id", storage.getId());
 
             @SuppressWarnings("rawtypes")
             List list = query.list();

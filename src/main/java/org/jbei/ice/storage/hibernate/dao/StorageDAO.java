@@ -57,10 +57,8 @@ public class StorageDAO extends HibernateRepository<Storage> {
         Session session = currentSession();
         try {
             Query query = session.createQuery("from " + Storage.class.getName()
-                                                      + " where index = :index and storage_type = :type");
+                                                      + " where index = :index");
             query.setString("index", index);
-            query.setString("type", type.name());
-
             List<Storage> list = query.list();
             if (list != null) {
                 result = list;

@@ -16,32 +16,42 @@ angular.module('ice.entry.sample.controller', [])
 
         $scope.Plate96Rows = SampleService.getPlate96Rows();
         $scope.Plate96Cols = SampleService.getPlate96Cols();
-
-        // retrieve samples for partId
-        Util.list('rest/parts/' + partId + '/samples', function (result) {
-            $scope.samples = result;
+        $scope.addToCartDefaultLocal;
+        Util.get('rest/config/ADD_TO_CART_DEFAULT_SET_TO_LOCAL', function (result) {
+            $scope.addToCartDefaultLocal = result.value.toUpperCase() === "YES" ? true : false;
         });
 
-        // marks the sample object "inCart" field if the data
-        // contains the entry id of current part being viewed
-        //var setInCart = function (data) {
-        //    if (!data || !data.length) {
-        //        $scope.samples[0].inCart = false;
-        //        return;
-        //    }
-        //
-        //    // check specific values added to cart
-        //    for (var idx = 0; idx < data.length; idx += 1) {
-        //        // using "==" instead of "===" since partId is a string
-        //        if (data[idx].partData.id == partId) {
-        //            $scope.samples[0].inCart = true;
-        //            return;
-        //        }
-        //    }
-        //
-        //    // assuming not found
-        //    $scope.samples[0].inCart = false;
-        //};
+        // retrieve samples for partId and all samples for relevent plates
+        var refreshSamples = function() {
+            Util.list('rest/parts/' + partId + '/samples', function (result) {
+                var samples = [];
+                var distinctPlates = {};
+                var totalSamples = 0;
+                for (var i=0; i<result.length; i++) {
+                    var sample = result[i];
+                    if ("" + sample.partId === partId) {
+                        totalSamples += 1;
+                    }
+
+                    if (sample.location.type === "PLATE96") {
+                        if (distinctPlates[sample.location.id]) {
+                            distinctPlates[sample.location.id].push(sample);
+                        } else {
+                            distinctPlates[sample.location.id] = [sample];
+                        }
+
+                    } else {
+                        samples.push(sample);
+                    }
+                }
+
+                $scope.samples = samples;
+                $scope.distinctPlates = distinctPlates;
+                $scope.selected = null;
+                $scope.totalSamples = totalSamples;
+            });
+        };
+        refreshSamples();
 
         $scope.isAddGene = function (samples) {
             if (!samples || !samples.length)
@@ -158,8 +168,7 @@ angular.module('ice.entry.sample.controller', [])
 
         $scope.delete = function (sample) {
             Util.remove('rest/parts/' + partId + '/samples/' + sample.id, {}, function () {
-                var idx = $scope.samples.indexOf(sample);
-                $scope.samples.splice(idx, 1);
+                refreshSamples();
             });
         };
 
@@ -190,6 +199,7 @@ angular.module('ice.entry.sample.controller', [])
                     },
                     location: {}
                 };
+                refreshSamples();
             });
         };
 
@@ -229,8 +239,5 @@ angular.module('ice.entry.sample.controller', [])
                 recurse = recurse.child;
             }
             return false;
-        }
-    })
-;
-
-
+        };
+    });
