@@ -16,8 +16,8 @@ import org.jbei.ice.storage.hibernate.dao.StorageDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -244,8 +244,8 @@ public class SampleService extends HasEntry {
         }
         entrySamples.addAll(siblingSamples);
 
-        Set<Sample> unique = new HashSet<Sample>(entrySamples);
-        entrySamples = new ArrayList<Sample>(unique);
+        Set<Sample> unique = new HashSet<>(entrySamples);
+        entrySamples = new ArrayList<>(unique);
 
         for (Sample sample : entrySamples) {
             // convert sample to info
@@ -284,7 +284,7 @@ public class SampleService extends HasEntry {
             partSample.setPartName(sample.getEntry().getName());
             partSample.setLabel(sample.getLabel());
 
-            if (sample.getEntry().getId() == entryId) {
+            if (sample.getEntry().getId() == entry.getId()) {
                 partSample.setCreationTime(sample.getCreationTime().getTime());
                 partSample.setInCart(inCart);
                 partSample.setCanEdit(sampleAuthorization.canWrite(userId, sample));
