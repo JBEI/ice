@@ -405,7 +405,10 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/shotgunsequences")
     public ArrayList<ShotgunSequenceDTO> getShotgunSequences(
-            @PathParam("id") final long partId) {
+            @Context final UriInfo info,
+            @PathParam("id") final long partId,
+            @DefaultValue("100") @QueryParam("limit") int limit,
+            @DefaultValue("0") @QueryParam("start") int start) {
         final String userId = getUserId();
         ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
         final EntryDAO entryDAO = DAOFactory.getEntryDAO();
@@ -442,7 +445,8 @@ public class PartResource extends RestResource {
             Logger.error(e);
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
-        final boolean success = controller.addTraceSequence(userId, partId, file, fileName);
+        TraceSequences traceSequences = new TraceSequences(userId, partId);
+        final boolean success = traceSequences.addTraceSequence(file, fileName);
         return respond(success);
     }
 
@@ -483,10 +487,20 @@ public class PartResource extends RestResource {
         return super.respond(Response.Status.OK);
     }
 
+    @DELETE
+    @Path("/{id}/shotgunsequences/{shotgunId}")
+    public Response deleteShotgunSequence(@Context final UriInfo info,
+                                @PathParam("id") final long partId,
+                                @PathParam("shotgunId") final long shotgunId) {
+        final String userId = getUserId();
+        controller.deleteShotgunSequence(userId, partId, shotgunId);
+        return super.respond(Response.Status.OK);
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
-    public ArrayList<PartSample> getSamples(@PathParam("id") long partId) {
+    public ArrayList<PartSample> getSamples(@PathParam("id") String partId) {
         String userId = requireUserId();
         ArrayList<PartSample> partSamples = sampleService.retrieveEntrySamples(userId, partId);
         return partSamples;
@@ -495,7 +509,7 @@ public class PartResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
-    public Response addSample(@PathParam("id") final long partId,
+    public Response addSample(@PathParam("id") final String partId,
                               @QueryParam("strainNamePrefix") final String strainNamePrefix,
                               final PartSample partSample) {
         final String userId = getUserId();
@@ -667,7 +681,7 @@ public class PartResource extends RestResource {
      */
     @GET
     @Path("/{id}/links")
-    public Response getLinkedParts(@PathParam("id") long partId,
+    public Response getLinkedParts(@PathParam("id") String partId,
                                    @DefaultValue("CHILD") @QueryParam("linkType") LinkType linkType) {
         final String userId = requireUserId();
         EntryLinks entryLinks = new EntryLinks(userId, partId);
@@ -679,7 +693,7 @@ public class PartResource extends RestResource {
      */
     @DELETE
     @Path("/{id}/links/{linkedId}")
-    public Response deleteLink(@PathParam("id") final long partId,
+    public Response deleteLink(@PathParam("id") final String partId,
                                @DefaultValue("CHILD") @QueryParam("linkType") LinkType linkType,
                                @PathParam("linkedId") final long linkedPart) {
         final String userId = getUserId();
@@ -699,7 +713,7 @@ public class PartResource extends RestResource {
     @Path("/{id}/links")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createLink(@PathParam("id") long partId,
+    public Response createLink(@PathParam("id") String partId,
                                @DefaultValue("CHILD") @QueryParam("linkType") LinkType type,
                                PartData partData) {
         String userId = getUserId();

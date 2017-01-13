@@ -1,30 +1,67 @@
 <div ng-controller="ShotgunSequenceController">
-    <div class="row pad_top" ng-if="shotgunSequences.length">
+    <div class="row pad_top">
+        <div class="col-md-12">
+            <button type="button" class="ice-button" ng-click="showAddShotgunSequenceModal()">Add PacBio/MiSeq Trace</button>
+        </div>
+    </div>
+
+    <div class="row pad_top" ng-if="shotgunSequences.length===0">
+        <div class="col-md-12">
+            <i class="text-muted">No PacBio/MiSeqs available</i>
+        </div>
+    </div>
+
+    <div class="row pad_top" ng-if="shotgunSequences && shotgunSequences.length">
         <div class="col-md-12">
             <table cellspacing="0" class="table table-condensed table-hover font-95em">
                 <thead>
                 <tr>
                     <td></td>
-                    <td><b>MiSeq/PacBio Sequence</b></td>
-                    <td><b>Quality</b></td>
+                    <td><b>PacBio/MiSeq</b></td>
+                    <td><b>Uploader</b></td>
                     <td><b>Uploaded On</b></td>
+                    <th>&nbsp;</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="shotgunSequence in shotgunSequences">
+                <div ng-show="false">
+                    {{limit = shotgunParams.limit}}
+                    {{start = (shotgunParams.currentPage - 1) * limit}}
+                    {{end = start + 5}}
+                </div>
+                <tr ng-repeat="shotgunSequence in shotgunSequences.slice(start,end)">
                     <td style="opacity:0.2; text-shadow:0 1px 0 #fff;" width="30px">
-                        <b class="no_wrap">{{$index+1}}</b>
+                        <b class="no_wrap">{{$index+shotgunParams.start+1 | number}}</b>
                     </td>
-                    <td><a class="cursor_pointer"
-                           ng-click="downloadShotgunFile(shotgunSequence)">{{shotgunSequence.filename}}</a>
+                    <td>
+                        <a class="cursor_pointer"
+                        ng-click="downloadShotgunFile(shotgunSequence)">{{shotgunSequence.filename}}</a>
                     </td>
-                    <td><span class="label quality-{{shotgunSequence.call}}">{{shotgunSequence.score}}</span>
-                        {{shotgunSequence.call}}
-                    </td>
+                    <td><a ng-href="profile/{{shotgunSequence.depositor.id}}">{{shotgunSequence.depositor.firstName}}
+                        {{shotgunSequence.depositor.lastName}}</a></td>
                     <td>{{shotgunSequence.created | date:'MMM d, y, h:mm a'}}</td>
+                    <td style="font-size:14px">
+                        <i ng-click="deleteShotgunSequenceFile(shotgunSequence.fileId)"
+                        class="fa fa-trash-o delete_icon"></i>
+                    </td>
                 </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <div class="row" ng-if="shotgunSequences && shotgunSequences.length">
+        <div class="col-sm-6">
+            <uib-pagination total-items="shotgunSequences.length" ng-change="shotgunPageChanged()"
+                            ng-model="shotgunParams.currentPage"
+                            max-size="maxSize" class="pagination-sm" items-per-page="shotgunParams.limit"
+                            boundary-links="true">
+            </uib-pagination>
+        </div>
+
+        <div class="col-md-6" style="margin-top: 20px;">
+            <strong class="small">{{pageCounts(shotgunParams.currentPage, shotgunSequences.length,
+                shotgunParams.limit)}}</strong>
         </div>
     </div>
 </div>

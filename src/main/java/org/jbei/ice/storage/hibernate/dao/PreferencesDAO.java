@@ -35,7 +35,7 @@ public class PreferencesDAO extends HibernateRepository<Preference> {
             Criteria criteria = session.createCriteria(Preference.class)
                                        .add(Restrictions.eq("account", account))
                                        .add(Restrictions.in("key", keyString));
-            return new ArrayList<Preference>(criteria.list());
+            return new ArrayList<>(criteria.list());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

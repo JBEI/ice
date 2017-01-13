@@ -80,7 +80,28 @@ angular.module('ice.entry.sample.controller', [])
                 controller: function ($scope, samples) {
                     $scope.samples = samples;
                     $scope.tempRange = [{value: 30}, {value: 37}];
+                    $scope.plateInformationOptions = [{value: "LB"},
+                        {value: "LB Apr50"},
+                        {value: "LB Carb100"},
+                        {value: "LB Chlor25"},
+                        {value: "LB Gent30 Kan50 Rif100"},
+                        {value: "LB Kan50"},
+                        {value: "LB Kan50 Rif100 Tet 5"},
+                        {value: "LB Spect100"},
+                        {value: "YPD 1000"},
+                        {value: "CSM -HIS"},
+                        {value: "CSM -HIS -LEU -URA"},
+                        {value: "CSM -LEU"},
+                        {value: "CSM -TRP"},
+                        {value: "CSM -URA"},
+                        {value: "1/2 MS Hygro50"},
+                        {value: "Other"}];
+
                     $scope.sampleTemp = $scope.tempRange[0];
+                    $scope.userData = {
+                        plateDescription: $scope.plateInformationOptions[0],
+                        plateDescriptionText: undefined
+                    };
 
                     $scope.hasComments = function () {
                         for (var i = 0; i < $scope.samples.length; i += 1) {
@@ -90,13 +111,15 @@ angular.module('ice.entry.sample.controller', [])
                         return false;
                     };
 
-                    $scope.addSampleToCart = function (type, tmp) {
+                    $scope.addSampleToCart = function () {
                         var sampleSelection = {
-                            requestType: type,
-                            growthTemperature: tmp.value,
+                            requestType: $scope.userData.sampleType,
+                            growthTemperature: $scope.sampleTemp.value,
                             partData: {
                                 id: entryId
-                            }
+                            },
+                            plateDescription: $scope.userData.plateDescription.value == "Other" ?
+                                $scope.userData.plateDescriptionText : $scope.userData.plateDescription.value
                         };
 
                         // add selection to shopping cart
@@ -104,6 +127,11 @@ angular.module('ice.entry.sample.controller', [])
                             $rootScope.$emit("SamplesInCart");
                             modalInstance.close('');
                         });
+                    };
+
+                    $scope.disableAddToCart = function () {
+                        return !$scope.userData.sampleType || !$scope.userData.plateDescription ||
+                            ($scope.userData.plateDescription.value == 'Other' && !$scope.userData.plateDescriptionText);
                     }
                 },
                 resolve: {
@@ -112,7 +140,8 @@ angular.module('ice.entry.sample.controller', [])
                     }
                 }
             });
-        };
+        }
+        ;
 
         $scope.newSample = {
             open: {},
@@ -129,7 +158,7 @@ angular.module('ice.entry.sample.controller', [])
             return $scope.newSample.open.cell === row + (10 + col + '').slice(-2);
         };
 
-        // add sample 96 well plate click
+// add sample 96 well plate click
         $scope.cellBarcodeClick = function (row, col) { //todo: prevent the popover from opening for multiple wells
             var rc = row + (10 + col + '').slice(-2);
             $scope.newSample.open = {
@@ -199,7 +228,7 @@ angular.module('ice.entry.sample.controller', [])
             return false;
         };
 
-        // has either well or t
+// has either well or t
         $scope.hasContent = function (row, col) {
             var rc = row + (10 + col + '').slice(-2);
             var recurse = $scope.newSample.location;
@@ -211,5 +240,4 @@ angular.module('ice.entry.sample.controller', [])
             }
             return false;
         };
-
     });
