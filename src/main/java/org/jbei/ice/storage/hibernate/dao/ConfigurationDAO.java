@@ -3,6 +3,8 @@ package org.jbei.ice.storage.hibernate.dao;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
+
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.storage.DAOException;
@@ -34,13 +36,18 @@ public class ConfigurationDAO extends HibernateRepository<Configuration> {
         Session session = currentSession();
 
         try {
-            Query query = session.createQuery("from " + Configuration.class.getName() + " where key = :key");
-            query.setParameter("key", key);
-            Object queryResult = query.uniqueResult();
+        	final Transaction t = session.beginTransaction();
+        	try {
+                Query query = session.createQuery("from " + Configuration.class.getName() + " where key = :key");
+                query.setParameter("key", key);
+                Object queryResult = query.uniqueResult();
 
-            if (queryResult != null) {
-                configuration = (Configuration) queryResult;
-            }
+                if (queryResult != null) {
+                    configuration = (Configuration) queryResult;
+                }
+        	} finally {
+        		t.commit();
+        	}
         } catch (HibernateException e) {
             throw new DAOException("Failed to get Configuration using key: " + key, e);
         }
