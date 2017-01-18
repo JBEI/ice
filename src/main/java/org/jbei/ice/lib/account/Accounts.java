@@ -62,7 +62,7 @@ public class Accounts {
     }
 
     public List<AccountTransfer> filterAccount(String userId, String token, int limit) {
-        Set<Account> results = accountDAO.getMatchingAccounts(token, limit);
+        List<Account> results = accountDAO.getMatchingAccounts(token, limit);
         List<AccountTransfer> accountTransfers = new ArrayList<>();
         for (Account match : results) {
             AccountTransfer info = new AccountTransfer();

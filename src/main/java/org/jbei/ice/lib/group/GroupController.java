@@ -15,6 +15,7 @@ import org.jbei.ice.storage.model.Group;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class GroupController {
@@ -141,7 +142,7 @@ public class GroupController {
         return save(publicGroup);
     }
 
-    public Set<Group> getMatchingGroups(String userId, String query, int limit) {
+    public List<Group> getMatchingGroups(String userId, String query, int limit) {
         Account account = accountController.getByEmail(userId);
         if (account == null)
             return null;
@@ -155,9 +156,9 @@ public class GroupController {
      * @param account account whose groups are being retrieved
      * @return set of groups retrieved for account
      */
-    public Set<Group> getAllGroups(Account account) {
+    public List<Group> getAllGroups(Account account) {
         if (account == null) {
-            Set<Group> groups = new HashSet<>();
+            List<Group> groups = new ArrayList<>(1);
             groups.add(createOrRetrievePublicGroup());
             return groups;
         }

@@ -15,10 +15,8 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.*;
 import org.jbei.ice.storage.model.*;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * ICE Annotations with support for generating potential annotations for a specified entry
@@ -111,7 +109,7 @@ public class Annotations {
 
             // check permissions
             Account account = accountDAO.getByEmail(userId);
-            Set<Group> groups = new HashSet<>(this.groupDAO.retrieveMemberGroups(account));
+            List<Group> groups = this.groupDAO.retrieveMemberGroups(account);
 
             for (DNAFeature dnaFeature : features) {
                 Feature feature = this.featureDAO.get(dnaFeature.getId());

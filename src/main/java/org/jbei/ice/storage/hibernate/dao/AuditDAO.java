@@ -1,17 +1,15 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Audit;
 import org.jbei.ice.storage.model.Entry;
 
+import javax.persistence.criteria.CriteriaDelete;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 /**
@@ -19,7 +17,6 @@ import java.util.List;
  *
  * @author Hector Plahar
  */
-@SuppressWarnings("unchecked")
 public class AuditDAO extends HibernateRepository<Audit> {
 
     /**
@@ -35,11 +32,13 @@ public class AuditDAO extends HibernateRepository<Audit> {
 
     public List<Audit> getAuditsForEntry(Entry entry, int limit, int offset, boolean asc, String sort) {
         try {
-            Criteria criteria = currentSession().createCriteria(Audit.class)
-                    .add(Restrictions.eq("entry", entry));
-            criteria.setMaxResults(limit);
-            criteria.setFirstResult(offset);
-            return criteria.list();
+            if (sort == null)
+                sort = "id";
+            CriteriaQuery<Audit> query = getBuilder().createQuery(Audit.class);
+            Root<Audit> from = query.from(Audit.class);
+            query.where(getBuilder().equal(from.get("entry"), entry));
+            query.orderBy(asc ? getBuilder().asc(from.get(sort)) : getBuilder().desc(from.get(sort)));
+            return currentSession().createQuery(query).setFirstResult(offset).setMaxResults(limit).list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -47,20 +46,23 @@ public class AuditDAO extends HibernateRepository<Audit> {
     }
 
     public int getHistoryCount(Entry entry) {
-        Number itemCount = (Number) currentSession().createCriteria(Audit.class)
-                .setProjection(Projections.countDistinct("id"))
-                .add(Restrictions.eq("entry", entry)).uniqueResult();
-        if (itemCount != null)
-            return itemCount.intValue();
-        return 0;
+        try {
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<Audit> from = query.from(Audit.class);
+            query.select(getBuilder().countDistinct(from.get("id"))).where(getBuilder().equal(from.get("entry"), entry));
+            return currentSession().createQuery(query).uniqueResult().intValue();
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
     }
 
     public int deleteAll(Entry entry) {
         try {
-            Session session = currentSession();
-            Query query = session.createQuery("delete from " + Audit.class.getName() + " where entry=:entry");
-            query.setParameter("entry", entry);
-            return query.executeUpdate();
+            CriteriaDelete<Audit> query = getBuilder().createCriteriaDelete(Audit.class);
+            Root<Audit> from = query.from(Audit.class);
+            query.where(getBuilder().equal(from.get("entry"), entry));
+            return currentSession().createQuery(query).executeUpdate();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

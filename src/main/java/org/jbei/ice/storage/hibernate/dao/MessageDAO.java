@@ -1,11 +1,8 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.NativeQuery;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
@@ -13,6 +10,8 @@ import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Group;
 import org.jbei.ice.storage.model.Message;
 
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -23,16 +22,14 @@ import java.util.Set;
  *
  * @author Hector Plahar
  */
-@SuppressWarnings("unchecked")
 public class MessageDAO extends HibernateRepository<Message> {
 
-    public Message retrieveMessage(long id) throws DAOException {
+    public Message retrieveMessage(long id) {
         return super.get(Message.class, id);
     }
 
-    public int retrieveNewMessageCount(Account account) throws DAOException {
+    public int retrieveNewMessageCount(Account account) {
         try {
-            Session session = currentSession();
             StringBuilder builder = new StringBuilder();
             builder.append("select count(id) from message m where m.is_read=false AND (m.id in ")
                     .append("(select message_id from message_destination_accounts where account_id = ")
@@ -52,7 +49,7 @@ public class MessageDAO extends HibernateRepository<Message> {
                 builder.append("))");
             }
             builder.append(")");
-            Query query = session.createSQLQuery(builder.toString());
+            NativeQuery query = currentSession().createNativeQuery(builder.toString());
             Number number = (Number) query.uniqueResult();
             return number.intValue();
         } catch (HibernateException he) {
@@ -63,7 +60,6 @@ public class MessageDAO extends HibernateRepository<Message> {
 
     public List<Message> retrieveMessages(Account account, List<Group> groups, int start, int count) {
         try {
-            Session session = currentSession();
             StringBuilder builder = new StringBuilder();
             builder.append("select id from message m where m.id in ")
                     .append("(select message_id from message_destination_accounts where account_id = ")
@@ -85,7 +81,7 @@ public class MessageDAO extends HibernateRepository<Message> {
                 builder.append("))");
             }
 
-            Query query = session.createSQLQuery(builder.toString());
+            NativeQuery query = currentSession().createNativeQuery(builder.toString());
             query.setFirstResult(start);
             query.setMaxResults(count);
             List list = query.list();
@@ -98,16 +94,18 @@ public class MessageDAO extends HibernateRepository<Message> {
             if (set.isEmpty())
                 return new ArrayList<>();
 
-            Criteria criteria = session.createCriteria(Message.class).add(Restrictions.in("id", set));
-            criteria.addOrder(Order.desc("dateSent"));
-            return criteria.list();
+            CriteriaQuery<Message> criteriaQuery = getBuilder().createQuery(Message.class);
+            Root<Message> from = criteriaQuery.from(Message.class);
+            criteriaQuery.where(from.get("id").in(set));
+            criteriaQuery.orderBy(getBuilder().desc(from.get("dateSent")));
+            return currentSession().createQuery(criteriaQuery).list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
         }
     }
 
-    public int retrieveMessageCount(Account account, List<Group> groups) throws DAOException {
+    public int retrieveMessageCount(Account account, List<Group> groups) {
         try {
             Session session = currentSession();
             StringBuilder builder = new StringBuilder();
@@ -132,7 +130,7 @@ public class MessageDAO extends HibernateRepository<Message> {
                 builder.append("))");
             }
 
-            Query query = session.createSQLQuery(builder.toString());
+            NativeQuery query = session.createNativeQuery(builder.toString());
             Number number = (Number) query.uniqueResult();
             return number.intValue();
         } catch (HibernateException he) {

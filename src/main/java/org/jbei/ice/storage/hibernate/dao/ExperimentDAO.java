@@ -1,15 +1,16 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.NativeQuery;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
+import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Experiment;
 
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 /**
@@ -21,13 +22,13 @@ public class ExperimentDAO extends HibernateRepository<Experiment> {
         return super.get(Experiment.class, id);
     }
 
-    @SuppressWarnings("unchecked")
     public List<Experiment> getExperimentList(long entryId) {
         try {
-            String sql = "SELECT DISTINCT e FROM Experiment e JOIN e.subjects s WHERE s.id=:id";
-            Query query = currentSession().createQuery(sql);
-            query.setLong("id", entryId);
-            return query.list();
+            CriteriaQuery<Experiment> query = getBuilder().createQuery(Experiment.class);
+            Root<Experiment> from = query.from(Experiment.class);
+            Join<Experiment, Entry> entryJoin = from.join("subjects");
+            query.distinct(true).where(getBuilder().equal(entryJoin.get("id"), entryId));
+            return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -37,8 +38,8 @@ public class ExperimentDAO extends HibernateRepository<Experiment> {
     public int getExperimentCount(long entryId) throws DAOException {
         try {
             String sql = "SELECT count(*) FROM experiment_entry WHERE entry_id=:id";
-            SQLQuery query = currentSession().createSQLQuery(sql);
-            query.setLong("id", entryId);
+            NativeQuery query = currentSession().createNativeQuery(sql);
+            query.setParameter("id", entryId);
             Number result = (Number) query.uniqueResult();
             return result.intValue();
         } catch (HibernateException he) {
@@ -49,9 +50,10 @@ public class ExperimentDAO extends HibernateRepository<Experiment> {
 
     public Experiment getByUrl(String url) throws DAOException {
         try {
-            Criteria criteria = currentSession().createCriteria(Experiment.class.getName())
-                    .add(Restrictions.eq("url", url));
-            return (Experiment) criteria.uniqueResult();
+            CriteriaQuery<Experiment> query = getBuilder().createQuery(Experiment.class);
+            Root<Experiment> from = query.from(Experiment.class);
+            query.where(getBuilder().equal(from.get("url"), url));
+            return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

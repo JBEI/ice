@@ -122,7 +122,7 @@ public class RemoteEntriesAsCSV {
                 groups.add(publicGroup);
 
                 EntryDAO entryDAO = DAOFactory.getEntryDAO();
-                Set<Entry> results = entryDAO.retrieveVisibleEntries(null, groups, ColumnField.CREATED, true, 0, Integer.MAX_VALUE, null);
+                List<Entry> results = entryDAO.retrieveVisibleEntries(null, groups, ColumnField.CREATED, true, 0, Integer.MAX_VALUE, null);
                 writeLocalEntries(results, fields, writer, zos);
             }
 
@@ -182,7 +182,7 @@ public class RemoteEntriesAsCSV {
         }
     }
 
-    protected void writeLocalEntries(Set<Entry> entries, List<EntryField> fields,
+    protected void writeLocalEntries(List<Entry> entries, List<EntryField> fields,
                                      CSVWriter writer, ZipOutputStream zos) {
         if (entries == null)
             return;

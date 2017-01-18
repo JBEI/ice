@@ -9,7 +9,6 @@ import org.jbei.ice.storage.model.Parameter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Hector Plahar
@@ -18,15 +17,15 @@ public class CustomFields {
 
     private EntryAuthorization authorization;
     private final ParameterDAO dao;
+    private final EntryDAO entryDAO;
 
     public CustomFields() {
         this.authorization = new EntryAuthorization();
         this.dao = DAOFactory.getParameterDAO();
+        this.entryDAO = DAOFactory.getEntryDAO();
     }
 
     public CustomField createField(String userId, long partId, CustomField field) {
-        EntryDAO entryDAO = DAOFactory.getEntryDAO();
-
         Entry entry = entryDAO.get(partId);
         authorization.expectWrite(userId, entry);
 
@@ -62,7 +61,6 @@ public class CustomFields {
     }
 
     public List<CustomField> getFieldsForPart(String userId, long partId) {
-        EntryDAO entryDAO = DAOFactory.getEntryDAO();
         Entry entry = entryDAO.get(partId);
         authorization.expectRead(userId, entry);
 
@@ -78,7 +76,7 @@ public class CustomFields {
 
     public List<PartData> getPartsByFields(String userId, List<CustomField> fields) {
         // todo : performance
-        Set<Entry> entries = dao.filter(fields);
+        List<Entry> entries = dao.filter(fields);
         List<PartData> parts = new ArrayList<>();
         for (Entry entry : entries) {
             if (!authorization.canRead(userId, entry))

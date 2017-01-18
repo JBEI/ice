@@ -1,17 +1,16 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.criterion.*;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Account;
 
-import java.util.HashSet;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Data accessor object to manipulate {@link Account} objects in the database.
@@ -39,23 +38,24 @@ public class AccountDAO extends HibernateRepository<Account> {
      * @param limit maximum number of matching accounts to return; 0 to return all
      * @return list of matching accounts
      */
-    @SuppressWarnings("unchecked")
-    public Set<Account> getMatchingAccounts(String token, int limit) {
+    public List<Account> getMatchingAccounts(String token, int limit) {
         try {
+            CriteriaQuery<Account> query = getBuilder().createQuery(Account.class);
+            Root<Account> from = query.from(Account.class);
+
             String[] tokens = token.split("\\s+");
-            Disjunction disjunction = Restrictions.disjunction();
+            List<Predicate> predicates = new ArrayList<>();
             for (String tok : tokens) {
-                disjunction.add(Restrictions.ilike("firstName", tok, MatchMode.ANYWHERE))
-                        .add(Restrictions.ilike("lastName", tok, MatchMode.ANYWHERE))
-                        .add(Restrictions.ilike("email", tok, MatchMode.ANYWHERE));
+                tok = tok.toLowerCase();
+                predicates.add(
+                        getBuilder().or(
+                                getBuilder().like(getBuilder().lower(from.get("firstName")), "%" + tok + "%"),
+                                getBuilder().like(getBuilder().lower(from.get("lastName")), "%" + tok + "%"),
+                                getBuilder().like(getBuilder().lower(from.get("email")), "%" + tok + "%"))
+                );
             }
-
-            Criteria criteria = currentSession().createCriteria(Account.class)
-                    .add(disjunction);
-
-            if (limit > 0)
-                criteria.setMaxResults(limit);
-            return new HashSet<>(criteria.list());
+            query.where(predicates.toArray(new Predicate[predicates.size()])).distinct(true);
+            return currentSession().createQuery(query).setMaxResults(limit).list();
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException(e);
@@ -66,16 +66,17 @@ public class AccountDAO extends HibernateRepository<Account> {
      * Retrieve an {@link Account} by the email field.
      *
      * @param email unique email identifier for account
-     * @return Account record referenced by email or null if email is null
+     * @return Account record referenced by email
      */
     public Account getByEmail(String email) {
         if (email == null)
             return null;
 
         try {
-            return (Account) currentSession().createCriteria(Account.class)
-                    .add(Restrictions.eq("email", email.trim()).ignoreCase())
-                    .uniqueResult();
+            CriteriaQuery<Account> query = getBuilder().createQuery(Account.class);
+            Root<Account> from = query.from(Account.class);
+            query.where(getBuilder().equal(getBuilder().lower(from.get("email")), email.trim().toLowerCase()));
+            return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve Account by email: " + email, e);
@@ -93,20 +94,21 @@ public class AccountDAO extends HibernateRepository<Account> {
      * @return list of matching accounts
      * @throws DAOException on {@link HibernateException} retrieving accounts
      */
-    @SuppressWarnings("unchecked")
     public List<Account> getAccounts(int offset, int limit, String sort, boolean asc, String filter) {
         try {
-            Criteria criteria = currentSession().createCriteria(Account.class.getName());
-            if (!StringUtils.isEmpty(filter)) {
-                criteria.add(Restrictions.disjunction()
-                        .add(Restrictions.ilike("firstName", filter, MatchMode.ANYWHERE))
-                        .add(Restrictions.ilike("lastName", filter, MatchMode.ANYWHERE))
-                        .add(Restrictions.ilike("email", filter, MatchMode.ANYWHERE)));
+            CriteriaQuery<Account> query = getBuilder().createQuery(Account.class);
+            Root<Account> from = query.from(Account.class);
+
+            if (filter != null && !filter.isEmpty()) {
+                filter = filter.toLowerCase();
+                query.where(getBuilder().or(
+                                getBuilder().like(getBuilder().lower(from.get("firstName")), "%" + filter + "%"),
+                                getBuilder().like(getBuilder().lower(from.get("lastName")), "%" + filter + "%"),
+                                getBuilder().like(getBuilder().lower(from.get("email")), "%" + filter + "%"))
+                );
             }
-            criteria.addOrder(asc ? Order.asc(sort) : Order.desc(sort));
-            criteria.setMaxResults(limit);
-            criteria.setFirstResult(offset);
-            return criteria.list();
+            query.distinct(true).orderBy(asc ? getBuilder().asc(from.get(sort)) : getBuilder().desc(from.get(sort)));
+            return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(offset).list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -123,15 +125,19 @@ public class AccountDAO extends HibernateRepository<Account> {
      */
     public long getAccountsCount(String filter) {
         try {
-            Criteria criteria = currentSession().createCriteria(Account.class.getName());
-            if (!StringUtils.isEmpty(filter)) {
-                criteria.add(Restrictions.disjunction()
-                        .add(Restrictions.ilike("firstName", filter, MatchMode.ANYWHERE))
-                        .add(Restrictions.ilike("lastName", filter, MatchMode.ANYWHERE))
-                        .add(Restrictions.ilike("email", filter, MatchMode.ANYWHERE)));
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<Account> from = query.from(Account.class);
+
+            if (filter != null && !filter.isEmpty()) {
+                filter = filter.toLowerCase();
+                query.where(getBuilder().or(
+                                getBuilder().like(getBuilder().lower(from.get("firstName")), "%" + filter + "%"),
+                                getBuilder().like(getBuilder().lower(from.get("lastName")), "%" + filter + "%"),
+                                getBuilder().like(getBuilder().lower(from.get("email")), "%" + filter + "%"))
+                );
             }
-            Number itemCount = (Number) criteria.setProjection(Projections.countDistinct("id")).uniqueResult();
-            return itemCount.longValue();
+            query.select(getBuilder().countDistinct(from.get("id")));
+            return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

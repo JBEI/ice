@@ -419,7 +419,7 @@ public class PartResource extends RestResource {
         }
 
         ArrayList<ShotgunSequenceDTO> returns = new ArrayList<>();
-        List<ShotgunSequence> results = dao.getByEntry(entry, userId);
+        List<ShotgunSequence> results = dao.getByEntry(entry);
 
         for (ShotgunSequence ret : results) {
             returns.add(new ShotgunSequenceDTO(ret));

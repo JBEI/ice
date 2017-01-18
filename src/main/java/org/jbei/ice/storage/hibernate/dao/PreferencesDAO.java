@@ -1,9 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.user.PreferenceKey;
 import org.jbei.ice.storage.DAOException;
@@ -11,10 +8,9 @@ import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Preference;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.*;
 
 /**
  * Data accessor for working with preference objects
@@ -23,70 +19,85 @@ import java.util.Iterator;
  */
 public class PreferencesDAO extends HibernateRepository<Preference> {
 
-    @SuppressWarnings("unchecked")
-    public ArrayList<Preference> getAccountPreferences(Account account, ArrayList<PreferenceKey> keys)
-            throws DAOException {
-        Session session = currentSession();
+    public List<Preference> getAccountPreferences(Account account, List<PreferenceKey> keys) {
         ArrayList<String> keyString = new ArrayList<>();
         for (PreferenceKey key : keys)
             keyString.add(key.name());
 
         try {
-            Criteria criteria = session.createCriteria(Preference.class)
-                                       .add(Restrictions.eq("account", account))
-                                       .add(Restrictions.in("key", keyString));
-            return new ArrayList<>(criteria.list());
+            CriteriaQuery<Preference> query = getBuilder().createQuery(Preference.class);
+            Root<Preference> from = query.from(Preference.class);
+            query.where(getBuilder().equal(from.get("account"), account), from.get("key").in(keyString));
+            return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
         }
     }
 
-    public Preference getPreference(Account account, String key) throws DAOException {
-        Session session = currentSession();
-        Criteria criteria = session.createCriteria(Preference.class)
-                                   .add(Restrictions.eq("account", account))
-                                   .add(Restrictions.eq("key", key.toUpperCase()));
+    public Preference getPreference(Account account, String key) {
         try {
-            return (Preference) criteria.uniqueResult();
+            CriteriaQuery<Preference> query = getBuilder().createQuery(Preference.class);
+            Root<Preference> from = query.from(Preference.class);
+            query.where(
+                    getBuilder().equal(from.get("account"), account),
+                    getBuilder().equal(from.get("key"), key.toUpperCase())
+            );
+            return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
         }
     }
 
-    public HashMap<String, String> retrievePreferenceValues(Account account, HashSet<String> keys) throws DAOException {
-        Session session = currentSession();
-        Criteria criteria = session.createCriteria(Preference.class)
-                                   .add(Restrictions.eq("account", account));
-        Iterator iterator = criteria.list().iterator();
-        HashMap<String, String> results = new HashMap<>();
-        while (iterator.hasNext()) {
-            Preference preference = (Preference) iterator.next();
-            if (keys.contains(preference.getKey().toUpperCase())) {
-                results.put(preference.getKey().toUpperCase().trim(), preference.getValue().trim());
-            }
-        }
+    public HashMap<String, String> retrievePreferenceValues(Account account, HashSet<String> keys) {
+        try {
+            CriteriaQuery<Preference> query = getBuilder().createQuery(Preference.class);
+            Root<Preference> from = query.from(Preference.class);
+            query.where(getBuilder().equal(from.get("account"), account), from.get("key").in(keys));
+            List<Preference> result = currentSession().createQuery(query).list();
 
-        return results;
+            Iterator iterator = result.iterator();
+            HashMap<String, String> results = new HashMap<>();
+            while (iterator.hasNext()) {
+                Preference preference = (Preference) iterator.next();
+                if (keys.contains(preference.getKey().toUpperCase())) {
+                    results.put(preference.getKey().toUpperCase().trim(), preference.getValue().trim());
+                }
+            }
+            return results;
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 
-    public Preference createOrUpdatePreference(Account account, String key, String value) throws DAOException {
-        Criteria criteria = currentSession().createCriteria(Preference.class)
-                .add(Restrictions.eq("account", account))
-                .add(Restrictions.eq("key", key));
-        Preference preference = (Preference) criteria.uniqueResult();
-        if (preference == null) {
-            preference = new Preference(account, key, value);
-            return create(preference);
+    public Preference createOrUpdatePreference(Account account, String key, String value) {
+        try {
+            CriteriaQuery<Preference> query = getBuilder().createQuery(Preference.class);
+            Root<Preference> from = query.from(Preference.class);
+            query.where(
+                    getBuilder().equal(from.get("account"), account),
+                    getBuilder().equal(from.get("key"), key.toUpperCase())
+            );
+            Optional<Preference> optional = currentSession().createQuery(query).uniqueResultOptional();
+            if (optional.isPresent()) {
+                Preference preference = optional.get();
+                if (preference.getValue().equalsIgnoreCase(value))
+                    return preference;
+                currentSession().update(preference);
+                return preference;
+            } else {
+                return this.create(new Preference(account, key, value));
+            }
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
         }
-
-        preference.setValue(value);
-        return update(preference);
     }
 
     @Override
     public Preference get(long id) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return super.get(Preference.class, id);
     }
 }

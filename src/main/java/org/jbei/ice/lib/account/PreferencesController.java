@@ -32,7 +32,7 @@ public class PreferencesController {
 
     public HashMap<PreferenceKey, String> retrieveAccountPreferences(Account account, ArrayList<PreferenceKey> keys) {
         HashMap<PreferenceKey, String> preferences = new HashMap<>();
-        ArrayList<Preference> results = dao.getAccountPreferences(account, keys);
+        List<Preference> results = dao.getAccountPreferences(account, keys);
 
         for (Preference preference : results) {
             PreferenceKey key = PreferenceKey.fromString(preference.getKey());
@@ -62,7 +62,7 @@ public class PreferencesController {
         keys.add(PreferenceKey.PRINCIPAL_INVESTIGATOR);
         keys.add(PreferenceKey.FUNDING_SOURCE);
 
-        ArrayList<Preference> preferences = dao.getAccountPreferences(requestedAccount, keys);
+        List<Preference> preferences = dao.getAccountPreferences(requestedAccount, keys);
         if (preferences == null)
             return null;
 
