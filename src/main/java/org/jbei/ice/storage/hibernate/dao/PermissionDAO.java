@@ -312,7 +312,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(predicate);
             predicates.add(entry.get("id").in(entries));
-            predicates.add(getBuilder().equal(entry.get("visibility"), Visibility.OK.getValue()));
+            predicates.add(entry.get("visibility").in(Visibility.OK.getValue(), Visibility.PENDING.getValue()));
             query.select(entry.get("id")).distinct(true);
             query.where(predicates.toArray(new Predicate[predicates.size()]));
             return currentSession().createQuery(query).list();
