@@ -1,16 +1,15 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Comment;
 import org.jbei.ice.storage.model.Entry;
 
-import java.util.ArrayList;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.List;
 
 /**
  * DAO for comment objects
@@ -19,12 +18,12 @@ import java.util.ArrayList;
  */
 public class CommentDAO extends HibernateRepository<Comment> {
 
-    @SuppressWarnings("unchecked")
-    public ArrayList<Comment> retrieveComments(Entry entry) {
+    public List<Comment> retrieveComments(Entry entry) {
         try {
-            Query query = currentSession().createQuery("from " + Comment.class.getName() + " where entry=:entry");
-            query.setParameter("entry", entry);
-            return new ArrayList<Comment>(query.list());
+            CriteriaQuery<Comment> query = getBuilder().createQuery(Comment.class);
+            Root<Comment> from = query.from(Comment.class);
+            query.select(from).where(getBuilder().equal(from.get("entry"), entry));
+            return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -32,10 +31,15 @@ public class CommentDAO extends HibernateRepository<Comment> {
     }
 
     public int getCommentCount(Entry entry) {
-        Number itemCount = (Number) currentSession().createCriteria(Comment.class)
-                .setProjection(Projections.countDistinct("id"))
-                .add(Restrictions.eq("entry", entry)).uniqueResult();
-        return itemCount.intValue();
+        try {
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<Comment> from = query.from(Comment.class);
+            query.select(getBuilder().countDistinct(from.get("id"))).where(getBuilder().equal(from.get("entry"), entry));
+            return currentSession().createQuery(query).uniqueResult().intValue();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 
     @Override

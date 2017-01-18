@@ -1,15 +1,16 @@
 package org.jbei.ice.lib.entry;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
+import org.jbei.ice.storage.hibernate.dao.SequenceFeatureDAO;
 import org.jbei.ice.storage.model.Entry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents a main part and the hierarchical links that it is involved in.
@@ -21,6 +22,7 @@ import java.util.List;
 public class EntryLinks extends HasEntry {
 
     private final SequenceDAO sequenceDAO;
+    private final SequenceFeatureDAO sequenceFeatureDAO;
     private final Entry entry;
     private final EntryAuthorization entryAuthorization;
     private final String userId;
@@ -31,6 +33,7 @@ public class EntryLinks extends HasEntry {
             throw new IllegalArgumentException("Could not retrieve part with id " + partId);
         this.userId = userId;
         this.sequenceDAO = DAOFactory.getSequenceDAO();
+        this.sequenceFeatureDAO = DAOFactory.getSequenceFeatureDAO();
         this.entryAuthorization = new EntryAuthorization();
         this.entryAuthorization.expectRead(userId, this.entry);
     }
@@ -201,14 +204,14 @@ public class EntryLinks extends HasEntry {
             partData.setHasSequence(hasSequence);
             boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
             partData.setHasOriginalSequence(hasOriginalSequence);
-            String sequenceString = sequenceDAO.getSequenceString(entry);
-            if (StringUtils.isEmpty(sequenceString))
+            Optional<String> sequenceString = sequenceDAO.getSequenceString(entry);
+            if (sequenceString.isPresent()) {
+                String sequence = sequenceString.get();
+                int featureCount = sequenceFeatureDAO.getFeatureCount(entry);
+                partData.setBasePairCount(sequence.trim().length());
+                partData.setFeatureCount(featureCount);
+            } else {
                 partData.setBasePairCount(0);
-            else
-                partData.setBasePairCount(sequenceString.trim().length());
-
-            if (!StringUtils.isEmpty(sequenceString)) {
-                partData.setFeatureCount(DAOFactory.getSequenceFeatureDAO().getFeatureCount(entry));
             }
 
             results.add(partData);

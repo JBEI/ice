@@ -22,7 +22,6 @@ import org.jbei.ice.storage.model.Group;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Hector Plahar
@@ -49,7 +48,7 @@ public class Entries extends HasEntry {
 
     public boolean updateVisibility(List<Long> entryIds, Visibility visibility) {
         Account account = accountDAO.getByEmail(userId);
-        Set<Group> accountGroups = new GroupController().getAllGroups(account);
+        List<Group> accountGroups = new GroupController().getAllGroups(account);
         if (!new AccountController().isAdministrator(userId) && !permissionDAO.canWrite(account, accountGroups, entryIds))
             return false;
 
@@ -123,7 +122,8 @@ public class Entries extends HasEntry {
                 entries = dao.sharedWithUserEntryIds(account, account.getGroups());
                 break;
             case "available":
-                entries = dao.getVisibleEntryIds(account.getType() == AccountType.ADMIN);
+                Group publicGroup = new GroupController().createOrRetrievePublicGroup();
+                entries = dao.getVisibleEntryIds(account.getType() == AccountType.ADMIN, publicGroup);
                 break;
         }
 

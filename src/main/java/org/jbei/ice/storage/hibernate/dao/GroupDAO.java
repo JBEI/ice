@@ -1,12 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.sql.JoinType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.group.GroupController;
@@ -15,16 +9,16 @@ import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Group;
 
-import java.util.HashSet;
+import javax.persistence.criteria.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 /**
- * Manager to manipulate {@link Group} objects.
+ * Data Accessor object to manipulate {@link Group} objects.
  *
- * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
+ * @author Hector Plahar
  */
-@SuppressWarnings("unchecked")
 public class GroupDAO extends HibernateRepository<Group> {
     /**
      * Retrieve {@link Group} object from the database by its uuid.
@@ -33,24 +27,30 @@ public class GroupDAO extends HibernateRepository<Group> {
      * @return Group object.
      * @throws DAOException
      */
-    public Group get(String uuid) throws DAOException {
+    public Group get(String uuid) {
         try {
-            return (Group) currentSession().createCriteria(Group.class)
-                    .add(Restrictions.eq("uuid", uuid))
-                    .uniqueResult();
+            CriteriaQuery<Group> query = getBuilder().createQuery(Group.class);
+            Root<Group> from = query.from(Group.class);
+            query.where(getBuilder().equal(from.get("uuid"), uuid));
+            return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException(e);
         }
     }
 
-    public long getMemberCount(String uuid) throws DAOException {
-        Number number = (Number) currentSession().createCriteria(Group.class)
-                .add(Restrictions.eq("uuid", uuid))
-                .createAlias("members", "member")
-                .setProjection(Projections.rowCount())
-                .uniqueResult();
-        return number.longValue();
+    public long getMemberCount(String uuid) {
+        try {
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<Group> from = query.from(Group.class);
+            Join<Group, Account> member = from.join("members");
+            query.select(getBuilder().countDistinct(member.get("id")));
+            query.where(getBuilder().equal(from.get("uuid"), uuid));
+            return currentSession().createQuery(query).uniqueResult();
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
     }
 
     /**
@@ -58,73 +58,62 @@ public class GroupDAO extends HibernateRepository<Group> {
      *
      * @param id group unique identifier
      * @return Group object.
-     * @throws DAOException
+     * @throws DAOException on HibernateException
      */
-    public Group get(long id) throws DAOException {
+    public Group get(long id) {
         return super.get(Group.class, id);
     }
 
-    public HashSet<Group> getByIdList(Set<Long> idsSet) throws DAOException {
-        Session session = currentSession();
-
+    public List<Group> getByIdList(Set<Long> idsSet) {
         try {
-            Criteria criteria = session.createCriteria(Group.class).add(Restrictions.in("id", idsSet));
-            List list = criteria.list();
-            return new HashSet<>(list);
-
+            CriteriaQuery<Group> query = getBuilder().createQuery(Group.class);
+            Root<Group> from = query.from(Group.class);
+            query.where(from.get("id").in(idsSet));
+            return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
         }
     }
 
-    public Set<Group> getMatchingGroups(Account account, String token, int limit) throws DAOException {
-        Session session = currentSession();
+    public List<Group> getMatchingGroups(Account account, String token, int limit) {
         Set<Group> userGroups = account.getGroups();
 
         try {
             token = token.toUpperCase();
-            // match the string and group must either be public, owned by user or in user's private groups
-            String queryString = "from " + Group.class.getName() + " g where (UPPER(g.label) like '%" + token + "%')";
-            Query query = session.createQuery(queryString);
-
-            if (limit > 0)
-                query.setMaxResults(limit);
-
-            @SuppressWarnings("unchecked")
-            HashSet<Group> result = new HashSet<>(query.list());
-            if (result.isEmpty())
-                return result;
-
-            HashSet<Group> matches = new HashSet<>();
-            for (Group group : result) {
-                if (group.getUuid().equals(GroupController.PUBLIC_GROUP_UUID))
-                    continue;
-
-                if (group.getType() != GroupType.PUBLIC && (group
-                        .getOwner() != account) && (userGroups == null || !userGroups.contains(group)))
-                    continue;
-
-                matches.add(group);
+            CriteriaQuery<Group> query = getBuilder().createQuery(Group.class).distinct(true);
+            Root<Group> from = query.from(Group.class);
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(getBuilder().like(getBuilder().upper(from.get("label")), "%" + token + "%"));
+            predicates.add(getBuilder().notEqual(from.get("uuid"), GroupController.PUBLIC_GROUP_UUID));
+            Predicate predicate = getBuilder().or(
+                    getBuilder().equal(from.get("type"), GroupType.PUBLIC),
+                    getBuilder().equal(from.get("owner"), account)
+            );
+            if (userGroups != null && !userGroups.isEmpty()) {
+                predicate.getExpressions().add(from.in(userGroups));
             }
-
-            return matches;
+            predicates.add(predicate);
+            query.where(predicates.toArray(new Predicate[predicates.size()]));
+            return currentSession().createQuery(query).setMaxResults(limit).list();
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Error retrieving matching groups", e);
         }
     }
 
-    public List<Group> retrieveMemberGroups(Account account) throws DAOException {
+    public List<Group> retrieveMemberGroups(Account account) {
         try {
-            Criteria criteria = currentSession().createCriteria(Group.class)
-                    .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-                    .createAlias("members", "member", JoinType.LEFT_OUTER_JOIN)
-                    .add(Restrictions.disjunction(
-                            Restrictions.eq("owner", account),
-                            Restrictions.eq("member.email", account.getEmail())));
-            return criteria.list();
+            CriteriaQuery<Group> query = getBuilder().createQuery(Group.class).distinct(true);
+            Root<Group> from = query.from(Group.class);
+            Join<Group, Account> members = from.join("members", JoinType.LEFT);
+            query.where(getBuilder().or(
+                    getBuilder().equal(from.get("owner"), account),
+                    getBuilder().equal(members.get("email"), account.getEmail())
+            ));
+            return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
+            Logger.error(he);
             throw new DAOException(he);
         }
     }
@@ -136,38 +125,41 @@ public class GroupDAO extends HibernateRepository<Group> {
      * @return list of UUIDs matching the query
      * @throws DAOException on hibernate exception
      */
-    public Set<String> getMemberGroupUUIDs(Account account) throws DAOException {
+    public List<String> getMemberGroupUUIDs(Account account) {
         try {
-            Criteria criteria = currentSession().createCriteria(Group.class)
-                    .createAlias("members", "member", JoinType.LEFT_OUTER_JOIN)
-                    .add(Restrictions.disjunction(Restrictions.eq("owner", account),
-                            Restrictions.eq("member.email", account.getEmail())))
-                    .setProjection(Projections.property("uuid"));
-            return new HashSet<>(criteria.list());
-        } catch (HibernateException he) {
-            throw new DAOException(he);
-        }
-    }
-
-    public List<Group> getGroupsByType(GroupType type, int offset, int limit) throws DAOException {
-        try {
-            Criteria criteria = currentSession().createCriteria(Group.class)
-                    .add(Restrictions.eq("type", type))
-                    .setFirstResult(offset)
-                    .setMaxResults(limit);
-            return criteria.list();
+            CriteriaQuery<String> query = getBuilder().createQuery(String.class).distinct(true);
+            Root<Group> from = query.from(Group.class);
+            Join<Group, Account> members = from.join("members", JoinType.LEFT);
+            query.select(from.get("uuid")).where(getBuilder().or(
+                    getBuilder().equal(from.get("owner"), account),
+                    getBuilder().equal(members.get("email"), account.getEmail())
+            ));
+            return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
         }
     }
 
-    public long getGroupsByTypeCount(GroupType type) throws DAOException {
+    public List<Group> getGroupsByType(GroupType type, int offset, int limit) {
         try {
-            Number number = (Number) currentSession().createCriteria(Group.class)
-                    .add(Restrictions.eq("type", type))
-                    .setProjection(Projections.rowCount()).uniqueResult();
-            return number.longValue();
+            CriteriaQuery<Group> query = getBuilder().createQuery(Group.class).distinct(true);
+            Root<Group> from = query.from(Group.class);
+            query.where(getBuilder().equal(from.get("type"), type));
+            return currentSession().createQuery(query).setFirstResult(offset).setMaxResults(limit).list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    public long getGroupsByTypeCount(GroupType type) {
+        try {
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class).distinct(true);
+            Root<Group> from = query.from(Group.class);
+            query.select(getBuilder().countDistinct(from.get("id")));
+            query.where(getBuilder().equal(from.get("type"), type));
+            return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -184,11 +176,12 @@ public class GroupDAO extends HibernateRepository<Group> {
      */
     public List<Group> getGroupsBy(GroupType type, boolean isAutoJoin) {
         try {
-            return currentSession().createCriteria(Group.class)
-                    .add(Restrictions.eq("type", type))
-                    .add(Restrictions.eq("autoJoin", isAutoJoin))
-                    .list();
-
+            CriteriaQuery<Group> query = getBuilder().createQuery(Group.class).distinct(true);
+            Root<Group> from = query.from(Group.class);
+            query.where(
+                    getBuilder().equal(from.get("type"), type),
+                    getBuilder().equal((from.get("autoJoin")), isAutoJoin));
+            return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

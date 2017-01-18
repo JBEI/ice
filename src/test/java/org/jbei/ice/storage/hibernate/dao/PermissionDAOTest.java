@@ -45,6 +45,7 @@ public class PermissionDAOTest {
     @Test
     public void testNonAdminCantReadWithoutPermissions() throws Exception {
         List<Long> entryIds = makePrivateEntryIds(adminAccount);
-        Assert.assertArrayEquals(new Object[0], dao.getCanReadEntries(regularAccount, regularAccount.getGroups(), entryIds).toArray());
+        Assert.assertArrayEquals(new Object[0],
+                dao.getCanReadEntries(regularAccount, new ArrayList<>(regularAccount.getGroups()), entryIds).toArray());
     }
 }

@@ -40,7 +40,8 @@ public class HibernateUtil {
     }
 
     public static void beginTransaction() {
-        getSessionFactory().getCurrentSession().beginTransaction();
+        if (!getSessionFactory().getCurrentSession().getTransaction().isActive())
+            getSessionFactory().getCurrentSession().beginTransaction();
     }
 
     public static void commitTransaction() {

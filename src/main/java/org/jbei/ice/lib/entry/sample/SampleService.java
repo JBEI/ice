@@ -129,7 +129,7 @@ public class SampleService extends HasEntry {
                 String barcode = tube.getDisplay();
                 Storage existing = storageDAO.retrieveStorageTube(barcode);
                 if (existing != null) {
-                    ArrayList<Sample> samples = dao.getSamplesByStorage(existing);
+                    List<Sample> samples = dao.getSamplesByStorage(existing);
                     if (samples != null && !samples.isEmpty()) {
                         Logger.error("Barcode \"" + barcode + "\" already has a sample associated with it");
                         return null;
@@ -223,7 +223,7 @@ public class SampleService extends HasEntry {
         entryAuthorization.expectRead(userId, entry);
 
         // samples
-        ArrayList<Sample> entrySamples = dao.getSamplesByEntry(entry);
+        List<Sample> entrySamples = dao.getSamplesByEntry(entry);
         ArrayList<PartSample> samples = new ArrayList<>();
         if (entrySamples == null)
             return samples;

@@ -144,7 +144,7 @@ public class BulkUploadController {
         authorization.expectAdmin(userId);
 
         HashMap<String, ArrayList<BulkUploadInfo>> infoList = new HashMap<>();
-        ArrayList<BulkUpload> results;
+        List<BulkUpload> results;
 
         results = dao.retrieveByStatus(BulkUploadStatus.PENDING_APPROVAL);
         if (results == null || results.isEmpty())
@@ -250,7 +250,7 @@ public class BulkUploadController {
      */
     public ArrayList<BulkUploadInfo> retrieveByUser(String requesterId, String userAccountId) {
         Account userAccount = accountController.getByEmail(userAccountId);
-        ArrayList<BulkUpload> results = dao.retrieveByAccount(userAccount);
+        List<BulkUpload> results = dao.retrieveByAccount(userAccount);
         ArrayList<BulkUploadInfo> infoArrayList = new ArrayList<>();
 
         for (BulkUpload draft : results) {
@@ -271,7 +271,7 @@ public class BulkUploadController {
         if (!accountController.isAdministrator(userId))
             return null;
 
-        ArrayList<BulkUpload> results = dao.retrieveByStatus(BulkUploadStatus.PENDING_APPROVAL);
+        List<BulkUpload> results = dao.retrieveByStatus(BulkUploadStatus.PENDING_APPROVAL);
         ArrayList<BulkUploadInfo> infoArrayList = new ArrayList<>();
 
         for (BulkUpload draft : results) {

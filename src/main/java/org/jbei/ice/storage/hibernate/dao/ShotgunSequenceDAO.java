@@ -2,11 +2,8 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.NativeQuery;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOException;
@@ -14,6 +11,8 @@ import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.ShotgunSequence;
 
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -26,22 +25,16 @@ import java.util.List;
 public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
     public static final String SHOTGUN_SEQUENCES_DIR = "shotgun_sequences";
 
-    public ShotgunSequence create(String fileName, String depositor, Entry entry, String fileUUID, Date date)
-            throws DAOException {
-
-        ShotgunSequence result = new ShotgunSequence(entry, fileUUID, fileName, depositor, date);
-
+    public ShotgunSequence create(String fileName, String depositor, Entry entry, String fileUUID, Date date) {
         try {
-            super.create(result);
+            ShotgunSequence result = new ShotgunSequence(entry, fileUUID, fileName, depositor, date);
+            return super.create(result);
         } catch (DAOException e) {
             throw new DAOException("Failed to create Shotgun Sequence!", e);
         }
-
-        return result;
     }
 
-    public void writeSequenceFileToDisk(String fileName, InputStream inputStream)
-            throws IOException, DAOException {
+    public void writeSequenceFileToDisk(String fileName, InputStream inputStream) throws IOException {
         try {
             String dataDirectory = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
             File traceFilesDirectory = Paths.get(dataDirectory, SHOTGUN_SEQUENCES_DIR).toFile();
@@ -65,41 +58,16 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
         }
     }
 
-
-    public List<ShotgunSequence> getByEntry(Entry entry, String userId) throws DAOException {
-        List<ShotgunSequence> result = null;
-
-        Session session = currentSession();
+    public List<ShotgunSequence> getByEntry(Entry entry) {
         try {
-            String queryString = "from ShotgunSequence as shotgunSequence where shotgunSequence.entry = :entry order by"
-                    + " shotgunSequence.creationTime asc";
-            Query query = session.createQuery(queryString);
-
-            query.setEntity("entry", entry);
-
-            Object queryResult = query.list();
-
-            if (queryResult != null) {
-                result = query.list();
-            }
-        } catch (HibernateException e) {
-            throw new DAOException("Failed to get shotgun sequence by entry!", e);
-        }
-
-        return result;
-    }
-
-    public int getCountByEntry(Entry entry) throws DAOException {
-        try {
-            Criteria criteria = currentSession().createCriteria(ShotgunSequence.class.getName())
-                    .add(Restrictions.eq("entry", entry))
-                    .setProjection(Projections.countDistinct("id"));
-            Number number = (Number) criteria.uniqueResult();
-            if (number == null)
-                return 0;
-            return number.intValue();
-        } catch (HibernateException e) {
-            throw new DAOException("Failed to get shotgun sequence by entry!", e);
+            CriteriaQuery<ShotgunSequence> query = getBuilder().createQuery(ShotgunSequence.class);
+            Root<ShotgunSequence> from = query.from(ShotgunSequence.class);
+            query.where(getBuilder().equal(from.get("entry"), entry));
+            query.orderBy(getBuilder().asc(from.get("creationTime")));
+            return currentSession().createQuery(query).list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
         }
     }
 
@@ -110,12 +78,12 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
         return path.toFile();
     }
 
-    public ShotgunSequence getByFileId(String fileId) throws DAOException {
+    public ShotgunSequence getByFileId(String fileId) {
         ShotgunSequence shotgunSequence = null;
 
-        Session session = currentSession();
         try {
-            Query query = session.createQuery("from " + ShotgunSequence.class.getName() + " where fileId = :fileId");
+            NativeQuery query = currentSession().createNativeQuery("from "
+                    + ShotgunSequence.class.getName() + " where fileId = :fileId");
             query.setParameter("fileId", fileId);
             Object queryResult = query.uniqueResult();
 
@@ -130,13 +98,18 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
     }
 
     public int getShotgunSequenceCount(Entry entry) {
-        Number itemCount = (Number) currentSession().createCriteria(ShotgunSequence.class)
-                .setProjection(Projections.countDistinct("id"))
-                .add(Restrictions.eq("entry", entry)).uniqueResult();
-        return itemCount.intValue();
+        try {
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<ShotgunSequence> from = query.from(ShotgunSequence.class);
+            query.select(getBuilder().countDistinct(from.get("id"))).where(getBuilder().equal(from.get("entry"), entry));
+            return currentSession().createQuery(query).uniqueResult().intValue();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
     }
 
-    public void delete(File shotgunFile, ShotgunSequence shotgunSequence) throws DAOException {
+    public void delete(File shotgunFile, ShotgunSequence shotgunSequence) {
         if (shotgunSequence == null) {
             throw new DAOException("Failed to delete null Shotgun Sequence!");
         }
@@ -149,8 +122,8 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
         }
     }
 
-    private void deleteShotgunSequenceToFile(File shotgunFilesDirectory, ShotgunSequence shotgunSequence) throws IOException,
-            DAOException {
+    private void deleteShotgunSequenceToFile(File shotgunFilesDirectory, ShotgunSequence shotgunSequence)
+            throws IOException {
         try {
             File file = new File(shotgunFilesDirectory + File.separator + shotgunSequence.getFileId());
             file.delete();

@@ -1,12 +1,17 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.criterion.Restrictions;
+import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Folder;
+import org.jbei.ice.storage.model.Permission;
 import org.jbei.ice.storage.model.RemoteAccessModel;
 
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 /**
@@ -20,16 +25,23 @@ public class RemoteAccessModelDAO extends HibernateRepository<RemoteAccessModel>
     }
 
     public RemoteAccessModel getByFolder(Account account, Folder folder) {
-        List list = currentSession().createCriteria(RemoteAccessModel.class)
-                .createAlias("permission", "permission")
-                .add(Restrictions.eq("permission.folder", folder))
-                .add(Restrictions.eq("permission.account", account))
-                .list();
-        if (!list.isEmpty()) {
-            if (list.size() > 1)
-                Logger.warn("Found " + list.size() + " access models for folder " + folder.getId());
-            return (RemoteAccessModel) list.get(0);
+        try {
+            CriteriaQuery<RemoteAccessModel> query = getBuilder().createQuery(RemoteAccessModel.class);
+            Root<RemoteAccessModel> from = query.from(RemoteAccessModel.class);
+            Join<RemoteAccessModel, Permission> permission = from.join("permission");
+            query.where(
+                    getBuilder().equal(permission.get("folder"), folder),
+                    getBuilder().equal(permission.get("account"), account)
+            );
+            List<RemoteAccessModel> result = currentSession().createQuery(query).list();
+            if (result.size() > 1) {
+                Logger.warn("Found " + result.size() + " access models for folder " + folder.getId());
+                return result.get(0);
+            }
+            return null;
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
         }
-        return null;
     }
 }
