@@ -237,6 +237,7 @@ public class FolderController {
 
             case PRIVATE:
             case TRANSFERRED:
+            case SHARED:
                 Folder folder = dao.get(folderId);
                 if (folder == null)
                     return null;
