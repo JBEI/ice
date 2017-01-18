@@ -310,13 +310,6 @@ public class SampleService extends HasEntry {
         return samples;
     }
 
-    public ArrayList<Sample> retrievePlate(String userId, long plateId) {
-
-        List<Storage> plates = storageDAO.retrieveStorageByIndex(String.valueOf(plateId), SampleType.PLATE96);
-        ArrayList<Sample> samples = dao.getSamplesByStorage(plates.get(0));
-        return samples;
-    }
-
     protected PartSample setAccountInfo(PartSample partSample, String email) {
         Account account = DAOFactory.getAccountDAO().getByEmail(email);
         if (account != null)
