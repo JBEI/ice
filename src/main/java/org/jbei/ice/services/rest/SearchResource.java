@@ -62,7 +62,7 @@ public class SearchResource extends RestResource {
                 throw new WebApplicationException(Response.Status.FORBIDDEN);
 
             WebSearch webSearch = new WebSearch();
-            return super.respond(webSearch.run(query));
+            return super.respond(webSearch.run(query, false));
         }
 
         if (StringUtils.isEmpty(userId)) {

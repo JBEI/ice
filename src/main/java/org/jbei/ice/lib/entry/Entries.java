@@ -31,7 +31,6 @@ public class Entries extends HasEntry {
     private final EntryDAO dao;
     private final PermissionDAO permissionDAO;
     private final AccountDAO accountDAO;
-    private final EntryAuthorization authorization;
     private final String userId;
 
     /**
@@ -43,7 +42,6 @@ public class Entries extends HasEntry {
         this.permissionDAO = DAOFactory.getPermissionDAO();
         this.accountDAO = DAOFactory.getAccountDAO();
         this.userId = userId;
-        this.authorization = new EntryAuthorization();
     }
 
     public boolean updateVisibility(List<Long> entryIds, Visibility visibility) {
@@ -62,21 +60,6 @@ public class Entries extends HasEntry {
         }
 
         return true;
-    }
-
-    /**
-     * Retrieve {@link Entry} from the database by id.
-     *
-     * @param id unique local identifier for entry
-     * @return entry retrieved from the database.
-     */
-    public Entry get(long id) {
-        Entry entry = dao.get(id);
-        if (entry == null)
-            return null;
-
-        authorization.expectRead(userId, entry);
-        return entry;
     }
 
     public List<Long> getEntriesFromSelectionContext(EntrySelection context) {
