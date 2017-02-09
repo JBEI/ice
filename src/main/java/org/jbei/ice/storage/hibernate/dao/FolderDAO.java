@@ -258,18 +258,17 @@ public class FolderDAO extends HibernateRepository<Folder> {
             Root<Permission> from = query.from(Permission.class);
             Join<Permission, Folder> folder = from.join("folder");
 
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(getBuilder().or(
-                    getBuilder().equal(from.get("account"), account),
-                    from.get("group").in(accountGroups)
-            ));
-            predicates.add(getBuilder().equal(from.get("canWrite"), true));
-            predicates.add(getBuilder().isNotNull(from.get("folder")));
-            predicates.add(
-                    getBuilder().equal(getBuilder().lower(folder.get("ownerEmail")), account.getEmail().toLowerCase())
+            // where ((account = account or group in groups) and canWrite)) or is owner
+            Predicate predicate = getBuilder().and(
+                    getBuilder().or(
+                            getBuilder().equal(from.get("account"), account),
+                            from.get("group").in(accountGroups)
+                    ),
+                    getBuilder().equal(from.get("canWrite"), true),
+                    getBuilder().isNotNull(from.get("folder"))
             );
 
-            query.select(folder).where(predicates.toArray(new Predicate[predicates.size()]));
+            query.select(folder).where(predicate);
             return currentSession().createQuery(query).list();
         } catch (HibernateException e) {
             Logger.error(e);
