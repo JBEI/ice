@@ -1,16 +1,20 @@
 package org.jbei.ice.services.rest;
 
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.Setting;
+import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
+import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.RemoteEntriesAsCSV;
 import org.jbei.ice.lib.net.WoRController;
+import org.jbei.ice.lib.search.WebSearch;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -20,7 +24,7 @@ import java.util.List;
 
 /**
  * Resource for web of registries requests
- * <p>
+ * <p/>
  * This is particularly useful for third party tools to tap into the web of
  * registries functionality without having specific API keys to each of the instances
  *
@@ -66,7 +70,7 @@ public class WebResource extends RestResource {
             @DefaultValue("created") @QueryParam("sort") final String sort,
             @DefaultValue("false") @QueryParam("asc") final boolean asc) {
         getUserId();
-        final WebEntries result = remoteEntries.getPublicEntries(partnerId, offset, limit, sort, asc);
+        final Results<PartData> result = remoteEntries.getPublicEntries(partnerId, offset, limit, sort, asc);
         return super.respond(Response.Status.OK, result);
     }
 
@@ -114,7 +118,7 @@ public class WebResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entries/{entryId}/sequence")
     public Response getWebEntrySequence(
-            @PathParam("id") final long partnerId, @PathParam("entryId") final long entryId) {
+            @PathParam("id") final long partnerId, @PathParam("entryId") final String entryId) {
         requireUserId();
         final FeaturedDNASequence result = remoteEntries.getPublicEntrySequence(partnerId, entryId);
         return super.respond(Response.Status.OK, result);
@@ -136,17 +140,6 @@ public class WebResource extends RestResource {
         RemoteContact remoteContact = new RemoteContact();
         return super.respond(remoteContact.handleRemoteRemoveRequest(worToken, url));
     }
-
-//    @GET
-//    @Path("/partners")
-//    public Response getWebPartners(@HeaderParam(AUTHENTICATION_PARAM_NAME) String sessionId,
-//                                   @HeaderParam(WOR_PARTNER_TOKEN) String worToken,
-//                                   @QueryParam("url") String url) {
-//        if (StringUtils.isEmpty(sessionId))
-//            return super.respond(controller.getWebPartners(worToken, url));
-//        final String userId = getUserId();
-//        return super.respond(controller.getWebPartners());
-//    }
 
     @PUT
     @Path("/partner/{url}")
@@ -183,5 +176,32 @@ public class WebResource extends RestResource {
             return Response.ok(new Setting("fileName", file.getName())).build();
         }
         return super.respond(false);
+    }
+
+    // equivalent to search web in web of registries
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/entries")
+    public Response searchWebEntries(final SearchQuery query,
+                                     @DefaultValue("true") @QueryParam("includeLocal") boolean includeLocal) {
+        requireUserId();
+        WebSearch webSearch = new WebSearch();
+        return super.respond(webSearch.run(query, includeLocal));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Path("/entries/{id}")
+    public Response getWebEntry(@PathParam("id") String entryId) {
+        try {
+            requireUserId();
+            WebEntries webEntries = new WebEntries();
+            return super.respond(webEntries.getPart(entryId));
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new WebApplicationException(e);
+        }
     }
 }

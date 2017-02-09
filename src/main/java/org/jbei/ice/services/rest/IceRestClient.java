@@ -137,13 +137,18 @@ public class IceRestClient extends RestClient {
     }
 
     public Response postSequenceFile(String url, String recordId, EntryType entryType, String sequence) {
-        WebTarget target = client.target("https://" + url).path("/rest/file/sequence");
-        Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
-        final FormDataMultiPart multiPart = new FormDataMultiPart();
-        multiPart.field("file", IOUtils.toInputStream(sequence), MediaType.TEXT_PLAIN_TYPE);
-        multiPart.field("entryRecordId", recordId);
-        multiPart.field("entryType", entryType.name());
-        return invocationBuilder.post(Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
+        try {
+            WebTarget target = client.target("https://" + url).path("/rest/file/sequence");
+            Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
+            final FormDataMultiPart multiPart = new FormDataMultiPart();
+            multiPart.field("file", IOUtils.toInputStream(sequence, "UTF-8"), MediaType.TEXT_PLAIN_TYPE);
+            multiPart.field("entryRecordId", recordId);
+            multiPart.field("entryType", entryType.name());
+            return invocationBuilder.post(Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
+        } catch (Exception e) {
+            Logger.error(e);
+            return null;
+        }
     }
 
     // WOR

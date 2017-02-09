@@ -9,6 +9,7 @@ import org.jbei.ice.storage.model.ApiKey;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Data Accessor object for retrieving {@link ApiKey} objects
@@ -43,6 +44,7 @@ public class ApiKeyDAO extends HibernateRepository<ApiKey> {
             query.orderBy(asc ? getBuilder().asc(from.get(sort)) : getBuilder().desc(from.get(sort)));
             return currentSession().createQuery(query).setFirstResult(start).setMaxResults(limit).list();
         } catch (HibernateException he) {
+            Logger.error(he);
             throw new DAOException(he);
         }
     }
@@ -56,17 +58,19 @@ public class ApiKeyDAO extends HibernateRepository<ApiKey> {
                 query.where(getBuilder().equal(from.get("ownerEmail"), userId)).distinct(true);
             return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
+            Logger.error(he);
             throw new DAOException(he);
         }
     }
 
-    public ApiKey getByClientId(String clientId) {
+    public Optional<ApiKey> getByClientId(String clientId) {
         try {
             CriteriaQuery<ApiKey> query = getBuilder().createQuery(ApiKey.class);
             Root<ApiKey> from = query.from(ApiKey.class);
             query.where(getBuilder().equal(from.get("clientId"), clientId));
-            return currentSession().createQuery(query).uniqueResult();
+            return currentSession().createQuery(query).uniqueResultOptional();
         } catch (HibernateException he) {
+            Logger.error(he);
             throw new DAOException(he);
         }
     }
