@@ -18,7 +18,12 @@ angular.module('ice.search.controller', [])
 
         var runAdvancedSearch = function (filters) {
             $scope.loadingSearchResults = true;
+            if ($scope.params.limit) {
+                $scope.searchFilters.parameters.retrieveCount = $scope.params.limit;
+                filters.parameters.retrieveCount = $scope.params.limit;
+            }
 
+            //console.log(filters);
             Util.post("rest/search", filters, function (result) {
                 $scope.searchResults = result;
                 $scope.loadingSearchResults = false;

@@ -32,7 +32,6 @@ import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Contents of a folder which could be other folders or biological parts (entries)
@@ -173,7 +172,7 @@ public class FolderContents {
     protected List<FolderDetails> addEntriesToFolders(String userId, List<Long> entries, List<FolderDetails> folders) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
-        Set<Group> accountGroups = new GroupController().getAllGroups(account);
+        List<Group> accountGroups = new GroupController().getAllGroups(account);
         if (!folderAuthorization.isAdmin(userId))
             entries = DAOFactory.getPermissionDAO().getCanReadEntries(account, accountGroups, entries);
 
@@ -200,7 +199,7 @@ public class FolderContents {
                 List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);
                 folderDAO.addFolderContents(folder, entryModelList);
                 if (folder.isPropagatePermissions()) {
-                    Set<Permission> folderPermissions = permissionDAO.getFolderPermissions(folder);
+                    List<Permission> folderPermissions = permissionDAO.getFolderPermissions(folder);
                     addEntryPermission(userId, folderPermissions, entryModelList);
                 }
 
@@ -428,7 +427,7 @@ public class FolderContents {
         return filteredPermissions;
     }
 
-    private void addEntryPermission(String userId, Set<Permission> permissions, List<Entry> entries) {
+    private void addEntryPermission(String userId, List<Permission> permissions, List<Entry> entries) {
         PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
         EntryAuthorization entryAuthorization = new EntryAuthorization();
 

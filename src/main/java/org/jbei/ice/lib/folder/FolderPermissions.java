@@ -18,7 +18,7 @@ import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Represents permissions for a specified folder with methods to manipulate them
@@ -63,7 +63,7 @@ public class FolderPermissions {
         ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
 
         // get local permissions
-        Set<Permission> permissions = this.permissionDAO.getFolderPermissions(folder);
+        List<Permission> permissions = this.permissionDAO.getFolderPermissions(folder);
         for (Permission permission : permissions) {
             if (permission.getGroup() != null && permission.getGroup().getUuid()
                     .equals(GroupController.PUBLIC_GROUP_UUID))

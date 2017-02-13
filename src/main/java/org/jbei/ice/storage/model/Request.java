@@ -48,6 +48,9 @@ public class Request implements DataModel {
     @Column(name = "growth_temp")
     private Integer growthTemperature;
 
+    @Column(name = "plate_description")
+    private String plateDescription;
+
     @Column(name = "request_status")
     @Enumerated(value = EnumType.STRING)
     private SampleRequestStatus status = SampleRequestStatus.IN_CART;
@@ -100,6 +103,18 @@ public class Request implements DataModel {
         this.growthTemperature = growthTemperature;
     }
 
+    public Integer getGrowthTemperature() {
+        return growthTemperature;
+    }
+
+    public String getPlateDescription() {
+        return plateDescription;
+    }
+
+    public void setPlateDescription(String plateDescription) {
+        this.plateDescription = plateDescription;
+    }
+
     public Entry getEntry() {
         return entry;
     }
@@ -116,6 +131,7 @@ public class Request implements DataModel {
         sampleRequest.setStatus(getStatus());
         if (growthTemperature != null)
             sampleRequest.setGrowthTemperature(growthTemperature);
+        sampleRequest.setPlateDescription(plateDescription);
         EntryType type = EntryType.nameToType(entry.getRecordType());
         PartData data = new PartData(type);
         data.setId(entry.getId());

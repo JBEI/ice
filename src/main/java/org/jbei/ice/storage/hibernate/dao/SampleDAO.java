@@ -1,10 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
@@ -12,47 +8,54 @@ import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Sample;
 import org.jbei.ice.storage.model.Storage;
 
-import java.util.ArrayList;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 
 /**
- * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
+ * @author Hector Plahar
  */
 public class SampleDAO extends HibernateRepository<Sample> {
 
-    public Sample get(long id) throws DAOException {
+    public Sample get(long id) {
         return super.get(Sample.class, id);
     }
 
-    public boolean hasSample(Entry entry) throws DAOException {
-        Session session = currentSession();
+    public boolean hasSample(Entry entry) {
         try {
-            Number itemCount = (Number) session.createCriteria(Sample.class)
-                                               .setProjection(Projections.countDistinct("id"))
-                                               .add(Restrictions.eq("entry", entry)).uniqueResult();
-
-            return itemCount.intValue() > 0;
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<Sample> from = query.from(Sample.class);
+            query.select(getBuilder().countDistinct(from.get("id")));
+            query.where(getBuilder().equal(from.get("entry"), entry));
+            return currentSession().createQuery(query).setMaxResults(1).uniqueResult() > 0;
         } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve sample by entry: " + entry.getId(), e);
+            Logger.error(e);
+            throw new DAOException(e);
         }
     }
 
     public int getSampleCount(Entry entry) {
-        Number itemCount = (Number) currentSession().createCriteria(Sample.class)
-                .setProjection(Projections.countDistinct("id"))
-                .add(Restrictions.eq("entry", entry)).uniqueResult();
-        return itemCount.intValue();
-    }
-
-    @SuppressWarnings("unchecked")
-    public ArrayList<Sample> getSamplesByEntry(Entry entry) throws DAOException {
-        Query query = currentSession().createQuery("from " + Sample.class.getName() + " where entry=:entry");
-        query.setParameter("entry", entry);
         try {
-            return new ArrayList<Sample>(query.list());
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<Sample> from = query.from(Sample.class);
+            query.select(getBuilder().countDistinct(from.get("id")));
+            query.where(getBuilder().equal(from.get("entry"), entry));
+            return currentSession().createQuery(query).uniqueResult().intValue();
         } catch (HibernateException e) {
             Logger.error(e);
-            throw new DAOException("Failed to retrieve sample by entry: " + entry.getId(), e);
+            throw new DAOException(e);
+        }
+    }
+
+    public List<Sample> getSamplesByEntry(Entry entry) {
+        try {
+            CriteriaQuery<Sample> query = getBuilder().createQuery(Sample.class);
+            Root<Sample> from = query.from(Sample.class);
+            query.where(getBuilder().equal(from.get("entry"), entry));
+            return currentSession().createQuery(query).list();
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
         }
     }
 
@@ -63,24 +66,15 @@ public class SampleDAO extends HibernateRepository<Sample> {
      * @return ArrayList of Sample objects.
      * @throws DAOException
      */
-    @SuppressWarnings("unchecked")
-    public ArrayList<Sample> getSamplesByStorage(Storage storage) throws DAOException {
-        ArrayList<Sample> samples = null;
-        Session session = currentSession();
+    public List<Sample> getSamplesByStorage(Storage storage) {
         try {
-            String queryString = "from " + Sample.class.getName() + " as sample where sample.storage = :storage";
-            Query query = session.createQuery(queryString);
-            query.setEntity("storage", storage);
-
-            @SuppressWarnings("rawtypes")
-            List list = query.list();
-            if (list != null) {
-                samples = (ArrayList<Sample>) list;
-            }
-
+            CriteriaQuery<Sample> query = getBuilder().createQuery(Sample.class);
+            Root<Sample> from = query.from(Sample.class);
+            query.where(getBuilder().equal(from.get("storage"), storage));
+            return currentSession().createQuery(query).list();
         } catch (HibernateException e) {
+            Logger.error(e);
             throw new DAOException("Failed to retrieve sample by storage id: " + storage.getId(), e);
         }
-        return samples;
     }
 }

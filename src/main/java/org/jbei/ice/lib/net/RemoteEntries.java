@@ -5,12 +5,12 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
+import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
-import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.executor.TransferTask;
@@ -53,7 +53,7 @@ public class RemoteEntries {
         return ("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
     }
 
-    public WebEntries getPublicEntries(long remoteId, int offset, int limit, String sort, boolean asc) {
+    public Results<PartData> getPublicEntries(long remoteId, int offset, int limit, String sort, boolean asc) {
         if (!hasRemoteAccessEnabled())
             return null;
 
@@ -77,11 +77,10 @@ public class RemoteEntries {
             return null;
         }
 
-        WebEntries entries = new WebEntries();
-        entries.setRegistryPartner(partner.toDataTransferObject());
-        entries.setCount(details.getCount());
-        entries.setEntries(details.getEntries());
-        return entries;
+        Results<PartData> results = new Results<>();
+        results.setData(details.getEntries());
+        results.setResultCount(details.getCount());
+        return results;
     }
 
     @SuppressWarnings("unchecked")
@@ -170,7 +169,7 @@ public class RemoteEntries {
         if (partner == null || partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
             return null;
 
-        return remoteContact.getPublicEntry(partner.getUrl(), entryId, partner.getApiKey());
+        return remoteContact.getPublicEntry(partner.getUrl(), Long.toString(entryId), partner.getApiKey());
     }
 
     public PartData getPublicEntryTooltip(String userId, long remoteId, long entryId) {
@@ -195,7 +194,7 @@ public class RemoteEntries {
         return remoteContact.getPublicEntryStatistics(partner.getUrl(), entryId, partner.getApiKey());
     }
 
-    public FeaturedDNASequence getPublicEntrySequence(long remoteId, long entryId) {
+    public FeaturedDNASequence getPublicEntrySequence(long remoteId, String entryId) {
         if (!hasRemoteAccessEnabled())
             return null;
 

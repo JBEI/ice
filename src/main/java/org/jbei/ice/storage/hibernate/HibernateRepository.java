@@ -7,6 +7,8 @@ import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DataModel;
 import org.jbei.ice.storage.IRepository;
 
+import javax.persistence.criteria.CriteriaBuilder;
+
 /**
  * Parent abstract class for Hibernate Persistence
  *
@@ -21,6 +23,10 @@ public abstract class HibernateRepository<T extends DataModel> implements IRepos
      */
     protected static Session currentSession() {
         return HibernateUtil.currentSession();
+    }
+
+    protected CriteriaBuilder getBuilder() {
+        return currentSession().getCriteriaBuilder();
     }
 
     /**

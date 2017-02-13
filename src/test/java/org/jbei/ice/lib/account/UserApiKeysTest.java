@@ -58,9 +58,9 @@ public class UserApiKeysTest {
         AccessKey adminKey = adminApiKeys.requestKey("admin.app.test");
         Assert.assertNotNull(adminKey);
 
-        Results<AccessKey> keys = apiKeys.getKeys(0, 15, "creationTime", true, false);
+        Results<AccessKey> keys = apiKeys.getKeys(15, 0, "creationTime", true, false);
         Assert.assertEquals(2, keys.getResultCount());
-        Assert.assertTrue(adminApiKeys.getKeys(0, 15, "creationTime", true, true).getResultCount() >= 3);
+        Assert.assertTrue(adminApiKeys.getKeys(15, 0, "creationTime", true, true).getResultCount() >= 3);
     }
 
     @Test
@@ -75,7 +75,7 @@ public class UserApiKeysTest {
         Assert.assertFalse(apiKeys.deleteKey(accessKey.getId(), "secret"));
         Assert.assertTrue(apiKeys.deleteKey(accessKey.getId(), accessKey.getSecret()));
 
-        Results<AccessKey> keys = apiKeys.getKeys(0, 15, "creationTime", true, false);
+        Results<AccessKey> keys = apiKeys.getKeys(15, 0, "creationTime", true, false);
         Assert.assertEquals(0, keys.getResultCount());
     }
 }

@@ -1,5 +1,6 @@
 package org.jbei.ice.services.rest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.sample.PartSample;
@@ -12,6 +13,9 @@ import org.jbei.ice.lib.entry.sample.SampleService;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,6 +83,31 @@ public class SampleResource extends RestResource {
 
         final boolean success = requestRetriever.setRequestsStatus(userId, sampleRequestIds, status);
         return super.respond(success);
+    }
+
+    @POST
+    @Path("/requests/file")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response getRequestFile(@QueryParam("sid") String sid,
+                                   final ArrayList<Long> requestIds) {
+        // only supports csv for now
+        if (StringUtils.isEmpty(sessionId))
+            sessionId = sid;
+
+        final String userId = getUserId(sessionId);
+        final ArrayList<Long> sampleRequestIds = new ArrayList<>();
+        for (final Number number : requestIds) {
+            sampleRequestIds.add(number.longValue());
+        }
+
+        try {
+            ByteArrayOutputStream outputStream = requestRetriever.generateCSVFile(userId, sampleRequestIds);
+            StreamingOutput stream = outputStream::writeTo;
+            return Response.ok(stream).header("Content-Disposition", "attachment;filename=\"data.csv\"").build();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DELETE

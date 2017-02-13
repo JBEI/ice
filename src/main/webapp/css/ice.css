@@ -264,6 +264,10 @@ html, body {
     background-color: #ff7f50;
 }
 
+.tooltip {
+    white-space: nowrap !important;
+}
+
 .entry_go_back {
     color: #233559;
     font-size: 40px;

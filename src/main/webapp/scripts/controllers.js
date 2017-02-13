@@ -740,4 +740,3 @@ iceControllers.controller('PermanentEntryDeletionConfirmationModalController', f
         });
     }
 });
-

@@ -2,6 +2,7 @@ package org.jbei.ice.lib.entry.sample;
 
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.model.Sample;
+import org.jbei.ice.lib.common.logging.Logger;
 
 import java.util.Calendar;
 import java.util.Date;

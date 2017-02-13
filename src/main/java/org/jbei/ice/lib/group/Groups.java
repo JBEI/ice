@@ -95,7 +95,7 @@ public class Groups {
 
     public List<UserGroup> getMatchingGroups(String token, int limit) {
         Account account = accountDAO.getByEmail(this.userId);
-        Set<Group> groups = dao.getMatchingGroups(account, token, limit);
+        List<Group> groups = dao.getMatchingGroups(account, token, limit);
         List<UserGroup> results = new ArrayList<>(groups.size());
         for (Group group : groups) {
             results.add(group.toDataTransferObject());

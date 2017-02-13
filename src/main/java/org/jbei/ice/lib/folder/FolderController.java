@@ -85,7 +85,7 @@ public class FolderController {
      */
     public ArrayList<FolderDetails> getPublicFolders() {
         Group publicGroup = groupController.createOrRetrievePublicGroup();
-        Set<Folder> folders = permissionDAO.getFolders(publicGroup);
+        List<Folder> folders = permissionDAO.getFolders(publicGroup);
         ArrayList<FolderDetails> list = new ArrayList<>();
         for (Folder folder : folders) {
             FolderDetails details = folder.toDataTransferObject();
@@ -113,7 +113,7 @@ public class FolderController {
         groups.add(publicGroup);
 
         EntryDAO entryDAO = DAOFactory.getEntryDAO();
-        Set<Entry> results = entryDAO.retrieveVisibleEntries(null, groups, sort, asc, offset, limit, null);
+        List<Entry> results = entryDAO.retrieveVisibleEntries(null, groups, sort, asc, offset, limit, null);
         long visibleCount = entryDAO.visibleEntryCount(null, groups, null);
 
         FolderDetails details = new FolderDetails();
@@ -237,6 +237,7 @@ public class FolderController {
 
             case PRIVATE:
             case TRANSFERRED:
+            case SHARED:
                 Folder folder = dao.get(folderId);
                 if (folder == null)
                     return null;
@@ -324,7 +325,7 @@ public class FolderController {
 
         Set<Group> groups = account.getGroups();
         groups.remove(groupController.createOrRetrievePublicGroup());
-        Set<Folder> sharedFolders = DAOFactory.getPermissionDAO().retrieveFolderPermissions(account, groups);
+        List<Folder> sharedFolders = DAOFactory.getPermissionDAO().retrieveFolderPermissions(account, groups);
         if (sharedFolders == null)
             return null;
 

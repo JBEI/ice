@@ -28,6 +28,7 @@ public enum ConfigurationKey implements IDataTransferModel {
 
     BLAST_INSTALL_DIR(""),
 
+    ADD_TO_CART_DEFAULT_SET_TO_LOCAL("YES"),
     NEW_REGISTRATION_ALLOWED("NO"),
     PASSWORD_CHANGE_ALLOWED("YES"),
     PROFILE_EDIT_ALLOWED("YES"),

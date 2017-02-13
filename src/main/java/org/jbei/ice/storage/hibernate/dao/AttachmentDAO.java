@@ -1,12 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.storage.DAOException;
@@ -14,6 +8,8 @@ import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Attachment;
 import org.jbei.ice.storage.model.Entry;
 
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
@@ -25,27 +21,23 @@ import java.util.List;
  */
 public class AttachmentDAO extends HibernateRepository<Attachment> {
 
-    public Attachment save(File attDir, Attachment attachment, InputStream inputStream) throws DAOException {
+    public Attachment save(File attDir, Attachment attachment, InputStream inputStream) {
         try {
             attachment = create(attachment);
             if (inputStream != null)
                 FileUtils.writeFile(attDir, attachment.getFileId(), inputStream);
-        } catch (HibernateException e) {
-            throw new DAOException("dbSave failed!", e);
         } catch (Exception e1) {
             Logger.error(e1);
-            throw new DAOException("Unknown database exception ", e1);
+            throw new DAOException("Exception writing attachment file ", e1);
         }
 
         return attachment;
     }
 
-    public void delete(File attDir, Attachment attachment) throws DAOException {
+    public void delete(File attDir, Attachment attachment) {
         try {
             delete(attachment);
             deleteFile(attDir, attachment);
-        } catch (HibernateException e) {
-            throw new DAOException("dbDelete failed!", e);
         } catch (Exception e) {
             Logger.error(e);
             throw new DAOException("Unknown exception ", e);
@@ -59,26 +51,27 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
      * @return ArrayList of Attachments.
      * @throws DAOException
      */
-    @SuppressWarnings("unchecked, rawtypes")
-    public List<Attachment> getByEntry(Entry entry) throws DAOException {
+    public List<Attachment> getByEntry(Entry entry) {
         try {
-            Criteria criteria = currentSession().createCriteria(Attachment.class)
-                    .add(Restrictions.eq("entry", entry));
-            criteria.addOrder(Order.desc("id"));
-            return criteria.list();
+            CriteriaQuery<Attachment> query = getBuilder().createQuery(Attachment.class);
+            Root<Attachment> from = query.from(Attachment.class);
+            query.where(getBuilder().equal(from.get("entry"), entry));
+            query.orderBy(getBuilder().desc(from.get("id")));
+            return currentSession().createQuery(query).list();
         } catch (HibernateException e) {
+            Logger.error(e);
             throw new DAOException("Failed to retrieve attachment by entry: " + entry.getId(), e);
         }
     }
 
-    public boolean hasAttachment(Entry entry) throws DAOException {
-        Session session = currentSession();
+    public boolean hasAttachment(Entry entry) {
         try {
-            Number itemCount = (Number) session.createCriteria(Attachment.class)
-                    .setProjection(Projections.countDistinct("id"))
-                    .add(Restrictions.eq("entry", entry)).uniqueResult();
-            return itemCount.longValue() > 0;
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<Attachment> from = query.from(Attachment.class);
+            query.select(getBuilder().countDistinct(from.get("id"))).where(getBuilder().equal(from.get("entry"), entry));
+            return currentSession().createQuery(query).uniqueResult() > 0;
         } catch (HibernateException e) {
+            Logger.error(e);
             throw new DAOException("Failed to retrieve attachment by entry: " + entry.getId(), e);
         }
     }
@@ -88,25 +81,18 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
      *
      * @param fileId unique file identifier
      * @return retrieved attachment; null if none is found or there is a problem retrieving
-     * attachment
-     * @throws DAOException on Hibernate exception
+     * the attachment
      */
-    public Attachment getByFileId(String fileId) throws DAOException {
-        Attachment attachment = null;
-        Session session = currentSession();
+    public Attachment getByFileId(String fileId) {
         try {
-            Query query = session.createQuery("from " + Attachment.class.getName() + " where fileId = :fileId");
-            query.setParameter("fileId", fileId);
-            Object queryResult = query.uniqueResult();
-
-            if (queryResult != null) {
-                attachment = (Attachment) queryResult;
-            }
+            CriteriaQuery<Attachment> query = getBuilder().createQuery(Attachment.class);
+            Root<Attachment> from = query.from(Attachment.class);
+            query.where(getBuilder().equal(from.get("fileId"), fileId));
+            return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException e) {
+            Logger.error(e);
             throw new DAOException("Failed to retrieve attachment by fileId: " + fileId, e);
         }
-
-        return attachment;
     }
 
     /**
@@ -116,7 +102,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
      * @return File physical attachment file
      * @throws DAOException
      */
-    public File getFile(File attDir, Attachment attachment) throws DAOException {
+    public File getFile(File attDir, Attachment attachment) {
         File file = new File(attDir + File.separator + attachment.getFileId());
         if (!file.exists()) {
             throw new DAOException("Attachment file " + file.getAbsolutePath() + " does not exist");

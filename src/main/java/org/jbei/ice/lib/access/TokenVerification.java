@@ -8,6 +8,8 @@ import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.ApiKey;
 import org.jbei.ice.storage.model.RemotePartner;
 
+import java.util.Optional;
+
 /**
  * Verifies the different tokens that ICE handles including <code>API</code> token,
  * <code>Web of registries token</code>
@@ -25,10 +27,11 @@ public class TokenVerification {
     public String verifyAPIKey(String token, String clientId, String userId) {
         // hash = (token, client + salt + client)
 
-        ApiKey key = DAOFactory.getApiKeyDAO().getByClientId(clientId);
-        if (key == null)
+        Optional<ApiKey> optionalKey = DAOFactory.getApiKeyDAO().getByClientId(clientId);
+        if (!optionalKey.isPresent())
             throw new PermissionException("Invalid client Id " + clientId);
 
+        ApiKey key = optionalKey.get();
         String hash_token = tokenHash.encrypt(token, clientId + key.getSecret() + clientId);
         if (!hash_token.equalsIgnoreCase(key.getHashedToken()))
             throw new PermissionException("Invalid token");

@@ -123,7 +123,7 @@ public class EntriesAsCSV {
 
         // filter entries based on what the user is allowed to see if the user is not an admin
         Account account = this.accountDAO.getByEmail(userId);
-        Set<Group> accountGroups = new GroupController().getAllGroups(account);
+        List<Group> accountGroups = new GroupController().getAllGroups(account);
         if (account.getType() != AccountType.ADMIN)
             entries = permissionDAO.getCanReadEntries(account, accountGroups, entries);
 

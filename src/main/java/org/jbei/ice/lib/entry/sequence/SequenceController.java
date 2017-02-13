@@ -91,11 +91,14 @@ public class SequenceController extends HasEntry {
         if (!deleteSequence(userId, entryId))
             return null;
 
-//        sequence = update(userId, sequence);
         sequence = save(userId, sequence);
-        if (sequence != null)
-            return sequenceToDNASequence(sequence);
-        return null;
+        if (sequence == null)
+            return null;
+
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
+        sequenceAnalysisController.rebuildAllAlignments(entry);
+        return sequenceToDNASequence(sequence);
     }
 
     /**
@@ -147,7 +150,7 @@ public class SequenceController extends HasEntry {
 
         String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
         dao.deleteSequence(sequence, tmpDir);
-//        BlastPlus.scheduleBlastIndexRebuildTask(true);  // todo : update is delete and save which is not right
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
         return true;
     }
 
@@ -429,6 +432,8 @@ public class SequenceController extends HasEntry {
                 case "original":
                     sequenceString = sequence.getSequenceUser();
                     name = sequence.getFileName();
+                    if (StringUtils.isEmpty(name))
+                        name = entry.getPartNumber() + ".gb";
                     break;
 
                 case "genbank":
@@ -447,12 +452,12 @@ public class SequenceController extends HasEntry {
                     break;
 
                 case "sbol1":
-                    sequenceString = compose(sequence, new SBOLFormatter(true));
+                    sequenceString = compose(sequence, new SBOLFormatter());
                     name = entry.getPartNumber() + ".xml";
                     break;
 
                 case "sbol2":
-                    sequenceString = compose(sequence, new SBOLFormatter(false));
+                    sequenceString = compose(sequence, new SBOL2Formatter());
                     name = entry.getPartNumber() + ".xml";
                     break;
 

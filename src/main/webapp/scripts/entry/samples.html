@@ -1,28 +1,27 @@
 <div ng-controller="EntrySampleController">
 
-    <div class="row pad_top" ng-if="entry.canEdit||samples.length>0">
+    <div class="row pad_top" ng-if="entry.canEdit || totalSamples > 0">
         <div class="col-md-12">
             <button type="button" ng-click="newSample.add=true" class="ice-button" ng-if="entry.canEdit">
                 Add Sample
             </button>
-        <span ng-if="samples && samples.length">
-            &nbsp;
-            <span ng-if="!isAddGene(samples)">
-            <button ng-if="!entrySampleInCart(entry)" ng-click="openAddToCart(entry.id, samples)" type="button"
-                    class="ice-button">
-                <i style="font-size: 14px; color: #007dbc" class="fa fa-cart-plus"></i> Add to Cart
-            </button>
-            <button ng-if="entrySampleInCart(entry)" ng-click="removeFromCart(null, entry)"
-                    type="button" class="ice-button">
-                <i style="font-size: 14px;" class="fa fa-ban text-danger"></i> Remove From Cart
-            </button>
+            <span ng-if="totalSamples > 0">&nbsp;
+                <span ng-if="!isAddGene(samples) || addToCartDefaultLocal">
+                    <button ng-if="!entrySampleInCart(entry)" ng-click="openAddToCart(entry.id, samples)" type="button"
+                            class="ice-button">
+                        <i style="font-size: 14px; color: #007dbc" class="fa fa-cart-plus"></i> Add to Cart
+                    </button>
+                    <button ng-if="entrySampleInCart(entry)" ng-click="removeFromCart(null, entry)"
+                            type="button" class="ice-button">
+                        <i style="font-size: 14px;" class="fa fa-ban text-danger"></i> Remove From Cart
+                    </button>
                 </span>
-            <span ng-if="isAddGene(samples)">
-            <button ng-click="requestFromAddGene(samples)" type="button" class="ice-button">
-                <i style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Request from Addgene
-            </button>
+                <span ng-if="isAddGene(samples) && !addToCartDefaultLocal">
+                    <button ng-click="requestFromAddGene(samples)" type="button" class="ice-button">
+                        <i style="font-size: 14px; color: #007dbc" class="fa fa-shopping-cart"></i> Request from Addgene
+                    </button>
+                </span>
             </span>
-        </span>
         </div>
     </div>
 
@@ -147,55 +146,55 @@
             </div>
         </div>
     </div>
-
-    <div class="row pad_top" ng-if="samples.length===0">
+    <div class="row pad_top" ng-if="totalSamples === 0">
         <div class="col-md-12">
             <i class="text-muted">No samples available</i>
         </div>
     </div>
 
-    <div class="row pad_top" ng-repeat="sample in samples track by $index" ng-if="samples.length > 0">
-        <div class="col-md-12">
+    <!--widget for plate 96 -->
+    <div class="row pad_top" ng-repeat="(key, value) in distinctPlates track by $index" style="display: inline-block;">
+        <div class="col-md-12" style="margin: 15px; height: 372px;">
+            <div class="col-md-6">
+                <ice-plate96 selected="selected"
+                             entry="entry"
+                             plate="distinctPlates[key]"
+                             on-delete="delete(selected)">
+                </ice-plate96>
+            </div>
 
-            <!--widget for plate 96 -->
-            <div class="row" ng-if="$index % 2 == 0">
+        </div>
+    </div>
 
-                <!--left sample-->
-                <div class="col-md-6" ng-if="samples[$index+0].location.type==='PLATE96'&&samples[$index+0]">
-                    <ice-plate96 sample="samples[$index+0]" on-delete="delete(samples[$index+0])"></ice-plate96>
-                </div>
+    <!--widget for shelf-->
+    <div class="row pad_top" ng-repeat="sample in samples track by $index"
+         ng-if="samples[$index].location.type==='SHELF' && samples[$index]"
+         style="display: inline-block;">
+        <div class="col-md-12" style="margin: 15px;">
+            <div class="col-md-6">
+                <ice-shelf sample="samples[$index]" on-delete="delete(samples[$index])"></ice-shelf>
+            </div>
+        </div>
+    </div>
 
-                <!--right sample-->
-                <div class="col-md-6" ng-if="samples[$index+1].location.type==='PLATE96'&&samples[$index+1]">
-                    <ice-plate96 sample="samples[$index+1]" on-delete="delete(samples[$index+1])"></ice-plate96>
-                </div>
+    <!--widget for addgene-->
+    <div class="row pad_top" ng-repeat="sample in samples track by $index"
+         ng-if="samples[$index].location.type==='ADDGENE' && samples[$index]"
+         style="display: inline-block;">
+        <div class="col-md-12" style="margin: 15px;">
+            <div class="col-md-6">
+                <ice-addgene sample="samples[$index]" on-delete="delete(samples[$index])"></ice-addgene>
+            </div>
+        </div>
+    </div>
 
-                <!--widget for shelf-->
-                <div class="col-md-6" ng-if="samples[$index+0].location.type==='SHELF'&&samples[$index+0]">
-                    <ice-shelf sample="samples[$index+0]" on-delete="delete(samples[$index+0])"></ice-shelf>
-                </div>
-
-                <div class="col-md-6" ng-if="samples[$index+1].location.type==='SHELF'&&samples[$index+1]">
-                    <ice-shelf sample="samples[$index+1]" on-delete="delete(samples[$index+1])"></ice-shelf>
-                </div>
-
-                <!--widget for addgene-->
-                <div class="col-md-6" ng-if="samples[$index+0].location.type==='ADDGENE'&&samples[$index+0]">
-                    <ice-addgene sample="samples[$index+0]" on-delete="delete(samples[$index+0])"></ice-addgene>
-                </div>
-
-                <div class="col-md-6" ng-if="samples[$index+1].location.type==='ADDGENE'&&samples[$index+1]">
-                    <ice-addgene sample="samples[$index+1]" on-delete="delete(samples[$index+1])"></ice-addgene>
-                </div>
-
-                <!--widget for generic-->
-                <div class="col-md-6" ng-if="samples[$index+0].location.type==='GENERIC'&&samples[$index+0]">
-                    <ice-generic sample="samples[$index+0]" on-delete="delete(samples[$index+0])"></ice-generic>
-                </div>
-
-                <div class="col-md-6" ng-if="samples[$index+1].location.type==='GENERIC'&&samples[$index+1]">
-                    <ice-generic sample="samples[$index+1]" on-delete="delete(samples[$index+1])"></ice-generic>
-                </div>
+    <!--widget for generic-->
+    <div class="row pad_top" ng-repeat="sample in samples track by $index"
+         ng-if="samples[$index].location.type==='GENERIC' && samples[$index]"
+         style="display: inline-block;">
+        <div class="col-md-12" style="margin: 15px;">
+            <div class="col-md-6">
+                <ice-generic sample="samples[$index]" on-delete="delete(samples[$index])"></ice-generic>
             </div>
         </div>
     </div>

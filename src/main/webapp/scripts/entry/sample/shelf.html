@@ -4,25 +4,25 @@
             <strong style="color: #a52a2a;">SHELF {{sample.location.display}}</strong>
         </td>
     </tr>
-    <tr>
+    <tr style="height: 92px">
         <!--<td>&nbsp;</td>-->
         <td class="pad-8">
-            <h2 class="text-center">Box<br>
-                <small class="no_wrap">{{sample.location.child.display || "&nbsp;"}}</small>
+            <h2 class="text-center">Box:
+                <span class="no_wrap">{{sample.location.child.display || "&nbsp;"}}</span>
             </h2>
         </td>
     </tr>
-    <tr>
+    <tr style="height: 92px">
         <td class="pad-8">
-            <h2 class="text-center">Well<br>
-                <small class="no_wrap">{{sample.location.child.child.display || "&nbsp;"}}</small>
+            <h2 class="text-center">Well:
+                <span class="no_wrap">{{sample.location.child.child.display || "&nbsp;"}}</span>
             </h2>
         </td>
     </tr>
-    <tr ng-if="sample.location.child.child.child.display">
+    <tr style="height: 92px">
         <td class="pad-8">
-            <h2 class="text-center">Tube<br>
-                <small class="no_wrap">{{sample.location.child.child.child.display || "&nbsp;"}}</small>
+            <h2 class="text-center">Tube:
+                <span class="no_wrap">{{sample.location.child.child.child.display || "N/A"}}</span>
             </h2>
         </td>
     </tr>

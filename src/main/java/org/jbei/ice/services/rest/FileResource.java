@@ -30,6 +30,7 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Sequence;
+import org.jbei.ice.storage.model.ShotgunSequence;
 import org.jbei.ice.storage.model.TraceSequence;
 
 import javax.ws.rs.*;
@@ -40,7 +41,6 @@ import java.io.*;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Resource for accessing files both locally and remotely
@@ -217,10 +217,11 @@ public class FileResource extends RestResource {
     public Response getShotgunSequenceFile(@PathParam("fileId") String fileId,
                                            @QueryParam("sid") String sid) {
         ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
+        ShotgunSequence shotgunSequence = dao.getByFileId(fileId);
 
         try {
             final File file = dao.getFile(fileId);
-            return addHeaders(Response.ok(file), "sequence-" + ThreadLocalRandom.current().nextInt(10000, 100001) + ".ss.zip");
+            return addHeaders(Response.ok(file), shotgunSequence.getFilename());
         } catch (Exception e) {
             Logger.error(e);
             return Response.serverError().build();

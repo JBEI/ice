@@ -195,7 +195,7 @@ public class RemoteContact {
         return restClient.getWor(url, path, PartStatistics.class, null, apiKey);
     }
 
-    public FeaturedDNASequence getPublicEntrySequence(String url, long partId, String apiKey) {
+    public FeaturedDNASequence getPublicEntrySequence(String url, String partId, String apiKey) {
         String path = "/rest/parts/" + partId + "/sequence";
         return restClient.getWor(url, path, FeaturedDNASequence.class, null, apiKey);
     }
@@ -230,8 +230,13 @@ public class RemoteContact {
         }
     }
 
-    public PartData getPublicEntry(String url, long entryId, String apiKey) {
-        return restClient.getWor(url, "rest/parts/" + entryId, PartData.class, null, apiKey);
+    public PartData getPublicEntry(String url, String entryId, String apiKey) {
+        try {
+            return restClient.getWor(url, "rest/parts/" + entryId, PartData.class, null, apiKey);
+        } catch (Exception e) {
+            Logger.warn("Error retrieving public entry from " + entryId + " : " + e.getMessage());
+            return null;
+        }
     }
 
     /**

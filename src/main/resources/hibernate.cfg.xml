@@ -25,6 +25,8 @@
         <property name="hibernate.c3p0.acquireRetryAttempts">0</property>
         <!-- wait 30secs before attempting to acquire db connection after a failed attempt -->
         <property name="hibernate.c3p0.acquireRetryDelay">30000</property>
+        <property name="hibernate.c3p0.privilegeSpawnedThreads">true</property>
+        <property name="hibernate.c3p0.contextClassLoaderSource">library</property>
 
         <!-- Enables Hibernate's automatic session context management -->
         <property name="hibernate.current_session_context_class">

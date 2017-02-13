@@ -1,13 +1,14 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.AccountPreferences;
+
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 
 /**
  * DAO to manipulate {@link AccountPreferences} objects in the database.
@@ -23,25 +24,20 @@ public class AccountPreferencesDAO extends HibernateRepository<AccountPreference
      * @return retrieved AccountPreferences
      * @throws DAOException
      */
-    public AccountPreferences getAccountPreferences(Account account) throws DAOException {
-        AccountPreferences accountPreferences = null;
-        Session session = currentSession();
-
+    public AccountPreferences getAccountPreferences(Account account) {
         try {
-            Query query = session.createQuery("from " + AccountPreferences.class.getName()
-                                                      + " where account = :account");
-            query.setParameter("account", account);
-            accountPreferences = (AccountPreferences) query.uniqueResult();
+            CriteriaQuery<AccountPreferences> query = getBuilder().createQuery(AccountPreferences.class);
+            Root<AccountPreferences> from = query.from(AccountPreferences.class);
+            query.where(getBuilder().equal(from.get("account"), account));
+            return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to get AccountPreferences by Account: " + account.getFullName(), e);
         }
-
-        return accountPreferences;
     }
 
     @Override
     public AccountPreferences get(long id) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return super.get(AccountPreferences.class, id);
     }
 }

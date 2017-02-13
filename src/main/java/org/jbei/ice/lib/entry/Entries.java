@@ -22,7 +22,6 @@ import org.jbei.ice.storage.model.Group;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Hector Plahar
@@ -32,7 +31,6 @@ public class Entries extends HasEntry {
     private final EntryDAO dao;
     private final PermissionDAO permissionDAO;
     private final AccountDAO accountDAO;
-    private final EntryAuthorization authorization;
     private final String userId;
 
     /**
@@ -44,12 +42,11 @@ public class Entries extends HasEntry {
         this.permissionDAO = DAOFactory.getPermissionDAO();
         this.accountDAO = DAOFactory.getAccountDAO();
         this.userId = userId;
-        this.authorization = new EntryAuthorization();
     }
 
     public boolean updateVisibility(List<Long> entryIds, Visibility visibility) {
         Account account = accountDAO.getByEmail(userId);
-        Set<Group> accountGroups = new GroupController().getAllGroups(account);
+        List<Group> accountGroups = new GroupController().getAllGroups(account);
         if (!new AccountController().isAdministrator(userId) && !permissionDAO.canWrite(account, accountGroups, entryIds))
             return false;
 
@@ -63,21 +60,6 @@ public class Entries extends HasEntry {
         }
 
         return true;
-    }
-
-    /**
-     * Retrieve {@link Entry} from the database by id.
-     *
-     * @param id unique local identifier for entry
-     * @return entry retrieved from the database.
-     */
-    public Entry get(long id) {
-        Entry entry = dao.get(id);
-        if (entry == null)
-            return null;
-
-        authorization.expectRead(userId, entry);
-        return entry;
     }
 
     public List<Long> getEntriesFromSelectionContext(EntrySelection context) {
@@ -123,7 +105,8 @@ public class Entries extends HasEntry {
                 entries = dao.sharedWithUserEntryIds(account, account.getGroups());
                 break;
             case "available":
-                entries = dao.getVisibleEntryIds(account.getType() == AccountType.ADMIN);
+                Group publicGroup = new GroupController().createOrRetrievePublicGroup();
+                entries = dao.getVisibleEntryIds(account.getType() == AccountType.ADMIN, publicGroup);
                 break;
         }
 
