@@ -52,7 +52,7 @@
 
                     <div ng-if="group.confirmDeleteGroup">
                         Delete?
-                        <button class="btn btn-primary btn-xs">Yes</button>
+                        <button class="btn btn-primary btn-xs" ng-click="deletePublicGroup(group)">Yes</button>
                         <button class="btn btn-default btn-xs" ng-click="group.confirmDeleteGroup=false">No</button>
                     </div>
                 </td>

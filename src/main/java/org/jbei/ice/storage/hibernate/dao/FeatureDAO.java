@@ -28,7 +28,7 @@ public class FeatureDAO extends HibernateRepository<Feature> {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Feature> from = query.from(Feature.class);
-            query.select(from.get("id")).where(getBuilder().isNotNull(from.get("name")),
+            query.select(getBuilder().countDistinct(from.get("id"))).where(getBuilder().isNotNull(from.get("name")),
                     getBuilder().notEqual(from.get("name"), ""));
             return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {

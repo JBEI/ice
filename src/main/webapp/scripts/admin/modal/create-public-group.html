@@ -1,5 +1,5 @@
 <div class="modal-header">
-    <button type="button" class="close" ng-click="closeCreatePublicGroupModal()">&times;</button>
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
     <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
         <i class="fa fa-group"></i> &nbsp;
         <span ng-if="!newPublicGroup.id">Create Public Group</span>
@@ -66,5 +66,5 @@
     <button type="submit" ng-disabled="!newPublicGroup.label" class="btn btn-primary"
             ng-click="createNewPublicGroup()">Create
     </button>
-    <button type="reset" ng-click="closeCreatePublicGroupModal()" class="btn btn-default">Cancel</button>
+    <button type="reset" ng-click="$dismiss('cancel')" class="btn btn-default">Cancel</button>
 </div>

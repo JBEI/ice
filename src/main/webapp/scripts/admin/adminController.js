@@ -379,7 +379,6 @@ angular.module('ice.admin.controller', [])
         $scope.groupListPageChanged = function () {
             Util.get("rest/groups", function (result) {
                 $scope.groups = result.data;
-                console.log(result);
                 $scope.adminGroupsPagingParams.available = result.resultCount;
             }, $scope.adminGroupsPagingParams);
         };
@@ -405,6 +404,14 @@ angular.module('ice.admin.controller', [])
                 Util.setFeedback("Public group successfully created", "success");
                 $scope.groupListPageChanged();
             })
+        };
+
+        $scope.deletePublicGroup = function (group) {
+            Util.remove("rest/groups/" + group.id, null, function () {
+                var i = $scope.groups.indexOf(group);
+                if (i != -1)
+                    $scope.groups.splice(i, 1);
+            })
         }
     })
     .controller('AdminGroupsModalController', function ($scope, $uibModalInstance, currentGroup, Util) {
@@ -414,10 +421,6 @@ angular.module('ice.admin.controller', [])
             $scope.newPublicGroup = currentGroup;
         else
             $scope.newPublicGroup = {type: 'PUBLIC'};
-
-        $scope.closeCreatePublicGroupModal = function () {
-            $uibModalInstance.close();
-        };
 
         $scope.createNewPublicGroup = function () {
             $scope.newPublicGroup.members = $scope.selectedUsers;
