@@ -8,6 +8,7 @@ import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.web.PartnerEntries;
 import org.jbei.ice.lib.entry.EntryFields;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.PartDataUtil;
@@ -99,7 +100,8 @@ public class RemoteEntriesAsCSV {
             for (RemotePartner partner : partners) {
                 try {
                     Logger.info("Retrieving from " + partner.getUrl());
-                    Results<PartData> webEntries = remoteEntries.getPublicEntries(partner.getId(), 0, Integer.MAX_VALUE, null, true);
+                    PartnerEntries partnerEntries = remoteEntries.getPublicEntries(partner.getId(), 0, Integer.MAX_VALUE, null, true);
+                    Results<PartData> webEntries = partnerEntries.getEntries();
                     if (webEntries == null || webEntries.getData() == null) {
                         Logger.error("Could not retrieve entries for " + partner.getUrl());
                         continue;

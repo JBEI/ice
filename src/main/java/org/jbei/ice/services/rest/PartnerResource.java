@@ -9,6 +9,7 @@ import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.TraceSequenceAnalysis;
+import org.jbei.ice.lib.dto.web.PartnerEntries;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.net.*;
@@ -308,5 +309,30 @@ public class PartnerResource extends RestResource {
         } catch (IllegalArgumentException e) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
+    }
+
+    /**
+     * Retrieves entries for specified partner using the specified paging parameters
+     *
+     * @param partnerId unique identifier for registry partner whose entries are being retrieved
+     * @param offset    record retrieve offset paging parameter
+     * @param limit     maximum number of entries to retrieve
+     * @param sort      field to sort on
+     * @param asc       sort order
+     * @return Response with public entries from registry partners
+     */
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/entries")
+    public Response getWebEntries(
+            @PathParam("id") final long partnerId,
+            @DefaultValue("0") @QueryParam("offset") final int offset,
+            @DefaultValue("15") @QueryParam("limit") final int limit,
+            @DefaultValue("created") @QueryParam("sort") final String sort,
+            @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+        requireUserId();
+        RemoteEntries remoteEntries = new RemoteEntries();
+        PartnerEntries entries = remoteEntries.getPublicEntries(partnerId, offset, limit, sort, asc);
+        return super.respond(Response.Status.OK, entries);
     }
 }

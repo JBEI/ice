@@ -13,7 +13,6 @@ import java.util.List;
 /**
  * @author Hector Plahar
  */
-@SuppressWarnings("unchecked")
 public class RemoteFolders {
 
     private final RemotePartner partner;
@@ -25,6 +24,7 @@ public class RemoteFolders {
             throw new IllegalArgumentException("Cannot retrieve partner with id " + partnerId);
     }
 
+    @SuppressWarnings("unchecked")
     public List<FolderDetails> getAvailableFolders() {
         try {
             String restPath = "rest/folders/public";
