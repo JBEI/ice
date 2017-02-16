@@ -91,11 +91,11 @@ public class ExperimentsTest {
         Assert.assertEquals(created.getOwnerEmail(), userId);
 
         // update
-        study.setLabel("new label");
+        study.setLabel("Metabolomic study of the integrated adipic acid-producing Borrelidin Polyketide Synthase (PKS) (JGI constructs Ver. 1.0/ 2.0) S. venezuelae ATCC10712. From 20170206");
         created = experiments.createOrUpdateStudy(study);
         Assert.assertNotNull(created);
         Assert.assertEquals(created.getUrl(), study.getUrl());
-        Assert.assertEquals(created.getLabel(), study.getLabel());
+        Assert.assertEquals(created.getLabel(), study.getLabel().substring(0, 128));
         Assert.assertEquals(created.getOwnerEmail(), userId);
 
         List<Study> studies = experiments.getPartStudies();
