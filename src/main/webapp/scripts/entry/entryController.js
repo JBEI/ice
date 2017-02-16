@@ -1005,7 +1005,7 @@ angular.module('ice.entry.controller', [])
     })
     .controller('EntryFoldersController', function ($scope, Util) {
         $scope.containedFolders = undefined;
-        Util.list("rest/parts/" + $scope.entry.id + "/folders", function (result) {
+        Util.list("rest/parts/" + $scope.entry.recordId + "/folders", function (result) {
             $scope.containedFolders = result;
         });
     })
