@@ -83,6 +83,14 @@ public class EntryAuthorization extends Authorization<Entry> {
         if (permissionDAO.hasPermissionMulti(entry, null, account, null, false, true))
             return true;
 
+        // check group permissions
+        // get groups for account
+        Set<Group> accountGroups = groupController.getAllGroups(account);
+
+        // check group permissions
+        if (permissionDAO.hasPermissionMulti(entry, null, null, accountGroups, false, true))
+            return true;
+
         return false;
     }
 
