@@ -88,7 +88,9 @@ public class Experiments extends HasEntry {
             experiment = new Experiment();
             experiment.setCreationTime(new Date());
             experiment.setUrl(study.getUrl());
-            String label = study.getLabel().substring(0, 128);
+            String label = study.getLabel();
+            if (label.length() >= 128)
+                label = label.substring(0, 128);
             experiment.setLabel(label);
             experiment.getSubjects().add(entry);
             experiment.setOwnerEmail(userId);
@@ -98,7 +100,9 @@ public class Experiments extends HasEntry {
 
         if (!userId.equalsIgnoreCase(study.getOwnerEmail()))
             entryAuthorization.expectWrite(userId, entry);
-        String label = study.getLabel().substring(0, 128);
+        String label = study.getLabel();
+        if (label.length() >= 128)
+            label = label.substring(0, 128);
         experiment.setUrl(study.getUrl());
         experiment.setLabel(label);
         experiment.getSubjects().add(entry);
