@@ -102,7 +102,7 @@ angular.module('ice.admin.controller', [])
                 id: 'annotations-curation',
                 url: 'scripts/admin/curation.html',
                 display: 'Annotations Curation',
-                description: 'Curate annotations for auto annotations',
+                description: 'Curate existing annotations for automatic sequence annotation',
                 selected: false,
                 icon: 'fa-language'
             },
