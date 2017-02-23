@@ -1,9 +1,11 @@
 package org.jbei.ice.storage.hibernate.filter;
 
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.*;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.hibernate.search.annotations.Factory;
-import org.hibernate.search.filter.impl.CachingWrapperFilter;
 
 import java.util.ArrayList;
 
@@ -20,12 +22,12 @@ public class EntryHasFilterFactory {
     }
 
     @Factory
-    public Filter getFilter() {
+    public Query getFilter() {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
         for (String f : field) {
             builder.add(new TermQuery(new Term(f, "true")), BooleanClause.Occur.MUST);
         }
-        return new CachingWrapperFilter(new QueryWrapperFilter(builder.build()));
+        return builder.build();
     }
 }
