@@ -1,7 +1,10 @@
 package org.jbei.ice.storage.hibernate.filter;
 
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.*;
+import org.apache.lucene.search.BooleanClause;
+import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TermQuery;
 import org.hibernate.search.annotations.Factory;
 
 import java.util.HashSet;
@@ -25,7 +28,7 @@ public class EntrySecurityFilterFactory {
     }
 
     @Factory
-    public Filter getFilter() {
+    public Query getFilter() {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
         // must have either account id present or group uuid present
@@ -39,6 +42,6 @@ public class EntrySecurityFilterFactory {
             }
         }
 
-        return new QueryWrapperFilter(builder.build());
+        return builder.build();
     }
 }
