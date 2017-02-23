@@ -60,4 +60,26 @@ angular.module('ice.wor.service', [])
                 return menuDetails;
             }
         }
-    });
+    })
+    .factory('RemoteSelection', function () {
+        var selectedEntries = [];
+
+        return {
+            select: function (entry) {
+                var idx = selectedEntries.indexOf(entry);
+                if (idx == -1)
+                    selectedEntries.push(entry);
+                else
+                    selectedEntries.splice(idx, 1);
+            },
+
+            getSelection: function () {
+                return selectedEntries;
+            },
+
+            isSelected: function (entry) {
+                return selectedEntries.indexOf(entry) != -1;
+            }
+        }
+    })
+;

@@ -18,7 +18,10 @@
     <table cellspacing="0" class="table table-hover font-95em table-border-bottom"
            ng-class="{'opacity_4':loadingPage}">
         <thead>
-        <tr data-ng-if='webResults&&webResults.entries.length>0'>
+        <tr data-ng-if='webResults && webResults.entries.length>0'>
+            <th style="width: 36px">
+                <i class="fa fa-fw fa-square-o" style="font-size: 15px"></i>
+            </th>
             <th ng-click="sort('type')" class="cursor_pointer">
                 <span style="font-size: 12px; text-transform: uppercase">TYPE</span>
                 <i ng-if="queryParams.sort!=='type'" class="sortable fa fa-angle-down"></i>
@@ -69,6 +72,10 @@
         </thead>
         <tbody>
         <tr data-ng-repeat="entry in webResults.entries">
+            <td>
+                <i class="fa fa-fw" style="font-size: 15px" ng-click="remoteSelectionClicked(entry)"
+                   ng-class="{'fa-check-square-o': remoteEntrySelected(entry), 'fa-square-o': !remoteEntrySelected(entry)}"></i>
+            </td>
             <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
                 {{entry.type | uppercase}}
             </td>

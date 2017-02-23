@@ -13,7 +13,7 @@ package org.jbei.ice.lib.dto.entry;
  */
 public enum Visibility {
 
-    PERMANENTLY_DELETED(-2), DELETED(-1), DRAFT(0), PENDING(1), TRANSFERRED(2), OK(9);
+    PERMANENTLY_DELETED(-2), DELETED(-1), DRAFT(0), PENDING(1), TRANSFERRED(2), REMOTE(3), OK(9);
 
     private final int value;
 

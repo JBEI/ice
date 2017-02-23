@@ -196,8 +196,13 @@ public class RemoteContact {
     }
 
     public FeaturedDNASequence getPublicEntrySequence(String url, String partId, String apiKey) {
-        String path = "/rest/parts/" + partId + "/sequence";
-        return restClient.getWor(url, path, FeaturedDNASequence.class, null, apiKey);
+        try {
+            String path = "/rest/parts/" + partId + "/sequence";
+            return restClient.getWor(url, path, FeaturedDNASequence.class, null, apiKey);
+        } catch (Exception e) {
+            // this is fine since it could be searching multiple instances
+            return null;
+        }
     }
 
     public FeaturedDNASequence getSequence(String url, String userId, String partId, long folderId, String token,
@@ -234,7 +239,7 @@ public class RemoteContact {
         try {
             return restClient.getWor(url, "rest/parts/" + entryId, PartData.class, null, apiKey);
         } catch (Exception e) {
-            Logger.warn("Error retrieving public entry from " + entryId + " : " + e.getMessage());
+            // this is fine since it could be searching all instances
             return null;
         }
     }

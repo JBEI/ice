@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ice.wor.controller', [])
-    .controller('WorContentController', function ($rootScope, $scope, $location, $uibModal, $cookieStore, $stateParams,
-                                                  WorService, Util) {
+    .controller('WorContentController', function ($rootScope, $scope, $location, $uibModal, $stateParams,
+                                                  WorService, Util, RemoteSelection) {
         $scope.selectedPartner = $stateParams.partner;
         $scope.loadingPage = true;
         $scope.queryParams = {
@@ -19,8 +19,6 @@ angular.module('ice.wor.controller', [])
         // init: retrieve first page of all public entries for selected partner
         // todo : check for invalid partner id
         Util.get('rest/partners/' + $scope.queryParams.partnerId + '/entries', function (result) {
-            console.log(result);
-
             $scope.loadingPage = false;
             $scope.webResults = {
                 partner: result.partner,
@@ -91,6 +89,14 @@ angular.module('ice.wor.controller', [])
                 $scope.queryParams.currentPage = 1;
             }, $scope.queryParams);
         };
+
+        $scope.remoteSelectionClicked = function (entry) {
+            RemoteSelection.select(entry);
+        };
+
+        $scope.remoteEntrySelected = function (entry) {
+            return RemoteSelection.isSelected(entry);
+        }
     })
     .controller('WorFolderContentController', function ($location, $rootScope, $scope, $stateParams, WorService, Util) {
         var id = $stateParams.folderId;
@@ -152,11 +158,9 @@ angular.module('ice.wor.controller', [])
             $location.path("web/" + partnerId + "/entry/" + entryId, true);
         };
     })
-    .controller('WorEntryController', function ($location, $scope, $window, $stateParams,
-                                                $cookieStore, EntryService, WorService, Util) {
+    .controller('WorEntryController', function ($location, $scope, $window, $stateParams, EntryService, WorService, Util) {
         $scope.notFound = undefined;
         $scope.remoteEntry = undefined;
-        $scope.sessionId = $cookieStore.get("sessionId");
 
         Util.get('rest/partners/' + $stateParams.partner, function (result) {
             $scope.currentPartner = result;
@@ -248,12 +252,12 @@ angular.module('ice.wor.controller', [])
             $window.open("rest/file/remote/" + $stateParams.partner + "/attachment/" + attachment.fileId, "_self");
         };
     })
-    .controller('WebOfRegistriesDetailController', function ($scope, $cookieStore, $location, $stateParams) {
+    .controller('WebOfRegistriesDetailController', function ($scope, $location, $stateParams) {
         $scope.selectRemotePartnerFolder = function (folder) {
             $location.path('web/' + $stateParams.partner + "/folder/" + folder.id);
         };
     })
-    .controller('WebOfRegistriesController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
+    .controller('WebOfRegistriesController', function ($rootScope, $scope, $location, $uibModal,
                                                        $stateParams, Util) {
         $scope.newPartner = undefined;
         $scope.partnerStatusList = [
@@ -355,7 +359,7 @@ angular.module('ice.wor.controller', [])
             // todo
         }
     })
-    .controller('WebOfRegistriesMenuController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
+    .controller('WebOfRegistriesMenuController', function ($rootScope, $scope, $location, $uibModal,
                                                            $stateParams, Util, localStorageService) {
         // retrieve web of registries partners
         Util.get("rest/web", function (result) {

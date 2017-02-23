@@ -88,7 +88,8 @@ public class FolderDAO extends HibernateRepository<Folder> {
                 ));
             }
             if (visibleOnly) {
-                predicates.add(getBuilder().equal(entry.get("visibility"), Visibility.OK.getValue()));
+                predicates.add(entry.get("visibility").in(Arrays.asList(Visibility.OK.getValue(),
+                        Visibility.REMOTE.getValue())));
             }
             predicates.add(getBuilder().equal(from.get("id"), id));
             query.select(getBuilder().countDistinct(entry.get("id")));
@@ -182,7 +183,8 @@ public class FolderDAO extends HibernateRepository<Folder> {
                 ));
             }
             if (visibleOnly) {
-                predicates.add(getBuilder().equal(entry.get("visibility"), Visibility.OK.getValue()));
+                predicates.add(entry.get("visibility").in(Arrays.asList(Visibility.OK.getValue(),
+                        Visibility.REMOTE.getValue())));
             }
             query.select(entry).where(predicates.toArray(new Predicate[predicates.size()]));
             query.orderBy(pageParameters.isAscending() ? getBuilder().asc(entry.get(sortString)) :
