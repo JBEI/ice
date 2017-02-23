@@ -76,7 +76,7 @@ public class FeatureDAO extends HibernateRepository<Feature> {
             for (String name : names) {
                 CriteriaQuery<Feature> featureQuery = getBuilder().createQuery(Feature.class);
                 Root<Feature> root = featureQuery.from(Feature.class);
-                query.where(getBuilder().equal(getBuilder().lower(root.get("name")), name.toLowerCase()));
+                featureQuery.where(getBuilder().equal(getBuilder().lower(root.get("name")), name.toLowerCase()));
                 List<Feature> result = currentSession().createQuery(featureQuery).list();
                 results.put(name, result);
             }
