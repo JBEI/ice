@@ -397,10 +397,6 @@ angular.module('ice.profile.controller', [])
             $scope.userMatches = undefined;
         };
 
-        $scope.resetSelectedUsers = function () {
-            $scope.selectedUsers = [];
-        };
-
         $scope.createGroup = function (groupName, groupDescription) {
             $scope.newGroup = {label: groupName, description: groupDescription, members: $scope.selectedUsers};
             Util.update("rest/users/" + profileId + "/groups", $scope.newGroup, {}, function (result) {
@@ -434,7 +430,12 @@ angular.module('ice.profile.controller', [])
                 if (!result)
                     return;
 
-                Util.setFeedback("Group successfully created", "success");
+                var msg = "Group successfully ";
+                if (group && group.id)
+                    msg += "updated";
+                else
+                    msg += "created";
+                Util.setFeedback(msg, "success");
                 getGroups();
             })
         };
@@ -453,14 +454,12 @@ angular.module('ice.profile.controller', [])
         $scope.webPartners = [];
         $scope.placeHolder = 'User name or email';
 
-        $scope.closeGroupModal = function () {
-            $uibModalInstance.dismiss('cancel');
-        };
-
+        // check if we are in edit mode or creating new group
         if (currentGroup && currentGroup.id) {
             Util.get("rest/groups/" + currentGroup.id + "/members", function (result) {
                 currentGroup.type = 'ACCOUNT';
                 $scope.newGroup = currentGroup;
+                $scope.newGroup.members = [];
 
                 angular.forEach(result.members, function (member) {
                     member.type = 'ACCOUNT';
@@ -513,6 +512,12 @@ angular.module('ice.profile.controller', [])
             $scope.newUserName = undefined;
             $scope.newGroup.partner = undefined;
             $scope.newGroup.type = 'ACCOUNT';
+        };
+
+        $scope.removeUserFromGroup = function (user) {
+            var index = $scope.newGroup.members.indexOf(user);
+            if (index)
+                $scope.newGroup.members.splice(index, 1);
         };
 
         $scope.createOrUpdateGroup = function () {

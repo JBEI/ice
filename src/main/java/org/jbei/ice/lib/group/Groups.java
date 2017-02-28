@@ -187,7 +187,10 @@ public class Groups {
         if (group == null)
             return null;
 
-        if (!userId.equalsIgnoreCase(group.getOwner().getEmail())) {
+        if (group.getType() == GroupType.PUBLIC) {
+            if (!accountController.isAdministrator(userId))
+                throw new PermissionException("Administrative privileges required");
+        } else if (!userId.equalsIgnoreCase(group.getOwner().getEmail())) {
             Account account = accountDAO.getByEmail(this.userId);
             if (account.getType() != AccountType.ADMIN)
                 throw new PermissionException("Missing required permissions");

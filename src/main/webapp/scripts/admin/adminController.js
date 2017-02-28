@@ -401,7 +401,12 @@ angular.module('ice.admin.controller', [])
                 if (!result)
                     return;
 
-                Util.setFeedback("Public group successfully created", "success");
+                var msg = "Group successfully ";
+                if (group && group.id)
+                    msg += "updated";
+                else
+                    msg += "created";
+                Util.setFeedback(msg, "success");
                 $scope.groupListPageChanged();
             })
         };
@@ -414,44 +419,54 @@ angular.module('ice.admin.controller', [])
             })
         }
     })
-    .controller('AdminGroupsModalController', function ($scope, $uibModalInstance, currentGroup, Util) {
-        $scope.selectedUsers = [];
+    .controller('AdminGroupsModalController', function ($http, $scope, $cookieStore, $uibModalInstance,
+                                                        currentGroup, Util) {
+        $scope.enteredUser = undefined;
 
-        if (currentGroup)
-            $scope.newPublicGroup = currentGroup;
-        else
-            $scope.newPublicGroup = {type: 'PUBLIC'};
-
-        $scope.createNewPublicGroup = function () {
-            $scope.newPublicGroup.members = $scope.selectedUsers;
-            Util.post("rest/groups", $scope.newPublicGroup, function (result) {
-                $uibModalInstance.close(result);
+        if (currentGroup && currentGroup.id) {
+            Util.get("rest/groups/" + currentGroup.id + "/members", function (result) {
+                $scope.newPublicGroup = angular.copy(currentGroup);
+                $scope.newPublicGroup.members = result.members;
             });
-        };
+        } else {
+            $scope.newPublicGroup = {type: 'PUBLIC', members: []};
+        }
 
-        $scope.filterUsers = function (val) {
-            if (!val) {
-                $scope.userMatches = undefined;
-                return;
+        $scope.savePublicGroup = function () {
+            if ($scope.newPublicGroup.id) {
+                Util.update("rest/groups/" + $scope.newPublicGroup.id, $scope.newPublicGroup, {}, function (result) {
+                    $uibModalInstance.close(result);
+                });
+            } else {
+                Util.post("rest/groups", $scope.newPublicGroup, function (result) {
+                    $uibModalInstance.close(result);
+                });
             }
+        };
 
-            $scope.filtering = true;
-
-            Util.list("rest/users/autocomplete", function (result) {
-                $scope.userMatches = result;
-                $scope.filtering = false;
-            }, {limit: 10, val: val}, function (error) {
-                $scope.filtering = false;
-                $scope.userMatches = undefined;
+        $scope.filter = function (val) {
+            return $http.get('rest/users/autocomplete', {
+                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                params: {
+                    val: val
+                }
+            }).then(function (res) {
+                return res.data;
             });
         };
 
-        $scope.selectUser = function (user) {
-            var index = $scope.selectedUsers.indexOf(user);
-            if (index == -1)
-                $scope.selectedUsers.push(user);
-            else
-                $scope.selectedUsers.splice(index, 1);
+        $scope.userSelectionForGroupAdd = function ($item, $model, $label) {
+            $scope.newPublicGroup.members.push($item);
+
+            // reset
+            $scope.newUserName = undefined;
+            $scope.newPublicGroup.type = 'ACCOUNT';
+        };
+
+        $scope.removeUserFromGroup = function (user) {
+            var index = $scope.newPublicGroup.members.indexOf(user);
+            if (index)
+                $scope.newPublicGroup.members.splice(index, 1);
         };
     })
     .controller('AdminManuscriptsController', function ($scope, $uibModal, $window, $location, Util) {
