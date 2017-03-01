@@ -1,7 +1,6 @@
 package org.jbei.auth.hmac;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jbei.ice.lib.common.logging.Logger;
 
 import javax.crypto.Mac;
 import java.io.FilterInputStream;
@@ -20,7 +19,6 @@ import java.util.Arrays;
 public final class HmacInputStream extends FilterInputStream {
 
     private static final Charset UTF8 = Charset.forName("UTF-8");
-    private static final Logger log = LoggerFactory.getLogger(HmacInputStream.class);
 
     private final Mac mac;
 
@@ -48,7 +46,7 @@ public final class HmacInputStream extends FilterInputStream {
         if (read != -1) {
             final String debug = new String(Arrays.copyOfRange(data, offset, offset + read), UTF8);
             mac.update(data, offset, read);
-            log.debug("Stream data: " + debug);
+            Logger.debug("Stream data: " + debug);
         }
         return read;
     }

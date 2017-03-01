@@ -6,8 +6,7 @@ package org.jbei.auth.hmac;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.auth.Authorization;
 import org.jbei.auth.KeyTable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jbei.ice.lib.common.logging.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.SignatureException;
@@ -20,8 +19,6 @@ import java.util.Map;
  * @version 1.0
  */
 public class HmacAuthorizor {
-
-    private static final Logger log = LoggerFactory.getLogger(HmacAuthorizor.class);
 
     private final HmacSignatureFactory factory;
 
@@ -46,15 +43,15 @@ public class HmacAuthorizor {
                                        final String path, final Map<String, ? extends Iterable<String>> params) {
         final String[] parts = StringUtils.split(auth, ':');
         if (parts == null || parts.length == 0) {
-            log.debug("No Authorization header found on request");
+            Logger.debug("No Authorization header found on request");
         } else if ("1".equals(parts[0]) && parts.length == 4) {
             try {
                 return factory.buildSignature(parts[1], parts[2], method, host, path, params);
             } catch (final SignatureException e) {
-                log.error("Cannot initialize signature", e);
+                Logger.error("Cannot initialize signature", e);
             }
         } else {
-            log.warn("Unknown Authorization header format: " + auth);
+            Logger.warn("Unknown Authorization header format: " + auth);
         }
         return null;
     }
@@ -69,11 +66,11 @@ public class HmacAuthorizor {
         final String auth = request.getHeader("Authorization");
         final String[] parts = StringUtils.split(auth, ':');
         if (parts == null || parts.length == 0) {
-            log.debug("No Authorization header found on request");
+            Logger.debug("No Authorization header found on request");
         } else if ("1".equals(parts[0]) && parts.length == 4) {
             return version1(request, parts[1], parts[2], parts[3]);
         } else {
-            log.warn("Unknown Authorization header format: " + auth);
+            Logger.warn("Unknown Authorization header format: " + auth);
         }
         return Authorization.INVALID;
     }
@@ -98,7 +95,7 @@ public class HmacAuthorizor {
                 };
             }
         } catch (final SignatureException e) {
-            log.warn("Signature failed in HmacAuthorizor: " + e.getMessage());
+            Logger.warn("Signature failed in HmacAuthorizor: " + e.getMessage());
         }
         return Authorization.INVALID;
     }
