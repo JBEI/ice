@@ -1,11 +1,9 @@
 package org.jbei.ice.storage.hibernate.filter;
 
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanClause;
-import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.*;
 import org.hibernate.search.annotations.Factory;
+import org.hibernate.search.filter.impl.CachingWrapperFilter;
 
 import java.util.HashSet;
 
@@ -17,18 +15,18 @@ public class EntrySecurityFilterFactory {
     private String accountId;
     private HashSet<String> groupUUids;
 
-    // injected
+    // injected parameter
     public void setAccount(String accountId) {
         this.accountId = accountId;
     }
 
-    // injected
+    // injected parameter
     public void setGroupUUids(HashSet<String> groupUUids) {
         this.groupUUids = groupUUids;
     }
 
     @Factory
-    public Query getFilter() {
+    public Filter getFilter() {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
         // must have either account id present or group uuid present
@@ -42,6 +40,6 @@ public class EntrySecurityFilterFactory {
             }
         }
 
-        return builder.build();
+        return new CachingWrapperFilter(new QueryWrapperFilter(builder.build()));
     }
 }
