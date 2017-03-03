@@ -654,13 +654,13 @@ public class BlastPlus {
         FeatureDAO featureDAO = DAOFactory.getFeatureDAO();
         SequenceFeatureDAO sequenceFeatureDAO = DAOFactory.getSequenceFeatureDAO();
 
-        long count = featureDAO.getFeatureCount();
+        long count = featureDAO.getFeatureCount(null);
         if (count <= 0)
             return;
 
         int offset = 0;
         while (offset < count) {
-            List<Feature> features = featureDAO.getFeatures(offset++, 1);
+            List<Feature> features = featureDAO.getFeatures(offset++, 1, null);
             Feature feature = features.get(0);
             String featureName = feature.getName();
             if (featureName == null || featureName.trim().isEmpty())

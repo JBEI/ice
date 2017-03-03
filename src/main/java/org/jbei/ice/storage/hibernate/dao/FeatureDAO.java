@@ -24,12 +24,15 @@ public class FeatureDAO extends HibernateRepository<Feature> {
         return super.get(Feature.class, id);
     }
 
-    public long getFeatureCount() {
+    public long getFeatureCount(String filter) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Feature> from = query.from(Feature.class);
-            query.select(getBuilder().countDistinct(from.get("id"))).where(getBuilder().isNotNull(from.get("name")),
-                    getBuilder().notEqual(from.get("name"), ""));
+            query.select(getBuilder().countDistinct(from.get("id")));
+            if (filter != null && !filter.isEmpty())
+                query.where(getBuilder().like(getBuilder().lower(from.get("name")), "%" + filter.toLowerCase() + "%"));
+            else
+                query.where(getBuilder().isNotNull(from.get("name")), getBuilder().notEqual(from.get("name"), ""));
             return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);
@@ -37,11 +40,14 @@ public class FeatureDAO extends HibernateRepository<Feature> {
         }
     }
 
-    public List<Feature> getFeatures(int offset, int size) {
+    public List<Feature> getFeatures(int offset, int size, String filter) {
         try {
             CriteriaQuery<Feature> query = getBuilder().createQuery(Feature.class);
             Root<Feature> from = query.from(Feature.class);
-            query.where(getBuilder().isNotNull(from.get("name")), getBuilder().notEqual(from.get("name"), ""));
+            if (filter != null && !filter.isEmpty())
+                query.where(getBuilder().like(getBuilder().lower(from.get("name")), "%" + filter.toLowerCase() + "%"));
+            else
+                query.where(getBuilder().isNotNull(from.get("name")), getBuilder().notEqual(from.get("name"), ""));
             return currentSession().createQuery(query).setFirstResult(offset).setMaxResults(size).list();
         } catch (HibernateException he) {
             Logger.error(he);

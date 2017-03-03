@@ -4,6 +4,7 @@ import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.DNAFeature;
+import org.jbei.ice.lib.dto.DNAFeatureLocation;
 import org.jbei.ice.lib.dto.DNAFeatures;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.common.Results;
@@ -80,6 +81,31 @@ public class Annotations {
             }
             results.getData().add(features);
         }
+        return results;
+    }
+
+    public Results<DNAFeature> filter(int offset, int limit, String filter) {
+        List<SequenceFeature> features = sequenceFeatureDAO.getSequenceFeatures(this.userId, filter, offset, limit);
+
+        // todo : restrict by read permission (the call above restricts by owner
+        int count = sequenceFeatureDAO.getSequenceFeaturesCount(this.userId, filter);
+        Results<DNAFeature> results = new Results<>();
+        results.setResultCount(count);
+
+        for (SequenceFeature feature : features) {
+            DNAFeature dnaFeature = feature.toDataTransferObject();
+
+            Entry entry = feature.getSequence().getEntry();
+            dnaFeature.setIdentifier(entry.getPartNumber());
+
+            DNAFeatureLocation location = new DNAFeatureLocation();
+            location.setGenbankStart(feature.getUniqueGenbankStart());
+            location.setEnd(feature.getUniqueEnd());
+            dnaFeature.getLocations().add(location);
+            dnaFeature.getEntries().add(entry.getId());
+            results.getData().add(dnaFeature);
+        }
+
         return results;
     }
 

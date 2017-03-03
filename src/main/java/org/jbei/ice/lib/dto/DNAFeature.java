@@ -7,8 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Value object to hold a combination of {@link SequenceFeature} and
- * {@link Feature} data.
+ * Data transfer object for Sequence Features
  *
  * @author Zinovii Dmytriv, Timothy Ham
  */
