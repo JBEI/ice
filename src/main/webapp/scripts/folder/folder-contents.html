@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <!--if subfolder-->
-    <div class="row entry_general_header_td" style="height: 60px;" ng-if="folder.type">
+    <div class="row entry_general_header_td" style="height: 60px" ng-if="folder.type">
         <div class="col-md-12">
             <table>
                 <tr>
@@ -214,6 +214,7 @@
                 <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
                     <i class="fa fa-fw fa-trash-o red" ng-if="entry.visible=='DELETED'"></i>
                     {{entry.type | uppercase}}
+                    <i class="fa fa-fw fa-cloud" ng-if="entry.visible=='REMOTE'" style="color: #c9e6f2"></i>
                 </td>
                 <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"

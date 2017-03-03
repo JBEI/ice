@@ -34,6 +34,10 @@ public class Logger {
         LOGGER.error(e.getMessage(), e);
     }
 
+    public static boolean isDebugEnabled() {
+        return LOGGER.isDebugEnabled();
+    }
+
     public static void warn(String message) {
         LOGGER.warn(message);
     }

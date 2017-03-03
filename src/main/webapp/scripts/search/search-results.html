@@ -45,7 +45,7 @@
                 </th>
                 <th ng-click="sortResults('part_id')" class="cursor_pointer"
                     style="font-size: 12px; text-transform: uppercase">
-                    <span style="font-size: 12px; text-transform: uppercase">Part ID</span>
+                    <span style="font-size: 12px">PART ID</span>
                     <i ng-if="searchFilters.parameters.sortField!=='PART_ID'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='PART_ID'" style="font-size: 14px"
                        class="fa opacity_4"
@@ -53,7 +53,7 @@
                 </th>
                 <th data-ng-click="sortResults('NAME')" class="cursor_pointer"
                     style="font-size: 12px; text-transform: uppercase">
-                    <span style="font-size: 12px; text-transform: uppercase">Name</span>
+                    <span style="font-size: 12px">NAME</span>
                     <i ng-if="searchFilters.parameters.sortField!=='NAME'" class="sortable fa fa-angle-down"></i>
                     <i ng-show="searchFilters.parameters.sortField=='NAME'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>
@@ -66,7 +66,7 @@
                     <img src="img/dna.svg" width="15px" alt="has dna"/>
                 </th>
                 <th ng-click="sortResults('created')" class="cursor_pointer" style="width: 120px">
-                    <span style="font-size: 11px; text-transform: uppercase">Created</span>
+                    <span style="font-size: 11px">CREATED</span>
                     <i ng-show="searchFilters.parameters.sortField==='CREATED'" style="font-size: 14px"
                        class="fa opacity_4"
                        ng-class="{'fa-angle-down':searchFilters.parameters.sortAscending==false, 'fa-angle-up':searchFilters.parameters.sortAscending==true}"></i>

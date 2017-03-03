@@ -10,6 +10,7 @@ import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
+import org.jbei.ice.lib.dto.web.PartnerEntries;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.executor.IceExecutorService;
@@ -53,7 +54,7 @@ public class RemoteEntries {
         return ("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
     }
 
-    public Results<PartData> getPublicEntries(long remoteId, int offset, int limit, String sort, boolean asc) {
+    public PartnerEntries getPublicEntries(long remoteId, int offset, int limit, String sort, boolean asc) {
         if (!hasRemoteAccessEnabled())
             return null;
 
@@ -80,10 +81,9 @@ public class RemoteEntries {
         Results<PartData> results = new Results<>();
         results.setData(details.getEntries());
         results.setResultCount(details.getCount());
-        return results;
+        return new PartnerEntries(partner.toDataTransferObject(), results);
     }
 
-    @SuppressWarnings("unchecked")
     public List<AttachmentInfo> getEntryAttachments(String userId, long remoteId, long entryId) {
         if (!hasRemoteAccessEnabled())
             return null;

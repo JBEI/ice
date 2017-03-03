@@ -10,6 +10,7 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -75,7 +76,7 @@ public class BulkZipUpload extends BulkCSVUpload {
                         processedBulkUpload.setUserMessage("Duplicate csv file in zip archive. It should only contain one.");
                         return processedBulkUpload;
                     }
-                    csvFile = IOUtils.toString(zipFile.getInputStream(zipEntry));
+                    csvFile = IOUtils.toString(zipFile.getInputStream(zipEntry), StandardCharsets.UTF_8);
                 } else {
                     InputStream inputStream = zipFile.getInputStream(zipEntry);
                     files.put(name, inputStream);

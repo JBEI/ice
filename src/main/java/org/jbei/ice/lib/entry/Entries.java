@@ -92,8 +92,11 @@ public class Entries extends HasEntry {
     }
 
     protected List<Long> getCollectionEntries(String collection, boolean all, EntryType type) {
-        List<Long> entries = null;
+        if (collection == null || collection.isEmpty())
+            return null;
+
         Account account = accountDAO.getByEmail(userId);
+        List<Long> entries = null;
 
         switch (collection.toLowerCase()) {
             case "personal":

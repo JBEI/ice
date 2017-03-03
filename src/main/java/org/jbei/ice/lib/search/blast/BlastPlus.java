@@ -34,6 +34,7 @@ import java.io.*;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
@@ -562,12 +563,12 @@ public class BlastPlus {
 
             process.waitFor();
             StringWriter writer = new StringWriter();
-            IOUtils.copy(blastOutputStream, writer);
+            IOUtils.copy(blastOutputStream, writer, StandardCharsets.UTF_8);
             blastOutputStream.close();
             String outputString = writer.toString();
             Logger.debug("format output was: " + outputString);
             writer = new StringWriter();
-            IOUtils.copy(blastErrorStream, writer);
+            IOUtils.copy(blastErrorStream, writer, StandardCharsets.UTF_8);
             String errorString = writer.toString();
             Logger.debug("format error was: " + errorString);
             process.destroy();
@@ -653,13 +654,13 @@ public class BlastPlus {
         FeatureDAO featureDAO = DAOFactory.getFeatureDAO();
         SequenceFeatureDAO sequenceFeatureDAO = DAOFactory.getSequenceFeatureDAO();
 
-        long count = featureDAO.getFeatureCount();
+        long count = featureDAO.getFeatureCount(null);
         if (count <= 0)
             return;
 
         int offset = 0;
         while (offset < count) {
-            List<Feature> features = featureDAO.getFeatures(offset++, 1);
+            List<Feature> features = featureDAO.getFeatures(offset++, 1, null);
             Feature feature = features.get(0);
             String featureName = feature.getName();
             if (featureName == null || featureName.trim().isEmpty())

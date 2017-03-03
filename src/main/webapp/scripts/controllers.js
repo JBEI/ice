@@ -4,7 +4,7 @@ var iceControllers = angular.module('iceApp.controllers', ['iceApp.services', 'u
     'angularMoment']);
 
 iceControllers.controller('ActionMenuController', function ($stateParams, $uibModal, $scope, $window, $rootScope,
-                                                            $location, $cookieStore, Selection, FolderSelection, Util) {
+                                                            $location, Selection, FolderSelection, Util, RemoteSelection) {
     $scope.editDisabled = $scope.addToDisabled = $scope.removeDisabled = $scope.moveToDisabled = $scope.deleteDisabled = true;
     $scope.entrySelected = false;
 
@@ -17,6 +17,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     });
 
     $scope.selectedFolders = [];
+    $scope.selectedRemote = RemoteSelection.getSelection();
 
     $scope.closeFeedbackAlert = function () {
         Util.clearFeedback();
@@ -170,7 +171,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     });
 
     $scope.canAddToFolder = function () {
-        return !$scope.addToDisabled && !this.isDealingWithDeleted();
+        return (!$scope.addToDisabled || $scope.selectedRemote.length) && !this.isDealingWithDeleted();
     };
 
     $scope.canEdit = function () {
@@ -178,7 +179,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     };
 
     $scope.canDelete = function () {
-        return Selection.canDelete();
+        return Selection.canEdit() && Selection.canDelete();
     };
 
 // Working in "deleted" collection or with deleted entry
@@ -431,10 +432,9 @@ iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $u
 });
 
 iceControllers.controller('AddToFolderController', function ($rootScope, $scope, $uibModalInstance, Util, FolderSelection,
-                                                             Selection, move, selectedFolder, $stateParams) {
+                                                             Selection, RemoteSelection, move, selectedFolder, $stateParams) {
 
     // get folders that I can edit
-
     $scope.getPersonalFolders = function () {
         Util.list("rest/folders", function (result) {
             $scope.userFolders = result;
@@ -444,10 +444,6 @@ iceControllers.controller('AddToFolderController', function ($rootScope, $scope,
     // init
     $scope.selectedFolders = [];
     $scope.newFolder = {creating: false};
-
-    $scope.closeModal = function (res) {
-        $uibModalInstance.close(res);
-    };
 
     // create entry selection object that provides context for user selection
     var getEntrySelection = function () {
@@ -470,6 +466,7 @@ iceControllers.controller('AddToFolderController', function ($rootScope, $scope,
             selectionType: selectionType,
             entryType: Selection.getSelection().type,
             entries: [],
+            remoteEntries: [],
             destination: angular.copy($scope.selectedFolders)
         };
 
@@ -477,6 +474,10 @@ iceControllers.controller('AddToFolderController', function ($rootScope, $scope,
         for (var i = 0; i < selectedEntriesObjectArray.length; i += 1) {
             entrySelection.entries.push(selectedEntriesObjectArray[i].id);
         }
+
+        for (var j = 0; j < RemoteSelection.getSelection().length; j += 1)
+            entrySelection.remoteEntries.push(RemoteSelection.getSelection()[j]);
+
         return entrySelection;
     };
 
@@ -539,7 +540,7 @@ iceControllers.controller('AddToFolderController', function ($rootScope, $scope,
                     $rootScope.$emit("RefreshAfterDeletion");
                     $scope.updateSelectedFolderCounts();
                     Selection.reset();
-                    $scope.closeModal(res);
+                    $uibModalInstance.close(res);
                 }
             });
         }

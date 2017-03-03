@@ -78,4 +78,37 @@ public class SequenceFeatureDAO extends HibernateRepository<SequenceFeature> {
             throw new DAOException(he);
         }
     }
+
+    public List<SequenceFeature> getSequenceFeatures(String userId, String nameFilter, int start, int limit) {
+        try {
+            CriteriaQuery<SequenceFeature> query = getBuilder().createQuery(SequenceFeature.class);
+            Root<SequenceFeature> from = query.from(SequenceFeature.class);
+            Join<SequenceFeature, Sequence> sequence = from.join("sequence");
+            Join<Sequence, Entry> entry = sequence.join("entry");
+
+            query.where(getBuilder().equal(entry.get("ownerEmail"), userId),
+                    getBuilder().like(getBuilder().lower(from.get("name")), "%" + nameFilter.toLowerCase() + "%"));
+            return currentSession().createQuery(query).setFirstResult(start).setMaxResults(limit).list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    public int getSequenceFeaturesCount(String userId, String nameFilter) {
+        try {
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<SequenceFeature> from = query.from(SequenceFeature.class);
+            Join<SequenceFeature, Sequence> sequence = from.join("sequence");
+            Join<Sequence, Entry> entry = sequence.join("entry");
+
+            query.select(getBuilder().countDistinct(from.get("id"))).where(
+                    getBuilder().equal(entry.get("ownerEmail"), userId),
+                    getBuilder().like(getBuilder().lower(from.get("name")), "%" + nameFilter.toLowerCase() + "%"));
+            return currentSession().createQuery(query).uniqueResult().intValue();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
 }

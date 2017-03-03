@@ -5,7 +5,7 @@ angular.module('ice.common.service', [])
         return {
             handleError: function (response) {
                 var type;
-                var errorMsg = response.data.errorMessage;
+                var errorMsg = response.data ? response.data.errorMessage : "Unknown error";
 
                 switch (response.status) {
                     case 401:
@@ -185,6 +185,12 @@ angular.module('ice.common.service', [])
                 });
 
                 return down.download(a);
+            },
+
+            constants: function () {
+                return {
+                    REMOTE_ENTRY_SELECTED: "EntrySelected"
+                }
             }
         }
     });

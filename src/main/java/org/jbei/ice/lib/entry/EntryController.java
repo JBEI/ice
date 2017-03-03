@@ -11,6 +11,7 @@ import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOException;
@@ -347,12 +348,26 @@ public class EntryController extends HasEntry {
             authorization.expectRead(userId, entry);
 
         PartData partData = retrieveEntryDetails(userId, entry);
-        partData.setCanEdit(authorization.canWriteThoroughCheck(userId, entry));
-        partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
+        if (partData.getVisibility() == Visibility.REMOTE)
+            partData.setCanEdit(false);
+        else {
+            partData.setCanEdit(authorization.canWriteThoroughCheck(userId, entry));
+            partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
+        }
         return partData;
     }
 
     protected PartData retrieveEntryDetails(String userId, Entry entry) throws PermissionException {
+        if (entry.getVisibility() == Visibility.REMOTE.getValue()) {
+            WebEntries webEntries = new WebEntries();
+            PartData partData = webEntries.getPart(entry.getRecordId());
+            partData.setVisibility(Visibility.REMOTE);
+            partData.setId(entry.getId()); // id returned from remote is different from the local id
+            partData.getParents().clear(); // need to map parents to local
+            // todo : sequence data
+            return partData;
+        }
+
         PartData partData = ModelToInfoFactory.getInfo(entry);
         if (partData == null)
             return null;

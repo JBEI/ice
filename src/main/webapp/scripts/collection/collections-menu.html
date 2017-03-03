@@ -24,8 +24,7 @@
                     <span ng-hide="showAddCollection">{{(collection.count | number) || 0}}</span>
                     <!--shown only for personal collection-->
                     <i ng-show="showAddCollection && collection.name==='personal'" ng-click="addCollectionIconClick()"
-                       uib-tooltip="Add"
-                       class="fa fa-fw fa-plus edit_icon" stop-event="click">
+                       uib-tooltip="Add" class="fa fa-fw fa-plus edit_icon" stop-event="click">
                     </i>
 
                     <i ng-show="showAddCollection" stop-event="click" class="opacity_hover fa fa-fw" ng-class="

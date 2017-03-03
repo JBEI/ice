@@ -47,6 +47,7 @@ public class Folders {
         accountGroups.add(everybodyGroup);
 
         List<Folder> folders = dao.getCanEditFolders(account, accountGroups);
+        folders.addAll(dao.getFoldersByOwner(account));
         ArrayList<FolderDetails> result = new ArrayList<>();
 
         for (Folder folder : folders) {
