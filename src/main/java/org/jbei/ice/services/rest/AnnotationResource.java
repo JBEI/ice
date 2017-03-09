@@ -39,7 +39,7 @@ public class AnnotationResource extends RestResource {
                                 @DefaultValue("15") @QueryParam("limit") final int limit,
                                 @DefaultValue("created") @QueryParam("sort") final String sort,
                                 @DefaultValue("false") @QueryParam("asc") final boolean asc,
-                                @DefaultValue("") @QueryParam("filter") String filter) {
+                                @QueryParam("filter") String filter) {
         String userId = requireUserId();
         Annotations annotations = new Annotations(userId);
         try {

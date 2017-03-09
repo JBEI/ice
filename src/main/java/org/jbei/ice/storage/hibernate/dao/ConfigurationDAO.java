@@ -9,7 +9,6 @@ import org.jbei.ice.storage.model.Configuration;
 
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import java.util.List;
 
 /**
  * Manage {@link Configuration} objects in the database.
@@ -43,20 +42,6 @@ public class ConfigurationDAO extends HibernateRepository<Configuration> {
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to get Configuration using key: " + key, e);
-        }
-    }
-
-    /**
-     * Retrieves all configuration objects that are stored
-     *
-     * @return all available configuration objects
-     */
-    public List<Configuration> getAll() {
-        try {
-            return currentSession().createQuery(getBuilder().createQuery(Configuration.class)).getResultList();
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
         }
     }
 }

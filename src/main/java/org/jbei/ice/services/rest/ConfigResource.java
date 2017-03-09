@@ -77,4 +77,14 @@ public class ConfigResource extends RestResource {
         final String url = getThisServer(false);
         return super.respond(controller.updateSetting(userId, setting, url));
     }
+
+    @PUT
+    @Path("/value")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateConfigValue(Setting setting) {
+        String userId = requireUserId();
+        log(userId, "auto updating setting " + setting.getKey());
+        return super.respond(controller.autoUpdateSetting(userId, setting));
+    }
 }

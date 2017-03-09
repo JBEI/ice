@@ -55,6 +55,10 @@ adminService.factory('AdminSettings', function () {
 
         getBooleanKeys: function () {
             return booleanKeys;
+        },
+
+        canAutoInstall: function (key) {
+            return key == 'BLAST_INSTALL_DIR'
         }
     }
 });

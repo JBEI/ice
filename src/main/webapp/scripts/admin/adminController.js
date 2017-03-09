@@ -39,10 +39,12 @@ angular.module('ice.admin.controller', [])
                 angular.forEach(result, function (setting) {
                     if (AdminSettings.generalSettingKeys().indexOf(setting.key) != -1) {
                         $scope.generalSettings.push({
+                            'originalKey': setting.key,
                             'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
                             'value': setting.value,
                             'editMode': false,
-                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) != -1
+                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) != -1,
+                            'canAutoInstall': AdminSettings.canAutoInstall(setting.key)
                         });
                     }
 
@@ -178,6 +180,20 @@ angular.module('ice.admin.controller', [])
                 booleanSetting.value = "no";
 
             $scope.submitSetting(booleanSetting);
+        };
+
+        // sends a message to the server to auto install a (general) setting's value
+        $scope.autoInstallSetting = function (setting) {
+            $scope.autoInstalling = setting.originalKey;
+            // put to /rest/config/value
+            Util.update("/rest/config/value", {key: setting.originalKey}, {}, function (result) {
+                console.log(result);
+                if (result.key == setting.originalKey)
+                    setting.value = result.value;
+                $scope.autoInstalling = undefined;
+            }, function (error) {
+                $scope.autoInstalling = undefined;
+            });
         }
     })
     .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, $uibModal, Util,
