@@ -121,6 +121,7 @@ public class ConfigurationController {
 
         String osName = System.getProperty("os.name").replaceAll("\\s+", "").toLowerCase();
         String blast = "ncbi-blast-2.6.0+-x64-" + osName + ".tar.gz";
+
         Path path = Paths.get(dao.get(ConfigurationKey.TEMPORARY_DIRECTORY).getValue(), blast);
         Path dest = Paths.get(dao.get(ConfigurationKey.DATA_DIRECTORY).getValue());
         if (!Files.exists(dest)) {
@@ -147,7 +148,8 @@ public class ConfigurationController {
             Archiver archiver = ArchiverFactory.createArchiver("tar", "gz");
             archiver.extract(path.toFile(), dest.toFile());
 
-            configuration.setValue(dest.toString() + File.separatorChar + "ncbi-blast-2.6.0+");
+            Path valuePath = Paths.get(dest.toString(), "ncbi-blast-2.6.0+", "bin");
+            configuration.setValue(valuePath.toString());
             return dao.update(configuration).toDataTransferObject();
         } catch (Exception e) {
             Logger.error(e);
