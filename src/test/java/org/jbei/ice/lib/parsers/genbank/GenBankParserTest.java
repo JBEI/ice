@@ -111,8 +111,11 @@ public class GenBankParserTest {
                     "ACCESSION   BBa_I0462\n" +
                     "FEATURES             Location/Qualifiers\n" +
                     "     RBS             1..12\n" +
+                    "                     /label=BBa_J61107_BBa_C0012\n" +
                     "     CDS             19..774\n" +
+                    "                     /label=BBa_J61107_BBa_C0012\n" +
                     "     terminator      808..936\n" +
+                    "                     /label=BBa_J61107_BBa_C0012\n" +
                     "ORIGIN\n" +
                     "        1 aaagaggaga aatactagat gaaaaacata aatgccgacg acacatacag aataattaat\n" +
                     "       61 aaaattaaag cttgtagaag caataatgat attaatcaat gcttatctga tatgactaaa\n" +
