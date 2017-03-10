@@ -1,8 +1,30 @@
 'use strict';
 
 angular.module('ice.admin.controller', [])
-    .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, $cookieStore,
-                                             AdminSettings, Util) {
+    .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, AdminSettings, Util, $interval) {
+        $scope.rebuildStatus = undefined;
+        var promise;
+
+        var getIndexStatus = function () {
+            console.log("getting status");
+
+            Util.get("rest/search/indexes/LUCENE/status", function (result) {
+                console.log(result); // done + total
+                if (result.total != result.done && result.done < result.total) {
+                    $scope.rebuildStatus = {type: 'LUCENE', done: result.done, total: result.total};
+                } else {
+                    console.log("cancelling");
+                    $interval.cancel(promise);
+                    $scope.rebuildStatus = {};
+                }
+
+            }, {}, function (error) {
+                $interval.cancel(promise);
+                $scope.rebuildStatus = {};
+            })
+        };
+
+        promise = $interval(getIndexStatus, 2000);
 
         // save email type settings
         $scope.selectEmailType = function (type) {
@@ -28,8 +50,6 @@ angular.module('ice.admin.controller', [])
 
         // retrieve general setting
         $scope.getSetting = function () {
-            var sessionId = $cookieStore.get("sessionId");
-
             $scope.generalSettings = [];
             $scope.emailSettings = [];
             $scope.emailConfig = {type: "", smtp: "", pass: "", edit: false, showEdit: false, showPass: false};
@@ -39,10 +59,12 @@ angular.module('ice.admin.controller', [])
                 angular.forEach(result, function (setting) {
                     if (AdminSettings.generalSettingKeys().indexOf(setting.key) != -1) {
                         $scope.generalSettings.push({
+                            'originalKey': setting.key,
                             'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
                             'value': setting.value,
                             'editMode': false,
-                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) != -1
+                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) != -1,
+                            'canAutoInstall': AdminSettings.canAutoInstall(setting.key)
                         });
                     }
 
@@ -75,45 +97,7 @@ angular.module('ice.admin.controller', [])
         };
 
         var menuOption = $stateParams.option;
-
-        var menuOptions = $scope.adminMenuOptions = [
-            {url: 'scripts/admin/settings.html', display: 'Settings', selected: true, icon: 'fa-cogs'},
-            {
-                id: 'web',
-                url: 'scripts/admin/wor.html',
-                display: 'Web of Registries',
-                selected: false,
-                icon: 'fa-globe',
-                description: 'Share/access entries with/on other ICE instances'
-            },
-            {id: 'users', url: 'scripts/admin/users.html', display: 'Users', selected: false, icon: 'fa-user'},
-            {
-                id: 'groups',
-                url: 'scripts/admin/groups.html',
-                display: 'Public Groups',
-                selected: false,
-                icon: 'fa-group'
-            },
-            {
-                id: 'samples', url: 'scripts/admin/sample-requests.html', display: 'Sample Requests', selected: false,
-                icon: 'fa-shopping-cart'
-            },
-            {
-                id: 'annotations-curation',
-                url: 'scripts/admin/curation.html',
-                display: 'Annotations Curation',
-                description: 'Curate existing annotations for automatic sequence annotation',
-                selected: false,
-                icon: 'fa-language'
-            },
-            {
-                id: 'manuscripts',
-                url: 'scripts/admin/manuscripts.html',
-                display: 'Editor Tools',
-                selected: false,
-                icon: 'fa-newspaper-o'
-            }
-        ];
+        var menuOptions = $scope.adminMenuOptions = AdminSettings.getMenuOptions();
 
         $scope.showSelection = function (index) {
             angular.forEach(menuOptions, function (details) {
@@ -153,11 +137,16 @@ angular.module('ice.admin.controller', [])
         }
 
         $scope.rebuildBlastIndex = function () {
+            $scope.rebuildStatus.type = "BLAST";
             Util.update("rest/search/indexes/blast");
         };
 
         $scope.rebuildLuceneIndex = function () {
-            Util.update("rest/search/indexes/lucene");
+            $scope.rebuildStatus.type = "LUCENE";
+            Util.update("rest/search/indexes/lucene", {}, {}, function () {
+                console.log("starting status check");
+                promise = $interval(getIndexStatus, 2000);
+            });
         };
 
         $scope.submitSetting = function (newSetting) {
@@ -178,6 +167,20 @@ angular.module('ice.admin.controller', [])
                 booleanSetting.value = "no";
 
             $scope.submitSetting(booleanSetting);
+        };
+
+        // sends a message to the server to auto install a (general) setting's value
+        $scope.autoInstallSetting = function (setting) {
+            $scope.autoInstalling = setting.originalKey;
+            // put to /rest/config/value
+            Util.update("/rest/config/value", {key: setting.originalKey}, {}, function (result) {
+                console.log(result);
+                if (result.key == setting.originalKey)
+                    setting.value = result.value;
+                $scope.autoInstalling = undefined;
+            }, function (error) {
+                $scope.autoInstalling = undefined;
+            });
         }
     })
     .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, $uibModal, Util,

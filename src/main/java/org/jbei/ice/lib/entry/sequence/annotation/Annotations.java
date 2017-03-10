@@ -10,6 +10,7 @@ import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.executor.IceExecutorService;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.storage.DAOFactory;
@@ -85,10 +86,12 @@ public class Annotations {
     }
 
     public Results<DNAFeature> filter(int offset, int limit, String filter) {
-        List<SequenceFeature> features = sequenceFeatureDAO.getSequenceFeatures(this.userId, filter, offset, limit);
+        Account account = accountDAO.getByEmail(userId);
+        List<Group> groups = new GroupController().getAllGroups(account);
+        List<SequenceFeature> features = sequenceFeatureDAO.getSequenceFeatures(this.userId, groups, filter,
+                offset, limit);
 
-        // todo : restrict by read permission (the call above restricts by owner
-        int count = sequenceFeatureDAO.getSequenceFeaturesCount(this.userId, filter);
+        int count = sequenceFeatureDAO.getSequenceFeaturesCount(this.userId, groups, filter);
         Results<DNAFeature> results = new Results<>();
         results.setResultCount(count);
 

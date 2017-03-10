@@ -7,12 +7,16 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.net.WoRController;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ConfigurationDAO;
 import org.jbei.ice.storage.model.Configuration;
+import org.rauschig.jarchivelib.Archiver;
+import org.rauschig.jarchivelib.ArchiverFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -102,6 +106,57 @@ public class ConfigurationController {
         return configuration.toDataTransferObject();
     }
 
+    // update the setting automatically. Currently works only for blast installations
+    public Setting autoUpdateSetting(String userId, Setting setting) {
+        AccountController accountController = new AccountController();
+        if (!accountController.isAdministrator(userId))
+            throw new PermissionException("Cannot auto update system setting without admin privileges");
+
+        Configuration configuration = dao.get(setting.getKey());
+        if (configuration == null) {
+            Logger.error("Could not retrieve setting " + setting.getKey());
+            return null;
+        }
+
+        String osName = System.getProperty("os.name").replaceAll("\\s+", "").toLowerCase();
+        String blast = "ncbi-blast-2.6.0+-x64-" + osName + ".tar.gz";
+
+        Path path = Paths.get(dao.get(ConfigurationKey.TEMPORARY_DIRECTORY).getValue(), blast);
+        Path dest = Paths.get(dao.get(ConfigurationKey.DATA_DIRECTORY).getValue());
+        if (!Files.exists(dest)) {
+            Logger.error("Cannot access access dir : " + dest.toString());
+            return null;
+        }
+
+        try {
+            URL url = new URL("ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.6.0/" + blast);
+            try (InputStream is = url.openStream();
+                 ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+
+                if (Files.exists(path))
+                    Files.delete(path);
+
+                byte[] buf = new byte[4096];
+                int n;
+
+                while ((n = is.read(buf)) >= 0) {
+                    os.write(buf, 0, n);
+                }
+                Files.write(path, os.toByteArray());
+            }
+
+            Archiver archiver = ArchiverFactory.createArchiver("tar", "gz");
+            archiver.extract(path.toFile(), dest.toFile());
+
+            Path valuePath = Paths.get(dest.toString(), "ncbi-blast-2.6.0+", "bin");
+            configuration.setValue(valuePath.toString());
+            return dao.update(configuration).toDataTransferObject();
+        } catch (Exception e) {
+            Logger.error(e);
+            return null;
+        }
+    }
+
     /**
      * Initializes the database on new install
      */
@@ -118,7 +173,7 @@ public class ConfigurationController {
 
     public SiteSettings getSiteSettings() {
         SiteSettings settings = new SiteSettings();
-        String dataDirectory = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        String dataDirectory = dao.get(ConfigurationKey.DATA_DIRECTORY).getValue();
         final String LOGO_NAME = "logo.png";
         final String LOGIN_MESSAGE_FILENAME = "institution.html";
         final String FOOTER_FILENAME = "footer.html";
@@ -134,7 +189,7 @@ public class ConfigurationController {
     public File getUIAsset(String assetName) {
         if (StringUtils.isEmpty(assetName))
             throw new IllegalArgumentException("Cannot retrieve asset with no name");
-        String dataDirectory = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        String dataDirectory = dao.get(ConfigurationKey.DATA_DIRECTORY).getValue();
         Path path = Paths.get(dataDirectory, UI_CONFIG_DIR, assetName);
         if (Files.exists(path)) {
             return path.toFile();

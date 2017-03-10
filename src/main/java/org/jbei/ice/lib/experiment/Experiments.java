@@ -44,8 +44,7 @@ public class Experiments extends HasEntry {
      * Retrieves experiment data associated with a specific entry
      *
      * @return list of experiment studies associated with the specified entry, or null if the entry does not exist
-     * @throws PermissionException if the specified user does not have read privileges on the
-     *                             specified entry
+     * @throws PermissionException if the specified user does not have read privileges on the specified entry
      */
     public ArrayList<Study> getPartStudies() {
         entryAuthorization.expectRead(userId, entry);
