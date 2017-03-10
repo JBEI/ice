@@ -7,7 +7,6 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.net.WoRController;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ConfigurationDAO;
 import org.jbei.ice.storage.model.Configuration;
@@ -130,12 +129,13 @@ public class ConfigurationController {
         }
 
         try {
-            URL url = new URL("ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/" + blast);
+            URL url = new URL("ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.6.0/" + blast);
             try (InputStream is = url.openStream();
                  ByteArrayOutputStream os = new ByteArrayOutputStream()) {
 
                 if (Files.exists(path))
                     Files.delete(path);
+
                 byte[] buf = new byte[4096];
                 int n;
 
@@ -173,7 +173,7 @@ public class ConfigurationController {
 
     public SiteSettings getSiteSettings() {
         SiteSettings settings = new SiteSettings();
-        String dataDirectory = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        String dataDirectory = dao.get(ConfigurationKey.DATA_DIRECTORY).getValue();
         final String LOGO_NAME = "logo.png";
         final String LOGIN_MESSAGE_FILENAME = "institution.html";
         final String FOOTER_FILENAME = "footer.html";
@@ -189,7 +189,7 @@ public class ConfigurationController {
     public File getUIAsset(String assetName) {
         if (StringUtils.isEmpty(assetName))
             throw new IllegalArgumentException("Cannot retrieve asset with no name");
-        String dataDirectory = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        String dataDirectory = dao.get(ConfigurationKey.DATA_DIRECTORY).getValue();
         Path path = Paths.get(dataDirectory, UI_CONFIG_DIR, assetName);
         if (Files.exists(path)) {
             return path.toFile();
