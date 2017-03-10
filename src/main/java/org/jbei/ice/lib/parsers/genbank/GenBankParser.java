@@ -245,13 +245,15 @@ public class GenBankParser extends AbstractParser {
         StringBuilder qualifierBlock = new StringBuilder();
         DNAFeature dnaFeature = null;
 
+        boolean isQualifierMultiline = false;
         for (int i = 1; i < lines.length; i += 1) {
             String line = lines[i].trim();
-            boolean isQualifier = (line.startsWith("/") && line.contains("="));
+            boolean isQualifier = ((line.startsWith("/") && line.contains("="))) || isQualifierMultiline;
             if (isQualifier) {
                 if (!qualifierBlock.toString().isEmpty() && !qualifierBlock.toString().endsWith("\n"))  // and is not an empty string
                     qualifierBlock.append("\n");
                 qualifierBlock.append(line);
+                isQualifierMultiline = !line.endsWith("\"");
 //                .append("\n");
                 continue;
             }
