@@ -1,6 +1,19 @@
 <div class="pad_top">
-    <button type="button" ng-click="rebuildLuceneIndex()" class="ice-button">
-        Rebuild Indexes
+    <button type="button" ng-click="rebuildLuceneIndex()" class="ice-button"
+            ng-disabled="rebuildStatus.type == 'LUCENE'">
+        <span ng-if="rebuildStatus.type == 'LUCENE'">
+        <i class="fa fa-spinner fa-pulse fa-1x fa-fw"></i> Rebuilding lucene indexes...
+        <uib-progressbar value="rebuildStatus.done" style="height: 2px; margin-bottom: 0" max="rebuildStatus.total"
+                         type="info"></uib-progressbar>
+        </span>
+
+        <span ng-if="rebuildStatus && !rebuildStatus.type">
+            Rebuild Indexes
+        </span>
+
+        <span ng-if="!rebuildStatus" class="flash">
+           Checking index status...
+        </span>
     </button>
     &nbsp;
     <button type="button" ng-click="rebuildBlastIndex()" class="ice-button">

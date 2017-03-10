@@ -3,6 +3,7 @@ package org.jbei.ice.lib.search;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.search.FullTextSession;
+import org.hibernate.search.MassIndexer;
 import org.hibernate.search.Search;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.executor.Task;
@@ -21,8 +22,10 @@ public class RebuildLuceneIndexTask extends Task {
         try {
             Session session = HibernateUtil.newSession();
             FullTextSession fullTextSession = Search.getFullTextSession(session);
-            fullTextSession.createIndexer().idFetchSize(20);
-            fullTextSession.createIndexer().startAndWait();
+            MassIndexer indexer = fullTextSession.createIndexer();
+            indexer.idFetchSize(20);
+            indexer.progressMonitor(IndexerProgressMonitor.getInstance());
+            indexer.startAndWait();
         } catch (HibernateException he) {
             Logger.error(he);
         } catch (InterruptedException e) {
