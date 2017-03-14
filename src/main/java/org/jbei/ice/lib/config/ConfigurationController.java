@@ -13,13 +13,15 @@ import org.jbei.ice.storage.model.Configuration;
 import org.rauschig.jarchivelib.Archiver;
 import org.rauschig.jarchivelib.ArchiverFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 
 /**
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 public class ConfigurationController {
 
     public static final String UI_CONFIG_DIR = "asset";
+    public static final String BLAST_FTP_DIR = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.6.0/";
 
     private final ConfigurationDAO dao;
 
@@ -128,28 +131,22 @@ public class ConfigurationController {
             return null;
         }
 
-        try {
-            URL url = new URL("ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.6.0/" + blast);
-            try (InputStream is = url.openStream();
-                 ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-
-                if (Files.exists(path))
-                    Files.delete(path);
-
-                byte[] buf = new byte[4096];
-                int n;
-
-                while ((n = is.read(buf)) >= 0) {
-                    os.write(buf, 0, n);
-                }
-                Files.write(path, os.toByteArray());
-            }
+        try (InputStream is = (new URL(BLAST_FTP_DIR + blast)).openStream()) {
+            Files.copy(is, path.toAbsolutePath(), StandardCopyOption.REPLACE_EXISTING);
 
             Archiver archiver = ArchiverFactory.createArchiver("tar", "gz");
             archiver.extract(path.toFile(), dest.toFile());
 
             Path valuePath = Paths.get(dest.toString(), "ncbi-blast-2.6.0+", "bin");
             configuration.setValue(valuePath.toString());
+            Files.list(valuePath).forEach(dirPath -> {
+                try {
+                    Files.setPosixFilePermissions(dirPath, PosixFilePermissions.fromString("rwxrwxrwx"));
+                } catch (IOException e) {
+                    Logger.error(e);
+                }
+            });
+
             return dao.update(configuration).toDataTransferObject();
         } catch (Exception e) {
             Logger.error(e);
