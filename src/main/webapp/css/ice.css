@@ -593,6 +593,15 @@ a:hover {
     cursor: pointer;
 }
 
+.ice-button:disabled,
+.ice-button[disabled] {
+    border: 1px solid #ccc;
+    background: #eee;
+    color: #777;
+    box-shadow: 0 0 1px 1px #efefef;
+    cursor: default;
+}
+
 .pager_nav {
     font-weight: bold;
     font-size: 11px;
