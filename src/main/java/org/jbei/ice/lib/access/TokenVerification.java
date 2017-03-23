@@ -27,7 +27,7 @@ public class TokenVerification {
     public String verifyAPIKey(String token, String clientId, String userId) {
         // hash = (token, client + salt + client)
 
-        Optional<ApiKey> optionalKey = DAOFactory.getApiKeyDAO().getByClientId(clientId);
+        Optional<ApiKey> optionalKey = DAOFactory.getApiKeyDAO().getByClientId(userId, clientId);
         if (!optionalKey.isPresent())
             throw new PermissionException("Invalid client Id " + clientId);
 

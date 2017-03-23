@@ -27,6 +27,7 @@ public class RestResource {
     protected final String WOR_PARTNER_TOKEN = Headers.WOR_PARTNER_TOKEN;
     protected final String API_KEY_TOKEN = Headers.API_KEY_TOKEN;               // token for validation
     protected final String API_KEY_USER = Headers.API_KEY_USER;           // optional user. system checks and uses assigned token user if not specified
+    protected final String API_KEY_OWNER = Headers.API_KEY_OWNER;
     protected final String API_KEY_CLIENT_ID = Headers.API_KEY_CLIENT_ID;    // client id
     protected final String REMOTE_USER_TOKEN = Headers.REMOTE_USER_TOKEN;   // token for remote user
     protected final String REMOTE_USER_ID = Headers.REMOTE_USER_ID;         // id for remote user
@@ -39,6 +40,9 @@ public class RestResource {
 
     @HeaderParam(value = API_KEY_USER)
     protected String apiUser;
+
+    @HeaderParam(value = API_KEY_OWNER)
+    protected String apiKeyOwner;
 
     @HeaderParam(value = API_KEY_TOKEN)
     protected String apiToken;
@@ -118,7 +122,9 @@ public class RestResource {
 
             try {
                 TokenVerification tokenVerification = new TokenVerification();
-                userId = tokenVerification.verifyAPIKey(apiToken, clientId, apiUser);
+                if (apiKeyOwner == null && apiUser != null)
+                    apiKeyOwner = apiUser;
+                userId = tokenVerification.verifyAPIKey(apiToken, clientId, apiKeyOwner);
             } catch (PermissionException pe) {
                 throw new WebApplicationException(Response.Status.UNAUTHORIZED);
             }

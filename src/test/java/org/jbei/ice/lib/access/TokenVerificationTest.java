@@ -45,10 +45,16 @@ public class TokenVerificationTest {
         String verified = verification.verifyAPIKey(key.getToken(), key.getClientId(), userId);
         Assert.assertEquals(verified, userId);
 
-        // verify for another user
+        // verify for another user (cannot use someone else's token)
         Account account1 = AccountCreator.createTestAccount("testVerifyAPIKey2", false);
         String userId1 = account1.getEmail();
-        Assert.assertEquals(userId1, verification.verifyAPIKey(key.getToken(), key.getClientId(), userId1));
+        boolean isValid = true;
+        try {
+            verification.verifyAPIKey(key.getToken(), key.getClientId(), userId1);
+        } catch (PermissionException e) {
+            isValid = false;
+        }
+        Assert.assertFalse(isValid);
     }
 
     @Test

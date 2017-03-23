@@ -9,19 +9,30 @@
         <i style="font-size:60px; float: left;padding-right:10px; color: #3a87ad" class="fa fa-info-circle"></i>
         <span class="font-90em">
             Enter a <b>client identifier</b> to request an API key. API keys enable third party application access to
-            this ICE instance. For web applications,
-            it is recommended that a unique domain name be used. <b>e.g. app.example.com</b>
+            this ICE instance. The use of a unique domain name is recommended. <b>e.g. app.example.com</b>. Duplicate
+            domain names are not permitted.
         </span>
     </div>
 
+    <div class="alert alert-danger" style="padding: 8px" ng-if="errorCreatingKey">
+        <i style="font-size:23px; float: left; padding-right:10px" class="fa fa-exclamation-triangle red"></i>
+        <span class="font-90em">
+           Error creating API key. Potential cause is a duplicate client id.
+        </span>
+    </div>
+
+    <br>
     <form>
         <div class="form-group">
             <label>Client ID</label> &nbsp; <input type="text"
                                                    ng-class="{'input_box':!clientIdValidationError, 'input_box_error':clientIdValidationError}"
-                                                   style="width: 423px" ng-model="client.id">
+                                                   style="width: 423px; padding: 5px" ng-model="client.id">
             <button type="button" class="btn btn-sm btn-primary" ng-click="generateToken()">Generate</button>
         </div>
     </form>
+
+    <br>
+
 </div>
 
 <div class="modal-body" ng-if="apiKey">
@@ -37,14 +48,17 @@
     <br>
 
     <dl class="dl-horizontal">
-        <dt>Client ID</dt>
+        <dt>X-ICE-API-Token-Client</dt>
         <dd>{{apiKey.clientId}}</dd>
 
-        <dt>Token</dt>
+        <dt>X-ICE-API-Token</dt>
         <dd>{{apiKey.token}}</dd>
+
+        <dt>X-ICE-API-Token-Owner</dt>
+        <dd>{{apiKey.account.email}}</dd>
     </dl>
 </div>
 
-<div class="modal-footer">
-    <button class="btn btn-default btn-sm" ng-click="cancel()">Close</button>
+<div class="modal-footer" ng-if="apiKey">
+    <button class="btn btn-primary btn-sm" ng-click="cancel()">OK</button>
 </div>
