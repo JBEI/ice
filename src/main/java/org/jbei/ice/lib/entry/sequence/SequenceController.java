@@ -450,7 +450,7 @@ public class SequenceController extends HasEntry {
                     break;
 
                 case "fasta":
-                    FastaFormatter formatter = new FastaFormatter(sequence.getEntry().getName());
+                    FastaFormatter formatter = new FastaFormatter();
                     sequenceString = compose(sequence, formatter);
                     name = entry.getPartNumber() + ".fasta";
                     break;
