@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.parsers.genbank;
 
+import org.jbei.ice.lib.dto.DNAFeatureNote;
 import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.junit.Assert;
@@ -42,6 +43,14 @@ public class GenBankParserTest {
         Assert.assertEquals(8, featuresTag.getFeatures().get(0).getNotes().size());
         Assert.assertEquals(1, featuresTag.getFeatures().get(1).getNotes().size());
         Assert.assertEquals(7, featuresTag.getFeatures().get(2).getNotes().size());
+
+        DNAFeatureNote note = featuresTag.getFeatures().get(2).getNotes().get(6);
+        Assert.assertEquals("translation", note.getName());
+        Assert.assertEquals("GVARKPGMDRSDLFNVNAGIVKNLVQQVAKTCPKACIGIITNPVNTTVAIAAEVLKKAGVYDKNKLFGVTTLDIIRSNTFVAELKGKQPGEVEVPVIGGHSGVTILPLLSQVPGVSFTEQEVADLTKRIQNAGTEVVEAKAGGGSATLSMG", note.getValue());
+
+        note = featuresTag.getFeatures().get(2).getNotes().get(1);
+        Assert.assertEquals("codon_start", note.getName());
+        Assert.assertEquals("1", note.getValue());
 
         // parse features 3
         tag.setRawBody(features3);
@@ -113,7 +122,8 @@ public class GenBankParserTest {
                     "     RBS             1..12\n" +
                     "                     /label=BBa_J61130\n" +
                     "     CDS             19..774\n" +
-                    "                     /label=BBa_J61107_BBa_C0012\n" +
+                    "                     /label=\"BBa_J61107_BBa_C0012\"\n" +
+                    "                     /codon_start=1  \n" +
                     "     terminator      808..936\n" +
                     "ORIGIN\n" +
                     "        1 aaagaggaga aatactagat gaaaaacata aatgccgacg acacatacag aataattaat\n" +
