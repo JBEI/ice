@@ -2,29 +2,36 @@
 
 angular.module('ice.admin.controller', [])
     .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, AdminSettings, Util, $interval) {
-        $scope.rebuildStatus = undefined;
-        var promise;
+        $scope.luceneRebuild = undefined;
+        $scope.blastRebuild = undefined;
+        var lucenePromise;
+        var blastPromise;
 
-        var getIndexStatus = function () {
-            console.log("getting status");
-
+        var getLuceneIndexStatus = function () {
+            console.log("checking lucene");
             Util.get("rest/search/indexes/LUCENE/status", function (result) {
-                console.log(result); // done + total
-                if (result.total != result.done && result.done < result.total) {
-                    $scope.rebuildStatus = {type: 'LUCENE', done: result.done, total: result.total};
-                } else {
-                    console.log("cancelling");
-                    $interval.cancel(promise);
-                    $scope.rebuildStatus = {};
-                }
-
+                if (result.total == 0)
+                    $interval.cancel(lucenePromise);
+                $scope.luceneRebuild = {done: result.done, total: result.total};
             }, {}, function (error) {
-                $interval.cancel(promise);
-                $scope.rebuildStatus = {};
+                $interval.cancel(lucenePromise);
+                $scope.luceneRebuild = undefined;
             })
         };
+        lucenePromise = $interval(getLuceneIndexStatus, 2000);
 
-        promise = $interval(getIndexStatus, 2000);
+        var getBlastStatus = function () {
+            console.log("checking blast");
+            Util.get("rest/search/indexes/BLAST/status", function (result) {
+                if (!result.total)
+                    $interval.cancel(blastPromise);
+                $scope.blastRebuild = {done: result.done, total: result.total};
+            }, {}, function (error) {
+                $interval.cancel(blastPromise);
+                $scope.blastRebuild = undefined;
+            })
+        };
+        blastPromise = $interval(getBlastStatus, 2000);
 
         // save email type settings
         $scope.selectEmailType = function (type) {
@@ -137,15 +144,14 @@ angular.module('ice.admin.controller', [])
         }
 
         $scope.rebuildBlastIndex = function () {
-            $scope.rebuildStatus.type = "BLAST";
-            Util.update("rest/search/indexes/blast");
+            Util.update("rest/search/indexes/blast", {}, {}, function () {
+                blastPromise = $interval(getBlastStatus, 2000);
+            });
         };
 
         $scope.rebuildLuceneIndex = function () {
-            $scope.rebuildStatus.type = "LUCENE";
             Util.update("rest/search/indexes/lucene", {}, {}, function () {
-                console.log("starting status check");
-                promise = $interval(getIndexStatus, 2000);
+                lucenePromise = $interval(getLuceneIndexStatus, 2000);
             });
         };
 

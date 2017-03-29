@@ -31,13 +31,12 @@ public class FastaParser extends AbstractParser {
 
             if (richSequences.hasNext()) {
                 RichSequence richSequence = richSequences.nextRichSequence();
-
                 sequence = new FeaturedDNASequence(richSequence.seqString(), new LinkedList<>());
             } else {
                 throw new InvalidFormatParserException("No sequence found in sequence file!");
             }
         } catch (BioException e) {
-            throw new InvalidFormatParserException("Couln't parse FASTA sequence!", e);
+            throw new InvalidFormatParserException("Couldn't parse FASTA sequence!", e);
         }
 
         return sequence;

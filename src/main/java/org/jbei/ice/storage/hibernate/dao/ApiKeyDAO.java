@@ -63,11 +63,22 @@ public class ApiKeyDAO extends HibernateRepository<ApiKey> {
         }
     }
 
-    public Optional<ApiKey> getByClientId(String clientId) {
+    /**
+     * Retrieves an api key by client id.
+     * If one exists it is expected that the client id + the creator id uniquely retrieves it. In other words,
+     * the same user cannot have two api keys for the same client
+     *
+     * @param creatorId unique identifier for the user who requested creation of the key
+     * @param clientId  client identifier for api key
+     * @return container that may or may not contain the found key
+     * @throws DAOException if more that one api key is found or there is a problem accessing the database
+     */
+    public Optional<ApiKey> getByClientId(String creatorId, String clientId) {
         try {
             CriteriaQuery<ApiKey> query = getBuilder().createQuery(ApiKey.class);
             Root<ApiKey> from = query.from(ApiKey.class);
-            query.where(getBuilder().equal(from.get("clientId"), clientId));
+            query.where(getBuilder().equal(from.get("clientId"),
+                    clientId), getBuilder().equal(from.get("ownerEmail"), creatorId));
             return currentSession().createQuery(query).uniqueResultOptional();
         } catch (HibernateException he) {
             Logger.error(he);

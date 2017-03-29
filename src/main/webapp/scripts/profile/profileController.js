@@ -118,6 +118,9 @@ angular.module('ice.profile.controller', [])
         };
 
         $scope.generateToken = function () {
+            $scope.errorCreatingKey = undefined;
+            $scope.clientIdValidationError = undefined;
+
             if (!$scope.client.id) {
                 $scope.clientIdValidationError = true;
                 return;
@@ -126,7 +129,10 @@ angular.module('ice.profile.controller', [])
             var queryParams = {client_id: $scope.client.id};
             Util.post("rest/api-keys", null, function (result) {
                 $scope.apiKey = result;
-            }, queryParams);
+            }, queryParams, function (error) {
+                console.error(error);
+                $scope.errorCreatingKey = true;
+            });
         }
     })
     .controller('ProfileEntryController', function ($scope, $location, $cookieStore, $stateParams, Util) {

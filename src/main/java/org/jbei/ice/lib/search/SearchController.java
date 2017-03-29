@@ -107,7 +107,7 @@ public class SearchController {
                 return IndexerProgressMonitor.getInstance().getStatus();
 
             case BLAST:
-                return null;
+                return BlastPlus.getStatus();
         }
     }
 

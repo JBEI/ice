@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.parsers.genbank;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
@@ -14,7 +15,7 @@ import java.util.regex.Pattern;
 /**
  * Genbank parser and generator. The Genbank file format is defined in gbrel.txt located at
  * ftp://ftp.ncbi.nlm.nih.gov/genbank/gbrel.txt
- * <p>
+ * <p/>
  * This parser also handles some incorrectly formatted and obsolete genbank files.
  *
  * @author Timothy Ham
@@ -227,6 +228,22 @@ public class GenBankParser extends AbstractParser {
         return result;
     }
 
+    private boolean isMultiLineQualifer(String line) {
+        if (StringUtils.isEmpty(line) || !line.contains("="))
+            return false;
+
+        try {
+            String split = line.split("=")[1];
+            if (split.endsWith("\""))
+                return false;
+
+            Long.decode(split);
+            return false;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     protected FeaturesTag parseFeaturesTag(final Tag tag) throws InvalidFormatParserException {
         final FeaturesTag result = new FeaturesTag();
         result.setKey(tag.getKey());
@@ -245,14 +262,16 @@ public class GenBankParser extends AbstractParser {
         StringBuilder qualifierBlock = new StringBuilder();
         DNAFeature dnaFeature = null;
 
+        boolean isQualifierMultiline = false;
+
         for (int i = 1; i < lines.length; i += 1) {
             String line = lines[i].trim();
-            boolean isQualifier = (line.startsWith("/") && line.contains("="));
+            boolean isQualifier = ((line.startsWith("/") && line.contains("="))) || isQualifierMultiline;
             if (isQualifier) {
-                if (!qualifierBlock.toString().isEmpty() && !qualifierBlock.toString().endsWith("\n"))  // and is not an empty string
+                if (!qualifierBlock.toString().isEmpty() && !qualifierBlock.toString().endsWith("\n"))
                     qualifierBlock.append("\n");
                 qualifierBlock.append(line);
-//                .append("\n");
+                isQualifierMultiline = isMultiLineQualifer(line);
                 continue;
             }
 
@@ -348,20 +367,19 @@ public class GenBankParser extends AbstractParser {
         return result;
     }
 
+    /**
+     * Qualifiers are interesting beasts. The values can be quoted or not quoted. They can span
+     * multiple lines. Older versions used backslash to indicate space ("\\" -> " "). Oh, and it
+     * uses two quotes in a row to ("") to indicate a literal quote (e.g. "\""). And since each
+     * genbank feature does not have a specified "label" field, the label can be anything. Some
+     * software uses "label", another uses "notes", and some of the examples in gbrel.txt uses
+     * "gene". But really, it could be anything. Qualifier "translation" must be handled
+     * differently from other multi-line fields, as they are expected to be concatenated without
+     * spaces.
+     * <p/>
+     * This parser tries to normalize to "label", and preserve quotedness.
+     */
     private DNAFeature parseQualifiers(final String block, DNAFeature dnaFeature) {
-        /*
-         * Qualifiers are interesting beasts. The values can be quoted or not quoted. They can span
-         * multiple lines. Older versions used backslash to indicate space ("\\" -> " "). Oh, and it
-         * uses two quotes in a row to ("") to indicate a literal quote (e.g. "\""). And since each
-         * genbank feature does not have a specified "label" field, the label can be anything. Some
-         * software uses "label", another uses "notes", and some of the examples in gbrel.txt uses
-         * "gene". But really, it could be anything. Qualifer "translation" must be handled
-         * differently from other multi-line fields, as they are expected to be concatenated without
-         * spaces.
-         * 
-         * This parser tries to normalize to "label", and preserve quotedness.
-         */
-
         final ArrayList<DNAFeatureNote> notes = new ArrayList<>();
         if ("".equals(block)) {
             return dnaFeature;

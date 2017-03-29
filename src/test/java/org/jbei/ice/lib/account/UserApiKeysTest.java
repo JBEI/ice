@@ -34,7 +34,7 @@ public class UserApiKeysTest {
         Assert.assertNotNull(accessKey);
         Assert.assertNotNull(accessKey.getToken());
 
-        AccessKey accessKey2 = apiKeys.requestKey("app.test");
+        AccessKey accessKey2 = apiKeys.requestKey("app.test2");
         Assert.assertNotNull(accessKey2);
         Assert.assertNotNull(accessKey2.getToken());
         Assert.assertNotEquals(accessKey.getToken(), accessKey2.getToken());
@@ -50,7 +50,7 @@ public class UserApiKeysTest {
         Assert.assertNotNull(accessKey);
         Assert.assertNotNull(accessKey.getToken());
 
-        AccessKey accessKey2 = apiKeys.requestKey("app.test");
+        AccessKey accessKey2 = apiKeys.requestKey("app.test2");
         Assert.assertNotNull(accessKey2);
         Assert.assertNotNull(accessKey2.getToken());
 

@@ -1,23 +1,29 @@
 <div class="pad_top">
-    <button type="button" ng-click="rebuildLuceneIndex()" class="ice-button"
-            ng-disabled="rebuildStatus.type == 'LUCENE'">
-        <span ng-if="rebuildStatus.type == 'LUCENE'">
-        <i class="fa fa-spinner fa-pulse fa-1x fa-fw"></i> Rebuilding lucene indexes...
-        <uib-progressbar value="rebuildStatus.done" style="height: 2px; margin-bottom: 0" max="rebuildStatus.total"
-                         type="info"></uib-progressbar>
+    <button type="button" ng-click="rebuildLuceneIndex()" class="ice-button" ng-disabled="luceneRebuild.total">
+        <span ng-if="luceneRebuild && luceneRebuild.total">
+            <i class="fa fa-spinner fa-pulse fa-1x fa-fw"></i> Rebuilding lucene indexes...
+            <uib-progressbar value="luceneRebuild.done" style="height: 2px; margin-bottom: 0" max="luceneRebuild.total"
+                             type="info"></uib-progressbar>
         </span>
 
-        <span ng-if="rebuildStatus && !rebuildStatus.type">
+        <span ng-if="!luceneRebuild.total">
             Rebuild Indexes
-        </span>
-
-        <span ng-if="!rebuildStatus" class="flash">
-           Checking index status...
         </span>
     </button>
     &nbsp;
-    <button type="button" ng-click="rebuildBlastIndex()" class="ice-button">
-        Rebuild Blast
+    <button type="button" ng-click="rebuildBlastIndex()" class="ice-button"
+            ng-disabled="blastRebuild.total || !blastRebuild">
+        <span ng-if="blastRebuild.total">
+            <i class="fa fa-spinner fa-pulse fa-1x fa-fw"></i> Rebuilding blast...
+        </span>
+
+        <span ng-if="blastRebuild && !blastRebuild.total">
+            Rebuild Blast
+        </span>
+
+        <span ng-if="!blastRebuild">
+            <i class="fa fa-spinner fa-pulse fa-1x fa-fw"></i> Checking status...
+        </span>
     </button>
 </div>
 
@@ -49,7 +55,8 @@
                                    ng-click="autoInstallSetting(setting)" uib-tooltip="Auto install"></i>
 
                                 <span ng-if="autoInstalling==setting.originalKey">
-                                    <i class="flash">Auto installing...</i> <img src="img/loader-mini.gif"/>
+                                    <i class="flash">Please wait. This may take a few minutes...</i> <img
+                                        src="img/loader-mini.gif"/>
                                 </span>
                             </span>
                         </i>
