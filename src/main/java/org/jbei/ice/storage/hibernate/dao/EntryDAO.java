@@ -409,26 +409,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     /**
-     * @return number of entries that have visibility of "OK"
-     * @throws DAOException
-     */
-
-    public long getAllEntryCount(String filter) {
-        try {
-            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
-            Root<Entry> from = query.from(Entry.class);
-            query.select(getBuilder().countDistinct(from.get("id")));
-            ArrayList<Predicate> predicates = new ArrayList<>();
-            checkAddFilter(predicates, from, filter);
-            query.where(predicates.toArray(new Predicate[predicates.size()]));
-            return currentSession().createQuery(query).uniqueResult();
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
-    }
-
-    /**
      * Retrieve {@link Entry} objects of the given list of ids.
      *
      * @param ids list of ids to retrieve
@@ -674,6 +654,28 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
+    /**
+     * @return number of entries that have visibility of "OK"
+     */
+    public long getAllEntryCount(String filter) {
+        try {
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<Entry> from = query.from(Entry.class);
+            query.select(getBuilder().countDistinct(from.get("id")));
+            ArrayList<Predicate> predicates = new ArrayList<>();
+            checkAddFilter(predicates, from, filter);
+            predicates.add(getBuilder().or(
+                    getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()),
+                    getBuilder().equal(from.get("visibility"), Visibility.PENDING.getValue())
+            ));
+            query.where(predicates.toArray(new Predicate[predicates.size()]));
+            return currentSession().createQuery(query).uniqueResult();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
     public List<Entry> retrieveAllEntries(ColumnField sort, boolean asc, int start, int limit, String filter) {
         if (sort == null)
             sort = ColumnField.CREATED;
@@ -684,7 +686,10 @@ public class EntryDAO extends HibernateRepository<Entry> {
             ArrayList<Predicate> predicates = new ArrayList<>();
             String fieldName = columnFieldToString(sort);
             checkAddFilter(predicates, from, filter);
-            predicates.add(getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()));
+            predicates.add(getBuilder().or(
+                    getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()),
+                    getBuilder().equal(from.get("visibility"), Visibility.PENDING.getValue())
+            ));
             query.where(predicates.toArray(new Predicate[predicates.size()]));
             query.orderBy(asc ? getBuilder().asc(from.get(fieldName)) : getBuilder().desc(from.get(fieldName)));
             return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
