@@ -1018,7 +1018,6 @@ angular.module('ice.upload.controller', [])
 
         $scope.importUploader.onCompleteItem = function (item, response, status, headers) {
             $scope.processing = false;
-            item.remove();
         };
 
         $scope.ok = function () {
