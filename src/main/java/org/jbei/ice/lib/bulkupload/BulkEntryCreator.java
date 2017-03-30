@@ -29,7 +29,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Creates entries for bulk uploads
@@ -231,7 +234,7 @@ public class BulkEntryCreator {
 
             // rejected by admin
             case IN_PROGRESS:
-                ArrayList<Long> entryList = dao.getEntryIds(upload);
+                List<Long> entryList = dao.getEntryIds(upload);
                 for (Number l : entryList) {
                     Entry entry = entryDAO.get(l.longValue());
                     if (entry == null || entry.getVisibility() != Visibility.PENDING.getValue())
@@ -559,7 +562,7 @@ public class BulkEntryCreator {
         try {
             String sequenceName = data.getSequenceFileName();
             if (!StringUtils.isBlank(sequenceName)) {
-                String sequenceString = IOUtils.toString(files.get(sequenceName));
+                String sequenceString = IOUtils.toString(files.get(sequenceName), "UTF-8");
                 DNASequence dnaSequence = SequenceController.parse(sequenceString);
 
                 if (dnaSequence == null || dnaSequence.getSequence().equals("")) {

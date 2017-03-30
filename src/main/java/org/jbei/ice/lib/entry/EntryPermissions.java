@@ -12,7 +12,6 @@ import org.jbei.ice.storage.model.Permission;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Permissions associated with a specified entry
@@ -62,7 +61,7 @@ public class EntryPermissions extends Permissions {
         authorization.expectWrite(userId, entry);
 
         ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
-        Set<Permission> permissions = permissionDAO.getEntryPermissions(entry);
+        List<Permission> permissions = permissionDAO.getEntryPermissions(entry);
 
         GroupController groupController = new GroupController();
         Group publicGroup = groupController.createOrRetrievePublicGroup();

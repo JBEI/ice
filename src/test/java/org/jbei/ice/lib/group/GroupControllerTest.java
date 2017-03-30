@@ -9,7 +9,7 @@ import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Group;
 import org.junit.*;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -103,7 +103,7 @@ public class GroupControllerTest {
         g3.setLabel("myg3");
         Assert.assertNotNull(controller.createGroup(account2.getEmail(), g3));
 
-        Set<Group> groups = controller.getMatchingGroups(account.getEmail(), "myg", 10);
+        List<Group> groups = controller.getMatchingGroups(account.getEmail(), "myg", 10);
         Assert.assertNotNull(groups);
         Assert.assertEquals(1, groups.size());
     }

@@ -11,6 +11,7 @@ import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Folder;
 import org.jbei.ice.storage.model.Group;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -39,7 +40,7 @@ public class EntryAuthorization extends Authorization<Entry> {
         Account account = getAccount(userId);
 
         // get groups for account. if account is null, this will return everyone group
-        Set<Group> accountGroups = groupController.getAllGroups(account);
+        List<Group> accountGroups = groupController.getAllGroups(account);
 
         // check read permission through group membership
         // ie. belongs to group that has read privileges for entry (or a group whose parent group does)
@@ -85,7 +86,7 @@ public class EntryAuthorization extends Authorization<Entry> {
 
         // check group permissions
         // get groups for account
-        Set<Group> accountGroups = groupController.getAllGroups(account);
+        List<Group> accountGroups = groupController.getAllGroups(account);
 
         // check group permissions
         if (permissionDAO.hasPermissionMulti(entry, null, null, accountGroups, false, true))
@@ -109,7 +110,7 @@ public class EntryAuthorization extends Authorization<Entry> {
             return true;
 
         // get groups for account
-        Set<Group> accountGroups = groupController.getAllGroups(account);
+        List<Group> accountGroups = groupController.getAllGroups(account);
 
         // check group permissions
         if (permissionDAO.hasPermissionMulti(entry, null, null, accountGroups, false, true))

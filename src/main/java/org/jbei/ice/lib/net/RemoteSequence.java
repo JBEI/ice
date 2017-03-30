@@ -6,10 +6,7 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.AbstractFormatter;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.FastaFormatter;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.SBOLFormatter;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.rest.IceRestClient;
@@ -73,7 +70,8 @@ public class RemoteSequence {
     }
 
     public ByteArrayWrapper get(String type) {
-        FeaturedDNASequence featuredDNASequence = remoteContact.getPublicEntrySequence(partner.getUrl(), remotePartId,
+        FeaturedDNASequence featuredDNASequence = remoteContact.getPublicEntrySequence(partner.getUrl(),
+                Long.toString(remotePartId),
                 partner.getApiKey());
         if (featuredDNASequence == null)
             return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
@@ -93,17 +91,16 @@ public class RemoteSequence {
                     break;
 
                 case "fasta":
-                    name = name + ".fasta";
-                    formatter = new FastaFormatter(name);
+                    formatter = new FastaFormatter();
                     break;
 
                 case "sbol1":
-                    formatter = new SBOLFormatter(true);
+                    formatter = new SBOLFormatter();
                     name = name + ".xml";
                     break;
 
                 case "sbol2":
-                    formatter = new SBOLFormatter(false);
+                    formatter = new SBOL2Formatter();
                     name = name + ".xml";
                     break;
 

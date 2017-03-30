@@ -20,6 +20,7 @@ import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
+import org.jbei.ice.lib.search.IndexBuildStatus;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -34,14 +35,16 @@ import java.io.*;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
  * Enables (command line) interaction with BLAST+
- * <p>
+ * <p/>
  * Current usage is for blast searches and auto-annotation support
  *
  * @author Hector Plahar
@@ -352,7 +355,7 @@ public class BlastPlus {
     /**
      * Re-builds the blast database, using a lock file to prevent concurrent rebuilds.
      * The lock file has a "life-span" of 1 day after which it is deleted.
-     * <p>
+     * <p/>
      * Also, a rebuild can be forced even if a lock file exists which is less than a day old
      *
      * @param force set to true to force a rebuild. Use with caution
@@ -423,7 +426,7 @@ public class BlastPlus {
 
     /**
      * Run the bl2seq program on multiple subjects.
-     * <p>
+     * <p/>
      * This method requires disk space write temporary files. It tries to clean up after itself.
      *
      * @param query   reference sequence.
@@ -489,7 +492,7 @@ public class BlastPlus {
 
     /**
      * Build the blast search or sequence database database.
-     * <p>
+     * <p/>
      * <p/>First dump the sequences from the sql database into a fasta file, than create the blast
      * database by calling formatBlastDb.
      *
@@ -500,18 +503,12 @@ public class BlastPlus {
      * @throws BlastException
      */
     private static void rebuildSequenceDatabase(Path blastInstall, Path blastDb, boolean isFeatures) throws BlastException {
-
         Path newFastaFile = Paths.get(blastDb.toString(), "bigfastafile.new");
 
         // check if file exists
         if (Files.exists(newFastaFile)) {
             try {
-                BasicFileAttributes attr = Files.readAttributes(newFastaFile, BasicFileAttributes.class);
-                long hoursSinceCreation = attr.creationTime().to(TimeUnit.HOURS);
-                if (hoursSinceCreation > 1)
-                    Files.delete(newFastaFile);
-                else
-                    return;
+                Files.delete(newFastaFile);
             } catch (IOException ioe) {
                 Logger.error(ioe);
                 return;
@@ -562,12 +559,12 @@ public class BlastPlus {
 
             process.waitFor();
             StringWriter writer = new StringWriter();
-            IOUtils.copy(blastOutputStream, writer);
+            IOUtils.copy(blastOutputStream, writer, StandardCharsets.UTF_8);
             blastOutputStream.close();
             String outputString = writer.toString();
             Logger.debug("format output was: " + outputString);
             writer = new StringWriter();
-            IOUtils.copy(blastErrorStream, writer);
+            IOUtils.copy(blastErrorStream, writer, StandardCharsets.UTF_8);
             String errorString = writer.toString();
             Logger.debug("format error was: " + errorString);
             process.destroy();
@@ -580,6 +577,26 @@ public class BlastPlus {
         } catch (IOException e) {
             throw new BlastException(e);
         }
+    }
+
+    public static IndexBuildStatus getStatus() {
+        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+        Path path = Paths.get(dataDir, BLAST_DB_FOLDER, LOCK_FILE_NAME);
+
+        if (Files.exists(path)) {
+            try {
+                BasicFileAttributes attributes = Files.readAttributes(path, BasicFileAttributes.class);
+                long seconds = attributes.creationTime().to(TimeUnit.SECONDS);
+                if ((Instant.now().getEpochSecond() - seconds) > 3 * 24 * 60) {
+                    Files.delete(path);
+                    return new IndexBuildStatus(0, 0);
+                }
+            } catch (IOException e) {
+                // ok to ignore
+            }
+            return new IndexBuildStatus(0, 1);
+        }
+        return new IndexBuildStatus(0, 0);
     }
 
     /**
@@ -653,13 +670,13 @@ public class BlastPlus {
         FeatureDAO featureDAO = DAOFactory.getFeatureDAO();
         SequenceFeatureDAO sequenceFeatureDAO = DAOFactory.getSequenceFeatureDAO();
 
-        long count = featureDAO.getFeatureCount();
+        long count = featureDAO.getFeatureCount(null);
         if (count <= 0)
             return;
 
         int offset = 0;
         while (offset < count) {
-            List<Feature> features = featureDAO.getFeatures(offset++, 1);
+            List<Feature> features = featureDAO.getFeatures(offset++, 1, null);
             Feature feature = features.get(0);
             String featureName = feature.getName();
             if (featureName == null || featureName.trim().isEmpty())

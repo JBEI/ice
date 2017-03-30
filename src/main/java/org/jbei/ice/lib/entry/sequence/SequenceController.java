@@ -9,7 +9,9 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
@@ -218,6 +220,11 @@ public class SequenceController extends HasEntry {
         Entry entry = getEntry(recordId);
         if (entry == null)
             throw new IllegalArgumentException("The part " + recordId + " could not be located");
+
+        if (entry.getVisibility() == Visibility.REMOTE.getValue()) {
+            WebEntries webEntries = new WebEntries();
+            return webEntries.getSequence(recordId);
+        }
 
         if (!new PermissionsController().isPubliclyVisible(entry))
             authorization.expectRead(userId, entry);
@@ -443,18 +450,18 @@ public class SequenceController extends HasEntry {
                     break;
 
                 case "fasta":
-                    FastaFormatter formatter = new FastaFormatter(sequence.getEntry().getName());
+                    FastaFormatter formatter = new FastaFormatter();
                     sequenceString = compose(sequence, formatter);
                     name = entry.getPartNumber() + ".fasta";
                     break;
 
                 case "sbol1":
-                    sequenceString = compose(sequence, new SBOLFormatter(true));
+                    sequenceString = compose(sequence, new SBOLFormatter());
                     name = entry.getPartNumber() + ".xml";
                     break;
 
                 case "sbol2":
-                    sequenceString = compose(sequence, new SBOLFormatter(false));
+                    sequenceString = compose(sequence, new SBOL2Formatter());
                     name = entry.getPartNumber() + ".xml";
                     break;
 

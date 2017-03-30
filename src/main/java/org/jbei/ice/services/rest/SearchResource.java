@@ -6,6 +6,7 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.search.IndexType;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResults;
+import org.jbei.ice.lib.search.IndexBuildStatus;
 import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.lib.search.WebSearch;
 import org.jbei.ice.lib.shared.ColumnField;
@@ -62,7 +63,7 @@ public class SearchResource extends RestResource {
                 throw new WebApplicationException(Response.Status.FORBIDDEN);
 
             WebSearch webSearch = new WebSearch();
-            return super.respond(webSearch.run(query));
+            return super.respond(webSearch.run(query, false));
         }
 
         if (StringUtils.isEmpty(userId)) {
@@ -133,5 +134,13 @@ public class SearchResource extends RestResource {
         log(userId, "rebuilding blast database");
         controller.rebuildIndexes(userId, IndexType.BLAST);
         return super.respond(Response.Status.OK);
+    }
+
+    @GET
+    @Path("/indexes/{type}/status")
+    public Response getIndexStatus(@PathParam("type") String indexType) {
+        requireUserId();
+        IndexBuildStatus status = controller.getIndexStatus(IndexType.valueOf(indexType.toUpperCase()));
+        return super.respond(status);
     }
 }

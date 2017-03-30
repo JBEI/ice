@@ -1,16 +1,14 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.Criteria;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.dto.entry.CustomField;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Parameter;
 
-import java.util.HashSet;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Data accessor object for handling {@link Parameter}s
@@ -25,43 +23,29 @@ public class ParameterDAO extends HibernateRepository<Parameter> {
     }
 
     // filter by key value pairs
-    public Set<Entry> filter(List<CustomField> fields) {
-        Set<Entry> entries = new HashSet<>();
+    // todo : this needs to be looked at
+    public List<Entry> filter(List<CustomField> fields) {
+        List<Entry> entries = new ArrayList<>();
         boolean flag = false;
 
         for (CustomField field : fields) {
             if (flag && entries.isEmpty())
                 return entries;
 
-            Criteria criteria = currentSession().createCriteria(Parameter.class);
-            criteria.setProjection(Projections.property("entry"));
-            criteria.add(Restrictions.and(
-                    Restrictions.eq("key", field.getName()).ignoreCase(),
-                    Restrictions.eq("value", field.getValue()).ignoreCase()));
+            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
+            Root<Parameter> from = query.from(Parameter.class);
+            query.select(from.get("entry")).where(
+                    getBuilder().equal(getBuilder().lower(from.get("key")), field.getName().toLowerCase()),
+                    getBuilder().equal(getBuilder().lower(from.get("value")), field.getValue().toLowerCase())
+            );
 
             if (flag)
-                criteria.add(Restrictions.in("entry", entries));
+                query.getRestriction().getExpressions().add(from.get("entry").in(entries));
             else
                 flag = true;
-            entries = new HashSet<>(criteria.list());
+            entries = currentSession().createQuery(query).list();
         }
 
         return entries;
-    }
-
-    public void addIfNotExists(String key, String value, Entry entry) {
-        Criteria criteria = currentSession().createCriteria(Parameter.class);
-        criteria.add(Restrictions.and(
-                Restrictions.eq("entry", entry),
-                Restrictions.eq("key", key).ignoreCase(),
-                Restrictions.eq("value", value).ignoreCase()));
-        if (!criteria.list().isEmpty())
-            return;
-
-        Parameter parameter = new Parameter();
-        parameter.setEntry(entry);
-        parameter.setKey(key);
-        parameter.setValue(value);
-        create(parameter);
     }
 }

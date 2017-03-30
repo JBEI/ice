@@ -23,6 +23,7 @@ import org.jbei.ice.storage.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -104,7 +105,7 @@ public class PartSequence extends HasEntry {
 
         // parse actual sequence
         try {
-            String sequenceString = IOUtils.toString(inputStream);
+            String sequenceString = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
             DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
             if (dnaSequence == null)
                 throw new InvalidFormatParserException("Could not parse sequence string");

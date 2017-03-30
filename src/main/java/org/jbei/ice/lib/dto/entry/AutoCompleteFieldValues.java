@@ -42,7 +42,7 @@ public class AutoCompleteFieldValues {
         List<String> results;
         switch (this.autoCompleteField) {
             case SELECTION_MARKERS:
-                results = entryDAO.getMatchingSelectionMarkers(token, limit);
+                results = DAOFactory.getSelectionMarkerDAO().getMatchingSelectionMarkers(token, limit);
                 break;
 
             case ORIGIN_OF_REPLICATION:

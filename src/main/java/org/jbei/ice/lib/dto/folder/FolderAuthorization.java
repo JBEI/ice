@@ -6,6 +6,7 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Folder;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -44,8 +45,8 @@ public class FolderAuthorization extends Authorization<Folder> {
         // now check actual permissions
         Set<Folder> folders = new HashSet<>();
         folders.add(folder);
-        if (controller.groupHasReadPermission(account.getGroups(), folders)
-                || controller.groupHasWritePermission(account.getGroups(), folders))
+        if (controller.groupHasReadPermission(new ArrayList<>(account.getGroups()), folders)
+                || controller.groupHasWritePermission(new ArrayList<>(account.getGroups()), folders))
             return true;
 
         return controller.accountHasReadPermission(account, folders)
@@ -63,7 +64,7 @@ public class FolderAuthorization extends Authorization<Folder> {
         // now check actual permissions
         Set<Folder> folders = new HashSet<>();
         folders.add(folder);
-        return controller.groupHasWritePermission(account.getGroups(), folders)
+        return controller.groupHasWritePermission(new ArrayList<>(account.getGroups()), folders)
                 || controller.accountHasWritePermission(account, folders);
     }
 }

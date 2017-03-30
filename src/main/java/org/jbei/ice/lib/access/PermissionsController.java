@@ -192,7 +192,7 @@ public class PermissionsController {
     }
 
     // checks if there is a set permission with write user
-    public boolean groupHasWritePermission(Set<Group> groups, Set<Folder> folders) {
+    public boolean groupHasWritePermission(List<Group> groups, Set<Folder> folders) {
         if (groups.isEmpty())
             return false;
 
@@ -201,21 +201,21 @@ public class PermissionsController {
 
     public boolean isPubliclyVisible(Entry entry) {
         Group publicGroup = groupController.createOrRetrievePublicGroup();
-        Set<Group> groups = new HashSet<>();
+        List<Group> groups = new ArrayList<>(1);
         groups.add(publicGroup);
         return dao.hasPermissionMulti(entry, null, null, groups, true, false);
     }
 
     public boolean isPublicVisible(Folder folder) {
         Group publicGroup = groupController.createOrRetrievePublicGroup();
-        Set<Group> groups = new HashSet<>();
+        List<Group> groups = new ArrayList<>(1);
         groups.add(publicGroup);
         Set<Folder> folders = new HashSet<>();
         folders.add(folder);
         return groupHasReadPermission(groups, folders);
     }
 
-    public boolean groupHasReadPermission(Set<Group> groups, Set<Folder> folders) {
+    public boolean groupHasReadPermission(List<Group> groups, Set<Folder> folders) {
         if (groups.isEmpty() || folders.isEmpty())
             return false;
 
@@ -242,7 +242,7 @@ public class PermissionsController {
         ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
 
         // read accounts
-        Set<Account> readAccounts = dao.retrieveAccountPermissions(folder, false, true);
+        List<Account> readAccounts = dao.retrieveAccountPermissions(folder, false, true);
         for (Account readAccount : readAccounts) {
             accessPermissions.add(new AccessPermission(AccessPermission.Article.ACCOUNT, readAccount.getId(),
                     AccessPermission.Type.READ_FOLDER, folder.getId(),
@@ -250,7 +250,7 @@ public class PermissionsController {
         }
 
         // write accounts
-        Set<Account> writeAccounts = dao.retrieveAccountPermissions(folder, true, false);
+        List<Account> writeAccounts = dao.retrieveAccountPermissions(folder, true, false);
         for (Account writeAccount : writeAccounts) {
             accessPermissions.add(new AccessPermission(AccessPermission.Article.ACCOUNT, writeAccount.getId(),
                     AccessPermission.Type.WRITE_FOLDER, folder.getId(),
@@ -258,7 +258,7 @@ public class PermissionsController {
         }
 
         // read groups
-        Set<Group> readGroups = dao.retrieveGroupPermissions(folder, false, true);
+        List<Group> readGroups = dao.retrieveGroupPermissions(folder, false, true);
         for (Group group : readGroups) {
             if (!includePublic && group.getUuid().equalsIgnoreCase(GroupController.PUBLIC_GROUP_UUID))
                 continue;
@@ -268,7 +268,7 @@ public class PermissionsController {
         }
 
         // write groups
-        Set<Group> writeGroups = dao.retrieveGroupPermissions(folder, true, false);
+        List<Group> writeGroups = dao.retrieveGroupPermissions(folder, true, false);
         for (Group group : writeGroups) {
             accessPermissions.add(new AccessPermission(AccessPermission.Article.GROUP, group.getId(),
                     AccessPermission.Type.WRITE_FOLDER, folder.getId(),

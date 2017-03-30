@@ -1,14 +1,15 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.HibernateException;
-import org.hibernate.criterion.Restrictions;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.RemotePartner;
 
-import java.util.ArrayList;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Data Accessor Object for managing {@link RemotePartner} Objects
@@ -17,11 +18,11 @@ import java.util.List;
  */
 public class RemotePartnerDAO extends HibernateRepository<RemotePartner> {
 
-    @SuppressWarnings("unchecked")
-    public List<RemotePartner> getRegistryPartners() throws DAOException {
+    public List<RemotePartner> getRegistryPartners() {
         try {
-            List list = currentSession().createCriteria(RemotePartner.class).list();
-            return new ArrayList<>(list);
+            CriteriaQuery<RemotePartner> query = getBuilder().createQuery(RemotePartner.class);
+            query.from(RemotePartner.class);
+            return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -35,14 +36,15 @@ public class RemotePartnerDAO extends HibernateRepository<RemotePartner> {
      * @param url partner url to retrieve by
      * @return partner is found, null otherwise
      */
-    public RemotePartner getByUrl(String url) throws DAOException {
+    public RemotePartner getByUrl(String url) {
         try {
-            Object object = currentSession().createCriteria(RemotePartner.class.getName())
-                    .add(Restrictions.eq("url", url)).uniqueResult();
-            if (object == null)
-                return null;
-
-            return (RemotePartner) object;
+            CriteriaQuery<RemotePartner> query = getBuilder().createQuery(RemotePartner.class);
+            Root<RemotePartner> from = query.from(RemotePartner.class);
+            query.where(getBuilder().equal(from.get("url"), url));
+            Optional<RemotePartner> result = currentSession().createQuery(query).uniqueResultOptional();
+            if (result.isPresent())
+                return result.get();
+            return null;
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

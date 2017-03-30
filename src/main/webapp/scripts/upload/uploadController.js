@@ -947,8 +947,8 @@ angular.module('ice.upload.controller', [])
     })
     .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, uploadId,
                                                        $uibModalInstance, FileUploader, addType, linkedAddType, Util) {
-        var sid = $cookieStore.get("sessionId");
         $scope.addType = addType;
+        $scope.processing = false;
 
         //
         // reset the current bulk upload. involves deleting all entries and showing user new upload form
@@ -969,6 +969,8 @@ angular.module('ice.upload.controller', [])
         };
 
         var createUploader = function () {
+            var sid = $cookieStore.get("sessionId");
+
             if ($scope.importUploader) {
                 $scope.importUploader.cancelAll();
                 $scope.importUploader.clearQueue();
@@ -1010,16 +1012,12 @@ angular.module('ice.upload.controller', [])
             }
         };
 
-        $scope.importUploader.onCompleteItem = function (item, response, status, headers) {
-            $scope.processing = false;
+        $scope.importUploader.onBeforeUploadItem = function (item) {
+            $scope.processing = true;
         };
 
-        $scope.importUploader.onProgressItem = function (event, item, progress) {
-            if (progress !== '100')
-                return;
-
-            $scope.processing = true;
-            item.remove();
+        $scope.importUploader.onCompleteItem = function (item, response, status, headers) {
+            $scope.processing = false;
         };
 
         $scope.ok = function () {

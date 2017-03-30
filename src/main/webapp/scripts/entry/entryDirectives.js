@@ -6,7 +6,10 @@ angular.module('ice.entry.directives', [])
             scope:{
                 sample:"=",
                 delete:"&onDelete",
-                remote:"="
+                remote:"=",
+                entry:"=",
+                plate:"=",
+                selected:"="
             },
 
             restrict:"E",

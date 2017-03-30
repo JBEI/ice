@@ -5,9 +5,10 @@ import org.apache.commons.io.IOUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
+import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.web.WebEntries;
+import org.jbei.ice.lib.dto.web.PartnerEntries;
 import org.jbei.ice.lib.entry.EntryFields;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.PartDataUtil;
@@ -99,15 +100,16 @@ public class RemoteEntriesAsCSV {
             for (RemotePartner partner : partners) {
                 try {
                     Logger.info("Retrieving from " + partner.getUrl());
-                    WebEntries webEntries = remoteEntries.getPublicEntries(partner.getId(), 0, Integer.MAX_VALUE, null, true);
-                    if (webEntries == null || webEntries.getEntries() == null) {
+                    PartnerEntries partnerEntries = remoteEntries.getPublicEntries(partner.getId(), 0, Integer.MAX_VALUE, null, true);
+                    Results<PartData> webEntries = partnerEntries.getEntries();
+                    if (webEntries == null || webEntries.getData() == null) {
                         Logger.error("Could not retrieve entries for " + partner.getUrl());
                         continue;
                     }
-                    Logger.info("Obtained " + webEntries.getCount() + " from " + partner.getUrl());
+                    Logger.info("Obtained " + webEntries.getResultCount() + " from " + partner.getUrl());
 
                     // go through entries for each partner and write to the zip file
-                    writeDataEntries(partner, webEntries.getEntries(), fields, writer, zos);
+                    writeDataEntries(partner, webEntries.getData(), fields, writer, zos);
 
                 } catch (Exception e) {
                     Logger.warn("Exception retrieving entries " + e.getMessage());
@@ -122,7 +124,7 @@ public class RemoteEntriesAsCSV {
                 groups.add(publicGroup);
 
                 EntryDAO entryDAO = DAOFactory.getEntryDAO();
-                Set<Entry> results = entryDAO.retrieveVisibleEntries(null, groups, ColumnField.CREATED, true, 0, Integer.MAX_VALUE, null);
+                List<Entry> results = entryDAO.retrieveVisibleEntries(null, groups, ColumnField.CREATED, true, 0, Integer.MAX_VALUE, null);
                 writeLocalEntries(results, fields, writer, zos);
             }
 
@@ -155,7 +157,7 @@ public class RemoteEntriesAsCSV {
 
                     // get remote sequence
                     FeaturedDNASequence featuredDNASequence = remoteEntries.getPublicEntrySequence(partner.getId(),
-                            partData.getId());
+                            Long.toString(partData.getId()));
 
                     if (featuredDNASequence != null) {
                         String name = partData.getPartId() + ".gb";
@@ -182,7 +184,7 @@ public class RemoteEntriesAsCSV {
         }
     }
 
-    protected void writeLocalEntries(Set<Entry> entries, List<EntryField> fields,
+    protected void writeLocalEntries(List<Entry> entries, List<EntryField> fields,
                                      CSVWriter writer, ZipOutputStream zos) {
         if (entries == null)
             return;

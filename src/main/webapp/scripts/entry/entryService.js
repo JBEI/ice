@@ -511,6 +511,15 @@ angular.module('ice.entry.service', [])
                         icon: 'fa-database'
                     }
                 ];
+            },
+
+            getEntryItems: function () {
+                return [
+                    {name: "Plasmid", type: "plasmid"},
+                    {name: "Strain", type: "strain"},
+                    {name: "Part", type: "part"},
+                    {name: "Arabidopsis Seed", type: "arabidopsis"}
+                ]
             }
         }
     })

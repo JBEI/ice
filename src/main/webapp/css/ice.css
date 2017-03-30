@@ -264,6 +264,10 @@ html, body {
     background-color: #ff7f50;
 }
 
+.tooltip {
+    white-space: nowrap !important;
+}
+
 .entry_go_back {
     color: #233559;
     font-size: 40px;
@@ -587,6 +591,15 @@ a:hover {
     box-shadow: 0 0 1px 1px #ddd;
     border-radius: 2px;
     cursor: pointer;
+}
+
+.ice-button:disabled,
+.ice-button[disabled] {
+    border: 1px solid #ccc;
+    background: #eee;
+    color: #777;
+    box-shadow: 0 0 1px 1px #efefef;
+    cursor: default;
 }
 
 .pager_nav {
@@ -1275,8 +1288,6 @@ button[disabled].action-menu:hover {
 }
 
 .table-row-index {
-    vertical-align: middle;
-    line-height: 1;
     opacity: 0.2;
     text-shadow: 0 1px 0 #fff;
     font-weight: bold;
@@ -1422,4 +1433,22 @@ button[disabled].action-menu:hover {
     background-color: #fdfdfd;
     margin-right: 21px;
     cursor: pointer;
+}
+
+.flash {
+    animation-name: flash;
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+    animation-play-state: running;
+}
+
+@keyframes flash {
+    from {
+        color: white;
+    }
+    to {
+        color: black;
+    }
 }

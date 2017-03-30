@@ -13,8 +13,14 @@ import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemoteUser;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.dao.*;
-import org.jbei.ice.storage.model.*;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
+import org.jbei.ice.storage.hibernate.dao.GroupDAO;
+import org.jbei.ice.storage.hibernate.dao.RemoteClientModelDAO;
+import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Group;
+import org.jbei.ice.storage.model.RemoteClientModel;
+import org.jbei.ice.storage.model.RemotePartner;
 
 import java.util.*;
 
@@ -89,7 +95,7 @@ public class Groups {
 
     public List<UserGroup> getMatchingGroups(String token, int limit) {
         Account account = accountDAO.getByEmail(this.userId);
-        Set<Group> groups = dao.getMatchingGroups(account, token, limit);
+        List<Group> groups = dao.getMatchingGroups(account, token, limit);
         List<UserGroup> results = new ArrayList<>(groups.size());
         for (Group group : groups) {
             results.add(group.toDataTransferObject());
@@ -181,7 +187,10 @@ public class Groups {
         if (group == null)
             return null;
 
-        if (!userId.equalsIgnoreCase(group.getOwner().getEmail())) {
+        if (group.getType() == GroupType.PUBLIC) {
+            if (!accountController.isAdministrator(userId))
+                throw new PermissionException("Administrative privileges required");
+        } else if (!userId.equalsIgnoreCase(group.getOwner().getEmail())) {
             Account account = accountDAO.getByEmail(this.userId);
             if (account.getType() != AccountType.ADMIN)
                 throw new PermissionException("Missing required permissions");

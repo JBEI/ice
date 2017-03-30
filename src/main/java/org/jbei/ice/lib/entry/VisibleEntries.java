@@ -38,7 +38,7 @@ public class VisibleEntries {
     }
 
     public List<PartData> getEntries(ColumnField field, boolean asc, int start, int limit, String filter) {
-        Set<Entry> results;
+        List<Entry> results;
 
         if (isAdmin) {
             // no filters

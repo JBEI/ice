@@ -36,7 +36,6 @@ import java.util.*;
  *
  * @author Hector Plahar, Elena Aravina
  */
-@SuppressWarnings("unchecked")
 public class HibernateSearch {
 
     private HibernateSearch() {
@@ -230,6 +229,7 @@ public class HibernateSearch {
         return results;
     }
 
+    @SuppressWarnings("unchecked")
     public SearchResults executeSearch(String userId, HashMap<String, QueryType> terms,
                                        SearchQuery searchQuery,
                                        HashMap<String, SearchResult> blastResults) {
@@ -440,7 +440,7 @@ public class HibernateSearch {
         if (parameters == null)
             return;
 
-        ArrayList<String> terms = new ArrayList<>();
+        ArrayList<String> terms = new ArrayList<>(3);
 
         if (parameters.getHasSample()) {
             terms.add("hasSample");
@@ -457,8 +457,7 @@ public class HibernateSearch {
         if (terms.isEmpty())
             return;
 
-        fullTextQuery.enableFullTextFilter("boolean")
-                .setParameter("field", terms);
+        fullTextQuery.enableFullTextFilter("boolean").setParameter("field", terms);
     }
 
     protected static String cleanQuery(String query) {

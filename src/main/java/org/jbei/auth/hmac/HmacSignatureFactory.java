@@ -9,8 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.jbei.auth.KeyTable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jbei.ice.lib.common.logging.Logger;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
@@ -62,7 +61,6 @@ public class HmacSignatureFactory {
             return a.substring(0, a.indexOf("=")).compareTo(b.substring(0, b.indexOf("=")));
         }
     };
-    private static final Logger log = LoggerFactory.getLogger(HmacSignatureFactory.class);
     private static final PercentEscaper ESCAPER = new PercentEscaper("-_.~", false);
     private static final String HMAC = "HmacSHA1";
     private static final String NEWLINE = "\n";
@@ -256,13 +254,13 @@ public class HmacSignatureFactory {
     }
 
     private void debugRequestString(final StringBuilder buffer) {
-        if (log.isDebugEnabled()) {
+        if (Logger.isDebugEnabled()) {
             final StringBuilder debug = new StringBuilder();
             debug.append("Constructed request string:").append(NEWLINE);
             debug.append("-----BEGIN-----").append(NEWLINE);
             debug.append(buffer).append(NEWLINE);
             debug.append("----- END -----").append(NEWLINE);
-            log.debug(debug.toString());
+            Logger.debug(debug.toString());
         }
     }
 

@@ -25,21 +25,20 @@
                 </i>
 
                 <h4>
-                    <span ng-if="entry.visible=='OK' && entry.visible=='DRAFT'">
-                    <small class="label " ng-class="{
-                    'label-warning':entry.visible=='DRAFT'}"
-                           style="font-size: 9px; position: relative; top: -4px">{{entry.visible}}
-                    </small>
+                    <span ng-if="entry.visible=='DRAFT'">
+                        <small class="label " ng-class="{'label-warning':entry.visible=='DRAFT'}"
+                               style="font-size: 9px; position: relative; top: -4px">{{entry.visible}}
+                        </small>
                     </span>
 
-                    <span ng-if="entry.visible=='DELETED' || entry.visible=='TRANSFERRED' || entry.visible=='PENDING'">
-                    <small class="label " ng-class="{
-                    'label-danger':entry.visible=='DELETED',
-                    'label-info':entry.visible=='TRANSFERRED',
-                    'label-warning':entry.visible=='PENDING'}"
-                           style="font-size: 9px; position: relative; top: -4px;
-                           border-radius: 0.25em 0 0 0.25em; padding-right: 3px">{{entry.visible}}
-                    </small>
+                    <span ng-if="entry.visible=='DELETED' || entry.visible=='TRANSFERRED' || entry.visible=='PENDING' || entry.visible=='REMOTE'">
+                        <small class="label " ng-class="{
+                        'label-danger':entry.visible=='DELETED',
+                        'label-info':entry.visible=='TRANSFERRED' || entry.visible=='REMOTE',
+                        'label-warning':entry.visible=='PENDING'}"
+                               style="font-size: 9px; position: relative; top: -4px;
+                               border-radius: 0.25em 0 0 0.25em; padding-right: 3px">{{entry.visible}}
+                        </small>
                     </span>
 
                     <!--restore/accept/approve button invariants (for admins)-->
@@ -109,6 +108,7 @@
                             Public
                         </small>
                     </span>
+
                     <span ng-repeat="parent in entry.parents">
                     &nbsp;<a ng-href="entry/{{parent.id}}" uib-tooltip="{{parent.name}}"
                              tooltip-trigger="mouseenter"
@@ -164,7 +164,7 @@
                         <ice-entry-permission entry='entry'></ice-entry-permission>
                     </div>
 
-                    <div class="pad_top pull-right" ng-if="entry.canEdit">
+                    <div class="pad_top pull-right">
                         <ice-entry-folders entry="entry"></ice-entry-folders>
                     </div>
                 </td>

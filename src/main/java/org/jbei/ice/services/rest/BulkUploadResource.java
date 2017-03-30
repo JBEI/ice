@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -130,7 +131,7 @@ public class BulkUploadResource extends RestResource {
         try {
             String fileName = contentDispositionHeader.getFileName();
             String userId = requireUserId();
-            String sequence = IOUtils.toString(fileInputStream);
+            String sequence = IOUtils.toString(fileInputStream, StandardCharsets.UTF_8);
             SequenceInfo sequenceInfo = controller.addSequence(userId, uploadId, entryId,
                     sequence, fileName);
             if (sequenceInfo == null) {

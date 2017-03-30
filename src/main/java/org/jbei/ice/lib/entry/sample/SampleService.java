@@ -16,6 +16,7 @@ import org.jbei.ice.storage.hibernate.dao.StorageDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -129,7 +130,7 @@ public class SampleService extends HasEntry {
                 String barcode = tube.getDisplay();
                 Storage existing = storageDAO.retrieveStorageTube(barcode);
                 if (existing != null) {
-                    ArrayList<Sample> samples = dao.getSamplesByStorage(existing);
+                    List<Sample> samples = dao.getSamplesByStorage(existing);
                     if (samples != null && !samples.isEmpty()) {
                         Logger.error("Barcode \"" + barcode + "\" already has a sample associated with it");
                         return null;
@@ -147,6 +148,7 @@ public class SampleService extends HasEntry {
         // create storage locations
         Storage currentStorage;
         List<Storage> storageList = storageDAO.retrieveStorageByIndex(mainLocation.getDisplay(), SampleType.PLATE96);
+
         if (storageList != null && storageList.size() > 0) {
             currentStorage = storageList.get(0);
 
@@ -223,7 +225,7 @@ public class SampleService extends HasEntry {
         entryAuthorization.expectRead(userId, entry);
 
         // samples
-        ArrayList<Sample> entrySamples = dao.getSamplesByEntry(entry);
+        List<Sample> entrySamples = dao.getSamplesByEntry(entry);
         ArrayList<PartSample> samples = new ArrayList<>();
         if (entrySamples == null)
             return samples;
@@ -233,10 +235,22 @@ public class SampleService extends HasEntry {
             Account userAccount = DAOFactory.getAccountDAO().getByEmail(userId);
             inCart = DAOFactory.getRequestDAO().getSampleRequestInCart(userAccount, entry) != null;
         }
+        ArrayList<Sample> siblingSamples = new ArrayList<>();
+        for (Sample sample : entrySamples) {
+            Storage storage = sample.getStorage();
+            if (storage.getParent() != null && storage.getParent().getParent() != null) {
+                siblingSamples.addAll(dao.getSamplesByStorage(storage.getParent().getParent()));
+            }
+        }
+        entrySamples.addAll(siblingSamples);
+
+        Set<Sample> unique = new HashSet<>(entrySamples);
+        entrySamples = new ArrayList<>(unique);
 
         for (Sample sample : entrySamples) {
             // convert sample to info
             Storage storage = sample.getStorage();
+
             if (storage == null) {
                 // dealing with sample with no storage
                 PartSample generic = sample.toDataTransferObject();
@@ -265,21 +279,30 @@ public class SampleService extends HasEntry {
             // get specific sample type and details about it
             PartSample partSample = new PartSample();
             partSample.setId(sample.getId());
-            partSample.setCreationTime(sample.getCreationTime().getTime());
-            partSample.setLabel(sample.getLabel());
+            partSample.setPartId(sample.getEntry().getId());
             partSample.setLocation(storageLocation);
-            partSample.setInCart(inCart);
-            partSample = setAccountInfo(partSample, sample.getDepositor());
-            partSample.setCanEdit(sampleAuthorization.canWrite(userId, sample));
+            partSample.setPartName(sample.getEntry().getName());
+            partSample.setLabel(sample.getLabel());
 
-            if (sample.getComments() != null) {
-                for (Comment comment : sample.getComments()) {
-                    UserComment userComment = new UserComment();
-                    userComment.setId(comment.getId());
-                    userComment.setMessage(comment.getBody());
-                    partSample.getComments().add(userComment);
+            if (sample.getEntry().getId() == entry.getId()) {
+                partSample.setCreationTime(sample.getCreationTime().getTime());
+                partSample.setInCart(inCart);
+                partSample.setCanEdit(sampleAuthorization.canWrite(userId, sample));
+
+                if (sample.getComments() != null) {
+                    for (Comment comment : sample.getComments()) {
+                        UserComment userComment = new UserComment();
+                        userComment.setId(comment.getId());
+                        userComment.setMessage(comment.getBody());
+                        partSample.getComments().add(userComment);
+                    }
                 }
+            } else {
+                partSample.setCanEdit(false);
             }
+
+            partSample = setAccountInfo(partSample, sample.getDepositor());
+
 
             samples.add(partSample);
         }
@@ -364,7 +387,7 @@ public class SampleService extends HasEntry {
             Entry entry = sample.getEntry();
             if (entry == null)
                 continue;
-
+            Logger.info(entry.getName());
             if (!entryAuthorization.canRead(userId, entry))
                 continue;
 

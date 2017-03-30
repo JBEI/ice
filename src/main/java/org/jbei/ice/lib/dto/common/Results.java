@@ -2,7 +2,7 @@ package org.jbei.ice.lib.dto.common;
 
 import org.jbei.ice.storage.IDataTransferModel;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,7 +16,7 @@ public class Results<T extends IDataTransferModel> implements IDataTransferModel
     private List<T> data;
 
     public Results() {
-        this.data = new LinkedList<>();
+        this.data = new ArrayList<>();
     }
 
     public long getResultCount() {
@@ -35,6 +35,6 @@ public class Results<T extends IDataTransferModel> implements IDataTransferModel
     }
 
     public void setData(List<T> data) {
-        this.data = data;
+        this.data = new ArrayList<>(data);
     }
 }

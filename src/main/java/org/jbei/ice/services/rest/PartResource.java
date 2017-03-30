@@ -226,7 +226,7 @@ public class PartResource extends RestResource {
                                          final Study study) {
         try {
             final String userId = requireUserId();
-            log(userId, "adding experiment " + study.toString());
+            log(userId, "adding experiment " + study.toString() + " to " + partId);
             Experiments experiments = new Experiments(userId, partId);
             final Study created = experiments.createOrUpdateStudy(study);
             return respond(Response.Status.OK, created);
@@ -418,7 +418,7 @@ public class PartResource extends RestResource {
         }
 
         ArrayList<ShotgunSequenceDTO> returns = new ArrayList<>();
-        List<ShotgunSequence> results = dao.getByEntry(entry, userId);
+        List<ShotgunSequence> results = dao.getByEntry(entry);
 
         for (ShotgunSequence ret : results) {
             returns.add(new ShotgunSequenceDTO(ret));
@@ -489,8 +489,8 @@ public class PartResource extends RestResource {
     @DELETE
     @Path("/{id}/shotgunsequences/{shotgunId}")
     public Response deleteShotgunSequence(@Context final UriInfo info,
-                                @PathParam("id") final long partId,
-                                @PathParam("shotgunId") final long shotgunId) {
+                                          @PathParam("id") final long partId,
+                                          @PathParam("shotgunId") final long shotgunId) {
         final String userId = getUserId();
         controller.deleteShotgunSequence(userId, partId, shotgunId);
         return super.respond(Response.Status.OK);

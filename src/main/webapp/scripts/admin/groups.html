@@ -9,26 +9,27 @@
         <i class="text-muted">No public groups available</i>
     </div>
 
-    <div class="pad_top" ng-if="groups.length" style="width: 98%">
-        <table cellspacing="0" class="table table-hover table-border-bottom" ng-class="{'opacity_4':loadingPage}">
+    <div class="pad_top" ng-if="groups.length" style="width: 96%">
+        <table cellspacing="0" class="table  table-hover table-border-bottom"
+               ng-class="{'opacity_4':loadingPage}">
             <thead>
             <tr>
                 <th>&nbsp;</th>
-                <th class="entry-table-header">Label</th>
-                <th class="entry-table-header">Members</th>
+                <th class="entry-table-header" style="width: 360px">Label</th>
+                <th class="entry-table-header" style="width: 130px">Members</th>
                 <th class="entry-table-header">Created</th>
-                <th></th>
+                <th style="width:120px"></th>
             </tr>
             </thead>
             <tbody>
             <tr data-ng-repeat="group in groups">
-                <td style="vertical-align: middle; line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"
+                <td style="vertical-align: middle; line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff"
                     class="font-14em">
                     <b>{{$index+1}}</b>
                 </td>
                 <td>{{group.label}}
                     <br>
-                    <i class="small text-muted">{{group.description}}</i>
+                    <i class="small text-muted">{{group.description || 'No description provided'}}</i>
                 </td>
                 <td style="width:180px; white-space:nowrap; vertical-align: middle">
                     <span class="label"
@@ -37,11 +38,11 @@
                           'label-default': group.memberCount == 0}">{{group.memberCount | number}}
                     </span>
                 </td>
-                <td style="width:180px">
+                <td style="width:190px">
                     {{group.ownerEmail}} <br>
                     <small class="text-muted">{{group.creationTime | date:'MMM d, yyyy'}}</small>
                 </td>
-                <td style="width:150px; white-space:nowrap; vertical-align: middle">
+                <td style="border-left: 1px solid #EEEEEE; width:150px; white-space:nowrap; vertical-align: middle">
                     <div ng-if="!group.confirmDeleteGroup">
                         <i class="fa fa-fw fa-pencil font-14em edit_icon" uib-tooltip="Edit"
                            ng-click="openCreatePublicGroupModal(group)"></i>
@@ -52,7 +53,7 @@
 
                     <div ng-if="group.confirmDeleteGroup">
                         Delete?
-                        <button class="btn btn-primary btn-xs">Yes</button>
+                        <button class="btn btn-primary btn-xs" ng-click="deletePublicGroup(group)">Yes</button>
                         <button class="btn btn-default btn-xs" ng-click="group.confirmDeleteGroup=false">No</button>
                     </div>
                 </td>

@@ -24,15 +24,12 @@ import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.lib.net.RemoteTransfer;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
-import org.jbei.ice.storage.hibernate.dao.FolderDAO;
-import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
-import org.jbei.ice.storage.hibernate.dao.RemoteAccessModelDAO;
-import org.jbei.ice.storage.hibernate.dao.RemoteShareModelDAO;
+import org.jbei.ice.storage.hibernate.dao.*;
 import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Contents of a folder which could be other folders or biological parts (entries)
@@ -85,6 +82,83 @@ public class FolderContents {
     }
 
     /**
+     * @param remoteEntries list of entries that map to entries on other ICE instances. It contains enough information
+     *                      for the table view (as a cache)
+     * @param folders       list of folders that the remote entries are to be added to
+     * @return List of folders that the specified entries were added to
+     */
+    protected List<FolderDetails> addRemoteEntries(String userId, List<PartData> remoteEntries, List<FolderDetails> folders) {
+        // nothing adding to destination
+        if (remoteEntries == null)
+            return new ArrayList<>();
+
+        // nothing to add
+        if (remoteEntries.isEmpty())
+            return folders;
+
+        EntryDAO entryDAO = DAOFactory.getEntryDAO();
+        List<Entry> entryModelList = new ArrayList<>(remoteEntries.size());
+
+        for (PartData partData : remoteEntries) {
+            Entry entry = entryDAO.getByRecordId(partData.getRecordId());
+            if (entry == null) {
+                switch (partData.getType()) {
+                    case PART:
+                        entry = new Part();
+                        break;
+
+                    case STRAIN:
+                        entry = new Strain();
+                        break;
+
+                    case PLASMID:
+                        entry = new Plasmid();
+                        break;
+
+                    case ARABIDOPSIS:
+                        entry = new ArabidopsisSeed();
+                        break;
+                }
+
+                entry.setRecordId(partData.getRecordId());
+                entry.setVersionId(partData.getRecordId());
+                entry.setRecordType(partData.getType().getDisplay());
+                entry.setName(partData.getName());
+                entry.setShortDescription(partData.getShortDescription());
+                entry.setStatus(partData.getStatus());
+                entry.setVisibility(Visibility.REMOTE.getValue());
+                entry.setPartNumber(partData.getPartId());
+                String sequence = partData.isHasSequence() ? "sequence" : "text";
+                entry.setLongDescriptionType(sequence);
+                entry.setBioSafetyLevel(partData.getBioSafetyLevel());
+                entry.setCreationTime(new Date(partData.getCreationTime()));
+
+                entry = entryDAO.create(entry);
+            }
+
+            entryModelList.add(entry);
+        }
+
+        for (FolderDetails details : folders) {
+            Folder folder = folderDAO.get(details.getId());
+            if (folder == null) {
+                Logger.warn("Could not add entries to folder " + details.getId() + " which doesn't exist");
+                continue;
+            }
+
+            if (!folderAuthorization.canWrite(userId, folder)) {
+                Logger.warn(userId + " lacks write privs on folder " + folder.getId());
+                continue;
+            }
+
+            folderDAO.addFolderContents(folder, entryModelList);
+            details.setCount(folderDAO.getFolderSize(folder.getId(), null, true));
+        }
+
+        return folders;
+    }
+
+    /**
      * Adds entries in the selection context, to specified folders
      *
      * @param userId        unique identifier for user making request
@@ -95,6 +169,9 @@ public class FolderContents {
      */
     public List<FolderDetails> addEntrySelection(String userId, EntrySelection entryLocation) {
         Entries retriever = new Entries(userId);
+        if (entryLocation.getRemoteEntries() != null && !entryLocation.getRemoteEntries().isEmpty())
+            return addRemoteEntries(userId, entryLocation.getRemoteEntries(), entryLocation.getDestination());
+
         List<Long> entries = retriever.getEntriesFromSelectionContext(entryLocation);
         if (StringUtils.isEmpty(userId)) {
             ArrayList<FolderDetails> destination = entryLocation.getDestination();
@@ -173,11 +250,11 @@ public class FolderContents {
     protected List<FolderDetails> addEntriesToFolders(String userId, List<Long> entries, List<FolderDetails> folders) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
-        Set<Group> accountGroups = new GroupController().getAllGroups(account);
+        List<Group> accountGroups = new GroupController().getAllGroups(account);
         if (!folderAuthorization.isAdmin(userId))
             entries = DAOFactory.getPermissionDAO().getCanReadEntries(account, accountGroups, entries);
 
-        if (entries.isEmpty())
+        if (entries == null || entries.isEmpty())
             return new ArrayList<>();
 
         for (FolderDetails details : folders) {
@@ -200,7 +277,7 @@ public class FolderContents {
                 List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);
                 folderDAO.addFolderContents(folder, entryModelList);
                 if (folder.isPropagatePermissions()) {
-                    Set<Permission> folderPermissions = permissionDAO.getFolderPermissions(folder);
+                    List<Permission> folderPermissions = permissionDAO.getFolderPermissions(folder);
                     addEntryPermission(userId, folderPermissions, entryModelList);
                 }
 
@@ -428,7 +505,7 @@ public class FolderContents {
         return filteredPermissions;
     }
 
-    private void addEntryPermission(String userId, Set<Permission> permissions, List<Entry> entries) {
+    private void addEntryPermission(String userId, List<Permission> permissions, List<Entry> entries) {
         PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
         EntryAuthorization entryAuthorization = new EntryAuthorization();
 

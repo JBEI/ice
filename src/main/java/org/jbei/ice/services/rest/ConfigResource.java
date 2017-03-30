@@ -1,5 +1,7 @@
 package org.jbei.ice.services.rest;
 
+import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.Setting;
 
@@ -76,5 +78,23 @@ public class ConfigResource extends RestResource {
         log(userId, "updating system setting " + setting.getKey() + " to \'" + setting.getValue() + "\'");
         final String url = getThisServer(false);
         return super.respond(controller.updateSetting(userId, setting, url));
+    }
+
+    @PUT
+    @Path("/value")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateConfigValue(Setting setting) {
+        try {
+            String userId = requireUserId();
+            log(userId, "auto updating setting " + setting.getKey());
+            setting = controller.autoUpdateSetting(userId, setting);
+            if (setting == null)
+                throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+            return super.respond(setting);
+        } catch (PermissionException e) {
+            Logger.error(e);
+            throw new WebApplicationException(e.getMessage(), Response.Status.FORBIDDEN);
+        }
     }
 }

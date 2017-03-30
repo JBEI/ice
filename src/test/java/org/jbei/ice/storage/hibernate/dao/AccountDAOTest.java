@@ -6,7 +6,6 @@ import org.jbei.ice.storage.model.Account;
 import org.junit.*;
 
 import java.util.List;
-import java.util.Set;
 
 public class AccountDAOTest {
 
@@ -42,7 +41,7 @@ public class AccountDAOTest {
 
         // get by first name (return 4)
         int limit = 4;
-        Set<Account> accounts = dao.getMatchingAccounts("Fir", limit);
+        List<Account> accounts = dao.getMatchingAccounts("Fir", limit);
         Assert.assertEquals(limit, accounts.size());
         for (Account account : accounts) {
             Assert.assertTrue(account.getFirstName().contains("Fir"));
