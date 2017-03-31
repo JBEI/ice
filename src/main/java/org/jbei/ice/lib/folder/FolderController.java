@@ -204,7 +204,11 @@ public class FolderController {
             throw new IllegalArgumentException("Folder " + folder.getId() + " is not a transferred folder");
 
         // change the status and those of the entries contained to "ok"
-        if (dao.setFolderEntryVisibility(folder.getId(), Visibility.OK) == 0)
+        List<Long> entryIds = dao.getFolderContentIds(folder.getId(), null, false);
+        if (entryIds == null || entryIds.isEmpty())
+            return folder.toDataTransferObject();
+
+        if (DAOFactory.getEntryDAO().setEntryVisibility(entryIds, Visibility.OK) == 0)
             return null;
 
         folder.setType(FolderType.PRIVATE);

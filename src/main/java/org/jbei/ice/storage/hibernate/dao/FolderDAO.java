@@ -11,7 +11,10 @@ import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.*;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.*;
 
 /**
@@ -275,21 +278,6 @@ public class FolderDAO extends HibernateRepository<Folder> {
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException(e);
-        }
-    }
-
-    public int setFolderEntryVisibility(long folderId, Visibility ok) {
-        try {
-            CriteriaUpdate<Folder> update = getBuilder().createCriteriaUpdate(Folder.class);
-            Root<Folder> from = update.from(Folder.class);
-            Join<Folder, Entry> entry = from.join("contents");
-
-            update.set(entry.get("visibility"), ok.getValue());
-            update.where(getBuilder().equal(from.get("id"), folderId));
-            return currentSession().createQuery(update).executeUpdate();
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
         }
     }
 
