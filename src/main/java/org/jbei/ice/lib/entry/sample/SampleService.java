@@ -160,7 +160,7 @@ public class SampleService extends HasEntry {
                     return null;
                 }
             }
-        }  else {
+        } else {
             currentStorage = createStorage(sampleDepositor, mainLocation.getDisplay(), mainLocation.getType());
             currentStorage = storageDAO.create(currentStorage);
         }
@@ -238,6 +238,8 @@ public class SampleService extends HasEntry {
         ArrayList<Sample> siblingSamples = new ArrayList<>();
         for (Sample sample : entrySamples) {
             Storage storage = sample.getStorage();
+            if (storage == null)
+                continue;
             if (storage.getParent() != null && storage.getParent().getParent() != null) {
                 siblingSamples.addAll(dao.getSamplesByStorage(storage.getParent().getParent()));
             }
