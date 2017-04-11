@@ -141,12 +141,11 @@ public class EntriesAsCSV {
 
         List<EntryField> fields = getEntryFields();
         String[] headers = getCSVHeaders(fields);
+        Set<Long> sequenceSet = new HashSet<>();
 
         try (CSVWriter writer = new CSVWriter(fileWriter)) {
 
             writer.writeNext(headers);
-
-            Set<Long> sequenceSet = new HashSet<>();
 
             // write entry fields
             for (long entryId : entries) {
@@ -171,9 +170,9 @@ public class EntriesAsCSV {
 
                 writer.writeNext(line);
             }
-
-            writeZip(userId, sequenceSet);
         }
+
+        writeZip(userId, sequenceSet);
     }
 
     private String getSequenceName(Entry entry) {
