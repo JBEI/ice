@@ -172,7 +172,6 @@ public class EntriesAsCSV {
                 writer.writeNext(line);
             }
 
-            writer.close();
             writeZip(userId, sequenceSet);
         }
     }
