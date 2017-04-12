@@ -19,6 +19,7 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * ABI to manipulate DNA sequence trace analysis
@@ -99,7 +100,10 @@ public class SequenceAnalysisController {
     }
 
     public TraceSequence getTraceSequenceByFileId(String fileId) {
-        return traceDao.getByFileId(fileId);
+        Optional<TraceSequence> result = traceDao.getByFileId(fileId);
+        if (result.isPresent())
+            return result.get();
+        return null;
     }
 
     /**
@@ -246,7 +250,7 @@ public class SequenceAnalysisController {
     /**
      * Calculate sequence alignments between the sequence associated with an {@link Entry} entry
      * with all the {@link TraceSequence}s associated with that entry.
-     * <p>
+     * <p/>
      * Calls buildOrReplaceAlignment on each TraceSequence.
      *
      * @param entry entry object

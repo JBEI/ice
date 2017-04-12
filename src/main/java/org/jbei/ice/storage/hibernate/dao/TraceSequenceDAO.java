@@ -3,7 +3,6 @@ package org.jbei.ice.storage.hibernate.dao;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.query.NativeQuery;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
@@ -18,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Data accessor for {@link TraceSequence}s
@@ -36,7 +36,7 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
      */
     public TraceSequence create(File tracesFile, TraceSequence traceSequence, InputStream inputStream) {
         try {
-            if (getByFileId(traceSequence.getFileId()) != null) {
+            if (getByFileId(traceSequence.getFileId()).isPresent()) {
                 throw new DAOException("TraceSequence with fileId " + traceSequence.getFileId() + " already exists!");
             }
 
@@ -80,26 +80,19 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
     /**
      * Retrieve the {@link TraceSequence} object by its fileId.
      *
-     * @param fileId
+     * @param fileId  unique file identifier
      * @return TraceSequence object.
      * @throws DAOException
      */
-    public TraceSequence getByFileId(String fileId) {
-        TraceSequence traceSequence = null;
-
+    public Optional<TraceSequence> getByFileId(String fileId) {
         try {
-            NativeQuery query = currentSession().createNativeQuery("from " + TraceSequence.class.getName() + " where fileId = :fileId");
-            query.setParameter("fileId", fileId);
-            Object queryResult = query.uniqueResult();
-
-            if (queryResult != null) {
-                traceSequence = (TraceSequence) queryResult;
-            }
+            CriteriaQuery<TraceSequence> query = getBuilder().createQuery(TraceSequence.class);
+            Root<TraceSequence> from = query.from(TraceSequence.class);
+            query.where(getBuilder().equal(from.get("fileId"), fileId));
+            return currentSession().createQuery(query).uniqueResultOptional();
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve entry by fileId: " + fileId, e);
         }
-
-        return traceSequence;
     }
 
     /**
