@@ -97,7 +97,7 @@ public class Experiments extends HasEntry {
             return experiment.toDataTransferObject();
         }
 
-        if (!userId.equalsIgnoreCase(study.getOwnerEmail()))
+        if (!userId.equalsIgnoreCase(experiment.getOwnerEmail()))
             entryAuthorization.expectWrite(userId, entry);
         String label = study.getLabel();
         if (label.length() >= 128)
