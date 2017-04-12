@@ -90,6 +90,8 @@ public class ExperimentsTest {
         Assert.assertEquals(created.getLabel(), study.getLabel());
         Assert.assertEquals(created.getOwnerEmail(), userId);
 
+        long createdId = created.getId();
+
         // update
         study.setLabel("Metabolomic study of the integrated adipic acid-producing Borrelidin Polyketide Synthase (PKS) (JGI constructs Ver. 1.0/ 2.0) S. venezuelae ATCC10712. From 20170206");
         created = experiments.createOrUpdateStudy(study);
@@ -101,6 +103,15 @@ public class ExperimentsTest {
         List<Study> studies = experiments.getPartStudies();
         Assert.assertNotNull(studies);
         Assert.assertEquals(1, studies.size());
+
+        // test assigning same study to a different entry
+        study.setUrl("http://edd-test.jbei.org/foo/bar");
+        study.setLabel("test create");
+        String partId2 = Long.toString(TestEntryCreator.createTestPart(userId));
+        experiments = new Experiments(userId, partId2);
+        created = experiments.createOrUpdateStudy(study);
+        Assert.assertNotNull(created);
+        Assert.assertEquals(created.getId(), createdId); // should be the same created experiment
     }
 
     @Test
