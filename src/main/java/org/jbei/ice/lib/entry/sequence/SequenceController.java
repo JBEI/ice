@@ -235,8 +235,11 @@ public class SequenceController extends HasEntry {
 
     protected FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {
         Sequence sequence = dao.getByEntry(entry);
-        if (sequence == null)
-            return null;
+        if (sequence == null) {
+            FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence();
+            featuredDNASequence.setName(entry.getName());
+            return featuredDNASequence;
+        }
 
         FeaturedDNASequence featuredDNASequence = sequenceToDNASequence(sequence);
         featuredDNASequence.setCanEdit(canEdit);
