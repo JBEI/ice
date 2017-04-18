@@ -40,7 +40,7 @@ public class UserApiKeys {
      */
     public AccessKey requestKey(String clientId) {
         try {
-            Optional<ApiKey> optional = apiKeyDAO.getByClientId(this.userId, clientId);
+            Optional<ApiKey> optional = apiKeyDAO.getByClientId(clientId);
             if (optional.isPresent())
                 throw new IllegalArgumentException("Attempting to create duplicate key for client id " + clientId);
         } catch (DAOException e) {
