@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.entry.sequence;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.dto.*;
@@ -16,6 +15,7 @@ import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.sbol.SBOLParser;
 import org.jbei.ice.lib.search.blast.BlastPlus;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
@@ -23,7 +23,6 @@ import org.jbei.ice.storage.model.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -105,7 +104,7 @@ public class PartSequence extends HasEntry {
 
         // parse actual sequence
         try {
-            String sequenceString = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+            String sequenceString = Utils.getString(inputStream);
             DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
             if (dnaSequence == null)
                 throw new InvalidFormatParserException("Could not parse sequence string");

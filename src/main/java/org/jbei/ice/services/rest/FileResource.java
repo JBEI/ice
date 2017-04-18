@@ -24,7 +24,6 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.RemoteSequence;
-import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
@@ -290,7 +289,7 @@ public class FileResource extends RestResource {
             if (info == null)
                 throw new WebApplicationException(Response.serverError().build());
             return Response.status(Response.Status.OK).entity(info).build();
-        } catch (final InvalidFormatParserException e) {
+        } catch (Exception e) {
             Logger.error(e);
             ErrorResponse response = new ErrorResponse();
             response.setMessage(e.getMessage());
