@@ -51,7 +51,7 @@
                         <i class='opacity_4' ng-if="!setting.value">
                             <span ng-if="!setting.canAutoInstall || !autoInstalling">No value entered</span>
                             <span ng-if="setting.canAutoInstall">
-                                <i class="fa fa-exclamation-triangle opacity_hover" ng-if="!autoInstalling"
+                                <i class="fa fa-cloud-download opacity_hover" ng-if="!autoInstalling"
                                    ng-click="autoInstallSetting(setting)" uib-tooltip="Auto install"></i>
 
                                 <span ng-if="autoInstalling==setting.originalKey">
