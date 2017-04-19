@@ -74,8 +74,8 @@ public class TraceSequences {
                                 byteArrayOutputStream.write(c);
                             }
 
-                            boolean parsed = parseTraceSequence(zipEntry.getName(),
-                                    byteArrayOutputStream.toByteArray());
+                            String zipFilename = Paths.get(zipEntry.getName()).getFileName().toString();
+                            boolean parsed = parseTraceSequence(zipFilename, byteArrayOutputStream.toByteArray());
                             if (!parsed) {
                                 String errMsg = ("Could not parse \"" + zipEntry.getName()
                                         + "\". Only Fasta, GenBank & ABI files are supported.");
