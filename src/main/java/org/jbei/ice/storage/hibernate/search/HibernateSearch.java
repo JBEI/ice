@@ -23,7 +23,6 @@ import org.jbei.ice.lib.search.QueryType;
 import org.jbei.ice.lib.search.filter.SearchFieldFactory;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
 import org.jbei.ice.storage.model.Entry;
@@ -308,7 +307,6 @@ public class HibernateSearch {
                 PartData info = ModelToInfoFactory.createTableViewData(userId, entry, true);
                 if (info == null)
                     continue;
-                info.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
                 searchResult.setEntryInfo(info);
             }
 

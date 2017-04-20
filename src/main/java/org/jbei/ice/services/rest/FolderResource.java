@@ -99,7 +99,7 @@ public class FolderResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFolder(@PathParam("id") long folderId) {
         String userId = requireUserId();
-        log(userId, "get folder \"" + folderId + "\"");
+        log(userId, "Get folder details for \"" + folderId + "\"");
         try {
             UserFolder folder = new UserFolder(userId);
             return super.respond(folder.getFolder(folderId));

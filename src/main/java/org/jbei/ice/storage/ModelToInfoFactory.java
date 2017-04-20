@@ -306,6 +306,8 @@ public class ModelToInfoFactory {
             view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
         }
 
+        // entry count
+        view.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
         return view;
     }
 
