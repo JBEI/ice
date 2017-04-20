@@ -232,12 +232,14 @@
                     <i ng-if="!entry.shortDescription" class="small text-muted">No description provided</i>
                 </td>
                 <td style="vertical-align: middle">
-                    <a ng-click="showEntryDetails(entry, $index, 'history')" style="opacity: 0.4"
-                       class="small cursor_pointer">
-                        <ng-pluralize count="entry.viewCount"
-                                      when="{'0': '',
-                                  '1': '1 view',
-                                  'other':'{} views'}"></ng-pluralize>
+                    <a ng-click="showEntryDetails(entry, $index, 'history')" class="cursor_pointer"
+                       uib-tooltip="{{entry.viewCount}} view(s)">
+                        <span ng-if="entry.viewCount" class="glyphicon glyphicon-fire small" ng-class="{
+                        'light-blue': entry.viewCount < 50,
+                        'gold': entry.viewCount >= 50 && entry.viewCount <= 100,
+                         'orange': entry.viewCount > 100 && entry.viewCount <= 500,
+                          'dark-orange': entry.viewCount > 500 && entry.viewCount <= 1000,
+                          'red': entry.viewCount > 1000}"></span>
                     </a>
                 </td>
                 <td style="vertical-align: middle; width:100px; white-space:nowrap"
