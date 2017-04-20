@@ -702,7 +702,7 @@ angular.module('ice.collection.controller', [])
 
             // number on this page
             var pageCount = (currentPage * maxPageCount) > resultCount ? resultCount : (currentPage * maxPageCount);
-            return pageNum + " - " + $filter('number')(pageCount) + " of " + $filter('number')(resultCount);
+            return $filter('number')(pageNum) + " - " + $filter('number')(pageCount) + " of " + $filter('number')(resultCount);
         };
 
         // retrieve user settings
