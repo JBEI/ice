@@ -43,7 +43,7 @@ public class AnnotationResource extends RestResource {
         String userId = requireUserId();
         Annotations annotations = new Annotations(userId);
         try {
-            if (!filter.isEmpty())
+            if (filter != null && !filter.isEmpty())
                 return super.respond(annotations.filter(offset, limit, filter));
             return super.respond(annotations.get(offset, limit, sort));
         } catch (PermissionException pe) {
