@@ -1,7 +1,7 @@
 package org.jbei.ice.services.rest;
 
+import com.google.common.io.ByteStreams;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -149,14 +149,11 @@ public class FileResource extends RestResource {
             linked = null;
         }
 
-        final StreamingOutput stream = new StreamingOutput() {
-            @Override
-            public void write(final OutputStream output) throws IOException, WebApplicationException {
-                byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType, linked,
-                        "existing".equalsIgnoreCase(linkedType));
-                ByteArrayInputStream stream = new ByteArrayInputStream(template);
-                IOUtils.copy(stream, output);
-            }
+        final StreamingOutput stream = output -> {
+            byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType, linked,
+                    "existing".equalsIgnoreCase(linkedType));
+            ByteArrayInputStream input = new ByteArrayInputStream(template);
+            ByteStreams.copy(input, output);
         };
 
         String filename = type.toLowerCase();
@@ -186,13 +183,9 @@ public class FileResource extends RestResource {
             wrapper = sequenceController.getSequenceFile(userId, partId, downloadType);
         }
 
-        StreamingOutput stream = new StreamingOutput() {
-            @Override
-            public void write(final OutputStream output) throws IOException,
-                    WebApplicationException {
-                final ByteArrayInputStream stream = new ByteArrayInputStream(wrapper.getBytes());
-                IOUtils.copy(stream, output);
-            }
+        StreamingOutput stream = output -> {
+            final ByteArrayInputStream input = new ByteArrayInputStream(wrapper.getBytes());
+            ByteStreams.copy(input, output);
         };
 
         return addHeaders(Response.ok(stream), wrapper.getName());
@@ -245,7 +238,7 @@ public class FileResource extends RestResource {
         if (uri != null) {
             try (final InputStream in = uri.toURL().openStream();
                  final OutputStream out = new FileOutputStream(png)) {
-                IOUtils.copy(in, out);
+                ByteStreams.copy(in, out);
             } catch (IOException e) {
                 Logger.error(e);
                 return respond(false);
