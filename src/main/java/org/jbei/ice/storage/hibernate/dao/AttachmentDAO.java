@@ -1,8 +1,8 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import com.google.common.io.ByteStreams;
 import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.utils.FileUtils;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Attachment;
@@ -12,6 +12,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -24,8 +26,9 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
     public Attachment save(File attDir, Attachment attachment, InputStream inputStream) {
         try {
             attachment = create(attachment);
-            if (inputStream != null)
-                FileUtils.writeFile(attDir, attachment.getFileId(), inputStream);
+            if (inputStream != null) {
+                Files.write(Paths.get(attDir.getAbsolutePath(), attachment.getFileId()), ByteStreams.toByteArray(inputStream));
+            }
         } catch (Exception e1) {
             Logger.error(e1);
             throw new DAOException("Exception writing attachment file ", e1);

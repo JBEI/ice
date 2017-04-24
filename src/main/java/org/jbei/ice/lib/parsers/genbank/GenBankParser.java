@@ -4,8 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
-import org.jbei.ice.lib.utils.FileUtils;
-import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
 
 import java.util.*;
@@ -95,11 +93,7 @@ public class GenBankParser extends AbstractParser {
     private void recordParsingError(final String fileText, final Exception e)
             throws InvalidFormatParserException {
         final String message = "Error parsing genBank file. Please examine the recorded file.";
-        try {
-            FileUtils.recordAndReportFile(message, fileText, e);
-        } catch (final UtilityException e1) {
-            throw new InvalidFormatParserException("failed to write error");
-        }
+//            FileUtils.recordAndReportFile(message, fileText, e); // todo
     }
 
     private ArrayList<Tag> splitTags(final String block, final String[] acceptedTags,
