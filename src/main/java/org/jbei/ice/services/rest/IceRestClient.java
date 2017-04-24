@@ -31,7 +31,7 @@ public class IceRestClient extends RestClient {
 
     protected IceRestClient() {
         ClientConfig clientConfig = new ClientConfig();
-        clientConfig.register(IceAuthenticationFilter.class);
+        clientConfig.register(IceRequestFilter.class);
         clientConfig.register(PartDataJSONHandler.class);
         clientConfig.register(ArrayDataJSONHandler.class);
         clientConfig.register(MultiPartFeature.class);
