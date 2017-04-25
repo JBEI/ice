@@ -1,15 +1,18 @@
 package org.jbei.ice.lib.entry;
 
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents entry selection in a specific context and by type
  * (e.g. select all plasmids from a search result)
+ * Can include an adhoc selection of local or remote entries
  *
  * @author Hector Plahar
  */
@@ -22,6 +25,7 @@ public class EntrySelection implements IDataTransferModel {
     private ArrayList<FolderDetails> destination;   // destination for entry selection
     private String folderId;                        // personal, available, shared, drafts, pending, actual folderId
     private ArrayList<Long> entries;                // if no context, then ad hoc selection
+    private ArrayList<PartData> remoteEntries;        // record Ids of adhoc remote entry selection
 
     public EntrySelection() {
         entries = new ArrayList<>();
@@ -82,5 +86,9 @@ public class EntrySelection implements IDataTransferModel {
 
     public void setEntries(ArrayList<Long> entries) {
         this.entries = entries;
+    }
+
+    public List<PartData> getRemoteEntries() {
+        return this.remoteEntries;
     }
 }

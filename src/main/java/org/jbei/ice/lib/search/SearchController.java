@@ -100,6 +100,17 @@ public class SearchController {
         }
     }
 
+    public IndexBuildStatus getIndexStatus(IndexType type) {
+        switch (type) {
+            case LUCENE:
+            default:
+                return IndexerProgressMonitor.getInstance().getStatus();
+
+            case BLAST:
+                return BlastPlus.getStatus();
+        }
+    }
+
     /**
      * Parses the query string checking for terms and phrases. A quote is used to indicate
      * the boundaries of a phrase

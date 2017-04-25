@@ -18,8 +18,12 @@
                        placeholder="Optional file description">
             </form>
 
-            <div style="height: 5px; width: 170px; background-color: #f5f5f5;">
+            <div style="height: 5px; width: 170px; background-color: #f5f5f5;" ng-if="uploader.progress">
                 <div class="progress-bar" role="progressbar" ng-style="{ 'width': uploader.progress + '%' }"></div>
+            </div>
+
+            <div class="alert alert-danger font-75em" role="alert" style="padding: 4px" ng-if="uploadError">
+                Server error uploading file
             </div>
 
             <div class="pad-8 text-center">

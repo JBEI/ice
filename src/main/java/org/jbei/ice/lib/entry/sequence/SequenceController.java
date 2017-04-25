@@ -10,7 +10,9 @@ import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
@@ -222,6 +224,11 @@ public class SequenceController extends HasEntry {
         if (entry == null)
             throw new IllegalArgumentException("The part " + recordId + " could not be located");
 
+        if (entry.getVisibility() == Visibility.REMOTE.getValue()) {
+            WebEntries webEntries = new WebEntries();
+            return webEntries.getSequence(recordId);
+        }
+
         if (!new PermissionsController().isPubliclyVisible(entry))
             authorization.expectRead(userId, entry);
 
@@ -231,8 +238,11 @@ public class SequenceController extends HasEntry {
 
     protected FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {
         Sequence sequence = dao.getByEntry(entry);
-        if (sequence == null)
-            return null;
+        if (sequence == null) {
+            FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence();
+            featuredDNASequence.setName(entry.getName());
+            return featuredDNASequence;
+        }
 
         FeaturedDNASequence featuredDNASequence = sequenceToDNASequence(sequence);
         featuredDNASequence.setCanEdit(canEdit);
@@ -446,7 +456,7 @@ public class SequenceController extends HasEntry {
                     break;
 
                 case "fasta":
-                    FastaFormatter formatter = new FastaFormatter(sequence.getEntry().getName());
+                    FastaFormatter formatter = new FastaFormatter();
                     sequenceString = compose(sequence, formatter);
                     name = entry.getPartNumber() + ".fasta";
                     break;

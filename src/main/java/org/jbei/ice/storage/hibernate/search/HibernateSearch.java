@@ -23,7 +23,6 @@ import org.jbei.ice.lib.search.QueryType;
 import org.jbei.ice.lib.search.filter.SearchFieldFactory;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
 import org.jbei.ice.storage.model.Entry;
@@ -36,7 +35,6 @@ import java.util.*;
  *
  * @author Hector Plahar, Elena Aravina
  */
-@SuppressWarnings("unchecked")
 public class HibernateSearch {
 
     private HibernateSearch() {
@@ -230,6 +228,7 @@ public class HibernateSearch {
         return results;
     }
 
+    @SuppressWarnings("unchecked")
     public SearchResults executeSearch(String userId, HashMap<String, QueryType> terms,
                                        SearchQuery searchQuery,
                                        HashMap<String, SearchResult> blastResults) {
@@ -308,7 +307,6 @@ public class HibernateSearch {
                 PartData info = ModelToInfoFactory.createTableViewData(userId, entry, true);
                 if (info == null)
                     continue;
-                info.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
                 searchResult.setEntryInfo(info);
             }
 
@@ -440,7 +438,7 @@ public class HibernateSearch {
         if (parameters == null)
             return;
 
-        ArrayList<String> terms = new ArrayList<>();
+        ArrayList<String> terms = new ArrayList<>(3);
 
         if (parameters.getHasSample()) {
             terms.add("hasSample");
@@ -457,8 +455,7 @@ public class HibernateSearch {
         if (terms.isEmpty())
             return;
 
-        fullTextQuery.enableFullTextFilter("boolean")
-                .setParameter("field", terms);
+        fullTextQuery.enableFullTextFilter("boolean").setParameter("field", terms);
     }
 
     protected static String cleanQuery(String query) {

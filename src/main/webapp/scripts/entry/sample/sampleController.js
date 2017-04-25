@@ -16,18 +16,18 @@ angular.module('ice.entry.sample.controller', [])
 
         $scope.Plate96Rows = SampleService.getPlate96Rows();
         $scope.Plate96Cols = SampleService.getPlate96Cols();
-        $scope.addToCartDefaultLocal;
+        $scope.addToCartDefaultLocal = undefined;
         Util.get('rest/config/ADD_TO_CART_DEFAULT_SET_TO_LOCAL', function (result) {
-            $scope.addToCartDefaultLocal = result.value.toUpperCase() === "YES" ? true : false;
+            $scope.addToCartDefaultLocal = result.value.toUpperCase() === "YES";
         });
 
         // retrieve samples for partId and all samples for relevent plates
-        var refreshSamples = function() {
+        var refreshSamples = function () {
             Util.list('rest/parts/' + partId + '/samples', function (result) {
                 var samples = [];
                 var distinctPlates = {};
                 var totalSamples = 0;
-                for (var i=0; i<result.length; i++) {
+                for (var i = 0; i < result.length; i++) {
                     var sample = result[i];
                     if ("" + sample.partId === partId) {
                         totalSamples += 1;
@@ -80,7 +80,8 @@ angular.module('ice.entry.sample.controller', [])
                 controller: function ($scope, samples) {
                     $scope.samples = samples;
                     $scope.tempRange = [{value: 30}, {value: 37}];
-                    $scope.plateInformationOptions = [{value: "LB"},
+                    $scope.plateInformationOptions = [{value: ""},
+                        {value: "LB"},
                         {value: "LB Apr50"},
                         {value: "LB Carb100"},
                         {value: "LB Chlor25"},
@@ -130,7 +131,7 @@ angular.module('ice.entry.sample.controller', [])
                     };
 
                     $scope.disableAddToCart = function () {
-                        return !$scope.userData.sampleType || !$scope.userData.plateDescription ||
+                        return !$scope.userData.sampleType || !$scope.userData.plateDescription.value ||
                             ($scope.userData.plateDescription.value == 'Other' && !$scope.userData.plateDescriptionText);
                     }
                 },
@@ -140,8 +141,7 @@ angular.module('ice.entry.sample.controller', [])
                     }
                 }
             });
-        }
-        ;
+        };
 
         $scope.newSample = {
             open: {},

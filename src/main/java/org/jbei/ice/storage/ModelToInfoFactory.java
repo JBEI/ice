@@ -275,7 +275,8 @@ public class ModelToInfoFactory {
         view.setStatus(entry.getStatus());
         view.setAlias(entry.getAlias());
         view.setOwnerEmail(entry.getOwnerEmail());
-        view.setVisibility(Visibility.valueToEnum(entry.getVisibility()));
+        Visibility visibility = Visibility.valueToEnum(entry.getVisibility());
+        view.setVisibility(visibility);
 
         if (userId != null) {
             EntryAuthorization authorization = new EntryAuthorization();
@@ -297,10 +298,16 @@ public class ModelToInfoFactory {
         view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));
 
         // has sequence
-        SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
-        view.setHasSequence(sequenceDAO.hasSequence(entry.getId()));
-        view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
+        if (visibility == Visibility.REMOTE) {
+            view.setHasSequence(entry.getLongDescriptionType().equalsIgnoreCase("sequence"));
+        } else {
+            SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
+            view.setHasSequence(sequenceDAO.hasSequence(entry.getId()));
+            view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
+        }
 
+        // entry count
+        view.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
         return view;
     }
 

@@ -1,6 +1,5 @@
 package org.jbei.ice.lib.bulkupload;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
@@ -562,7 +561,7 @@ public class BulkEntryCreator {
         try {
             String sequenceName = data.getSequenceFileName();
             if (!StringUtils.isBlank(sequenceName)) {
-                String sequenceString = IOUtils.toString(files.get(sequenceName), "UTF-8");
+                String sequenceString = Utils.getString(files.get(sequenceName));
                 DNASequence dnaSequence = SequenceController.parse(sequenceString);
 
                 if (dnaSequence == null || dnaSequence.getSequence().equals("")) {

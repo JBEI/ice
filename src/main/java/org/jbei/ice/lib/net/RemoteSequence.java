@@ -91,8 +91,7 @@ public class RemoteSequence {
                     break;
 
                 case "fasta":
-                    name = name + ".fasta";
-                    formatter = new FastaFormatter(name);
+                    formatter = new FastaFormatter();
                     break;
 
                 case "sbol1":

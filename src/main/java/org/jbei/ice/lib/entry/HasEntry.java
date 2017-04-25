@@ -13,7 +13,7 @@ import java.util.List;
  * Provides a means to retrieve an entry using an id that can either be
  * the database identifier for the entry object or any one of the other unique entry
  * fields. e.g. <code>part number</code> or <code>universally unique id</code>
- * <p>
+ * <p/>
  * Also provides access to the entry data accessor object
  *
  * @author Hector Plahar
@@ -28,6 +28,12 @@ public class HasEntry {
         this.accountDAO = DAOFactory.getAccountDAO();
     }
 
+    /**
+     * Retrieve entry using a unique entry identifier
+     *
+     * @param id unique entry identifier for entry. Can be the name if names are unique in this ICE instance
+     * @return found entry or null
+     */
     protected Entry getEntry(String id) {
         Entry entry = null;
 

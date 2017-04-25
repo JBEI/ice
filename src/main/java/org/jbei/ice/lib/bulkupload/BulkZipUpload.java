@@ -1,11 +1,11 @@
 package org.jbei.ice.lib.bulkupload;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.utils.Utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -75,7 +75,7 @@ public class BulkZipUpload extends BulkCSVUpload {
                         processedBulkUpload.setUserMessage("Duplicate csv file in zip archive. It should only contain one.");
                         return processedBulkUpload;
                     }
-                    csvFile = IOUtils.toString(zipFile.getInputStream(zipEntry));
+                    csvFile = Utils.getString(zipFile.getInputStream(zipEntry));
                 } else {
                     InputStream inputStream = zipFile.getInputStream(zipEntry);
                     files.put(name, inputStream);

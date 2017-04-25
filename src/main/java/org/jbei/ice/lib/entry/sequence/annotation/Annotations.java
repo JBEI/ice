@@ -4,11 +4,13 @@ import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.DNAFeature;
+import org.jbei.ice.lib.dto.DNAFeatureLocation;
 import org.jbei.ice.lib.dto.DNAFeatures;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.executor.IceExecutorService;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.storage.DAOFactory;
@@ -80,6 +82,33 @@ public class Annotations {
             }
             results.getData().add(features);
         }
+        return results;
+    }
+
+    public Results<DNAFeature> filter(int offset, int limit, String filter) {
+        Account account = accountDAO.getByEmail(userId);
+        List<Group> groups = new GroupController().getAllGroups(account);
+        List<SequenceFeature> features = sequenceFeatureDAO.getSequenceFeatures(this.userId, groups, filter,
+                offset, limit);
+
+        int count = sequenceFeatureDAO.getSequenceFeaturesCount(this.userId, groups, filter);
+        Results<DNAFeature> results = new Results<>();
+        results.setResultCount(count);
+
+        for (SequenceFeature feature : features) {
+            DNAFeature dnaFeature = feature.toDataTransferObject();
+
+            Entry entry = feature.getSequence().getEntry();
+            dnaFeature.setIdentifier(entry.getPartNumber());
+
+            DNAFeatureLocation location = new DNAFeatureLocation();
+            location.setGenbankStart(feature.getUniqueGenbankStart());
+            location.setEnd(feature.getUniqueEnd());
+            dnaFeature.getLocations().add(location);
+            dnaFeature.getEntries().add(entry.getId());
+            results.getData().add(dnaFeature);
+        }
+
         return results;
     }
 

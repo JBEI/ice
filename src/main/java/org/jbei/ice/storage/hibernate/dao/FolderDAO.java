@@ -11,7 +11,10 @@ import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.*;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.*;
 
 /**
@@ -88,7 +91,8 @@ public class FolderDAO extends HibernateRepository<Folder> {
                 ));
             }
             if (visibleOnly) {
-                predicates.add(getBuilder().equal(entry.get("visibility"), Visibility.OK.getValue()));
+                predicates.add(entry.get("visibility").in(Arrays.asList(Visibility.OK.getValue(),
+                        Visibility.REMOTE.getValue())));
             }
             predicates.add(getBuilder().equal(from.get("id"), id));
             query.select(getBuilder().countDistinct(entry.get("id")));
@@ -182,7 +186,8 @@ public class FolderDAO extends HibernateRepository<Folder> {
                 ));
             }
             if (visibleOnly) {
-                predicates.add(getBuilder().equal(entry.get("visibility"), Visibility.OK.getValue()));
+                predicates.add(entry.get("visibility").in(Arrays.asList(Visibility.OK.getValue(),
+                        Visibility.REMOTE.getValue())));
             }
             query.select(entry).where(predicates.toArray(new Predicate[predicates.size()]));
             query.orderBy(pageParameters.isAscending() ? getBuilder().asc(entry.get(sortString)) :
@@ -258,37 +263,21 @@ public class FolderDAO extends HibernateRepository<Folder> {
             Root<Permission> from = query.from(Permission.class);
             Join<Permission, Folder> folder = from.join("folder");
 
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(getBuilder().or(
-                    getBuilder().equal(from.get("account"), account),
-                    from.get("group").in(accountGroups)
-            ));
-            predicates.add(getBuilder().equal(from.get("canWrite"), true));
-            predicates.add(getBuilder().isNotNull(from.get("folder")));
-            predicates.add(
-                    getBuilder().equal(getBuilder().lower(folder.get("ownerEmail")), account.getEmail().toLowerCase())
+            // where ((account = account or group in groups) and canWrite)) or is owner
+            Predicate predicate = getBuilder().and(
+                    getBuilder().or(
+                            getBuilder().equal(from.get("account"), account),
+                            from.get("group").in(accountGroups)
+                    ),
+                    getBuilder().equal(from.get("canWrite"), true),
+                    getBuilder().isNotNull(from.get("folder"))
             );
 
-            query.select(folder).where(predicates.toArray(new Predicate[predicates.size()]));
+            query.select(folder).where(predicate);
             return currentSession().createQuery(query).list();
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException(e);
-        }
-    }
-
-    public int setFolderEntryVisibility(long folderId, Visibility ok) {
-        try {
-            CriteriaUpdate<Folder> update = getBuilder().createCriteriaUpdate(Folder.class);
-            Root<Folder> from = update.from(Folder.class);
-            Join<Folder, Entry> entry = from.join("contents");
-
-            update.set(entry.get("visibility"), ok.getValue());
-            update.where(getBuilder().equal(from.get("id"), folderId));
-            return currentSession().createQuery(update).executeUpdate();
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
         }
     }
 

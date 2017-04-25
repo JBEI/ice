@@ -65,6 +65,7 @@ public class CollectionEntries {
             default:
                 return this.getPersonalEntries(field, asc, offset, limit, filter);
 
+            case FEATURED:
             case AVAILABLE:
                 return this.getAvailableEntries(field, asc, offset, limit, filter);
 

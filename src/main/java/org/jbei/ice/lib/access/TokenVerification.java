@@ -4,6 +4,7 @@ import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.ApiKey;
 import org.jbei.ice.storage.model.RemotePartner;
@@ -37,12 +38,18 @@ public class TokenVerification {
             throw new PermissionException("Invalid token");
 
         // if the api belongs to an admin, accept whatever user id they present
-        Account account = DAOFactory.getAccountDAO().getByEmail(key.getOwnerEmail());
+        AccountDAO accountDAO = DAOFactory.getAccountDAO();
+        Account account = accountDAO.getByEmail(key.getOwnerEmail());
         if (userId == null)
             userId = account.getEmail();
 
-        if (account.getType() == AccountType.ADMIN)
-            return userId;                          // todo : verify that this account actually exists on this instance
+        if (account.getType() == AccountType.ADMIN) {
+            if (account.getEmail().equalsIgnoreCase(userId))
+                return userId;
+            if (accountDAO.getByEmail(userId) == null)
+                throw new PermissionException("Invalid user id");
+            return userId;
+        }
 
         return key.getOwnerEmail();
     }

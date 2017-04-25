@@ -8,30 +8,30 @@
     </div>
 
     <table class="table table-hover pad_top table-border-bottom" ng-if="userGroups.data.length"
-           style="width: 98%;">
+           style="width: 96%;">
         <thead>
         <tr>
             <th>&nbsp;</th>
             <th style="width: 360px">
                 <span class="entry-table-header">Label</span>
             </th>
-            <th style="width:180px; white-space:nowrap">
+            <th style="width:130px; white-space:nowrap">
                 <span class="entry-table-header">Members</span>
             </th>
             <th>
                 <span class="entry-table-header">Created</span>
             </th>
-            <th></th>
+            <th style="width:120px"></th>
         </tr>
         </thead>
         <tbody>
         <tr ng-repeat="group in userGroups.data">
-            <td class="font-14em table-row-index">
-                <b>{{$index+1}}</b>
+            <td class="font-14em table-row-index" style="width: 40px">
+                <b>{{$index+1 | number}}</b>
             </td>
             <td>{{group.label}}
                 <br>
-                <i class="small text-muted">{{group.description}}</i>
+                <i class="small text-muted">{{group.description || 'No description provided'}}</i>
             </td>
             <td style="vertical-align: middle">
                 <span class="label"
@@ -40,26 +40,32 @@
                       'label-default': group.memberCount == 0}">{{group.memberCount | number}}
                 </span>
             </td>
-            <td style="width:180px; vertical-align: middle">
-                <small class="text-muted">{{group.creationTime | date:'MMM d, yyyy, h:mm a'}}</small>
+            <td style="width:190px; vertical-align: middle">
+                <small ng-if="group.creationTime" class="text-muted">
+                    {{group.creationTime | date:'MMM d, yyyy, h:mm a'}}
+                </small>
             </td>
-            <td style="width:150px; white-space:nowrap; vertical-align: middle" ng-if="user.email==group.ownerEmail">
-                <div ng-if="!group.confirmDeleteGroup">
-                    <i class="fa fa-fw fa-pencil font-14em edit_icon" uib-tooltip="Edit"
-                       ng-click="openCreateGroupModal(group)"></i>
-                    &nbsp;
-                    <i class="fa fa-fw fa-trash font-14em delete_icon" ng-click="group.confirmDeleteGroup = true"
-                       uib-tooltip="Delete"></i>
+            <td style="border-left: 1px solid #EEEEEE; white-space:nowrap; vertical-align: middle">
+                <div ng-if="user.email==group.ownerEmail">
+                    <div ng-if="!group.confirmDeleteGroup">
+                        <i class="fa fa-fw fa-pencil font-14em edit_icon" uib-tooltip="Edit"
+                           ng-click="openCreateGroupModal(group)"></i>
+                        &nbsp;
+                        <i class="fa fa-fw fa-trash font-14em delete_icon" ng-click="group.confirmDeleteGroup = true"
+                           uib-tooltip="Delete"></i>
+                    </div>
+
+                    <div ng-if="group.confirmDeleteGroup">
+                        Delete?
+                        <button class="btn btn-primary btn-xs" ng-click="deleteUserGroup(group)">Yes</button>
+                        <button class="btn btn-default btn-xs" ng-click="group.confirmDeleteGroup=false">No</button>
+                    </div>
                 </div>
 
-                <div ng-if="group.confirmDeleteGroup">
-                    Delete?
-                    <button class="btn btn-primary btn-xs" ng-click="deleteUserGroup(group)">Yes</button>
-                    <button class="btn btn-default btn-xs" ng-click="group.confirmDeleteGroup=false">No</button>
+                <div ng-if="user.email!=group.ownerEmail">
+                    <i class="fa fa-fw fa-user-times font-14em delete_icon" uib-tooltip="Leave Group"></i>
                 </div>
-            </td>
-            <td style="width:150px;" ng-if="user.email!=group.ownerEmail">
-                <i class="fa fa-fw fa-user-times font-14em delete_icon" uib-tooltip="Leave"></i>
+
             </td>
         </tr>
         </tbody>

@@ -44,8 +44,7 @@ public class Experiments extends HasEntry {
      * Retrieves experiment data associated with a specific entry
      *
      * @return list of experiment studies associated with the specified entry, or null if the entry does not exist
-     * @throws PermissionException if the specified user does not have read privileges on the
-     *                             specified entry
+     * @throws PermissionException if the specified user does not have read privileges on the specified entry
      */
     public ArrayList<Study> getPartStudies() {
         entryAuthorization.expectRead(userId, entry);
@@ -63,11 +62,11 @@ public class Experiments extends HasEntry {
     /**
      * Creates a new study for a particular entry. If a unique identifier is associated with the {@link Study} object
      * then an update occurs instead of a new object being created.
-     * <p>
+     * <p/>
      * Only read access is required to create a new study. To update an existing study
      * the user must be the creator or must have write access on the entry the study is associated with
      *
-     * @param study  data for study
+     * @param study data for study
      * @return saved study (including unique identifier)
      */
     public Study createOrUpdateStudy(Study study) {
@@ -88,17 +87,23 @@ public class Experiments extends HasEntry {
             experiment = new Experiment();
             experiment.setCreationTime(new Date());
             experiment.setUrl(study.getUrl());
-            experiment.setLabel(study.getLabel());
+            String label = study.getLabel();
+            if (label.length() >= 128)
+                label = label.substring(0, 128);
+            experiment.setLabel(label);
             experiment.getSubjects().add(entry);
             experiment.setOwnerEmail(userId);
             experiment = dao.create(experiment);
             return experiment.toDataTransferObject();
         }
 
-        if (!userId.equalsIgnoreCase(study.getOwnerEmail()))
+        if (!userId.equalsIgnoreCase(experiment.getOwnerEmail()))
             entryAuthorization.expectWrite(userId, entry);
+        String label = study.getLabel();
+        if (label.length() >= 128)
+            label = label.substring(0, 128);
         experiment.setUrl(study.getUrl());
-        experiment.setLabel(study.getLabel());
+        experiment.setLabel(label);
         experiment.getSubjects().add(entry);
         return dao.update(experiment).toDataTransferObject();
     }

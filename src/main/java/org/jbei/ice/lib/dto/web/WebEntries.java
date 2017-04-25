@@ -2,7 +2,9 @@ package org.jbei.ice.lib.dto.web;
 
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
@@ -43,7 +45,7 @@ public class WebEntries {
     public PartData getPart(String recordId) {
         // check local first
         Entry entry = this.entryDAO.getByRecordId(recordId);
-        if (entry != null) {
+        if (entry != null && entry.getVisibility() != Visibility.REMOTE.getValue()) {
             PermissionsController permissionsController = new PermissionsController();
             if (permissionsController.isPubliclyVisible(entry))
                 return ModelToInfoFactory.getInfo(entry);
@@ -51,9 +53,42 @@ public class WebEntries {
 
         List<RemotePartner> partners = this.remotePartnerDAO.getRegistryPartners();
         for (RemotePartner partner : partners) {
+            if (partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+                continue;
+
             PartData partData = this.remoteContact.getPublicEntry(partner.getUrl(), recordId, partner.getApiKey());
-            if (partData != null)
-                return partData;
+
+            // if the part is just a remote then the main one is on some other ICE instance
+            if (partData == null || partData.getVisibility() == Visibility.REMOTE)
+                continue;
+
+            return partData;
+        }
+        return null;
+    }
+
+    public FeaturedDNASequence getSequence(String entryId) {
+        String recordId;
+        try {
+            long id = Long.decode(entryId);
+            Entry entry = this.entryDAO.get(id);
+            if (entry == null)
+                recordId = entryId;
+            else
+                recordId = entry.getRecordId();
+
+        } catch (NumberFormatException ex) {
+            recordId = entryId;
+        }
+
+        List<RemotePartner> partners = this.remotePartnerDAO.getRegistryPartners();
+        for (RemotePartner partner : partners) {
+            if (partner.getPartnerStatus() != RemotePartnerStatus.APPROVED)
+                continue;
+
+            FeaturedDNASequence sequence = this.remoteContact.getPublicEntrySequence(partner.getUrl(), recordId, partner.getApiKey());
+            if (sequence != null)
+                return sequence;
         }
         return null;
     }

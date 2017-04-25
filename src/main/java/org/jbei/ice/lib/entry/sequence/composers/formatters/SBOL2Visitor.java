@@ -22,7 +22,7 @@ public class SBOL2Visitor {
     private Set<String> uris;
     private SBOLDocument doc;
 
-    public SBOL2Visitor(SBOLDocument doc) throws URISyntaxException {
+    public SBOL2Visitor(SBOLDocument doc) throws SBOLValidationException, URISyntaxException {
 
         this.doc = doc;
         uriString = Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/entry";

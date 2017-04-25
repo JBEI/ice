@@ -1,6 +1,6 @@
 <div class="container-fluid">
     <!--if subfolder-->
-    <div class="row entry_general_header_td" style="height: 60px;" ng-if="folder.type">
+    <div class="row entry_general_header_td" style="height: 60px" ng-if="folder.type">
         <div class="col-md-12">
             <table>
                 <tr>
@@ -214,6 +214,7 @@
                 <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
                     <i class="fa fa-fw fa-trash-o red" ng-if="entry.visible=='DELETED'"></i>
                     {{entry.type | uppercase}}
+                    <i class="fa fa-fw fa-cloud" ng-if="entry.visible=='REMOTE'" style="color: #c9e6f2"></i>
                 </td>
                 <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
                        popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
@@ -231,12 +232,14 @@
                     <i ng-if="!entry.shortDescription" class="small text-muted">No description provided</i>
                 </td>
                 <td style="vertical-align: middle">
-                    <a ng-click="showEntryDetails(entry, $index, 'history')" style="opacity: 0.4"
-                       class="small cursor_pointer">
-                        <ng-pluralize count="entry.viewCount"
-                                      when="{'0': '',
-                                  '1': '1 view',
-                                  'other':'{} views'}"></ng-pluralize>
+                    <a ng-click="showEntryDetails(entry, $index, 'history')" class="cursor_pointer"
+                       uib-tooltip="{{entry.viewCount}} view(s)">
+                        <span ng-if="entry.viewCount" class="glyphicon glyphicon-fire small" ng-class="{
+                        'light-blue': entry.viewCount < 50,
+                        'gold': entry.viewCount >= 50 && entry.viewCount <= 100,
+                         'orange': entry.viewCount > 100 && entry.viewCount <= 500,
+                          'dark-orange': entry.viewCount > 500 && entry.viewCount <= 1000,
+                          'red': entry.viewCount > 1000}"></span>
                     </a>
                 </td>
                 <td style="vertical-align: middle; width:100px; white-space:nowrap"

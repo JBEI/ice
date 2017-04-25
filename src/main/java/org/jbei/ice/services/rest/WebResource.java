@@ -3,7 +3,6 @@ package org.jbei.ice.services.rest;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.Setting;
-import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PartStatistics;
@@ -50,29 +49,29 @@ public class WebResource extends RestResource {
         return super.respond(controller.getRegistryPartners(approvedOnly));
     }
 
-    /**
-     * Retrieves entries for specified partner using the specified paging parameters
-     *
-     * @param partnerId unique identifier for registry partner whose entries are being retrieved
-     * @param offset    record retrieve offset paging parameter
-     * @param limit     maximum number of entries to retrieve
-     * @param sort      field to sort on
-     * @param asc       sort order
-     * @return Response with public entries from registry partners
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/{id}/entries")
-    public Response getWebEntries(
-            @PathParam("id") final long partnerId,
-            @DefaultValue("0") @QueryParam("offset") final int offset,
-            @DefaultValue("15") @QueryParam("limit") final int limit,
-            @DefaultValue("created") @QueryParam("sort") final String sort,
-            @DefaultValue("false") @QueryParam("asc") final boolean asc) {
-        getUserId();
-        final Results<PartData> result = remoteEntries.getPublicEntries(partnerId, offset, limit, sort, asc);
-        return super.respond(Response.Status.OK, result);
-    }
+//    /**
+//     * Retrieves entries for specified partner using the specified paging parameters
+//     *
+//     * @param partnerId unique identifier for registry partner whose entries are being retrieved
+//     * @param offset    record retrieve offset paging parameter
+//     * @param limit     maximum number of entries to retrieve
+//     * @param sort      field to sort on
+//     * @param asc       sort order
+//     * @return Response with public entries from registry partners
+//     */
+//    @GET
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Path("/{id}/entries")
+//    public Response getWebEntries(
+//            @PathParam("id") final long partnerId,
+//            @DefaultValue("0") @QueryParam("offset") final int offset,
+//            @DefaultValue("15") @QueryParam("limit") final int limit,
+//            @DefaultValue("created") @QueryParam("sort") final String sort,
+//            @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+//        getUserId();
+//        final Results<PartData> result = remoteEntries.getPublicEntries(partnerId, offset, limit, sort, asc);
+//        return super.respond(Response.Status.OK, result);
+//    }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

@@ -379,10 +379,9 @@ angular.module('ice.collection.controller', [])
 // deals with sub collections e.g. /folders/:id
 // retrieves the contents of folders
     .
-    controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $cookieStore,
-                                                       $stateParams, EntryContextUtil,
-                                                       Selection, Util, localStorageService) {
-        var sessionId = $cookieStore.get("sessionId");
+    controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $stateParams,
+                                                       EntryContextUtil, Selection, Util, localStorageService) {
+        //$rootScope.$emit("CollectionSelection", $stateParams.collection);
         var resource = "collections";
 
         $scope.folderPageChange = function () {
@@ -683,7 +682,7 @@ angular.module('ice.collection.controller', [])
         }
     })
     // also the main controller
-    .controller('CollectionController', function ($scope, $state, $filter, $location, $cookieStore, $rootScope,
+    .controller('CollectionController', function ($scope, $state, $filter, $location, $rootScope, EntryService,
                                                   Authentication, CollectionMenuOptions, Util) {
         // todo : set on all
         var searchUrl = "search";
@@ -691,10 +690,8 @@ angular.module('ice.collection.controller', [])
             $location.search('q', null);
         }
 
-        var sessionId = $cookieStore.get("sessionId");
         $scope.searchFilters = {};
         $rootScope.settings = {};
-
 
         // retrieve site wide settings
         $scope.pageCounts = function (currentPage, resultCount, maxPageCount) {
@@ -704,7 +701,7 @@ angular.module('ice.collection.controller', [])
 
             // number on this page
             var pageCount = (currentPage * maxPageCount) > resultCount ? resultCount : (currentPage * maxPageCount);
-            return pageNum + " - " + $filter('number')(pageCount) + " of " + $filter('number')(resultCount);
+            return $filter('number')(pageNum) + " - " + $filter('number')(pageCount) + " of " + $filter('number')(resultCount);
         };
 
         // retrieve user settings
@@ -713,12 +710,7 @@ angular.module('ice.collection.controller', [])
         $scope.collectionList = CollectionMenuOptions.getCollectionOptions();
 
         // entry items that can be created
-        $scope.items = [
-            {name: "Plasmid", type: "plasmid"},
-            {name: "Strain", type: "strain"},
-            {name: "Part", type: "part"},
-            {name: "Arabidopsis Seed", type: "arabidopsis"}
-        ];
+        $scope.items = EntryService.getEntryItems();
 
         if ($location.path() === "/") {
             // change state to trigger collection-selection.html (see ice.app.js)
@@ -779,8 +771,6 @@ angular.module('ice.collection.controller', [])
 
         // remove sample request from cart
         $scope.removeFromCart = function (content, entry) {
-            console.log("remote from cart", content, entry);
-
             if (entry) {
                 var partId = entry.id;
                 for (var idx = 0; idx < $scope.shoppingCartContents.length; idx += 1) {

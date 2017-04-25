@@ -50,7 +50,6 @@ public class SharedEntries {
         ArrayList<PartData> data = new ArrayList<>();
         for (Entry entry : entries) {
             PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false);
-            info.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
             data.add(info);
         }
         return data;

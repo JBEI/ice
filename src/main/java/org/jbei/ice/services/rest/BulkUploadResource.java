@@ -1,7 +1,6 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.AuthorizationException;
@@ -130,7 +129,7 @@ public class BulkUploadResource extends RestResource {
         try {
             String fileName = contentDispositionHeader.getFileName();
             String userId = requireUserId();
-            String sequence = IOUtils.toString(fileInputStream);
+            String sequence = Utils.getString(fileInputStream);
             SequenceInfo sequenceInfo = controller.addSequence(userId, uploadId, entryId,
                     sequence, fileName);
             if (sequenceInfo == null) {

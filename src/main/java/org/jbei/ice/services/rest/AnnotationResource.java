@@ -38,10 +38,13 @@ public class AnnotationResource extends RestResource {
     public Response getFeatures(@DefaultValue("0") @QueryParam("offset") final int offset,
                                 @DefaultValue("15") @QueryParam("limit") final int limit,
                                 @DefaultValue("created") @QueryParam("sort") final String sort,
-                                @DefaultValue("false") @QueryParam("asc") final boolean asc) {
+                                @DefaultValue("false") @QueryParam("asc") final boolean asc,
+                                @QueryParam("filter") String filter) {
         String userId = requireUserId();
         Annotations annotations = new Annotations(userId);
         try {
+            if (filter != null && !filter.isEmpty())
+                return super.respond(annotations.filter(offset, limit, filter));
             return super.respond(annotations.get(offset, limit, sort));
         } catch (PermissionException pe) {
             throw new WebApplicationException(Response.Status.FORBIDDEN);

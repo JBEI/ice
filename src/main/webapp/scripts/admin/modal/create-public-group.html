@@ -1,5 +1,5 @@
 <div class="modal-header">
-    <button type="button" class="close" ng-click="closeCreatePublicGroupModal()">&times;</button>
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
     <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
         <i class="fa fa-group"></i> &nbsp;
         <span ng-if="!newPublicGroup.id">Create Public Group</span>
@@ -25,38 +25,43 @@
             </div>
 
             <div class="pad-top-5">
-                <b class="font-75em">ADD EXISTING USERS</b><br>
-                <input class="input_box" type="text" ng-model="enteredUser" placeHolder="User name or email"
-                       ng-change="filterUsers(enteredUser)" style="width: 210px"/>
+                <b class="font-75em">ADD USERS</b><br>
+                <script type="text/ng-template" id="customTemplate.html">
+                    <a class="font-90em">
+                        <span ng-bind-html="match.model.firstName + ' ' + match.model.lastName | uibTypeaheadHighlight:query"></span>
+
+                        <div ng-bind-html="match.model.email | uibTypeaheadHighlight:query"
+                             style="font-size: 12px; color: #aaa; margin-top: -3px;"></div>
+                    </a>
+                </script>
+                <input class="input_box" type="text" ng-model="newUserName" placeHolder="Search by username or email"
+                       style="width: 210px; padding: 5px"
+                       typeahead-loading="loadingAddExistingData"
+                       uib-typeahead="result for result in filter($viewValue)"
+                       typeahead-editable="true" typeahead-template-url="customTemplate.html"
+                       typeahead-on-select="userSelectionForGroupAdd($item, $model, $label)"/>
 
                 <br><br>
 
                 <div style="background-color: #fff; height: 200px; overflow: auto; width: 400px">
 
-                    <div ng-if="!filtering && !userMatches" style="opacity: 0.7;" class="small pad-8">
-                        <i>No user matches</i>
+                    <div ng-if="!filtering && !newPublicGroup.members.length" style="opacity: 0.7;" class="small pad-8">
+                        <i>No users added</i>
                     </div>
 
                     <table class="table table-condensed table-hover">
-                        <tr ng-repeat="user in userMatches | orderBy:'firstName' | orderBy:'fullName'">
-                            <td ng-click="selectUser(user)" class="font-80em no_wrap hover_icon_visible cursor_pointer">
-                                <i class="fa"
-                                   ng-class="{'fa-circle-o': selectedUsers.indexOf(user) == -1, 'fa-circle green': selectedUsers.indexOf(user)!=-1}"
-                                   style="font-size: 14px"></i>&nbsp; {{user.firstName}} {{user.lastName}}
+                        <tr ng-repeat="user in newPublicGroup.members | orderBy:'firstName' | orderBy:'fullName'">
+                            <td class="font-80em no_wrap hover_icon_visible cursor_pointer">
+                                {{user.firstName}} {{user.lastName}}
                                 <small class="opacity_4 pad-left-8">{{user.email}}</small>
+
+                                <i class="pull-right fa fa-fw fa-times delete_icon"
+                                   ng-click="removeUserFromGroup(user)"></i>
                             </td>
                         </tr>
                     </table>
                 </div>
 
-                <small ng-if="(selectedUsers.length+selectedRemoteUsers.length) > 0"
-                       style="margin-top: 15px; color: #777">{{selectedUsers.length}} selected
-                    <button ng-click="resetSelectedUsers()" class="btn-xs btn-link pull-right"
-                            style="margin-right: 130px">
-                        <i class="fa fa-fw fa-times"></i>Reset Selection
-                    </button>
-                </small>
-                <small ng-if="!selectedUsers.length" style="margin-top: 15px; color: #777">0 users selected</small>
             </div>
         </form>
     </div>
@@ -64,7 +69,7 @@
 
 <div class="modal-footer">
     <button type="submit" ng-disabled="!newPublicGroup.label" class="btn btn-primary"
-            ng-click="createNewPublicGroup()">Create
+            ng-click="savePublicGroup()">Save
     </button>
-    <button type="reset" ng-click="closeCreatePublicGroupModal()" class="btn btn-default">Cancel</button>
+    <button type="reset" ng-click="$dismiss('cancel')" class="btn btn-default">Cancel</button>
 </div>
