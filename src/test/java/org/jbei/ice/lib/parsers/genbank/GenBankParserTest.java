@@ -63,13 +63,13 @@ public class GenBankParserTest {
         Assert.assertEquals(5, featuresTag.getFeatures().get(3).getNotes().size());
     }
 
-    public static String features =
+    public static final String features =
             "FEATURES             Location/Qualifiers\n" +
                     "     RBS             1..12\n" +
                     "     CDS             19..774\n" +
                     "     terminator      808..936\n";
 
-    public static String features2 =
+    public static final String features2 =
             "FEATURES             Location/Qualifiers\n" +
                     "     source          1..452\n" +
                     "                     /organism=\"Escherichia coli\"\n" +
@@ -93,7 +93,7 @@ public class GenBankParserTest {
                     "                     NTTVAIAAEVLKKAGVYDKNKLFGVTTLDIIRSNTFVAELKGKQPGEVEVPVIGGHSG\n" +
                     "                     VTILPLLSQVPGVSFTEQEVADLTKRIQNAGTEVVEAKAGGGSATLSMG\"\n";
 
-    public static String features3 =
+    public static final String features3 =
             "FEATURES             Location/Qualifiers\n" +
                     "     exon            255..457\n" +
                     "                     /number=3\n" +
@@ -114,7 +114,7 @@ public class GenBankParserTest {
                     "                     ARALPFWNEEIVPQIKAGKRVLIAAHGNSLRGIVKHLEGMSDQAIMELNLPTGIPIVY\n" +
                     "                     ELNKELKPTKPMQFLGDEETVRKAMEAVAAQGKAK\"";
 
-    public static String genbank =
+    public static final String genbank =
             "LOCUS       BBa_I0462                936 bp    DNA     linear   UNK 11-May-2016\n" +
                     "DEFINITION  LuxR protein generator\n" +
                     "ACCESSION   BBa_I0462\n" +
@@ -146,7 +146,7 @@ public class GenBankParserTest {
                     "//\n";
 
 
-    public static String getGenbank2 =
+    public static final String getGenbank2 =
             "LOCUS       AB648464                 452 bp    DNA     linear   BCT 05-SEP-2013\n" +
                     "DEFINITION  Escherichia coli mdh gene for malate dehydrogenase, partial cds,\n" +
                     "            serovar: OUT:H34, isolate: EC04-81.\n" +

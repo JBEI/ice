@@ -57,7 +57,7 @@ public class SequenceAnalysisController {
         if (shotgunSequence == null)
             return;
 
-        File shotgunDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), SHOTGUN_DIR_NAME).toFile();
+        Path shotgunDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), SHOTGUN_DIR_NAME);
         shotgunDao.delete(shotgunDir, shotgunSequence);
     }
 

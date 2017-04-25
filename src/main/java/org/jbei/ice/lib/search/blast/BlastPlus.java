@@ -244,8 +244,8 @@ public class BlastPlus {
         searchResult.seteValue(line[9]);
         searchResult.setScore(Float.valueOf(line[11]));
         searchResult.setAlignment(line[13]);
-        searchResult.setQueryLength(Integer.valueOf(line[12]));
-        searchResult.setNident(Integer.valueOf(line[13]));
+        searchResult.setQueryLength(Integer.parseInt(line[12]));
+        searchResult.setNident(Integer.parseInt(line[13]));
         return searchResult;
     }
 

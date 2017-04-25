@@ -14,8 +14,8 @@ import java.util.*;
 
 public class SBOL2Visitor {
 
-    final String ICE_NS = "http://ice.jbei.org#";
-    final String ICE_PREFIX = "ice";
+    static final String ICE_NS = "http://ice.jbei.org#";
+    static final String ICE_PREFIX = "ice";
 
     private ComponentDefinition componentDefinition;
     private String uriString;

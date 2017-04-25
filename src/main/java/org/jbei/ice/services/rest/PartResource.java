@@ -408,7 +408,7 @@ public class PartResource extends RestResource {
             @PathParam("id") final long partId,
             @DefaultValue("100") @QueryParam("limit") int limit,
             @DefaultValue("0") @QueryParam("start") int start) {
-        final String userId = getUserId();
+        getUserId();
         ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
         final EntryDAO entryDAO = DAOFactory.getEntryDAO();
         final Entry entry = entryDAO.get(partId);
