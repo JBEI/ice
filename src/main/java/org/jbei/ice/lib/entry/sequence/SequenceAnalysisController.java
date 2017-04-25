@@ -16,6 +16,7 @@ import org.jbei.ice.storage.hibernate.dao.TraceSequenceDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
@@ -48,7 +49,7 @@ public class SequenceAnalysisController {
         if (traceSequence == null)
             return;
 
-        File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), TRACES_DIR_NAME).toFile();
+        Path tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), TRACES_DIR_NAME);
         traceDao.delete(tracesDir, traceSequence);
     }
 
