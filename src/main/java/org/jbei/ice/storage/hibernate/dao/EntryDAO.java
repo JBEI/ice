@@ -386,7 +386,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
                     from.get("group").in(requesterGroups),
                     getBuilder().equal(from.get("account"), requester)
             ));
-            predicates.add(getBuilder().equal(join.get("visiblity"), Visibility.OK.getValue()));
+            predicates.add(getBuilder().equal(join.get("visibility"), Visibility.OK.getValue()));
             predicates.add(getBuilder().equal(join.get("ownerEmail"), owner));
 
             if (filter != null && !filter.trim().isEmpty()) {
