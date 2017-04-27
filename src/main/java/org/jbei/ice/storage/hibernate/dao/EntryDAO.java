@@ -164,7 +164,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
     public List<Entry> retrieveVisibleEntries(Account account, Set<Group> groups, ColumnField sortField, boolean asc,
                                               int start, int count, String filter) {
         try {
-            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
+            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class).distinct(true);
             Root<Entry> from = query.from(Entry.class);
             Join<Entry, Permission> entryPermission = from.join("permissions");
 
