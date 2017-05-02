@@ -378,6 +378,16 @@ angular.module('ice.wor.controller', [])
             $scope.worMenuSortParams = {field: 'creationTime', asc: true};
         }
 
+        $rootScope.$on("CollectionSelected", function (event, data) {
+            $scope.selectedPartnerFolders = undefined;
+            $scope.selectedPartner = undefined;
+        });
+
+        $rootScope.$on("CollectionFolderSelected", function (event, data) {
+            $scope.selectedPartnerFolders = undefined;
+            $scope.selectedPartner = undefined;
+        });
+
         $scope.sortWorCollectionFolders = function () {
             if ($scope.worMenuSortParams.field == 'creationTime') {
                 if (!$scope.worMenuSortParams.asc) {
