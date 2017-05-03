@@ -11,6 +11,7 @@ import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.EntriesAsCSV;
@@ -38,7 +39,9 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Resource for accessing files both locally and remotely
@@ -299,10 +302,21 @@ public class FileResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response downloadCSV(@QueryParam("sequenceFormats") final List<String> sequenceFormats,
+                                @QueryParam("entryFields") final List<String> fields,
                                 EntrySelection selection) {
         String userId = super.requireUserId();
         EntriesAsCSV entriesAsCSV = new EntriesAsCSV(sequenceFormats.toArray(new String[sequenceFormats.size()]));
-        boolean success = entriesAsCSV.setSelectedEntries(userId, selection);
+        List<EntryField> entryFields = new ArrayList<>();
+        try {
+            if (fields != null) {
+                entryFields.addAll(fields.stream().map(EntryField::fromString).collect(Collectors.toList()));
+            }
+        } catch (Exception e) {
+            Logger.error(e);
+        }
+
+        boolean success = entriesAsCSV.setSelectedEntries(userId, selection,
+                entryFields.toArray(new EntryField[entryFields.size()]));
         if (!success)
             return super.respond(false);
 

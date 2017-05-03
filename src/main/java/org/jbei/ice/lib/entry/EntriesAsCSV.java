@@ -63,14 +63,15 @@ public class EntriesAsCSV {
      *
      * @param userId    identifier of user making request
      * @param selection selection indicating source of entries
+     * @param fields    optional list of fields used to filter the data
      * @return true if extraction happened successfully and can be retrieved with a call to <code>getFilePath</code>
      * false otherwise
      */
-    public boolean setSelectedEntries(String userId, EntrySelection selection) {
+    public boolean setSelectedEntries(String userId, EntrySelection selection, EntryField... fields) {
         Entries retriever = new Entries(userId);
         this.entries = retriever.getEntriesFromSelectionContext(selection);
         try {
-            writeList(userId);
+            writeList(userId, fields);
             return true;
         } catch (IOException e) {
             Logger.error(e);
@@ -83,13 +84,14 @@ public class EntriesAsCSV {
      *
      * @param userId  identifier of user making request
      * @param entries list of entry ids
+     * @param fields  optional list of fields used to filter the data
      * @return true if extraction happened successfully and can be retrieved with a call to <code>getFilePath</code>
      * false otherwise
      */
-    public boolean setEntries(String userId, List<Long> entries) {
+    public boolean setEntries(String userId, List<Long> entries, EntryField... fields) {
         this.entries = entries;
         try {
-            writeList(userId);
+            writeList(userId, fields);
             return true;
         } catch (IOException e) {
             Logger.error(e);
@@ -97,10 +99,10 @@ public class EntriesAsCSV {
         }
     }
 
-    protected String[] getCSVHeaders(List<EntryField> fields) {
+    protected String[] getCSVHeaders(EntryField[] fields) {
 
         // get headers
-        String[] headers = new String[fields.size() + 3];
+        String[] headers = new String[fields.length + 3];
         headers[0] = "Created";
         headers[1] = "Part ID";
 
@@ -119,7 +121,7 @@ public class EntriesAsCSV {
      * @param userId identifier of user making request
      * @throws IOException on Exception write values to file
      */
-    private void writeList(String userId) throws IOException {
+    private void writeList(String userId, EntryField... fields) throws IOException {
 
         // filter entries based on what the user is allowed to see if the user is not an admin
         Account account = this.accountDAO.getByEmail(userId);
@@ -139,7 +141,8 @@ public class EntriesAsCSV {
         csvPath = tmpFile.toPath();
         FileWriter fileWriter = new FileWriter(tmpFile);
 
-        List<EntryField> fields = getEntryFields();
+        if (fields == null || fields.length == 0)
+            fields = getEntryFields();
         String[] headers = getCSVHeaders(fields);
         Set<Long> sequenceSet = new HashSet<>();
 
@@ -152,7 +155,7 @@ public class EntriesAsCSV {
                 Entry entry = dao.get(entryId);
 
                 //  get contents and write data out
-                String[] line = new String[fields.size() + 3];
+                String[] line = new String[fields.length + 3];
                 line[0] = entry.getCreationTime().toString();
                 line[1] = entry.getPartNumber();
                 int i = 1;
@@ -252,7 +255,7 @@ public class EntriesAsCSV {
         }
     }
 
-    protected List<EntryField> getEntryFields() {
+    protected EntryField[] getEntryFields() {
         Set<String> recordTypes = new HashSet<>(dao.getRecordTypes(entries));
         List<EntryField> fields = EntryFields.getCommonFields();
 
@@ -278,7 +281,7 @@ public class EntriesAsCSV {
             }
         }
 
-        return fields;
+        return fields.toArray(new EntryField[(fields.size())]);
     }
 
     public Path getFilePath() {
