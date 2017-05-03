@@ -229,7 +229,7 @@ public class SequenceController extends HasEntry {
         if (!new PermissionsController().isPubliclyVisible(entry))
             authorization.expectRead(userId, entry);
 
-        boolean canEdit = authorization.canWriteThoroughCheck(userId, entry);
+        boolean canEdit = authorization.canWrite(userId, entry);
         return getFeaturedSequence(entry, canEdit);
     }
 

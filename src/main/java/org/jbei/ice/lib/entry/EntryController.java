@@ -235,7 +235,7 @@ public class EntryController extends HasEntry {
     }
 
     protected boolean canEdit(String userId, String depositor, Entry entry) {
-        return userId.equalsIgnoreCase(depositor) || authorization.canWriteThoroughCheck(userId, entry);
+        return userId.equalsIgnoreCase(depositor) || authorization.canWrite(userId, entry);
     }
 
     public PartStatistics retrieveEntryStatistics(String userId, long entryId) {
@@ -275,7 +275,7 @@ public class EntryController extends HasEntry {
         List<Entry> toTrash = new LinkedList<>();
         for (PartData data : list) {
             Entry entry = dao.get(data.getId());
-            if (entry == null || !authorization.canWriteThoroughCheck(userId, entry))
+            if (entry == null || !authorization.canWrite(userId, entry))
                 return false;
 
             toTrash.add(entry);
@@ -351,7 +351,7 @@ public class EntryController extends HasEntry {
         if (partData.getVisibility() == Visibility.REMOTE)
             partData.setCanEdit(false);
         else {
-            partData.setCanEdit(authorization.canWriteThoroughCheck(userId, entry));
+            partData.setCanEdit(authorization.canWrite(userId, entry));
             partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
         }
         return partData;
@@ -421,7 +421,7 @@ public class EntryController extends HasEntry {
             if (!authorization.canRead(userId, parent))
                 continue;
 
-            if (parent.getVisibility() != Visibility.OK.getValue() && !authorization.canWriteThoroughCheck(userId, entry))
+            if (parent.getVisibility() != Visibility.OK.getValue() && !authorization.canWrite(userId, entry))
                 continue;
 
             EntryType type = EntryType.nameToType(parent.getRecordType());

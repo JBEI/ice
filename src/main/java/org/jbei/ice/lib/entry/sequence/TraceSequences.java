@@ -314,6 +314,6 @@ public class TraceSequences {
     }
 
     protected boolean canEdit(String userId, String depositor, Entry entry) {
-        return userId.equalsIgnoreCase(depositor) || entryAuthorization.canWriteThoroughCheck(userId, entry);
+        return userId.equalsIgnoreCase(depositor) || entryAuthorization.canWrite(userId, entry);
     }
 }

@@ -28,6 +28,7 @@ public class EntryAuthorization extends Authorization<Entry> {
         groupController = new GroupController();
     }
 
+    @Override
     public boolean canRead(String userId, Entry entry) {
         // super checks for owner or admin
         if (userId == null) {
@@ -67,35 +68,25 @@ public class EntryAuthorization extends Authorization<Entry> {
             return true;
 
         // can account read any folder that entry is contained in?
-        if (permissionDAO.hasPermissionMulti(null, entryFolders, account, null, true, false))
-            return true;
-
-        return canWrite(userId, entry);
+        return permissionDAO.hasPermissionMulti(null, entryFolders, account, null, true, false) || canWrite(userId, entry);
     }
 
+    /**
+     * Determine if the referenced userId has write permissions for the entry.
+     * <br> Checks if:
+     * <ol>
+     * <li>User has explicit write permissions for entry</li>
+     * <li>User belongs to a group that has write permissions for entry</li>
+     * <li>Entry is in a folder that account has write privileges on</li>
+     * <li>Entry is in a folder that a group that the account belongs to has write privileges on</li>
+     * </ol>
+     *
+     * @param userId unique user identifier
+     * @param entry  entry being checked
+     * @return true if user has write privileges, false otherwise
+     */
     @Override
     public boolean canWrite(String userId, Entry entry) {
-        if (super.canWrite(userId, entry))
-            return true;
-
-        Account account = getAccount(userId);
-
-        // check explicit write permission
-        if (permissionDAO.hasPermissionMulti(entry, null, account, null, false, true))
-            return true;
-
-        // check group permissions
-        // get groups for account
-        List<Group> accountGroups = groupController.getAllGroups(account);
-
-        // check group permissions
-        if (permissionDAO.hasPermissionMulti(entry, null, null, accountGroups, false, true))
-            return true;
-
-        return false;
-    }
-
-    public boolean canWriteThoroughCheck(String userId, Entry entry) {
         if (userId == null)
             return false;
 

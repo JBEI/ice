@@ -75,7 +75,7 @@ public class PartSequence extends HasEntry {
         if (!new PermissionsController().isPubliclyVisible(entry))
             entryAuthorization.expectRead(userId, entry);
 
-        boolean canEdit = entryAuthorization.canWriteThoroughCheck(userId, entry);
+        boolean canEdit = entryAuthorization.canWrite(userId, entry);
         return getFeaturedSequence(entry, canEdit);
     }
 

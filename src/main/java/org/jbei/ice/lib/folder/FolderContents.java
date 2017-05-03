@@ -104,6 +104,7 @@ public class FolderContents {
             if (entry == null) {
                 switch (partData.getType()) {
                     case PART:
+                    default:
                         entry = new Part();
                         break;
 
@@ -147,7 +148,7 @@ public class FolderContents {
             }
 
             if (!folderAuthorization.canWrite(userId, folder)) {
-                Logger.warn(userId + " lacks write privs on folder " + folder.getId());
+                Logger.warn(userId + " lacks write privileges on folder " + folder.getId());
                 continue;
             }
 
@@ -511,7 +512,7 @@ public class FolderContents {
 
         for (Permission folderPermission : permissions) {
             for (Entry entry : entries) {
-                if (!entryAuthorization.canWriteThoroughCheck(userId, entry))
+                if (!entryAuthorization.canWrite(userId, entry))
                     continue;
 
                 // does the permissions already exists

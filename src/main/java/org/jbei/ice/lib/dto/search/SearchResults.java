@@ -91,7 +91,7 @@ public class SearchResults implements IDataTransferModel {
             Integer o22 = Integer.valueOf(o2RemainderSplit[0].trim());
             Integer o12 = Integer.valueOf(o1RemainderSplit[0].trim());
             if (o22.intValue() != o12.intValue()) {
-                return Double.compare((double) (o21 / o22), (double) (o11 / o12));
+                return Double.compare(((double) o21 / (double) o22), ((double) o11 / (double) o12));
             }
 
             // return third value (%)
