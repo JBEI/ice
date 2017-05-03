@@ -253,10 +253,9 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         $scope.editDisabled = true;
     };
 
-// todo : getEntrySelection() should be moved to Selection
     $scope.csvExport = function (includeSequences) {
         var selection = getEntrySelection();
-        var formats = {sequenceFormats: []};
+        var formats = {sequenceFormats: []};//, entryFields: ["name"]};
         if (includeSequences)
             formats.sequenceFormats.push("genbank");
 
@@ -264,7 +263,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         Util.post("rest/file/csv", selection, function (result) {
             if (result && result.value) {
                 $window.open("rest/file/tmp/" + result.value, "_self");
-                Selection.reset();
+                //Selection.reset();
             }
         }, formats);
     };
