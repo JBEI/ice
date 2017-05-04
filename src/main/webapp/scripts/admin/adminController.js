@@ -294,6 +294,18 @@ angular.module('ice.admin.controller', [])
                 controller: "AdminSampleLocationSearch",
                 backdrop: "static"
             });
+        };
+
+        $scope.getPrimarySample = function (locations) {
+            if (locations.length != 3)
+                return locations[0];
+
+            for (var i = 0; i < locations.length; i += 1) {
+                if (locations[i].label.indexOf("backup") == -1)
+                    return locations[i];
+
+            }
+            return locations[0];
         }
     })
     .controller('AdminSampleLocationSearch', function ($scope, $uibModalInstance, Util) {

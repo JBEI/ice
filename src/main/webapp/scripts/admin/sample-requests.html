@@ -89,6 +89,7 @@
                     </div>
                 </td>
                 <td>
+
                     <div ng-if="request.location[0].location.type==='SHELF'">
                         <strong style="color: #a52a2a;">SHELF {{request.location[0].location.display}}</strong><br>
                         Box
@@ -102,14 +103,15 @@
                         </small>
                     </div>
 
-                    <div ng-if="request.location[0].location.type === 'PLATE96'">
-                        <strong style="color: #a52a2a;">96 WELL PLATE
-                            {{request.location[0].location.display}}</strong><br>
+                    <div ng-if="request.location[0].location.type === 'PLATE96'"
+                         ng-init="mainSample = getPrimarySample(request.location)">
+                        <strong style="color: #a52a2a;">96 WELL PLATE{{mainSample.location.display}}</strong>
+                        <br>
                         Well
-                        <small class="no_wrap">{{request.location[0].location.child.display || "&nbsp;"}}</small>
+                        <small class="no_wrap">{{mainSample.location.child.display || "&nbsp;"}}</small>
                         /
                         Tube
-                        <small class="no_wrap">{{request.location[0].location.child.child.display || "&nbsp;"}}</small>
+                        <small class="no_wrap">{{mainSample.location.child.child.display || "&nbsp;"}}</small>
                     </div>
 
                     <div ng-if="request.location[0].location.type === 'GENERIC'">
