@@ -199,11 +199,25 @@ public class PermissionsController {
         return dao.hasPermissionMulti(null, folders, null, groups, false, true);
     }
 
+    /**
+     * Determines whether an entry has assigned public privileges either directly or by virtue of being in a folder
+     * that has public privileges assigned
+     *
+     * @param entry entry being checked for public read privileges
+     * @return true if the entry has public read privileges, false otherwise
+     */
     public boolean isPubliclyVisible(Entry entry) {
         Group publicGroup = groupController.createOrRetrievePublicGroup();
         List<Group> groups = new ArrayList<>(1);
         groups.add(publicGroup);
-        return dao.hasPermissionMulti(entry, null, null, groups, true, false);
+
+        // check that the entry has public read
+        if (dao.hasPermissionMulti(entry, null, null, groups, true, false)) {
+            return true;
+        }
+
+        // else check and possible folders
+        return dao.hasPermissionMulti(null, entry.getFolders(), null, groups, true, false);
     }
 
     public boolean isPublicVisible(Folder folder) {
