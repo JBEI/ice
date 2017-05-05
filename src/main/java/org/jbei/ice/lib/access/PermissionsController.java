@@ -7,6 +7,8 @@ import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.entry.EntryAuthorization;
+import org.jbei.ice.lib.entry.EntryPermissionTask;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
@@ -252,7 +254,7 @@ public class PermissionsController {
      * @param includePublic whether to include public access if set
      * @return list of permissions that have been found for the specified folder
      */
-    public ArrayList<AccessPermission> retrieveSetFolderPermission(Folder folder, boolean includePublic) {
+    public List<AccessPermission> retrieveSetFolderPermission(Folder folder, boolean includePublic) {
         ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
 
         // read accounts
@@ -305,36 +307,24 @@ public class PermissionsController {
      * @param userId unique identifier for account of user requesting action that led to this call
      * @param folder folder user permissions are being propagated
      * @param add    true if folder is to be added, false otherwise
-     * @return true if action permission was propagated successfully
+     * @return true if action permission was scheduled to be propagated
      */
     public boolean propagateFolderPermissions(String userId, Folder folder, boolean add) {
         if (!accountController.isAdministrator(userId) && !userId.equalsIgnoreCase(folder.getOwnerEmail()))
             return false;
 
         // retrieve folder permissions
-        ArrayList<AccessPermission> permissions = retrieveSetFolderPermission(folder, true);
+        List<AccessPermission> permissions = retrieveSetFolderPermission(folder, true);
         if (permissions.isEmpty())
             return true;
 
-        // if propagate, add permissions to entries contained in here  //TODO : inefficient for large entries/perms
-        if (add) {
-            for (Entry entry : folder.getContents()) {
-                for (AccessPermission accessPermission : permissions) {
-                    addPermission(accessPermission, entry, null, null);
-                }
-            }
-        } else {
-            // else remove permissions
-            for (Entry entry : folder.getContents()) {
-                for (AccessPermission accessPermission : permissions) {
-                    removePermission(accessPermission, entry, null, null);
-                }
-            }
-        }
+        List<Long> entries = folderDAO.getEntryIds(folder);
+        EntryPermissionTask task = new EntryPermissionTask(userId, entries, permissions, add);
+        IceExecutorService.getInstance().runTask(task);
         return true;
     }
 
-    public FolderDetails setFolderPermissions(String userId, long folderId, ArrayList<AccessPermission> permissions) {
+    public FolderDetails setFolderPermissions(String userId, long folderId, List<AccessPermission> permissions) {
         Folder folder = folderDAO.get(folderId);
         FolderAuthorization folderAuthorization = new FolderAuthorization();
         folderAuthorization.expectWrite(userId, folder);

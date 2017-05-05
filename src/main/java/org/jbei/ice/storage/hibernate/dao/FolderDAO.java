@@ -292,4 +292,19 @@ public class FolderDAO extends HibernateRepository<Folder> {
             throw new DAOException(he);
         }
     }
+
+    /**
+     * Retrieve the list of ids of entries contained in a folder. Using this method is much faster (especially for
+     * larger number of entries in a folder) that iterating through all the entries of a folder
+     *
+     * @param folder folder whose entries are being retrieved
+     * @return list of ids of entries in a folder
+     */
+    public List<Long> getEntryIds(Folder folder) {
+        CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+        Root<Folder> from = query.from(Folder.class);
+        Join<Folder, Entry> entry = from.join("contents");
+        query.select(entry.get("id")).where(getBuilder().equal(from, folder));
+        return currentSession().createQuery(query).list();
+    }
 }

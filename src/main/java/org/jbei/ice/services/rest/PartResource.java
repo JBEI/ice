@@ -499,9 +499,9 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/samples")
-    public ArrayList<PartSample> getSamples(@PathParam("id") String partId) {
+    public Response getSamples(@PathParam("id") String partId) {
         String userId = requireUserId();
-        return sampleService.retrieveEntrySamples(userId, partId);
+        return super.respond(sampleService.retrieveEntrySamples(userId, partId));
     }
 
     @POST
@@ -513,7 +513,7 @@ public class PartResource extends RestResource {
         final String userId = getUserId();
         log(userId, "creating sample for part " + partId);
         sampleService.createSample(userId, partId, partSample, strainNamePrefix);
-        ArrayList<PartSample> result = sampleService.retrieveEntrySamples(userId, partId);
+        List<PartSample> result = sampleService.retrieveEntrySamples(userId, partId);
         Results<PartSample> results = new Results<>();
         results.setData(result);
         return super.respond(results);

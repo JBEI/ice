@@ -312,7 +312,6 @@ public class EntryController extends HasEntry {
             // must be a public entry (todo : move to separate method
             if (!permissionsController.isPubliclyVisible(entry))
                 throw new PermissionException("Not a public entry");
-
             return retrieveEntryDetails(null, entry);
         }
 
@@ -324,8 +323,6 @@ public class EntryController extends HasEntry {
             Logger.error("Could not retrieve share model");
             return null;
         }
-
-        Permission permission = shareModel.getPermission(); // folder must match
 
         // validate access token
         TokenHash tokenHash = new TokenHash();

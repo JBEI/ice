@@ -344,7 +344,7 @@ public class FolderContents {
         details.setCount(folderSize);
 
         if (userId != null) {
-            ArrayList<AccessPermission> permissions = getAndFilterFolderPermissions(userId, folder);
+            List<AccessPermission> permissions = getAndFilterFolderPermissions(userId, folder);
             details.setAccessPermissions(permissions);
             boolean canEdit = permissionsController.hasWritePermission(userId, folder);
             details.setCanEdit(canEdit);
@@ -469,8 +469,8 @@ public class FolderContents {
      * @param folder Folder whose permissions are to be retrieved
      * @return list of filtered permissions
      */
-    protected ArrayList<AccessPermission> getAndFilterFolderPermissions(String userId, Folder folder) {
-        ArrayList<AccessPermission> permissions = permissionsController.retrieveSetFolderPermission(folder, false);
+    protected List<AccessPermission> getAndFilterFolderPermissions(String userId, Folder folder) {
+        List<AccessPermission> permissions = permissionsController.retrieveSetFolderPermission(folder, false);
         if (accountController.isAdministrator(userId) || folder.getOwnerEmail().equalsIgnoreCase(userId)) {
             return permissions;
         }
