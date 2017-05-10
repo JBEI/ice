@@ -10,6 +10,7 @@ public enum SequenceFormat {
     FASTA,
     SBOL1,
     SBOL2,
+    PLAIN,
     GENBANK;
 
     public static SequenceFormat fromString(String type) {

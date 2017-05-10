@@ -48,7 +48,7 @@ public class GeneralParser {
 
         for (AbstractParser parser : parsers) {
             try {
-                parsedSequence = parser.parse(bytes);
+                parsedSequence = parser.parse(new String(bytes));
                 break;
             } catch (InvalidFormatParserException e) {
                 // it's ok

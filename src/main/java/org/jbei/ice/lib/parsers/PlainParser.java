@@ -16,10 +16,9 @@ public class PlainParser extends AbstractParser {
 
     @Override
     public DNASequence parse(String textSequence) throws InvalidFormatParserException {
-        textSequence = cleanSequence(textSequence);
-
         SymbolList sl;
         try {
+            textSequence = cleanSequence(textSequence);
             sl = new SimpleSymbolList(DNATools.getDNA().getTokenization("token"), textSequence
                     .replaceAll("\\s+", "").replaceAll("[\\.|~]", "-").replaceAll("[0-9]", ""));
         } catch (BioException e) {

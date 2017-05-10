@@ -2,27 +2,31 @@ package org.jbei.ice.lib.entry.sequence;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionsController;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryFactory;
 import org.jbei.ice.lib.entry.HasEntry;
-import org.jbei.ice.lib.parsers.GeneralParser;
+import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
+import org.jbei.ice.lib.parsers.PlainParser;
+import org.jbei.ice.lib.parsers.fasta.FastaParser;
+import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.lib.parsers.sbol.SBOLParser;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.*;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -85,44 +89,84 @@ public class PartSequence extends HasEntry {
      * @param inputStream input stream of bytes representing the file
      * @param fileName    name of file being parsed
      * @return wrapper around the internal model used to represent sequence information
-     * @throws InvalidFormatParserException on Exception parsing the contents of the file
+     * @throws IOException on Exception parsing the contents of the file
      */
-    public SequenceInfo parseSequenceFile(InputStream inputStream, String fileName) throws InvalidFormatParserException {
-        if (fileName != null) {
-            int dotIndex = fileName.lastIndexOf('.');
-            if (dotIndex != -1) {
-                String ext = fileName.substring(dotIndex + 1);
-
-                // unique case for sbol since it can result in multiple entries created
-                if ("rdf".equalsIgnoreCase(ext) || "xml".equalsIgnoreCase(ext) || "sbol".equalsIgnoreCase(ext)) {
-                    PartData partData = ModelToInfoFactory.getInfo(entry);
-                    SBOLParser sbolParser = new SBOLParser(partData);
-                    return sbolParser.parse(inputStream, fileName);
-                }
-            }
-        }
-
-        // parse actual sequence
+    public SequenceInfo parseSequenceFile(InputStream inputStream, String fileName) throws IOException {
         try {
+            AbstractParser parser;
             String sequenceString = Utils.getString(inputStream);
-            DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
-            if (dnaSequence == null)
-                throw new InvalidFormatParserException("Could not parse sequence string");
 
-            Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-            sequence.setSequenceUser(sequenceString);
-            sequence.setEntry(entry);
-            if (!StringUtils.isBlank(fileName))
-                sequence.setFileName(fileName);
+            switch (detectFormat(sequenceString)) {
+                case GENBANK:
+                    parser = new GenBankParser();
+                    break;
 
-            Sequence result = sequenceDAO.saveSequence(sequence);
-            BlastPlus.scheduleBlastIndexRebuildTask(true);
-            SequenceInfo info = result.toDataTransferObject();
-            info.setSequence(dnaSequence);
-            return info;
-        } catch (IOException e) {
-            throw new InvalidFormatParserException(e);
+                case SBOL2:
+                    SBOLParser sbolParser = new SBOLParser(this.userId, Long.toString(this.entry.getId()));
+                    return sbolParser.parseToEntry(sequenceString, fileName);
+
+                case FASTA:
+                    parser = new FastaParser();
+                    break;
+
+                default:
+                case PLAIN:
+                    parser = new PlainParser();
+                    break;
+            }
+
+            // parse actual sequence
+            DNASequence sequence = parser.parse(sequenceString);
+            return save(sequence, sequenceString, fileName);
+        } catch (InvalidFormatParserException e) {
+            Logger.error(e);
+            throw new IOException(e);
         }
+    }
+
+    protected SequenceInfo save(DNASequence dnaSequence, String sequenceString, String fileName) {
+        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        sequence.setSequenceUser(sequenceString);
+        sequence.setEntry(entry);
+        if (!StringUtils.isBlank(fileName))
+            sequence.setFileName(fileName);
+
+        Sequence result = sequenceDAO.saveSequence(sequence);
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
+        SequenceInfo info = result.toDataTransferObject();
+        info.setSequence(dnaSequence);
+        return info;
+    }
+
+    /**
+     * Attempts to detect the sequence format from the first line of a stream using the following heuristics
+     * <ul>
+     * <li>If line starts with <code>LOCUS</code> then assumed to be a genbank file</li>
+     * <li>If line starts with <code>></code> then assumed to be a fasta file</li>
+     * <li>If line starts with <code><</code> then assumed to be an sbol file</li>
+     * <li>Anything else is assumed to be plain nucleotides</li>
+     * </ul>
+     *
+     * @param sequenceString input sequence
+     * @return detected format
+     * @throws IOException
+     */
+    protected SequenceFormat detectFormat(String sequenceString) throws IOException {
+        BufferedReader reader = new BufferedReader(new StringReader(sequenceString));
+        String line = reader.readLine();
+        if (line == null)
+            throw new IOException("Could not obtain line from document");
+
+        if (line.startsWith("LOCUS"))
+            return SequenceFormat.GENBANK;
+
+        if (line.startsWith(">"))
+            return SequenceFormat.FASTA;
+
+        if (line.startsWith("<"))
+            return SequenceFormat.SBOL2;
+
+        return SequenceFormat.PLAIN;
     }
 
     protected FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {

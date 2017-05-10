@@ -97,8 +97,7 @@ public class FileResource extends RestResource {
     @Path("tmp/{fileId}")
     public Response getTmpFile(@PathParam("fileId") final String fileId,
                                @QueryParam("filename") String fileName) {
-        final File tmpFile = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY),
-                fileId).toFile();
+        final File tmpFile = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY), fileId).toFile();
         if (tmpFile == null || !tmpFile.exists()) {
             return super.respond(Response.Status.NOT_FOUND);
         }
@@ -263,18 +262,15 @@ public class FileResource extends RestResource {
                                    @FormDataParam("entryType") String entryType,
                                    @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
         try {
-            if (entryType == null) {
-                entryType = "PART";
-            }
-
             final String fileName = contentDispositionHeader.getFileName();
             String userId = getUserId();
 
             PartSequence partSequence;
             if (StringUtils.isEmpty(recordId)) {
+                if (entryType == null) {
+                    entryType = "PART";
+                }
                 EntryType type = EntryType.nameToType(entryType);
-                if (type == null)
-                    throw new WebApplicationException("Invalid entry type: " + entryType, Response.Status.BAD_REQUEST);
                 partSequence = new PartSequence(userId, type);
             } else {
                 partSequence = new PartSequence(userId, recordId);

@@ -2,10 +2,6 @@ package org.jbei.ice.lib.entry.sequence;
 
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.DNASequence;
-import org.jbei.ice.lib.parsers.ABIParser;
-import org.jbei.ice.lib.parsers.GeneralParser;
-import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
@@ -105,34 +101,6 @@ public class SequenceAnalysisController {
         if (result.isPresent())
             return result.get();
         return null;
-    }
-
-    /**
-     * Parses a given sequence file (Genbank, Fasta, ABI) and return an {@link DNASequence}.
-     *
-     * @param bytes bytes representation of the sequence information
-     * @return Parsed Sequence as {@link DNASequence}.
-     */
-    public DNASequence parse(byte[] bytes) {
-        if (bytes.length == 0) {
-            return null;
-        }
-
-        // Trying to parse as Fasta, Genbank, etc
-        DNASequence dnaSequence = GeneralParser.getInstance().parse(bytes);
-        if (dnaSequence == null) {
-            // Trying to parse as ABI
-
-            ABIParser abiParser = new ABIParser();
-
-            try {
-                dnaSequence = abiParser.parse(bytes);
-            } catch (InvalidFormatParserException e) {
-                return null;
-            }
-        }
-
-        return dnaSequence;
     }
 
     /**
