@@ -31,7 +31,7 @@ Command line installation steps:
         git clone https://github.com/JBEI/ice.git ./ice
         cd ice
 
-* Generate a self-signed certificate
+* Generate a self-signed certificate. When prompted for a password, use **changeit**.
 
         keytool -genkey -alias tomcat -keyalg RSA -keystore ./.keystore
 
