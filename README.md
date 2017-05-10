@@ -33,6 +33,8 @@ Command line installation steps:
 
 * Generate a self-signed certificate
 
+        keytool -genkey -alias tomcat -keyalg RSA -keystore ./.keystore
+
 * Start the built in jetty server. This may take a few minutes to download additional dependencies.
         
         mvn jetty:run
