@@ -154,16 +154,6 @@ public class SequenceController extends HasEntry {
     }
 
     /**
-     * Parse the given String into an {@link DNASequence} object.
-     *
-     * @param sequence
-     * @return parsed DNASequence object.
-     */
-    public static DNASequence parse(String sequence) {
-        return GeneralParser.getInstance().parse(sequence);
-    }
-
-    /**
      * Generate a formatted text of a given {@link IFormatter} from the given {@link Sequence}.
      *
      * @param sequence
