@@ -436,7 +436,7 @@ angular.module('ice.entry.controller', [])
             queueLimit: 1 // can only upload 1 file
         });
 
-        uploader.onProgressItem = function (event, item, progress) {
+        uploader.onProgressItem = function (item, progress) {
             $scope.serverError = undefined;
 
             if (progress != "100")  // isUploading is always true until it returns
@@ -1521,7 +1521,7 @@ angular.module('ice.entry.controller', [])
             queueLimit: 1 // can only upload 1 file
         });
 
-        uploader.onProgressItem = function (event, item, progress) {
+        uploader.onProgressItem = function (item, progress) {
             $scope.serverError = undefined;
 
             if (progress != "100")  // isUploading is always true until it returns
