@@ -21,7 +21,7 @@
     <span class="text-muted font-90em"
           ng-if="permissions.length">Current permissions: {{permissions.length | number}}</span>
 
-    <div ng-if="canSetPublicPermission" class="pull-right cursor_pointer font-12em"
+    <div ng-if="folder.canSetPublicPermission" class="pull-right cursor_pointer font-12em"
          ng-class="{'opacity_4': !folder.publicReadAccess}"
          style="margin-right: 10px" ng-click="enableDisablePublicRead()">
         <i class=" fa fa-fw fa-globe"></i>

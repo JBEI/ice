@@ -186,19 +186,13 @@ angular.module('ice.collection.controller', [])
         $scope.placeHolder = "Enter user name or email";
         $scope.webPartners = [];
 
-        $scope.canSetPublicPermission = undefined;
-        if (!$rootScope.settings || !$rootScope.settings['RESTRICT_PUBLIC_ENABLE']) {
-            Util.get("rest/config/RESTRICT_PUBLIC_ENABLE", function (result) {
-                if (!result)
-                    return;
-                if (!$rootScope.settings)
-                    $rootScope.settings = {};
-                $rootScope.settings['RESTRICT_PUBLIC_ENABLE'] = result.value;
-                $scope.canSetPublicPermission = (result.value == "no") || $rootScope.user.isAdmin;
-            });
-        } else {
-            $scope.canSetPublicPermission = ($rootScope.settings['RESTRICT_PUBLIC_ENABLE'].value == "no") || $rootScope.user.isAdmin;
-        }
+        $scope.folder.canSetPublicPermission = undefined;
+        Util.get("rest/config/RESTRICT_PUBLIC_ENABLE", function (result) {
+            if (!result)
+                return;
+
+            $scope.folder.canSetPublicPermission = (result.value == "no") || $rootScope.user.isAdmin;
+        });
 
         // retrieve permissions for folder
         Util.list("rest/folders/" + folder.id + "/permissions", function (result) {
@@ -374,6 +368,56 @@ angular.module('ice.collection.controller', [])
                 case "remote":
                     return;
             }
+        };
+    })
+    .controller('FolderPartsUploadController', function ($scope, $cookieStore, FileUploader, folder) {
+        var sid = $cookieStore.get("sessionId");
+        $scope.serverResult = undefined;
+        $scope.processingFile = undefined;
+        $scope.progress = 0;
+
+        // file upload
+        var uploader = $scope.partsUploader = new FileUploader({
+            scope: $scope, // to automatically update the html. Default: $rootScope
+            url: "rest/file/entries",
+            method: 'POST',
+            removeAfterUpload: true,
+            headers: {"X-ICE-Authentication-SessionId": sid},
+            autoUpload: true,
+            queueLimit: 1 // can only upload 1 file
+        });
+
+        uploader.onProgressItem = function (item, progress) {
+            console.log("progress", progress, item);
+            $scope.serverError = undefined;
+            $scope.progress = progress;
+
+            if (progress != "100")  // isUploading is always true until it returns
+                return;
+
+            // upload complete. have processing
+            $scope.processingFile = item.file.name;
+        };
+
+        uploader.onSuccessItem = function (item, response, status, header) {
+            console.log(response, status);
+            $scope.serverResult = response;
+        };
+
+        uploader.onCompleteAll = function () {
+            console.log("complete");
+            $scope.processingFile = undefined;
+        };
+
+        uploader.onBeforeUploadItem = function (item) {
+            //item.formData.push({entryType: $scope.entry.type});
+            //item.formData.push({entryRecordId: $scope.entry.recordId});
+        };
+
+        uploader.onErrorItem = function (item, response, status, headers) {
+            $scope.serverError = true;
+            $scope.processingFile = undefined;
+            console.log("error", item, response);
         };
     })
 
@@ -614,6 +658,22 @@ angular.module('ice.collection.controller', [])
                 if (updatedPermissions) {
                     $scope.folder.accessPermissions = updatedPermissions;
                 }
+            });
+        };
+
+        $scope.openPartsUploadDialog = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/folder/modal/folder-upload-parts.html',
+                controller: "FolderPartsUploadController",
+                backdrop: "static",
+                resolve: {
+                    folder: function () {
+                        return $scope.folder;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (result) {
             });
         };
 
