@@ -213,16 +213,9 @@ iceDirectives.directive("iceVectorViewer", function ($cookieStore, $location) {
         var entryId;
 
         function generateObject() {
-            var search = $location.search();
-            var s = "<object id='VectorViewer' width='100%' height='100%' data='swf/vv/VectorViewer.swf?entryId="
-                + entryId + "&amp;sessionId=" + sid;
 
-            if (search && search.folderId) {
-                s += "&folderId=" + search.folderId + "&amp;remote=true";
-            }
-            s += "'></object>";
+            element.html('<iframe src="/scripts/lib/ve/veIndex.html?embedded=true" width="100%" height="100%" />');
 
-            element.html(s);
         }
 
         scope.$watch('entry', function (value) {
