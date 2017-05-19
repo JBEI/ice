@@ -292,6 +292,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
 
     /**
      * Filters the given list, removing those that the specified account does not have read privileges on
+     * // todo : this doesn't check permissions from folder (get list of all folders entries are in)
      *
      * @param account account to filter entries by
      * @param groups  groups that this account belongs to

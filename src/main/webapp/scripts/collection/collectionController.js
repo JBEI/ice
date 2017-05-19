@@ -370,7 +370,7 @@ angular.module('ice.collection.controller', [])
             }
         };
     })
-    .controller('FolderPartsUploadController', function ($scope, $cookieStore, FileUploader, folder) {
+    .controller('FolderPartsUploadController', function ($scope, $cookieStore, FileUploader, Util, folder, $uibModalInstance) {
         var sid = $cookieStore.get("sessionId");
         $scope.serverResult = undefined;
         $scope.processingFile = undefined;
@@ -388,7 +388,6 @@ angular.module('ice.collection.controller', [])
         });
 
         uploader.onProgressItem = function (item, progress) {
-            console.log("progress", progress, item);
             $scope.serverError = undefined;
             $scope.progress = progress;
 
@@ -400,12 +399,16 @@ angular.module('ice.collection.controller', [])
         };
 
         uploader.onSuccessItem = function (item, response, status, header) {
-            console.log(response, status);
-            $scope.serverResult = response;
+            $scope.serverResult = {data: response, total: response.length, valid: []}
+            for (var i = 0; i < response.length; i += 1) {
+                var datum = response[i];
+                if (datum.partData) {
+                    $scope.serverResult.valid.push(datum.partData.id);
+                }
+            }
         };
 
         uploader.onCompleteAll = function () {
-            console.log("complete");
             $scope.processingFile = undefined;
         };
 
@@ -417,9 +420,31 @@ angular.module('ice.collection.controller', [])
         uploader.onErrorItem = function (item, response, status, headers) {
             $scope.serverError = true;
             $scope.processingFile = undefined;
-            console.log("error", item, response);
         };
-    })
+
+        $scope.addValidEntriesToFolder = function () {
+            if (!$scope.serverResult.valid || !$scope.serverResult.valid.length)
+                return;
+
+            $scope.serverResult.addingToFolder = true;
+            var entrySelection = {
+                destination: [folder],
+                entries: $scope.serverResult.valid
+            };
+
+            Util.update("rest/folders/entries", entrySelection, {}, function (res) {
+                if (!res)
+                    return;
+                $scope.$broadcast("UpdateCollectionCounts");
+
+                console.log(res);
+                $uibModalInstance.close(res);
+            }, function (failure) {
+                console.error(failure);
+            });
+        }
+    }
+)
 
 // deals with sub collections e.g. /folders/:id
 // retrieves the contents of folders
@@ -674,6 +699,10 @@ angular.module('ice.collection.controller', [])
             });
 
             modalInstance.result.then(function (result) {
+                if (!result)
+                    return;
+                $scope.params.currentPage = 1;
+                $scope.folderPageChange();
             });
         };
 

@@ -1291,6 +1291,13 @@ button[disabled].action-menu:hover {
     cursor: pointer;
 }
 
+.entry-type {
+    opacity: 0.7;
+    font-weight: bold;
+    font-size: 0.85em;
+    text-shadow: 0 1px 0 #fff;
+}
+
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
     display: none !important;
 }
@@ -1459,4 +1466,24 @@ button[disabled].action-menu:hover {
     to {
         color: black;
     }
+}
+
+.link-sup {
+    vertical-align: top;
+    right: -7px;
+    position: relative;
+    font-size: 9px;
+    line-height: 0;
+    top: -0.7em;
+    color: darkgray;
+}
+
+.link-sub {
+    vertical-align: bottom;
+    left: -7px;
+    position: relative;
+    font-size: 9px;
+    line-height: 0;
+    bottom: -0.5em;
+    color: darkgray;
 }

@@ -173,8 +173,13 @@
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                 </th>
                 <th class="entry-table-header" style="width:100px;">
-                    <i class="fa fa-flask fa-fw" style="font-size: 14px" ng-if="entryHeaders.hasSample.selected"></i>
-                    <img src="img/dna.svg" width="15px" ng-if="entryHeaders.hasSequence.selected" alt="has dna"/>
+                    <i class="fa fa-flask fa-fw" uib-tooltip="Has Sample" style="font-size: 15px"
+                       ng-if="entryHeaders.hasSample.selected"></i>
+                    <img src="img/dna.svg" uib-tooltip="Has Sequence" width="16px"
+                         style="margin-left: 3px; margin-right: 3px;"
+                         ng-if="entryHeaders.hasSequence.selected"/>
+                    <!--<i class="fa fa-link fa-fw" style="font-size: 14px"></i>-->
+                    <span uib-tooltip="Has Link" style="font-size: 14px" class="glyphicon glyphicon-link"></span>
                 </th>
                 <th class="entry-table-header" ng-if="entryHeaders.created.selected">
                     <span ng-click="sort('created')">Created</span>
@@ -233,8 +238,8 @@
                 </td>
                 <td style="vertical-align: middle">
                     <a ng-click="showEntryDetails(entry, $index, 'history')" class="cursor_pointer"
-                       uib-tooltip="{{entry.viewCount}} view(s)">
-                        <span ng-if="entry.viewCount" class="glyphicon glyphicon-fire small" ng-class="{
+                       uib-tooltip="{{entry.viewCount}} views">
+                        <span ng-if="entry.viewCount > 1" class="glyphicon glyphicon-fire small" ng-class="{
                         'light-blue': entry.viewCount < 50,
                         'gold': entry.viewCount >= 50 && entry.viewCount <= 100,
                          'orange': entry.viewCount > 100 && entry.viewCount <= 500,
@@ -253,13 +258,26 @@
                 </td>
                 <td style="vertical-align: middle;">
                     <span ng-if="entryHeaders.hasSample.selected">
-                        <i ng-show="entry.hasSample" class="fa fa-flask fa-fw"
+                        <i ng-show="entry.hasSample" class="fa fa-flask fa-fw dark-gray"
                            style="color: #555; font-size: 14px;"></i>
                         <i ng-show="!entry.hasSample" class="fa fa-square fa-fw"
                            style="opacity: 0; font-size: 14px;"></i>
                     </span>
-                    <img ng-show="entry.hasSequence && entryHeaders.hasSequence.selected" src="img/dna.svg"
-                         width="15px"/>
+
+                    <span ng-if="entryHeaders.hasSequence.selected">
+                        <img ng-show="entry.hasSequence" src="img/dna.svg" width="16px"
+                             style="margin-left: 2px; margin-right: 3px"/>
+                         <i ng-show="!entry.hasSequence" class="fa fa-square fa-fw"
+                            style="opacity: 0; font-size: 14px"></i>
+                    </span>
+                    <span ng-if="entry.linkedParts.length || entry.parents.length">
+                        <span class="opacity_hover link-sup">{{entry.parents.length}}</span>
+                        <span class="glyphicon glyphicon-link"></span>
+                        <!--<sub style="vertical-align: bottom; left: -7px">{{entry.linkedParts.length}}</sub>-->
+                        <span class="opacity_hover link-sub">{{entry.linkedParts.length}}</span>
+                    </span>
+                    <i ng-show="!entry.linkedParts.length && !entry.parents.length" class="fa fa-square fa-fw"
+                       style="opacity: 0; font-size: 14px;"></i>
                 </td>
                 <td style="width: 130px; white-space: nowrap; vertical-align: middle;"
                     ng-if="entryHeaders.created.selected">

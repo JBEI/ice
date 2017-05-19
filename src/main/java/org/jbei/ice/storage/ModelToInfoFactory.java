@@ -305,6 +305,25 @@ public class ModelToInfoFactory {
             view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
         }
 
+        // has parents
+        for (Entry linkedEntry : entry.getLinkedEntries()) {
+            // todo : authorization
+//            if (!authorization.canRead(userId, parent))
+//                continue;
+            PartData linkedPartData = new PartData(EntryType.nameToType(linkedEntry.getRecordType()));
+            linkedPartData.setId(linkedEntry.getId());
+            view.getLinkedParts().add(linkedPartData);
+        }
+
+        List<Entry> parents = DAOFactory.getEntryDAO().getParents(entry.getId());
+        if (parents != null) {
+            for (Entry parentEntry : parents) {
+                PartData partData = new PartData(EntryType.nameToType(parentEntry.getRecordType()));
+                partData.setId(parentEntry.getId());
+                view.getParents().add(partData);
+            }
+        }
+
         // entry count
         view.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
         return view;

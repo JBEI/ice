@@ -44,11 +44,12 @@ public class FolderContents {
     private PermissionsController permissionsController = new PermissionsController();
     private AccountController accountController = new AccountController();
     private RemoteContact remoteContact = new RemoteContact();
+    private PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
 
     // adds a specified entry to a folder. The entry was transferred earlier so already exists
     public boolean remotelyAddEntrySelection(String remoteUserId, long folderId, String remoteUserToken,
                                              EntrySelection selection, RegistryPartner requestingPartner) {
-        Folder folder = DAOFactory.getFolderDAO().get(folderId);      // folder that the entry is contained in
+        Folder folder = folderDAO.get(folderId);      // folder that the entry is contained in
         if (folder == null)
             return false;
 
@@ -197,7 +198,7 @@ public class FolderContents {
     }
 
     protected FolderDetails addEntriesToTransferredFolder(List<Long> entries, Folder folder) {
-        List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);  // todo : performance
+        List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);
         Logger.info("Adding " + entryModelList.size() + " transferred entries to folder " + folder.getId());
         folderDAO.addFolderContents(folder, entryModelList);
         return folder.toDataTransferObject();
@@ -250,7 +251,6 @@ public class FolderContents {
      */
     protected List<FolderDetails> addEntriesToFolders(String userId, List<Long> entries, List<FolderDetails> folders) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
         List<Group> accountGroups = new GroupController().getAllGroups(account);
         if (!folderAuthorization.isAdmin(userId))
             entries = DAOFactory.getPermissionDAO().getCanReadEntries(account, accountGroups, entries);
@@ -507,7 +507,6 @@ public class FolderContents {
     }
 
     private void addEntryPermission(String userId, List<Permission> permissions, List<Entry> entries) {
-        PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
         EntryAuthorization entryAuthorization = new EntryAuthorization();
 
         for (Permission folderPermission : permissions) {
