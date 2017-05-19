@@ -378,8 +378,8 @@
                     </div>
                 </td>
                 <td style="vertical-align: middle">
-                    <span ng-if="result.entryInfo.viewCount" class="glyphicon glyphicon-fire small"
-                          uib-tooltip="{{result.entryInfo.viewCount}} view(s)" ng-class="{
+                    <span ng-if="result.entryInfo.viewCount > 1" class="glyphicon glyphicon-fire small"
+                          uib-tooltip="{{result.entryInfo.viewCount}} views" ng-class="{
                         'light-blue': result.entryInfo.viewCount < 50,
                         'gold': result.entryInfo.viewCount >= 50 && result.entryInfo.viewCount <= 100,
                         'orange': result.entryInfo.viewCount > 100 && result.entryInfo.viewCount <= 500,
