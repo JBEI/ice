@@ -71,7 +71,7 @@
             </td>
             <td style="vertical-align: middle">
                 <span ng-if="entry.viewCount" class="glyphicon glyphicon-fire small"
-                      uib-tooltip="{{entry.viewCount}} view(s)" ng-class="{
+                      uib-tooltip="{{entry.viewCount > 1}} views" ng-class="{
                         'light-blue': entry.viewCount < 50,
                         'gold': entry.viewCount >= 50 && entry.viewCount <= 100,
                         'orange': entry.viewCount > 100 && entry.viewCount <= 500,
