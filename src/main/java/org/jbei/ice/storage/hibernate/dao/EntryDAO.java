@@ -116,12 +116,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @throws DAOException
      */
     public Entry getByRecordId(String recordId) {
+        if (recordId == null)
+            return null;
         return getEntryByField("recordId", recordId);
     }
 
     /**
      * Retrieve an {@link Entry} by it's part number.
-     * <p/>
+     * <p>
      * If multiple Entries exist with the same part number, this method throws an exception.
      *
      * @param partNumber part number associated with entry
