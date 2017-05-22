@@ -20,6 +20,7 @@ import org.jbei.ice.storage.hibernate.dao.TraceSequenceDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
@@ -74,8 +75,8 @@ public class TraceSequences {
                                 byteArrayOutputStream.write(c);
                             }
 
-                            boolean parsed = parseTraceSequence(zipEntry.getName(),
-                                    byteArrayOutputStream.toByteArray());
+                            String zipFilename = Paths.get(zipEntry.getName()).getFileName().toString();
+                            boolean parsed = parseTraceSequence(zipFilename, byteArrayOutputStream.toByteArray());
                             if (!parsed) {
                                 String errMsg = ("Could not parse \"" + zipEntry.getName()
                                         + "\". Only Fasta, GenBank & ABI files are supported.");
@@ -206,7 +207,7 @@ public class TraceSequences {
 
         String uuid = Utils.generateUUID();
         TraceSequence traceSequence = new TraceSequence(entry, uuid, filename, this.userId, sequence, new Date());
-        File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), TRACES_DIR_NAME).toFile();
+        Path tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), TRACES_DIR_NAME);
         return dao.create(tracesDir, traceSequence, inputStream);
     }
 
@@ -312,109 +313,7 @@ public class TraceSequences {
         }
     }
 
-
-    /**
-     * Rebuild the trace sequence alignments for entry using bl2seq. This is intended to be called
-     * when the sequence associated with the entry is updated and therefore requires that the sequence
-     * alignment be re-calculated
-     */
-    public void rebuildAlignments(TraceSequence traceSequence, Sequence sequence) {
-
-        if (traceSequence == null) {
-            throw new IllegalArgumentException("Failed to rebuild alignment for null trace sequence!");
-        }
-
-        // if sequence is null => delete alignment
-        if (sequence == null || sequence.getEntry() == null) {
-            return;
-        }
-
-        // actually build alignment
-        String traceSequenceString = traceSequence.getSequence();
-        String entrySequenceString = sequence.getSequence();
-
-        int entrySequenceLength = entrySequenceString.length();
-        boolean isCircular = (sequence.getEntry() instanceof Plasmid) && ((Plasmid) sequence.getEntry()).getCircular();
-
-        if (isCircular) {
-            entrySequenceString += entrySequenceString;
-        }
-
-        try {
-            List<Bl2SeqResult> bl2seqAlignmentResults = BlastPlus.runBlast2Seq(entrySequenceString, traceSequenceString);
-
-            if (bl2seqAlignmentResults.size() > 0) {
-                int maxAlignedSequenceLength = -1;
-                Bl2SeqResult maxBl2SeqResult = null;
-
-                for (Bl2SeqResult bl2seqResult : bl2seqAlignmentResults) {
-                    int querySequenceLength = bl2seqResult.getQuerySequence().length();
-
-                    if (maxAlignedSequenceLength < querySequenceLength) {
-                        maxAlignedSequenceLength = querySequenceLength;
-                        maxBl2SeqResult = bl2seqResult;
-                    }
-                }
-
-                if (maxBl2SeqResult != null) {
-                    int strand = maxBl2SeqResult.getOrientation() == 0 ? 1 : -1;
-                    TraceSequenceAlignment traceSequenceAlignment = traceSequence.getTraceSequenceAlignment();
-                    int queryStart = maxBl2SeqResult.getQueryStart();
-                    int queryEnd = maxBl2SeqResult.getQueryEnd();
-                    int subjectStart = maxBl2SeqResult.getSubjectStart();
-                    int subjectEnd = maxBl2SeqResult.getSubjectEnd();
-
-                    if (isCircular) {
-                        if (queryStart > entrySequenceLength - 1) {
-                            queryStart = queryStart - entrySequenceLength;
-                        }
-
-                        if (queryEnd > entrySequenceLength - 1) {
-                            queryEnd = queryEnd - entrySequenceLength;
-                        }
-
-                        if (subjectEnd > entrySequenceLength - 1) {
-                            subjectEnd = subjectEnd - entrySequenceLength;
-                        }
-
-                        if (subjectStart > entrySequenceLength - 1) {
-                            subjectStart = subjectStart - entrySequenceLength;
-                        }
-                    }
-
-                    if (traceSequenceAlignment == null) {
-                        traceSequenceAlignment = new TraceSequenceAlignment(traceSequence,
-                                maxBl2SeqResult.getScore(), strand,
-                                queryStart, queryEnd,
-                                subjectStart, subjectEnd,
-                                maxBl2SeqResult.getQuerySequence(),
-                                maxBl2SeqResult.getSubjectSequence(),
-                                sequence.getFwdHash(),
-                                new Date());
-
-                        traceSequence.setTraceSequenceAlignment(traceSequenceAlignment);
-                    } else {
-                        traceSequenceAlignment.setModificationTime(new Date());
-                        traceSequenceAlignment.setScore(maxBl2SeqResult.getScore());
-                        traceSequenceAlignment.setStrand(strand);
-                        traceSequenceAlignment.setQueryStart(queryStart);
-                        traceSequenceAlignment.setQueryEnd(queryEnd);
-                        traceSequenceAlignment.setSubjectStart(subjectStart);
-                        traceSequenceAlignment.setSubjectEnd(subjectEnd);
-                        traceSequenceAlignment.setQueryAlignment(maxBl2SeqResult.getQuerySequence());
-                        traceSequenceAlignment.setSubjectAlignment(maxBl2SeqResult.getSubjectSequence());
-                        traceSequenceAlignment.setSequenceHash(sequence.getFwdHash());
-                    }
-
-                    dao.save(traceSequence);
-                }
-            }
-        } catch (BlastException e) {
-            Logger.error(e);
-        }
-    }
-
     protected boolean canEdit(String userId, String depositor, Entry entry) {
-        return userId.equalsIgnoreCase(depositor) || entryAuthorization.canWriteThoroughCheck(userId, entry);
+        return userId.equalsIgnoreCase(depositor) || entryAuthorization.canWrite(userId, entry);
     }
 }

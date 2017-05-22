@@ -1,0 +1,73 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <span class="glyphicon glyphicon-cloud-upload"></span> &nbsp;Upload Parts to Folder
+    </span>
+</div>
+
+<div class="modal-body" ng-if="!serverResult">
+    <div ng-if="!processingFile">
+        <div class="alert alert-info" style="margin-bottom: 10px; margin-top: 10px">
+            <i style="font-size: 18px" class="fa fa-info-circle pull-left"> </i> Place parts numbers in a csv file, one
+            per line. All empty lines will be ignored
+        </div>
+
+        <div class="alert alert-danger" style="margin-bottom: 10px" ng-if="serverError">
+            <i style="font-size: 18px" class="fa fa-exclamation-triangle pull-left"></i> Error parsing file
+        </div>
+
+        <div class="margin-top-20 font-90em"><input nv-file-select uploader="partsUploader" type="file"/></div>
+        <br>
+    </div>
+
+    <div ng-if="processingFile && progress < 100">
+        <img src="img/loader-mini.gif" ng-if="progress!= '100'"> Uploading File....
+        <uib-progressbar value="progress">{{progress}}%</uib-progressbar>
+    </div>
+
+    <div ng-if="progress==100 && processingFile">
+        <img src="img/loader-mini.gif"> Processing File...
+        <uib-progressbar class="progress-striped active" value="100" type="warning"
+                         style="height: 20px"></uib-progressbar>
+    </div>
+</div>
+
+<div class="modal-body" ng-if="serverResult">
+    <table>
+        <tr>
+            <th style="width: 80px">&nbsp;</th>
+            <th class="entry-table-header" style="width: 250px;">Part Number</th>
+            <th class="entry-table-header" style="padding-left: 65px;">Type</th>
+        </tr>
+    </table>
+
+    <div style="height: 300px; overflow: scroll; border: 1px solid #DDDDDD">
+        <table class="table">
+            <tr ng-repeat="message in serverResult.data track by $index"
+                ng-class="{'danger':!message.partData, 'success': message.partData}">
+                <td style="width: 50px; padding-left: 50px;">
+                    <span class="glyphicon"
+                          ng-class="{'glyphicon-ok green':message.partData, 'glyphicon-remove red': !message.partData}">
+                    </span>
+                </td>
+                <td ng-if="!message.partData">{{message.identifier}}</td>
+                <td ng-if="message.partData"><a ng-href="entry/{{message.partData.id}}" target="_blank">{{message.identifier}}</a>
+                </td>
+
+                <td>
+                    <span ng-if="message.partData" class="entry-type">{{message.partData.type}}</span>
+                    <span ng-if="!message.partData"></span>
+                </td>
+        </table>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <span ng-if="serverResult" class="pull-left" style="font-size: 85%">
+        <b>{{serverResult.valid.length}}</b> valid entries out of <b>{{serverResult.data.length}}</b></span>
+    <button class="btn btn-default btn-sm" ng-click="$dismiss('cancel')">Cancel</button>
+    <button class="btn btn-primary btn-sm" ng-disabled="serverResult.addingToFolder"
+            ng-if="serverResult.valid && serverResult.valid.length" type="button" ng-click="addValidEntriesToFolder()">
+        <strong>Add to folder</strong>
+    </button>
+</div>

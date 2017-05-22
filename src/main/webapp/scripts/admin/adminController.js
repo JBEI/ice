@@ -8,7 +8,6 @@ angular.module('ice.admin.controller', [])
         var blastPromise;
 
         var getLuceneIndexStatus = function () {
-            console.log("checking lucene");
             Util.get("rest/search/indexes/LUCENE/status", function (result) {
                 if (result.total == 0)
                     $interval.cancel(lucenePromise);
@@ -21,7 +20,6 @@ angular.module('ice.admin.controller', [])
         lucenePromise = $interval(getLuceneIndexStatus, 2000);
 
         var getBlastStatus = function () {
-            console.log("checking blast");
             Util.get("rest/search/indexes/BLAST/status", function (result) {
                 if (!result.total)
                     $interval.cancel(blastPromise);
@@ -296,6 +294,18 @@ angular.module('ice.admin.controller', [])
                 controller: "AdminSampleLocationSearch",
                 backdrop: "static"
             });
+        };
+
+        $scope.getPrimarySample = function (locations) {
+            if (locations.length != 3)
+                return locations[0];
+
+            for (var i = 0; i < locations.length; i += 1) {
+                if (locations[i].label.indexOf("backup") == -1)
+                    return locations[i];
+
+            }
+            return locations[0];
         }
     })
     .controller('AdminSampleLocationSearch', function ($scope, $uibModalInstance, Util) {

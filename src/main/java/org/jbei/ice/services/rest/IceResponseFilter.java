@@ -1,5 +1,6 @@
 package org.jbei.ice.services.rest;
 
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
 
 import javax.ws.rs.container.ContainerRequestContext;
@@ -21,9 +22,6 @@ public class IceResponseFilter implements ContainerResponseFilter {
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
-        // 401 = unauthorized (trans not started)
-        // 500 = request failed
-        // 204 = no content ???
         int status = responseContext.getStatus();
         if (status != 401) {
             if (status == 500)
@@ -31,8 +29,8 @@ public class IceResponseFilter implements ContainerResponseFilter {
             else {
                 try {
                     HibernateUtil.commitTransaction();
-                } catch (Exception e) {
-//                    Logger.error(e);
+                } catch (Throwable e) {
+                    Logger.error(e);
                     responseContext.setStatus(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
                     HibernateUtil.rollbackTransaction();
                 }

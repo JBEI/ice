@@ -105,7 +105,7 @@ public class SampleResource extends RestResource {
             StreamingOutput stream = outputStream::writeTo;
             return Response.ok(stream).header("Content-Disposition", "attachment;filename=\"data.csv\"").build();
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.error(e);
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         }
     }

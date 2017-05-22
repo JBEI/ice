@@ -24,7 +24,6 @@ import java.util.List;
  * <li><code>Deleted</code></li>
  * <li><code>Transferred</code></li>
  * </ul>
- * <p>
  * These cannot be created or deleted by users
  *
  * @author Hector Plahar
@@ -91,19 +90,20 @@ public class CollectionResource extends RestResource {
                          @DefaultValue("false") @QueryParam("asc") final boolean asc,
                          @DefaultValue("") @QueryParam("filter") String filter,
                          @QueryParam("fields") List<String> queryParam) {
+        String userId = requireUserId();
+
         try {
             CollectionType type = CollectionType.valueOf(collectionType.toUpperCase());
             ColumnField sortField = ColumnField.valueOf(sort.toUpperCase());
-
-            String userId = requireUserId();
             log(userId, "retrieving entries for collection " + type);
             CollectionEntries entries = new CollectionEntries(userId, type);
-
             return super.respond(entries.getEntries(sortField, asc, offset, limit, filter));
         } catch (PermissionException pe) {
             return super.respond(Response.Status.FORBIDDEN);
         } catch (IllegalArgumentException ie) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        } catch (Exception e) {
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
 }

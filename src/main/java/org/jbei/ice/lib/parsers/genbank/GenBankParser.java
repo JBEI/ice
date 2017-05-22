@@ -4,8 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
-import org.jbei.ice.lib.utils.FileUtils;
-import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
 
 import java.util.*;
@@ -62,44 +60,24 @@ public class GenBankParser extends AbstractParser {
     // TODO parse source feature tag with xdb_ref
     @Override
     public DNASequence parse(String textSequence) throws InvalidFormatParserException {
-        if (textSequence == null || textSequence.isEmpty())
-            throw new InvalidFormatParserException("Cannot parse empty genbank sequence");
+        FeaturedDNASequence sequence;
+        textSequence = cleanSequence(textSequence);
 
-        FeaturedDNASequence sequence = null;
-        try {
-            textSequence = cleanSequence(textSequence);
+        ArrayList<Tag> tags = splitTags(textSequence, NORMAL_TAGS, IGNORE_TAGS);
+        tags = parseTags(tags);
 
-            ArrayList<Tag> tags = splitTags(textSequence, NORMAL_TAGS, IGNORE_TAGS);
-            tags = parseTags(tags);
-
-            sequence = new FeaturedDNASequence();
-            for (final Tag tag : tags) {
-                if (tag instanceof LocusTag) {
-                    sequence.setName(((LocusTag) tag).getLocusName());
-                    sequence.setIsCircular(((LocusTag) tag).isCircular());
-                } else if (tag instanceof OriginTag) {
-                    sequence.setSequence(((OriginTag) tag).getSequence());
-                } else if (tag instanceof FeaturesTag) {
-                    sequence.setFeatures(((FeaturesTag) tag).getFeatures());
-                }
+        sequence = new FeaturedDNASequence();
+        for (final Tag tag : tags) {
+            if (tag instanceof LocusTag) {
+                sequence.setName(((LocusTag) tag).getLocusName());
+                sequence.setIsCircular(((LocusTag) tag).isCircular());
+            } else if (tag instanceof OriginTag) {
+                sequence.setSequence(((OriginTag) tag).getSequence());
+            } else if (tag instanceof FeaturesTag) {
+                sequence.setFeatures(((FeaturesTag) tag).getFeatures());
             }
-        } catch (NullPointerException | StringIndexOutOfBoundsException e) {
-            recordParsingError(textSequence, e);
         }
         return sequence;
-    }
-
-    /**
-     * If there is a parsing error of interest, write the file to disk, and send an email to admin.
-     */
-    private void recordParsingError(final String fileText, final Exception e)
-            throws InvalidFormatParserException {
-        final String message = "Error parsing genBank file. Please examine the recorded file.";
-        try {
-            FileUtils.recordAndReportFile(message, fileText, e);
-        } catch (final UtilityException e1) {
-            throw new InvalidFormatParserException("failed to write error");
-        }
     }
 
     private ArrayList<Tag> splitTags(final String block, final String[] acceptedTags,

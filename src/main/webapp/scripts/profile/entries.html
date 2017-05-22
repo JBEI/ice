@@ -70,10 +70,14 @@
                 </div>
             </td>
             <td style="vertical-align: middle">
-                <small style="opacity: 0.4">
-                    <ng-pluralize count="entry.viewCount" when="{'0': '', '1': '1 view', 'other':'{} views'}">
-                    </ng-pluralize>
-                </small>
+                <span ng-if="entry.viewCount" class="glyphicon glyphicon-fire small"
+                      uib-tooltip="{{entry.viewCount > 1}} views" ng-class="{
+                        'light-blue': entry.viewCount < 50,
+                        'gold': entry.viewCount >= 50 && entry.viewCount <= 100,
+                        'orange': entry.viewCount > 100 && entry.viewCount <= 500,
+                        'dark-orange': entry.viewCount > 500 && entry.viewCount <= 1000,
+                        'red': entry.viewCount > 1000}">
+                </span>
             </td>
             <td style="vertical-align: middle; width:80px; white-space:nowrap">
                 <span class="label" ng-class="{

@@ -25,7 +25,7 @@ public class EntrySelection implements IDataTransferModel {
     private ArrayList<FolderDetails> destination;   // destination for entry selection
     private String folderId;                        // personal, available, shared, drafts, pending, actual folderId
     private ArrayList<Long> entries;                // if no context, then ad hoc selection
-    private ArrayList<PartData> remoteEntries;        // record Ids of adhoc remote entry selection
+    private ArrayList<PartData> remoteEntries;      // record Ids of adhoc remote entry selection
 
     public EntrySelection() {
         entries = new ArrayList<>();

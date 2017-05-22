@@ -99,7 +99,7 @@ public class FolderResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getFolder(@PathParam("id") long folderId) {
         String userId = requireUserId();
-        log(userId, "get folder \"" + folderId + "\"");
+        log(userId, "Get folder details for \"" + folderId + "\"");
         try {
             UserFolder folder = new UserFolder(userId);
             return super.respond(folder.getFolder(folderId));
@@ -116,12 +116,11 @@ public class FolderResource extends RestResource {
      */
     @PUT
     @Path("/{id}")
-    public Response update(@PathParam("id") final long folderId,
-                           final FolderDetails details) {
+    public Response update(@PathParam("id") final long folderId, final FolderDetails details) {
         final String userId = requireUserId();
         log(userId, "update folder \"" + folderId + "\"");
         final FolderDetails resp = controller.update(userId, folderId, details);
-        return super.respond(Response.Status.OK, resp);
+        return super.respond(resp);
     }
 
     /**

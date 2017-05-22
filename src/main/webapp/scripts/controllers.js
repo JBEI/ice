@@ -253,10 +253,9 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         $scope.editDisabled = true;
     };
 
-// todo : getEntrySelection() should be moved to Selection
     $scope.csvExport = function (includeSequences) {
         var selection = getEntrySelection();
-        var formats = {sequenceFormats: []};
+        var formats = {sequenceFormats: []};//, entryFields: ["name"]};
         if (includeSequences)
             formats.sequenceFormats.push("genbank");
 
@@ -264,7 +263,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         Util.post("rest/file/csv", selection, function (result) {
             if (result && result.value) {
                 $window.open("rest/file/tmp/" + result.value, "_self");
-                Selection.reset();
+                //Selection.reset();
             }
         }, formats);
     };
@@ -550,6 +549,8 @@ iceControllers.controller('AddToFolderController', function ($rootScope, $scope,
 iceControllers.controller('RegisterController', function ($scope, $resource, $location, Util) {
     $scope.errMsg = undefined;
     $scope.registerSuccess = undefined;
+    $scope.processing = undefined;
+
     $scope.newUser = {
         firstName: undefined,
         lastName: undefined,
@@ -560,8 +561,8 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
 
     $scope.submit = function () {
         var validates = true;
+        $scope.processing = true;
         // validate
-        console.log($scope.newUser);
 
         if (!$scope.newUser.firstName) {
             $scope.firstNameError = true;
@@ -588,16 +589,20 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
             validates = false;
         }
 
-        if (!validates)
+        if (!validates) {
+            $scope.processing = false;
             return;
+        }
 
         Util.post("rest/users", $scope.newUser, function (data) {
+            $scope.processing = false;
             if (data.length != 0)
                 $scope.registerSuccess = true;
             else
                 $scope.errMsg = "Could not create account";
         }, {}, function (error) {
             $scope.errMsg = "Error creating account";
+            $scope.processing = false;
         });
     };
 

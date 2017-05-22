@@ -159,7 +159,7 @@ public class SampleServiceTest {
         shelf.setType(SampleType.SHELF);
         shelf.setChild(box);
 
-        partSample1.setLocation(well);
+        partSample1.setLocation(shelf);
         partSample1 = service.createSample(userId, Long.toString(strain1.getId()), partSample1, null);
         Assert.assertNotNull(partSample1);
 
@@ -196,7 +196,7 @@ public class SampleServiceTest {
         plate2.setType(SampleType.PLATE96);
         plate2.setChild(well2);
 
-        partSample2.setLocation(tube2);
+        partSample2.setLocation(plate2);
         partSample2 = service.createSample(userId, Long.toString(strain2.getId()), partSample2, null);
         Assert.assertNotNull(partSample2);
 
@@ -221,7 +221,7 @@ public class SampleServiceTest {
         plate3.setType(SampleType.PLATE96);
         plate3.setChild(well3);
 
-        partSample3.setLocation(tube3);
+        partSample3.setLocation(plate3);
         partSample3 = service.createSample(userId, Long.toString(strain2.getId()), partSample3, null);
         Assert.assertNotNull(partSample3);
 

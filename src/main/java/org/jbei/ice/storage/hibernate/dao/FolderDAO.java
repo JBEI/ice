@@ -11,7 +11,10 @@ import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.*;
 
-import javax.persistence.criteria.*;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 import java.util.*;
 
 /**
@@ -278,21 +281,6 @@ public class FolderDAO extends HibernateRepository<Folder> {
         }
     }
 
-    public int setFolderEntryVisibility(long folderId, Visibility ok) {
-        try {
-            CriteriaUpdate<Folder> update = getBuilder().createCriteriaUpdate(Folder.class);
-            Root<Folder> from = update.from(Folder.class);
-            Join<Folder, Entry> entry = from.join("contents");
-
-            update.set(entry.get("visibility"), ok.getValue());
-            update.where(getBuilder().equal(from.get("id"), folderId));
-            return currentSession().createQuery(update).executeUpdate();
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
-    }
-
     public List<Folder> filterByName(String token, int limit) {
         try {
             CriteriaQuery<Folder> query = getBuilder().createQuery(Folder.class);
@@ -303,5 +291,20 @@ public class FolderDAO extends HibernateRepository<Folder> {
             Logger.error(he);
             throw new DAOException(he);
         }
+    }
+
+    /**
+     * Retrieve the list of ids of entries contained in a folder. Using this method is much faster (especially for
+     * larger number of entries in a folder) that iterating through all the entries of a folder
+     *
+     * @param folder folder whose entries are being retrieved
+     * @return list of ids of entries in a folder
+     */
+    public List<Long> getEntryIds(Folder folder) {
+        CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+        Root<Folder> from = query.from(Folder.class);
+        Join<Folder, Entry> entry = from.join("contents");
+        query.select(entry.get("id")).where(getBuilder().equal(from, folder));
+        return currentSession().createQuery(query).list();
     }
 }

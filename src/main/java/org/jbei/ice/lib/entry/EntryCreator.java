@@ -40,7 +40,7 @@ public class EntryCreator extends HasEntry {
 
     /**
      * Create an entry in the database.
-     * <p>
+     * <p/>
      * Generates a new Part Number, the record id (UUID), version id, and timestamps.
      * Optionally set the record globally visible or schedule an index rebuild.
      *
@@ -160,15 +160,12 @@ public class EntryCreator extends HasEntry {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
 
         // linked entries can be a combination of new and existing parts
-        if (part.getLinkedParts() != null && part.getLinkedParts().size() > 0) {
+        if (part.getLinkedParts() != null) {
             for (PartData data : part.getLinkedParts()) {
                 Entry linked;
                 if (data.getId() > 0) {
                     linked = dao.get(data.getId());
-                    if (linked == null)
-                        continue;
-
-                    if (!entryAuthorization.canRead(userId, linked)) {
+                    if (linked == null || !entryAuthorization.canRead(userId, linked)) {
                         continue;
                     }
 
@@ -177,7 +174,7 @@ public class EntryCreator extends HasEntry {
                     linked = InfoToModelFactory.updateEntryField(data, linked);
                     linked.setVisibility(Visibility.OK.getValue());
 
-                    if (entryAuthorization.canWriteThoroughCheck(userId, linked)) {
+                    if (entryAuthorization.canWrite(userId, linked)) {
                         // then update
                     }
                 } else {
@@ -186,8 +183,7 @@ public class EntryCreator extends HasEntry {
                     linked = createEntry(account, linkedEntry, data.getAccessPermissions());
                 }
 
-                if (entry != null)
-                    entry.getLinkedEntries().add(linked);
+                entry.getLinkedEntries().add(linked);
             }
         }
 

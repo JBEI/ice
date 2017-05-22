@@ -4,7 +4,6 @@ import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.storage.IDataTransferModel;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,7 +16,7 @@ public abstract class AbstractFolder implements IDataTransferModel, Comparable<A
 
     private long id;
     private long creationTime;
-    private ArrayList<AccessPermission> accessPermissions;
+    private List<AccessPermission> accessPermissions;
     private List<PartData> entries;
 
     public AbstractFolder() {
@@ -45,11 +44,11 @@ public abstract class AbstractFolder implements IDataTransferModel, Comparable<A
         this.creationTime = creationTime;
     }
 
-    public ArrayList<AccessPermission> getAccessPermissions() {
+    public List<AccessPermission> getAccessPermissions() {
         return accessPermissions;
     }
 
-    public void setAccessPermissions(ArrayList<AccessPermission> accessPermissions) {
+    public void setAccessPermissions(List<AccessPermission> accessPermissions) {
         this.accessPermissions = accessPermissions;
     }
 

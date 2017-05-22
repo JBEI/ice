@@ -154,16 +154,6 @@ public class SequenceController extends HasEntry {
     }
 
     /**
-     * Parse the given String into an {@link DNASequence} object.
-     *
-     * @param sequence
-     * @return parsed DNASequence object.
-     */
-    public static DNASequence parse(String sequence) {
-        return GeneralParser.getInstance().parse(sequence);
-    }
-
-    /**
      * Generate a formatted text of a given {@link IFormatter} from the given {@link Sequence}.
      *
      * @param sequence
@@ -229,14 +219,17 @@ public class SequenceController extends HasEntry {
         if (!new PermissionsController().isPubliclyVisible(entry))
             authorization.expectRead(userId, entry);
 
-        boolean canEdit = authorization.canWriteThoroughCheck(userId, entry);
+        boolean canEdit = authorization.canWrite(userId, entry);
         return getFeaturedSequence(entry, canEdit);
     }
 
     protected FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {
         Sequence sequence = dao.getByEntry(entry);
-        if (sequence == null)
-            return null;
+        if (sequence == null) {
+            FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence();
+            featuredDNASequence.setName(entry.getName());
+            return featuredDNASequence;
+        }
 
         FeaturedDNASequence featuredDNASequence = sequenceToDNASequence(sequence);
         featuredDNASequence.setCanEdit(canEdit);

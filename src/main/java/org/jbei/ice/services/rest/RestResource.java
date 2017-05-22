@@ -27,7 +27,6 @@ public class RestResource {
     protected final String WOR_PARTNER_TOKEN = Headers.WOR_PARTNER_TOKEN;
     protected final String API_KEY_TOKEN = Headers.API_KEY_TOKEN;               // token for validation
     protected final String API_KEY_USER = Headers.API_KEY_USER;           // optional user. system checks and uses assigned token user if not specified
-    protected final String API_KEY_OWNER = Headers.API_KEY_OWNER;
     protected final String API_KEY_CLIENT_ID = Headers.API_KEY_CLIENT_ID;    // client id
     protected final String REMOTE_USER_TOKEN = Headers.REMOTE_USER_TOKEN;   // token for remote user
     protected final String REMOTE_USER_ID = Headers.REMOTE_USER_ID;         // id for remote user
@@ -40,9 +39,6 @@ public class RestResource {
 
     @HeaderParam(value = API_KEY_USER)
     protected String apiUser;
-
-    @HeaderParam(value = API_KEY_OWNER)
-    protected String apiKeyOwner;
 
     @HeaderParam(value = API_KEY_TOKEN)
     protected String apiToken;
@@ -66,7 +62,8 @@ public class RestResource {
     protected HttpServletRequest request;
 
     /**
-     * Extract the User ID from header values in the resource request.
+     * Extract the User ID from header values in the resource request. This can either
+     * be the session id or API keys
      *
      * @return a string User ID
      * @throws WebApplicationException for unauthorized access
@@ -86,6 +83,26 @@ public class RestResource {
         if (userId == null)
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         return userId;
+    }
+
+    /**
+     * Requires either a valid user request or request from a web partner
+     *
+     * @param logMessage log message for request
+     */
+    protected void requireUserIdOrWebPartner(String logMessage) {
+        String userId = getUserId();
+        if (StringUtils.isNotEmpty(userId)) {
+            log(userId, logMessage);
+            return;
+        }
+
+        // try web partner
+        RegistryPartner partner = getWebPartner();
+        if (partner == null)
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+
+        log(partner.getUrl(), logMessage);
     }
 
     // returns the  name and port for this server
@@ -122,9 +139,7 @@ public class RestResource {
 
             try {
                 TokenVerification tokenVerification = new TokenVerification();
-                if (apiKeyOwner == null && apiUser != null)
-                    apiKeyOwner = apiUser;
-                userId = tokenVerification.verifyAPIKey(apiToken, clientId, apiKeyOwner);
+                userId = tokenVerification.verifyAPIKey(apiToken, clientId, apiUser);
             } catch (PermissionException pe) {
                 throw new WebApplicationException(Response.Status.UNAUTHORIZED);
             }
@@ -222,6 +237,9 @@ public class RestResource {
      * @param message log message
      */
     protected void log(final String userId, final String message) {
+        if (StringUtils.isEmpty(message))
+            return;
+
         final String who = (userId == null) ? "Unknown" : userId;
         Logger.info(who + ": " + message);
     }

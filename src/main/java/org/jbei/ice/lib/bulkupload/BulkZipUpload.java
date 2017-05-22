@@ -1,16 +1,15 @@
 package org.jbei.ice.lib.bulkupload;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.utils.Utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -49,10 +48,8 @@ public class BulkZipUpload extends BulkCSVUpload {
         String csvFile = null;
         HashMap<String, InputStream> files = new HashMap<>();
 
-        try {
-            ZipFile zipFile = new ZipFile(zipFilePath.toFile());
+        try (ZipFile zipFile = new ZipFile(zipFilePath.toFile())) {
             Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
-
 
             // go through zip elements
             while (enumeration.hasMoreElements()) {
@@ -76,7 +73,7 @@ public class BulkZipUpload extends BulkCSVUpload {
                         processedBulkUpload.setUserMessage("Duplicate csv file in zip archive. It should only contain one.");
                         return processedBulkUpload;
                     }
-                    csvFile = IOUtils.toString(zipFile.getInputStream(zipEntry), StandardCharsets.UTF_8);
+                    csvFile = Utils.getString(zipFile.getInputStream(zipEntry));
                 } else {
                     InputStream inputStream = zipFile.getInputStream(zipEntry);
                     files.put(name, inputStream);

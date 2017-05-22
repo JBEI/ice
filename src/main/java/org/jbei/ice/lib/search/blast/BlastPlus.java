@@ -2,7 +2,6 @@ package org.jbei.ice.lib.search.blast;
 
 import com.opencsv.CSVReader;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.RNATools;
@@ -35,7 +34,6 @@ import java.io.*;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
@@ -70,8 +68,8 @@ public class BlastPlus {
      */
     static String runBlastQuery(String dbFolder, BlastQuery query, String... options) throws BlastException {
         try {
-            String command = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
-                    + query.getBlastProgram().getName();
+            Path commandPath = Paths.get(Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR),
+                    query.getBlastProgram().getName());
             String blastDb = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), dbFolder,
                     BLAST_DB_NAME).toString();
             if (!Files.exists(Paths.get(blastDb + ".nsq"))) {
@@ -79,7 +77,7 @@ public class BlastPlus {
             }
 
             String[] blastCommand = new String[3 + options.length];
-            blastCommand[0] = command;
+            blastCommand[0] = commandPath.toString();
             blastCommand[1] = "-db";
             blastCommand[2] = blastDb;
             System.arraycopy(options, 0, blastCommand, 3, options.length);
@@ -246,8 +244,8 @@ public class BlastPlus {
         searchResult.seteValue(line[9]);
         searchResult.setScore(Float.valueOf(line[11]));
         searchResult.setAlignment(line[13]);
-        searchResult.setQueryLength(Integer.valueOf(line[12]));
-        searchResult.setNident(Integer.valueOf(line[13]));
+        searchResult.setQueryLength(Integer.parseInt(line[12]));
+        searchResult.setNident(Integer.parseInt(line[13]));
         return searchResult;
     }
 
@@ -376,14 +374,16 @@ public class BlastPlus {
         final Path blastFolder = Paths.get(dataDir, BLAST_DB_FOLDER);
         File lockFile = Paths.get(blastFolder.toString(), LOCK_FILE_NAME).toFile();
         if (lockFile.exists()) {
-            if (lockFile.lastModified() <= (System.currentTimeMillis() - (1000 * 60 * 60 * 24)))
+            if (lockFile.lastModified() <= (System.currentTimeMillis() - (1000 * 60 * 60 * 24))) {
                 if (!lockFile.delete()) {
                     Logger.warn("Could not delete outdated blast lockfile. Delete the following file manually: "
                             + lockFile.getAbsolutePath());
-                } else {
-                    Logger.info("Blast db locked (lockfile - " + lockFile.getAbsolutePath() + "). Rebuild aborted!");
                     return;
                 }
+            } else {
+                Logger.info("Blast db locked (lockfile - " + lockFile.getAbsolutePath() + "). Rebuild aborted!");
+                return;
+            }
         }
 
         try {
@@ -556,16 +556,14 @@ public class BlastPlus {
             Process process = runTime.exec(commandString, new String[0], blastDb.toFile());
             InputStream blastOutputStream = process.getInputStream();
             InputStream blastErrorStream = process.getErrorStream();
-
             process.waitFor();
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(blastOutputStream, writer, StandardCharsets.UTF_8);
+            String outputString = Utils.getString(blastOutputStream);
             blastOutputStream.close();
-            String outputString = writer.toString();
+
             Logger.debug("format output was: " + outputString);
-            writer = new StringWriter();
-            IOUtils.copy(blastErrorStream, writer, StandardCharsets.UTF_8);
-            String errorString = writer.toString();
+            String errorString = Utils.getString(blastErrorStream);
+            blastErrorStream.close();
+
             Logger.debug("format error was: " + errorString);
             process.destroy();
             if (errorString.length() > 0) {

@@ -5,11 +5,10 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -156,5 +155,17 @@ public class Utils {
         if (value != null)
             return value;
         return key.getDefaultValue();
+    }
+
+    public static String getString(InputStream stream) throws IOException {
+        StringBuilder builder = new StringBuilder();
+        try (Reader reader = new BufferedReader(new InputStreamReader
+                (stream, Charset.forName(StandardCharsets.UTF_8.name())))) {
+            int c;
+            while ((c = reader.read()) != -1) {
+                builder.append((char) c);
+            }
+        }
+        return builder.toString();
     }
 }

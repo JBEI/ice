@@ -11,18 +11,20 @@ import javax.xml.namespace.QName;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SBOL2Visitor {
 
-    final String ICE_NS = "http://ice.jbei.org#";
-    final String ICE_PREFIX = "ice";
+    static final String ICE_NS = "http://ice.jbei.org#";
+    static final String ICE_PREFIX = "ice";
 
     private ComponentDefinition componentDefinition;
     private String uriString;
     private Set<String> uris;
     private SBOLDocument doc;
 
-    public SBOL2Visitor(SBOLDocument doc) throws URISyntaxException {
+    public SBOL2Visitor(SBOLDocument doc) throws SBOLValidationException, URISyntaxException {
 
         this.doc = doc;
         uriString = Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/entry";
@@ -196,11 +198,44 @@ public class SBOL2Visitor {
         }
     }
 
-    private static String displayIdFromUri(String uri) {
-        return uri.substring(uri.lastIndexOf('/') + 1);
+    /**
+     * Extract the URI prefix from this object's identity URI.
+     *
+     * @return the extracted URI prefix
+     */
+    private static String prefixFromUri(String URIstr) {
+        Pattern r = Pattern.compile(genericURIpattern1b);
+        Matcher m = r.matcher(URIstr);
+        if (m.matches())
+            return m.group(2);
+        else
+            return null;
     }
 
-    private static String prefixFromUri(String uri) {
-        return uri.substring(0, uri.lastIndexOf('/') - 1);
+    private static final String delimiter = "[/|#|:]";
+
+    private static final String URIprefixPattern = "\\b(?:https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
+
+    private static final String displayIDpattern = "[a-zA-Z_]+[a-zA-Z0-9_]*";//"[a-zA-Z0-9_]+";
+
+    private static final String versionPattern = "[0-9]+[a-zA-Z0-9_\\.-]*"; // ^ and $ are the beginning and end of the string anchors respectively.
+    // | is used to denote alternates.
+
+    private static final String genericURIpattern1 = "((" + URIprefixPattern + ")(" + delimiter + "(" + displayIDpattern + ")){1,3})(/(" + versionPattern + "))?";
+
+    private static final String genericURIpattern1b = "((" + URIprefixPattern + delimiter + ")(" + displayIDpattern + "){1,3})(/(" + versionPattern + "))?";
+
+    /**
+     * Extract the object's display ID from the given object's identity URI.
+     *
+     * @return the extracted display ID
+     */
+    private static String displayIdFromUri(String URIstr) {
+        Pattern r = Pattern.compile(genericURIpattern1);
+        Matcher m = r.matcher(URIstr);
+        if (m.matches()) {
+            return m.group(4);
+        } else
+            return null;
     }
 }

@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.*;
-import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.*;
@@ -274,14 +273,14 @@ public class ModelToInfoFactory {
         view.setCreationTime(entry.getCreationTime().getTime());
         view.setStatus(entry.getStatus());
         view.setAlias(entry.getAlias());
-        view.setOwnerEmail(entry.getOwnerEmail());
+//        view.setOwnerEmail(entry.getOwnerEmail());
         Visibility visibility = Visibility.valueToEnum(entry.getVisibility());
-        view.setVisibility(visibility);
+//        view.setVisibility(visibility);
 
-        if (userId != null) {
-            EntryAuthorization authorization = new EntryAuthorization();
-            view.setCanEdit(authorization.canWrite(userId, entry));
-        }
+//        if (userId != null) {
+//            EntryAuthorization authorization = new EntryAuthorization();
+//            view.setCanEdit(authorization.canWrite(userId, entry));
+//        }
 
         // information about the owner and creator
         if (includeOwnerInfo) {
@@ -306,6 +305,27 @@ public class ModelToInfoFactory {
             view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
         }
 
+        // has parents
+        for (Entry linkedEntry : entry.getLinkedEntries()) {
+            // todo : authorization
+//            if (!authorization.canRead(userId, parent))
+//                continue;
+            PartData linkedPartData = new PartData(EntryType.nameToType(linkedEntry.getRecordType()));
+            linkedPartData.setId(linkedEntry.getId());
+            view.getLinkedParts().add(linkedPartData);
+        }
+
+        List<Entry> parents = DAOFactory.getEntryDAO().getParents(entry.getId());
+        if (parents != null) {
+            for (Entry parentEntry : parents) {
+                PartData partData = new PartData(EntryType.nameToType(parentEntry.getRecordType()));
+                partData.setId(parentEntry.getId());
+                view.getParents().add(partData);
+            }
+        }
+
+        // entry count
+        view.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
         return view;
     }
 

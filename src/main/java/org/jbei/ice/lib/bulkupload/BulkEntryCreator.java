@@ -1,12 +1,10 @@
 package org.jbei.ice.lib.bulkupload;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -16,8 +14,7 @@ import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.sample.SampleService;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.search.blast.BlastPlus;
+import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
@@ -517,7 +514,7 @@ public class BulkEntryCreator {
                 // attempt to get linked entry and add
                 if (linked.getId() != 0) {
                     Entry linkedEntry = entryDAO.get(linked.getId());
-                    if (linkedEntry != null && entryAuthorization.canWriteThoroughCheck(userId, entry)) {
+                    if (linkedEntry != null && entryAuthorization.canWrite(userId, entry)) {
                         EntryLinks links = new EntryLinks(userId, Long.toString(entry.getId()));
                         links.addLink(linked, LinkType.CHILD);
                     }
@@ -562,20 +559,8 @@ public class BulkEntryCreator {
         try {
             String sequenceName = data.getSequenceFileName();
             if (!StringUtils.isBlank(sequenceName)) {
-                String sequenceString = IOUtils.toString(files.get(sequenceName), "UTF-8");
-                DNASequence dnaSequence = SequenceController.parse(sequenceString);
-
-                if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
-                    Logger.error("Couldn't parse sequence file " + sequenceName);
-                } else {
-                    Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-                    sequence.setSequenceUser(sequenceString);
-                    sequence.setEntry(entry);
-                    sequence.setFileName(sequenceName);
-                    Sequence result = DAOFactory.getSequenceDAO().saveSequence(sequence);
-                    if (result != null)
-                        BlastPlus.scheduleBlastIndexRebuildTask(true);
-                }
+                PartSequence partSequence = new PartSequence(entry.getOwnerEmail(), entry.getRecordId());
+                partSequence.parseSequenceFile(files.get(sequenceName), sequenceName);
             }
         } catch (IOException e) {
             Logger.error(e);

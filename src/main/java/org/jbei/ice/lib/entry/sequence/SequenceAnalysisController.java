@@ -2,10 +2,6 @@ package org.jbei.ice.lib.entry.sequence;
 
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.DNASequence;
-import org.jbei.ice.lib.parsers.ABIParser;
-import org.jbei.ice.lib.parsers.GeneralParser;
-import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
 import org.jbei.ice.lib.search.blast.BlastException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
@@ -16,9 +12,11 @@ import org.jbei.ice.storage.hibernate.dao.TraceSequenceDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * ABI to manipulate DNA sequence trace analysis
@@ -47,7 +45,7 @@ public class SequenceAnalysisController {
         if (traceSequence == null)
             return;
 
-        File tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), TRACES_DIR_NAME).toFile();
+        Path tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), TRACES_DIR_NAME);
         traceDao.delete(tracesDir, traceSequence);
     }
 
@@ -55,7 +53,7 @@ public class SequenceAnalysisController {
         if (shotgunSequence == null)
             return;
 
-        File shotgunDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), SHOTGUN_DIR_NAME).toFile();
+        Path shotgunDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), SHOTGUN_DIR_NAME);
         shotgunDao.delete(shotgunDir, shotgunSequence);
     }
 
@@ -99,35 +97,10 @@ public class SequenceAnalysisController {
     }
 
     public TraceSequence getTraceSequenceByFileId(String fileId) {
-        return traceDao.getByFileId(fileId);
-    }
-
-    /**
-     * Parses a given sequence file (Genbank, Fasta, ABI) and return an {@link DNASequence}.
-     *
-     * @param bytes bytes representation of the sequence information
-     * @return Parsed Sequence as {@link DNASequence}.
-     */
-    public DNASequence parse(byte[] bytes) {
-        if (bytes.length == 0) {
-            return null;
-        }
-
-        // Trying to parse as Fasta, Genbank, etc
-        DNASequence dnaSequence = GeneralParser.getInstance().parse(bytes);
-        if (dnaSequence == null) {
-            // Trying to parse as ABI
-
-            ABIParser abiParser = new ABIParser();
-
-            try {
-                dnaSequence = abiParser.parse(bytes);
-            } catch (InvalidFormatParserException e) {
-                return null;
-            }
-        }
-
-        return dnaSequence;
+        Optional<TraceSequence> result = traceDao.getByFileId(fileId);
+        if (result.isPresent())
+            return result.get();
+        return null;
     }
 
     /**
@@ -246,7 +219,7 @@ public class SequenceAnalysisController {
     /**
      * Calculate sequence alignments between the sequence associated with an {@link Entry} entry
      * with all the {@link TraceSequence}s associated with that entry.
-     * <p>
+     * <p/>
      * Calls buildOrReplaceAlignment on each TraceSequence.
      *
      * @param entry entry object

@@ -43,6 +43,6 @@ public class SampleAuthorization extends Authorization<Sample> {
             return true;
 
         // check if there is an entry
-        return sample.getEntry() != null && entryAuthorization.canWriteThoroughCheck(userId, sample.getEntry());
+        return sample.getEntry() != null && entryAuthorization.canWrite(userId, sample.getEntry());
     }
 }

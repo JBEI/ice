@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.folder;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
@@ -167,6 +168,17 @@ public class FolderController {
         return folders;
     }
 
+    /**
+     * Updates the folder referenced by the folderId with the passed folder details.
+     * If the propagate parameter is set (differs from existing folder's value) then the contained entries are updated
+     * accordingly.
+     *
+     * @param userId   unique identifier for user making request. Must have write privileges
+     * @param folderId unique identifier for folder being updated
+     * @param details  new details to update
+     * @return updated folder's details
+     * @throws PermissionException if user making request doesn't have the appropriate privileges
+     */
     public FolderDetails update(String userId, long folderId, FolderDetails details) {
         Folder folder = dao.get(folderId);
         if (folder == null)
@@ -204,7 +216,11 @@ public class FolderController {
             throw new IllegalArgumentException("Folder " + folder.getId() + " is not a transferred folder");
 
         // change the status and those of the entries contained to "ok"
-        if (dao.setFolderEntryVisibility(folder.getId(), Visibility.OK) == 0)
+        List<Long> entryIds = dao.getFolderContentIds(folder.getId(), null, false);
+        if (entryIds == null || entryIds.isEmpty())
+            return folder.toDataTransferObject();
+
+        if (DAOFactory.getEntryDAO().setEntryVisibility(entryIds, Visibility.OK) == 0)
             return null;
 
         folder.setType(FolderType.PRIVATE);

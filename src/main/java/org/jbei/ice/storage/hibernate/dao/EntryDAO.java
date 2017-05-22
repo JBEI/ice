@@ -13,7 +13,6 @@ import org.jbei.ice.storage.model.*;
 
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -101,7 +100,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         try {
             CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
             Root<Entry> from = query.from(Entry.class);
-            query.where(getBuilder().equal(from.get(field), fieldValue));
+            query.where(getBuilder().equal(getBuilder().lower(from.get(field)), fieldValue.toLowerCase()));
             return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException e) {
             Logger.error(e);
@@ -164,7 +163,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
     public List<Entry> retrieveVisibleEntries(Account account, Set<Group> groups, ColumnField sortField, boolean asc,
                                               int start, int count, String filter) {
         try {
-            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
+            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class).distinct(true);
             Root<Entry> from = query.from(Entry.class);
             Join<Entry, Permission> entryPermission = from.join("permissions");
 
@@ -386,7 +385,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
                     from.get("group").in(requesterGroups),
                     getBuilder().equal(from.get("account"), requester)
             ));
-            predicates.add(getBuilder().equal(join.get("visiblity"), Visibility.OK.getValue()));
+            predicates.add(getBuilder().equal(join.get("visibility"), Visibility.OK.getValue()));
             predicates.add(getBuilder().equal(join.get("ownerEmail"), owner));
 
             if (filter != null && !filter.trim().isEmpty()) {
@@ -417,7 +416,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      */
     public List<Entry> getEntriesByIdSet(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
-            return new LinkedList<>();
+            return new ArrayList<>();
         }
 
         try {
@@ -758,7 +757,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
             Logger.error(he);
             throw new DAOException(he);
         }
-
     }
 
     /**

@@ -46,11 +46,11 @@ public class UserApiKeysTest {
         Account admin = AccountCreator.createTestAccount("UserApiKeysTest.testGetKeys.Admin", true);
 
         UserApiKeys apiKeys = new UserApiKeys(account.getEmail());
-        AccessKey accessKey = apiKeys.requestKey("app.test");
+        AccessKey accessKey = apiKeys.requestKey("app.test.3");
         Assert.assertNotNull(accessKey);
         Assert.assertNotNull(accessKey.getToken());
 
-        AccessKey accessKey2 = apiKeys.requestKey("app.test2");
+        AccessKey accessKey2 = apiKeys.requestKey("app.test.4");
         Assert.assertNotNull(accessKey2);
         Assert.assertNotNull(accessKey2.getToken());
 
@@ -68,7 +68,7 @@ public class UserApiKeysTest {
         Account account = AccountCreator.createTestAccount("UserApiKeysTest.testDeleteKey", false);
 
         UserApiKeys apiKeys = new UserApiKeys(account.getEmail());
-        AccessKey accessKey = apiKeys.requestKey("app.test");
+        AccessKey accessKey = apiKeys.requestKey("app.test.6");
         Assert.assertNotNull(accessKey);
         Assert.assertNotNull(accessKey.getToken());
 

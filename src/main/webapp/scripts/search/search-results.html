@@ -378,12 +378,16 @@
                     </div>
                 </td>
                 <td style="vertical-align: middle">
-                    <small style="opacity: 0.4">
-                        <ng-pluralize count="result.entryInfo.viewCount"
-                                      when="{'0': '', '1': '1 view', 'other':'{} views'}"></ng-pluralize>
-                    </small>
+                    <span ng-if="result.entryInfo.viewCount > 1" class="glyphicon glyphicon-fire small"
+                          uib-tooltip="{{result.entryInfo.viewCount}} views" ng-class="{
+                        'light-blue': result.entryInfo.viewCount < 50,
+                        'gold': result.entryInfo.viewCount >= 50 && result.entryInfo.viewCount <= 100,
+                        'orange': result.entryInfo.viewCount > 100 && result.entryInfo.viewCount <= 500,
+                        'dark-orange': result.entryInfo.viewCount > 500 && result.entryInfo.viewCount <= 1000,
+                        'red': result.entryInfo.viewCount > 1000}">
+                </span>
                 </td>
-                <td>
+                <td style="vertical-align: middle">
                     <div>
                         <a ng-href="profile/{{result.entryInfo.ownerId}}">{{result.entryInfo.owner}}</a>
                     </div>

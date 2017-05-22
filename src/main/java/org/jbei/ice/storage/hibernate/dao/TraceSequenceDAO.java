@@ -1,9 +1,8 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.apache.commons.io.IOUtils;
+import com.google.common.io.ByteStreams;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
-import org.hibernate.query.NativeQuery;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
@@ -13,54 +12,60 @@ import org.jbei.ice.storage.model.TraceSequenceAlignment;
 
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Data accessor for {@link TraceSequence}s
  *
- * @author Hector Plahar, Zinovii Dmytriv, Timothy Ham
+ * @author Hector Plahar
  */
 public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
 
     /**
      * Create a new {@link TraceSequence} object in the database, and write the file data to disk.
      *
-     * @param traceSequence
-     * @param inputStream
+     * @param traceDir      storage directory for the new trace sequence file
+     * @param traceSequence information about the new file to store, including a unique identifier
+     * @param inputStream   byte stream for file
      * @return Saved TraceSequence object.
-     * @throws DAOException
+     * @throws DAOException if the filename for the new trace sequence already exists or if there is an error saving
      */
-    public TraceSequence create(File tracesFile, TraceSequence traceSequence, InputStream inputStream) {
+    public TraceSequence create(Path traceDir, TraceSequence traceSequence, InputStream inputStream) {
         try {
-            if (getByFileId(traceSequence.getFileId()) != null) {
+            if (getByFileId(traceSequence.getFileId()).isPresent()) {
                 throw new DAOException("TraceSequence with fileId " + traceSequence.getFileId() + " already exists!");
             }
 
-            writeTraceSequenceToFile(tracesFile, traceSequence.getFileId(), inputStream);
+            writeTraceSequenceToFile(traceDir, traceSequence.getFileId(), inputStream);
             return super.create(traceSequence);
-        } catch (DAOException e) {
+        } catch (Exception e) {
+            Logger.error(e);
+
             try {
-                deleteTraceSequenceToFile(tracesFile, traceSequence);
+                // attempt to clean up by deleting the saved file
+                Path path = Paths.get(traceDir.toString(), traceSequence.getFileId());
+                if (!Files.deleteIfExists(path))
+                    Logger.error("Could not delete trace sequence: " + path);
             } catch (IOException e1) {
                 throw new DAOException(e1);
             }
 
-            throw new DAOException("Failed to create TraceSequence!", e);
-        } catch (IOException e) {
-            throw new DAOException("Failed to save trace file locally!", e);
+            throw new DAOException("Failed to create trace sequence", e);
         }
     }
 
     /**
      * Save the given {@link TraceSequence} object in the database.
      *
-     * @param traceSequence
+     * @param traceSequence object to save
      * @return Saved TraceSequence object.
-     * @throws DAOException
+     * @throws DAOException on hibernate exception saving
      */
     public TraceSequence save(TraceSequence traceSequence) {
         TraceSequenceAlignment traceSequenceAlignment = traceSequence.getTraceSequenceAlignment();
@@ -71,54 +76,46 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
             session.saveOrUpdate(traceSequence);
             return traceSequence;
         } catch (HibernateException e) {
-            throw new DAOException("dbSave failed!", e);
-        } catch (Exception e1) {
-            throw new DAOException("Unknown database exception ", e1);
+            throw new DAOException("Error saving trace sequence", e);
         }
     }
 
     /**
      * Retrieve the {@link TraceSequence} object by its fileId.
      *
-     * @param fileId
-     * @return TraceSequence object.
+     * @param fileId unique file identifier
+     * @return {@link Optional} container that contains the trace sequence if found.
      * @throws DAOException
      */
-    public TraceSequence getByFileId(String fileId) {
-        TraceSequence traceSequence = null;
-
+    public Optional<TraceSequence> getByFileId(String fileId) {
         try {
-            NativeQuery query = currentSession().createNativeQuery("from " + TraceSequence.class.getName() + " where fileId = :fileId");
-            query.setParameter("fileId", fileId);
-            Object queryResult = query.uniqueResult();
-
-            if (queryResult != null) {
-                traceSequence = (TraceSequence) queryResult;
-            }
+            CriteriaQuery<TraceSequence> query = getBuilder().createQuery(TraceSequence.class);
+            Root<TraceSequence> from = query.from(TraceSequence.class);
+            query.where(getBuilder().equal(from.get("fileId"), fileId));
+            return currentSession().createQuery(query).uniqueResultOptional();
         } catch (HibernateException e) {
             throw new DAOException("Failed to retrieve entry by fileId: " + fileId, e);
         }
-
-        return traceSequence;
     }
 
     /**
-     * Delete the given {@link TraceSequence} object in the database, and remove the file data from
-     * disk.
+     * Delete the trace file from the referenced directory and if that succeeds, deletes the given
+     * {@link TraceSequence} object in the database
      *
-     * @param traceSequence
-     * @throws DAOException
+     * @param tracesDir     directory for trace files
+     * @param traceSequence trace object to delete from database
+     * @throws DAOException on hibernate or IO Exception when attempting to save the trace sequence object
+     *                      or
      */
-    public void delete(File tracesFile, TraceSequence traceSequence) {
-        if (traceSequence == null) {
-            throw new DAOException("Failed to delete null Trace Sequence!");
-        }
-
+    public void delete(Path tracesDir, TraceSequence traceSequence) {
         try {
-            super.delete(traceSequence);
-            deleteTraceSequenceToFile(tracesFile, traceSequence);
-        } catch (IOException e) {
-            throw new DAOException("Failed to delete Trace Sequence file!", e);
+            Path tracePath = Paths.get(tracesDir.toString(), traceSequence.getFileId());
+            if (Files.deleteIfExists(tracePath))
+                super.delete(traceSequence);
+            else
+                Logger.error("Couldn't delete trace : " + tracePath.toString());
+        } catch (HibernateException | IOException e) {
+            throw new DAOException("Failed to delete Trace Sequence file", e);
         }
     }
 
@@ -127,52 +124,20 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
      *
      * @param fileName    Name of file written to disk.
      * @param inputStream File data.
-     * @throws IOException
      * @throws DAOException
      */
-    private void writeTraceSequenceToFile(File traceFilesDirectory, String fileName, InputStream inputStream)
-            throws IOException, DAOException {
-        try {
-            File file = new File(traceFilesDirectory + File.separator + fileName);
-
-            if (!traceFilesDirectory.exists()) {
-                if (!traceFilesDirectory.mkdirs()) {
-                    throw new DAOException("Could not create trace directory");
-                }
-            }
-
-            if (!file.exists() && !file.createNewFile()) {
-                throw new DAOException("Could not create trace file " + file.getName());
-            }
-
-            try (FileOutputStream outputStream = new FileOutputStream(file)) {
-                IOUtils.copy(inputStream, outputStream);
-            }
-        } catch (SecurityException e) {
-            throw new DAOException(e);
-        }
+    private void writeTraceSequenceToFile(Path tracesDir, String fileName, InputStream inputStream) throws IOException {
+        Files.createDirectories(tracesDir);
+        Files.write(Paths.get(tracesDir.toString(), fileName), ByteStreams.toByteArray(inputStream));
     }
 
     /**
-     * Delete the file data on disk associated with the {@link TraceSequence} object given.
+     * Retrieve all {@link TraceSequence} objects associated with the given {@link Entry} object
+     * using the paging parameters, ordered by creation time in ascending order
      *
-     * @param traceSequence
-     * @throws IOException
-     * @throws DAOException
-     */
-    private void deleteTraceSequenceToFile(File traceFilesDirectory, TraceSequence traceSequence) throws IOException {
-        try {
-            File file = new File(traceFilesDirectory + File.separator + traceSequence.getFileId());
-            file.delete();
-        } catch (SecurityException e) {
-            throw new DAOException(e);
-        }
-    }
-
-    /**
-     * Retrieve all {@link TraceSequence} objects associated with the given {@link Entry} object.
-     *
-     * @param entry
+     * @param entry entry whose trace sequences are being retrieved
+     * @param start start for traces retrieval
+     * @param limit maximum number of trace records to retrieve
      * @return List of TraceSequence objects.
      * @throws DAOException
      */
@@ -189,6 +154,12 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
         }
     }
 
+    /**
+     * Get number of trace sequences available for specified entry
+     *
+     * @param entry entry whose entry count is being retrieved
+     * @return number of traces available for the specified entry
+     */
     public int getCountByEntry(Entry entry) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);

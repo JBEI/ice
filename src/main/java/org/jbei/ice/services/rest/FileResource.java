@@ -1,19 +1,20 @@
 package org.jbei.ice.services.rest;
 
+import com.google.common.io.ByteStreams;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.jbei.ice.lib.account.UserSessions;
 import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
+import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
+import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntriesAsCSV;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
@@ -24,7 +25,6 @@ import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.RemoteSequence;
-import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
@@ -40,7 +40,9 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Resource for accessing files both locally and remotely
@@ -96,8 +98,7 @@ public class FileResource extends RestResource {
     @Path("tmp/{fileId}")
     public Response getTmpFile(@PathParam("fileId") final String fileId,
                                @QueryParam("filename") String fileName) {
-        final File tmpFile = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY),
-                fileId).toFile();
+        final File tmpFile = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY), fileId).toFile();
         if (tmpFile == null || !tmpFile.exists()) {
             return super.respond(Response.Status.NOT_FOUND);
         }
@@ -150,14 +151,11 @@ public class FileResource extends RestResource {
             linked = null;
         }
 
-        final StreamingOutput stream = new StreamingOutput() {
-            @Override
-            public void write(final OutputStream output) throws IOException, WebApplicationException {
-                byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType, linked,
-                        "existing".equalsIgnoreCase(linkedType));
-                ByteArrayInputStream stream = new ByteArrayInputStream(template);
-                IOUtils.copy(stream, output);
-            }
+        final StreamingOutput stream = output -> {
+            byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType, linked,
+                    "existing".equalsIgnoreCase(linkedType));
+            ByteArrayInputStream input = new ByteArrayInputStream(template);
+            ByteStreams.copy(input, output);
         };
 
         String filename = type.toLowerCase();
@@ -187,13 +185,9 @@ public class FileResource extends RestResource {
             wrapper = sequenceController.getSequenceFile(userId, partId, downloadType);
         }
 
-        StreamingOutput stream = new StreamingOutput() {
-            @Override
-            public void write(final OutputStream output) throws IOException,
-                    WebApplicationException {
-                final ByteArrayInputStream stream = new ByteArrayInputStream(wrapper.getBytes());
-                IOUtils.copy(stream, output);
-            }
+        StreamingOutput stream = output -> {
+            final ByteArrayInputStream input = new ByteArrayInputStream(wrapper.getBytes());
+            ByteStreams.copy(input, output);
         };
 
         return addHeaders(Response.ok(stream), wrapper.getName());
@@ -246,7 +240,7 @@ public class FileResource extends RestResource {
         if (uri != null) {
             try (final InputStream in = uri.toURL().openStream();
                  final OutputStream out = new FileOutputStream(png)) {
-                IOUtils.copy(in, out);
+                ByteStreams.copy(in, out);
             } catch (IOException e) {
                 Logger.error(e);
                 return respond(false);
@@ -269,18 +263,15 @@ public class FileResource extends RestResource {
                                    @FormDataParam("entryType") String entryType,
                                    @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
         try {
-            if (entryType == null) {
-                return Response.status(Response.Status.BAD_REQUEST).build();
-            }
-
             final String fileName = contentDispositionHeader.getFileName();
-            final String userId = UserSessions.getUserIdBySession(sessionId);
+            String userId = getUserId();
 
             PartSequence partSequence;
             if (StringUtils.isEmpty(recordId)) {
+                if (entryType == null) {
+                    entryType = "PART";
+                }
                 EntryType type = EntryType.nameToType(entryType);
-                if (type == null)
-                    throw new WebApplicationException("Invalid entry type: " + entryType, Response.Status.BAD_REQUEST);
                 partSequence = new PartSequence(userId, type);
             } else {
                 partSequence = new PartSequence(userId, recordId);
@@ -290,7 +281,7 @@ public class FileResource extends RestResource {
             if (info == null)
                 throw new WebApplicationException(Response.serverError().build());
             return Response.status(Response.Status.OK).entity(info).build();
-        } catch (final InvalidFormatParserException e) {
+        } catch (Exception e) {
             Logger.error(e);
             ErrorResponse response = new ErrorResponse();
             response.setMessage(e.getMessage());
@@ -308,10 +299,21 @@ public class FileResource extends RestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response downloadCSV(@QueryParam("sequenceFormats") final List<String> sequenceFormats,
+                                @QueryParam("entryFields") final List<String> fields,
                                 EntrySelection selection) {
         String userId = super.requireUserId();
         EntriesAsCSV entriesAsCSV = new EntriesAsCSV(sequenceFormats.toArray(new String[sequenceFormats.size()]));
-        boolean success = entriesAsCSV.setSelectedEntries(userId, selection);
+        List<EntryField> entryFields = new ArrayList<>();
+        try {
+            if (fields != null) {
+                entryFields.addAll(fields.stream().map(EntryField::fromString).collect(Collectors.toList()));
+            }
+        } catch (Exception e) {
+            Logger.error(e);
+        }
+
+        boolean success = entriesAsCSV.setSelectedEntries(userId, selection,
+                entryFields.toArray(new EntryField[entryFields.size()]));
         if (!success)
             return super.respond(false);
 
@@ -321,5 +323,21 @@ public class FileResource extends RestResource {
         }
 
         return Response.serverError().build();
+    }
+
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("entries")
+    public Response getEntriesInFile(@FormDataParam("file") InputStream fileInputStream,
+                                     @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
+        String userId = requireUserId();
+        try {
+            Entries entries = new Entries(userId);
+            return super.respond(entries.validateEntries(fileInputStream));
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 }

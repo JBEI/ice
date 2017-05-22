@@ -9,6 +9,7 @@ import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.StringReader;
 import java.util.LinkedList;
 
@@ -21,24 +22,22 @@ public class FastaParser extends AbstractParser {
 
     @Override
     public FeaturedDNASequence parse(String textSequence) throws InvalidFormatParserException {
-        textSequence = cleanSequence(textSequence);
-
-        BufferedReader br = new BufferedReader(new StringReader(textSequence));
-        FeaturedDNASequence sequence;
-
         try {
-            RichSequenceIterator richSequences = IOTools.readFastaDNA(br, null);
+            textSequence = cleanSequence(textSequence);
+            try (BufferedReader br = new BufferedReader(new StringReader(textSequence))) {
+                FeaturedDNASequence sequence;
+                RichSequenceIterator richSequences = IOTools.readFastaDNA(br, null);
 
-            if (richSequences.hasNext()) {
-                RichSequence richSequence = richSequences.nextRichSequence();
-                sequence = new FeaturedDNASequence(richSequence.seqString(), new LinkedList<>());
-            } else {
-                throw new InvalidFormatParserException("No sequence found in sequence file!");
+                if (richSequences.hasNext()) {
+                    RichSequence richSequence = richSequences.nextRichSequence();
+                    sequence = new FeaturedDNASequence(richSequence.seqString(), new LinkedList<>());
+                } else {
+                    throw new InvalidFormatParserException("No sequence found in sequence file!");
+                }
+                return sequence;
             }
-        } catch (BioException e) {
+        } catch (BioException | IOException e) {
             throw new InvalidFormatParserException("Couldn't parse FASTA sequence!", e);
         }
-
-        return sequence;
     }
 }

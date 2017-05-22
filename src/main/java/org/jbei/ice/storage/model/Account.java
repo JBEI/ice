@@ -12,7 +12,7 @@ import java.util.Set;
 
 /**
  * Store the account information for a single user.
- * <p>
+ * <p/>
  *
  * @author Timothy Ham, Zinovii Dmytriv, Hector Plahar
  */
@@ -149,27 +149,27 @@ public class Account implements DataModel {
     }
 
     public Date getCreationTime() {
-        return creationTime;
+        return new Date(creationTime.getTime());
     }
 
     public void setCreationTime(Date creationTime) {
-        this.creationTime = creationTime;
+        this.creationTime = new Date(creationTime.getTime());
     }
 
     public Date getModificationTime() {
-        return modificationTime;
+        return new Date(modificationTime.getTime());
     }
 
     public void setModificationTime(Date modificationTime) {
-        this.modificationTime = modificationTime;
+        this.modificationTime = new Date(modificationTime.getTime());
     }
 
     public Date getLastLoginTime() {
-        return lastLoginTime;
+        return new Date(lastLoginTime.getTime());
     }
 
     public void setLastLoginTime(Date lastLoginTime) {
-        this.lastLoginTime = lastLoginTime;
+        this.lastLoginTime = new Date(lastLoginTime.getTime());
     }
 
     public void setDescription(String description) {
@@ -190,7 +190,7 @@ public class Account implements DataModel {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null || obj.getClass() != Account.class)
+        if (obj == null || obj.getClass() != this.getClass())
             return false;
 
         Account account = (Account) obj;

@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -109,26 +110,12 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
         }
     }
 
-    public void delete(File shotgunFile, ShotgunSequence shotgunSequence) {
-        if (shotgunSequence == null) {
-            throw new DAOException("Failed to delete null Shotgun Sequence!");
-        }
-
+    public void delete(Path dir, ShotgunSequence shotgunSequence) {
         try {
             super.delete(shotgunSequence);
-            deleteShotgunSequenceToFile(shotgunFile, shotgunSequence);
+            Files.deleteIfExists(Paths.get(dir.toString(), shotgunSequence.getFileId()));
         } catch (IOException e) {
             throw new DAOException("Failed to delete Shotgun Sequence file!", e);
-        }
-    }
-
-    private void deleteShotgunSequenceToFile(File shotgunFilesDirectory, ShotgunSequence shotgunSequence)
-            throws IOException {
-        try {
-            File file = new File(shotgunFilesDirectory + File.separator + shotgunSequence.getFileId());
-            file.delete();
-        } catch (SecurityException e) {
-            throw new DAOException(e);
         }
     }
 
