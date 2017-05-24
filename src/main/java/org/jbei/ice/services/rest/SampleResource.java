@@ -2,7 +2,6 @@ package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
@@ -17,7 +16,6 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * REST Resource for samples
@@ -157,19 +155,5 @@ public class SampleResource extends RestResource {
         final String userId = requireUserId();
         log(userId, "add sample request to cart for " + request.getPartData().getId());
         return super.respond(requestRetriever.placeSampleInCart(userId, request));
-    }
-
-    /**
-     * @return Response with the current sample requests
-     */
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    @Path("/storage/{type}")
-    public Response getSampleStorageType(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-            @DefaultValue("IN_CART") @QueryParam("type") String type) {
-        String userId = getUserId(userAgentHeader);
-        List<StorageLocation> locations = sampleService.getStorageLocations(userId, type);
-        return respond(locations);
     }
 }
