@@ -116,6 +116,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @throws DAOException
      */
     public Entry getByRecordId(String recordId) {
+        if (recordId == null)
+            return null;
         return getEntryByField("recordId", recordId);
     }
 
