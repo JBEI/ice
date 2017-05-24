@@ -1,6 +1,5 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.storage.DAOException;
@@ -25,7 +24,6 @@ public class StorageDAO extends HibernateRepository<Storage> {
      *
      * @param barcode unique identifier for storage tube
      * @return retrieved Storage
-     * @throws DAOException on exception
      */
     public Storage retrieveStorageTube(String barcode) {
         List<Storage> results = retrieveStorageByIndex(barcode, SampleType.TUBE);
@@ -45,8 +43,7 @@ public class StorageDAO extends HibernateRepository<Storage> {
      *
      * @param index index value
      * @param type  storage type
-     * @return List of Storage objects.
-     * @throws DAOException
+     * @return List of Storage objects
      */
     public List<Storage> retrieveStorageByIndex(String index, SampleType type) {
         try {
@@ -54,27 +51,8 @@ public class StorageDAO extends HibernateRepository<Storage> {
             Root<Storage> from = query.from(Storage.class);
             query.where(getBuilder().equal(from.get("index"), index), getBuilder().equal(from.get("storageType"), type));
             return currentSession().createQuery(query).list();
-        } catch (HibernateException e) {
-            String msg = "Could not get Storage by index: " + index + " " + e.toString();
-            Logger.error(msg, e);
-            throw new DAOException(msg);
-        }
-    }
-
-    /**
-     * Retrieve all {@link Storage} objects with non-empty schemes.
-     *
-     * @return List of Storage objects with schemes.
-     * @throws DAOException
-     */
-    public List<Storage> getAllStorageSchemes() {
-        try {
-            CriteriaQuery<Storage> query = getBuilder().createQuery(Storage.class);
-            Root<Storage> from = query.from(Storage.class);
-            query.where(getBuilder().equal(from.get("storageType"), SampleType.SCHEME));
-            return currentSession().createQuery(query).list();
         } catch (Exception e) {
-            String msg = "Could not get all schemes " + e.toString();
+            String msg = "Could not get Storage by index: " + index + " " + e.toString();
             Logger.error(msg, e);
             throw new DAOException(msg);
         }

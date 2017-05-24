@@ -9,7 +9,6 @@ import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
@@ -123,7 +122,7 @@ public class SampleService extends HasEntry {
      *
      * @param sampleDepositor userID - unique identifier for user performing action
      * @param mainLocation    96 well plate location
-     * @return sample storage with a complete hierachy or null
+     * @return sample storage with a complete hierarchy or null
      */
     protected Storage createPlate96Location(String sampleDepositor, StorageLocation mainLocation) {
         // validate: expected format is [PLATE96, WELL, (optional - TUBE)]
@@ -345,40 +344,27 @@ public class SampleService extends HasEntry {
             return false;
 
         sampleAuthorization.expectWrite(userId, sample);
+        Storage storage = sample.getStorage();
+        dao.delete(sample);
 
-        try {
-            Storage storage = sample.getStorage();
-            while (storage != null) {
-                Storage parent = storage.getParent();
+        while (storage != null) {
+            Storage parent = storage.getParent();
 
-                if (storage.getChildren().size() == 0) {
-                    storageDAO.delete(storage);
-                }
-
-                if (parent != null) {
-                    parent.getChildren().remove(storage);
-                    storage = parent;
-                } else {
-                    break;
-                }
+            if (storage.getChildren().size() == 0) {
+                storageDAO.delete(storage);
+            } else {
+                break;
             }
 
-            sample.setStorage(null);
-            dao.delete(sample);
-            return true;
-        } catch (DAOException de) {
-            return false;
-        }
-    }
-
-    public List<StorageLocation> getStorageLocations(String userId, String entryType) {
-        List<Storage> storages = storageDAO.getAllStorageSchemes();
-        ArrayList<StorageLocation> locations = new ArrayList<>();
-        for (Storage storage : storages) {
-            locations.add(storage.toDataTransferObject());
+            if (parent != null) {
+                parent.getChildren().remove(storage);
+                storage = parent;
+            } else {
+                break;
+            }
         }
 
-        return locations;
+        return true;
     }
 
     public ArrayList<PartSample> getSamplesByBarcode(String userId, String barcode) {
