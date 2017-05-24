@@ -243,6 +243,7 @@ public class BulkCSVUpload {
                                 ArrayList<AttachmentInfo> attachments = data.getAttachments();
                                 if (attachments == null) {
                                     attachments = new ArrayList<>();
+                                    data.setAttachments(attachments);
                                 }
                                 attachments.clear();
                                 attachments.add(new AttachmentInfo(value));
@@ -316,6 +317,9 @@ public class BulkCSVUpload {
                 grandChildLocation.setDisplay(data);
                 partSample.getLocation().getChild().setChild(grandChildLocation);
                 break;
+
+            default:
+                throw new IllegalArgumentException("No handler for sample field " + sampleField);
         }
     }
 }

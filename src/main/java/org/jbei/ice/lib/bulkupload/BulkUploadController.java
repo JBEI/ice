@@ -27,6 +27,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -410,7 +411,8 @@ public class BulkUploadController {
 
         PartSequence partSequence = new PartSequence(userId, Long.toString(entryId));
         try {
-            return partSequence.parseSequenceFile(new ByteArrayInputStream(sequenceString.getBytes()), fileName);
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(sequenceString.getBytes(StandardCharsets.UTF_8));
+            return partSequence.parseSequenceFile(inputStream, fileName);
         } catch (IOException e) {
             Logger.error(e);
             return null;
