@@ -49,7 +49,8 @@ public class BulkZipUpload extends BulkCSVUpload {
         String csvFile = null;
         HashMap<String, InputStream> files = new HashMap<>();
 
-        try (ZipFile zipFile = new ZipFile(zipFilePath.toFile())) {
+        try {
+            ZipFile zipFile = new ZipFile(zipFilePath.toFile());
             Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
 
             // go through zip elements
