@@ -104,4 +104,15 @@ public class PartSample implements IDataTransferModel {
     public ArrayList<UserComment> getComments() {
         return comments;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        StorageLocation location = getLocation();
+        while (location != null) {
+            builder.append("[location: ").append(location.toString()).append("]");
+            location = location.getChild();
+        }
+        return builder.toString();
+    }
 }

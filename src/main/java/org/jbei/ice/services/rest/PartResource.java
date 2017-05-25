@@ -511,7 +511,7 @@ public class PartResource extends RestResource {
                               @QueryParam("strainNamePrefix") final String strainNamePrefix,
                               final PartSample partSample) {
         final String userId = getUserId();
-        log(userId, "creating sample for part " + partId);
+        log(userId, "creating sample " + partSample.toString() + " for part " + partId);
         sampleService.createSample(userId, partId, partSample, strainNamePrefix);
         List<PartSample> result = sampleService.retrieveEntrySamples(userId, partId);
         Results<PartSample> results = new Results<>();

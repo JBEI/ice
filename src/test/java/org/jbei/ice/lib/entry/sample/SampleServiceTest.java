@@ -47,7 +47,7 @@ public class SampleServiceTest {
     private String numberToPosition(int number) {
         Assert.assertTrue("Invalid plate number", number >= 0 && number <= 95);
         String row = String.format("%02d", (number % 12) + 1);
-        int position = number / 13;
+        int position = number / 12;
 
         switch (position) {
             case 0:

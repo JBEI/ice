@@ -56,4 +56,9 @@ public class StorageLocation implements IDataTransferModel {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return "(display: " + display + ", type: " + type.name() + ")";
+    }
 }
