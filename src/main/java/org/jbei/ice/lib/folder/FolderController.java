@@ -261,15 +261,15 @@ public class FolderController {
                 if (!accountController.isAdministrator(userId) && !folder.getOwnerEmail().equalsIgnoreCase(userId)) {
                     String errorMsg = userId + ": insufficient permissions to delete folder " + folderId;
                     Logger.warn(errorMsg);
-                    return null;
+                    throw new PermissionException(errorMsg);
                 }
 
                 details = folder.toDataTransferObject();
                 long folderSize = dao.getFolderSize(folderId, null, true);
                 details.setCount(folderSize);
 
-                dao.delete(folder);
                 permissionDAO.clearPermissions(folder);
+                dao.delete(folder);
                 return details;
 
             default:
