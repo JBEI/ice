@@ -98,9 +98,6 @@ public class SBOL2Visitor {
         if (entry.getOwnerEmail() != null)
             componentDefinition.createAnnotation(new QName(ICE_NS, "ownerEmail", ICE_PREFIX), entry.getOwnerEmail());
 
-        if (entry.getOwnerEmail() != null)
-            componentDefinition.createAnnotation(new QName(ICE_NS, "ownerEmail", ICE_PREFIX), entry.getOwnerEmail());
-
         if (entry.getCreator() != null)
             componentDefinition.createAnnotation(new QName(ICE_NS, "creator", ICE_PREFIX), entry.getCreator());
 
@@ -117,7 +114,11 @@ public class SBOL2Visitor {
             componentDefinition.createAnnotation(new QName(ICE_NS, "selectionMarker", ICE_PREFIX), selectionMarker.getName());
         }
 
-        // TODO: links
+        if (entry.getLinks() != null) {
+            for (Link link : entry.getLinks()) {
+                componentDefinition.createAnnotation(new QName(ICE_NS, link.getLink(), ICE_PREFIX), link.getUrl());
+            }
+        }
 
         if (entry.getKeywords() != null)
             componentDefinition.createAnnotation(new QName(ICE_NS, "keywords", ICE_PREFIX), entry.getKeywords());
@@ -149,8 +150,11 @@ public class SBOL2Visitor {
         if (entry.getVisibility() != null)
             componentDefinition.createAnnotation(new QName(ICE_NS, "visibility", ICE_PREFIX), entry.getVisibility());
 
-        // TODO: parameters
-        // TODO: permissions
+        if (entry.getParameters() != null) {
+            for (Parameter parameter : entry.getParameters()) {
+                componentDefinition.createAnnotation(new QName(ICE_NS, parameter.getKey(), ICE_PREFIX), parameter.getValue());
+            }
+        }
 
         if (entry.getFundingSource() != null)
             componentDefinition.createAnnotation(new QName(ICE_NS, "fundingSource", ICE_PREFIX), entry.getFundingSource());
@@ -161,10 +165,6 @@ public class SBOL2Visitor {
         // TODO: samples
         // TODO: attachments
 
-    }
-
-    public ComponentDefinition getComponentDefinition() {
-        return componentDefinition;
     }
 
     public void visit(SequenceFeature feature) throws SBOLValidationException, URISyntaxException {
@@ -183,15 +183,25 @@ public class SBOL2Visitor {
             uri = featureUri;
         }
 
-        AnnotationLocation location;
-
         if (feature.getAnnotationLocations() != null && !feature.getAnnotationLocations().isEmpty()) {
-            location = (AnnotationLocation) feature.getAnnotationLocations().toArray()[0];
-            SequenceAnnotation annotation = componentDefinition.createSequenceAnnotation(
-                    displayIdFromUri(uri),
-                    "location",
-                    location.getGenbankStart(), location.getEnd(),
-                    feature.getStrand() == 1 ? OrientationType.INLINE : OrientationType.REVERSECOMPLEMENT);
+            AnnotationLocation location = (AnnotationLocation) feature.getAnnotationLocations().toArray()[0];
+            SequenceAnnotation annotation;
+            OrientationType orientation = feature.getStrand() == 1 ? OrientationType.INLINE : OrientationType.REVERSECOMPLEMENT;
+
+            if (location.getEnd() < location.getGenbankStart()) {
+                annotation = componentDefinition.createSequenceAnnotation(
+                        displayIdFromUri(uri), "location", location.getGenbankStart(),
+                        feature.getSequence().getSequence().length(),
+                        orientation
+                );
+                annotation.addRange(displayIdFromUri(uri), 1, location.getEnd(), orientation);
+            } else {
+                annotation = componentDefinition.createSequenceAnnotation(
+                        displayIdFromUri(uri),
+                        "location",
+                        location.getGenbankStart(), location.getEnd(),
+                        orientation);
+            }
 
             annotation.addRole(IceSequenceOntology.getURI(feature.getGenbankType()));
             annotation.setName(feature.getName());
