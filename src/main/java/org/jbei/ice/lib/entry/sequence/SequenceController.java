@@ -421,44 +421,48 @@ public class SequenceController extends HasEntry {
         if (sequence == null)
             return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
 
+        // if requested format is the same as the original format (if original exist) then get the original instead
+        SequenceFormat format = SequenceFormat.fromString(type);
+        if (sequence.getFormat() == format && DAOFactory.getSequenceDAO().hasOriginalSequence(partId))
+            format = SequenceFormat.ORIGINAL;
+
         String name;
         String sequenceString;
 
         try {
-            switch (type.toLowerCase()) {
-                case "original":
+            switch (format) {
+                case ORIGINAL:
                     sequenceString = sequence.getSequenceUser();
                     name = sequence.getFileName();
                     if (StringUtils.isEmpty(name))
                         name = entry.getPartNumber() + ".gb";
                     break;
 
-                case "genbank":
+                case GENBANK:
                 default:
                     GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
-                    // TODO
                     genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular() : false);
                     sequenceString = compose(sequence, genbankFormatter);
                     name = entry.getPartNumber() + ".gb";
                     break;
 
-                case "fasta":
+                case FASTA:
                     FastaFormatter formatter = new FastaFormatter();
                     sequenceString = compose(sequence, formatter);
                     name = entry.getPartNumber() + ".fasta";
                     break;
 
-                case "sbol1":
+                case SBOL1:
                     sequenceString = compose(sequence, new SBOLFormatter());
                     name = entry.getPartNumber() + ".xml";
                     break;
 
-                case "sbol2":
+                case SBOL2:
                     sequenceString = compose(sequence, new SBOL2Formatter());
                     name = entry.getPartNumber() + ".xml";
                     break;
 
-                case "pigeoni":
+                case PIGEONI:
                     try {
                         URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
                         byte[] bytes = IOUtils.toByteArray(uri.toURL().openStream());
@@ -468,7 +472,7 @@ public class SequenceController extends HasEntry {
                         return new ByteArrayWrapper(new byte[]{'\0'}, "sequence_error");
                     }
 
-                case "pigeons":
+                case PIGEONS:
                     sequenceString = PigeonSBOLv.generatePigeonScript(sequence);
                     name = entry.getPartNumber() + ".txt";
                     break;
