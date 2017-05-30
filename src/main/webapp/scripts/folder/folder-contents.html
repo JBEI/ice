@@ -172,14 +172,14 @@
                     <i ng-show="params.sort=='status'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                 </th>
-                <th class="entry-table-header" style="width:100px;">
+                <th style="width:100px;">
                     <i class="fa fa-flask fa-fw" uib-tooltip="Has Sample" style="font-size: 15px"
                        ng-if="entryHeaders.hasSample.selected"></i>
                     <img src="img/dna.svg" uib-tooltip="Has Sequence" width="16px"
                          style="margin-left: 3px; margin-right: 3px;"
                          ng-if="entryHeaders.hasSequence.selected"/>
-                    <!--<i class="fa fa-link fa-fw" style="font-size: 14px"></i>-->
-                    <span uib-tooltip="Has Link" style="font-size: 14px" class="glyphicon glyphicon-link"></span>
+                    <span uib-tooltip="Has Link" style="font-size: 14px; margin-left: 8px"
+                          class="glyphicon glyphicon-link"></span>
                 </th>
                 <th class="entry-table-header" ng-if="entryHeaders.created.selected">
                     <span ng-click="sort('created')">Created</span>
