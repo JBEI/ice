@@ -167,9 +167,10 @@ angular.module('ice.common.service', [])
             },
 
             download: function (url, a) {
+                var m = a ? "POST" : "GET";
                 var down = $resource(url, {}, {
                     download: {
-                        method: 'POST',
+                        method: m,
                         responseType: 'arraybuffer',
                         transformResponse: function (data, headers) {
                             return {

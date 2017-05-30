@@ -215,7 +215,7 @@ angular.module('ice.entry.controller', [])
             $scope.shotgunUploadError = true;
         };
     })
-    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, $uibModal, Util) {
+    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, $uibModal, Util, Authentication) {
         var entryId = $stateParams.id;
 
         $scope.traceUploadError = undefined;
@@ -254,6 +254,24 @@ angular.module('ice.entry.controller', [])
                     $scope.showUploadOptions = false;
                     $scope.traceUploadError = false;
                 });
+            });
+        };
+
+        $scope.downloadAllTraces = function () {
+            var clickEvent = new MouseEvent("click", {
+                "view": window,
+                "bubbles": true,
+                "cancelable": false
+            });
+
+            Util.download("rest/parts/" + entryId + "/traces/all?sid=" + Authentication.getSessionId()).$promise.then(function (result) {
+                var url = URL.createObjectURL(new Blob([result.data]));
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = result.filename();
+                a.target = '_blank';
+                a.dispatchEvent(clickEvent);
+                $scope.selectedRequests = [];
             });
         };
 

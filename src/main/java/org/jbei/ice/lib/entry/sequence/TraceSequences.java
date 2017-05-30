@@ -20,12 +20,15 @@ import org.jbei.ice.storage.hibernate.dao.TraceSequenceDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Trace sequence for alignment against a specific sequence
@@ -49,11 +52,49 @@ public class TraceSequences {
         this.userId = userId;
     }
 
-    public boolean addTraceSequence(File file, String uploadFileName) {
-
+    /**
+     * Retrieves all the trace sequence files, for the specified part, and places them in a zip file
+     *
+     * @return output stream for zip file bytes
+     * @throws IOException on exception creating zip file or retrieving bytes for it
+     */
+    public ByteArrayOutputStream getAll() throws IOException {
         entryAuthorization.expectRead(userId, entry);
+        Path tracesDir = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), TRACES_DIR_NAME);
 
+        int count = dao.getCountByEntry(entry);
+        int start = 0;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+
+            HashSet<String> names = new HashSet<>();
+            while (start < count) {
+                List<TraceSequence> sequences = dao.getByEntry(entry, start, 5);
+                for (TraceSequence sequence : sequences) {
+                    // get stored file and write as original name
+                    int i = 1;
+                    String name = sequence.getFilename();
+                    while (!names.add(name)) {
+                        name = i + "_duplicate_" + sequence.getFilename();
+                        i += 1;
+                    }
+                    ZipEntry entry = new ZipEntry(name);
+                    zos.putNextEntry(entry);
+                    Path path = Paths.get(tracesDir.toString(), sequence.getFileId());
+                    zos.write(Files.readAllBytes(path));
+                    zos.closeEntry();
+                }
+                start += 5;
+            }
+        }
+        return baos;
+    }
+
+    public boolean addTraceSequence(File file, String uploadFileName) {
+        entryAuthorization.expectRead(userId, entry);
         FileInputStream inputStream;
+
         try {
             inputStream = new FileInputStream(file);
         } catch (FileNotFoundException e) {

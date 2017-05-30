@@ -70,6 +70,9 @@
     <div class="row pad_top">
         <div class="col-md-12">
             <button type="button" class="ice-button" ng-click="showAddSangerTraceModal()">Add Sanger Trace</button>
+            <button type="button" class="ice-button" ng-if="traces && traces.data.length"
+                    ng-click="downloadAllTraces()">Download All
+            </button>
         </div>
     </div>
 

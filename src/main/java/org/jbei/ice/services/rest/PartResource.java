@@ -36,10 +36,8 @@ import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.ShotgunSequence;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -385,11 +383,8 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/traces")
-    public Response getTraces(
-            @Context final UriInfo info,
-            @PathParam("id") final long partId,
-            @DefaultValue("100") @QueryParam("limit") int limit,
-            @DefaultValue("0") @QueryParam("start") int start) {
+    public Response getTraces(@PathParam("id") final long partId, @DefaultValue("100") @QueryParam("limit") int limit,
+                              @DefaultValue("0") @QueryParam("start") int start) {
         final String userId = getUserId();
         TraceSequences traceSequences = new TraceSequences(userId, partId);
         Results<TraceSequenceAnalysis> results = traceSequences.getTraces(start, limit);
@@ -398,6 +393,25 @@ public class PartResource extends RestResource {
         if (StringUtils.isEmpty(sessionId))
             return super.respond(new ArrayList<>(results.getData()));
         return super.respond(results);
+    }
+
+    @GET
+    @Path("/{id}/traces/all")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response getAllTraces(@PathParam("id") final long partId, @QueryParam("sid") String sid) {
+        if (StringUtils.isEmpty(sessionId))
+            sessionId = sid;
+
+        final String userId = requireUserId();
+        TraceSequences traceSequences = new TraceSequences(userId, partId);
+
+        try (ByteArrayOutputStream outputStream = traceSequences.getAll()) {
+            StreamingOutput stream = outputStream::writeTo;
+            return Response.ok(stream).header("Content-Disposition", "attachment;filename=\"data.zip\"").build();
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GET
