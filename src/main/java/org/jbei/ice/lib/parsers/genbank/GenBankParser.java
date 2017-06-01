@@ -210,19 +210,12 @@ public class GenBankParser extends AbstractParser {
         if (StringUtils.isEmpty(line) || !line.contains("="))
             return false;
 
-        try {
-            String[] split = line.split("=");
-            if (split.length != 2)
-                return false;
-
-            if (split[1].endsWith("\""))
-                return false;
-
-            Long.decode(split[1]);
-            return true;
-        } catch (IllegalArgumentException e) {
+        String[] split = line.split("=");
+        if (split.length != 2)
             return false;
-        }
+
+        String value = split[1];
+        return value.startsWith("\"") && !value.endsWith("\"");
     }
 
     protected FeaturesTag parseFeaturesTag(final Tag tag) throws InvalidFormatParserException {
