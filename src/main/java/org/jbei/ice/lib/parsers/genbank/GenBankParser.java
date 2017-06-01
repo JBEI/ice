@@ -211,12 +211,15 @@ public class GenBankParser extends AbstractParser {
             return false;
 
         try {
-            String split = line.split("=")[1];
-            if (split.endsWith("\""))
+            String[] split = line.split("=");
+            if (split.length != 2)
                 return false;
 
-            Long.decode(split);
-            return false;
+            if (split[1].endsWith("\""))
+                return false;
+
+            Long.decode(split[1]);
+            return true;
         } catch (IllegalArgumentException e) {
             return false;
         }
