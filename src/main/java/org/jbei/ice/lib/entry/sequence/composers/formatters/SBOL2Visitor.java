@@ -116,7 +116,8 @@ public class SBOL2Visitor {
 
         if (entry.getLinks() != null) {
             for (Link link : entry.getLinks()) {
-                componentDefinition.createAnnotation(new QName(ICE_NS, link.getLink(), ICE_PREFIX), link.getUrl());
+                if (StringUtils.isNotEmpty(link.getLink()) && StringUtils.isNotEmpty(link.getUrl()))
+                    componentDefinition.createAnnotation(new QName(ICE_NS, link.getLink(), ICE_PREFIX), link.getUrl());
             }
         }
 
@@ -152,7 +153,8 @@ public class SBOL2Visitor {
 
         if (entry.getParameters() != null) {
             for (Parameter parameter : entry.getParameters()) {
-                componentDefinition.createAnnotation(new QName(ICE_NS, parameter.getKey(), ICE_PREFIX), parameter.getValue());
+                if (StringUtils.isNotEmpty(parameter.getKey()) && StringUtils.isNotEmpty(parameter.getValue()))
+                    componentDefinition.createAnnotation(new QName(ICE_NS, parameter.getKey(), ICE_PREFIX), parameter.getValue());
             }
         }
 
