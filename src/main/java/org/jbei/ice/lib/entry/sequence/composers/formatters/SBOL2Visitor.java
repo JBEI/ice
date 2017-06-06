@@ -49,18 +49,9 @@ public class SBOL2Visitor {
         componentDefinition.setName(entry.getName());
         componentDefinition.setDescription(entry.getShortDescription());
 
-        org.sbolstandard.core2.Sequence dnaSequence;
-        String dsUri = sequence.getUri();
-
-        if (dsUri == null || dsUri.isEmpty()) {
-            dsUri = "sequence_" + sequence.getFwdHash().replaceAll("[\\s\\-()]", "");
-            dnaSequence = doc.createSequence(
-                    uriString, dsUri, "1", sequence.getSequence(), org.sbolstandard.core2.Sequence.IUPAC_DNA);
-        } else {
-            dnaSequence = doc.createSequence(
-                    prefixFromUri(dsUri), displayIdFromUri(dsUri), "1", sequence.getSequence(), org.sbolstandard.core2.Sequence.IUPAC_DNA);
-
-        }
+        String dsUri = "sequence_" + sequence.getFwdHash().replaceAll("[\\s\\-()]", "");
+        org.sbolstandard.core2.Sequence dnaSequence = doc.createSequence(
+                uriString, dsUri, "1", sequence.getSequence(), org.sbolstandard.core2.Sequence.IUPAC_DNA);
 
         dnaSequence.setElements(sequence.getSequence());
         componentDefinition.addSequence(dnaSequence);
@@ -198,20 +189,6 @@ public class SBOL2Visitor {
             annotation.addRole(IceSequenceOntology.getURI(feature.getGenbankType()));
             annotation.setName(feature.getName());
         }
-    }
-
-    /**
-     * Extract the URI prefix from this object's identity URI.
-     *
-     * @return the extracted URI prefix
-     */
-    private static String prefixFromUri(String URIstr) {
-        Pattern r = Pattern.compile(genericURIpattern1b);
-        Matcher m = r.matcher(URIstr);
-        if (m.matches())
-            return m.group(2);
-        else
-            return null;
     }
 
     private static final String delimiter = "[/|#|:]";
