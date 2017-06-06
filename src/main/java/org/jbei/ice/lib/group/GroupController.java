@@ -188,6 +188,9 @@ public class GroupController {
 
     public ArrayList<Group> getAllPublicGroupsForAccount(Account account) {
         ArrayList<Group> groups = new ArrayList<>();
+        if (account == null || account.getGroups() == null)
+            return groups;
+
         for (Group group : account.getGroups()) {
             if (group.getType() == GroupType.PUBLIC)
                 groups.add(group);
