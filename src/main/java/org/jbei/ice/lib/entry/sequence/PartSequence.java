@@ -91,7 +91,8 @@ public class PartSequence extends HasEntry {
      * @return wrapper around the internal model used to represent sequence information
      * @throws IOException on Exception parsing the contents of the file
      */
-    public SequenceInfo parseSequenceFile(InputStream inputStream, String fileName) throws IOException {
+    public SequenceInfo parseSequenceFile(InputStream inputStream, String fileName, boolean extractHierarchy)
+            throws IOException {
         try {
             AbstractParser parser;
             String sequenceString = Utils.getString(inputStream);
@@ -102,7 +103,7 @@ public class PartSequence extends HasEntry {
                     break;
 
                 case SBOL2:
-                    SBOLParser sbolParser = new SBOLParser(this.userId, Long.toString(this.entry.getId()));
+                    SBOLParser sbolParser = new SBOLParser(this.userId, Long.toString(this.entry.getId()), extractHierarchy);
                     return sbolParser.parseToEntry(sequenceString, fileName);
 
                 case FASTA:

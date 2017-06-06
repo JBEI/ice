@@ -261,6 +261,7 @@ public class FileResource extends RestResource {
     public Response uploadSequence(@FormDataParam("file") InputStream fileInputStream,
                                    @FormDataParam("entryRecordId") String recordId,
                                    @FormDataParam("entryType") String entryType,
+                                   @FormDataParam("extractHierarchy") @DefaultValue("false") boolean extractHierarchy,
                                    @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
         try {
             final String fileName = contentDispositionHeader.getFileName();
@@ -277,7 +278,7 @@ public class FileResource extends RestResource {
                 partSequence = new PartSequence(userId, recordId);
             }
 
-            SequenceInfo info = partSequence.parseSequenceFile(fileInputStream, fileName);
+            SequenceInfo info = partSequence.parseSequenceFile(fileInputStream, fileName, extractHierarchy);
             if (info == null)
                 throw new WebApplicationException(Response.serverError().build());
             return Response.status(Response.Status.OK).entity(info).build();

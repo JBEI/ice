@@ -560,7 +560,7 @@ public class BulkEntryCreator {
             String sequenceName = data.getSequenceFileName();
             if (!StringUtils.isBlank(sequenceName)) {
                 PartSequence partSequence = new PartSequence(entry.getOwnerEmail(), entry.getRecordId());
-                partSequence.parseSequenceFile(files.get(sequenceName), sequenceName);
+                partSequence.parseSequenceFile(files.get(sequenceName), sequenceName, false);
             }
         } catch (IOException e) {
             Logger.error(e);

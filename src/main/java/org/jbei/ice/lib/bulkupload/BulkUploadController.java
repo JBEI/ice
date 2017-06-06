@@ -412,7 +412,7 @@ public class BulkUploadController {
         PartSequence partSequence = new PartSequence(userId, Long.toString(entryId));
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(sequenceString.getBytes(StandardCharsets.UTF_8));
-            return partSequence.parseSequenceFile(inputStream, fileName);
+            return partSequence.parseSequenceFile(inputStream, fileName, false);
         } catch (IOException e) {
             Logger.error(e);
             return null;
