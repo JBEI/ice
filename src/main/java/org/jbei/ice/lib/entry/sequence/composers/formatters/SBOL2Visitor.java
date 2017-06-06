@@ -45,17 +45,7 @@ public class SBOL2Visitor {
 
         // Set required properties
         String partId = entry.getPartNumber();
-        String dcUri = sequence.getComponentUri();
-
-        if (dcUri == null) {
-            componentDefinition = doc.createComponentDefinition(uriString, partId, "1", ComponentDefinition.DNA);
-        } else {
-            String displayId = StringUtils.isBlank(sequence.getIdentifier()) ?
-                    displayIdFromUri(dcUri) : sequence.getIdentifier();
-            String prefix = prefixFromUri(dcUri);
-            componentDefinition = doc.createComponentDefinition(prefix, displayId, "1", ComponentDefinition.DNA);
-        }
-
+        componentDefinition = doc.createComponentDefinition(uriString, partId, "1", ComponentDefinition.DNA);
         componentDefinition.setName(entry.getName());
         componentDefinition.setDescription(entry.getShortDescription());
 
