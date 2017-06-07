@@ -10,9 +10,9 @@ import org.sbolstandard.core2.*;
 import javax.xml.namespace.QName;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class SBOL2Visitor {
 
@@ -21,11 +21,10 @@ public class SBOL2Visitor {
 
     private ComponentDefinition componentDefinition;
     private String uriString;
-    private Set<String> uris;
     private SBOLDocument doc;
+    private int annotationCount;
 
     public SBOL2Visitor(SBOLDocument doc) throws SBOLValidationException, URISyntaxException {
-
         this.doc = doc;
         uriString = Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/entry";
 
@@ -36,7 +35,6 @@ public class SBOL2Visitor {
         }
 
         doc.addNamespace(new URI(ICE_NS), ICE_PREFIX);
-        uris = new HashSet<>();
     }
 
     public void visit(Sequence sequence) throws SBOLValidationException, URISyntaxException {
@@ -147,24 +145,10 @@ public class SBOL2Visitor {
 
         // TODO: samples
         // TODO: attachments
-
     }
 
     public void visit(SequenceFeature feature) throws SBOLValidationException, URISyntaxException {
-
-        String featureUri = feature.getUri();
-        String uri;
-
-        if (featureUri == null || featureUri.isEmpty()) {
-            featureUri = UUID.randomUUID().toString().replaceAll("[\\s\\-()]", "");
-            uri = uriString + "/sa_" + featureUri;
-        } else {
-            if (uris.contains(featureUri))
-                return;
-
-            uris.add(featureUri);
-            uri = featureUri;
-        }
+        annotationCount++;
 
         if (feature.getAnnotationLocations() != null && !feature.getAnnotationLocations().isEmpty()) {
             AnnotationLocation location = (AnnotationLocation) feature.getAnnotationLocations().toArray()[0];
@@ -173,14 +157,14 @@ public class SBOL2Visitor {
 
             if (location.getEnd() < location.getGenbankStart()) {
                 annotation = componentDefinition.createSequenceAnnotation(
-                        displayIdFromUri(uri), "location", location.getGenbankStart(),
+                        "annotation" + annotationCount, "location", location.getGenbankStart(),
                         feature.getSequence().getSequence().length(),
                         orientation
                 );
-                annotation.addRange(displayIdFromUri(uri), 1, location.getEnd(), orientation);
+                annotation.addRange("annotation" + annotationCount, 1, location.getEnd(), orientation);
             } else {
                 annotation = componentDefinition.createSequenceAnnotation(
-                        displayIdFromUri(uri),
+                        "annotation" + annotationCount,
                         "location",
                         location.getGenbankStart(), location.getEnd(),
                         orientation);
@@ -189,32 +173,5 @@ public class SBOL2Visitor {
             annotation.addRole(IceSequenceOntology.getURI(feature.getGenbankType()));
             annotation.setName(feature.getName());
         }
-    }
-
-    private static final String delimiter = "[/|#|:]";
-
-    private static final String URIprefixPattern = "\\b(?:https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
-
-    private static final String displayIDpattern = "[a-zA-Z_]+[a-zA-Z0-9_]*";//"[a-zA-Z0-9_]+";
-
-    private static final String versionPattern = "[0-9]+[a-zA-Z0-9_\\.-]*"; // ^ and $ are the beginning and end of the string anchors respectively.
-    // | is used to denote alternates.
-
-    private static final String genericURIpattern1 = "((" + URIprefixPattern + ")(" + delimiter + "(" + displayIDpattern + ")){1,3})(/(" + versionPattern + "))?";
-
-    private static final String genericURIpattern1b = "((" + URIprefixPattern + delimiter + ")(" + displayIDpattern + "){1,3})(/(" + versionPattern + "))?";
-
-    /**
-     * Extract the object's display ID from the given object's identity URI.
-     *
-     * @return the extracted display ID
-     */
-    private static String displayIdFromUri(String URIstr) {
-        Pattern r = Pattern.compile(genericURIpattern1);
-        Matcher m = r.matcher(URIstr);
-        if (m.matches()) {
-            return m.group(4);
-        } else
-            return null;
     }
 }
