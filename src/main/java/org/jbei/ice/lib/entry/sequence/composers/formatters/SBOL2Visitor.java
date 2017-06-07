@@ -157,11 +157,11 @@ public class SBOL2Visitor {
 
             if (location.getEnd() < location.getGenbankStart()) {
                 annotation = componentDefinition.createSequenceAnnotation(
-                        "annotation" + annotationCount, "location", location.getGenbankStart(),
+                        "annotation" + annotationCount, "locationStart", location.getGenbankStart(),
                         feature.getSequence().getSequence().length(),
                         orientation
                 );
-                annotation.addRange("annotation" + annotationCount, 1, location.getEnd(), orientation);
+                annotation.addRange("locationEnd" + annotationCount, 1, location.getEnd(), orientation);
             } else {
                 annotation = componentDefinition.createSequenceAnnotation(
                         "annotation" + annotationCount,
