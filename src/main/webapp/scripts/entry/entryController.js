@@ -1033,11 +1033,25 @@ angular.module('ice.entry.controller', [])
             removePermission(permission.id);
         };
     })
-    .controller('EntryFoldersController', function ($scope, Util) {
+    .controller('EntryFoldersController', function ($rootScope, $scope, Util) {
         $scope.containedFolders = undefined;
         Util.list("rest/parts/" + $scope.entry.recordId + "/folders", function (result) {
             $scope.containedFolders = result;
         });
+
+        $scope.removeEntryFromFolder = function (folder) {
+            Util.post("rest/folders/" + folder.id + "/entries",
+                {entries: [$scope.entry.id], folderId: folder.id}, function (result) {
+                    if (result) {
+                        $rootScope.$broadcast("RefreshAfterDeletion");
+                        $scope.$broadcast("UpdateCollectionCounts");
+                        Util.setFeedback('1 entry removed from folder', 'success');
+                        var i = $scope.containedFolders.indexOf(folder);
+                        if (i >= 0)
+                            $scope.containedFolders.splice(i, 1);
+                    }
+                }, {move: false});
+        };
     })
     .controller('EntryDetailsController', function ($scope) {
         var entryPanes = $scope.entryPanes = [];
