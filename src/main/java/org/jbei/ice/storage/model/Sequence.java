@@ -154,19 +154,6 @@ public class Sequence implements DataModel {
     }
 
     public Set<SequenceFeature> getSequenceFeatures() {
-
-//        /* Hibernate hack.
-//        To use custom collections with Hibernate, I have to implement all sorts
-//        of hibernate methods to do this correctly. Instead, I just replace this set
-//        when I do a get method here with the SequenceFeatureCollection.
-//        */
-//        if (sequenceFeatures instanceof SequenceFeatureCollection) {
-//
-//        } else {
-//            SequenceFeatureCollection newSequenceFeatures = new SequenceFeatureCollection();
-//            newSequenceFeatures.addAll(sequenceFeatures);
-//            sequenceFeatures = newSequenceFeatures;
-//        }
         return sequenceFeatures;
     }
 
