@@ -137,9 +137,6 @@
                         </li>
                         <li class="font-75em cursor_pointer" ng-click="setType('none')"><a>None</a></li>
                     </ul>
-
-                    <!--<sup style="font-size: 9px; font-weight: normal; display: inherit"-->
-                    <!--ng-show="selection.length>0">{{selection.length}}</sup>-->
                 </th>
                 <th class="entry-table-header">
                     <span ng-click="sort('type')">TYPE</span>
@@ -172,7 +169,7 @@
                     <i ng-show="params.sort=='status'" style="font-size: 14px" class="fa opacity_4"
                        ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
                 </th>
-                <th style="width:100px;">
+                <th style="width:100px;" class="no_wrap">
                     <i class="fa fa-flask fa-fw" uib-tooltip="Has Sample" style="font-size: 15px"
                        ng-if="entryHeaders.hasSample.selected"></i>
                     <img src="img/dna.svg" uib-tooltip="Has Sequence" width="16px"
