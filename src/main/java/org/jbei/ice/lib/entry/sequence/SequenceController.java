@@ -413,7 +413,7 @@ public class SequenceController extends HasEntry {
         return sequence;
     }
 
-    public ByteArrayWrapper getSequenceFile(String userId, long partId, String type) {
+    public ByteArrayWrapper getSequenceFile(String userId, long partId, SequenceFormat format) {
         Entry entry = entryDAO.get(partId);
         authorization.expectRead(userId, entry);
 
@@ -422,7 +422,6 @@ public class SequenceController extends HasEntry {
             return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
 
         // if requested format is the same as the original format (if original exist) then get the original instead
-        SequenceFormat format = SequenceFormat.fromString(type);
         if (sequence.getFormat() == format && DAOFactory.getSequenceDAO().hasOriginalSequence(partId))
             format = SequenceFormat.ORIGINAL;
 

@@ -18,10 +18,7 @@ import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntriesAsCSV;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
-import org.jbei.ice.lib.entry.sequence.PartSequence;
-import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.*;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.RemoteSequence;
@@ -182,7 +179,7 @@ public class FileResource extends RestResource {
             RemoteSequence sequence = new RemoteSequence(remoteId, partId);
             wrapper = sequence.get(downloadType);
         } else {
-            wrapper = sequenceController.getSequenceFile(userId, partId, downloadType);
+            wrapper = sequenceController.getSequenceFile(userId, partId, SequenceFormat.fromString(downloadType));
         }
 
         StreamingOutput stream = output -> {
@@ -208,8 +205,7 @@ public class FileResource extends RestResource {
 
     @GET
     @Path("shotgunsequence/{fileId}")
-    public Response getShotgunSequenceFile(@PathParam("fileId") String fileId,
-                                           @QueryParam("sid") String sid) {
+    public Response getShotgunSequenceFile(@PathParam("fileId") String fileId) {
         ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
         ShotgunSequence shotgunSequence = dao.getByFileId(fileId);
 
@@ -303,7 +299,7 @@ public class FileResource extends RestResource {
                                 @QueryParam("entryFields") final List<String> fields,
                                 EntrySelection selection) {
         String userId = super.requireUserId();
-        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(sequenceFormats.toArray(new String[sequenceFormats.size()]));
+        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId, sequenceFormats.toArray(new String[sequenceFormats.size()]));
         List<EntryField> entryFields = new ArrayList<>();
         try {
             if (fields != null) {
@@ -313,7 +309,7 @@ public class FileResource extends RestResource {
             Logger.error(e);
         }
 
-        boolean success = entriesAsCSV.setSelectedEntries(userId, selection,
+        boolean success = entriesAsCSV.setSelectedEntries(selection,
                 entryFields.toArray(new EntryField[entryFields.size()]));
         if (!success)
             return super.respond(false);
