@@ -60,11 +60,11 @@ public class ConfigResource extends RestResource {
     @GET
     @Path("/{key}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Setting getConfig(@PathParam("key") final String key) {
+    public Response getConfig(@PathParam("key") final String key) {
         if (!"NEW_REGISTRATION_ALLOWED".equalsIgnoreCase(key) && !"PASSWORD_CHANGE_ALLOWED".equalsIgnoreCase(key)) {
             requireUserId();
         }
-        return controller.getPropertyValue(key);
+        return super.respond(controller.getPropertyValue(key));
     }
 
     /**
