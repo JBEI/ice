@@ -759,4 +759,20 @@ public class PartResource extends RestResource {
         Annotations annotations = new Annotations(userId);
         return super.respond(annotations.generate(partId, ownerFeatures));
     }
+
+    @POST
+    @Path("/custom")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response customExport(EntrySelection selection) {
+        String userId = super.requireUserId();
+        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId);
+
+        try (ByteArrayOutputStream outputStream = entriesAsCSV.customize(selection)) {
+            StreamingOutput stream = outputStream::writeTo;
+            return Response.ok(stream).header("Content-Disposition", "attachment;filename=\"data.zip\"").build();
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
