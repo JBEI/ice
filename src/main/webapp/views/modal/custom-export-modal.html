@@ -48,11 +48,14 @@
 </div>
 
 <div class="modal-footer">
-    <img src="im"
+    <div class="pull-left" ng-if="processingDownload">
+        <img src="img/loader-mini.gif"/> <i>Processing request...</i>
+    </div>
 
     <div class="pull-right">
         <button class="btn btn-sm btn-default" ng-click="$dismiss('cancel')">Cancel</button>
-        <button class="btn btn-sm btn-primary" ng-click="customExport()">Export</button>
+        <button class="btn btn-sm btn-primary" ng-disabled='processingDownload' ng-click="customExport()">Export
+        </button>
     </div>
 </div>
 
