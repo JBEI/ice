@@ -174,6 +174,10 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         return (!$scope.addToDisabled || $scope.selectedRemote.length) && !this.isDealingWithDeleted();
     };
 
+    $scope.canExport = function () {
+        return FolderSelection.getSelectedFolder() != undefined || Selection.hasSelection();
+    };
+
     $scope.canEdit = function () {
         return Selection.canEdit();
     };
@@ -445,8 +449,9 @@ iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $u
     $scope.retrieveRegistryPartners();
 });
 
-iceControllers.controller('CustomExportController', function ($scope, selectedTypes, selection, EntryService, Util) {
+iceControllers.controller('CustomExportController', function ($scope, $uibModalInstance, selectedTypes, selection, EntryService, Util) {
     console.log(selectedTypes);
+
     var fields = EntryService.getCommonFields();
     $scope.fields = [];
     angular.forEach(fields, function (field) {
@@ -473,7 +478,7 @@ iceControllers.controller('CustomExportController', function ($scope, selectedTy
     };
 
     $scope.customExport = function () {
-        $scope.processingDownload = false;
+        $scope.processingDownload = true;
 
         var clickEvent = new MouseEvent("click", {
             "view": window,
@@ -489,7 +494,9 @@ iceControllers.controller('CustomExportController', function ($scope, selectedTy
             a.target = '_blank';
             a.dispatchEvent(clickEvent);
 
-            // dialog
+            // close dialog
+            $scope.processingDownload = false;
+            $uibModalInstance.close()
         });
     }
 });
