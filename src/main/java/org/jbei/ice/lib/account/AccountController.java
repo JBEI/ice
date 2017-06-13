@@ -12,10 +12,8 @@ import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.AccountDAO;
-import org.jbei.ice.storage.hibernate.dao.AccountPreferencesDAO;
 import org.jbei.ice.storage.hibernate.dao.GroupDAO;
 import org.jbei.ice.storage.model.Account;
-import org.jbei.ice.storage.model.AccountPreferences;
 import org.jbei.ice.storage.model.Group;
 
 import java.text.SimpleDateFormat;
@@ -37,7 +35,6 @@ public class AccountController {
     private static final String ADMIN_ACCOUNT_EMAIL = "Administrator";
     private static final String ADMIN_ACCOUNT_PASSWORD = "Administrator";
     private final AccountDAO dao;
-    private final AccountPreferencesDAO accountPreferencesDAO;
     private final GroupDAO groupDAO;
 
     /**
@@ -45,7 +42,6 @@ public class AccountController {
      */
     public AccountController() {
         dao = DAOFactory.getAccountDAO();
-        accountPreferencesDAO = DAOFactory.getAccountPreferencesDAO();
         groupDAO = DAOFactory.getGroupDAO();
     }
 
@@ -55,8 +51,7 @@ public class AccountController {
      * @param transfer
      * @return updated account object
      */
-    public AccountTransfer updateAccount(final String requester, final long userId,
-                                         final AccountTransfer transfer) {
+    public AccountTransfer updateAccount(final String requester, final long userId, final AccountTransfer transfer) {
         final Account account = dao.get(userId);
         boolean requesterIsAdmin = isAdministrator(requester);
         if (!account.getEmail().equalsIgnoreCase(requester) && !requesterIsAdmin) {
@@ -384,14 +379,6 @@ public class AccountController {
         Account account = dao.getByEmail(email);
         if (account == null)
             return null;
-
-        AccountPreferences accountPreferences = accountPreferencesDAO.getAccountPreferences(account);
-
-        if (accountPreferences == null) {
-            accountPreferences = new AccountPreferences();
-            accountPreferences.setAccount(account);
-            accountPreferencesDAO.create(accountPreferences);
-        }
 
         // add to public groups
         List<Group> groups = groupDAO.getGroupsBy(GroupType.PUBLIC, true);
