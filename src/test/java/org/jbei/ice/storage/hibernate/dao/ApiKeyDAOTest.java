@@ -1,7 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.jbei.ice.lib.AccountCreator;
-import org.jbei.ice.lib.access.AccessStatus;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.ApiKey;
@@ -17,14 +16,20 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
 
     private ApiKeyDAO dao = new ApiKeyDAO();
 
-    @Test
-    public void testGet() throws Exception {
+    private ApiKey createKey(String userId, String clientId) {
         ApiKey key = new ApiKey();
-        key.setOwnerEmail("email@example");
+        key.setOwnerEmail(userId);
         key.setCreationTime(new Date());
         key.setSecret(UUID.randomUUID().toString());
-        key.setClientId("client");
-        key = dao.create(key);
+        if (clientId != null)
+            key.setClientId(clientId);
+        return dao.create(key);
+    }
+
+    @Test
+    public void testGet() throws Exception {
+        Account account = AccountCreator.createTestAccount("ApiKeyDAOTest.testGet", false);
+        ApiKey key = createKey(account.getEmail(), null);
         Assert.assertNotNull(key);
         ApiKey get = dao.get(key.getId());
         Assert.assertNotNull(get);
@@ -40,14 +45,8 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
 
         // create a number of api keys for user
         for (int i = 0; i < 6; i += 1) {
-            ApiKey apiKey = new ApiKey();
-            apiKey.setOwnerEmail(account.getEmail());
-            apiKey.setCreationTime(new Date());
-            apiKey.setHashedToken("token" + i);
-            apiKey.setSecret(UUID.randomUUID().toString());
-            apiKey.setStatus(AccessStatus.OK);
-            apiKey.setClientId("client" + i);
-            Assert.assertNotNull(dao.create(apiKey));
+            ApiKey apiKey = createKey(account.getEmail(), null);
+            Assert.assertNotNull(apiKey);
         }
 
         keys = dao.getApiKeysForUser(account.getEmail(), "id", 10, 0, false);
@@ -67,38 +66,20 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
 
         // create api keys for each account
         for (int i = 0; i < limit1; i += 1) {
-            ApiKey apiKey = new ApiKey();
-            apiKey.setOwnerEmail(account1.getEmail());
-            apiKey.setCreationTime(new Date());
-            apiKey.setHashedToken("token" + i);
-            apiKey.setStatus(AccessStatus.OK);
-            apiKey.setSecret(UUID.randomUUID().toString());
-            apiKey.setClientId(account1.getEmail() + "_client" + i);
-            Assert.assertNotNull(dao.create(apiKey));
+            ApiKey apiKey = createKey(account1.getEmail(), null);
+            Assert.assertNotNull(apiKey);
         }
 
         int limit2 = random.nextInt(10);
         for (int i = 0; i < limit2; i += 1) {
-            ApiKey apiKey = new ApiKey();
-            apiKey.setOwnerEmail(account2.getEmail());
-            apiKey.setCreationTime(new Date());
-            apiKey.setHashedToken("token" + i);
-            apiKey.setSecret(UUID.randomUUID().toString());
-            apiKey.setStatus(AccessStatus.OK);
-            apiKey.setClientId(account2.getEmail() + "_client" + i);
-            Assert.assertNotNull(dao.create(apiKey));
+            ApiKey apiKey = createKey(account2.getEmail(), null);
+            Assert.assertNotNull(apiKey);
         }
 
         int limit3 = random.nextInt(10);
         for (int i = 0; i < limit3; i += 1) {
-            ApiKey apiKey = new ApiKey();
-            apiKey.setOwnerEmail(account3.getEmail());
-            apiKey.setCreationTime(new Date());
-            apiKey.setHashedToken("token" + i);
-            apiKey.setStatus(AccessStatus.OK);
-            apiKey.setSecret(UUID.randomUUID().toString());
-            apiKey.setClientId(account3.getEmail() + "_client" + i);
-            Assert.assertNotNull(dao.create(apiKey));
+            ApiKey apiKey = createKey(account3.getEmail(), null);
+            Assert.assertNotNull(apiKey);
         }
 
         List<ApiKey> keys = dao.getAllApiKeys("id", 30, 0, false);
@@ -117,39 +98,22 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
 
         // create api keys for each account
         for (int i = 0; i < limit1; i += 1) {
-            ApiKey apiKey = new ApiKey();
-            apiKey.setOwnerEmail(account1.getEmail());
-            apiKey.setCreationTime(new Date());
-            apiKey.setHashedToken("token" + i);
-            apiKey.setSecret(UUID.randomUUID().toString());
-            apiKey.setStatus(AccessStatus.OK);
-            apiKey.setClientId(account1.getEmail() + "_client" + i);
-            Assert.assertNotNull(dao.create(apiKey));
+            ApiKey apiKey = createKey(account1.getEmail(), null);
+            Assert.assertNotNull(apiKey);
         }
 
         int limit2 = random.nextInt(10);
         for (int i = 0; i < limit2; i += 1) {
-            ApiKey apiKey = new ApiKey();
-            apiKey.setOwnerEmail(account2.getEmail());
-            apiKey.setCreationTime(new Date());
-            apiKey.setHashedToken("token" + i);
-            apiKey.setStatus(AccessStatus.OK);
-            apiKey.setSecret(UUID.randomUUID().toString());
-            apiKey.setClientId(account2.getEmail() + "_client" + i);
-            Assert.assertNotNull(dao.create(apiKey));
+            ApiKey apiKey = createKey(account2.getEmail(), null);
+            Assert.assertNotNull(apiKey);
         }
 
         int limit3 = random.nextInt(10);
         for (int i = 0; i < limit3; i += 1) {
-            ApiKey apiKey = new ApiKey();
-            apiKey.setOwnerEmail(account3.getEmail());
-            apiKey.setCreationTime(new Date());
-            apiKey.setHashedToken("token" + i);
-            apiKey.setStatus(AccessStatus.OK);
-            apiKey.setSecret(UUID.randomUUID().toString());
-            apiKey.setClientId(account3.getEmail() + "_client" + i);
-            Assert.assertNotNull(dao.create(apiKey));
+            ApiKey apiKey = createKey(account3.getEmail(), null);
+            Assert.assertNotNull(apiKey);
         }
+
         Assert.assertEquals(limit1, dao.getApiKeysCount(account1.getEmail()));
         Assert.assertEquals(limit2, dao.getApiKeysCount(account2.getEmail()));
         Assert.assertEquals(limit3, dao.getApiKeysCount(account3.getEmail()));
@@ -158,14 +122,8 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
     @Test
     public void testGetByClientId() throws Exception {
         Account account = AccountCreator.createTestAccount("ApiKeyDAOTest.testGetByClientId", false);
-        ApiKey apiKey = new ApiKey();
-        apiKey.setOwnerEmail(account.getEmail());
-        apiKey.setCreationTime(new Date());
-        apiKey.setHashedToken("token");
-        apiKey.setSecret(UUID.randomUUID().toString());
-        apiKey.setStatus(AccessStatus.OK);
-        apiKey.setClientId(account.getEmail() + "_client");
-        Assert.assertNotNull(dao.create(apiKey));
+        ApiKey apiKey = createKey(account.getEmail(), account.getEmail() + "_client");
+        Assert.assertNotNull(apiKey);
         Optional<ApiKey> result = dao.getByClientId(account.getEmail() + "_client");
         Assert.assertTrue(result.isPresent());
     }
