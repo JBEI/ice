@@ -1,6 +1,5 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
@@ -39,19 +38,19 @@ public class AuditDAO extends HibernateRepository<Audit> {
             query.where(getBuilder().equal(from.get("entry"), entry));
             query.orderBy(asc ? getBuilder().asc(from.get(sort)) : getBuilder().desc(from.get(sort)));
             return currentSession().createQuery(query).setFirstResult(offset).setMaxResults(limit).list();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
     }
 
-    public int getHistoryCount(Entry entry) {
+    public int getAuditsForEntryCount(Entry entry) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Audit> from = query.from(Audit.class);
             query.select(getBuilder().countDistinct(from.get("id"))).where(getBuilder().equal(from.get("entry"), entry));
             return currentSession().createQuery(query).uniqueResult().intValue();
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             Logger.error(e);
             throw new DAOException(e);
         }
@@ -63,7 +62,7 @@ public class AuditDAO extends HibernateRepository<Audit> {
             Root<Audit> from = query.from(Audit.class);
             query.where(getBuilder().equal(from.get("entry"), entry));
             return currentSession().createQuery(query).executeUpdate();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }

@@ -2,12 +2,10 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.access.AccessStatus;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.ApiKey;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Date;
@@ -18,21 +16,9 @@ import java.util.Random;
 /**
  * @author Hector Plahar
  */
-public class ApiKeyDAOTest {
+public class ApiKeyDAOTest extends HibernateRepositoryTest {
 
-    private ApiKeyDAO dao;
-
-    @Before
-    public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
-        dao = new ApiKeyDAO();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
-    }
+    private ApiKeyDAO dao = new ApiKeyDAO();
 
     @Test
     public void testGet() throws Exception {
@@ -113,7 +99,7 @@ public class ApiKeyDAOTest {
 
         List<ApiKey> keys = dao.getAllApiKeys("id", 30, 0, false);
         Assert.assertNotNull(keys);
-        Assert.assertEquals(limit1 + limit2 + limit3, keys.size());
+        Assert.assertTrue(limit1 + limit2 + limit3 <= keys.size());
     }
 
     @Test
@@ -174,6 +160,5 @@ public class ApiKeyDAOTest {
         Assert.assertNotNull(dao.create(apiKey));
         Optional<ApiKey> result = dao.getByClientId(account.getEmail() + "_client");
         Assert.assertTrue(result.isPresent());
-
     }
 }
