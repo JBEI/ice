@@ -8,10 +8,7 @@ import org.jbei.ice.storage.model.ApiKey;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 
 /**
  * @author Hector Plahar
@@ -25,7 +22,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
         ApiKey key = new ApiKey();
         key.setOwnerEmail("email@example");
         key.setCreationTime(new Date());
-        key.setSecret("sekrit");
+        key.setSecret(UUID.randomUUID().toString());
         key.setClientId("client");
         key = dao.create(key);
         Assert.assertNotNull(key);
@@ -47,7 +44,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
             apiKey.setOwnerEmail(account.getEmail());
             apiKey.setCreationTime(new Date());
             apiKey.setHashedToken("token" + i);
-            apiKey.setSecret("sekrit");
+            apiKey.setSecret(UUID.randomUUID().toString());
             apiKey.setStatus(AccessStatus.OK);
             apiKey.setClientId("client" + i);
             Assert.assertNotNull(dao.create(apiKey));
@@ -75,7 +72,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
             apiKey.setCreationTime(new Date());
             apiKey.setHashedToken("token" + i);
             apiKey.setStatus(AccessStatus.OK);
-            apiKey.setSecret("sekrit");
+            apiKey.setSecret(UUID.randomUUID().toString());
             apiKey.setClientId(account1.getEmail() + "_client" + i);
             Assert.assertNotNull(dao.create(apiKey));
         }
@@ -86,7 +83,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
             apiKey.setOwnerEmail(account2.getEmail());
             apiKey.setCreationTime(new Date());
             apiKey.setHashedToken("token" + i);
-            apiKey.setSecret("sekrit");
+            apiKey.setSecret(UUID.randomUUID().toString());
             apiKey.setStatus(AccessStatus.OK);
             apiKey.setClientId(account2.getEmail() + "_client" + i);
             Assert.assertNotNull(dao.create(apiKey));
@@ -99,7 +96,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
             apiKey.setCreationTime(new Date());
             apiKey.setHashedToken("token" + i);
             apiKey.setStatus(AccessStatus.OK);
-            apiKey.setSecret("sekrit");
+            apiKey.setSecret(UUID.randomUUID().toString());
             apiKey.setClientId(account3.getEmail() + "_client" + i);
             Assert.assertNotNull(dao.create(apiKey));
         }
@@ -124,7 +121,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
             apiKey.setOwnerEmail(account1.getEmail());
             apiKey.setCreationTime(new Date());
             apiKey.setHashedToken("token" + i);
-            apiKey.setSecret("sekrit");
+            apiKey.setSecret(UUID.randomUUID().toString());
             apiKey.setStatus(AccessStatus.OK);
             apiKey.setClientId(account1.getEmail() + "_client" + i);
             Assert.assertNotNull(dao.create(apiKey));
@@ -137,7 +134,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
             apiKey.setCreationTime(new Date());
             apiKey.setHashedToken("token" + i);
             apiKey.setStatus(AccessStatus.OK);
-            apiKey.setSecret("sekrit");
+            apiKey.setSecret(UUID.randomUUID().toString());
             apiKey.setClientId(account2.getEmail() + "_client" + i);
             Assert.assertNotNull(dao.create(apiKey));
         }
@@ -149,7 +146,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
             apiKey.setCreationTime(new Date());
             apiKey.setHashedToken("token" + i);
             apiKey.setStatus(AccessStatus.OK);
-            apiKey.setSecret("sekrit");
+            apiKey.setSecret(UUID.randomUUID().toString());
             apiKey.setClientId(account3.getEmail() + "_client" + i);
             Assert.assertNotNull(dao.create(apiKey));
         }
@@ -165,6 +162,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
         apiKey.setOwnerEmail(account.getEmail());
         apiKey.setCreationTime(new Date());
         apiKey.setHashedToken("token");
+        apiKey.setSecret(UUID.randomUUID().toString());
         apiKey.setStatus(AccessStatus.OK);
         apiKey.setClientId(account.getEmail() + "_client");
         Assert.assertNotNull(dao.create(apiKey));
