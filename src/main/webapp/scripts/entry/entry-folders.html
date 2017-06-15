@@ -11,7 +11,7 @@
         <td class="entry_detail_folder_row">
             <div ng-if="!folder.confirmDelete">
                 <i class="fa fa-folder-open-o small pad_left"></i>
-                <a ng-href="folders/{{folder.id}}" class="font-85em">{{folder.folderName | fileTruncate:23:false}}</a>
+                <a ng-href="folders/{{folder.id}}" class="font-85em">{{folder.folderName | fileTruncate:22:false}}</a>
 
                 <i stop-event="click" ng-if="folder.canEdit" class="fa fa-trash-o delete_icon pull-right"
                    ng-click="folder.confirmDelete = true"></i>

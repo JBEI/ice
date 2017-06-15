@@ -17,7 +17,7 @@ import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntriesAsCSV;
 import org.jbei.ice.lib.entry.EntrySelection;
-import org.jbei.ice.lib.entry.attachment.AttachmentController;
+import org.jbei.ice.lib.entry.attachment.Attachments;
 import org.jbei.ice.lib.entry.sequence.*;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.net.RemoteEntries;
@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 public class FileResource extends RestResource {
 
     private SequenceController sequenceController = new SequenceController();
-    private AttachmentController attachmentController = new AttachmentController();
+    private Attachments attachments = new Attachments();
 
     @GET
     @Path("asset/{assetName}")
@@ -76,7 +76,7 @@ public class FileResource extends RestResource {
             final String fileId = Utils.generateUUID();
             final File attachmentFile = Paths.get(
                     Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
-                    AttachmentController.attachmentDirName, fileId).toFile();
+                    Attachments.attachmentDirName, fileId).toFile();
             FileUtils.copyInputStreamToFile(fileInputStream, attachmentFile);
             final AttachmentInfo info = new AttachmentInfo();
             info.setFileId(fileId);
@@ -107,19 +107,19 @@ public class FileResource extends RestResource {
 
     @GET
     @Path("attachment/{fileId}")
-    public Response getAttachment(@PathParam("fileId") String fileId,
-                                  @QueryParam("sid") String sid) {
-        if (StringUtils.isEmpty(sessionId))
-            sessionId = sid;
+    public Response getAttachment(@PathParam("fileId") String fileId) {
+        String userId = requireUserId();
+        try {
+            ByteArrayWrapper wrapper = attachments.getAttachmentByFileId(userId, fileId);
+            if (wrapper == null) {
+                return respond(Response.Status.NOT_FOUND);
+            }
 
-        String userId = getUserId(sessionId);
-        File file = attachmentController.getAttachmentByFileId(userId, fileId);
-        if (file == null) {
-            return respond(Response.Status.NOT_FOUND);
+            return addHeaders(Response.ok(wrapper.getBytes()), wrapper.getName());
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new WebApplicationException(e);
         }
-
-        String name = attachmentController.getFileName(userId, fileId);
-        return addHeaders(Response.ok(file), name);
     }
 
     @GET

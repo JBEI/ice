@@ -4,7 +4,7 @@ import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.bulkupload.BulkUploadAuthorization;
 import org.jbei.ice.lib.bulkupload.BulkUploadInfo;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.entry.attachment.AttachmentController;
+import org.jbei.ice.lib.entry.attachment.Attachments;
 import org.jbei.ice.lib.folder.AbstractFolder;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
@@ -91,12 +91,12 @@ public class Collection {
             partData.setSequenceFileName(name);
         }
 
-        AttachmentController attachmentController = new AttachmentController();
+        Attachments attachments = new Attachments();
 
         // check attachment
-        if (attachmentController.hasAttachment(entry)) {
+        if (DAOFactory.getAttachmentDAO().hasAttachment(entry)) {
             partData.setHasAttachment(true);
-            partData.setAttachments(attachmentController.getByEntry(userId, entry.getId()));
+            partData.setAttachments(attachments.getByEntry(userId, entry.getId()));
         }
 
         // todo: trace sequences

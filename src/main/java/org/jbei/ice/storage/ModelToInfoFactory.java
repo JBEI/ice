@@ -136,18 +136,6 @@ public class ModelToInfoFactory {
         if (creatorAccount != null)
             info.setCreatorId(creatorAccount.getId());
 
-        AccountController accountController = new AccountController();
-        try {
-            long ownerId = accountController.getAccountId(entry.getOwnerEmail());
-            info.setOwnerId(ownerId);
-            if (entry.getCreatorEmail() != null && !entry.getCreatorEmail().isEmpty()) {
-                long creatorId = accountController.getAccountId(entry.getCreatorEmail());
-                info.setCreatorId(creatorId);
-            }
-        } catch (Exception ce) {
-            Logger.debug(ce.getMessage());
-        }
-
         info.setAlias(entry.getAlias());
         info.setKeywords(entry.getKeywords());
         info.setStatus(entry.getStatus());
@@ -165,7 +153,7 @@ public class ModelToInfoFactory {
         info.setPrincipalInvestigator(entry.getPrincipalInvestigator());
         try {
             if (!StringUtils.isEmpty(entry.getPrincipalInvestigatorEmail())) {
-                Account piAccount = accountController.getByEmail(entry.getPrincipalInvestigatorEmail());
+                Account piAccount = DAOFactory.getAccountDAO().getByEmail(entry.getPrincipalInvestigatorEmail());
                 if (piAccount != null) {
                     info.setPrincipalInvestigator(piAccount.getFullName());
                     info.setPrincipalInvestigatorEmail(piAccount.getEmail());
@@ -205,9 +193,9 @@ public class ModelToInfoFactory {
 
         // linked entries
         for (Entry linkedEntry : entry.getLinkedEntries()) {
-            PartData linkedPartData = getInfo(linkedEntry);
-            if (linkedPartData != null)
-                info.getLinkedParts().add(linkedPartData);
+            PartData linkedPartData = new PartData(EntryType.nameToType(linkedEntry.getRecordType()));
+            linkedPartData.setId(linkedEntry.getId());
+            info.getLinkedParts().add(linkedPartData);
         }
 
         return info;
@@ -273,14 +261,7 @@ public class ModelToInfoFactory {
         view.setCreationTime(entry.getCreationTime().getTime());
         view.setStatus(entry.getStatus());
         view.setAlias(entry.getAlias());
-//        view.setOwnerEmail(entry.getOwnerEmail());
         Visibility visibility = Visibility.valueToEnum(entry.getVisibility());
-//        view.setVisibility(visibility);
-
-//        if (userId != null) {
-//            EntryAuthorization authorization = new EntryAuthorization();
-//            view.setCanEdit(authorization.canWrite(userId, entry));
-//        }
 
         // information about the owner and creator
         if (includeOwnerInfo) {
@@ -325,7 +306,7 @@ public class ModelToInfoFactory {
         }
 
         // entry count
-        view.setViewCount(DAOFactory.getAuditDAO().getHistoryCount(entry));
+        view.setViewCount(DAOFactory.getAuditDAO().getAuditsForEntryCount(entry));
         return view;
     }
 

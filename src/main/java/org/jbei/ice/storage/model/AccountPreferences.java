@@ -39,13 +39,6 @@ public class AccountPreferences implements DataModel {
         super();
     }
 
-    public AccountPreferences(Account account, String preferences, String restrictionEnzymes) {
-        super();
-        this.preferences = preferences;
-        this.restrictionEnzymes = restrictionEnzymes;
-        this.account = account;
-    }
-
     public long getId() {
         return id;
     }

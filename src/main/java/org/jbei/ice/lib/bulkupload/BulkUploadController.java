@@ -11,7 +11,7 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.entry.EntryController;
-import org.jbei.ice.lib.entry.attachment.AttachmentController;
+import org.jbei.ice.lib.entry.attachment.Attachments;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.GroupController;
@@ -43,7 +43,7 @@ public class BulkUploadController {
     private final BulkUploadAuthorization authorization;
     private final AccountController accountController;
     private final EntryController entryController;
-    private final AttachmentController attachmentController;
+    private final Attachments attachments;
 
     public BulkUploadController() {
         dao = DAOFactory.getBulkUploadDAO();
@@ -51,7 +51,7 @@ public class BulkUploadController {
         authorization = new BulkUploadAuthorization();
         accountController = new AccountController();
         entryController = new EntryController();
-        attachmentController = new AttachmentController();
+        attachments = new Attachments();
     }
 
     /**
@@ -230,9 +230,9 @@ public class BulkUploadController {
         }
 
         // check attachment
-        if (attachmentController.hasAttachment(entry)) {
+        if (DAOFactory.getAttachmentDAO().hasAttachment(entry)) {
             partData.setHasAttachment(true);
-            partData.setAttachments(attachmentController.getByEntry(userId, entry.getId()));
+            partData.setAttachments(attachments.getByEntry(userId, entry.getId()));
         }
 
         // todo: trace sequences
@@ -429,7 +429,7 @@ public class BulkUploadController {
 
         String fileId = Utils.generateUUID();
         File attachmentFile = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
-                AttachmentController.attachmentDirName, fileId).toFile();
+                Attachments.attachmentDirName, fileId).toFile();
 
         try {
             FileUtils.copyInputStreamToFile(fileInputStream, attachmentFile);
@@ -442,7 +442,7 @@ public class BulkUploadController {
         info.setFileId(fileId);
         info.setFilename(fileName);
 
-        return attachmentController.addAttachmentToEntry(userId, entryId, info);
+        return attachments.addAttachmentToEntry(userId, entryId, info);
     }
 
     public boolean deleteAttachment(String userId, long bulkUploadId, long entryId) {
