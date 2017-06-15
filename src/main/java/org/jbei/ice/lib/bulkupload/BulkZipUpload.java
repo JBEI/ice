@@ -10,6 +10,7 @@ import org.jbei.ice.lib.utils.Utils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -48,7 +49,8 @@ public class BulkZipUpload extends BulkCSVUpload {
         String csvFile = null;
         HashMap<String, InputStream> files = new HashMap<>();
 
-        try (ZipFile zipFile = new ZipFile(zipFilePath.toFile())) {
+        try {
+            ZipFile zipFile = new ZipFile(zipFilePath.toFile());
             Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
 
             // go through zip elements
@@ -91,8 +93,8 @@ public class BulkZipUpload extends BulkCSVUpload {
             return processedBulkUpload;
         }
 
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(csvFile.getBytes())) {
-
+        try {
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(csvFile.getBytes(StandardCharsets.UTF_8));
             // retrieve the partData and validates
             List<PartWithSample> updates = super.getBulkUploadDataFromFile(inputStream);
             if (updates == null) {

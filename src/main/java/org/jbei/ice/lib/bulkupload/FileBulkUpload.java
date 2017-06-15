@@ -4,11 +4,13 @@ import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 
 /**
- * Processes bulk uploads. Supported file formats are "csv", "zip" and "xml", with the latter being for SBOL
+ * Processes bulk uploads.
+ * Supported file formats are <code>csv</code>, <code>zip</code> and <code>xml</code>, with the latter being for SBOL
  *
  * @author Hector Plahar
  */
@@ -35,7 +37,7 @@ public class FileBulkUpload {
      * <li>Files with a <code>.xml</code> extension are processed as SBOL files</li>
      * </ul>
      *
-     * @return
+     * @return wrapper around processed upload
      * @throws IOException
      */
     public ProcessedBulkUpload process() throws IOException {
@@ -116,6 +118,6 @@ public class FileBulkUpload {
         }
 
         sb.append("\n");
-        return sb.toString().getBytes();
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
     }
 }

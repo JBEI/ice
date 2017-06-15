@@ -40,7 +40,7 @@ public class PartSequenceTest {
         Assert.assertNull(sequence);
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(genbank.getBytes());
-        SequenceInfo sequenceInfo = partSequence.parseSequenceFile(inputStream, "testFile.gb");
+        SequenceInfo sequenceInfo = partSequence.parseSequenceFile(inputStream, "testFile.gb", false);
         Assert.assertNotNull(sequenceInfo);
         FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) sequenceInfo.getSequence();
         Assert.assertNotNull(featuredDNASequence);
@@ -58,7 +58,7 @@ public class PartSequenceTest {
         PartSequence partSequence = new PartSequence(account.getEmail(), EntryType.PART);
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(fasta.getBytes());
-        SequenceInfo sequenceInfo = partSequence.parseSequenceFile(inputStream, "fasta.fa");
+        SequenceInfo sequenceInfo = partSequence.parseSequenceFile(inputStream, "fasta.fa", false);
         Assert.assertNotNull(sequenceInfo);
         Assert.assertNotNull(sequenceInfo.getSequence());
     }

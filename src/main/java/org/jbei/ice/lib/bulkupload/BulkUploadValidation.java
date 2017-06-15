@@ -74,6 +74,7 @@ public class BulkUploadValidation {
         }
 
         switch (type) {
+            default:
             case STRAIN:
                 validateStrain((Strain) entry);
                 break;

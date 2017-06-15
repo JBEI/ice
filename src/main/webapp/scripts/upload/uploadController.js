@@ -1003,12 +1003,10 @@ angular.module('ice.upload.controller', [])
 
         $scope.importUploader.onErrorItem = function (item, response, status, headers) {
             $scope.processing = false;
-            $scope.uploadError = response;
+            $scope.uploadError = {message: "Unknown server error"};
 
             if (status == 400) {
                 $scope.uploadError.message = "Validation error processing file \'" + item.file.name + "\'";
-            } else {
-                $scope.uploadError.message = "Unknown server error";
             }
         };
 

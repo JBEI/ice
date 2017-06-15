@@ -10,10 +10,9 @@
     </span>
 </span>
 
-<!--separator-->
-<span ng-if="user.isAdmin && folder.owner.email===user.email" style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
-
 <span ng-if="user.isAdmin">
+    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+
     <small ng-if="folder.type!='PUBLIC'" class="opacity_hover edit_icon" style="font-size: 13px;"
            ng-click="changeFolderType('PUBLIC')">
         <i style="font-size: 14px; color: #555" class="fa fa-level-up fa-flip-horizontal"></i> Promote

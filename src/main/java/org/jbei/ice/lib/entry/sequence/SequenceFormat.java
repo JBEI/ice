@@ -11,6 +11,8 @@ public enum SequenceFormat {
     SBOL1,
     SBOL2,
     PLAIN,
+    PIGEONI,
+    PIGEONS,
     GENBANK;
 
     public static SequenceFormat fromString(String type) {

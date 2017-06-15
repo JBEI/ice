@@ -1,0 +1,62 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-fw fa-cloud-download"></i> &nbsp;Custom Export</span>
+</div>
+
+<div class="modal-body">
+
+    Select the information you wish to export from the fields below:
+
+    <!--<div class="entry-details-subheader">-->
+    <!--<strong style="color: #233559">General Information</strong> <a class="small pull-right"-->
+    <!--ng-click="selectAll('general')">Select all</a>-->
+    <!--</div>-->
+    <!--<br>-->
+
+    <!--<div class="row" ng-repeat="field in fields track by $index" style="display: inline-block;">-->
+    <!--<div>-->
+    <!--<div class="col-sm-12">-->
+    <!--<div class="col-sm-6 no_wrap"><i class="fa fa-fw fa-check-square"></i> {{field}}</div>-->
+    <!--</div>-->
+    <!--</div>-->
+    <!--</div>-->
+
+    <!--<div class="entry-details-subheader">-->
+    <!--<strong style="color: #233559">Sample Information</strong> <a class="small pull-right">Select all</a>-->
+    <!--</div>-->
+    <!--<br>-->
+
+    <div class="entry-details-subheader">
+        <strong style="color: #233559">Sequence Information</strong>
+    </div>
+    <br>
+    Format&nbsp;
+
+    <div class="btn-group" uib-dropdown>
+        <button id="single-button" type="button" class="btn btn-xs btn-default" uib-dropdown-toggle>
+            {{sequence.format}} <span class="caret"></span>
+        </button>
+        <ul class="uib-dropdown-menu" role="menu" aria-labelledby="single-button">
+            <li role="menuitem" ng-click="sequence.format='Genbank'"><a href="#">Genbank</a></li>
+            <li role="menuitem" ng-click="sequence.format='SBOL'"><a href="#">SBOL</a></li>
+            <li role="menuitem" ng-click="sequence.format='FASTA'"><a href="#">FASTA</a></li>
+            <li role="menuitem" ng-click="sequence.format='Plain'"><a href="#">Plain</a></li>
+        </ul>
+    </div>
+
+</div>
+
+<div class="modal-footer">
+    <div class="pull-left" ng-if="processingDownload">
+        <img src="img/loader-mini.gif"/> <i>Processing request...</i>
+    </div>
+
+    <div class="pull-right">
+        <button class="btn btn-sm btn-default" ng-click="$dismiss('cancel')">Cancel</button>
+        <button class="btn btn-sm btn-primary" ng-disabled='processingDownload' ng-click="customExport()">Export
+        </button>
+    </div>
+</div>
+
+

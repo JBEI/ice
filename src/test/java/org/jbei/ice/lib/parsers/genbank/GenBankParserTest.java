@@ -66,8 +66,11 @@ public class GenBankParserTest {
     public static final String features =
             "FEATURES             Location/Qualifiers\n" +
                     "     RBS             1..12\n" +
+                    "                     /=\n" +
                     "     CDS             19..774\n" +
-                    "     terminator      808..936\n";
+                    "     terminator      808..936\n" +
+                    "                     /ApEinfo_graphicformat=\"arrow_data {{0 1 2 0 0 -1} {} 0}\n" +
+                    "                     width 5 offset 0";
 
     public static final String features2 =
             "FEATURES             Location/Qualifiers\n" +

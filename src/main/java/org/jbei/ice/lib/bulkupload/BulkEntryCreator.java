@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.bulkupload;
 
+import com.google.common.io.ByteStreams;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
@@ -25,6 +26,8 @@ import org.jbei.ice.storage.model.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashMap;
@@ -560,7 +563,7 @@ public class BulkEntryCreator {
             String sequenceName = data.getSequenceFileName();
             if (!StringUtils.isBlank(sequenceName)) {
                 PartSequence partSequence = new PartSequence(entry.getOwnerEmail(), entry.getRecordId());
-                partSequence.parseSequenceFile(files.get(sequenceName), sequenceName);
+                partSequence.parseSequenceFile(files.get(sequenceName), sequenceName, false);
             }
         } catch (IOException e) {
             Logger.error(e);
@@ -589,8 +592,9 @@ public class BulkEntryCreator {
                 attachment.setFileId(fileId);
                 attachment.setFileName(attachmentName);
                 String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-                File attachmentDir = Paths.get(dataDir, "attachments").toFile();
-                DAOFactory.getAttachmentDAO().save(attachmentDir, attachment, attachmentStream);
+                Path path = Paths.get(dataDir, "attachments", attachment.getFileId());
+                Files.write(path, ByteStreams.toByteArray(attachmentStream));
+                DAOFactory.getAttachmentDAO().create(attachment);
             }
         } catch (Exception e) {
             Logger.error(e);

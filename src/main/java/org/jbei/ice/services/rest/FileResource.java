@@ -17,11 +17,8 @@ import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntriesAsCSV;
 import org.jbei.ice.lib.entry.EntrySelection;
-import org.jbei.ice.lib.entry.attachment.AttachmentController;
-import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
-import org.jbei.ice.lib.entry.sequence.PartSequence;
-import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.attachment.Attachments;
+import org.jbei.ice.lib.entry.sequence.*;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.RemoteSequence;
@@ -53,7 +50,7 @@ import java.util.stream.Collectors;
 public class FileResource extends RestResource {
 
     private SequenceController sequenceController = new SequenceController();
-    private AttachmentController attachmentController = new AttachmentController();
+    private Attachments attachments = new Attachments();
 
     @GET
     @Path("asset/{assetName}")
@@ -79,7 +76,7 @@ public class FileResource extends RestResource {
             final String fileId = Utils.generateUUID();
             final File attachmentFile = Paths.get(
                     Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
-                    AttachmentController.attachmentDirName, fileId).toFile();
+                    Attachments.attachmentDirName, fileId).toFile();
             FileUtils.copyInputStreamToFile(fileInputStream, attachmentFile);
             final AttachmentInfo info = new AttachmentInfo();
             info.setFileId(fileId);
@@ -110,19 +107,19 @@ public class FileResource extends RestResource {
 
     @GET
     @Path("attachment/{fileId}")
-    public Response getAttachment(@PathParam("fileId") String fileId,
-                                  @QueryParam("sid") String sid) {
-        if (StringUtils.isEmpty(sessionId))
-            sessionId = sid;
+    public Response getAttachment(@PathParam("fileId") String fileId) {
+        String userId = requireUserId();
+        try {
+            ByteArrayWrapper wrapper = attachments.getAttachmentByFileId(userId, fileId);
+            if (wrapper == null) {
+                return respond(Response.Status.NOT_FOUND);
+            }
 
-        String userId = getUserId(sessionId);
-        File file = attachmentController.getAttachmentByFileId(userId, fileId);
-        if (file == null) {
-            return respond(Response.Status.NOT_FOUND);
+            return addHeaders(Response.ok(wrapper.getBytes()), wrapper.getName());
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new WebApplicationException(e);
         }
-
-        String name = attachmentController.getFileName(userId, fileId);
-        return addHeaders(Response.ok(file), name);
     }
 
     @GET
@@ -182,7 +179,7 @@ public class FileResource extends RestResource {
             RemoteSequence sequence = new RemoteSequence(remoteId, partId);
             wrapper = sequence.get(downloadType);
         } else {
-            wrapper = sequenceController.getSequenceFile(userId, partId, downloadType);
+            wrapper = sequenceController.getSequenceFile(userId, partId, SequenceFormat.fromString(downloadType));
         }
 
         StreamingOutput stream = output -> {
@@ -208,8 +205,7 @@ public class FileResource extends RestResource {
 
     @GET
     @Path("shotgunsequence/{fileId}")
-    public Response getShotgunSequenceFile(@PathParam("fileId") String fileId,
-                                           @QueryParam("sid") String sid) {
+    public Response getShotgunSequenceFile(@PathParam("fileId") String fileId) {
         ShotgunSequenceDAO dao = DAOFactory.getShotgunSequenceDAO();
         ShotgunSequence shotgunSequence = dao.getByFileId(fileId);
 
@@ -261,6 +257,7 @@ public class FileResource extends RestResource {
     public Response uploadSequence(@FormDataParam("file") InputStream fileInputStream,
                                    @FormDataParam("entryRecordId") String recordId,
                                    @FormDataParam("entryType") String entryType,
+                                   @FormDataParam("extractHierarchy") @DefaultValue("false") boolean extractHierarchy,
                                    @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
         try {
             final String fileName = contentDispositionHeader.getFileName();
@@ -277,7 +274,7 @@ public class FileResource extends RestResource {
                 partSequence = new PartSequence(userId, recordId);
             }
 
-            SequenceInfo info = partSequence.parseSequenceFile(fileInputStream, fileName);
+            SequenceInfo info = partSequence.parseSequenceFile(fileInputStream, fileName, extractHierarchy);
             if (info == null)
                 throw new WebApplicationException(Response.serverError().build());
             return Response.status(Response.Status.OK).entity(info).build();
@@ -302,7 +299,7 @@ public class FileResource extends RestResource {
                                 @QueryParam("entryFields") final List<String> fields,
                                 EntrySelection selection) {
         String userId = super.requireUserId();
-        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(sequenceFormats.toArray(new String[sequenceFormats.size()]));
+        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId, sequenceFormats.toArray(new String[sequenceFormats.size()]));
         List<EntryField> entryFields = new ArrayList<>();
         try {
             if (fields != null) {
@@ -312,7 +309,7 @@ public class FileResource extends RestResource {
             Logger.error(e);
         }
 
-        boolean success = entriesAsCSV.setSelectedEntries(userId, selection,
+        boolean success = entriesAsCSV.setSelectedEntries(selection,
                 entryFields.toArray(new EntryField[entryFields.size()]));
         if (!success)
             return super.respond(false);

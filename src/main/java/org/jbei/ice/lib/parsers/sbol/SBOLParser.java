@@ -35,8 +35,11 @@ import java.util.Map;
  */
 public class SBOLParser extends AbstractParser {
 
-    public SBOLParser(String userId, String entryId) {
+    private boolean extractHierarchy;
+
+    public SBOLParser(String userId, String entryId, boolean extractHierarchy) {
         super(userId, entryId);
+        this.extractHierarchy = extractHierarchy;
     }
 
     // map of component identity to entry id
@@ -59,6 +62,8 @@ public class SBOLParser extends AbstractParser {
 
         // parse raw document and return
         SequenceInfo sequenceInfo = parseToGenBank(document, fileName, entry, null);
+        if (!this.extractHierarchy)
+            return sequenceInfo;
 
         // document parsed successfully, go through module definitions
         for (ModuleDefinition moduleDefinition : document.getModuleDefinitions()) {

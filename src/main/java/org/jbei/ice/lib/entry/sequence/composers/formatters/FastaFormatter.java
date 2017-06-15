@@ -27,8 +27,6 @@ public class FastaFormatter extends AbstractFormatter {
 
         builder.append(">")
                 .append(entry.getPartNumber())
-                .append("|")
-                .append(entry.getName())
                 .append(System.lineSeparator());
         for (int i = 1; i <= sequence.getSequence().length(); i += 1) {
             builder.append(sequence.getSequence().charAt(i - 1));

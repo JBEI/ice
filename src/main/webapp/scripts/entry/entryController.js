@@ -215,7 +215,7 @@ angular.module('ice.entry.controller', [])
             $scope.shotgunUploadError = true;
         };
     })
-    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, $uibModal, Util) {
+    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, $uibModal, Util, Authentication) {
         var entryId = $stateParams.id;
 
         $scope.traceUploadError = undefined;
@@ -254,6 +254,24 @@ angular.module('ice.entry.controller', [])
                     $scope.showUploadOptions = false;
                     $scope.traceUploadError = false;
                 });
+            });
+        };
+
+        $scope.downloadAllTraces = function () {
+            var clickEvent = new MouseEvent("click", {
+                "view": window,
+                "bubbles": true,
+                "cancelable": false
+            });
+
+            Util.download("rest/parts/" + entryId + "/traces/all?sid=" + Authentication.getSessionId()).$promise.then(function (result) {
+                var url = URL.createObjectURL(new Blob([result.data]));
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = result.filename();
+                a.target = '_blank';
+                a.dispatchEvent(clickEvent);
+                $scope.selectedRequests = [];
             });
         };
 
@@ -1015,11 +1033,25 @@ angular.module('ice.entry.controller', [])
             removePermission(permission.id);
         };
     })
-    .controller('EntryFoldersController', function ($scope, Util) {
+    .controller('EntryFoldersController', function ($rootScope, $scope, Util) {
         $scope.containedFolders = undefined;
         Util.list("rest/parts/" + $scope.entry.recordId + "/folders", function (result) {
             $scope.containedFolders = result;
         });
+
+        $scope.removeEntryFromFolder = function (folder) {
+            Util.post("rest/folders/" + folder.id + "/entries",
+                {entries: [$scope.entry.id], folderId: folder.id}, function (result) {
+                    if (result) {
+                        $rootScope.$broadcast("RefreshAfterDeletion");
+                        $scope.$broadcast("UpdateCollectionCounts");
+                        Util.setFeedback('1 entry removed from folder', 'success');
+                        var i = $scope.containedFolders.indexOf(folder);
+                        if (i >= 0)
+                            $scope.containedFolders.splice(i, 1);
+                    }
+                }, {move: false});
+        };
     })
     .controller('EntryDetailsController', function ($scope) {
         var entryPanes = $scope.entryPanes = [];

@@ -15,25 +15,15 @@ import java.io.OutputStream;
 public class AbstractFormatter implements IFormatter {
     public static final String DEFAULT_NAMESPACE = "org.jbei";
 
-    private String namespaceName = DEFAULT_NAMESPACE;
-
     @Override
     /**
      * Format the {@link Sequence} and output to the {@link OutputStream}.
      */
-    public void format(Sequence sequence, OutputStream outputStream) throws FormatterException,
-            IOException {
-    }
-
-    public String getNamespaceName() {
-        return namespaceName;
-    }
-
-    public void setNamespaceName(String value) {
-        namespaceName = value;
+    public void format(Sequence sequence, OutputStream outputStream) throws FormatterException, IOException {
+        throw new UnsupportedOperationException("Unsupported");
     }
 
     public Namespace getNamespace() {
-        return new SimpleNamespace(getNamespaceName());
+        return new SimpleNamespace(DEFAULT_NAMESPACE);
     }
 }

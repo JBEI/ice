@@ -19,7 +19,7 @@ import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.*;
-import org.jbei.ice.lib.entry.attachment.AttachmentController;
+import org.jbei.ice.lib.entry.attachment.Attachments;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.TraceSequences;
@@ -36,10 +36,8 @@ import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.ShotgunSequence;
 
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.*;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,7 +56,7 @@ import java.util.List;
 public class PartResource extends RestResource {
 
     private EntryController controller = new EntryController();
-    private AttachmentController attachmentController = new AttachmentController();
+    private Attachments attachments = new Attachments();
     private SequenceController sequenceController = new SequenceController();
     private SampleService sampleService = new SampleService();
     private RemoteEntries remoteEntries = new RemoteEntries();
@@ -332,8 +330,8 @@ public class PartResource extends RestResource {
     public AttachmentInfo addAttachment(@PathParam("id") final long partId,
                                         final AttachmentInfo attachment) {
         final String userId = getUserId();
-        final AttachmentController attachmentController = new AttachmentController();
-        return attachmentController.addAttachmentToEntry(userId, partId, attachment);
+        final Attachments attachments = new Attachments();
+        return attachments.addAttachmentToEntry(userId, partId, attachment);
     }
 
     @GET
@@ -341,7 +339,7 @@ public class PartResource extends RestResource {
     @Path("/{id}/attachments")
     public List<AttachmentInfo> getAttachments(@PathParam("id") final long partId) {
         final String userId = getUserId();
-        return attachmentController.getByEntry(userId, partId);
+        return attachments.getByEntry(userId, partId);
     }
 
     @DELETE
@@ -349,7 +347,7 @@ public class PartResource extends RestResource {
     public Response deleteAttachment(@PathParam("id") final long partId,
                                      @PathParam("attachmentId") final long attachmentId) {
         final String userId = getUserId();
-        return super.respond(attachmentController.delete(userId, partId, attachmentId));
+        return super.respond(attachments.delete(userId, partId, attachmentId));
     }
 
     /**
@@ -385,11 +383,8 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/traces")
-    public Response getTraces(
-            @Context final UriInfo info,
-            @PathParam("id") final long partId,
-            @DefaultValue("100") @QueryParam("limit") int limit,
-            @DefaultValue("0") @QueryParam("start") int start) {
+    public Response getTraces(@PathParam("id") final long partId, @DefaultValue("100") @QueryParam("limit") int limit,
+                              @DefaultValue("0") @QueryParam("start") int start) {
         final String userId = getUserId();
         TraceSequences traceSequences = new TraceSequences(userId, partId);
         Results<TraceSequenceAnalysis> results = traceSequences.getTraces(start, limit);
@@ -398,6 +393,25 @@ public class PartResource extends RestResource {
         if (StringUtils.isEmpty(sessionId))
             return super.respond(new ArrayList<>(results.getData()));
         return super.respond(results);
+    }
+
+    @GET
+    @Path("/{id}/traces/all")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response getAllTraces(@PathParam("id") final long partId, @QueryParam("sid") String sid) {
+        if (StringUtils.isEmpty(sessionId))
+            sessionId = sid;
+
+        final String userId = requireUserId();
+        TraceSequences traceSequences = new TraceSequences(userId, partId);
+
+        try (ByteArrayOutputStream outputStream = traceSequences.getAll()) {
+            StreamingOutput stream = outputStream::writeTo;
+            return Response.ok(stream).header("Content-Disposition", "attachment;filename=\"data.zip\"").build();
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GET
@@ -511,7 +525,7 @@ public class PartResource extends RestResource {
                               @QueryParam("strainNamePrefix") final String strainNamePrefix,
                               final PartSample partSample) {
         final String userId = getUserId();
-        log(userId, "creating sample for part " + partId);
+        log(userId, "creating sample " + partSample.toString() + " for part " + partId);
         sampleService.createSample(userId, partId, partSample, strainNamePrefix);
         List<PartSample> result = sampleService.retrieveEntrySamples(userId, partId);
         Results<PartSample> results = new Results<>();
@@ -744,5 +758,21 @@ public class PartResource extends RestResource {
         log(userId, "requesting auto annotations for entry " + partId);
         Annotations annotations = new Annotations(userId);
         return super.respond(annotations.generate(partId, ownerFeatures));
+    }
+
+    @POST
+    @Path("/custom")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response customExport(EntrySelection selection) {
+        String userId = super.requireUserId();
+        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId);
+
+        try (ByteArrayOutputStream outputStream = entriesAsCSV.customize(selection)) {
+            StreamingOutput stream = outputStream::writeTo;
+            return Response.ok(stream).header("Content-Disposition", "attachment;filename=\"data.zip\"").build();
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+        }
     }
 }

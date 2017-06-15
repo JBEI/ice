@@ -105,16 +105,6 @@ public class Utils {
     }
 
     /**
-     * Calculate the SHA-256 hash of the given string.
-     *
-     * @param string plain text to hash.
-     * @return Hex digest of the given string.
-     */
-    public static String encryptSha256(String string) {
-        return encrypt(string, "SHA-256");
-    }
-
-    /**
      * Calculate the message digest of the given message string using the given algorithm.
      *
      * @param string    Plain text message.
@@ -159,12 +149,11 @@ public class Utils {
 
     public static String getString(InputStream stream) throws IOException {
         StringBuilder builder = new StringBuilder();
-        try (Reader reader = new BufferedReader(new InputStreamReader
-                (stream, Charset.forName(StandardCharsets.UTF_8.name())))) {
-            int c;
-            while ((c = reader.read()) != -1) {
-                builder.append((char) c);
-            }
+        Reader reader = new BufferedReader(new InputStreamReader
+                (stream, Charset.forName(StandardCharsets.UTF_8.name())));
+        int c;
+        while ((c = reader.read()) != -1) {
+            builder.append((char) c);
         }
         return builder.toString();
     }

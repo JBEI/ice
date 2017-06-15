@@ -1,13 +1,21 @@
 <div ng-controller="ShotgunSequenceController">
     <div class="row pad_top">
         <div class="col-md-12">
-            <button type="button" class="ice-button" ng-click="showAddShotgunSequenceModal()">Add PacBio/MiSeq Trace</button>
+            <div class="entry-details-subheader">
+                <strong style="color: #233559" class="font-90em">PACBIO/MISEQ TRACES</strong>
+
+                <div class="pull-right">
+                    <small class="opacity_hover" style="text-decoration: none" ng-click="showAddShotgunSequenceModal()">
+                        <i class="fa fa-fw fa-plus"></i>Add PacBio/MiSeq Trace
+                    </small>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="row pad_top" ng-if="shotgunSequences.length===0">
         <div class="col-md-12">
-            <i class="text-muted">No PacBio/MiSeqs available</i>
+            <i class="text-muted">No PacBio/MiSeq files available</i>
         </div>
     </div>
 
@@ -35,22 +43,24 @@
                     </td>
                     <td>
                         <a class="cursor_pointer"
-                        ng-click="downloadShotgunFile(shotgunSequence)">{{shotgunSequence.filename}}</a>
+                           ng-click="downloadShotgunFile(shotgunSequence)">{{shotgunSequence.filename}}</a>
                     </td>
                     <td><a ng-href="profile/{{shotgunSequence.depositor.id}}">{{shotgunSequence.depositor.firstName}}
                         {{shotgunSequence.depositor.lastName}}</a></td>
                     <td>{{shotgunSequence.created | date:'MMM d, y, h:mm a'}}</td>
                     <td style="font-size:14px">
                         <i ng-click="deleteShotgunSequenceFile(shotgunSequence.fileId)"
-                        class="fa fa-trash-o delete_icon"></i>
+                           class="fa fa-trash-o delete_icon"></i>
                     </td>
                 </tr>
                 </tbody>
             </table>
         </div>
-    </div>
+        <!--</div>-->
 
-    <div class="row" ng-if="shotgunSequences && shotgunSequences.length">
+        <!--<br>-->
+
+        <!--<div class="row" ng-if="shotgunSequences && shotgunSequences.length">-->
         <div class="col-sm-6">
             <uib-pagination total-items="shotgunSequences.length" ng-change="shotgunPageChanged()"
                             ng-model="shotgunParams.currentPage"
@@ -67,9 +77,24 @@
 </div>
 
 <div ng-controller="TraceSequenceController">
+
     <div class="row pad_top">
         <div class="col-md-12">
-            <button type="button" class="ice-button" ng-click="showAddSangerTraceModal()">Add Sanger Trace</button>
+            <div class="entry-details-subheader">
+                <strong style="color: #233559" class="font-90em">SANGAR TRACES</strong>
+
+                <div class="pull-right">
+                    <small class="opacity_hover" style="text-decoration: none" ng-click="showAddSangerTraceModal()">
+                        <i class="fa fa-fw fa-plus"></i>Add Sanger Trace
+                    </small>
+                    <span ng-if="traces && traces.data.length">
+                    <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                        <small class="opacity_hover" ng-click="downloadAllTraces()">
+                            <i class="fa fa-upload"></i>&nbsp; Download All
+                        </small>
+                    </span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -111,9 +136,9 @@
                 </tbody>
             </table>
         </div>
-    </div>
+        <!--</div>-->
 
-    <div class="row" ng-if="traces && traces.resultCount">
+        <!--<div class="row" ng-if="traces && traces.resultCount">-->
         <div class="col-sm-6">
             <uib-pagination total-items="traces.resultCount" ng-change="tracesPageChanged()"
                             ng-model="tracesParams.currentPage"

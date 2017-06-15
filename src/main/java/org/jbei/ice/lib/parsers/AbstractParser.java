@@ -37,10 +37,6 @@ public abstract class AbstractParser extends HasEntry {
         sequenceDAO = DAOFactory.getSequenceDAO();
     }
 
-    public SequenceInfo parseToEntry(byte[] bytes, String filename) throws InvalidFormatParserException {
-        throw new UnsupportedOperationException("Not implemented for this parser");
-    }
-
     public DNASequence parse(String textSequence) throws InvalidFormatParserException {
         throw new UnsupportedOperationException("Not implemented for this parser");
     }

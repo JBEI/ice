@@ -253,7 +253,7 @@ public class EntryController extends HasEntry {
         statistics.setSequenceCount(sequenceCount);
         int sampleCount = DAOFactory.getSampleDAO().getSampleCount(entry);
         statistics.setSampleCount(sampleCount);
-        int historyCount = DAOFactory.getAuditDAO().getHistoryCount(entry);
+        int historyCount = DAOFactory.getAuditDAO().getAuditsForEntryCount(entry);
         statistics.setHistoryCount(historyCount);
         int eddCount = DAOFactory.getExperimentDAO().getExperimentCount(entryId);
         statistics.setExperimentalDataCount(eddCount);

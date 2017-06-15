@@ -26,7 +26,6 @@
         </button>
     </div>
 
-
     <!--edit, delete/erase, and restore-->
     <div class="btn-group" style="margin-left: 20px">
         <button class="btn btn-default action-menu" ng-disabled="!canEdit()" ng-click="editEntry()">
@@ -56,7 +55,7 @@
 
     <!--download-->
     <div class="btn-group" style="margin-left: 20px" uib-dropdown>
-        <button class="btn btn-default action-menu" ng-disabled="addToDisabled" uib-dropdown-toggle>
+        <button class="btn btn-default action-menu" ng-disabled="!canExport()" uib-dropdown-toggle>
             <i class="fa fa-cloud-download font-12em"></i>
             <br>
             <small class="text-uppercase font-55em">Export <span class="caret"></span></small>
@@ -65,8 +64,8 @@
         <ul class="uib-dropdown-menu">
             <li><a href="#" class="font-90em" ng-click="csvExport(false)">CSV Only</a></li>
             <li><a href="#" class="font-90em" ng-click="csvExport(true)">CSV & sequences</a></li>
-            <!--<li class="divider"></li>-->
-            <!--<li><a href="#" class="font-90em">Customize</a></li>-->
+            <li class="divider"></li>
+            <li><a href="#" class="font-90em" ng-click="customizeExport()">Custom</a></li>
         </ul>
     </div>
 

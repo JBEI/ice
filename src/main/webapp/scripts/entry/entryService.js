@@ -19,7 +19,7 @@ angular.module('ice.entry.service', [])
                 }
 
                 // todo : this may be a problem when a user selects 3 entries (can edit 2) and deselects the 3rd
-                // todo : that use cannot edit
+                // todo : that user cannot edit
 
                 canEdit = entry.canEdit;
                 canDelete = entry.ownerEmail === userId;
@@ -363,19 +363,25 @@ angular.module('ice.entry.service', [])
             return canSubmit;
         };
 
-        var getFieldsForType = function (type) {
+        var getFieldsForType = function (type, typeFieldsOnly) {
             var fields = angular.copy(partFields);
             type = type.toLowerCase();
             switch (type) {
                 case 'strain':
+                    if (typeFieldsOnly)
+                        return strainFields;
                     fields.splice.apply(fields, [7, 0].concat(strainFields));
                     return fields;
 
                 case 'arabidopsis':
+                    if (typeFieldsOnly)
+                        return seedFields;
                     fields.splice.apply(fields, [7, 0].concat(seedFields));
                     return fields;
 
                 case 'plasmid':
+                    if (typeFieldsOnly)
+                        return plasmidFields;
                     fields.splice.apply(fields, [7, 0].concat(plasmidFields));
                     return fields;
 
@@ -394,8 +400,12 @@ angular.module('ice.entry.service', [])
                 return generateLinkOptions(type);
             },
 
-            getFieldsForType: function (type) {
-                return getFieldsForType(type);
+            getFieldsForType: function (type, typeFieldsOnly) {
+                return getFieldsForType(type, typeFieldsOnly);
+            },
+
+            getCommonFields: function () {
+                return getFieldsForType('part');
             },
 
             // converts to a form that the backend can work with

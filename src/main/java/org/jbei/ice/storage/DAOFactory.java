@@ -8,7 +8,6 @@ import org.jbei.ice.storage.hibernate.dao.*;
 public class DAOFactory {
 
     private static AccountDAO accountDAO;
-    private static AccountPreferencesDAO accountPreferencesDAO;
     private static AttachmentDAO attachmentDAO;
     private static BulkUploadDAO bulkUploadDAO;
     private static CommentDAO commentDAO;
@@ -43,12 +42,6 @@ public class DAOFactory {
         if (accountDAO == null)
             accountDAO = new AccountDAO();
         return accountDAO;
-    }
-
-    public static AccountPreferencesDAO getAccountPreferencesDAO() {
-        if (accountPreferencesDAO == null)
-            accountPreferencesDAO = new AccountPreferencesDAO();
-        return accountPreferencesDAO;
     }
 
     public static AttachmentDAO getAttachmentDAO() {

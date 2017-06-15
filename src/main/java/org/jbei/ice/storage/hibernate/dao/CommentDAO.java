@@ -1,6 +1,5 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
@@ -24,7 +23,7 @@ public class CommentDAO extends HibernateRepository<Comment> {
             Root<Comment> from = query.from(Comment.class);
             query.select(from).where(getBuilder().equal(from.get("entry"), entry));
             return currentSession().createQuery(query).list();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -36,7 +35,7 @@ public class CommentDAO extends HibernateRepository<Comment> {
             Root<Comment> from = query.from(Comment.class);
             query.select(getBuilder().countDistinct(from.get("id"))).where(getBuilder().equal(from.get("entry"), entry));
             return currentSession().createQuery(query).uniqueResult().intValue();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }

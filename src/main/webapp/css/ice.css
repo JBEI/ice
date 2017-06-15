@@ -1487,3 +1487,16 @@ button[disabled].action-menu:hover {
     bottom: -0.5em;
     color: darkgray;
 }
+
+.entry_detail_folder_row {
+    border-right: 1px solid #F2F2F2;
+    border-top: 1px solid #F2F2F2;
+    padding: 5px;
+    color: #0082c0;
+    line-height: 15px;
+}
+
+.entry_detail_folder_row:hover {
+    background-color: #F3F1D9;
+    color: #70822e;
+}

@@ -150,14 +150,6 @@ angular.module('ice.search.controller', [])
             //$scope.searchResultPageChanged();
             $scope.searchFilters.parameters.retrieveCount = $scope.params.limit;
             $scope.searchFilters.parameters.start = 0;
-
-            //console.log($scope.searchFilters);
-            //console.log($scope.params);
-            //var offset = (($scope.params.currentPage - 1) * $scope.params.limit) + index;
-            //EntryContextUtil.setContextCallback(function (offset, callback) {
-            //    $scope.searchFilters.parameters.start = offset;
-            //    $scope.searchFilters.parameters.retrieveCount = 1;
-
             runAdvancedSearch($scope.searchFilters);
         };
 
