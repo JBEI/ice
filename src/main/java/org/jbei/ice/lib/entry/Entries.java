@@ -145,6 +145,7 @@ public class Entries extends HasEntry {
                 entries = dao.sharedWithUserEntryIds(account, account.getGroups());
                 break;
             case "available":
+            case "featured":
                 Group publicGroup = new GroupController().createOrRetrievePublicGroup();
                 entries = dao.getVisibleEntryIds(account.getType() == AccountType.ADMIN, publicGroup);
                 break;

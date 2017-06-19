@@ -616,8 +616,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             if (type != null)
                 predicates.add(getBuilder().equal(from.get("recordType"), type.getName()));
 
-            query.select(getBuilder().countDistinct(from.get("id")))
-                    .where(predicates.toArray(new Predicate[predicates.size()]));
+            query.select(from.get("id")).where(predicates.toArray(new Predicate[predicates.size()]));
             return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
             Logger.error(he);
