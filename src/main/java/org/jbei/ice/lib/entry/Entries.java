@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.entry;
 
 import com.opencsv.CSVReader;
-import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.ParsedEntryId;
@@ -17,7 +16,6 @@ import org.jbei.ice.lib.search.SearchController;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
-import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Folder;
@@ -37,9 +35,9 @@ import java.util.List;
 public class Entries extends HasEntry {
 
     private final EntryDAO dao;
-    private final PermissionDAO permissionDAO;
     private final AccountDAO accountDAO;
     private final String userId;
+    private final EntryAuthorization authorization;
 
     /**
      * @param userId unique identifier for user creating permissions. Must have write privileges on the entry
@@ -47,27 +45,26 @@ public class Entries extends HasEntry {
      */
     public Entries(String userId) {
         this.dao = DAOFactory.getEntryDAO();
-        this.permissionDAO = DAOFactory.getPermissionDAO();
         this.accountDAO = DAOFactory.getAccountDAO();
+        this.authorization = new EntryAuthorization();
         this.userId = userId;
     }
 
-    public boolean updateVisibility(List<Long> entryIds, Visibility visibility) {
-        Account account = accountDAO.getByEmail(userId);
-        List<Group> accountGroups = new GroupController().getAllGroups(account);
-        if (!new AccountController().isAdministrator(userId) && !permissionDAO.canWrite(account, accountGroups, entryIds))
-            return false;
-
+    public List<Long> updateVisibility(List<Long> entryIds, Visibility visibility) {
+        List<Long> updated = new ArrayList<>();
         for (long entryId : entryIds) {
             Entry entry = dao.get(entryId);
             if (entry.getVisibility() == visibility.getValue())
                 continue;
 
+            if (!authorization.canWrite(userId, entry))
+                continue;
+
             entry.setVisibility(visibility.getValue());
             dao.update(entry);
+            updated.add(entryId);
         }
-
-        return true;
+        return updated;
     }
 
     public List<Long> getEntriesFromSelectionContext(EntrySelection context) {
