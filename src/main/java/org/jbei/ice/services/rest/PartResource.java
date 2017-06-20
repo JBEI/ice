@@ -745,8 +745,8 @@ public class PartResource extends RestResource {
         List<Long> arrayList = new ArrayList<>();
         for (Number id : entryIds)
             arrayList.add(id.longValue());
-        boolean success = entries.updateVisibility(arrayList, visibility);
-        return super.respond(success);
+        List<Long> updated = entries.updateVisibility(arrayList, visibility); // todo check return
+        return Response.ok(updated).build();
     }
 
     @GET

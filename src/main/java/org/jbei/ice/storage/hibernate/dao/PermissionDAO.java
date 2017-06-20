@@ -323,62 +323,6 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
-    /**
-     * Determines if the specified account has write privileges on the entries passed on the parameter
-     *
-     * @param account user account
-     * @param groups  groups that the account belongs to
-     * @param entries list of entry Ids to check
-     * @return true if the user has write privileges on <b>all</b> the entries specified in the parameter
-     */
-    public boolean canWrite(Account account, List<Group> groups, List<Long> entries) {
-        try {
-            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
-            Root<Permission> from = query.from(Permission.class);
-            Join<Permission, Entry> entry = from.join("entry");
-
-            query.select(from.get("group"));
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(entry.get("id").in(entries));
-            predicates.add(getBuilder().equal(entry.get("ownerEmail"), account.getEmail()));
-
-            if (groups.isEmpty()) {
-                predicates.add(getBuilder().equal(from.get("account"), account));
-            } else {
-                predicates.add(getBuilder().or(
-                        getBuilder().equal(from.get("account"), account),
-                        from.get("group").in(groups)));
-            }
-            predicates.add(getBuilder().equal(from.get("canWrite"), true));
-
-            query.select(entry.get("id")).where(predicates.toArray(new Predicate[predicates.size()]));
-            return currentSession().createQuery(query).uniqueResult() == entries.size();
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
-
-//        Criteria criteria = currentSession().createCriteria(Permission.class);
-//        criteria.add(Restrictions.in("entry.id", entries));
-//        criteria.add(Restrictions.or(Restrictions.eq("entry.ownerEmail", account.getEmail())));
-
-//        Disjunction disjunction = Restrictions.disjunction();
-//
-//        if (!groups.isEmpty()) {
-//            disjunction.add(Restrictions.in("group", groups));
-//        }
-//
-//        disjunction.add(Restrictions.eq("account", account));
-//        criteria.createAlias("entry", "entry", JoinType.LEFT_OUTER_JOIN);
-
-//        LogicalExpression logicalExpression = Restrictions.and(disjunction, Restrictions.eq("canWrite", true));
-//
-//        criteria.add(logicalExpression);
-//        criteria.setProjection(Projections.countDistinct("entry.id"));
-//        Number number = (Number) criteria.uniqueResult();
-//        return number.intValue() == entries.size();
-    }
-
     @Override
     public Permission get(long id) {
         return super.get(Permission.class, id);

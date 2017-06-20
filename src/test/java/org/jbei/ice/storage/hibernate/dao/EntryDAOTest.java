@@ -13,7 +13,9 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author Hector Plahar
@@ -41,7 +43,6 @@ public class EntryDAOTest {
         String summary = entryDAO.getEntrySummary(id);
         Assert.assertEquals("summary for test", summary);
     }
-
 
 
     @Test
@@ -94,5 +95,25 @@ public class EntryDAOTest {
         Assert.assertTrue(entries == null || entries.isEmpty());
         entries = entryDAO.getByName(uniqueName);
         Assert.assertNotNull(entries);
+    }
+
+    @Test
+    public void testGetOwnerEntryIds() throws Exception {
+        Account account = AccountCreator.createTestAccount("EntryDAOTest.testGetOwnerEntryIds", false);
+        Random random = new Random();
+        int entryCount = random.nextInt(30);
+        List<Long> created = new ArrayList<>(entryCount);
+        for (int i = 0; i < entryCount; i += 1) {
+            long id = TestEntryCreator.createTestPart(account.getEmail());
+            Entry entry = entryDAO.get(id);
+            created.add(id);
+            Assert.assertNotNull(entry);
+            Assert.assertEquals(entry.getOwnerEmail(), account.getEmail());
+        }
+
+        List<Long> ids = entryDAO.getOwnerEntryIds(account.getEmail(), null);
+        Assert.assertEquals(ids.size(), entryCount);
+        Assert.assertTrue(ids.removeAll(created));
+        Assert.assertTrue(ids.isEmpty());
     }
 }

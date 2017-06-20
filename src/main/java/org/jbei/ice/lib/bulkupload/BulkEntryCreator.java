@@ -573,7 +573,12 @@ public class BulkEntryCreator {
         try {
             if (data.getAttachments() != null && !data.getAttachments().isEmpty()) {
                 String attachmentName = data.getAttachments().get(0).getFilename();
+                if (StringUtils.isEmpty(attachmentName))
+                    return;
+
                 InputStream attachmentStream = files.get(attachmentName);
+                if (attachmentStream == null)
+                    return;
 
                 // clear
                 List<Attachment> attachments = DAOFactory.getAttachmentDAO().getByEntry(entry);
