@@ -1,9 +1,7 @@
 package org.jbei.ice.lib.entry;
 
-import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.executor.Task;
-import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
@@ -45,15 +43,6 @@ public class EntryPermissionTask extends Task {
     @Override
     public void execute() {
 
-        // check if user has write privileges on entries
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        List<Group> accountGroups = new GroupController().getAllGroups(account);
-
-        boolean checkIndividual = false;
-        if (account.getType() != AccountType.ADMIN && !permissionDAO.canWrite(account, accountGroups, entries)) {
-            checkIndividual = true;
-        }
-
         EntryDAO entryDAO = DAOFactory.getEntryDAO();
         EntryAuthorization entryAuthorization = new EntryAuthorization();
 
@@ -63,7 +52,7 @@ public class EntryPermissionTask extends Task {
                 continue;
 
             // check permission on individual entries
-            if (checkIndividual && !entryAuthorization.canWrite(userId, entry)) {
+            if (!entryAuthorization.canWrite(userId, entry)) {
                 continue;
             }
 
