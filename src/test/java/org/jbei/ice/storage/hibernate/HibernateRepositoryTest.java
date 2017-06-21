@@ -18,6 +18,6 @@ public class HibernateRepositoryTest {
 
     @After
     public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
+        HibernateUtil.rollbackTransaction();
     }
 }

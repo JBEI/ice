@@ -3,13 +3,11 @@ package org.jbei.ice.storage.hibernate.dao;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.shared.BioSafetyOption;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.SelectionMarker;
 import org.jbei.ice.storage.model.Strain;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -19,21 +17,9 @@ import java.util.Set;
 /**
  * @author Hector Plahar
  */
-public class SelectionMarkerDAOTest {
+public class SelectionMarkerDAOTest extends HibernateRepositoryTest {
 
-    private SelectionMarkerDAO dao;
-
-    @Before
-    public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
-        dao = new SelectionMarkerDAO();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
-    }
+    private SelectionMarkerDAO dao = new SelectionMarkerDAO();
 
     @Test
     public void testGetMatchingSelectionMarkers() throws Exception {

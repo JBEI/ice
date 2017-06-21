@@ -35,10 +35,6 @@ public class Group implements DataModel {
     @ManyToOne
     private Account owner;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "parent")
-    private Group parent;
-
     @Column(name = "creation_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date creationTime;
@@ -49,9 +45,6 @@ public class Group implements DataModel {
 
     @Column(name = "autojoin")
     private Boolean autoJoin;
-
-    @OneToMany(mappedBy = "parent", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-    private Set<Group> children = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     private GroupType type;
@@ -90,14 +83,6 @@ public class Group implements DataModel {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Group getParent() {
-        return parent;
-    }
-
-    public void setParent(Group parent) {
-        this.parent = parent;
     }
 
     public GroupType getType() {
@@ -155,10 +140,6 @@ public class Group implements DataModel {
         if (creationTime != null)
             user.setCreationTime(creationTime.getTime());
 
-        Group parent = getParent();
-        if (parent != null) {
-            user.setParentId(parent.getId());
-        }
         user.setType(getType());
         if (getOwner() != null)
             user.setOwnerEmail(getOwner().getEmail());

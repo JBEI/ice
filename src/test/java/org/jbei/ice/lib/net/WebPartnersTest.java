@@ -75,7 +75,7 @@ public class WebPartnersTest {
         // create registryPartner for add
         RegistryPartner partner = new RegistryPartner();
         partner.setUrl("registry-test20.jbei.org");
-        RegistryPartner added = partners.addNewPartner(adminUser, partner);
+        RegistryPartner added = partners.addNewPartner(adminUser, partner, null);
         Assert.assertNotNull(added);
         Assert.assertEquals(partner.getUrl(), "registry-test20.jbei.org");
         Assert.assertEquals(added.getStatus(), RemotePartnerStatus.APPROVED);
@@ -83,7 +83,7 @@ public class WebPartnersTest {
         // try to add the same partner again: list of partners should remain the same
         // (at two since both remote and local are implemented here)
         long size = partners.getPartners().size();
-        partners.addNewPartner(adminUser, partner);
+        partners.addNewPartner(adminUser, partner, null);
         Assert.assertEquals(size, partners.getPartners().size());
     }
 
@@ -96,7 +96,7 @@ public class WebPartnersTest {
         RegistryPartner partner = new RegistryPartner();
         partner.setUrl("registry-test20.jbei.org");
         WebPartners webPartners = createThisPartnerObject();
-        RegistryPartner added = webPartners.addNewPartner(adminUser, partner);
+        RegistryPartner added = webPartners.addNewPartner(adminUser, partner, null);
         Assert.assertNotNull(added);
         Assert.assertEquals(added.getStatus(), RemotePartnerStatus.APPROVED);
         String apiKey = partner.getApiKey();

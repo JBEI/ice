@@ -6,11 +6,9 @@ import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.*;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -19,21 +17,9 @@ import java.util.List;
 /**
  * @author Hector Plahar
  */
-public class SequenceDAOTest {
+public class SequenceDAOTest extends HibernateRepositoryTest {
 
-    private SequenceDAO sequenceDAO;
-
-    @Before
-    public void setUp() throws Exception {
-        sequenceDAO = new SequenceDAO();
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
-    }
+    private SequenceDAO sequenceDAO = new SequenceDAO();
 
     @Test
     public void testSaveSequence() throws Exception {
