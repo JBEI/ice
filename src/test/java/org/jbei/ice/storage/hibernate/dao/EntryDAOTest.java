@@ -5,12 +5,10 @@ import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.entry.EntryCreator;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -20,21 +18,9 @@ import java.util.Random;
 /**
  * @author Hector Plahar
  */
-public class EntryDAOTest {
+public class EntryDAOTest extends HibernateRepositoryTest {
 
-    private EntryDAO entryDAO;
-
-    @Before
-    public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
-        entryDAO = new EntryDAO();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
-    }
+    private EntryDAO entryDAO = new EntryDAO();
 
     @Test
     public void testGetEntrySummary() throws Exception {
