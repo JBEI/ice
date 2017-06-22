@@ -7,8 +7,6 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.executor.Task;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.model.RemotePartner;
 
 import java.util.List;
 
@@ -41,15 +39,13 @@ public class WebOfRegistriesTask extends Task {
 
         final String NODE_MASTER = Utils.getConfigValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER);
         if (NODE_MASTER.equalsIgnoreCase(this.myUrl) || StringUtils.isEmpty(NODE_MASTER)) {
-            Logger.warn("Aborting contact of node master.");
+            Logger.warn("Aborting contact of node master since this instance has been set as master");
             return;
         }
 
         if (!this.enable) {
             // delete from the node master
-            RemotePartner masterPartner = DAOFactory.getRemotePartnerDAO().getByUrl(NODE_MASTER);
-            if (masterPartner != null)
-                this.remoteContact.deleteInstanceFromMaster(NODE_MASTER, masterPartner.getApiKey(), this.myUrl);
+            this.remoteContact.deleteInstanceFromMaster(this.myUrl);
             return;
         }
 
@@ -58,7 +54,7 @@ public class WebOfRegistriesTask extends Task {
         RegistryPartner masterPartner = new RegistryPartner();
         masterPartner.setUrl(NODE_MASTER);
 
-        masterPartner = webPartners.addNewPartner(this.userId, masterPartner);
+        masterPartner = webPartners.addNewPartner(this.userId, masterPartner, this.myUrl);
         if (masterPartner == null) {
             Logger.error("Could not connect to master node");
             return;
@@ -79,7 +75,7 @@ public class WebOfRegistriesTask extends Task {
                 continue;
 
             // perform exchange with partners
-            webPartners.addNewPartner(userId, registryPartner);
+            webPartners.addNewPartner(userId, registryPartner, myUrl);
         }
     }
 }

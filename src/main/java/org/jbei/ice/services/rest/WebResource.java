@@ -123,14 +123,6 @@ public class WebResource extends RestResource {
         return super.respond(Response.Status.OK, result);
     }
 
-    @GET
-    @Path("/partner/{id}")
-    public Response getWebPartner(@PathParam("id") final long partnerId) {
-        final String userId = getUserId();
-        final RegistryPartner partner = controller.getWebPartner(userId, partnerId);
-        return super.respond(Response.Status.OK, partner);
-    }
-
     @DELETE
     @Path("/partner/remote")
     public Response remoteWebPartnerRemoveRequest(
