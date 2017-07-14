@@ -101,7 +101,7 @@ public class GroupDAOTest extends HibernateRepositoryTest {
     public void testGetMemberGroupUUIDs() throws Exception {
         Account account = AccountCreator.createTestAccount("GroupDAOTest.testGetMemberGroupUUIDs", false);
         Random random = new Random();
-        int count = random.nextInt(5);
+        int count = random.nextInt(5) + 1;
         List<String> uuids = new ArrayList<>(count);
         for (int i = 0; i < count; i += 1) {
             Group group = createGroup(UUID.randomUUID().toString(), null);
