@@ -1,0 +1,83 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-fw fa-arrow-up"></i> &nbsp;Import Plate Samples
+    </span>
+</div>
+
+<div class="modal-body">
+
+    <div class="font-90em" ng-if="!processingFile">
+        <div class="alert alert-info">Upload your CSV file below. Expected format is<br><br>
+
+            <table class="table table-bordered bg_f1 font-85em">
+                <tr>
+                    <td>Entry ID</td>
+                    <td>Location</td>
+                    <td>00001</td>
+                    <td>00002*</td>
+                    <td>00003*</td>
+                </tr>
+                <tr>
+                    <td>JBx_001</td>
+                    <td>A01</td>
+                    <td>abc</td>
+                    <td>ghi</td>
+                    <td>mno</td>
+                </tr>
+                <tr>
+                    <td>JBx_002</td>
+                    <td>A02</td>
+                    <td>def</td>
+                    <td>jkl</td>
+                    <td>opq</td>
+                </tr>
+            </table>
+            where <code>00001</code> <code>00002</code> and <code>00003</code> are plate names for the main, backup 1
+            and backup 2 plates respectively, and should be changed for the actual upload. Columns with * are optional
+        </div>
+
+        <input nv-file-select uploader="sampleImportUploader" type="file"/>
+    </div>
+
+    <!--<div> &lt;!&ndash; ng-if="processingFile && progress < 100"> &ndash;&gt;-->
+    <!--<img src="img/loader-mini.gif" ng-if="progress!= '100'"> Uploading File....-->
+    <!--<uib-progressbar value="progress">{{progress}}%</uib-progressbar>-->
+    <!--</div>-->
+
+    <div ng-if="processingFile">
+        <img src="img/loader-mini.gif"> Processing File...
+        <uib-progressbar class="progress-striped active" value="100" type="warning"
+                         style="height: 20px"></uib-progressbar>
+    </div>
+
+    <div class="pad-top-5" ng-if="!processingFile && result.success">
+        <div ng-if="result.data.length">
+            <br>
+            <span class="red">
+                <i class="fa fa-fw fa-exclamation-triangle"></i> <b class="text-uppercase">Samples could not be created
+                for the following {{result.data.length.length}} entries</b>
+            </span>
+
+            <br>
+
+            <div style="height: 300px; overflow-y: scroll; border-top: 1px solid #DDDDDD">
+                <div ng-repeat="datum in result.data track by $index" style="margin-left: 28px">
+                    <a ng-href="/entry/{{datum}}" target="_blank">{{datum}}</a>
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="!result.data.length">
+            <span class="green">
+                <i class="fa fa-fw fa-check"></i> <b class="text-uppercase">Samples successfully created</b>
+            </span>
+        </div>
+    </div>
+
+
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-sm btn-primary" ng-click="$dismiss('cancel')">Close</button>
+</div>

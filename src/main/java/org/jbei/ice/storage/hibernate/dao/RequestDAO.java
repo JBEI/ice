@@ -1,6 +1,5 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
@@ -39,7 +38,7 @@ public class RequestDAO extends HibernateRepository<Request> {
                     getBuilder().equal(from.get("account"), account)
             ));
             return currentSession().createQuery(query).list();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -64,7 +63,7 @@ public class RequestDAO extends HibernateRepository<Request> {
                 Logger.error("Multiple sample requests found for entry " + entry.getId());
             }
             return (Request) inCart.toArray()[0];
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -79,13 +78,13 @@ public class RequestDAO extends HibernateRepository<Request> {
             if (account != null)
                 query.where(getBuilder().equal(from.get("account"), account));
             return currentSession().createQuery(query).uniqueResult().intValue();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
     }
 
-    public int getCount(SampleRequestStatus status, String filter) {
+    public int getCount(String filter, List<SampleRequestStatus> status) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Request> from = query.from(Request.class);
@@ -94,13 +93,13 @@ public class RequestDAO extends HibernateRepository<Request> {
             if (!predicates.isEmpty())
                 query.where(predicates.toArray(new Predicate[predicates.size()]));
             return currentSession().createQuery(query).uniqueResult().intValue();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
     }
 
-    public List<Request> get(int start, int limit, String sort, boolean asc, SampleRequestStatus status, String filter) {
+    public List<Request> get(int start, int limit, String sort, boolean asc, String filter, List<SampleRequestStatus> status) {
         try {
             CriteriaQuery<Request> query = getBuilder().createQuery(Request.class).distinct(true);
             Root<Request> from = query.from(Request.class);
@@ -110,16 +109,16 @@ public class RequestDAO extends HibernateRepository<Request> {
 
             query.orderBy(asc ? getBuilder().asc(from.get(sort)) : getBuilder().desc(from.get(sort)));
             return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
     }
 
-    protected List<Predicate> createPredicates(Root<Request> root, String filter, SampleRequestStatus status) {
+    protected List<Predicate> createPredicates(Root<Request> root, String filter, List<SampleRequestStatus> status) {
         List<Predicate> predicates = new ArrayList<>();
-        if (status != null)
-            predicates.add(getBuilder().equal(root.get("status"), status));
+        if (status != null && !status.isEmpty())
+            predicates.add(root.get("status").in(status));
 
         if (filter != null) {
             Join<SampleRequest, Account> account = root.join("account");
@@ -147,7 +146,7 @@ public class RequestDAO extends HibernateRepository<Request> {
 
             query.orderBy(asc ? getBuilder().asc(from.get(sort)) : getBuilder().desc(from.get(sort)));
             return currentSession().createQuery(query).setFirstResult(start).setMaxResults(limit).list();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
