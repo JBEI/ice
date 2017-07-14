@@ -1,0 +1,24 @@
+<div>
+    <i class="fa fa-fw" ng-click="sampleFilterChecked('FULFILLED')" ng-class="{
+    'fa-check-square-o': params.status.indexOf('FULFILLED') != -1,
+    'fa-square-o':params.status.indexOf('FULFILLED') == -1}">
+    </i> <span class="label ice-label-success">Fulfilled</span>
+</div>
+<div>
+    <i class="fa fa-fw" ng-click="sampleFilterChecked('PENDING')" ng-class="{
+    'fa-check-square-o': params.status.indexOf('PENDING') != -1,
+    'fa-square-o':params.status.indexOf('PENDING') == -1}">
+    </i> <span class="label label-default">Pending</span>
+</div>
+<div>
+    <i class="fa fa-fw" ng-click="sampleFilterChecked('REJECTED')" ng-class="{
+    'fa-check-square-o': params.status.indexOf('REJECTED') != -1,
+    'fa-square-o':params.status.indexOf('REJECTED') == -1}">
+    </i> <span class="label ice-label-danger">Rejected</span>
+</div>
+<div>
+    <i class="fa fa-fw" ng-click="sampleFilterChecked('IN_CART')" ng-class="{
+    'fa-check-square-o': params.status.indexOf('IN_CART') != -1,
+    'fa-square-o':params.status.indexOf('IN_CART') == -1}">
+    </i> <span class="label ice-label-info">In Cart</span>
+</div>

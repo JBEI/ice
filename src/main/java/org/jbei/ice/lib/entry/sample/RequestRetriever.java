@@ -90,16 +90,16 @@ public class RequestRetriever {
     }
 
     public UserSamples getRequests(String userId, int start, int limit, String sort, boolean asc,
-                                   SampleRequestStatus status, String filter) {
+                                   List<SampleRequestStatus> status, String filter) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         if (account.getType() != AccountType.ADMIN)
             return getUserSamples(userId, null, start, limit, sort, asc);
 
-        int count = dao.getCount(status, filter);
+        int count = dao.getCount(filter, status);
         UserSamples samples = new UserSamples();
         samples.setCount(count);
 
-        List<Request> results = dao.get(start, limit, sort, asc, status, filter);
+        List<Request> results = dao.get(start, limit, sort, asc, filter, status);
         SampleService sampleService = new SampleService();
 
         for (Request request : results) {

@@ -34,7 +34,7 @@ public class HasEntry {
      * @param id unique entry identifier for entry. Can be the name if names are unique in this ICE instance
      * @return found entry or null
      */
-    protected Entry getEntry(String id) {
+    public Entry getEntry(String id) {
         Entry entry = null;
 
         // check if numeric
