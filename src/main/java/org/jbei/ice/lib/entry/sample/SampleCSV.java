@@ -74,7 +74,6 @@ public class SampleCSV implements Closeable {
         PartSample partSample = new PartSample();
 
         StorageLocation tube = new StorageLocation();
-        tube.setName("Tube");
         tube.setType(SampleType.TUBE);
         tube.setDisplay(barcode);
 
@@ -85,7 +84,7 @@ public class SampleCSV implements Closeable {
 
         StorageLocation plate = new StorageLocation();
         plate.setType(SampleType.PLATE96);
-        plate.setName(plateName);
+        plate.setDisplay(plateName);
         plate.setChild(well);
 
         partSample.setLocation(plate);
