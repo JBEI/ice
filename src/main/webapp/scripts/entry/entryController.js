@@ -300,8 +300,7 @@ angular.module('ice.entry.controller', [])
             $window.open("rest/file/trace/" + trace.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
         };
     })
-    .controller('TraceSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId,
-                                                                $cookieStore) {
+    .controller('TraceSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId, Authentication) {
         $scope.cancelAddSangerTrace = function () {
             $uibModalInstance.dismiss('cancel');
         };
@@ -312,7 +311,7 @@ angular.module('ice.entry.controller', [])
             method: 'POST',
             removeAfterUpload: true,
             headers: {
-                "X-ICE-Authentication-SessionId": $cookieStore.get("sessionId")
+                "X-ICE-Authentication-SessionId": Authentication.getSessionId()
             },
             autoUpload: true,
             queueLimit: 1, // can only upload 1 file

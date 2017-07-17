@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.jbei.ice.lib.access.AccessTokens;
 import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.access.TokenVerification;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -31,15 +30,12 @@ public class WebPartners {
     private final TokenHash tokenHash;
     private RemoteContact remoteContact;
     private final AccountController accountController;
-    private final TokenVerification tokenVerification;
-
 
     public WebPartners() {
         this.dao = DAOFactory.getRemotePartnerDAO();
         this.tokenHash = new TokenHash();
         this.remoteContact = new RemoteContact();
         this.accountController = new AccountController();
-        this.tokenVerification = new TokenVerification();
     }
 
     public WebPartners(RemoteContact remoteContact) {
@@ -47,32 +43,16 @@ public class WebPartners {
         this.remoteContact = remoteContact;
     }
 
-    public RegistryPartner get(long partnerId) {
-        return dao.get(partnerId).toDataTransferObject();
-    }
-
-    /**
-     * Request for the list of partners that this instance has, from other partners.
-     * If this instance is not in web of registries, an empty list is returned
-     *
-     * @param apiKey authentication token that this instance previously provided to instance at <code>url</code>
-     * @param url    location of ICE instance (partner) making request
-     * @return list of registry partners that this instance has, an empty list if this ICE instance is not in web
-     * of registries
-     * @throws IllegalArgumentException if the partner with specified url could not be located
-     * @throws PermissionException      if the api key could not be verified
-     */
-    public List<RegistryPartner> getPartners(String apiKey, String url) {
-        if (!isInWebOfRegistries())
-            return new ArrayList<>();
-
-        RemotePartner partner = dao.getByUrl(url);
-        if (partner == null)
-            throw new IllegalArgumentException("Could not retrieve partner with url \"" + url + "\"");
-
-        if (tokenVerification.verifyPartnerToken(url, apiKey) == null)
-            throw new PermissionException("Could not verify api key for partner \"" + url + "\"");
-        return getPartners();
+    public RegistryPartner get(String partnerId) {
+        RemotePartner partner;
+        try {
+            partner = dao.get(Long.decode(partnerId));
+        } catch (NumberFormatException nfe) {
+            partner = dao.getByUrl(partnerId);
+        }
+        if (partner != null)
+            return partner.toDataTransferObject();
+        return null;
     }
 
     /**
@@ -357,13 +337,13 @@ public class WebPartners {
      * @param partner registry partner object that contains unique uniform resource identifier & name for the registry
      * @return add partner ofr
      */
-    public RegistryPartner addNewPartner(String userId, RegistryPartner partner) {
+    public RegistryPartner addNewPartner(String userId, RegistryPartner partner, String thisUrl) {
         if (!isInWebOfRegistries())
             return null;
 
         // check for admin privileges before granting request
         if (!accountController.isAdministrator(userId))
-            throw new PermissionException("Non admin attempting to add remote partner");
+            throw new PermissionException("Non admin attempting to add remote partner " + partner.getUrl());
 
         if (StringUtils.isEmpty(partner.getUrl()))
             throw new IllegalArgumentException("Cannot add partner without valid url");
@@ -380,6 +360,16 @@ public class WebPartners {
         // create information about this instance to send to potential partner
         // including a random token for use when contacting this instance
         RegistryPartner thisPartner = getThisInstanceWithNewApiKey();
+
+        // validate this url
+        if (!isValidUrl(thisPartner.getUrl())) {
+            if (isValidUrl(thisUrl))
+                thisPartner.setUrl(thisUrl);
+            else {
+                Logger.error("Could not obtain a valid url for this instance.");
+                thisPartner = null;
+            }
+        }
 
         if (thisPartner == null) {
             // will not contact
@@ -413,9 +403,6 @@ public class WebPartners {
      */
     protected RegistryPartner getThisInstanceWithNewApiKey() {
         String myURL = getThisUri();
-        if (!isValidUrl(myURL))
-            return null;
-
         RegistryPartner thisPartner = new RegistryPartner();
         String myName = Utils.getConfigValue(ConfigurationKey.PROJECT_NAME);
         thisPartner.setName(myName);

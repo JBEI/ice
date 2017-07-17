@@ -370,8 +370,8 @@ angular.module('ice.collection.controller', [])
             }
         };
     })
-    .controller('FolderPartsUploadController', function ($scope, $cookieStore, FileUploader, Util, folder, $uibModalInstance) {
-        var sid = $cookieStore.get("sessionId");
+    .controller('FolderPartsUploadController', function ($scope, Authentication, FileUploader, Util, folder,
+                                                         $uibModalInstance) {
         $scope.serverResult = undefined;
         $scope.processingFile = undefined;
         $scope.progress = 0;
@@ -382,7 +382,7 @@ angular.module('ice.collection.controller', [])
             url: "rest/file/entries",
             method: 'POST',
             removeAfterUpload: true,
-            headers: {"X-ICE-Authentication-SessionId": sid},
+            headers: {"X-ICE-Authentication-SessionId": Authentication.getSessionId()},
             autoUpload: true,
             queueLimit: 1 // can only upload 1 file
         });
@@ -410,11 +410,6 @@ angular.module('ice.collection.controller', [])
 
         uploader.onCompleteAll = function () {
             $scope.processingFile = undefined;
-        };
-
-        uploader.onBeforeUploadItem = function (item) {
-            //item.formData.push({entryType: $scope.entry.type});
-            //item.formData.push({entryRecordId: $scope.entry.recordId});
         };
 
         uploader.onErrorItem = function (item, response, status, headers) {

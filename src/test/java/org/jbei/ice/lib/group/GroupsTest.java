@@ -29,21 +29,6 @@ public class GroupsTest {
         HibernateUtil.commitTransaction();
     }
 
-//    @Test
-//    public void testGet() throws Exception {
-//
-//    }
-//
-//    @Test
-//    public void testGet1() throws Exception {
-//
-//    }
-//
-//    @Test
-//    public void testGetMatchingGroups() throws Exception {
-//
-//    }
-
     @Test
     public void testAddGroup() throws Exception {
         Account account = AccountCreator.createTestAccount("GroupsTest.testAddGroup", false);
@@ -80,11 +65,6 @@ public class GroupsTest {
         Assert.assertEquals(1, result.getRemoteMembers().size());
     }
 
-    //    @Test
-//    public void testGetGroupMembers() throws Exception {
-//
-//    }
-//
     @Test
     public void testUpdate() throws Exception {
         Account account = AccountCreator.createTestAccount("GroupsTest.testUpdate", false);
@@ -151,9 +131,4 @@ public class GroupsTest {
         Assert.assertEquals(1, group.getRemoteMembers().size());
         Assert.assertEquals(remoteUser3.getUser().getEmail(), group.getRemoteMembers().get(0).getUser().getEmail());
     }
-//
-//    @Test
-//    public void testSetGroupMembers() throws Exception {
-//
-//    }
 }

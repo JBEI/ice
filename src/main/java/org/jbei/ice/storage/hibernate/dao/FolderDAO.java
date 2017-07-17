@@ -1,6 +1,5 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.common.PageParameters;
@@ -22,7 +21,6 @@ import java.util.*;
  *
  * @author Hector Plahar
  */
-@SuppressWarnings("unchecked")
 public class FolderDAO extends HibernateRepository<Folder> {
 
     /**
@@ -58,7 +56,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             folder.setModificationTime(new Date());
             currentSession().update(folder);
             return folder;
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -98,7 +96,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             query.select(getBuilder().countDistinct(entry.get("id")));
             query.where(predicates.toArray(new Predicate[predicates.size()]));
             return currentSession().createQuery(query).uniqueResult();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -128,7 +126,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             }
             query.select(entry.get("id")).where(predicates.toArray(new Predicate[predicates.size()]));
             return currentSession().createQuery(query).list();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -141,7 +139,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
      * @param pageParameters paging params
      * @param visibleOnly    whether to only include entries with "OK" visibility
      * @return list of found entries
-     * @throws DAOException on HibernateException retrieving
+     * @throws DAOException on Exception retrieving
      */
     public List<Entry> retrieveFolderContents(long folderId, PageParameters pageParameters, boolean visibleOnly) {
         try {
@@ -194,7 +192,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
                     getBuilder().desc(entry.get(sortString)));
             return currentSession().createQuery(query).setFirstResult(pageParameters.getOffset())
                     .setMaxResults(pageParameters.getLimit()).list();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -208,7 +206,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             folder.setModificationTime(new Date());
             session.saveOrUpdate(folder);
             return folder;
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             Logger.error(e);
             throw new DAOException(e);
         }
@@ -231,7 +229,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             );
             query.orderBy(getBuilder().desc(from.get("creationTime")));
             return currentSession().createQuery(query).list();
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve folders!", e);
         }
@@ -243,7 +241,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             Root<Folder> from = query.from(Folder.class);
             query.where(getBuilder().equal(from.get("type"), type));
             return currentSession().createQuery(query).list();
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             Logger.error(e);
             throw new DAOException(e);
         }
@@ -275,7 +273,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
 
             query.select(folder).where(predicate);
             return currentSession().createQuery(query).list();
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             Logger.error(e);
             throw new DAOException(e);
         }
@@ -287,7 +285,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             Root<Folder> from = query.from(Folder.class);
             query.where(getBuilder().like(getBuilder().lower(from.get("name")), "%" + token.toLowerCase() + "%"));
             return currentSession().createQuery(query).setMaxResults(limit).list();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -301,10 +299,15 @@ public class FolderDAO extends HibernateRepository<Folder> {
      * @return list of ids of entries in a folder
      */
     public List<Long> getEntryIds(Folder folder) {
-        CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
-        Root<Folder> from = query.from(Folder.class);
-        Join<Folder, Entry> entry = from.join("contents");
-        query.select(entry.get("id")).where(getBuilder().equal(from, folder));
-        return currentSession().createQuery(query).list();
+        try {
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<Folder> from = query.from(Folder.class);
+            Join<Folder, Entry> entry = from.join("contents");
+            query.select(entry.get("id")).where(getBuilder().equal(from, folder));
+            return currentSession().createQuery(query).list();
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
     }
 }
