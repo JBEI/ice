@@ -42,6 +42,10 @@ public class EntryUtil {
                 value = getSeedFieldValues((ArabidopsisSeed) entry, field);
                 break;
 
+            case PROTEIN:
+                value = getProteinFieldValues((Protein) entry, field);
+                break;
+
             default:
                 value = null;
         }
@@ -189,6 +193,16 @@ public class EntryUtil {
         }
     }
 
+    protected static String getProteinFieldValues(Protein protein, EntryField field) {
+        switch (field) {
+            case DUMMY:
+                return protein.getDummy();
+
+            default:
+                return null;
+        }
+    }
+
     public static String getPartNumberPrefix() {
         return Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX) +
                 Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DELIMITER);
@@ -235,8 +249,8 @@ public class EntryUtil {
         if (StringUtils.isEmpty(partData.getShortDescription()))
             invalidFields.add(EntryField.SUMMARY);
 
-        if ((type != EntryType.PART) && (partData.getSelectionMarkers() == null || partData.getSelectionMarkers().isEmpty()))
-            invalidFields.add(EntryField.SELECTION_MARKERS);
+        // if ((type != EntryType.PART && type != EntryType.PROTEIN) && (partData.getSelectionMarkers() == null || partData.getSelectionMarkers().isEmpty()))
+        //     invalidFields.add(EntryField.SELECTION_MARKERS);
 
         return invalidFields;
     }
@@ -340,6 +354,20 @@ public class EntryUtil {
         }
 
         return seedData;
+    }
+
+    private static ProteinData setProteinDataFromField(ProteinData proteinData, String value,
+                                                            EntryField field) {
+        if (proteinData == null)
+            proteinData = new ProteinData();
+
+        switch (field) {
+            case DUMMY:
+                proteinData.setDummy(value);
+                break;
+        }
+
+        return proteinData;
     }
 
     /**
@@ -452,6 +480,10 @@ public class EntryUtil {
             case PLANT_TYPE:
             case PARENTS:
                 data.setArabidopsisSeedData(setSeedDataFromField(data.getArabidopsisSeedData(), value, field));
+                break;
+
+            case DUMMY:
+                data.setProteinData(setProteinDataFromField(data.getProteinData(), value, field));
                 break;
 
             case CREATOR:

@@ -546,7 +546,8 @@ angular.module('ice.upload.controller', [])
                     type: $scope.importType.toUpperCase(),
                     strainData: {},
                     plasmidData: {},
-                    arabidopsisSeedData: {}
+                    arabidopsisSeedData: {},
+                    proteinData: {}
                 };
 
                 // check if there is a linked object being updated
@@ -564,7 +565,8 @@ angular.module('ice.upload.controller', [])
                         type: $scope.linkedSelection.toUpperCase(),
                         strainData: {},
                         plasmidData: {},
-                        arabidopsisSeedData: {}
+                        arabidopsisSeedData: {},
+                        proteinData: {}
                     };
 
                     if ($scope.linkedSelection.toUpperCase() == "EXISTING")

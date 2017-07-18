@@ -42,6 +42,10 @@ public class ModelToInfoFactory {
                 part.setArabidopsisSeedData(seedInfo(entry));
                 break;
 
+            case PROTEIN:
+                part.setProteinData(proteinInfo(entry));
+                break;
+
             default:
             case PART:
                 return part;
@@ -114,6 +118,15 @@ public class ModelToInfoFactory {
         data.setOriginOfReplication(plasmid.getOriginOfReplication());
         data.setPromoters(plasmid.getPromoters());
         data.setReplicatesIn(plasmid.getReplicatesIn());
+        return data;
+    }
+
+    private static ProteinData proteinInfo(Entry entry) {
+        ProteinData data = new ProteinData();
+
+        // protein specific
+        Protein protein = (Protein) entry;
+        data.setDummy(protein.getDummy());
         return data;
     }
 
@@ -360,6 +373,14 @@ public class ModelToInfoFactory {
                 plasmidData.setPromoters(plasmid.getPromoters());
                 plasmidData.setReplicatesIn(plasmid.getReplicatesIn());
                 part.setPlasmidData(plasmidData);
+                break;
+
+            case PROTEIN:
+                ProteinData proteinData = new ProteinData();
+
+                Protein protein = (Protein) entry;
+                proteinData.setDummy(protein.getDummy());
+                part.setProteinData(proteinData);
                 break;
         }
 

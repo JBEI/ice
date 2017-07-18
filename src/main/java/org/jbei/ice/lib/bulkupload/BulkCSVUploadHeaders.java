@@ -24,7 +24,6 @@ public class BulkCSVUploadHeaders {
                 addArabidopsisSeedHeaders(list);
                 break;
 
-            default:
             case STRAIN:
                 addStrainHeaders(list);
                 break;
@@ -32,6 +31,12 @@ public class BulkCSVUploadHeaders {
             case PLASMID:
                 addPlasmidHeaders(list);
                 break;
+                
+            case PROTEIN:
+                addProteinHeaders(list);
+                break;
+
+            default:
         }
 
         adddFileHeaders(list);
@@ -88,5 +93,9 @@ public class BulkCSVUploadHeaders {
         list.add(EntryField.PLANT_TYPE);
         list.add(EntryField.SELECTION_MARKERS);
         list.add(EntryField.SENT_TO_ABRC);
+    }
+
+    public static void addProteinHeaders(List<EntryField> list) {
+        list.add(EntryField.DUMMY);
     }
 }

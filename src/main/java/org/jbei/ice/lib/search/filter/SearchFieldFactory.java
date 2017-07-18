@@ -6,6 +6,7 @@ import org.jbei.ice.storage.model.ArabidopsisSeed;
 import org.jbei.ice.storage.model.Part;
 import org.jbei.ice.storage.model.Plasmid;
 import org.jbei.ice.storage.model.Strain;
+import org.jbei.ice.storage.model.Protein;
 
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +23,7 @@ public class SearchFieldFactory {
     private static HashSet<String> strainFields = new HashSet<>();
     private static HashSet<String> plasmidFields = new HashSet<>();
     private static HashSet<String> seedFields = new HashSet<>();
+    private static HashSet<String> proteinFields = new HashSet<>();
 
     static {
         commonFields.add("owner");
@@ -59,6 +61,9 @@ public class SearchFieldFactory {
         seedFields.add("generation");
         seedFields.add("parents");
         seedFields.add("plantType");
+
+        // protein fields
+        proteinFields.add("dummy");
     }
 
     public static String[] getCommonFields() {
@@ -80,6 +85,10 @@ public class SearchFieldFactory {
 
                 case ARABIDOPSIS:
                     fields.addAll(seedFields);
+                    break;
+
+                case PROTEIN:
+                    fields.addAll(proteinFields);
                     break;
             }
         }
@@ -110,6 +119,10 @@ public class SearchFieldFactory {
 
                 case PART:
                     classes[i] = Part.class;
+                    break;
+
+                case PROTEIN:
+                    classes[i] = Protein.class;
                     break;
             }
         }

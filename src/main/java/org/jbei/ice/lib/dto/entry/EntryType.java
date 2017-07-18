@@ -5,7 +5,8 @@ public enum EntryType {
     STRAIN("Strain", "strain"),
     PLASMID("Plasmid", "plasmid"),
     PART("Part", "part"),
-    ARABIDOPSIS("Arabidopsis", "arabidopsis");
+    ARABIDOPSIS("Arabidopsis", "arabidopsis"),
+    PROTEIN("Protein", "protein");
 
     private String name;
     private String display;

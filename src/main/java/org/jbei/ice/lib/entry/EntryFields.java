@@ -55,4 +55,8 @@ public class EntryFields {
         list.add(EntryField.SELECTION_MARKERS);
         list.add(EntryField.SENT_TO_ABRC);
     }
+
+    public static void addProteinHeaders(List<EntryField> list) {
+        list.add(EntryField.DUMMY);
+    }
 }

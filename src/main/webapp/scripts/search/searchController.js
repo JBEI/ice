@@ -6,7 +6,7 @@ angular.module('ice.search.controller', [])
 
         $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
-        var query = {entryTypes: ['STRAIN', 'PLASMID', 'PART', 'ARABIDOPSIS'], queryString: undefined};
+        var query = {entryTypes: ['STRAIN', 'PLASMID', 'PART', 'ARABIDOPSIS', 'PROTEIN'], queryString: undefined};
 
         $scope.$on("RunSearch", function (event, filters) {
             query = filters;

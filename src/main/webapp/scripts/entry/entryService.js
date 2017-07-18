@@ -298,6 +298,11 @@ angular.module('ice.entry.service', [])
             {label: "Host", schema: 'host', inputType: 'short', subSchema: 'strainData'}
         ];
 
+        // fields peculiar to proteins
+        var proteinFields = [
+            {label: "Dummy Field", schema: 'dummy', inputType: 'medium', subSchema: 'proteinData'},
+        ];
+
         var generateLinkOptions = function (type) {
             switch (type.toLowerCase()) {
                 case 'plasmid':
@@ -322,6 +327,12 @@ angular.module('ice.entry.service', [])
                     return [
                         {type: 'part', display: 'Part'},
                         {type: 'arabidopsis', display: 'Arabidopsis Seed'}
+                    ];
+
+                case 'protein':
+                    return [
+                        {type: 'part', display: 'Part'},
+                        {type: 'protein', display: 'Protein'}
                     ];
             }
         };
@@ -383,6 +394,12 @@ angular.module('ice.entry.service', [])
                     if (typeFieldsOnly)
                         return plasmidFields;
                     fields.splice.apply(fields, [7, 0].concat(plasmidFields));
+                    return fields;
+
+                case 'protein':
+                    if (typeFieldsOnly)
+                        return proteinFields;
+                    fields.splice.apply(fields, [7, 0].concat(proteinFields));
                     return fields;
 
                 case 'part':
@@ -528,7 +545,8 @@ angular.module('ice.entry.service', [])
                     {name: "Plasmid", type: "plasmid"},
                     {name: "Strain", type: "strain"},
                     {name: "Part", type: "part"},
-                    {name: "Arabidopsis Seed", type: "arabidopsis"}
+                    {name: "Arabidopsis Seed", type: "arabidopsis"},
+                    {name: "Protein", type: "protein"}
                 ]
             }
         }

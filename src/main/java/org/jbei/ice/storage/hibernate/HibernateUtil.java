@@ -88,6 +88,7 @@ public class HibernateUtil {
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.Strain.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.Part.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.ArabidopsisSeed.class);
+                configuration.addAnnotatedClass(org.jbei.ice.storage.model.Protein.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.Link.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.SelectionMarker.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.Sequence.class);
