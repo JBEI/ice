@@ -110,6 +110,20 @@ public class RemoteTransfer {
 
         for (PartData data : entries) {
             try {
+                if (data.getLinkedParts() != null && !data.getLinkedParts().isEmpty()) {
+                    List<PartData> linkedParts = new ArrayList<>();
+                    for (PartData linkedData : data.getLinkedParts()) {
+                        Entry entry = entryDAO.get(linkedData.getId());
+                        if (entry == null)
+                            continue;
+
+                        linkedData = ModelToInfoFactory.getInfo(entry);
+                        linkedParts.add(linkedData);
+                    }
+                    data.getLinkedParts().clear();
+                    data.getLinkedParts().addAll(linkedParts);
+                }
+
                 PartData object = remoteContact.transferPart(url, data);
                 if (object == null) {
                     exceptionCount += 1;
