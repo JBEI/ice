@@ -53,7 +53,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
 
             query.select(getBuilder().countDistinct(from.get("id")));
             query.where(predicates.toArray(new Predicate[predicates.size()]));
-            return currentSession().createQuery(query).setMaxResults(1).uniqueResult() == 1;
+            return currentSession().createQuery(query).setMaxResults(1).uniqueResult() > 0;
         } catch (Exception e) {
             Logger.error(e);
             throw new DAOException(e);
@@ -78,7 +78,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
 
             query.select(getBuilder().countDistinct(from.get("id")));
             query.where(predicates.toArray(new Predicate[predicates.size()]));
-            return currentSession().createQuery(query).setMaxResults(1).uniqueResult() == 1;
+            return currentSession().createQuery(query).setMaxResults(1).uniqueResult() > 0;
         } catch (Exception e) {
             Logger.error(e);
             throw new DAOException(e);
