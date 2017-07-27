@@ -1,6 +1,5 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
@@ -39,7 +38,7 @@ public class RemoteAccessModelDAO extends HibernateRepository<RemoteAccessModel>
                 return result.get(0);
             }
             return null;
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }

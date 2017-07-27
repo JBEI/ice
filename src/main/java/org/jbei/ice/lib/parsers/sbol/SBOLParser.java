@@ -3,13 +3,13 @@ package org.jbei.ice.lib.parsers.sbol;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.DNASequence;
-import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryLinks;
 import org.jbei.ice.lib.entry.LinkType;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
+import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.storage.DAOFactory;
@@ -19,9 +19,10 @@ import org.jbei.ice.storage.model.Part;
 import org.jbei.ice.storage.model.Sequence;
 import org.sbolstandard.core2.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,23 +33,22 @@ import java.util.Map;
  *
  * @author Hector Plahar
  */
-public class SBOLParser {
+public class SBOLParser extends AbstractParser {
 
-    private final PartData partData;
-    private final String userId;
+    private boolean extractHierarchy;
 
-    public SBOLParser(PartData partData) {
-        this.partData = partData;
-        this.userId = this.partData.getOwnerEmail();
+    public SBOLParser(String userId, String entryId, boolean extractHierarchy) {
+        super(userId, entryId);
+        this.extractHierarchy = extractHierarchy;
     }
 
     // map of component identity to entry id
     private Map<String, Long> identityEntryMap = new HashMap<>();
 
-    public SequenceInfo parse(InputStream inputStream, String fileName) throws InvalidFormatParserException {
+    public SequenceInfo parseToEntry(String textSequence, String fileName) throws InvalidFormatParserException {
         SBOLDocument document;
         try {
-            document = SBOLReader.read(inputStream);
+            document = SBOLReader.read(new ByteArrayInputStream(textSequence.getBytes(StandardCharsets.UTF_8)));
         } catch (SBOLValidationException e) {
             Logger.error(e);
             throw new InvalidFormatParserException("Invalid SBOL file: " + e.getMessage());
@@ -61,8 +61,9 @@ public class SBOLParser {
         }
 
         // parse raw document and return
-        Entry entry = DAOFactory.getEntryDAO().get(partData.getId());
         SequenceInfo sequenceInfo = parseToGenBank(document, fileName, entry, null);
+        if (!this.extractHierarchy)
+            return sequenceInfo;
 
         // document parsed successfully, go through module definitions
         for (ModuleDefinition moduleDefinition : document.getModuleDefinitions()) {
@@ -115,9 +116,7 @@ public class SBOLParser {
             SBOLWriter.write(sbolDocument, out, "GENBANK");
             if (out.size() > 0) {
                 GenBankParser parser = new GenBankParser();
-
-                String genBankString = out.toString();
-                dnaSequence = parser.parse(genBankString);
+                dnaSequence = parser.parse(new String(out.toByteArray()));
                 sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
             }
         } catch (InvalidFormatParserException e) {
@@ -135,7 +134,8 @@ public class SBOLParser {
             sequence.setSequenceUser(rdf);
         sequence.setFormat(SequenceFormat.SBOL2);
         sequence.setEntry(entry);
-        sequence.setFileName(fileName);
+        if (fileName != null)
+            sequence.setFileName(fileName);
         if (!StringUtils.isEmpty(uri))
             sequence.setUri(uri);
 
@@ -144,7 +144,8 @@ public class SBOLParser {
         sequenceInfo.setEntryId(entry.getId());
         sequenceInfo.setSequence(dnaSequence);
         sequenceInfo.setFormat(sequence.getFormat());
-        sequenceInfo.setFilename(fileName);
+        if (fileName != null)
+            sequenceInfo.setFilename(fileName);
         return sequenceInfo;
     }
 
@@ -176,7 +177,7 @@ public class SBOLParser {
         return entry.getId();
     }
 
-    public void createICEModuleDefinitionRecord(SBOLDocument document, ModuleDefinition moduleDefinition) throws SBOLValidationException {
+    protected void createICEModuleDefinitionRecord(SBOLDocument document, ModuleDefinition moduleDefinition) throws SBOLValidationException {
         SBOLDocument rootedDocument = document.createRecursiveCopy(moduleDefinition);
         Logger.debug("Creating ICE record for ModuleDefinition: " + moduleDefinition.getIdentity());
         String identity = moduleDefinition.getIdentity().toString();
@@ -223,7 +224,7 @@ public class SBOLParser {
         }
     }
 
-    public void createICEComponentDefinitionRecord(SBOLDocument document, ComponentDefinition componentDefinition)
+    protected void createICEComponentDefinitionRecord(SBOLDocument document, ComponentDefinition componentDefinition)
             throws SBOLValidationException {
         SBOLDocument rootedDocument = document.createRecursiveCopy(componentDefinition);
         String identity = componentDefinition.getIdentity().toString();

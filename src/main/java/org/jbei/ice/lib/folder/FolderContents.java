@@ -44,11 +44,12 @@ public class FolderContents {
     private PermissionsController permissionsController = new PermissionsController();
     private AccountController accountController = new AccountController();
     private RemoteContact remoteContact = new RemoteContact();
+    private PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
 
     // adds a specified entry to a folder. The entry was transferred earlier so already exists
     public boolean remotelyAddEntrySelection(String remoteUserId, long folderId, String remoteUserToken,
                                              EntrySelection selection, RegistryPartner requestingPartner) {
-        Folder folder = DAOFactory.getFolderDAO().get(folderId);      // folder that the entry is contained in
+        Folder folder = folderDAO.get(folderId);      // folder that the entry is contained in
         if (folder == null)
             return false;
 
@@ -104,6 +105,7 @@ public class FolderContents {
             if (entry == null) {
                 switch (partData.getType()) {
                     case PART:
+                    default:
                         entry = new Part();
                         break;
 
@@ -147,7 +149,7 @@ public class FolderContents {
             }
 
             if (!folderAuthorization.canWrite(userId, folder)) {
-                Logger.warn(userId + " lacks write privs on folder " + folder.getId());
+                Logger.warn(userId + " lacks write privileges on folder " + folder.getId());
                 continue;
             }
 
@@ -196,7 +198,7 @@ public class FolderContents {
     }
 
     protected FolderDetails addEntriesToTransferredFolder(List<Long> entries, Folder folder) {
-        List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);  // todo : performance
+        List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);
         Logger.info("Adding " + entryModelList.size() + " transferred entries to folder " + folder.getId());
         folderDAO.addFolderContents(folder, entryModelList);
         return folder.toDataTransferObject();
@@ -249,7 +251,6 @@ public class FolderContents {
      */
     protected List<FolderDetails> addEntriesToFolders(String userId, List<Long> entries, List<FolderDetails> folders) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
         List<Group> accountGroups = new GroupController().getAllGroups(account);
         if (!folderAuthorization.isAdmin(userId))
             entries = DAOFactory.getPermissionDAO().getCanReadEntries(account, accountGroups, entries);
@@ -343,7 +344,7 @@ public class FolderContents {
         details.setCount(folderSize);
 
         if (userId != null) {
-            ArrayList<AccessPermission> permissions = getAndFilterFolderPermissions(userId, folder);
+            List<AccessPermission> permissions = getAndFilterFolderPermissions(userId, folder);
             details.setAccessPermissions(permissions);
             boolean canEdit = permissionsController.hasWritePermission(userId, folder);
             details.setCanEdit(canEdit);
@@ -468,8 +469,8 @@ public class FolderContents {
      * @param folder Folder whose permissions are to be retrieved
      * @return list of filtered permissions
      */
-    protected ArrayList<AccessPermission> getAndFilterFolderPermissions(String userId, Folder folder) {
-        ArrayList<AccessPermission> permissions = permissionsController.retrieveSetFolderPermission(folder, false);
+    protected List<AccessPermission> getAndFilterFolderPermissions(String userId, Folder folder) {
+        List<AccessPermission> permissions = permissionsController.retrieveSetFolderPermission(folder, false);
         if (accountController.isAdministrator(userId) || folder.getOwnerEmail().equalsIgnoreCase(userId)) {
             return permissions;
         }
@@ -506,12 +507,11 @@ public class FolderContents {
     }
 
     private void addEntryPermission(String userId, List<Permission> permissions, List<Entry> entries) {
-        PermissionDAO permissionDAO = DAOFactory.getPermissionDAO();
         EntryAuthorization entryAuthorization = new EntryAuthorization();
 
         for (Permission folderPermission : permissions) {
             for (Entry entry : entries) {
-                if (!entryAuthorization.canWriteThoroughCheck(userId, entry))
+                if (!entryAuthorization.canWrite(userId, entry))
                     continue;
 
                 // does the permissions already exists

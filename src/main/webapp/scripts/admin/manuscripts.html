@@ -85,9 +85,10 @@
                 </td>
                 <td style="vertical-align: middle; width: 35px; border-right: 1px dashed #f1f1f1">
                     <a ng-href="folders/{{manuscript.folder.id}}" ng-mouseover="manuscript.open = true"
-                       uib-tooltip="{{baseUrl}}/folders/{{manuscript.folder.id}}"
-                       ng-mouseleave="manuscript.open=false"><i class="fa fa-fw font-14em dark_blue"
-                                                                ng-class="{'fa-folder': !manuscript.open, 'fa-folder-open':manuscript.open}"></i></a>
+                       uib-tooltip="{{baseUrl}}/folders/{{manuscript.folder.id}}" ng-mouseleave="manuscript.open=false">
+                        <i class="fa fa-fw font-14em dark_blue"
+                           ng-class="{'fa-folder': !manuscript.open, 'fa-folder-open':manuscript.open}"></i>
+                    </a>
                 </td>
                 <td style="vertical-align: middle; width: 110px">
                     <div>

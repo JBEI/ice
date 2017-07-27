@@ -1,8 +1,8 @@
 <div ng-controller="WebOfRegistriesController" ng-init="showAddRegistryForm=false" style="height: 580px">
     <div class="pad_top">
         <button type="button" class="ice-button" ng-click="enableDisableWor()">
-            <span ng-if="isWorEnabled">Disable</span>
-            <span ng-if="!isWorEnabled">Enable</span>
+            <span ng-if="isWorEnabled"><b>DISABLE</b></span>
+            <span ng-if="!isWorEnabled"><b>ENABLE</b></span>
             <i style="font-size: 14px" class="fa fa-fw"
                ng-class="{'fa-toggle-on green':isWorEnabled, 'fa-toggle-off':!isWorEnabled}"></i>
         </button>

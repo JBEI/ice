@@ -1,13 +1,18 @@
-<span ng-if="folder.owner.email===user.email && folder.canEdit">
-    <small class="opacity_hover edit_icon" ng-click="openFolderShareSettings()" style="font-size: 13px;">
+<span ng-if="folder.canEdit">
+    <span class="opacity_hover edit_icon" ng-click="openFolderShareSettings()" style="font-size: 13px;">
         <i style="font-size: 14px; color: #555" class="fa fa-share-alt"></i> Share
-    </small>
+    </span>
+
+    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+
+    <span class="opacity_hover edit_icon" ng-click="openPartsUploadDialog()" style="font-size: 13px;">
+        <span class="glyphicon glyphicon-cloud-upload" style="color: #555"></span> Upload
+    </span>
 </span>
 
-<!--separator-->
-<span ng-if="user.isAdmin && folder.owner.email===user.email" style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
-
 <span ng-if="user.isAdmin">
+    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+
     <small ng-if="folder.type!='PUBLIC'" class="opacity_hover edit_icon" style="font-size: 13px;"
            ng-click="changeFolderType('PUBLIC')">
         <i style="font-size: 14px; color: #555" class="fa fa-level-up fa-flip-horizontal"></i> Promote

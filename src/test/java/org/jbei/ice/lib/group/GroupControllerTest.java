@@ -111,8 +111,8 @@ public class GroupControllerTest {
     @Test
     public void testRetrieveGroupMembers() throws Exception {
         Account a1 = AccountCreator.createTestAccount("testRetrieveGroupMembers1", false);
-        Account a2 = AccountCreator.createTestAccount("testRetrieveGroupMembers2", false);
-        Account a3 = AccountCreator.createTestAccount("testRetrieveGroupMembers3", false);
+        AccountCreator.createTestAccount("testRetrieveGroupMembers2", false);
+        AccountCreator.createTestAccount("testRetrieveGroupMembers3", false);
 
         UserGroup user = new UserGroup();
         user.setDescription("desc");
@@ -127,8 +127,8 @@ public class GroupControllerTest {
     @Test
     public void testSetGroupMembers() throws Exception {
         Account a1 = AccountCreator.createTestAccount("testSetGroupMembers1", false);
-        Account a2 = AccountCreator.createTestAccount("testSetGroupMembers2", false);
-        Account a3 = AccountCreator.createTestAccount("testSetGroupMembers3", false);
+        AccountCreator.createTestAccount("testSetGroupMembers2", false);
+        AccountCreator.createTestAccount("testSetGroupMembers3", false);
 
         UserGroup user = new UserGroup();
         user.setDescription("desc");

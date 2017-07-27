@@ -206,10 +206,12 @@ public class RemoteEntries {
     }
 
     public File getPublicAttachment(String userId, long remoteId, String fileId) {
-        if (!hasRemoteAccessEnabled())
-            return null;
+        // todo :
 
-        String path = "/rest/file/attachment/" + fileId; // todo
+//        if (!hasRemoteAccessEnabled())
+//            return null;
+//
+//        String path = "/rest/file/attachment/" + fileId; // todo
         return null;
     }
 }

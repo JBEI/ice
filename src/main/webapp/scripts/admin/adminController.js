@@ -238,8 +238,6 @@ angular.module('ice.admin.controller', [])
         $scope.requestSamples = function () {
             $scope.loadingPage = true;
             var params = angular.copy($scope.params);
-            if (params.status == 'ALL')
-                params.status = undefined;
 
             Util.get("rest/samples/requests", function (result) {
                 $scope.sampleRequests = result;
@@ -248,6 +246,19 @@ angular.module('ice.admin.controller', [])
             }, params, function (error) {
                 $scope.loadingPage = false;
             });
+        };
+
+        $scope.samplesFilterTemplate = "scripts/admin/popover/sample-filter-template.html";
+        $scope.params.status = ['FULFILLED', 'IN_CART', 'PENDING', 'REJECTED'];
+        $scope.samplesRequesterNameTemplate = "scripts/admin/popover/sample-requester-name-filter-template.html";
+
+        $scope.sampleFilterChecked = function (filter) {
+            var idx = $scope.params.status.indexOf(filter);
+            if (idx == -1)
+                $scope.params.status.push(filter);
+            else
+                $scope.params.status.splice(idx, 1);
+            $scope.requestSamples();
         };
 
         // initial sample request (uses default paging values)
@@ -294,13 +305,71 @@ angular.module('ice.admin.controller', [])
                 controller: "AdminSampleLocationSearch",
                 backdrop: "static"
             });
-        }
-    })
-    .controller('AdminSampleLocationSearch', function ($scope, $uibModalInstance, Util) {
-        $scope.closeModal = function () {
-            $uibModalInstance.close();
         };
 
+        $scope.importSamples = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/admin/modal/import-samples.html',
+                controller: 'AdminSampleImport',
+                backdrop: "static"
+            })
+        };
+
+        $scope.getPrimarySample = function (locations) {
+            if (locations.length != 3)
+                return locations[0];
+
+            for (var i = 0; i < locations.length; i += 1) {
+                if (locations[i].label.indexOf("backup") == -1)
+                    return locations[i];
+            }
+            return locations[0];
+        }
+    })
+    .controller('AdminSampleImport', function ($scope, $uibModalInstance, Util, FileUploader, Authentication) {
+        $scope.progress = 0;
+
+        var uploader = $scope.sampleImportUploader = new FileUploader({
+            scope: $scope, // to automatically update the html. Default: $rootScope
+            url: "rest/samples",
+            method: 'POST',
+            removeAfterUpload: true,
+            headers: {"X-ICE-Authentication-SessionId": Authentication.getSessionId()},
+            autoUpload: true,
+            queueLimit: 1 // can only upload 1 file
+        });
+
+        uploader.onProgressItem = function (item, progress) {
+            $scope.progress = progress;
+        };
+
+        uploader.onSuccessItem = function (item, response, status, header) {
+            $scope.processingFile = false;
+            $scope.result = {success: true, data: response};
+
+            //$scope.serverResult = {data: response, total: response.length, valid: []}
+            //for (var i = 0; i < response.length; i += 1) {
+            //    var datum = response[i];
+            //    if (datum.partData) {
+            //        $scope.serverResult.valid.push(datum.partData.id);
+            //    }
+            //}
+        };
+
+        uploader.onAfterAddingFile = function () {
+            $scope.processingFile = false;
+            $scope.result = {success: false};
+        };
+
+        uploader.onBeforeUploadItem = function () {
+            $scope.processingFile = true;
+        };
+
+        uploader.onCompleteAll = function () {
+            $scope.processingFile = false;
+        };
+    })
+    .controller('AdminSampleLocationSearch', function ($scope, $uibModalInstance, Util) {
         $scope.sample = {};
 
         $scope.searchSampleLocation = function () {

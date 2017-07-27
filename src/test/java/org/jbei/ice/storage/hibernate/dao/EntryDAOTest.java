@@ -5,34 +5,22 @@ import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.entry.EntryCreator;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author Hector Plahar
  */
-public class EntryDAOTest {
+public class EntryDAOTest extends HibernateRepositoryTest {
 
-    private EntryDAO entryDAO;
-
-    @Before
-    public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
-        entryDAO = new EntryDAO();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
-    }
+    private EntryDAO entryDAO = new EntryDAO();
 
     @Test
     public void testGetEntrySummary() throws Exception {
@@ -41,7 +29,6 @@ public class EntryDAOTest {
         String summary = entryDAO.getEntrySummary(id);
         Assert.assertEquals("summary for test", summary);
     }
-
 
 
     @Test
@@ -94,5 +81,25 @@ public class EntryDAOTest {
         Assert.assertTrue(entries == null || entries.isEmpty());
         entries = entryDAO.getByName(uniqueName);
         Assert.assertNotNull(entries);
+    }
+
+    @Test
+    public void testGetOwnerEntryIds() throws Exception {
+        Account account = AccountCreator.createTestAccount("EntryDAOTest.testGetOwnerEntryIds", false);
+        Random random = new Random();
+        int entryCount = random.nextInt(30);
+        List<Long> created = new ArrayList<>(entryCount);
+        for (int i = 0; i < entryCount; i += 1) {
+            long id = TestEntryCreator.createTestPart(account.getEmail());
+            Entry entry = entryDAO.get(id);
+            created.add(id);
+            Assert.assertNotNull(entry);
+            Assert.assertEquals(entry.getOwnerEmail(), account.getEmail());
+        }
+
+        List<Long> ids = entryDAO.getOwnerEntryIds(account.getEmail(), null);
+        Assert.assertEquals(ids.size(), entryCount);
+        Assert.assertTrue(ids.removeAll(created));
+        Assert.assertTrue(ids.isEmpty());
     }
 }

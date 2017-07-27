@@ -4,14 +4,12 @@ import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.dto.common.PageParameters;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.shared.ColumnField;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Folder;
 import org.jbei.ice.storage.model.Part;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -20,21 +18,9 @@ import java.util.List;
 /**
  * @author Hector Plahar
  */
-public class FolderDAOTest {
+public class FolderDAOTest extends HibernateRepositoryTest {
 
-    private FolderDAO dao;
-
-    @Before
-    public void setUp() {
-        HibernateUtil.initializeMock();
-        dao = new FolderDAO();
-        HibernateUtil.beginTransaction();
-    }
-
-    @After
-    public void tearDown() {
-        HibernateUtil.commitTransaction();
-    }
+    private FolderDAO dao = new FolderDAO();
 
     @Test
     public void testGet() throws Exception {

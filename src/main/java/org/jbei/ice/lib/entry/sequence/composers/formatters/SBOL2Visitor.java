@@ -10,20 +10,21 @@ import org.sbolstandard.core2.*;
 import javax.xml.namespace.QName;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class SBOL2Visitor {
 
-    final String ICE_NS = "http://ice.jbei.org#";
-    final String ICE_PREFIX = "ice";
+    static final String ICE_NS = "http://ice.jbei.org#";
+    static final String ICE_PREFIX = "ice";
 
     private ComponentDefinition componentDefinition;
     private String uriString;
-    private Set<String> uris;
     private SBOLDocument doc;
+    private int annotationCount;
 
     public SBOL2Visitor(SBOLDocument doc) throws SBOLValidationException, URISyntaxException {
-
         this.doc = doc;
         uriString = Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/entry";
 
@@ -34,7 +35,6 @@ public class SBOL2Visitor {
         }
 
         doc.addNamespace(new URI(ICE_NS), ICE_PREFIX);
-        uris = new HashSet<>();
     }
 
     public void visit(Sequence sequence) throws SBOLValidationException, URISyntaxException {
@@ -43,32 +43,13 @@ public class SBOL2Visitor {
 
         // Set required properties
         String partId = entry.getPartNumber();
-        String dcUri = sequence.getComponentUri();
-
-        if (dcUri == null) {
-            componentDefinition = doc.createComponentDefinition(uriString, partId, "1", ComponentDefinition.DNA);
-        } else {
-            String displayId = StringUtils.isBlank(sequence.getIdentifier()) ?
-                    displayIdFromUri(dcUri) : sequence.getIdentifier();
-            String prefix = prefixFromUri(dcUri);
-            componentDefinition = doc.createComponentDefinition(prefix, displayId, "1", ComponentDefinition.DNA);
-        }
-
+        componentDefinition = doc.createComponentDefinition(uriString, partId, "1", ComponentDefinition.DNA);
         componentDefinition.setName(entry.getName());
         componentDefinition.setDescription(entry.getShortDescription());
 
-        org.sbolstandard.core2.Sequence dnaSequence;
-        String dsUri = sequence.getUri();
-
-        if (dsUri == null || dsUri.isEmpty()) {
-            dsUri = "sequence_" + sequence.getFwdHash().replaceAll("[\\s\\-()]", "");
-            dnaSequence = doc.createSequence(
-                    uriString, dsUri, "1", sequence.getSequence(), org.sbolstandard.core2.Sequence.IUPAC_DNA);
-        } else {
-            dnaSequence = doc.createSequence(
-                    prefixFromUri(dsUri), displayIdFromUri(dsUri), "1", sequence.getSequence(), org.sbolstandard.core2.Sequence.IUPAC_DNA);
-
-        }
+        String dsUri = "sequence_" + sequence.getFwdHash().replaceAll("[\\s\\-()]", "");
+        org.sbolstandard.core2.Sequence dnaSequence = doc.createSequence(
+                uriString, dsUri, "1", sequence.getSequence(), org.sbolstandard.core2.Sequence.IUPAC_DNA);
 
         dnaSequence.setElements(sequence.getSequence());
         componentDefinition.addSequence(dnaSequence);
@@ -96,9 +77,6 @@ public class SBOL2Visitor {
         if (entry.getOwnerEmail() != null)
             componentDefinition.createAnnotation(new QName(ICE_NS, "ownerEmail", ICE_PREFIX), entry.getOwnerEmail());
 
-        if (entry.getOwnerEmail() != null)
-            componentDefinition.createAnnotation(new QName(ICE_NS, "ownerEmail", ICE_PREFIX), entry.getOwnerEmail());
-
         if (entry.getCreator() != null)
             componentDefinition.createAnnotation(new QName(ICE_NS, "creator", ICE_PREFIX), entry.getCreator());
 
@@ -115,7 +93,12 @@ public class SBOL2Visitor {
             componentDefinition.createAnnotation(new QName(ICE_NS, "selectionMarker", ICE_PREFIX), selectionMarker.getName());
         }
 
-        // TODO: links
+        if (entry.getLinks() != null) {
+            for (Link link : entry.getLinks()) {
+                if (StringUtils.isNotEmpty(link.getLink()) && StringUtils.isNotEmpty(link.getUrl()))
+                    componentDefinition.createAnnotation(new QName(ICE_NS, link.getLink(), ICE_PREFIX), link.getUrl());
+            }
+        }
 
         if (entry.getKeywords() != null)
             componentDefinition.createAnnotation(new QName(ICE_NS, "keywords", ICE_PREFIX), entry.getKeywords());
@@ -147,8 +130,12 @@ public class SBOL2Visitor {
         if (entry.getVisibility() != null)
             componentDefinition.createAnnotation(new QName(ICE_NS, "visibility", ICE_PREFIX), entry.getVisibility());
 
-        // TODO: parameters
-        // TODO: permissions
+        if (entry.getParameters() != null) {
+            for (Parameter parameter : entry.getParameters()) {
+                if (StringUtils.isNotEmpty(parameter.getKey()) && StringUtils.isNotEmpty(parameter.getValue()))
+                    componentDefinition.createAnnotation(new QName(ICE_NS, parameter.getKey(), ICE_PREFIX), parameter.getValue());
+            }
+        }
 
         if (entry.getFundingSource() != null)
             componentDefinition.createAnnotation(new QName(ICE_NS, "fundingSource", ICE_PREFIX), entry.getFundingSource());
@@ -158,49 +145,33 @@ public class SBOL2Visitor {
 
         // TODO: samples
         // TODO: attachments
-
-    }
-
-    public ComponentDefinition getComponentDefinition() {
-        return componentDefinition;
     }
 
     public void visit(SequenceFeature feature) throws SBOLValidationException, URISyntaxException {
-
-        String featureUri = feature.getUri();
-        String uri;
-
-        if (featureUri == null || featureUri.isEmpty()) {
-            featureUri = UUID.randomUUID().toString().replaceAll("[\\s\\-()]", "");
-            uri = uriString + "/sa_" + featureUri;
-        } else {
-            if (uris.contains(featureUri))
-                return;
-
-            uris.add(featureUri);
-            uri = featureUri;
-        }
-
-        AnnotationLocation location;
+        annotationCount++;
 
         if (feature.getAnnotationLocations() != null && !feature.getAnnotationLocations().isEmpty()) {
-            location = (AnnotationLocation) feature.getAnnotationLocations().toArray()[0];
-            SequenceAnnotation annotation = componentDefinition.createSequenceAnnotation(
-                    displayIdFromUri(uri),
-                    "location",
-                    location.getGenbankStart(), location.getEnd(),
-                    feature.getStrand() == 1 ? OrientationType.INLINE : OrientationType.REVERSECOMPLEMENT);
+            AnnotationLocation location = (AnnotationLocation) feature.getAnnotationLocations().toArray()[0];
+            SequenceAnnotation annotation;
+            OrientationType orientation = feature.getStrand() == 1 ? OrientationType.INLINE : OrientationType.REVERSECOMPLEMENT;
+
+            if (location.getEnd() < location.getGenbankStart()) {
+                annotation = componentDefinition.createSequenceAnnotation(
+                        "annotation" + annotationCount, "locationStart", location.getGenbankStart(),
+                        feature.getSequence().getSequence().length(),
+                        orientation
+                );
+                annotation.addRange("locationEnd" + annotationCount, 1, location.getEnd(), orientation);
+            } else {
+                annotation = componentDefinition.createSequenceAnnotation(
+                        "annotation" + annotationCount,
+                        "location",
+                        location.getGenbankStart(), location.getEnd(),
+                        orientation);
+            }
 
             annotation.addRole(IceSequenceOntology.getURI(feature.getGenbankType()));
             annotation.setName(feature.getName());
         }
-    }
-
-    private static String displayIdFromUri(String uri) {
-        return uri.substring(uri.lastIndexOf('/') + 1);
-    }
-
-    private static String prefixFromUri(String uri) {
-        return uri.substring(0, uri.lastIndexOf('/') - 1);
     }
 }

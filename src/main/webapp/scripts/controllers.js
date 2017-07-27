@@ -174,6 +174,10 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         return (!$scope.addToDisabled || $scope.selectedRemote.length) && !this.isDealingWithDeleted();
     };
 
+    $scope.canExport = function () {
+        return FolderSelection.getSelectedFolder() != undefined || Selection.hasSelection();
+    };
+
     $scope.canEdit = function () {
         return Selection.canEdit();
     };
@@ -235,7 +239,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         if (selectedEntries.length > 1) {
             var type;
             for (type in Selection.getSelectedTypes()) {
-                break;
+                break;   // todo : ??
             }
 
             // first create bulk upload
@@ -253,10 +257,9 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         $scope.editDisabled = true;
     };
 
-// todo : getEntrySelection() should be moved to Selection
     $scope.csvExport = function (includeSequences) {
         var selection = getEntrySelection();
-        var formats = {sequenceFormats: []};
+        var formats = {sequenceFormats: []};//, entryFields: ["name"]};
         if (includeSequences)
             formats.sequenceFormats.push("genbank");
 
@@ -264,9 +267,26 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         Util.post("rest/file/csv", selection, function (result) {
             if (result && result.value) {
                 $window.open("rest/file/tmp/" + result.value, "_self");
-                Selection.reset();
             }
         }, formats);
+    };
+
+    $scope.customizeExport = function () {
+        var modalInstance = $uibModal.open({
+            controller: "CustomExportController",
+            templateUrl: "views/modal/custom-export-modal.html",
+            backdrop: 'static',
+            size: 'lg',
+            resolve: {
+                selectedTypes: function () {
+                    return Selection.getSelectedTypes()
+                },
+
+                selection: function () {
+                    return getEntrySelection();
+                }
+            }
+        });
     };
 
     $rootScope.$on("CollectionSelected", function (event, data) {
@@ -352,8 +372,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
             Util.setFeedback('Transfer of ' + entrySelection.length + word + ' successfully accepted', 'success');
         }
     }
-})
-;
+});
 
 iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $uibModalInstance, Util, FolderSelection,
                                                                       $stateParams, Selection, selectedFolder) {
@@ -423,12 +442,63 @@ iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $u
         partner.selected = !partner.selected
     };
 
-
     //
     // init
     //
     $scope.selectedPartners = [];
     $scope.retrieveRegistryPartners();
+});
+
+iceControllers.controller('CustomExportController', function ($scope, $uibModalInstance, selectedTypes, selection, EntryService, Util) {
+    console.log(selectedTypes);
+
+    var fields = EntryService.getCommonFields();
+    $scope.fields = [];
+    angular.forEach(fields, function (field) {
+        $scope.fields.push(field.label);
+    });
+
+    $scope.sequence = {format: "FASTA"};
+    $scope.general = {};
+
+    $scope.selectAll = function (format) {
+        if (!format)
+            format = 'general';
+
+        switch (format) {
+            case "general":
+                break;
+
+            case "sample":
+                break;
+
+            case "sequence":
+                break;
+        }
+    };
+
+    $scope.customExport = function () {
+        $scope.processingDownload = true;
+
+        var clickEvent = new MouseEvent("click", {
+            "view": window,
+            "bubbles": true,
+            "cancelable": false
+        });
+
+        Util.download("rest/parts/custom", selection).$promise.then(function (result) {
+            var url = URL.createObjectURL(new Blob([result.data]));
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = result.filename();
+            a.target = '_blank';
+            a.dispatchEvent(clickEvent);
+
+            // close dialog
+            $scope.processingDownload = false;
+            $uibModalInstance.close()
+        });
+    }
 });
 
 iceControllers.controller('AddToFolderController', function ($rootScope, $scope, $uibModalInstance, Util, FolderSelection,

@@ -1,32 +1,17 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.Configuration;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * @author Hector Plahar
  */
-public class ConfigurationDAOTest {
+public class ConfigurationDAOTest extends HibernateRepositoryTest {
 
-    private ConfigurationDAO dao;
-
-    @BeforeClass
-    public static void setUpBeforeClass() throws Exception {
-        HibernateUtil.initializeMock();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        HibernateUtil.beginTransaction();
-        dao = new ConfigurationDAO();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
-    }
+    private ConfigurationDAO dao = new ConfigurationDAO();
 
     @Test
     public void testSave() throws Exception {

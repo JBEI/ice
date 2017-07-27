@@ -1,6 +1,5 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
@@ -23,7 +22,6 @@ public class RemoteClientModelDAO extends HibernateRepository<RemoteClientModel>
         return super.get(RemoteClientModel.class, id);
     }
 
-
     /**
      * Retrieves clients belonging to specified group
      *
@@ -37,7 +35,7 @@ public class RemoteClientModelDAO extends HibernateRepository<RemoteClientModel>
             Join<RemoteClientModel, Group> groups = from.join("groups");
             query.where(getBuilder().equal(groups.get("id"), group.getId()), getBuilder().isNotNull(from.get("email")));
             return currentSession().createQuery(query).list();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -58,7 +56,7 @@ public class RemoteClientModelDAO extends HibernateRepository<RemoteClientModel>
             query.select(getBuilder().countDistinct(from.get("id")));
             query.where(getBuilder().equal(groups.get("id"), group.getId()), getBuilder().isNotNull(from.get("email")));
             return currentSession().createQuery(query).uniqueResult().intValue();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -73,7 +71,7 @@ public class RemoteClientModelDAO extends HibernateRepository<RemoteClientModel>
                     getBuilder().equal(from.get("remotePartner"), remotePartner)
             );
             return currentSession().createQuery(query).uniqueResult();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }

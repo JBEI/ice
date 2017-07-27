@@ -5,6 +5,7 @@ import org.jbei.ice.lib.access.AccessTokens;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.common.PageParameters;
@@ -15,6 +16,7 @@ import org.jbei.ice.lib.dto.entry.PartStatistics;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.EntrySelection;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.rest.IceRestClient;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
@@ -249,7 +251,9 @@ public class RemoteContact {
      *
      * @return true, if the master reports correct execution of the request. false otherwise
      */
-    public boolean deleteInstanceFromMaster(String url, String apiKey, String thisUrl) {
-        return restClient.delete(apiKey, url, "rest/partners/" + thisUrl);
+    public boolean deleteInstanceFromMaster(String thisUrl) {
+        final String NODE_MASTER = Utils.getConfigValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER);
+        RemotePartner masterPartner = DAOFactory.getRemotePartnerDAO().getByUrl(NODE_MASTER);
+        return masterPartner != null && restClient.delete(masterPartner.getApiKey(), masterPartner.getUrl(), "rest/partners/" + thisUrl);
     }
 }

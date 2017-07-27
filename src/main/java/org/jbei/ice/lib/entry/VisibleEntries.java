@@ -26,6 +26,7 @@ public class VisibleEntries {
     private final Account account;
     private final boolean isAdmin;
     private final EntryDAO dao;
+    private final Group everybodyGroup;
 
     public VisibleEntries(String userId) {
         this.account = DAOFactory.getAccountDAO().getByEmail(userId);
@@ -35,6 +36,7 @@ public class VisibleEntries {
             throw new IllegalArgumentException("Cannot retrieve account for \"" + userId + "\"");
         this.isAdmin = authorization.isAdmin(userId);
         this.dao = DAOFactory.getEntryDAO();
+        this.everybodyGroup = new GroupController().createOrRetrievePublicGroup();
     }
 
     public List<PartData> getEntries(ColumnField field, boolean asc, int start, int limit, String filter) {
@@ -46,8 +48,6 @@ public class VisibleEntries {
         } else {
             // retrieve groups for account and filter by permission
             Set<Group> accountGroups = new HashSet<>(account.getGroups());
-            GroupController controller = new GroupController();
-            Group everybodyGroup = controller.createOrRetrievePublicGroup();
             accountGroups.add(everybodyGroup);
             results = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit, filter);
         }
@@ -72,8 +72,6 @@ public class VisibleEntries {
         }
 
         Set<Group> accountGroups = new HashSet<>(account.getGroups());
-        GroupController controller = new GroupController();
-        Group everybodyGroup = controller.createOrRetrievePublicGroup();
         accountGroups.add(everybodyGroup);
         return dao.visibleEntryCount(account, accountGroups, filter);
     }

@@ -1,6 +1,5 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.group.GroupController;
@@ -20,6 +19,18 @@ import java.util.Set;
  * @author Hector Plahar
  */
 public class GroupDAO extends HibernateRepository<Group> {
+
+    /**
+     * Retrieve {@link Group} object from the database by its id.
+     *
+     * @param id group unique identifier
+     * @return Group object.
+     * @throws DAOException on Exception
+     */
+    public Group get(long id) {
+        return super.get(Group.class, id);
+    }
+
     /**
      * Retrieve {@link Group} object from the database by its uuid.
      *
@@ -27,13 +38,13 @@ public class GroupDAO extends HibernateRepository<Group> {
      * @return Group object.
      * @throws DAOException
      */
-    public Group get(String uuid) {
+    public Group getByUUID(String uuid) {
         try {
             CriteriaQuery<Group> query = getBuilder().createQuery(Group.class);
             Root<Group> from = query.from(Group.class);
             query.where(getBuilder().equal(from.get("uuid"), uuid));
             return currentSession().createQuery(query).uniqueResult();
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             Logger.error(e);
             throw new DAOException(e);
         }
@@ -47,32 +58,9 @@ public class GroupDAO extends HibernateRepository<Group> {
             query.select(getBuilder().countDistinct(member.get("id")));
             query.where(getBuilder().equal(from.get("uuid"), uuid));
             return currentSession().createQuery(query).uniqueResult();
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             Logger.error(e);
             throw new DAOException(e);
-        }
-    }
-
-    /**
-     * Retrieve {@link Group} object from the database by its id.
-     *
-     * @param id group unique identifier
-     * @return Group object.
-     * @throws DAOException on HibernateException
-     */
-    public Group get(long id) {
-        return super.get(Group.class, id);
-    }
-
-    public List<Group> getByIdList(Set<Long> idsSet) {
-        try {
-            CriteriaQuery<Group> query = getBuilder().createQuery(Group.class);
-            Root<Group> from = query.from(Group.class);
-            query.where(from.get("id").in(idsSet));
-            return currentSession().createQuery(query).list();
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
         }
     }
 
@@ -96,7 +84,7 @@ public class GroupDAO extends HibernateRepository<Group> {
             predicates.add(predicate);
             query.where(predicates.toArray(new Predicate[predicates.size()]));
             return currentSession().createQuery(query).setMaxResults(limit).list();
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             Logger.error(e);
             throw new DAOException("Error retrieving matching groups", e);
         }
@@ -112,7 +100,7 @@ public class GroupDAO extends HibernateRepository<Group> {
                     getBuilder().equal(members.get("email"), account.getEmail())
             ));
             return currentSession().createQuery(query).list();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -135,7 +123,7 @@ public class GroupDAO extends HibernateRepository<Group> {
                     getBuilder().equal(members.get("email"), account.getEmail())
             ));
             return currentSession().createQuery(query).list();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -147,7 +135,7 @@ public class GroupDAO extends HibernateRepository<Group> {
             Root<Group> from = query.from(Group.class);
             query.where(getBuilder().equal(from.get("type"), type));
             return currentSession().createQuery(query).setFirstResult(offset).setMaxResults(limit).list();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -160,7 +148,7 @@ public class GroupDAO extends HibernateRepository<Group> {
             query.select(getBuilder().countDistinct(from.get("id")));
             query.where(getBuilder().equal(from.get("type"), type));
             return currentSession().createQuery(query).uniqueResult();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }
@@ -172,7 +160,7 @@ public class GroupDAO extends HibernateRepository<Group> {
      * @param type       type of groups to retrieve
      * @param isAutoJoin auto join status
      * @return list of groups found that match the parameters
-     * @throws DAOException on HibernateException retrieving groups
+     * @throws DAOException on Exception retrieving groups
      */
     public List<Group> getGroupsBy(GroupType type, boolean isAutoJoin) {
         try {
@@ -182,7 +170,7 @@ public class GroupDAO extends HibernateRepository<Group> {
                     getBuilder().equal(from.get("type"), type),
                     getBuilder().equal((from.get("autoJoin")), isAutoJoin));
             return currentSession().createQuery(query).list();
-        } catch (HibernateException he) {
+        } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
         }

@@ -1,13 +1,15 @@
 package org.jbei.ice.services.rest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.StorageLocation;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.sample.UserSamples;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
+import org.jbei.ice.lib.entry.sample.SampleCSV;
 import org.jbei.ice.lib.entry.sample.SampleService;
 
 import javax.ws.rs.*;
@@ -16,6 +18,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,10 +57,13 @@ public class SampleResource extends RestResource {
             @DefaultValue("requested") @QueryParam("sort") final String sort,
             @DefaultValue("false") @QueryParam("asc") final boolean asc,
             @QueryParam("filter") final String filter,
-            @QueryParam("status") final SampleRequestStatus status) {
+            @QueryParam("status") List<String> options) {
         final String userId = requireUserId();
         Logger.info(userId + ": retrieving sample requests");
-        final UserSamples samples = requestRetriever.getRequests(userId, offset, limit, sort, asc, status, filter);
+        List<SampleRequestStatus> sampleList = new ArrayList<>(options.size());
+        for (String option : options)
+            sampleList.add(SampleRequestStatus.valueOf(option.toUpperCase()));
+        final UserSamples samples = requestRetriever.getRequests(userId, offset, limit, sort, asc, sampleList, filter);
         return super.respond(Response.Status.OK, samples);
     }
 
@@ -105,7 +111,7 @@ public class SampleResource extends RestResource {
             StreamingOutput stream = outputStream::writeTo;
             return Response.ok(stream).header("Content-Disposition", "attachment;filename=\"data.csv\"").build();
         } catch (IOException e) {
-            e.printStackTrace();
+            Logger.error(e);
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
@@ -159,17 +165,17 @@ public class SampleResource extends RestResource {
         return super.respond(requestRetriever.placeSampleInCart(userId, request));
     }
 
-    /**
-     * @return Response with the current sample requests
-     */
-    @GET
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/storage/{type}")
-    public Response getSampleStorageType(
-            @HeaderParam(value = "X-ICE-Authentication-SessionId") String userAgentHeader,
-            @DefaultValue("IN_CART") @QueryParam("type") String type) {
-        String userId = getUserId(userAgentHeader);
-        List<StorageLocation> locations = sampleService.getStorageLocations(userId, type);
-        return respond(locations);
+    public Response addSamples(@FormDataParam("file") InputStream fileInputStream,
+                               @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
+        String userId = requireUserId();
+        try {
+            SampleCSV sampleCSV = new SampleCSV(userId, fileInputStream);
+            return super.respond(sampleCSV.parse());
+        } catch (IOException e) {
+            throw new WebApplicationException(e);
+        }
     }
 }

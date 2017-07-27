@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class IndexerProgressMonitor implements MassIndexerProgressMonitor {
 
-    private static IndexerProgressMonitor INSTANCE;
+    private static IndexerProgressMonitor INSTANCE = new IndexerProgressMonitor();
     private final AtomicLong documentsDoneCounter = new AtomicLong();
     private final AtomicLong totalCounter = new AtomicLong();
 
@@ -17,8 +17,6 @@ public class IndexerProgressMonitor implements MassIndexerProgressMonitor {
     }
 
     public static IndexerProgressMonitor getInstance() {
-        if (INSTANCE == null)
-            INSTANCE = new IndexerProgressMonitor();
         return INSTANCE;
     }
 

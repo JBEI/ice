@@ -127,8 +127,4 @@ public class WoRController {
         WebOfRegistriesTask contactTask = new WebOfRegistriesTask(userId, url, enable);
         IceExecutorService.getInstance().runTask(contactTask);
     }
-
-    public RegistryPartner getWebPartner(String userId, long partnerId) {
-        return dao.get(partnerId).toDataTransferObject();
-    }
 }

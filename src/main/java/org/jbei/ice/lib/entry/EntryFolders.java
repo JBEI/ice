@@ -35,10 +35,13 @@ public class EntryFolders extends HasEntry {
     public List<FolderDetails> getFolders() {
         List<FolderDetails> folders = new ArrayList<>();
         for (Folder folder : this.entry.getFolders()) {
-            if (!this.folderAuthorization.canRead(this.userId, folder))
+            boolean canEdit = this.folderAuthorization.canWrite(this.userId, folder);
+            if (!canEdit && !this.folderAuthorization.canRead(this.userId, folder))
                 continue;
 
-            folders.add(folder.toDataTransferObject());
+            FolderDetails folderDetails = folder.toDataTransferObject();
+            folderDetails.setCanEdit(canEdit);
+            folders.add(folderDetails);
         }
         return folders;
     }

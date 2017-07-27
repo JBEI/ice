@@ -129,7 +129,7 @@ public class GroupController {
     }
 
     public Group createOrRetrievePublicGroup() {
-        Group publicGroup = dao.get(PUBLIC_GROUP_UUID);
+        Group publicGroup = dao.getByUUID(PUBLIC_GROUP_UUID);
         if (publicGroup != null)
             return publicGroup;
 
@@ -137,7 +137,6 @@ public class GroupController {
         publicGroup.setLabel(PUBLIC_GROUP_NAME);
         publicGroup.setDescription(PUBLIC_GROUP_DESCRIPTION);
         publicGroup.setType(GroupType.SYSTEM);
-        publicGroup.setParent(null);
         publicGroup.setUuid(PUBLIC_GROUP_UUID);
         return save(publicGroup);
     }
@@ -157,62 +156,24 @@ public class GroupController {
      * @return set of groups retrieved for account
      */
     public List<Group> getAllGroups(Account account) {
-        if (account == null) {
-            List<Group> groups = new ArrayList<>(1);
-            groups.add(createOrRetrievePublicGroup());
-            return groups;
-        }
+        List<Group> groups = new ArrayList<>();
+        groups.add(createOrRetrievePublicGroup());
 
-        Set<Long> groupIds = getAllAccountGroups(account);
-        return dao.getByIdList(groupIds);
-    }
+        if (account != null)
+            groups.addAll(account.getGroups());
 
-    /**
-     * Retrieve all parent {@link Group}s of a given {@link Account}.
-     *
-     * @param account Account to query on.
-     * @return Set of Group ids.
-     */
-    protected Set<Long> getAllAccountGroups(Account account) {
-        HashSet<Long> accountGroups = new HashSet<>();
-
-        for (Group group : account.getGroups()) {
-            accountGroups = getParentGroups(group, accountGroups);
-        }
-
-        // Everyone belongs to the everyone group
-        Group everybodyGroup = createOrRetrievePublicGroup();
-        accountGroups.add(everybodyGroup.getId());
-        return accountGroups;
+        return groups;
     }
 
     public ArrayList<Group> getAllPublicGroupsForAccount(Account account) {
         ArrayList<Group> groups = new ArrayList<>();
+        if (account == null || account.getGroups() == null)
+            return groups;
+
         for (Group group : account.getGroups()) {
             if (group.getType() == GroupType.PUBLIC)
                 groups.add(group);
         }
         return groups;
-    }
-
-    /**
-     * Retrieve all parent {@link Group}s of a given group.
-     *
-     * @param group    Group to query on.
-     * @param groupIds optional set of group ids. Can be empty.
-     * @return Set of Parent group ids.
-     */
-    protected HashSet<Long> getParentGroups(Group group, HashSet<Long> groupIds) {
-        if (groupIds.contains(group.getId())) {
-            return groupIds;
-        } else {
-            groupIds.add(group.getId());
-            Group parentGroup = group.getParent();
-            if (parentGroup != null) {
-                getParentGroups(parentGroup, groupIds);
-            }
-        }
-
-        return groupIds;
     }
 }

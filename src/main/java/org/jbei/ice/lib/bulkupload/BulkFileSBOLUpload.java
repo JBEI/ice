@@ -15,6 +15,7 @@ import org.sbolstandard.core.SBOLRootObject;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 /**
@@ -81,6 +82,11 @@ public class BulkFileSBOLUpload {
             Logger.error(e);
             return null;
         }
-        return stream.toString();
+        try {
+            return stream.toString(StandardCharsets.UTF_8.name());
+        } catch (IOException e) {
+            Logger.error(e);
+            return null;
+        }
     }
 }

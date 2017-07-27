@@ -228,7 +228,7 @@ public class Groups {
         group = dao.update(group);
 
         setGroupMembers(group, userGroup.getMembers(), userGroup.getRemoteMembers());
-        return group != null;
+        return true;
     }
 
     protected void setGroupMembers(Group group, List<AccountTransfer> members, List<RemoteUser> remoteUsers) {

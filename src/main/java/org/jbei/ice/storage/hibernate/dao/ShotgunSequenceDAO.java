@@ -2,7 +2,6 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.HibernateException;
-import org.hibernate.query.NativeQuery;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
@@ -17,6 +16,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
@@ -79,22 +79,15 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
     }
 
     public ShotgunSequence getByFileId(String fileId) {
-        ShotgunSequence shotgunSequence = null;
-
         try {
-            NativeQuery query = currentSession().createNativeQuery("from "
-                    + ShotgunSequence.class.getName() + " where fileId = :fileId");
-            query.setParameter("fileId", fileId);
-            Object queryResult = query.uniqueResult();
-
-            if (queryResult != null) {
-                shotgunSequence = (ShotgunSequence) queryResult;
-            }
-        } catch (HibernateException e) {
-            throw new DAOException("Failed to retrieve entry by fileId: " + fileId, e);
+            CriteriaQuery<ShotgunSequence> query = getBuilder().createQuery(ShotgunSequence.class);
+            Root<ShotgunSequence> from = query.from(ShotgunSequence.class);
+            query.where(getBuilder().equal(from.get("fileId"), fileId));
+            return currentSession().createQuery(query).uniqueResult();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
         }
-
-        return shotgunSequence;
     }
 
     public int getShotgunSequenceCount(Entry entry) {
@@ -109,26 +102,12 @@ public class ShotgunSequenceDAO extends HibernateRepository<ShotgunSequence> {
         }
     }
 
-    public void delete(File shotgunFile, ShotgunSequence shotgunSequence) {
-        if (shotgunSequence == null) {
-            throw new DAOException("Failed to delete null Shotgun Sequence!");
-        }
-
+    public void delete(Path dir, ShotgunSequence shotgunSequence) {
         try {
             super.delete(shotgunSequence);
-            deleteShotgunSequenceToFile(shotgunFile, shotgunSequence);
+            Files.deleteIfExists(Paths.get(dir.toString(), shotgunSequence.getFileId()));
         } catch (IOException e) {
             throw new DAOException("Failed to delete Shotgun Sequence file!", e);
-        }
-    }
-
-    private void deleteShotgunSequenceToFile(File shotgunFilesDirectory, ShotgunSequence shotgunSequence)
-            throws IOException {
-        try {
-            File file = new File(shotgunFilesDirectory + File.separator + shotgunSequence.getFileId());
-            file.delete();
-        } catch (SecurityException e) {
-            throw new DAOException(e);
         }
     }
 

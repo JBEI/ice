@@ -27,11 +27,18 @@ import java.util.List;
 @Path("/partners")
 public class PartnerResource extends RestResource {
 
+    private final WebPartners webPartners = new WebPartners();
+
+    /**
+     * Retrieve details about a specific partner
+     *
+     * @param partnerId unique partner identifier (either the database id or the url)
+     * @return details about the partner if found
+     */
     @GET
     @Path("{id}")
-    public Response getWebPartner(@PathParam("id") final long partnerId) {
-        requireUserId();
-        WebPartners webPartners = new WebPartners();
+    public Response getWebPartner(@PathParam("id") final String partnerId) {
+        requireUserIdOrWebPartner("retrieving details for partner " + partnerId);
         final RegistryPartner partner = webPartners.get(partnerId);
         return super.respond(Response.Status.OK, partner);
     }
@@ -39,24 +46,13 @@ public class PartnerResource extends RestResource {
     /**
      * Retrieves list of available web partners requested by user or an ICE instance
      *
-     * @param url Optional parameter. URL of partner making requesting. If set, the partner token
-     *            is also required
      * @return list of partners
      */
     @GET
-    public Response getWebPartners(@QueryParam("url") String url) {
-        String userId = getUserId();
+    public Response getWebPartners() {
+        requireUserIdOrWebPartner("retrieving web partners");
         WebPartners webPartners = new WebPartners();
-        try {
-            if (StringUtils.isEmpty(userId))
-                return super.respond(webPartners.getPartners(worPartnerToken, url));
-            log(userId, "retrieving web partners");
-            return super.respond(webPartners.getPartners());
-        } catch (IllegalArgumentException ile) {
-            return super.respond(Response.Status.BAD_REQUEST);
-        } catch (PermissionException pe) {
-            return super.respond(Response.Status.FORBIDDEN);
-        }
+        return super.respond(webPartners.getPartners());
     }
 
     /**
@@ -71,7 +67,6 @@ public class PartnerResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addNewPartner(RegistryPartner partner) {
-        WebPartners webPartners = new WebPartners();
         RegistryPartner result;
         String userId = getUserId();
 
@@ -83,7 +78,7 @@ public class PartnerResource extends RestResource {
             result = webPartners.processRemoteWebPartnerAdd(partner);
         } else {
             // local request
-            result = webPartners.addNewPartner(userId, partner);
+            result = webPartners.addNewPartner(userId, partner, super.getThisServer(false));
         }
 
         return super.respond(result);

@@ -75,6 +75,8 @@ public class RemoteClientModel implements DataModel {
         partner.setId(remotePartner.getId());
         partner.setUrl(remotePartner.getUrl());
         partner.setName(remotePartner.getName());
+        remoteUser.setPartner(partner);
+
         AccountTransfer accountTransfer = new AccountTransfer();
         accountTransfer.setEmail(email);
         remoteUser.setUser(accountTransfer);

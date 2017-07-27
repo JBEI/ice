@@ -122,7 +122,7 @@ public class Experiments extends HasEntry {
             return false;
 
         if (!userId.equalsIgnoreCase(experiment.getOwnerEmail()) &&
-                !entryAuthorization.canWriteThoroughCheck(userId, entry)) {
+                !entryAuthorization.canWrite(userId, entry)) {
             throw new PermissionException("Cannot delete experiment");
         }
 

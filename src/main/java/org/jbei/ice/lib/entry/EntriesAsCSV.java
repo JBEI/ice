@@ -9,6 +9,7 @@ import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -45,11 +46,13 @@ public class EntriesAsCSV {
     private SequenceDAO sequenceDAO;
     private AccountDAO accountDAO;
     private PermissionDAO permissionDAO;
+    private final String userId;
 
     /**
      * @param formats optional list of formats of sequences to include
      */
-    public EntriesAsCSV(String... formats) {
+    public EntriesAsCSV(String userId, String... formats) {
+        this.userId = userId;
         this.includeSequences = formats.length > 0;
         this.formats = formats;
         this.dao = DAOFactory.getEntryDAO();
@@ -61,16 +64,16 @@ public class EntriesAsCSV {
     /**
      * Set source of entries, extract to csv
      *
-     * @param userId    identifier of user making request
      * @param selection selection indicating source of entries
+     * @param fields    optional list of fields used to filter the data
      * @return true if extraction happened successfully and can be retrieved with a call to <code>getFilePath</code>
      * false otherwise
      */
-    public boolean setSelectedEntries(String userId, EntrySelection selection) {
+    public boolean setSelectedEntries(EntrySelection selection, EntryField... fields) {
         Entries retriever = new Entries(userId);
         this.entries = retriever.getEntriesFromSelectionContext(selection);
         try {
-            writeList(userId);
+            writeList(fields);
             return true;
         } catch (IOException e) {
             Logger.error(e);
@@ -81,15 +84,15 @@ public class EntriesAsCSV {
     /**
      * Directly set the list of entries whose fields and (optionally) sequences are to be extracted
      *
-     * @param userId  identifier of user making request
      * @param entries list of entry ids
+     * @param fields  optional list of fields used to filter the data
      * @return true if extraction happened successfully and can be retrieved with a call to <code>getFilePath</code>
      * false otherwise
      */
-    public boolean setEntries(String userId, List<Long> entries) {
+    public boolean setEntries(List<Long> entries, EntryField... fields) {
         this.entries = entries;
         try {
-            writeList(userId);
+            writeList(fields);
             return true;
         } catch (IOException e) {
             Logger.error(e);
@@ -97,10 +100,10 @@ public class EntriesAsCSV {
         }
     }
 
-    protected String[] getCSVHeaders(List<EntryField> fields) {
+    protected String[] getCSVHeaders(EntryField[] fields) {
 
         // get headers
-        String[] headers = new String[fields.size() + 3];
+        String[] headers = new String[fields.length + 3];
         headers[0] = "Created";
         headers[1] = "Part ID";
 
@@ -116,10 +119,9 @@ public class EntriesAsCSV {
     /**
      * Iterate through list of entries and extract values
      *
-     * @param userId identifier of user making request
      * @throws IOException on Exception write values to file
      */
-    private void writeList(String userId) throws IOException {
+    private void writeList(EntryField... fields) throws IOException {
 
         // filter entries based on what the user is allowed to see if the user is not an admin
         Account account = this.accountDAO.getByEmail(userId);
@@ -139,7 +141,8 @@ public class EntriesAsCSV {
         csvPath = tmpFile.toPath();
         FileWriter fileWriter = new FileWriter(tmpFile);
 
-        List<EntryField> fields = getEntryFields();
+        if (fields == null || fields.length == 0)
+            fields = getEntryFields();
         String[] headers = getCSVHeaders(fields);
         Set<Long> sequenceSet = new HashSet<>();
 
@@ -152,7 +155,7 @@ public class EntriesAsCSV {
                 Entry entry = dao.get(entryId);
 
                 //  get contents and write data out
-                String[] line = new String[fields.size() + 3];
+                String[] line = new String[fields.length + 3];
                 line[0] = entry.getCreationTime().toString();
                 line[1] = entry.getPartNumber();
                 int i = 1;
@@ -172,7 +175,7 @@ public class EntriesAsCSV {
             }
         }
 
-        writeZip(userId, sequenceSet);
+        writeZip(sequenceSet);
     }
 
     private String getSequenceName(Entry entry) {
@@ -183,27 +186,27 @@ public class EntriesAsCSV {
             format = formats[0].toLowerCase();
         }
 
-        switch (format.toLowerCase()) {
-            case "original":
+        switch (SequenceFormat.fromString(format)) {
+            case ORIGINAL:
                 Sequence sequence = sequenceDAO.getByEntry(entry);
                 if (sequence == null)
                     return "";
                 return sequence.getFileName();
 
-            case "genbank":
+            case GENBANK:
             default:
                 return entry.getPartNumber() + ".gb";
 
-            case "fasta":
+            case FASTA:
                 return entry.getPartNumber() + ".fasta";
 
-            case "sbol1":
-            case "sbol2":
+            case SBOL1:
+            case SBOL2:
                 return entry.getPartNumber() + ".xml";
         }
     }
 
-    private boolean writeZip(String userId, Set<Long> sequenceSet) {
+    private boolean writeZip(Set<Long> sequenceSet) {
         SequenceController sequenceController = new SequenceController();
         Path tmpPath = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY));
         try {
@@ -216,7 +219,7 @@ public class EntriesAsCSV {
             // get sequence formats
             for (long entryId : sequenceSet) {
                 for (String format : formats) {
-                    ByteArrayWrapper wrapper = sequenceController.getSequenceFile(userId, entryId, format);
+                    ByteArrayWrapper wrapper = sequenceController.getSequenceFile(userId, entryId, SequenceFormat.fromString(format));
                     putZipEntry(wrapper, zos);
                 }
             }
@@ -252,7 +255,7 @@ public class EntriesAsCSV {
         }
     }
 
-    protected List<EntryField> getEntryFields() {
+    protected EntryField[] getEntryFields() {
         Set<String> recordTypes = new HashSet<>(dao.getRecordTypes(entries));
         List<EntryField> fields = EntryFields.getCommonFields();
 
@@ -278,7 +281,49 @@ public class EntriesAsCSV {
             }
         }
 
-        return fields;
+        return fields.toArray(new EntryField[(fields.size())]);
+    }
+
+    public ByteArrayOutputStream customize(EntrySelection selection) throws IOException {
+        Entries retriever = new Entries(this.userId);
+        this.entries = retriever.getEntriesFromSelectionContext(selection);
+        SequenceController sequenceController = new SequenceController();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        EntryAuthorization entryAuthorization = new EntryAuthorization();
+
+        try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+            for (long entryId : this.entries) {
+                // get the entry
+                Entry entry = DAOFactory.getEntryDAO().get(entryId);
+                if (entry == null) {
+                    System.out.println("ERROR : no entry " + entryId);  // write to csv file
+                    continue;
+                }
+
+                if (!entryAuthorization.canRead(userId, entry)) {
+                    System.out.println("ERROR : cannot read " + entryId);
+                    continue;
+                }
+
+                if (!sequenceDAO.hasSequence(entryId)) {
+                    System.out.println("no sequence");
+                    continue;
+                }
+
+                // get the sequence
+                ByteArrayWrapper wrapper = sequenceController.getSequenceFile(userId, entryId, SequenceFormat.FASTA);
+                if (wrapper == null) {
+                    System.out.println("ERROR : no sequence " + entryId);
+                    continue;
+                }
+
+                ZipEntry zipEntry = new ZipEntry(entry.getPartNumber() + File.separatorChar + entry.getPartNumber() + ".fa");
+                zos.putNextEntry(zipEntry);
+                zos.write(wrapper.getBytes());
+                zos.closeEntry();
+            }
+        }
+        return baos;
     }
 
     public Path getFilePath() {

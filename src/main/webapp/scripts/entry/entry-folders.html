@@ -7,11 +7,29 @@
     <tr ng-hide="(containedFolders&&containedFolders.length)">
         <td class="font-85em pad-6"><i style="color: #999">Not contained in any folders</i></td>
     </tr>
-    <tr ng-repeat="folder in containedFolders">
-        <td class="entry_detail_view_row">
-            <i class="fa fa-folder-open-o small pad_left"></i>&nbsp;<a ng-href="folders/{{folder.id}}"
-                                                                       class="font-85em">{{folder.folderName |
-                fileTruncate:23:false}}</a>
+    <tr ng-repeat="folder in containedFolders | orderBy: 'folderName' : false">
+        <td class="entry_detail_folder_row">
+            <div ng-if="!folder.confirmDelete">
+                <i class="fa fa-folder-open-o small pad_left"></i>
+                <a ng-href="folders/{{folder.id}}" class="font-85em">{{folder.folderName | fileTruncate:22:false}}</a>
+
+                <i stop-event="click" ng-if="folder.canEdit" class="fa fa-trash-o delete_icon pull-right"
+                   ng-click="folder.confirmDelete = true"></i>
+            </div>
+
+            <div ng-if="folder.confirmDelete">
+                <i class="fa fa-exclamation-triangle alert_color font-85em"></i>
+                <span class="font-80em" style="color: #CC3333">Remove entry?</span>
+
+                <div class="pull-right">
+                    <button stop-event="click" class="btn btn-xs btn-primary"
+                            ng-click="removeEntryFromFolder(folder)">Yes
+                    </button>
+                    <button stop-event="click" class="btn btn-xs btn-default" ng-click="folder.confirmDelete = false">No
+                    </button>
+                </div>
+            </div>
+
         </td>
     </tr>
 </table>

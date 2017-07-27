@@ -59,7 +59,7 @@ public class EntryHistory {
             }
             results.getData().add(history);
         }
-        long count = dao.getHistoryCount(this.entry);
+        long count = dao.getAuditsForEntryCount(this.entry);
         results.setResultCount(count);
         return results;
     }

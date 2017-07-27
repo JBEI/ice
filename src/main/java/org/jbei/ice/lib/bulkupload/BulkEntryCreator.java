@@ -1,11 +1,11 @@
 package org.jbei.ice.lib.bulkupload;
 
+import com.google.common.io.ByteStreams;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.bulkupload.EditMode;
 import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -15,8 +15,7 @@ import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.sample.SampleService;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.search.blast.BlastPlus;
+import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
@@ -27,6 +26,8 @@ import org.jbei.ice.storage.model.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.HashMap;
@@ -516,7 +517,7 @@ public class BulkEntryCreator {
                 // attempt to get linked entry and add
                 if (linked.getId() != 0) {
                     Entry linkedEntry = entryDAO.get(linked.getId());
-                    if (linkedEntry != null && entryAuthorization.canWriteThoroughCheck(userId, entry)) {
+                    if (linkedEntry != null && entryAuthorization.canWrite(userId, entry)) {
                         EntryLinks links = new EntryLinks(userId, Long.toString(entry.getId()));
                         links.addLink(linked, LinkType.CHILD);
                     }
@@ -561,20 +562,8 @@ public class BulkEntryCreator {
         try {
             String sequenceName = data.getSequenceFileName();
             if (!StringUtils.isBlank(sequenceName)) {
-                String sequenceString = Utils.getString(files.get(sequenceName));
-                DNASequence dnaSequence = SequenceController.parse(sequenceString);
-
-                if (dnaSequence == null || dnaSequence.getSequence().equals("")) {
-                    Logger.error("Couldn't parse sequence file " + sequenceName);
-                } else {
-                    Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-                    sequence.setSequenceUser(sequenceString);
-                    sequence.setEntry(entry);
-                    sequence.setFileName(sequenceName);
-                    Sequence result = DAOFactory.getSequenceDAO().saveSequence(sequence);
-                    if (result != null)
-                        BlastPlus.scheduleBlastIndexRebuildTask(true);
-                }
+                PartSequence partSequence = new PartSequence(entry.getOwnerEmail(), entry.getRecordId());
+                partSequence.parseSequenceFile(files.get(sequenceName), sequenceName, false);
             }
         } catch (IOException e) {
             Logger.error(e);
@@ -584,7 +573,12 @@ public class BulkEntryCreator {
         try {
             if (data.getAttachments() != null && !data.getAttachments().isEmpty()) {
                 String attachmentName = data.getAttachments().get(0).getFilename();
+                if (StringUtils.isEmpty(attachmentName))
+                    return;
+
                 InputStream attachmentStream = files.get(attachmentName);
+                if (attachmentStream == null)
+                    return;
 
                 // clear
                 List<Attachment> attachments = DAOFactory.getAttachmentDAO().getByEntry(entry);
@@ -603,8 +597,9 @@ public class BulkEntryCreator {
                 attachment.setFileId(fileId);
                 attachment.setFileName(attachmentName);
                 String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-                File attachmentDir = Paths.get(dataDir, "attachments").toFile();
-                DAOFactory.getAttachmentDAO().save(attachmentDir, attachment, attachmentStream);
+                Path path = Paths.get(dataDir, "attachments", attachment.getFileId());
+                Files.write(path, ByteStreams.toByteArray(attachmentStream));
+                DAOFactory.getAttachmentDAO().create(attachment);
             }
         } catch (Exception e) {
             Logger.error(e);

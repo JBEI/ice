@@ -24,6 +24,7 @@ public class BulkCSVUploadHeaders {
                 addArabidopsisSeedHeaders(list);
                 break;
 
+            default:
             case STRAIN:
                 addStrainHeaders(list);
                 break;

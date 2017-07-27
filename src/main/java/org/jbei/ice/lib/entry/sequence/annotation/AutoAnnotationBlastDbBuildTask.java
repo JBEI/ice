@@ -24,7 +24,7 @@ public class AutoAnnotationBlastDbBuildTask extends Task {
     private boolean stopped;
     private final Object LOCK_OBJECT = new Object();
     private int exceptionCount;
-    private final int RUN_HOUR = 1;    // make config param
+    private static final int RUN_HOUR = 1;    // make config param
     private final boolean runOnce;
 
     public AutoAnnotationBlastDbBuildTask(boolean runOnce) {

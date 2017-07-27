@@ -1,7 +1,5 @@
 package org.jbei.ice.storage.hibernate.dao;
 
-import com.google.common.io.ByteStreams;
-import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
@@ -11,9 +9,6 @@ import org.jbei.ice.storage.model.Entry;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.io.File;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 
 /**
@@ -22,20 +17,6 @@ import java.util.List;
  * @author Hector Plahar
  */
 public class AttachmentDAO extends HibernateRepository<Attachment> {
-
-    public Attachment save(File attDir, Attachment attachment, InputStream inputStream) {
-        try {
-            attachment = create(attachment);
-            if (inputStream != null) {
-                Files.write(Paths.get(attDir.getAbsolutePath(), attachment.getFileId()), ByteStreams.toByteArray(inputStream));
-            }
-        } catch (Exception e1) {
-            Logger.error(e1);
-            throw new DAOException("Exception writing attachment file ", e1);
-        }
-
-        return attachment;
-    }
 
     public void delete(File attDir, Attachment attachment) {
         try {
@@ -61,7 +42,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
             query.where(getBuilder().equal(from.get("entry"), entry));
             query.orderBy(getBuilder().desc(from.get("id")));
             return currentSession().createQuery(query).list();
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve attachment by entry: " + entry.getId(), e);
         }
@@ -73,7 +54,7 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
             Root<Attachment> from = query.from(Attachment.class);
             query.select(getBuilder().countDistinct(from.get("id"))).where(getBuilder().equal(from.get("entry"), entry));
             return currentSession().createQuery(query).uniqueResult() > 0;
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve attachment by entry: " + entry.getId(), e);
         }
@@ -92,25 +73,10 @@ public class AttachmentDAO extends HibernateRepository<Attachment> {
             Root<Attachment> from = query.from(Attachment.class);
             query.where(getBuilder().equal(from.get("fileId"), fileId));
             return currentSession().createQuery(query).uniqueResult();
-        } catch (HibernateException e) {
+        } catch (Exception e) {
             Logger.error(e);
             throw new DAOException("Failed to retrieve attachment by fileId: " + fileId, e);
         }
-    }
-
-    /**
-     * Retrieve the {@link File} from the disk of the given {@link Attachment}.
-     *
-     * @param attachment attachment whose physical file is to be retrieved
-     * @return File physical attachment file
-     * @throws DAOException
-     */
-    public File getFile(File attDir, Attachment attachment) {
-        File file = new File(attDir + File.separator + attachment.getFileId());
-        if (!file.exists()) {
-            throw new DAOException("Attachment file " + file.getAbsolutePath() + " does not exist");
-        }
-        return file;
     }
 
     public boolean deleteFile(File attDir, Attachment attachment) {

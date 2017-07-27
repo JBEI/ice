@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.folder;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
@@ -167,6 +168,17 @@ public class FolderController {
         return folders;
     }
 
+    /**
+     * Updates the folder referenced by the folderId with the passed folder details.
+     * If the propagate parameter is set (differs from existing folder's value) then the contained entries are updated
+     * accordingly.
+     *
+     * @param userId   unique identifier for user making request. Must have write privileges
+     * @param folderId unique identifier for folder being updated
+     * @param details  new details to update
+     * @return updated folder's details
+     * @throws PermissionException if user making request doesn't have the appropriate privileges
+     */
     public FolderDetails update(String userId, long folderId, FolderDetails details) {
         Folder folder = dao.get(folderId);
         if (folder == null)
@@ -249,15 +261,15 @@ public class FolderController {
                 if (!accountController.isAdministrator(userId) && !folder.getOwnerEmail().equalsIgnoreCase(userId)) {
                     String errorMsg = userId + ": insufficient permissions to delete folder " + folderId;
                     Logger.warn(errorMsg);
-                    return null;
+                    throw new PermissionException(errorMsg);
                 }
 
                 details = folder.toDataTransferObject();
                 long folderSize = dao.getFolderSize(folderId, null, true);
                 details.setCount(folderSize);
 
-                dao.delete(folder);
                 permissionDAO.clearPermissions(folder);
+                dao.delete(folder);
                 return details;
 
             default:

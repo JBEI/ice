@@ -9,8 +9,9 @@ import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.SampleDAO;
 import org.jbei.ice.storage.hibernate.dao.StorageDAO;
 import org.jbei.ice.storage.model.*;
@@ -29,12 +30,16 @@ public class SampleService extends HasEntry {
 
     private final SampleDAO dao;
     private final StorageDAO storageDAO;
+    private final AccountDAO accountDAO;
+    private final EntryDAO entryDAO;
     private final EntryAuthorization entryAuthorization;
     private final SampleAuthorization sampleAuthorization;
 
     public SampleService() {
         dao = DAOFactory.getSampleDAO();
+        accountDAO = DAOFactory.getAccountDAO();
         storageDAO = DAOFactory.getStorageDAO();
+        entryDAO = DAOFactory.getEntryDAO();
         entryAuthorization = new EntryAuthorization();
         sampleAuthorization = new SampleAuthorization();
     }
@@ -106,7 +111,7 @@ public class SampleService extends HasEntry {
         sample = dao.create(sample);
         String name = entry.getName();
         if (strainNamePrefix != null && name != null && !name.startsWith(strainNamePrefix)) {
-            DAOFactory.getEntryDAO().generateNextStrainNameForEntry(entry, strainNamePrefix);
+            entryDAO.generateNextStrainNameForEntry(entry, strainNamePrefix);
         }
         return sample.toDataTransferObject();
     }
@@ -117,7 +122,7 @@ public class SampleService extends HasEntry {
      *
      * @param sampleDepositor userID - unique identifier for user performing action
      * @param mainLocation    96 well plate location
-     * @return sample storage with a complete hierachy or null
+     * @return sample storage with a complete hierarchy or null
      */
     protected Storage createPlate96Location(String sampleDepositor, StorageLocation mainLocation) {
         // validate: expected format is [PLATE96, WELL, (optional - TUBE)]
@@ -216,8 +221,7 @@ public class SampleService extends HasEntry {
         return currentStorage;
     }
 
-
-    public ArrayList<PartSample> retrieveEntrySamples(String userId, String entryId) {
+    public List<PartSample> retrieveEntrySamples(String userId, String entryId) {
         Entry entry = super.getEntry(entryId);
         if (entry == null)
             return null;
@@ -232,7 +236,7 @@ public class SampleService extends HasEntry {
 
         boolean inCart = false;
         if (userId != null) {
-            Account userAccount = DAOFactory.getAccountDAO().getByEmail(userId);
+            Account userAccount = accountDAO.getByEmail(userId);
             inCart = DAOFactory.getRequestDAO().getSampleRequestInCart(userAccount, entry) != null;
         }
         ArrayList<Sample> siblingSamples = new ArrayList<>();
@@ -304,8 +308,6 @@ public class SampleService extends HasEntry {
             }
 
             partSample = setAccountInfo(partSample, sample.getDepositor());
-
-
             samples.add(partSample);
         }
 
@@ -313,7 +315,7 @@ public class SampleService extends HasEntry {
     }
 
     protected PartSample setAccountInfo(PartSample partSample, String email) {
-        Account account = DAOFactory.getAccountDAO().getByEmail(email);
+        Account account = accountDAO.getByEmail(email);
         if (account != null)
             partSample.setDepositor(account.toDataTransferObject());
         else {
@@ -342,40 +344,27 @@ public class SampleService extends HasEntry {
             return false;
 
         sampleAuthorization.expectWrite(userId, sample);
+        Storage storage = sample.getStorage();
+        dao.delete(sample);
 
-        try {
-            Storage storage = sample.getStorage();
-            while (storage != null) {
-                Storage parent = storage.getParent();
+        while (storage != null) {
+            Storage parent = storage.getParent();
 
-                if (storage.getChildren().size() == 0) {
-                    DAOFactory.getStorageDAO().delete(storage);
-                }
-
-                if (parent != null) {
-                    parent.getChildren().remove(storage);
-                    storage = parent;
-                } else {
-                    break;
-                }
+            if (storage.getChildren().size() == 0) {
+                storageDAO.delete(storage);
+            } else {
+                break;
             }
 
-            sample.setStorage(null);
-            dao.delete(sample);
-            return true;
-        } catch (DAOException de) {
-            return false;
-        }
-    }
-
-    public List<StorageLocation> getStorageLocations(String userId, String entryType) {
-        List<Storage> storages = DAOFactory.getStorageDAO().getAllStorageSchemes();
-        ArrayList<StorageLocation> locations = new ArrayList<>();
-        for (Storage storage : storages) {
-            locations.add(storage.toDataTransferObject());
+            if (parent != null) {
+                parent.getChildren().remove(storage);
+                storage = parent;
+            } else {
+                break;
+            }
         }
 
-        return locations;
+        return true;
     }
 
     public ArrayList<PartSample> getSamplesByBarcode(String userId, String barcode) {
