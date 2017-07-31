@@ -191,7 +191,7 @@ angular.module('ice.collection.controller', [])
             if (!result)
                 return;
 
-            $scope.folder.canSetPublicPermission = (result.value == "no") || $rootScope.user.isAdmin;
+            $scope.folder.canSetPublicPermission = (result.value.toLowerCase() == "no") || $rootScope.user.isAdmin;
         });
 
         // retrieve permissions for folder
