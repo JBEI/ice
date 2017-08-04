@@ -22,6 +22,7 @@ import org.jbei.ice.lib.entry.sequence.*;
 import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.RemoteSequence;
+import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
@@ -283,6 +284,25 @@ public class FileResource extends RestResource {
             ErrorResponse response = new ErrorResponse();
             response.setMessage(e.getMessage());
             throw new WebApplicationException(Response.serverError().entity(response).build());
+        }
+    }
+
+    /**
+     * Create a model of the uploaded sequence file. Note that this does not associate the sequence
+     * with any existing entry. It just parses the uploaded file
+     */
+    @POST
+    @Path("sequence/model")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createSequenceModel(@FormDataParam("file") InputStream fileInputStream,
+                                        @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
+        final String fileName = contentDispositionHeader.getFileName();
+        SequenceController sequenceController = new SequenceController();
+        try {
+            return super.respond(sequenceController.parseSequence(fileInputStream, fileName));
+        } catch (InvalidFormatParserException e) {
+            throw new WebApplicationException(e.getMessage());
         }
     }
 
