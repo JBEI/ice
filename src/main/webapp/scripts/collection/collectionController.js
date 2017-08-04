@@ -110,7 +110,6 @@ angular.module('ice.collection.controller', [])
         });
 
         $rootScope.$on("CollectionSelection", function (event, data) {
-            //console.log("collection selection", data);
             $scope.selectCollection(data);
         });
 
