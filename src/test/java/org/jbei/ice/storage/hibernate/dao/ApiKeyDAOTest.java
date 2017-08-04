@@ -45,6 +45,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
 
         // create a number of api keys for user
         for (int i = 0; i < 6; i += 1) {
+
             ApiKey apiKey = createKey(account.getEmail(), null);
             Assert.assertNotNull(apiKey);
         }
@@ -66,6 +67,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
 
         // create api keys for each account
         for (int i = 0; i < limit1; i += 1) {
+
             ApiKey apiKey = createKey(account1.getEmail(), null);
             Assert.assertNotNull(apiKey);
         }
@@ -98,6 +100,7 @@ public class ApiKeyDAOTest extends HibernateRepositoryTest {
 
         // create api keys for each account
         for (int i = 0; i < limit1; i += 1) {
+
             ApiKey apiKey = createKey(account1.getEmail(), null);
             Assert.assertNotNull(apiKey);
         }
