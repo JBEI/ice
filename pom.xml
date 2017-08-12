@@ -205,6 +205,7 @@
                 <artifactId>maven-jetty-plugin</artifactId>
                 <version>6.1.26</version>
                 <configuration>
+                    <scanIntervalSeconds>5</scanIntervalSeconds>
                     <jettyConfig>jetty-debug.xml</jettyConfig>
                     <webAppConfig>
                         <contextPath>/</contextPath>

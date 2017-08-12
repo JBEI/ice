@@ -59,7 +59,7 @@ public class GenBankParser extends AbstractParser {
 
     // TODO parse source feature tag with xdb_ref
     @Override
-    public DNASequence parse(String textSequence) throws InvalidFormatParserException {
+    public DNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
         FeaturedDNASequence sequence;
         textSequence = cleanSequence(textSequence);
 
