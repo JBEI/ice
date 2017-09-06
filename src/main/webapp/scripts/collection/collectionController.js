@@ -399,7 +399,7 @@ angular.module('ice.collection.controller', [])
         };
 
         uploader.onSuccessItem = function (item, response, status, header) {
-            $scope.serverResult = {data: response, total: response.length, valid: []}
+            $scope.serverResult = {data: response, total: response.length, valid: []};
             for (var i = 0; i < response.length; i += 1) {
                 var datum = response[i];
                 if (datum.partData) {
