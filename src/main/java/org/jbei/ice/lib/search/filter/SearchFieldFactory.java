@@ -63,7 +63,10 @@ public class SearchFieldFactory {
         seedFields.add("plantType");
 
         // protein fields
-        proteinFields.add("dummy");
+        proteinFields.add("organism");
+        proteinFields.add("fullName");
+        proteinFields.add("geneName");
+        proteinFields.add("uploadedFrom");
     }
 
     public static String[] getCommonFields() {

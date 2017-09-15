@@ -150,8 +150,17 @@ public class InfoToModelFactory {
         if (proteinData == null)
             return entry;
 
-        if (proteinData.getDummy() != null)
-            protein.setDummy(proteinData.getDummy());
+        if (proteinData.getOrganism() != null)
+            protein.setOrganism(proteinData.getOrganism());
+
+        if (proteinData.getFullName() != null)
+            protein.setFullName(proteinData.getFullName());
+
+        if (proteinData.getGeneName() != null)
+            protein.setGeneName(proteinData.getGeneName());
+
+        if (proteinData.getUploadedFrom() != null)
+            protein.setUploadedFrom(proteinData.getUploadedFrom());
 
         return entry;
     }
@@ -473,7 +482,10 @@ public class InfoToModelFactory {
                 entry = infoToSeedForField(entry, value, field);
                 break;
 
-            case DUMMY:
+            case ORGANISM:
+            case FULL_NAME:
+            case GENE_NAME:
+            case UPLOADED_FROM:
                 entry = infoToProteinForField(entry, value, field);
                 break;
 
@@ -595,8 +607,20 @@ public class InfoToModelFactory {
         Protein protein = (Protein) entry;
 
         switch (field) {
-            case DUMMY:
-                protein.setDummy(value);
+            case ORGANISM:
+                protein.setOrganism(value);
+                return protein;
+
+            case FULL_NAME:
+                protein.setFullName(value);
+                return protein;
+
+            case GENE_NAME:
+                protein.setGeneName(value);
+                return protein;
+
+            case UPLOADED_FROM:
+                protein.setUploadedFrom(value);
                 return protein;
 
             default:

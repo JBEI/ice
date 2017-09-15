@@ -39,7 +39,7 @@ angular.module('ice.upload.service', [])
             "Plant Type", "Generation", "Sent to ABRC?", "Selection Markers <span class='required'>*</span>"]));
 
         var proteinHeaders = angular.copy(partHeaders);
-        proteinHeaders.splice.apply(proteinHeaders, [15, 0].concat(["Dummy", "Selection Markers <span class='required'>*</span>"]));
+        proteinHeaders.splice.apply(proteinHeaders, [15, 0].concat(["Organism", "Full Name", "Gene Name", "Uploaded From"]));
 
         //
         // data schema (should map exactly to headers)
@@ -62,8 +62,8 @@ angular.module('ice.upload.service', [])
             'plantType', 'generation', 'sentToAbrc', 'selectionMarkers'));
 
         var proteinSchema = angular.copy(dataSchema);
-        proteinSchema.splice.apply(proteinSchema, [15, 0].concat('dummy'));
-
+        proteinSchema.splice.apply(proteinSchema, [15, 0].concat('organism', 'fullName', 'geneName',
+            'uploadedFrom'));
 
         return {
             getDataSchema: function (type) {

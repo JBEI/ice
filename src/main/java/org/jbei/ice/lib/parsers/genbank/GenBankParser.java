@@ -149,10 +149,6 @@ public class GenBankParser extends AbstractParser {
                 case LOCUS_TAG:
                     tags.set(i, parseLocusTag(tag));
                     break;
-
-                case SOURCE_TAG:
-                    // ??
-                    break;
             }
         }
         return tags;

@@ -57,6 +57,9 @@ public class EntryFields {
     }
 
     public static void addProteinHeaders(List<EntryField> list) {
-        list.add(EntryField.DUMMY);
+        list.add(EntryField.ORGANISM);
+        list.add(EntryField.FULL_NAME);
+        list.add(EntryField.GENE_NAME);
+        list.add(EntryField.UPLOADED_FROM);
     }
 }

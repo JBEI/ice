@@ -126,7 +126,10 @@ public class ModelToInfoFactory {
 
         // protein specific
         Protein protein = (Protein) entry;
-        data.setDummy(protein.getDummy());
+        data.setOrganism(protein.getOrganism());
+        data.setFullName(protein.getFullName());
+        data.setGeneName(protein.getGeneName());
+        data.setUploadedFrom(protein.getUploadedFrom());
         return data;
     }
 
@@ -379,7 +382,10 @@ public class ModelToInfoFactory {
                 ProteinData proteinData = new ProteinData();
 
                 Protein protein = (Protein) entry;
-                proteinData.setDummy(protein.getDummy());
+                proteinData.setOrganism(protein.getOrganism());
+                proteinData.setFullName(protein.getFullName());
+                proteinData.setGeneName(protein.getGeneName());
+                proteinData.setUploadedFrom(protein.getUploadedFrom());
                 part.setProteinData(proteinData);
                 break;
         }

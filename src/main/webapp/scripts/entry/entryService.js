@@ -300,7 +300,10 @@ angular.module('ice.entry.service', [])
 
         // fields peculiar to proteins
         var proteinFields = [
-            {label: "Dummy Field", schema: 'dummy', inputType: 'medium', subSchema: 'proteinData'},
+            {label: "Organism", schema: 'organism', inputType: 'medium', subSchema: 'proteinData'},
+            {label: "Full Name", schema: 'fullName', inputType: 'medium', subSchema: 'proteinData'},
+            {label: "Gene Name", schema: 'geneName', inputType: 'medium', subSchema: 'proteinData'},
+            {label: "Uploaded From", schema: 'uploadedFrom', inputType: 'medium', subSchema: 'proteinData'},
         ];
 
         var generateLinkOptions = function (type) {

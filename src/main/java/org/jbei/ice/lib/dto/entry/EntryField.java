@@ -45,7 +45,10 @@ public enum EntryField implements IDataTransferModel {
     PLANT_TYPE("Plant Type", false),
     PARENTS("Parents", false),
     EXISTING_PART_NUMBER("Existing Part Number", false),
-    DUMMY("Dummy", false);
+    ORGANISM("Organism", false),
+    FULL_NAME("Full Name", false),
+    GENE_NAME("Gene Name", false),
+    UPLOADED_FROM("Uploaded From", false);
 
     private String label;
     private boolean required;

@@ -195,8 +195,17 @@ public class PartDataUtil {
             return "";
 
         switch (field) {
-            case DUMMY:
-                return proteinData.getDummy();
+            case ORGANISM:
+                return proteinData.getOrganism();
+
+            case FULL_NAME:
+                return proteinData.getFullName();
+
+            case GENE_NAME:
+                return proteinData.getGeneName();
+
+            case UPLOADED_FROM:
+                return proteinData.getUploadedFrom();
 
             default:
                 return null;

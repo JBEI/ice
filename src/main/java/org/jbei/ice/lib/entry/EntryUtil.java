@@ -195,8 +195,17 @@ public class EntryUtil {
 
     protected static String getProteinFieldValues(Protein protein, EntryField field) {
         switch (field) {
-            case DUMMY:
-                return protein.getDummy();
+            case ORGANISM:
+                return protein.getOrganism();
+
+            case FULL_NAME:
+                return protein.getFullName();
+
+            case GENE_NAME:
+                return protein.getGeneName();
+
+            case UPLOADED_FROM:
+                return protein.getUploadedFrom();
 
             default:
                 return null;
@@ -362,8 +371,20 @@ public class EntryUtil {
             proteinData = new ProteinData();
 
         switch (field) {
-            case DUMMY:
-                proteinData.setDummy(value);
+            case ORGANISM:
+                proteinData.setOrganism(value);
+                break;
+
+            case FULL_NAME:
+                proteinData.setFullName(value);
+                break;
+
+            case GENE_NAME:
+                proteinData.setGeneName(value);
+                break;
+
+            case UPLOADED_FROM:
+                proteinData.setUploadedFrom(value);
                 break;
         }
 
@@ -482,7 +503,10 @@ public class EntryUtil {
                 data.setArabidopsisSeedData(setSeedDataFromField(data.getArabidopsisSeedData(), value, field));
                 break;
 
-            case DUMMY:
+            case ORGANISM:
+            case FULL_NAME:
+            case GENE_NAME:
+            case UPLOADED_FROM:
                 data.setProteinData(setProteinDataFromField(data.getProteinData(), value, field));
                 break;
 

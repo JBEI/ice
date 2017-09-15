@@ -31,7 +31,7 @@ public class BulkCSVUploadHeaders {
             case PLASMID:
                 addPlasmidHeaders(list);
                 break;
-                
+
             case PROTEIN:
                 addProteinHeaders(list);
                 break;
@@ -96,6 +96,9 @@ public class BulkCSVUploadHeaders {
     }
 
     public static void addProteinHeaders(List<EntryField> list) {
-        list.add(EntryField.DUMMY);
+        list.add(EntryField.ORGANISM);
+        list.add(EntryField.FULL_NAME);
+        list.add(EntryField.GENE_NAME);
+        list.add(EntryField.UPLOADED_FROM);
     }
 }
