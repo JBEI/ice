@@ -61,7 +61,7 @@ public class HmacSignatureFactory {
             return a.substring(0, a.indexOf("=")).compareTo(b.substring(0, b.indexOf("=")));
         }
     };
-    private static final PercentEscaper ESCAPER = new PercentEscaper("-_.~", false);
+    private static final PercentEscaper ESCAPER = new PercentEscaper("-_.~%", false);
     private static final String HMAC = "HmacSHA1";
     private static final String NEWLINE = "\n";
 
