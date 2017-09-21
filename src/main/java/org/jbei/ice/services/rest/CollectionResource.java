@@ -103,6 +103,7 @@ public class CollectionResource extends RestResource {
         } catch (IllegalArgumentException ie) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         } catch (Exception e) {
+            Logger.error(e);
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
