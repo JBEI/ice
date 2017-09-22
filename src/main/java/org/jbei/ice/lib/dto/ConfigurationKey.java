@@ -23,7 +23,6 @@ public enum ConfigurationKey implements IDataTransferModel {
     PROJECT_NAME(""),
     URI_PREFIX("localhost:8443"),
     PART_NUMBER_PREFIX("TEST"),
-    PART_NUMBER_DIGITAL_SUFFIX("000001"),
     PART_NUMBER_DELIMITER("_"),
 
     BLAST_INSTALL_DIR(""),
