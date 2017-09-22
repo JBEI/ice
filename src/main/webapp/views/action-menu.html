@@ -28,11 +28,25 @@
 
     <!--edit, delete/erase, and restore-->
     <div class="btn-group" style="margin-left: 20px">
-        <button class="btn btn-default action-menu" ng-disabled="!canEdit()" ng-click="editEntry()">
+        <button class="btn btn-default action-menu" ng-disabled="!canEdit()" ng-click="editEntry()"
+                ng-if="!user.isAdmin">
             <i class="fa fa-pencil font-12em"></i>
             <br>
             <small class="text-uppercase font-55em">Edit</small>
         </button>
+
+        <div class="btn-group" style="margin-left: 20px" uib-dropdown ng-if="user.isAdmin">
+            <button class="btn btn-default action-menu" uib-dropdown-toggle>
+                <i class="fa fa-cloud-download font-12em"></i>
+                <br>
+                <small class="text-uppercase font-55em">Edit <span class="caret"></span></small>
+            </button>
+
+            <ul class="uib-dropdown-menu">
+                <li><a href="#" class="font-90em" ng-click="editEntry()">Entries</a></li>
+                <li><a href="#" class="font-90em" ng-click="bulkUpdateSequences()">Sequences</a></li>
+            </ul>
+        </div>
 
         <button class="btn btn-default action-menu" ng-show="!isDealingWithDeleted()" ng-disabled="!canDelete()" ng-click="deleteSelectedEntries()">
             <i class="fa fa-trash-o font-12em"></i>

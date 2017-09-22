@@ -14,9 +14,6 @@ import org.jbei.ice.storage.model.*;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -138,18 +135,13 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      * Delete the given {@link Sequence} object in the database.
      *
      * @param sequence          sequence to delete
-     * @param pigeonImageFolder path of the image folder where the pigeon images are cached
      */
-    public void deleteSequence(Sequence sequence, String pigeonImageFolder) {
-        String sequenceHash = sequence.getFwdHash();
+    public void deleteSequence(Sequence sequence) {
         try {
             sequence.setEntry(null);
             sequence.getSequenceFeatures();
             super.delete(sequence);
             currentSession().flush();
-            Files.deleteIfExists(Paths.get(pigeonImageFolder, sequenceHash + ".png"));
-        } catch (IOException e) {
-            Logger.warn(e.getMessage());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

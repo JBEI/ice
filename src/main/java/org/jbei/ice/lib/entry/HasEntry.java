@@ -13,7 +13,7 @@ import java.util.List;
  * Provides a means to retrieve an entry using an id that can either be
  * the database identifier for the entry object or any one of the other unique entry
  * fields. e.g. <code>part number</code> or <code>universally unique id</code>
- * <p/>
+ * <p>
  * Also provides access to the entry data accessor object
  *
  * @author Hector Plahar
