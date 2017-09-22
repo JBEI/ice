@@ -120,6 +120,10 @@ public class FolderContents {
                     case ARABIDOPSIS:
                         entry = new ArabidopsisSeed();
                         break;
+
+                    case PROTEIN:
+                        entry = new Protein();
+                        break;
                 }
 
                 entry.setRecordId(partData.getRecordId());

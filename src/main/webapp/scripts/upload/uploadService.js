@@ -38,6 +38,9 @@ angular.module('ice.upload.service', [])
         seedHeaders.splice.apply(seedHeaders, [15, 0].concat(["Homozygosity", "Ecotype", "Harvest Date", "Parents",
             "Plant Type", "Generation", "Sent to ABRC?", "Selection Markers <span class='required'>*</span>"]));
 
+        var proteinHeaders = angular.copy(partHeaders);
+        proteinHeaders.splice.apply(proteinHeaders, [15, 0].concat(["Organism", "Full Name", "Gene Name", "Uploaded From"]));
+
         //
         // data schema (should map exactly to headers)
         //
@@ -58,6 +61,10 @@ angular.module('ice.upload.service', [])
         seedSchema.splice.apply(seedSchema, [15, 0].concat('homozygosity', 'ecotype', 'harvestDate', 'parents',
             'plantType', 'generation', 'sentToAbrc', 'selectionMarkers'));
 
+        var proteinSchema = angular.copy(dataSchema);
+        proteinSchema.splice.apply(proteinSchema, [15, 0].concat('organism', 'fullName', 'geneName',
+            'uploadedFrom'));
+
         return {
             getDataSchema: function (type) {
                 switch (type.toLowerCase()) {
@@ -69,6 +76,9 @@ angular.module('ice.upload.service', [])
 
                     case "arabidopsis":
                         return seedSchema;
+
+                    case "protein":
+                        return proteinSchema;
 
                     case "part":
                     default:
@@ -95,6 +105,9 @@ angular.module('ice.upload.service', [])
 
                     case "arabidopsis":
                         return seedHeaders;
+
+                    case "protein":
+                        return proteinHeaders;
                 }
             },
 
@@ -145,6 +158,10 @@ angular.module('ice.upload.service', [])
                     case "arabidopsis":
                         object.arabidopsisSeedData[dataSchema[index]] = value;
                         return object;
+
+                    case "protein":
+                        object.proteinData[dataSchema[index]] = value;
+                        return object;
                 }
             },
 
@@ -173,8 +190,6 @@ angular.module('ice.upload.service', [])
                         return entry.strainData[dataSchema[index]];
 
                     case "plasmid":
-                        //console.log(entry);
-
                         // 6 custom fields
                         if (index >= 21)
                             return entry[this.getDataSchema("part")[index - 6]];
@@ -185,6 +200,12 @@ angular.module('ice.upload.service', [])
                         if (index >= 22)
                             return entry[this.getDataSchema("part")[index - 7]];
                         return entry.arabidopsisSeedData[dataSchema[index]];
+
+                    case "protein":
+                        // 1 custom field
+                        if (index >= 16)
+                            return entry[this.getDataSchema("part")[index - 1]];
+                        return entry.proteinData[dataSchema[index]];
 
                     case "part":
                         return entry[dataSchema[index]];
@@ -216,6 +237,12 @@ angular.module('ice.upload.service', [])
                         return [
                             {type: 'part', display: 'Part'},
                             {type: 'arabidopsis', display: 'Arabidopsis Seed'}
+                        ];
+
+                    case 'protein':
+                        return [
+                            {type: 'part', display: 'Part'},
+                            {type: 'protein', display: 'Protein'}
                         ];
                 }
             }

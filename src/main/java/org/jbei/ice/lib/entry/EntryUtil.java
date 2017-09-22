@@ -42,6 +42,10 @@ public class EntryUtil {
                 value = getSeedFieldValues((ArabidopsisSeed) entry, field);
                 break;
 
+            case PROTEIN:
+                value = getProteinFieldValues((Protein) entry, field);
+                break;
+
             default:
                 value = null;
         }
@@ -189,6 +193,25 @@ public class EntryUtil {
         }
     }
 
+    protected static String getProteinFieldValues(Protein protein, EntryField field) {
+        switch (field) {
+            case ORGANISM:
+                return protein.getOrganism();
+
+            case FULL_NAME:
+                return protein.getFullName();
+
+            case GENE_NAME:
+                return protein.getGeneName();
+
+            case UPLOADED_FROM:
+                return protein.getUploadedFrom();
+
+            default:
+                return null;
+        }
+    }
+
     public static String getPartNumberPrefix() {
         return Utils.getConfigValue(ConfigurationKey.PART_NUMBER_PREFIX) +
                 Utils.getConfigValue(ConfigurationKey.PART_NUMBER_DELIMITER);
@@ -235,8 +258,8 @@ public class EntryUtil {
         if (StringUtils.isEmpty(partData.getShortDescription()))
             invalidFields.add(EntryField.SUMMARY);
 
-        if ((type != EntryType.PART) && (partData.getSelectionMarkers() == null || partData.getSelectionMarkers().isEmpty()))
-            invalidFields.add(EntryField.SELECTION_MARKERS);
+        // if ((type != EntryType.PART && type != EntryType.PROTEIN) && (partData.getSelectionMarkers() == null || partData.getSelectionMarkers().isEmpty()))
+        //     invalidFields.add(EntryField.SELECTION_MARKERS);
 
         return invalidFields;
     }
@@ -340,6 +363,32 @@ public class EntryUtil {
         }
 
         return seedData;
+    }
+
+    private static ProteinData setProteinDataFromField(ProteinData proteinData, String value,
+                                                            EntryField field) {
+        if (proteinData == null)
+            proteinData = new ProteinData();
+
+        switch (field) {
+            case ORGANISM:
+                proteinData.setOrganism(value);
+                break;
+
+            case FULL_NAME:
+                proteinData.setFullName(value);
+                break;
+
+            case GENE_NAME:
+                proteinData.setGeneName(value);
+                break;
+
+            case UPLOADED_FROM:
+                proteinData.setUploadedFrom(value);
+                break;
+        }
+
+        return proteinData;
     }
 
     /**
@@ -452,6 +501,13 @@ public class EntryUtil {
             case PLANT_TYPE:
             case PARENTS:
                 data.setArabidopsisSeedData(setSeedDataFromField(data.getArabidopsisSeedData(), value, field));
+                break;
+
+            case ORGANISM:
+            case FULL_NAME:
+            case GENE_NAME:
+            case UPLOADED_FROM:
+                data.setProteinData(setProteinDataFromField(data.getProteinData(), value, field));
                 break;
 
             case CREATOR:

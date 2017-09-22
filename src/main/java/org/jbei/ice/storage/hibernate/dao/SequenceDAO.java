@@ -79,6 +79,37 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         return sequence;
     }
 
+    public Sequence saveProtein(Sequence sequence) {
+        if (sequence == null || sequence.getEntry() == null)
+            throw new IllegalArgumentException("Cannot save null sequence or sequence without entry");
+
+        Set<SequenceFeature> sequenceFeatureSet = null;
+
+        normalizeAnnotationLocations(sequence);
+        if (sequence.getSequenceFeatures() != null) {
+            sequenceFeatureSet = new HashSet<>(sequence.getSequenceFeatures());
+            sequence.setSequenceFeatures(null);
+        }
+
+        // create sequence
+        sequence = create(sequence);
+
+        // separate out sequence features and uniquely create features
+        // if (sequenceFeatureSet != null) {
+        //     for (SequenceFeature sequenceFeature : sequenceFeatureSet) {
+        //         Feature feature = sequenceFeature.getFeature();
+        //
+        //         if (feature == null) {
+        //             throw new DAOException("SequenceFeature has no feature");
+        //         }
+        //
+        //         sequence = ProteinTools.get(sequence);
+        //     }
+        // }
+
+        return sequence;
+    }
+
     private boolean sameFeatureUri(Feature f1, Feature f2) {
         if (f1.getUri() == null && f2.getUri() == null)
             return true;

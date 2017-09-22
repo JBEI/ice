@@ -86,6 +86,9 @@ public class BulkUploadValidation {
             case ARABIDOPSIS:
                 validateSeedFields((ArabidopsisSeed) entry);
                 break;
+
+            case PROTEIN:
+                break;
         }
     }
 
@@ -114,6 +117,9 @@ public class BulkUploadValidation {
             failedFields.add(EntryField.SELECTION_MARKERS);
     }
 
+    private void validateProtein(Protein protein) {
+    }
+
     /**
      * validates fields that are common to all entries (e.g. BioSafety Level)
      * Any fields that fail validation are added to the set of failed validation fields
@@ -133,8 +139,8 @@ public class BulkUploadValidation {
         if (StringUtils.isBlank(entry.getCreator()))
             failedFields.add(EntryField.CREATOR);
 
-        if (StringUtils.isBlank(entry.getCreatorEmail()))
-            failedFields.add(EntryField.CREATOR_EMAIL);
+        // if (StringUtils.isBlank(entry.getCreatorEmail()))
+        //     failedFields.add(EntryField.CREATOR_EMAIL);
 
         if (StringUtils.isBlank(entry.getPrincipalInvestigator()))
             failedFields.add(EntryField.PI);

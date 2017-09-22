@@ -21,12 +21,17 @@ import java.util.LinkedList;
 public class FastaParser extends AbstractParser {
 
     @Override
-    public FeaturedDNASequence parse(String textSequence) throws InvalidFormatParserException {
+    public FeaturedDNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
         try {
             textSequence = cleanSequence(textSequence);
             try (BufferedReader br = new BufferedReader(new StringReader(textSequence))) {
                 FeaturedDNASequence sequence;
-                RichSequenceIterator richSequences = IOTools.readFastaDNA(br, null);
+                RichSequenceIterator richSequences;
+                if (entryType[0].equals("protein")) {
+                    richSequences = IOTools.readFastaProtein(br, null);
+                } else {
+                    richSequences = IOTools.readFastaDNA(br, null);
+                }
 
                 if (richSequences.hasNext()) {
                     RichSequence richSequence = richSequences.nextRichSequence();

@@ -64,6 +64,7 @@ public class PartData implements IDataTransferModel {
     private StrainData strainData;
     private PlasmidData plasmidData;
     private ArabidopsisSeedData arabidopsisSeedData;
+    private ProteinData proteinData;
 
     public PartData(EntryType type) {
         this.type = type;
@@ -409,6 +410,14 @@ public class PartData implements IDataTransferModel {
 
     public void setArabidopsisSeedData(ArabidopsisSeedData arabidopsisSeedData) {
         this.arabidopsisSeedData = arabidopsisSeedData;
+    }
+
+    public ProteinData getProteinData() {
+        return proteinData;
+    }
+
+    public void setProteinData(ProteinData proteinData) {
+        this.proteinData = proteinData;
     }
 
     public long getBasePairCount() {
