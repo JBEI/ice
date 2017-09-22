@@ -208,9 +208,8 @@ public class BulkUploadController {
             // check if any links and convert
             if (!entry.getLinkedEntries().isEmpty()) {
                 Entry linked = (Entry) entry.getLinkedEntries().toArray()[0];
-                PartData linkedData = partData.getLinkedParts().remove(0);
-                linkedData = setFileData(userId, linked, linkedData);
-                partData.getLinkedParts().add(linkedData);
+                PartData linkedData = setFileData(userId, linked, ModelToInfoFactory.getInfo(linked));
+                partData.getLinkedParts().set(0, linkedData);
             }
 
             info.getEntryList().add(partData);
