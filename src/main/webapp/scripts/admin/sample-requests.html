@@ -6,10 +6,16 @@
         <button type="button" ng-click="searchSampleLocations()" class="ice-button">
             Search Sample Locations
         </button>
-        <button type="button" class="ice-button pull-right" style="margin-right: 28px" ng-click="importSamples()">
-            <span class="glyphicon glyphicon-arrow-up"></span>
-            Import Samples
-        </button>
+        <div class="pull-right">
+            <button type="button" class="ice-button" ng-click="sanitizeCsv()">
+                Sanitize
+            </button>
+
+            <button type="button" class="ice-button" style="margin-right: 28px" ng-click="importSamples()">
+                <span class="glyphicon glyphicon-arrow-up"></span>
+                Import Samples
+            </button>
+        </div>
     </div>
 
     <div class="pad_top" ng-if="sampleRequests.requests && !sampleRequests.requests.length">

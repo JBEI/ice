@@ -110,7 +110,7 @@ public class Entries extends HasEntry {
                 if (result[0].isEmpty())
                     continue;
 
-                Entry entry = dao.getByPartNumber(result[0]);
+                Entry entry = dao.getByPartNumber(result[0].trim());
                 if (entry == null || !authorization.canRead(this.userId, entry)) {
                     accepted.add(new ParsedEntryId(result[0], null));
                     continue;

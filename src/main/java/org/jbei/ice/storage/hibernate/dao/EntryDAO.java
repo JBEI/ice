@@ -35,7 +35,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
         return super.get(Entry.class, id);
     }
 
-
     public String getEntrySummary(long id) {
         try {
             CriteriaQuery<String> query = getBuilder().createQuery(String.class);
@@ -123,7 +122,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
     /**
      * Retrieve an {@link Entry} by it's part number.
-     * <p>
+     * <p/>
      * If multiple Entries exist with the same part number, this method throws an exception.
      *
      * @param partNumber part number associated with entry
@@ -822,6 +821,21 @@ public class EntryDAO extends HibernateRepository<Entry> {
             Root<Entry> from = query.from(Entry.class);
             query.select(from.get("id"))
                     .where(getBuilder().equal(from.get("ownerEmail"), userId), from.get("id").in(entries));
+            return currentSession().createQuery(query).list();
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
+    }
+
+    public List<Entry> getMatching(String name, String alias, EntryType type) {
+        try {
+            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
+            Root<Entry> from = query.from(Entry.class);
+            query.where(
+                    getBuilder().equal(from.get("name"), name),
+                    getBuilder().equal(from.get("alias"), alias),
+                    getBuilder().equal(from.get("recordType"), type.getName()));
             return currentSession().createQuery(query).list();
         } catch (HibernateException e) {
             Logger.error(e);

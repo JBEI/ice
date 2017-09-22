@@ -257,6 +257,54 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         $scope.editDisabled = true;
     };
 
+    $scope.bulkUpdateSequences = function () {
+        $uibModal.open({
+            controller: function ($scope, FileUploader, Authentication) {
+                $scope.bulkSampleEditUploader = new FileUploader({
+                    scope: $scope, // to automatically update the html. Default: $rootScope
+                    url: "rest/sequences",
+                    method: 'PUT',
+                    removeAfterUpload: true,
+                    headers: {"X-ICE-Authentication-SessionId": Authentication.getSessionId()},
+                    autoUpload: true,
+                    queueLimit: 1 // can only upload 1 file
+                });
+
+                $scope.bulkSampleEditUploader.onProgressItem = function (item, progress) {
+                    $scope.progress = progress;
+                };
+
+                $scope.bulkSampleEditUploader.onAfterAddingFile = function () {
+                    $scope.processingFile = false;
+                    $scope.result = {success: false};
+                };
+
+                $scope.bulkSampleEditUploader.onBeforeUploadItem = function () {
+                    $scope.processingFile = true;
+                };
+
+                $scope.bulkSampleEditUploader.onCompleteAll = function () {
+                    $scope.processingFile = false;
+                };
+
+                $scope.bulkSampleEditUploader.onSuccessItem = function (item, response, status, header) {
+                    console.log("success", status, response);
+                    $scope.processingFile = false;
+                    $scope.result = {success: true, data: response};
+                };
+
+                $scope.bulkSampleEditUploader.onErrorItem = function (item, response, status, headers) {
+                    $scope.result = {success: false};
+                    $scope.processingFile = undefined;
+                    console.log(item, response, status, headers);
+                };
+            },
+            templateUrl: "views/modal/bulk-sequences-update.html",
+            backdrop: 'static',
+            size: 'lg'
+        });
+    };
+
     $scope.csvExport = function (includeSequences) {
         var selection = getEntrySelection();
         var formats = {sequenceFormats: []};//, entryFields: ["name"]};
@@ -272,7 +320,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     };
 
     $scope.customizeExport = function () {
-        var modalInstance = $uibModal.open({
+        $uibModal.open({
             controller: "CustomExportController",
             templateUrl: "views/modal/custom-export-modal.html",
             backdrop: 'static',
@@ -334,7 +382,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     };
 
     $scope.openTransferEntriesModal = function () {
-        var modalInstance = $uibModal.open({
+        $uibModal.open({
             templateUrl: 'views/modal/transfer-entries-modal.html',
             controller: "TransferEntriesToPartnersModal",
             backdrop: "static",

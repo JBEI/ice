@@ -309,7 +309,7 @@ public class BulkUploadResource extends RestResource {
             if (processedBulkUpload.isSuccess())
                 return Response.status(Response.Status.OK).entity(processedBulkUpload).build();
             return Response.status(Response.Status.BAD_REQUEST).entity(processedBulkUpload).build();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Logger.error(e);
             ProcessedBulkUpload processedBulkUpload = new ProcessedBulkUpload();
             processedBulkUpload.setUserMessage(e.getCause().getMessage());

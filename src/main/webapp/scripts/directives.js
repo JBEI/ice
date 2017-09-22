@@ -207,22 +207,15 @@ iceDirectives.directive("ice.menu.tags", function () {
     }
 });
 
-iceDirectives.directive("iceVectorViewer", function ($cookieStore, FolderSelection, $location) {
+iceDirectives.directive("iceVectorViewer", function ($cookieStore, $location) {
     function link(scope, element, attrs) {
         var sid = $cookieStore.get("sessionId");
         var entryId;
 
         function generateObject() {
-            var search = $location.search();
-            var s = "<object id='VectorViewer' width='100%' height='100%' data='swf/vv/VectorViewer.swf?entryId="
-                + entryId + "&amp;sessionId=" + sid;
 
-            if (search && search.folderId) {
-                s += "&folderId=" + search.folderId + "&amp;remote=true";
-            }
-            s += "'></object>";
+            element.html('<iframe src="/scripts/lib/ve/veIndex.html?embedded=true" style="border: 1px solid black" width="100%" height="100%" border-width="1px"/>');
 
-            element.html(s);
         }
 
         scope.$watch('entry', function (value) {

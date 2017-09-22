@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
@@ -175,6 +176,25 @@ public class SampleResource extends RestResource {
             SampleCSV sampleCSV = new SampleCSV(userId, fileInputStream);
             return super.respond(sampleCSV.parse());
         } catch (IOException e) {
+            throw new WebApplicationException(e);
+        }
+    }
+
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/file") // todo : change end point
+    public Response createSamples(@FormDataParam("file") InputStream fileInputStream,
+                                  @FormDataParam("file") FormDataContentDisposition header) {
+        String userId = requireUserId();
+        try {
+            SampleCSV sampleCSV = new SampleCSV(userId, fileInputStream);
+            String fileName = sampleCSV.generate();
+            AttachmentInfo info = new AttachmentInfo();
+            info.setFileId(fileName);
+            return super.respond(info);
+        } catch (Exception e) {
+            Logger.error(e);
             throw new WebApplicationException(e);
         }
     }

@@ -110,7 +110,6 @@ angular.module('ice.collection.controller', [])
         });
 
         $rootScope.$on("CollectionSelection", function (event, data) {
-            //console.log("collection selection", data);
             $scope.selectCollection(data);
         });
 
@@ -191,7 +190,7 @@ angular.module('ice.collection.controller', [])
             if (!result)
                 return;
 
-            $scope.folder.canSetPublicPermission = (result.value == "no") || $rootScope.user.isAdmin;
+            $scope.folder.canSetPublicPermission = (result.value.toLowerCase() == "no") || $rootScope.user.isAdmin;
         });
 
         // retrieve permissions for folder
@@ -399,7 +398,7 @@ angular.module('ice.collection.controller', [])
         };
 
         uploader.onSuccessItem = function (item, response, status, header) {
-            $scope.serverResult = {data: response, total: response.length, valid: []}
+            $scope.serverResult = {data: response, total: response.length, valid: []};
             for (var i = 0; i < response.length; i += 1) {
                 var datum = response[i];
                 if (datum.partData) {
