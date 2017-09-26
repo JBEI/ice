@@ -212,12 +212,6 @@ iceDirectives.directive("iceVectorViewer", function ($cookieStore, $location) {
         var sid = $cookieStore.get("sessionId");
         var entryId;
 
-        function generateObject() {
-
-            element.html('<iframe src="/scripts/lib/ve/veIndex.html?embedded=true" style="border: 1px solid black" width="100%" height="100%" border-width="1px"/>');
-
-        }
-
         scope.$watch('entry', function (value) {
             if (!value) {
                 if (attrs.entryid) {
@@ -229,7 +223,8 @@ iceDirectives.directive("iceVectorViewer", function ($cookieStore, $location) {
             }
 
             if (entryId)
-                generateObject();
+                element.html('<iframe src="/scripts/lib/ve/veIndex.html?embedded=true" id="' + entryId + 
+                    '" style="border: 1px solid black" width="100%" height="100%" border-width="1px"/>');
         });
     }
 
