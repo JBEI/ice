@@ -581,6 +581,7 @@ public class SequenceController extends HasEntry {
                 }
 
                 for (Entry entry : entries) {
+                    Logger.info("Updating sequence for entry " + entry.getPartNumber());
                     Sequence sequence = dao.getByEntry(entry);
                     if (sequence != null) {
                         dao.deleteSequence(sequence);
@@ -593,7 +594,7 @@ public class SequenceController extends HasEntry {
                         throw new DAOException("Could not save sequence");
 
                     sequenceAnalysisController.rebuildAllAlignments(entry);
-                    sequenceToDNASequence(sequence);
+//                    sequenceToDNASequence(sequence);
                 }
             }
 
