@@ -566,7 +566,8 @@ public class SequenceController extends HasEntry {
                 String entryName = name.substring(0, name.indexOf('.'));
                 List<Entry> entries = DAOFactory.getEntryDAO().getByName(entryName);
 
-                if (entries.size() != 1) {
+                // todo : allowing multiple entries update for now
+                if (entries == null || entries.isEmpty()) {
                     errors.add(name);
                     continue;
                 }
@@ -579,20 +580,21 @@ public class SequenceController extends HasEntry {
                     continue;
                 }
 
-                Entry entry = entries.get(0);
-                Sequence sequence = dao.getByEntry(entry);
-                if (sequence != null) {
-                    dao.deleteSequence(sequence);
+                for (Entry entry : entries) {
+                    Sequence sequence = dao.getByEntry(entry);
+                    if (sequence != null) {
+                        dao.deleteSequence(sequence);
+                    }
+
+                    sequence = dnaSequenceToSequence(dnaSequence);
+                    sequence.setEntry(entry);
+                    sequence = dao.saveSequence(sequence);
+                    if (sequence == null)
+                        throw new DAOException("Could not save sequence");
+
+                    sequenceAnalysisController.rebuildAllAlignments(entry);
+                    sequenceToDNASequence(sequence);
                 }
-
-                sequence = dnaSequenceToSequence(dnaSequence);
-                sequence.setEntry(entry);
-                sequence = dao.saveSequence(sequence);
-                if (sequence == null)
-                    throw new DAOException("Could not save sequence");
-
-                sequenceAnalysisController.rebuildAllAlignments(entry);
-                sequenceToDNASequence(sequence);
             }
 
             BlastPlus.scheduleBlastIndexRebuildTask(true);
