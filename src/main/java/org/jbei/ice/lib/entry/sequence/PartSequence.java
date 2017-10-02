@@ -133,10 +133,10 @@ public class PartSequence extends HasEntry {
         if (!StringUtils.isBlank(fileName))
             sequence.setFileName(fileName);
         Sequence result;
-        if (entryType.equals("protein")) {
-            result = sequenceDAO.saveSequence(sequence);
-        } else {
+        if (EntryType.PROTEIN.getName().equalsIgnoreCase(entryType)) {
             result = sequenceDAO.saveProtein(sequence);
+        } else {
+            result = sequenceDAO.saveSequence(sequence);
         }
 
         BlastPlus.scheduleBlastIndexRebuildTask(true);
