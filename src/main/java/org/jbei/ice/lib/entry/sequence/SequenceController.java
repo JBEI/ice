@@ -76,9 +76,9 @@ public class SequenceController extends HasEntry {
         return result;
     }
 
-    public FeaturedDNASequence updateSequence(String userId, long entryId, FeaturedDNASequence featuredDNASequence,
+    public FeaturedDNASequence updateSequence(String userId, String entryId, FeaturedDNASequence featuredDNASequence,
                                               boolean addFeatures) {
-        Entry entry = entryDAO.get(entryId);
+        Entry entry = super.getEntry(entryId);
         if (entry == null) {
             return null;
         }
@@ -133,8 +133,8 @@ public class SequenceController extends HasEntry {
         return sequenceToDNASequence(sequence);
     }
 
-    public boolean deleteSequence(String requester, long partId) {
-        Entry entry = DAOFactory.getEntryDAO().get(partId);
+    public boolean deleteSequence(String requester, String partId) {
+        Entry entry = getEntry(partId);
         authorization.expectWrite(requester, entry);
 
         Sequence sequence = dao.getByEntry(entry);
