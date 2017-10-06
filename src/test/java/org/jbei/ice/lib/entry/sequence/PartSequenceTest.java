@@ -70,7 +70,7 @@ public class PartSequenceTest {
                     "KEYWORDS    .\n" +
                     "FEATURES             Location/Qualifiers\n" +
                     "     promoter        1..234\n" +
-                    "                     /label=pTrc promoter\n" +
+                    "                     /label=\"pTrc promoter\"\n" +
                     "                     /vntifkey=\"30\"\n" +
                     "ORIGIN\n" +
                     "        1 cgactgcacg gtgcaccaat gcttctggcg tcaggcagcc atcggaagct gtggtatggc\n" +
