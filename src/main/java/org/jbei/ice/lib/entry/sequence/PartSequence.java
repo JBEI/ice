@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.entry.sequence;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -76,9 +75,7 @@ public class PartSequence extends HasEntry {
     }
 
     public FeaturedDNASequence get() {
-        if (!new PermissionsController().isPubliclyVisible(entry))
-            entryAuthorization.expectRead(userId, entry);
-
+        entryAuthorization.expectRead(userId, entry);
         boolean canEdit = entryAuthorization.canWrite(userId, entry);
         return getFeaturedSequence(entry, canEdit);
     }
@@ -86,8 +83,10 @@ public class PartSequence extends HasEntry {
     /**
      * Parses a sequence in a file and associates it with the current entry
      *
-     * @param inputStream input stream of bytes representing the file
-     * @param fileName    name of file being parsed
+     * @param inputStream      input stream of bytes representing the file
+     * @param fileName         name of file being parsed
+     * @param extractHierarchy for SBOL2 sequences only. If set to <code>true</code>, creates a hierarchy of ICE entries
+     *                         as needed
      * @return wrapper around the internal model used to represent sequence information
      * @throws IOException on Exception parsing the contents of the file
      */
