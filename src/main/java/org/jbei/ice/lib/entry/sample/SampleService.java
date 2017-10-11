@@ -133,10 +133,14 @@ public class SampleService extends HasEntry {
             if (tube != null) {
                 // just check the barcode
                 String barcode = tube.getDisplay();
-                Storage existing = storageDAO.retrieveStorageTube(barcode);
-                if (existing != null) {
-                    List<Sample> samples = dao.getSamplesByStorage(existing);
-                    if (samples != null && !samples.isEmpty()) {
+                List<Storage> existing = storageDAO.retrieveStorageTube(barcode);
+                if (existing != null && !existing.isEmpty()) {
+                    List<Sample> samples = new ArrayList<>();
+                    for (Storage storage : existing) {
+                        samples.addAll(dao.getSamplesByStorage(storage));
+                    }
+
+                    if (!samples.isEmpty()) {
                         Logger.error("Barcode \"" + barcode + "\" already has a sample associated with it");
                         return null;
                     }
@@ -367,13 +371,25 @@ public class SampleService extends HasEntry {
         return true;
     }
 
-    public ArrayList<PartSample> getSamplesByBarcode(String userId, String barcode) {
-        Storage storage = storageDAO.retrieveStorageTube(barcode);
+    public List<PartSample> getSamplesByBarcode(String userId, String barcode) {
+        List<Storage> storage = storageDAO.retrieveStorageTube(barcode);
         if (storage == null)
             return null;
 
-        List<Sample> samples = dao.getSamplesByStorage(storage);
-        ArrayList<PartSample> partSamples = new ArrayList<>();
+        List<PartSample> partSamples = new ArrayList<>();
+
+        if (storage.isEmpty())
+            return partSamples;
+
+        List<Sample> samples = new ArrayList<>();
+        for (Storage item : storage) {
+            List<Sample> result = dao.getSamplesByStorage(item);
+            if (result == null)
+                continue;
+
+            samples.addAll(result);
+        }
+
         for (Sample sample : samples) {
             Entry entry = sample.getEntry();
             if (entry == null)

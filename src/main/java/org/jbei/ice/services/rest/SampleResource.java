@@ -41,9 +41,14 @@ public class SampleResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("{token}")
     public Response getSampleByToken(@PathParam("token") String token) {
-        String userId = getUserId();
-        ArrayList<PartSample> result = sampleService.getSamplesByBarcode(userId, token);
-        return super.respond(result);
+        try {
+            String userId = getUserId();
+            List<PartSample> result = sampleService.getSamplesByBarcode(userId, token);
+            return super.respond(result);
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new WebApplicationException();
+        }
     }
 
     /**
