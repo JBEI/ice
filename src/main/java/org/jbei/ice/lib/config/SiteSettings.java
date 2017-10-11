@@ -9,7 +9,7 @@ import org.jbei.ice.storage.IDataTransferModel;
  */
 public class SiteSettings implements IDataTransferModel {
 
-    private String version = "5.3.5";
+    private String version = "5.3.6";
     private String assetName;
     private boolean hasLogo;
     private boolean hasLoginMessage;

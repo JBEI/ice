@@ -382,9 +382,6 @@ angular.module('ice.admin.controller', [])
 
                 if (result && result.length) {
                     $scope.sample.partId = result[0].partId;
-                    //Util.get("rest/parts/" + $scope.sample.partId, function (entry) {
-                    //    $scope.sample.entry = entry;
-                    //});entry
                 } else {
                     $scope.sample.notFound = true;
                 }

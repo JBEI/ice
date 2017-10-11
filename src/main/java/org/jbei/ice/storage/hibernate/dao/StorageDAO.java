@@ -25,17 +25,13 @@ public class StorageDAO extends HibernateRepository<Storage> {
      * @param barcode unique identifier for storage tube
      * @return retrieved Storage
      */
-    public Storage retrieveStorageTube(String barcode) {
+    public List<Storage> retrieveStorageTube(String barcode) {
         List<Storage> results = retrieveStorageByIndex(barcode, SampleType.TUBE);
 
         if (results == null || results.isEmpty()) {
             return null;
         }
-
-        if (results.size() > 1)
-            throw new DAOException("Expecting single result, received \"" + results.size() + "\" for index " + barcode);
-
-        return results.get(0);
+        return results;
     }
 
     /**
