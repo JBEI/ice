@@ -15,7 +15,7 @@
                 <!--<i class="fa fa-search cursor_pointer blue"-->
                 <!--style="padding: 4px 9px 4px 5px; background-color: #fff; font-size: 19px"></i>-->
 
-                <div class="uib-dropdown-menu" style="padding: 12px;width: 451px">
+                <div class="uib-dropdown-menu" style="padding: 12px;width: 509px">
                     <span style="letter-spacing:-1px; color:#555;">&nbsp;<b>TYPE</b>&nbsp;&nbsp;</span>
                     <label class="checkbox-inline" stop-event='click'>
                         <input type="checkbox" ng-model="searchTypes.all" ng-change="check('all')">All
@@ -35,6 +35,10 @@
 
                     <label class="checkbox-inline" stop-event='click'>
                         <input type="checkbox" ng-model="searchTypes.arabidopsis" ng-change="check('arabidopsis')">Arabidopsis
+                    </label>
+
+                    <label class="checkbox-inline" stop-event='click'>
+                        <input type="checkbox" ng-model="searchTypes.protein" ng-change="check('protein')">Protein
                     </label>
 
                     <div class="divider"></div>
