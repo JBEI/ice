@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationController;
@@ -22,6 +23,7 @@ import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.UtilityException;
+import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
@@ -31,9 +33,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * ABI to manipulate {@link Sequence}s.
@@ -67,9 +76,9 @@ public class SequenceController extends HasEntry {
         return result;
     }
 
-    public FeaturedDNASequence updateSequence(String userId, long entryId, FeaturedDNASequence featuredDNASequence,
+    public FeaturedDNASequence updateSequence(String userId, String entryId, FeaturedDNASequence featuredDNASequence,
                                               boolean addFeatures) {
-        Entry entry = entryDAO.get(entryId);
+        Entry entry = super.getEntry(entryId);
         if (entry == null) {
             return null;
         }
@@ -103,57 +112,52 @@ public class SequenceController extends HasEntry {
         return sequenceToDNASequence(sequence);
     }
 
-    /**
-     * Update the {@link Sequence} in the database, with the option to rebuild the search index.
-     *
-     * @param userId   unique identifier for user performing action
-     * @param sequence sequence to be updated
-     * @return Saved Sequence.
-     */
-    protected Sequence update(String userId, Sequence sequence) {
-        authorization.expectWrite(userId, sequence.getEntry());
-        Sequence result;
-
-        Entry entry = sequence.getEntry();
-        entry.setModificationTime(Calendar.getInstance().getTime());
-        Sequence oldSequence = dao.getByEntry(entry);
-
-        if (oldSequence == null) {
-            result = dao.create(sequence);
-        } else {
-            String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-            if (!StringUtils.isEmpty(tmpDir)) {
-                String hash = oldSequence.getFwdHash();
-                try {
-                    Files.deleteIfExists(Paths.get(tmpDir, hash + ".png"));
-                } catch (IOException e) {
-                    Logger.warn(e.getMessage());
-                }
-            }
-
-            oldSequence.setSequenceUser(sequence.getSequenceUser());
-            oldSequence.setSequence(sequence.getSequence());
-            oldSequence.setFwdHash(sequence.getFwdHash());
-            oldSequence.setRevHash(sequence.getRevHash());
-            result = dao.updateSequence(oldSequence, sequence.getSequenceFeatures());
+    protected FeaturedDNASequence updateSequence(Entry entry, DNASequence featuredDNASequence, boolean rebuild) {
+        Sequence sequence = dnaSequenceToSequence(featuredDNASequence);
+        if (sequence.getSequenceFeatures() == null || sequence.getSequenceFeatures().isEmpty()) {
+            DNASequence dnaSequence = GeneralParser.getInstance().parse(featuredDNASequence.getSequence());
+            sequence = dnaSequenceToSequence(dnaSequence);
         }
 
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
-        return result;
+        sequence.setEntry(entry);
+        deleteSequence(sequence);
+        sequence.setEntry(entry);
+        sequence = dao.saveSequence(sequence);
+        if (sequence == null)
+            return null;
+
+        if (rebuild) BlastPlus.scheduleBlastIndexRebuildTask(true);
+
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
+        sequenceAnalysisController.rebuildAllAlignments(entry);
+        return sequenceToDNASequence(sequence);
     }
 
-    public boolean deleteSequence(String requester, long partId) {
-        Entry entry = DAOFactory.getEntryDAO().get(partId);
+    public boolean deleteSequence(String requester, String partId) {
+        Entry entry = getEntry(partId);
         authorization.expectWrite(requester, entry);
 
         Sequence sequence = dao.getByEntry(entry);
         if (sequence == null)
             return true;
+        deleteSequence(sequence);
+        return true;
+    }
+
+    protected void deleteSequence(Sequence sequence) {
+        dao.deleteSequence(sequence);
 
         String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-        dao.deleteSequence(sequence, tmpDir);
+        Path pigeonPath = Paths.get(tmpDir, sequence.getFwdHash() + ".png");
+
+        try {
+            Files.deleteIfExists(pigeonPath);
+        } catch (IOException e) {
+            // ok to ignore
+            Logger.info("Error deleting pigeon folder " + pigeonPath.toString());
+        }
+
         BlastPlus.scheduleBlastIndexRebuildTask(true);
-        return true;
     }
 
     /**
@@ -247,7 +251,7 @@ public class SequenceController extends HasEntry {
     /**
      * Generate a {@link FeaturedDNASequence} from a given {@link Sequence} object.
      *
-     * @param sequence
+     * @param sequence sequence object to convert
      * @return FeaturedDNASequence
      */
     public FeaturedDNASequence sequenceToDNASequence(Sequence sequence) {
@@ -303,7 +307,7 @@ public class SequenceController extends HasEntry {
     /**
      * Create a {@link Sequence} object from an {@link DNASequence} object.
      *
-     * @param dnaSequence
+     * @param dnaSequence object to convert
      * @return Translated Sequence object.
      */
     public static Sequence dnaSequenceToSequence(DNASequence dnaSequence) {
@@ -504,7 +508,7 @@ public class SequenceController extends HasEntry {
 
         // parse actual sequence
         try {
-            String sequenceString = IOUtils.toString(inputStream);
+            String sequenceString = IOUtils.toString(inputStream, Charset.defaultCharset());
             DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
             if (dnaSequence == null)
                 throw new InvalidFormatParserException("Could not parse sequence string");
@@ -520,5 +524,83 @@ public class SequenceController extends HasEntry {
         } catch (IOException e) {
             throw new InvalidFormatParserException(e);
         }
+    }
+
+    /**
+     * Bulk update sequences based on uploaded zip file
+     * containing sequences, where the sequence name is the (unique) part name
+     *
+     * @param userId          userId of user making request
+     * @param fileInputStream input stream of zip file
+     */
+    public List<String> bulkUpdate(String userId, InputStream fileInputStream) throws IOException {
+        if (!new AccountController().isAdministrator(userId))
+            throw new PermissionException("Must have admin privileges to use this feature");
+
+        List<String> errors = new ArrayList<>();
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
+
+        try (ZipInputStream stream = new ZipInputStream(fileInputStream)) {
+            ZipEntry zipEntry;
+
+            while ((zipEntry = stream.getNextEntry()) != null) {
+                if (zipEntry.isDirectory())
+                    continue;
+
+                String name = zipEntry.getName();
+                if (name.contains("/"))
+                    name = name.substring(name.lastIndexOf("/") + 1);
+
+                if (name.startsWith(".") || name.startsWith("_"))
+                    continue;
+
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                int len;
+                byte data[] = new byte[1024];
+
+                while ((len = stream.read(data)) > 0) {
+                    out.write(data, 0, len);
+                }
+                stream.closeEntry();
+
+                String entryName = name.substring(0, name.indexOf('.'));
+                List<Entry> entries = DAOFactory.getEntryDAO().getByName(entryName);
+
+                // todo : allowing multiple entries update for now
+                if (entries == null || entries.isEmpty()) {
+                    errors.add(name);
+                    continue;
+                }
+
+                String sequenceString = new String(out.toByteArray());
+                DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+                if (dnaSequence == null) {
+                    Logger.error("Could not parse sequence for " + name);
+                    errors.add(name);
+                    continue;
+                }
+
+                for (Entry entry : entries) {
+                    Logger.info("Updating sequence for entry " + entry.getPartNumber());
+                    Sequence sequence = dao.getByEntry(entry);
+                    if (sequence != null) {
+                        dao.deleteSequence(sequence);
+                    }
+
+                    sequence = dnaSequenceToSequence(dnaSequence);
+                    sequence.setEntry(entry);
+                    sequence = dao.saveSequence(sequence);
+                    if (sequence == null)
+                        throw new DAOException("Could not save sequence");
+
+                    sequenceAnalysisController.rebuildAllAlignments(entry);
+//                    sequenceToDNASequence(sequence);
+                }
+            }
+
+            BlastPlus.scheduleBlastIndexRebuildTask(true);
+        }
+
+        return errors;
     }
 }

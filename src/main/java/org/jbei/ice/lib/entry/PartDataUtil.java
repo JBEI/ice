@@ -29,6 +29,10 @@ public class PartDataUtil {
                 value = getSeedFieldValues(data.getArabidopsisSeedData(), field);
                 break;
 
+            case PROTEIN:
+                value = getProteinFieldValues(data.getProteinData(), field);
+                break;
+
             default:
                 value = null;
         }
@@ -180,6 +184,28 @@ public class PartDataUtil {
 
             case PARENTS:
                 return seed.getSeedParents();
+
+            default:
+                return null;
+        }
+    }
+
+    protected static String getProteinFieldValues(ProteinData proteinData, EntryField field) {
+        if (proteinData == null)
+            return "";
+
+        switch (field) {
+            case ORGANISM:
+                return proteinData.getOrganism();
+
+            case FULL_NAME:
+                return proteinData.getFullName();
+
+            case GENE_NAME:
+                return proteinData.getGeneName();
+
+            case UPLOADED_FROM:
+                return proteinData.getUploadedFrom();
 
             default:
                 return null;

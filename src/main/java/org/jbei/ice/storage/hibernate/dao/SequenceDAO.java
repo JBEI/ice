@@ -14,9 +14,6 @@ import org.jbei.ice.storage.model.*;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -82,6 +79,37 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
         return sequence;
     }
 
+    public Sequence saveProtein(Sequence sequence) {
+        if (sequence == null || sequence.getEntry() == null)
+            throw new IllegalArgumentException("Cannot save null sequence or sequence without entry");
+
+        Set<SequenceFeature> sequenceFeatureSet = null;
+
+        normalizeAnnotationLocations(sequence);
+        if (sequence.getSequenceFeatures() != null) {
+            sequenceFeatureSet = new HashSet<>(sequence.getSequenceFeatures());
+            sequence.setSequenceFeatures(null);
+        }
+
+        // create sequence
+        sequence = create(sequence);
+
+        // separate out sequence features and uniquely create features
+        // if (sequenceFeatureSet != null) {
+        //     for (SequenceFeature sequenceFeature : sequenceFeatureSet) {
+        //         Feature feature = sequenceFeature.getFeature();
+        //
+        //         if (feature == null) {
+        //             throw new DAOException("SequenceFeature has no feature");
+        //         }
+        //
+        //         sequence = ProteinTools.get(sequence);
+        //     }
+        // }
+
+        return sequence;
+    }
+
     private boolean sameFeatureUri(Feature f1, Feature f2) {
         if (f1.getUri() == null && f2.getUri() == null)
             return true;
@@ -138,18 +166,13 @@ public class SequenceDAO extends HibernateRepository<Sequence> {
      * Delete the given {@link Sequence} object in the database.
      *
      * @param sequence          sequence to delete
-     * @param pigeonImageFolder path of the image folder where the pigeon images are cached
      */
-    public void deleteSequence(Sequence sequence, String pigeonImageFolder) {
-        String sequenceHash = sequence.getFwdHash();
+    public void deleteSequence(Sequence sequence) {
         try {
             sequence.setEntry(null);
             sequence.getSequenceFeatures();
             super.delete(sequence);
             currentSession().flush();
-            Files.deleteIfExists(Paths.get(pigeonImageFolder, sequenceHash + ".png"));
-        } catch (IOException e) {
-            Logger.warn(e.getMessage());
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

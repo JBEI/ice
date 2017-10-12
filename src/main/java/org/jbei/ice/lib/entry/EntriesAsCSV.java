@@ -278,6 +278,10 @@ public class EntriesAsCSV {
                 case PLASMID:
                     EntryFields.addPlasmidHeaders(fields);
                     break;
+
+                case PROTEIN:
+                    EntryFields.addProteinHeaders(fields);
+                    break;
             }
         }
 

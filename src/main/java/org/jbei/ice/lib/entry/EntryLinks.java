@@ -140,6 +140,9 @@ public class EntryLinks extends HasEntry {
 
             case PLASMID:
                 return childType == parentType || childType == EntryType.PART;
+
+            case PROTEIN:
+                return childType == parentType || childType == EntryType.PART;
         }
     }
 

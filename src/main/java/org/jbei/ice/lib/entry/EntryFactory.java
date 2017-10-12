@@ -21,6 +21,9 @@ public class EntryFactory {
             case ARABIDOPSIS:
                 return new ArabidopsisSeed();
 
+            case PROTEIN:
+                return new Protein();
+
             default:
                 return new Part();
         }

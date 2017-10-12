@@ -583,7 +583,7 @@ public class PartResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/sequence")
-    public Response updateSequence(@PathParam("id") final long partId,
+    public Response updateSequence(@PathParam("id") final String partId,
                                    @DefaultValue("false") @QueryParam("add") boolean add,
                                    FeaturedDNASequence sequence) {
         final String userId = requireUserId();
@@ -592,7 +592,7 @@ public class PartResource extends RestResource {
 
     @DELETE
     @Path("/{id}/sequence")
-    public Response deleteSequence(@PathParam("id") final long partId) {
+    public Response deleteSequence(@PathParam("id") final String partId) {
         final String userId = requireUserId();
         try {
             return super.respond(sequenceController.deleteSequence(userId, partId));

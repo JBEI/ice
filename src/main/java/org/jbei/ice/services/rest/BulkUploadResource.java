@@ -309,7 +309,7 @@ public class BulkUploadResource extends RestResource {
             if (processedBulkUpload.isSuccess())
                 return Response.status(Response.Status.OK).entity(processedBulkUpload).build();
             return Response.status(Response.Status.BAD_REQUEST).entity(processedBulkUpload).build();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Logger.error(e);
             ProcessedBulkUpload processedBulkUpload = new ProcessedBulkUpload();
             processedBulkUpload.setUserMessage(e.getCause().getMessage());
@@ -339,7 +339,7 @@ public class BulkUploadResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/entry/{entryId}/sequence")
     public Response deleteEntrySequence(@PathParam("id") long uploadId,
-                                        @PathParam("entryId") long entryId) {
+                                        @PathParam("entryId") String entryId) {
         String userId = getUserId();
         if (new SequenceController().deleteSequence(userId, entryId)) {
             return Response.ok().build();

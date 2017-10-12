@@ -1,0 +1,59 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-fw fa-arrow-up"></i> &nbsp;Bulk Sequence Update
+    </span>
+</div>
+
+<div class="modal-body">
+
+    <div class="font-90em">
+        <div class="alert alert-info">
+            <i class="fa fa-fw fa-hand-stop-o red pull-left" style="font-size: 40px"></i>
+            <b class="font-12em red">PLEASE USE WITH CAUTION</b><br>
+            This feature enables you to update multiple sequences at once. <br>
+        </div>
+    </div>
+
+    <div ng-if="!processingFile">
+        <input nv-file-select uploader="bulkSampleEditUploader" type="file"/>
+    </div>
+
+    <div ng-if="processingFile">
+        <img src="img/loader-mini.gif"> Processing File. Please wait. This may take a few minutes...
+        <uib-progressbar class="progress-striped active" value="100" type="warning"
+                         style="height: 20px"></uib-progressbar>
+    </div>
+
+    <div class="pad-top-5" ng-if="!processingFile && result.success">
+        <br>
+
+        <div ng-if="result.data.length" class="pad-top-5 alert alert-danger">
+            <i class="fa fa-fw fa-exclamation-triangle red"></i> <b>Error processing
+            the following {{result.data.length}} files</b>
+
+            <div style="height: 300px; overflow-y: scroll; border-top: 1px solid #DDDDDD">
+                <div ng-repeat="datum in result.data track by $index" style="margin-left: 28px">
+                    {{datum}}
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-success" ng-if="!result.data.length">
+            <i class="fa fa-fw fa-check green font-14em"></i> <b>Sequences successfully updated</b>
+        </div>
+    </div>
+
+    <br>
+
+    <div class="pad-top-5 alert alert-danger" ng-if="!processingFile && result && result.success==false">
+        <i class="fa fa-fw fa-exclamation-triangle red font-14em pull-left"></i>
+        <b>Server Error updating sequences</b>
+    </div>
+
+
+</div>
+
+<div class="modal-footer" ng-if="!processingFile">
+    <button class="btn btn-sm btn-primary" ng-click="$dismiss('cancel')">Close</button>
+</div>
