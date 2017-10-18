@@ -1072,7 +1072,7 @@ angular.module('ice.entry.controller', [])
     })
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
-                                             $route, $window, FileUploader, EntryService, EntryContextUtil, Selection,
+                                             $route, $window, $document, FileUploader, EntryService, EntryContextUtil, Selection,
                                              Util, Authentication) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
@@ -1378,6 +1378,62 @@ angular.module('ice.entry.controller', [])
             });
 
         var menuSubDetails = $scope.subDetails = EntryService.getMenuSubDetails();
+
+        $scope.loadVectorEditor = function () {
+
+            $scope.data = undefined;
+
+            $scope.editor = $window.createVectorEditor(document.getElementById("ve-Root"), {
+                onSave: function (event, sequenceData, editorState) {
+                    console.log("event:", event);
+                    console.log("sequenceData:", sequenceData);
+                    console.log("editorState:", editorState);
+                },
+
+                onCopy: function (event, sequenceData, editorState) {
+                    console.log("event:", event);
+                    console.log("sequenceData:", sequenceData);
+                    console.log("editorState:", editorState);
+
+
+                    const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
+                    clipboardData.setData('text/plain', JSON.stringify(sequenceData.sequence));
+                    $scope.data.selection = editorState.selectionLayer;
+                    clipboardData.setData('application/json', JSON.stringify($scope.data));
+                    console.log($scope.data);
+
+                    event.preventDefault();
+                    //in onPaste in your app you can do:
+                    // e.clipboardData.getData('application/json')
+                }
+            });
+
+            Util.get("rest/parts/" + $scope.entry.id + "/sequence", function (result) {
+                $scope.data = {
+                    sequenceData: {sequence: result.sequence, features: []},
+                    registryData: {
+                        uri: result.uri,
+                        identifier: result.identifier,
+                        name: result.name,
+                        circular: result.circular
+                    }
+                };
+
+                for (var i = 0; i < result.features.length; i += 1) {
+                    var feature = result.features[i];
+                    var location = feature.locations[0];
+                    $scope.data.sequenceData.features.push({
+                        start: location.genbankStart,
+                        end: location.end,
+                        forward: feature.strand == 1,
+                        type: feature.type,
+                        name: feature.name
+                    });
+                }
+
+                $scope.editor.updateEditor($scope.data);
+            });
+        };
 
         $scope.showSelection = function (index) {
             angular.forEach(menuSubDetails, function (details) {

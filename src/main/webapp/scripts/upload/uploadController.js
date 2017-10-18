@@ -341,6 +341,9 @@ angular.module('ice.upload.controller', [])
                 return sheetHeaders[index];
             };
 
+            //
+            // calculates the column width for each header type
+            //
             var getColWidth = function (index) {
                 var fieldType;
 
@@ -659,7 +662,7 @@ angular.module('ice.upload.controller', [])
             $scope.spreadSheet = $dataTable.data('handsontable');
 
             $scope.fileUploadModal = function () {
-                var modalInstance = $uibModal.open({
+                $uibModal.open({
                     templateUrl: 'scripts/upload/modal/file-upload.html',
                     controller: 'BulkUploadModalController',
                     backdrop: 'static',
@@ -680,7 +683,7 @@ angular.module('ice.upload.controller', [])
             };
 
             $scope.confirmResetFormModal = function () {
-                var resetModalInstance = $uibModal.open({
+                $uibModal.open({
                     templateUrl: 'scripts/upload/modal/reset-bulk-upload-sheet.html',
                     controller: 'BulkUploadModalController',
                     backdrop: 'static',
@@ -701,7 +704,7 @@ angular.module('ice.upload.controller', [])
             };
 
             $scope.confirmRejectUploadModal = function () {
-                var resetModalInstance = $uibModal.open({
+                $uibModal.open({
                     templateUrl: 'scripts/upload/modal/reject-upload.html',
                     controller: 'BulkUploadRejectModalController',
                     backdrop: 'static',
@@ -714,7 +717,7 @@ angular.module('ice.upload.controller', [])
             };
 
             $scope.setPermissionsModal = function () {
-                var modelInstance = $uibModal.open({
+                $uibModal.open({
                     templateUrl: 'scripts/upload/modal/permissions.html',
                     controller: 'BulkUploadPermissionsController',
                     backdrop: 'static',
@@ -748,7 +751,7 @@ angular.module('ice.upload.controller', [])
                         $scope.requestError = error.data;
                         $scope.submitting = false;
 
-                        var resetModalInstance = $uibModal.open({
+                        $uibModal.open({
                             templateUrl: 'scripts/upload/modal/upload-submit-alert.html',
                             controller: function ($scope, msg, isError) {
                                 $scope.requestError = msg;
@@ -1034,8 +1037,9 @@ angular.module('ice.upload.controller', [])
                 url += "?link=" + linkedAddType;
             $window.open(url, "_self");
         }
-    }).controller('BulkUploadPermissionsController', function ($scope, $cookieStore, $location, $uibModalInstance,
-                                                               upload, Util) {
+    })
+    .controller('BulkUploadPermissionsController', function ($scope, $cookieStore, $location, $uibModalInstance,
+                                                             upload, Util) {
         $scope.cancel = function () {
             $uibModalInstance.dismiss('cancel');
         };
