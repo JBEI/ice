@@ -371,7 +371,7 @@
                     <div uib-dropdown-toggle class="uib-dropdown-toggle opacity_hover">Download <span
                             class="caret"></span>
                     </div>
-                    <ul class="uib-dropdown-menu">
+                    <ul class="dropdown-menu" uib-dropdown-menu>
                         <li class="cursor_pointer font-80em" ng-if="entry.hasOriginalSequence">
                             <a ng-href="rest/file/{{entry.id}}/sequence/original?sid={{sessionId}}"
                                target="_self">Original</a>
@@ -392,27 +392,27 @@
                             <a ng-href="rest/file/{{entry.id}}/sequence/sbol2?sid={{sessionId}}"
                                target="_self"><i>SBOL 2.0</i></a>
                         </li>
-                        <li class="cursor_pointer font-80em">
-                            <a ng-href="rest/file/{{entry.id}}/sequence/pigeonI?sid={{sessionId}}"
-                               target="_self"><i>Pigeon Image</i></a>
-                        </li>
-                        <li class="cursor_pointer font-80em">
-                            <a ng-href="rest/file/{{entry.id}}/sequence/pigeonS?sid={{sessionId}}"
-                               target="_self"><i>Pigeon Script</i></a>
-                        </li>
+                        <!--<li class="cursor_pointer font-80em">-->
+                            <!--<a ng-href="rest/file/{{entry.id}}/sequence/pigeonI?sid={{sessionId}}"-->
+                               <!--target="_self"><i>Pigeon Image</i></a>-->
+                        <!--</li>-->
+                        <!--<li class="cursor_pointer font-80em">-->
+                            <!--<a ng-href="rest/file/{{entry.id}}/sequence/pigeonS?sid={{sessionId}}"-->
+                               <!--target="_self"><i>Pigeon Script</i></a>-->
+                        <!--</li>-->
                     </ul>
                 </small>
 
                 <span ng-if="entry.basePairCount">
                     <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
 
-                    <small class="opacity_hover" ng-click="sbolShowHide()">
-                        <span ng-show="showSBOL">Hide</span>
-                        <span ng-hide="showSBOL">Show</span> Pigeon Image
-                    </small>
+                    <!--<small class="opacity_hover" ng-click="sbolShowHide()">-->
+                        <!--<span ng-show="showSBOL">Hide</span>-->
+                        <!--<span ng-hide="showSBOL">Show</span> Pigeon Image-->
+                    <!--</small>-->
 
 
-                    <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
+                    <!--<span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>-->
 
                     <small class="opacity_hover" ng-click="showAutoAnnotationPopup()">
                         Auto Annotate
