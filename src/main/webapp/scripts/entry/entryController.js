@@ -1380,7 +1380,6 @@ angular.module('ice.entry.controller', [])
         var menuSubDetails = $scope.subDetails = EntryService.getMenuSubDetails();
 
         $scope.loadVectorEditor = function () {
-
             $scope.data = undefined;
 
             $scope.editor = $window.createVectorEditor(document.getElementById("ve-Root"), {
@@ -1410,7 +1409,9 @@ angular.module('ice.entry.controller', [])
 
             Util.get("rest/parts/" + $scope.entry.id + "/sequence", function (result) {
                 $scope.data = {
-                    sequenceData: {sequence: result.sequence, features: []},
+                    sequenceData: {
+                        sequence: result.sequence, features: [], name: $scope.entry.name
+                    },
                     registryData: {
                         uri: result.uri,
                         identifier: result.identifier,
@@ -1421,17 +1422,42 @@ angular.module('ice.entry.controller', [])
 
                 for (var i = 0; i < result.features.length; i += 1) {
                     var feature = result.features[i];
+                    if (!feature.locations.length)
+                        continue;
+
                     var location = feature.locations[0];
+                    console.log(feature);
+
                     $scope.data.sequenceData.features.push({
                         start: location.genbankStart,
                         end: location.end,
+                        id: feature.id,
                         forward: feature.strand == 1,
                         type: feature.type,
-                        name: feature.name
+                        name: feature.name,
+                        notes: feature.notes,
+                        annotationType: feature.type
                     });
                 }
 
-                $scope.editor.updateEditor($scope.data);
+                $scope.editor.updateEditor({
+                    sequenceData: $scope.data.sequenceData,
+                    annotationVisibility: {
+                        features: true,
+                        translations: true,
+                        parts: false,
+                        orfs: false,
+                        orfTranslations: true,
+                        axis: true,
+                        cutsites: false,
+                        reverseSequence: true
+                    },
+                    panelsShown: {
+                        sequence: false,
+                        circular: true,
+                        rail: true
+                    }
+                });
             });
         };
 

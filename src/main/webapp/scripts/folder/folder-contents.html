@@ -124,12 +124,12 @@
             <thead>
             <tr style="height: 32px">
                 <!--selection toggle-->
-                <th class="uib-dropdown" uib-dropdown style="font-size: 15px; vertical-align: middle;">
+                <th uib-dropdown style="font-size: 15px; vertical-align: middle;">
                     <span class="uib-dropdown-toggle" uib-dropdown-toggle>
                         <i class="fa fa-fw cursor_default" ng-class="selectAllClass()" ng-click="selectAll()"
                            stop-event="click"></i><small class="caret cursor_pointer" style="margin-left: 0"></small>
                     </span>
-                    <ul class="uib-dropdown-menu" uib-dropdown-menu style="min-width: 100px">
+                    <ul class="dropdown-menu" uib-dropdown-menu style="min-width: 100px">
                         <li class="font-75em cursor_pointer" ng-click="setType('all')"><a>All</a></li>
                         <li ng-repeat="choice in items" ng-click="setType(choice.type)"
                             class="font-75em cursor_pointer">
@@ -188,7 +188,7 @@
                     style="width: 12px; padding: 0; vertical-align: middle; opacity: 1">
                     <i class="fa fa-fw fa-ellipsis-v"></i>
 
-                    <div class="uib-dropdown-menu pull-right" style="background-color: #f1f1f1" uib-dropdown-menu>
+                    <div class="dropdown-menu pull-right" style="background-color: #f1f1f1" uib-dropdown-menu>
                         <strong class="pad-8 small">Show/Hide fields</strong>
                         <table class=" no_wrap table table-condensed font-75em" style="font-weight: normal"
                                stop-event="click">
@@ -219,7 +219,7 @@
                     <i class="fa fa-fw fa-cloud" ng-if="entry.visible=='REMOTE'" style="color: #c9e6f2"></i>
                 </td>
                 <td><a ng-click="showEntryDetails(entry, $index)" class="cell_mouseover form-group"
-                       popover-trigger="mouseenter" ng-mouseover="tooltipDetails(entry)"
+                       popover-trigger="'mouseenter'" ng-mouseover="tooltipDetails(entry)"
                        uib-popover-template="folderPopupTemplateUrl" popover-placement="right">{{entry.partId}}</a>
                 </td>
                 <td ng-if="entryHeaders.alias.selected">
