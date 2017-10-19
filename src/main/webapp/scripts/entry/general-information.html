@@ -490,7 +490,7 @@
         <!--</div>-->
 
         <div ng-show="entry.hasSequence && entry.basePairCount" style="height: 600px; width: 100%">
-            <div id="ve-Root" style="width: 900px" ng-if="entry.type!=='PROTEIN'" ng-init="loadVectorEditor()"></div>
+            <div id="ve-Root" ng-if="entry.type!=='PROTEIN'" ng-init="loadVectorEditor()"></div>
 
             <span ng-if="entry.type==='PROTEIN'">
                 <i style="color: #999; display: block; font-size: 1.5em" class="pad_top">
