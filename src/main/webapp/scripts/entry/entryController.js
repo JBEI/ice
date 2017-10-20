@@ -398,7 +398,7 @@ angular.module('ice.entry.controller', [])
                                                  $stateParams, EntryService, Util, $anchorScroll) {
         var sid = $cookieStore.get("sessionId");
         var partLinks;
-        $scope.entry = undefined;
+        $scope.entry = {id: $stateParams.id};
 
         Util.get("rest/parts/" + $stateParams.id, function (result) {
             $scope.entry = EntryService.convertToUIForm(result);
@@ -1394,7 +1394,6 @@ angular.module('ice.entry.controller', [])
                     console.log("sequenceData:", sequenceData);
                     console.log("editorState:", editorState);
 
-
                     const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
                     clipboardData.setData('text/plain', JSON.stringify(sequenceData.sequence));
                     $scope.data.selection = editorState.selectionLayer;
@@ -1426,7 +1425,6 @@ angular.module('ice.entry.controller', [])
                         continue;
 
                     var location = feature.locations[0];
-                    console.log(feature);
 
                     $scope.data.sequenceData.features.push({
                         start: location.genbankStart,
