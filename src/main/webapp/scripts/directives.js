@@ -207,33 +207,6 @@ iceDirectives.directive("ice.menu.tags", function () {
     }
 });
 
-iceDirectives.directive("iceVectorViewer", function () {
-    //function link(scope, element, attrs) {
-    //    var entryId;
-    //
-    //    scope.$watch('entry', function (value) {
-    //        if (!value) {
-    //            if (attrs.entryid) {
-    //                entryId = attrs.entryid;
-    //            } else
-    //                return;
-    //        } else {
-    //            entryId = value.id;
-    //        }
-    //
-    //        if (entryId)
-    //            element.html('<iframe src="/scripts/lib/ve/veIndex.html?embedded=true" id="' + entryId +
-    //                '" style="border: 1px solid black" width="100%" height="100%" border-width="1px"/>');
-    //    });
-    //}
-
-    return {
-        restrict: 'AE',
-        scope: false,
-        templateUrl: 'scripts/lib/ve/veIndex.html'
-    };
-});
-
 iceDirectives.directive("iceRemoteFlash",
     function ($cookieStore) {
         function link(scope, element, attrs) {
