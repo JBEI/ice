@@ -212,7 +212,7 @@ angular.module('ice.search.controller', [])
         };
     })
     .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {
-        $scope.searchTypes = {all: true, strain: true, plasmid: true, part: true, arabidopsis: true};
+        $scope.searchTypes = {all: true, strain: true, plasmid: true, part: true, arabidopsis: true, protein: true};
         $scope.fieldFilters = [];
 
         $scope.addFieldFilter = function () {
