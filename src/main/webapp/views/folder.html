@@ -61,12 +61,11 @@
         <div class="btn-toolbar" style="margin-top: 23px;">
             <!-- sub menu [Create Entry, Add To, etc] -->
             <div class="btn-group" uib-dropdown is-open="createEntry.isOpen">
-                <button type="button" class="subMenuCreateNew btn-sm"
-                        style="font-size: 14px" uib-dropdown-toggle>Create Entry <span class="caret"></span>
+                <button type="button" class="subMenuCreateNew btn-sm" uib-dropdown-toggle ng-click="createType='create'"
+                        style="font-size: 14px">Create Entry <span class="caret"></span>
                 </button>
 
-                <button type="button" style="padding: 5px 5px"
-                        class="btn-xs subMenuCreateNew"
+                <button type="button" style="padding: 5px 5px" class="btn-xs subMenuCreateNew"
                         title="Bulk Import" ng-click="toggleUploadDropdown($event, 'upload')">
                     <i class="fa fa-table" style="font-size: 19px"></i>
                 </button>

@@ -97,8 +97,8 @@ angular.module('ice.entry.directives', [])
 
                             const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
                             clipboardData.setData('text/plain', sequenceData.sequence);
-                            $scope.data.selection = editorState.selectionLayer;
-                            clipboardData.setData('application/json', JSON.stringify($scope.data));
+                            data.selection = editorState.selectionLayer;
+                            clipboardData.setData('application/json', JSON.stringify(data));
                             event.preventDefault();
                         }
                     });
@@ -108,7 +108,7 @@ angular.module('ice.entry.directives', [])
                         annotationVisibility: {
                             parts: false,
                             orfs: false,
-                            cutsites: false,
+                            cutsites: false
                         },
                         panelsShown: {
                             sequence: false,
