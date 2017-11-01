@@ -100,6 +100,25 @@ angular.module('ice.entry.directives', [])
                             data.selection = editorState.selectionLayer;
                             clipboardData.setData('application/json', JSON.stringify(data));
                             event.preventDefault();
+                        },
+
+                        ToolBarProps: {
+                            //name the tools you want to see in the toolbar in the order you want to see them
+                            toolList: [
+                                //"saveTool",
+                                //"downloadTool",
+                                //"undoTool",
+                                //"redoTool",
+                                "cutsiteTool",
+                                "featureTool",
+                                "oligoTool",
+                                "orfTool",
+                                "viewTool",
+                                //"editTool",
+                                "findTool",
+                                "visibilityTool",
+                                "propertiesTool"
+                            ]
                         }
                     });
 
