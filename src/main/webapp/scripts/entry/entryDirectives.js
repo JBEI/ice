@@ -66,8 +66,8 @@ angular.module('ice.entry.directives', [])
                 var entryId;
                 scope.$watch('entry', function (value) {
                     if (!value) {
-                        if (attrs.partId) {
-                            entryId = attrs.partId;
+                        if (attrs.partid) {
+                            entryId = attrs.partid;
                         }
                     } else {
                         entryId = value.id;
@@ -84,17 +84,7 @@ angular.module('ice.entry.directives', [])
             controller: function ($scope, Util, $window) {
                 $scope.loadVectorEditor = function (data) {
                     $scope.editor = $window.createVectorEditor(document.getElementById("ve-Root"), {
-                        onSave: function (event, sequenceData, editorState) {
-                            console.log("event:", event);
-                            console.log("sequenceData:", sequenceData);
-                            console.log("editorState:", editorState);
-                        },
-
                         onCopy: function (event, sequenceData, editorState) {
-                            console.log("event:", event);
-                            console.log("sequenceData:", sequenceData);
-                            console.log("editorState:", editorState);
-
                             const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
                             clipboardData.setData('text/plain', sequenceData.sequence);
                             data.selection = editorState.selectionLayer;
@@ -139,9 +129,11 @@ angular.module('ice.entry.directives', [])
 
                 $scope.fetchEntrySequence = function (entryId) {
                     Util.get("rest/parts/" + entryId + "/sequence", function (result) {
+                        console.log(result);
+
                         var data = {
                             sequenceData: {
-                                sequence: result.sequence, features: [], name: $scope.entry.name
+                                sequence: result.sequence, features: [] //, name: $scope.entry.name
                             },
                             registryData: {
                                 uri: result.uri,
