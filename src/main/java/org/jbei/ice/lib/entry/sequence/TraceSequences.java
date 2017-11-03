@@ -201,7 +201,7 @@ public class TraceSequences {
 
         if (dnaSequence == null) {
             // try parsing as fasta, genbank, etc
-            dnaSequence = GeneralParser.getInstance().parse(bytes);
+            dnaSequence = GeneralParser.parse(new String(bytes));
             if (dnaSequence == null || dnaSequence.getSequence() == null) {
                 String errMsg = ("Could not parse \"" + fileName
                         + "\". Only Fasta, GenBank & ABI files are supported.");

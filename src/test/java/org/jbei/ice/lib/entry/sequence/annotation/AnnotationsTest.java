@@ -44,7 +44,7 @@ public class AnnotationsTest {
 
         Assert.assertFalse(sequenceDAO.hasSequence(plasmid.getId()));
 
-        DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+        DNASequence dnaSequence = GeneralParser.parse(sequenceString);
         Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(plasmid);
         sequence = sequenceDAO.saveSequence(sequence);

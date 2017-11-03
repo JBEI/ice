@@ -27,7 +27,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
         Strain strain = TestEntryCreator.createTestStrain(account);
 
         // parse sequence and associate with strain
-        DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+        DNASequence dnaSequence = GeneralParser.parse(sequenceString);
         Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(strain);
 
@@ -35,7 +35,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
         // create second strain and associate with same sequence
         Strain strain2 = TestEntryCreator.createTestStrain(account);
-        dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+        dnaSequence = GeneralParser.parse(sequenceString);
         sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(strain2);
         Assert.assertNotNull(sequenceDAO.saveSequence(sequence));
@@ -54,7 +54,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
         // create account and sequence
         Account account = AccountCreator.createTestAccount("SequenceDAOTest.testUpdateSequence", false);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
-        DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+        DNASequence dnaSequence = GeneralParser.parse(sequenceString);
         Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(plasmid);
         sequence = sequenceDAO.saveSequence(sequence);
@@ -97,7 +97,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
         // create account and sequence
         Account account = AccountCreator.createTestAccount("SequenceDAOTest.testGetByEntry", false);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
-        DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+        DNASequence dnaSequence = GeneralParser.parse(sequenceString);
         Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(plasmid);
         sequence = sequenceDAO.saveSequence(sequence);
@@ -113,7 +113,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
         Assert.assertFalse(sequenceDAO.hasSequence(plasmid.getId()));
 
-        DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+        DNASequence dnaSequence = GeneralParser.parse(sequenceString);
         Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(plasmid);
         sequence = sequenceDAO.saveSequence(sequence);
