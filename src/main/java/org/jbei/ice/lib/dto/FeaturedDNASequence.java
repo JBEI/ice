@@ -21,6 +21,7 @@ public class FeaturedDNASequence extends DNASequence {
     private String dcUri;
     private boolean canEdit;
     private long length;
+    private String organism = "";
 
     public FeaturedDNASequence() {
         super();
@@ -111,5 +112,13 @@ public class FeaturedDNASequence extends DNASequence {
 
     public void setLength(long length) {
         this.length = length;
+    }
+
+    public String getOrganism() {
+        return organism;
+    }
+
+    public void setOrganism(String organism) {
+        this.organism = organism;
     }
 }

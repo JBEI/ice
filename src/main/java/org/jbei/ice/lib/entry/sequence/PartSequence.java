@@ -116,22 +116,28 @@ public class PartSequence extends HasEntry {
             }
 
             // parse actual sequence
-            DNASequence sequence = parser.parse(sequenceString);
-            return save(sequence, sequenceString, fileName);
+            String entryType = this.entry.getRecordType();
+            DNASequence sequence = parser.parse(sequenceString, entryType);
+            return save(sequence, sequenceString, fileName, entryType);
         } catch (InvalidFormatParserException e) {
             Logger.error(e);
             throw new IOException(e);
         }
     }
 
-    protected SequenceInfo save(DNASequence dnaSequence, String sequenceString, String fileName) {
+    protected SequenceInfo save(DNASequence dnaSequence, String sequenceString, String fileName, String entryType) {
         Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
         sequence.setSequenceUser(sequenceString);
         sequence.setEntry(entry);
         if (!StringUtils.isBlank(fileName))
             sequence.setFileName(fileName);
+        Sequence result;
+        if (EntryType.PROTEIN.getName().equalsIgnoreCase(entryType)) {
+            result = sequenceDAO.saveProtein(sequence);
+        } else {
+            result = sequenceDAO.saveSequence(sequence);
+        }
 
-        Sequence result = sequenceDAO.saveSequence(sequence);
         BlastPlus.scheduleBlastIndexRebuildTask(true);
         SequenceInfo info = result.toDataTransferObject();
         info.setSequence(dnaSequence);

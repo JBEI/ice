@@ -1,0 +1,72 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-fw fa-arrow-up"></i> &nbsp;Import Plate Samples
+    </span>
+</div>
+
+<div class="modal-body">
+
+    <div class="font-90em" ng-if="!processingFile">
+        <div class="alert alert-info">Upload your CSV file below. Expected format is<br><br>
+            <table class="table table-bordered bg_f1 font-85em">
+                <tr>
+                    <td>Name</td>
+                    <td>User's Name</td>
+                    <td>Seq</td>
+                    <td>Cons. size</td>
+                    <td>Status</td>
+                    <td>Dest. Vector</td>
+                    <td>Resistance</td>
+                    <td>Strain</td>
+                    <td>Master Well</td>
+                </tr>
+                <tr>
+                    <td>plasmid_alias</td>
+                    <td>plasmid_name</td>
+                    <td>ignored</td>
+                    <td>ignored</td>
+                    <td>ignored</td>
+                    <td>ignored</td>
+                    <td>ignored</td>
+                    <td>ignored</td>
+                    <td>xxxxxx-A14</td>
+                </tr>
+            </table>
+            <br>
+            The output is of the format <br>
+            <table class="table table-bordered bg_f1 font-85em">
+                <tr>
+                    <td>Well</td>
+                    <td>PartID (Strain)</td>
+                </tr>
+                <tr>
+                    <td>A14</td>
+                    <td>Z12a</td>
+                </tr>
+            </table>
+        </div>
+
+        <input nv-file-select uploader="sampleUploader" type="file"/>
+    </div>
+
+    <div ng-if="processingFile">
+        <img src="img/loader-mini.gif"> Processing File...
+        <uib-progressbar class="progress-striped active" value="100" type="warning"
+                         style="height: 20px"></uib-progressbar>
+    </div>
+
+    <div class="pad-top-5" ng-if="!processingFile">
+        <br>
+
+        <div ng-if="result.data">
+            <span class="green">
+                <i class="fa fa-fw fa-check"></i> <b class="text-uppercase">Success.</b>
+            </span>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-sm btn-primary" ng-click="$dismiss('cancel')">Close</button>
+</div>

@@ -61,18 +61,16 @@
         <div class="btn-toolbar" style="margin-top: 23px;">
             <!-- sub menu [Create Entry, Add To, etc] -->
             <div class="btn-group" uib-dropdown is-open="createEntry.isOpen">
-                <button type="button" class="subMenuCreateNew btn-sm"
-                        style="font-size: 14px"
-                        ng-click="toggleUploadDropdown($event, 'create')">Create Entry <span class="caret"></span>
+                <button type="button" class="subMenuCreateNew btn-sm" uib-dropdown-toggle ng-click="createType='create'"
+                        style="font-size: 14px">Create Entry <span class="caret"></span>
                 </button>
 
-                <button type="button" style="padding: 5px 5px"
-                        class="btn-xs subMenuCreateNew"
+                <button type="button" style="padding: 5px 5px" class="btn-xs subMenuCreateNew"
                         title="Bulk Import" ng-click="toggleUploadDropdown($event, 'upload')">
                     <i class="fa fa-table" style="font-size: 19px"></i>
                 </button>
 
-                <ul class="uib-dropdown-menu">
+                <ul class="dropdown-menu" uib-dropdown-menu>
                     <li ng-repeat="choice in items">
                         <a ng-href="{{createType}}/{{choice.type}}" class="cursor_pointer">
                             <i ng-if="createType==='upload'"

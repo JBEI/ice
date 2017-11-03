@@ -300,7 +300,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.searchSampleLocations = function () {
-            var modalInstance = $uibModal.open({
+            $uibModal.open({
                 templateUrl: 'scripts/admin/modal/sample-location-search.html',
                 controller: "AdminSampleLocationSearch",
                 backdrop: "static"
@@ -308,10 +308,19 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.importSamples = function () {
-            var modalInstance = $uibModal.open({
+            $uibModal.open({
                 templateUrl: 'scripts/admin/modal/import-samples.html',
                 controller: 'AdminSampleImport',
                 backdrop: "static"
+            })
+        };
+
+        $scope.sanitizeCsv = function () {
+            $uibModal.open({
+                templateUrl: 'scripts/admin/modal/create-samples.html',
+                controller: 'AdminSampleCreate',
+                backdrop: "static",
+                size: 'lg'
             })
         };
 
@@ -325,6 +334,40 @@ angular.module('ice.admin.controller', [])
             }
             return locations[0];
         }
+    })
+    .controller('AdminSampleCreate', function ($scope, FileUploader, Authentication, $window) {
+        $scope.sampleUploader = new FileUploader({
+            scope: $scope, // to automatically update the html. Default: $rootScope
+            url: "rest/samples/file",
+            method: 'POST',
+            removeAfterUpload: true,
+            headers: {"X-ICE-Authentication-SessionId": Authentication.getSessionId()},
+            autoUpload: true,
+            queueLimit: 1 // can only upload 1 file
+        });
+
+        $scope.sampleUploader.onProgressItem = function (item, progress) {
+            $scope.progress = progress;
+        };
+
+        $scope.sampleUploader.onSuccessItem = function (item, response, status, header) {
+            $scope.processingFile = false;
+            $scope.result = {success: true, data: response};
+            $window.open("rest/file/tmp/" + response.fileId + "?filename=data.csv", "_self");
+        };
+
+        $scope.sampleUploader.onAfterAddingFile = function () {
+            $scope.processingFile = false;
+            $scope.result = {success: false};
+        };
+
+        $scope.sampleUploader.onBeforeUploadItem = function () {
+            $scope.processingFile = true;
+        };
+
+        $scope.sampleUploader.onCompleteAll = function () {
+            $scope.processingFile = false;
+        };
     })
     .controller('AdminSampleImport', function ($scope, $uibModalInstance, Util, FileUploader, Authentication) {
         $scope.progress = 0;
@@ -346,14 +389,6 @@ angular.module('ice.admin.controller', [])
         uploader.onSuccessItem = function (item, response, status, header) {
             $scope.processingFile = false;
             $scope.result = {success: true, data: response};
-
-            //$scope.serverResult = {data: response, total: response.length, valid: []}
-            //for (var i = 0; i < response.length; i += 1) {
-            //    var datum = response[i];
-            //    if (datum.partData) {
-            //        $scope.serverResult.valid.push(datum.partData.id);
-            //    }
-            //}
         };
 
         uploader.onAfterAddingFile = function () {

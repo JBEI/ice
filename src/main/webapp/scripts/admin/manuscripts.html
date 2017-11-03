@@ -66,7 +66,7 @@
                                 'btn-default':manuscript.status == 'UNDER_REVIEW'}">
                             {{manuscript.status | capitalize}} <span class="caret"></span>
                         </button>
-                        <ul class="uib-dropdown-menu">
+                        <ul class="dropdown-menu" uib-dropdown-menu>
                             <li ng-if="manuscript.status != 'ACCEPTED'"
                                 ng-click="updatePaperStatus(manuscript, 'ACCEPTED')"><a href="#">Accept</a></li>
                             <li ng-if="manuscript.status != 'REJECTED'"

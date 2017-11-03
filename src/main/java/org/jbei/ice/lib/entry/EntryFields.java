@@ -55,4 +55,11 @@ public class EntryFields {
         list.add(EntryField.SELECTION_MARKERS);
         list.add(EntryField.SENT_TO_ABRC);
     }
+
+    public static void addProteinHeaders(List<EntryField> list) {
+        list.add(EntryField.ORGANISM);
+        list.add(EntryField.FULL_NAME);
+        list.add(EntryField.GENE_NAME);
+        list.add(EntryField.UPLOADED_FROM);
+    }
 }

@@ -15,7 +15,7 @@ import org.jbei.ice.lib.dto.DNASequence;
 public class PlainParser extends AbstractParser {
 
     @Override
-    public DNASequence parse(String textSequence) throws InvalidFormatParserException {
+    public DNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
         SymbolList sl;
         try {
             textSequence = cleanSequence(textSequence);

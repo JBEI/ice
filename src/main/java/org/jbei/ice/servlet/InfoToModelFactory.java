@@ -35,6 +35,10 @@ public class InfoToModelFactory {
                 entry = setSeedFields(info.getArabidopsisSeedData(), new ArabidopsisSeed());
                 break;
 
+            case PROTEIN:
+                entry = setProteinFields(info.getProteinData(), new Protein());
+                break;
+
             case PART:
             default:
                 entry = new Part();
@@ -141,6 +145,26 @@ public class InfoToModelFactory {
         return entry;
     }
 
+    protected static Entry setProteinFields(ProteinData proteinData, Entry entry) {
+        Protein protein = (Protein) entry;
+        if (proteinData == null)
+            return entry;
+
+        if (proteinData.getOrganism() != null)
+            protein.setOrganism(proteinData.getOrganism());
+
+        if (proteinData.getFullName() != null)
+            protein.setFullName(proteinData.getFullName());
+
+        if (proteinData.getGeneName() != null)
+            protein.setGeneName(proteinData.getGeneName());
+
+        if (proteinData.getUploadedFrom() != null)
+            protein.setUploadedFrom(proteinData.getUploadedFrom());
+
+        return entry;
+    }
+
     /**
      * sets the corresponding fields in data only if they are not null
      *
@@ -167,6 +191,10 @@ public class InfoToModelFactory {
 
             case ARABIDOPSIS:
                 entry = setSeedFields(data.getArabidopsisSeedData(), entry);
+                break;
+
+            case PROTEIN:
+                entry = setProteinFields(data.getProteinData(), entry);
                 break;
         }
 
@@ -252,7 +280,7 @@ public class InfoToModelFactory {
         if (info.getKeywords() != null)
             entry.setKeywords(info.getKeywords());
 
-        // parameters 
+        // parameters
         List<Parameter> parameters = getParameters(info.getCustomFields(), entry);
         entry.setParameters(parameters);
         return entry;
@@ -453,8 +481,17 @@ public class InfoToModelFactory {
             case PARENTS:
                 entry = infoToSeedForField(entry, value, field);
                 break;
+
+            case ORGANISM:
+            case FULL_NAME:
+            case GENE_NAME:
+            case UPLOADED_FROM:
+                entry = infoToProteinForField(entry, value, field);
+                break;
+
             default:
                 break;
+
         }
         if (plasmid == null)
             return new Entry[]{entry};
@@ -560,6 +597,34 @@ public class InfoToModelFactory {
 
             default:
                 return seed;
+        }
+    }
+
+    private static Entry infoToProteinForField(Entry entry, String value, EntryField field) {
+        if (!entry.getRecordType().equalsIgnoreCase(EntryType.PROTEIN.toString()))
+            return entry;
+
+        Protein protein = (Protein) entry;
+
+        switch (field) {
+            case ORGANISM:
+                protein.setOrganism(value);
+                return protein;
+
+            case FULL_NAME:
+                protein.setFullName(value);
+                return protein;
+
+            case GENE_NAME:
+                protein.setGeneName(value);
+                return protein;
+
+            case UPLOADED_FROM:
+                protein.setUploadedFrom(value);
+                return protein;
+
+            default:
+                return protein;
         }
     }
 }

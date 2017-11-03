@@ -186,8 +186,9 @@
 
         <div class="margin-top-10 font-95em" ng-hide="activePart.hasSequence">
             <div class="alert alert-info" style="margin-bottom: 10px; margin-top: 10px">
-                <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Supported file formats are
-                Genbank, Fasta and SBOL
+                <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i>
+                <span ng-if="activePart.type==='PROTEIN'">Supported file formats are Genpep and Fasta</span>
+                <span ng-if="activePart.type!=='PROTEIN'">Supported file formats are Genbank, Fasta and SBOL</span>
             </div>
 
             <div class="alert alert-danger" style="margin-bottom: 10px" ng-if="serverError">
@@ -213,7 +214,7 @@
         </div>
 
         <div class="margin-top-10" ng-if="activePart.hasSequence" style="height: 600px">
-            <ice-vector-viewer entryId="{{activePart.id}}"></ice-vector-viewer>
+            <ice-vector-viewer partId="{{activePart.id}}"></ice-vector-viewer>
         </div>
     </div>
 </div>
@@ -250,4 +251,3 @@
 </div>
 
 </form>
-

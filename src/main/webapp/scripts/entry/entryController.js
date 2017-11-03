@@ -398,7 +398,7 @@ angular.module('ice.entry.controller', [])
                                                  $stateParams, EntryService, Util, $anchorScroll) {
         var sid = $cookieStore.get("sessionId");
         var partLinks;
-        $scope.entry = undefined;
+        $scope.entry = {id: $stateParams.id};
 
         Util.get("rest/parts/" + $stateParams.id, function (result) {
             $scope.entry = EntryService.convertToUIForm(result);
@@ -1072,7 +1072,7 @@ angular.module('ice.entry.controller', [])
     })
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
-                                             $route, $window, FileUploader, EntryService, EntryContextUtil, Selection,
+                                             $route, $window, $document, FileUploader, EntryService, EntryContextUtil, Selection,
                                              Util, Authentication) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;

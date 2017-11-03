@@ -207,68 +207,30 @@ iceDirectives.directive("ice.menu.tags", function () {
     }
 });
 
-iceDirectives.directive("iceVectorViewer", function ($cookieStore, FolderSelection, $location) {
-    function link(scope, element, attrs) {
-        var sid = $cookieStore.get("sessionId");
-        var entryId;
+iceDirectives.directive("iceRemoteFlash",
+    function ($cookieStore) {
+        function link(scope, element, attrs) {
+            var sid = $cookieStore.get("sessionId");
+            var entryId, url;
 
-        function generateObject() {
-            var search = $location.search();
-            var s = "<object id='VectorViewer' width='100%' height='100%' data='swf/vv/VectorViewer.swf?entryId="
-                + entryId + "&amp;sessionId=" + sid;
-
-            if (search && search.folderId) {
-                s += "&folderId=" + search.folderId + "&amp;remote=true";
-            }
-            s += "'></object>";
-
-            element.html(s);
-        }
-
-        scope.$watch('entry', function (value) {
-            if (!value) {
-                if (attrs.entryid) {
-                    entryId = attrs.entryid;
-                } else
-                    return;
-            } else {
-                entryId = value.id;
-            }
-
-            if (entryId)
-                generateObject();
-        });
-    }
-
-    return {
-        restrict: 'AE',
-        link: link
-    };
-});
-
-iceDirectives.directive("iceRemoteFlash", function ($cookieStore) {
-    function link(scope, element, attrs) {
-        var sid = $cookieStore.get("sessionId");
-        var entryId, url;
-
-        function generateObject() {
-            element.html('<object id="VectorViewer" width="100%" height="100%" data="swf/vv/VectorViewer.swf?entryId='
-                + entryId + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
+            function generateObject() {
+                element.html('<object id="VectorViewer" width="100%" height="100%" data="swf/vv/VectorViewer.swf?entryId='
+                    + entryId + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
                     </object>');
+            }
+
+            scope.$watch('remoteEntry', function (value) {
+                entryId = value.id;
+                url = value.partnerId;
+                generateObject();
+            });
         }
 
-        scope.$watch('remoteEntry', function (value) {
-            entryId = value.id;
-            url = value.partnerId;
-            generateObject();
-        });
-    }
-
-    return {
-        restrict: 'AE',
-        link: link
-    };
-});
+        return {
+            restrict: 'AE',
+            link: link
+        };
+    });
 
 iceDirectives.directive("iceSequenceChecker", function ($cookieStore) {
     function link(scope, element, attrs) {

@@ -6,11 +6,14 @@
     <meta charset="utf-8">
     <title>ICE - Inventory of Composable Elements</title>
 
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/open-vector-editor/umd/main.css">
+
     <link href="css/font-awesome.min.css" rel="stylesheet">
     <link href="css/ice.css" rel="stylesheet">
-    <link rel="stylesheet" href="scripts/lib/handsontable-0.25.1/pikaday.css">
-    <link rel="stylesheet" media="screen" href="scripts/lib/handsontable-0.25.1/handsontable.full.min.css">
+    <link rel="stylesheet" href="scripts/lib/handsontable-0.34.5/pikaday.css">
+    <link rel="stylesheet" media="screen" href="scripts/lib/handsontable-0.34.5/handsontable.full.min.css">
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500' rel='stylesheet' type='text/css'>
 
     <script src="scripts/lib/jquery/jquery-1.11.3.min.js"></script>
     <script src="scripts/lib/angular/angular.min.js"></script>
@@ -21,12 +24,13 @@
     <script src="scripts/lib/angular/angular-touch.min.js"></script>
 
     <script src="scripts/lib/angular-ui/angular-ui-router.min-0.2.15.js"></script>
-    <script src="scripts/lib/angular-ui/ui-bootstrap-tpls-0.14.3.min.js"></script>
+    <script src="scripts/lib/angular-ui/ui-bootstrap-tpls-2.5.0.min.js"></script>
 
     <script src="scripts/lib/angular-file-upload-2.2.0/angular-file-upload.min.js"></script>
 
-    <script src="scripts/lib/handsontable-0.25.1/handsontable.full.min.js"></script>
-    <script src="scripts/lib/handsontable-0.25.1/pikaday.js"></script>
+    <script src="scripts/lib/handsontable-0.34.5/handsontable.full.min.js"></script>
+    <script src="scripts/lib/handsontable-0.34.5/pikaday.js"></script>
+    <script src="scripts/lib/handsontable-0.34.5/numbro.js"></script>
 
     <script src="scripts/lib/momentjs/moment.min.js"></script>
     <script src="scripts/lib/angular-moment/angular-moment.min.js"></script>
@@ -78,6 +82,8 @@
 </head>
 
 <body>
+<script type="text/javascript" src="https://unpkg.com/open-vector-editor/umd/open-vector-editor.js"></script>
+
 <div id="container">
     <div id="body" ui-view></div>
     <div class="navbar-fixed-bottom" style="border-top: 1px solid #BBBAAA; background-color: white;">

@@ -82,7 +82,7 @@
                                 }">
                             {{partner.status |capitalize}} <span class="caret"></span>
                         </button>
-                        <ul class="uib-dropdown-menu">
+                        <ul class="dropdown-menu" uib-dropdown-menu>
                             <li ng-if="partner.status != 'BLOCKED'" ng-click="setPartnerStatus(partner, 'BLOCKED')">
                                 <a class="font-90em" href="#">Block</a>
                             </li>
