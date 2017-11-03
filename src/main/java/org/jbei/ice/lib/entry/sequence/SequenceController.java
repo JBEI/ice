@@ -95,7 +95,7 @@ public class SequenceController extends HasEntry {
 
         Sequence sequence = dnaSequenceToSequence(featuredDNASequence);
         if (sequence.getSequenceFeatures() == null || sequence.getSequenceFeatures().isEmpty()) {
-            DNASequence dnaSequence = GeneralParser.getInstance().parse(featuredDNASequence.getSequence());
+            DNASequence dnaSequence = GeneralParser.parse(featuredDNASequence.getSequence());
             sequence = dnaSequenceToSequence(dnaSequence);
         }
         sequence.setEntry(entry);
@@ -107,27 +107,6 @@ public class SequenceController extends HasEntry {
             return null;
 
         BlastPlus.scheduleBlastIndexRebuildTask(true);
-        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
-        sequenceAnalysisController.rebuildAllAlignments(entry);
-        return sequenceToDNASequence(sequence);
-    }
-
-    protected FeaturedDNASequence updateSequence(Entry entry, DNASequence featuredDNASequence, boolean rebuild) {
-        Sequence sequence = dnaSequenceToSequence(featuredDNASequence);
-        if (sequence.getSequenceFeatures() == null || sequence.getSequenceFeatures().isEmpty()) {
-            DNASequence dnaSequence = GeneralParser.getInstance().parse(featuredDNASequence.getSequence());
-            sequence = dnaSequenceToSequence(dnaSequence);
-        }
-
-        sequence.setEntry(entry);
-        deleteSequence(sequence);
-        sequence.setEntry(entry);
-        sequence = dao.saveSequence(sequence);
-        if (sequence == null)
-            return null;
-
-        if (rebuild) BlastPlus.scheduleBlastIndexRebuildTask(true);
-
         SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
         sequenceAnalysisController.rebuildAllAlignments(entry);
         return sequenceToDNASequence(sequence);
@@ -509,7 +488,7 @@ public class SequenceController extends HasEntry {
         // parse actual sequence
         try {
             String sequenceString = IOUtils.toString(inputStream, Charset.defaultCharset());
-            DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+            DNASequence dnaSequence = GeneralParser.parse(sequenceString);
             if (dnaSequence == null)
                 throw new InvalidFormatParserException("Could not parse sequence string");
 
@@ -573,7 +552,7 @@ public class SequenceController extends HasEntry {
                 }
 
                 String sequenceString = new String(out.toByteArray());
-                DNASequence dnaSequence = GeneralParser.getInstance().parse(sequenceString);
+                DNASequence dnaSequence = GeneralParser.parse(sequenceString);
                 if (dnaSequence == null) {
                     Logger.error("Could not parse sequence for " + name);
                     errors.add(name);

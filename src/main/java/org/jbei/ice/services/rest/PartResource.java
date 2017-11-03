@@ -620,9 +620,14 @@ public class PartResource extends RestResource {
                            PartData partData) {
         final String userId = requireUserId();
         final EntryCreator creator = new EntryCreator();
-        if (StringUtils.isEmpty(sourceId)) {
-            log(userId, "created new " + partData.getType().getDisplay());
-            return super.respond(creator.createPart(userId, partData));
+        try {
+            if (StringUtils.isEmpty(sourceId)) {
+                log(userId, "created new " + partData.getType().getDisplay());
+                return super.respond(creator.createPart(userId, partData));
+            }
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         }
 
         try {
