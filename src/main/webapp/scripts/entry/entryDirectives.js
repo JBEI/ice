@@ -161,8 +161,8 @@ angular.module('ice.entry.directives', [])
                             var location = feature.locations[0];
 
                             data.sequenceData.features.push({
-                                start: location.genbankStart,
-                                end: location.end,
+                                start: location.genbankStart - 1,
+                                end: location.end - 1,
                                 id: feature.id,
                                 forward: feature.strand == 1,
                                 type: feature.type,
