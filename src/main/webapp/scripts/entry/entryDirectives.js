@@ -91,7 +91,17 @@ angular.module('ice.entry.directives', [])
                             clipboardData.setData('application/json', JSON.stringify(data));
                             event.preventDefault();
                         },
-
+                        PropertiesProps: {
+                            propertiesList: [
+                                "features",
+                                //"parts",
+                                "primers",
+                                "translations",
+                                "cutsites",
+                                "orfs",
+                                //"genbank"
+                            ]
+                        },
                         ToolBarProps: {
                             //name the tools you want to see in the toolbar in the order you want to see them
                             toolList: [
@@ -151,8 +161,8 @@ angular.module('ice.entry.directives', [])
                             var location = feature.locations[0];
 
                             data.sequenceData.features.push({
-                                start: location.genbankStart,
-                                end: location.end,
+                                start: location.genbankStart - 1,
+                                end: location.end - 1,
                                 id: feature.id,
                                 forward: feature.strand == 1,
                                 type: feature.type,
