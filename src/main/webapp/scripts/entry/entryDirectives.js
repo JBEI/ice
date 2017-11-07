@@ -91,7 +91,17 @@ angular.module('ice.entry.directives', [])
                             clipboardData.setData('application/json', JSON.stringify(data));
                             event.preventDefault();
                         },
-
+                        PropertiesProps: {
+                            propertiesList: [
+                                "features",
+                                //"parts",
+                                "primers",
+                                "translations",
+                                "cutsites",
+                                "orfs",
+                                //"genbank"
+                            ]
+                        },
                         ToolBarProps: {
                             //name the tools you want to see in the toolbar in the order you want to see them
                             toolList: [
