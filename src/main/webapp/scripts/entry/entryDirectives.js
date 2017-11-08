@@ -95,10 +95,10 @@ angular.module('ice.entry.directives', [])
                             propertiesList: [
                                 "features",
                                 //"parts",
-                                "primers",
+                                //"primers",
                                 "translations",
                                 "cutsites",
-                                "orfs",
+                                "orfs"
                                 //"genbank"
                             ]
                         },
@@ -129,10 +129,18 @@ angular.module('ice.entry.directives', [])
                             orfs: false,
                             cutsites: false
                         },
+                        annotationsToSupport: {
+                            features: true,
+                            translations: true,
+                            parts: false,
+                            orfs: true,
+                            cutsites: true,
+                            primers: false
+                        },
                         panelsShown: {
                             sequence: false,
                             circular: true,
-                            rail: true
+                            rail: false
                         }
                     });
                 };
