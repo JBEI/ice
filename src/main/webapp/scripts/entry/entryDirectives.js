@@ -91,7 +91,17 @@ angular.module('ice.entry.directives', [])
                             clipboardData.setData('application/json', JSON.stringify(data));
                             event.preventDefault();
                         },
-
+                        PropertiesProps: {
+                            propertiesList: [
+                                "features",
+                                //"parts",
+                                //"primers",
+                                "translations",
+                                "cutsites",
+                                "orfs"
+                                //"genbank"
+                            ]
+                        },
                         ToolBarProps: {
                             //name the tools you want to see in the toolbar in the order you want to see them
                             toolList: [
@@ -119,10 +129,18 @@ angular.module('ice.entry.directives', [])
                             orfs: false,
                             cutsites: false
                         },
+                        annotationsToSupport: {
+                            features: true,
+                            translations: true,
+                            parts: false,
+                            orfs: true,
+                            cutsites: true,
+                            primers: false
+                        },
                         panelsShown: {
                             sequence: false,
                             circular: true,
-                            rail: true
+                            rail: false
                         }
                     });
                 };
