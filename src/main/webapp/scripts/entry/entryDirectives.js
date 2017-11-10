@@ -111,7 +111,7 @@ angular.module('ice.entry.directives', [])
                                 //"redoTool",
                                 "cutsiteTool",
                                 "featureTool",
-                                "oligoTool",
+                                //"oligoTool",
                                 "orfTool",
                                 "viewTool",
                                 //"editTool",
