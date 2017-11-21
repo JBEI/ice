@@ -34,11 +34,11 @@
         </div>
 
         <div class="col-sm-6">
-            <uib-pagination total-items="history.resultCount" ng-change="historyPageChanged()"
+            <ul uib-pagination total-items="history.resultCount" ng-change="historyPageChanged()"
                             ng-model="historyParams.currentPage"
                             max-size="historyParams.maxSize" class="pagination-sm" items-per-page="historyParams.limit"
                             boundary-links="true">
-            </uib-pagination>
+            </ul>
         </div>
 
         <div class="col-md-6" style="margin-top: 25px;">

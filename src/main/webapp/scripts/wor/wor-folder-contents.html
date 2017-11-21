@@ -117,10 +117,10 @@
     </div>
     <div class="row" ng-if="selectedPartnerFolder&&selectedPartnerFolder.entries.length > 0">
         <div class="col-md-5" style="padding-left: 0">
-            <uib-pagination total-items="selectedPartnerFolder.count" ng-change="worFolderContentPageChange()"
+            <ul uib-pagination total-items="selectedPartnerFolder.count" ng-change="worFolderContentPageChange()"
                         ng-model="params.currentPage"
                             max-size="maxSize" class="pagination-sm" items-per-page="15"
-                            boundary-links="true"></uib-pagination>
+                boundary-links="true"></ul>
         </div>
         <div class="col-md-7" style="margin-top: 25px;">
             <strong class="small">

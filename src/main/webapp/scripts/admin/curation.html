@@ -85,11 +85,11 @@
 
         <div ng-if="features.length > 0">
             <div class="col-md-7" style="padding-left: 0">
-                <uib-pagination total-items="curationTableParams.available" ng-change="featureListPageChanged()"
+                <ul uib-pagination total-items="curationTableParams.available" ng-change="featureListPageChanged()"
                                 ng-model="curationTableParams.currentPage"
                                 max-size="curationTableParams.maxSize" class="pagination-sm"
                                 items-per-page="curationTableParams.limit"
-                                boundary-links="true"></uib-pagination>
+                    boundary-links="true"></ul>
             </div>
 
             <div class="col-md-5" style="margin-top: 25px;">

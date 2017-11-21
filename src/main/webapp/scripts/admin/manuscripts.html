@@ -114,10 +114,10 @@
 
     <div ng-if="manuscripts.data && manuscripts.data.length">
         <div class="col-md-5" style="padding-left: 0">
-            <uib-pagination total-items="manuscripts.resultCount" ng-change="userListPageChanged()"
+            <ul uib-pagination total-items="manuscripts.resultCount" ng-change="userListPageChanged()"
                             ng-model="manuscriptsParams.currentPage"
                             max-size="manuscriptsParams.maxSize" class="pagination-sm" items-per-page="15"
-                            boundary-links="true"></uib-pagination>
+                boundary-links="true"></ul>
         </div>
 
         <div class="col-md-7" style="margin-top: 25px;">

@@ -117,10 +117,10 @@
 
 <div class="row" ng-if="webResults && webResults.entries.length > 0">
     <div class="col-md-6" style="padding-left: 0">
-        <uib-pagination total-items="webResults.count" ng-change="worContentsPageChange()"
+        <ul uib-pagination total-items="webResults.count" ng-change="worContentsPageChange()"
                         ng-model="queryParams.currentPage"
                         max-size="maxSize" class="pagination-sm" items-per-page="15"
-                        boundary-links="true"></uib-pagination>
+            boundary-links="true"></ul>
     </div>
     <div class="col-md-4" style="margin-top: 25px;">
         <strong class="small">
