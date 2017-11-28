@@ -3,7 +3,8 @@
     <div class="btn-group" style="margin-left: 20px">
 
         <!--add to folder-->
-        <button class="btn btn-default action-menu" ng-disabled="!canAddToFolder()" ng-click="openAddToFolderModal(false)">
+        <button class="btn btn-default action-menu" ng-disabled="!canAddToFolder()"
+                ng-click="openAddToFolderModal(false)">
             <i class="fa fa-fw fa-folder font-12em"></i>
             <br>
             <small class="text-uppercase font-55em">Add To</small>
@@ -48,13 +49,15 @@
             </ul>
         </div>
 
-        <button class="btn btn-default action-menu" ng-show="!isDealingWithDeleted()" ng-disabled="!canDelete()" ng-click="deleteSelectedEntries()">
+        <button class="btn btn-default action-menu" ng-show="!isDealingWithDeleted()" ng-disabled="!canDelete()"
+                ng-click="deleteSelectedEntries()">
             <i class="fa fa-trash-o font-12em"></i>
             <br>
             <small class="text-uppercase font-55em">Delete</small>
         </button>
 
-        <button class="btn btn-default action-menu" ng-show="isDealingWithDeleted()" ng-disabled="!canDelete()" ng-click="deleteSelectedEntries()">
+        <button class="btn btn-default action-menu" ng-show="isDealingWithDeleted()" ng-disabled="!canDelete()"
+                ng-click="deleteSelectedEntries()">
             <i class="fa fa-trash font-12em"></i>
             <br>
             <small class="text-uppercase font-55em">Permanent</small>
@@ -93,7 +96,8 @@
         </button>
 
         <!--accept transferred entries-->
-        <button class="btn btn-default action-menu" ng-disabled="!canAcceptTransfer()" ng-click="acceptTransferredEntries()">
+        <button class="btn btn-default action-menu" ng-disabled="!canAcceptTransfer()"
+                ng-click="acceptTransferredEntries()">
             <i class="fa fa-save font-12em"></i>
             <br>
             <small class="text-uppercase font-55em">Accept</small>
@@ -101,11 +105,10 @@
     </div>
 
     <div class="pull-right" style="margin-right: 2px; height: 30px" ng-if="serverFeedback">
-        <uib-alert style="width: 300px; padding: 5px 25px 5px 10px" type="{{serverFeedback.type}}"
-                   close="closeFeedbackAlert()"
-                   dismiss-on-timeout="5000">
+        <div style="padding: 5px 25px 5px 10px" uib-alert ng-class="'alert-' + (serverFeedback.type)"
+             dismiss-on-timeout="5000" close="closeFeedbackAlert()">
             <small>{{serverFeedback.message}}</small>
-        </uib-alert>
+        </div>
     </div>
 </div>
 
