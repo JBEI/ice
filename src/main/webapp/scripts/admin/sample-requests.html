@@ -140,9 +140,9 @@
 
     <div ng-if='sampleRequests && sampleRequests.requests.length > 0'>
         <div class="col-md-6" style="padding-left: 0">
-            <uib-pagination total-items="sampleRequests.count" ng-change="sampleRequestPageChanged()"
+            <ul uib-pagination total-items="sampleRequests.count" ng-change="sampleRequestPageChanged()"
                             ng-model="params.currentPage" max-size="maxSize"
-                            class="pagination-sm" items-per-page="15" boundary-links="true"></uib-pagination>
+                class="pagination-sm" items-per-page="15" boundary-links="true"></ul>
         </div>
         <div class="col-md-4" style="margin-top: 20px;"><strong class="small">
             <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i> {{pageCounts(params.currentPage,

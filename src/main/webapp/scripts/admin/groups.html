@@ -62,11 +62,11 @@
         </table>
 
         <div class="col-md-5" style="padding-left: 0">
-            <uib-pagination total-items="adminGroupsPagingParams.available" ng-change="groupListPageChanged()"
+            <ul uib-pagination total-items="adminGroupsPagingParams.available" ng-change="groupListPageChanged()"
                             ng-model="adminGroupsPagingParams.currentPage"
                             max-size="adminGroupsPagingParams.maxSize" class="pagination-sm"
                             items-per-page="adminGroupsPagingParams.limit"
-                            boundary-links="true"></uib-pagination>
+                boundary-links="true"></ul>
         </div>
 
         <div class="col-md-7" style="margin-top: 25px;">

@@ -141,10 +141,10 @@
 
     <div ng-if="userList && userList.users.length > 0">
         <div class="col-md-5" style="padding-left: 0">
-            <uib-pagination total-items="userList.resultCount" ng-change="userListPageChanged()"
+            <ul uib-pagination total-items="userList.resultCount" ng-change="userListPageChanged()"
                             ng-model="userListParams.currentPage"
                             max-size="maxSize" class="pagination-sm" items-per-page="15"
-                            boundary-links="true"></uib-pagination>
+                boundary-links="true"></ul>
         </div>
 
         <div class="col-md-7" style="margin-top: 25px;">

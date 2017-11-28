@@ -111,7 +111,7 @@ angular.module('ice.entry.directives', [])
                                 //"redoTool",
                                 "cutsiteTool",
                                 "featureTool",
-                                "oligoTool",
+                                //"oligoTool",
                                 "orfTool",
                                 "viewTool",
                                 //"editTool",
@@ -176,7 +176,8 @@ angular.module('ice.entry.directives', [])
                                 type: feature.type,
                                 name: feature.name,
                                 notes: feature.notes,
-                                annotationType: feature.type
+                                annotationType: feature.type,
+                                locations: feature.locations
                             });
                         }
 

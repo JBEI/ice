@@ -285,12 +285,13 @@
             </tbody>
         </table>
     </div>
+
     <div class="row" ng-if="folder && folder.entries.length > 0" style="margin-top: -15px">
         <div class="col-md-6" style="padding-left: 0">
-            <uib-pagination total-items="folder.count" ng-change="folderPageChange()" ng-model="params.currentPage"
+            <ul uib-pagination total-items="folder.count" ng-change="folderPageChange()" ng-model="params.currentPage"
                             max-size="maxSize" class="pagination-sm" items-per-page="params.limit"
                             boundary-links="true">
-            </uib-pagination>
+            </ul>
         </div>
         <div class="col-md-4" style="margin-top: 25px;">
             <strong class="small">
