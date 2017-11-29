@@ -154,12 +154,7 @@ angular
                 controller: 'UploadController',
                 templateUrl: 'scripts/upload/import.html'
             })
-            .state('flash', {
-                url: '/static/swf/:shortHand/:swfName?entryId&sessionId&url',
-                controller: 'FullScreenFlashController',
-                templateUrl: 'scripts/entry/fullscreen-flash.html'
-            })
-            // for backward compatibility with older ice version urls where links were submitted with publications
+            //backward compatibility with older ice version urls where links were submitted with publications
             .state('redirect', {
                 url: '/page=collections;id=:id',
                 controller: function ($stateParams, $location) {

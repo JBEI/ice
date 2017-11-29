@@ -1500,3 +1500,10 @@ button[disabled].action-menu:hover {
     background-color: #F3F1D9;
     color: #70822e;
 }
+
+.modal-ve-sized {
+    width: 98%;
+    height: 92%;
+    padding: 0;
+    background-color: white;
+}

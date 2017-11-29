@@ -587,6 +587,7 @@ public class PartResource extends RestResource {
                                    @DefaultValue("false") @QueryParam("add") boolean add,
                                    FeaturedDNASequence sequence) {
         final String userId = requireUserId();
+        log(userId, "updating sequence for entry " + partId);
         return super.respond(sequenceController.updateSequence(userId, partId, sequence, add));
     }
 
