@@ -1089,11 +1089,14 @@ angular.module('ice.entry.controller', [])
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/entry/modal/vector-editor.html',
                 controller: function ($scope, $window, entry, $uibModalInstance) {
+                    var sequence;
+
                     $scope.loadVectorEditor = function () {
                         console.log(entry);
 
                         Util.get("rest/parts/" + entry.id + "/sequence", function (result) {
                             $scope.sequenceName = result.name;
+                            sequence = result;
 
                             var features = [];
                             for (var i = 0; i < result.features.length; i += 1) {
@@ -1105,7 +1108,7 @@ angular.module('ice.entry.controller', [])
                                 features.push({
                                     start: location.genbankStart - 1,
                                     end: location.end - 1,
-                                    id: feature.id,
+                                    fid: feature.id,
                                     forward: feature.strand == 1,
                                     type: feature.type,
                                     name: feature.name,
@@ -1120,6 +1123,36 @@ angular.module('ice.entry.controller', [])
                                     console.log("event:", event);
                                     console.log("sequenceData:", sequenceData);
                                     console.log("editorState:", editorState);
+
+                                    // convert to featuredDNASequence
+                                    if (!sequence) {
+                                        sequence = {
+                                            features: [],
+                                            sequence: sequenceData.sequence
+                                        }
+                                    }
+                                    else {
+                                        sequence.features = [];
+                                    }
+
+                                    for (const prop in sequenceData.features) {
+                                        var feature = sequenceData.features[prop];
+                                        console.log(feature);
+                                        sequence.features.push({
+                                            id: feature.fid,
+                                            annotationType: feature.type,
+                                            name: feature.name,
+                                            strand: feature.strand ? 1 : -1,
+                                            //uri:
+                                            //identifier:
+                                            locations: [{genbankStart: feature.start + 1, end: feature.end + 1}]
+                                            //notes:[name:"", value:""]
+                                        })
+                                    }
+
+                                    Util.post("rest/parts/" + entry.id + "/sequence", sequence, function (result) {
+                                        console.log(result);
+                                    })
                                 },
 
                                 onCopy: function (event, copiedSequenceData, editorState) {
