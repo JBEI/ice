@@ -1503,7 +1503,5 @@ button[disabled].action-menu:hover {
 
 .modal-ve-sized {
     width: 98%;
-    height: 92%;
     padding: 0;
-    background-color: white;
 }
