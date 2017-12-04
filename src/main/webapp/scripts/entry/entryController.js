@@ -1119,6 +1119,8 @@ angular.module('ice.entry.controller', [])
                             }
 
                             $scope.vEeditor = $window.createVectorEditor(document.getElementById("vector-editor-root"), {
+                                editorName: "vector-editor",
+                                doNotUseAbsolutePosition: true,
                                 onSave: function (event, sequenceData, editorState) {
                                     console.log("event:", event);
                                     console.log("sequenceData:", sequenceData);
@@ -1156,9 +1158,9 @@ angular.module('ice.entry.controller', [])
                                 },
 
                                 onCopy: function (event, copiedSequenceData, editorState) {
-                                    console.log("event:", event);
-                                    console.log("sequenceData:", copiedSequenceData);
-                                    console.log("editorState:", editorState);
+                                    //console.log("event:", event);
+                                    //console.log("sequenceData:", copiedSequenceData);
+                                    //console.log("editorState:", editorState);
                                     const clipboardData = event.clipboardData;
                                     clipboardData.setData('text/plain', copiedSequenceData.sequence);
                                     clipboardData.setData('application/json', JSON.stringify(copiedSequenceData));
@@ -1188,7 +1190,7 @@ angular.module('ice.entry.controller', [])
                                         //"oligoTool",
                                         "orfTool",
                                         "viewTool",
-                                        "editTool",
+                                        //"editTool",
                                         "findTool",
                                         "visibilityTool",
                                         "propertiesTool"
@@ -1196,6 +1198,7 @@ angular.module('ice.entry.controller', [])
                                 }
                             });
                             $scope.vEeditor.updateEditor({
+                                readOnly: false,
                                 sequenceData: {
                                     sequence: result.sequence, features: features, name: result.name
                                 },
