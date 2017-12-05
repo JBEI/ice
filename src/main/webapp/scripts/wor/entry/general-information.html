@@ -134,8 +134,9 @@
         <!--</div>-->
         <!--</div>-->
 
-        <div ng-show="remoteEntry.hasSequence" style="height: 600px">
-            <span ice-remote-flash></span>
+        <div ng-show="remoteEntry.hasSequence" style="height: 600px; width: 100%">
+            <ice-vector-viewer ng-if="remoteEntry.type!=='PROTEIN'" partId="remoteEntry.id"
+                               entry="remoteEntry"></ice-vector-viewer>
         </div>
     </div>
 </div>

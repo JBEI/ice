@@ -1084,8 +1084,6 @@ angular.module('ice.entry.controller', [])
         $scope.sessionId = sessionId;
 
         $scope.open = function () {
-            //window.open('static/swf/ve/VectorEditor?entryId=' + $scope.entry.recordId + '&sessionId=' + sessionId);
-
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/entry/modal/vector-editor.html',
                 controller: function ($scope, $window, entry, $uibModalInstance) {
@@ -1105,6 +1103,8 @@ angular.module('ice.entry.controller', [])
                                     continue;
 
                                 var location = feature.locations[0];
+                                var notes = feature.notes.length ? feature.notes[0].value : "";
+
                                 features.push({
                                     start: location.genbankStart - 1,
                                     end: location.end - 1,
@@ -1112,7 +1112,7 @@ angular.module('ice.entry.controller', [])
                                     forward: feature.strand == 1,
                                     type: feature.type,
                                     name: feature.name,
-                                    notes: feature.notes,
+                                    notes: notes,
                                     annotationType: feature.type,
                                     locations: feature.locations
                                 })
@@ -1122,10 +1122,6 @@ angular.module('ice.entry.controller', [])
                                 editorName: "vector-editor",
                                 doNotUseAbsolutePosition: true,
                                 onSave: function (event, sequenceData, editorState) {
-                                    console.log("event:", event);
-                                    console.log("sequenceData:", sequenceData);
-                                    console.log("editorState:", editorState);
-
                                     // convert to featuredDNASequence
                                     if (!sequence) {
                                         sequence = {
@@ -1142,13 +1138,11 @@ angular.module('ice.entry.controller', [])
                                         console.log(feature);
                                         sequence.features.push({
                                             id: feature.fid,
-                                            annotationType: feature.type,
+                                            type: feature.type,
                                             name: feature.name,
-                                            strand: feature.strand ? 1 : -1,
-                                            //uri:
-                                            //identifier:
-                                            locations: [{genbankStart: feature.start + 1, end: feature.end + 1}]
-                                            //notes:[name:"", value:""]
+                                            strand: feature.forward ? 1 : -1,
+                                            locations: [{genbankStart: feature.start + 1, end: feature.end + 1}],
+                                            notes: [{name: "note", value: features.notes}]
                                         })
                                     }
 
@@ -1158,9 +1152,6 @@ angular.module('ice.entry.controller', [])
                                 },
 
                                 onCopy: function (event, copiedSequenceData, editorState) {
-                                    //console.log("event:", event);
-                                    //console.log("sequenceData:", copiedSequenceData);
-                                    //console.log("editorState:", editorState);
                                     const clipboardData = event.clipboardData;
                                     clipboardData.setData('text/plain', copiedSequenceData.sequence);
                                     clipboardData.setData('application/json', JSON.stringify(copiedSequenceData));
@@ -1170,27 +1161,21 @@ angular.module('ice.entry.controller', [])
                                 PropertiesProps: {
                                     propertiesList: [
                                         "features",
-                                        //"parts",
-                                        //"primers",
                                         "translations",
                                         "cutsites",
                                         "orfs"
-                                        //"genbank"
                                     ]
                                 },
                                 ToolBarProps: {
                                     //name the tools you want to see in the toolbar in the order you want to see them
                                     toolList: [
                                         "saveTool",
-                                        //"downloadTool",
                                         "undoTool",
                                         "redoTool",
                                         "cutsiteTool",
                                         "featureTool",
-                                        //"oligoTool",
                                         "orfTool",
                                         "viewTool",
-                                        //"editTool",
                                         "findTool",
                                         "visibilityTool",
                                         "propertiesTool"
@@ -1216,7 +1201,7 @@ angular.module('ice.entry.controller', [])
                                     primers: false
                                 },
                                 panelsShown: {
-                                    sequence: false,
+                                    sequence: true,
                                     circular: true,
                                     rail: false
                                 }
@@ -1234,7 +1219,8 @@ angular.module('ice.entry.controller', [])
                 }
             });
 
-            modalInstance.result.then(function (part) {
+            modalInstance.result.then(function (sequence) {
+                console.log("ve closed", sequence);
             });
         };
 
