@@ -21,6 +21,7 @@ import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.attachment.Attachments;
 import org.jbei.ice.lib.entry.sample.SampleService;
+import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.TraceSequences;
 import org.jbei.ice.lib.entry.sequence.annotation.Annotations;
@@ -586,8 +587,16 @@ public class PartResource extends RestResource {
     public Response updateSequence(@PathParam("id") final String partId,
                                    @DefaultValue("false") @QueryParam("add") boolean add,
                                    FeaturedDNASequence sequence) {
-        final String userId = requireUserId();
-        return super.respond(sequenceController.updateSequence(userId, partId, sequence, add));
+        try {
+            final String userId = requireUserId();
+            log(userId, "updating sequence for entry " + partId);
+            PartSequence partSequence = new PartSequence(userId, partId);
+            return super.respond(partSequence.update(sequence));
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new WebApplicationException(e);
+        }
+//        return super.respond(sequenceController.updateSequence(userId, partId, sequence, add));
     }
 
     @DELETE

@@ -3,7 +3,7 @@ package org.jbei.ice.lib.dto;
 import org.jbei.ice.storage.IDataTransferModel;
 
 /**
- * Value object to hold {@link SequenceFeatureAttribute} data.
+ * Value object to hold {@link org.jbei.ice.storage.model.SequenceFeatureAttribute} data.
  * <p/>
  * This is called a Qualifier in genbank reference parlance.
  *
