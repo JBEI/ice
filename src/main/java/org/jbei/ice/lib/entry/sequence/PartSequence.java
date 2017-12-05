@@ -2,6 +2,7 @@ package org.jbei.ice.lib.entry.sequence;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
@@ -11,12 +12,15 @@ import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryFactory;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.parsers.AbstractParser;
+import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.PlainParser;
 import org.jbei.ice.lib.parsers.fasta.FastaParser;
 import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.lib.parsers.sbol.SBOLParser;
 import org.jbei.ice.lib.search.blast.BlastPlus;
+import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
@@ -26,6 +30,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -123,6 +131,75 @@ public class PartSequence extends HasEntry {
             Logger.error(e);
             throw new IOException(e);
         }
+    }
+
+    /**
+     * Updates the sequence information associated with this part with the referenced one.
+     * <br>
+     * Write privileges on the entry are required
+     *
+     * @param dnaSequence new sequence to associate with this part
+     * @return updated sequence information
+     */
+    public FeaturedDNASequence update(FeaturedDNASequence dnaSequence) {
+        entryAuthorization.expectWrite(userId, entry);
+
+        // convert sequence wrapper to sequence storage model
+        Sequence sequence = dnaSequenceToSequence(dnaSequence);
+
+        // sometimes the whole sequence is sent in the string portion (when there are no features)
+        if (sequence.getSequenceFeatures() == null || sequence.getSequenceFeatures().isEmpty()) {
+            DNASequence parsedSequence = GeneralParser.parse(dnaSequence.getSequence());
+            if (parsedSequence != null)
+                sequence = dnaSequenceToSequence(parsedSequence);
+        }
+
+        if (sequence == null)
+            return null;
+
+        // delete existing sequence for entry
+        Sequence existingSequence = sequenceDAO.getByEntry(this.entry);
+        if (existingSequence != null)
+            deleteSequence(existingSequence);
+
+        // associated entry with new one
+        sequence.setEntry(this.entry);
+        sequence = sequenceDAO.saveSequence(sequence);
+        if (sequence == null)
+            return null;
+
+        // rebuild blast
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
+
+        // rebuild the trace sequence alignments
+        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
+        sequenceAnalysisController.rebuildAllAlignments(entry);
+        return sequenceToDNASequence(sequence);
+    }
+
+    public boolean delete() {
+        entryAuthorization.expectWrite(userId, entry);
+        Sequence sequence = sequenceDAO.getByEntry(entry);
+        if (sequence == null)
+            return true;
+        deleteSequence(sequence);
+        return true;
+    }
+
+    protected void deleteSequence(Sequence sequence) {
+        sequenceDAO.deleteSequence(sequence);
+
+        String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
+        Path pigeonPath = Paths.get(tmpDir, sequence.getFwdHash() + ".png");
+
+        try {
+            Files.deleteIfExists(pigeonPath);
+        } catch (IOException e) {
+            // ok to ignore
+            Logger.info("Error deleting pigeon folder " + pigeonPath.toString());
+        }
+
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
     }
 
     protected SequenceInfo save(DNASequence dnaSequence, String sequenceString, String fileName, String entryType) {
@@ -242,4 +319,121 @@ public class PartSequence extends HasEntry {
 
         return featuredDNASequence;
     }
+
+    /**
+     * Create a {@link Sequence} object from an {@link DNASequence} object.
+     *
+     * @param dnaSequence object to convert
+     * @return Translated Sequence object.
+     */
+    protected Sequence dnaSequenceToSequence(DNASequence dnaSequence) {
+        if (dnaSequence == null) {
+            return null;
+        }
+
+        String fwdHash = "";
+        String revHash = "";
+
+        String sequenceString = dnaSequence.getSequence();
+        if (!StringUtils.isEmpty(sequenceString)) {
+            fwdHash = SequenceUtils.calculateSequenceHash(sequenceString);
+            try {
+                revHash = SequenceUtils.calculateSequenceHash(SequenceUtils.reverseComplement(sequenceString));
+            } catch (UtilityException e) {
+                revHash = "";
+            }
+        }
+
+        Sequence sequence = new Sequence(sequenceString, "", fwdHash, revHash, null);
+        Set<SequenceFeature> sequenceFeatures = sequence.getSequenceFeatures();
+
+        if (dnaSequence instanceof FeaturedDNASequence) {
+            FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) dnaSequence;
+            sequence.setUri(featuredDNASequence.getUri());
+            sequence.setComponentUri(featuredDNASequence.getDcUri());
+            sequence.setIdentifier(featuredDNASequence.getIdentifier());
+
+            if (featuredDNASequence.getFeatures() != null && !featuredDNASequence.getFeatures().isEmpty()) {
+                for (DNAFeature dnaFeature : featuredDNASequence.getFeatures()) {
+                    List<DNAFeatureLocation> locations = dnaFeature.getLocations();
+                    String featureSequence = "";
+
+                    for (DNAFeatureLocation location : locations) {
+                        int genbankStart = location.getGenbankStart();
+                        int end = location.getEnd();
+
+                        if (genbankStart < 1) {
+                            genbankStart = 1;
+                        } else if (genbankStart > featuredDNASequence.getSequence().length()) {
+                            genbankStart = featuredDNASequence.getSequence().length();
+                        }
+
+                        if (end < 1) {
+                            end = 1;
+                        } else if (end > featuredDNASequence.getSequence().length()) {
+                            end = featuredDNASequence.getSequence().length();
+                        }
+
+                        if (genbankStart > end) { // over zero case
+                            featureSequence = featuredDNASequence.getSequence().substring(
+                                    genbankStart - 1, featuredDNASequence.getSequence().length());
+                            featureSequence += featuredDNASequence.getSequence().substring(0, end);
+                        } else { // normal
+                            featureSequence = featuredDNASequence.getSequence().substring(genbankStart - 1, end);
+                        }
+
+                        if (dnaFeature.getStrand() == -1) {
+                            try {
+                                featureSequence = SequenceUtils.reverseComplement(featureSequence);
+                            } catch (UtilityException e) {
+                                featureSequence = "";
+                            }
+                        }
+                    }
+
+                    SequenceFeature.AnnotationType annotationType = null;
+                    if (dnaFeature.getAnnotationType() != null && !dnaFeature.getAnnotationType().isEmpty()) {
+                        annotationType = SequenceFeature.AnnotationType.valueOf(dnaFeature.getAnnotationType());
+                    }
+
+                    String name = dnaFeature.getName().length() < 127 ? dnaFeature.getName()
+                            : dnaFeature.getName().substring(0, 123) + "...";
+                    Feature feature = new Feature(name, dnaFeature.getIdentifier(), featureSequence,
+                            dnaFeature.getType());
+                    if (dnaFeature.getLocations() != null && !dnaFeature.getLocations().isEmpty())
+                        feature.setUri(dnaFeature.getLocations().get(0).getUri());
+
+                    SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature,
+                            dnaFeature.getStrand(), name,
+                            dnaFeature.getType(), annotationType);
+                    sequenceFeature.setUri(dnaFeature.getUri());
+
+                    for (DNAFeatureLocation location : locations) {
+                        int start = location.getGenbankStart();
+                        int end = location.getEnd();
+                        AnnotationLocation annotationLocation = new AnnotationLocation(start, end, sequenceFeature);
+                        sequenceFeature.getAnnotationLocations().add(annotationLocation);
+                    }
+
+                    ArrayList<SequenceFeatureAttribute> sequenceFeatureAttributes = new ArrayList<>();
+                    if (dnaFeature.getNotes() != null && dnaFeature.getNotes().size() > 0) {
+                        for (DNAFeatureNote dnaFeatureNote : dnaFeature.getNotes()) {
+                            SequenceFeatureAttribute sequenceFeatureAttribute = new SequenceFeatureAttribute();
+                            sequenceFeatureAttribute.setSequenceFeature(sequenceFeature);
+                            sequenceFeatureAttribute.setKey(dnaFeatureNote.getName());
+                            sequenceFeatureAttribute.setValue(dnaFeatureNote.getValue());
+                            sequenceFeatureAttribute.setQuoted(dnaFeatureNote.isQuoted());
+                            sequenceFeatureAttributes.add(sequenceFeatureAttribute);
+                        }
+                    }
+
+                    sequenceFeature.getSequenceFeatureAttributes().addAll(sequenceFeatureAttributes);
+                    sequenceFeatures.add(sequenceFeature);
+                }
+            }
+        }
+
+        return sequence;
+    }
+
 }

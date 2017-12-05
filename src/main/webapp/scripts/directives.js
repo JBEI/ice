@@ -135,21 +135,22 @@ iceDirectives.directive('myTabs', function () {
         },
         templateUrl: 'scripts/entry/tabs.html'
     };
-})
-    .directive('myPane', function () {
-        return {
-            require: '^myTabs',
-            restrict: 'E',
-            transclude: true,
-            scope: {
-                title: '@'
-            },
-            link: function (scope, element, attrs, tabsCtrl) {
-                tabsCtrl.addPane(scope);
-            },
-            templateUrl: 'scripts/entry/pane.html'
-        };
-    });
+});
+
+iceDirectives.directive('myPane', function () {
+    return {
+        require: '^myTabs',
+        restrict: 'E',
+        transclude: true,
+        scope: {
+            title: '@'
+        },
+        link: function (scope, element, attrs, tabsCtrl) {
+            tabsCtrl.addPane(scope);
+        },
+        templateUrl: 'scripts/entry/pane.html'
+    };
+});
 
 iceDirectives.directive("iceCollectionContents", function () {
     return {
@@ -206,31 +207,6 @@ iceDirectives.directive("ice.menu.tags", function () {
         templateUrl: "views/tags-menu.html"
     }
 });
-
-iceDirectives.directive("iceRemoteFlash",
-    function ($cookieStore) {
-        function link(scope, element, attrs) {
-            var sid = $cookieStore.get("sessionId");
-            var entryId, url;
-
-            function generateObject() {
-                element.html('<object id="VectorViewer" width="100%" height="100%" data="swf/vv/VectorViewer.swf?entryId='
-                    + entryId + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
-                    </object>');
-            }
-
-            scope.$watch('remoteEntry', function (value) {
-                entryId = value.id;
-                url = value.partnerId;
-                generateObject();
-            });
-        }
-
-        return {
-            restrict: 'AE',
-            link: link
-        };
-    });
 
 iceDirectives.directive("iceSequenceChecker", function ($cookieStore) {
     function link(scope, element, attrs) {

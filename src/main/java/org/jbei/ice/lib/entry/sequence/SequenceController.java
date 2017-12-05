@@ -76,42 +76,6 @@ public class SequenceController extends HasEntry {
         return result;
     }
 
-    public FeaturedDNASequence updateSequence(String userId, String entryId, FeaturedDNASequence featuredDNASequence,
-                                              boolean addFeatures) {
-        Entry entry = super.getEntry(entryId);
-        if (entry == null) {
-            return null;
-        }
-
-        authorization.expectRead(userId, entry);
-
-        if (addFeatures) {
-            // expect existing sequence
-            Sequence existingSequence = dao.getByEntry(entry);
-            FeaturedDNASequence dnaSequence = sequenceToDNASequence(existingSequence);
-            featuredDNASequence.getFeatures().addAll(dnaSequence.getFeatures());
-            featuredDNASequence.setSequence(dnaSequence.getSequence());
-        }
-
-        Sequence sequence = dnaSequenceToSequence(featuredDNASequence);
-        if (sequence.getSequenceFeatures() == null || sequence.getSequenceFeatures().isEmpty()) {
-            DNASequence dnaSequence = GeneralParser.parse(featuredDNASequence.getSequence());
-            sequence = dnaSequenceToSequence(dnaSequence);
-        }
-        sequence.setEntry(entry);
-        if (!deleteSequence(userId, entryId))
-            return null;
-
-        sequence = save(userId, sequence);
-        if (sequence == null)
-            return null;
-
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
-        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
-        sequenceAnalysisController.rebuildAllAlignments(entry);
-        return sequenceToDNASequence(sequence);
-    }
-
     public boolean deleteSequence(String requester, String partId) {
         Entry entry = getEntry(partId);
         authorization.expectWrite(requester, entry);
