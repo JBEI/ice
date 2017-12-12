@@ -1084,7 +1084,144 @@ angular.module('ice.entry.controller', [])
         $scope.sessionId = sessionId;
 
         $scope.open = function () {
-            window.open('static/swf/ve/VectorEditor?entryId=' + $scope.entry.recordId + '&sessionId=' + sessionId);
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/entry/modal/vector-editor.html',
+                controller: function ($scope, $window, entry, $uibModalInstance) {
+                    var sequence;
+
+                    $scope.loadVectorEditor = function () {
+                        console.log(entry);
+
+                        Util.get("rest/parts/" + entry.id + "/sequence", function (result) {
+                            $scope.sequenceName = result.name;
+                            sequence = result;
+
+                            var features = [];
+                            for (var i = 0; i < result.features.length; i += 1) {
+                                var feature = result.features[i];
+                                if (!feature.locations.length)
+                                    continue;
+
+                                var location = feature.locations[0];
+                                var notes = feature.notes.length ? feature.notes[0].value : "";
+
+                                features.push({
+                                    start: location.genbankStart - 1,
+                                    end: location.end - 1,
+                                    fid: feature.id,
+                                    forward: feature.strand == 1,
+                                    type: feature.type,
+                                    name: feature.name,
+                                    notes: notes,
+                                    annotationType: feature.type,
+                                    locations: feature.locations
+                                })
+                            }
+
+                            $scope.vEeditor = $window.createVectorEditor(document.getElementById("vector-editor-root"), {
+                                editorName: "vector-editor",
+                                doNotUseAbsolutePosition: true,
+                                onSave: function (event, sequenceData, editorState) {
+                                    // convert to featuredDNASequence
+                                    if (!sequence) {
+                                        sequence = {
+                                            features: [],
+                                            sequence: sequenceData.sequence
+                                        }
+                                    }
+                                    else {
+                                        sequence.features = [];
+                                    }
+
+                                    for (const prop in sequenceData.features) {
+                                        var feature = sequenceData.features[prop];
+                                        console.log(feature);
+                                        sequence.features.push({
+                                            id: feature.fid,
+                                            type: feature.type,
+                                            name: feature.name,
+                                            strand: feature.forward ? 1 : -1,
+                                            locations: [{genbankStart: feature.start + 1, end: feature.end + 1}],
+                                            notes: [{name: "note", value: features.notes}]
+                                        })
+                                    }
+
+                                    Util.post("rest/parts/" + entry.id + "/sequence", sequence, function (result) {
+                                        console.log(result);
+                                    })
+                                },
+
+                                onCopy: function (event, copiedSequenceData, editorState) {
+                                    const clipboardData = event.clipboardData;
+                                    clipboardData.setData('text/plain', copiedSequenceData.sequence);
+                                    clipboardData.setData('application/json', JSON.stringify(copiedSequenceData));
+                                    event.preventDefault();
+                                },
+
+                                PropertiesProps: {
+                                    propertiesList: [
+                                        "features",
+                                        "translations",
+                                        "cutsites",
+                                        "orfs"
+                                    ]
+                                },
+                                ToolBarProps: {
+                                    //name the tools you want to see in the toolbar in the order you want to see them
+                                    toolList: [
+                                        "saveTool",
+                                        "undoTool",
+                                        "redoTool",
+                                        "cutsiteTool",
+                                        "featureTool",
+                                        "orfTool",
+                                        "viewTool",
+                                        "findTool",
+                                        "visibilityTool",
+                                        "propertiesTool"
+                                    ]
+                                }
+                            });
+                            $scope.vEeditor.updateEditor({
+                                readOnly: false,
+                                sequenceData: {
+                                    sequence: result.sequence, features: features, name: result.name
+                                },
+                                annotationVisibility: {
+                                    parts: false,
+                                    orfs: false,
+                                    cutsites: false
+                                },
+                                annotationsToSupport: {
+                                    features: true,
+                                    translations: true,
+                                    parts: false,
+                                    orfs: true,
+                                    cutsites: true,
+                                    primers: false
+                                },
+                                panelsShown: {
+                                    sequence: true,
+                                    circular: true,
+                                    rail: false
+                                }
+                            })
+                        });
+                    }
+                },
+
+                size: "ve-sized",
+                backdrop: "static",
+                resolve: {
+                    entry: function () {
+                        return $scope.entry;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (sequence) {
+                console.log("ve closed", sequence);
+            });
         };
 
         $scope.sequenceUpload = function (type) {

@@ -58,30 +58,21 @@ angular.module('ice.entry.directives', [])
     })
     .directive("iceVectorViewer", function () {
         return {
-            scope: false,
+            scope: {
+                entry: "=",
+                isRemote: "="
+            },
             restrict: "AE",
-            transclude: true,
 
             link: function (scope, element, attrs) {
-                var entryId;
-                scope.$watch('entry', function (value) {
-                    if (!value) {
-                        if (attrs.partid) {
-                            entryId = attrs.partid;
-                        }
-                    } else {
-                        entryId = value.id;
-                    }
-
-                    if (entryId) {
-                        scope.fetchEntrySequence(entryId);
-                    }
-                });
             },
 
             template: '<div id="ve-Root"><br><img src="img/loader-mini.gif"> Loading sequence&hellip;</div>',
 
             controller: function ($scope, Util, $window) {
+                if (!$scope.entry && !$scope.entry.id) // todo : error message?
+                    return;
+
                 $scope.loadVectorEditor = function (data) {
                     $scope.editor = $window.createVectorEditor(document.getElementById("ve-Root"), {
                         onCopy: function (event, sequenceData, editorState) {
@@ -94,27 +85,17 @@ angular.module('ice.entry.directives', [])
                         PropertiesProps: {
                             propertiesList: [
                                 "features",
-                                //"parts",
-                                //"primers",
                                 "translations",
                                 "cutsites",
                                 "orfs"
-                                //"genbank"
                             ]
                         },
                         ToolBarProps: {
-                            //name the tools you want to see in the toolbar in the order you want to see them
                             toolList: [
-                                //"saveTool",
-                                //"downloadTool",
-                                //"undoTool",
-                                //"redoTool",
                                 "cutsiteTool",
                                 "featureTool",
-                                //"oligoTool",
                                 "orfTool",
                                 "viewTool",
-                                //"editTool",
                                 "findTool",
                                 "visibilityTool",
                                 "propertiesTool"
@@ -167,6 +148,7 @@ angular.module('ice.entry.directives', [])
                                 continue;
 
                             var location = feature.locations[0];
+                            var notes = feature.notes.length ? feature.notes[0].value : "";
 
                             data.sequenceData.features.push({
                                 start: location.genbankStart - 1,
@@ -175,7 +157,7 @@ angular.module('ice.entry.directives', [])
                                 forward: feature.strand == 1,
                                 type: feature.type,
                                 name: feature.name,
-                                notes: feature.notes,
+                                notes: notes,
                                 annotationType: feature.type,
                                 locations: feature.locations
                             });
@@ -184,6 +166,11 @@ angular.module('ice.entry.directives', [])
                         $scope.loadVectorEditor(data);
                     });
                 };
+
+                //
+                // init
+                //
+                $scope.fetchEntrySequence($scope.entry.id);
             }
         };
     });
