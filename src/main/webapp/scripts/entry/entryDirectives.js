@@ -60,7 +60,7 @@ angular.module('ice.entry.directives', [])
         return {
             scope: {
                 entry: "=",
-                isRemote: "="
+                remote: "="
             },
             restrict: "AE",
 
@@ -127,9 +127,16 @@ angular.module('ice.entry.directives', [])
                 };
 
                 $scope.fetchEntrySequence = function (entryId) {
-                    Util.get("rest/parts/" + entryId + "/sequence", function (result) {
-                        console.log(result);
+                    var url;
+                    if ($scope.remote && $scope.remote.partner) {
+                        url = "rest/web/" + $scope.remote.partner + "/entries/" + entryId + "/sequence";
+                        console.log("loading remote sequence");
+                    } else {
+                        url = "rest/parts/" + entryId + "/sequence";
+                        console.log("loading local sequence");
+                    }
 
+                    Util.get(url, function (result) {
                         var data = {
                             sequenceData: {
                                 sequence: result.sequence, features: [] //, name: $scope.entry.name
