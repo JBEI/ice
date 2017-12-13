@@ -1090,8 +1090,6 @@ angular.module('ice.entry.controller', [])
                     var sequence;
 
                     $scope.loadVectorEditor = function () {
-                        console.log(entry);
-
                         Util.get("rest/parts/" + entry.id + "/sequence", function (result) {
                             $scope.sequenceName = result.name;
                             sequence = result;
@@ -1123,15 +1121,10 @@ angular.module('ice.entry.controller', [])
                                 doNotUseAbsolutePosition: true,
                                 onSave: function (event, sequenceData, editorState) {
                                     // convert to featuredDNASequence
-                                    if (!sequence) {
-                                        sequence = {
-                                            features: [],
-                                            sequence: sequenceData.sequence
-                                        }
-                                    }
-                                    else {
-                                        sequence.features = [];
-                                    }
+                                    sequence = {
+                                        features: [],
+                                        sequence: sequenceData.sequence
+                                    };
 
                                     for (const prop in sequenceData.features) {
                                         var feature = sequenceData.features[prop];
@@ -1146,7 +1139,7 @@ angular.module('ice.entry.controller', [])
                                         })
                                     }
 
-                                    Util.post("rest/parts/" + entry.id + "/sequence", sequence, function (result) {
+                                    Util.update("rest/parts/" + entry.id + "/sequence", sequence, function (result) {
                                         console.log(result);
                                     })
                                 },

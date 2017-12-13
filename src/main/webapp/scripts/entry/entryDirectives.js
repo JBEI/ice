@@ -60,20 +60,22 @@ angular.module('ice.entry.directives', [])
         return {
             scope: {
                 entry: "=",
-                isRemote: "="
+                remote: "="
             },
             restrict: "AE",
 
             link: function (scope, element, attrs) {
             },
 
-            template: '<div id="ve-Root"><br><img src="img/loader-mini.gif"> Loading sequence&hellip;</div>',
+            template: '<div id="ve-Root"><br><img src="img/loader-mini.gif"> {{$scope.loadMessage || "Loading"}} sequence&hellip;</div>',
 
             controller: function ($scope, Util, $window) {
+                $scope.loadMessage = undefined;
                 if (!$scope.entry && !$scope.entry.id) // todo : error message?
                     return;
 
                 $scope.loadVectorEditor = function (data) {
+                    $scope.loadMessage = "Rendering";
                     $scope.editor = $window.createVectorEditor(document.getElementById("ve-Root"), {
                         onCopy: function (event, sequenceData, editorState) {
                             const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
@@ -127,9 +129,16 @@ angular.module('ice.entry.directives', [])
                 };
 
                 $scope.fetchEntrySequence = function (entryId) {
-                    Util.get("rest/parts/" + entryId + "/sequence", function (result) {
-                        console.log(result);
+                    var url;
+                    if ($scope.remote && $scope.remote.partner) {
+                        url = "rest/web/" + $scope.remote.partner + "/entries/" + entryId + "/sequence";
+                        console.log("loading remote sequence");
+                    } else {
+                        url = "rest/parts/" + entryId + "/sequence";
+                        console.log("loading local sequence");
+                    }
 
+                    Util.get(url, function (result) {
                         var data = {
                             sequenceData: {
                                 sequence: result.sequence, features: [] //, name: $scope.entry.name
