@@ -33,16 +33,6 @@
         <listener-class>org.jbei.ice.servlet.IceServletContextListener</listener-class>
     </listener>
 
-    <servlet>
-        <servlet-name>SBOLVisualDownloadServlet</servlet-name>
-        <servlet-class>org.jbei.ice.servlet.SBOLVisualDownloadServlet</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>SBOLVisualDownloadServlet</servlet-name>
-        <url-pattern>/download</url-pattern>
-    </servlet-mapping>
-
     <!-- jersey rest service -->
     <servlet>
         <servlet-name>Jersey REST Servlet</servlet-name>
