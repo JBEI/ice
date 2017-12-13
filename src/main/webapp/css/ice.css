@@ -1450,24 +1450,6 @@ button[disabled].action-menu:hover {
     cursor: pointer;
 }
 
-.flash {
-    animation-name: flash;
-    animation-duration: 1s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-    animation-direction: alternate;
-    animation-play-state: running;
-}
-
-@keyframes flash {
-    from {
-        color: white;
-    }
-    to {
-        color: black;
-    }
-}
-
 .link-sup {
     vertical-align: top;
     right: -7px;
@@ -1499,4 +1481,9 @@ button[disabled].action-menu:hover {
 .entry_detail_folder_row:hover {
     background-color: #F3F1D9;
     color: #70822e;
+}
+
+.modal-ve-sized {
+    width: 98%;
+    padding: 0;
 }

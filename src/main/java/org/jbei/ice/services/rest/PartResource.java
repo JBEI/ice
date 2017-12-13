@@ -580,8 +580,7 @@ public class PartResource extends RestResource {
         }
     }
 
-    // put should be used to update when the new vector editor implementation is in place
-    @POST
+    @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/sequence")
     public Response updateSequence(@PathParam("id") final String partId,
@@ -596,7 +595,6 @@ public class PartResource extends RestResource {
             Logger.error(e);
             throw new WebApplicationException(e);
         }
-//        return super.respond(sequenceController.updateSequence(userId, partId, sequence, add));
     }
 
     @DELETE
@@ -760,7 +758,7 @@ public class PartResource extends RestResource {
         for (Number id : entryIds)
             arrayList.add(id.longValue());
         List<Long> updated = entries.updateVisibility(arrayList, visibility); // todo check return
-        return Response.ok(updated).build();
+        return Response.ok().build();
     }
 
     @GET
