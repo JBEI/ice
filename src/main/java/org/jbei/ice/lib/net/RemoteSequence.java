@@ -1,13 +1,11 @@
 package org.jbei.ice.lib.net;
 
-import org.apache.commons.io.IOUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
-import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.rest.IceRestClient;
 import org.jbei.ice.storage.DAOFactory;
@@ -16,7 +14,6 @@ import org.jbei.ice.storage.model.RemotePartner;
 import org.jbei.ice.storage.model.Sequence;
 
 import java.io.ByteArrayOutputStream;
-import java.net.URI;
 
 /**
  * Sequence that is available remotely
@@ -104,15 +101,10 @@ public class RemoteSequence {
                     name = name + ".xml";
                     break;
 
-                case "pigeoni":
-                    URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
-                    byte[] bytes = IOUtils.toByteArray(uri.toURL().openStream());
-                    return new ByteArrayWrapper(bytes, name + ".png");
-
-                case "pigeons":
-                    String sequenceString = PigeonSBOLv.generatePigeonScript(sequence);
-                    name = name + ".txt";
-                    return new ByteArrayWrapper(sequenceString.getBytes(), name);
+                case "gff3":
+                    formatter = new GFF3Formatter();
+                    name = name + ".gff3";
+                    break;
             }
 
             formatter.format(sequence, byteStream);
