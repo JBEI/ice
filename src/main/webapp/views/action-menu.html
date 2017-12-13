@@ -104,8 +104,8 @@
         </button>
     </div>
 
-    <div class="pull-right" style="margin-right: 2px; height: 30px" ng-if="serverFeedback">
-        <div style="padding: 5px 25px 5px 10px" uib-alert ng-class="'alert-' + (serverFeedback.type)"
+    <div class="pull-right" style="margin-right: 2px; height: 30px; min-width: 220px" ng-if="serverFeedback">
+        <div style="padding: 5px 25px 5px 10px; height: 35px" uib-alert ng-class="'alert-' + (serverFeedback.type)"
              dismiss-on-timeout="5000" close="closeFeedbackAlert()">
             <small>{{serverFeedback.message}}</small>
         </div>
