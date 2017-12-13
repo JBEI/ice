@@ -80,12 +80,6 @@
             <strong style="color: #233559;">SEQUENCE</strong>
 
             <div class="pull-right" ng-if="remoteEntry.hasSequence">
-                <!--<small class="opacity_hover" ng-click="open()"><i class="fa fa-external-link blue"></i>-->
-                <!--Open in VectorEditor-->
-                <!--</small>-->
-
-                <!--<span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>-->
-
                 <small class="btn-group" uib-dropdown>
 
                     <div uib-dropdown-toggle class="uib-dropdown-toggle opacity_hover">Download <span
@@ -110,13 +104,6 @@
                         </li>
                     </ul>
                 </small>
-
-                <!--<span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>-->
-
-                <!--<small class="opacity_hover" ng-click="sbolShowHide()">-->
-                <!--<span ng-show="showSBOL">Hide</span>-->
-                <!--<span ng-hide="showSBOL">Show</span> Pigeon Image-->
-                <!--</small>-->
             </div>
 
         </div>
@@ -125,17 +112,8 @@
             <i style="color: #999" class="font-90em">No sequence data provided</i>
         </div>
 
-        <!--sbol-->
-        <!--<div style="width: 100%; overflow: auto; position: relative; zoom: 1;" ng-if='remoteEntry.hasSequence'-->
-        <!--ng-show="showSBOL">-->
-        <!--<div style="width: 0;">-->
-        <!--<img height="130px"-->
-        <!--ng-src="download?type=sbol_visual&amp;id={{remoteEntry.sbolVisualURL}}&amp;sid={{sessionId}}">-->
-        <!--</div>-->
-        <!--</div>-->
-
         <div ng-show="remoteEntry.hasSequence" style="height: 600px; width: 100%">
-            <ice-vector-viewer ng-if="remoteEntry.type!=='PROTEIN'" partId="remoteEntry.id"
+            <ice-vector-viewer ng-if="remoteEntry.type!=='PROTEIN'" remote="{'partner': currentPartner.id}"
                                entry="remoteEntry"></ice-vector-viewer>
         </div>
     </div>
