@@ -55,8 +55,9 @@
                     <td style="line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"><b>{{$index+1}}</b>
                     </td>
                     <td>
-                        <a ng-if="experiment.label" ng-href="{{experiment.url}}">{{experiment.label}}</a>
-                        <a ng-if="!experiment.label" ng-href="{{experiment.url}}">{{experiment.url}}</a>
+                        <a target="_blank" ng-if="experiment.label"
+                           ng-href="{{experiment.url}}">{{experiment.label}}</a>
+                        <a target="_blank" ng-if="!experiment.label" ng-href="{{experiment.url}}">{{experiment.url}}</a>
                     </td>
                     <!--<td><a ng-href="profile/{{traceSequence.depositor.id}}">{{traceSequence.depositor.firstName}}-->
                     <!--{{traceSequence.depositor.lastName}}</a></td>-->
