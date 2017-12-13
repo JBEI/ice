@@ -19,15 +19,12 @@ import org.jbei.ice.lib.entry.EntriesAsCSV;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.attachment.Attachments;
 import org.jbei.ice.lib.entry.sequence.*;
-import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.RemoteSequence;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.ShotgunSequenceDAO;
-import org.jbei.ice.storage.model.Entry;
-import org.jbei.ice.storage.model.Sequence;
 import org.jbei.ice.storage.model.ShotgunSequence;
 import org.jbei.ice.storage.model.TraceSequence;
 
@@ -35,8 +32,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.*;
-import java.net.URI;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -217,35 +216,6 @@ public class FileResource extends RestResource {
             Logger.error(e);
             return Response.serverError().build();
         }
-    }
-
-    @GET
-    @Produces("image/png")
-    @Path("sbolVisual/{rid}")
-    public Response getSBOLVisual(@PathParam("rid") String recordId) {
-        final String tmpDir = Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-        final Entry entry = DAOFactory.getEntryDAO().getByRecordId(recordId);
-        final Sequence sequence = entry.getSequence();
-        final String hash = sequence.getFwdHash();
-        final File png = Paths.get(tmpDir, hash + ".png").toFile();
-
-        if (png.exists()) {
-            return addHeaders(Response.ok(png), entry.getPartNumber() + ".png");
-        }
-
-        final URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
-        if (uri != null) {
-            try (final InputStream in = uri.toURL().openStream();
-                 final OutputStream out = new FileOutputStream(png)) {
-                ByteStreams.copy(in, out);
-            } catch (IOException e) {
-                Logger.error(e);
-                return respond(false);
-            }
-
-            return addHeaders(Response.ok(png), entry.getPartNumber() + ".png");
-        }
-        return respond(false);
     }
 
     /**

@@ -17,7 +17,6 @@ import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
-import org.jbei.ice.lib.entry.sequence.composers.pigeon.PigeonSBOLv;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
@@ -32,7 +31,6 @@ import org.jbei.ice.storage.model.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -411,19 +409,9 @@ public class SequenceController extends HasEntry {
                     name = entry.getPartNumber() + ".xml";
                     break;
 
-                case PIGEONI:
-                    try {
-                        URI uri = PigeonSBOLv.generatePigeonVisual(sequence);
-                        byte[] bytes = IOUtils.toByteArray(uri.toURL().openStream());
-                        return new ByteArrayWrapper(bytes, entry.getPartNumber() + ".png");
-                    } catch (Exception e) {
-                        Logger.error(e);
-                        return new ByteArrayWrapper(new byte[]{'\0'}, "sequence_error");
-                    }
-
-                case PIGEONS:
-                    sequenceString = PigeonSBOLv.generatePigeonScript(sequence);
-                    name = entry.getPartNumber() + ".txt";
+                case GFF3:
+                    sequenceString = compose(sequence, new GFF3Formatter());
+                    name = entry.getPartNumber() + ".gff3";
                     break;
             }
         } catch (Exception e) {
