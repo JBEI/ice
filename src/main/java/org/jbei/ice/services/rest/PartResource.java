@@ -760,7 +760,7 @@ public class PartResource extends RestResource {
         for (Number id : entryIds)
             arrayList.add(id.longValue());
         List<Long> updated = entries.updateVisibility(arrayList, visibility); // todo check return
-        return Response.ok(updated).build();
+        return Response.ok().build();
     }
 
     @GET
