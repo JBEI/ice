@@ -51,19 +51,33 @@ public class Logger {
     }
 
     private static void sendEmail(String message, Throwable e) {
+        final String sendEmailConfig;
+        final String emailPrefix;
         if (e instanceof HibernateException) {
             return;
         }
 
-        String value = Utils.getConfigValue(ConfigurationKey.SEND_EMAIL_ON_ERRORS);
-        String prefix =  Utils.getConfigValue(ConfigurationKey.ERROR_EMAIL_EXCEPTION_PREFIX);
+        // A transaction may not be started, or is already rolled back. Must wrap calls here
+        //  in a try-catch to avoid uncaught errors in error-handling code.
+        try {
+            sendEmailConfig = Utils.getConfigValue(ConfigurationKey.SEND_EMAIL_ON_ERRORS);
+            emailPrefix =  Utils.getConfigValue(ConfigurationKey.ERROR_EMAIL_EXCEPTION_PREFIX);
+        } catch (Throwable t) {
+            LOGGER.error("Cannot load email configuration to mail errors!", t);
+            return;
+        }
 
-        if (value != null && value.equalsIgnoreCase("YES")) {
-            SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            String body = "System Time: " + dateFormatter.format((new Date())) + "\n\n";
-            body = body + message;
-            String subject = "Error";
-            EmailFactory.getEmail().sendError(prefix + " " + subject, body);
+        // Do not allow errors constructing the email to abort error handler logging
+        try {
+            if (sendEmailConfig != null && sendEmailConfig.equalsIgnoreCase("YES")) {
+                SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String body = "System Time: " + dateFormatter.format((new Date())) + "\n\n";
+                body = body + message;
+                String subject = "Error";
+                EmailFactory.getEmail().sendError(emailPrefix + " " + subject, body);
+            }
+        } catch(Throwable t) {
+            LOGGER.error("Failed to build error mail!", t);
         }
     }
 
