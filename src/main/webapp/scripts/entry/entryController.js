@@ -1086,6 +1086,7 @@ angular.module('ice.entry.controller', [])
         $scope.open = function () {
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/entry/modal/vector-editor.html',
+                keyboard: false,
                 controller: function ($scope, $window, entry, $uibModalInstance) {
                     var sequence;
 
@@ -1100,20 +1101,23 @@ angular.module('ice.entry.controller', [])
                                 if (!feature.locations.length)
                                     continue;
 
-                                var location = feature.locations[0];
                                 var notes = feature.notes.length ? feature.notes[0].value : "";
 
-                                features.push({
-                                    start: location.genbankStart - 1,
-                                    end: location.end - 1,
-                                    fid: feature.id,
-                                    forward: feature.strand == 1,
-                                    type: feature.type,
-                                    name: feature.name,
-                                    notes: notes,
-                                    annotationType: feature.type,
-                                    locations: feature.locations
-                                })
+                                for (var j = 0; j < feature.locations.length; j += 1) {
+                                    var location = feature.locations[j];
+
+                                    features.push({
+                                        start: location.genbankStart - 1,
+                                        end: location.end - 1,
+                                        fid: feature.id,
+                                        forward: feature.strand == 1,
+                                        type: feature.type,
+                                        name: feature.name,
+                                        notes: notes,
+                                        annotationType: feature.type,
+                                        locations: feature.locations
+                                    })
+                                }
                             }
 
                             $scope.vEeditor = $window.createVectorEditor(document.getElementById("vector-editor-root"), {
