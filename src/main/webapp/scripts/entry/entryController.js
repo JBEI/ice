@@ -1095,7 +1095,18 @@ angular.module('ice.entry.controller', [])
                             $scope.sequenceName = result.name;
                             sequence = result;
 
-                            var features = [];
+                            var data = {
+                                sequenceData: {
+                                    sequence: result.sequence, features: [] //, name: $scope.entry.name
+                                },
+                                registryData: {
+                                    uri: result.uri,
+                                    identifier: result.identifier,
+                                    name: result.name,
+                                    circular: result.circular
+                                }
+                            };
+
                             for (var i = 0; i < result.features.length; i += 1) {
                                 var feature = result.features[i];
                                 if (!feature.locations.length)
@@ -1106,7 +1117,7 @@ angular.module('ice.entry.controller', [])
                                 for (var j = 0; j < feature.locations.length; j += 1) {
                                     var location = feature.locations[j];
 
-                                    features.push({
+                                    data.sequenceData.features.push({
                                         start: location.genbankStart - 1,
                                         end: location.end - 1,
                                         fid: feature.id,
@@ -1171,9 +1182,12 @@ angular.module('ice.entry.controller', [])
                                 },
 
                                 onCopy: function (event, copiedSequenceData, editorState) {
-                                    const clipboardData = event.clipboardData;
+                                    console.log(event, copiedSequenceData, editorState);
+
+                                    const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
                                     clipboardData.setData('text/plain', copiedSequenceData.sequence);
-                                    clipboardData.setData('application/json', JSON.stringify(copiedSequenceData));
+                                    data.selection = editorState.selectionLayer;
+                                    clipboardData.setData('application/json', JSON.stringify(data));
                                     event.preventDefault();
                                 },
 
@@ -1203,9 +1217,7 @@ angular.module('ice.entry.controller', [])
                             });
                             $scope.vEeditor.updateEditor({
                                 readOnly: false,
-                                sequenceData: {
-                                    sequence: result.sequence, features: features, name: result.name
-                                },
+                                sequenceData: data.sequenceData,
                                 annotationVisibility: {
                                     parts: false,
                                     orfs: false,
