@@ -156,22 +156,26 @@ angular.module('ice.entry.directives', [])
                             if (!feature.locations.length)
                                 continue;
 
-                            var location = feature.locations[0];
                             var notes = feature.notes.length ? feature.notes[0].value : "";
 
-                            data.sequenceData.features.push({
-                                start: location.genbankStart - 1,
-                                end: location.end - 1,
-                                id: feature.id,
-                                forward: feature.strand == 1,
-                                type: feature.type,
-                                name: feature.name,
-                                notes: notes,
-                                annotationType: feature.type,
-                                locations: feature.locations
-                            });
+                            for (var j = 0; j < feature.locations.length; j += 1) {
+                                var location = feature.locations[j];
+
+                                data.sequenceData.features.push({
+                                    start: location.genbankStart - 1,
+                                    end: location.end - 1,
+                                    fid: feature.id,
+                                    forward: feature.strand == 1,
+                                    type: feature.type,
+                                    name: feature.name,
+                                    notes: notes,
+                                    annotationType: feature.type,
+                                    locations: feature.locations
+                                });
+                            }
                         }
 
+                        console.log(data);
                         $scope.loadVectorEditor(data);
                     });
                 };

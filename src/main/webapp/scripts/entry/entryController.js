@@ -1086,6 +1086,7 @@ angular.module('ice.entry.controller', [])
         $scope.open = function () {
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/entry/modal/vector-editor.html',
+                keyboard: false,
                 controller: function ($scope, $window, entry, $uibModalInstance) {
                     var sequence;
 
@@ -1100,43 +1101,68 @@ angular.module('ice.entry.controller', [])
                                 if (!feature.locations.length)
                                     continue;
 
-                                var location = feature.locations[0];
                                 var notes = feature.notes.length ? feature.notes[0].value : "";
 
-                                features.push({
-                                    start: location.genbankStart - 1,
-                                    end: location.end - 1,
-                                    fid: feature.id,
-                                    forward: feature.strand == 1,
-                                    type: feature.type,
-                                    name: feature.name,
-                                    notes: notes,
-                                    annotationType: feature.type,
-                                    locations: feature.locations
-                                })
+                                for (var j = 0; j < feature.locations.length; j += 1) {
+                                    var location = feature.locations[j];
+
+                                    features.push({
+                                        start: location.genbankStart - 1,
+                                        end: location.end - 1,
+                                        fid: feature.id,
+                                        forward: feature.strand == 1,
+                                        type: feature.type,
+                                        name: feature.name,
+                                        notes: notes,
+                                        annotationType: feature.type,
+                                        locations: feature.locations
+                                    })
+                                }
                             }
 
                             $scope.vEeditor = $window.createVectorEditor(document.getElementById("vector-editor-root"), {
                                 editorName: "vector-editor",
                                 doNotUseAbsolutePosition: true,
                                 onSave: function (event, sequenceData, editorState) {
+
                                     // convert to featuredDNASequence
                                     sequence = {
                                         features: [],
                                         sequence: sequenceData.sequence
                                     };
 
+                                    var featureMap = {};
+
                                     for (const prop in sequenceData.features) {
+                                        if (!sequenceData.features.hasOwnProperty(prop))
+                                            continue;
+
                                         var feature = sequenceData.features[prop];
                                         console.log(feature);
-                                        sequence.features.push({
-                                            id: feature.fid,
-                                            type: feature.type,
-                                            name: feature.name,
-                                            strand: feature.forward ? 1 : -1,
-                                            locations: [{genbankStart: feature.start + 1, end: feature.end + 1}],
-                                            notes: [{name: "note", value: features.notes}]
-                                        })
+
+                                        var existingFeature = featureMap[feature.fid];
+                                        if (existingFeature) {
+                                            existingFeature.locations.push({
+                                                genbankStart: feature.start + 1,
+                                                end: feature.end + 1
+                                            })
+                                        } else {
+                                            featureMap[feature.fid] = {
+                                                id: feature.fid,
+                                                type: feature.type,
+                                                name: feature.name,
+                                                strand: feature.forward ? 1 : -1,
+                                                locations: [{genbankStart: feature.start + 1, end: feature.end + 1}],
+                                                notes: [{name: "note", value: features.notes}]
+                                            };
+                                        }
+                                    }
+
+                                    for (const property in featureMap) {
+                                        if (!featureMap.hasOwnProperty(property))
+                                            continue;
+
+                                        sequence.features.push(featureMap[property]);
                                     }
 
                                     Util.update("rest/parts/" + entry.id + "/sequence", sequence, function (result) {
