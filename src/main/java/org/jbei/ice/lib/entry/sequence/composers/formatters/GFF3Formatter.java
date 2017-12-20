@@ -30,12 +30,12 @@ public class GFF3Formatter extends AbstractFormatter {
 
                 // location
                 for (AnnotationLocation location : sequenceFeature.getAnnotationLocations()) {
-                    builder.append(featureLine).append(" ")
-                            .append(location.getGenbankStart()).append(" ")
+                    builder.append(featureLine).append("\t")
+                            .append(location.getGenbankStart()).append("\t")
                             .append(location.getEnd()).append(" ")
-                            .append(". ")
+                            .append(".\t")
                             .append(sequenceFeature.getStrand() == 1 ? "+ " : "- ")
-                            .append(". ");
+                            .append(".\t");
                     builder.append(System.lineSeparator());
                 }
             }
