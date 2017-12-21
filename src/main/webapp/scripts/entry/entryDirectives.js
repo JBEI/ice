@@ -141,7 +141,7 @@ angular.module('ice.entry.directives', [])
                     Util.get(url, function (result) {
                         var data = {
                             sequenceData: {
-                                sequence: result.sequence, features: [] //, name: $scope.entry.name
+                                sequence: result.sequence, features: [], name: $scope.entry.name
                             },
                             registryData: {
                                 uri: result.uri,
