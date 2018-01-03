@@ -1097,7 +1097,7 @@ angular.module('ice.entry.controller', [])
 
                             var data = {
                                 sequenceData: {
-                                    sequence: result.sequence, features: [] //, name: $scope.entry.name
+                                    sequence: result.sequence, features: [], name: result.name
                                 },
                                 registryData: {
                                     uri: result.uri,
@@ -1149,8 +1149,6 @@ angular.module('ice.entry.controller', [])
                                             continue;
 
                                         var feature = sequenceData.features[prop];
-                                        console.log(feature);
-
                                         var existingFeature = featureMap[feature.fid];
                                         if (existingFeature) {
                                             existingFeature.locations.push({
