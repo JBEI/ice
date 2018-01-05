@@ -445,7 +445,7 @@ angular.module('ice.collection.controller', [])
     .
     controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $stateParams,
                                                        EntryContextUtil, Selection, Util, localStorageService) {
-        //$rootScope.$emit("CollectionSelection", $stateParams.collection);
+        $rootScope.$emit("CollectionSelection", $stateParams.collection);
         var resource = "collections";
 
         $scope.folderPageChange = function () {
