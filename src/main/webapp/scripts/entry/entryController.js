@@ -1188,6 +1188,20 @@ angular.module('ice.entry.controller', [])
                                     clipboardData.setData('application/json', JSON.stringify(data));
                                     event.preventDefault();
                                 },
+                                onPaste: function(event, editorState) {
+                                    //the onPaste here must return sequenceData in the teselagen data format
+                                    const clipboardData = event.clipboardData;
+                                    let jsonData = clipboardData.getData("application/json")
+                                    if (jsonData) {
+                                        jsonData = JSON.parse(jsonData)
+                                        if (jsonData && jsonData.isJbeiSeq) {
+                                            //HECTOR you'll need to implement/add the convertJbeiToTeselagen function here
+                                            jsonData = convertJbeiToTeselagen(jsonData)
+                                        }
+                                    }
+                                    const sequenceData = jsonData || {sequence: clipboardData.getData("text/plain")}
+                                    return sequenceData
+                                },
 
                                 PropertiesProps: {
                                     propertiesList: [
@@ -1206,10 +1220,8 @@ angular.module('ice.entry.controller', [])
                                         "cutsiteTool",
                                         "featureTool",
                                         "orfTool",
-                                        "viewTool",
                                         "findTool",
-                                        "visibilityTool",
-                                        "propertiesTool"
+                                        "visibilityTool"
                                     ]
                                 }
                             });
@@ -1229,11 +1241,32 @@ angular.module('ice.entry.controller', [])
                                     cutsites: true,
                                     primers: false
                                 },
-                                panelsShown: {
-                                    sequence: true,
-                                    circular: true,
-                                    rail: false
-                                }
+                                panelsShown: [
+                                    [
+                                      {
+                                        id: "sequence",
+                                        name: "Sequence Map",
+                                        active: true
+                                      }
+                                    ],
+                                    [
+                                      {
+                                        id: "circular",
+                                        name: "Plasmid",
+                                        active: true
+                                      },
+                                      {
+                                        id: "rail",
+                                        name: "Linear Map",
+                                        active: false
+                                      },
+                                      {
+                                        id: "properties",
+                                        name: "Properties",
+                                        active: false
+                                      }
+                                    ]
+                                  ]
                             })
                         });
                     }
