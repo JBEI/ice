@@ -15,7 +15,7 @@ public class MessageInfo implements IDataTransferModel {
 
     private long id;
     private long sent;
-    private String from;
+    private AccountTransfer from;
     private String message;
     private String title;
     private boolean read;
@@ -23,6 +23,7 @@ public class MessageInfo implements IDataTransferModel {
     private ArrayList<AccountTransfer> accounts;
 
     public MessageInfo() {
+        from = new AccountTransfer();
         userGroups = new ArrayList<>();
         accounts = new ArrayList<>();
     }
@@ -43,11 +44,11 @@ public class MessageInfo implements IDataTransferModel {
         this.sent = sent;
     }
 
-    public String getFrom() {
+    public AccountTransfer getFrom() {
         return from;
     }
 
-    public void setFrom(String from) {
+    public void setFrom(AccountTransfer from) {
         this.from = from;
     }
 

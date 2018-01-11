@@ -8,7 +8,7 @@ angular.module('ice.profile.service', [])
                     {
                         url: 'scripts/profile/profile-information.html',
                         display: 'Profile',
-                        selected: true,
+                        selected: false,
                         icon: 'fa-user',
                         open: true
                     },
@@ -28,7 +28,7 @@ angular.module('ice.profile.service', [])
                     },
                     {
                         id: 'messages',
-                        url: 'scripts/profile/messages.html',
+                        url: 'scripts/profile/message/messages.html',
                         display: 'Messages',
                         selected: false,
                         icon: 'fa-envelope-o'

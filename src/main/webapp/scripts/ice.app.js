@@ -119,8 +119,7 @@ angular
                 templateUrl: 'scripts/entry/entry.html'
             })
             .state('main.entry.option', {
-                url: '/:option',
-                templateUrl: 'scripts/entry/sequence-analysis.html'
+                url: '/:option'
             })
             .state('main.create', {
                 url: 'create/:type',
@@ -132,8 +131,7 @@ angular
                 templateUrl: 'scripts/profile/profile.html'
             })
             .state('main.profile.option', {
-                url: '/:option',
-                templateUrl: 'scripts/profile/groups.html'
+                url: '/:option'
             })
             .state('main.admin', {
                 url: 'admin',
@@ -147,7 +145,6 @@ angular
             .state('main.admin.option', {
                 url: '/:option',
                 templateUrl: 'scripts/admin/settings.html'
-
             })
             .state('main.upload', {
                 url: 'upload/:type',
