@@ -5,15 +5,16 @@ import org.apache.lucene.search.*;
 import org.hibernate.search.annotations.Factory;
 import org.hibernate.search.filter.impl.CachingWrapperFilter;
 
-import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Hector Plahar
+ * @author William Morrell
  */
 public class EntrySecurityFilterFactory {
 
     private String accountId;
-    private HashSet<String> groupUUids;
+    private Set<String> groupUUids;
 
     // injected parameter
     public void setAccount(String accountId) {
@@ -21,7 +22,7 @@ public class EntrySecurityFilterFactory {
     }
 
     // injected parameter
-    public void setGroupUUids(HashSet<String> groupUUids) {
+    public void setGroupUUids(Set<String> groupUUids) {
         this.groupUUids = groupUUids;
     }
 
@@ -31,12 +32,14 @@ public class EntrySecurityFilterFactory {
 
         // must have either account id present or group uuid present
         if (accountId != null) {
-            builder.add(new TermQuery(new Term("canRead", accountId)), BooleanClause.Occur.SHOULD);
+            Term accountTerm = new Term("canRead_" + accountId, accountId);
+            builder.add(new TermQuery(accountTerm), BooleanClause.Occur.SHOULD);
         }
 
         if (this.groupUUids != null) {
             for (String uuid : this.groupUUids) {
-                builder.add(new TermQuery(new Term("canRead", uuid)), BooleanClause.Occur.SHOULD);
+                Term groupTerm = new Term("canRead_" + uuid, uuid);
+                builder.add(new TermQuery(groupTerm), BooleanClause.Occur.SHOULD);
             }
         }
 
