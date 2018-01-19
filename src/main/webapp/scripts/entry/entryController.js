@@ -1148,14 +1148,14 @@ angular.module('ice.entry.controller', [])
                                             continue;
 
                                         var feature = sequenceData.features[prop];
-                                        var existingFeature = featureMap[feature.fid];
+                                        var existingFeature = featureMap[feature.id];
                                         if (existingFeature) {
                                             existingFeature.locations.push({
                                                 genbankStart: feature.start + 1,
                                                 end: feature.end + 1
                                             })
                                         } else {
-                                            featureMap[feature.fid] = {
+                                            featureMap[feature.id] = {
                                                 id: feature.fid,
                                                 type: feature.type,
                                                 name: feature.name,
