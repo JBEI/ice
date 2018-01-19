@@ -44,4 +44,15 @@ public class MessageResource extends RestResource {
         Messages messages = new Messages(userId);
         return respond(messages.send(messageInfo));
     }
+
+    @POST
+    @Path("/{id}/response")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response reply(@PathParam("id") long id, MessageInfo message) {
+        String userId = requireUserId();
+        log(userId, "replying to message " + id);
+        Messages messages = new Messages(userId);
+        return respond(messages.replyTo(id, message));
+    }
 }

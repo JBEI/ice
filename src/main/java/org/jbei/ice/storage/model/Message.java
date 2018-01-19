@@ -34,14 +34,14 @@ public class Message implements DataModel {
 
     @ManyToMany
     @JoinTable(name = "message_destination_accounts",
-               joinColumns = {@JoinColumn(name = "message_id")},
-               inverseJoinColumns = {@JoinColumn(name = "account_id")})
+            joinColumns = {@JoinColumn(name = "message_id")},
+            inverseJoinColumns = {@JoinColumn(name = "account_id")})
     private Set<Account> destinationAccounts = new HashSet<>();
 
     @ManyToMany
     @JoinTable(name = "message_destination_groups",
-               joinColumns = {@JoinColumn(name = "message_id")},
-               inverseJoinColumns = {@JoinColumn(name = "group_id")})
+            joinColumns = {@JoinColumn(name = "message_id")},
+            inverseJoinColumns = {@JoinColumn(name = "group_id")})
     private Set<Group> destinationGroups = new HashSet<>();
 
     @Column(name = "message")
@@ -150,11 +150,18 @@ public class Message implements DataModel {
         this.destinationGroups = destinationGroups;
     }
 
+    public void setParent(Message message) {
+        this.parent = message;
+    }
+
+    public Message getParent() {
+        return this.parent;
+    }
+
     @Override
     public MessageInfo toDataTransferObject() {
         MessageInfo info = new MessageInfo();
         info.setId(getId());
-        info.setFrom(getFromEmail());
         info.setMessage(getMessage());
         info.setTitle(getTitle());
         info.setRead(isRead());

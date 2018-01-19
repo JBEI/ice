@@ -14,6 +14,7 @@ import org.jbei.ice.storage.model.Message;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -110,7 +111,13 @@ public class Messages {
 
             MessageInfo info = new MessageInfo();
             info.setId(message.getId());
-            info.setFrom(message.getFromEmail());
+
+            // get from details
+            AccountTransfer accountTransfer = new AccountTransfer();
+            accountTransfer.setEmail(from.getEmail());
+            accountTransfer.setFirstName(account.getFirstName());
+            accountTransfer.setLastName(account.getLastName());
+            info.setFrom(accountTransfer);
             info.setTitle(message.getTitle());
             info.setRead(message.isRead());
             info.setSent(message.getDateSent().getTime());
@@ -132,7 +139,18 @@ public class Messages {
         return message.toDataTransferObject();
     }
 
-    public int getNewMessageCount(Account account) {
-        return dao.retrieveNewMessageCount(account);
+    public boolean replyTo(long mid, MessageInfo info) {
+        // check if user has permission to access referenced message
+        Message parent = dao.get(mid);
+
+        // create new message and set as parent
+        Message message = new Message();
+        message.setDateSent(new Date());
+        message.setFromEmail(this.userId);
+        message.setMessage(info.getMessage());
+        message.setTitle(info.getTitle());
+        message.setDestinationAccounts(new HashSet<>(parent.getDestinationAccounts()));
+        message.setParent(parent);
+        return dao.create(message) != null;
     }
 }
