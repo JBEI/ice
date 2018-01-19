@@ -1325,8 +1325,7 @@ button[disabled].action-menu:hover {
 }
 
 .message-selected {
-    background-color: #285e8e;
-    color: white;
+    background-color: #c6c6c6;
 }
 
 .message-details {

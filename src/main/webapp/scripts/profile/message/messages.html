@@ -1,0 +1,73 @@
+<div ng-controller="MessageController">
+    <div class="pad_top">
+        <button type="button" class="ice-button" ng-click="openCreateMessageModal()">Compose</button>
+    </div>
+
+    <div class="pad_top" ng-if="!selectedMessage">
+        <div class="row">
+            <div class="col-md-12">
+                <table style="width: 90%">
+                    <tr>
+                        <td style=" vertical-align: top;">
+                            <div ng-repeat="message in messages.data" class="message"
+                                 ng-class="{'message-selected': message.id == selectedMessage.id}"
+                                 ng-click="selectMessage(message)">
+                                <strong class="font-10em">{{message.from.firstName}} {{message.from.lastName}}</strong>
+                                <small class="pull-right">{{message.sent | date : 'short'}}</small>
+                                <div class="font-95em">{{message.title}}</div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="row" ng-if="messages && messages.data.length" style="margin-top: -15px">
+            <div class="col-md-6">
+                <ul uib-pagination total-items="messages.resultCount" ng-change="getMessages()"
+                    ng-model="messageParams.currentPage"
+                    max-size="maxSize" class="pagination-sm" items-per-page="messageParams.limit"
+                    boundary-links="true">
+                </ul>
+            </div>
+            <div class="col-md-4" style="margin-top: 25px;">
+                <strong class="small">
+                    <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
+                    {{pageCounts(messageParams.currentPage, messages.resultCount, messageParams.limit)}}
+                </strong>
+            </div>
+        </div>
+    </div>
+
+    <br>
+
+    <div ng-if="selectedMessage">
+        <div style="width: 95%; border-top: 1px solid #ccc; border-bottom: 1px solid #ccc; padding: 4px;
+        background-color: #f4f4f4; text-align: center">
+            <i class="fa fa-fw fa-chevron-left pull-left cursor_pointer" ng-click="backToMessages()"></i>
+            <strong>{{selectedMessage.title}}</strong>
+        </div>
+
+        <div class="comment margin-top-20" style="background-color: #f9f9f9">
+            <!--ng-repeat="comment in (comments = (entryComments | orderBy: 'id':true))">-->
+            <!--<span class="close pull-left">{{entryComments.length - $index}}</span>-->
+            <div class="pull-left"><a ng-href="profile/{{selectedMessage.from.id}}">{{selectedMessage.from.firstName}}
+                {{selectedMessage.from.lastName}}</a>
+            </div>
+
+            <small class="opacity_4 font-90em pull-right">{{selectedMessage.sent | date:'medium'}}</small>
+            <br><br>
+
+            <div class="font-95em">{{selectedMessage.message}}</div>
+        </div>
+
+        <div class="pull-right" style="margin-right: 50px">
+            <textarea cols="40" rows="10" placeholder="Send a reply" ng-model="messageReply"
+                      style="padding: 14px 9px; border: 1px solid #d4d4d4; background-color: #fbfbfb"></textarea>
+            <br>
+            <button class="btn btn-sm btn-info" ng-click="replyMessage()">Send</button>
+        </div>
+    </div>
+
+
+</div>

@@ -1,80 +1,6 @@
 'use strict';
 
 angular.module('ice.profile.controller', [])
-    .controller('MessageController', function ($scope, $uibModal, $stateParams, Util) {
-        $scope.selectedMessage = undefined;
-
-        $scope.selectMessage = function (message) {
-            Util.get("rest/messages/" + message.id, function (result) {
-                message.selected = true;
-                //result.message = result.message.replace(/(?:\r\n|\r|\n)/g, '<br />');
-                $scope.selectedMessage = result;
-            });
-        };
-
-        // get all messages
-        Util.get("rest/messages", function (result) {
-            $scope.messages = result;
-            if (result.data.length) {
-                $scope.selectMessage(result.data[0]);
-            }
-        });
-
-        $scope.replyMessage = function () {
-        };
-
-        $scope.openCreateMessageModal = function () {
-            $uibModal.open({
-                templateUrl: 'scripts/profile/modal/create-message.html',
-                backdrop: "static",
-                keyboard: false,
-                controller: 'CreateMessageController'
-            })
-        };
-    })
-    .controller('CreateMessageController', function ($scope, $uibModalInstance, $http, $cookieStore, Util) {
-        $scope.newMessage = {accounts: [], userGroups: []};
-
-        $scope.createNewMessage = function () {
-            Util.post("rest/messages", $scope.newMessage, function (result) {
-                $uibModalInstance.close();
-            })
-        };
-
-        $scope.closeGroupModal = function () {
-            $uibModalInstance.dismiss('cancel');
-        };
-
-        $scope.setMessageRecipient = function (a, b, c) {
-            $scope.newMessage.accounts.push(a);
-            $scope.addedUser = undefined;
-        };
-
-        $scope.removeMessageRecipient = function (account, group) {
-            if (account) {
-                var accountIdx = $scope.newMessage.accounts.indexOf(account);
-                if (accountIdx != -1)
-                    $scope.newMessage.accounts.splice(accountIdx, 1);
-            }
-
-            if (group) {
-                var groupIdx = $scope.newMessage.userGroups.indexOf(gr);
-                if (groupIdx != -1)
-                    $scope.newMessage.userGroups.splice(groupIdx, 1);
-            }
-        };
-
-        $scope.filter = function (val) {
-            return $http.get('rest/users/autocomplete', {
-                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
-                params: {
-                    val: val
-                }
-            }).then(function (res) {
-                return res.data;
-            });
-        };
-    })
     .controller('ApiKeysController', function ($scope, $uibModal, Util) {
         $scope.apiKeys = undefined;
 
@@ -189,16 +115,48 @@ angular.module('ice.profile.controller', [])
         $scope.preferenceEntryDefaults = ProfileService.preferenceEntryDefaults();
         $scope.preferences = {};
 
-        var profileOption = $stateParams.option;
+        var menuOptions = $scope.profileMenuOptions = ProfileService.profileMenuOptions();
+        var profileOption = $stateParams.option ? $stateParams.option : menuOptions[0];
         var profileId = $scope.userId = $stateParams.id;
+
+        //
+        // initialize default view based on url
+        //
+        for (var i = 0; i < menuOptions.length; i += 1) {
+            if (menuOptions[i].id === profileOption) {
+                $scope.profileOptionSelection = menuOptions[i].url;
+                menuOptions[i].selected = true;
+                break;
+            }
+        }
+
+        if ($scope.profileOptionSelection === undefined) {
+            $scope.profileOptionSelection = menuOptions[0].url;
+            menuOptions[0].selected = true;
+        }
+
+        // retrieve profile information from server
+        Util.get("rest/users/" + profileId, function (result) {
+            $scope.profile = result;
+            Util.get("rest/users/" + profileId + "/preferences", function (prefs) {
+                $scope.profile.preferences = prefs;
+                if (prefs.preferences == undefined)
+                    return;
+
+                for (var i = 0; i < prefs.preferences.length; i += 1) {
+                    $scope.preferences[prefs.preferences[i].key] = prefs.preferences[i].value;
+                }
+            });
+        });
+        //
+        // end init
+        //
 
         $scope.savePreference = function (pref) {
             Util.post("rest/users/" + profileId + "/preferences/" + pref.id, {}, function (result) {
                 pref.edit = false;
             }, {value: $scope.preferences[pref.id]});
         };
-
-        var menuOptions = $scope.profileMenuOptions = ProfileService.profileMenuOptions();
 
         $scope.showSelection = function (index) {
             var selectedOption = menuOptions[index];
@@ -220,40 +178,6 @@ angular.module('ice.profile.controller', [])
                 $location.path("profile/" + profileId);
             }
         };
-
-        // initialize view
-        if (profileOption === undefined) {
-            $scope.profileOptionSelection = menuOptions[0].url;
-            menuOptions[0].selected = true;
-        } else {
-            menuOptions[0].selected = false;
-            for (var i = 1; i < menuOptions.length; i += 1) {
-                if (menuOptions[i].id === profileOption) {
-                    $scope.profileOptionSelection = menuOptions[i].url;
-                    menuOptions[i].selected = true;
-                    break;
-                }
-            }
-
-            if ($scope.profileOptionSelection === undefined) {
-                $scope.profileOptionSelection = menuOptions[0].url;
-                menuOptions[0].selected = true;
-            }
-        }
-
-        // retrieve profile information from server
-        Util.get("rest/users/" + profileId, function (result) {
-            $scope.profile = result;
-            Util.get("rest/users/" + profileId + "/preferences", function (prefs) {
-                $scope.profile.preferences = prefs;
-                if (prefs.preferences == undefined)
-                    return;
-
-                for (var i = 0; i < prefs.preferences.length; i += 1) {
-                    $scope.preferences[prefs.preferences[i].key] = prefs.preferences[i].value;
-                }
-            });
-        });
 
         $scope.editClick = function (message, profile, password) {
             $scope.showChangePassword = password;

@@ -1072,8 +1072,8 @@ angular.module('ice.entry.controller', [])
     })
 
     .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
-                                             $route, $window, $document, FileUploader, EntryService, EntryContextUtil, Selection,
-                                             Util, Authentication) {
+                                             $route, $window, $document, FileUploader, EntryService, EntryContextUtil,
+                                             Selection, Util, Authentication) {
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
@@ -1135,7 +1135,6 @@ angular.module('ice.entry.controller', [])
                                 editorName: "vector-editor",
                                 doNotUseAbsolutePosition: true,
                                 onSave: function (event, sequenceData, editorState) {
-
                                     // convert to featuredDNASequence
                                     sequence = {
                                         features: [],
@@ -1149,20 +1148,20 @@ angular.module('ice.entry.controller', [])
                                             continue;
 
                                         var feature = sequenceData.features[prop];
-                                        var existingFeature = featureMap[feature.fid];
+                                        var existingFeature = featureMap[feature.id];
                                         if (existingFeature) {
                                             existingFeature.locations.push({
                                                 genbankStart: feature.start + 1,
                                                 end: feature.end + 1
                                             })
                                         } else {
-                                            featureMap[feature.fid] = {
+                                            featureMap[feature.id] = {
                                                 id: feature.fid,
                                                 type: feature.type,
                                                 name: feature.name,
                                                 strand: feature.forward ? 1 : -1,
                                                 locations: [{genbankStart: feature.start + 1, end: feature.end + 1}],
-                                                notes: [{name: "note", value: features.notes}]
+                                                notes: [{name: "note", value: feature.notes}]
                                             };
                                         }
                                     }

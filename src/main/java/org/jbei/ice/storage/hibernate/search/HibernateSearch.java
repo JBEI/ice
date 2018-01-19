@@ -245,7 +245,7 @@ public class HibernateSearch {
         // generate queries for terms filtering stop words
         for (Map.Entry<String, QueryType> entry : terms.entrySet()) {
             String term = cleanQuery(entry.getKey());
-            if (term.trim().isEmpty() || StandardAnalyzer.STOP_WORDS_SET.contains(term))
+            if (term.trim().isEmpty() || StandardAnalyzer.STOP_WORDS_SET.contains(term.toLowerCase()))
                 continue;
 
             BioSafetyOption safetyOption = searchQuery.getBioSafetyOption();
