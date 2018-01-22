@@ -60,11 +60,19 @@ angular.module('ice.entry.directives', [])
         return {
             scope: {
                 entry: "=",
-                remote: "="
+                remote: "=",
+                reloadInfo: "="
             },
+
             restrict: "AE",
 
             link: function (scope, element, attrs) {
+                scope.$watch("reloadInfo", function () {
+                    if (!scope.reloadInfo || !scope.entry || !scope.reloadInfo.reload)
+                        return;
+
+                    scope.fetchEntrySequence(scope.entry.id);
+                });
             },
 
             template: '<div id="ve-Root"><br><img src="img/loader-mini.gif"> {{$scope.loadMessage || "Loading"}} sequence&hellip;</div>',
@@ -129,6 +137,7 @@ angular.module('ice.entry.directives', [])
                 };
 
                 $scope.fetchEntrySequence = function (entryId) {
+                    console.log("loading sequence for", entryId);
                     var url;
                     if ($scope.remote && $scope.remote.partner) {
                         url = "rest/web/" + $scope.remote.partner + "/entries/" + entryId + "/sequence";
@@ -175,7 +184,6 @@ angular.module('ice.entry.directives', [])
                             }
                         }
 
-                        console.log(data);
                         $scope.loadVectorEditor(data);
                     });
                 };

@@ -1077,6 +1077,12 @@ angular.module('ice.entry.controller', [])
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
+        $scope.reloadInfo = {};
+
+        $rootScope.$on("ReloadVectorViewData", function (event, data) {
+            $scope.reloadInfo = undefined;
+            $scope.reloadInfo = {reload: data};
+        });
 
         $scope.isFileUpload = false;
 
@@ -1089,6 +1095,7 @@ angular.module('ice.entry.controller', [])
                 keyboard: false,
                 controller: function ($scope, $window, entry, $uibModalInstance) {
                     var sequence;
+                    $scope.changesSaved = false;
 
                     $scope.loadVectorEditor = function () {
                         Util.get("rest/parts/" + entry.id + "/sequence", function (result) {
@@ -1173,14 +1180,13 @@ angular.module('ice.entry.controller', [])
                                         sequence.features.push(featureMap[property]);
                                     }
 
-                                    Util.update("rest/parts/" + entry.id + "/sequence", sequence, function (result) {
-                                        console.log(result);
-                                    })
+                                    Util.update("rest/parts/" + entry.id + "/sequence", sequence, {},
+                                        function () {
+                                            $scope.changesSaved = true;
+                                        })
                                 },
 
                                 onCopy: function (event, copiedSequenceData, editorState) {
-                                    console.log(event, copiedSequenceData, editorState);
-
                                     const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
                                     clipboardData.setData('text/plain', copiedSequenceData.sequence);
                                     data.selection = editorState.selectionLayer;
@@ -1247,8 +1253,8 @@ angular.module('ice.entry.controller', [])
                 }
             });
 
-            modalInstance.result.then(function (sequence) {
-                console.log("ve closed", sequence);
+            modalInstance.result.then(function (changesSaved) {
+                $rootScope.$emit("ReloadVectorViewData", changesSaved);
             });
         };
 
