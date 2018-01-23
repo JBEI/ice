@@ -92,6 +92,20 @@ angular.module('ice.entry.directives', [])
                             clipboardData.setData('application/json', JSON.stringify(data));
                             event.preventDefault();
                         },
+                        onPaste: function(event, editorState) {
+                            //the onPaste here must return sequenceData in the teselagen data format
+                            const clipboardData = event.clipboardData;
+                            let jsonData = clipboardData.getData("application/json")
+                            if (jsonData) {
+                                jsonData = JSON.parse(jsonData)
+                                if (jsonData && jsonData.isJbeiSeq) {
+                                    //HECTOR you'll need to implement/add the convertJbeiToTeselagen function here
+                                    jsonData = convertJbeiToTeselagen(jsonData)
+                                }
+                            }
+                            const sequenceData = jsonData || {sequence: clipboardData.getData("text/plain")}
+                            return sequenceData
+                        },
                         PropertiesProps: {
                             propertiesList: [
                                 "features",
@@ -105,10 +119,8 @@ angular.module('ice.entry.directives', [])
                                 "cutsiteTool",
                                 "featureTool",
                                 "orfTool",
-                                "viewTool",
                                 "findTool",
-                                "visibilityTool",
-                                "propertiesTool"
+                                "visibilityTool"
                             ]
                         }
                     });
@@ -128,11 +140,30 @@ angular.module('ice.entry.directives', [])
                             cutsites: true,
                             primers: false
                         },
-                        panelsShown: {
-                            sequence: false,
-                            circular: true,
-                            rail: false
-                        }
+                        panelsShown: [
+                            [
+                              {
+                                id: "circular",
+                                name: "Plasmid",
+                                active: true
+                              },
+                              {
+                                id: "sequence",
+                                name: "Sequence Map",
+                                active: false
+                              }
+                              {
+                                id: "rail",
+                                name: "Linear Map",
+                                active: false
+                              },
+                              {
+                                id: "properties",
+                                name: "Properties",
+                                active: false
+                              }
+                            ]
+                          ]
                     });
                 };
 
