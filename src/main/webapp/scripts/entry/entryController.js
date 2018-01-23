@@ -1077,25 +1077,19 @@ angular.module('ice.entry.controller', [])
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
-        $scope.reloadInfo = {};
-
-        $rootScope.$on("ReloadVectorViewData", function (event, data) {
-            $scope.reloadInfo = undefined;
-            $scope.reloadInfo = {reload: data};
-        });
 
         $scope.isFileUpload = false;
-
         var sessionId = $cookieStore.get("sessionId");
         $scope.sessionId = sessionId;
 
+        // open vector editor modal
         $scope.open = function () {
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/entry/modal/vector-editor.html',
                 keyboard: false,
                 controller: function ($scope, $window, entry, $uibModalInstance) {
                     var sequence;
-                    $scope.changesSaved = false;
+                    $scope.updatedSequence = undefined;
 
                     $scope.loadVectorEditor = function () {
                         Util.get("rest/parts/" + entry.id + "/sequence", function (result) {
@@ -1141,6 +1135,7 @@ angular.module('ice.entry.controller', [])
                             $scope.vEeditor = $window.createVectorEditor(document.getElementById("vector-editor-root"), {
                                 editorName: "vector-editor",
                                 doNotUseAbsolutePosition: true,
+
                                 onSave: function (event, sequenceData, editorState) {
                                     // convert to featuredDNASequence
                                     sequence = {
@@ -1181,8 +1176,10 @@ angular.module('ice.entry.controller', [])
                                     }
 
                                     Util.update("rest/parts/" + entry.id + "/sequence", sequence, {},
-                                        function () {
-                                            $scope.changesSaved = true;
+                                        function (result) {
+                                            console.log("save completed for", entry.id);
+                                            $rootScope.$emit("ReloadVectorViewData", result);
+                                            $scope.updatedSequence = result;
                                         })
                                 },
 
@@ -1241,7 +1238,7 @@ angular.module('ice.entry.controller', [])
                                 }
                             })
                         });
-                    }
+                    };
                 },
 
                 size: "ve-sized",
@@ -1252,18 +1249,13 @@ angular.module('ice.entry.controller', [])
                     }
                 }
             });
-
-            modalInstance.result.then(function (changesSaved) {
-                $rootScope.$emit("ReloadVectorViewData", changesSaved);
-            });
         };
 
         $scope.sequenceUpload = function (type) {
             if (type === 'file') {
                 $scope.isFileUpload = true;
                 $scope.isPaste = false;
-            }
-            else {
+            } else {
                 $scope.isPaste = true;
                 $scope.isFileUpload = false;
             }
