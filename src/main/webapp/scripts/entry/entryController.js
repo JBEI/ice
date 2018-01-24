@@ -1091,6 +1091,37 @@ angular.module('ice.entry.controller', [])
                     var sequence;
                     $scope.updatedSequence = undefined;
 
+                    // converts FeaturedDNASequence (jbei format) to genbank
+                    var convertFeaturedDNASequence = function (result) {
+                        var features = [];
+
+                        for (var i = 0; i < result.features.length; i += 1) {
+                            var feature = result.features[i];
+                            if (!feature.locations.length)
+                                continue;
+
+                            var notes = feature.notes.length ? feature.notes[0].value : "";
+
+                            for (var j = 0; j < feature.locations.length; j += 1) {
+                                var location = feature.locations[j];
+
+                                features.push({
+                                    start: location.genbankStart - 1,
+                                    end: location.end - 1,
+                                    fid: feature.id,
+                                    forward: feature.strand == 1,
+                                    type: feature.type,
+                                    name: feature.name,
+                                    notes: notes,
+                                    annotationType: feature.type,
+                                    locations: feature.locations
+                                })
+                            }
+                        }
+
+                        return features;
+                    };
+
                     $scope.loadVectorEditor = function () {
                         Util.get("rest/parts/" + entry.id + "/sequence", function (result) {
                             $scope.sequenceName = result.name;
@@ -1108,35 +1139,15 @@ angular.module('ice.entry.controller', [])
                                 }
                             };
 
-                            for (var i = 0; i < result.features.length; i += 1) {
-                                var feature = result.features[i];
-                                if (!feature.locations.length)
-                                    continue;
-
-                                var notes = feature.notes.length ? feature.notes[0].value : "";
-
-                                for (var j = 0; j < feature.locations.length; j += 1) {
-                                    var location = feature.locations[j];
-
-                                    data.sequenceData.features.push({
-                                        start: location.genbankStart - 1,
-                                        end: location.end - 1,
-                                        fid: feature.id,
-                                        forward: feature.strand == 1,
-                                        type: feature.type,
-                                        name: feature.name,
-                                        notes: notes,
-                                        annotationType: feature.type,
-                                        locations: feature.locations
-                                    })
-                                }
-                            }
+                            data.sequenceData.features = convertFeaturedDNASequence(result);
 
                             $scope.vEeditor = $window.createVectorEditor(document.getElementById("vector-editor-root"), {
                                 editorName: "vector-editor",
                                 doNotUseAbsolutePosition: true,
 
                                 onSave: function (event, sequenceData, editorState) {
+                                    console.log(sequenceData);
+
                                     // convert to featuredDNASequence
                                     sequence = {
                                         features: [],
@@ -1187,8 +1198,21 @@ angular.module('ice.entry.controller', [])
                                     const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
                                     clipboardData.setData('text/plain', copiedSequenceData.sequence);
                                     data.selection = editorState.selectionLayer;
+                                    console.log("copy", data);
                                     clipboardData.setData('application/json', JSON.stringify(data));
                                     event.preventDefault();
+                                },
+
+                                onPaste: function (event, editorState) {
+                                    const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
+                                    var jsonData = clipboardData.getData('application/json');
+                                    if (jsonData) {
+                                        jsonData = JSON.parse(jsonData);
+                                        // convert to teselegan format
+                                        jsonData = {sequence: jsonData.sequenceData.sequence.substring(jsonData.selection.start, jsonData.selection.end + 1)};
+                                    }
+                                    console.log("paste", jsonData);
+                                    return jsonData || {sequence: clipboardData.getData("text/plain")}
                                 },
 
                                 PropertiesProps: {
