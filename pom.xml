@@ -56,17 +56,17 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>5.2.10.Final</version>
+            <version>5.2.12.Final</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-search-orm</artifactId>
-            <version>5.7.0.Final</version>
+            <version>5.9.0.Final</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>5.4.1.Final</version>
+            <version>5.4.2.Final</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.web</groupId>
@@ -76,7 +76,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-c3p0</artifactId>
-            <version>5.2.10.Final</version>
+            <version>5.2.12.Final</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
