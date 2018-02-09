@@ -107,10 +107,8 @@ angular.module('ice.entry.directives', [])
                                 "cutsiteTool",
                                 "featureTool",
                                 "orfTool",
-                                "viewTool",
                                 "findTool",
-                                "visibilityTool",
-                                "propertiesTool"
+                                "visibilityTool"
                             ]
                         }
                     });
@@ -130,11 +128,29 @@ angular.module('ice.entry.directives', [])
                             cutsites: true,
                             primers: false
                         },
-                        panelsShown: {
-                            sequence: false,
-                            circular: true,
-                            rail: false
-                        }
+                        panelsShown: [
+                            [{
+                                id: "circular",
+                                name: "Plasmid",
+                                active: true
+                            },
+                                {
+                                    id: "sequence",
+                                    name: "Sequence Map",
+                                    active: false
+                                },
+
+                                {
+                                    id: "rail",
+                                    name: "Linear Map",
+                                    active: false
+                                },
+                                {
+                                    id: "properties",
+                                    name: "Properties",
+                                    active: false
+                                }
+                            ]]
                     });
                 };
 
@@ -160,8 +176,7 @@ angular.module('ice.entry.directives', [])
 
                         for (var j = 0; j < feature.locations.length; j += 1) {
                             var location = feature.locations[j];
-
-                            data.sequenceData.features.push({
+                            var featureObject = {
                                 start: location.genbankStart - 1,
                                 end: location.end - 1,
                                 fid: feature.id,
@@ -171,7 +186,8 @@ angular.module('ice.entry.directives', [])
                                 notes: notes,
                                 annotationType: feature.type,
                                 locations: feature.locations
-                            });
+                            };
+                            data.sequenceData.features.push(featureObject);
                         }
                     }
                     return data;

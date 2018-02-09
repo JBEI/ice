@@ -1091,6 +1091,19 @@ angular.module('ice.entry.controller', [])
                     var sequence;
                     $scope.updatedSequence = undefined;
 
+                    var getColorForType = function (annotationType) {
+                        switch (annotationType.toUpperCase()) {
+                            case "CDS":
+                                return "#EF6500";
+
+                            case "MISC_FEATURE":
+                                return "#006FEF";
+
+                            case "MISC_MARKER":
+                                return "#8DCEB1";
+                        }
+                    };
+
                     // converts FeaturedDNASequence (jbei format) to genbank
                     var convertFeaturedDNASequence = function (result) {
                         var features = [];
@@ -1105,7 +1118,7 @@ angular.module('ice.entry.controller', [])
                             for (var j = 0; j < feature.locations.length; j += 1) {
                                 var location = feature.locations[j];
 
-                                features.push({
+                                var featureObject = {
                                     start: location.genbankStart - 1,
                                     end: location.end - 1,
                                     fid: feature.id,
@@ -1115,7 +1128,12 @@ angular.module('ice.entry.controller', [])
                                     notes: notes,
                                     annotationType: feature.type,
                                     locations: feature.locations
-                                })
+                                };
+
+                                var color = getColorForType(feature.type);
+                                if (color)
+                                    featureObject.color = color;
+                                features.push(featureObject);
                             }
                         }
 
@@ -1146,7 +1164,6 @@ angular.module('ice.entry.controller', [])
                                 doNotUseAbsolutePosition: true,
 
                                 onSave: function (event, sequenceData, editorState) {
-                                    console.log(sequenceData);
 
                                     // convert to featuredDNASequence
                                     sequence = {
@@ -1198,6 +1215,7 @@ angular.module('ice.entry.controller', [])
                                     const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
                                     clipboardData.setData('text/plain', copiedSequenceData.sequence);
                                     data.selection = editorState.selectionLayer;
+                                    data.openVECopied = copiedSequenceData;
                                     console.log("copy", data);
                                     clipboardData.setData('application/json', JSON.stringify(data));
                                     event.preventDefault();
@@ -1208,8 +1226,7 @@ angular.module('ice.entry.controller', [])
                                     var jsonData = clipboardData.getData('application/json');
                                     if (jsonData) {
                                         jsonData = JSON.parse(jsonData);
-                                        // convert to teselegan format
-                                        jsonData = {sequence: jsonData.sequenceData.sequence.substring(jsonData.selection.start, jsonData.selection.end + 1)};
+                                        jsonData = jsonData.openVECopied;
                                     }
                                     console.log("paste", jsonData);
                                     return jsonData || {sequence: clipboardData.getData("text/plain")}
@@ -1255,11 +1272,33 @@ angular.module('ice.entry.controller', [])
                                     cutsites: true,
                                     primers: false
                                 },
-                                panelsShown: {
-                                    sequence: true,
-                                    circular: true,
-                                    rail: false
-                                }
+                                panelsShown: [
+                                    [
+                                        {
+                                            id: "circular",
+                                            name: "Plasmid",
+                                            active: true
+                                        },
+
+                                        {
+                                            id: "rail",
+                                            name: "Linear Map",
+                                            active: false
+                                        },
+                                        {
+                                            id: "properties",
+                                            name: "Properties",
+                                            active: false
+                                        }
+                                    ],
+                                    [
+                                        {
+                                            id: "sequence",
+                                            name: "Sequence Map",
+                                            active: true
+                                        }
+                                    ]
+                                ]
                             })
                         });
                     };
