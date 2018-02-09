@@ -67,17 +67,19 @@ angular.module('ice.entry.directives', [])
             restrict: "AE",
 
             link: function (scope, element, attrs) {
-                scope.$watch("reloadInfo", function () {
-                    if (!scope.reloadInfo || !scope.entry || !scope.reloadInfo.reload)
-                        return;
-
-                    scope.fetchEntrySequence(scope.entry.id);
-                });
             },
 
             template: '<div id="ve-Root"><br><img src="img/loader-mini.gif"> {{$scope.loadMessage || "Loading"}} sequence&hellip;</div>',
 
-            controller: function ($scope, Util, $window) {
+            controller: function ($rootScope, $scope, Util, $window) {
+                $rootScope.$on("ReloadVectorViewData", function (event, data) {
+                    if (!data)
+                        return;
+
+                    console.log("refreshing vector editor");
+                    $scope.loadVectorEditor(convertToVEModel(data));
+                });
+
                 $scope.loadMessage = undefined;
                 if (!$scope.entry && !$scope.entry.id) // todo : error message?
                     return;
@@ -105,10 +107,8 @@ angular.module('ice.entry.directives', [])
                                 "cutsiteTool",
                                 "featureTool",
                                 "orfTool",
-                                "viewTool",
                                 "findTool",
-                                "visibilityTool",
-                                "propertiesTool"
+                                "visibilityTool"
                             ]
                         }
                     });
@@ -128,12 +128,69 @@ angular.module('ice.entry.directives', [])
                             cutsites: true,
                             primers: false
                         },
-                        panelsShown: {
-                            sequence: false,
-                            circular: true,
-                            rail: false
-                        }
+                        panelsShown: [
+                            [{
+                                id: "circular",
+                                name: "Plasmid",
+                                active: true
+                            },
+                                {
+                                    id: "sequence",
+                                    name: "Sequence Map",
+                                    active: false
+                                },
+
+                                {
+                                    id: "rail",
+                                    name: "Linear Map",
+                                    active: false
+                                },
+                                {
+                                    id: "properties",
+                                    name: "Properties",
+                                    active: false
+                                }
+                            ]]
                     });
+                };
+
+                var convertToVEModel = function (result) {
+                    var data = {
+                        sequenceData: {
+                            sequence: result.sequence, features: [], name: $scope.entry.name
+                        },
+                        registryData: {
+                            uri: result.uri,
+                            identifier: result.identifier,
+                            name: result.name,
+                            circular: result.circular
+                        }
+                    };
+
+                    for (var i = 0; i < result.features.length; i += 1) {
+                        var feature = result.features[i];
+                        if (!feature.locations.length)
+                            continue;
+
+                        var notes = feature.notes.length ? feature.notes[0].value : "";
+
+                        for (var j = 0; j < feature.locations.length; j += 1) {
+                            var location = feature.locations[j];
+                            var featureObject = {
+                                start: location.genbankStart - 1,
+                                end: location.end - 1,
+                                fid: feature.id,
+                                forward: feature.strand == 1,
+                                type: feature.type,
+                                name: feature.name,
+                                notes: notes,
+                                annotationType: feature.type,
+                                locations: feature.locations
+                            };
+                            data.sequenceData.features.push(featureObject);
+                        }
+                    }
+                    return data;
                 };
 
                 $scope.fetchEntrySequence = function (entryId) {
@@ -148,42 +205,7 @@ angular.module('ice.entry.directives', [])
                     }
 
                     Util.get(url, function (result) {
-                        var data = {
-                            sequenceData: {
-                                sequence: result.sequence, features: [], name: $scope.entry.name
-                            },
-                            registryData: {
-                                uri: result.uri,
-                                identifier: result.identifier,
-                                name: result.name,
-                                circular: result.circular
-                            }
-                        };
-
-                        for (var i = 0; i < result.features.length; i += 1) {
-                            var feature = result.features[i];
-                            if (!feature.locations.length)
-                                continue;
-
-                            var notes = feature.notes.length ? feature.notes[0].value : "";
-
-                            for (var j = 0; j < feature.locations.length; j += 1) {
-                                var location = feature.locations[j];
-
-                                data.sequenceData.features.push({
-                                    start: location.genbankStart - 1,
-                                    end: location.end - 1,
-                                    fid: feature.id,
-                                    forward: feature.strand == 1,
-                                    type: feature.type,
-                                    name: feature.name,
-                                    notes: notes,
-                                    annotationType: feature.type,
-                                    locations: feature.locations
-                                });
-                            }
-                        }
-
+                        var data = convertToVEModel(result);
                         $scope.loadVectorEditor(data);
                     });
                 };

@@ -1077,25 +1077,68 @@ angular.module('ice.entry.controller', [])
         $scope.partIdEditMode = false;
         $scope.showSBOL = true;
         $scope.context = EntryContextUtil.getContext();
-        $scope.reloadInfo = {};
-
-        $rootScope.$on("ReloadVectorViewData", function (event, data) {
-            $scope.reloadInfo = undefined;
-            $scope.reloadInfo = {reload: data};
-        });
 
         $scope.isFileUpload = false;
-
         var sessionId = $cookieStore.get("sessionId");
         $scope.sessionId = sessionId;
 
+        // open vector editor modal
         $scope.open = function () {
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/entry/modal/vector-editor.html',
                 keyboard: false,
                 controller: function ($scope, $window, entry, $uibModalInstance) {
                     var sequence;
-                    $scope.changesSaved = false;
+                    $scope.updatedSequence = undefined;
+
+                    var getColorForType = function (annotationType) {
+                        switch (annotationType.toUpperCase()) {
+                            case "CDS":
+                                return "#EF6500";
+
+                            case "MISC_FEATURE":
+                                return "#006FEF";
+
+                            case "MISC_MARKER":
+                                return "#8DCEB1";
+                        }
+                    };
+
+                    // converts FeaturedDNASequence (jbei format) to genbank
+                    var convertFeaturedDNASequence = function (result) {
+                        var features = [];
+
+                        for (var i = 0; i < result.features.length; i += 1) {
+                            var feature = result.features[i];
+                            if (!feature.locations.length)
+                                continue;
+
+                            var notes = feature.notes.length ? feature.notes[0].value : "";
+
+                            for (var j = 0; j < feature.locations.length; j += 1) {
+                                var location = feature.locations[j];
+
+                                var featureObject = {
+                                    start: location.genbankStart - 1,
+                                    end: location.end - 1,
+                                    fid: feature.id,
+                                    forward: feature.strand == 1,
+                                    type: feature.type,
+                                    name: feature.name,
+                                    notes: notes,
+                                    annotationType: feature.type,
+                                    locations: feature.locations
+                                };
+
+                                var color = getColorForType(feature.type);
+                                if (color)
+                                    featureObject.color = color;
+                                features.push(featureObject);
+                            }
+                        }
+
+                        return features;
+                    };
 
                     $scope.loadVectorEditor = function () {
                         Util.get("rest/parts/" + entry.id + "/sequence", function (result) {
@@ -1114,34 +1157,14 @@ angular.module('ice.entry.controller', [])
                                 }
                             };
 
-                            for (var i = 0; i < result.features.length; i += 1) {
-                                var feature = result.features[i];
-                                if (!feature.locations.length)
-                                    continue;
-
-                                var notes = feature.notes.length ? feature.notes[0].value : "";
-
-                                for (var j = 0; j < feature.locations.length; j += 1) {
-                                    var location = feature.locations[j];
-
-                                    data.sequenceData.features.push({
-                                        start: location.genbankStart - 1,
-                                        end: location.end - 1,
-                                        fid: feature.id,
-                                        forward: feature.strand == 1,
-                                        type: feature.type,
-                                        name: feature.name,
-                                        notes: notes,
-                                        annotationType: feature.type,
-                                        locations: feature.locations
-                                    })
-                                }
-                            }
+                            data.sequenceData.features = convertFeaturedDNASequence(result);
 
                             $scope.vEeditor = $window.createVectorEditor(document.getElementById("vector-editor-root"), {
                                 editorName: "vector-editor",
                                 doNotUseAbsolutePosition: true,
+
                                 onSave: function (event, sequenceData, editorState) {
+
                                     // convert to featuredDNASequence
                                     sequence = {
                                         features: [],
@@ -1181,8 +1204,10 @@ angular.module('ice.entry.controller', [])
                                     }
 
                                     Util.update("rest/parts/" + entry.id + "/sequence", sequence, {},
-                                        function () {
-                                            $scope.changesSaved = true;
+                                        function (result) {
+                                            console.log("save completed for", entry.id);
+                                            $rootScope.$emit("ReloadVectorViewData", result);
+                                            $scope.updatedSequence = result;
                                         })
                                 },
 
@@ -1190,8 +1215,21 @@ angular.module('ice.entry.controller', [])
                                     const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
                                     clipboardData.setData('text/plain', copiedSequenceData.sequence);
                                     data.selection = editorState.selectionLayer;
+                                    data.openVECopied = copiedSequenceData;
+                                    console.log("copy", data);
                                     clipboardData.setData('application/json', JSON.stringify(data));
                                     event.preventDefault();
+                                },
+
+                                onPaste: function (event, editorState) {
+                                    const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
+                                    var jsonData = clipboardData.getData('application/json');
+                                    if (jsonData) {
+                                        jsonData = JSON.parse(jsonData);
+                                        jsonData = jsonData.openVECopied;
+                                    }
+                                    console.log("paste", jsonData);
+                                    return jsonData || {sequence: clipboardData.getData("text/plain")}
                                 },
 
                                 PropertiesProps: {
@@ -1234,14 +1272,36 @@ angular.module('ice.entry.controller', [])
                                     cutsites: true,
                                     primers: false
                                 },
-                                panelsShown: {
-                                    sequence: true,
-                                    circular: true,
-                                    rail: false
-                                }
+                                panelsShown: [
+                                    [
+                                        {
+                                            id: "circular",
+                                            name: "Plasmid",
+                                            active: true
+                                        },
+
+                                        {
+                                            id: "rail",
+                                            name: "Linear Map",
+                                            active: false
+                                        },
+                                        {
+                                            id: "properties",
+                                            name: "Properties",
+                                            active: false
+                                        }
+                                    ],
+                                    [
+                                        {
+                                            id: "sequence",
+                                            name: "Sequence Map",
+                                            active: true
+                                        }
+                                    ]
+                                ]
                             })
                         });
-                    }
+                    };
                 },
 
                 size: "ve-sized",
@@ -1252,18 +1312,13 @@ angular.module('ice.entry.controller', [])
                     }
                 }
             });
-
-            modalInstance.result.then(function (changesSaved) {
-                $rootScope.$emit("ReloadVectorViewData", changesSaved);
-            });
         };
 
         $scope.sequenceUpload = function (type) {
             if (type === 'file') {
                 $scope.isFileUpload = true;
                 $scope.isPaste = false;
-            }
-            else {
+            } else {
                 $scope.isPaste = true;
                 $scope.isFileUpload = false;
             }

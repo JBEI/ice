@@ -339,7 +339,7 @@ public class HibernateSearch {
                     query = qb.keyword().wildcard().onFields(SearchFieldFactory.getCommonFields()).matching(term).createQuery();
                     builder.add(query, BooleanClause.Occur.SHOULD);
                 } else {
-                    query = qb.keyword().fuzzy().onFields(queryFields).ignoreFieldBridge().matching(term).createQuery();
+                    query = qb.keyword().onFields(queryFields).ignoreFieldBridge().matching(term).createQuery();
                     builder.add(query, BooleanClause.Occur.MUST);
                 }
             }
@@ -357,7 +357,6 @@ public class HibernateSearch {
             Query visibilityQuery3 = qb.keyword().onField("visibility")
                     .matching(Visibility.PERMANENTLY_DELETED.getValue()).createQuery();
             builder.add(visibilityQuery3, BooleanClause.Occur.MUST_NOT);
-
 
             // bio-safety level
             if (option != null) {
