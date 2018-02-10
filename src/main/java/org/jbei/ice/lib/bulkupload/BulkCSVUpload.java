@@ -63,6 +63,14 @@ public class BulkCSVUpload {
         try (FileInputStream inputStream = new FileInputStream(csvFilePath.toFile())) {
             try {
                 List<PartWithSample> updates = getBulkUploadDataFromFile(inputStream);
+                if (updates == null) {
+                    processedBulkUpload.setSuccess(false);
+                    processedBulkUpload.setUserMessage("Validation failed");
+                    for (EntryField field : invalidFields) {
+                        processedBulkUpload.getHeaders().add(new EntryHeaderValue(false, field));
+                    }
+                    return processedBulkUpload;
+                }
 
                 // create actual entries
                 BulkEntryCreator creator = new BulkEntryCreator();

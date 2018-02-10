@@ -470,6 +470,9 @@ public class BulkEntryCreator {
         SampleService sampleService = new SampleService();
         EntryAuthorization entryAuthorization = new EntryAuthorization();
 
+        if (data == null)
+            return false;
+
         for (PartWithSample partWithSample : data) {
             if (partWithSample == null)
                 continue;
