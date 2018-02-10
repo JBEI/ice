@@ -126,12 +126,12 @@ public class Entry implements DataModel {
     private String alias;
 
     @Column(name = "name", length = 127)
-    @Field(store = Store.YES, boost = @Boost(2f))
+    @Field(store = Store.YES)
     private String name;
 
     @Column(name = "part_number", length = 127)
     @Fields({
-            @Field(boost = @Boost(2f), store = Store.YES),
+            @Field(store = Store.YES),
             @Field(name = "partNumber_forSort", analyze = Analyze.NO, store = Store.YES)
     })
     @Analyzer(definition = "customanalyzer")
@@ -139,7 +139,6 @@ public class Entry implements DataModel {
 
     @Column(name = "keywords", length = 127)
     @Field
-    @Boost(1.2f)
     private String keywords;
 
     @Column(name = "status", length = 127)
