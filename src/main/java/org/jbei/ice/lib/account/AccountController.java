@@ -198,14 +198,16 @@ public class AccountController {
         final String newPassword = Utils.generateUUID().substring(24);
         final String encryptedPassword = AccountUtils.encryptNewUserPassword(newPassword, salt);
 
-        final Account account = AccountUtils.fromDTO(info);
+        Account account = AccountUtils.fromDTO(info);
         account.setPassword(encryptedPassword);
         account.setSalt(salt);
         account.setCreationTime(Calendar.getInstance().getTime());
-        save(account);
+        account = save(account);
+
+        info.setId(account.getId());
+        info.setPassword(newPassword);
 
         if (!sendEmail) {
-            info.setPassword(newPassword);
             return info;
         }
 
@@ -246,7 +248,6 @@ public class AccountController {
                 .append("\n\nThank you.");
 
         EmailFactory.getEmail().send(info.getEmail(), subject, stringBuilder.toString());
-        info.setPassword(newPassword);
         return info;
     }
 

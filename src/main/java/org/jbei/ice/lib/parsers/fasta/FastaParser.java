@@ -16,7 +16,7 @@ import java.util.LinkedList;
 /**
  * Parse FASTA files.
  *
- * @author Zinovii Dmytriv, Timothy Ham
+ * @author Hector Plahar, Zinovii Dmytriv, Timothy Ham
  */
 public class FastaParser extends AbstractParser {
 
@@ -24,10 +24,11 @@ public class FastaParser extends AbstractParser {
     public FeaturedDNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
         try {
             textSequence = cleanSequence(textSequence);
+            textSequence = textSequence.replaceAll("\t", "\n");
             try (BufferedReader br = new BufferedReader(new StringReader(textSequence))) {
                 FeaturedDNASequence sequence;
                 RichSequenceIterator richSequences;
-                if (entryType[0].equals("protein")) {
+                if (entryType.length > 0 && entryType[0].equals("protein")) {
                     richSequences = IOTools.readFastaProtein(br, null);
                 } else {
                     richSequences = IOTools.readFastaDNA(br, null);

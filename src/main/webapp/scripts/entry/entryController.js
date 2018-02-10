@@ -1326,9 +1326,15 @@ angular.module('ice.entry.controller', [])
 
         $scope.processPastedSequence = function (event, part) {
             var sequenceString = event.originalEvent.clipboardData.getData('text/plain');
-            Util.post("rest/parts/" + part.id + "/sequence", {sequence: sequenceString}, function (result) {
-                part.hasSequence = true;
-            })
+            Util.update("rest/parts/" + part.id + "/sequence", {sequence: sequenceString}, {},
+                function (result) {
+                    if (!result)
+                        return;
+
+                    part.hasSequence = true;
+                    part.basePairCount = result.sequence.length;
+                    $rootScope.$emit("ReloadVectorViewData", result);
+                })
         };
 
         $scope.deleteSequence = function (part) {

@@ -213,7 +213,7 @@
                        ng-class="{'fa-square-o':!isSelected(entry), 'fa-check-square-o':isSelected(entry)}"
                        ng-click="select(entry)"></i>
                 </td>
-                <td style="opacity:0.7; font-weight: bold; font-size: 0.85em; text-shadow: 0 1px 0 #fff">
+                <td class="entry-type">
                     <i class="fa fa-fw fa-trash-o red" ng-if="entry.visible=='DELETED'"></i>
                     {{entry.type | uppercase}}
                     <i class="fa fa-fw fa-cloud" ng-if="entry.visible=='REMOTE'" style="color: #c9e6f2"></i>
