@@ -45,6 +45,8 @@ public abstract class Permissions extends HasEntry {
         permission.setEntry(entry);
         if (entry != null)
             entry.getPermissions().add(permission);
+        if (folder != null)
+            folder.getPermissions().add(permission);
         permission.setGroup(group);
         permission.setFolder(folder);
         permission.setUpload(upload);

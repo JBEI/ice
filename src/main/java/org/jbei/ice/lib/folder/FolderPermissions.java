@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.folder;
 
 import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.access.Permissions;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.TokenHash;
@@ -25,7 +26,7 @@ import java.util.List;
  *
  * @author Hector Plahar
  */
-public class FolderPermissions {
+public class FolderPermissions extends Permissions {
 
     private final Folder folder;
     private final FolderAuthorization authorization;
@@ -111,31 +112,9 @@ public class FolderPermissions {
         // verify write authorization
         authorization.expectWrite(userId, folder);
 
-        // permission object
-        Permission permission = new Permission();
-        permission.setFolder(folder);
-        if (accessPermission.getArticle() == AccessPermission.Article.GROUP) {
-            Group group = DAOFactory.getGroupDAO().get(accessPermission.getArticleId());
-            if (group == null) {
-                String errorMessage = "Could not assign group with id " + accessPermission.getArticleId() + " to folder";
-                Logger.error(errorMessage);
-                throw new IllegalArgumentException(errorMessage);
-            }
-            permission.setGroup(group);
-        } else {
-            Account account = accountDAO.get(accessPermission.getArticleId());
-            if (account == null) {
-                String errorMessage = "Could not assign account with id " + accessPermission.getArticleId() + " to folder";
-                Logger.error(errorMessage);
-                throw new IllegalArgumentException(errorMessage);
-            }
-
-            permission.setAccount(account);
-        }
-
-        permission.setCanRead(accessPermission.isCanRead());
-        permission.setCanWrite(accessPermission.isCanWrite());
-        AccessPermission created = permissionDAO.create(permission).toDataTransferObject();
+        Permission permission = addPermission(accessPermission, null, folder, null);
+        if (permission == null)
+            return null;
 
         // todo : on remote folder as well
         if (folder.getType() == FolderType.PRIVATE) {
@@ -150,7 +129,7 @@ public class FolderPermissions {
         if (folder.isPropagatePermissions()) {
             permissionsController.propagateFolderPermissions(userId, folder, true);
         }
-        return created;
+        return permission.toDataTransferObject();
     }
 
     public boolean enablePublicReadAccess() {

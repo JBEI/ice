@@ -281,6 +281,8 @@ public class FolderContents {
             } else {
                 List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);
                 folderDAO.addFolderContents(folder, entryModelList);
+
+
                 if (folder.isPropagatePermissions()) {
                     List<Permission> folderPermissions = permissionDAO.getFolderPermissions(folder);
                     addEntryPermission(userId, folderPermissions, entryModelList);

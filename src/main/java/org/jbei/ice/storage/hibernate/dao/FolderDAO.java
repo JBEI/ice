@@ -279,6 +279,33 @@ public class FolderDAO extends HibernateRepository<Folder> {
         }
     }
 
+    public List<Long> getCanReadFolderIds(Account account, Set<Group> accountGroups) {
+        try {
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<Permission> from = query.from(Permission.class);
+            Join<Permission, Folder> folder = from.join("folder");
+
+            // where ((account = account or group in groups) and canWrite)) or is owner
+            Predicate predicate = getBuilder().and(
+                    getBuilder().or(
+                            getBuilder().equal(from.get("account"), account),
+                            from.get("group").in(accountGroups)
+                    ),
+                    getBuilder().or(
+                            getBuilder().equal(from.get("canWrite"), true),
+                            getBuilder().equal(from.get("canRead"), true)
+                    ),
+                    getBuilder().isNotNull(from.get("folder"))
+            );
+
+            query.select(folder.get("id")).where(predicate);
+            return currentSession().createQuery(query).list();
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
+    }
+
     public List<Folder> filterByName(String token, int limit) {
         try {
             CriteriaQuery<Folder> query = getBuilder().createQuery(Folder.class);

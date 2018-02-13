@@ -222,6 +222,7 @@ public class Entry implements DataModel {
     private final Set<Permission> permissions = new HashSet<>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "contents")
+    @IndexedEmbedded(depth = 1)
     private Set<Folder> folders = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE})
