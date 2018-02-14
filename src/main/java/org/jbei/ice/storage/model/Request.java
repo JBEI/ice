@@ -138,6 +138,7 @@ public class Request implements DataModel {
         data.setPartId(entry.getPartNumber());
         data.setSelectionMarkers(EntryUtil.getSelectionMarkersAsList(entry.getSelectionMarkers()));
         data.setName(entry.getName());
+        data.setBioSafetyLevel(entry.getBioSafetyLevel());
         sampleRequest.setPartData(data);
         sampleRequest.setRequester(getAccount().toDataTransferObject());
         sampleRequest.setRequestTime(getRequested().getTime());
