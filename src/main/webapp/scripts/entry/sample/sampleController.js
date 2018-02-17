@@ -1,54 +1,66 @@
 'use strict';
 
 angular.module('ice.entry.sample.controller', [])
-    .controller('DisplaySampleController', function ($rootScope, $scope, SampleService) {
+    .controller('DisplaySampleController', function ($rootScope, $scope, SampleService, Util) {
+        //
+        // init (fetch all samples on the plate)
+        //
+        if ($scope.sample.location.type == 'PLATE96') {
+            Util.get("rest/samples/location/" + $scope.sample.location.id, function (result) {
+                $scope.sampleMap = result.sampleMap;
+            });
+        }
+
+        $scope.selectSample = function (data) {
+            $scope.selected = angular.copy(data);
+            if (data.location.type == "PLATE96") {
+                if (data.location.child.child)
+                    $scope.selected.location = data.location.child.child;
+                else
+                    $scope.selected.location = data.location.child;
+                $scope.selected.location.name = data.location.child.display;
+            }
+            console.log($scope.selected);
+        };
+
+        $scope.plateNumber = $scope.sample.location.display;
+
+        $scope.selectSample($scope.sample); // select sample by default to show details
         $scope.Plate96Rows = SampleService.getPlate96Rows();
         $scope.Plate96Cols = SampleService.getPlate96Cols();
 
         $scope.canDelete = function () {
             return !$scope.remote && $rootScope.user && $rootScope.user.isAdmin;
+        };
+
+        // relies on line 20 setting the actual location (e.g. A01) to the name field
+        $scope.isSelectedColumn = function (location, col) {
+            if (location.name[1] == "0")
+                return col == location.name[2];
+            return col == location.name.substring(1);
+        };
+
+        $scope.isSelectedRow = function (location, row) {
+            return location.name[0] == row;
         }
     })
-    .controller('EntrySampleController', function ($location, $rootScope, $scope, $uibModal, $cookieStore, $stateParams,
-                                                   Util, SampleService) {
-        var sessionId = $cookieStore.get("sessionId");
+    .controller('EntrySampleController', function ($rootScope, $scope, $uibModal, $stateParams, Util, SampleService) {
         var partId = $stateParams.id;
 
         $scope.Plate96Rows = SampleService.getPlate96Rows();
         $scope.Plate96Cols = SampleService.getPlate96Cols();
         $scope.addToCartDefaultLocal = undefined;
+
         Util.get('rest/config/ADD_TO_CART_DEFAULT_SET_TO_LOCAL', function (result) {
             $scope.addToCartDefaultLocal = result.value.toUpperCase() === "YES";
         });
 
-        // retrieve samples for partId and all samples for relevent plates
+        // retrieve samples for partId and all samples for relevant plates
         var refreshSamples = function () {
             Util.list('rest/parts/' + partId + '/samples', function (result) {
-                var samples = [];
-                var distinctPlates = {};
-                var totalSamples = 0;
-                for (var i = 0; i < result.length; i++) {
-                    var sample = result[i];
-                    if ("" + sample.partId === partId) {
-                        totalSamples += 1;
-                    }
-
-                    if (sample.location.type === "PLATE96") {
-                        if (distinctPlates[sample.location.id]) {
-                            distinctPlates[sample.location.id].push(sample);
-                        } else {
-                            distinctPlates[sample.location.id] = [sample];
-                        }
-
-                    } else {
-                        samples.push(sample);
-                    }
-                }
-
-                $scope.samples = samples;
-                $scope.distinctPlates = distinctPlates;
+                $scope.totalSamples = result.length;
+                $scope.samples = result;
                 $scope.selected = null;
-                $scope.totalSamples = totalSamples;
             });
         };
         refreshSamples();
@@ -228,7 +240,6 @@ angular.module('ice.entry.sample.controller', [])
             return false;
         };
 
-// has either well or t
         $scope.hasContent = function (row, col) {
             var rc = row + (10 + col + '').slice(-2);
             var recurse = $scope.newSample.location;

@@ -153,16 +153,16 @@
     </div>
 
     <!--widget for plate 96 -->
-    <div class="row pad_top" ng-repeat="(key, value) in distinctPlates track by $index" style="display: inline-block;">
+    <div class="row pad_top" ng-repeat="sample in samples track by $index"
+         ng-if="samples[$index].location.type==='PLATE96'" style="display: inline-block">
         <div class="col-md-12" style="margin: 15px; height: 372px;">
             <div class="col-md-6">
                 <ice-plate96 selected="selected"
                              entry="entry"
-                             plate="distinctPlates[key]"
+                             sample="sample"
                              on-delete="delete(selected)">
                 </ice-plate96>
             </div>
-
         </div>
     </div>
 

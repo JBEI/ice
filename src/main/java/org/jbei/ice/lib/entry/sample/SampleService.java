@@ -17,7 +17,6 @@ import org.jbei.ice.storage.hibernate.dao.StorageDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -225,6 +224,15 @@ public class SampleService extends HasEntry {
         return currentStorage;
     }
 
+    /**
+     * Retrieves the available samples for specified entry
+     *
+     * @param userId  identifier for user making request
+     * @param entryId identifier for entry whose samples are being retrieved
+     * @return list of found samples for the specified entry (including the hierarchy of the locations if applicable from the top down)
+     * @throws org.jbei.ice.lib.access.PermissionException if the specified user doesn't have read privileges
+     *                                                     on the specified entry
+     */
     public List<PartSample> retrieveEntrySamples(String userId, String entryId) {
         Entry entry = super.getEntry(entryId);
         if (entry == null)
@@ -235,54 +243,44 @@ public class SampleService extends HasEntry {
         // samples
         List<Sample> entrySamples = dao.getSamplesByEntry(entry);
         ArrayList<PartSample> samples = new ArrayList<>();
-        if (entrySamples == null)
+        if (entrySamples == null || entrySamples.isEmpty())
             return samples;
 
+        // check if the sample is in the requesting user's cart
         boolean inCart = false;
         if (userId != null) {
             Account userAccount = accountDAO.getByEmail(userId);
             inCart = DAOFactory.getRequestDAO().getSampleRequestInCart(userAccount, entry) != null;
         }
-        ArrayList<Sample> siblingSamples = new ArrayList<>();
-        for (Sample sample : entrySamples) {
-            Storage storage = sample.getStorage();
-            if (storage == null)
-                continue;
-            if (storage.getParent() != null && storage.getParent().getParent() != null) {
-                siblingSamples.addAll(dao.getSamplesByStorage(storage.getParent().getParent()));
-            }
-        }
-        entrySamples.addAll(siblingSamples);
 
-        Set<Sample> unique = new HashSet<>(entrySamples);
-        entrySamples = new ArrayList<>(unique);
-
+        // convert sample to info
         for (Sample sample : entrySamples) {
-            // convert sample to info
             Storage storage = sample.getStorage();
 
             if (storage == null) {
-                // dealing with sample with no storage
+                // dealing with sample with no storage so set generic storage
                 PartSample generic = sample.toDataTransferObject();
                 StorageLocation location = new StorageLocation();
                 location.setType(SampleType.GENERIC);
                 location.setDisplay(sample.getLabel());
                 generic.setLocation(location);
                 generic = setAccountInfo(generic, sample.getDepositor());
+                generic.setCanEdit(sampleAuthorization.canWrite(userId, sample));
                 samples.add(generic);
                 continue;
             }
 
             StorageLocation storageLocation = storage.toDataTransferObject();
 
+            // storage starts at the leaf level (e.g. tube or well for 96 well plate) so
+            // walk up parents to get to top level for sample location
             while (storage.getParent() != null) {
                 storage = storage.getParent();
                 StorageLocation parentLocation = storage.toDataTransferObject();
                 parentLocation.setChild(storageLocation);
                 storageLocation = parentLocation;
 
-                boolean isParent = (storageLocation.getType() != null && storageLocation.getType().isTopLevel());
-                if (isParent)
+                if (storageLocation.getType() != null && storageLocation.getType().isTopLevel())
                     break;
             }
 
@@ -316,6 +314,19 @@ public class SampleService extends HasEntry {
         }
 
         return samples;
+    }
+
+    public PlateSamples retrievePlate(String userId, long locationId, SampleType sampleType) {
+        Storage storage = storageDAO.get(locationId);
+        if (storage == null)
+            return null;
+
+        if (!storage.getStorageType().name().equalsIgnoreCase(sampleType.name()))
+            return null; // todo : throw an appropriate exception
+
+        PlateSamples plateSamples = new PlateSamples();
+        plateSamples.setSample(userId, locationId);
+        return plateSamples;
     }
 
     protected PartSample setAccountInfo(PartSample partSample, String email) {
