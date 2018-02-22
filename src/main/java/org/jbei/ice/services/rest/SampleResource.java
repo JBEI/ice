@@ -5,10 +5,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.dto.sample.PartSample;
-import org.jbei.ice.lib.dto.sample.SampleRequest;
-import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
-import org.jbei.ice.lib.dto.sample.UserSamples;
+import org.jbei.ice.lib.dto.sample.*;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
 import org.jbei.ice.lib.entry.sample.SampleCSV;
 import org.jbei.ice.lib.entry.sample.SampleService;
@@ -202,5 +199,32 @@ public class SampleResource extends RestResource {
             Logger.error(e);
             throw new WebApplicationException(e);
         }
+    }
+
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/file/model")
+    // bad request if the entries are not found
+    public Response createSamplesModel(@FormDataParam("file") InputStream fileInputStream,
+                                       @FormDataParam("file") FormDataContentDisposition header) {
+        String userId = requireUserId();
+        try {
+            SampleCSV sampleCSV = new SampleCSV(userId, fileInputStream);
+            List<String> errors = sampleCSV.verify();
+            return super.respond(errors);
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new WebApplicationException(e);
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/location/{id}")
+    public Response getSamplesForLocation(@PathParam("id") long locationId,
+                                          @DefaultValue("PLATE96") @QueryParam("type") SampleType sampleType) {
+        String userId = requireUserId();
+        return super.respond(new SampleService().retrievePlate(userId, locationId, sampleType));
     }
 }

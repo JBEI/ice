@@ -2,12 +2,16 @@ package org.jbei.ice.storage.model;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.search.annotations.ClassBridge;
+import org.hibernate.search.annotations.ContainedIn;
+import org.jbei.ice.lib.access.EntryFolderPermissionBridge;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -19,6 +23,7 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "folder")
+@ClassBridge(impl = EntryFolderPermissionBridge.class)
 @SequenceGenerator(name = "sequence", sequenceName = "folder_id_seq", allocationSize = 1)
 public class Folder implements DataModel {
 
@@ -56,9 +61,14 @@ public class Folder implements DataModel {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "folder_entry", joinColumns = {@JoinColumn(name = "folder_id", nullable = false)},
-               inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
+            inverseJoinColumns = {@JoinColumn(name = "entry_id", nullable = false)})
     @LazyCollection(LazyCollectionOption.EXTRA)
+    @ContainedIn
     private Set<Entry> contents = new LinkedHashSet<>();
+
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, mappedBy = "folder",
+            orphanRemoval = true, fetch = FetchType.LAZY)
+    private final Set<Permission> permissions = new HashSet<>();
 
     public Folder() {
     }
@@ -135,6 +145,10 @@ public class Folder implements DataModel {
 
     public void setPropagatePermissions(boolean propagatePermissions) {
         this.propagatePermissions = propagatePermissions;
+    }
+
+    public Set<Permission> getPermissions() {
+        return this.permissions;
     }
 
     public Folder getParent() {

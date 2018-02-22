@@ -1,0 +1,51 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="$close()">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">PLATE {{plateNumber}}</span>
+</div>
+
+<div class="modal-body">
+    <div class="alert alert-info" style="margin-bottom: 10px">
+        <i style="font-size: 30px" class="fa fa-info-circle pull-left"></i>
+        Upload a CSV file in the format
+        <code>[part_number, well location, barcode]</code>
+        one per line
+    </div>
+
+    <div class="alert alert-danger" style="margin-bottom: 10px" ng-if="sampleUploadError==true">
+        <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i> Error processing file
+    </div>
+
+    <div class="alert alert-success" style="margin-bottom: 10px" ng-if="!sampleUploadError && errors && !errors.length">
+        <i style="font-size: 18px" class="fa fa-check pull-left"></i> Successfully validated
+    </div>
+
+    <br>
+
+    <div style="max-height: 240px;overflow-y: auto; overflow-x: hidden" ng-if="errors && errors.length">
+        <table class="table small">
+            <thead>
+            <tr>
+                <th>Part Number</th>
+                <th>Well</th>
+                <th>Barcode</th>
+                <th>Error Message</th>
+            </tr>
+            </thead>
+            <tr ng-repeat="arr in errors" ng-init="arr=arr.split(',')">
+                <td>{{arr[0]}}</td>
+                <td>{{arr[1]}}</td>
+                <td>{{arr[2]}}</td>
+                <td>{{errorDetails(arr[3])}}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!--file upload-->
+    <input nv-file-select type="file" uploader="sampleInformationUploader"/>
+
+    <br>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-default btn-sm" ng-click="$close()">Close</button>
+</div>

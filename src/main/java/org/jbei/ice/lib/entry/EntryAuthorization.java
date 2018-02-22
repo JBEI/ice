@@ -56,6 +56,8 @@ public class EntryAuthorization extends Authorization<Entry> {
             return true;
 
         Set<Folder> entryFolders = entry.getFolders();
+        if (entryFolders == null || entryFolders.isEmpty())
+            return false;
 
         // is in a public folder
         for (Folder folder : entryFolders) {
