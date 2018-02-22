@@ -3,7 +3,8 @@
         <td colspan="{{Plate96Cols.length+1}}">
             <img src="img/loader-mini.gif" ng-if="!sampleMap"/> <strong style="color: #a52a2a">PLATE <span
                 class="color_444">{{plateNumber}}</span></strong>
-            <i class="fa fa-fw fa-cloud-upload opacity_hover pull-right"></i>
+            <i ng-if="userIsAdmin()" class="fa fa-fw fa-cloud-upload opacity_hover pull-right"
+               uib-tooltip="Upload sample verification" ng-click="uploadSampleInformation()"></i>
         </td>
     </tr>
     <tr>

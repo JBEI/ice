@@ -201,6 +201,24 @@ public class SampleResource extends RestResource {
         }
     }
 
+    @POST
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/file/model")
+    // bad request if the entries are not found
+    public Response createSamplesModel(@FormDataParam("file") InputStream fileInputStream,
+                                       @FormDataParam("file") FormDataContentDisposition header) {
+        String userId = requireUserId();
+        try {
+            SampleCSV sampleCSV = new SampleCSV(userId, fileInputStream);
+            List<String> errors = sampleCSV.verify();
+            return super.respond(errors);
+        } catch (Exception e) {
+            Logger.error(e);
+            throw new WebApplicationException(e);
+        }
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/location/{id}")

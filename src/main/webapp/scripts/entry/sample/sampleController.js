@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.entry.sample.controller', [])
-    .controller('DisplaySampleController', function ($rootScope, $scope, SampleService, Util) {
+    .controller('DisplaySampleController', function ($rootScope, $scope, $uibModal, SampleService, Util) {
         //
         // init (fetch all samples on the plate)
         //
@@ -10,6 +10,10 @@ angular.module('ice.entry.sample.controller', [])
                 $scope.sampleMap = result.sampleMap;
             });
         }
+
+        $scope.userIsAdmin = function () {
+            return $rootScope.user.isAdmin;
+        };
 
         $scope.selectSample = function (data) {
             $scope.selected = angular.copy(data);
@@ -20,7 +24,6 @@ angular.module('ice.entry.sample.controller', [])
                     $scope.selected.location = data.location.child;
                 $scope.selected.location.name = data.location.child.display;
             }
-            console.log($scope.selected);
         };
 
         $scope.plateNumber = $scope.sample.location.display;
@@ -42,6 +45,94 @@ angular.module('ice.entry.sample.controller', [])
 
         $scope.isSelectedRow = function (location, row) {
             return location.name[0] == row;
+        };
+
+        $scope.uploadSampleInformation = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/entry/modal/upload-sample-information.html',
+                controller: "UploadSampleInformationController",
+                backdrop: "static",
+                resolve: {
+                    plateNumber: function () {
+                        return $scope.plateNumber;
+                    },
+                    existing: function () {
+                        return $scope.sampleMap;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (result) {
+                if (result) {
+                    $scope.$broadcast("UpdateCollectionCounts");
+                    $scope.updateSelectedCollectionFolders();
+                    Selection.reset();
+                }
+            });
+        }
+    })
+    .controller('UploadSampleInformationController', function ($scope, plateNumber, existing,
+                                                               $uibModalInstance, FileUploader, Authentication) {
+        $scope.plateNumber = plateNumber;
+        $scope.sampleMap = existing;
+
+        $scope.sampleInformationUploader = new FileUploader({
+            scope: $scope, // to automatically update the html. Default: $rootScope
+            url: "rest/samples/file/model",
+            method: 'POST',
+            removeAfterUpload: true,
+            headers: {
+                "X-ICE-Authentication-SessionId": Authentication.getSessionId()
+            },
+            autoUpload: true,
+            queueLimit: 1
+        });
+
+        $scope.sampleInformationUploader.onSuccessItem = function (item, response, status, headers) {
+            if (status != "200") {
+                $scope.sampleUploadError = true;
+                return;
+            }
+
+            $scope.errors = response;
+        };
+
+        $scope.sampleInformationUploader.onErrorItem = function (item, response, status, headers) {
+            $scope.sampleUploadError = true;
+        };
+
+        $scope.sampleInformationUploader.onAfterAddingFile = function () {
+            $scope.errors = undefined;
+            $scope.isSuccess = false;
+        };
+
+        $scope.sampleInformationUploader.onProgressItem = function (item, progress) {
+            $scope.progress = progress;
+        };
+
+        $scope.errorDetails = function (code) {
+            switch (code) {
+                default:
+                    return "Unknown error";
+
+                case "+s":
+                    return "Multiple storage locations for barcode";
+
+                case "-p":
+                    return "No parent well for tube";
+
+                case "-ws":
+                    return "Wrong sample for barcode";
+
+                case "-b":
+                    return "Mismatched barcode";
+
+                case "-w":
+                    return "Mismatched well";
+
+                case "-e":
+                    return "Invalid entry";
+            }
         }
     })
     .controller('EntrySampleController', function ($rootScope, $scope, $uibModal, $stateParams, Util, SampleService) {
