@@ -16,6 +16,7 @@ public class EntrySecurityFilterFactory {
 
     private String accountId;
     private HashSet<String> groupUUids;
+    private HashSet<String> folderIds;
 
     // injected parameter
     public void setAccount(String accountId) {
@@ -25,6 +26,11 @@ public class EntrySecurityFilterFactory {
     // injected parameter
     public void setGroupUUids(HashSet<String> groupUUids) {
         this.groupUUids = groupUUids;
+    }
+
+    // injected parameter
+    public void setFolderIds(HashSet<String> folderIds) {
+        this.folderIds = folderIds;
     }
 
     @Factory
@@ -39,6 +45,12 @@ public class EntrySecurityFilterFactory {
         if (this.groupUUids != null) {
             for (String uuid : this.groupUUids) {
                 builder.add(new TermQuery(new Term("canRead", uuid)), BooleanClause.Occur.SHOULD);
+            }
+        }
+
+        if (this.folderIds != null) {
+            for (String uuid : this.folderIds) {
+                builder.add(new TermQuery(new Term("containedIn", uuid)), BooleanClause.Occur.SHOULD);
             }
         }
 

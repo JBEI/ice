@@ -13,7 +13,10 @@ import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.hibernate.dao.StorageDAO;
 import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.Sample;
+import org.jbei.ice.storage.model.Storage;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -74,6 +77,74 @@ public class SampleCSV implements Closeable {
                 }
             }
         }
+        return errors;
+    }
+
+    // similar to parse but instead of creating samples, if verifies
+    public List<String> verify() throws IOException {
+        StorageDAO storageDAO = DAOFactory.getStorageDAO();
+        List<String> errors = new ArrayList<>();
+
+        for (String[] line : reader) {
+            if (line.length < 3)
+                continue;
+
+            String entryId = line[0].trim();
+            String wellLocation = line[1].trim();
+            String barcode = line[2].trim();
+
+            if (StringUtils.isEmpty(entryId) || hasEntry.getEntry(entryId) == null) {
+                Logger.error("Could not retrieve entry by id " + entryId);
+                errors.add(entryId + ", " + wellLocation + ", " + barcode + ", -e");
+                continue;
+            }
+
+            // skipping barcode for now
+            if (StringUtils.isEmpty(barcode))
+                continue;
+
+            List<Storage> storages = storageDAO.retrieveStorageTube(barcode);
+
+            // should be only one storage location for barcode
+            if (storages == null || storages.isEmpty() || storages.size() > 1) {
+                errors.add(entryId + ", " + wellLocation + ", " + barcode + ", +s");
+                continue;
+            }
+
+            Storage storage = storages.get(0);
+            Storage parent = storage.getParent();
+
+            // no parent well
+            if (parent == null) {
+                errors.add(entryId + ", " + wellLocation + ", " + barcode + ", -p");
+                continue;
+            }
+
+            // now verify
+            List<Sample> samples = DAOFactory.getSampleDAO().getSamplesByStorage(storage);
+            if (samples == null || samples.size() != 1) {
+                errors.add(entryId + ", " + wellLocation + ", " + barcode + ", -ws"); // wrong sample
+                continue;
+            }
+
+            Sample sample = samples.get(0);
+            if (!sample.getEntry().getPartNumber().equalsIgnoreCase(entryId)) {
+                errors.add(entryId + ", " + wellLocation + ", " + barcode + ", -ws"); // wrong sample
+                continue;
+            }
+
+            if (!storage.getIndex().equals(barcode)) {
+                errors.add(entryId + ", " + wellLocation + ", " + barcode + ", -b"); // mismatched barcode
+                continue;
+            }
+
+            if (!parent.getIndex().equals(wellLocation)) {
+                errors.add(entryId + ", " + wellLocation + ", " + barcode + ", -w"); // mismatched well
+            }
+
+            // all good?
+        }
+
         return errors;
     }
 

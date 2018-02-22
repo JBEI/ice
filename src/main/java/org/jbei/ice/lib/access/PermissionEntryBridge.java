@@ -41,8 +41,5 @@ public class PermissionEntryBridge implements FieldBridge {
             if (!permission.getGroup().getUuid().equalsIgnoreCase(existingFieldValue))
                 luceneOptions.addFieldToDocument(fieldName, permission.getGroup().getUuid(), document);
         }
-
-        // TODO: adding entries to a folder that has permission granted to someone does not trigger this
-        // bridge until an entry is edited.
     }
 }

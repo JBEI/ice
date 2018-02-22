@@ -18,6 +18,7 @@ import org.jbei.ice.lib.dto.search.FieldFilter;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
 import org.jbei.ice.lib.dto.search.SearchResults;
+import org.jbei.ice.lib.folder.Folders;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.QueryType;
 import org.jbei.ice.lib.search.filter.SearchFieldFactory;
@@ -414,10 +415,10 @@ public class HibernateSearch {
      * @param fullTextQuery search fulltextquery for which filter is enabled
      */
     protected FullTextQuery checkEnableSecurityFilter(String userId, FullTextQuery fullTextQuery) {
-        Set<String> groupUUIDs;
+        Set<String> groupUUIDs = new HashSet<>();
+        Set<String> folderIds = new HashSet<>();
 
         if (StringUtils.isEmpty(userId)) {
-            groupUUIDs = new HashSet<>();
             groupUUIDs.add(GroupController.PUBLIC_GROUP_UUID);
         } else {
             AccountController accountController = new AccountController();
@@ -425,10 +426,12 @@ public class HibernateSearch {
                 return fullTextQuery;
             }
             groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(userId);
+            folderIds = new Folders(userId).getCanReadFolderIds();
         }
 
         fullTextQuery.enableFullTextFilter("security")
                 .setParameter("account", userId)
+                .setParameter("folderIds", folderIds)
                 .setParameter("groupUUids", groupUUIDs);
         return fullTextQuery;
     }

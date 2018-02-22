@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * ICE Folders
@@ -39,7 +40,7 @@ public class Folders {
      *
      * @return list of folders
      */
-    public ArrayList<FolderDetails> getCanEditFolders() {
+    public List<FolderDetails> getCanEditFolders() {
         Account account = this.accountDAO.getByEmail(userId);
         Set<Group> accountGroups = new HashSet<>(account.getGroups());
         GroupController controller = new GroupController();
@@ -72,12 +73,24 @@ public class Folders {
         return result;
     }
 
+    public Set<String> getCanReadFolderIds() {
+        Account account = this.accountDAO.getByEmail(userId);
+        Set<Group> accountGroups = new HashSet<>(account.getGroups());
+        GroupController controller = new GroupController();
+        Group everybodyGroup = controller.createOrRetrievePublicGroup();
+        accountGroups.add(everybodyGroup);
+
+        Set<String> idStrings = new HashSet<>();
+        List<Long> folderIds = dao.getCanReadFolderIds(account, accountGroups);
+        if (folderIds.isEmpty())
+            return idStrings;
+
+        idStrings.addAll(folderIds.stream().map(Object::toString).collect(Collectors.toList()));
+        return idStrings;
+    }
+
     public List<FolderDetails> filter(String token, int limit) {
         List<Folder> list = dao.filterByName(token, limit);
-        List<FolderDetails> results = new ArrayList<>();
-        for (Folder folder : list) {
-            results.add(folder.toDataTransferObject());
-        }
-        return results;
+        return list.stream().map(Folder::toDataTransferObject).collect(Collectors.toList());
     }
 }

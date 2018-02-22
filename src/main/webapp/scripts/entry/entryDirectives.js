@@ -8,7 +8,6 @@ angular.module('ice.entry.directives', [])
                 delete: "&onDelete",
                 remote: "=",
                 entry: "=",
-                plate: "=",
                 selected: "="
             },
 

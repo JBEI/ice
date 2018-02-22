@@ -46,6 +46,7 @@ public class Permission implements DataModel {
 
     @ManyToOne
     @JoinColumn(name = "folder_id")
+    @ContainedIn
     private Folder folder;
 
     @ManyToOne

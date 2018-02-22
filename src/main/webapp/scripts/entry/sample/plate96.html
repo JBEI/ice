@@ -1,49 +1,64 @@
 <table class="entry_sample_panel">
     <tr>
         <td colspan="{{Plate96Cols.length+1}}">
-            <strong style="color: #a52a2a">PLATE <span class="color_444">{{plate[0].location.display}}</span></strong>
+            <img src="img/loader-mini.gif" ng-if="!sampleMap"/> <strong style="color: #a52a2a">PLATE <span
+                class="color_444">{{plateNumber}}</span></strong>
+            <i ng-if="userIsAdmin()" class="fa fa-fw fa-cloud-upload opacity_hover pull-right"
+               uib-tooltip="Upload sample verification" ng-click="uploadSampleInformation()"></i>
         </td>
     </tr>
     <tr>
         <td>&nbsp;</td>
         <td class="text-center" ng-repeat="col in Plate96Cols">
-            <strong class="opacity_4">{{col}}</strong>
+            <strong ng-class="{'opacity_4': !isSelectedColumn(selected.location, col)}">{{col}}</strong>
         </td>
     </tr>
     <tr ng-repeat="row in Plate96Rows">
-        <td><strong class="opacity_4">{{row}}</strong>&nbsp;&nbsp;</td>
-
-        <td ng-repeat="col in Plate96Cols track by $id(col)">
-            <div ng-repeat="sample in plate"
-                 style="position: absolute; cursor: pointer;"
-                 ng-click="$parent.$parent.$parent.selected = sample">
-                <div ng-if="row + (10+col+'').slice(-2) === sample.location.child.display">
-                    <i class="fa fa-circle"
-                       ng-class="{'green':sample.location.child.child, 'alert_color':!sample.location.child.child}"
-                       style="font-size: 30px; color: green;"
-                       uib-tooltip="{{sample.location.child.child.display}}"
-                       ng-if="sample.partId === entry.id">
-                   </i>
-                    <i class="fa fa-circle"
-                       ng-class="{'green':sample.location.child.child, 'alert_color':!sample.location.child.child}"
-                       style="font-size: 30px; color: #A9A9A9; text-decoration: none; cursor: pointer;"
-                       uib-tooltip="{{sample.partName}} - {{sample.location.child.child.display}}"
-                       ng-if="sample.partId != entry.id">
-                   </i>
-                </div>
-            </div>
-            <i class="fa fa-circle-thin" style="font-size: 30px;"></i>
+        <td>
+            <strong ng-class="{'opacity_4': !isSelectedRow(selected.location, row)}">{{row}}</strong>
+            &nbsp;&nbsp;
         </td>
 
+        <td ng-repeat="col in Plate96Cols track by $id(col)">
+            <div style="position: absolute; cursor: pointer">
+                <div ng-if="row + (10+col+'').slice(-2) === sample.location.child.display">
+                    <i class="fa fa-circle" ng-click="selectSample(sample)"
+                       ng-class="{
+                       'green':sample.location.child.child,
+                       'alert_color':!sample.location.child.child
+                       }"
+                       style="font-size: 30px" uib-tooltip="{{sample.location.child.child.display}}"
+                       ng-if="sample.partId === entry.id">
+                    </i>
+                </div>
+
+                <div ng-if="row + (10+col+'').slice(-2) !== sample.location.child.display">
+                    <i class="fa fa-circle" ng-click="selectSample(sampleMap[row + (10+col+'').slice(-2)])"
+                       ng-class="{'opacity_3': selected.location.name != row + (10+col+'').slice(-2)}"
+                       style="font-size: 30px; text-decoration: none; cursor: pointer;"
+                       uib-tooltip="{{sampleMap[row + (10+col+'').slice(-2)].partName}}"
+                       ng-if="sampleMap[row + (10+col+'').slice(-2)].location">
+                    </i>
+                </div>
+            </div>
+
+            <i class="fa fa-circle-thin" style="font-size: 30px;"></i>
+        </td>
     </tr>
+
     <tr style="height: 67px;">
         <td colspan="{{Plate96Cols.length+1}}" class="small">
             <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
 
-            <i class="fa fa-warning dark-orange font-14em" ng-if="selected.comments.length"
-               uib-tooltip="1 or more comments available"></i>
+            <i class="fa fa-warning dark-orange font-12em" ng-if="selected.comments.length==1"
+               uib-tooltip="{{selected.comments[0].message}}"></i>
+            <i class="fa fa-warning dark-orange font-12em" ng-if="selected.comments.length > 1"
+               uib-tooltip="Comments available"></i>
+
             <strong ng-if="selected.label">{{selected.label}}</strong><br>
-            <span style="color: #777" ng-if="selected.id">
+
+            <div ng-if="selected.location.type=='TUBE'"><b>Barcode</b> {{selected.location.display}}</div>
+            <span class="text-muted" ng-if="selected.partId">
                 {{selected.creationTime | date : 'short'}} -
             </span>
             <a ng-href="profile/{{selected.depositor.id}}">{{selected.depositor.firstName}}
@@ -55,8 +70,12 @@
                     <i class="fa fa-exclamation-triangle alert_color fa-fw"></i>
                     <b style="color:#CC3333">Delete?</b>
 
-                    <button stop-event="click" class="btn btn-xs btn-primary" ng-click="delete(); selected.deleteRequested=false">Yes</button>
-                    <button stop-event="click" class="btn btn-xs btn-default" ng-click="selected.deleteRequested=false">No</button>
+                    <button stop-event="click" class="btn btn-xs btn-primary"
+                            ng-click="delete(); selected.deleteRequested=false">Yes
+                    </button>
+                    <button stop-event="click" class="btn btn-xs btn-default" ng-click="selected.deleteRequested=false">
+                        No
+                    </button>
                 </div>
 
                 <div class="pull-right" style="font-size: 14px;" ng-if="selected.canEdit && !selected.deleteRequested">
@@ -64,7 +83,7 @@
                 </div>
             </div>
 
-            <div class="display-inline pull-right" ng-if="selected.id && selected.partId != entry.id">
+            <div class="display-inline pull-right" ng-if="selected.partId && selected.partId != entry.id">
                 <a ng-href="entry/{{selected.partId}}/samples" style="font-size: 11pt;">
                     <strong>Go to {{selected.partName}} ▶</strong><br>
                 </a>

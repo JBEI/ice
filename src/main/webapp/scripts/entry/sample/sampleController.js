@@ -1,54 +1,157 @@
 'use strict';
 
 angular.module('ice.entry.sample.controller', [])
-    .controller('DisplaySampleController', function ($rootScope, $scope, SampleService) {
+    .controller('DisplaySampleController', function ($rootScope, $scope, $uibModal, SampleService, Util) {
+        //
+        // init (fetch all samples on the plate)
+        //
+        if ($scope.sample.location.type == 'PLATE96') {
+            Util.get("rest/samples/location/" + $scope.sample.location.id, function (result) {
+                $scope.sampleMap = result.sampleMap;
+            });
+        }
+
+        $scope.userIsAdmin = function () {
+            return $rootScope.user.isAdmin;
+        };
+
+        $scope.selectSample = function (data) {
+            $scope.selected = angular.copy(data);
+            if (data.location.type == "PLATE96") {
+                if (data.location.child.child)
+                    $scope.selected.location = data.location.child.child;
+                else
+                    $scope.selected.location = data.location.child;
+                $scope.selected.location.name = data.location.child.display;
+            }
+        };
+
+        $scope.plateNumber = $scope.sample.location.display;
+
+        $scope.selectSample($scope.sample); // select sample by default to show details
         $scope.Plate96Rows = SampleService.getPlate96Rows();
         $scope.Plate96Cols = SampleService.getPlate96Cols();
 
         $scope.canDelete = function () {
             return !$scope.remote && $rootScope.user && $rootScope.user.isAdmin;
+        };
+
+        // relies on line 20 setting the actual location (e.g. A01) to the name field
+        $scope.isSelectedColumn = function (location, col) {
+            if (location.name[1] == "0")
+                return col == location.name[2];
+            return col == location.name.substring(1);
+        };
+
+        $scope.isSelectedRow = function (location, row) {
+            return location.name[0] == row;
+        };
+
+        $scope.uploadSampleInformation = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/entry/modal/upload-sample-information.html',
+                controller: "UploadSampleInformationController",
+                backdrop: "static",
+                resolve: {
+                    plateNumber: function () {
+                        return $scope.plateNumber;
+                    },
+                    existing: function () {
+                        return $scope.sampleMap;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (result) {
+                if (result) {
+                    $scope.$broadcast("UpdateCollectionCounts");
+                    $scope.updateSelectedCollectionFolders();
+                    Selection.reset();
+                }
+            });
         }
     })
-    .controller('EntrySampleController', function ($location, $rootScope, $scope, $uibModal, $cookieStore, $stateParams,
-                                                   Util, SampleService) {
-        var sessionId = $cookieStore.get("sessionId");
+    .controller('UploadSampleInformationController', function ($scope, plateNumber, existing,
+                                                               $uibModalInstance, FileUploader, Authentication) {
+        $scope.plateNumber = plateNumber;
+        $scope.sampleMap = existing;
+
+        $scope.sampleInformationUploader = new FileUploader({
+            scope: $scope, // to automatically update the html. Default: $rootScope
+            url: "rest/samples/file/model",
+            method: 'POST',
+            removeAfterUpload: true,
+            headers: {
+                "X-ICE-Authentication-SessionId": Authentication.getSessionId()
+            },
+            autoUpload: true,
+            queueLimit: 1
+        });
+
+        $scope.sampleInformationUploader.onSuccessItem = function (item, response, status, headers) {
+            if (status != "200") {
+                $scope.sampleUploadError = true;
+                return;
+            }
+
+            $scope.errors = response;
+        };
+
+        $scope.sampleInformationUploader.onErrorItem = function (item, response, status, headers) {
+            $scope.sampleUploadError = true;
+        };
+
+        $scope.sampleInformationUploader.onAfterAddingFile = function () {
+            $scope.errors = undefined;
+            $scope.isSuccess = false;
+        };
+
+        $scope.sampleInformationUploader.onProgressItem = function (item, progress) {
+            $scope.progress = progress;
+        };
+
+        $scope.errorDetails = function (code) {
+            switch (code) {
+                default:
+                    return "Unknown error";
+
+                case "+s":
+                    return "Multiple storage locations for barcode";
+
+                case "-p":
+                    return "No parent well for tube";
+
+                case "-ws":
+                    return "Wrong sample for barcode";
+
+                case "-b":
+                    return "Mismatched barcode";
+
+                case "-w":
+                    return "Mismatched well";
+
+                case "-e":
+                    return "Invalid entry";
+            }
+        }
+    })
+    .controller('EntrySampleController', function ($rootScope, $scope, $uibModal, $stateParams, Util, SampleService) {
         var partId = $stateParams.id;
 
         $scope.Plate96Rows = SampleService.getPlate96Rows();
         $scope.Plate96Cols = SampleService.getPlate96Cols();
         $scope.addToCartDefaultLocal = undefined;
+
         Util.get('rest/config/ADD_TO_CART_DEFAULT_SET_TO_LOCAL', function (result) {
             $scope.addToCartDefaultLocal = result.value.toUpperCase() === "YES";
         });
 
-        // retrieve samples for partId and all samples for relevent plates
+        // retrieve samples for partId and all samples for relevant plates
         var refreshSamples = function () {
             Util.list('rest/parts/' + partId + '/samples', function (result) {
-                var samples = [];
-                var distinctPlates = {};
-                var totalSamples = 0;
-                for (var i = 0; i < result.length; i++) {
-                    var sample = result[i];
-                    if ("" + sample.partId === partId) {
-                        totalSamples += 1;
-                    }
-
-                    if (sample.location.type === "PLATE96") {
-                        if (distinctPlates[sample.location.id]) {
-                            distinctPlates[sample.location.id].push(sample);
-                        } else {
-                            distinctPlates[sample.location.id] = [sample];
-                        }
-
-                    } else {
-                        samples.push(sample);
-                    }
-                }
-
-                $scope.samples = samples;
-                $scope.distinctPlates = distinctPlates;
+                $scope.totalSamples = result.length;
+                $scope.samples = result;
                 $scope.selected = null;
-                $scope.totalSamples = totalSamples;
             });
         };
         refreshSamples();
@@ -228,7 +331,6 @@ angular.module('ice.entry.sample.controller', [])
             return false;
         };
 
-// has either well or t
         $scope.hasContent = function (row, col) {
             var rc = row + (10 + col + '').slice(-2);
             var recurse = $scope.newSample.location;

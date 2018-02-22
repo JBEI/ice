@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.AccountDAO;
@@ -36,6 +37,9 @@ public class HasEntry {
      */
     public Entry getEntry(String id) {
         Entry entry = null;
+
+        if (StringUtils.isEmpty(id))
+            return null;
 
         // check if numeric
         try {
