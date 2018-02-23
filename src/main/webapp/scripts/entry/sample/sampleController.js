@@ -111,9 +111,9 @@ angular.module('ice.entry.sample.controller', [])
         };
 
         $scope.errorDetails = function (code) {
-            switch (code) {
-                default:
-                    return "Unknown error";
+            switch (code.trim()) {
+                case "-s":
+                    return "No storage locations for barcode";
 
                 case "+s":
                     return "Multiple storage locations for barcode";
@@ -133,6 +133,8 @@ angular.module('ice.entry.sample.controller', [])
                 case "-e":
                     return "Invalid entry";
             }
+
+            return "Unknown error"
         }
     })
     .controller('EntrySampleController', function ($rootScope, $scope, $uibModal, $stateParams, Util, SampleService) {

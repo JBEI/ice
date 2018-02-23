@@ -106,7 +106,12 @@ public class SampleCSV implements Closeable {
             List<Storage> storages = storageDAO.retrieveStorageTube(barcode);
 
             // should be only one storage location for barcode
-            if (storages == null || storages.isEmpty() || storages.size() > 1) {
+            if (storages == null || storages.isEmpty()) {
+                errors.add(entryId + ", " + wellLocation + ", " + barcode + ", -s");
+                continue;
+            }
+
+            if (storages.size() > 1) {
                 errors.add(entryId + ", " + wellLocation + ", " + barcode + ", +s");
                 continue;
             }
