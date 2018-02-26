@@ -22,24 +22,30 @@ public class PermissionEntryBridge implements FieldBridge {
         if (permission.getEntry() == null && permission.getFolder() == null)
             return;
 
-        String fieldName;
-        if (permission.isCanRead() || permission.isCanWrite()) {
-            fieldName = "canRead";
-        } else
+        if (!permission.isCanRead() && permission.isCanWrite())
             return;
 
         // account
-        if (permission.getAccount() != null) {
-            String existingFieldValue = document.get(fieldName);
-            if (!permission.getAccount().getEmail().equalsIgnoreCase(existingFieldValue))
-                luceneOptions.addFieldToDocument(fieldName, permission.getAccount().getEmail(), document);
+        if (permission.getAccount() != null && !fieldValueExists(document, permission.getAccount().getEmail())) {
+            luceneOptions.addFieldToDocument(IndexField.CAN_READ, permission.getAccount().getEmail(), document);
         }
 
         // group
-        if (permission.getGroup() != null) {
-            String existingFieldValue = document.get(fieldName);
-            if (!permission.getGroup().getUuid().equalsIgnoreCase(existingFieldValue))
-                luceneOptions.addFieldToDocument(fieldName, permission.getGroup().getUuid(), document);
+        if (permission.getGroup() != null && !fieldValueExists(document, permission.getGroup().getUuid())) {
+            luceneOptions.addFieldToDocument(IndexField.CAN_READ, permission.getGroup().getUuid(), document);
         }
+    }
+
+    protected boolean fieldValueExists(Document document, String value) {
+        String[] values = document.getValues(IndexField.CAN_READ);
+        if (values == null || values.length == 0)
+            return false;
+
+        for (String fieldValue : values) {
+            if (fieldValue.equalsIgnoreCase(value))
+                return true;
+        }
+
+        return false;
     }
 }
