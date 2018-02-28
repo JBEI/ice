@@ -725,7 +725,7 @@ angular.module('ice.entry.controller', [])
                     $scope.$emit("UpdateCollectionCounts");
                     if ($scope.part.pastedSequence) {
                         // todo : also handle linked parts
-                        Util.post("rest/parts/" + result.id + "/sequence", {sequence: $scope.part.pastedSequence}, function () {
+                        Util.update("rest/parts/" + result.id + "/sequence", {sequence: $scope.part.pastedSequence}, {}, function () {
                             $location.path('/entry/' + result.id);
                             $scope.showSBOL = false;
                         })
@@ -1524,7 +1524,7 @@ angular.module('ice.entry.controller', [])
                         }
 
                         // add sequence to entry
-                        Util.post("rest/parts/" + sequencePartId + "/sequence", linkSequence, function (result) {
+                        Util.update("rest/parts/" + sequencePartId + "/sequence", linkSequence, {}, function (result) {
                             linkPartToMainEntry($scope.addExistingPartNumber);
                         });
                     };
@@ -1987,9 +1987,9 @@ angular.module('ice.entry.controller', [])
                         $scope.savingAnnotations = true;
 
                         //url, obj, successHandler, params, errHandler
-                        Util.post("rest/parts/" + part.id + "/sequence", {features: $scope.selectedFeatures}, function () {
+                        Util.update("rest/parts/" + part.id + "/sequence", {features: $scope.selectedFeatures}, {add: true}, function () {
                             $uibModalInstance.close(true);
-                        }, {add: true}, function (error) {
+                        }, function (error) {
                             $scope.savingAnnotations = false;
                             $scope.errorSavingAnnotations = true;
                         })

@@ -135,6 +135,8 @@ public class Annotations {
         try {
             List<DNAFeature> features = BlastPlus.runCheckFeatures(query);
             FeaturedDNASequence dnaSequence = new FeaturedDNASequence();
+            if (features.isEmpty())
+                return dnaSequence;
 
             // check permissions
             Account account = accountDAO.getByEmail(userId);
@@ -144,6 +146,7 @@ public class Annotations {
                 Feature feature = this.featureDAO.get(dnaFeature.getId());
                 if (feature == null)
                     continue;
+
                 List<Long> entries = this.sequenceFeatureDAO.getEntryIdsByFeature(feature);
                 if (entries.isEmpty())
                     continue;

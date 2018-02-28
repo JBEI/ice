@@ -89,6 +89,8 @@ angular.module('ice.entry.sample.controller', [])
         });
 
         $scope.sampleInformationUploader.onSuccessItem = function (item, response, status, headers) {
+            $scope.processingInProgress = false;
+            
             if (status != "200") {
                 $scope.sampleUploadError = true;
                 return;
@@ -99,11 +101,13 @@ angular.module('ice.entry.sample.controller', [])
 
         $scope.sampleInformationUploader.onErrorItem = function (item, response, status, headers) {
             $scope.sampleUploadError = true;
+            $scope.processingInProgress = false;
         };
 
         $scope.sampleInformationUploader.onAfterAddingFile = function () {
             $scope.errors = undefined;
             $scope.isSuccess = false;
+            $scope.processingInProgress = true;
         };
 
         $scope.sampleInformationUploader.onProgressItem = function (item, progress) {
@@ -111,9 +115,9 @@ angular.module('ice.entry.sample.controller', [])
         };
 
         $scope.errorDetails = function (code) {
-            switch (code) {
-                default:
-                    return "Unknown error";
+            switch (code.trim()) {
+                case "-s":
+                    return "No storage locations for barcode";
 
                 case "+s":
                     return "Multiple storage locations for barcode";
@@ -133,6 +137,8 @@ angular.module('ice.entry.sample.controller', [])
                 case "-e":
                     return "Invalid entry";
             }
+
+            return "Unknown error"
         }
     })
     .controller('EntrySampleController', function ($rootScope, $scope, $uibModal, $stateParams, Util, SampleService) {

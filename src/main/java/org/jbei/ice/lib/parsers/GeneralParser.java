@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.parsers;
 
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.DNASequence;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.lib.parsers.fasta.FastaParser;
 import org.jbei.ice.lib.parsers.genbank.GenBankParser;
@@ -22,7 +22,7 @@ public class GeneralParser {
     public static final String GENBANK_DELIMITER = "//";
     public static final String FASTA_DELIMITER = ">";
 
-    public static DNASequence parse(String sequence) {
+    public static FeaturedDNASequence parse(String sequence) {
 
         AbstractParser parser;
         try {

@@ -590,6 +590,8 @@ public class PartResource extends RestResource {
             final String userId = requireUserId();
             log(userId, "updating sequence for entry " + partId);
             PartSequence partSequence = new PartSequence(userId, partId);
+            if (add)
+                return super.respond(partSequence.addNewFeatures(sequence.getFeatures()));
             return super.respond(partSequence.update(sequence));
         } catch (Exception e) {
             Logger.error(e);

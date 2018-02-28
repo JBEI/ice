@@ -21,7 +21,8 @@
 
     <br>
 
-    <div style="max-height: 240px;overflow-y: auto; overflow-x: hidden" ng-if="errors && errors.length">
+    <div style="max-height: 240px;overflow-y: auto; overflow-x: hidden"
+         ng-if="!processingInProgress && errors && errors.length">
         <table class="table small">
             <thead>
             <tr>
@@ -41,7 +42,8 @@
     </div>
 
     <!--file upload-->
-    <input nv-file-select type="file" uploader="sampleInformationUploader"/>
+    <input nv-file-select type="file" uploader="sampleInformationUploader"/> <span ng-if="processingInProgress"><img
+        src="img/loader-mini.gif"> Processing...</span>
 
     <br>
 </div>
