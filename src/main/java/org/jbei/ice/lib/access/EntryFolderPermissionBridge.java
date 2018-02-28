@@ -24,11 +24,11 @@ public class EntryFolderPermissionBridge implements FieldBridge {
             if (!permission.isCanRead() && !permission.isCanWrite())
                 continue;
 
-            String existingFieldValue = document.get(IndexField.CAN_READ);
+            String existingFieldValue = document.get(IndexField.CONTAINED_IN);
             if (String.valueOf(permission.getFolder().getId()).equalsIgnoreCase(existingFieldValue))
                 continue;
 
-            luceneOptions.addFieldToDocument(IndexField.CAN_READ, String.valueOf(folder.getId()), document);
+            luceneOptions.addFieldToDocument(IndexField.CONTAINED_IN, String.valueOf(folder.getId()), document);
         }
     }
 }
