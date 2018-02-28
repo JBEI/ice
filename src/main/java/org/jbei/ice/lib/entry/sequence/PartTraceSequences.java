@@ -35,7 +35,7 @@ import java.util.zip.ZipOutputStream;
  *
  * @author Hector Plahar
  */
-public class TraceSequences {
+public class PartTraceSequences {
 
     private final TraceSequenceDAO dao;
     private final EntryAuthorization entryAuthorization;
@@ -43,7 +43,7 @@ public class TraceSequences {
     private final String userId;
     public static final String TRACES_DIR_NAME = "traces";
 
-    public TraceSequences(String userId, long partId) {
+    public PartTraceSequences(String userId, long partId) {
         this.dao = DAOFactory.getTraceSequenceDAO();
         this.entryAuthorization = new EntryAuthorization();
         this.entry = DAOFactory.getEntryDAO().get(partId);
