@@ -143,38 +143,68 @@ public class PartSequence extends HasEntry {
      */
     public FeaturedDNASequence update(FeaturedDNASequence dnaSequence) {
         entryAuthorization.expectWrite(userId, entry);
+        Sequence existing = sequenceDAO.getByEntry(this.entry);
+
+        // update raw sequence if no sequence is passed
+        if ((dnaSequence.getFeatures() == null || dnaSequence.getFeatures().isEmpty())) {
+            // sometimes the whole sequence is sent in the string portion (when there are no features)
+            // no features to add
+            dnaSequence = GeneralParser.parse(dnaSequence.getSequence());
+        } else if (dnaSequence.getSequence().isEmpty()) {
+            dnaSequence.setSequence(existing.getSequence());
+        }
 
         // convert sequence wrapper to sequence storage model
         Sequence sequence = dnaSequenceToSequence(dnaSequence);
-
-        // sometimes the whole sequence is sent in the string portion (when there are no features)
-        if (sequence.getSequenceFeatures() == null || sequence.getSequenceFeatures().isEmpty()) {
-            DNASequence parsedSequence = GeneralParser.parse(dnaSequence.getSequence());
-            if (parsedSequence != null)
-                sequence = dnaSequenceToSequence(parsedSequence);
-        }
-
         if (sequence == null)
             return null;
 
         // delete existing sequence for entry
-        Sequence existingSequence = sequenceDAO.getByEntry(this.entry);
-        if (existingSequence != null)
-            deleteSequence(existingSequence);
+        if (existing != null)
+            deleteSequence(existing);
 
         // associated entry with new one
         sequence.setEntry(this.entry);
         sequence = sequenceDAO.saveSequence(sequence);
-        if (sequence == null)
-            return null;
 
         // rebuild blast
         BlastPlus.scheduleBlastIndexRebuildTask(true);
 
         // rebuild the trace sequence alignments
+        rebuldTraceAlignments();
+
+        return sequenceToDNASequence(sequence);
+    }
+
+    /**
+     * Add referenced features to list of features for existing sequence.
+     * Any existing features are preserved
+     *
+     * @param features list of features to add
+     * @return DTO for new sequence to include newly added features
+     * @throws IllegalArgumentException if no existing sequence is available for the entry
+     */
+    public FeaturedDNASequence addNewFeatures(List<DNAFeature> features) {
+        entryAuthorization.expectWrite(userId, entry);
+        Sequence existing = sequenceDAO.getByEntry(this.entry);
+        if (existing == null)
+            throw new IllegalArgumentException("Cannot add features to non-existent sequence");
+
+        FeaturedDNASequence dnaSequence = sequenceToDNASequence(existing);
+        dnaSequence.getFeatures().addAll(features);
+        sequenceDAO.deleteSequence(existing);
+
+        Sequence sequence = dnaSequenceToSequence(dnaSequence);
+        sequence.setEntry(entry);
+        sequence = sequenceDAO.saveSequence(sequence);
+        rebuldTraceAlignments();
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
+        return sequenceToDNASequence(sequence);
+    }
+
+    protected void rebuldTraceAlignments() {
         SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
         sequenceAnalysisController.rebuildAllAlignments(entry);
-        return sequenceToDNASequence(sequence);
     }
 
     public boolean delete() {
@@ -345,7 +375,6 @@ public class PartSequence extends HasEntry {
         }
 
         Sequence sequence = new Sequence(sequenceString, "", fwdHash, revHash, null);
-        Set<SequenceFeature> sequenceFeatures = sequence.getSequenceFeatures();
 
         if (dnaSequence instanceof FeaturedDNASequence) {
             FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) dnaSequence;
@@ -353,87 +382,93 @@ public class PartSequence extends HasEntry {
             sequence.setComponentUri(featuredDNASequence.getDcUri());
             sequence.setIdentifier(featuredDNASequence.getIdentifier());
 
-            if (featuredDNASequence.getFeatures() != null && !featuredDNASequence.getFeatures().isEmpty()) {
-                for (DNAFeature dnaFeature : featuredDNASequence.getFeatures()) {
-                    List<DNAFeatureLocation> locations = dnaFeature.getLocations();
-                    String featureSequence = "";
-
-                    for (DNAFeatureLocation location : locations) {
-                        int genbankStart = location.getGenbankStart();
-                        int end = location.getEnd();
-
-                        if (genbankStart < 1) {
-                            genbankStart = 1;
-                        } else if (genbankStart > featuredDNASequence.getSequence().length()) {
-                            genbankStart = featuredDNASequence.getSequence().length();
-                        }
-
-                        if (end < 1) {
-                            end = 1;
-                        } else if (end > featuredDNASequence.getSequence().length()) {
-                            end = featuredDNASequence.getSequence().length();
-                        }
-
-                        if (genbankStart > end) { // over zero case
-                            featureSequence = featuredDNASequence.getSequence().substring(
-                                    genbankStart - 1, featuredDNASequence.getSequence().length());
-                            featureSequence += featuredDNASequence.getSequence().substring(0, end);
-                        } else { // normal
-                            featureSequence = featuredDNASequence.getSequence().substring(genbankStart - 1, end);
-                        }
-
-                        if (dnaFeature.getStrand() == -1) {
-                            try {
-                                featureSequence = SequenceUtils.reverseComplement(featureSequence);
-                            } catch (UtilityException e) {
-                                featureSequence = "";
-                            }
-                        }
-                    }
-
-                    SequenceFeature.AnnotationType annotationType = null;
-                    if (dnaFeature.getAnnotationType() != null && !dnaFeature.getAnnotationType().isEmpty()) {
-                        annotationType = SequenceFeature.AnnotationType.valueOf(dnaFeature.getAnnotationType());
-                    }
-
-                    String name = dnaFeature.getName().length() < 127 ? dnaFeature.getName()
-                            : dnaFeature.getName().substring(0, 123) + "...";
-                    Feature feature = new Feature(name, dnaFeature.getIdentifier(), featureSequence,
-                            dnaFeature.getType());
-                    if (dnaFeature.getLocations() != null && !dnaFeature.getLocations().isEmpty())
-                        feature.setUri(dnaFeature.getLocations().get(0).getUri());
-
-                    SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature,
-                            dnaFeature.getStrand(), name,
-                            dnaFeature.getType(), annotationType);
-                    sequenceFeature.setUri(dnaFeature.getUri());
-
-                    for (DNAFeatureLocation location : locations) {
-                        int start = location.getGenbankStart();
-                        int end = location.getEnd();
-                        AnnotationLocation annotationLocation = new AnnotationLocation(start, end, sequenceFeature);
-                        sequenceFeature.getAnnotationLocations().add(annotationLocation);
-                    }
-
-                    ArrayList<SequenceFeatureAttribute> sequenceFeatureAttributes = new ArrayList<>();
-                    if (dnaFeature.getNotes() != null && dnaFeature.getNotes().size() > 0) {
-                        for (DNAFeatureNote dnaFeatureNote : dnaFeature.getNotes()) {
-                            SequenceFeatureAttribute sequenceFeatureAttribute = new SequenceFeatureAttribute();
-                            sequenceFeatureAttribute.setSequenceFeature(sequenceFeature);
-                            sequenceFeatureAttribute.setKey(dnaFeatureNote.getName());
-                            sequenceFeatureAttribute.setValue(dnaFeatureNote.getValue());
-                            sequenceFeatureAttribute.setQuoted(dnaFeatureNote.isQuoted());
-                            sequenceFeatureAttributes.add(sequenceFeatureAttribute);
-                        }
-                    }
-
-                    sequenceFeature.getSequenceFeatureAttributes().addAll(sequenceFeatureAttributes);
-                    sequenceFeatures.add(sequenceFeature);
-                }
-            }
+            // convert dto features
+            convertSequenceFeatures(sequence, featuredDNASequence.getFeatures(), dnaSequence.getSequence());
         }
 
         return sequence;
     }
 
+    protected void convertSequenceFeatures(Sequence sequence, List<DNAFeature> dnaFeatures, String sequenceString) {
+        if (dnaFeatures == null || dnaFeatures.isEmpty())
+            return;
+
+        Set<SequenceFeature> sequenceFeatures = sequence.getSequenceFeatures();
+        for (DNAFeature dnaFeature : dnaFeatures) {
+            List<DNAFeatureLocation> locations = dnaFeature.getLocations();
+            String featureSequence = "";
+
+            for (DNAFeatureLocation location : locations) {
+                int genbankStart = location.getGenbankStart();
+                int end = location.getEnd();
+
+                if (genbankStart < 1) {
+                    genbankStart = 1;
+                } else if (genbankStart > sequenceString.length()) {
+                    genbankStart = sequenceString.length();
+                }
+
+                if (end < 1) {
+                    end = 1;
+                } else if (end > sequenceString.length()) {
+                    end = sequenceString.length();
+                }
+
+                if (genbankStart > end) { // over zero case
+                    featureSequence = sequenceString.substring(
+                            genbankStart - 1, sequenceString.length());
+                    featureSequence += sequenceString.substring(0, end);
+                } else { // normal
+                    featureSequence = sequenceString.substring(genbankStart - 1, end);
+                }
+
+                if (dnaFeature.getStrand() == -1) {
+                    try {
+                        featureSequence = SequenceUtils.reverseComplement(featureSequence);
+                    } catch (UtilityException e) {
+                        featureSequence = "";
+                    }
+                }
+            }
+
+            SequenceFeature.AnnotationType annotationType = null;
+            if (dnaFeature.getAnnotationType() != null && !dnaFeature.getAnnotationType().isEmpty()) {
+                annotationType = SequenceFeature.AnnotationType.valueOf(dnaFeature.getAnnotationType());
+            }
+
+            String name = dnaFeature.getName().length() < 127 ? dnaFeature.getName()
+                    : dnaFeature.getName().substring(0, 123) + "...";
+            Feature feature = new Feature(name, dnaFeature.getIdentifier(), featureSequence,
+                    dnaFeature.getType());
+            if (dnaFeature.getLocations() != null && !dnaFeature.getLocations().isEmpty())
+                feature.setUri(dnaFeature.getLocations().get(0).getUri());
+
+            SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature,
+                    dnaFeature.getStrand(), name,
+                    dnaFeature.getType(), annotationType);
+            sequenceFeature.setUri(dnaFeature.getUri());
+
+            for (DNAFeatureLocation location : locations) {
+                int start = location.getGenbankStart();
+                int end = location.getEnd();
+                AnnotationLocation annotationLocation = new AnnotationLocation(start, end, sequenceFeature);
+                sequenceFeature.getAnnotationLocations().add(annotationLocation);
+            }
+
+            ArrayList<SequenceFeatureAttribute> sequenceFeatureAttributes = new ArrayList<>();
+            if (dnaFeature.getNotes() != null && dnaFeature.getNotes().size() > 0) {
+                for (DNAFeatureNote dnaFeatureNote : dnaFeature.getNotes()) {
+                    SequenceFeatureAttribute sequenceFeatureAttribute = new SequenceFeatureAttribute();
+                    sequenceFeatureAttribute.setSequenceFeature(sequenceFeature);
+                    sequenceFeatureAttribute.setKey(dnaFeatureNote.getName());
+                    sequenceFeatureAttribute.setValue(dnaFeatureNote.getValue());
+                    sequenceFeatureAttribute.setQuoted(dnaFeatureNote.isQuoted());
+                    sequenceFeatureAttributes.add(sequenceFeatureAttribute);
+                }
+            }
+
+            sequenceFeature.getSequenceFeatureAttributes().addAll(sequenceFeatureAttributes);
+            sequenceFeatures.add(sequenceFeature);
+        }
+    }
 }

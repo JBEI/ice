@@ -4,7 +4,9 @@ import org.biojava.bio.BioException;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.symbol.SimpleSymbolList;
 import org.biojava.bio.symbol.SymbolList;
-import org.jbei.ice.lib.dto.DNASequence;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
+
+import java.util.ArrayList;
 
 /**
  * Parser to handle file with simply nucleotide sequences. Technically these files are not FASTA
@@ -15,7 +17,7 @@ import org.jbei.ice.lib.dto.DNASequence;
 public class PlainParser extends AbstractParser {
 
     @Override
-    public DNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
+    public FeaturedDNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
         SymbolList sl;
         try {
             textSequence = cleanSequence(textSequence);
@@ -24,6 +26,6 @@ public class PlainParser extends AbstractParser {
         } catch (BioException e) {
             throw new InvalidFormatParserException("Couldn't parse Plain sequence!", e);
         }
-        return new DNASequence(sl.seqString());
+        return new FeaturedDNASequence(sl.seqString(), new ArrayList<>());
     }
 }

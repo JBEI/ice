@@ -2,6 +2,7 @@ package org.jbei.ice.lib.parsers;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.DNASequence;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.HasEntry;
@@ -37,7 +38,7 @@ public abstract class AbstractParser extends HasEntry {
         sequenceDAO = DAOFactory.getSequenceDAO();
     }
 
-    public DNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
+    public FeaturedDNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
         throw new UnsupportedOperationException("Not implemented for this parser");
     }
 

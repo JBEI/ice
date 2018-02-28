@@ -1,7 +1,10 @@
 package org.jbei.ice.lib.parsers.genbank;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.dto.*;
+import org.jbei.ice.lib.dto.DNAFeature;
+import org.jbei.ice.lib.dto.DNAFeatureLocation;
+import org.jbei.ice.lib.dto.DNAFeatureNote;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.utils.Utils;
@@ -59,7 +62,7 @@ public class GenBankParser extends AbstractParser {
 
     // TODO parse source feature tag with xdb_ref
     @Override
-    public DNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
+    public FeaturedDNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
         FeaturedDNASequence sequence;
         textSequence = cleanSequence(textSequence);
 
