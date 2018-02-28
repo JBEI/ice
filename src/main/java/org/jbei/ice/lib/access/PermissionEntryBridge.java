@@ -13,7 +13,6 @@ import org.jbei.ice.storage.model.Permission;
  */
 public class PermissionEntryBridge implements FieldBridge {
 
-    @Override
     public void set(String name, Object value, Document document, LuceneOptions luceneOptions) {
         if (value == null)
             return;
@@ -22,7 +21,7 @@ public class PermissionEntryBridge implements FieldBridge {
         if (permission.getEntry() == null && permission.getFolder() == null)
             return;
 
-        if (!permission.isCanRead() && permission.isCanWrite())
+        if (!permission.isCanRead() && !permission.isCanWrite())
             return;
 
         // account
