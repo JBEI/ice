@@ -317,11 +317,12 @@ public class FileResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("entries")
     public Response getEntriesInFile(@FormDataParam("file") InputStream fileInputStream,
-                                     @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
+                                     @FormDataParam("file") FormDataContentDisposition contentDispositionHeader,
+                                     @DefaultValue("false") @QueryParam("checkName") boolean checkName) {
         String userId = requireUserId();
         try {
             Entries entries = new Entries(userId);
-            return super.respond(entries.validateEntries(fileInputStream));
+            return super.respond(entries.validateEntries(fileInputStream, checkName));
         } catch (IOException e) {
             Logger.error(e);
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
