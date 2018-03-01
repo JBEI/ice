@@ -143,6 +143,10 @@ html, body {
     margin-top: 20px;
 }
 
+.font-bold {
+    font-weight: bold;
+}
+
 .margin-top-10 {
     margin-top: 10px;
 }

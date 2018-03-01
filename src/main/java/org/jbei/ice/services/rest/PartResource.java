@@ -22,8 +22,8 @@ import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.attachment.Attachments;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
+import org.jbei.ice.lib.entry.sequence.PartTraceSequences;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
-import org.jbei.ice.lib.entry.sequence.TraceSequences;
 import org.jbei.ice.lib.entry.sequence.annotation.Annotations;
 import org.jbei.ice.lib.experiment.Experiments;
 import org.jbei.ice.lib.experiment.Study;
@@ -387,8 +387,8 @@ public class PartResource extends RestResource {
     public Response getTraces(@PathParam("id") final long partId, @DefaultValue("100") @QueryParam("limit") int limit,
                               @DefaultValue("0") @QueryParam("start") int start) {
         final String userId = getUserId();
-        TraceSequences traceSequences = new TraceSequences(userId, partId);
-        Results<TraceSequenceAnalysis> results = traceSequences.getTraces(start, limit);
+        PartTraceSequences partTraceSequences = new PartTraceSequences(userId, partId);
+        Results<TraceSequenceAnalysis> results = partTraceSequences.getTraces(start, limit);
 
         // hack for trace sequence viewer without having to modify it
         if (StringUtils.isEmpty(sessionId))
@@ -404,9 +404,9 @@ public class PartResource extends RestResource {
             sessionId = sid;
 
         final String userId = requireUserId();
-        TraceSequences traceSequences = new TraceSequences(userId, partId);
+        PartTraceSequences partTraceSequences = new PartTraceSequences(userId, partId);
 
-        try (ByteArrayOutputStream outputStream = traceSequences.getAll()) {
+        try (ByteArrayOutputStream outputStream = partTraceSequences.getAll()) {
             StreamingOutput stream = outputStream::writeTo;
             return Response.ok(stream).header("Content-Disposition", "attachment;filename=\"data.zip\"").build();
         } catch (IOException e) {
@@ -459,8 +459,8 @@ public class PartResource extends RestResource {
             Logger.error(e);
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
-        TraceSequences traceSequences = new TraceSequences(userId, partId);
-        final boolean success = traceSequences.addTraceSequence(file, fileName);
+        PartTraceSequences partTraceSequences = new PartTraceSequences(userId, partId);
+        final boolean success = partTraceSequences.addTraceSequence(file, fileName);
         return respond(success);
     }
 

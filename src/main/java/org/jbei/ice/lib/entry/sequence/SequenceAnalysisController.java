@@ -224,7 +224,6 @@ public class SequenceAnalysisController {
      *
      * @param entry entry object
      */
-
     public void rebuildAllAlignments(Entry entry) {
         if (entry == null)
             return;

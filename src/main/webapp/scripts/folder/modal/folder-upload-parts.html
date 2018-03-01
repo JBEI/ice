@@ -8,8 +8,19 @@
 <div class="modal-body" ng-if="!serverResult">
     <div ng-if="!processingFile">
         <div class="alert alert-info" style="margin-bottom: 10px; margin-top: 10px">
-            <i style="font-size: 18px" class="fa fa-info-circle pull-left"> </i> Place parts numbers in a csv file, one
-            per line. All empty lines will be ignored
+            <i style="font-size: 40px" class="fa fa-info-circle pull-left"> </i> Place part <span ng-if="!checkNames">numbers</span>
+            <span ng-if="checkNames">names</span> in a csv file, one
+            per line. All empty lines will be ignored, as well as columns other than the first.
+        </div>
+
+        <div class="font-95em">
+            Upload using
+            <span ng-class="{'opacity_hover': checkNames, 'font-bold': !checkNames}" ng-click="checkNames=false">
+                <i class="fa fa-fw" ng-class="{'fa-circle-o': checkNames, 'fa-check-circle': !checkNames}"></i>part numbers
+            </span>
+            <span ng-class="{'opacity_hover': !checkNames, 'font-bold': checkNames}" ng-click="checkNames=true">
+                <i class="fa fa-fw" ng-class="{'fa-circle-o': !checkNames, 'fa-check-circle': checkNames}"></i>names only (Note that names are not unique)
+            </span>
         </div>
 
         <div class="alert alert-danger" style="margin-bottom: 10px" ng-if="serverError">
@@ -26,7 +37,7 @@
     </div>
 
     <div ng-if="progress==100 && processingFile">
-        <img src="img/loader-mini.gif"> Processing File...
+        <img src="img/loader-mini.gif"> Processing File. This may take several minutes...
         <uib-progressbar class="progress-striped active" value="100" type="warning"
                          style="height: 20px"></uib-progressbar>
     </div>

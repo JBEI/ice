@@ -146,7 +146,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
             Root<Entry> from = query.from(Entry.class);
             query.where(
-                    getBuilder().equal(from.get("name"), name),
+                    getBuilder().equal(getBuilder().lower(from.get("name")), name.toLowerCase()),
                     getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()));
             return currentSession().createQuery(query).list();
         } catch (HibernateException e) {
