@@ -305,6 +305,55 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
         });
     };
 
+    $scope.bulkUpdateTraces = function () {
+        console.log("foo");
+        $uibModal.open({
+            controller: function ($scope, FileUploader, Authentication) {
+                $scope.bulkTracesEditUploader = new FileUploader({
+                    scope: $scope, // to automatically update the html. Default: $rootScope
+                    url: "rest/traces",
+                    method: 'PUT',
+                    removeAfterUpload: true,
+                    headers: {"X-ICE-Authentication-SessionId": Authentication.getSessionId()},
+                    autoUpload: true,
+                    queueLimit: 1 // can only upload 1 file
+                });
+
+                $scope.bulkTracesEditUploader.onProgressItem = function (item, progress) {
+                    $scope.progress = progress;
+                };
+
+                $scope.bulkTracesEditUploader.onAfterAddingFile = function () {
+                    $scope.processingFile = false;
+                    $scope.result = {success: false};
+                };
+
+                $scope.bulkTracesEditUploader.onBeforeUploadItem = function () {
+                    $scope.processingFile = true;
+                };
+
+                $scope.bulkTracesEditUploader.onCompleteAll = function () {
+                    $scope.processingFile = false;
+                };
+
+                $scope.bulkTracesEditUploader.onSuccessItem = function (item, response, status, header) {
+                    console.log("success", status, response);
+                    $scope.processingFile = false;
+                    $scope.result = {success: true, data: response};
+                };
+
+                $scope.bulkTracesEditUploader.onErrorItem = function (item, response, status, headers) {
+                    $scope.result = {success: false};
+                    $scope.processingFile = undefined;
+                    console.log(item, response, status, headers);
+                };
+            },
+            templateUrl: "views/modal/bulk-traces-update.html",
+            backdrop: 'static',
+            size: 'lg'
+        });
+    };
+
     $scope.csvExport = function (includeSequences) {
         var selection = getEntrySelection();
         var formats = {sequenceFormats: []};//, entryFields: ["name"]};
