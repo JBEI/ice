@@ -377,6 +377,7 @@ angular.module('ice.collection.controller', [])
         $scope.serverResult = undefined;
         $scope.processingFile = undefined;
         $scope.progress = 0;
+        $scope.checkNames = false;
 
         // file upload
         var uploader = $scope.partsUploader = new FileUploader({
@@ -388,6 +389,10 @@ angular.module('ice.collection.controller', [])
             autoUpload: true,
             queueLimit: 1 // can only upload 1 file
         });
+
+        uploader.onAfterAddingFile = function (item) {
+            item.url = item.url + "?checkName=" + $scope.checkNames;
+        };
 
         uploader.onProgressItem = function (item, progress) {
             $scope.serverError = undefined;

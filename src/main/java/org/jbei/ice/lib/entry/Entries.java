@@ -97,9 +97,12 @@ public class Entries extends HasEntry {
     }
 
     /**
-     * @param stream csv file input stream
+     * Validate list of entries in a csv file either via names or partnumbers
+     *
+     * @param stream    csv file input stream
+     * @param checkName whether to check names or part numbers
      */
-    public List<ParsedEntryId> validateEntries(InputStream stream) throws IOException {
+    public List<ParsedEntryId> validateEntries(InputStream stream, boolean checkName) throws IOException {
         List<ParsedEntryId> accepted = new ArrayList<>();
         EntryAuthorization authorization = new EntryAuthorization();
 
@@ -110,16 +113,30 @@ public class Entries extends HasEntry {
                 if (result[0].isEmpty())
                     continue;
 
-                Entry entry = dao.getByPartNumber(result[0].trim());
-                if (entry == null || !authorization.canRead(this.userId, entry)) {
-                    accepted.add(new ParsedEntryId(result[0], null));
-                    continue;
+                List<Entry> entries;
+                if (checkName) {
+                    entries = dao.getByName(result[0].trim());
+                } else {
+                    Entry entry = dao.getByPartNumber(result[0].trim());
+                    entries = new ArrayList<>(1);
+                    if (entry != null)
+                        entries.add(entry);
                 }
 
-                PartData partData = new PartData(EntryType.nameToType(entry.getRecordType()));
-                partData.setPartId(entry.getPartNumber());
-                partData.setId(entry.getId());
-                accepted.add(new ParsedEntryId(result[0], partData));
+                if (entries.isEmpty())
+                    accepted.add(new ParsedEntryId(result[0], null));
+                else {
+                    for (Entry e : entries) {
+                        if (!authorization.canRead(this.userId, e)) {
+                            accepted.add(new ParsedEntryId(result[0], null));
+                            continue;
+                        }
+                        PartData partData = new PartData(EntryType.nameToType(e.getRecordType()));
+                        partData.setPartId(e.getPartNumber());
+                        partData.setId(e.getId());
+                        accepted.add(new ParsedEntryId(result[0], partData));
+                    }
+                }
             }
         }
         return accepted;
