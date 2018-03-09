@@ -35,32 +35,31 @@ public class TraceSequences {
     public List<String> bulkUpdate(InputStream inputStream) {
         new EntryAuthorization().expectAdmin(userId);
 
-        List<String> errors = new ArrayList<>();
+        List<String> results = new ArrayList<>();
         try (ZipInputStream stream = new ZipInputStream(inputStream)) {
             ZipEntry zipEntry;
-            String fileName = null;
 
             while ((zipEntry = stream.getNextEntry()) != null) {
-                if (zipEntry.getName().startsWith("__MACOSX"))
-                    continue;
-
-                if (zipEntry.isDirectory()) {
-                    fileName = zipEntry.getName();
-                    continue;
-                }
-
-                if (fileName == null)
+                String fileName = zipEntry.getName();
+                if (fileName.startsWith("__MACOSX"))
                     continue;
 
                 // filename should be a part number
                 String[] split = fileName.split(File.separator);
+                if (split.length < 1)
+                    continue;
+
                 String partNumber = split[split.length - 1];
+                if (partNumber.startsWith(".") || partNumber.startsWith("_"))   // todo or get the settings from
+                    continue;
+
                 Entry entry = DAOFactory.getEntryDAO().getByPartNumber(partNumber);
                 if (entry == null) {
-                    errors.add("Part number \"" + partNumber + "\" generated from \"" + fileName + "\" not a valid entry");
-                    break;
+                    Logger.error("Part number \"" + partNumber + "\" generated from \"" + fileName + "\" not a valid entry");
+                    continue;
                 }
 
+                results.add(entry.getPartNumber());
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 int c;
                 while ((c = stream.read()) != -1) {
@@ -74,7 +73,7 @@ public class TraceSequences {
             Logger.error(e);
         }
 
-        return errors;
+        return results;
     }
 
     protected boolean add(Entry entry, String fileName, InputStream fileInputStream) {
