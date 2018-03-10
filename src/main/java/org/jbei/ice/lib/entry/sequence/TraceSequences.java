@@ -41,7 +41,7 @@ public class TraceSequences {
 
             while ((zipEntry = stream.getNextEntry()) != null) {
                 String fileName = zipEntry.getName();
-                if (fileName.startsWith("__MACOSX"))
+                if (fileName.startsWith("__MACOSX") || fileName.endsWith(File.separator))
                     continue;
 
                 // filename should be a part number
@@ -52,6 +52,9 @@ public class TraceSequences {
                 String partNumber = split[split.length - 1];
                 if (partNumber.startsWith(".") || partNumber.startsWith("_"))   // todo or get the settings from
                     continue;
+
+                // cleanup part number
+                partNumber = partNumber.substring(0, partNumber.indexOf('.'));
 
                 Entry entry = DAOFactory.getEntryDAO().getByPartNumber(partNumber);
                 if (entry == null) {
