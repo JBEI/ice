@@ -47,7 +47,9 @@ public class GFF3Formatter extends AbstractFormatter {
                 for (AnnotationLocation location : sequenceFeature.getAnnotationLocations()) {
                     builder.append(sequenceId).append("\t")
                             .append(".").append("\t")
-                            .append(sequenceFeature.getGenbankType()).append("\t")
+                            // todo : use "sequence_variant_obs" for variations, "gene" for genes, "region" for rest
+//                            .append(sequenceFeature.getGenbankType()).append("\t")
+                            .append(".").append("\t")
                             .append(location.getGenbankStart()).append("\t")
                             .append(location.getEnd()).append("\t")
                             .append(".").append("\t")
