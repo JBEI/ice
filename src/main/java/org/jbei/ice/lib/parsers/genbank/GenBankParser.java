@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 /**
  * Genbank parser and generator. The Genbank file format is defined in gbrel.txt located at
  * ftp://ftp.ncbi.nlm.nih.gov/genbank/gbrel.txt
- * <p/>
+ * <p>
  * This parser also handles some incorrectly formatted and obsolete genbank files.
  *
  * @author Timothy Ham
@@ -63,21 +63,40 @@ public class GenBankParser extends AbstractParser {
     // TODO parse source feature tag with xdb_ref
     @Override
     public FeaturedDNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
-        FeaturedDNASequence sequence;
+        FeaturedDNASequence sequence = new FeaturedDNASequence();
         textSequence = cleanSequence(textSequence);
+        List<Tag> tags = splitTags(textSequence, NORMAL_TAGS, IGNORE_TAGS);
 
-        ArrayList<Tag> tags = splitTags(textSequence, NORMAL_TAGS, IGNORE_TAGS);
-        tags = parseTags(tags);
+        for (Tag tag : tags) {
+            switch (tag.getKey()) {
+                default:
+                    parseNormalTag(tag);
+                    break;
 
-        sequence = new FeaturedDNASequence();
-        for (final Tag tag : tags) {
-            if (tag instanceof LocusTag) {
-                sequence.setName(((LocusTag) tag).getLocusName());
-                sequence.setIsCircular(((LocusTag) tag).isCircular());
-            } else if (tag instanceof OriginTag) {
-                sequence.setSequence(((OriginTag) tag).getSequence());
-            } else if (tag instanceof FeaturesTag) {
-                sequence.setFeatures(((FeaturesTag) tag).getFeatures());
+                case ACCESSION_TAG:
+                    tag = parseNormalTag(tag);
+                    sequence.setIdentifier(tag.getValue());
+                    break;
+
+                case ORIGIN_TAG:
+                    OriginTag originTag = parseOriginTag(tag);
+                    sequence.setSequence(originTag.getSequence());
+                    break;
+
+                case FEATURES_TAG:
+                    FeaturesTag featuresTag = parseFeaturesTag(tag);
+                    sequence.setFeatures(featuresTag.getFeatures());
+                    break;
+
+                case REFERENCE_TAG:
+                    parseReferenceTag(tag); // todo
+                    break;
+
+                case LOCUS_TAG:
+                    LocusTag locusTag = parseLocusTag(tag);
+                    sequence.setName(locusTag.getLocusName());
+                    sequence.setIsCircular(locusTag.isCircular());
+                    break;
             }
         }
         return sequence;
@@ -129,33 +148,38 @@ public class GenBankParser extends AbstractParser {
         return result;
     }
 
-    private ArrayList<Tag> parseTags(final ArrayList<Tag> tags) throws InvalidFormatParserException {
-        for (int i = 0; i < tags.size(); i++) {
-            final Tag tag = tags.get(i);
-            switch (tag.getKey()) {
-                default:
-                    parseNormalTag(tag);
-                    break;
-
-                case ORIGIN_TAG:
-                    tags.set(i, parseOriginTag(tag));
-                    break;
-
-                case FEATURES_TAG:
-                    tags.set(i, parseFeaturesTag(tag));
-                    break;
-
-                case REFERENCE_TAG:
-                    tags.set(i, parseReferenceTag(tag));
-                    break;
-
-                case LOCUS_TAG:
-                    tags.set(i, parseLocusTag(tag));
-                    break;
-            }
-        }
-        return tags;
-    }
+//    private List<Tag> parseTags(final List<Tag> tags) throws InvalidFormatParserException {
+//        for (int i = 0; i < tags.size(); i++) {
+//            final Tag tag = tags.get(i);
+//            switch (tag.getKey()) {
+//                default:
+//                    parseNormalTag(tag);
+//                    break;
+//
+//                case ACCESSION_TAG:
+//                    Tag t = parseNormalTag(tag);
+//                    tags.set(i, new AccessionTag(t.getValue()));
+//                    break;
+//
+//                case ORIGIN_TAG:
+//                    tags.set(i, parseOriginTag(tag));
+//                    break;
+//
+//                case FEATURES_TAG:
+//                    tags.set(i, parseFeaturesTag(tag));
+//                    break;
+//
+//                case REFERENCE_TAG:
+//                    tags.set(i, parseReferenceTag(tag));
+//                    break;
+//
+//                case LOCUS_TAG:
+//                    tags.set(i, parseLocusTag(tag));
+//                    break;
+//            }
+//        }
+//        return tags;
+//    }
 
     private Tag parseNormalTag(final Tag tag) {
         String value = "";
@@ -349,7 +373,7 @@ public class GenBankParser extends AbstractParser {
      * "gene". But really, it could be anything. Qualifier "translation" must be handled
      * differently from other multi-line fields, as they are expected to be concatenated without
      * spaces.
-     * <p/>
+     * <p>
      * This parser tries to normalize to "label", and preserve quotedness.
      */
     private DNAFeature parseQualifiers(final String block, DNAFeature dnaFeature) {

@@ -28,8 +28,8 @@
     <div class="pad-top-5" ng-if="!processingFile && result.success">
         <br>
 
-        <div ng-if="result.data.length" class="pad-top-5 alert alert-danger">
-            <i class="fa fa-fw fa-exclamation-triangle red"></i> <b>Error processing
+        <div ng-if="result.data.length" class="pad-top-5 alert alert-success">
+            <i class="fa fa-fw fa-check green"></i> <b>Sequences successfully uploaded for
             the following {{result.data.length}} files</b>
 
             <div style="height: 300px; overflow-y: scroll; border-top: 1px solid #DDDDDD">
@@ -39,8 +39,8 @@
             </div>
         </div>
 
-        <div class="alert alert-success" ng-if="!result.data.length">
-            <i class="fa fa-fw fa-check green font-14em"></i> <b>Sequences successfully updated</b>
+        <div class="alert alert-danger" ng-if="!result.data.length">
+            <i class="fa fa-fw fa-exclamation-triangle red font-14em"></i> <b>No sequences uploaded</b>
         </div>
     </div>
 
@@ -50,8 +50,6 @@
         <i class="fa fa-fw fa-exclamation-triangle red font-14em pull-left"></i>
         <b>Server Error updating sequences</b>
     </div>
-
-
 </div>
 
 <div class="modal-footer" ng-if="!processingFile">
