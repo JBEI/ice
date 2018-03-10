@@ -489,6 +489,8 @@ angular.module('ice.upload.controller', [])
 
             // bulk create or update from auto-fill or paste
             var bulkCreateOrUpdate = function (change) {
+                console.log(change);
+
                 $scope.saving = true;
 
                 // array of objects that will be created or updated
@@ -618,7 +620,7 @@ angular.module('ice.upload.controller', [])
                 // single cell edit
                 if (source === "edit") {   // single cell edit, change expected to contain single array
                     createOrUpdateEntry(change[0]);
-                } else if (source === "autofill" || source === "paste") {
+                } else if (source === "Autofill.fill" || source === "CopyPaste.paste") {
                     bulkCreateOrUpdate(change);
                 }
             };
@@ -642,6 +644,7 @@ angular.module('ice.upload.controller', [])
                 manualColumnResize: true,
                 columnSorting: false,
                 contextMenu: true,
+                fillHandle: "vertical",
                 afterRemoveRow: function (row) {
                     Util.remove("rest/uploads/" + $scope.bulkUpload.id + "/entry/" + $scope.bulkUpload.entryIdData[row],
                         {});
