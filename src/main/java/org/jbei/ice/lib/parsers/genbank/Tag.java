@@ -43,6 +43,6 @@ public class Tag {
     }
 
     public enum Type {
-        ORIGIN, LOCUS, FEATURES, REFERENCE, REGULAR
+        ORIGIN, LOCUS, FEATURES, REFERENCE, REGULAR, ACCESSION
     }
 }
