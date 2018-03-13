@@ -268,7 +268,20 @@ angular.module('ice.search.controller', [])
 
             // bio safety
             if ($scope.bioSafetyLevelOption) {
-                searchQuery.bioSafetyOption = $scope.bioSafetyLevelOption == "1" ? "LEVEL_ONE" : "LEVEL_TWO";
+                switch ($scope.bioSafetyLevelOption) {
+                    case "1":
+                    default:
+                        searchQuery.bioSafetyOption = "LEVEL_ONE";
+                        break;
+
+                    case "2":
+                        searchQuery.bioSafetyOption = "LEVEL_TWO";
+                        break;
+
+                    case "-1":
+                        searchQuery.bioSafetyOption = "RESTRICTED";
+                        break;
+                }
             }
             // todo include above with fieldFilters
             searchQuery.fieldFilters = $scope.fieldFilters;

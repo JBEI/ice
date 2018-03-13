@@ -435,8 +435,13 @@ angular.module('ice.entry.controller', [])
                 ];
             }
 
-            if (result.bioSafetyLevel)
-                $scope.entry.bioSafetyLevel = "Level " + result.bioSafetyLevel;
+            if (result.bioSafetyLevel) {
+                if (result.bioSafetyLevel == -1)
+                    $scope.entry.bioSafetyLevel = "Restricted";
+                else
+                    $scope.entry.bioSafetyLevel = "Level " + result.bioSafetyLevel;
+            }
+
             $scope.linkOptions = EntryService.linkOptions(result.type);
             $scope.selectedFields = EntryService.getFieldsForType(result.type);
             $scope.activePart = $scope.entry;
@@ -514,6 +519,8 @@ angular.module('ice.entry.controller', [])
                 $anchorScroll();
                 return;
             }
+
+            console.log($scope.entry.bioSafetyLevel);
 
             if ($scope.entry.bioSafetyLevel === 'Level 1')
                 $scope.entry.bioSafetyLevel = 1;
@@ -1162,8 +1169,7 @@ angular.module('ice.entry.controller', [])
                             $scope.vEeditor = $window.createVectorEditor(document.getElementById("vector-editor-root"), {
                                 editorName: "vector-editor",
                                 doNotUseAbsolutePosition: true,
-
-                                onSave: function (event, sequenceData, editorState) {
+                                onSave: function (event, sequenceData, editorState, onSuccessCallback) {
 
                                     // convert to featuredDNASequence
                                     sequence = {
@@ -1208,6 +1214,7 @@ angular.module('ice.entry.controller', [])
                                             console.log("save completed for", entry.id);
                                             $rootScope.$emit("ReloadVectorViewData", result);
                                             $scope.updatedSequence = result;
+                                            onSuccessCallback();
                                         })
                                 },
 
@@ -1216,7 +1223,6 @@ angular.module('ice.entry.controller', [])
                                     clipboardData.setData('text/plain', copiedSequenceData.sequence);
                                     data.selection = editorState.selectionLayer;
                                     data.openVECopied = copiedSequenceData;
-                                    console.log("copy", data);
                                     clipboardData.setData('application/json', JSON.stringify(data));
                                     event.preventDefault();
                                 },
@@ -1706,6 +1712,16 @@ angular.module('ice.entry.controller', [])
                 field.errorUpdating = true;
                 Util.setFeedback("Error updating entry", "danger")
             });
+        };
+
+        $scope.displayForBLSValue = function (bslValue) {
+            switch (bslValue) {
+                case -1:
+                    return "Restricted";
+
+                default:
+                    return bslValue;
+            }
         };
 
 // converts an array of string (currently only for autoCompleteAdd) to object so it can be edited

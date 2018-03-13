@@ -204,7 +204,8 @@ angular.module('ice.entry.service', [])
             {
                 label: "Bio Safety Level", schema: 'bioSafetyLevel', options: [
                 {value: "1", text: "Level 1"},
-                {value: "2", text: "Level 2"}
+                {value: "2", text: "Level 2"},
+                {value: "-1", text: "Restricted"}
             ]
             },
             {label: "Creator", required: true, schema: 'creator', inputType: 'withEmail', bothRequired: true},
