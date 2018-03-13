@@ -173,8 +173,12 @@ angular.module('ice.upload.service', [])
 
                 if (index < 15 || dataSchema[index] == "selectionMarkers") {
                     var val = entry[dataSchema[index]];
-                    if (dataSchema[index] == "bioSafetyLevel" && val == 0)
-                        return '';
+                    if (dataSchema[index] == "bioSafetyLevel") {
+                        if (val == 0)
+                            return '';
+                        if (val == -1)
+                            return "Restricted";
+                    }
 
                     if (dataSchema[index] == "selectionMarkers")
                         return val.toString();

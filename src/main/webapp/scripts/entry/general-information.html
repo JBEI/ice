@@ -22,7 +22,12 @@
             <!--display field value types that are not 'withEmail' and not 'date'-->
             <!--todo : also need different display widgets for different types-->
             <div ng-if="!field.edit&&field.inputType!=='withEmail'&&field.inputType!=='date'">
-                {{entry[field.schema]|arrayDisplay}}
+                <span ng-if="field.schema!='bioSafetyLevel'">{{entry[field.schema]|arrayDisplay}}</span>
+                <span ng-if="field.schema=='bioSafetyLevel'">
+                    <i class="fa fa-fw fa-exclamation-triangle orange" ng-if="entry[field.schema] == -1"></i>
+                    {{displayForBLSValue(entry[field.schema])}}
+                  </span>
+
                 <span ng-click="field.edit=true; checkConvertFieldToObject(field)">
                     <i ng-show="showEdit&&field.canEdit!=false" class="fa fa-pencil edit_icon"
                        style="margin-left: 5px;"></i>

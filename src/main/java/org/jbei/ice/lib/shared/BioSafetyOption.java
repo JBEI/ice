@@ -10,7 +10,8 @@ import org.jbei.ice.storage.IDataTransferModel;
 public enum BioSafetyOption implements IDataTransferModel {
 
     LEVEL_ONE("1"),
-    LEVEL_TWO("2");
+    LEVEL_TWO("2"),
+    RESTRICTED("-1");
 
     private String value;
 

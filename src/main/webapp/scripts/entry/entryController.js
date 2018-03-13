@@ -435,8 +435,13 @@ angular.module('ice.entry.controller', [])
                 ];
             }
 
-            if (result.bioSafetyLevel)
-                $scope.entry.bioSafetyLevel = "Level " + result.bioSafetyLevel;
+            if (result.bioSafetyLevel) {
+                if (result.bioSafetyLevel == -1)
+                    $scope.entry.bioSafetyLevel = "Restricted";
+                else
+                    $scope.entry.bioSafetyLevel = "Level " + result.bioSafetyLevel;
+            }
+
             $scope.linkOptions = EntryService.linkOptions(result.type);
             $scope.selectedFields = EntryService.getFieldsForType(result.type);
             $scope.activePart = $scope.entry;
@@ -514,6 +519,8 @@ angular.module('ice.entry.controller', [])
                 $anchorScroll();
                 return;
             }
+
+            console.log($scope.entry.bioSafetyLevel);
 
             if ($scope.entry.bioSafetyLevel === 'Level 1')
                 $scope.entry.bioSafetyLevel = 1;
@@ -1705,6 +1712,16 @@ angular.module('ice.entry.controller', [])
                 field.errorUpdating = true;
                 Util.setFeedback("Error updating entry", "danger")
             });
+        };
+
+        $scope.displayForBLSValue = function (bslValue) {
+            switch (bslValue) {
+                case -1:
+                    return "Restricted";
+
+                default:
+                    return bslValue;
+            }
         };
 
 // converts an array of string (currently only for autoCompleteAdd) to object so it can be edited
