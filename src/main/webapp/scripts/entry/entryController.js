@@ -1162,8 +1162,7 @@ angular.module('ice.entry.controller', [])
                             $scope.vEeditor = $window.createVectorEditor(document.getElementById("vector-editor-root"), {
                                 editorName: "vector-editor",
                                 doNotUseAbsolutePosition: true,
-
-                                onSave: function (event, sequenceData, editorState) {
+                                onSave: function (event, sequenceData, editorState, onSuccessCallback) {
 
                                     // convert to featuredDNASequence
                                     sequence = {
@@ -1208,6 +1207,7 @@ angular.module('ice.entry.controller', [])
                                             console.log("save completed for", entry.id);
                                             $rootScope.$emit("ReloadVectorViewData", result);
                                             $scope.updatedSequence = result;
+                                            onSuccessCallback();
                                         })
                                 },
 
@@ -1216,7 +1216,6 @@ angular.module('ice.entry.controller', [])
                                     clipboardData.setData('text/plain', copiedSequenceData.sequence);
                                     data.selection = editorState.selectionLayer;
                                     data.openVECopied = copiedSequenceData;
-                                    console.log("copy", data);
                                     clipboardData.setData('application/json', JSON.stringify(data));
                                     event.preventDefault();
                                 },
