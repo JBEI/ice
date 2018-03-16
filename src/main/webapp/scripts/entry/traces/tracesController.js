@@ -1,0 +1,225 @@
+'use strict';
+
+angular.module('ice.entry.traces.controller', [])
+    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, $uibModal, Util, Authentication) {
+        var entryId = $stateParams.id;
+
+        $scope.traceUploadError = undefined;
+        $scope.maxSize = 5;
+        $scope.tracesParams = {limit: 5, currentPage: 1, start: 0};
+
+        Util.get("/rest/parts/" + entryId + "/traces", function (result) {
+            $scope.traces = result;
+        }, $scope.tracesParams);
+
+        $scope.tracesPageChanged = function () {
+            $scope.tracesParams.start = ($scope.tracesParams.currentPage - 1) * $scope.tracesParams.limit;
+            Util.get("/rest/parts/" + entryId + "/traces", function (result) {
+                $scope.traces = result;
+            }, $scope.tracesParams);
+        };
+
+        $scope.showAddSangerTraceModal = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: "scripts/entry/modal/add-sanger-trace.html",
+                controller: 'TraceSequenceUploadModalController',
+                backdrop: 'static',
+                resolve: {
+                    entryId: function () {
+                        return $stateParams.id;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function () {
+                $scope.tracesParams.start = 0;
+
+                Util.get("/rest/parts/" + entryId + "/traces", function (result) {
+                    Util.setFeedback("", "success");
+                    $scope.traces = result;
+                    $scope.showUploadOptions = false;
+                    $scope.traceUploadError = false;
+                });
+            });
+        };
+
+        $scope.downloadAllTraces = function () {
+            var clickEvent = new MouseEvent("click", {
+                "view": window,
+                "bubbles": true,
+                "cancelable": false
+            });
+
+            Util.download("rest/parts/" + entryId + "/traces/all?sid=" + Authentication.getSessionId()).$promise.then(function (result) {
+                var url = URL.createObjectURL(new Blob([result.data]));
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = result.filename();
+                a.target = '_blank';
+                a.dispatchEvent(clickEvent);
+                $scope.selectedRequests = [];
+            });
+        };
+
+        $scope.deleteTraceSequenceFile = function (fileId) {
+            var foundTrace;
+            var foundIndex;
+
+            for (var i = 0; i < $scope.traces.data.length; i++) {
+                var trace = $scope.traces.data[i];
+                if (trace.fileId === fileId && trace.fileId != undefined) {
+                    foundTrace = trace;
+                    foundIndex = i;
+                    break;
+                }
+            }
+
+            if (foundTrace != undefined) {
+                Util.remove("rest/parts/" + entryId + "/traces/" + foundTrace.id, {}, function (result) {
+                    $scope.traces.data.splice(foundIndex, 1);
+                    $scope.entryStatistics.sequenceCount = $scope.traces.data.length;
+                });
+            }
+        };
+
+        $scope.downloadTraceFile = function (trace) {
+            $window.open("rest/file/trace/" + trace.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
+        };
+
+        var alignmentTracks = function (data) {
+            var alignment = {
+                id: "iceAlignment",
+                alignmentTracks: []
+            };
+
+            for (var i = 0; i < data.length; i += 1) {
+                alignment.alignmentTracks.push({
+                    sequenceData: {
+                        id: i + 1,
+                        name: data[i].filename,
+                        sequence: data[i].sequence
+                    },
+                    alignmentData: {
+                        id: i + 1,
+                        sequence: data[i].traceSequenceAlignment.queryAlignment
+                    }
+                })
+            }
+
+            return alignment;
+        };
+
+        $scope.fetchSequenceTraces = function () {
+            Util.get("rest/parts/" + entryId + "/traces", function (result) {
+                console.log(result);
+                $scope.loadSequenceChecker(alignmentTracks(result.data));
+            })
+        };
+
+        $scope.loadSequenceChecker = function (alignmentTracks) {
+            console.log("sequence checker", alignmentTracks);
+
+            $scope.checkerEditor = $window.createVectorEditor(document.getElementById("sequence-checker-root"), {
+                PropertiesProps: {
+                    propertiesList: [
+                        "features",
+                        "translations",
+                        "cutsites",
+                        "orfs"
+                    ]
+                },
+                ToolBarProps: {
+                    toolList: [
+                        "cutsiteTool",
+                        "featureTool",
+                        "orfTool",
+                        "findTool",
+                        "visibilityTool"
+                    ]
+                }
+            });
+
+            $scope.checkerEditor.updateEditor({
+                //sequenceData: data.sequenceData,
+                annotationVisibility: {
+                    parts: false,
+                    orfs: false,
+                    cutsites: false
+                },
+                annotationsToSupport: {
+                    features: true,
+                    translations: true,
+                    parts: false,
+                    orfs: true,
+                    cutsites: true,
+                    primers: false
+                },
+                panelsShown: [
+                    [{
+                        id: "iceAlignment",
+                        type: "alignment", //panel must be of type alignment
+                        name: "Trace Alignment",
+                        active: true
+                    },
+                        {
+                            id: "circular",
+                            name: "Plasmid",
+                            active: false
+                        },
+                        {
+                            id: "sequence",
+                            name: "Sequence Map",
+                            active: false
+                        },
+
+                        {
+                            id: "rail",
+                            name: "Linear Map",
+                            active: false
+                        },
+                        {
+                            id: "properties",
+                            name: "Properties",
+                            active: false
+                        }
+                    ]]
+            });
+
+            $scope.checkerEditor.addAlignment(alignmentTracks);
+        }
+    })
+    .controller('TraceSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId, Authentication) {
+        $scope.cancelAddSangerTrace = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
+
+        $scope.traceSequenceUploader = new FileUploader({
+            scope: $scope, // to automatically update the html. Default: $rootScope
+            url: "rest/parts/" + entryId + "/traces",
+            method: 'POST',
+            removeAfterUpload: true,
+            headers: {
+                "X-ICE-Authentication-SessionId": Authentication.getSessionId()
+            },
+            autoUpload: true,
+            queueLimit: 1, // can only upload 1 file
+            formData: [
+                {
+                    entryId: entryId
+                }
+            ]
+        });
+
+        $scope.traceSequenceUploader.onSuccessItem = function (item, response, status, headers) {
+            if (status != "200") {
+                $scope.traceUploadError = true;
+                return;
+            }
+
+            $uibModalInstance.close();
+        };
+
+        $scope.traceSequenceUploader.onErrorItem = function (item, response, status, headers) {
+            $scope.traceUploadError = true;
+        };
+    })

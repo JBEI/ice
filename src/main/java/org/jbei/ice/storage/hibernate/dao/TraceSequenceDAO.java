@@ -110,10 +110,8 @@ public class TraceSequenceDAO extends HibernateRepository<TraceSequence> {
     public void delete(Path tracesDir, TraceSequence traceSequence) {
         try {
             Path tracePath = Paths.get(tracesDir.toString(), traceSequence.getFileId());
-            if (Files.deleteIfExists(tracePath))
-                super.delete(traceSequence);
-            else
-                Logger.error("Couldn't delete trace : " + tracePath.toString());
+            Files.deleteIfExists(tracePath);
+            super.delete(traceSequence);
         } catch (HibernateException | IOException e) {
             throw new DAOException("Failed to delete Trace Sequence file", e);
         }

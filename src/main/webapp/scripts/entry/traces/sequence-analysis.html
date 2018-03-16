@@ -63,9 +63,9 @@
         <!--<div class="row" ng-if="shotgunSequences && shotgunSequences.length">-->
         <div class="col-sm-6">
             <ul uib-pagination total-items="shotgunSequences.length" ng-change="shotgunPageChanged()"
-                            ng-model="shotgunParams.currentPage"
-                            max-size="maxSize" class="pagination-sm" items-per-page="shotgunParams.limit"
-                            boundary-links="true">
+                ng-model="shotgunParams.currentPage"
+                max-size="maxSize" class="pagination-sm" items-per-page="shotgunParams.limit"
+                boundary-links="true">
             </ul>
         </div>
 
@@ -141,9 +141,9 @@
         <!--<div class="row" ng-if="traces && traces.resultCount">-->
         <div class="col-sm-6">
             <ul uib-pagination total-items="traces.resultCount" ng-change="tracesPageChanged()"
-                            ng-model="tracesParams.currentPage"
-                            max-size="maxSize" class="pagination-sm" items-per-page="tracesParams.limit"
-                            boundary-links="true">
+                ng-model="tracesParams.currentPage"
+                max-size="maxSize" class="pagination-sm" items-per-page="tracesParams.limit"
+                boundary-links="true">
             </ul>
         </div>
 
@@ -154,8 +154,10 @@
     </div>
 
     <div class="row pad_top" ng-if="entry.hasSequence&&traces.data.length">
-        <div class="col-md-12" style="height: 600px">
-            <ice-sequence-checker entryId="{{entry.id}}"></ice-sequence-checker>
+        <div class="col-md-12" style="height: 600px" ng-init="fetchSequenceTraces()">
+            <!--<ice-sequence-checker entryId="{{entry.id}}"></ice-sequence-checker>-->
+            <div id="sequence-checker-root" style="height: 100%">
+                <img src="img/loader-mini.gif"> Loading sequence checker&hellip;</div>
         </div>
     </div>
 </div>
