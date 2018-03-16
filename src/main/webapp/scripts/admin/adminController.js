@@ -235,6 +235,20 @@ angular.module('ice.admin.controller', [])
             }
         };
 
+        $scope.getBSLLabel = function (bslValue) {
+            switch (bslValue) {
+                default:
+                    return "";
+
+                case 1:
+                case 2:
+                    return "BSL " + bslValue;
+
+                case -1:
+                    return "RESTRICTED";
+            }
+        };
+
         $scope.requestSamples = function () {
             $scope.loadingPage = true;
             var params = angular.copy($scope.params);
