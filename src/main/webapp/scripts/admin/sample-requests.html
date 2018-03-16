@@ -65,7 +65,7 @@
                        ng-click="selectRequest(request)"></i>
                 </td>
                 <td class="entry-type">{{request.partData.type}}<br>
-                    <span class="font-weight: normal">BSL {{request.partData.bioSafetyLevel}}</span></td>
+                    <span class="font-weight: normal">{{getBSLLabel(request.partData.bioSafetyLevel)}}</span></td>
                 <td>
                     <a ng-href="entry/{{request.partData.id}}">{{request.partData.name}}</a>
                     <br>
