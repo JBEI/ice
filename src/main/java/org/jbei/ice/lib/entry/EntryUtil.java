@@ -129,7 +129,7 @@ public class EntryUtil {
 
     protected static String getStrainFieldValues(Strain strain, EntryField field) {
         switch (field) {
-            case PARENTAL_STRAIN:
+            case HOST:
                 return strain.getHost();
 
             case GENOTYPE_OR_PHENOTYPE:
@@ -282,7 +282,7 @@ public class EntryUtil {
             strainData = new StrainData();
 
         switch (field) {
-            case PARENTAL_STRAIN:
+            case HOST:
                 strainData.setHost(value);
                 break;
 
@@ -480,7 +480,7 @@ public class EntryUtil {
                 data.setSelectionMarkers(selectionMarkers);
                 break;
 
-            case PARENTAL_STRAIN:
+            case HOST:
             case GENOTYPE_OR_PHENOTYPE:
                 data.setStrainData(setStrainDataFromField(data.getStrainData(), value, field));
                 break;

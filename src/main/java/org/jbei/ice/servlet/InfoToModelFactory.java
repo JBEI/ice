@@ -459,7 +459,7 @@ public class InfoToModelFactory {
                 entry.setSelectionMarkers(markers);
                 break;
 
-            case PARENTAL_STRAIN:
+            case HOST:
             case GENOTYPE_OR_PHENOTYPE:
                 entry = infoToStrainForField(entry, value, field);
                 break;
@@ -506,7 +506,7 @@ public class InfoToModelFactory {
         Strain strain = (Strain) entry;
 
         switch (field) {
-            case PARENTAL_STRAIN:
+            case HOST:
                 strain.setHost(value);
                 return strain;
 
