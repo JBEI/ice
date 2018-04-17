@@ -30,7 +30,7 @@ public enum EntryField implements IDataTransferModel {
     ATT_FILENAME("Attachment File", false),
     SEQ_TRACE_FILES("Sequence Trace File(s)", false),
     SELECTION_MARKERS("Selection Markers", true),
-    PARENTAL_STRAIN("Parent Strain", false),
+    HOST("Host", false),
     GENOTYPE_OR_PHENOTYPE("Genotype or Phenotype", false),
     CIRCULAR("Circular", false),
     BACKBONE("Backbone", false),

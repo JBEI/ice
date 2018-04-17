@@ -96,18 +96,16 @@ public class GenbankFormatter extends AbstractFormatter {
     }
 
     @Override
-    public void format(Sequence sequence, OutputStream outputStream) throws FormatterException,
-            IOException {
+    public void format(Sequence sequence, OutputStream outputStream) throws FormatterException, IOException {
         if (sequence == null || outputStream == null || sequence.getSequence().isEmpty()) {
             return;
         }
 
-        SimpleRichSequence simpleRichSequence = null;
+        SimpleRichSequence simpleRichSequence;
         try {
-            simpleRichSequence = new SimpleRichSequence(getNamespace(), normalizeLocusName(name),
-                                                        accessionNumber, version, DNATools.createDNA(
-                    sequence.getSequence()),
-                                                        seqVersion);
+            simpleRichSequence = new SimpleRichSequence(
+                    getNamespace(), normalizeLocusName(name), accessionNumber, version,
+                    DNATools.createDNA(sequence.getSequence()), seqVersion);
 
             simpleRichSequence.setCircular(getCircular());
             if (getDescription() != null && !getDescription().isEmpty()) {
@@ -128,7 +126,7 @@ public class GenbankFormatter extends AbstractFormatter {
                 for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
                     if (sequenceFeature.getFeature() == null) {
                         Logger.warn("In sequence with id: " + sequence.getId()
-                                            + "; SequenceFeature object has no feature assigned to it.");
+                                + "; SequenceFeature object has no feature assigned to it.");
 
                         continue;
                     }
@@ -148,8 +146,7 @@ public class GenbankFormatter extends AbstractFormatter {
                         ArrayList<Location> members = new ArrayList<>();
                         for (AnnotationLocation location : locations) {
                             members.add(new SimpleRichLocation(new SimplePosition(location.getGenbankStart()),
-                                                               new SimplePosition(location.getEnd()), 1,
-                                                               getStrand(sequenceFeature)));
+                                    new SimplePosition(location.getEnd()), 1, getStrand(sequenceFeature)));
                         }
                         featureTemplate.location = new CompoundRichLocation(members);
                     }
@@ -216,8 +213,8 @@ public class GenbankFormatter extends AbstractFormatter {
             }
 
             richAnnotation.addNote(new SimpleNote(RichObjectFactory.getDefaultOntology()
-                                                                   .getOrCreateTerm(key), normalizeFeatureValue(value),
-                                                  i + 2));
+                    .getOrCreateTerm(key), normalizeFeatureValue(value),
+                    i + 2));
             i++;
         }
 
@@ -236,7 +233,7 @@ public class GenbankFormatter extends AbstractFormatter {
 
         if (sequenceFeature.getGenbankType() == null || sequenceFeature.getGenbankType().isEmpty()) {
             Logger.warn("SequenceFeature by id: " + sequenceFeature.getId()
-                                + " has invalid genbank type.");
+                    + " has invalid genbank type.");
 
             featureType = "misc_feature";
         } else {

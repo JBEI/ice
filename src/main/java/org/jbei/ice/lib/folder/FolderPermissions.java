@@ -7,6 +7,7 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.access.AccessPermission;
+import org.jbei.ice.lib.dto.access.RemoteAccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
@@ -39,6 +40,11 @@ public class FolderPermissions extends Permissions {
     private final RemoteClientModelDAO remoteClientModelDAO;
     private final RemotePartnerDAO remotePartnerDAO;
 
+    /**
+     * @param userId   unique identifier of user
+     * @param folderId unique local folder identifier
+     * @throws IllegalArgumentException if the referenced folder identifier doesn't resolve to an existing folder
+     */
     public FolderPermissions(String userId, long folderId) {
         this.dao = DAOFactory.getFolderDAO();
         this.permissionDAO = DAOFactory.getPermissionDAO();
@@ -55,9 +61,11 @@ public class FolderPermissions extends Permissions {
     }
 
     /**
-     * Retrieves list of available folder permissions (both local and remote)
+     * Retrieves list of available folder permissions (both local and remote).
+     * User must have write privileges on folder to perform this action
      *
      * @return list available folders
+     * @throws PermissionException is user doesn't have write permissions on folder
      */
     public ArrayList<AccessPermission> get() {
         authorization.expectWrite(userId, folder);
@@ -80,7 +88,7 @@ public class FolderPermissions extends Permissions {
 //                accessPermission.setType(this.permission.isCanWrite() ? AccessPermission.Type.WRITE_FOLDER : AccessPermission.Type.READ_FOLDER);
                 AccountTransfer accountTransfer = new AccountTransfer();
                 accountTransfer.setEmail(remoteShareModel.getClient().getEmail());
-                accessPermission.setPartner(remoteShareModel.getClient().getRemotePartner().toDataTransferObject());
+//                accessPermission.setPartner(remoteShareModel.getClient().getRemotePartner().toDataTransferObject());
                 accessPermission.setDisplay(accountTransfer.getEmail());
             }
 
@@ -106,7 +114,7 @@ public class FolderPermissions extends Permissions {
 
         // check if permission for remote folder is being created
         if (accessPermission.getArticle() == AccessPermission.Article.REMOTE) {
-            return createRemotePermission(accessPermission);
+            return createRemotePermission((RemoteAccessPermission) accessPermission);
         }
 
         // verify write authorization
@@ -165,7 +173,7 @@ public class FolderPermissions extends Permissions {
      * @return wrapper around the unique identifier for the remote permission created
      * @throws IllegalArgumentException if the partner record cannot be retrieved
      */
-    public AccessPermission createRemotePermission(AccessPermission accessPermission) {
+    public AccessPermission createRemotePermission(RemoteAccessPermission accessPermission) {
         RegistryPartner partner = accessPermission.getPartner();
         RemotePartner remotePartner = remotePartnerDAO.get(partner.getId());
         if (remotePartner == null) {
@@ -174,28 +182,31 @@ public class FolderPermissions extends Permissions {
             throw new IllegalArgumentException(errorMessage);
         }
 
-        // todo : must be owner?
         authorization.expectWrite(userId, folder);
 
         String remoteUserId = accessPermission.getUserId();
-        String token = tokenHash.generateSalt();
+        String randomToken = tokenHash.generateRandomToken();
 
-        // send token and also verify user Id
-        accessPermission.setSecret(token);
+        // generate random token and also verify user Id
+        accessPermission.setSecret(randomToken);
         AccountTransfer accountTransfer = new AccountTransfer();
         accountTransfer.setEmail(userId);
+
         accessPermission.setAccount(accountTransfer);
         accessPermission.setDisplay(folder.getName());
         accessPermission.setTypeId(folder.getId());
+
+        // send to remote partner (throws illegal argument exception if user id doesn't exist on other side)
         if (!sendToken(accessPermission, remotePartner))
             return null; // something happened with the send; likely user id is invalid
 
-        // create local client record mapping to remote
+        // create local client record mapping to remote partner + user id
+        // this narrows down the remote client allowed to access the article (folder)
         RemoteClientModel remoteClientModel = getOrCreateRemoteClient(remoteUserId, remotePartner);
 
-        // create remote share record storing the secret
-        // todo : use folder uuid instead of folder id ?
-        String secret = tokenHash.encrypt(folder.getId() + remotePartner.getUrl() + remoteUserId, token);
+        // store the access credentials locally by hashing the random token that was sent
+        // when requesting the folder, the remote user will send the random token
+        String secret = tokenHash.encrypt(folder.getId() + remotePartner.getUrl() + remoteUserId, randomToken);
         RemoteShareModel remoteShare = new RemoteShareModel();
         remoteShare.setClient(remoteClientModel);
         remoteShare.setSecret(secret);
