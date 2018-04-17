@@ -29,6 +29,7 @@ public class PermissionResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addRemoteAccess(RemoteAccessPermission accessPermission) {
         RegistryPartner partner = requireWebPartner();
+        log(partner.getUrl(), "adding remote permission");
         RemoteAccess remoteAccess = new RemoteAccess();
         return super.respond(remoteAccess.add(partner, accessPermission));
     }

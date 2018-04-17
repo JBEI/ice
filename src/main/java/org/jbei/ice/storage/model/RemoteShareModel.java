@@ -87,7 +87,7 @@ public class RemoteShareModel implements DataModel {
         accessPermission.setType(this.permission.isCanWrite() ? AccessPermission.Type.WRITE_FOLDER : AccessPermission.Type.READ_FOLDER);
         AccountTransfer accountTransfer = new AccountTransfer();
         accountTransfer.setEmail(this.client.getEmail());
-        accessPermission.setPartner(this.client.getRemotePartner().toDataTransferObject());
+//        accessPermission.setPartner(this.client.getRemotePartner().toDataTransferObject());
         accessPermission.setDisplay(accountTransfer.getEmail());
         return accessPermission;
     }
