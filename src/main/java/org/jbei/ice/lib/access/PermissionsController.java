@@ -12,7 +12,10 @@ import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.dao.*;
+import org.jbei.ice.storage.hibernate.dao.AccountDAO;
+import org.jbei.ice.storage.hibernate.dao.FolderDAO;
+import org.jbei.ice.storage.hibernate.dao.GroupDAO;
+import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
@@ -292,9 +295,8 @@ public class PermissionsController {
         }
 
         // remote accounts
-        RemoteShareModelDAO remoteShareModelDAO = DAOFactory.getRemoteShareModelDAO();
-        List<RemoteShareModel> remoteAccessModelList = remoteShareModelDAO.getByFolder(folder);
-        for (RemoteShareModel remoteShareModel : remoteAccessModelList) {
+        List<Permission> remoteAccessModelList = DAOFactory.getPermissionDAO().getFolderPermissions(folder);
+        for (Permission remoteShareModel : remoteAccessModelList) {
             accessPermissions.add(remoteShareModel.toDataTransferObject());
         }
 

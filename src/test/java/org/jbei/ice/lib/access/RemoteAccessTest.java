@@ -5,13 +5,14 @@ import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.access.RemoteAccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.folder.collection.CollectionType;
 import org.jbei.ice.lib.folder.collection.Collections;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
 import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Folder;
+import org.jbei.ice.storage.model.RemoteAccessModel;
 import org.jbei.ice.storage.model.RemotePartner;
 import org.junit.After;
 import org.junit.Assert;
@@ -51,7 +52,7 @@ public class RemoteAccessTest {
         partner = DAOFactory.getRemotePartnerDAO().create(partner);
 
         // create permission to share with this user
-        RemoteAccessPermission permission = new RemoteAccessPermission();
+        AccessPermission permission = new AccessPermission();
         AccountTransfer accountTransfer = new AccountTransfer();
         accountTransfer.setEmail("I wanna share from far away"); // person sharing
 
@@ -62,7 +63,10 @@ public class RemoteAccessTest {
         permission.setTypeId(Integer.MAX_VALUE);
         permission.setSecret("supersekrit");
 
-        remoteAccess.add(partner.toDataTransferObject(), permission);
+        AccessPermission accessPermission = remoteAccess.add(partner.toDataTransferObject(), permission);
+        Folder folder = DAOFactory.getFolderDAO().get(accessPermission.getTypeId());
+        RemoteAccessModel model = DAOFactory.getRemoteAccessModelDAO().getByFolder(account, folder);
+        Assert.assertNotNull(model);
 
         // shared folder should be in list of shared collection
         Collections collections = new Collections(account.getEmail());

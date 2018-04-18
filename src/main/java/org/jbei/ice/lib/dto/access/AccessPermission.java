@@ -1,7 +1,9 @@
 package org.jbei.ice.lib.dto.access;
 
 import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.group.UserGroup;
+import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.storage.IDataTransferModel;
 
 /**
@@ -18,6 +20,9 @@ public class AccessPermission implements IDataTransferModel {
     private AccountTransfer account; // account making request
     private UserGroup group;
     private String userId;
+    private FolderDetails folderDetails;
+    private RegistryPartner partner;
+    private String secret;
 
     public AccessPermission() {
     }
@@ -120,6 +125,30 @@ public class AccessPermission implements IDataTransferModel {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public FolderDetails getFolderDetails() {
+        return folderDetails;
+    }
+
+    public void setFolderDetails(FolderDetails folderDetails) {
+        this.folderDetails = folderDetails;
+    }
+
+    public RegistryPartner getPartner() {
+        return partner;
+    }
+
+    public void setPartner(RegistryPartner partner) {
+        this.partner = partner;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 
     public enum Type implements IDataTransferModel {
