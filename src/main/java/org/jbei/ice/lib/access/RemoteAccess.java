@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.access.RemoteAccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.utils.Utils;
@@ -60,7 +59,7 @@ public class RemoteAccess {
      * @throws PermissionException      if this instance is not in a web of registries configuration or it is but
      *                                  not with the specified partner
      */
-    public AccessPermission add(RegistryPartner partner, RemoteAccessPermission accessPermission) {
+    public AccessPermission add(RegistryPartner partner, AccessPermission accessPermission) {
         if (!isInWebOfRegistries())
             throw new PermissionException("This ICE instance doesn't have WoR enabled");
 
@@ -164,7 +163,7 @@ public class RemoteAccess {
         return this.permissionDAO.create(permission);
     }
 
-    protected RemoteAccessModel createRemoteAccessModel(RemoteAccessPermission accessPermission,
+    protected RemoteAccessModel createRemoteAccessModel(AccessPermission accessPermission,
                                                         RemoteClientModel remoteClientModel, Permission permission) {
         RemoteAccessModel remoteAccessModel = new RemoteAccessModel();
         remoteAccessModel.setToken(accessPermission.getSecret());

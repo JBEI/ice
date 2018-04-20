@@ -11,7 +11,6 @@ import org.jbei.ice.storage.model.RemoteAccessModel;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
-import java.util.List;
 
 /**
  * @author Hector Plahar
@@ -32,12 +31,7 @@ public class RemoteAccessModelDAO extends HibernateRepository<RemoteAccessModel>
                     getBuilder().equal(permission.get("folder"), folder),
                     getBuilder().equal(permission.get("account"), account)
             );
-            List<RemoteAccessModel> result = currentSession().createQuery(query).list();
-            if (result.size() > 1) {
-                Logger.warn("Found " + result.size() + " access models for folder " + folder.getId());
-                return result.get(0);
-            }
-            return null;
+            return currentSession().createQuery(query).uniqueResult();
         } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);
