@@ -86,24 +86,47 @@ angular.module('ice.entry.traces.controller', [])
             $window.open("rest/file/trace/" + trace.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
         };
 
-        var alignmentTracks = function (data) {
+        var alignmentTracks = function (alignedSequence, referenceSequence) {
+            //refSequence.features : available
+
             var alignment = {
                 id: "iceAlignment",
-                alignmentTracks: []
+                pairwiseAlignments: []
             };
 
-            for (var i = 0; i < data.length; i += 1) {
-                alignment.alignmentTracks.push({
-                    sequenceData: {
-                        id: i + 1,
-                        name: data[i].filename,
-                        sequence: data[i].sequence
-                    },
-                    alignmentData: {
-                        id: i + 1,
-                        sequence: data[i].traceSequenceAlignment.queryAlignment
-                    }
-                })
+            for (var i = 0; i < alignedSequence.length; i += 1) {
+                if (!alignedSequence[i].traceSequenceAlignment)
+                    continue;
+
+                //console.log("alignmentData", alignedSequence[i].traceSequenceAlignment);
+                alignment.pairwiseAlignments.push(
+                    [
+                        // reference sequence
+                        {
+                            sequenceData: {
+                                id: i + 1, // refSequence.identifier
+                                name: referenceSequence.name,
+                                sequence: referenceSequence.sequence // raw sequence
+                            },
+                            alignmentData: {
+                                id: i + 1,
+                                sequence: alignedSequence[i].traceSequenceAlignment.queryAlignment
+                            }
+                        },
+                        // alignment sequence
+                        {
+                            sequenceData: {
+                                id: i + 1,
+                                name: alignedSequence[i].filename,
+                                sequence: alignedSequence[i].sequence     // raw sequence
+                            },
+                            alignmentData: {
+                                id: i + 1,
+                                sequence: alignedSequence[i].traceSequenceAlignment.subjectAlignment
+                            }
+                        }
+                    ]
+                );
             }
 
             return alignment;
@@ -111,14 +134,15 @@ angular.module('ice.entry.traces.controller', [])
 
         $scope.fetchSequenceTraces = function () {
             Util.get("rest/parts/" + entryId + "/traces", function (result) {
-                console.log(result);
-                $scope.loadSequenceChecker(alignmentTracks(result.data));
+                if (result && result.data) {
+                    Util.get("rest/parts/" + entryId + "/sequence", function (sequenceData) {
+                        $scope.loadSequenceChecker(alignmentTracks(result.data, sequenceData));
+                    })
+                }
             })
         };
 
-        $scope.loadSequenceChecker = function (alignmentTracks) {
-            console.log("sequence checker", alignmentTracks);
-
+        $scope.loadSequenceChecker = function (alignments) {
             $scope.checkerEditor = $window.createVectorEditor(document.getElementById("sequence-checker-root"), {
                 PropertiesProps: {
                     propertiesList: [
@@ -184,8 +208,7 @@ angular.module('ice.entry.traces.controller', [])
                         }
                     ]]
             });
-
-            $scope.checkerEditor.addAlignment(alignmentTracks);
+            $scope.checkerEditor.addAlignment(alignments);
         }
     })
     .controller('TraceSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId, Authentication) {
@@ -222,4 +245,4 @@ angular.module('ice.entry.traces.controller', [])
         $scope.traceSequenceUploader.onErrorItem = function (item, response, status, headers) {
             $scope.traceUploadError = true;
         };
-    })
+    });
