@@ -34,6 +34,10 @@ public class Logger {
         LOGGER.error(e.getMessage(), e);
     }
 
+    public static void errorLocalOnly(final Throwable t) {
+        LOGGER.error(t.getMessage(), t);
+    }
+
     public static boolean isDebugEnabled() {
         return LOGGER.isDebugEnabled();
     }

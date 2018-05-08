@@ -38,7 +38,8 @@ public class CustomEmail extends Email {
             email.send();
             return true;
         } catch (EmailException e) {
-            Logger.error(e);
+            // local-only error log, prevent stack overflow when failing to send mail
+            Logger.errorLocalOnly(e);
             return false;
         }
     }
