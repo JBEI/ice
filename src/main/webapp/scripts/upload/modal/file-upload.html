@@ -30,6 +30,9 @@
                 <li ng-repeat="header in uploadError.headers">{{header.entryField}}</li>
             </ul>
         </span>
+        <span ng-if="uploadError.details" class="font-85em" style="margin-left: 25px">
+            {{uploadError.details}}
+        </span>
     </div>
 
     <input ng-if="!processing && !modalClose && !uploadError" type="file" nv-file-select="" uploader="importUploader"
