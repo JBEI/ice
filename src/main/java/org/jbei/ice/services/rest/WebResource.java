@@ -1,6 +1,7 @@
 package org.jbei.ice.services.rest;
 
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
@@ -14,6 +15,8 @@ import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.RemoteEntriesAsCSV;
 import org.jbei.ice.lib.net.WoRController;
 import org.jbei.ice.lib.search.WebSearch;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Configuration;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -23,7 +26,7 @@ import java.util.List;
 
 /**
  * Resource for web of registries requests
- * <p/>
+ * <p>
  * This is particularly useful for third party tools to tap into the web of
  * registries functionality without having specific API keys to each of the instances
  *
@@ -120,6 +123,11 @@ public class WebResource extends RestResource {
             @PathParam("id") final long partnerId, @PathParam("entryId") final String entryId) {
         requireUserId();
         final FeaturedDNASequence result = remoteEntries.getPublicEntrySequence(partnerId, entryId);
+        Configuration configuration = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
+        if (configuration != null && result != null) {
+            String uriPrefix = configuration.getValue();
+            result.setUri(uriPrefix + "/web/" + partnerId + "/entry/" + entryId);
+        }
         return super.respond(Response.Status.OK, result);
     }
 

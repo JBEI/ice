@@ -1005,17 +1005,24 @@ angular.module('ice.upload.controller', [])
                 $uibModalInstance.close();
                 $location.path("upload/" + response.uploadInfo.id);
             } else {
-                $scope.uploadError = "Unknown server error";
+                $scope.uploadError = {};
+                if (response.userMessage)
+                    $scope.uploadError.message = response.userMessage;
             }
         };
 
         $scope.importUploader.onErrorItem = function (item, response, status, headers) {
-            console.log(response);
             $scope.processing = false;
-            $scope.uploadError = {message: "Unknown server error"};
+            $scope.uploadError = {};
+            if (response.userMessage)
+                $scope.uploadError.message = response.userMessage;
+            else
+                $scope.uploadError.message = "Unknown server error";
 
             if (status == 400) {
                 $scope.uploadError.message = "Validation error processing file \'" + item.file.name + "\'";
+                if (response.userMessage)
+                    $scope.uploadError.details = response.userMessage;
                 $scope.uploadError.headers = response.headers;
             }
         };
