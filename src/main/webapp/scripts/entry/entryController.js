@@ -1036,13 +1036,16 @@ angular.module('ice.entry.controller', [])
 
                             var data = {
                                 sequenceData: {
-                                    sequence: result.sequence, features: [], name: result.name
+                                    sequence: result.sequence,
+                                    features: [],
+                                    name: result.name,
+                                    circular: result.isCircular
                                 },
                                 registryData: {
                                     uri: result.uri,
                                     identifier: result.identifier,
                                     name: result.name,
-                                    circular: result.circular
+                                    circular: result.isCircular
                                 }
                             };
 
@@ -1116,7 +1119,6 @@ angular.module('ice.entry.controller', [])
                                         jsonData = JSON.parse(jsonData);
                                         jsonData = jsonData.openVECopied;
                                     }
-                                    console.log("paste", jsonData);
                                     return jsonData || {sequence: clipboardData.getData("text/plain")}
                                 },
 
@@ -1137,10 +1139,8 @@ angular.module('ice.entry.controller', [])
                                         "cutsiteTool",
                                         "featureTool",
                                         "orfTool",
-                                        "viewTool",
                                         "findTool",
-                                        "visibilityTool",
-                                        "propertiesTool"
+                                        "visibilityTool"
                                     ]
                                 }
                             });
