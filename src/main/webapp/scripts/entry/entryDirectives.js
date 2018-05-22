@@ -113,6 +113,8 @@ angular.module('ice.entry.directives', [])
                         }
                     });
 
+                    var plasmidActive = data && data.sequenceData && data.sequenceData.circular == true;
+
                     $scope.editor.updateEditor({
                         sequenceData: data.sequenceData,
                         annotationVisibility: {
@@ -128,42 +130,45 @@ angular.module('ice.entry.directives', [])
                             cutsites: true,
                             primers: false
                         },
-                        panelsShown: [
-                            [{
+                        panelsShown: [[
+                            {
                                 id: "circular",
                                 name: "Plasmid",
-                                active: true
+                                active: plasmidActive
                             },
-                                {
-                                    id: "sequence",
-                                    name: "Sequence Map",
-                                    active: false
-                                },
+                            {
+                                id: "sequence",
+                                name: "Sequence Map",
+                                active: false
+                            },
 
-                                {
-                                    id: "rail",
-                                    name: "Linear Map",
-                                    active: false
-                                },
-                                {
-                                    id: "properties",
-                                    name: "Properties",
-                                    active: false
-                                }
-                            ]]
+                            {
+                                id: "rail",
+                                name: "Linear Map",
+                                active: !plasmidActive
+                            },
+                            {
+                                id: "properties",
+                                name: "Properties",
+                                active: false
+                            }
+                        ]]
                     });
                 };
 
                 var convertToVEModel = function (result) {
                     var data = {
                         sequenceData: {
-                            sequence: result.sequence, features: [], name: $scope.entry.name
+                            sequence: result.sequence,
+                            features: [],
+                            name: $scope.entry.name,
+                            circular: result.isCircular
                         },
                         registryData: {
                             uri: result.uri,
                             identifier: result.identifier,
                             name: result.name,
-                            circular: result.circular
+                            circular: result.isCircular
                         }
                     };
 
