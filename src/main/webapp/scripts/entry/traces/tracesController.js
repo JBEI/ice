@@ -143,72 +143,8 @@ angular.module('ice.entry.traces.controller', [])
         };
 
         $scope.loadSequenceChecker = function (alignments) {
-            $scope.checkerEditor = $window.createVectorEditor(document.getElementById("sequence-checker-root"), {
-                PropertiesProps: {
-                    propertiesList: [
-                        "features",
-                        "translations",
-                        "cutsites",
-                        "orfs"
-                    ]
-                },
-                ToolBarProps: {
-                    toolList: [
-                        "cutsiteTool",
-                        "featureTool",
-                        "orfTool",
-                        "findTool",
-                        "visibilityTool"
-                    ]
-                }
-            });
-
-            $scope.checkerEditor.updateEditor({
-                //sequenceData: data.sequenceData,
-                annotationVisibility: {
-                    parts: false,
-                    orfs: false,
-                    cutsites: false
-                },
-                annotationsToSupport: {
-                    features: true,
-                    translations: true,
-                    parts: false,
-                    orfs: true,
-                    cutsites: true,
-                    primers: false
-                },
-                panelsShown: [
-                    [{
-                        id: "iceAlignment",
-                        type: "alignment", //panel must be of type alignment
-                        name: "Trace Alignment",
-                        active: true
-                    },
-                        {
-                            id: "circular",
-                            name: "Plasmid",
-                            active: false
-                        },
-                        {
-                            id: "sequence",
-                            name: "Sequence Map",
-                            active: false
-                        },
-
-                        {
-                            id: "rail",
-                            name: "Linear Map",
-                            active: false
-                        },
-                        {
-                            id: "properties",
-                            name: "Properties",
-                            active: false
-                        }
-                    ]]
-            });
-            $scope.checkerEditor.addAlignment(alignments);
+            $scope.checkerEditor = $window.createAlignmentView(document.getElementById("sequence-checker-root"),
+                alignments);
         }
     })
     .controller('TraceSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId, Authentication) {
