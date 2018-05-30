@@ -87,8 +87,6 @@ angular.module('ice.entry.traces.controller', [])
         };
 
         var alignmentTracks = function (alignedSequence, referenceSequence) {
-            //refSequence.features : available
-
             var alignment = {
                 id: "iceAlignment",
                 pairwiseAlignments: []
@@ -98,7 +96,16 @@ angular.module('ice.entry.traces.controller', [])
                 if (!alignedSequence[i].traceSequenceAlignment)
                     continue;
 
-                //console.log("alignmentData", alignedSequence[i].traceSequenceAlignment);
+                if (alignedSequence[i].traceSequenceAlignment.queryStart > alignedSequence[i].traceSequenceAlignment.queryEnd) {
+                    console.log(alignedSequence[i].traceSequenceAlignment);
+                    continue;
+                }
+
+                if (alignedSequence[i].traceSequenceAlignment.subjectStart > alignedSequence[i].traceSequenceAlignment.subjectEnd) {
+                    console.log(alignedSequence[i].traceSequenceAlignment);
+                    continue;
+                }
+
                 alignment.pairwiseAlignments.push(
                     [
                         // reference sequence
@@ -110,7 +117,9 @@ angular.module('ice.entry.traces.controller', [])
                             },
                             alignmentData: {
                                 id: i + 1,
-                                sequence: alignedSequence[i].traceSequenceAlignment.queryAlignment
+                                sequence: alignedSequence[i].traceSequenceAlignment.queryAlignment,
+                                matchStart: alignedSequence[i].traceSequenceAlignment.queryStart,
+                                matchEnd: alignedSequence[i].traceSequenceAlignment.queryEnd
                             }
                         },
                         // alignment sequence
@@ -122,7 +131,9 @@ angular.module('ice.entry.traces.controller', [])
                             },
                             alignmentData: {
                                 id: i + 1,
-                                sequence: alignedSequence[i].traceSequenceAlignment.subjectAlignment
+                                sequence: alignedSequence[i].traceSequenceAlignment.subjectAlignment,
+                                matchStart: alignedSequence[i].traceSequenceAlignment.subjectStart,
+                                matchEnd: alignedSequence[i].traceSequenceAlignment.subjectEnd
                             }
                         }
                     ]
