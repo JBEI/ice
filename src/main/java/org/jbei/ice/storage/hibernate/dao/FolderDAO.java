@@ -35,6 +35,24 @@ public class FolderDAO extends HibernateRepository<Folder> {
     }
 
     /**
+     * Attempt to retrieve a local folder that references a remote folder.
+     *
+     * @param remoteFolderId   folder id of the remote folder. This is stored in the <code>description</code> field
+     * @param remoteOwnerEmail user id of remote owner of folder
+     * @return located folder of type <code>REMOTE</code> if found, null otherwise
+     */
+    public Folder getRemote(String remoteFolderId, String remoteOwnerEmail) {
+        CriteriaQuery<Folder> query = getBuilder().createQuery(Folder.class);
+        Root<Folder> from = query.from(Folder.class);
+        query.where(
+                getBuilder().equal(from.get("type"), FolderType.REMOTE),
+                getBuilder().equal(from.get("description"), remoteFolderId),
+                getBuilder().equal(from.get("ownerEmail"), remoteOwnerEmail)
+        );
+        return currentSession().createQuery(query).uniqueResult();
+    }
+
+    /**
      * Removes, from the list of entries in the specified folder, those whose ids match the ids passed in the
      * parameter
      *

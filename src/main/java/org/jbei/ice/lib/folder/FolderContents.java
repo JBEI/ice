@@ -24,7 +24,10 @@ import org.jbei.ice.lib.net.RemoteContact;
 import org.jbei.ice.lib.net.RemoteTransfer;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
-import org.jbei.ice.storage.hibernate.dao.*;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.hibernate.dao.FolderDAO;
+import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
+import org.jbei.ice.storage.hibernate.dao.RemoteAccessModelDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
@@ -56,14 +59,13 @@ public class FolderContents {
         RemotePartner remotePartner = DAOFactory.getRemotePartnerDAO().getByUrl(requestingPartner.getUrl());
 
         // check that the remote user has the right token
-        RemoteShareModel shareModel = DAOFactory.getRemoteShareModelDAO().get(remoteUserId, remotePartner, folder);
+        Permission shareModel = permissionDAO.get(remoteUserId, remotePartner, folder);
         if (shareModel == null) {
             Logger.error("Could not retrieve share model");
             return false;
         }
 
-        Permission permission = shareModel.getPermission(); // folder must match
-        if (permission.getFolder().getId() != folderId || !permission.isCanWrite()) {
+        if (shareModel.getFolder().getId() != folderId || !shareModel.isCanWrite()) {
             throw new PermissionException("permission could not be verified");
         }
 
@@ -431,8 +433,8 @@ public class FolderContents {
             return null;
         }
 
-        RemoteShareModelDAO shareModelDAO = DAOFactory.getRemoteShareModelDAO();
-        RemoteShareModel shareModel = shareModelDAO.get(remoteUserId, remotePartner, folder);
+        PermissionDAO shareModelDAO = DAOFactory.getPermissionDAO();
+        Permission shareModel = shareModelDAO.get(remoteUserId, remotePartner, folder);
         if (shareModel == null) {
             Logger.error("Could not retrieve share model");
             return null;
@@ -446,7 +448,7 @@ public class FolderContents {
             return null;
         }
 
-        boolean canEdit = shareModel.getPermission().isCanWrite();
+        boolean canEdit = shareModel.isCanWrite();
         // todo : move everything above to folder permissions and folder authorization
         FolderDetails details = folder.toDataTransferObject();
         details.setCanEdit(canEdit);

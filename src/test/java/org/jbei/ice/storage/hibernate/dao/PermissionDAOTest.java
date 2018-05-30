@@ -1,106 +1,62 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import org.jbei.ice.lib.AccountCreator;
+import org.jbei.ice.lib.dto.folder.FolderType;
+import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
+import org.jbei.ice.storage.model.*;
+import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.List;
 
 public class PermissionDAOTest extends HibernateRepositoryTest {
 
     private PermissionDAO dao = new PermissionDAO();
 
-//    public List<Long> makePrivateEntryIds() throws Exception {
-//        List<Long> entryIds = new ArrayList<>(3);
-//        for (int i = 0; i < 3; i++) {
-//            Strain strain = TestEntryCreator.createTestStrain(ownerAccount);
-//            entryIds.add(strain.getId());
-//        }
-//        return entryIds;
-//    }
-
     @Test
-    public void testNonAdminCantReadWithoutPermissions() throws Exception {
-//        Account regularAccount = AccountCreator.createTestAccount("Joe", false);
-//        List<Long> entryIds = makePrivateEntryIds(adminAccount);
-//        Assert.assertArrayEquals(new Object[0],
-//                dao.getCanReadEntries(regularAccount, new ArrayList<>(regularAccount.getGroups()), entryIds).toArray());
+    public void testGet() {
+        Permission model = new Permission();
+        model.setSecret("s3crit");
+        model = dao.create(model);
+        Assert.assertNotNull(model);
+        model = dao.get(model.getId());
+        Assert.assertNotNull(model);
+        Assert.assertEquals(model.getSecret(), "s3crit");
     }
 
     @Test
-    public void testHasPermission() throws Exception {
+    public void testGetByFolder() throws Exception {
+        Account account = AccountCreator.createTestAccount("RemoteShareModelDAOTest.testGetByFolder", false);
 
-    }
+        Permission model = new Permission();
+        model.setSecret("s3crit3");
 
-    @Test
-    public void testHasPermissionMulti() throws Exception {
+        Folder folder = new Folder();
+        folder.setName("test");
+        folder.setType(FolderType.PRIVATE);
+        folder.setOwnerEmail("foo");
+        folder = DAOFactory.getFolderDAO().create(folder);
+        Assert.assertNotNull(folder);
 
-    }
+        model.setAccount(account);
+        model.setCanRead(true);
+        model.setFolder(folder);
 
-    @Test
-    public void testRetrievePermission() throws Exception {
+        RemoteClientModel remoteClientModel = new RemoteClientModel();
+        remoteClientModel.setEmail(account.getEmail());
+        RemotePartner partner = new RemotePartner();
+        partner.setUrl("test-test.jbei.org");
+        partner = DAOFactory.getRemotePartnerDAO().create(partner);
+        Assert.assertNotNull(partner);
 
-    }
+        remoteClientModel.setRemotePartner(partner);
+        remoteClientModel = DAOFactory.getRemoteClientModelDAO().create(remoteClientModel);
+        model.setClient(remoteClientModel);
 
-    @Test
-    public void testCreatePermissionQuery() throws Exception {
+        Assert.assertNotNull((model = dao.create(model)));
 
-    }
-
-    @Test
-    public void testRemovePermission() throws Exception {
-
-    }
-
-    @Test
-    public void testGetEntryPermissions() throws Exception {
-
-    }
-
-    @Test
-    public void testGetFolderPermissions() throws Exception {
-
-    }
-
-    @Test
-    public void testRetrieveAccountPermissions() throws Exception {
-
-    }
-
-    @Test
-    public void testHasSetWriteFolderPermission() throws Exception {
-
-    }
-
-    @Test
-    public void testRetrieveGroupPermissions() throws Exception {
-
-    }
-
-    @Test
-    public void testClearPermissions() throws Exception {
-
-    }
-
-    @Test
-    public void testClearPermissions1() throws Exception {
-
-    }
-
-    @Test
-    public void testRetrieveFolderPermissions() throws Exception {
-
-    }
-
-    @Test
-    public void testGetFolders() throws Exception {
-
-    }
-
-    @Test
-    public void testGetCanReadEntries() throws Exception {
-
-    }
-
-    @Test
-    public void testGet() throws Exception {
-
+        List<Permission> results = dao.getFolderPermissions(folder);
+        Assert.assertNotNull(results);
     }
 }

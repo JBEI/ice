@@ -42,6 +42,7 @@ public class SearchController {
                 blastResults = BlastPlus.runBlast(query.getBlastQuery());
             } catch (BlastException e) {
                 Logger.error("Exception running blast " + e.getMessage());
+                return null;
             }
         }
 

@@ -503,7 +503,7 @@ angular.module('ice.entry.service', [])
                     },
                     {
                         id: 'sequences',
-                        url: 'scripts/entry/sequence-analysis.html',
+                        url: 'scripts/entry/traces/sequence-analysis.html',
                         display: 'Sequence Analysis',
                         isPrivileged: false,
                         countName: 'sequenceCount',

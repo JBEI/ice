@@ -1,7 +1,7 @@
 package org.jbei.ice.services.rest;
 
 import org.jbei.ice.lib.access.RemoteAccess;
-import org.jbei.ice.lib.dto.access.RemoteAccessPermission;
+import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 
 import javax.ws.rs.Consumes;
@@ -27,8 +27,9 @@ public class PermissionResource extends RestResource {
     @Path("/remote")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addRemoteAccess(RemoteAccessPermission accessPermission) {
+    public Response addRemoteAccess(AccessPermission accessPermission) {
         RegistryPartner partner = requireWebPartner();
+        log(partner.getUrl(), "adding remote permission");
         RemoteAccess remoteAccess = new RemoteAccess();
         return super.respond(remoteAccess.add(partner, accessPermission));
     }
