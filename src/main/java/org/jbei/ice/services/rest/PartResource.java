@@ -24,6 +24,7 @@ import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.entry.sequence.PartTraceSequences;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.lib.entry.sequence.annotation.Annotations;
 import org.jbei.ice.lib.experiment.Experiments;
 import org.jbei.ice.lib.experiment.Study;
@@ -777,11 +778,12 @@ public class PartResource extends RestResource {
     @POST
     @Path("/custom")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    public Response customExport(EntrySelection selection) {
+    public Response customExport(@QueryParam("sequenceFormat") String sequenceFormat, EntrySelection selection) {
         String userId = super.requireUserId();
         EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId);
+        SequenceFormat format = SequenceFormat.fromString(sequenceFormat.toUpperCase());
 
-        try (ByteArrayOutputStream outputStream = entriesAsCSV.customize(selection)) {
+        try (ByteArrayOutputStream outputStream = entriesAsCSV.customize(selection, format)) {
             StreamingOutput stream = outputStream::writeTo;
             return Response.ok(stream).header("Content-Disposition", "attachment;filename=\"data.zip\"").build();
         } catch (IOException e) {

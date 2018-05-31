@@ -10,8 +10,6 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.FormatterException;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.GFF3Formatter;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -290,13 +288,12 @@ public class EntriesAsCSV {
         return fields.toArray(new EntryField[(fields.size())]);
     }
 
-    public ByteArrayOutputStream customize(EntrySelection selection) throws IOException {
+    public ByteArrayOutputStream customize(EntrySelection selection, SequenceFormat format) throws IOException {
         Entries retriever = new Entries(this.userId);
         this.entries = retriever.getEntriesFromSelectionContext(selection);
         SequenceController sequenceController = new SequenceController();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         EntryAuthorization entryAuthorization = new EntryAuthorization();
-        GFF3Formatter formatter = new GFF3Formatter();
 
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
             for (long entryId : this.entries) {
@@ -319,25 +316,15 @@ public class EntriesAsCSV {
                 }
 
                 // get the sequence
-                ByteArrayWrapper wrapper = sequenceController.getSequenceFile(userId, entryId, SequenceFormat.FASTA);
+                ByteArrayWrapper wrapper = sequenceController.getSequenceFile(userId, entryId, format);
                 if (wrapper == null) {
                     Logger.error("ERROR : no sequence " + entryId);
                     continue;
                 }
 
-                ZipEntry zipEntry = new ZipEntry(entry.getPartNumber() + File.separatorChar + entry.getPartNumber() + ".fa");
+                ZipEntry zipEntry = new ZipEntry(entry.getPartNumber() + File.separatorChar + wrapper.getName());
                 zos.putNextEntry(zipEntry);
                 zos.write(wrapper.getBytes());
-
-                // add GFF
-                ZipEntry gffEntry = new ZipEntry(entry.getPartNumber() + File.separatorChar + entry.getPartNumber() + ".gff3");
-                zos.putNextEntry(gffEntry);
-                try {
-                    formatter.format(sequence, zos);
-                } catch (FormatterException e) {
-                    Logger.error(e);
-                }
-
                 zos.closeEntry();
             }
         }
