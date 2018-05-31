@@ -10,6 +10,8 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.FormatterException;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.GFF3Formatter;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -294,36 +296,48 @@ public class EntriesAsCSV {
         SequenceController sequenceController = new SequenceController();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         EntryAuthorization entryAuthorization = new EntryAuthorization();
+        GFF3Formatter formatter = new GFF3Formatter();
 
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
             for (long entryId : this.entries) {
                 // get the entry
                 Entry entry = DAOFactory.getEntryDAO().get(entryId);
                 if (entry == null) {
-                    System.out.println("ERROR : no entry " + entryId);  // write to csv file
+                    Logger.error("ERROR : no entry " + entryId);  // write to csv file
                     continue;
                 }
 
                 if (!entryAuthorization.canRead(userId, entry)) {
-                    System.out.println("ERROR : cannot read " + entryId);
+                    Logger.error("ERROR : cannot read " + entryId);
                     continue;
                 }
 
-                if (!sequenceDAO.hasSequence(entryId)) {
-                    System.out.println("no sequence");
+                Sequence sequence = sequenceDAO.getByEntry(entry);
+                if (sequence == null) {
+                    Logger.error("no sequence");
                     continue;
                 }
 
                 // get the sequence
                 ByteArrayWrapper wrapper = sequenceController.getSequenceFile(userId, entryId, SequenceFormat.FASTA);
                 if (wrapper == null) {
-                    System.out.println("ERROR : no sequence " + entryId);
+                    Logger.error("ERROR : no sequence " + entryId);
                     continue;
                 }
 
                 ZipEntry zipEntry = new ZipEntry(entry.getPartNumber() + File.separatorChar + entry.getPartNumber() + ".fa");
                 zos.putNextEntry(zipEntry);
                 zos.write(wrapper.getBytes());
+
+                // add GFF
+                ZipEntry gffEntry = new ZipEntry(entry.getPartNumber() + File.separatorChar + entry.getPartNumber() + ".gff3");
+                zos.putNextEntry(gffEntry);
+                try {
+                    formatter.format(sequence, zos);
+                } catch (FormatterException e) {
+                    Logger.error(e);
+                }
+
                 zos.closeEntry();
             }
         }
