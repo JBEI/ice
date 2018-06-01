@@ -396,7 +396,7 @@ public class SequenceController extends HasEntry {
                 case FASTA:
                     FastaFormatter formatter = new FastaFormatter();
                     sequenceString = compose(sequence, formatter);
-                    name = entry.getPartNumber() + ".fasta";
+                    name = entry.getPartNumber() + ".fa";
                     break;
 
                 case SBOL1:
