@@ -288,7 +288,7 @@ public class EntriesAsCSV {
         return fields.toArray(new EntryField[(fields.size())]);
     }
 
-    public ByteArrayOutputStream customize(EntrySelection selection) throws IOException {
+    public ByteArrayOutputStream customize(EntrySelection selection, SequenceFormat format) throws IOException {
         Entries retriever = new Entries(this.userId);
         this.entries = retriever.getEntriesFromSelectionContext(selection);
         SequenceController sequenceController = new SequenceController();
@@ -300,28 +300,29 @@ public class EntriesAsCSV {
                 // get the entry
                 Entry entry = DAOFactory.getEntryDAO().get(entryId);
                 if (entry == null) {
-                    System.out.println("ERROR : no entry " + entryId);  // write to csv file
+                    Logger.error("ERROR : no entry " + entryId);  // write to csv file
                     continue;
                 }
 
                 if (!entryAuthorization.canRead(userId, entry)) {
-                    System.out.println("ERROR : cannot read " + entryId);
+                    Logger.error("ERROR : cannot read " + entryId);
                     continue;
                 }
 
-                if (!sequenceDAO.hasSequence(entryId)) {
-                    System.out.println("no sequence");
+                Sequence sequence = sequenceDAO.getByEntry(entry);
+                if (sequence == null) {
+                    Logger.error("no sequence");
                     continue;
                 }
 
                 // get the sequence
-                ByteArrayWrapper wrapper = sequenceController.getSequenceFile(userId, entryId, SequenceFormat.FASTA);
+                ByteArrayWrapper wrapper = sequenceController.getSequenceFile(userId, entryId, format);
                 if (wrapper == null) {
-                    System.out.println("ERROR : no sequence " + entryId);
+                    Logger.error("ERROR : no sequence " + entryId);
                     continue;
                 }
 
-                ZipEntry zipEntry = new ZipEntry(entry.getPartNumber() + File.separatorChar + entry.getPartNumber() + ".fa");
+                ZipEntry zipEntry = new ZipEntry(entry.getPartNumber() + File.separatorChar + wrapper.getName());
                 zos.putNextEntry(zipEntry);
                 zos.write(wrapper.getBytes());
                 zos.closeEntry();
