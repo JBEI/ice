@@ -583,7 +583,7 @@ iceControllers.controller('CustomExportController', function ($scope, $uibModalI
             "cancelable": false
         });
 
-        Util.download("rest/parts/custom", selection).$promise.then(function (result) {
+        Util.download("rest/parts/custom?sequenceFormat=" + $scope.sequence.format, selection).$promise.then(function (result) {
             var url = URL.createObjectURL(new Blob([result.data]));
             var a = document.createElement('a');
             a.href = url;
