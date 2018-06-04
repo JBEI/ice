@@ -52,4 +52,4 @@ Command line installation steps:
 [![Build Status](https://travis-ci.org/JBEI/ice.svg?branch=dev)](https://travis-ci.org/JBEI/ice)
 
 ## Related Projects
-[Vector Editor](https://github.com/JBEI/vectoreditor) is used in ICE to display and edit sequences
+[Open Vector Editor](https://github.com/TeselaGen/openVectorEditor) is used in ICE to display and edit sequences
