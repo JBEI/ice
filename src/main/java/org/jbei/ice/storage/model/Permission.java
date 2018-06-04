@@ -11,7 +11,7 @@ import javax.persistence.*;
 
 /**
  * Permission object for storing permissions related to either folders or entries
- * on an account or group basis
+ * on an account or group basis. Also stores information for remote sharing
  *
  * @author Hector Plahar
  */
@@ -53,8 +53,19 @@ public class Permission implements DataModel {
     @JoinColumn(name = "upload_id")
     private BulkUpload upload;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
-    private RemoteShareModel remoteShare;
+    // access verification token
+    @Column(name = "secret")
+    private String secret;
+
+    // who is sharing (must be a local account)
+    @OneToOne
+    @JoinColumn(name = "sharer_id", nullable = true)
+    private Account sharer;
+
+    // who it's being shared with
+    @OneToOne
+    @JoinColumn(name = "client_id")
+    private RemoteClientModel client;
 
     public long getId() {
         return id;
@@ -116,12 +127,28 @@ public class Permission implements DataModel {
         this.folder = folder;
     }
 
-    public RemoteShareModel getRemoteShare() {
-        return remoteShare;
+    public String getSecret() {
+        return secret;
     }
 
-    public void setRemoteShare(RemoteShareModel remoteShare) {
-        this.remoteShare = remoteShare;
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public Account getSharer() {
+        return sharer;
+    }
+
+    public void setSharer(Account sharer) {
+        this.sharer = sharer;
+    }
+
+    public RemoteClientModel getClient() {
+        return client;
+    }
+
+    public void setClient(RemoteClientModel client) {
+        this.client = client;
     }
 
     @Override

@@ -323,6 +323,23 @@ public class PermissionDAO extends HibernateRepository<Permission> {
         }
     }
 
+    public Permission get(String userId, RemotePartner remotePartner, Folder folder) {
+        try {
+            CriteriaQuery<Permission> query = getBuilder().createQuery(Permission.class);
+            Root<Permission> from = query.from(Permission.class);
+            Join<Permission, RemoteClientModel> client = from.join("client");
+            query.where(
+                    getBuilder().equal(from.get("folder"), folder),
+                    getBuilder().equal(client.get("remotePartner"), remotePartner),
+                    getBuilder().equal(client.get("email"), userId)
+            );
+            return currentSession().createQuery(query).uniqueResult();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
     @Override
     public Permission get(long id) {
         return super.get(Permission.class, id);

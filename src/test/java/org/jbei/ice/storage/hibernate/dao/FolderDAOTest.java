@@ -2,6 +2,7 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.dto.common.PageParameters;
+import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
@@ -31,6 +32,23 @@ public class FolderDAOTest extends HibernateRepositoryTest {
         folder = dao.get(folder.getId());
         Assert.assertEquals(folder.getDescription(), info.getDescription());
         Assert.assertEquals(folder.getName(), info.getName());
+    }
+
+    @Test
+    public void testGetRemote() throws Exception {
+        Folder folder = createFolderObject("testGetRemote");
+        folder.setType(FolderType.REMOTE);
+        folder.setDescription("remoteFolderId");
+        folder = dao.create(folder);
+        Assert.assertNotNull(folder);
+
+        Folder result = dao.getRemote("remoteFolderId", "testGetRemote");
+        Assert.assertNotNull(result);
+
+        Assert.assertEquals(result.getId(), folder.getId());
+        Assert.assertEquals(result.getDescription(), folder.getDescription());
+        Assert.assertEquals(result.getName(), folder.getName());
+        Assert.assertEquals(result.getOwnerEmail(), folder.getOwnerEmail());
     }
 
     @Test

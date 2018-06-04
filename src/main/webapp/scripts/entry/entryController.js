@@ -111,7 +111,7 @@ angular.module('ice.entry.controller', [])
                 $scope.newComment.samples.push(sample);
             else
                 $scope.newComment.samples.splice(idx, 1);
-        }
+        };
     })
     .controller('ShotgunSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, $uibModal, Util) {
         var entryId = $stateParams.id;
@@ -178,6 +178,8 @@ angular.module('ice.entry.controller', [])
         $scope.downloadShotgunFile = function (sequence) {
             $window.open("rest/file/shotgunsequence/" + sequence.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
         };
+
+
     })
     .controller('ShotgunSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId,
                                                                   $cookieStore) {
@@ -213,126 +215,6 @@ angular.module('ice.entry.controller', [])
 
         $scope.shotgunSequenceUploader.onErrorItem = function (item, response, status, headers) {
             $scope.shotgunUploadError = true;
-        };
-    })
-    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, $uibModal, Util, Authentication) {
-        var entryId = $stateParams.id;
-
-        $scope.traceUploadError = undefined;
-        $scope.maxSize = 5;
-        $scope.tracesParams = {limit: 5, currentPage: 1, start: 0};
-
-        Util.get("/rest/parts/" + entryId + "/traces", function (result) {
-            $scope.traces = result;
-        }, $scope.tracesParams);
-
-        $scope.tracesPageChanged = function () {
-            $scope.tracesParams.start = ($scope.tracesParams.currentPage - 1) * $scope.tracesParams.limit;
-            Util.get("/rest/parts/" + entryId + "/traces", function (result) {
-                $scope.traces = result;
-            }, $scope.tracesParams);
-        };
-
-        $scope.showAddSangerTraceModal = function () {
-            var modalInstance = $uibModal.open({
-                templateUrl: "scripts/entry/modal/add-sanger-trace.html",
-                controller: 'TraceSequenceUploadModalController',
-                backdrop: 'static',
-                resolve: {
-                    entryId: function () {
-                        return $stateParams.id;
-                    }
-                }
-            });
-
-            modalInstance.result.then(function () {
-                $scope.tracesParams.start = 0;
-
-                Util.get("/rest/parts/" + entryId + "/traces", function (result) {
-                    Util.setFeedback("", "success");
-                    $scope.traces = result;
-                    $scope.showUploadOptions = false;
-                    $scope.traceUploadError = false;
-                });
-            });
-        };
-
-        $scope.downloadAllTraces = function () {
-            var clickEvent = new MouseEvent("click", {
-                "view": window,
-                "bubbles": true,
-                "cancelable": false
-            });
-
-            Util.download("rest/parts/" + entryId + "/traces/all?sid=" + Authentication.getSessionId()).$promise.then(function (result) {
-                var url = URL.createObjectURL(new Blob([result.data]));
-                var a = document.createElement('a');
-                a.href = url;
-                a.download = result.filename();
-                a.target = '_blank';
-                a.dispatchEvent(clickEvent);
-                $scope.selectedRequests = [];
-            });
-        };
-
-        $scope.deleteTraceSequenceFile = function (fileId) {
-            var foundTrace;
-            var foundIndex;
-
-            for (var i = 0; i < $scope.traces.data.length; i++) {
-                var trace = $scope.traces.data[i];
-                if (trace.fileId === fileId && trace.fileId != undefined) {
-                    foundTrace = trace;
-                    foundIndex = i;
-                    break;
-                }
-            }
-
-            if (foundTrace != undefined) {
-                Util.remove("rest/parts/" + entryId + "/traces/" + foundTrace.id, {}, function (result) {
-                    $scope.traces.data.splice(foundIndex, 1);
-                    $scope.entryStatistics.sequenceCount = $scope.traces.data.length;
-                });
-            }
-        };
-
-        $scope.downloadTraceFile = function (trace) {
-            $window.open("rest/file/trace/" + trace.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
-        };
-    })
-    .controller('TraceSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId, Authentication) {
-        $scope.cancelAddSangerTrace = function () {
-            $uibModalInstance.dismiss('cancel');
-        };
-
-        $scope.traceSequenceUploader = new FileUploader({
-            scope: $scope, // to automatically update the html. Default: $rootScope
-            url: "rest/parts/" + entryId + "/traces",
-            method: 'POST',
-            removeAfterUpload: true,
-            headers: {
-                "X-ICE-Authentication-SessionId": Authentication.getSessionId()
-            },
-            autoUpload: true,
-            queueLimit: 1, // can only upload 1 file
-            formData: [
-                {
-                    entryId: entryId
-                }
-            ]
-        });
-
-        $scope.traceSequenceUploader.onSuccessItem = function (item, response, status, headers) {
-            if (status != "200") {
-                $scope.traceUploadError = true;
-                return;
-            }
-
-            $uibModalInstance.close();
-        };
-
-        $scope.traceSequenceUploader.onErrorItem = function (item, response, status, headers) {
-            $scope.traceUploadError = true;
         };
     })
     .controller('EntryExperimentController', function ($scope, $cookieStore, $stateParams, Util) {

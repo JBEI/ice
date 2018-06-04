@@ -117,8 +117,10 @@ public class ConfigurationController {
 
         Configuration configuration = dao.get(setting.getKey());
         if (configuration == null) {
-            Logger.error("Could not retrieve setting " + setting.getKey());
-            return null;
+            Logger.warn("Could not retrieve setting " + setting.getKey() + ". Creating...");
+            if (setting.getValue() == null)
+                setting.setValue("");
+            configuration = dao.create(new Configuration(setting.getKey(), setting.getValue()));
         }
 
         String osName = System.getProperty("os.name").replaceAll("\\s+", "").toLowerCase();

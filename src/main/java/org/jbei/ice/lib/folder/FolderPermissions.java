@@ -35,15 +35,18 @@ public class FolderPermissions extends Permissions {
     private final String userId;
     private final PermissionDAO permissionDAO;
     private final AccountDAO accountDAO;
-    private final RemoteShareModelDAO remoteShareModelDAO;
     private final RemoteClientModelDAO remoteClientModelDAO;
     private final RemotePartnerDAO remotePartnerDAO;
 
+    /**
+     * @param userId   unique identifier of user
+     * @param folderId unique local folder identifier
+     * @throws IllegalArgumentException if the referenced folder identifier doesn't resolve to an existing folder
+     */
     public FolderPermissions(String userId, long folderId) {
         this.dao = DAOFactory.getFolderDAO();
         this.permissionDAO = DAOFactory.getPermissionDAO();
         this.accountDAO = DAOFactory.getAccountDAO();
-        this.remoteShareModelDAO = DAOFactory.getRemoteShareModelDAO();
         this.remoteClientModelDAO = DAOFactory.getRemoteClientModelDAO();
         this.remotePartnerDAO = DAOFactory.getRemotePartnerDAO();
         this.folder = this.dao.get(folderId);
@@ -55,11 +58,13 @@ public class FolderPermissions extends Permissions {
     }
 
     /**
-     * Retrieves list of available folder permissions (both local and remote)
+     * Retrieves list of available folder permissions (both local and remote).
+     * User must have write privileges on folder to perform this action
      *
      * @return list available folders
+     * @throws PermissionException is user doesn't have write permissions on folder
      */
-    public ArrayList<AccessPermission> get() {
+    public List<AccessPermission> get() {
         authorization.expectWrite(userId, folder);
         ArrayList<AccessPermission> accessPermissions = new ArrayList<>();
 
@@ -70,21 +75,7 @@ public class FolderPermissions extends Permissions {
                     .equals(GroupController.PUBLIC_GROUP_UUID))
                 continue;
 
-            AccessPermission accessPermission = permission.toDataTransferObject();
-
-            if (permission.getRemoteShare() != null) {
-                RemoteShareModel remoteShareModel = permission.getRemoteShare();
-                accessPermission.setArticle(AccessPermission.Article.REMOTE);
-                accessPermission.setArticleId(permission.getId()); // for remote access permissions, the article id is the actual permission
-                accessPermission.setId(remoteShareModel.getId());
-//                accessPermission.setType(this.permission.isCanWrite() ? AccessPermission.Type.WRITE_FOLDER : AccessPermission.Type.READ_FOLDER);
-                AccountTransfer accountTransfer = new AccountTransfer();
-                accountTransfer.setEmail(remoteShareModel.getClient().getEmail());
-                accessPermission.setPartner(remoteShareModel.getClient().getRemotePartner().toDataTransferObject());
-                accessPermission.setDisplay(accountTransfer.getEmail());
-            }
-
-            accessPermissions.add(accessPermission);
+            accessPermissions.add(permission.toDataTransferObject());
         }
 
         return accessPermissions;
@@ -164,8 +155,12 @@ public class FolderPermissions extends Permissions {
      * @param accessPermission access details
      * @return wrapper around the unique identifier for the remote permission created
      * @throws IllegalArgumentException if the partner record cannot be retrieved
+     * @throws PermissionException      if user doesn't have write privileges on folder
      */
     public AccessPermission createRemotePermission(AccessPermission accessPermission) {
+
+        authorization.expectWrite(userId, folder);
+
         RegistryPartner partner = accessPermission.getPartner();
         RemotePartner remotePartner = remotePartnerDAO.get(partner.getId());
         if (remotePartner == null) {
@@ -174,45 +169,48 @@ public class FolderPermissions extends Permissions {
             throw new IllegalArgumentException(errorMessage);
         }
 
-        // todo : must be owner?
-        authorization.expectWrite(userId, folder);
-
         String remoteUserId = accessPermission.getUserId();
-        String token = tokenHash.generateSalt();
+        String randomToken = tokenHash.generateRandomToken();
 
-        // send token and also verify user Id
-        accessPermission.setSecret(token);
+        // generate random token and also verify user Id
+        accessPermission.setSecret(randomToken);
         AccountTransfer accountTransfer = new AccountTransfer();
         accountTransfer.setEmail(userId);
+
         accessPermission.setAccount(accountTransfer);
         accessPermission.setDisplay(folder.getName());
         accessPermission.setTypeId(folder.getId());
-        if (!sendToken(accessPermission, remotePartner))
-            return null; // something happened with the send; likely user id is invalid
 
-        // create local client record mapping to remote
+        // send to remote partner (throws illegal argument exception if user id doesn't exist on other side)
+        if (!sendToken(accessPermission, remotePartner)) {
+            Logger.error("Could not share folder remotely");
+            return null; // something happened with the send; likely user id is invalid
+        }
+
+        // create local client record mapping to remote partner + user id
+        // this narrows down the remote client allowed to access the article (folder)
         RemoteClientModel remoteClientModel = getOrCreateRemoteClient(remoteUserId, remotePartner);
 
-        // create remote share record storing the secret
-        // todo : use folder uuid instead of folder id ?
-        String secret = tokenHash.encrypt(folder.getId() + remotePartner.getUrl() + remoteUserId, token);
-        RemoteShareModel remoteShare = new RemoteShareModel();
+        // store the access credentials locally by hashing the random token that was sent
+        // when requesting the folder, the remote user will send the random token
+        String secret = tokenHash.encrypt(folder.getId() + remotePartner.getUrl() + remoteUserId, randomToken);
+        Permission remoteShare = new Permission();
         remoteShare.setClient(remoteClientModel);
         remoteShare.setSecret(secret);
         Account account = accountDAO.getByEmail(userId);
         remoteShare.setSharer(account);
-        remoteShare = remoteShareModelDAO.create(remoteShare);
 
-        // create permission object
-        Permission permission = createPermissionModel(accessPermission, remoteShare);
+        // add permissions
+        remoteShare.setFolder(folder);
+        remoteShare.setCanWrite(accessPermission.isCanWrite());
+        remoteShare.setCanRead(accessPermission.isCanRead());
+        remoteShare = this.permissionDAO.create(remoteShare);
 
         accessPermission.setId(remoteShare.getId());
-        accessPermission.setArticleId(permission.getId());
+        accessPermission.setArticleId(remoteShare.getId());
         accessPermission.setArticle(AccessPermission.Article.REMOTE);
-
-        RemoteShareModel remoteShareModel = permission.getRemoteShare();
-        accessPermission.setPartner(remoteShareModel.getClient().getRemotePartner().toDataTransferObject());
-        accessPermission.setDisplay(remoteShareModel.getClient().getEmail());
+        accessPermission.setPartner(remoteShare.getClient().getRemotePartner().toDataTransferObject());
+        accessPermission.setDisplay(remoteShare.getClient().getEmail());
 
         return accessPermission;
     }
@@ -259,15 +257,5 @@ public class FolderPermissions extends Permissions {
         RemoteContact remoteContact = new RemoteContact();
         // send to remote partner at POST /rest/permissions/remote
         return remoteContact.shareFolder(partner.getUrl(), accessPermission, partner.getApiKey()) != null;
-    }
-
-    protected Permission createPermissionModel(AccessPermission accessPermission, RemoteShareModel remoteShare) {
-        Permission permission = new Permission();
-        permission.setFolder(folder);
-        permission.setCanWrite(accessPermission.isCanWrite());
-        permission.setCanRead(accessPermission.isCanRead());
-        permission.setRemoteShare(remoteShare);
-        remoteShare.setPermission(permission);
-        return this.permissionDAO.create(permission);
     }
 }

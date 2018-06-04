@@ -125,7 +125,7 @@ public class PartSequence extends HasEntry {
 
             // parse actual sequence
             String entryType = this.entry.getRecordType();
-            DNASequence sequence = parser.parse(sequenceString, entryType);
+            FeaturedDNASequence sequence = parser.parse(sequenceString, entryType);
             return save(sequence, sequenceString, fileName, entryType);
         } catch (InvalidFormatParserException e) {
             Logger.error(e);
@@ -232,9 +232,10 @@ public class PartSequence extends HasEntry {
         BlastPlus.scheduleBlastIndexRebuildTask(true);
     }
 
-    protected SequenceInfo save(DNASequence dnaSequence, String sequenceString, String fileName, String entryType) {
+    protected SequenceInfo save(FeaturedDNASequence dnaSequence, String sequenceString, String fileName, String entryType) {
         Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
         sequence.setSequenceUser(sequenceString);
+        sequence.setIdentifier(dnaSequence.getIdentifier());
         sequence.setEntry(entry);
         if (!StringUtils.isBlank(fileName))
             sequence.setFileName(fileName);

@@ -2,9 +2,11 @@ package org.jbei.ice.lib.access;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.rest.IceRestClient;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.*;
@@ -34,6 +36,18 @@ public class RemoteAccess {
     }
 
     /**
+     * Checks if the web of registries admin config value has been set to enable this ICE instance
+     * to join the web of registries configuration
+     *
+     * @return true if value has been set to the affirmative, false otherwise
+     */
+    protected boolean isInWebOfRegistries() {
+        String value = Utils.getConfigValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
+        return ("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
+    }
+
+    /**
+     * // todo : check if already shared
      * Add access privileges for a user on this instance to enable access
      * to a (currently folder only) resource on a remote ICE instance
      *
@@ -42,51 +56,70 @@ public class RemoteAccess {
      *                         that the permission is for
      * @throws IllegalArgumentException if the permission details is missing some required information or has invalid
      *                                  information. e.g. the specified user does not exist on this ICE instance
+     * @throws PermissionException      if this instance is not in a web of registries configuration or it is but
+     *                                  not with the specified partner
      */
     public AccessPermission add(RegistryPartner partner, AccessPermission accessPermission) {
-        // todo : must be in web of registries to accept add remote permission
+        if (!isInWebOfRegistries())
+            throw new PermissionException("This ICE instance doesn't have WoR enabled");
 
         // person on this site that the permission is for
         String userId = accessPermission.getUserId();
 
         // verify that it is valid
-        Account account = accountDAO.getByEmail(userId);   // todo : if null
+        Account account = accountDAO.getByEmail(userId);
         if (account == null)
             throw new IllegalArgumentException("Email address " + userId + " not on this registry instance");
 
         // remote person doing the sharing
         AccountTransfer accountTransfer = accessPermission.getAccount();
-        if (accountTransfer == null)
-            throw new IllegalArgumentException("No account for remote permission add");
+        if (accountTransfer == null || StringUtils.isEmpty(accountTransfer.getEmail()))
+            throw new IllegalArgumentException("Remote sharer information not available");
 
-        // read of write permission
+        // read or write permission
         if (!accessPermission.isCanRead() && !accessPermission.isCanWrite())
-            throw new IllegalArgumentException("Invalid read/write values for permission");
+            throw new IllegalArgumentException("Invalid read/write values for permission. Both are false");
 
         // verify secret token
         if (StringUtils.isEmpty(accessPermission.getSecret()))
             throw new IllegalArgumentException("No access token sent with permission");
 
-        String remoteEmail = accountTransfer.getEmail();
-
-        // create a local folder instance that references a remote folder (also acts like a cache)
-        Folder folder = new Folder();
-        folder.setType(FolderType.REMOTE);
-        folder.setName(accessPermission.getDisplay());
-        folder.setOwnerEmail(remoteEmail);
-        folder = this.folderDAO.create(folder);
-
         // get the remote partner object
         RemotePartner remotePartner = remotePartnerDAO.getByUrl(partner.getUrl());
+        if (remotePartner == null)
+            throw new IllegalArgumentException("Cannot retrieve remote partner with url " + partner.getUrl());
+
+        // email of remote user making share request
+        String remoteEmail = accountTransfer.getEmail();
+
+        // todo : can also be single entry sharing
+        // create a local folder instance that references a remote folder (can also acts like a cache)
+        // if remote folder already exists then retrieve it and share that
+        Folder folder = getOrCreateRemoteFolder(accessPermission.getDisplay(),
+                Long.toString(accessPermission.getTypeId()), remoteEmail);
 
         // get or create the client for the remote user who is sharing the folder
         RemoteClientModel remoteClientModel = getOrCreateRemoteClient(remoteEmail, remotePartner);
 
-        // store access
+        // store access permission to remote folder for referenced account
         Permission permission = createPermissionModel(accessPermission, folder, account);
 
+        // remote access model associated with permission and remote client for storing secret
         RemoteAccessModel remoteAccessModel = createRemoteAccessModel(accessPermission, remoteClientModel, permission);
         return remoteAccessModel.toDataTransferObject();
+    }
+
+    public Folder getOrCreateRemoteFolder(String display, String remoteFolderId, String remoteEmail) {
+        Folder folder = this.folderDAO.getRemote(remoteFolderId, remoteEmail);
+        if (folder == null) {
+            folder = new Folder();
+            folder.setType(FolderType.REMOTE);
+            folder.setName(display);
+            folder.setDescription(remoteFolderId);
+            folder.setOwnerEmail(remoteEmail);
+            folder = this.folderDAO.create(folder);
+        }
+        return folder;
     }
 
     public AccountTransfer getRemoteUser(long remoteId, String email) {
@@ -130,8 +163,8 @@ public class RemoteAccess {
         return this.permissionDAO.create(permission);
     }
 
-    protected RemoteAccessModel createRemoteAccessModel(AccessPermission accessPermission, RemoteClientModel remoteClientModel,
-                                                        Permission permission) {
+    protected RemoteAccessModel createRemoteAccessModel(AccessPermission accessPermission,
+                                                        RemoteClientModel remoteClientModel, Permission permission) {
         RemoteAccessModel remoteAccessModel = new RemoteAccessModel();
         remoteAccessModel.setToken(accessPermission.getSecret());
         remoteAccessModel.setRemoteClientModel(remoteClientModel);

@@ -318,7 +318,7 @@ public class EntryController extends HasEntry {
         RemotePartner remotePartner = DAOFactory.getRemotePartnerDAO().getByUrl(requestingPartner.getUrl());
 
         // check that the remote user has the right token
-        RemoteShareModel shareModel = DAOFactory.getRemoteShareModelDAO().get(remoteUserId, remotePartner, folder);
+        Permission shareModel = DAOFactory.getPermissionDAO().get(remoteUserId, remotePartner, folder);
         if (shareModel == null) {
             Logger.error("Could not retrieve share model");
             return null;

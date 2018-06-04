@@ -30,7 +30,6 @@ public class DAOFactory {
     private static ParameterDAO parameterDAO;
     private static ApiKeyDAO apiKeyDAO;
     private static RemoteClientModelDAO remoteClientModelDAO;
-    private static RemoteShareModelDAO remoteShareModelDAO;
     private static RemoteAccessModelDAO remoteAccessModelDAO;
     private static ManuscriptModelDAO manuscriptModelDAO;
     private static SequenceFeatureDAO sequenceFeatureDAO;
@@ -174,12 +173,6 @@ public class DAOFactory {
         if (remoteClientModelDAO == null)
             remoteClientModelDAO = new RemoteClientModelDAO();
         return remoteClientModelDAO;
-    }
-
-    public static RemoteShareModelDAO getRemoteShareModelDAO() {
-        if (remoteShareModelDAO == null)
-            remoteShareModelDAO = new RemoteShareModelDAO();
-        return remoteShareModelDAO;
     }
 
     public static RemoteAccessModelDAO getRemoteAccessModelDAO() {

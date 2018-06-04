@@ -130,14 +130,13 @@ public class SequenceController extends HasEntry {
         RemotePartner remotePartner = DAOFactory.getRemotePartnerDAO().getByUrl(requestingPartner.getUrl());
 
         // check that the remote user has the right token
-        RemoteShareModel shareModel = DAOFactory.getRemoteShareModelDAO().get(remoteUserId, remotePartner, folder);
+        Permission shareModel = DAOFactory.getPermissionDAO().get(remoteUserId, remotePartner, folder);
         if (shareModel == null) {
             Logger.error("Could not retrieve share model");
             return null;
         }
 
-        Permission permission = shareModel.getPermission(); // folder must match
-        if (permission.getFolder().getId() != folderId) {
+        if (shareModel.getFolder().getId() != folderId) {
             String msg = "Shared folder does not match folder being requested";
             Logger.error(msg);
             throw new PermissionException(msg);
@@ -151,7 +150,7 @@ public class SequenceController extends HasEntry {
         }
 
         // check that entry id is contained in folder
-        return getFeaturedSequence(entry, permission.isCanWrite());
+        return getFeaturedSequence(entry, shareModel.isCanWrite());
     }
 
     public FeaturedDNASequence retrievePartSequence(String userId, String recordId) {

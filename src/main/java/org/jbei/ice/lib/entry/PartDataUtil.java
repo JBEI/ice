@@ -124,7 +124,7 @@ public class PartDataUtil {
             return "";
 
         switch (field) {
-            case PARENTAL_STRAIN:
+            case HOST:
                 return strainData.getHost();
 
             case GENOTYPE_OR_PHENOTYPE:
