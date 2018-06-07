@@ -86,11 +86,47 @@ angular.module('ice.entry.traces.controller', [])
             $window.open("rest/file/trace/" + trace.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
         };
 
+        var convertFeaturedDNASequence = function (result) {
+            var features = [];
+
+            for (var i = 0; i < result.features.length; i += 1) {
+                var feature = result.features[i];
+                if (!feature.locations.length)
+                    continue;
+
+                var notes = feature.notes.length ? feature.notes[0].value : "";
+
+                for (var j = 0; j < feature.locations.length; j += 1) {
+                    var location = feature.locations[j];
+
+                    var featureObject = {
+                        start: location.genbankStart - 1,
+                        end: location.end - 1,
+                        fid: feature.id,
+                        forward: feature.strand == 1,
+                        type: feature.type,
+                        name: feature.name,
+                        notes: notes,
+                        annotationType: feature.type,
+                        locations: feature.locations
+                    };
+
+                    features.push(featureObject);
+                }
+            }
+
+            return features;
+        };
+
+
         var alignmentTracks = function (alignedSequence, referenceSequence) {
             var alignment = {
                 id: "iceAlignment",
                 pairwiseAlignments: []
             };
+
+            // get reference sequences features
+            var features = convertFeaturedDNASequence(referenceSequence);
 
             for (var i = 0; i < alignedSequence.length; i += 1) {
                 if (!alignedSequence[i].traceSequenceAlignment)
@@ -113,7 +149,8 @@ angular.module('ice.entry.traces.controller', [])
                             sequenceData: {
                                 id: i + 1, // refSequence.identifier
                                 name: referenceSequence.name,
-                                sequence: referenceSequence.sequence // raw sequence
+                                sequence: referenceSequence.sequence, // raw sequence
+                                features: features
                             },
                             alignmentData: {
                                 id: i + 1,
