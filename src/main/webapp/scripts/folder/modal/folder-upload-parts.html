@@ -15,10 +15,10 @@
 
         <div class="font-95em">
             Upload using
-            <span ng-class="{'opacity_hover': checkNames, 'font-bold': !checkNames}" ng-click="checkNames=false">
+            <span ng-class="{'opacity_hover': checkNames, 'font-bold': !checkNames}" ng-click="setCheckName(false)">
                 <i class="fa fa-fw" ng-class="{'fa-circle-o': checkNames, 'fa-check-circle': !checkNames}"></i>part numbers
             </span>
-            <span ng-class="{'opacity_hover': !checkNames, 'font-bold': checkNames}" ng-click="checkNames=true">
+            <span ng-class="{'opacity_hover': !checkNames, 'font-bold': checkNames}" ng-click="setCheckName(true)">
                 <i class="fa fa-fw" ng-class="{'fa-circle-o': !checkNames, 'fa-check-circle': checkNames}"></i>names only (Note that names are not unique)
             </span>
         </div>
