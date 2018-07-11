@@ -337,7 +337,6 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
                 };
 
                 $scope.bulkTracesEditUploader.onSuccessItem = function (item, response, status, header) {
-                    console.log("success", status, response);
                     $scope.processingFile = false;
                     $scope.result = {success: true, data: response};
                 };
