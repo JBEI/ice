@@ -94,13 +94,17 @@ public class FileResource extends RestResource {
     @GET
     @Path("tmp/{fileId}")
     public Response getTmpFile(@PathParam("fileId") final String fileId,
-                               @QueryParam("filename") String fileName) {
+                               @QueryParam("filename") String fileName,
+                               @DefaultValue("false") @QueryParam("delete") boolean delete) {
         final File tmpFile = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY), fileId).toFile();
         if (tmpFile == null || !tmpFile.exists()) {
             return super.respond(Response.Status.NOT_FOUND);
         }
         if (StringUtils.isEmpty(fileName))
             fileName = tmpFile.getName();
+
+        if (delete)
+            tmpFile.deleteOnExit();
 
         return addHeaders(Response.ok(tmpFile), fileName);
     }
