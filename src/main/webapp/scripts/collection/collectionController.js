@@ -424,6 +424,10 @@ angular.module('ice.collection.controller', [])
             $scope.processingFile = undefined;
         };
 
+        $scope.setCheckName = function (value) {
+            $scope.checkNames = value;
+        };
+
         $scope.addValidEntriesToFolder = function () {
             if (!$scope.serverResult.valid || !$scope.serverResult.valid.length)
                 return;
