@@ -120,6 +120,24 @@ angular.module('ice.entry.traces.controller', [])
 
 
         var alignmentTracks = function (alignedSequence, referenceSequence) {
+//            function magicDownload(text, fileName) {
+//                let blob = new Blob([text], {
+//                    type: "text/csv;charset=utf8;"
+//                });
+//
+//// create hidden link
+//                let element = document.createElement("a");
+//                document.body.appendChild(element);
+//                element.setAttribute("href", window.URL.createObjectURL(blob));
+//                element.setAttribute("download", fileName);
+//                element.style.display = "";
+//
+//                element.click();
+//
+//                document.body.removeChild(element);
+//            }
+
+
             var alignment = {
                 id: "iceAlignment",
                 pairwiseAlignments: []
@@ -132,49 +150,44 @@ angular.module('ice.entry.traces.controller', [])
                 if (!alignedSequence[i].traceSequenceAlignment)
                     continue;
 
-                if (alignedSequence[i].traceSequenceAlignment.queryStart > alignedSequence[i].traceSequenceAlignment.queryEnd) {
-                    console.log(alignedSequence[i].traceSequenceAlignment);
-                    continue;
-                }
-
-                if (alignedSequence[i].traceSequenceAlignment.subjectStart > alignedSequence[i].traceSequenceAlignment.subjectEnd) {
-                    console.log(alignedSequence[i].traceSequenceAlignment);
-                    continue;
-                }
-
-                alignment.pairwiseAlignments.push(
-                    [
-                        // reference sequence
-                        {
-                            sequenceData: {
-                                id: i + 1, // refSequence.identifier
-                                name: referenceSequence.name,
-                                sequence: referenceSequence.sequence, // raw sequence
-                                features: features
-                            },
-                            alignmentData: {
-                                id: i + 1,
-                                sequence: alignedSequence[i].traceSequenceAlignment.queryAlignment,
-                                matchStart: alignedSequence[i].traceSequenceAlignment.queryStart,
-                                matchEnd: alignedSequence[i].traceSequenceAlignment.queryEnd
-                            }
+                var pairwiseAlignment = [
+                    // reference sequence
+                    {
+                        sequenceData: {
+                            id: i + 1, // refSequence.identifier
+                            name: referenceSequence.name,
+                            sequence: referenceSequence.sequence, // raw sequence
+                            features: features
                         },
-                        // alignment sequence
-                        {
-                            sequenceData: {
-                                id: i + 1,
-                                name: alignedSequence[i].filename,
-                                sequence: alignedSequence[i].sequence     // raw sequence
-                            },
-                            alignmentData: {
-                                id: i + 1,
-                                sequence: alignedSequence[i].traceSequenceAlignment.subjectAlignment,
-                                matchStart: alignedSequence[i].traceSequenceAlignment.subjectStart,
-                                matchEnd: alignedSequence[i].traceSequenceAlignment.subjectEnd
-                            }
+                        alignmentData: {
+                            id: i + 1,
+                            sequence: alignedSequence[i].traceSequenceAlignment.queryAlignment,
+                            matchStart: alignedSequence[i].traceSequenceAlignment.queryStart,
+                            matchEnd: alignedSequence[i].traceSequenceAlignment.queryEnd
                         }
-                    ]
-                );
+                    },
+                    // alignment sequence
+                    {
+                        sequenceData: {
+                            id: i + 1,
+                            name: alignedSequence[i].filename,
+                            sequence: alignedSequence[i].sequence     // raw sequence
+                        },
+                        alignmentData: {
+                            id: i + 1,
+                            sequence: alignedSequence[i].traceSequenceAlignment.subjectAlignment,
+                            matchStart: alignedSequence[i].traceSequenceAlignment.subjectStart,
+                            strand: alignedSequence[i].traceSequenceAlignment.strand,
+                            matchEnd: alignedSequence[i].traceSequenceAlignment.subjectEnd
+                        }
+                    }
+                ];
+
+                alignment.pairwiseAlignments.push(pairwiseAlignment);
+
+                //if (alignedSequence[i].traceSequenceAlignment.subjectStart > alignedSequence[i].traceSequenceAlignment.subjectEnd) {
+                //    magicDownload(JSON.stringify(pairwiseAlignment), 'alignedSequence.json');
+                //}
             }
 
             return alignment;
