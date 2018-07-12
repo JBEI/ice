@@ -2,11 +2,13 @@ package org.jbei.ice.lib.entry;
 
 import com.opencsv.CSVWriter;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
 import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
@@ -103,7 +105,7 @@ public class EntriesAsCSV {
     protected String[] getCSVHeaders(EntryField[] fields) {
 
         // get headers
-        String[] headers = new String[fields.length + 3];
+        String[] headers = new String[fields.length + 4];
         headers[0] = "Created";
         headers[1] = "Part ID";
 
@@ -113,6 +115,7 @@ public class EntriesAsCSV {
             headers[i] = field.getLabel();
         }
         headers[i + 1] = "Sequence File";
+        headers[i + 2] = "Parent IDs";
         return headers;
     }
 
@@ -155,7 +158,7 @@ public class EntriesAsCSV {
                 Entry entry = dao.get(entryId);
 
                 //  get contents and write data out
-                String[] line = new String[fields.length + 3];
+                String[] line = new String[fields.length + 4];
                 line[0] = entry.getCreationTime().toString();
                 line[1] = entry.getPartNumber();
                 int i = 1;
@@ -171,6 +174,15 @@ public class EntriesAsCSV {
                     line[i + 1] = "";
                 }
 
+                // get parents for entry
+                EntryLinks links = new EntryLinks(this.userId, entry.getPartNumber());
+                String parents = "";
+                for (PartData data : links.getParents()) {
+                    parents += data.getPartId() + ",";
+                }
+                if (!StringUtils.isEmpty(parents))
+                    parents = parents.substring(0, parents.length() - 1);
+                line[i + 2] = ("\"" + parents + "\"");
                 writer.writeNext(line);
             }
         }
