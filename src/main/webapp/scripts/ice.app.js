@@ -18,6 +18,10 @@ angular
             return original.apply($location, [path]);
         };
 
+        //$rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
+        //    console.log(event, toState, toParams, fromState, fromParams);
+        //});
+
         $rootScope.logout = function () {
             Authentication.logout();
         };
