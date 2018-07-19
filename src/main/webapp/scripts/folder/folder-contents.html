@@ -45,20 +45,11 @@
                                 <small class="font-65em" ng-if="folder.type != 'REMOTE'">
                                     {{folder.creationTime | date:'short'}}
                                 </small>
+
                                 <small ng-if="folder.accessPermissions.length" style="color: #333">
                                     <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
-
-                                    <span ng-repeat="permission in folder.accessPermissions" style="margin-right: 3px">
-                                        <span class="label" uib-tooltip="{{shareText(permission)}}"
-                                              ng-class="{'bg_permission_group':permission.article==='GROUP',
-                                              'bg_permission_user':permission.article==='ACCOUNT',
-                                              'bg_permission_remote':permission.article==='REMOTE'}">
-                                             <i class="fa"
-                                                ng-class="{'fa-group':permission.article==='GROUP',
-                                                'fa-user':permission.article==='ACCOUNT',
-                                                'fa-globe':permission.article==='REMOTE'}"></i>
-                                            {{getDisplay(permission)}}
-                                        </span>
+                                    <i class="fa fa-fw fa-users font-85em text-info"
+                                       uib-tooltip="Shared with others"></i>
                                     </span>
                                 </small>
                             </div>
@@ -289,8 +280,8 @@
     <div class="row" ng-if="folder && folder.entries.length > 0" style="margin-top: -15px">
         <div class="col-md-6" style="padding-left: 0">
             <ul uib-pagination total-items="folder.count" ng-change="folderPageChange()" ng-model="params.currentPage"
-                            max-size="maxSize" class="pagination-sm" items-per-page="params.limit"
-                            boundary-links="true">
+                max-size="maxSize" class="pagination-sm" items-per-page="params.limit"
+                boundary-links="true">
             </ul>
         </div>
         <div class="col-md-4" style="margin-top: 25px;">
