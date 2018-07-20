@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('ice.upload.controller', [])
-    .controller('UploadController', function ($rootScope, $location, $scope, $uibModal, $cookieStore, $resource,
-                                              $stateParams, FileUploader, $http, UploadUtil, Util) {
-        var sid = $cookieStore.get("sessionId");
+    .controller('UploadController', function ($rootScope, $location, $scope, $uibModal, $resource, $http,
+                                              $stateParams, FileUploader, UploadUtil, Util, Authentication) {
+        var sid = Authentication.getSessionId();
         //var upload = Upload(sid);
         var sheetData = [
             []
@@ -51,7 +51,6 @@ angular.module('ice.upload.controller', [])
         // add a part_id column to enable linking to existing entries
         //
         $scope.addExistingPart = function () {
-            linkedImportType = $scope.linkedSelection = "Existing";
             var ht = angular.element('#dataTable').handsontable('getInstance');
 
             // check if there is already a link
@@ -60,8 +59,11 @@ angular.module('ice.upload.controller', [])
                 ht.alter('remove_col', length - 1, linkedHeaders.length);
             }
 
+            linkedImportType = $scope.linkedSelection = "Existing";
             linkedHeaders = ["Part Number"];
             linkedDataSchema = ["partId"];
+
+            // add linkedHeaders.length number of columns after the last column
             ht.alter('insert_col', undefined, linkedHeaders.length);
         };
 
@@ -632,13 +634,11 @@ angular.module('ice.upload.controller', [])
                 colHeaders: getSheetHeaders,
                 rowHeaders: true, // use default of 1, 2, 3 for row headers
                 colWidths: getColWidth,
-                //stretchH: 'all',
                 minSpareRows: 1,
                 enterMoves: {row: 0, col: 1}, // move right on enter instead of down
                 autoWrapRow: true,
                 autoWrapCol: true,
                 cells: getCellProperties,
-                //width: widthFunction,
                 height: heightFunction,
                 afterChange: afterChange,
                 manualColumnResize: true,
@@ -648,6 +648,22 @@ angular.module('ice.upload.controller', [])
                 afterRemoveRow: function (row) {
                     Util.remove("rest/uploads/" + $scope.bulkUpload.id + "/entry/" + $scope.bulkUpload.entryIdData[row],
                         {});
+                },
+                afterSelection: function (row, col, row2, col2) {
+                    var noHandleList = ['attachments', 'sequenceFileName', 'sequenceTrace'];
+                    var colName;
+                    var importLength = UploadUtil.getSheetHeaders($scope.importType).length;
+
+                    if (col2 >= UploadUtil.getSheetHeaders($scope.importType).length) {
+                        colName = UploadUtil.getTypeField(linkedImportType, (col2 - importLength))
+                    } else {
+                        colName = UploadUtil.getTypeField($scope.importType, col2);
+                    }
+
+                    if (noHandleList.indexOf(colName) != -1)
+                        $dataTable.handsontable('updateSettings', {fillHandle: false});
+                    else
+                        $dataTable.handsontable('updateSettings', {fillHandle: true});
                 }
             };
 
@@ -932,8 +948,7 @@ angular.module('ice.upload.controller', [])
             createSheet();
         }
     })
-    .controller('BulkUploadRejectModalController', function ($scope, $cookieStore, $location, $uibModalInstance,
-                                                             upload, Util) {
+    .controller('BulkUploadRejectModalController', function ($scope, $location, $uibModalInstance, upload, Util) {
         $scope.rejectUpload = function () {
             $scope.submitting = true;
 
@@ -1175,32 +1190,7 @@ angular.module('ice.upload.controller', [])
             });
         };
 
-        $scope.enablePublicRead = function (folder) {
-        };
-
-        $scope.disablePublicRead = function (folder) {
-        };
-
         $scope.deletePermission = function (index, permission) {
             removePermission(permission.id);
-        };
-
-        $scope.filter = function (val) {
-            if (!val) {
-                $scope.accessPermissions = undefined;
-                return;
-            }
-
-            $scope.filtering = true;
-            // todo
-            //Permission().filterUsersAndGroups({limit: 10, val: val},
-            //    function (result) {
-            //        $scope.accessPermissions = result;
-            //        $scope.filtering = false;
-            //    }, function (error) {
-            //        console.error(error);
-            //        $scope.filtering = false;
-            //        $scope.accessPermissions = undefined;
-            //    });
         };
     });
