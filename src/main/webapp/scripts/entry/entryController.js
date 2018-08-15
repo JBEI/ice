@@ -1,10 +1,13 @@
 'use strict';
 
 angular.module('ice.entry.controller', [])
-    .controller('EntryAttachmentController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Util) {
+    .controller('EntryAttachmentController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Util, Authentication) {
 
-        // create a uploader with options
-        var sid = $cookieStore.get("sessionId");
+        // init. get remote
+        Util.list("rest/parts/" + $stateParams.id + "/attachments", function (result) {
+            $scope.attachments = result;
+        }, $scope.remote);
+
         var desc = "";
         $scope.uploadError = undefined;
 
@@ -12,13 +15,14 @@ angular.module('ice.entry.controller', [])
             desc = $scope.attachmentDescription;
         });
 
+        // create a uploader with options
         var uploader = $scope.uploader = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "rest/file/attachment",
             method: 'POST',
             removeAfterUpload: true,
             headers: {
-                "X-ICE-Authentication-SessionId": sid
+                "X-ICE-Authentication-SessionId": Authentication.getSessionId()
             }
         });
 
@@ -47,12 +51,8 @@ angular.module('ice.entry.controller', [])
             $scope.attachmentDescription = undefined;
         };
 
-        Util.list("rest/parts/" + $stateParams.id + "/attachments", function (result) {
-            $scope.attachments = result;
-        });
-
         $scope.downloadAttachment = function (attachment) {
-            $window.open("rest/file/attachment/" + attachment.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
+            $window.open("rest/file/attachment/" + attachment.fileId + "?sid=" + Authentication.getSessionId(), "_self");
         };
 
         $scope.deleteAttachment = function (index, att) {
@@ -178,8 +178,6 @@ angular.module('ice.entry.controller', [])
         $scope.downloadShotgunFile = function (sequence) {
             $window.open("rest/file/shotgunsequence/" + sequence.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
         };
-
-
     })
     .controller('ShotgunSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId,
                                                                   $cookieStore) {
@@ -941,22 +939,9 @@ angular.module('ice.entry.controller', [])
                 }, {move: false});
         };
     })
-    .controller('VectorEditorController', function (Util, $scope, $window, entry, $uibModalInstance) {
+    .controller('VectorEditorController', function (Util, $scope, $window, entry, remote) {
         var sequence;
         $scope.updatedSequence = undefined;
-
-        var getColorForType = function (annotationType) {
-            switch (annotationType.toUpperCase()) {
-                case "CDS":
-                    return "#EF6500";
-
-                case "MISC_FEATURE":
-                    return "#006FEF";
-
-                case "MISC_MARKER":
-                    return "#8DCEB1";
-            }
-        };
 
         // converts FeaturedDNASequence (jbei format) to genbank
         var convertFeaturedDNASequence = function (result) {
@@ -984,9 +969,6 @@ angular.module('ice.entry.controller', [])
                         locations: feature.locations
                     };
 
-                    var color = getColorForType(feature.type);
-                    if (color)
-                        featureObject.color = color;
                     features.push(featureObject);
                 }
             }
@@ -1020,6 +1002,8 @@ angular.module('ice.entry.controller', [])
                     editorName: "vector-editor",
                     doNotUseAbsolutePosition: true,
                     onSave: function (event, sequenceData, editorState, onSuccessCallback) {
+                        if (remote.remote || !entry.canEdit)
+                            return;
 
                         // convert to featuredDNASequence
                         sequence = {
@@ -1110,7 +1094,7 @@ angular.module('ice.entry.controller', [])
                     }
                 });
                 $scope.vEeditor.updateEditor({
-                    readOnly: false,
+                    readOnly: remote.remote,
                     sequenceData: data.sequenceData,
                     annotationVisibility: {
                         parts: false,
@@ -1153,10 +1137,10 @@ angular.module('ice.entry.controller', [])
                         ]
                     ]
                 })
-            });
+            }, remote);
         };
     })
-    .controller('EntryController', function ($scope, $stateParams, $cookieStore, $location, $uibModal, $rootScope,
+    .controller('EntryController', function ($scope, $stateParams, $location, $uibModal, $rootScope,
                                              $route, $window, $document, FileUploader, EntryService, EntryContextUtil,
                                              Selection, Util, Authentication) {
         $scope.partIdEditMode = false;
@@ -1164,12 +1148,12 @@ angular.module('ice.entry.controller', [])
         $scope.context = EntryContextUtil.getContext();
 
         $scope.isFileUpload = false;
-        var sessionId = $cookieStore.get("sessionId");
+        var sessionId = Authentication.getSessionId();
         $scope.sessionId = sessionId;
 
         // open vector editor modal
-        $scope.open = function () {
-            var modalInstance = $uibModal.open({
+        $scope.openSequenceInFullVectorEditor = function () {
+            $uibModal.open({
                 templateUrl: 'scripts/entry/modal/vector-editor.html',
                 keyboard: false,
                 controller: 'VectorEditorController',
@@ -1178,6 +1162,9 @@ angular.module('ice.entry.controller', [])
                 resolve: {
                     entry: function () {
                         return $scope.entry;
+                    },
+                    remote: function () {
+                        return $scope.remoteParams;
                     }
                 }
             });
@@ -1237,7 +1224,6 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.addLink = function (part, role) {
-
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/entry/modal/add-link-modal.html',
                 controller: function ($scope, $http, $uibModalInstance, $cookieStore) {
@@ -1453,32 +1439,34 @@ angular.module('ice.entry.controller', [])
         $scope.notFound = undefined;
         $scope.noAccess = undefined;
 
+        // init : fetch entry; see if folder id and remote params is set
         var params = $location.search();
+        $scope.remoteParams = params;
 
-        Util.get("rest/parts/" + $stateParams.id,
-            function (result) {
-                Selection.reset();
-                Selection.selectEntry(result);
+        Util.get("rest/parts/" + $stateParams.id, function (result) {
+            Selection.reset();
+            Selection.selectEntry(result);
 
-                $scope.entry = EntryService.convertToUIForm(result);
-                if ($scope.entry.canEdit)
-                    $scope.newParameter = {edit: false};
-                $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
-                $scope.entry.remote = params.remote;
+            $scope.entry = EntryService.convertToUIForm(result);
+            if ($scope.entry.canEdit)
+                $scope.newParameter = {edit: false};
 
-                // get sample count, comment count etc
-                Util.get("rest/parts/" + $stateParams.id + "/statistics", function (stats) {
-                    $scope.entryStatistics = stats;
-                }, params);
+            $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
+            $scope.entry.remote = params.remote;
 
-            }, params, function (error) {
-                if (error.status === 404)
-                    $scope.notFound = true;
-                else if (error.status === 403)
-                    $scope.noAccess = true;
-            });
+            // get sample count, comment count etc
+            Util.get("rest/parts/" + $stateParams.id + "/statistics", function (stats) {
+                $scope.entryStatistics = stats;
+            }, params);
 
-        var menuSubDetails = $scope.subDetails = EntryService.getMenuSubDetails();
+        }, params, function (error) {
+            if (error.status === 404)
+                $scope.notFound = true;
+            else if (error.status === 403)
+                $scope.noAccess = true;
+        });
+
+        var menuSubDetails = $scope.subDetails = EntryService.getMenuSubDetails(params.remote);
 
         $scope.showSelection = function (index) {
             angular.forEach(menuSubDetails, function (details) {

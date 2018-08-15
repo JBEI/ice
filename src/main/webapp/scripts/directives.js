@@ -42,6 +42,9 @@ iceDirectives.directive("iceActionMenu", function () {
 iceDirectives.directive("iceEntryAttachment", function () {
     return {
         restrict: "E",
+        scope: {
+            remote: '='
+        },
         templateUrl: "scripts/entry/entry-attachment.html"
     }
 });

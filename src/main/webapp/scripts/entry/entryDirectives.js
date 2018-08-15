@@ -199,9 +199,13 @@ angular.module('ice.entry.directives', [])
                 };
 
                 $scope.fetchEntrySequence = function (entryId) {
-                    console.log("loading sequence for", entryId);
+                    console.log("loading sequence for", entryId, ", remote", $scope.remote);
                     var url;
-                    if ($scope.remote && $scope.remote.partner) {
+
+                    if ($scope.remote.folderId) {
+                        url = "rest/parts/" + entryId + "/sequence?remote=true&folderId=" + $scope.remote.folderId;
+                        console.log("loading shared sequence");
+                    } else if ($scope.remote.partner) {
                         url = "rest/web/" + $scope.remote.partner + "/entries/" + entryId + "/sequence";
                         console.log("loading remote sequence");
                     } else {

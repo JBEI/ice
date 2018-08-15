@@ -80,6 +80,7 @@ public class PartResource extends RestResource {
             log(userId, "get remote entry");
             long partId = Long.decode(id);
             PartData data = remoteEntries.getEntryDetails(userId, fid, partId);
+            data.setVisibility(Visibility.REMOTE);
             return super.respond(data);
         } else {
             try {
@@ -339,8 +340,12 @@ public class PartResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/attachments")
-    public List<AttachmentInfo> getAttachments(@PathParam("id") final long partId) {
+    public List<AttachmentInfo> getAttachments(@PathParam("id") final long partId,
+                                               @DefaultValue("false") @QueryParam("remote") boolean isRemote,
+                                               @QueryParam("folderId") long fid) {
         final String userId = getUserId();
+        if (isRemote)
+            return new ArrayList<>(); // todo
         return attachments.getByEntry(userId, partId);
     }
 

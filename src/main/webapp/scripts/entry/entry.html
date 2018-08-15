@@ -157,14 +157,14 @@
                     </table>
 
                     <div class="pad_top pull-right">
-                        <ice-entry-attachment></ice-entry-attachment>
+                        <ice-entry-attachment remote="remoteParams"></ice-entry-attachment>
                     </div>
 
                     <div class="pad_top pull-right" ng-if="entry.canEdit">
                         <ice-entry-permission entry='entry'></ice-entry-permission>
                     </div>
 
-                    <div class="pad_top pull-right">
+                    <div class="pad_top pull-right" ng-if="!entry.remote">
                         <ice-entry-folders entry="entry"></ice-entry-folders>
                     </div>
                 </td>
