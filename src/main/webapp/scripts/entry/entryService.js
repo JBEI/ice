@@ -412,6 +412,7 @@ angular.module('ice.entry.service', [])
             }
         };
 
+
         return {
             toStringArray: function (obj) {
                 return toStringArray(obj);
@@ -493,8 +494,9 @@ angular.module('ice.entry.service', [])
                 return entry;
             },
 
-            getMenuSubDetails: function () {
-                return [
+            // retrieves the submenu options for entry (if param set to true then it is for a remote entry)
+            getMenuSubDetails: function (forRemoteEntry) {
+                var details = [
                     {
                         url: 'scripts/entry/general-information.html',
                         display: 'General Information',
@@ -516,32 +518,38 @@ angular.module('ice.entry.service', [])
                         isPrivileged: false,
                         countName: 'commentCount',
                         icon: 'fa-comments-o'
-                    },
-                    {
+                    }];
+
+                if (!forRemoteEntry) {
+                    details.push({
                         id: 'samples',
                         url: 'scripts/entry/samples.html',
                         display: 'Samples',
                         isPrivileged: false,
                         countName: 'sampleCount',
                         icon: 'fa-flask'
-                    },
-                    {
+                    });
+
+                    details.push({
                         id: 'history',
                         url: 'scripts/entry/history.html',
                         display: 'History',
                         isPrivileged: true,
                         countName: 'historyCount',
                         icon: 'fa-history'
-                    },
-                    {
+                    });
+
+                    details.push({
                         id: 'experiments',
                         url: 'scripts/entry/experiments.html',
                         display: 'Experimental Data',
                         isPrivileged: false,
                         countName: 'experimentalDataCount',
                         icon: 'fa-database'
-                    }
-                ];
+                    });
+                }
+
+                return details;
             },
 
             getEntryItems: function () {
