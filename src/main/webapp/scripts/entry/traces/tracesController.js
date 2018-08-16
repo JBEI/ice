@@ -209,10 +209,6 @@ angular.module('ice.entry.traces.controller', [])
         }
     })
     .controller('TraceSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId, Authentication) {
-        $scope.cancelAddSangerTrace = function () {
-            $uibModalInstance.dismiss('cancel');
-        };
-
         $scope.traceSequenceUploader = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "rest/parts/" + entryId + "/traces",
