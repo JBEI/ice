@@ -15,7 +15,7 @@
                 <th class="entry-table-header">Client Id</th>
                 <th class="entry-table-header">Creation Time</th>
                 <th class="entry-table-header" style="width: 85px">Read Only</th>
-                <th class="entry-table-header" style="width: 100px">Allow Delegation</th>
+                <th class="entry-table-header" style="width: 100px" ng-if="user.isAdmin">Allow Delegation</th>
                 <th></th>
             </tr>
             </thead>
@@ -33,7 +33,7 @@
                        'fa-spinner fa-pulse':apiKey.updatingReadOnly}"
                        ng-click="updateAPIReadOnly(apiKey)"></i>
                 </td>
-                <td style="text-align: center">
+                <td style="text-align: center" ng-if="user.isAdmin">
                     <i class="fa fa-fw font-12em cursor_pointer"
                        ng-class="{'fa-check-square-o':apiKey.allowDelegate && !apiKey.updatingDelegate,
                        'fa-square-o': !apiKey.allowDelegate && !apiKey.updatingDelegate,
