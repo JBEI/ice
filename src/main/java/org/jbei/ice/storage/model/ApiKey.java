@@ -48,6 +48,9 @@ public class ApiKey implements DataModel {
     @Column(name = "allow_delegate")
     private Boolean allowDelegate;          // allow other user id actions. this is only applicable if user is admin
 
+    @Column(name = "read_only")
+    private Boolean readOnly;
+
     public long getId() {
         return id;
     }
@@ -116,6 +119,14 @@ public class ApiKey implements DataModel {
         this.allowDelegate = allow;
     }
 
+    public Boolean getReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(Boolean readOnly) {
+        this.readOnly = readOnly;
+    }
+
     @Override
     public AccessKey toDataTransferObject() {
         AccessKey accessKey = new AccessKey();
@@ -127,6 +138,9 @@ public class ApiKey implements DataModel {
         accountTransfer.setEmail(this.ownerEmail);
         if (this.allowDelegate != null)
             accessKey.setAllowDelegate(this.allowDelegate);
+
+        if (this.readOnly != null)
+            accessKey.setReadOnly(this.readOnly);
         accessKey.setAccount(accountTransfer);
         return accessKey;
     }

@@ -35,7 +35,10 @@ angular.module('ice.profile.controller', [])
 
         $scope.updateAPIReadOnly = function (apiKey) {
             apiKey.updatingReadOnly = true;
-            Util.update("rest/api-keys/" + apiKey.id, {readOnly: !apiKey.readOnly}, {}, function (result) {
+            var data = angular.copy(apiKey);
+            data.readOnly = !apiKey.readOnly;
+
+            Util.update("rest/api-keys/" + apiKey.id, data, {}, function (result) {
                 apiKey.readOnly = result.readOnly;
                 apiKey.updatingReadOnly = false;
             }, function (error) {
@@ -44,11 +47,11 @@ angular.module('ice.profile.controller', [])
         };
 
         $scope.updateAPIDelegate = function (apiKey) {
-            console.log("updating", apiKey);
-
-            //apiKey.allowDelegate = !apiKey.allowDelegate
             apiKey.updatingDelegate = true;
-            Util.update("rest/api-keys/" + apiKey.id, {allowDelegate: !apiKey.allowDelegate}, {}, function (result) {
+            var data = angular.copy(apiKey);
+            data.allowDelegate = !apiKey.allowDelegate;
+
+            Util.update("rest/api-keys/" + apiKey.id, data, {}, function (result) {
                 apiKey.allowDelegate = result.allowDelegate;
                 apiKey.updatingDelegate = false;
             }, function (error) {
@@ -60,7 +63,7 @@ angular.module('ice.profile.controller', [])
         $scope.apiKey = undefined;
         $scope.clientIdValidationError = undefined;
         $scope.errorCreatingKey = undefined;
-        $scope.client = {};
+        $scope.client = {readOnly: true};
 
         $scope.cancel = function () {
             $uibModalInstance.close();

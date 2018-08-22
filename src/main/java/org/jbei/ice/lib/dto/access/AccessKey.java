@@ -15,6 +15,7 @@ public class AccessKey implements IDataTransferModel {
     private String token;
     private long creationTime;
     private boolean allowDelegate;
+    private boolean readOnly;
 
     public long getId() {
         return id;
@@ -70,5 +71,13 @@ public class AccessKey implements IDataTransferModel {
 
     public boolean isAllowDelegate() {
         return this.allowDelegate;
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
     }
 }

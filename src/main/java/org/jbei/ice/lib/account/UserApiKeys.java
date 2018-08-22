@@ -150,8 +150,9 @@ public class UserApiKeys {
             if (!new AccountController().isAdministrator(userId))
                 throw new PermissionException("Invalid privileges to update access key");
 
-        // todo : check secrets
         key.setAllowDelegate(apiKey.isAllowDelegate());
+        key.setReadOnly(apiKey.isReadOnly());
+
         return apiKeyDAO.update(key).toDataTransferObject();
     }
 }
