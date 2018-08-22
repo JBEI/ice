@@ -45,6 +45,9 @@ public class ApiKey implements DataModel {
     @Enumerated(value = EnumType.STRING)
     private AccessStatus status;
 
+    @Column(name = "allow_delegate")
+    private Boolean allowDelegate;          // allow other user id actions. this is only applicable if user is admin
+
     public long getId() {
         return id;
     }
@@ -105,6 +108,14 @@ public class ApiKey implements DataModel {
         this.status = status;
     }
 
+    public Boolean getAllowDelegate() {
+        return this.allowDelegate;
+    }
+
+    public void setAllowDelegate(boolean allow) {
+        this.allowDelegate = allow;
+    }
+
     @Override
     public AccessKey toDataTransferObject() {
         AccessKey accessKey = new AccessKey();
@@ -114,6 +125,8 @@ public class ApiKey implements DataModel {
         accessKey.setCreationTime(this.creationTime.getTime());
         AccountTransfer accountTransfer = new AccountTransfer();
         accountTransfer.setEmail(this.ownerEmail);
+        if (this.allowDelegate != null)
+            accessKey.setAllowDelegate(this.allowDelegate);
         accessKey.setAccount(accountTransfer);
         return accessKey;
     }

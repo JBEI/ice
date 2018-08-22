@@ -968,7 +968,7 @@ angular.module('ice.upload.controller', [])
             $uibModalInstance.dismiss('cancel');
         };
     })
-    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookieStore, $routeParams, uploadId,
+    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookies, $routeParams, uploadId,
                                                        $uibModalInstance, FileUploader, addType, linkedAddType, Util) {
         $scope.addType = addType;
         $scope.processing = false;
@@ -992,7 +992,7 @@ angular.module('ice.upload.controller', [])
         };
 
         var createUploader = function () {
-            var sid = $cookieStore.get("sessionId");
+            var sid = $cookies.get("sessionId");
 
             if ($scope.importUploader) {
                 $scope.importUploader.cancelAll();
@@ -1065,7 +1065,7 @@ angular.module('ice.upload.controller', [])
             $window.open(url, "_self");
         }
     })
-    .controller('BulkUploadPermissionsController', function ($scope, $cookieStore, $location, $uibModalInstance,
+    .controller('BulkUploadPermissionsController', function ($scope, $cookies, $location, $uibModalInstance,
                                                              upload, Util) {
         $scope.cancel = function () {
             $uibModalInstance.dismiss('cancel');

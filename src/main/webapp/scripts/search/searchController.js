@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.search.controller', [])
-    .controller('SearchController', function ($scope, $http, $cookieStore, $location, EntryContextUtil,
+    .controller('SearchController', function ($scope, $http, $cookies, $location, EntryContextUtil,
                                               Selection, Util, localStorageService) {
 
         $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
@@ -211,7 +211,7 @@ angular.module('ice.search.controller', [])
             }
         };
     })
-    .controller('SearchInputController', function ($scope, $rootScope, $http, $cookieStore, $location) {
+    .controller('SearchInputController', function ($scope, $rootScope, $http, $cookies, $location) {
         $scope.searchTypes = {all: true, strain: true, plasmid: true, part: true, arabidopsis: true, protein: true};
         $scope.fieldFilters = [];
 

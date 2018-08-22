@@ -9,8 +9,7 @@
         <i style="font-size:60px; float: left;padding-right:10px; color: #3a87ad" class="fa fa-info-circle"></i>
         <span class="font-90em">
             Enter a <b>client identifier</b> to request an API key. API keys enable third party application access to
-            this ICE instance. The use of a unique domain name is recommended. <b>e.g. app.example.com</b>. Duplicate
-            domain names are not permitted.
+            this ICE instance. The use of a unique domain name is recommended. Duplicate domain names are not permitted.
         </span>
     </div>
 
@@ -24,7 +23,7 @@
     <br>
     <form>
         <div class="form-group">
-            <label>Client ID</label> &nbsp; <input type="text"
+            <label>Client ID</label> &nbsp; <input type="text" placeholder="app.example.com"
                                                    ng-class="{'input_box':!clientIdValidationError, 'input_box_error':clientIdValidationError}"
                                                    style="width: 423px; padding: 5px" ng-model="client.id">
             <button type="button" class="btn btn-sm btn-primary" ng-click="generateToken()">Generate</button>

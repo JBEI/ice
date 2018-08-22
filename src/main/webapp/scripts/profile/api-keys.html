@@ -14,6 +14,8 @@
                 <th>&nbsp;</th>
                 <th class="entry-table-header">Client Id</th>
                 <th class="entry-table-header">Creation Time</th>
+                <th class="entry-table-header" style="width: 85px">Read Only</th>
+                <th class="entry-table-header" style="width: 100px">Allow Delegation</th>
                 <th></th>
             </tr>
             </thead>
@@ -24,7 +26,23 @@
                 </td>
                 <td>{{apiKey.clientId}}</td>
                 <td>{{apiKey.creationTime | date:'MMM d, yyyy hh:mm a'}}</td>
-                <td><i class="fa fa-trash-o delete_icon" ng-click="deleteAPIKey(apiKey)"></i></td>
+                <td style="text-align: center">
+                    <i class="fa fa-fw font-12em cursor_pointer"
+                       ng-class="{'fa-check-square-o':apiKey.readOnly && !apiKey.updatingReadOnly,
+                       'fa-square-o': !apiKey.readOnly && !apiKey.updatingReadOnly,
+                       'fa-spinner fa-pulse':apiKey.updatingReadOnly}"
+                       ng-click="updateAPIReadOnly(apiKey)"></i>
+                </td>
+                <td style="text-align: center">
+                    <i class="fa fa-fw font-12em cursor_pointer"
+                       ng-class="{'fa-check-square-o':apiKey.allowDelegate && !apiKey.updatingDelegate,
+                       'fa-square-o': !apiKey.allowDelegate && !apiKey.updatingDelegate,
+                       'fa-spinner fa-pulse':apiKey.updatingDelegate}"
+                       ng-click="updateAPIDelegate(apiKey)"></i>
+                </td>
+                <td>
+                    <i class="fa fa-trash-o font-12em delete_icon pull-right" ng-click="deleteAPIKey(apiKey)"></i>
+                </td>
             </tr>
             </tbody>
         </table>

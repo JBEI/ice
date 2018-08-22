@@ -31,7 +31,30 @@ angular.module('ice.profile.controller', [])
                 if (idx >= 0)
                     $scope.apiKeys.splice(idx, 1);
             });
-        }
+        };
+
+        $scope.updateAPIReadOnly = function (apiKey) {
+            apiKey.updatingReadOnly = true;
+            Util.update("rest/api-keys/" + apiKey.id, {readOnly: !apiKey.readOnly}, {}, function (result) {
+                apiKey.readOnly = result.readOnly;
+                apiKey.updatingReadOnly = false;
+            }, function (error) {
+                apiKey.updatingReadOnly = false;
+            })
+        };
+
+        $scope.updateAPIDelegate = function (apiKey) {
+            console.log("updating", apiKey);
+
+            //apiKey.allowDelegate = !apiKey.allowDelegate
+            apiKey.updatingDelegate = true;
+            Util.update("rest/api-keys/" + apiKey.id, {allowDelegate: !apiKey.allowDelegate}, {}, function (result) {
+                apiKey.allowDelegate = result.allowDelegate;
+                apiKey.updatingDelegate = false;
+            }, function (error) {
+                apiKey.updatingDelegate = false;
+            })
+        };
     })
     .controller('GenerateApiKeyController', function ($scope, $uibModalInstance, Util) {
         $scope.apiKey = undefined;
@@ -61,7 +84,7 @@ angular.module('ice.profile.controller', [])
             });
         }
     })
-    .controller('ProfileEntryController', function ($scope, $location, $cookieStore, $stateParams, Util) {
+    .controller('ProfileEntryController', function ($scope, $location, $cookies, $stateParams, Util) {
         var profileId = $stateParams.id;
         $scope.profileEntryPopupTemplate = "scripts/folder/template.html";
         $scope.maxSize = 5;
@@ -243,7 +266,7 @@ angular.module('ice.profile.controller', [])
             $scope.editProfile = angular.copy($scope.profile);
         }
     })
-    .controller('ProfileSamplesController', function ($scope, $cookieStore, $location, $stateParams, Util) {
+    .controller('ProfileSamplesController', function ($scope, $cookies, $location, $stateParams, Util) {
         $scope.maxSize = 15;
         $scope.params = {currentPage: 1};
         $scope.pendingSampleRequests = undefined;
@@ -263,7 +286,7 @@ angular.module('ice.profile.controller', [])
             });
         }
     })
-    .controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookieStore, $stateParams,
+    .controller('ProfileGroupsController', function ($rootScope, $scope, $location, $cookies, $stateParams,
                                                      $uibModal, Util) {
         var profileId = $stateParams.id;
         $location.path("profile/" + profileId + "/groups", false);
@@ -379,7 +402,7 @@ angular.module('ice.profile.controller', [])
             })
         }
     })
-    .controller('ProfileGroupsModalController', function ($scope, $http, Util, currentGroup, $cookieStore, $uibModalInstance) {
+    .controller('ProfileGroupsModalController', function ($scope, $http, Util, currentGroup, $cookies, $uibModalInstance) {
         $scope.headerMessage = currentGroup ? "Update \"" + currentGroup.label + "\"" : "Create New Group";
         $scope.webPartners = [];
         $scope.placeHolder = 'User name or email';
@@ -417,7 +440,7 @@ angular.module('ice.profile.controller', [])
                 return;
 
             return $http.get('rest/users/autocomplete', {
-                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                headers: {'X-ICE-Authentication-SessionId': $cookies.get("sessionId")},
                 params: {
                     val: val
                 }
