@@ -187,7 +187,7 @@ angular.module('ice.admin.controller', [])
             });
         }
     })
-    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookieStore, $uibModal, Util,
+    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookies, $uibModal, Util,
                                                           Authentication) {
         $rootScope.error = undefined;
 
@@ -541,7 +541,7 @@ angular.module('ice.admin.controller', [])
             })
         }
     })
-    .controller('AdminGroupsModalController', function ($http, $scope, $cookieStore, $uibModalInstance,
+    .controller('AdminGroupsModalController', function ($http, $scope, $cookies, $uibModalInstance,
                                                         currentGroup, Util) {
         $scope.enteredUser = undefined;
 
@@ -568,7 +568,7 @@ angular.module('ice.admin.controller', [])
 
         $scope.filter = function (val) {
             return $http.get('rest/users/autocomplete', {
-                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                headers: {'X-ICE-Authentication-SessionId': $cookies.get("sessionId")},
                 params: {
                     val: val
                 }
@@ -677,7 +677,7 @@ angular.module('ice.admin.controller', [])
             })
         };
     })
-    .controller('CreateManuscriptController', function ($scope, $uibModalInstance, $cookieStore, $http, manuscript,
+    .controller('CreateManuscriptController', function ($scope, $uibModalInstance, $cookies, $http, manuscript,
                                                         baseUrl, Util) {
         $scope.submitButtonText = "Create";
         $scope.modalHeaderTitle = "Add New Paper";
@@ -713,7 +713,7 @@ angular.module('ice.admin.controller', [])
 
         $scope.filterFolders = function (token) {
             return $http.get('rest/folders/autocomplete', {
-                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                headers: {'X-ICE-Authentication-SessionId': $cookies.get("sessionId")},
                 params: {
                     val: token
                 }

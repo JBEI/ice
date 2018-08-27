@@ -35,6 +35,17 @@ public class ApiKeyResource extends RestResource {
         return super.respond(key);
     }
 
+    @PUT
+    @Path("/{id}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response updateAPIKey(@PathParam("id") long id, AccessKey key) {
+        String userId = requireUserId();
+        log(userId, "updating api key " + id);
+        UserApiKeys apiKeys = new UserApiKeys(userId);
+        return super.respond(apiKeys.update(id, key));
+    }
+
     /**
      * retrieves list of api keys created by user
      */

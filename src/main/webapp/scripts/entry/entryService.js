@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.entry.service', [])
-    .factory('Selection', function ($rootScope, $cookieStore) {
+    .factory('Selection', function ($rootScope, $cookies) {
         var selectedEntries = {};
         var selectedSearchResultsCount = 0;
         var selectedSearchNotificationSent = false;  // send notification when at least one is selected and then none
@@ -10,7 +10,7 @@ angular.module('ice.entry.service', [])
         var canDelete = false;
         var selectedTypes = {};
         var searchQuery = undefined;
-        var userId = $cookieStore.get('userId');
+        var userId = $cookies.get('userId');
 
         return {
             selectEntry: function (entry) {

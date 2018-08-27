@@ -804,7 +804,7 @@ iceControllers.controller('ForgotPasswordController', function ($scope, $resourc
     }
 });
 
-iceControllers.controller('LoginController', function ($scope, $location, $cookieStore, $cookies, $rootScope, Util) {
+iceControllers.controller('LoginController', function ($scope, $location, $cookies, $rootScope, Util) {
 
     // init
     $scope.login = {};
@@ -846,15 +846,15 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
             function (success) {
                 if (success && success.sessionId) {
                     $rootScope.user = success;
-                    $cookieStore.put('userId', success.email);
-                    $cookieStore.put('sessionId', success.sessionId);
+                    $cookies.put('userId', success.email);
+                    $cookies.put('sessionId', success.sessionId);
                     var loginDestination = $cookies.loginDestination || '/';
                     $cookies.loginDestination = null;
                     $location.path(loginDestination);
                     Util.clearFeedback();
                 } else {
-                    $cookieStore.remove('userId');
-                    $cookieStore.remove('sessionId');
+                    $cookies.remove('userId');
+                    $cookies.remove('sessionId');
                 }
                 $scope.login.processing = false;
             }, null, function (error) {
@@ -864,10 +864,10 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
 });
 
 // turning out to be pretty specific to the permissions
-iceControllers.controller('GenericTabsController', function ($scope, $cookieStore) {
+iceControllers.controller('GenericTabsController', function ($scope, $cookies) {
     console.log("GenericTabsController");
     var panes = $scope.panes = [];
-    var sessionId = $cookieStore.get("sessionId");
+    var sessionId = $cookies.get("sessionId");
 
     $scope.activateTab = function (pane) {
         angular.forEach(panes, function (pane) {

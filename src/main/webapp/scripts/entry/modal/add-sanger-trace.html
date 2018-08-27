@@ -1,12 +1,12 @@
 <div class="modal-header">
-    <button type="button" class="close" ng-click="cancelAddSangerTrace()">&times;</button>
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
     <span class="bebas modal-title" style="color: #657B83;font-size: 19px">Add Sanger Trace(s)</span>
 </div>
 
 <div class="modal-body">
     <div class="alert alert-info" style="margin-bottom: 10px">
-        <i style="font-size: 30px" class="fa fa-info-circle pull-left"></i>
-        Upload Fasta, GenBank, or ABI formats (optionally in a zip file)
+        <i style="font-size: 30px" class="fa fa-info-circle pull-left"></i> Upload Fasta, GenBank, or ABI formats
+        (optionally in a zip file)
     </div>
 
     <div class="alert alert-danger" style="margin-bottom: 10px" ng-if="traceUploadError==true">
@@ -22,8 +22,4 @@
         <div class="progress-bar" role="progressbar"
              ng-style="{ 'width': traceSequenceUploader.progress + '%' }"></div>
     </div>
-</div>
-
-<div class="modal-footer">
-    <button class="btn btn-default btn-sm" ng-click="cancelAddSangerTrace()">{{'Close'}}</button>
 </div>

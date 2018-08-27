@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Enables (command line) interaction with BLAST+
- * <p/>
+ * <p>
  * Current usage is for blast searches and auto-annotation support
  *
  * @author Hector Plahar
@@ -229,24 +229,28 @@ public class BlastPlus {
      * @return object wrapper around details of the hit
      */
     private static SearchResult parseBlastOutputLine(String[] line) {
+        try {
+            // extract part information
+            PartData view = new PartData(EntryType.nameToType(line[1]));
+            view.setId(Long.decode(line[0]));
+            view.setName(line[2]);
+            view.setPartId(line[3]);
+            String summary = DAOFactory.getEntryDAO().getEntrySummary(view.getId());
+            view.setShortDescription(summary);
 
-        // extract part information
-        PartData view = new PartData(EntryType.nameToType(line[1]));
-        view.setId(Long.decode(line[0]));
-        view.setName(line[2]);
-        view.setPartId(line[3]);
-        String summary = DAOFactory.getEntryDAO().getEntrySummary(view.getId());
-        view.setShortDescription(summary);
-
-        //search result object
-        SearchResult searchResult = new SearchResult();
-        searchResult.setEntryInfo(view);
-        searchResult.seteValue(line[9]);
-        searchResult.setScore(Float.valueOf(line[11]));
-        searchResult.setAlignment(line[13]);
-        searchResult.setQueryLength(Integer.parseInt(line[12]));
-        searchResult.setNident(Integer.parseInt(line[13]));
-        return searchResult;
+            //search result object
+            SearchResult searchResult = new SearchResult();
+            searchResult.setEntryInfo(view);
+            searchResult.seteValue(line[9]);
+            searchResult.setScore(Float.valueOf(line[11].trim()));
+            searchResult.setAlignment(line[13]);
+            searchResult.setQueryLength(Integer.parseInt(line[12].trim()));
+            searchResult.setNident(Integer.parseInt(line[13].trim()));
+            return searchResult;
+        } catch (Exception e) {
+            Logger.error(e);
+            return null;
+        }
     }
 
     /**
@@ -265,6 +269,8 @@ public class BlastPlus {
 
             for (String[] line : lines) {
                 SearchResult info = parseBlastOutputLine(line);
+                if (info == null)
+                    continue;
 
                 info.setQueryLength(queryLength);
                 String idString = Long.toString(info.getEntryInfo().getId());
@@ -353,7 +359,7 @@ public class BlastPlus {
     /**
      * Re-builds the blast database, using a lock file to prevent concurrent rebuilds.
      * The lock file has a "life-span" of 1 day after which it is deleted.
-     * <p/>
+     * <p>
      * Also, a rebuild can be forced even if a lock file exists which is less than a day old
      *
      * @param force set to true to force a rebuild. Use with caution
@@ -426,7 +432,7 @@ public class BlastPlus {
 
     /**
      * Run the bl2seq program on multiple subjects.
-     * <p/>
+     * <p>
      * This method requires disk space write temporary files. It tries to clean up after itself.
      *
      * @param query   reference sequence.
@@ -492,7 +498,7 @@ public class BlastPlus {
 
     /**
      * Build the blast search or sequence database database.
-     * <p/>
+     * <p>
      * <p/>First dump the sequences from the sql database into a fasta file, than create the blast
      * database by calling formatBlastDb.
      *

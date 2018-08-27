@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.common.service', [])
-    .factory('Util', function ($rootScope, $location, $cookieStore, $cookies, $resource) {
+    .factory('Util', function ($rootScope, $location, $cookies, $resource) {
         return {
             handleError: function (response) {
                 var type;
@@ -10,7 +10,7 @@ angular.module('ice.common.service', [])
                 switch (response.status) {
                     case 401:
                         if ($location.path() != '/login') {
-                            $cookieStore.remove('user');
+                            $cookies.remove('user');
                             $rootScope.user = undefined;
                             $cookies.loginDestination = $location.path();
                             $location.path('/login');
@@ -83,7 +83,7 @@ angular.module('ice.common.service', [])
                 $resource(url, queryParams, {
                     'get': {
                         method: 'GET',
-                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
+                        headers: {'X-ICE-Authentication-SessionId': $cookies.get('sessionId')}
                     }
                 }).get(successHandler, errorCallback);
             },
@@ -107,7 +107,7 @@ angular.module('ice.common.service', [])
                     'list': {
                         method: 'GET',
                         isArray: true,
-                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
+                        headers: {'X-ICE-Authentication-SessionId': $cookies.get('sessionId')}
                     }
                 }).list(successHandler, errorCallback);
             },
@@ -123,7 +123,7 @@ angular.module('ice.common.service', [])
                 $resource(url, params, {
                     'post': {
                         method: 'POST',
-                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
+                        headers: {'X-ICE-Authentication-SessionId': $cookies.get('sessionId')}
                     }
                 }).post(obj, successHandler, errorCallback);
             },
@@ -144,7 +144,7 @@ angular.module('ice.common.service', [])
                 $resource(url, params, {
                     'update': {
                         method: 'PUT',
-                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
+                        headers: {'X-ICE-Authentication-SessionId': $cookies.get('sessionId')}
                     }
                 }).update(obj, successHandler, errorCallback);
             },
@@ -161,7 +161,7 @@ angular.module('ice.common.service', [])
                 $resource(url, params, {
                     'delete': {
                         method: 'DELETE',
-                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')}
+                        headers: {'X-ICE-Authentication-SessionId': $cookies.get('sessionId')}
                     }
                 }).delete(successHandler, errorCallback)
             },
@@ -171,7 +171,7 @@ angular.module('ice.common.service', [])
                 var down = $resource(url, {}, {
                     download: {
                         method: m,
-                        headers: {'X-ICE-Authentication-SessionId': $cookieStore.get('sessionId')},
+                        headers: {'X-ICE-Authentication-SessionId': $cookies.get('sessionId')},
                         responseType: 'arraybuffer',
                         transformResponse: function (data, headers) {
                             return {

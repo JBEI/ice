@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.entry.controller', [])
-    .controller('EntryAttachmentController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, Util, Authentication) {
+    .controller('EntryAttachmentController', function ($scope, $window, $cookies, $stateParams, FileUploader, Util, Authentication) {
 
         // init. get remote
         Util.list("rest/parts/" + $stateParams.id + "/attachments", function (result) {
@@ -71,7 +71,7 @@ angular.module('ice.entry.controller', [])
             confirmObject[idx] = value;
         }
     })
-    .controller('EntryCommentController', function ($scope, $cookieStore, $stateParams, Util) {
+    .controller('EntryCommentController', function ($scope, $cookies, $stateParams, Util) {
         var entryId = $stateParams.id;
         $scope.newComment = {samples: []};
 
@@ -113,7 +113,7 @@ angular.module('ice.entry.controller', [])
                 $scope.newComment.samples.splice(idx, 1);
         };
     })
-    .controller('ShotgunSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, $uibModal, Util) {
+    .controller('ShotgunSequenceController', function ($scope, $window, $cookies, $stateParams, FileUploader, $uibModal, Util) {
         var entryId = $stateParams.id;
         $scope.shotgunUploadError = undefined;
         $scope.maxSize = 5;
@@ -176,11 +176,11 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.downloadShotgunFile = function (sequence) {
-            $window.open("rest/file/shotgunsequence/" + sequence.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
+            $window.open("rest/file/shotgunsequence/" + sequence.fileId + "?sid=" + $cookies.get("sessionId"), "_self");
         };
     })
     .controller('ShotgunSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId,
-                                                                  $cookieStore) {
+                                                                  $cookies) {
         $scope.cancelAddShotgunSequence = function () {
             $uibModalInstance.dismiss('cancel');
         };
@@ -191,7 +191,7 @@ angular.module('ice.entry.controller', [])
             method: 'POST',
             removeAfterUpload: true,
             headers: {
-                "X-ICE-Authentication-SessionId": $cookieStore.get("sessionId")
+                "X-ICE-Authentication-SessionId": $cookies.get("sessionId")
             },
             autoUpload: true,
             queueLimit: 1, // can only upload 1 file
@@ -215,7 +215,7 @@ angular.module('ice.entry.controller', [])
             $scope.shotgunUploadError = true;
         };
     })
-    .controller('EntryExperimentController', function ($scope, $cookieStore, $stateParams, Util) {
+    .controller('EntryExperimentController', function ($scope, $cookies, $stateParams, Util) {
         var entryId = $stateParams.id;
         $scope.experiment = {};
         $scope.addExperiment = false;
@@ -249,7 +249,7 @@ angular.module('ice.entry.controller', [])
             });
         }
     })
-    .controller('PartHistoryController', function ($scope, $window, $cookieStore, $stateParams, Util) {
+    .controller('PartHistoryController', function ($scope, $window, $cookies, $stateParams, Util) {
         var entryId = $stateParams.id;
         $scope.historyParams = {offset: 0, limit: 10, currentPage: 1, maxSize: 5};
 
@@ -274,9 +274,9 @@ angular.module('ice.entry.controller', [])
             });
         }
     })
-    .controller('EditEntryController', function ($scope, $http, $location, $cookieStore, $rootScope, FileUploader,
+    .controller('EditEntryController', function ($scope, $http, $location, $cookies, $rootScope, FileUploader,
                                                  $stateParams, EntryService, Util, $anchorScroll) {
-        var sid = $cookieStore.get("sessionId");
+        var sid = $cookies.get("sessionId");
         var partLinks;
         $scope.entry = {id: $stateParams.id};
 
@@ -434,13 +434,13 @@ angular.module('ice.entry.controller', [])
         };
     })
     .controller('CreateEntryController', function ($http, $scope, $uibModal, $rootScope, FileUploader, $location,
-                                                   $stateParams, $cookieStore, EntryService, Util, $anchorScroll) {
+                                                   $stateParams, $cookies, EntryService, Util, $anchorScroll) {
         $scope.createType = $stateParams.type;
         $scope.showMain = true;
 
         // generate the various link options for selected option
         $scope.linkOptions = EntryService.linkOptions($scope.createType.toLowerCase());
-        var sid = $cookieStore.get("sessionId");
+        var sid = $cookies.get("sessionId");
 
         // retrieves the defaults for the specified type. Note that $scope.part is the main part
         var getPartDefaults = function (type, isMain) {
@@ -731,8 +731,8 @@ angular.module('ice.entry.controller', [])
             $scope.serverError = false;
         };
     })
-    .controller('EntryPermissionController', function ($rootScope, $scope, $cookieStore, filterFilter, Util) {
-        var sessionId = $cookieStore.get("sessionId");
+    .controller('EntryPermissionController', function ($rootScope, $scope, $cookies, filterFilter, Util) {
+        var sessionId = $cookies.get("sessionId");
         var panes = $scope.panes = [];
         $scope.userFilterInput = undefined;
         $scope.canSetPublicPermission = undefined;
@@ -939,7 +939,7 @@ angular.module('ice.entry.controller', [])
                 }, {move: false});
         };
     })
-    .controller('VectorEditorController', function (Util, $scope, $window, entry, remote) {
+    .controller('VectorEditorController', function (Util, $rootScope, $scope, $window, entry, remote) {
         var sequence;
         $scope.updatedSequence = undefined;
 
@@ -1094,7 +1094,7 @@ angular.module('ice.entry.controller', [])
                     }
                 });
                 $scope.vEeditor.updateEditor({
-                    readOnly: remote.remote,
+                    readOnly: remote.remote || !entry.canEdit,
                     sequenceData: data.sequenceData,
                     annotationVisibility: {
                         parts: false,
@@ -1226,7 +1226,7 @@ angular.module('ice.entry.controller', [])
         $scope.addLink = function (part, role) {
             var modalInstance = $uibModal.open({
                 templateUrl: 'scripts/entry/modal/add-link-modal.html',
-                controller: function ($scope, $http, $uibModalInstance, $cookieStore) {
+                controller: function ($scope, $http, $uibModalInstance, $cookies) {
                     $scope.mainEntry = part;
                     $scope.role = role;
                     $scope.loadingAddExistingData = undefined;
@@ -1237,7 +1237,7 @@ angular.module('ice.entry.controller', [])
                         $scope.links = part.linkedParts;
                     }
 
-                    var sessionId = $cookieStore.get("sessionId");
+                    var sessionId = $cookies.get("sessionId");
                     $scope.getEntriesByPartNumber = function (val) {
                         return $http.get('rest/search/filter', {
                             headers: {'X-ICE-Authentication-SessionId': sessionId},

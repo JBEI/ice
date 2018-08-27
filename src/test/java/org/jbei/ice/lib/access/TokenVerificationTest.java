@@ -6,34 +6,23 @@ import org.jbei.ice.lib.account.UserApiKeys;
 import org.jbei.ice.lib.dto.access.AccessKey;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.RemotePartner;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Date;
 
 /**
  * @author Hector Plahar
  */
-public class TokenVerificationTest {
+public class TokenVerificationTest extends HibernateRepositoryTest {
 
     private TokenVerification verification;
 
-    @BeforeClass
-    public static void init() {
-        HibernateUtil.initializeMock();
-    }
-
-    @Before
-    public void setUp() throws Exception {
-        HibernateUtil.beginTransaction();
+    public TokenVerificationTest() {
         verification = new TokenVerification();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
     }
 
     @Test
@@ -48,6 +37,20 @@ public class TokenVerificationTest {
         // verify for another user (cannot use someone else's token)
         Account account1 = AccountCreator.createTestAccount("testVerifyAPIKey2", false);
         String userId1 = account1.getEmail();
+
+        // will fail because delegation not set
+        boolean caught = false;
+        try {
+            verification.verifyAPIKey(key.getToken(), key.getClientId(), userId1);
+        } catch (PermissionException e) {
+            caught = true;
+        }
+        Assert.assertTrue(caught);
+
+        // set delegation and try again
+        key.setAllowDelegate(true);
+        keys.update(key.getId(), key);
+        Assert.assertNotNull(key);
         Assert.assertEquals(userId1, verification.verifyAPIKey(key.getToken(), key.getClientId(), userId1));
     }
 
