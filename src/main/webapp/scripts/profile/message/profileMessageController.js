@@ -54,7 +54,7 @@ angular.module('ice.profile.message.controller', [])
         }
     })
     .
-    controller('CreateMessageController', function ($scope, $uibModalInstance, $http, $cookieStore, Util) {
+    controller('CreateMessageController', function ($scope, $uibModalInstance, $http, $cookies, Util) {
         $scope.newMessage = {accounts: [], userGroups: []};
 
         $scope.createNewMessage = function () {
@@ -88,7 +88,7 @@ angular.module('ice.profile.message.controller', [])
 
         $scope.filter = function (val) {
             return $http.get('rest/users/autocomplete', {
-                headers: {'X-ICE-Authentication-SessionId': $cookieStore.get("sessionId")},
+                headers: {'X-ICE-Authentication-SessionId': $cookies.get("sessionId")},
                 params: {
                     val: val
                 }

@@ -84,8 +84,8 @@
         <input type="text" ng-model="activePart[field.schema]" maxlength="150"
                ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                placeHolder={{field.placeHolder}} style="width:205px;" typeahead-loading="loadingData"
-               uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue) | filter:$viewValue"
-               ng-focus="field.edit=true" ng-blur="field.edit=false">
+               uib-typeahead="result for result in getLocation(field.autoCompleteField, $viewValue)"
+               ng-change="field.invalid=false" ng-focus="field.edit=true" ng-blur="field.edit=false">
         <i ng-show="loadingData" class="fa fa-spinner fa-spin"></i>
     </div>
 

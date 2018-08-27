@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.entry.traces.controller', [])
-    .controller('TraceSequenceController', function ($scope, $window, $cookieStore, $stateParams, FileUploader, $uibModal, Util, Authentication) {
+    .controller('TraceSequenceController', function ($scope, $window, $cookies, $stateParams, FileUploader, $uibModal, Util, Authentication) {
         var entryId = $stateParams.id;
 
         $scope.traceUploadError = undefined;
@@ -83,7 +83,7 @@ angular.module('ice.entry.traces.controller', [])
         };
 
         $scope.downloadTraceFile = function (trace) {
-            $window.open("rest/file/trace/" + trace.fileId + "?sid=" + $cookieStore.get("sessionId"), "_self");
+            $window.open("rest/file/trace/" + trace.fileId + "?sid=" + $cookies.get("sessionId"), "_self");
         };
 
         var convertFeaturedDNASequence = function (result) {
@@ -209,10 +209,6 @@ angular.module('ice.entry.traces.controller', [])
         }
     })
     .controller('TraceSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId, Authentication) {
-        $scope.cancelAddSangerTrace = function () {
-            $uibModalInstance.dismiss('cancel');
-        };
-
         $scope.traceSequenceUploader = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "rest/parts/" + entryId + "/traces",

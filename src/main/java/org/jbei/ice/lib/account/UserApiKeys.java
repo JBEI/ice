@@ -136,4 +136,23 @@ public class UserApiKeys {
         apiKeyDAO.delete(key);
         return true;
     }
+
+    public AccessKey update(long id, AccessKey apiKey) {
+        ApiKey key = apiKeyDAO.get(id);
+        if (key == null)
+            return null;
+
+        if (!apiKey.getSecret().equals(key.getSecret()))
+            throw new PermissionException("Mismatched api secret. Cannot update");
+
+        // must be admin or owner to update
+        if (!this.userId.equalsIgnoreCase(key.getOwnerEmail()))
+            if (!new AccountController().isAdministrator(userId))
+                throw new PermissionException("Invalid privileges to update access key");
+
+        key.setAllowDelegate(apiKey.isAllowDelegate());
+        key.setReadOnly(apiKey.isReadOnly());
+
+        return apiKeyDAO.update(key).toDataTransferObject();
+    }
 }

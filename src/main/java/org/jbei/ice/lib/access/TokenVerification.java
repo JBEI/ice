@@ -12,8 +12,11 @@ import org.jbei.ice.storage.model.RemotePartner;
 import java.util.Optional;
 
 /**
- * Verifies the different tokens that ICE handles including <code>API</code> token,
- * <code>Web of registries token</code>
+ * Verifies the different tokens that ICE handles including
+ * <ul>
+ * <li><code>API</code> token</li>
+ * <li><code>Web of registries token</code></li>
+ * </ul>
  *
  * @author Hector Plahar
  */
@@ -25,6 +28,16 @@ public class TokenVerification {
         this.tokenHash = new TokenHash();
     }
 
+    /**
+     * Verify the API token and return the user id that this validates.
+     * Note that the returned the validated user might be different from the owner of the token
+     * if the api key allows delegation and the owner of the token is an administrator
+     *
+     * @param token    unique token identifier
+     * @param clientId client identifier for the token
+     * @param userId   user id that is the purported owner of the token or the being used to delegate the task
+     * @return user id according to api keys validation
+     */
     public String verifyAPIKey(String token, String clientId, String userId) {
         // hash = (token, client + salt + client)
 
@@ -37,21 +50,25 @@ public class TokenVerification {
         if (!hash_token.equalsIgnoreCase(key.getHashedToken()))
             throw new PermissionException("Invalid token");
 
-        // if the api belongs to an admin, accept whatever user id they present
+        // validate owner; must have a valid account on this instance
         AccountDAO accountDAO = DAOFactory.getAccountDAO();
         Account account = accountDAO.getByEmail(key.getOwnerEmail());
-        if (userId == null)
-            userId = account.getEmail();
+        if (account == null)
+            throw new PermissionException("Invalid token owner");   // this really shouldn't happen
 
-        if (account.getType() == AccountType.ADMIN) {
-            if (account.getEmail().equalsIgnoreCase(userId))
-                return userId;
-            if (accountDAO.getByEmail(userId) == null)
-                throw new PermissionException("Invalid user id");
-            return userId;
-        }
+        // return owner if none specified
+        if (userId == null || key.getOwnerEmail().equalsIgnoreCase(userId))
+            return account.getEmail();
 
-        return key.getOwnerEmail();
+        // must be admin
+        if (account.getType() != AccountType.ADMIN)
+            throw new PermissionException("Invalid API key request.");
+
+        // check if validation is allowed
+        if (key.getAllowDelegate() == null || !key.getAllowDelegate())
+            throw new PermissionException("Invalid API key request. Delegation not permitted.");
+
+        return userId;
     }
 
     public RegistryPartner verifyPartnerToken(String url, String token) {
