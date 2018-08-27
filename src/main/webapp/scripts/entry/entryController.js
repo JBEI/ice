@@ -939,7 +939,7 @@ angular.module('ice.entry.controller', [])
                 }, {move: false});
         };
     })
-    .controller('VectorEditorController', function (Util, $scope, $window, entry, remote) {
+    .controller('VectorEditorController', function (Util, $rootScope, $scope, $window, entry, remote) {
         var sequence;
         $scope.updatedSequence = undefined;
 
@@ -1094,7 +1094,7 @@ angular.module('ice.entry.controller', [])
                     }
                 });
                 $scope.vEeditor.updateEditor({
-                    readOnly: remote.remote,
+                    readOnly: remote.remote || !entry.canEdit,
                     sequenceData: data.sequenceData,
                     annotationVisibility: {
                         parts: false,
