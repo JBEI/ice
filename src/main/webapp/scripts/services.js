@@ -27,28 +27,6 @@ angular.module('iceApp.services', ['ngCookies', 'ngResource'])
                 return $cookies.get('sessionId');
             },
 
-            getLoggedInUser: function () {
-                if ($rootScope.user) {
-                    return $rootScope.user;
-                }
-
-                var sid = $cookies.get('sessionId');
-                return $http.get('rest/accesstokens',
-                    {headers: {'X-ICE-Authentication-SessionId': sid}})
-                    .success(function (data) {
-                        $rootScope.user = data;
-                    })
-                    .error(function (data, status) {
-                        if (status === 401) {
-                            $cookies.remove('userId');
-                            $cookies.remove('sessionId');
-                            if ($location.path() !== '/login')
-                                $cookies.loginDestination = $location.path();
-                            $location.path('/login');
-                        }
-                    });
-            },
-
             isAdmin: function () {
                 if ($rootScope.user) {
                     if (!$rootScope.user.isAdmin)
