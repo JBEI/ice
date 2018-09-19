@@ -5,7 +5,7 @@ import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.dto.Curation;
 import org.jbei.ice.lib.dto.DNAFeature;
 import org.jbei.ice.lib.dto.DNASequence;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.SequenceUtil;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
@@ -45,7 +45,7 @@ public class AnnotationsTest {
         Assert.assertFalse(sequenceDAO.hasSequence(plasmid.getId()));
 
         DNASequence dnaSequence = GeneralParser.parse(sequenceString);
-        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(plasmid);
         sequence = sequenceDAO.saveSequence(sequence);
         Assert.assertNotNull(sequence);

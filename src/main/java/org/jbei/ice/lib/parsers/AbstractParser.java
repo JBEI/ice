@@ -6,7 +6,7 @@ import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.HasEntry;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.SequenceUtil;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
@@ -58,7 +58,7 @@ public abstract class AbstractParser extends HasEntry {
     }
 
     protected SequenceInfo save(DNASequence dnaSequence, String sequenceString) {
-        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
         sequence.setSequenceUser(sequenceString);
         sequence.setEntry(entry);
         if (!StringUtils.isBlank(fileName))

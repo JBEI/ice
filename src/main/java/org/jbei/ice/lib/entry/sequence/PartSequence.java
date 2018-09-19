@@ -233,7 +233,7 @@ public class PartSequence extends HasEntry {
     }
 
     protected SequenceInfo save(FeaturedDNASequence dnaSequence, String sequenceString, String fileName, String entryType) {
-        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
         sequence.setSequenceUser(sequenceString);
         sequence.setIdentifier(dnaSequence.getIdentifier());
         sequence.setEntry(entry);

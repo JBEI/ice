@@ -3,7 +3,7 @@ package org.jbei.ice.storage.hibernate.dao;
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.dto.DNASequence;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.SequenceUtil;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
@@ -28,7 +28,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
 
         // parse sequence and associate with strain
         DNASequence dnaSequence = GeneralParser.parse(sequenceString);
-        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(strain);
 
         Assert.assertNotNull(sequenceDAO.saveSequence(sequence));
@@ -36,7 +36,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
         // create second strain and associate with same sequence
         Strain strain2 = TestEntryCreator.createTestStrain(account);
         dnaSequence = GeneralParser.parse(sequenceString);
-        sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(strain2);
         Assert.assertNotNull(sequenceDAO.saveSequence(sequence));
 
@@ -55,7 +55,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
         Account account = AccountCreator.createTestAccount("SequenceDAOTest.testUpdateSequence", false);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
         DNASequence dnaSequence = GeneralParser.parse(sequenceString);
-        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(plasmid);
         sequence = sequenceDAO.saveSequence(sequence);
         Assert.assertNotNull(sequence);
@@ -98,7 +98,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
         Account account = AccountCreator.createTestAccount("SequenceDAOTest.testGetByEntry", false);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
         DNASequence dnaSequence = GeneralParser.parse(sequenceString);
-        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(plasmid);
         sequence = sequenceDAO.saveSequence(sequence);
         Assert.assertNotNull(sequence);
@@ -114,7 +114,7 @@ public class SequenceDAOTest extends HibernateRepositoryTest {
         Assert.assertFalse(sequenceDAO.hasSequence(plasmid.getId()));
 
         DNASequence dnaSequence = GeneralParser.parse(sequenceString);
-        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(plasmid);
         sequence = sequenceDAO.saveSequence(sequence);
         Assert.assertNotNull(sequence);

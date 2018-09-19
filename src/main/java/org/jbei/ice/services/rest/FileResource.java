@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 @Path("/file")
 public class FileResource extends RestResource {
 
-    private SequenceController sequenceController = new SequenceController();
+    private Sequences sequences = new Sequences();
     private Attachments attachments = new Attachments();
 
     @GET
@@ -183,7 +183,7 @@ public class FileResource extends RestResource {
             RemoteSequence sequence = new RemoteSequence(remoteId, partId);
             wrapper = sequence.get(downloadType);
         } else {
-            wrapper = sequenceController.getSequenceFile(userId, partId, SequenceFormat.fromString(downloadType));
+            wrapper = sequences.getSequenceFile(userId, partId, SequenceFormat.fromString(downloadType));
         }
 
         StreamingOutput stream = output -> {
@@ -272,9 +272,9 @@ public class FileResource extends RestResource {
     public Response createSequenceModel(@FormDataParam("file") InputStream fileInputStream,
                                         @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
         final String fileName = contentDispositionHeader.getFileName();
-        SequenceController sequenceController = new SequenceController();
+        Sequences sequences = new Sequences();
         try {
-            return super.respond(sequenceController.parseSequence(fileInputStream, fileName));
+            return super.respond(sequences.parseSequence(fileInputStream, fileName));
         } catch (InvalidFormatParserException e) {
             throw new WebApplicationException(e.getMessage());
         }

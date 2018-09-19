@@ -10,8 +10,8 @@ import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
+import org.jbei.ice.lib.entry.sequence.Sequences;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -220,7 +220,7 @@ public class EntriesAsCSV {
     }
 
     private void writeZip(Set<Long> sequenceSet) {
-        SequenceController sequenceController = new SequenceController();
+        Sequences sequences = new Sequences();
         Path tmpPath = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY));
         try {
             File tmpZip = File.createTempFile("zip-", ".zip", tmpPath.toFile());
@@ -232,7 +232,7 @@ public class EntriesAsCSV {
             // get sequence formats
             for (long entryId : sequenceSet) {
                 for (String format : formats) {
-                    ByteArrayWrapper wrapper = sequenceController.getSequenceFile(userId, entryId, SequenceFormat.fromString(format));
+                    ByteArrayWrapper wrapper = sequences.getSequenceFile(userId, entryId, SequenceFormat.fromString(format));
                     putZipEntry(wrapper, zos);
                 }
             }
@@ -302,7 +302,7 @@ public class EntriesAsCSV {
     public ByteArrayOutputStream customize(EntrySelection selection, SequenceFormat format) throws IOException {
         Entries retriever = new Entries(this.userId);
         this.entries = retriever.getEntriesFromSelectionContext(selection);
-        SequenceController sequenceController = new SequenceController();
+        Sequences sequences = new Sequences();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         EntryAuthorization entryAuthorization = new EntryAuthorization();
 
@@ -327,7 +327,7 @@ public class EntriesAsCSV {
                 }
 
                 // get the sequence
-                ByteArrayWrapper wrapper = sequenceController.getSequenceFile(userId, entryId, format);
+                ByteArrayWrapper wrapper = sequences.getSequenceFile(userId, entryId, format);
                 if (wrapper == null) {
                     Logger.error("ERROR : no sequence " + entryId);
                     continue;

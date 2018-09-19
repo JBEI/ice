@@ -4,7 +4,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.Sequences;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -27,7 +27,7 @@ public class SequenceResource extends RestResource {
                                     @FormDataParam("file") FormDataContentDisposition contentDisposition) {
         String userId = requireUserId();
         try {
-            SequenceController controller = new SequenceController();
+            Sequences controller = new Sequences();
             List<String> errors = controller.bulkUpdate(userId, fileInputStream);
             return super.respond(errors);
         } catch (PermissionException e) {

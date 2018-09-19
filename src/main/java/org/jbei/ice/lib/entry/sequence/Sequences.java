@@ -20,8 +20,6 @@ import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.search.blast.BlastPlus;
-import org.jbei.ice.lib.utils.SequenceUtils;
-import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
@@ -43,39 +41,45 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * ABI to manipulate {@link Sequence}s.
+ * Represents Sequences in ICE
  *
- * @author Hector Plahar, Timothy Ham, Zinovii Dmytriv
+ * @author Hector Plahar
  */
-public class SequenceController extends HasEntry {
+public class Sequences {
 
     private final SequenceDAO dao;
     private final EntryDAO entryDAO;
     private final EntryAuthorization authorization;
+    private final HasEntry hasEntry;
 
-    public SequenceController() {
+    public Sequences() {
         dao = DAOFactory.getSequenceDAO();
         entryDAO = DAOFactory.getEntryDAO();
+        hasEntry = new HasEntry();
         authorization = new EntryAuthorization();
     }
 
     /**
-     * Save the given {@link Sequence} into the database, with the option to rebuild the search
-     * index.
+     * Persist the passed sequence and associate it with the specified entry
      *
-     * @param userId   unique identifier of user saving sequence
-     * @param sequence sequence to save
-     * @return Saved Sequence
+     * @param userId      unique identifier of user saving sequence
+     * @param entryId     unique identifier to entry this sequence is to be associated with
+     * @param dnaSequence sequence to save
+     * @return saved sequence
+     * @throws PermissionException if the user making the request doesn't have write privileges on the entry associated
+     *                             with the sequence
      */
-    public Sequence save(String userId, Sequence sequence) {
-        authorization.expectWrite(userId, sequence.getEntry());
+    public DNASequence save(String userId, String entryId, DNASequence dnaSequence) {
+        Entry entry = hasEntry.getEntry(entryId);
+        authorization.expectWrite(userId, entry);
+        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
         Sequence result = dao.saveSequence(sequence);
         BlastPlus.scheduleBlastIndexRebuildTask(true);
-        return result;
+        return sequenceToDNASequence(result);
     }
 
     public boolean deleteSequence(String requester, String partId) {
-        Entry entry = getEntry(partId);
+        Entry entry = hasEntry.getEntry(partId);
         authorization.expectWrite(requester, entry);
 
         Sequence sequence = dao.getByEntry(entry);
@@ -121,7 +125,7 @@ public class SequenceController extends HasEntry {
     // responds to remote requested entry sequence
     public FeaturedDNASequence getRequestedSequence(RegistryPartner requestingPartner, String remoteUserId,
                                                     String token, String entryId, long folderId) {
-        Entry entry = getEntry(entryId);
+        Entry entry = hasEntry.getEntry(entryId);
         if (entry == null)
             return null;
 
@@ -154,7 +158,7 @@ public class SequenceController extends HasEntry {
     }
 
     public FeaturedDNASequence retrievePartSequence(String userId, String recordId) {
-        Entry entry = getEntry(recordId);
+        Entry entry = hasEntry.getEntry(recordId);
         if (entry == null)
             throw new IllegalArgumentException("The part " + recordId + " could not be located");
 
@@ -244,121 +248,6 @@ public class SequenceController extends HasEntry {
         return featuredDNASequence;
     }
 
-    /**
-     * Create a {@link Sequence} object from an {@link DNASequence} object.
-     *
-     * @param dnaSequence object to convert
-     * @return Translated Sequence object.
-     */
-    public static Sequence dnaSequenceToSequence(DNASequence dnaSequence) {
-        if (dnaSequence == null) {
-            return null;
-        }
-
-        String fwdHash = "";
-        String revHash = "";
-
-        String sequenceString = dnaSequence.getSequence();
-        if (!StringUtils.isEmpty(sequenceString)) {
-            fwdHash = SequenceUtils.calculateSequenceHash(sequenceString);
-            try {
-                revHash = SequenceUtils.calculateSequenceHash(SequenceUtils.reverseComplement(sequenceString));
-            } catch (UtilityException e) {
-                revHash = "";
-            }
-        }
-
-        Sequence sequence = new Sequence(sequenceString, "", fwdHash, revHash, null);
-        Set<SequenceFeature> sequenceFeatures = sequence.getSequenceFeatures();
-
-        if (dnaSequence instanceof FeaturedDNASequence) {
-            FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) dnaSequence;
-            sequence.setUri(featuredDNASequence.getUri());
-            sequence.setComponentUri(featuredDNASequence.getDcUri());
-            sequence.setIdentifier(featuredDNASequence.getIdentifier());
-
-            if (featuredDNASequence.getFeatures() != null && !featuredDNASequence.getFeatures().isEmpty()) {
-                for (DNAFeature dnaFeature : featuredDNASequence.getFeatures()) {
-                    List<DNAFeatureLocation> locations = dnaFeature.getLocations();
-                    String featureSequence = "";
-
-                    for (DNAFeatureLocation location : locations) {
-                        int genbankStart = location.getGenbankStart();
-                        int end = location.getEnd();
-
-                        if (genbankStart < 1) {
-                            genbankStart = 1;
-                        } else if (genbankStart > featuredDNASequence.getSequence().length()) {
-                            genbankStart = featuredDNASequence.getSequence().length();
-                        }
-
-                        if (end < 1) {
-                            end = 1;
-                        } else if (end > featuredDNASequence.getSequence().length()) {
-                            end = featuredDNASequence.getSequence().length();
-                        }
-
-                        if (genbankStart > end) { // over zero case
-                            featureSequence = featuredDNASequence.getSequence().substring(
-                                    genbankStart - 1, featuredDNASequence.getSequence().length());
-                            featureSequence += featuredDNASequence.getSequence().substring(0, end);
-                        } else { // normal
-                            featureSequence = featuredDNASequence.getSequence().substring(genbankStart - 1, end);
-                        }
-
-                        if (dnaFeature.getStrand() == -1) {
-                            try {
-                                featureSequence = SequenceUtils.reverseComplement(featureSequence);
-                            } catch (UtilityException e) {
-                                featureSequence = "";
-                            }
-                        }
-                    }
-
-                    SequenceFeature.AnnotationType annotationType = null;
-                    if (dnaFeature.getAnnotationType() != null && !dnaFeature.getAnnotationType().isEmpty()) {
-                        annotationType = SequenceFeature.AnnotationType.valueOf(dnaFeature.getAnnotationType());
-                    }
-
-                    String name = dnaFeature.getName().length() < 127 ? dnaFeature.getName()
-                            : dnaFeature.getName().substring(0, 123) + "...";
-                    Feature feature = new Feature(name, dnaFeature.getIdentifier(), featureSequence,
-                            dnaFeature.getType());
-                    if (dnaFeature.getLocations() != null && !dnaFeature.getLocations().isEmpty())
-                        feature.setUri(dnaFeature.getLocations().get(0).getUri());
-
-                    SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature,
-                            dnaFeature.getStrand(), name,
-                            dnaFeature.getType(), annotationType);
-                    sequenceFeature.setUri(dnaFeature.getUri());
-
-                    for (DNAFeatureLocation location : locations) {
-                        int start = location.getGenbankStart();
-                        int end = location.getEnd();
-                        AnnotationLocation annotationLocation = new AnnotationLocation(start, end, sequenceFeature);
-                        sequenceFeature.getAnnotationLocations().add(annotationLocation);
-                    }
-
-                    ArrayList<SequenceFeatureAttribute> sequenceFeatureAttributes = new ArrayList<>();
-                    if (dnaFeature.getNotes() != null && dnaFeature.getNotes().size() > 0) {
-                        for (DNAFeatureNote dnaFeatureNote : dnaFeature.getNotes()) {
-                            SequenceFeatureAttribute sequenceFeatureAttribute = new SequenceFeatureAttribute();
-                            sequenceFeatureAttribute.setSequenceFeature(sequenceFeature);
-                            sequenceFeatureAttribute.setKey(dnaFeatureNote.getName());
-                            sequenceFeatureAttribute.setValue(dnaFeatureNote.getValue());
-                            sequenceFeatureAttribute.setQuoted(dnaFeatureNote.isQuoted());
-                            sequenceFeatureAttributes.add(sequenceFeatureAttribute);
-                        }
-                    }
-
-                    sequenceFeature.getSequenceFeatureAttributes().addAll(sequenceFeatureAttributes);
-                    sequenceFeatures.add(sequenceFeature);
-                }
-            }
-        }
-
-        return sequence;
-    }
 
     public ByteArrayWrapper getSequenceFile(String userId, long partId, SequenceFormat format) {
         Entry entry = entryDAO.get(partId);
@@ -443,7 +332,7 @@ public class SequenceController extends HasEntry {
             if (dnaSequence == null)
                 throw new InvalidFormatParserException("Could not parse sequence string");
 
-            Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+            Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
             sequence.setSequenceUser(sequenceString);
             if (!StringUtils.isBlank(fileName))
                 sequence.setFileName(fileName);
@@ -517,7 +406,7 @@ public class SequenceController extends HasEntry {
                         dao.deleteSequence(sequence);
                     }
 
-                    sequence = dnaSequenceToSequence(dnaSequence);
+                    sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
                     sequence.setEntry(entry);
                     sequence = dao.saveSequence(sequence);
                     if (sequence == null)

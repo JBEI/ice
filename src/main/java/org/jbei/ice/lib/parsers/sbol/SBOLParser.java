@@ -7,8 +7,8 @@ import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryLinks;
 import org.jbei.ice.lib.entry.LinkType;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
+import org.jbei.ice.lib.entry.sequence.SequenceUtil;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.genbank.GenBankParser;
@@ -117,7 +117,7 @@ public class SBOLParser extends AbstractParser {
             if (out.size() > 0) {
                 GenBankParser parser = new GenBankParser();
                 dnaSequence = parser.parse(new String(out.toByteArray()));
-                sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+                sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
             }
         } catch (InvalidFormatParserException e) {
             Logger.error("Error parsing generated genBank: " + e.getMessage());

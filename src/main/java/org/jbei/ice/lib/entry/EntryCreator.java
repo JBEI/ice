@@ -6,7 +6,8 @@ import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.SequenceUtil;
+import org.jbei.ice.lib.entry.sequence.Sequences;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.utils.Utils;
@@ -230,9 +231,9 @@ public class EntryCreator extends HasEntry {
 
         // check sequence
         if (sequence != null) {
-            SequenceController sequenceController = new SequenceController();
-            FeaturedDNASequence dnaSequence = sequenceController.sequenceToDNASequence(sequence);
-            sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+            Sequences sequences = new Sequences();
+            FeaturedDNASequence dnaSequence = sequences.sequenceToDNASequence(sequence);
+            sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
             sequence.setEntry(entry);
             sequenceDAO.saveSequence(sequence);
             BlastPlus.scheduleBlastIndexRebuildTask(true);

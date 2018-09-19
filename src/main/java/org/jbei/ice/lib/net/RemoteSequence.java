@@ -4,7 +4,7 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.SequenceUtil;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.services.rest.IceRestClient;
@@ -76,7 +76,7 @@ public class RemoteSequence {
         String name = featuredDNASequence.getName();
 
         try {
-            Sequence sequence = SequenceController.dnaSequenceToSequence(featuredDNASequence);
+            Sequence sequence = SequenceUtil.dnaSequenceToSequence(featuredDNASequence);
             ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
             AbstractFormatter formatter;
 

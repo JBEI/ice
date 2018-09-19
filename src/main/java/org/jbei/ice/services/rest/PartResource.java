@@ -23,8 +23,8 @@ import org.jbei.ice.lib.entry.attachment.Attachments;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.entry.sequence.PartTraceSequences;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
+import org.jbei.ice.lib.entry.sequence.Sequences;
 import org.jbei.ice.lib.entry.sequence.annotation.Annotations;
 import org.jbei.ice.lib.experiment.Experiments;
 import org.jbei.ice.lib.experiment.Study;
@@ -59,7 +59,7 @@ public class PartResource extends RestResource {
 
     private EntryController controller = new EntryController();
     private Attachments attachments = new Attachments();
-    private SequenceController sequenceController = new SequenceController();
+    private Sequences sequences = new Sequences();
     private SampleService sampleService = new SampleService();
     private RemoteEntries remoteEntries = new RemoteEntries();
 
@@ -571,13 +571,13 @@ public class PartResource extends RestResource {
                 if (StringUtils.isEmpty(userId)) {
                     RegistryPartner partner = requireWebPartner();
                     if (StringUtils.isEmpty(remoteUserToken) || fid == 0) {
-                        sequence = sequenceController.retrievePartSequence(userId, partId);
+                        sequence = sequences.retrievePartSequence(userId, partId);
                     } else {
-                        sequence = sequenceController.getRequestedSequence(partner, remoteUserId, remoteUserToken, partId, fid);
+                        sequence = sequences.getRequestedSequence(partner, remoteUserId, remoteUserToken, partId, fid);
                     }
                 } else {
                     // user id can be null if partId is public
-                    sequence = sequenceController.retrievePartSequence(userId, partId);
+                    sequence = sequences.retrievePartSequence(userId, partId);
                 }
             }
             return Response.status(Response.Status.OK).entity(sequence).build();
@@ -610,7 +610,7 @@ public class PartResource extends RestResource {
     public Response deleteSequence(@PathParam("id") final String partId) {
         final String userId = requireUserId();
         try {
-            return super.respond(sequenceController.deleteSequence(userId, partId));
+            return super.respond(sequences.deleteSequence(userId, partId));
         } catch (PermissionException e) {
             Logger.error(e);
             throw new WebApplicationException(e.getMessage(), Response.Status.FORBIDDEN);
