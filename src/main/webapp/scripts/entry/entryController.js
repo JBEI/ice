@@ -1384,35 +1384,6 @@ angular.module('ice.entry.controller', [])
             });
         };
 
-// todo :
-
-        var setPartDefaults = function (user) {
-            var partDefaults = {
-                type: $scope.createType,
-                links: [
-                    {}
-                ],
-                selectionMarkers: [
-                    {}
-                ],
-                bioSafetyLevel: '1',
-                status: 'Complete',
-                creator: user.firstName + ' ' + user.lastName,
-                creatorEmail: user.email
-            };
-
-            $scope.part = angular.copy(partDefaults);
-        };
-
-        if (!$rootScope.user) {
-            Authentication.getLoggedInUser().then(function (result) {
-                var user = result.data;
-                setPartDefaults(user);
-            });
-        } else {
-            setPartDefaults($rootScope.user);
-        }
-
         $scope.sbolShowHide = function () {
             $scope.showSBOL = !$scope.showSBOL;
         };

@@ -268,7 +268,7 @@ angular.module('ice.upload.controller', [])
 
                     case 'bioSafetyLevel':
                         object.type = 'autocomplete';
-                        object.source = ['1', '2', ''];
+                        object.source = ['1', 'Level 1', '2', 'Level 2', 'Restricted', ''];
                         object.validator = function (value, callback) {
                             callback(object.source.indexOf(value) != -1);
                         };
@@ -401,6 +401,13 @@ angular.module('ice.upload.controller', [])
                 if (!object)
                     return;
 
+                if (object.bioSafetyLevel == "Level 1")
+                    object.bioSafetyLevel = 1;
+                else if (object.bioSafetyLevel == "Level 2")
+                    object.bioSafetyLevel = 2;
+                else if (object.bioSafetyLevel == "Restricted")
+                    object.bioSafetyLevel = "-1";
+
                 $scope.saving = true;
                 if ($scope.bulkUpload.id === undefined) {
                     // create draft of specified type
@@ -427,6 +434,8 @@ angular.module('ice.upload.controller', [])
                         });
                     } else {
                         // update entry for existing upload
+                        console.log(object);
+
                         Util.post('rest/uploads/' + $scope.bulkUpload.id + '/entry/' + object.id, object,
                             function (updatedEntry) {
                                 $scope.bulkUpload.lastUpdate = updatedEntry.modificationTime;

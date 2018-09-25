@@ -63,7 +63,7 @@ public class AccountUtils {
         account.setFirstName(info.getFirstName());
         account.setLastName(info.getLastName());
         account.setInitials(info.getInitials());
-        account.setEmail(info.getEmail().trim());
+        account.setEmail(info.getEmail().trim().toLowerCase());
         account.setDescription(info.getDescription());
         account.setInstitution(info.getInstitution());
         account.setIp("");
