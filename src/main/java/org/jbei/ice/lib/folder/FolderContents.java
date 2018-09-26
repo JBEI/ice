@@ -182,7 +182,7 @@ public class FolderContents {
 
         List<Long> entries = retriever.getEntriesFromSelectionContext(entryLocation);
         if (StringUtils.isEmpty(userId)) {
-            ArrayList<FolderDetails> destination = entryLocation.getDestination();
+            List<FolderDetails> destination = entryLocation.getDestination();
 
             // check that folder is transferred before rejecting
             if (destination == null || destination.isEmpty())

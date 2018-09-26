@@ -22,10 +22,10 @@ public class EntrySelection implements IDataTransferModel {
     private EntryType entryType;                    // type of entry selected. It is superseded by the all parameter.
     private EntrySelectionType selectionType;       // context selection type
     private SearchQuery searchQuery;                // search query if selection type is "SEARCH"
-    private ArrayList<FolderDetails> destination;   // destination for entry selection
+    private List<FolderDetails> destination;   // destination for entry selection
     private String folderId;                        // personal, available, shared, drafts, pending, actual folderId
-    private ArrayList<Long> entries;                // if no context, then ad hoc selection
-    private ArrayList<PartData> remoteEntries;      // record Ids of adhoc remote entry selection
+    private List<Long> entries;                // if no context, then ad hoc selection
+    private List<PartData> remoteEntries;      // record Ids of adhoc remote entry selection
 
     public EntrySelection() {
         entries = new ArrayList<>();
@@ -64,11 +64,11 @@ public class EntrySelection implements IDataTransferModel {
         this.searchQuery = searchQuery;
     }
 
-    public ArrayList<FolderDetails> getDestination() {
+    public List<FolderDetails> getDestination() {
         return destination;
     }
 
-    public void setDestination(ArrayList<FolderDetails> destination) {
+    public void setDestination(List<FolderDetails> destination) {
         this.destination = destination;
     }
 
@@ -80,7 +80,7 @@ public class EntrySelection implements IDataTransferModel {
         this.folderId = folderId;
     }
 
-    public ArrayList<Long> getEntries() {
+    public List<Long> getEntries() {
         return entries;
     }
 
