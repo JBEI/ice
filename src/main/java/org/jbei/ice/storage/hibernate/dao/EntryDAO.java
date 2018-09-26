@@ -623,6 +623,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
+    // todo : replace with hibernate search
     public List<Long> getVisibleEntryIds(boolean admin, Group publicGroup) {
         try {
             if (admin) {
