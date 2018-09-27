@@ -122,7 +122,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
     /**
      * Retrieve an {@link Entry} by it's part number.
-     * <p/>
+     * <p>
      * If multiple Entries exist with the same part number, this method throws an exception.
      *
      * @param partNumber part number associated with entry
@@ -449,24 +449,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    // todo : look at this again (can restrict to strain type and also order by id)
-    public synchronized void generateNextStrainNameForEntry(Entry entry, String prefix) {
+    public void generateNextStrainNameForEntry(Entry entry, String prefix) {
         try {
-            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
-            Root<Entry> from = query.from(Entry.class);
-            query.where(getBuilder().like(getBuilder().lower(from.get("name")), prefix.toLowerCase() + "1%"))
-                    .orderBy(getBuilder().desc(from.get("name")));
-            Entry result = currentSession().createQuery(query).setMaxResults(1).uniqueResult();
-            int next = 0;
-            if (result != null) {
-                String name = result.getName();
-                next = Integer.decode(name.split(prefix)[1]);
-            }
-            next += 1;
-            String nextName = prefix + next;
-            entry.setName(nextName);
-            currentSession().update(entry);
 
+            String nextName = prefix + String.format("%06d", entry.getId());
+            entry.setName(nextName);
+            update(entry);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
