@@ -19,6 +19,7 @@ import org.jbei.ice.storage.model.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Service for dealing with {@link Sample}s
@@ -412,5 +413,13 @@ public class SampleService extends HasEntry {
             partSamples.add(sample.toDataTransferObject());
         }
         return partSamples;
+    }
+
+    public List<StorageLocation> getStorageLocations(String userId, SampleType type, int offset, int limit) {
+        sampleAuthorization.expectAdmin(userId);
+        List<StorageLocation> locations = new ArrayList<>();
+        List<Storage> storages = storageDAO.get(type, offset, limit);
+        locations.addAll(storages.stream().map(Storage::toDataTransferObject).collect(Collectors.toList()));
+        return locations;
     }
 }
