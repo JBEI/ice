@@ -171,7 +171,7 @@ public class PartSequence extends HasEntry {
         BlastPlus.scheduleBlastIndexRebuildTask(true);
 
         // rebuild the trace sequence alignments
-        rebuldTraceAlignments();
+        rebuildTraceAlignments();
 
         return sequenceToDNASequence(sequence);
     }
@@ -197,12 +197,12 @@ public class PartSequence extends HasEntry {
         Sequence sequence = dnaSequenceToSequence(dnaSequence);
         sequence.setEntry(entry);
         sequence = sequenceDAO.saveSequence(sequence);
-        rebuldTraceAlignments();
+        rebuildTraceAlignments();
         BlastPlus.scheduleBlastIndexRebuildTask(true);
         return sequenceToDNASequence(sequence);
     }
 
-    protected void rebuldTraceAlignments() {
+    protected void rebuildTraceAlignments() {
         SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
         sequenceAnalysisController.rebuildAllAlignments(entry);
     }
