@@ -1013,7 +1013,7 @@ angular.module('ice.entry.controller', [])
 
                         var featureMap = {};
 
-                        for (const prop in sequenceData.features) {
+                        for (var prop in sequenceData.features) {
                             if (!sequenceData.features.hasOwnProperty(prop))
                                 continue;
 
@@ -1036,7 +1036,7 @@ angular.module('ice.entry.controller', [])
                             }
                         }
 
-                        for (const property in featureMap) {
+                        for (var property in featureMap) {
                             if (!featureMap.hasOwnProperty(property))
                                 continue;
 
@@ -1053,7 +1053,7 @@ angular.module('ice.entry.controller', [])
                     },
 
                     onCopy: function (event, copiedSequenceData, editorState) {
-                        const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
+                        var clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
                         clipboardData.setData('text/plain', copiedSequenceData.sequence);
                         data.selection = editorState.selectionLayer;
                         data.openVECopied = copiedSequenceData;
@@ -1062,7 +1062,7 @@ angular.module('ice.entry.controller', [])
                     },
 
                     onPaste: function (event, editorState) {
-                        const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
+                        var clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
                         var jsonData = clipboardData.getData('application/json');
                         if (jsonData) {
                             jsonData = JSON.parse(jsonData);
