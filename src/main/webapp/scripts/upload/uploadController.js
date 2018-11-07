@@ -91,7 +91,7 @@ angular.module('ice.upload.controller', [])
                 var response = JSON.parse(xhr.responseText);
 
                 if (response && response.filename) {
-                    var ht = angular.element('#dataTable').handsontable('getInstance')
+                    var ht = angular.element('#dataTable').handsontable('getInstance');
                     sheetData[row][col] = response.filename;
                     ht.setDataAtCell(row, col, response.filename, 'loadData');
                 } else {
@@ -195,7 +195,7 @@ angular.module('ice.upload.controller', [])
                     });
                     $(td).empty().append(value).append("&nbsp;").append($del);
                 } else {
-                    var $up = $('<span class="fileUpload"><i class="fa fa-upload opacity_hover opacity_4"></i> Upload '
+                    var $up = $('<span class="fileUpload"><i class="fa fa-upload opacity_4"></i> Upload '
                         + '<input type="file" class="upload" /></span>');
 
                     $up.on("change", function (event) {
@@ -262,7 +262,7 @@ angular.module('ice.upload.controller', [])
                         object.source = ['Complete', 'In Progress', 'Planned', ''];
                         object.allowInvalid = false;
                         object.validator = function (value, callback) {
-                            callback(object.source.indexOf(value) != -1);
+                            callback(object.source.indexOf(value) !== -1);
                         };
                         break;
 
@@ -270,7 +270,7 @@ angular.module('ice.upload.controller', [])
                         object.type = 'autocomplete';
                         object.source = ['1', 'Level 1', '2', 'Level 2', 'Restricted', ''];
                         object.validator = function (value, callback) {
-                            callback(object.source.indexOf(value) != -1);
+                            callback(object.source.indexOf(value) !== -1);
                         };
                         object.allowInvalid = false;
                         break;
