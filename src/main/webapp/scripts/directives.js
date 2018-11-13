@@ -43,7 +43,8 @@ iceDirectives.directive("iceEntryAttachment", function () {
     return {
         restrict: "E",
         scope: {
-            remote: '='
+            remote: '=',
+            canEdit: '='
         },
         templateUrl: "scripts/entry/entry-attachment.html"
     }
