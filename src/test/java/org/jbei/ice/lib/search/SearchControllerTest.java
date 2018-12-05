@@ -83,6 +83,11 @@ public class SearchControllerTest {
         Assert.assertNotNull(results);
         Assert.assertEquals(1, results.getResultCount());
 
+        // case insensentive
+        results = controller.runSearch(account.getEmail().toLowerCase(), query);
+        Assert.assertNotNull(results);
+        Assert.assertEquals(1, results.getResultCount());
+
         // search for promoters
         query.setQueryString("pTet");
         results = controller.runSearch(account.getEmail(), query);

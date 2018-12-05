@@ -6,13 +6,11 @@ import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.storage.ModelToInfoFactory;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Strain;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -21,16 +19,9 @@ import java.util.HashSet;
 /**
  * @author Hector Plahar, Elena Aravina
  */
-public class EntryControllerTest {
+public class EntryControllerTest extends HibernateRepositoryTest {
 
-    private EntryController controller;
-
-    @Before
-    public void setUp() {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
-        controller = new EntryController();
-    }
+    private EntryController controller = new EntryController();
 
     @Test
     public void testUpdatePart() throws Exception {
@@ -160,10 +151,5 @@ public class EntryControllerTest {
             else
                 Assert.assertTrue(caught);
         }
-    }
-
-    @After
-    public void tearDown() {
-        HibernateUtil.commitTransaction();
     }
 }

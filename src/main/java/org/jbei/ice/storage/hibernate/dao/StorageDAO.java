@@ -1,5 +1,6 @@
 package org.jbei.ice.storage.hibernate.dao;
 
+import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.sample.SampleType;
 import org.jbei.ice.storage.DAOException;
@@ -51,6 +52,18 @@ public class StorageDAO extends HibernateRepository<Storage> {
             String msg = "Could not get Storage by index: " + index + " " + e.toString();
             Logger.error(msg, e);
             throw new DAOException(msg);
+        }
+    }
+
+    public List<Storage> get(SampleType type, int offset, int limit) {
+        try {
+            CriteriaQuery<Storage> query = getBuilder().createQuery(Storage.class);
+            Root<Storage> from = query.from(Storage.class);
+            query.where(getBuilder().equal(from.get("storageType"), type)).orderBy(getBuilder().asc(from.get("id")));
+            return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(offset).getResultList();
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
         }
     }
 

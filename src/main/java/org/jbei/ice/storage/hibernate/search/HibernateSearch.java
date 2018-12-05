@@ -278,7 +278,7 @@ public class HibernateSearch {
         fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
 
         // enable security filter if needed
-        fullTextQuery = checkEnableSecurityFilter(userId, fullTextQuery);
+        fullTextQuery = checkEnableSecurityFilter(userId.toLowerCase(), fullTextQuery);
 
         // check sample
         checkEnableHasAttribute(fullTextQuery, searchQuery.getParameters());
@@ -291,7 +291,7 @@ public class HibernateSearch {
 
         // execute search
         result = fullTextQuery.list();
-        Logger.info(resultCount + " results for \"" + searchQuery.getQueryString() + "\"");
+        Logger.info(userId + ": " + resultCount + " results for \"" + searchQuery.getQueryString() + "\"");
 
         LinkedList<SearchResult> searchResults = new LinkedList<>();
         for (Object[] objects : (Iterable<Object[]>) result) {

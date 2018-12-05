@@ -71,7 +71,7 @@ public class Authorization<T extends DataModel> {
 
     public void expectRead(String userId, T object) throws PermissionException {
         if (!canRead(userId, object))
-            throw new PermissionException(userId + " does not have access to object " + object);
+            throw new PermissionException(userId + " does not have access to object " + object.toString() + " with id " + object.getId());
     }
 
     /**

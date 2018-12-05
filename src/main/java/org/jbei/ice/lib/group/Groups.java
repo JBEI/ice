@@ -225,6 +225,7 @@ public class Groups {
 
         group.setLabel(userGroup.getLabel());
         group.setDescription(userGroup.getDescription());
+        group.setAutoJoin(userGroup.isAutoJoin());
         group = dao.update(group);
 
         setGroupMembers(group, userGroup.getMembers(), userGroup.getRemoteMembers());

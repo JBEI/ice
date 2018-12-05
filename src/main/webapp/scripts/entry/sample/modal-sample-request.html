@@ -14,16 +14,16 @@
 
     <div class="radio" style="padding-left: 40px">
         <label>
-            <input type="radio" name="sampleTypeOptions" ng-model="userData.sampleType" value="LIQUID_CULTURE">Liquid
-            Culture
+            <input type="radio" name="sampleTypeOptions" ng-click="selectedSampleType('LIQUID_CULTURE')"
+                   ng-model="userData.sampleType" value="LIQUID_CULTURE">Liquid Culture
         </label>
     </div>
 
     <div class="radio" style="padding-left: 40px">
         <label>
-            <input type="radio" name="sampleTypeOptions" ng-model="userData.sampleType" value="STREAK_ON_AGAR_PLATE">Streak
-            on
-            Agar Plate
+            <input type="radio" name="sampleTypeOptions" ng-model="userData.sampleType"
+                   ng-click="selectedSampleType('STREAK_ON_AGAR_PLATE')" value="STREAK_ON_AGAR_PLATE">Streak on Agar
+            Plate
         </label>
     </div>
 
@@ -32,7 +32,7 @@
     <strong>Requested Growth Temp &deg;C</strong>
 
     <div style="padding-left: 40px">
-        <select class="input_box pull_down"
+        <select class="input_box"
                 ng-model="sampleTemp" ng-options="option.value for option in tempRange">
         </select>
     </div>
@@ -42,12 +42,12 @@
     <strong>Specify Media Antibiotics &amp; Carbon source</strong>
 
     <div style="padding-left: 40px">
-        <select class="input_box pull_down" ng-model="userData.plateDescription"
+        <select class="input_box" ng-model="userData.plateDescription" ng-disabled="!plateInformationOptions"
                 ng-options="option.value for option in plateInformationOptions">
         </select>
 
-        <input ng-if="userData.plateDescription.value =='Other'" class="input_box"
-               ng-model="userData.plateDescriptionText"/>
+        <input ng-if="userData.plateDescription.value =='I will deliver my own media'" class="input_box"
+               ng-model="userData.plateDescriptionText" placeholder="Enter media"/>
     </div>
 </div>
 

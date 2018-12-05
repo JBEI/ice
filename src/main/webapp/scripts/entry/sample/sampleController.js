@@ -5,7 +5,7 @@ angular.module('ice.entry.sample.controller', [])
         //
         // init (fetch all samples on the plate)
         //
-        if ($scope.sample.location.type == 'PLATE96') {
+        if ($scope.sample.location.type === "PLATE96") {
             Util.get("rest/samples/location/" + $scope.sample.location.id, function (result) {
                 $scope.sampleMap = result.sampleMap;
             });
@@ -17,7 +17,7 @@ angular.module('ice.entry.sample.controller', [])
 
         $scope.selectSample = function (data) {
             $scope.selected = angular.copy(data);
-            if (data.location.type == "PLATE96") {
+            if (data.location.type === "PLATE96") {
                 if (data.location.child.child)
                     $scope.selected.location = data.location.child.child;
                 else
@@ -71,8 +71,8 @@ angular.module('ice.entry.sample.controller', [])
             });
         }
     })
-    .controller('UploadSampleInformationController', function ($scope, plateNumber, existing,
-                                                               $uibModalInstance, FileUploader, Authentication) {
+    .controller('UploadSampleInformationController', function ($scope, plateNumber, existing, $uibModalInstance,
+                                                               FileUploader, Authentication) {
         $scope.plateNumber = plateNumber;
         $scope.sampleMap = existing;
 
@@ -90,8 +90,8 @@ angular.module('ice.entry.sample.controller', [])
 
         $scope.sampleInformationUploader.onSuccessItem = function (item, response, status, headers) {
             $scope.processingInProgress = false;
-            
-            if (status != "200") {
+
+            if (status !== 200) {
                 $scope.sampleUploadError = true;
                 return;
             }
@@ -141,6 +141,58 @@ angular.module('ice.entry.sample.controller', [])
             return "Unknown error"
         }
     })
+    .controller('SampleOptionsController', function ($rootScope, $scope, $uibModalInstance, SampleService, Util,
+                                                     samples, entryId) {
+        $scope.samples = samples;
+        $scope.tempRange = [{value: 30}, {value: 37}];
+
+        // $scope.plateInformationOptions = [{value: ""}];
+
+        $scope.sampleTemp = $scope.tempRange[0];
+        $scope.userData = {
+            plateDescription: {value: ""},
+            plateDescriptionText: undefined
+        };
+
+        $scope.selectedSampleType = function (type) {
+            if (type === 'LIQUID_CULTURE') {
+                $scope.plateInformationOptions = SampleService.getLiquidCultureOptions();
+            } else {
+                $scope.plateInformationOptions = SampleService.getStreakOnAgarPlateOptions();
+            }
+        };
+
+        $scope.hasComments = function () {
+            for (var i = 0; i < $scope.samples.length; i += 1) {
+                if ($scope.samples[i].comments.length)
+                    return true;
+            }
+            return false;
+        };
+
+        $scope.addSampleToCart = function () {
+            var sampleSelection = {
+                requestType: $scope.userData.sampleType,
+                growthTemperature: $scope.sampleTemp.value,
+                partData: {
+                    id: entryId
+                },
+                plateDescription: $scope.userData.plateDescription.value === "I will deliver my own media" ?
+                    $scope.userData.plateDescriptionText : $scope.userData.plateDescription.value
+            };
+
+            // add selection to shopping cart
+            Util.post("rest/samples/requests", sampleSelection, function () {
+                $rootScope.$emit("SamplesInCart");
+                $uibModalInstance.close('');
+            });
+        };
+
+        $scope.disableAddToCart = function () {
+            return !$scope.userData.sampleType || !$scope.userData.plateDescription.value ||
+                ($scope.userData.plateDescription.value === "I will deliver my own media" && !$scope.userData.plateDescriptionText);
+        }
+    })
     .controller('EntrySampleController', function ($rootScope, $scope, $uibModal, $stateParams, Util, SampleService) {
         var partId = $stateParams.id;
 
@@ -184,69 +236,16 @@ angular.module('ice.entry.sample.controller', [])
         };
 
         $scope.openAddToCart = function (entryId, samples) {
-            var modalInstance = $uibModal.open({
+            $uibModal.open({
                 templateUrl: 'scripts/entry/sample/modal-sample-request.html',
-                controller: function ($scope, samples) {
-                    $scope.samples = samples;
-                    $scope.tempRange = [{value: 30}, {value: 37}];
-                    $scope.plateInformationOptions = [{value: ""},
-                        {value: "LB"},
-                        {value: "LB Apr50"},
-                        {value: "LB Carb100"},
-                        {value: "LB Chlor25"},
-                        {value: "LB Gent30 Kan50 Rif100"},
-                        {value: "LB Kan50"},
-                        {value: "LB Kan50 Rif100 Tet 5"},
-                        {value: "LB Spect100"},
-                        {value: "YPD 1000"},
-                        {value: "CSM -HIS"},
-                        {value: "CSM -HIS -LEU -URA"},
-                        {value: "CSM -LEU"},
-                        {value: "CSM -TRP"},
-                        {value: "CSM -URA"},
-                        {value: "1/2 MS Hygro50"},
-                        {value: "Other"}];
-
-                    $scope.sampleTemp = $scope.tempRange[0];
-                    $scope.userData = {
-                        plateDescription: $scope.plateInformationOptions[0],
-                        plateDescriptionText: undefined
-                    };
-
-                    $scope.hasComments = function () {
-                        for (var i = 0; i < $scope.samples.length; i += 1) {
-                            if ($scope.samples[i].comments.length)
-                                return true;
-                        }
-                        return false;
-                    };
-
-                    $scope.addSampleToCart = function () {
-                        var sampleSelection = {
-                            requestType: $scope.userData.sampleType,
-                            growthTemperature: $scope.sampleTemp.value,
-                            partData: {
-                                id: entryId
-                            },
-                            plateDescription: $scope.userData.plateDescription.value == "Other" ?
-                                $scope.userData.plateDescriptionText : $scope.userData.plateDescription.value
-                        };
-
-                        // add selection to shopping cart
-                        Util.post("rest/samples/requests", sampleSelection, function () {
-                            $rootScope.$emit("SamplesInCart");
-                            modalInstance.close('');
-                        });
-                    };
-
-                    $scope.disableAddToCart = function () {
-                        return !$scope.userData.sampleType || !$scope.userData.plateDescription.value ||
-                            ($scope.userData.plateDescription.value == 'Other' && !$scope.userData.plateDescriptionText);
-                    }
-                },
+                controller: 'SampleOptionsController',
                 resolve: {
                     samples: function () {
                         return samples;
+                    },
+
+                    entryId: function () {
+                        return entryId;
                     }
                 }
             });
