@@ -68,7 +68,7 @@ angular.module('ice.entry.directives', [])
             link: function (scope, element, attrs) {
             },
 
-            template: '<div id="ve-Root"><br><img src="img/loader-mini.gif"> {{$scope.loadMessage || "Loading"}} sequence&hellip;</div>',
+            template: '<div id="ve-Root" style="height: 550px"><br><img src="img/loader-mini.gif"> {{$scope.loadMessage || "Loading"}} sequence&hellip;</div>',
 
             controller: function ($rootScope, $scope, Util, $window) {
                 $rootScope.$on("ReloadVectorViewData", function (event, data) {
@@ -189,8 +189,7 @@ angular.module('ice.entry.directives', [])
                                 type: feature.type,
                                 name: feature.name,
                                 notes: notes,
-                                annotationType: feature.type,
-                                locations: feature.locations
+                                annotationType: feature.type
                             };
                             data.sequenceData.features.push(featureObject);
                         }

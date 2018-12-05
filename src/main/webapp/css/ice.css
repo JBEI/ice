@@ -1499,3 +1499,7 @@ button[disabled].action-menu:hover {
     width: 98%;
     padding: 0;
 }
+
+.veAxisFill {
+    fill: #FFFFB3 !important;
+}
