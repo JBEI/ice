@@ -63,7 +63,7 @@ public class AutoCompleteFieldValues {
         HashSet<String> individualResults = new HashSet<>();
         for (String result : results) {
             for (String split : result.split(",")) {
-                if (!split.contains(token))
+                if (!split.toLowerCase().contains(token.toLowerCase()))
                     continue;
                 individualResults.add(split.trim());
             }
