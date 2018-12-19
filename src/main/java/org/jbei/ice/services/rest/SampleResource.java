@@ -31,6 +31,17 @@ public class SampleResource extends RestResource {
     private RequestRetriever requestRetriever = new RequestRetriever();
     private SampleService sampleService = new SampleService();
 
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/locations")
+    public Response getSamplesLocations(
+            @DefaultValue("PLATE96") @QueryParam("type") SampleType sampleType,
+            @DefaultValue("0") @QueryParam("offset") final int offset,
+            @DefaultValue("15") @QueryParam("limit") final int limit) {
+        String userId = getUserId();
+        return super.respond(sampleService.getStorageLocations(userId, sampleType, offset, limit));
+    }
+
     /**
      * @return Response with matching part sample
      */
@@ -225,6 +236,6 @@ public class SampleResource extends RestResource {
     public Response getSamplesForLocation(@PathParam("id") long locationId,
                                           @DefaultValue("PLATE96") @QueryParam("type") SampleType sampleType) {
         String userId = requireUserId();
-        return super.respond(new SampleService().retrievePlate(userId, locationId, sampleType));
+        return super.respond(sampleService.retrievePlate(userId, locationId, sampleType));
     }
 }

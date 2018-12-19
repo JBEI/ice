@@ -28,7 +28,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      *
      * @param id unique local identifier for entry record (typically synthetic database id)
      * @return Entry entry record associated with id
-     * @throws DAOException
+     * @throws DAOException on hibernate exception
      */
     @Override
     public Entry get(long id) {
@@ -87,7 +87,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             if (include != null && !include.isEmpty()) {
                 predicates.add(from.get("recordType").in(include));
             }
-            query.select(from.get("partNumber")).distinct(true).where(predicates.toArray(new Predicate[predicates.size()]));
+            query.select(from.get("partNumber")).distinct(true).where(predicates.toArray(new Predicate[0]));
             return currentSession().createQuery(query).setMaxResults(limit).list();
         } catch (HibernateException he) {
             Logger.error(he);
@@ -95,11 +95,11 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    protected Entry getEntryByField(String field, String fieldValue) {
+    private Entry getEntryByField(String field, String fieldValue) {
         try {
             CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
             Root<Entry> from = query.from(Entry.class);
-            query.where(getBuilder().equal(getBuilder().lower(from.get(field)), fieldValue.toLowerCase()));
+            query.where(getBuilder().equal(from.get(field), fieldValue));
             return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException e) {
             Logger.error(e);
@@ -112,7 +112,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      *
      * @param recordId unique global identifier for entry record (typically UUID)
      * @return Entry entry record associated with recordId
-     * @throws DAOException
+     * @throws DAOException on hibernate exception
      */
     public Entry getByRecordId(String recordId) {
         if (recordId == null)
@@ -122,12 +122,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
     /**
      * Retrieve an {@link Entry} by it's part number.
-     * <p/>
+     * <p>
      * If multiple Entries exist with the same part number, this method throws an exception.
      *
      * @param partNumber part number associated with entry
      * @return Entry
-     * @throws DAOException
+     * @throws DAOException on hibernate exception
      */
     public Entry getByPartNumber(String partNumber) {
         return getEntryByField("partNumber", partNumber);
@@ -193,7 +193,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 ));
             }
 
-            query.where(predicates.toArray(new Predicate[predicates.size()]));
+            query.where(predicates.toArray(new Predicate[0]));
             query.orderBy(asc ? getBuilder().asc(from.get(fieldName)) : getBuilder().desc(from.get(fieldName)));
             return currentSession().createQuery(query).setMaxResults(count).setFirstResult(start).list();
         } catch (HibernateException he) {
@@ -236,15 +236,15 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    protected void checkAddFilter(List<Predicate> predicates, Root<Entry> root, String filter) {
+    private void checkAddFilter(List<Predicate> predicates, Root<Entry> root, String filter) {
         if (filter == null || filter.trim().isEmpty())
             return;
 
         filter = filter.toLowerCase();
         predicates.add(getBuilder().or(
-                        getBuilder().like(getBuilder().lower(root.get("name")), "%" + filter + "%"),
-                        getBuilder().like(getBuilder().lower(root.get("alias")), "%" + filter + "%"),
-                        getBuilder().like(getBuilder().lower(root.get("partNumber")), "%" + filter + "%")
+                getBuilder().like(getBuilder().lower(root.get("name")), "%" + filter + "%"),
+                getBuilder().like(getBuilder().lower(root.get("alias")), "%" + filter + "%"),
+                getBuilder().like(getBuilder().lower(root.get("partNumber")), "%" + filter + "%")
                 )
         );
     }
@@ -279,9 +279,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
             if (filter != null && !filter.trim().isEmpty()) {
                 filter = filter.toLowerCase();
                 predicates.add(getBuilder().or(
-                                getBuilder().like(getBuilder().lower(entry.get("name")), "%" + filter + "%"),
-                                getBuilder().like(getBuilder().lower(entry.get("alias")), "%" + filter + "%"),
-                                getBuilder().like(getBuilder().lower(entry.get("partNumber")), "%" + filter + "%")
+                        getBuilder().like(getBuilder().lower(entry.get("name")), "%" + filter + "%"),
+                        getBuilder().like(getBuilder().lower(entry.get("alias")), "%" + filter + "%"),
+                        getBuilder().like(getBuilder().lower(entry.get("partNumber")), "%" + filter + "%")
                         )
                 );
             }
@@ -318,9 +318,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
             if (filter != null && !filter.trim().isEmpty()) {
                 filter = filter.toLowerCase();
                 predicates.add(getBuilder().or(
-                                getBuilder().like(getBuilder().lower(entry.get("name")), "%" + filter + "%"),
-                                getBuilder().like(getBuilder().lower(entry.get("alias")), "%" + filter + "%"),
-                                getBuilder().like(getBuilder().lower(entry.get("partNumber")), "%" + filter + "%")
+                        getBuilder().like(getBuilder().lower(entry.get("name")), "%" + filter + "%"),
+                        getBuilder().like(getBuilder().lower(entry.get("alias")), "%" + filter + "%"),
+                        getBuilder().like(getBuilder().lower(entry.get("partNumber")), "%" + filter + "%")
                         )
                 );
             }
@@ -392,9 +392,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
             if (filter != null && !filter.trim().isEmpty()) {
                 filter = filter.toLowerCase();
                 predicates.add(getBuilder().or(
-                                getBuilder().like(getBuilder().lower(join.get("name")), "%" + filter + "%"),
-                                getBuilder().like(getBuilder().lower(join.get("alias")), "%" + filter + "%"),
-                                getBuilder().like(getBuilder().lower(join.get("partNumber")), "%" + filter + "%")
+                        getBuilder().like(getBuilder().lower(join.get("name")), "%" + filter + "%"),
+                        getBuilder().like(getBuilder().lower(join.get("alias")), "%" + filter + "%"),
+                        getBuilder().like(getBuilder().lower(join.get("partNumber")), "%" + filter + "%")
                         )
                 );
             }
@@ -449,24 +449,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    // todo : look at this again (can restrict to strain type and also order by id)
-    public synchronized void generateNextStrainNameForEntry(Entry entry, String prefix) {
+    public void generateNextStrainNameForEntry(Entry entry, String prefix) {
         try {
-            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
-            Root<Entry> from = query.from(Entry.class);
-            query.where(getBuilder().like(getBuilder().lower(from.get("name")), prefix.toLowerCase() + "1%"))
-                    .orderBy(getBuilder().desc(from.get("name")));
-            Entry result = currentSession().createQuery(query).setMaxResults(1).uniqueResult();
-            int next = 0;
-            if (result != null) {
-                String name = result.getName();
-                next = Integer.decode(name.split(prefix)[1]);
-            }
-            next += 1;
-            String nextName = prefix + next;
-            entry.setName(nextName);
-            currentSession().update(entry);
 
+            String nextName = prefix + String.format("%06d", entry.getId());
+            entry.setName(nextName);
+            update(entry);
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -527,7 +515,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    protected String columnFieldToString(ColumnField field) {
+    private String columnFieldToString(ColumnField field) {
         if (field == null)
             return "creationTime";
 
@@ -574,15 +562,9 @@ public class EntryDAO extends HibernateRepository<Entry> {
             CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
             Root<Entry> from = query.from(Entry.class);
 
-            ArrayList<Predicate> predicates = new ArrayList<>();
-            predicates.add(getBuilder().equal(from.get("ownerEmail"), ownerEmail));
-            predicates.add(getBuilder().or(
-                    getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()),
-                    getBuilder().equal(from.get("visibility"), Visibility.PENDING.getValue())
-            ));
-
+            List<Predicate> predicates = getOwnerPredicate(from, ownerEmail);
             checkAddFilter(predicates, from, filter);
-            query.where(predicates.toArray(new Predicate[predicates.size()]));
+            query.where(predicates.toArray(new Predicate[0]));
             String fieldName = columnFieldToString(sort);
             query.orderBy(asc ? getBuilder().asc(from.get(fieldName)) : getBuilder().desc(from.get(fieldName)));
             return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
@@ -590,6 +572,16 @@ public class EntryDAO extends HibernateRepository<Entry> {
             Logger.error(he);
             throw new DAOException(he);
         }
+    }
+
+    private List<Predicate> getOwnerPredicate(Root<Entry> from, String ownerEmail) {
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(getBuilder().equal(from.get("ownerEmail"), ownerEmail));
+        predicates.add(getBuilder().or(
+                getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()),
+                getBuilder().equal(from.get("visibility"), Visibility.PENDING.getValue())
+        ));
+        return predicates;
     }
 
     /**
@@ -604,18 +596,12 @@ public class EntryDAO extends HibernateRepository<Entry> {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Entry> from = query.from(Entry.class);
-
-            ArrayList<Predicate> predicates = new ArrayList<>();
-            predicates.add(getBuilder().equal(from.get("ownerEmail"), ownerEmail));
-            predicates.add(getBuilder().or(
-                    getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()),
-                    getBuilder().equal(from.get("visibility"), Visibility.PENDING.getValue())
-            ));
+            List<Predicate> predicates = getOwnerPredicate(from, ownerEmail);
 
             if (type != null)
                 predicates.add(getBuilder().equal(from.get("recordType"), type.getName()));
 
-            query.select(from.get("id")).where(predicates.toArray(new Predicate[predicates.size()]));
+            query.select(from.get("id")).where(predicates.toArray(new Predicate[0]));
             return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
             Logger.error(he);
@@ -668,7 +654,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
                     getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()),
                     getBuilder().equal(from.get("visibility"), Visibility.PENDING.getValue())
             ));
-            query.where(predicates.toArray(new Predicate[predicates.size()]));
+            query.where(predicates.toArray(new Predicate[0]));
             return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);
@@ -690,7 +676,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
                     getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()),
                     getBuilder().equal(from.get("visibility"), Visibility.PENDING.getValue())
             ));
-            query.where(predicates.toArray(new Predicate[predicates.size()]));
+            query.where(predicates.toArray(new Predicate[0]));
             query.orderBy(asc ? getBuilder().asc(from.get(fieldName)) : getBuilder().desc(from.get(fieldName)));
             return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
         } catch (HibernateException he) {
@@ -704,16 +690,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Entry> from = query.from(Entry.class);
-
-            ArrayList<Predicate> predicates = new ArrayList<>();
-            predicates.add(getBuilder().equal(from.get("ownerEmail"), ownerEmail));
-            predicates.add(getBuilder().or(
-                    getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()),
-                    getBuilder().equal(from.get("visibility"), Visibility.PENDING.getValue())
-            ));
-
-            query.select(getBuilder().countDistinct(from.get("id")))
-                    .where(predicates.toArray(new Predicate[predicates.size()]));
+            List<Predicate> predicates = getOwnerPredicate(from, ownerEmail);
+            query.select(getBuilder().countDistinct(from.get("id"))).where(predicates.toArray(new Predicate[0]));
             return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);
@@ -739,7 +717,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
                     getBuilder().isNull(entry.get("visibility"))
             ));
             predicates.add(getBuilder().equal(entry.get("ownerEmail"), ownerEmail));
-            query.select(getBuilder().countDistinct(entry.get("id"))).where(predicates.toArray(new Predicate[predicates.size()]));
+            query.select(getBuilder().countDistinct(entry.get("id"))).where(predicates.toArray(new Predicate[0]));
             return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);

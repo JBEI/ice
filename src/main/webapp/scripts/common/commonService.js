@@ -39,7 +39,7 @@ angular.module('ice.common.service', [])
                         type = "danger";
                 }
 
-                if (errorMsg == undefined) {
+                if (!errorMsg) {
                     errorMsg = "Unknown server error";
                     type = "danger";
                 }
@@ -56,7 +56,7 @@ angular.module('ice.common.service', [])
                 if (!type)
                     type = 'info';
 
-                if (type == 'error')
+                if (type === 'error')
                     type = "danger";
 
                 $rootScope.serverFeedback = {type: type, message: message};

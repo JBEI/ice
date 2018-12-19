@@ -107,8 +107,7 @@ angular.module('ice.entry.traces.controller', [])
                         type: feature.type,
                         name: feature.name,
                         notes: notes,
-                        annotationType: feature.type,
-                        locations: feature.locations
+                        annotationType: feature.type
                     };
 
                     features.push(featureObject);

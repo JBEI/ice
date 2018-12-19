@@ -243,6 +243,15 @@ html, body {
     border-radius: 2px;
 }
 
+.input_box:disabled,
+.input_box[disabled] {
+    border: 1px solid #ccc;
+    background: #eee;
+    color: #777;
+    box-shadow: 0 0 1px 1px #efefef;
+    cursor: default;
+}
+
 .input_box_group {
     background: none repeat scroll 0 0 #FFFFFF;
     border: 1px solid #BBBBBB;
@@ -1489,4 +1498,12 @@ button[disabled].action-menu:hover {
 .modal-ve-sized {
     width: 98%;
     padding: 0;
+}
+
+.veAxisFill {
+    fill: #FFFFB3 !important;
+}
+
+.dragover {
+    border: 2px dashed #0082c0;
 }

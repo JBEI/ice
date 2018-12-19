@@ -19,9 +19,6 @@ import java.io.StringReader;
  */
 public class GeneralParser {
 
-    public static final String GENBANK_DELIMITER = "//";
-    public static final String FASTA_DELIMITER = ">";
-
     public static FeaturedDNASequence parse(String sequence) {
 
         AbstractParser parser;

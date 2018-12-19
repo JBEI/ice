@@ -892,8 +892,7 @@ angular.module('ice.entry.controller', [])
                 if (result.type == 'READ_ENTRY') {
                     $scope.readPermissions.push(result);
                     $scope.activePermissions = $scope.readPermissions;
-                }
-                else {
+                } else {
                     $scope.writePermissions.push(result);
                     $scope.activePermissions = $scope.writePermissions;
                 }
@@ -976,12 +975,11 @@ angular.module('ice.entry.controller', [])
                             start: location.genbankStart - 1,
                             end: location.end - 1,
                             fid: feature.id,
-                            forward: feature.strand == 1,
+                            forward: feature.strand === 1,
                             type: feature.type,
                             name: feature.name,
                             notes: notes,
-                            annotationType: feature.type,
-                            locations: feature.locations
+                            annotationType: feature.type
                         };
 
                         features.push(featureObject);
@@ -1016,6 +1014,7 @@ angular.module('ice.entry.controller', [])
                 $scope.vEeditor = $window.createVectorEditor("createDomNodeForMe", {
                     editorName: "vector-editor",
                     doNotUseAbsolutePosition: true,
+                    isFullscreen: true,
                     disableSetReadOnly: true,
                     handleFullscreenClose: function () { // this will make the editor fullscreen by default, and will allow you to handle the close request
                         $scope.vEeditor.close();         // handle vector editor root removal and clean up
@@ -1049,7 +1048,6 @@ angular.module('ice.entry.controller', [])
                                     type: feature.type,
                                     name: feature.name,
                                     strand: feature.forward ? 1 : -1,
-                                    locations: [{genbankStart: feature.start + 1, end: feature.end + 1}],
                                     notes: [{name: "note", value: feature.notes}]
                                 };
                             }
@@ -1072,7 +1070,7 @@ angular.module('ice.entry.controller', [])
                     },
 
                     onCopy: function (event, copiedSequenceData, editorState) {
-                        const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
+                        var clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
                         clipboardData.setData('text/plain', copiedSequenceData.sequence);
                         data.selection = editorState.selectionLayer;
                         data.openVECopied = copiedSequenceData;
@@ -1081,7 +1079,7 @@ angular.module('ice.entry.controller', [])
                     },
 
                     onPaste: function (event, editorState) {
-                        const clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
+                        var clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
                         var jsonData = clipboardData.getData('application/json');
                         if (jsonData) {
                             jsonData = JSON.parse(jsonData);
@@ -1157,693 +1155,692 @@ angular.module('ice.entry.controller', [])
                     ]
                 })
             }, remote);
-        };
+            };
 
-        $scope.sequenceUpload = function (type) {
-            if (type === 'file') {
-                $scope.isFileUpload = true;
-                $scope.isPaste = false;
-            } else {
-                $scope.isPaste = true;
-                $scope.isFileUpload = false;
-            }
-        };
+            $scope.sequenceUpload = function (type) {
+                if (type === 'file') {
+                    $scope.isFileUpload = true;
+                    $scope.isPaste = false;
+                } else {
+                    $scope.isPaste = true;
+                    $scope.isFileUpload = false;
+                }
+            };
 
-        $scope.processPastedSequence = function (event, part) {
-            var sequenceString = event.originalEvent.clipboardData.getData('text/plain');
-            Util.update("rest/parts/" + part.id + "/sequence", {sequence: sequenceString}, {},
-                function (result) {
-                    if (!result)
-                        return;
-
-                    part.hasSequence = true;
-                    part.basePairCount = result.sequence.length;
-                    $rootScope.$emit("ReloadVectorViewData", result);
-                })
-        };
-
-        $scope.deleteSequence = function (part) {
-            var modalInstance = $uibModal.open({
-                templateUrl: 'scripts/entry/sequence/modal-delete-sequence-confirmation.html',
-                controller: function ($scope, $uibModalInstance) {
-                    $scope.toDelete = part;
-                    $scope.processingDelete = undefined;
-                    $scope.errorDeleting = undefined;
-
-                    $scope.deleteSequence = function () {
-                        $scope.processingDelete = true;
-                        $scope.errorDeleting = false;
-
-                        Util.remove('rest/parts/' + part.id + '/sequence', {}, function (result) {
-                            $scope.processingDelete = false;
-                            $uibModalInstance.close(part);
-                        }, function () {
-                            $scope.processingDelete = false;
-                            $scope.errorDeleting = true;
-                        });
-                    }
-                },
-                backdrop: "static"
-            });
-
-            modalInstance.result.then(function (part) {
-                if (part)
-                    part.hasSequence = false;
-            });
-        };
-
-        $scope.addLink = function (part, role) {
-            var modalInstance = $uibModal.open({
-                templateUrl: 'scripts/entry/modal/add-link-modal.html',
-                controller: function ($scope, $http, $uibModalInstance, $cookies) {
-                    $scope.mainEntry = part;
-                    $scope.role = role;
-                    $scope.loadingAddExistingData = undefined;
-
-                    if (role === 'PARENT') {
-                        $scope.links = part.parents;
-                    } else {
-                        $scope.links = part.linkedParts;
-                    }
-
-                    var sessionId = $cookies.get("sessionId");
-                    $scope.getEntriesByPartNumber = function (val) {
-                        return $http.get('rest/search/filter', {
-                            headers: {'X-ICE-Authentication-SessionId': sessionId},
-                            params: {
-                                token: val,
-                                field: 'PART_NUMBER'
-                            }
-                        }).then(function (res) {
-                            return res.data;
-                        });
-                    };
-
-                    var linkPartToMainEntry = function (item) {
-                        Util.post('rest/parts/' + $scope.mainEntry.id + '/links', item, function () {
-                            $scope.links.push(item);   // todo
-                            $scope.addExistingPartNumber = undefined;
-                            $scope.mainEntrySequence = undefined;
-                        }, {linkType: $scope.role}, function () {
-                            $scope.errorMessage = "Error linking this entry to " + item.partId;
-                        });
-                    };
-
-                    // todo : todo
-                    $scope.addExistingPartLink = function ($item, $model, $label) {
-                        $scope.errorMessage = undefined;
-
-                        // prevent selecting current entry
-                        if ($item == $scope.mainEntry.partId)
+            $scope.processPastedSequence = function (event, part) {
+                var sequenceString = event.originalEvent.clipboardData.getData('text/plain');
+                Util.update("rest/parts/" + part.id + "/sequence", {sequence: sequenceString}, {},
+                    function (result) {
+                        if (!result)
                             return;
 
-                        // or already added entry
-                        var found = false;
-                        angular.forEach($scope.links, function (t) {
-                            if (t.partId === $item) {
-                                found = true;
-                            }
-                        });
-                        if (found)
-                            return;
+                        part.hasSequence = true;
+                        part.basePairCount = result.sequence.length;
+                        $rootScope.$emit("ReloadVectorViewData", result);
+                    })
+            };
 
-                        // fetch entry being added from server
-                        Util.get("rest/parts/" + $item, function (result) {
-                            $scope.selectedLink = result;
-                            if ($scope.role == 'CHILD') {
+            $scope.deleteSequence = function (part) {
+                var modalInstance = $uibModal.open({
+                    templateUrl: 'scripts/entry/sequence/modal-delete-sequence-confirmation.html',
+                    controller: function ($scope, $uibModalInstance) {
+                        $scope.toDelete = part;
+                        $scope.processingDelete = undefined;
+                        $scope.errorDeleting = undefined;
 
-                                // if item being added as a child is of type part then
-                                if (result.type.toLowerCase() == 'part') {
+                        $scope.deleteSequence = function () {
+                            $scope.processingDelete = true;
+                            $scope.errorDeleting = false;
 
-                                    // check if it has a sequence
-                                    if (!result.hasSequence) {
-                                        $scope.addExistingPartNumber = result;
-
-                                        // if not, retrieve sequence annotations for parent entry
-                                        // to allow user to select one annotation as the sequence for the entry being
-                                        // added
-                                        $scope.getEntrySequence($scope.mainEntry.id);
-                                    } else {
-
-                                        // has sequence so just add the link
-                                        linkPartToMainEntry(result);
-                                    }
-                                } else {
-                                    // just add the link
-                                    linkPartToMainEntry(result);
-                                }
-                            } else {
-                                // parent of main entry being added
-                                if ($scope.mainEntry.type.toLowerCase() == 'part') {
-
-                                    // if child (main) does not have a attached sequence
-                                    if (!$scope.mainEntry.hasSequence) {
-
-                                        // retrieve sequence feature options for parent
-                                        $scope.addExistingPartNumber = result;
-                                        $scope.getEntrySequence($scope.addExistingPartNumber.id);
-                                    } else {
-                                        linkPartToMainEntry(result);
-                                    }
-                                } else {
-                                    linkPartToMainEntry(result);
-                                }
-                            }
-                        });
-                    };
-
-                    $scope.removeExistingPartLink = function (link) {
-                        var i = $scope.links.indexOf(link);
-                        if (i < 0)
-                            return;
-
-                        Util.remove('rest/parts/' + $scope.mainEntry.id + '/links/' + link.id,
-                            {linkType: $scope.role}, function (result) {
-                                $scope.links.splice(i, 1);
+                            Util.remove('rest/parts/' + part.id + '/sequence', {}, function (result) {
+                                $scope.processingDelete = false;
+                                $uibModalInstance.close(part);
+                            }, function () {
+                                $scope.processingDelete = false;
+                                $scope.errorDeleting = true;
                             });
-                    };
+                        }
+                    },
+                    backdrop: "static"
+                });
 
-                    $scope.close = function () {
-                        $uibModalInstance.close();
-                    };
+                modalInstance.result.then(function (part) {
+                    if (part)
+                        part.hasSequence = false;
+                });
+            };
 
-                    $scope.getEntrySequence = function (id) {
-                        $scope.retrievingSequenceFeatureList = true;
-                        $scope.mainEntrySequence = undefined;
+            $scope.addLink = function (part, role) {
+                var modalInstance = $uibModal.open({
+                    templateUrl: 'scripts/entry/modal/add-link-modal.html',
+                    controller: function ($scope, $http, $uibModalInstance, $cookies) {
+                        $scope.mainEntry = part;
+                        $scope.role = role;
+                        $scope.loadingAddExistingData = undefined;
 
-                        Util.get("rest/parts/" + id + "/sequence", function (result) {
-                            $scope.mainEntrySequence = result;
-                            $scope.retrievingSequenceFeatureList = false;
-                        }, function (error) {
-                            console.error(error);
-                            $scope.retrievingSequenceFeatureList = false;
-                        });
-                    };
+                        if (role === 'PARENT') {
+                            $scope.links = part.parents;
+                        } else {
+                            $scope.links = part.linkedParts;
+                        }
 
-                    $scope.addSequenceToLinkAndLink = function (feature) {
-                        // update sequence information on entry
-                        // POST rest/parts/{id}/sequence featuredDNA sequence
-                        //console.log($scope.mainEntrySequence, feature, $scope.addExistingPartNumber);
-
-                        // todo : backend should probably handle this; quick fix for the milestone
-                        var start = feature.locations[0].genbankStart;
-                        var end = feature.locations[0].end;
-                        var sequence = $scope.mainEntrySequence.sequence.substring(start - 1, end);
-                        feature.locations[0].genbankStart = 1;
-                        feature.locations[0].end = sequence.length;
-
-                        var linkSequence = {
-                            identifier: $scope.addExistingPartNumber.partId,
-                            sequence: sequence,
-                            genbankStart: 0,
-                            end: sequence.length,
-                            features: [feature]
+                        var sessionId = $cookies.get("sessionId");
+                        $scope.getEntriesByPartNumber = function (val) {
+                            return $http.get('rest/search/filter', {
+                                headers: {'X-ICE-Authentication-SessionId': sessionId},
+                                params: {
+                                    token: val,
+                                    field: 'PART_NUMBER'
+                                }
+                            }).then(function (res) {
+                                return res.data;
+                            });
                         };
 
-                        var sequencePartId;
-                        if ($scope.role == 'CHILD') {
-                            sequencePartId = $scope.selectedLink.id;
-                        } else {
-                            sequencePartId = $scope.mainEntry.id;
-                        }
+                        var linkPartToMainEntry = function (item) {
+                            Util.post('rest/parts/' + $scope.mainEntry.id + '/links', item, function () {
+                                $scope.links.push(item);   // todo
+                                $scope.addExistingPartNumber = undefined;
+                                $scope.mainEntrySequence = undefined;
+                            }, {linkType: $scope.role}, function () {
+                                $scope.errorMessage = "Error linking this entry to " + item.partId;
+                            });
+                        };
 
-                        // add sequence to entry
-                        Util.update("rest/parts/" + sequencePartId + "/sequence", linkSequence, {}, function (result) {
-                            linkPartToMainEntry($scope.addExistingPartNumber);
-                        });
-                    };
-                },
-                backdrop: "static"
+                        // todo : todo
+                        $scope.addExistingPartLink = function ($item, $model, $label) {
+                            $scope.errorMessage = undefined;
+
+                            // prevent selecting current entry
+                            if ($item == $scope.mainEntry.partId)
+                                return;
+
+                            // or already added entry
+                            var found = false;
+                            angular.forEach($scope.links, function (t) {
+                                if (t.partId === $item) {
+                                    found = true;
+                                }
+                            });
+                            if (found)
+                                return;
+
+                            // fetch entry being added from server
+                            Util.get("rest/parts/" + $item, function (result) {
+                                $scope.selectedLink = result;
+                                if ($scope.role == 'CHILD') {
+
+                                    // if item being added as a child is of type part then
+                                    if (result.type.toLowerCase() == 'part') {
+
+                                        // check if it has a sequence
+                                        if (!result.hasSequence) {
+                                            $scope.addExistingPartNumber = result;
+
+                                            // if not, retrieve sequence annotations for parent entry
+                                            // to allow user to select one annotation as the sequence for the entry being
+                                            // added
+                                            $scope.getEntrySequence($scope.mainEntry.id);
+                                        } else {
+
+                                            // has sequence so just add the link
+                                            linkPartToMainEntry(result);
+                                        }
+                                    } else {
+                                        // just add the link
+                                        linkPartToMainEntry(result);
+                                    }
+                                } else {
+                                    // parent of main entry being added
+                                    if ($scope.mainEntry.type.toLowerCase() == 'part') {
+
+                                        // if child (main) does not have a attached sequence
+                                        if (!$scope.mainEntry.hasSequence) {
+
+                                            // retrieve sequence feature options for parent
+                                            $scope.addExistingPartNumber = result;
+                                            $scope.getEntrySequence($scope.addExistingPartNumber.id);
+                                        } else {
+                                            linkPartToMainEntry(result);
+                                        }
+                                    } else {
+                                        linkPartToMainEntry(result);
+                                    }
+                                }
+                            });
+                        };
+
+                        $scope.removeExistingPartLink = function (link) {
+                            var i = $scope.links.indexOf(link);
+                            if (i < 0)
+                                return;
+
+                            Util.remove('rest/parts/' + $scope.mainEntry.id + '/links/' + link.id,
+                                {linkType: $scope.role}, function (result) {
+                                    $scope.links.splice(i, 1);
+                                });
+                        };
+
+                        $scope.close = function () {
+                            $uibModalInstance.close();
+                        };
+
+                        $scope.getEntrySequence = function (id) {
+                            $scope.retrievingSequenceFeatureList = true;
+                            $scope.mainEntrySequence = undefined;
+
+                            Util.get("rest/parts/" + id + "/sequence", function (result) {
+                                $scope.mainEntrySequence = result;
+                                $scope.retrievingSequenceFeatureList = false;
+                            }, function (error) {
+                                console.error(error);
+                                $scope.retrievingSequenceFeatureList = false;
+                            });
+                        };
+
+                        $scope.addSequenceToLinkAndLink = function (feature) {
+                            // update sequence information on entry
+                            // POST rest/parts/{id}/sequence featuredDNA sequence
+                            //console.log($scope.mainEntrySequence, feature, $scope.addExistingPartNumber);
+
+                            // todo : backend should probably handle this; quick fix for the milestone
+                            var start = feature.locations[0].genbankStart;
+                            var end = feature.locations[0].end;
+                            var sequence = $scope.mainEntrySequence.sequence.substring(start - 1, end);
+                            feature.locations[0].genbankStart = 1;
+                            feature.locations[0].end = sequence.length;
+
+                            var linkSequence = {
+                                identifier: $scope.addExistingPartNumber.partId,
+                                sequence: sequence,
+                                genbankStart: 0,
+                                end: sequence.length,
+                                features: [feature]
+                            };
+
+                            var sequencePartId;
+                            if ($scope.role == 'CHILD') {
+                                sequencePartId = $scope.selectedLink.id;
+                            } else {
+                                sequencePartId = $scope.mainEntry.id;
+                            }
+
+                            // add sequence to entry
+                            Util.update("rest/parts/" + sequencePartId + "/sequence", linkSequence, {}, function (result) {
+                                linkPartToMainEntry($scope.addExistingPartNumber);
+                            });
+                        };
+                    },
+                    backdrop: "static"
+                });
+
+                modalInstance.result.then(function (entry) {
+                    if (entry) {
+                        part = entry;
+                    }
+                }, function () {
+                });
+            };
+
+            $scope.sbolShowHide = function () {
+                $scope.showSBOL = !$scope.showSBOL;
+            };
+
+            $scope.getSequenceSectionHeader = function () {
+                if ($scope.entry.hasSequence && !$scope.entry.basePairCount)
+                    return "SBOL INFORMATION";
+                return "SEQUENCE";
+            };
+
+            $scope.entryFields = undefined;
+            $scope.entry = undefined;
+            $scope.notFound = undefined;
+            $scope.noAccess = undefined;
+
+            // init : fetch entry; see if folder id and remote params is set
+            var params = $location.search();
+            $scope.remoteParams = params;
+
+            Util.get("rest/parts/" + $stateParams.id, function (result) {
+                Selection.reset();
+                Selection.selectEntry(result);
+
+                $scope.entry = EntryService.convertToUIForm(result);
+                if ($scope.entry.canEdit)
+                    $scope.newParameter = {edit: false};
+
+                $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
+                $scope.entry.remote = params.remote;
+
+                // get sample count, comment count etc
+                Util.get("rest/parts/" + $stateParams.id + "/statistics", function (stats) {
+                    $scope.entryStatistics = stats;
+                }, params);
+
+            }, params, function (error) {
+                if (error.status === 404)
+                    $scope.notFound = true;
+                else if (error.status === 403)
+                    $scope.noAccess = true;
             });
 
-            modalInstance.result.then(function (entry) {
-                if (entry) {
-                    part = entry;
+            var menuSubDetails = $scope.subDetails = EntryService.getMenuSubDetails(params.remote);
+
+            $scope.showSelection = function (index) {
+                angular.forEach(menuSubDetails, function (details) {
+                    details.selected = false;
+                });
+                menuSubDetails[index].selected = true;
+                $scope.selection = menuSubDetails[index].url;
+                if (menuSubDetails[index].id) {
+                    $location.path("entry/" + $stateParams.id + "/" + menuSubDetails[index].id);
+                } else {
+                    $location.path("entry/" + $stateParams.id);
                 }
-            }, function () {
-            });
-        };
+            };
 
-        $scope.sbolShowHide = function () {
-            $scope.showSBOL = !$scope.showSBOL;
-        };
-
-        $scope.getSequenceSectionHeader = function () {
-            if ($scope.entry.hasSequence && !$scope.entry.basePairCount)
-                return "SBOL INFORMATION";
-            return "SEQUENCE";
-        };
-
-        $scope.entryFields = undefined;
-        $scope.entry = undefined;
-        $scope.notFound = undefined;
-        $scope.noAccess = undefined;
-
-        // init : fetch entry; see if folder id and remote params is set
-        var params = $location.search();
-        $scope.remoteParams = params;
-
-        Util.get("rest/parts/" + $stateParams.id, function (result) {
-            Selection.reset();
-            Selection.selectEntry(result);
-
-            $scope.entry = EntryService.convertToUIForm(result);
-            if ($scope.entry.canEdit)
-                $scope.newParameter = {edit: false};
-
-            $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
-            $scope.entry.remote = params.remote;
-
-            // get sample count, comment count etc
-            Util.get("rest/parts/" + $stateParams.id + "/statistics", function (stats) {
-                $scope.entryStatistics = stats;
-            }, params);
-
-        }, params, function (error) {
-            if (error.status === 404)
-                $scope.notFound = true;
-            else if (error.status === 403)
-                $scope.noAccess = true;
-        });
-
-        var menuSubDetails = $scope.subDetails = EntryService.getMenuSubDetails(params.remote);
-
-        $scope.showSelection = function (index) {
-            angular.forEach(menuSubDetails, function (details) {
-                details.selected = false;
-            });
-            menuSubDetails[index].selected = true;
-            $scope.selection = menuSubDetails[index].url;
-            if (menuSubDetails[index].id) {
-                $location.path("entry/" + $stateParams.id + "/" + menuSubDetails[index].id);
-            } else {
-                $location.path("entry/" + $stateParams.id);
-            }
-        };
-
-        $scope.createCopyOfEntry = function () {
-            Util.post("rest/parts", {}, function (result) {
-                $scope.$emit("UpdateCollectionCounts");
-                $scope.showSBOL = false;
-                $location.path('entry/' + result.id);
-            }, {source: $scope.entry.recordId});
-        };
+            $scope.createCopyOfEntry = function () {
+                Util.post("rest/parts", {}, function (result) {
+                    $scope.$emit("UpdateCollectionCounts");
+                    $scope.showSBOL = false;
+                    $location.path('entry/' + result.id);
+                }, {source: $scope.entry.recordId});
+            };
 
 // check if a selection has been made
-        var menuOption = $stateParams.option;
-        if (menuOption === undefined) {
-            $scope.selection = menuSubDetails[0].url;
-            menuSubDetails[0].selected = true;
-        } else {
-            menuSubDetails[0].selected = false;
-            for (var i = 1; i < menuSubDetails.length; i += 1) {
-                if (menuSubDetails[i].id === menuOption) {
-                    $scope.selection = menuSubDetails[i].url;
-                    menuSubDetails[i].selected = true;
-                    break;
-                }
-            }
-
-            if ($scope.selection === undefined) {
+            var menuOption = $stateParams.option;
+            if (menuOption === undefined) {
                 $scope.selection = menuSubDetails[0].url;
                 menuSubDetails[0].selected = true;
-            }
-        }
-
-        $scope.edit = function (type, val) {
-            $scope[type] = val;
-        };
-
-        $scope.quickEdit = {};
-
-        $scope.quickEditEntry = function (field) {
-            field.errorUpdating = false;
-            field.updating = true;
-            field.invalid = false;
-
-            if (field.inputType === "autoCompleteAdd") {
-                $scope.quickEdit[field.schema] = $scope.convertedAutoCompleteAdd;
-            }
-
-            // validate
-            var canSubmit = EntryService.validateFields($scope.quickEdit, [field]);
-            if (!canSubmit) {
-                field.updating = false;
-                return;
-            }
-            // getTypeData is not converting selection markers for some reason
-            if (field.inputType === "autoCompleteAdd") {
-                $scope.entry[field.schema] = [];
-                angular.forEach($scope.convertedAutoCompleteAdd, function (val) {
-                    if (val.value.trim() == "")
-                        return;
-
-                    $scope.entry[field.schema].push(val.value);
-                });
             } else {
-                // update the main entry with quickEdit (which is the model)
-                $scope.entry[field.schema] = $scope.quickEdit[field.schema];
-                if (field.inputType === 'withEmail') {
-                    $scope.entry[field.schema + 'Email'] = $scope.quickEdit[field.schema + 'Email'];
+                menuSubDetails[0].selected = false;
+                for (var i = 1; i < menuSubDetails.length; i += 1) {
+                    if (menuSubDetails[i].id === menuOption) {
+                        $scope.selection = menuSubDetails[i].url;
+                        menuSubDetails[i].selected = true;
+                        break;
+                    }
+                }
+
+                if ($scope.selection === undefined) {
+                    $scope.selection = menuSubDetails[0].url;
+                    menuSubDetails[0].selected = true;
                 }
             }
 
-            $scope.entry = EntryService.getTypeData($scope.entry);
+            $scope.edit = function (type, val) {
+                $scope[type] = val;
+            };
 
-            Util.update("rest/parts/" + $scope.entry.id, $scope.entry, {}, function (result) {
-                field.edit = false;
+            $scope.quickEdit = {};
 
-                if (result)
-                    $scope.entry = EntryService.convertToUIForm(result);
+            $scope.quickEditEntry = function (field) {
+                field.errorUpdating = false;
+                field.updating = true;
+                field.invalid = false;
 
-                field.dirty = false;
-                field.updating = false;
-            }, function (error) {
-                field.updating = false;
-                field.errorUpdating = true;
-                Util.setFeedback("Error updating entry", "danger")
-            });
-        };
+                if (field.inputType === "autoCompleteAdd") {
+                    $scope.quickEdit[field.schema] = $scope.convertedAutoCompleteAdd;
+                }
 
-        $scope.displayForBLSValue = function (bslValue) {
-            switch (bslValue) {
-                case -1:
-                    return "Restricted";
+                // validate
+                var canSubmit = EntryService.validateFields($scope.quickEdit, [field]);
+                if (!canSubmit) {
+                    field.updating = false;
+                    return;
+                }
+                // getTypeData is not converting selection markers for some reason
+                if (field.inputType === "autoCompleteAdd") {
+                    $scope.entry[field.schema] = [];
+                    angular.forEach($scope.convertedAutoCompleteAdd, function (val) {
+                        if (val.value.trim() == "")
+                            return;
 
-                default:
-                    return bslValue;
-            }
-        };
+                        $scope.entry[field.schema].push(val.value);
+                    });
+                } else {
+                    // update the main entry with quickEdit (which is the model)
+                    $scope.entry[field.schema] = $scope.quickEdit[field.schema];
+                    if (field.inputType === 'withEmail') {
+                        $scope.entry[field.schema + 'Email'] = $scope.quickEdit[field.schema + 'Email'];
+                    }
+                }
+
+                $scope.entry = EntryService.getTypeData($scope.entry);
+
+                Util.update("rest/parts/" + $scope.entry.id, $scope.entry, {}, function (result) {
+                    field.edit = false;
+
+                    if (result)
+                        $scope.entry = EntryService.convertToUIForm(result);
+
+                    field.dirty = false;
+                    field.updating = false;
+                }, function (error) {
+                    field.updating = false;
+                    field.errorUpdating = true;
+                    Util.setFeedback("Error updating entry", "danger")
+                });
+            };
+
+            $scope.displayForBLSValue = function (bslValue) {
+                switch (bslValue) {
+                    case -1:
+                        return "Restricted";
+
+                    default:
+                        return bslValue;
+                }
+            };
 
 // converts an array of string (currently only for autoCompleteAdd) to object so it can be edited
-        $scope.checkConvertFieldToObject = function (field) {
-            $scope.convertedAutoCompleteAdd = [];
-            if (!angular.isArray($scope.entry[field.schema]))
-                return;
-
-            if (field.inputType !== 'autoCompleteAdd')
-                return;
-
-            for (var i = 0; i < $scope.entry[field.schema].length; i += 1) {
-                $scope.convertedAutoCompleteAdd[i] = {value: $scope.entry[field.schema][i]};
-            }
-        };
-
-        $scope.deleteCustomField = function (parameter) {
-            var index = $scope.entry.parameters.indexOf(parameter);
-            if (index >= 0) {
-                var currentParam = $scope.entry.parameters[index];
-                if (currentParam.id == parameter.id) {
-                    Util.remove("rest/custom-fields/" + parameter.id, {}, function (result) {
-                        $scope.entry.parameters.splice(index, 1);
-                    })
-                }
-            }
-        };
-
-        $scope.nextEntryInContext = function () {
-            $scope.context.offset += 1;
-            $scope.context.callback($scope.context.offset, function (result) {
-                $location.path("entry/" + result);
-            });
-        };
-
-        $scope.prevEntryInContext = function () {
-            $scope.context.offset -= 1;
-            $scope.context.callback($scope.context.offset, function (result) {
-                $location.path("entry/" + result);
-            });
-        };
-
-        $scope.backTo = function () {
-            Selection.reset();
-            $location.path($scope.context.back);
-        };
-
-// removes linked parts
-        $scope.removeLink = function (mainEntry, linkedEntry) {
-            Util.remove('rest/parts/' + mainEntry.id + '/links/' + linkedEntry.id, {}, function () {
-                var idx = mainEntry.linkedParts.indexOf(linkedEntry);
-                if (idx != -1) {
-                    mainEntry.linkedParts.splice(idx, 1);
-                }
-            });
-        };
-
-// removes a value from an autoCompleteAdd field at the specified index
-        $scope.removeAutoCompleteAdd = function (index) {
-            $scope.convertedAutoCompleteAdd.splice(index, 1);
-        };
-
-// add a new autoComplete add value at the specified index
-        $scope.addAutoCompleteAdd = function (index) {
-            $scope.convertedAutoCompleteAdd.splice(index + 1, 0, {value: ""});
-        };
-
-// file upload
-        var uploader = $scope.sequenceFileUpload = new FileUploader({
-            scope: $scope, // to automatically update the html. Default: $rootScope
-            url: "rest/file/sequence",
-            method: 'POST',
-            removeAfterUpload: true,
-            headers: {"X-ICE-Authentication-SessionId": sessionId},
-            autoUpload: true,
-            queueLimit: 1 // can only upload 1 file
-        });
-
-        uploader.onProgressItem = function (item, progress) {
-            $scope.serverError = undefined;
-
-            if (progress != "100")  // isUploading is always true until it returns
-                return;
-
-            // upload complete. have processing
-            $scope.processingFile = item.file.name;
-        };
-
-        uploader.onSuccessItem = function (item, response, status, header) {
-            if (!response)
-                return;
-
-            if (response.sequence) {
-                $scope.entry.basePairCount = response.sequence.sequence.length;
-            }
-
-            if (response.format && response.format.indexOf("SBOL") > -1) {
-                Util.list("rest/parts/" + $scope.entry.id + "/links", function (result) {
-                    if (!result)
-                        return;
-                    $scope.entry.linkedParts = result;
-                });
-            }
-
-            $scope.entry.hasSequence = true;
-        };
-
-        uploader.onCompleteAll = function () {
-            $scope.processingFile = undefined;
-        };
-
-        uploader.onBeforeUploadItem = function (item) {
-            item.formData.push({entryType: $scope.entry.type});
-            item.formData.push({entryRecordId: $scope.entry.recordId});
-        };
-
-        uploader.onErrorItem = function (item, response, status, headers) {
-            $scope.serverError = response.message;
-        };
-
-// customer parameter add for entry view
-        $scope.addNewCustomField = function () {
-            $scope.newParameter.nameInvalid = $scope.newParameter.name == undefined || $scope.newParameter.name == '';
-            $scope.newParameter.valueInvalid = $scope.newParameter.value == undefined || $scope.newParameter.value == '';
-            if ($scope.newParameter.nameInvalid || $scope.newParameter.valueInvalid)
-                return;
-
-            $scope.newParameter.partId = $scope.entry.id;
-            Util.post("rest/custom-fields", $scope.newParameter, function (result) {
-                if (!result)
+            $scope.checkConvertFieldToObject = function (field) {
+                $scope.convertedAutoCompleteAdd = [];
+                if (!angular.isArray($scope.entry[field.schema]))
                     return;
 
-                $scope.entry.parameters.push(result);
-                $scope.newParameter.edit = false;
-            })
-        };
+                if (field.inputType !== 'autoCompleteAdd')
+                    return;
 
-        $scope.showAutoAnnotationPopup = function () {
-            var modalInstance = $uibModal.open({
-                templateUrl: 'scripts/entry/sequence/modal-auto-annotate-sequence.html',
-                controller: function ($scope, $uibModalInstance, part, Util) {
-                    $scope.selectedFeatures = [];
-                    $scope.allSelected = false;
-                    $scope.part = part;
-                    $scope.pagingParams = {
-                        currentPage: 0,
-                        pageSize: 8,
-                        sort: "locations[0].genbankStart",
-                        asc: true
-                    };
-                    var displayOptions = [{display: "All features", key: "all"}, {
-                        display: "My features",
-                        key: "mine"
-                    }];
-                    $scope.options = {values: displayOptions, selection: displayOptions[0]};
+                for (var i = 0; i < $scope.entry[field.schema].length; i += 1) {
+                    $scope.convertedAutoCompleteAdd[i] = {value: $scope.entry[field.schema][i]};
+                }
+            };
 
-                    // retrieves "suggested" annotations for current entry
-                    $scope.fetchAnnotations = function () {
-                        $scope.annotations = undefined;
-                        Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
-                            angular.forEach(result.features, function (feature) {
-                                    //console.log(feature);
-                                    //if (feature.strand == 1)
-                                    feature.length = (feature.locations[0].end - feature.locations[0].genbankStart) + 1;
-                                    //else
-                                    //feature.length = (feature.locations[0].genbankStart - feature.locations[0].end) + 1;
-                                }
-                            );
-                            $scope.annotations = result;
-                            $scope.pagingParams.resultCount = result.features.length;
-                            $scope.pagingParams.numberOfPages = Math.ceil(result.features.length / $scope.pagingParams.pageSize);
-                        }, {ownerFeatures: $scope.options.selection.key == "mine"});
-                    };
-                    $scope.fetchAnnotations();
-
-                    /**
-                     * Support for sorting
-                     * @param field field to sort on
-                     */
-                    $scope.sort = function (field) {
-                        if ($scope.pagingParams.sort == field) {
-                            $scope.pagingParams.asc = !$scope.pagingParams.asc;
-                        } else {
-                            $scope.pagingParams.sort = field;
-                            $scope.pagingParams.asc = true;
-                        }
-                        $scope.pagingParams.currentPage = 0;
-                    };
-
-                    /**
-                     * Select all features on the UI
-                     */
-                    $scope.selectAll = function () {
-                        $scope.allSelected = !$scope.allSelected;
-                        if ($scope.allSelected) {
-                            $scope.selectedFeatures = $scope.annotations.features;
-                        } else {
-                            $scope.selectedFeatures = [];
-                        }
-                    };
-
-                    /**
-                     * Check or un-check (on UI) specific feature
-                     * @param feature
-                     */
-                    $scope.checkFeature = function (feature) {
-                        feature.selected = !feature.selected;
-                        var i = $scope.selectedFeatures.indexOf(feature);
-                        if (i == -1) {
-                            $scope.selectedFeatures.push(feature);
-                        }
-                        else {
-                            $scope.selectedFeatures.splice(i, 1);
-                        }
-
-                        $scope.allSelected = ($scope.selectedFeatures.length == $scope.annotations.features.length);
-                    };
-
-                    $scope.setClassName = function (feature) {
-                        var classPrefix = feature.strand == -1 ? "reverse-strand-" : "forward-strand-";
-                        feature.className = classPrefix + feature.type.toLowerCase();
-                    };
-
-                    /**
-                     *  Determine background color based on feature type
-                     * @param feature
-                     * @returns {{background-color: string}}
-                     */
-                    $scope.getBgStyle = function (feature) {
-                        var bgColor = "#CCC";
-
-                        switch (feature.type.toLowerCase()) {
-                            case 'cds':
-                                bgColor = "#EF6500";
-                                break;
-
-                            case "misc_feature":
-                                bgColor = "#006FEF";
-                                break;
-
-                            case "promoter":
-                                bgColor = "#31B440";
-                                break;
-
-                            case "terminator":
-                                bgColor = "red";
-                                break;
-
-                            case "rep_origin":
-                                bgColor = "#878787";
-                                break;
-
-                            case "misc_marker":
-                                bgColor = "#8DCEB1";
-                                break;
-                        }
-                        return {'background-color': bgColor};
-                    };
-
-                    $scope.getFirstStyle = function (selectedFeature) {
-                        var width = (selectedFeature.locations[0].genbankStart / $scope.annotations.length) * 100;
-                        return {"width": (Math.floor(width)) + '%'};
-                    };
-
-                    $scope.getSecondStyle = function (selectedFeature) {
-                        var width = ((selectedFeature.locations[0].end - selectedFeature.locations[0].genbankStart) / $scope.annotations.length) * 100;
-                        var style = $scope.getBgStyle(selectedFeature);
-                        style.width = (Math.ceil(width)) + '%';
-                        return style;
-                    };
-
-                    $scope.getThirdStyle = function (selectedFeature) {
-                        var w = (($scope.annotations.length - selectedFeature.locations[0].end) / $scope.annotations.length) * 100;
-                        return {"width": (Math.floor(w)) + '%'};
-                    };
-
-                    $scope.saveAnnotations = function () {
-                        $scope.errorSavingAnnotations = false;
-                        $scope.savingAnnotations = true;
-
-                        //url, obj, successHandler, params, errHandler
-                        Util.update("rest/parts/" + part.id + "/sequence", {features: $scope.selectedFeatures}, {add: true}, function () {
-                            $uibModalInstance.close(true);
-                        }, function (error) {
-                            $scope.savingAnnotations = false;
-                            $scope.errorSavingAnnotations = true;
+            $scope.deleteCustomField = function (parameter) {
+                var index = $scope.entry.parameters.indexOf(parameter);
+                if (index >= 0) {
+                    var currentParam = $scope.entry.parameters[index];
+                    if (currentParam.id == parameter.id) {
+                        Util.remove("rest/custom-fields/" + parameter.id, {}, function (result) {
+                            $scope.entry.parameters.splice(index, 1);
                         })
-                    };
-
-                    // used to show, in table of features, the selected feature
-                    $scope.showAnnotationInTable = function (selectedFeature) {
-                        var index = $scope.annotations.features.indexOf(selectedFeature);
-                        $scope.pagingParams.currentPage = parseInt(index / $scope.pagingParams.pageSize);
-                    }
-                },
-                size: 'lg',
-                resolve: {
-                    part: function () {
-                        return $scope.entry;
                     }
                 }
-                ,
-                backdrop: "static"
+            };
+
+            $scope.nextEntryInContext = function () {
+                $scope.context.offset += 1;
+                $scope.context.callback($scope.context.offset, function (result) {
+                    $location.path("entry/" + result);
+                });
+            };
+
+            $scope.prevEntryInContext = function () {
+                $scope.context.offset -= 1;
+                $scope.context.callback($scope.context.offset, function (result) {
+                    $location.path("entry/" + result);
+                });
+            };
+
+            $scope.backTo = function () {
+                Selection.reset();
+                $location.path($scope.context.back);
+            };
+
+// removes linked parts
+            $scope.removeLink = function (mainEntry, linkedEntry) {
+                Util.remove('rest/parts/' + mainEntry.id + '/links/' + linkedEntry.id, {}, function () {
+                    var idx = mainEntry.linkedParts.indexOf(linkedEntry);
+                    if (idx != -1) {
+                        mainEntry.linkedParts.splice(idx, 1);
+                    }
+                });
+            };
+
+// removes a value from an autoCompleteAdd field at the specified index
+            $scope.removeAutoCompleteAdd = function (index) {
+                $scope.convertedAutoCompleteAdd.splice(index, 1);
+            };
+
+// add a new autoComplete add value at the specified index
+            $scope.addAutoCompleteAdd = function (index) {
+                $scope.convertedAutoCompleteAdd.splice(index + 1, 0, {value: ""});
+            };
+
+// file upload
+            var uploader = $scope.sequenceFileUpload = new FileUploader({
+                scope: $scope, // to automatically update the html. Default: $rootScope
+                url: "rest/file/sequence",
+                method: 'POST',
+                removeAfterUpload: true,
+                headers: {"X-ICE-Authentication-SessionId": sessionId},
+                autoUpload: true,
+                queueLimit: 1 // can only upload 1 file
             });
 
-            modalInstance.result.then(function (reload) {
-                if (reload) {
-                    $window.location.reload();
+            uploader.onProgressItem = function (item, progress) {
+                $scope.serverError = undefined;
+
+                if (progress != "100")  // isUploading is always true until it returns
+                    return;
+
+                // upload complete. have processing
+                $scope.processingFile = item.file.name;
+            };
+
+            uploader.onSuccessItem = function (item, response, status, header) {
+                if (!response)
+                    return;
+
+                if (response.sequence) {
+                    $scope.entry.basePairCount = response.sequence.sequence.length;
                 }
-            });
-        };
-    }
-)
+
+                if (response.format && response.format.indexOf("SBOL") > -1) {
+                    Util.list("rest/parts/" + $scope.entry.id + "/links", function (result) {
+                        if (!result)
+                            return;
+                        $scope.entry.linkedParts = result;
+                    });
+                }
+
+                $scope.entry.hasSequence = true;
+            };
+
+            uploader.onCompleteAll = function () {
+                $scope.processingFile = undefined;
+            };
+
+            uploader.onBeforeUploadItem = function (item) {
+                item.formData.push({entryType: $scope.entry.type});
+                item.formData.push({entryRecordId: $scope.entry.recordId});
+            };
+
+            uploader.onErrorItem = function (item, response, status, headers) {
+                $scope.serverError = response.message;
+            };
+
+// customer parameter add for entry view
+            $scope.addNewCustomField = function () {
+                $scope.newParameter.nameInvalid = $scope.newParameter.name == undefined || $scope.newParameter.name == '';
+                $scope.newParameter.valueInvalid = $scope.newParameter.value == undefined || $scope.newParameter.value == '';
+                if ($scope.newParameter.nameInvalid || $scope.newParameter.valueInvalid)
+                    return;
+
+                $scope.newParameter.partId = $scope.entry.id;
+                Util.post("rest/custom-fields", $scope.newParameter, function (result) {
+                    if (!result)
+                        return;
+
+                    $scope.entry.parameters.push(result);
+                    $scope.newParameter.edit = false;
+                })
+            };
+
+            $scope.showAutoAnnotationPopup = function () {
+                var modalInstance = $uibModal.open({
+                    templateUrl: 'scripts/entry/sequence/modal-auto-annotate-sequence.html',
+                    controller: function ($scope, $uibModalInstance, part, Util) {
+                        $scope.selectedFeatures = [];
+                        $scope.allSelected = false;
+                        $scope.part = part;
+                        $scope.pagingParams = {
+                            currentPage: 0,
+                            pageSize: 8,
+                            sort: "locations[0].genbankStart",
+                            asc: true
+                        };
+                        var displayOptions = [{display: "All features", key: "all"}, {
+                            display: "My features",
+                            key: "mine"
+                        }];
+                        $scope.options = {values: displayOptions, selection: displayOptions[0]};
+
+                        // retrieves "suggested" annotations for current entry
+                        $scope.fetchAnnotations = function () {
+                            $scope.annotations = undefined;
+                            Util.get("rest/parts/" + part.id + "/annotations/auto", function (result) {
+                                angular.forEach(result.features, function (feature) {
+                                        //console.log(feature);
+                                        //if (feature.strand == 1)
+                                        feature.length = (feature.locations[0].end - feature.locations[0].genbankStart) + 1;
+                                        //else
+                                        //feature.length = (feature.locations[0].genbankStart - feature.locations[0].end) + 1;
+                                    }
+                                );
+                                $scope.annotations = result;
+                                $scope.pagingParams.resultCount = result.features.length;
+                                $scope.pagingParams.numberOfPages = Math.ceil(result.features.length / $scope.pagingParams.pageSize);
+                            }, {ownerFeatures: $scope.options.selection.key == "mine"});
+                        };
+                        $scope.fetchAnnotations();
+
+                        /**
+                         * Support for sorting
+                         * @param field field to sort on
+                         */
+                        $scope.sort = function (field) {
+                            if ($scope.pagingParams.sort == field) {
+                                $scope.pagingParams.asc = !$scope.pagingParams.asc;
+                            } else {
+                                $scope.pagingParams.sort = field;
+                                $scope.pagingParams.asc = true;
+                            }
+                            $scope.pagingParams.currentPage = 0;
+                        };
+
+                        /**
+                         * Select all features on the UI
+                         */
+                        $scope.selectAll = function () {
+                            $scope.allSelected = !$scope.allSelected;
+                            if ($scope.allSelected) {
+                                $scope.selectedFeatures = $scope.annotations.features;
+                            } else {
+                                $scope.selectedFeatures = [];
+                            }
+                        };
+
+                        /**
+                         * Check or un-check (on UI) specific feature
+                         * @param feature
+                         */
+                        $scope.checkFeature = function (feature) {
+                            feature.selected = !feature.selected;
+                            var i = $scope.selectedFeatures.indexOf(feature);
+                            if (i == -1) {
+                                $scope.selectedFeatures.push(feature);
+                            } else {
+                                $scope.selectedFeatures.splice(i, 1);
+                            }
+
+                            $scope.allSelected = ($scope.selectedFeatures.length == $scope.annotations.features.length);
+                        };
+
+                        $scope.setClassName = function (feature) {
+                            var classPrefix = feature.strand == -1 ? "reverse-strand-" : "forward-strand-";
+                            feature.className = classPrefix + feature.type.toLowerCase();
+                        };
+
+                        /**
+                         *  Determine background color based on feature type
+                         * @param feature
+                         * @returns {{background-color: string}}
+                         */
+                        $scope.getBgStyle = function (feature) {
+                            var bgColor = "#CCC";
+
+                            switch (feature.type.toLowerCase()) {
+                                case 'cds':
+                                    bgColor = "#EF6500";
+                                    break;
+
+                                case "misc_feature":
+                                    bgColor = "#006FEF";
+                                    break;
+
+                                case "promoter":
+                                    bgColor = "#31B440";
+                                    break;
+
+                                case "terminator":
+                                    bgColor = "red";
+                                    break;
+
+                                case "rep_origin":
+                                    bgColor = "#878787";
+                                    break;
+
+                                case "misc_marker":
+                                    bgColor = "#8DCEB1";
+                                    break;
+                            }
+                            return {'background-color': bgColor};
+                        };
+
+                        $scope.getFirstStyle = function (selectedFeature) {
+                            var width = (selectedFeature.locations[0].genbankStart / $scope.annotations.length) * 100;
+                            return {"width": (Math.floor(width)) + '%'};
+                        };
+
+                        $scope.getSecondStyle = function (selectedFeature) {
+                            var width = ((selectedFeature.locations[0].end - selectedFeature.locations[0].genbankStart) / $scope.annotations.length) * 100;
+                            var style = $scope.getBgStyle(selectedFeature);
+                            style.width = (Math.ceil(width)) + '%';
+                            return style;
+                        };
+
+                        $scope.getThirdStyle = function (selectedFeature) {
+                            var w = (($scope.annotations.length - selectedFeature.locations[0].end) / $scope.annotations.length) * 100;
+                            return {"width": (Math.floor(w)) + '%'};
+                        };
+
+                        $scope.saveAnnotations = function () {
+                            $scope.errorSavingAnnotations = false;
+                            $scope.savingAnnotations = true;
+
+                            //url, obj, successHandler, params, errHandler
+                            Util.update("rest/parts/" + part.id + "/sequence", {features: $scope.selectedFeatures}, {add: true}, function () {
+                                $uibModalInstance.close(true);
+                            }, function (error) {
+                                $scope.savingAnnotations = false;
+                                $scope.errorSavingAnnotations = true;
+                            })
+                        };
+
+                        // used to show, in table of features, the selected feature
+                        $scope.showAnnotationInTable = function (selectedFeature) {
+                            var index = $scope.annotations.features.indexOf(selectedFeature);
+                            $scope.pagingParams.currentPage = parseInt(index / $scope.pagingParams.pageSize);
+                        }
+                    },
+                    size: 'lg',
+                    resolve: {
+                        part: function () {
+                            return $scope.entry;
+                        }
+                    }
+                    ,
+                    backdrop: "static"
+                });
+
+                modalInstance.result.then(function (reload) {
+                    if (reload) {
+                        $window.location.reload();
+                    }
+                });
+            };
+        }
+    )
 ;
