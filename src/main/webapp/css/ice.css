@@ -1503,3 +1503,7 @@ button[disabled].action-menu:hover {
 .veAxisFill {
     fill: #FFFFB3 !important;
 }
+
+.dragover {
+    border: 2px dashed #0082c0;
+}

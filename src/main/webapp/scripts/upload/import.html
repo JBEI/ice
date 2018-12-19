@@ -34,7 +34,7 @@
                     <td style="padding-left: 40px">
                         <span ng-if="!bulkUpload||bulkUpload.status!='BULK_EDIT'">
                             <span class="opacity_hover edit_icon font-90em" ng-click="fileUploadModal()">
-                                <i style="font-size: 14px; color: #555" class="fa fa-cloud-upload"></i> File Upload
+                                <i style="font-size: 14px; color: #555" class="fa fa-cloud-upload"></i> CSV Upload
                             </span>
 
                             <span style="font-weight: normal; color: #ccc">&nbsp;|&nbsp;</span>
@@ -90,5 +90,7 @@
     </div>
 </div>
 
-<div id="dataTable" style="overflow: auto; position: fixed; right:0; left: 260px; top: 182px;"
-     class="font-85em"></div>
+<div id="dataTable" style="overflow: auto; position: fixed; right:0; left: 260px; top: 182px"
+     class="font-85em" ngf-drop="upload(files)" ng-model="files" class="drop-box"
+     ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"></div>
+
