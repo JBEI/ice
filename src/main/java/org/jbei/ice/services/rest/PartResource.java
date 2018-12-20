@@ -790,7 +790,7 @@ public class PartResource extends RestResource {
 
         try (ByteArrayOutputStream outputStream = entriesAsCSV.customize(selection, format)) {
             StreamingOutput stream = outputStream::writeTo;
-            return Response.ok(stream).header("Content-Disposition", "attachment;filename=\"data.zip\"").build();
+            return Response.ok(stream).header("Content-Disposition", "attachment;filename=\"ice-export-data.zip\"").build();
         } catch (IOException e) {
             Logger.error(e);
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
