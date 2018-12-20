@@ -212,42 +212,6 @@ iceDirectives.directive("ice.menu.tags", function () {
     }
 });
 
-//iceDirectives.directive("iceSequenceChecker", function ($cookieStore) {
-//    function link(scope, element, attrs) {
-//
-//        var id, sid = $cookieStore.get("sessionId");
-//        var url;
-//
-//        function generateObject() {
-//            if (!url) {
-//                element.html('<object id="SequenceChecker" width="100%" height="100%" data="swf/sc/SequenceChecker.swf?entryId='
-//                    + id + '&amp;sessionId=' + sid + '"> \
-//                    </object>');
-//            } else {
-//                element.html('<object id="SequenceChecker" width="100%" height="100%" data="swf/sc/SequenceChecker.swf?entryId='
-//                    + id + '&amp;sessionId=' + sid + '&amp;url=' + url + '"> \
-//                    </object>');
-//            }
-//        }
-//
-//        scope.$watch("active", function (value) {
-//            id = attrs.entryid;
-//            url = attrs.url;
-//            generateObject();
-//        });
-//
-//        scope.$watch("traceSequences", function (value) {
-//            if (value && value.length)
-//                generateObject();
-//        });
-//    }
-//
-//    return {
-//        restrict: 'AE',
-//        link: link
-//    };
-//});
-
 iceDirectives.directive('myCurrentTime', function ($interval, dateFilter) {
 
     function link(scope, element, attrs) {

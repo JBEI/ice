@@ -370,7 +370,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
     $scope.customizeExport = function () {
         $uibModal.open({
             controller: "CustomExportController",
-            templateUrl: "views/modal/custom-export-modal.html",
+            templateUrl: "scripts/entry/export/custom-export-modal.html",
             backdrop: 'static',
             size: 'lg',
             resolve: {
@@ -530,7 +530,7 @@ iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $u
 
     $scope.selectPartnerForTransfer = function (partner) {
         var indexOf = $scope.selectedPartners.indexOf(partner);
-        if (indexOf != -1) {
+        if (indexOf !== -1) {
             $scope.selectedPartners.splice(indexOf, 1);
         } else {
             $scope.selectedPartners.push(partner);
@@ -543,58 +543,6 @@ iceControllers.controller('TransferEntriesToPartnersModal', function ($scope, $u
     //
     $scope.selectedPartners = [];
     $scope.retrieveRegistryPartners();
-});
-
-iceControllers.controller('CustomExportController', function ($scope, $uibModalInstance, selectedTypes, selection, EntryService, Util) {
-    console.log(selectedTypes);
-
-    var fields = EntryService.getCommonFields();
-    $scope.fields = [];
-    angular.forEach(fields, function (field) {
-        $scope.fields.push(field.label);
-    });
-
-    $scope.sequence = {format: "FASTA"};
-    $scope.general = {};
-
-    $scope.selectAll = function (format) {
-        if (!format)
-            format = 'general';
-
-        switch (format) {
-            case "general":
-                break;
-
-            case "sample":
-                break;
-
-            case "sequence":
-                break;
-        }
-    };
-
-    $scope.customExport = function () {
-        $scope.processingDownload = true;
-
-        var clickEvent = new MouseEvent("click", {
-            "view": window,
-            "bubbles": true,
-            "cancelable": false
-        });
-
-        Util.download("rest/parts/custom?sequenceFormat=" + $scope.sequence.format, selection).$promise.then(function (result) {
-            var url = URL.createObjectURL(new Blob([result.data]));
-            var a = document.createElement('a');
-            a.href = url;
-            a.download = result.filename();
-            a.target = '_blank';
-            a.dispatchEvent(clickEvent);
-
-            // close dialog
-            $scope.processingDownload = false;
-            $uibModalInstance.close()
-        });
-    }
 });
 
 iceControllers.controller('AddToFolderController', function ($rootScope, $scope, $uibModalInstance, Util, FolderSelection,
@@ -627,7 +575,7 @@ iceControllers.controller('AddToFolderController', function ($rootScope, $scope,
             selectionType = 'COLLECTION';
 
         var entrySelection = {
-            all: Selection.getSelection().type == 'ALL',
+            all: Selection.getSelection().type === 'ALL',
             folderId: folderSelected,
             selectionType: selectionType,
             entryType: Selection.getSelection().type,
@@ -648,7 +596,7 @@ iceControllers.controller('AddToFolderController', function ($rootScope, $scope,
     };
 
     $scope.submitNewFolderForCreation = function () {
-        if ($scope.newFolder.folderName == undefined || $scope.newFolder.folderName === '') {
+        if (!$scope.newFolder.folderName) {
             $scope.newFolder.error = true;
             return;
         }
