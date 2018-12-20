@@ -6,7 +6,7 @@ angular.module('ice.upload.service', [])
         //
         // headers
         //
-        var partHeaders = ["Principal Investigator <span class='required'>*</span>"
+        const partHeaders = ["Principal Investigator <span class='required'>*</span>"
             , "PI Email"
             , "Funding Source"
             , "Intellectual Property"
@@ -22,46 +22,46 @@ angular.module('ice.upload.service', [])
             , "Creator <span class='required'>*</span>"
             , "Creator Email <span class='required'>*</span>"
             // other headers are inserted here
-            , "Sequence Trace File(s)"
+            , "Sequence Trace File"
             , "Sequence File"
             , "Attachment File"];
 
-        var strainHeaders = angular.copy(partHeaders);
+        const strainHeaders = angular.copy(partHeaders);
         strainHeaders.splice.apply(strainHeaders, [15, 0].concat(["Host", "Genotype or Phenotype",
             "Selection Markers <span class='required'>*</span>"]));
 
-        var plasmidHeaders = angular.copy(partHeaders);
+        const plasmidHeaders = angular.copy(partHeaders);
         plasmidHeaders.splice.apply(plasmidHeaders, [15, 0].concat(["Circular", "Backbone", "Promoters", "Replicates In",
             "Origin of Replication", "Selection Markers <span class='required'>*</span>"]));
 
-        var seedHeaders = angular.copy(partHeaders);
+        const seedHeaders = angular.copy(partHeaders);
         seedHeaders.splice.apply(seedHeaders, [15, 0].concat(["Homozygosity", "Ecotype", "Harvest Date", "Parents",
             "Plant Type", "Generation", "Sent to ABRC?", "Selection Markers <span class='required'>*</span>"]));
 
-        var proteinHeaders = angular.copy(partHeaders);
+        const proteinHeaders = angular.copy(partHeaders);
         proteinHeaders.splice.apply(proteinHeaders, [15, 0].concat(["Organism", "Full Name", "Gene Name", "Uploaded From"]));
 
         //
         // data schema (should map exactly to headers)
         //
-        var dataSchema = ['principalInvestigator', 'principalInvestigatorEmail', 'fundingSource',
+        const dataSchema = ['principalInvestigator', 'principalInvestigatorEmail', 'fundingSource',
             'intellectualProperty', 'bioSafetyLevel', 'name', 'alias', 'keywords', 'shortDescription',
             'longDescription', 'references', 'links', 'status', 'creator', 'creatorEmail',
             // other schema entered here
             'sequenceTrace', 'sequenceFileName', 'attachments'];
 
-        var strainSchema = angular.copy(dataSchema);
+        const strainSchema = angular.copy(dataSchema);
         strainSchema.splice.apply(strainSchema, [15, 0].concat('host', 'genotypePhenotype', 'selectionMarkers'));
 
-        var plasmidSchema = angular.copy(dataSchema);
+        const plasmidSchema = angular.copy(dataSchema);
         plasmidSchema.splice.apply(plasmidSchema, [15, 0].concat('circular', 'backbone', 'promoters', 'replicatesIn',
             'originOfReplication', 'selectionMarkers'));
 
-        var seedSchema = angular.copy(dataSchema);
+        const seedSchema = angular.copy(dataSchema);
         seedSchema.splice.apply(seedSchema, [15, 0].concat('homozygosity', 'ecotype', 'harvestDate', 'parents',
             'plantType', 'generation', 'sentToAbrc', 'selectionMarkers'));
 
-        var proteinSchema = angular.copy(dataSchema);
+        const proteinSchema = angular.copy(dataSchema);
         proteinSchema.splice.apply(proteinSchema, [15, 0].concat('organism', 'fullName', 'geneName',
             'uploadedFrom'));
 
@@ -113,20 +113,25 @@ angular.module('ice.upload.service', [])
 
             // converts the index (which depends on type) of the schema to the specific rest resource name
             indexToRestResource: function (type, index) {
-                var schema = this.getDataSchema(type);
-                if (index == schema.indexOf('sequenceFileName'))
-                    return 'sequence';
+                const schema = this.getDataSchema(type);
+                switch (index) {
+                    case schema.indexOf('sequenceFileName'):
+                        return "sequence";
 
-                if (index == schema.indexOf('attachments'))
-                    return 'attachment';
+                    default:
+                    case schema.indexOf('attachments'):
+                        return "attachment";
 
-                return 'attachment';
+                    // todo :
+                    case schema.indexOf("sequenceTrace"):
+                        return "trace";
+                }
             },
 
             setDataValue: function (type, index, object, value) {
-                var dataSchema = this.getDataSchema(type);
+                const dataSchema = this.getDataSchema(type);
                 // links is an array
-                if (dataSchema[index] == "links") {
+                if (dataSchema[index] === "links") {
                     object[dataSchema[index]] = [value];
                     return object;
                 }
@@ -137,7 +142,7 @@ angular.module('ice.upload.service', [])
                 }
 
                 // selection marker is an array
-                if (dataSchema[index] == "selectionMarkers") {
+                if (dataSchema[index] === "selectionMarkers") {
                     object[dataSchema[index]] = [value];
                     return object;
                 }
@@ -169,18 +174,18 @@ angular.module('ice.upload.service', [])
             // server side. sort of acts as a mapping to handle the case of "strainData" etc
             // with selection markers being the exception
             getEntryValue: function (type, entry, index) {
-                var dataSchema = this.getDataSchema(type);
+                const dataSchema = this.getDataSchema(type);
 
-                if (index < 15 || dataSchema[index] == "selectionMarkers") {
-                    var val = entry[dataSchema[index]];
-                    if (dataSchema[index] == "bioSafetyLevel") {
-                        if (val == 0)
+                if (index < 15 || dataSchema[index] === "selectionMarkers") {
+                    const val = entry[dataSchema[index]];
+                    if (dataSchema[index] === "bioSafetyLevel") {
+                        if (val === 0)
                             return '';
-                        if (val == -1)
+                        if (val === -1)
                             return "Restricted";
                     }
 
-                    if (dataSchema[index] == "selectionMarkers")
+                    if (dataSchema[index] === "selectionMarkers")
                         return val.toString();
 
                     return val;
@@ -249,6 +254,11 @@ angular.module('ice.upload.service', [])
                             {type: 'protein', display: 'Protein'}
                         ];
                 }
+            },
+
+            // determines if the field (column) is for a file upload column
+            isFileField: function (fieldName) {
+                return ["attachments", "sequenceFileName", "sequenceTrace"].indexOf(fieldName) !== -1;
             }
         }
     });

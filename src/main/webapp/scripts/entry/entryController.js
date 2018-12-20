@@ -892,8 +892,7 @@ angular.module('ice.entry.controller', [])
                 if (result.type == 'READ_ENTRY') {
                     $scope.readPermissions.push(result);
                     $scope.activePermissions = $scope.readPermissions;
-                }
-                else {
+                } else {
                     $scope.writePermissions.push(result);
                     $scope.activePermissions = $scope.writePermissions;
                 }
@@ -939,44 +938,58 @@ angular.module('ice.entry.controller', [])
                 }, {move: false});
         };
     })
-    .controller('VectorEditorController', function (Util, $rootScope, $scope, $window, entry, remote) {
-        var sequence;
-        $scope.updatedSequence = undefined;
+    .controller('EntryController', function ($scope, $stateParams, $location, $uibModal, $rootScope,
+                                             $route, $window, $document, FileUploader, EntryService, EntryContextUtil,
+                                             Selection, Util, Authentication) {
+        $scope.partIdEditMode = false;
+        $scope.showSBOL = true;
+        $scope.context = EntryContextUtil.getContext();
 
-        // converts FeaturedDNASequence (jbei format) to genbank
-        var convertFeaturedDNASequence = function (result) {
-            var features = [];
+        $scope.isFileUpload = false;
+        var sessionId = Authentication.getSessionId();
+        $scope.sessionId = sessionId;
 
-            for (var i = 0; i < result.features.length; i += 1) {
-                var feature = result.features[i];
-                if (!feature.locations.length)
-                    continue;
+        // open vector editor modal
+        $scope.openSequenceInFullVectorEditor = function () {
+            var sequence;
+            $scope.updatedSequence = undefined;
 
-                var notes = feature.notes.length ? feature.notes[0].value : "";
+            var entry = $scope.entry;
+            var remote = $scope.remoteParams;
 
-                for (var j = 0; j < feature.locations.length; j += 1) {
-                    var location = feature.locations[j];
+            // converts FeaturedDNASequence (jbei format) to genbank
+            var convertFeaturedDNASequence = function (result) {
+                var features = [];
 
-                    var featureObject = {
-                        start: location.genbankStart - 1,
-                        end: location.end - 1,
-                        fid: feature.id,
-                        forward: feature.strand == 1,
-                        type: feature.type,
-                        name: feature.name,
-                        notes: notes,
-                        annotationType: feature.type,
-                        locations: feature.locations
-                    };
+                for (var i = 0; i < result.features.length; i += 1) {
+                    var feature = result.features[i];
+                    if (!feature.locations.length)
+                        continue;
 
-                    features.push(featureObject);
+                    var notes = feature.notes.length ? feature.notes[0].value : "";
+
+                    for (var j = 0; j < feature.locations.length; j += 1) {
+                        var location = feature.locations[j];
+
+                        var featureObject = {
+                            start: location.genbankStart - 1,
+                            end: location.end - 1,
+                            fid: feature.id,
+                            forward: feature.strand === 1,
+                            type: feature.type,
+                            name: feature.name,
+                            notes: notes,
+                            annotationType: feature.type
+                        };
+
+                        features.push(featureObject);
+                    }
                 }
-            }
 
-            return features;
-        };
+                return features;
+            };
 
-        $scope.loadVectorEditor = function () {
+            // init
             Util.get("rest/parts/" + entry.id + "/sequence", function (result) {
                 $scope.sequenceName = result.name;
                 sequence = result;
@@ -998,9 +1011,14 @@ angular.module('ice.entry.controller', [])
 
                 data.sequenceData.features = convertFeaturedDNASequence(result);
 
-                $scope.vEeditor = $window.createVectorEditor(document.getElementById("vector-editor-root"), {
+                $scope.vEeditor = $window.createVectorEditor("createDomNodeForMe", {
                     editorName: "vector-editor",
                     doNotUseAbsolutePosition: true,
+                    isFullscreen: true,
+                    disableSetReadOnly: true,
+                    handleFullscreenClose: function () { // this will make the editor fullscreen by default, and will allow you to handle the close request
+                        $scope.vEeditor.close();         // handle vector editor root removal and clean up
+                    },
                     onSave: function (event, sequenceData, editorState, onSuccessCallback) {
                         if (remote.remote || !entry.canEdit)
                             return;
@@ -1013,7 +1031,7 @@ angular.module('ice.entry.controller', [])
 
                         var featureMap = {};
 
-                        for (var prop in sequenceData.features) {
+                        for (const prop in sequenceData.features) {
                             if (!sequenceData.features.hasOwnProperty(prop))
                                 continue;
 
@@ -1030,13 +1048,12 @@ angular.module('ice.entry.controller', [])
                                     type: feature.type,
                                     name: feature.name,
                                     strand: feature.forward ? 1 : -1,
-                                    locations: [{genbankStart: feature.start + 1, end: feature.end + 1}],
                                     notes: [{name: "note", value: feature.notes}]
                                 };
                             }
                         }
 
-                        for (var property in featureMap) {
+                        for (const property in featureMap) {
                             if (!featureMap.hasOwnProperty(property))
                                 continue;
 
@@ -1138,36 +1155,6 @@ angular.module('ice.entry.controller', [])
                     ]
                 })
             }, remote);
-        };
-    })
-    .controller('EntryController', function ($scope, $stateParams, $location, $uibModal, $rootScope,
-                                             $route, $window, $document, FileUploader, EntryService, EntryContextUtil,
-                                             Selection, Util, Authentication) {
-            $scope.partIdEditMode = false;
-            $scope.showSBOL = true;
-            $scope.context = EntryContextUtil.getContext();
-
-            $scope.isFileUpload = false;
-            var sessionId = Authentication.getSessionId();
-            $scope.sessionId = sessionId;
-
-            // open vector editor modal
-            $scope.openSequenceInFullVectorEditor = function () {
-                $uibModal.open({
-                    templateUrl: 'scripts/entry/modal/vector-editor.html',
-                    keyboard: false,
-                    controller: 'VectorEditorController',
-                    size: "ve-sized",
-                    backdrop: "static",
-                    resolve: {
-                        entry: function () {
-                            return $scope.entry;
-                        },
-                        remote: function () {
-                            return $scope.remoteParams;
-                        }
-                    }
-                });
             };
 
             $scope.sequenceUpload = function (type) {
@@ -1754,8 +1741,7 @@ angular.module('ice.entry.controller', [])
                             var i = $scope.selectedFeatures.indexOf(feature);
                             if (i == -1) {
                                 $scope.selectedFeatures.push(feature);
-                            }
-                            else {
+                            } else {
                                 $scope.selectedFeatures.splice(i, 1);
                             }
 

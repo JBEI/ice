@@ -49,7 +49,7 @@ angular.module('ice.entry.service', [])
                 }
 
                 // determine when to send a notification
-                if (selectedSearchResultsCount == 0) {
+                if (selectedSearchResultsCount === 0) {
                     if (selectedSearchNotificationSent) {
                         // notify again that count is not 0
                         $rootScope.$emit("EntrySelected", selectedSearchResultsCount);
@@ -379,7 +379,7 @@ angular.module('ice.entry.service', [])
         };
 
         var getFieldsForType = function (type, typeFieldsOnly) {
-            var fields = angular.copy(partFields);
+            const fields = angular.copy(partFields);
             type = type.toLowerCase();
             switch (type) {
                 case 'strain':
