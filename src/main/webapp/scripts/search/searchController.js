@@ -6,7 +6,7 @@ angular.module('ice.search.controller', [])
 
         $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
-        var query = {entryTypes: ['STRAIN', 'PLASMID', 'PART', 'ARABIDOPSIS', 'PROTEIN'], queryString: undefined};
+        var query = {entryTypes: ['STRAIN', 'PLASMID', 'PART', 'SEED', 'PROTEIN'], queryString: undefined};
 
         $scope.$on("RunSearch", function (event, filters) {
             query = filters;
@@ -16,7 +16,7 @@ angular.module('ice.search.controller', [])
             runAdvancedSearch(filters);
         });
 
-        var runAdvancedSearch = function (filters) {
+        const runAdvancedSearch = function (filters) {
             $scope.loadingSearchResults = true;
             if ($scope.params.limit) {
                 $scope.searchFilters.parameters.retrieveCount = $scope.params.limit;
@@ -212,7 +212,7 @@ angular.module('ice.search.controller', [])
         };
     })
     .controller('SearchInputController', function ($scope, $rootScope, $http, $cookies, $location) {
-        $scope.searchTypes = {all: true, strain: true, plasmid: true, part: true, arabidopsis: true, protein: true};
+        $scope.searchTypes = {all: true, strain: true, plasmid: true, part: true, seed: true, protein: true};
         $scope.fieldFilters = [];
 
         $scope.addFieldFilter = function () {
@@ -242,7 +242,7 @@ angular.module('ice.search.controller', [])
                 blastQuery: {}
             };
 
-            // check search types  : {all: false, strain: true, plasmid: false, part: true, arabidopsis: true}
+            // check search types  : {all: false, strain: true, plasmid: false, part: true, seed: true}
             for (var type in $scope.searchTypes) {
                 if ($scope.searchTypes.hasOwnProperty(type) && type !== 'all') {
                     if ($scope.searchTypes[type]) {
