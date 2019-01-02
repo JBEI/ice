@@ -18,6 +18,10 @@ public enum EntryType {
 
     public static EntryType nameToType(String name) {
         name = name.trim();
+
+        if ("arabidopsis".equalsIgnoreCase(name)) // ice-150: workaround for existing records
+            return SEED;
+
         for (EntryType type : EntryType.values()) {
             if (name.equalsIgnoreCase(type.getName()))
                 return type;
