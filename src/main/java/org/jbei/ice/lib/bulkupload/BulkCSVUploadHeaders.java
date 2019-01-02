@@ -20,7 +20,7 @@ public class BulkCSVUploadHeaders {
         List<EntryField> list = getCommonFields();
 
         switch (type) {
-            case ARABIDOPSIS:
+            case SEED:
                 addArabidopsisSeedHeaders(list);
                 break;
 
