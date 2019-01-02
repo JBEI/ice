@@ -38,7 +38,7 @@ public class ModelToInfoFactory {
                 part.setStrainData(strainInfo(entry));
                 break;
 
-            case ARABIDOPSIS:
+            case SEED:
                 part.setArabidopsisSeedData(seedInfo(entry));
                 break;
 
@@ -344,7 +344,7 @@ public class ModelToInfoFactory {
                 part.setStrainData(strainData);
                 break;
 
-            case ARABIDOPSIS:
+            case SEED:
                 ArabidopsisSeedData seedData = new ArabidopsisSeedData();
                 ArabidopsisSeed seed = (ArabidopsisSeed) entry;
                 PlantType plantType = PlantType.fromString(seed.getPlantType().toString());

@@ -62,7 +62,7 @@ public class ArabidopsisSeed extends Entry {
 
     public ArabidopsisSeed() {
         super();
-        setRecordType(EntryType.ARABIDOPSIS.getName());
+        setRecordType(EntryType.SEED.getName());
         setGeneration(Generation.UNKNOWN);
         setPlantType(PlantType.EMS);
         setEcotype("");

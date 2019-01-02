@@ -38,7 +38,7 @@ public class EntryUtil {
                 value = getPlasmidFieldValues((Plasmid) entry, field);
                 break;
 
-            case ARABIDOPSIS:
+            case SEED:
                 value = getSeedFieldValues((ArabidopsisSeed) entry, field);
                 break;
 

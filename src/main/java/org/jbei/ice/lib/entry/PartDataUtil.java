@@ -25,7 +25,7 @@ public class PartDataUtil {
                 value = getPlasmidFieldValues(data.getPlasmidData(), field);
                 break;
 
-            case ARABIDOPSIS:
+            case SEED:
                 value = getSeedFieldValues(data.getArabidopsisSeedData(), field);
                 break;
 

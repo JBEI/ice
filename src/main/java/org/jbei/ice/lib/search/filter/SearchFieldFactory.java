@@ -2,11 +2,7 @@ package org.jbei.ice.lib.search.filter;
 
 import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.storage.model.ArabidopsisSeed;
-import org.jbei.ice.storage.model.Part;
-import org.jbei.ice.storage.model.Plasmid;
-import org.jbei.ice.storage.model.Strain;
-import org.jbei.ice.storage.model.Protein;
+import org.jbei.ice.storage.model.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -86,7 +82,7 @@ public class SearchFieldFactory {
                     fields.addAll(plasmidFields);
                     break;
 
-                case ARABIDOPSIS:
+                case SEED:
                     fields.addAll(seedFields);
                     break;
 
@@ -116,7 +112,7 @@ public class SearchFieldFactory {
                     classes[i] = Plasmid.class;
                     break;
 
-                case ARABIDOPSIS:
+                case SEED:
                     classes[i] = ArabidopsisSeed.class;
                     break;
 

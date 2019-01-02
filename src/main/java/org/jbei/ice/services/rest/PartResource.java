@@ -102,7 +102,7 @@ public class PartResource extends RestResource {
      * Retrieves the defaults for the requested entry types.
      *
      * @param type the type of entry i.e. <code>PLASMID</code>, <code>PART</code>, <code>STRAIN</code> or
-     *             <code>ARABIDOPSIS</code>. Used to retrieve the default values for that entry
+     *             <code>SEED</code>. Used to retrieve the default values for that entry
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)

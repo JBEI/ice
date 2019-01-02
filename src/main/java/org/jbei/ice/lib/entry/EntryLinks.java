@@ -128,7 +128,7 @@ public class EntryLinks extends HasEntry {
 
     private boolean isCompatible(EntryType parentType, EntryType childType) {
         switch (parentType) {
-            case ARABIDOPSIS:
+            case SEED:
                 return childType == parentType || childType == EntryType.PART;
 
             case STRAIN:

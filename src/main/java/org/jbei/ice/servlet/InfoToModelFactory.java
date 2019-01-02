@@ -31,7 +31,7 @@ public class InfoToModelFactory {
                 entry = setStrainFields(info.getStrainData(), new Strain());
                 break;
 
-            case ARABIDOPSIS:
+            case SEED:
                 entry = setSeedFields(info.getArabidopsisSeedData(), new ArabidopsisSeed());
                 break;
 
@@ -189,7 +189,7 @@ public class InfoToModelFactory {
             case PART:
                 break;
 
-            case ARABIDOPSIS:
+            case SEED:
                 entry = setSeedFields(data.getArabidopsisSeedData(), entry);
                 break;
 
@@ -554,7 +554,7 @@ public class InfoToModelFactory {
     }
 
     private static Entry infoToSeedForField(Entry entry, String value, EntryField field) {
-        if (!entry.getRecordType().equalsIgnoreCase(EntryType.ARABIDOPSIS.toString()))
+        if (!entry.getRecordType().equalsIgnoreCase(EntryType.SEED.toString()))
             return entry;
 
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;

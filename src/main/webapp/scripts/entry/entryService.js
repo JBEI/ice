@@ -330,7 +330,7 @@ angular.module('ice.entry.service', [])
                 case 'arabidopsis':
                     return [
                         {type: 'part', display: 'Part'},
-                        {type: 'arabidopsis', display: 'Arabidopsis Seed'}
+                        {type: 'arabidopsis', display: 'Seed'}
                     ];
 
                 case 'protein':
@@ -557,7 +557,7 @@ angular.module('ice.entry.service', [])
                     {name: "Plasmid", type: "plasmid"},
                     {name: "Strain", type: "strain"},
                     {name: "Part", type: "part"},
-                    {name: "Arabidopsis Seed", type: "arabidopsis"},
+                    {name: "Seed", type: "seed"},
                     {name: "Protein", type: "protein"}
                 ]
             }
