@@ -396,6 +396,8 @@ public class EntryController extends HasEntry {
                     continue;
 
                 link = ModelToInfoFactory.createTipView(linkedEntry);
+                link.setSelectionMarkers(EntryUtil.getSelectionMarkersAsList(linkedEntry.getSelectionMarkers()));
+
                 Optional<String> linkedSequenceString = sequenceDAO.getSequenceString(linkedEntry);
 
                 if (linkedSequenceString.isPresent()) {
