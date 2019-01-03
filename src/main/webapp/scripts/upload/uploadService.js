@@ -74,7 +74,7 @@ angular.module('ice.upload.service', [])
                     case "plasmid":
                         return plasmidSchema;
 
-                    case "arabidopsis":
+                    case "seed":
                         return seedSchema;
 
                     case "protein":
@@ -103,7 +103,7 @@ angular.module('ice.upload.service', [])
                     case "part":
                         return partHeaders;
 
-                    case "arabidopsis":
+                    case "seed":
                         return seedHeaders;
 
                     case "protein":
@@ -160,7 +160,7 @@ angular.module('ice.upload.service', [])
                         object.plasmidData[dataSchema[index]] = value;
                         return object;
 
-                    case "arabidopsis":
+                    case "seed":
                         object.arabidopsisSeedData[dataSchema[index]] = value;
                         return object;
 
@@ -204,7 +204,7 @@ angular.module('ice.upload.service', [])
                             return entry[this.getDataSchema("part")[index - 6]];
                         return entry.plasmidData[dataSchema[index]];
 
-                    case "arabidopsis":
+                    case "seed":
                         // 7 custom fields
                         if (index >= 22)
                             return entry[this.getDataSchema("part")[index - 7]];
@@ -242,10 +242,10 @@ angular.module('ice.upload.service', [])
                             {type: 'strain', display: 'Strain'}
                         ];
 
-                    case 'arabidopsis':
+                    case 'seed':
                         return [
                             {type: 'part', display: 'Part'},
-                            {type: 'arabidopsis', display: 'Arabidopsis Seed'}
+                            {type: 'seed', display: 'Seed'}
                         ];
 
                     case 'protein':

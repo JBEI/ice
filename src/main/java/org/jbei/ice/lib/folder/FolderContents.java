@@ -119,7 +119,7 @@ public class FolderContents {
                         entry = new Plasmid();
                         break;
 
-                    case ARABIDOPSIS:
+                    case SEED:
                         entry = new ArabidopsisSeed();
                         break;
 

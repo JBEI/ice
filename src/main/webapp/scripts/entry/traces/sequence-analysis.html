@@ -156,8 +156,14 @@
     <div class="row pad_top" ng-if="entry.hasSequence&&traces.data.length">
         <div class="col-md-12" style="height: 600px" ng-init="fetchSequenceTraces()">
             <!--<ice-sequence-checker entryId="{{entry.id}}"></ice-sequence-checker>-->
-            <div id="sequence-checker-root" style="height: 100%">
-                <img src="img/loader-mini.gif"> Loading sequence checker&hellip;</div>
+            <div class="alert alert-info" ng-if="!matchingAlignmentsFound">
+                <b>No matching alignments!</b> None of your alignments could be matched to the reference sequence
+            </div>
+
+            <div id="sequence-checker-root" style="height: 100%" ng-if="matchingAlignmentsFound">
+                <img src="img/loader-mini.gif"> Loading sequence checker&hellip;
+            </div>
+
         </div>
     </div>
 </div>

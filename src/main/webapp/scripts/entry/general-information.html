@@ -22,7 +22,16 @@
             <!--display field value types that are not 'withEmail' and not 'date'-->
             <!--todo : also need different display widgets for different types-->
             <div ng-if="!field.edit&&field.inputType!=='withEmail'&&field.inputType!=='date'">
-                <span ng-if="field.schema!='bioSafetyLevel'">{{entry[field.schema]|arrayDisplay}}</span>
+
+                <span ng-if="field.schema!='bioSafetyLevel' && field.schema !=='selectionMarkers'">{{entry[field.schema]|arrayDisplay}}</span>
+
+                <span ng-if="field.schema=='selectionMarkers'">
+                    <div ng-if="entry.linkedParts">
+                        <span ng-repeat="linkedPart in entry.linkedParts">{{linkedPart[field.schema]|arrayDisplay}}</span>
+                    </div>
+                     {{entry[field.schema]|arrayDisplay}}
+                </span>
+
                 <span ng-if="field.schema=='bioSafetyLevel'">
                     <i class="fa fa-fw fa-exclamation-triangle orange" ng-if="entry[field.schema] == -1"></i>
                     {{displayForBLSValue(entry[field.schema])}}
@@ -108,7 +117,7 @@
             <!--checkbox-->
             <div ng-if="field.inputType==='bool'&&field.edit" ng-init="quickEdit[field.schema]=entry[field.schema]">
                 <input type="checkbox" ng-model="quickEdit[field.schema]" ng-change="field.dirty=true">
-                 <span style="padding-top:5px;">
+                <span style="padding-top:5px;">
                      <a class="btn btn-primary btn-xs" ng-click="quickEditEntry(field)">Save</a>
                     <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
                 </span>
@@ -253,7 +262,7 @@
             <input type="text" ng-model="newParameter.value" ng-trim="true"
                    ng-class="{'input_box':!newParameter.valueInvalid, 'input_box_error':newParameter.valueInvalid}"
                    maxlength="125" style="width: 400px;" placeHolder="Custom field value">
-                <span style="padding-top:5px;">
+            <span style="padding-top:5px;">
                     <a class="btn btn-primary btn-xs" ng-click="addNewCustomField()">Save</a>
                     <a class="btn btn-link btn-xs" ng-click="newParameter.edit=false; newParameter={}">Cancel</a>
                 </span>

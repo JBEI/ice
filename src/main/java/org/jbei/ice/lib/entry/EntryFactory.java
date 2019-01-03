@@ -18,7 +18,7 @@ public class EntryFactory {
             case STRAIN:
                 return new Strain();
 
-            case ARABIDOPSIS:
+            case SEED:
                 return new ArabidopsisSeed();
 
             case PROTEIN:

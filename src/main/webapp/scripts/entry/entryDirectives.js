@@ -185,7 +185,7 @@ angular.module('ice.entry.directives', [])
                                 start: location.genbankStart - 1,
                                 end: location.end - 1,
                                 fid: feature.id,
-                                forward: feature.strand == 1,
+                                forward: feature.strand === 1,
                                 type: feature.type,
                                 name: feature.name,
                                 notes: notes,
@@ -214,6 +214,7 @@ angular.module('ice.entry.directives', [])
 
                     Util.get(url, function (result) {
                         var data = convertToVEModel(result);
+                        $rootScope.$emit("VectorEditorSequenceModel", data);
                         $scope.loadVectorEditor(data);
                     });
                 };

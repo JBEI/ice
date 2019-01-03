@@ -1,14 +1,14 @@
 'use strict';
 
 angular.module('ice.entry.controller', [])
-    .controller('EntryAttachmentController', function ($scope, $window, $cookies, $stateParams, FileUploader, Util, Authentication) {
+    .controller('EntryAttachmentController', function ($scope, $window, $stateParams, FileUploader, Util, Authentication) {
 
         // init. get remote
         Util.list("rest/parts/" + $stateParams.id + "/attachments", function (result) {
             $scope.attachments = result;
         }, $scope.remote);
 
-        var desc = "";
+        let desc = "";
         $scope.uploadError = undefined;
 
         $scope.$watch('attachmentDescription', function () {
@@ -71,7 +71,7 @@ angular.module('ice.entry.controller', [])
             confirmObject[idx] = value;
         }
     })
-    .controller('EntryCommentController', function ($scope, $cookies, $stateParams, Util) {
+    .controller('EntryCommentController', function ($scope, $stateParams, Util) {
         var entryId = $stateParams.id;
         $scope.newComment = {samples: []};
 
@@ -113,7 +113,7 @@ angular.module('ice.entry.controller', [])
                 $scope.newComment.samples.splice(idx, 1);
         };
     })
-    .controller('ShotgunSequenceController', function ($scope, $window, $cookies, $stateParams, FileUploader, $uibModal, Util) {
+    .controller('ShotgunSequenceController', function ($scope, $window, $stateParams, FileUploader, $uibModal, Util) {
         var entryId = $stateParams.id;
         $scope.shotgunUploadError = undefined;
         $scope.maxSize = 5;
@@ -176,11 +176,11 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.downloadShotgunFile = function (sequence) {
-            $window.open("rest/file/shotgunsequence/" + sequence.fileId + "?sid=" + $cookies.get("sessionId"), "_self");
+            $window.open("rest/file/shotgunsequence/" + sequence.fileId + "?sid=" + Authentication.getSessionId(), "_self");
         };
     })
     .controller('ShotgunSequenceUploadModalController', function ($scope, FileUploader, $uibModalInstance, entryId,
-                                                                  $cookies) {
+                                                                  Authentication) {
         $scope.cancelAddShotgunSequence = function () {
             $uibModalInstance.dismiss('cancel');
         };
@@ -191,7 +191,7 @@ angular.module('ice.entry.controller', [])
             method: 'POST',
             removeAfterUpload: true,
             headers: {
-                "X-ICE-Authentication-SessionId": $cookies.get("sessionId")
+                "X-ICE-Authentication-SessionId": Authentication.getSessionId()
             },
             autoUpload: true,
             queueLimit: 1, // can only upload 1 file
@@ -215,7 +215,7 @@ angular.module('ice.entry.controller', [])
             $scope.shotgunUploadError = true;
         };
     })
-    .controller('EntryExperimentController', function ($scope, $cookies, $stateParams, Util) {
+    .controller('EntryExperimentController', function ($scope, $stateParams, Util) {
         var entryId = $stateParams.id;
         $scope.experiment = {};
         $scope.addExperiment = false;
@@ -249,7 +249,7 @@ angular.module('ice.entry.controller', [])
             });
         }
     })
-    .controller('PartHistoryController', function ($scope, $window, $cookies, $stateParams, Util) {
+    .controller('PartHistoryController', function ($scope, $window, $stateParams, Util) {
         var entryId = $stateParams.id;
         $scope.historyParams = {offset: 0, limit: 10, currentPage: 1, maxSize: 5};
 
@@ -266,7 +266,7 @@ angular.module('ice.entry.controller', [])
         $scope.deleteHistory = function (history) {
             Util.remove('rest/parts/' + entryId + '/history/' + history.id, {}, function (result) {
                 var idx = $scope.history.data.indexOf(history);
-                if (idx == -1)
+                if (idx === -1)
                     return;
 
                 $scope.history.data.splice(idx, 1);
@@ -274,9 +274,9 @@ angular.module('ice.entry.controller', [])
             });
         }
     })
-    .controller('EditEntryController', function ($scope, $http, $location, $cookies, $rootScope, FileUploader,
+    .controller('EditEntryController', function ($scope, $http, $location, Authentication, $rootScope, FileUploader,
                                                  $stateParams, EntryService, Util, $anchorScroll) {
-        var sid = $cookies.get("sessionId");
+        var sid = Authentication.getSessionId();
         var partLinks;
         $scope.entry = {id: $stateParams.id};
 
@@ -434,13 +434,12 @@ angular.module('ice.entry.controller', [])
         };
     })
     .controller('CreateEntryController', function ($http, $scope, $uibModal, $rootScope, FileUploader, $location,
-                                                   $stateParams, $cookies, EntryService, Util, $anchorScroll) {
+                                                   $stateParams, Authentication, EntryService, Util, $anchorScroll) {
         $scope.createType = $stateParams.type;
         $scope.showMain = true;
 
         // generate the various link options for selected option
         $scope.linkOptions = EntryService.linkOptions($scope.createType.toLowerCase());
-        var sid = $cookies.get("sessionId");
 
         // retrieves the defaults for the specified type. Note that $scope.part is the main part
         var getPartDefaults = function (type, isMain) {
@@ -540,7 +539,7 @@ angular.module('ice.entry.controller', [])
 
         $scope.getLocation = function (inputField, val) {
             return $http.get('rest/search/filter', {
-                headers: {'X-ICE-Authentication-SessionId': sid},
+                headers: {'X-ICE-Authentication-SessionId': Authentication.getSessionId()},
                 params: {
                     token: val,
                     field: inputField
@@ -628,7 +627,7 @@ angular.module('ice.entry.controller', [])
 
         $scope.getEntriesByPartNumber = function (val) {
             return $http.get('rest/search/filter', {
-                headers: {'X-ICE-Authentication-SessionId': sid},
+                headers: {'X-ICE-Authentication-SessionId': Authentication.getSessionId()},
                 params: {
                     token: val,
                     field: 'PART_NUMBER'
@@ -671,7 +670,7 @@ angular.module('ice.entry.controller', [])
             url: "rest/file/sequence",
             method: 'POST',
             removeAfterUpload: true,
-            headers: {"X-ICE-Authentication-SessionId": sid},
+            headers: {"X-ICE-Authentication-SessionId": Authentication.getSessionId()},
             autoUpload: true,
             queueLimit: 1 // can only upload 1 file
         });
@@ -731,8 +730,7 @@ angular.module('ice.entry.controller', [])
             $scope.serverError = false;
         };
     })
-    .controller('EntryPermissionController', function ($rootScope, $scope, $cookies, filterFilter, Util) {
-        var sessionId = $cookies.get("sessionId");
+    .controller('EntryPermissionController', function ($rootScope, $scope, filterFilter, Util) {
         var panes = $scope.panes = [];
         $scope.userFilterInput = undefined;
         $scope.canSetPublicPermission = undefined;
@@ -941,220 +939,235 @@ angular.module('ice.entry.controller', [])
     .controller('EntryController', function ($scope, $stateParams, $location, $uibModal, $rootScope,
                                              $route, $window, $document, FileUploader, EntryService, EntryContextUtil,
                                              Selection, Util, Authentication) {
-        $scope.partIdEditMode = false;
-        $scope.showSBOL = true;
-        $scope.context = EntryContextUtil.getContext();
+            $scope.partIdEditMode = false;
+            $scope.showSBOL = true;
+            $scope.context = EntryContextUtil.getContext();
 
-        $scope.isFileUpload = false;
-        var sessionId = Authentication.getSessionId();
-        $scope.sessionId = sessionId;
+            $scope.isFileUpload = false;
+            const sessionId = Authentication.getSessionId();
+            $scope.sessionId = sessionId;
+            $scope.existingVectorEditorSequenceModel = undefined;
 
-        // open vector editor modal
-        $scope.openSequenceInFullVectorEditor = function () {
-            var sequence;
-            $scope.updatedSequence = undefined;
+            $rootScope.$on("VectorEditorSequenceModel", function (event, data) {
+                console.log("VectorEditorSequenceModel", event, data);
+                $scope.existingVectorEditorSequenceModel = data;
+            });
 
-            var entry = $scope.entry;
-            var remote = $scope.remoteParams;
+            // open vector editor modal
+            $scope.openSequenceInFullVectorEditor = function () {
+                var sequence;
+                $scope.updatedSequence = undefined;
 
-            // converts FeaturedDNASequence (jbei format) to genbank
-            var convertFeaturedDNASequence = function (result) {
-                var features = [];
+                var entry = $scope.entry;
+                var remote = $scope.remoteParams;
 
-                for (var i = 0; i < result.features.length; i += 1) {
-                    var feature = result.features[i];
-                    if (!feature.locations.length)
-                        continue;
+                // converts FeaturedDNASequence (jbei format) to genbank
+                var convertFeaturedDNASequence = function (result) {
+                    var features = [];
 
-                    var notes = feature.notes.length ? feature.notes[0].value : "";
+                    for (var i = 0; i < result.features.length; i += 1) {
+                        var feature = result.features[i];
+                        if (!feature.locations.length)
+                            continue;
 
-                    for (var j = 0; j < feature.locations.length; j += 1) {
-                        var location = feature.locations[j];
+                        var notes = feature.notes.length ? feature.notes[0].value : "";
 
-                        var featureObject = {
-                            start: location.genbankStart - 1,
-                            end: location.end - 1,
-                            fid: feature.id,
-                            forward: feature.strand === 1,
-                            type: feature.type,
-                            name: feature.name,
-                            notes: notes,
-                            annotationType: feature.type
-                        };
+                        for (var j = 0; j < feature.locations.length; j += 1) {
+                            var location = feature.locations[j];
 
-                        features.push(featureObject);
+                            var featureObject = {
+                                start: location.genbankStart - 1,
+                                end: location.end - 1,
+                                fid: feature.id,
+                                forward: feature.strand === 1,
+                                type: feature.type,
+                                name: feature.name,
+                                notes: notes,
+                                annotationType: feature.type
+                            };
+
+                            features.push(featureObject);
+                        }
                     }
-                }
 
-                return features;
-            };
-
-            // init
-            Util.get("rest/parts/" + entry.id + "/sequence", function (result) {
-                $scope.sequenceName = result.name;
-                sequence = result;
-
-                var data = {
-                    sequenceData: {
-                        sequence: result.sequence,
-                        features: [],
-                        name: result.name,
-                        circular: result.isCircular
-                    },
-                    registryData: {
-                        uri: result.uri,
-                        identifier: result.identifier,
-                        name: result.name,
-                        circular: result.isCircular
-                    }
+                    return features;
                 };
 
-                data.sequenceData.features = convertFeaturedDNASequence(result);
+                // init
+                const createVectorEditorNode = function (openVEData) {
+                    $scope.vEeditor = $window.createVectorEditor("createDomNodeForMe", {
+                        editorName: "vector-editor",
+                        doNotUseAbsolutePosition: true,
+                        isFullscreen: true,
+                        disableSetReadOnly: true,
+                        handleFullscreenClose: function () { // this will make the editor fullscreen by default, and will allow you to handle the close request
+                            $scope.vEeditor.close();         // handle vector editor root removal and clean up
+                        },
+                        onSave: function (event, sequenceData, editorState, onSuccessCallback) {
+                            if (remote.remote || !entry.canEdit)
+                                return;
 
-                $scope.vEeditor = $window.createVectorEditor("createDomNodeForMe", {
-                    editorName: "vector-editor",
-                    doNotUseAbsolutePosition: true,
-                    isFullscreen: true,
-                    disableSetReadOnly: true,
-                    handleFullscreenClose: function () { // this will make the editor fullscreen by default, and will allow you to handle the close request
-                        $scope.vEeditor.close();         // handle vector editor root removal and clean up
-                    },
-                    onSave: function (event, sequenceData, editorState, onSuccessCallback) {
-                        if (remote.remote || !entry.canEdit)
-                            return;
+                            // convert to featuredDNASequence
+                            sequence = {
+                                features: [],
+                                sequence: sequenceData.sequence
+                            };
 
-                        // convert to featuredDNASequence
-                        sequence = {
-                            features: [],
-                            sequence: sequenceData.sequence
+                            var featureMap = {};
+
+                            for (const prop in sequenceData.features) {
+                                if (!sequenceData.features.hasOwnProperty(prop))
+                                    continue;
+
+                                var feature = sequenceData.features[prop];
+                                var existingFeature = featureMap[feature.id];
+                                if (existingFeature) {
+                                    existingFeature.locations.push({
+                                        genbankStart: feature.start + 1,
+                                        end: feature.end + 1
+                                    })
+                                } else {
+                                    featureMap[feature.id] = {
+                                        id: feature.fid,
+                                        type: feature.type,
+                                        name: feature.name,
+                                        strand: feature.forward ? 1 : -1,
+                                        notes: [{name: "note", value: feature.notes}]
+                                    };
+                                }
+                            }
+
+                            for (const property in featureMap) {
+                                if (!featureMap.hasOwnProperty(property))
+                                    continue;
+
+                                sequence.features.push(featureMap[property]);
+                            }
+
+                            Util.update("rest/parts/" + entry.id + "/sequence", sequence, {},
+                                function (result) {
+                                    console.log("save completed for", entry.id);
+                                    $rootScope.$emit("ReloadVectorViewData", result);
+                                    $scope.updatedSequence = result;
+                                    onSuccessCallback();
+                                })
+                        },
+
+                        onCopy: function (event, copiedSequenceData, editorState) {
+                            var clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
+                            clipboardData.setData('text/plain', copiedSequenceData.sequence);
+                            data.selection = editorState.selectionLayer;
+                            data.openVECopied = copiedSequenceData;
+                            clipboardData.setData('application/json', JSON.stringify(openVEData));
+                            event.preventDefault();
+                        },
+
+                        onPaste: function (event, editorState) {
+                            var clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
+                            var jsonData = clipboardData.getData('application/json');
+                            if (jsonData) {
+                                jsonData = JSON.parse(jsonData);
+                                jsonData = jsonData.openVECopied;
+                            }
+                            return jsonData || {sequence: clipboardData.getData("text/plain")}
+                        },
+
+                        PropertiesProps: {
+                            propertiesList: [
+                                "features",
+                                "translations",
+                                "cutsites",
+                                "orfs"
+                            ]
+                        },
+                        ToolBarProps: {
+                            //name the tools you want to see in the toolbar in the order you want to see them
+                            toolList: [
+                                "saveTool",
+                                "undoTool",
+                                "redoTool",
+                                "cutsiteTool",
+                                "featureTool",
+                                "orfTool",
+                                "findTool",
+                                "visibilityTool"
+                            ]
+                        }
+                    });
+
+                    $scope.vEeditor.updateEditor({
+                        readOnly: remote.remote || !entry.canEdit,
+                        sequenceData: openVEData.sequenceData,
+                        annotationVisibility: {
+                            parts: false,
+                            orfs: false,
+                            cutsites: false
+                        },
+                        annotationsToSupport: {
+                            features: true,
+                            translations: true,
+                            parts: false,
+                            orfs: true,
+                            cutsites: true,
+                            primers: false
+                        },
+                        panelsShown: [
+                            [
+                                {
+                                    id: "circular",
+                                    name: "Plasmid",
+                                    active: true
+                                },
+
+                                {
+                                    id: "rail",
+                                    name: "Linear Map",
+                                    active: false
+                                },
+                                {
+                                    id: "properties",
+                                    name: "Properties",
+                                    active: false
+                                }
+                            ],
+                            [
+                                {
+                                    id: "sequence",
+                                    name: "Sequence Map",
+                                    active: true
+                                }
+                            ]
+                        ]
+                    })
+                };
+
+
+                if ($scope.existingVectorEditorSequenceModel && $scope.existingVectorEditorSequenceModel.sequenceData) {
+                    createVectorEditorNode($scope.existingVectorEditorSequenceModel);
+                } else {
+                    Util.get("rest/parts/" + entry.id + "/sequence", function (result) {
+                        $scope.sequenceName = result.name;
+                        sequence = result;
+
+                        var data = {
+                            sequenceData: {
+                                sequence: result.sequence,
+                                features: [],
+                                name: result.name,
+                                circular: result.isCircular
+                            },
+                            registryData: {
+                                uri: result.uri,
+                                identifier: result.identifier,
+                                name: result.name,
+                                circular: result.isCircular
+                            }
                         };
 
-                        var featureMap = {};
-
-                        for (const prop in sequenceData.features) {
-                            if (!sequenceData.features.hasOwnProperty(prop))
-                                continue;
-
-                            var feature = sequenceData.features[prop];
-                            var existingFeature = featureMap[feature.id];
-                            if (existingFeature) {
-                                existingFeature.locations.push({
-                                    genbankStart: feature.start + 1,
-                                    end: feature.end + 1
-                                })
-                            } else {
-                                featureMap[feature.id] = {
-                                    id: feature.fid,
-                                    type: feature.type,
-                                    name: feature.name,
-                                    strand: feature.forward ? 1 : -1,
-                                    notes: [{name: "note", value: feature.notes}]
-                                };
-                            }
-                        }
-
-                        for (const property in featureMap) {
-                            if (!featureMap.hasOwnProperty(property))
-                                continue;
-
-                            sequence.features.push(featureMap[property]);
-                        }
-
-                        Util.update("rest/parts/" + entry.id + "/sequence", sequence, {},
-                            function (result) {
-                                console.log("save completed for", entry.id);
-                                $rootScope.$emit("ReloadVectorViewData", result);
-                                $scope.updatedSequence = result;
-                                onSuccessCallback();
-                            })
-                    },
-
-                    onCopy: function (event, copiedSequenceData, editorState) {
-                        var clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
-                        clipboardData.setData('text/plain', copiedSequenceData.sequence);
-                        data.selection = editorState.selectionLayer;
-                        data.openVECopied = copiedSequenceData;
-                        clipboardData.setData('application/json', JSON.stringify(data));
-                        event.preventDefault();
-                    },
-
-                    onPaste: function (event, editorState) {
-                        var clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
-                        var jsonData = clipboardData.getData('application/json');
-                        if (jsonData) {
-                            jsonData = JSON.parse(jsonData);
-                            jsonData = jsonData.openVECopied;
-                        }
-                        return jsonData || {sequence: clipboardData.getData("text/plain")}
-                    },
-
-                    PropertiesProps: {
-                        propertiesList: [
-                            "features",
-                            "translations",
-                            "cutsites",
-                            "orfs"
-                        ]
-                    },
-                    ToolBarProps: {
-                        //name the tools you want to see in the toolbar in the order you want to see them
-                        toolList: [
-                            "saveTool",
-                            "undoTool",
-                            "redoTool",
-                            "cutsiteTool",
-                            "featureTool",
-                            "orfTool",
-                            "findTool",
-                            "visibilityTool"
-                        ]
-                    }
-                });
-                $scope.vEeditor.updateEditor({
-                    readOnly: remote.remote || !entry.canEdit,
-                    sequenceData: data.sequenceData,
-                    annotationVisibility: {
-                        parts: false,
-                        orfs: false,
-                        cutsites: false
-                    },
-                    annotationsToSupport: {
-                        features: true,
-                        translations: true,
-                        parts: false,
-                        orfs: true,
-                        cutsites: true,
-                        primers: false
-                    },
-                    panelsShown: [
-                        [
-                            {
-                                id: "circular",
-                                name: "Plasmid",
-                                active: true
-                            },
-
-                            {
-                                id: "rail",
-                                name: "Linear Map",
-                                active: false
-                            },
-                            {
-                                id: "properties",
-                                name: "Properties",
-                                active: false
-                            }
-                        ],
-                        [
-                            {
-                                id: "sequence",
-                                name: "Sequence Map",
-                                active: true
-                            }
-                        ]
-                    ]
-                })
-            }, remote);
+                        data.sequenceData.features = convertFeaturedDNASequence(result);
+                        createVectorEditorNode(data);
+                    }, remote);
+                }
             };
 
             $scope.sequenceUpload = function (type) {
@@ -1213,7 +1226,7 @@ angular.module('ice.entry.controller', [])
             $scope.addLink = function (part, role) {
                 var modalInstance = $uibModal.open({
                     templateUrl: 'scripts/entry/modal/add-link-modal.html',
-                    controller: function ($scope, $http, $uibModalInstance, $cookies) {
+                    controller: function ($scope, $http, $uibModalInstance, Authentication) {
                         $scope.mainEntry = part;
                         $scope.role = role;
                         $scope.loadingAddExistingData = undefined;
@@ -1224,10 +1237,9 @@ angular.module('ice.entry.controller', [])
                             $scope.links = part.linkedParts;
                         }
 
-                        var sessionId = $cookies.get("sessionId");
                         $scope.getEntriesByPartNumber = function (val) {
                             return $http.get('rest/search/filter', {
-                                headers: {'X-ICE-Authentication-SessionId': sessionId},
+                                headers: {'X-ICE-Authentication-SessionId': Authentication.getSessionId()},
                                 params: {
                                     token: val,
                                     field: 'PART_NUMBER'

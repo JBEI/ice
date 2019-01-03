@@ -86,7 +86,7 @@ public class BulkUploadValidation {
                 validatePlasmid((Plasmid) entry);
                 break;
 
-            case ARABIDOPSIS:
+            case SEED:
                 validateSeedFields((ArabidopsisSeed) entry);
                 break;
 

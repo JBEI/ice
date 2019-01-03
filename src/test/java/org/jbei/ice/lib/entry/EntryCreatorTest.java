@@ -54,7 +54,7 @@ public class EntryCreatorTest {
         Assert.assertEquals(strainData.getHost(), entry.getHost());
 
         // create arabidopsis seed
-        PartData seed = new PartData(EntryType.ARABIDOPSIS);
+        PartData seed = new PartData(EntryType.SEED);
         ArabidopsisSeedData seedData = new ArabidopsisSeedData();
         seedData.setGeneration(Generation.F3);
         seedData.setPlantType(PlantType.OTHER);

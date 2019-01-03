@@ -193,11 +193,25 @@ angular.module('ice.entry.traces.controller', [])
         };
 
         $scope.fetchSequenceTraces = function () {
+            $scope.matchingAlignmentsFound = true;
             Util.get("rest/parts/" + entryId + "/traces", function (result) {
                 if (result && result.data) {
                     Util.get("rest/parts/" + entryId + "/sequence", function (sequenceData) {
-                        $scope.loadSequenceChecker(alignmentTracks(result.data, sequenceData));
-                    })
+                        const alignments = alignmentTracks(result.data, sequenceData);
+                        if (!alignments.pairwiseAlignments.length) {
+                            $scope.matchingAlignmentsFound = false;
+                            return;
+                        }
+
+                        $scope.loadSequenceChecker(alignments);
+
+                    }, {}, function (error) {
+                        console.error(error);
+                        Util.setFeedback("Error retrieving alignments", "error");
+                        $scope.matchingAlignmentsFound = false;
+                    });
+                } else {
+                    $scope.matchingAlignmentsFound = false;
                 }
             })
         };

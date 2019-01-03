@@ -278,7 +278,7 @@ public class EntriesAsCSV {
             }
 
             switch (type) {
-                case ARABIDOPSIS:
+                case SEED:
                     EntryFields.addArabidopsisSeedHeaders(fields);
                     break;
 

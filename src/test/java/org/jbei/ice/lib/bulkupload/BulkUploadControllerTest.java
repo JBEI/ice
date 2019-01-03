@@ -194,7 +194,7 @@ public class BulkUploadControllerTest {
     public void testRevertSubmitted() throws Exception {
         Account account = AccountCreator.createTestAccount("testRevertSubmitted", false);
         Account admin = AccountCreator.createTestAccount("testRevertSubmitted+Admin", true);
-        BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.ARABIDOPSIS);
+        BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.SEED);
         autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
         autoUpdate.getKeyValue().put(EntryField.PI, "test");
@@ -202,11 +202,11 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.BIO_SAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
         autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "test");
 
-        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.ARABIDOPSIS);
+        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.SEED);
         Assert.assertNotNull(autoUpdate);
         Assert.assertTrue(autoUpdate.getEntryId() > 0);
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
-        Assert.assertTrue(autoUpdate.getLastUpdate() != null);
+        Assert.assertNotNull(autoUpdate.getLastUpdate());
 
         Assert.assertNotNull(controller.getBulkImport(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0));
 
