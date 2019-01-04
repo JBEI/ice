@@ -949,7 +949,6 @@ angular.module('ice.entry.controller', [])
             $scope.existingVectorEditorSequenceModel = undefined;
 
             $rootScope.$on("VectorEditorSequenceModel", function (event, data) {
-                console.log("VectorEditorSequenceModel", event, data);
                 $scope.existingVectorEditorSequenceModel = data;
             });
 
@@ -999,6 +998,7 @@ angular.module('ice.entry.controller', [])
                         editorName: "vector-editor",
                         doNotUseAbsolutePosition: true,
                         isFullscreen: true,
+                        shouldAutosave: true,
                         disableSetReadOnly: true,
                         handleFullscreenClose: function () { // this will make the editor fullscreen by default, and will allow you to handle the close request
                             $scope.vEeditor.close();         // handle vector editor root removal and clean up
@@ -1032,7 +1032,11 @@ angular.module('ice.entry.controller', [])
                                         type: feature.type,
                                         name: feature.name,
                                         strand: feature.forward ? 1 : -1,
-                                        notes: [{name: "note", value: feature.notes}]
+                                        notes: [{name: "note", value: feature.notes}],
+                                        locations: [{
+                                            genbankStart: feature.start + 1,
+                                            end: feature.end + 1
+                                        }]
                                     };
                                 }
                             }
@@ -1058,7 +1062,7 @@ angular.module('ice.entry.controller', [])
                             clipboardData.setData('text/plain', copiedSequenceData.sequence);
                             data.selection = editorState.selectionLayer;
                             data.openVECopied = copiedSequenceData;
-                            clipboardData.setData('application/json', JSON.stringify(data));
+                            clipboardData.setData('application/json', JSON.stringify(openVEData));
                             event.preventDefault();
                         },
 
@@ -1083,7 +1087,7 @@ angular.module('ice.entry.controller', [])
                         ToolBarProps: {
                             //name the tools you want to see in the toolbar in the order you want to see them
                             toolList: [
-                                "saveTool",
+                                // "saveTool",
                                 "undoTool",
                                 "redoTool",
                                 "cutsiteTool",
@@ -1264,7 +1268,7 @@ angular.module('ice.entry.controller', [])
                             $scope.errorMessage = undefined;
 
                             // prevent selecting current entry
-                            if ($item == $scope.mainEntry.partId)
+                            if ($item === $scope.mainEntry.partId)
                                 return;
 
                             // or already added entry

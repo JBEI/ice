@@ -195,18 +195,18 @@ angular.module('ice.entry.service', [])
             {label: "Funding Source", schema: 'fundingSource', inputType: 'short'},
             {
                 label: "Status", schema: 'status', options: [
-                {value: "Complete", text: "Complete"},
-                {value: "In Progress", text: "In Progress"},
-                {value: "Abandoned", text: "Abandoned"},
-                {value: "Planned", text: "Planned"}
-            ]
+                    {value: "Complete", text: "Complete"},
+                    {value: "In Progress", text: "In Progress"},
+                    {value: "Abandoned", text: "Abandoned"},
+                    {value: "Planned", text: "Planned"}
+                ]
             },
             {
                 label: "Bio Safety Level", schema: 'bioSafetyLevel', options: [
-                {value: "1", text: "Level 1"},
-                {value: "2", text: "Level 2"},
-                {value: "-1", text: "Restricted"}
-            ]
+                    {value: "1", text: "Level 1"},
+                    {value: "2", text: "Level 2"},
+                    {value: "-1", text: "Restricted"}
+                ]
             },
             {label: "Creator", required: true, schema: 'creator', inputType: 'withEmail', bothRequired: true},
             {label: "Keywords", schema: 'keywords', inputType: 'medium'},
@@ -255,30 +255,30 @@ angular.module('ice.entry.service', [])
             },
             {
                 label: "Plant Type", schema: 'plantType', subSchema: 'arabidopsisSeedData', options: [
-                {value: "EMS", text: "EMS"},
-                {value: "OVER_EXPRESSION", text: "OVER_EXPRESSION"},
-                {value: "RNAI", text: "RNAi"},
-                {value: "REPORTER", text: "Reporter"},
-                {value: "T_DNA", text: "T-DNA"},
-                {value: "OTHER", text: "Other"}
-            ]
+                    {value: "EMS", text: "EMS"},
+                    {value: "OVER_EXPRESSION", text: "OVER_EXPRESSION"},
+                    {value: "RNAI", text: "RNAi"},
+                    {value: "REPORTER", text: "Reporter"},
+                    {value: "T_DNA", text: "T-DNA"},
+                    {value: "OTHER", text: "Other"}
+                ]
             },
             {
                 label: "Generation", schema: 'generation', subSchema: 'arabidopsisSeedData', options: [
-                {value: "UNKNOWN", text: "UNKNOWN"},
-                {value: "F1", text: "F1"},
-                {value: "F2", text: "F2"},
-                {value: "F3", text: "F3"},
-                {value: "M0", text: "M0"},
-                {value: "M1", text: "M1"},
-                {value: "M2", text: "M2"},
-                {value: "T0", text: "T0"},
-                {value: "T1", text: "T1"},
-                {value: "T2", text: "T2"},
-                {value: "T3", text: "T3"},
-                {value: "T4", text: "T4"},
-                {value: "T5", text: "T5"}
-            ]
+                    {value: "UNKNOWN", text: "UNKNOWN"},
+                    {value: "F1", text: "F1"},
+                    {value: "F2", text: "F2"},
+                    {value: "F3", text: "F3"},
+                    {value: "M0", text: "M0"},
+                    {value: "M1", text: "M1"},
+                    {value: "M2", text: "M2"},
+                    {value: "T0", text: "T0"},
+                    {value: "T1", text: "T1"},
+                    {value: "T2", text: "T2"},
+                    {value: "T3", text: "T3"},
+                    {value: "T4", text: "T4"},
+                    {value: "T5", text: "T5"}
+                ]
             },
             {label: "Harvest Date", schema: 'harvestDate', subSchema: 'arabidopsisSeedData', inputType: 'date'},
             {label: "Homozygosity", schema: 'homozygosity', subSchema: 'arabidopsisSeedData', inputType: 'medium'},
@@ -352,8 +352,7 @@ angular.module('ice.entry.service', [])
                 if (field.inputType === 'add' || field.inputType === 'autoCompleteAdd') {
                     if (part[field.schema].length == 0) {
                         field.invalid = true;
-                    }
-                    else {
+                    } else {
                         for (var i = 0; i < part[field.schema].length; i += 1) {
                             var fieldValue = part[field.schema][i].value;
                             field.invalid = !fieldValue || fieldValue === '';
@@ -389,6 +388,7 @@ angular.module('ice.entry.service', [])
                     return fields;
 
                 case 'arabidopsis':
+                case 'seed':
                     if (typeFieldsOnly)
                         return seedFields;
                     fields.splice.apply(fields, [7, 0].concat(seedFields));
