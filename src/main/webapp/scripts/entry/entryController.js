@@ -1060,8 +1060,8 @@ angular.module('ice.entry.controller', [])
                         onCopy: function (event, copiedSequenceData, editorState) {
                             var clipboardData = event.clipboardData || window.clipboardData || event.originalEvent.clipboardData;
                             clipboardData.setData('text/plain', copiedSequenceData.sequence);
-                            data.selection = editorState.selectionLayer;
-                            data.openVECopied = copiedSequenceData;
+                            openVEData.selection = editorState.selectionLayer;
+                            openVEData.openVECopied = copiedSequenceData;
                             clipboardData.setData('application/json', JSON.stringify(openVEData));
                             event.preventDefault();
                         },
