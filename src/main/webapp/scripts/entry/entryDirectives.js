@@ -213,7 +213,7 @@ angular.module('ice.entry.directives', [])
                     }
 
                     Util.get(url, function (result) {
-                        var data = convertToVEModel(result);
+                        const data = convertToVEModel(result);
                         $rootScope.$emit("VectorEditorSequenceModel", data);
                         $scope.loadVectorEditor(data);
                     });
