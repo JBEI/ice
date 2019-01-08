@@ -23,11 +23,11 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "samples")
-@SequenceGenerator(name = "sequence", sequenceName = "samples_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "samples_id", sequenceName = "samples_id_seq", allocationSize = 1)
 public class Sample implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "samples_id")
     private long id;
 
     @Column(name = "uuid", length = 36)

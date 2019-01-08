@@ -21,11 +21,11 @@ import java.util.Set;
 @Entity
 @Table(name = "bulk_upload")
 
-@SequenceGenerator(name = "sequence", sequenceName = "bulk_upload_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "bulk_upload_id", sequenceName = "bulk_upload_id_seq", allocationSize = 1)
 public class BulkUpload implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "bulk_upload_id")
     private long id;
 
     @Column(name = "name", length = 50)

@@ -15,11 +15,11 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @Entity
 @Table(name = "selection_markers")
-@SequenceGenerator(name = "sequence", sequenceName = "selection_markers_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "selection_markers_id", sequenceName = "selection_markers_id_seq", allocationSize = 1)
 public class SelectionMarker implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "selection_markers_id")
     private long id;
 
     @Column(name = "name", length = 50, nullable = false)

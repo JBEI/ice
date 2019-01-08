@@ -16,11 +16,11 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "groups")
-@SequenceGenerator(name = "sequence", sequenceName = "groups_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "groups_id", sequenceName = "groups_id_seq", allocationSize = 1)
 public class Group implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "groups_id")
     protected long id;
 
     @Column(name = "uuid", length = 36, nullable = false)

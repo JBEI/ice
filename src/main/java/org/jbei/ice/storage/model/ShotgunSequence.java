@@ -8,11 +8,11 @@ import java.util.Date;
 
 @Entity
 @Table(name = "shotgun_sequence")
-@SequenceGenerator(name = "sequence", sequenceName = "shotgun_sequence_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "shotgun_sequence_id", sequenceName = "shotgun_sequence_id_seq", allocationSize = 1)
 public class ShotgunSequence implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "shotgun_sequence_id")
     private long id;
 
     @OneToOne(fetch = FetchType.LAZY)

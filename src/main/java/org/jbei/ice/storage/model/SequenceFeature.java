@@ -19,11 +19,11 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "sequence_feature")
-@SequenceGenerator(name = "sequence", sequenceName = "sequence_feature_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "sequence_feature_id", sequenceName = "sequence_feature_id_seq", allocationSize = 1)
 public class SequenceFeature implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence_feature_id")
     private long id;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})

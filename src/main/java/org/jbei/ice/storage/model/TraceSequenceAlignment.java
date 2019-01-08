@@ -14,11 +14,11 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "trace_sequence_alignments")
-@SequenceGenerator(name = "sequence", sequenceName = "trace_sequence_alignments_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "trace_sequence_alignments_id", sequenceName = "trace_sequence_alignments_id_seq", allocationSize = 1)
 public class TraceSequenceAlignment implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "trace_sequence_alignments_id")
     private long id;
 
     @OneToOne(fetch = FetchType.EAGER)

@@ -15,11 +15,11 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @Entity
 @Table(name = "links")
-@SequenceGenerator(name = "sequence", sequenceName = "links_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "links_id", sequenceName = "links_id_seq", allocationSize = 1)
 public class Link implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "links_id")
     private long id;
 
     @Column(name = "link", length = 1023)

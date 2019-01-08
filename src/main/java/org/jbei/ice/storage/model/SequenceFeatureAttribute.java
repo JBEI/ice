@@ -12,11 +12,11 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "sequence_feature_attribute")
-@SequenceGenerator(name = "sequence", sequenceName = "sequence_feature_attribute_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "sequence_feature_attribute_id", sequenceName = "sequence_feature_attribute_id_seq", allocationSize = 1)
 public class SequenceFeatureAttribute implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence_feature_attribute_id")
     private long id;
 
     @Column(name = "key", length = 511)
