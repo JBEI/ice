@@ -101,8 +101,8 @@ public class FolderResource extends RestResource {
         String userId = requireUserId();
         log(userId, "Get folder details for \"" + folderId + "\"");
         try {
-            UserFolder folder = new UserFolder(userId);
-            return super.respond(folder.getFolder(folderId));
+            UserFolders folder = new UserFolders(userId);
+            return super.respond(folder.get(folderId));
         } catch (IllegalArgumentException e) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }

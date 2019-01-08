@@ -507,4 +507,7 @@ angular.module('ice.profile.controller', [])
             $scope.newGroup.partner = {id: partner.id, url: partner.url};
         };
     })
+    .controller('UserFoldersController', function () {
+
+    })
 ;
