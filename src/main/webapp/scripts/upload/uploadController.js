@@ -1026,7 +1026,8 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
         };
     })
     .controller('BulkUploadModalController', function ($window, $scope, $location, $cookies, $routeParams, uploadId,
-                                                       $uibModalInstance, FileUploader, addType, linkedAddType, Util) {
+                                                       $uibModalInstance, FileUploader, addType, linkedAddType, Util,
+                                                       Authentication) {
         $scope.addType = addType;
         $scope.processing = false;
 
