@@ -1,13 +1,11 @@
 package org.jbei.ice.lib.entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.lib.entry.sequence.SequenceUtil;
-import org.jbei.ice.lib.entry.sequence.Sequences;
+import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.lib.utils.Utils;
@@ -231,12 +229,8 @@ public class EntryCreator extends HasEntry {
 
         // check sequence
         if (sequence != null) {
-            Sequences sequences = new Sequences();
-            FeaturedDNASequence dnaSequence = sequences.sequenceToDNASequence(sequence);
-            sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
-            sequence.setEntry(entry);
-            sequenceDAO.saveSequence(sequence);
-            BlastPlus.scheduleBlastIndexRebuildTask(true);
+            PartSequence partSequence = new PartSequence(userId, sourceId);
+            new PartSequence(userId, entry.getPartNumber()).save(partSequence.get());
         }
 
         PartData copy = new PartData(EntryType.nameToType(entry.getRecordType()));

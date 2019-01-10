@@ -59,7 +59,6 @@ public class PartResource extends RestResource {
 
     private EntryController controller = new EntryController();
     private Attachments attachments = new Attachments();
-    private Sequences sequences = new Sequences();
     private SampleService sampleService = new SampleService();
     private RemoteEntries remoteEntries = new RemoteEntries();
 
@@ -561,6 +560,7 @@ public class PartResource extends RestResource {
                                 @QueryParam("folderId") long fid) {
         final FeaturedDNASequence sequence;
         final String userId = getUserId();
+        Sequences sequences = new Sequences(userId);
 
         try {
             if (isRemote) {
@@ -571,13 +571,13 @@ public class PartResource extends RestResource {
                 if (StringUtils.isEmpty(userId)) {
                     RegistryPartner partner = requireWebPartner();
                     if (StringUtils.isEmpty(remoteUserToken) || fid == 0) {
-                        sequence = sequences.retrievePartSequence(userId, partId);
+                        sequence = new PartSequence(userId, partId).get();
                     } else {
                         sequence = sequences.getRequestedSequence(partner, remoteUserId, remoteUserToken, partId, fid);
                     }
                 } else {
                     // user id can be null if partId is public
-                    sequence = sequences.retrievePartSequence(userId, partId);
+                    sequence = new PartSequence(userId, partId).get();
                 }
             }
             return Response.status(Response.Status.OK).entity(sequence).build();
@@ -598,7 +598,8 @@ public class PartResource extends RestResource {
             PartSequence partSequence = new PartSequence(userId, partId);
             if (add)
                 return super.respond(partSequence.addNewFeatures(sequence.getFeatures()));
-            return super.respond(partSequence.update(sequence));
+            partSequence.update(sequence);
+            return super.respond(true);
         } catch (Exception e) {
             Logger.error(e);
             throw new WebApplicationException(e);
@@ -609,12 +610,9 @@ public class PartResource extends RestResource {
     @Path("/{id}/sequence")
     public Response deleteSequence(@PathParam("id") final String partId) {
         final String userId = requireUserId();
-        try {
-            return super.respond(sequences.deleteSequence(userId, partId));
-        } catch (PermissionException e) {
-            Logger.error(e);
-            throw new WebApplicationException(e.getMessage(), Response.Status.FORBIDDEN);
-        }
+        PartSequence partSequence = new PartSequence(userId, partId);
+        partSequence.delete();
+        return super.respond(true);
     }
 
     /**

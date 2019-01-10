@@ -2,6 +2,8 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Feature;
@@ -11,6 +13,7 @@ import javax.persistence.criteria.Root;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Hibernate data accessor object for {@link Feature}s
@@ -22,6 +25,37 @@ public class FeatureDAO extends HibernateRepository<Feature> {
     @Override
     public Feature get(long id) {
         return super.get(Feature.class, id);
+    }
+
+    /**
+     * Retrieve the {@link Feature} object with the given DNA sequence string.
+     *
+     * @param featureDnaSequence dna sequence of feature
+     * @return Feature object.
+     * @throws DAOException
+     */
+    public Feature getByFeatureSequence(String featureDnaSequence) {
+        featureDnaSequence = featureDnaSequence.toLowerCase();
+
+        try {
+            String hash = SequenceUtils.calculateSequenceHash(featureDnaSequence);
+            CriteriaQuery<Feature> query = getBuilder().createQuery(Feature.class);
+            Root<Feature> from = query.from(Feature.class);
+            query.where(getBuilder().equal(from.get("hash"), hash));
+
+            Optional<Feature> result = currentSession().createQuery(query).uniqueResultOptional();
+            if (result.isPresent())
+                return result.get();
+
+            String reverseComplement = SequenceUtils.reverseComplement(featureDnaSequence);
+            String sequenceHash = SequenceUtils.calculateSequenceHash(reverseComplement);
+            query.getRestriction().getExpressions().clear();
+            query.where(getBuilder().equal(from.get("hash"), sequenceHash));
+            return currentSession().createQuery(query).uniqueResult();
+        } catch (HibernateException | UtilityException e) {
+            Logger.error(e);
+            throw new DAOException("Failed to get Feature by sequence!", e);
+        }
     }
 
     public long getFeatureCount(String filter) {

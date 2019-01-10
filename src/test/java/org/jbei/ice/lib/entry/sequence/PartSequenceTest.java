@@ -2,6 +2,8 @@ package org.jbei.ice.lib.entry.sequence;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.TestEntryCreator;
+import org.jbei.ice.lib.dto.DNAFeature;
+import org.jbei.ice.lib.dto.DNAFeatureLocation;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
@@ -61,6 +63,30 @@ public class PartSequenceTest {
         SequenceInfo sequenceInfo = partSequence.parseSequenceFile(inputStream, "fasta.fa", false);
         Assert.assertNotNull(sequenceInfo);
         Assert.assertNotNull(sequenceInfo.getSequence());
+    }
+
+    @Test
+    public void testUpdate() throws Exception {
+        Account account = AccountCreator.createTestAccount("PartSequenceTest.testUpdate", false);
+        PartSequence partSequence = new PartSequence(account.getEmail(), EntryType.PART);
+        Assert.assertNotNull(partSequence);
+
+        // parse sequence
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(genbank.getBytes());
+        SequenceInfo sequenceInfo = partSequence.parseSequenceFile(inputStream, "testFile2.gb", false);
+        Assert.assertNotNull(sequenceInfo);
+
+        // remove all existing features and add new feature
+        FeaturedDNASequence dnaSequence = partSequence.get();
+        dnaSequence.getFeatures().clear();
+        DNAFeature feature = new DNAFeature();
+        feature.setName("test");
+        feature.setType("misc_feature");
+        feature.getLocations().add(new DNAFeatureLocation(61, 89));
+        dnaSequence.getFeatures().add(feature);
+        partSequence.update(dnaSequence);
+
+        Assert.assertEquals(1, partSequence.get().getFeatures().size());
     }
 
     private static String genbank =

@@ -27,7 +27,7 @@ public class SequenceResource extends RestResource {
                                     @FormDataParam("file") FormDataContentDisposition contentDisposition) {
         String userId = requireUserId();
         try {
-            Sequences controller = new Sequences();
+            Sequences controller = new Sequences(userId);
             List<String> errors = controller.bulkUpdate(userId, fileInputStream);
             return super.respond(errors);
         } catch (PermissionException e) {

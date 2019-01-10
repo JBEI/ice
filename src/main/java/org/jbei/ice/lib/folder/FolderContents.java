@@ -203,7 +203,7 @@ public class FolderContents {
         return addEntriesToFolders(userId, entries, entryLocation.getDestination());
     }
 
-    protected FolderDetails addEntriesToTransferredFolder(List<Long> entries, Folder folder) {
+    private FolderDetails addEntriesToTransferredFolder(List<Long> entries, Folder folder) {
         List<Entry> entryModelList = DAOFactory.getEntryDAO().getEntriesByIdSet(entries);
         Logger.info("Adding " + entryModelList.size() + " transferred entries to folder " + folder.getId());
         folderDAO.addFolderContents(folder, entryModelList);

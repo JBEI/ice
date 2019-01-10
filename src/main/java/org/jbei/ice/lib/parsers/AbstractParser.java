@@ -1,18 +1,12 @@
 package org.jbei.ice.lib.parsers;
 
-import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.HasEntry;
-import org.jbei.ice.lib.entry.sequence.SequenceUtil;
-import org.jbei.ice.lib.search.blast.BlastPlus;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.Entry;
-import org.jbei.ice.storage.model.Sequence;
 
 public abstract class AbstractParser extends HasEntry {
 
@@ -55,19 +49,5 @@ public abstract class AbstractParser extends HasEntry {
         sequence = sequence.replace("\r\r", "\n"); // mac
         sequence = sequence.replace("\n\r", "\n"); // *win
         return sequence;
-    }
-
-    protected SequenceInfo save(DNASequence dnaSequence, String sequenceString) {
-        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
-        sequence.setSequenceUser(sequenceString);
-        sequence.setEntry(entry);
-        if (!StringUtils.isBlank(fileName))
-            sequence.setFileName(fileName);
-
-        Sequence result = sequenceDAO.saveSequence(sequence);
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
-        SequenceInfo info = result.toDataTransferObject();
-        info.setSequence(dnaSequence);
-        return info;
     }
 }

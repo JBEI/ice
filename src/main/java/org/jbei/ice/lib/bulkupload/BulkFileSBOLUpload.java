@@ -2,7 +2,7 @@ package org.jbei.ice.lib.bulkupload;
 
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.entry.sequence.Sequences;
+import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.parsers.sbol.ICESBOLParserVisitor;
 import org.sbolstandard.core.SBOLDocument;
 import org.sbolstandard.core.SBOLFactory;
@@ -61,8 +61,7 @@ public class BulkFileSBOLUpload {
 ////                sequence.setEntry(entry);
 //                if (sequenceUser != null)
 //                    sequence.setSequenceUser(sequenceUser);
-                Sequences sequences = new Sequences();
-                sequences.save(userId, Long.toString(update.getEntryId()), visitor.getFeaturedDNASequence());
+                new PartSequence(userId, Long.toString(update.getEntryId())).update(visitor.getFeaturedDNASequence());
             }
         } catch (Exception e) {
             Logger.error(e);

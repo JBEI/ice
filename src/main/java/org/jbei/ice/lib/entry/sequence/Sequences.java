@@ -3,26 +3,18 @@ package org.jbei.ice.lib.entry.sequence;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
-import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationController;
-import org.jbei.ice.lib.dto.*;
-import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
-import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
-import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.HasEntry;
-import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
-import org.jbei.ice.lib.search.blast.BlastPlus;
-import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.*;
 
@@ -30,13 +22,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -48,78 +35,15 @@ import java.util.zip.ZipInputStream;
 public class Sequences {
 
     private final SequenceDAO dao;
-    private final EntryDAO entryDAO;
     private final EntryAuthorization authorization;
     private final HasEntry hasEntry;
+    private final String userId;
 
-    public Sequences() {
+    public Sequences(String userId) {
         dao = DAOFactory.getSequenceDAO();
-        entryDAO = DAOFactory.getEntryDAO();
         hasEntry = new HasEntry();
         authorization = new EntryAuthorization();
-    }
-
-    /**
-     * Persist the passed sequence and associate it with the specified entry
-     *
-     * @param userId      unique identifier of user saving sequence
-     * @param entryId     unique identifier to entry this sequence is to be associated with
-     * @param dnaSequence sequence to save
-     * @return saved sequence
-     * @throws PermissionException if the user making the request doesn't have write privileges on the entry associated
-     *                             with the sequence
-     */
-    public DNASequence save(String userId, String entryId, DNASequence dnaSequence) {
-        Entry entry = hasEntry.getEntry(entryId);
-        authorization.expectWrite(userId, entry);
-        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
-        Sequence result = dao.saveSequence(sequence);
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
-        return sequenceToDNASequence(result);
-    }
-
-    public boolean deleteSequence(String requester, String partId) {
-        Entry entry = hasEntry.getEntry(partId);
-        authorization.expectWrite(requester, entry);
-
-        Sequence sequence = dao.getByEntry(entry);
-        if (sequence == null)
-            return true;
-        deleteSequence(sequence);
-        return true;
-    }
-
-    protected void deleteSequence(Sequence sequence) {
-        dao.deleteSequence(sequence);
-
-        String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-        Path pigeonPath = Paths.get(tmpDir, sequence.getFwdHash() + ".png");
-
-        try {
-            Files.deleteIfExists(pigeonPath);
-        } catch (IOException e) {
-            // ok to ignore
-            Logger.info("Error deleting pigeon folder " + pigeonPath.toString());
-        }
-
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
-    }
-
-    /**
-     * Generate a formatted text of a given {@link IFormatter} from the given {@link Sequence}.
-     *
-     * @param sequence
-     * @param formatter
-     * @return Text of a formatted sequence.
-     */
-    protected String compose(Sequence sequence, IFormatter formatter) {
-        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-        try {
-            formatter.format(sequence, byteStream);
-        } catch (FormatterException | IOException e) {
-            Logger.error(e);
-        }
-        return byteStream.toString();
+        this.userId = userId;
     }
 
     // responds to remote requested entry sequence
@@ -129,7 +53,8 @@ public class Sequences {
         if (entry == null)
             return null;
 
-        // see folderContents.getRemoteSharedContents
+        // see folderContents.getRemotelySharedContents
+        // todo : fold this into folder authorization and/or entry authorization
         Folder folder = DAOFactory.getFolderDAO().get(folderId);      // folder that the entry is contained in
         RemotePartner remotePartner = DAOFactory.getRemotePartnerDAO().getByUrl(requestingPartner.getUrl());
 
@@ -157,23 +82,6 @@ public class Sequences {
         return getFeaturedSequence(entry, shareModel.isCanWrite());
     }
 
-    public FeaturedDNASequence retrievePartSequence(String userId, String recordId) {
-        Entry entry = hasEntry.getEntry(recordId);
-        if (entry == null)
-            throw new IllegalArgumentException("The part " + recordId + " could not be located");
-
-        if (entry.getVisibility() == Visibility.REMOTE.getValue()) {
-            WebEntries webEntries = new WebEntries();
-            return webEntries.getSequence(recordId);
-        }
-
-        if (!new PermissionsController().isPubliclyVisible(entry))
-            authorization.expectRead(userId, entry);
-
-        boolean canEdit = authorization.canWrite(userId, entry);
-        return getFeaturedSequence(entry, canEdit);
-    }
-
     protected FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {
         Sequence sequence = dao.getByEntry(entry);
         if (sequence == null) {
@@ -182,9 +90,12 @@ public class Sequences {
             return featuredDNASequence;
         }
 
-        FeaturedDNASequence featuredDNASequence = sequenceToDNASequence(sequence);
+        List<SequenceFeature> sequenceFeatures = DAOFactory.getSequenceFeatureDAO().getEntrySequenceFeatures(entry);
+        FeaturedDNASequence featuredDNASequence = SequenceUtil.sequenceToDNASequence(sequence, sequenceFeatures);
         featuredDNASequence.setCanEdit(canEdit);
         featuredDNASequence.setIdentifier(entry.getPartNumber());
+
+
         String uriPrefix = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX).getValue();
         if (!StringUtils.isEmpty(uriPrefix)) {
             featuredDNASequence.setUri(uriPrefix + "/entry/" + entry.getId());
@@ -192,123 +103,22 @@ public class Sequences {
         return featuredDNASequence;
     }
 
-    /**
-     * Generate a {@link FeaturedDNASequence} from a given {@link Sequence} object.
-     *
-     * @param sequence sequence object to convert
-     * @return FeaturedDNASequence
-     */
-    public FeaturedDNASequence sequenceToDNASequence(Sequence sequence) {
-        if (sequence == null) {
-            return null;
-        }
-
-        List<DNAFeature> features = new LinkedList<>();
-
-        if (sequence.getSequenceFeatures() != null && sequence.getSequenceFeatures().size() > 0) {
-            for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
-                DNAFeature dnaFeature = new DNAFeature();
-                dnaFeature.setUri(sequenceFeature.getUri());
-
-                for (SequenceFeatureAttribute attribute : sequenceFeature.getSequenceFeatureAttributes()) {
-                    String key = attribute.getKey();
-                    String value = attribute.getValue();
-                    DNAFeatureNote dnaFeatureNote = new DNAFeatureNote(key, value);
-                    dnaFeatureNote.setQuoted(attribute.getQuoted());
-                    dnaFeature.addNote(dnaFeatureNote);
-                }
-
-                Set<AnnotationLocation> locations = sequenceFeature.getAnnotationLocations();
-                for (AnnotationLocation location : locations) {
-                    dnaFeature.getLocations().add(
-                            new DNAFeatureLocation(location.getGenbankStart(), location.getEnd()));
-                }
-
-                dnaFeature.setId(sequenceFeature.getId());
-                dnaFeature.setType(sequenceFeature.getGenbankType());
-                dnaFeature.setName(sequenceFeature.getName());
-                dnaFeature.setStrand(sequenceFeature.getStrand());
-
-                if (sequenceFeature.getAnnotationType() != null) {
-                    dnaFeature.setAnnotationType(sequenceFeature.getAnnotationType().toString());
-                }
-
-                features.add(dnaFeature);
-            }
-        }
-
-        boolean circular = false;
-        Entry entry = sequence.getEntry();
-        if (entry.getRecordType().equalsIgnoreCase(EntryType.PLASMID.name()))
-            circular = ((Plasmid) sequence.getEntry()).getCircular();
-        FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence(
-                sequence.getSequence(), entry.getName(), circular, features, "");
-        featuredDNASequence.setUri(sequence.getUri());
-
-        return featuredDNASequence;
-    }
-
-
-    public ByteArrayWrapper getSequenceFile(String userId, long partId, SequenceFormat format) {
-        Entry entry = entryDAO.get(partId);
-        authorization.expectRead(userId, entry);
-
-        Sequence sequence = dao.getByEntry(entry);
-        if (sequence == null)
-            return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
-
-        // if requested format is the same as the original format (if original exist) then get the original instead
-        if (sequence.getFormat() == format && DAOFactory.getSequenceDAO().hasOriginalSequence(partId))
-            format = SequenceFormat.ORIGINAL;
-
-        String name;
-        String sequenceString;
-
-        try {
-            switch (format) {
-                case ORIGINAL:
-                    sequenceString = sequence.getSequenceUser();
-                    name = sequence.getFileName();
-                    if (StringUtils.isEmpty(name))
-                        name = entry.getPartNumber() + ".gb";
-                    break;
-
-                case GENBANK:
-                default:
-                    GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
-                    genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular() : false);
-                    sequenceString = compose(sequence, genbankFormatter);
-                    name = entry.getPartNumber() + ".gb";
-                    break;
-
-                case FASTA:
-                    FastaFormatter formatter = new FastaFormatter();
-                    sequenceString = compose(sequence, formatter);
-                    name = entry.getPartNumber() + ".fa";
-                    break;
-
-                case SBOL1:
-                    sequenceString = compose(sequence, new SBOLFormatter());
-                    name = entry.getPartNumber() + ".xml";
-                    break;
-
-                case SBOL2:
-                    sequenceString = compose(sequence, new SBOL2Formatter());
-                    name = entry.getPartNumber() + ".xml";
-                    break;
-
-                case GFF3:
-                    sequenceString = compose(sequence, new GFF3Formatter());
-                    name = entry.getPartNumber() + ".gff3";
-                    break;
-            }
-        } catch (Exception e) {
-            Logger.error("Failed to generate genbank file for download!", e);
-            return new ByteArrayWrapper(new byte[]{'\0'}, "sequence_error");
-        }
-
-        return new ByteArrayWrapper(sequenceString.getBytes(), name);
-    }
+//    public FeaturedDNASequence retrievePartSequence(String userId, String recordId) {
+//        Entry entry = hasEntry.getEntry(recordId);
+//        if (entry == null)
+//            throw new IllegalArgumentException("The part " + recordId + " could not be located");
+//
+//        if (entry.getVisibility() == Visibility.REMOTE.getValue()) {
+//            WebEntries webEntries = new WebEntries();
+//            return webEntries.getSequence(recordId);
+//        }
+//
+//        if (!new PermissionsController().isPubliclyVisible(entry))
+//            authorization.expectRead(userId, entry);
+//
+//        boolean canEdit = authorization.canWrite(userId, entry);
+//        return getFeaturedSequence(entry, canEdit);
+//    }
 
     public SequenceInfo parseSequence(InputStream inputStream, String fileName) throws InvalidFormatParserException {
         int dotIndex = fileName.lastIndexOf('.');
@@ -328,7 +138,7 @@ public class Sequences {
         // parse actual sequence
         try {
             String sequenceString = IOUtils.toString(inputStream, Charset.defaultCharset());
-            DNASequence dnaSequence = GeneralParser.parse(sequenceString);
+            FeaturedDNASequence dnaSequence = GeneralParser.parse(sequenceString);
             if (dnaSequence == null)
                 throw new InvalidFormatParserException("Could not parse sequence string");
 
@@ -357,7 +167,6 @@ public class Sequences {
             throw new PermissionException("Must have admin privileges to use this feature");
 
         List<String> errors = new ArrayList<>();
-        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
 
         try (ZipInputStream stream = new ZipInputStream(fileInputStream)) {
             ZipEntry zipEntry;
@@ -375,7 +184,7 @@ public class Sequences {
 
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 int len;
-                byte data[] = new byte[1024];
+                byte[] data = new byte[1024];
 
                 while ((len = stream.read(data)) > 0) {
                     out.write(data, 0, len);
@@ -392,7 +201,7 @@ public class Sequences {
                 }
 
                 String sequenceString = new String(out.toByteArray());
-                DNASequence dnaSequence = GeneralParser.parse(sequenceString);
+                FeaturedDNASequence dnaSequence = GeneralParser.parse(sequenceString);
                 if (dnaSequence == null) {
                     Logger.error("Could not parse sequence for " + name);
                     errors.add(name);
@@ -401,23 +210,10 @@ public class Sequences {
 
                 for (Entry entry : entries) {
                     Logger.info("Updating sequence for entry " + entry.getPartNumber());
-                    Sequence sequence = dao.getByEntry(entry);
-                    if (sequence != null) {
-                        dao.deleteSequence(sequence);
-                    }
-
-                    sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
-                    sequence.setEntry(entry);
-                    sequence = dao.saveSequence(sequence);
-                    if (sequence == null)
-                        throw new DAOException("Could not save sequence");
-
-                    sequenceAnalysisController.rebuildAllAlignments(entry);
-//                    sequenceToDNASequence(sequence);
+                    PartSequence partSequence = new PartSequence(userId, entry.getPartNumber());
+                    partSequence.update(dnaSequence);
                 }
             }
-
-            BlastPlus.scheduleBlastIndexRebuildTask(true);
         }
 
         return errors;

@@ -10,8 +10,8 @@ import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
+import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
-import org.jbei.ice.lib.entry.sequence.Sequences;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -88,17 +88,13 @@ public class EntriesAsCSV {
      *
      * @param entries list of entry ids
      * @param fields  optional list of fields used to filter the data
-     * @return true if extraction happened successfully and can be retrieved with a call to <code>getFilePath</code>
-     * false otherwise
      */
-    public boolean setEntries(List<Long> entries, EntryField... fields) {
+    public void setEntries(List<Long> entries, EntryField... fields) {
         this.entries = entries;
         try {
             writeList(fields);
-            return true;
         } catch (IOException e) {
             Logger.error(e);
-            return false;
         }
     }
 
@@ -176,12 +172,12 @@ public class EntriesAsCSV {
 
                 // get parents for entry
                 EntryLinks links = new EntryLinks(this.userId, entry.getPartNumber());
-                String parents = "";
+                StringBuilder parents = new StringBuilder();
                 for (PartData data : links.getParents()) {
-                    parents += data.getPartId() + ",";
+                    parents.append(data.getPartId()).append(",");
                 }
-                if (!StringUtils.isEmpty(parents))
-                    parents = parents.substring(0, parents.length() - 1);
+                if (!StringUtils.isEmpty(parents.toString()))
+                    parents = new StringBuilder(parents.substring(0, parents.length() - 1));
                 line[i + 2] = ("\"" + parents + "\"");
                 writer.writeNext(line);
             }
@@ -220,7 +216,6 @@ public class EntriesAsCSV {
     }
 
     private void writeZip(Set<Long> sequenceSet) {
-        Sequences sequences = new Sequences();
         Path tmpPath = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY));
         try {
             File tmpZip = File.createTempFile("zip-", ".zip", tmpPath.toFile());
@@ -232,7 +227,7 @@ public class EntriesAsCSV {
             // get sequence formats
             for (long entryId : sequenceSet) {
                 for (String format : formats) {
-                    ByteArrayWrapper wrapper = sequences.getSequenceFile(userId, entryId, SequenceFormat.fromString(format));
+                    ByteArrayWrapper wrapper = new PartSequence(userId, Long.toString(entryId)).toFile(SequenceFormat.fromString(format));
                     putZipEntry(wrapper, zos);
                 }
             }
@@ -302,7 +297,6 @@ public class EntriesAsCSV {
     public ByteArrayOutputStream customize(EntrySelection selection, SequenceFormat format) throws IOException {
         Entries retriever = new Entries(this.userId);
         this.entries = retriever.getEntriesFromSelectionContext(selection);
-        Sequences sequences = new Sequences();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         EntryAuthorization entryAuthorization = new EntryAuthorization();
 
@@ -327,7 +321,7 @@ public class EntriesAsCSV {
                 }
 
                 // get the sequence
-                ByteArrayWrapper wrapper = sequences.getSequenceFile(userId, entryId, format);
+                ByteArrayWrapper wrapper = new PartSequence(userId, Long.toString(entryId)).toFile(format);
                 if (wrapper == null) {
                     Logger.error("ERROR : no sequence " + entryId);
                     continue;

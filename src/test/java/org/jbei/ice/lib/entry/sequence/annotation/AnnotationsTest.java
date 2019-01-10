@@ -4,13 +4,16 @@ import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.dto.Curation;
 import org.jbei.ice.lib.dto.DNAFeature;
-import org.jbei.ice.lib.dto.DNASequence;
-import org.jbei.ice.lib.entry.sequence.SequenceUtil;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
+import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceFeatureDAO;
-import org.jbei.ice.storage.model.*;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Feature;
+import org.jbei.ice.storage.model.Plasmid;
+import org.jbei.ice.storage.model.SequenceFeature;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,16 +42,14 @@ public class AnnotationsTest {
     public void testCurate() throws Exception {
         Account account = AccountCreator.createTestAccount("AnnotationsTest.testCurate", true);
         Plasmid plasmid = TestEntryCreator.createTestPlasmid(account);
-
+        Assert.assertNotNull(plasmid);
         SequenceDAO sequenceDAO = new SequenceDAO();
 
         Assert.assertFalse(sequenceDAO.hasSequence(plasmid.getId()));
 
-        DNASequence dnaSequence = GeneralParser.parse(sequenceString);
-        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
-        sequence.setEntry(plasmid);
-        sequence = sequenceDAO.saveSequence(sequence);
-        Assert.assertNotNull(sequence);
+        FeaturedDNASequence dnaSequence = GeneralParser.parse(sequenceString);
+        PartSequence partSequence = new PartSequence(account.getEmail(), plasmid.getRecordId());
+        partSequence.save(dnaSequence);
 
         SequenceFeatureDAO sequenceFeatureDAO = new SequenceFeatureDAO();
         List<SequenceFeature> sequenceFeatures = sequenceFeatureDAO.getEntrySequenceFeatures(plasmid);
@@ -71,8 +72,7 @@ public class AnnotationsTest {
         Assert.assertTrue(feature.getCuration().isExclude());
     }
 
-
-    static String sequenceString =
+    private static String sequenceString =
             "LOCUS       pj5_00001                804 bp    dna     circular UNK \n" +
                     "ACCESSION   pj5_00001\n" +
                     "VERSION     pj5_00001.1\n" +
