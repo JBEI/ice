@@ -32,7 +32,7 @@ public class FeatureDAO extends HibernateRepository<Feature> {
      *
      * @param featureDnaSequence dna sequence of feature
      * @return Feature object.
-     * @throws DAOException
+     * @throws DAOException on Hibernate or UtilityException
      */
     public Feature getByFeatureSequence(String featureDnaSequence) {
         featureDnaSequence = featureDnaSequence.toLowerCase();
@@ -58,15 +58,19 @@ public class FeatureDAO extends HibernateRepository<Feature> {
         }
     }
 
+    private void buildFilter(CriteriaQuery<?> query, Root<Feature> from, String filter) {
+        if (filter != null && !filter.isEmpty())
+            query.where(getBuilder().like(getBuilder().lower(from.get("name")), "%" + filter.toLowerCase() + "%"));
+        else
+            query.where(getBuilder().isNotNull(from.get("name")), getBuilder().notEqual(from.get("name"), ""));
+    }
+
     public long getFeatureCount(String filter) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Feature> from = query.from(Feature.class);
             query.select(getBuilder().countDistinct(from.get("id")));
-            if (filter != null && !filter.isEmpty())
-                query.where(getBuilder().like(getBuilder().lower(from.get("name")), "%" + filter.toLowerCase() + "%"));
-            else
-                query.where(getBuilder().isNotNull(from.get("name")), getBuilder().notEqual(from.get("name"), ""));
+            buildFilter(query, from, filter);
             return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);
@@ -78,10 +82,7 @@ public class FeatureDAO extends HibernateRepository<Feature> {
         try {
             CriteriaQuery<Feature> query = getBuilder().createQuery(Feature.class);
             Root<Feature> from = query.from(Feature.class);
-            if (filter != null && !filter.isEmpty())
-                query.where(getBuilder().like(getBuilder().lower(from.get("name")), "%" + filter.toLowerCase() + "%"));
-            else
-                query.where(getBuilder().isNotNull(from.get("name")), getBuilder().notEqual(from.get("name"), ""));
+            buildFilter(query, from, filter);
             return currentSession().createQuery(query).setFirstResult(offset).setMaxResults(size).list();
         } catch (HibernateException he) {
             Logger.error(he);
