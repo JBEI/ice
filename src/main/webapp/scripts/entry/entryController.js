@@ -1052,6 +1052,15 @@ angular.module('ice.entry.controller', [])
                                 function (result) {
                                     console.log("save completed for", entry.id);
                                     $rootScope.$emit("ReloadVectorViewData", result);
+                                    const sequenceModel = {
+                                        sequenceData: {
+                                            sequence: result.sequence,
+                                            features: convertFeaturedDNASequence(result),
+                                            name: result.name,
+                                            circular: result.isCircular
+                                        },
+                                    };
+                                    $rootScope.$emit("VectorEditorSequenceModel", sequenceModel);
                                     $scope.updatedSequence = result;
                                     onSuccessCallback();
                                 })
@@ -1144,7 +1153,6 @@ angular.module('ice.entry.controller', [])
                         ]
                     })
                 };
-
 
                 if ($scope.existingVectorEditorSequenceModel && $scope.existingVectorEditorSequenceModel.sequenceData) {
                     createVectorEditorNode($scope.existingVectorEditorSequenceModel);
