@@ -596,8 +596,6 @@ public class PartResource extends RestResource {
             final String userId = requireUserId();
             log(userId, "updating sequence for entry " + partId);
             PartSequence partSequence = new PartSequence(userId, partId);
-            if (add)
-                return super.respond(partSequence.addNewFeatures(sequence.getFeatures()));
             partSequence.update(sequence);
             return super.respond(true);
         } catch (Exception e) {
@@ -629,8 +627,7 @@ public class PartResource extends RestResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response create(@QueryParam("source") String sourceId,
-                           PartData partData) {
+    public Response create(@QueryParam("source") String sourceId, PartData partData) {
         final String userId = requireUserId();
         final EntryCreator creator = new EntryCreator();
         try {

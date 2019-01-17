@@ -37,4 +37,14 @@ public class SequenceResource extends RestResource {
             throw new WebApplicationException(e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @GET
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}/history")
+    public Response getSequenceHistory(@PathParam("id") String identifier) {
+        String userId = requireUserId();
+        return super.respond(false);
+
+    }
 }

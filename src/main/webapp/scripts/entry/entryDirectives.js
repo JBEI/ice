@@ -68,7 +68,7 @@ angular.module('ice.entry.directives', [])
             link: function (scope, element, attrs) {
             },
 
-            template: '<div id="ve-Root" style="height: 550px; width: 1050px"><br><img src="img/loader-mini.gif"> {{$scope.loadMessage || "Loading"}} sequence&hellip;</div>',
+            template: '<div id="ve-Root" style="height: 550px; width: 900px"><br><img src="img/loader-mini.gif"> {{$scope.loadMessage || "Loading"}} sequence&hellip;</div>',
 
             controller: function ($rootScope, $scope, Util, $window) {
                 $rootScope.$on("ReloadVectorViewData", function (event, data) {

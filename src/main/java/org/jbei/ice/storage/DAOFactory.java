@@ -36,6 +36,7 @@ public class DAOFactory {
     private static FeatureDAO featureDAO;
     private static FeatureCurationModelDAO featureCurationModelDAO;
     private static SelectionMarkerDAO selectionMarkerDAO;
+    private static SequenceHistoryDAO sequenceHistoryDAO;
 
     public static AccountDAO getAccountDAO() {
         if (accountDAO == null)
@@ -209,5 +210,11 @@ public class DAOFactory {
         if (selectionMarkerDAO == null)
             selectionMarkerDAO = new SelectionMarkerDAO();
         return selectionMarkerDAO;
+    }
+
+    public static SequenceHistoryDAO getSequenceHistoryDAO() {
+        if (sequenceHistoryDAO == null)
+            sequenceHistoryDAO = new SequenceHistoryDAO();
+        return sequenceHistoryDAO;
     }
 }

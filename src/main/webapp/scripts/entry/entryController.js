@@ -994,6 +994,8 @@ angular.module('ice.entry.controller', [])
 
                 // init
                 const createVectorEditorNode = function (openVEData) {
+                    console.log("create");
+
                     $scope.vEeditor = $window.createVectorEditor("createDomNodeForMe", {
                         editorName: "vector-editor",
                         doNotUseAbsolutePosition: true,
@@ -1003,6 +1005,33 @@ angular.module('ice.entry.controller', [])
                         handleFullscreenClose: function () { // this will make the editor fullscreen by default, and will allow you to handle the close request
                             $scope.vEeditor.close();         // handle vector editor root removal and clean up
                         },
+
+                        getSequenceAtVersion: function (versionId) {
+                            return openVEData.sequenceData;
+                            // teselagenSequenceData
+                        },
+
+                        getVersionList: function () {
+                            return [{
+                                versionId: "51241",
+                                dateChanged: "01/11/2019",
+                                editedBy: "Hector Plahar",
+                                revisionType: "Feature Add"
+                            },
+                                {
+                                    versionId: "51241",
+                                    dateChanged: "01/11/2019",
+                                    editedBy: "Hector Plahar",
+                                    revisionType: "Feature Add"
+                                },
+                                {
+                                    versionId: "51241",
+                                    dateChanged: "01/11/2019",
+                                    editedBy: "Hector Plahar",
+                                    revisionType: "Feature Remove"
+                                }]
+                        },
+
                         onSave: function (event, sequenceData, editorState, onSuccessCallback) {
                             if (remote.remote || !entry.canEdit)
                                 return;
@@ -1087,6 +1116,7 @@ angular.module('ice.entry.controller', [])
                         ToolBarProps: {
                             //name the tools you want to see in the toolbar in the order you want to see them
                             toolList: [
+                                "versionHistoryTool",
                                 // "saveTool",
                                 "undoTool",
                                 "redoTool",

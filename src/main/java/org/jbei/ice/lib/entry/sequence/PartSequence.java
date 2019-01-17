@@ -3,7 +3,6 @@ package org.jbei.ice.lib.entry.sequence;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
-import org.jbei.ice.lib.dto.DNAFeature;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
@@ -31,6 +30,7 @@ import org.jbei.ice.storage.model.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -143,9 +143,11 @@ public class PartSequence {
             // parse actual sequence
             String entryType = this.entry.getRecordType();
             FeaturedDNASequence dnaSequence = parser.parse(sequenceString, entryType);
-            save(dnaSequence);
+            Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
+            sequence.setSequenceUser(sequenceString);
+            saveSequenceObject(sequence);
 
-            Sequence sequence = sequenceDAO.getByEntry(this.entry);
+            sequence = sequenceDAO.getByEntry(this.entry);
             BlastPlus.scheduleBlastIndexRebuildTask(true);
             SequenceInfo info = sequence.toDataTransferObject();
             info.setSequence(dnaSequence);
@@ -160,6 +162,10 @@ public class PartSequence {
     public void save(FeaturedDNASequence dnaSequence) {
         entryAuthorization.expectWrite(userId, entry);
 
+        // check if there is already an existing sequence
+        if (sequenceDAO.getByEntry(this.entry) != null)
+            throw new IllegalArgumentException("Entry already has a sequence associated with it. Please delete first");
+
         // update raw sequence if no sequence is passed
 //        if ((dnaSequence.getFeatures() == null || dnaSequence.getFeatures().isEmpty())) {
 //            // sometimes the whole sequence is sent in the string portion (when there are no features)
@@ -172,6 +178,10 @@ public class PartSequence {
         if (sequence == null)
             return;
 
+        saveSequenceObject(sequence);
+    }
+
+    private void saveSequenceObject(Sequence sequence) {
         sequence.setEntry(this.entry);
         Set<SequenceFeature> sequenceFeatureSet = null;
         sequence = SequenceUtil.normalizeAnnotationLocations(sequence);
@@ -221,13 +231,13 @@ public class PartSequence {
 
         if (existing != null) {
             // diff
-            existing.setSequenceFeatures(new HashSet<>(DAOFactory.getSequenceFeatureDAO().getEntrySequenceFeatures(this.entry)));
+            existing.setSequenceFeatures(new HashSet<>(sequenceFeatureDAO.getEntrySequenceFeatures(this.entry)));
 
             // 1. check sequence string
             checkSequenceString(existing, sequence);
 
             // 2. check features
-            checkFeatures(existing, sequence);
+            checkForNewFeatures(existing, sequence);
 
             // 3. check for removed features
             checkRemovedFeatures(existing, sequence);
@@ -243,34 +253,46 @@ public class PartSequence {
     }
 
     public void delete() {
+        List<SequenceFeature> features = sequenceFeatureDAO.getEntrySequenceFeatures(entry);
+        for (SequenceFeature feature : features)
+            deleteSequenceFeature(feature);
+
         Sequence sequence = sequenceDAO.getByEntry(this.entry);
         sequence.setEntry(null);
-        List<SequenceFeature> features = sequenceFeatureDAO.getEntrySequenceFeatures(entry);
-        sequence.setSequenceFeatures(new HashSet<>(features));
+        sequence.setSequenceFeatures(null);
         sequenceDAO.delete(sequence);
     }
 
-    // features in existing which are not part of new sequence passed
+    // features in existing which are not part of new sequence passed and therefore need to be deleted
     private void checkRemovedFeatures(Sequence existing, Sequence sequence) {
         // for each existing feature check that it is in new sequence
-        for (SequenceFeature sequenceFeature : existing.getSequenceFeatures()) {
-            boolean isExistingFeature = checkFeature(sequence, sequenceFeature);
-            if (!isExistingFeature) {
-                Logger.info("Feature " + sequenceFeature.getName() + " was removed by user");
+        List<SequenceFeature> toRemoveFeatures = new ArrayList<>();
 
-                sequenceFeature.setSequence(null);
-                sequenceFeature.setFeature(null);
-                existing.getSequenceFeatures().remove(sequenceFeature);
-                sequenceFeatureDAO.delete(sequenceFeature);
+        for (SequenceFeature sequenceFeature : existing.getSequenceFeatures()) {
+            SequenceFeature foundFeature = checkFeature(sequence, sequenceFeature);
+            if (foundFeature == null) {
+                // remove feature
+                Logger.info("Feature " + sequenceFeature.getName() + " was removed by user");
+                deleteSequenceFeature(sequenceFeature);
+                toRemoveFeatures.add(sequenceFeature);
 
                 // todo : check if feature is not referenced by any sequence features then delete it
             }
         }
+
+        existing.getSequenceFeatures().removeAll(toRemoveFeatures);
+    }
+
+    private void deleteSequenceFeature(SequenceFeature sequenceFeature) {
+        sequenceFeature.setSequence(null);
+        sequenceFeature.setFeature(null);
+        sequenceFeatureDAO.delete(sequenceFeature);
     }
 
     private void checkSequenceString(Sequence existing, Sequence sequence) {
         if (!existing.getFwdHash().equals(sequence.getFwdHash()) || !existing.getRevHash().equals(sequence.getRevHash())) {
             existing.setSequence(sequence.getSequence()); // hashes are updated in here (probably not a good method name)
+            existing.setSequenceFeatures(null);
             sequenceDAO.update(existing);
         }
     }
@@ -310,12 +332,12 @@ public class PartSequence {
         return f2.getUri().equalsIgnoreCase(f1.getUri());
     }
 
-    private void checkFeatures(Sequence existing, Sequence sequence) {
+    private void checkForNewFeatures(Sequence existing, Sequence sequence) {
         // for each new feature, check if it is in existing sequence
         if (sequence.getSequenceFeatures() != null) {
             for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
-                boolean isExistingFeature = checkFeature(existing, sequenceFeature);
-                if (isExistingFeature)
+                SequenceFeature matchingFeature = checkFeature(existing, sequenceFeature);
+                if (matchingFeature != null)
                     Logger.info("Feature " + sequenceFeature.getName() + " is an existing feature");
                 else {
                     Logger.info("Feature " + sequenceFeature.getName() + " is not an existing feature");
@@ -326,27 +348,20 @@ public class PartSequence {
         }
     }
 
-    // look for sequenceFeature in sequenceFeatures in existing
+    // look for sequenceFeature in list of existing sequenceFeatures
     // feature and sequenceFeature are different objects in the database. sequenceFeature is created for each new feature
     // while feature can be reused
-    private boolean checkFeature(Sequence existing, SequenceFeature sequenceFeature) {
+    // returns matching existing feature or null if no match
+    private SequenceFeature checkFeature(Sequence existing, SequenceFeature sequenceFeature) {
         if (existing.getSequenceFeatures() == null)
-            return false;
+            return null;
 
         // is sequence feature already available
+        // important parts are strand and location
         for (SequenceFeature existingSequenceFeature : existing.getSequenceFeatures()) {
 
             // compare
             if (existingSequenceFeature.getStrand() != sequenceFeature.getStrand())
-                continue;
-
-            if (isNotEqual(existingSequenceFeature.getName(), sequenceFeature.getName()))
-                continue;
-
-            if (isNotEqual(existingSequenceFeature.getGenbankType(), sequenceFeature.getGenbankType()))
-                continue;
-
-            if (isNotEqual(existingSequenceFeature.getUri(), sequenceFeature.getUri()))
                 continue;
 
             // check annotation locations (doesnt support modification of annotation locations so exact matches are required)
@@ -359,77 +374,35 @@ public class PartSequence {
             if (location.getGenbankStart() != location2.getGenbankStart() && location.getEnd() != location2.getEnd())
                 continue;
 
-            // check sequence feature attributes
-            // todo : this is tied to sequenceFeature
-            // sequenceFeature.getSequenceFeatureAttributes()
-
             // check feature
-            Feature existingFeature = existingSequenceFeature.getFeature();
-            Feature feature = sequenceFeature.getFeature();
+            if (checkSameFeature(existingSequenceFeature, sequenceFeature))
+                return existingSequenceFeature;    // sequence found in list of existing
 
-            // hash
-            if (isNotEqual(feature.getHash(), existingFeature.getHash()))
-                continue;
+//            if (isNotEqual(existingSequenceFeature.getName(), sequenceFeature.getName()))
+//                continue;
+//
+//            if (isNotEqual(existingSequenceFeature.getGenbankType(), sequenceFeature.getGenbankType()))
+//                continue;
+//
+//            if (isNotEqual(existingSequenceFeature.getUri(), sequenceFeature.getUri()))
+//                continue;
 
-            // genbank type
-            if (isNotEqual(feature.getGenbankType(), existingFeature.getGenbankType()))
-                continue;
 
-            // uri
-            if (isNotEqual(feature.getUri(), existingFeature.getUri()))
-                continue;
-
-            // name
-            if (isNotEqual(feature.getName(), existingFeature.getName()))
-                continue;
-
-            // identification
-            if (isNotEqual(feature.getIdentification(), existingFeature.getIdentification()))
-                continue;
-
-            return true;
+            // check sequence feature attributes
+            // todo : this is tied to sequenceFeature and so can be modified without creating a new feature
+            // sequenceFeature.getSequenceFeatureAttributes()
         }
 
-        return false;
+        return null;
     }
 
-    private boolean isNotEqual(String str1, String str2) {
-        if (StringUtils.isEmpty(str1) && !StringUtils.isEmpty(str2))
-            return true;
-
-        if (StringUtils.isEmpty(str2) && !StringUtils.isEmpty(str1))
-            return true;
-
-        if (StringUtils.isEmpty(str1) && StringUtils.isEmpty(str2))
-            return false;
-
-        return !str1.equals(str2);
-    }
-
-    /**
-     * Add referenced features to list of features for existing sequence.
-     * Any existing features are preserved
-     *
-     * @param features list of features to add
-     * @return DTO for new sequence to include newly added features
-     * @throws IllegalArgumentException if no existing sequence is available for the entry
-     */
-    public FeaturedDNASequence addNewFeatures(List<DNAFeature> features) {
-        entryAuthorization.expectWrite(userId, entry);
-        Sequence existing = sequenceDAO.getByEntry(this.entry);
-        if (existing == null)
-            throw new IllegalArgumentException("Cannot add features to non-existent sequence");
-
-        for (DNAFeature dnaFeature : features) {
-            // create sequence feature
-            SequenceFeature sequenceFeature = SequenceUtil.dnaFeatureToSequenceFeature(existing, dnaFeature);
-            createSequenceFeature(sequenceFeature, existing);
-        }
-
-        rebuildTraceAlignments();
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
-        List<SequenceFeature> sequenceFeatures = sequenceFeatureDAO.getEntrySequenceFeatures(entry);
-        return SequenceUtil.sequenceToDNASequence(existing, sequenceFeatures);
+    // check that the feature object both point to are the same
+    // tolerates differences in name etc by only checking the sequence
+    private boolean checkSameFeature(SequenceFeature existingSequenceFeature, SequenceFeature newSequenceFeature) {
+        Feature existingFeature = existingSequenceFeature.getFeature();
+        Feature newFeature = newSequenceFeature.getFeature();
+        return existingFeature.getHash().equals(newFeature.getHash()) &&
+                existingFeature.getSequence().equals(newFeature.getSequence());
     }
 
     /**
