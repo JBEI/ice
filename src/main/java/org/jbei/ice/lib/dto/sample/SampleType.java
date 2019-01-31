@@ -10,6 +10,7 @@ public enum SampleType {
 
     PLATE96(true),
     ADDGENE(true),
+    GENSCRIPT(true),
     GENERIC(true),
     FREEZER(false),
     SHELF(true),

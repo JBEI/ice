@@ -486,7 +486,7 @@ public class SequenceController extends HasEntry {
 
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 int len;
-                byte data[] = new byte[1024];
+                byte[] data = new byte[1024];
 
                 while ((len = stream.read(data)) > 0) {
                     out.write(data, 0, len);
@@ -494,11 +494,10 @@ public class SequenceController extends HasEntry {
                 stream.closeEntry();
 
                 String entryName = name.substring(0, name.indexOf('.'));
-                List<Entry> entries = DAOFactory.getEntryDAO().getByName(entryName);
-
-                // todo : allowing multiple entries update for now
-                if (entries == null || entries.isEmpty()) {
-                    errors.add(name);
+                Entry entry = DAOFactory.getEntryDAO().getByPartNumber(entryName);
+                if (entry == null) {
+                    Logger.error("Could not find entry by part number: " + entryName);
+                    errors.add(entryName);
                     continue;
                 }
 
@@ -510,22 +509,20 @@ public class SequenceController extends HasEntry {
                     continue;
                 }
 
-                for (Entry entry : entries) {
-                    Logger.info("Updating sequence for entry " + entry.getPartNumber());
-                    Sequence sequence = dao.getByEntry(entry);
-                    if (sequence != null) {
-                        dao.deleteSequence(sequence);
-                    }
-
-                    sequence = dnaSequenceToSequence(dnaSequence);
-                    sequence.setEntry(entry);
-                    sequence = dao.saveSequence(sequence);
-                    if (sequence == null)
-                        throw new DAOException("Could not save sequence");
-
-                    sequenceAnalysisController.rebuildAllAlignments(entry);
-//                    sequenceToDNASequence(sequence);
+                Logger.info("Updating sequence for entry " + entry.getPartNumber());
+                Sequence sequence = dao.getByEntry(entry);
+                if (sequence != null) {
+                    dao.deleteSequence(sequence);
                 }
+
+                sequence = dnaSequenceToSequence(dnaSequence);
+                sequence.setEntry(entry);
+                sequence = dao.saveSequence(sequence);
+                if (sequence == null)
+                    throw new DAOException("Could not save sequence");
+
+                sequenceAnalysisController.rebuildAllAlignments(entry);
+//                    sequenceToDNASequence(sequence);
             }
 
             BlastPlus.scheduleBlastIndexRebuildTask(true);
