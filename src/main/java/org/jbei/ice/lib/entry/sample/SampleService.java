@@ -84,6 +84,12 @@ public class SampleService extends HasEntry {
                     currentStorage = storageDAO.create(currentStorage);
                     break;
 
+                case GENSCRIPT:
+                    currentStorage = createStorage(depositor, mainLocation.getDisplay(), mainLocation.getType());
+                    currentStorage.setName(mainLocation.getName());
+                    currentStorage = storageDAO.create(currentStorage);
+                    break;
+
                 case PLATE96:
                     currentStorage = createPlate96Location(depositor, mainLocation);
                     break;

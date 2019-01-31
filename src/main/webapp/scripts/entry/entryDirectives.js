@@ -55,6 +55,19 @@ angular.module('ice.entry.directives', [])
             controller: "DisplaySampleController"
         }
     })
+    .directive("iceGenscript", function () {
+        return {
+            scope: {
+                sample: "=",
+                delete: "&onDelete",
+                remote: "="
+            },
+
+            restrict: "E",
+            templateUrl: "scripts/entry/sample/genscript.html",
+            controller: "DisplaySampleController"
+        }
+    })
     .directive("iceVectorViewer", function () {
         return {
             scope: {
@@ -68,7 +81,7 @@ angular.module('ice.entry.directives', [])
             link: function (scope, element, attrs) {
             },
 
-            template: '<div id="ve-Root" style="height: 550px; width: 1050px"><br><img src="img/loader-mini.gif"> {{$scope.loadMessage || "Loading"}} sequence&hellip;</div>',
+            template: '<div id="ve-Root" style="height: 550px; width: 890px"><br><img src="img/loader-mini.gif"> {{$scope.loadMessage || "Loading"}} sequence&hellip;</div>',
 
             controller: function ($rootScope, $scope, Util, $window) {
                 $rootScope.$on("ReloadVectorViewData", function (event, data) {

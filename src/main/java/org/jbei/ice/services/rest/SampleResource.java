@@ -162,7 +162,7 @@ public class SampleResource extends RestResource {
                                     @PathParam("userId") final long uid,
                                     @DefaultValue("IN_CART") @QueryParam("status") final SampleRequestStatus status) {
         final String userId = requireUserId();
-        Logger.info(userId + ": retrieving sample requests for user");
+        Logger.info(userId + ": retrieving sample requests ");
         final UserSamples userSamples = requestRetriever.getUserSamples(userId, status, offset, limit, sort, asc);
         return super.respond(Response.Status.OK, userSamples);
     }
