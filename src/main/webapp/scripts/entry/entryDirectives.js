@@ -55,6 +55,19 @@ angular.module('ice.entry.directives', [])
             controller: "DisplaySampleController"
         }
     })
+    .directive("iceGenscript", function () {
+        return {
+            scope: {
+                sample: "=",
+                delete: "&onDelete",
+                remote: "="
+            },
+
+            restrict: "E",
+            templateUrl: "scripts/entry/sample/genscript.html",
+            controller: "DisplaySampleController"
+        }
+    })
     .directive("iceVectorViewer", function () {
         return {
             scope: {
