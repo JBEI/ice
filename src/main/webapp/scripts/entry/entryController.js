@@ -113,7 +113,7 @@ angular.module('ice.entry.controller', [])
                 $scope.newComment.samples.splice(idx, 1);
         };
     })
-    .controller('ShotgunSequenceController', function ($scope, $window, $stateParams, FileUploader, $uibModal, Util) {
+    .controller('ShotgunSequenceController', function ($scope, $window, $stateParams, FileUploader, $uibModal, Util, Authentication) {
         var entryId = $stateParams.id;
         $scope.shotgunUploadError = undefined;
         $scope.maxSize = 5;
