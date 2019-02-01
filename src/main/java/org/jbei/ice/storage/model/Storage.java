@@ -63,7 +63,7 @@ import java.util.Set;
 public class Storage implements DataModel {
 
     public enum StorageType {
-        GENERIC, ADDGENE, FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, PLATE81, WELL, TUBE, SCHEME
+        GENERIC, ADDGENE, GENSCRIPT, FREEZER, SHELF, BOX_INDEXED, BOX_UNINDEXED, PLATE96, PLATE81, WELL, TUBE, SCHEME
     }
 
     @Id
@@ -77,7 +77,7 @@ public class Storage implements DataModel {
     @Column(name = "name", length = 255, nullable = false)
     private String name;
 
-    @Column(name = "index", length = 31, nullable = true)
+    @Column(name = "index", length = 31)
     private String index;
 
     @Column(name = "description", length = 1023)

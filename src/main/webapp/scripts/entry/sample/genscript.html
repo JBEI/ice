@@ -1,0 +1,39 @@
+<table class="entry_sample_panel">
+    <tr>
+        <td colspan="4"><strong style="color: #a52a2a;">Genscript/Molecular Cloud</strong></td>
+    </tr>
+    <tr>
+        <td class="pad-8" style="width: 170px">
+            <img src="img/genscript.png" width="170px">
+            <br>
+            <h3 style="margin-left: 10px">
+                <a target="_blank" ng-href="{{sample.location.name}}"
+                   style="font-size: 65%;">{{sample.location.display}}</a>
+            </h3>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="5" class="small">
+            <div style="height: 1px; margin: 9px 0; overflow: hidden; background-color: #e5e5e5;"></div>
+            <i class="fa fa-warning dark-orange font-14em" ng-if="sample.comments.length"
+               uib-tooltip="1 or more comments available"></i>
+            <strong>{{sample.label}}</strong><br>
+            <span style="color: #777">{{sample.creationTime | date : 'short'}}</span> - <a
+                ng-href="profile/{{sample.depositor.id}}">{{sample.depositor.firstName}}
+            {{sample.depositor.lastName}}</a>
+
+            <div class="display-inline pull-right" ng-if="sample.canEdit && sample.deleteRequested">
+                <i class="fa fa-exclamation-triangle alert_color fa-fw"></i>
+                <b style="color:#CC3333">Delete?</b>
+
+                <button stop-event="click" class="btn btn-xs btn-primary" ng-click="delete()">Yes</button>
+                <button stop-event="click" class="btn btn-xs btn-default" ng-click="sample.deleteRequested=false">No
+                </button>
+            </div>
+
+            <div class="pull-right" style="font-size: 14px;" ng-if="sample.canEdit && !sample.deleteRequested">
+                <i class="fa fa-fw delete_icon fa-trash-o" ng-click="sample.deleteRequested=true"></i>
+            </div>
+        </td>
+    </tr>
+</table>
