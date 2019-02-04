@@ -14,11 +14,11 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "sequence_annotation_location")
-@SequenceGenerator(name = "sequence", sequenceName = "sequence_annotation_location_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "sequence_annotation_location_id", sequenceName = "sequence_annotation_location_id_seq", allocationSize = 1)
 public class AnnotationLocation implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence_annotation_location_id")
     private long id;
 
     @Column(name = "genbank_start", nullable = false)

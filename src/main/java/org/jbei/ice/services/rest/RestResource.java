@@ -23,13 +23,13 @@ import javax.ws.rs.core.Response;
  */
 public class RestResource {
 
-    protected final String AUTHENTICATION_PARAM_NAME = Headers.AUTHENTICATION_PARAM_NAME;
-    protected final String WOR_PARTNER_TOKEN = Headers.WOR_PARTNER_TOKEN;
-    protected final String API_KEY_TOKEN = Headers.API_KEY_TOKEN;               // token for validation
-    protected final String API_KEY_USER = Headers.API_KEY_USER;           // optional user. system checks and uses assigned token user if not specified
-    protected final String API_KEY_CLIENT_ID = Headers.API_KEY_CLIENT_ID;    // client id
-    protected final String REMOTE_USER_TOKEN = Headers.REMOTE_USER_TOKEN;   // token for remote user
-    protected final String REMOTE_USER_ID = Headers.REMOTE_USER_ID;         // id for remote user
+    private final String AUTHENTICATION_PARAM_NAME = Headers.AUTHENTICATION_PARAM_NAME;
+    final String WOR_PARTNER_TOKEN = Headers.WOR_PARTNER_TOKEN;
+    private final String API_KEY_TOKEN = Headers.API_KEY_TOKEN;               // token for validation
+    private final String API_KEY_USER = Headers.API_KEY_USER;           // optional user. system checks and uses assigned token user if not specified
+    private final String API_KEY_CLIENT_ID = Headers.API_KEY_CLIENT_ID;    // client id
+    private final String REMOTE_USER_TOKEN = Headers.REMOTE_USER_TOKEN;   // token for remote user
+    private final String REMOTE_USER_ID = Headers.REMOTE_USER_ID;         // id for remote user
 
     @HeaderParam(value = WOR_PARTNER_TOKEN)
     protected String worPartnerToken;
@@ -90,7 +90,7 @@ public class RestResource {
      *
      * @param logMessage log message for request
      */
-    protected void requireUserIdOrWebPartner(String logMessage) {
+    void requireUserIdOrWebPartner(String logMessage) {
         String userId = getUserId();
         if (StringUtils.isNotEmpty(userId)) {
             log(userId, logMessage);
@@ -106,12 +106,12 @@ public class RestResource {
     }
 
     // returns the  name and port for this server
-    protected String getThisServer(boolean includeContext) {
+    String getThisServer(boolean includeContext) {
         String url = request.getServerName();
         int port = request.getServerPort();
         // exclude invalid and default http(s) ports
         if (port > 0 && port != 443 && port != 80) {
-            url += (":" + Integer.toString(port));
+            url += (":" + port);
         }
 
         if (includeContext) {
@@ -152,7 +152,7 @@ public class RestResource {
         // check hmac signature
         final Object hmac = request.getAttribute(AuthenticationInterceptor.HMAC_SIGNATURE);
         final Object valid = request.getAttribute(AuthenticationInterceptor.EXPECTED_SIGNATURE);
-        if (hmac != null && hmac instanceof HmacSignature) {
+        if (hmac instanceof HmacSignature) {
             final HmacSignature generated = (HmacSignature) hmac;
             if (generated.generateSignature().equals(valid)) {
                 // TODO validation of meaningful userId
@@ -164,14 +164,14 @@ public class RestResource {
         return userId;
     }
 
-    protected RegistryPartner requireWebPartner() {
+    RegistryPartner requireWebPartner() {
         RegistryPartner partner = getWebPartner();
         if (partner == null)
             throw new WebApplicationException(Response.Status.FORBIDDEN);
         return partner;
     }
 
-    protected RegistryPartner getWebPartner() {
+    private RegistryPartner getWebPartner() {
         String clientId = !StringUtils.isEmpty(apiClientId) ? apiClientId : request.getRemoteHost();
         TokenVerification tokenVerification = new TokenVerification();
         return tokenVerification.verifyPartnerToken(clientId, worPartnerToken);
@@ -244,7 +244,7 @@ public class RestResource {
         Logger.info(who + ": " + message);
     }
 
-    protected Response addHeaders(Response.ResponseBuilder response, String fileName) {
+    Response addHeaders(Response.ResponseBuilder response, String fileName) {
         response.header("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
         int dotIndex = fileName.lastIndexOf('.') + 1;
         if (dotIndex == 0)

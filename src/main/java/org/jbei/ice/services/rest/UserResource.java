@@ -14,9 +14,12 @@ import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.dto.user.UserPreferences;
 import org.jbei.ice.lib.entry.OwnerEntries;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
+import org.jbei.ice.lib.folder.UserFolders;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.group.Groups;
 import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.model.Account;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -222,10 +225,19 @@ public class UserResource extends RestResource {
                                         @DefaultValue("15") @QueryParam("limit") int limit,
                                         @DefaultValue("requested") @QueryParam("sort") String sort,
                                         @DefaultValue("false") @QueryParam("asc") boolean asc,
-                                        @PathParam("userId") long uid,
                                         @DefaultValue("") @QueryParam("status") SampleRequestStatus status) {
         String user = requireUserId();
         return super.respond(Response.Status.OK,
                 requestRetriever.getUserSamples(user, status, offset, limit, sort, asc));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/folders")
+    public Response getUserFolders(@PathParam("id") long userId) {
+        String user = requireUserId();
+        Account account = DAOFactory.getAccountDAO().get(userId);
+        UserFolders userFolders = new UserFolders(account.getEmail());
+        return super.respond(userFolders.getList(user));
     }
 }

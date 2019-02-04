@@ -34,11 +34,11 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "REMOTE_PARTNER")
-@SequenceGenerator(name = "sequence", sequenceName = "remote_partner_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "remote_partner_id", sequenceName = "remote_partner_id_seq", allocationSize = 1)
 public class RemotePartner implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "remote_partner_id")
     private long id;
 
     @Column(name = "name", length = 127)

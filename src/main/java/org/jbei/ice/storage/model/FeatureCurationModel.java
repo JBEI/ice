@@ -10,11 +10,11 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "sequence_annotation_curation")
-@SequenceGenerator(name = "sequence", sequenceName = "sequence_annotation_curation_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "sequence_annotation_curation_id", sequenceName = "sequence_annotation_curation_id_seq", allocationSize = 1)
 public class FeatureCurationModel implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence_annotation_curation_id")
     private long id;
 
     @OneToOne

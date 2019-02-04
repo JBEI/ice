@@ -24,11 +24,11 @@ import java.util.Set;
 @Entity
 @Table(name = "folder")
 @ClassBridge(impl = EntryFolderPermissionBridge.class)
-@SequenceGenerator(name = "sequence", sequenceName = "folder_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "folder_id", sequenceName = "folder_id_seq", allocationSize = 1)
 public class Folder implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "folder_id")
     private long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -18,11 +18,11 @@ import javax.persistence.*;
 @Entity
 @Table(name = "PERMISSION")
 @ClassBridge(name = "permission", analyze = Analyze.NO, impl = PermissionEntryBridge.class)
-@SequenceGenerator(name = "sequence", sequenceName = "permission_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "permission_id", sequenceName = "permission_id_seq", allocationSize = 1)
 public class Permission implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "permission_id")
     private long id;
 
     @ManyToOne

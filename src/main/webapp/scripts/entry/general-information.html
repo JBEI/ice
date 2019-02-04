@@ -369,13 +369,14 @@
             <!--menu if entry sequence exists and entry is not protein-->
             <div class="pull-right" ng-if='entry.hasSequence&&entry.type!=="PROTEIN"'>
                 <span ng-if="entry.canEdit">
-                    <small class="opacity_hover" ng-click="deleteSequence(entry)">Delete</small>
+                    <small class="opacity_hover" ng-click="deleteSequence(entry)">Delete <i
+                            class="fa fa-trash-o"></i></small>
                     <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                 </span>
 
                 <span ng-if="entry.basePairCount">
                     <small class="opacity_hover" ng-click="openSequenceInFullVectorEditor()">
-                        Open in VectorEditor
+                         Open in VectorEditor <i class="fa fa-expand"></i>
                     </small>
 
                     <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
@@ -417,7 +418,7 @@
                 <span ng-if="entry.canEdit">
                     <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                     <small class="opacity_hover" ng-click="showAutoAnnotationPopup()">
-                        Auto Annotate
+                        Auto Annotate <i class="fa fa-magic"></i>
                     </small>
                 </span>
             </div>

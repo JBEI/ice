@@ -20,11 +20,11 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "attachments")
-@SequenceGenerator(name = "sequence", sequenceName = "attachments_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "attachments_id", sequenceName = "attachments_id_seq", allocationSize = 1)
 public class Attachment implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "attachments_id")
     private long id;
 
     @Column(name = "description", nullable = false)

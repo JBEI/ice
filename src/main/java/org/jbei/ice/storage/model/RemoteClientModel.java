@@ -24,11 +24,11 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "clients")
-@SequenceGenerator(name = "sequence", sequenceName = "clients_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "clients_id", sequenceName = "clients_id_seq", allocationSize = 1)
 public class RemoteClientModel implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "clients_id")
     private long id;
 
     @Column(name = "email")

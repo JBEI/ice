@@ -17,11 +17,11 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "PREFERENCE")
-@SequenceGenerator(name = "sequence", sequenceName = "preferences_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "preferences_id", sequenceName = "preferences_id_seq", allocationSize = 1)
 public class Preference implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "preferences_id")
     private long id;
 
     @ManyToOne

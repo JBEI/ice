@@ -12,11 +12,11 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "REMOTE_ACCESS")
-@SequenceGenerator(name = "sequence", sequenceName = "remote_access_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "remote_access_id", sequenceName = "remote_access_id_seq", allocationSize = 1)
 public class RemoteAccessModel implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "remote_access_id")
     private long id;
 
     @Column(name = "token")

@@ -12,11 +12,11 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "MANUSCRIPT")
-@SequenceGenerator(name = "sequence", sequenceName = "manuscript_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "manuscript_id", sequenceName = "manuscript_id_seq", allocationSize = 1)
 public class ManuscriptModel implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "manuscript_id")
     private long id;
 
     @Column(name = "title")

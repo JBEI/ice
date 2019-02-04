@@ -12,7 +12,7 @@ import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.utils.Utils;
 
 import javax.ws.rs.*;
@@ -341,10 +341,9 @@ public class BulkUploadResource extends RestResource {
     public Response deleteEntrySequence(@PathParam("id") long uploadId,
                                         @PathParam("entryId") String entryId) {
         String userId = getUserId();
-        if (new SequenceController().deleteSequence(userId, entryId)) {
-            return Response.ok().build();
-        }
-        return Response.serverError().build();
+        PartSequence partSequence = new PartSequence(userId, entryId);
+        partSequence.delete();
+        return Response.ok().build();
     }
 
     /**

@@ -21,11 +21,11 @@ import java.util.Set;
 @Indexed(index = "Message")
 @Entity
 @Table(name = "MESSAGE")
-@SequenceGenerator(name = "sequence", sequenceName = "message_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "message_id", sequenceName = "message_id_seq", allocationSize = 1)
 public class Message implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "message_id")
     private long id;
 
     @Column(name = "from_user", length = 127)

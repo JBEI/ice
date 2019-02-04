@@ -21,7 +21,7 @@ public class ApiKey implements DataModel {
     @GenericGenerator(name = "increment", strategy = "increment")
     private long id;
 
-    @Column(name = "owner_email", length = 255, nullable = false)
+    @Column(name = "owner_email", nullable = false)
     private String ownerEmail;
 
     @Column(name = "creation_time")
