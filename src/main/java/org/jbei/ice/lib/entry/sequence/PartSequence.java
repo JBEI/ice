@@ -30,10 +30,7 @@ import org.jbei.ice.storage.model.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Sequence information for a biological part in ICE
@@ -230,11 +227,14 @@ public class PartSequence {
             return;
 
         if (existing != null) {
+
+            SequenceVersionHistory history = new SequenceVersionHistory(userId, sequence.getId());
+
             // diff
             existing.setSequenceFeatures(new HashSet<>(sequenceFeatureDAO.getEntrySequenceFeatures(this.entry)));
 
             // 1. check sequence string
-            checkSequenceString(existing, sequence);
+            checkSequenceString(history, existing, sequence);
 
             // 2. check features
             checkForNewFeatures(existing, sequence);
@@ -289,11 +289,12 @@ public class PartSequence {
         sequenceFeatureDAO.delete(sequenceFeature);
     }
 
-    private void checkSequenceString(Sequence existing, Sequence sequence) {
+    private void checkSequenceString(SequenceVersionHistory history, Sequence existing, Sequence sequence) {
         if (!existing.getFwdHash().equals(sequence.getFwdHash()) || !existing.getRevHash().equals(sequence.getRevHash())) {
             existing.setSequence(sequence.getSequence()); // hashes are updated in here (probably not a good method name)
             existing.setSequenceFeatures(null);
             sequenceDAO.update(existing);
+            history.add(sequence.getSequence());
         }
     }
 

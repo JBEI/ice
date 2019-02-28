@@ -170,6 +170,7 @@ angular.module('ice.entry.directives', [])
                 };
 
                 var convertToVEModel = function (result) {
+                    console.log(result);
                     var data = {
                         sequenceData: {
                             sequence: result.sequence,
@@ -178,6 +179,7 @@ angular.module('ice.entry.directives', [])
                             circular: result.isCircular
                         },
                         registryData: {
+                            sid: result.id,
                             uri: result.uri,
                             identifier: result.identifier,
                             name: result.name,

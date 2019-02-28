@@ -505,7 +505,7 @@ public class GenBankParser extends AbstractParser {
 
     // TODO
     private ReferenceTag parseReferenceTag(final Tag tag) throws InvalidFormatParserException {
-        final String lines[] = tag.getRawBody().split("\n");
+        final String[] lines = tag.getRawBody().split("\n");
         final String putativeValue = lines[0].split(" +")[1];
         tag.setValue(putativeValue);
 

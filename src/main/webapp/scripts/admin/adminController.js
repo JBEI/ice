@@ -228,7 +228,7 @@ angular.module('ice.admin.controller', [])
 
         $scope.selectRequest = function (request) {
             var i = $scope.selectedRequests.indexOf(request);
-            if (i == -1) {
+            if (i === -1) {
                 $scope.selectedRequests.push(request);
             } else {
                 $scope.selectedRequests.splice(i, 1);
@@ -268,7 +268,7 @@ angular.module('ice.admin.controller', [])
 
         $scope.sampleFilterChecked = function (filter) {
             var idx = $scope.params.status.indexOf(filter);
-            if (idx == -1)
+            if (idx === -1)
                 $scope.params.status.push(filter);
             else
                 $scope.params.status.splice(idx, 1);

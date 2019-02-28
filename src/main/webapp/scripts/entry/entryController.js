@@ -994,8 +994,6 @@ angular.module('ice.entry.controller', [])
 
                 // init
                 const createVectorEditorNode = function (openVEData) {
-                    console.log("create");
-
                     $scope.vEeditor = $window.createVectorEditor("createDomNodeForMe", {
                         editorName: "vector-editor",
                         doNotUseAbsolutePosition: true,
@@ -1011,25 +1009,44 @@ angular.module('ice.entry.controller', [])
                             // teselagenSequenceData
                         },
 
+                        // getVersionList: function () {
+                        //     Util.get('rest/sequences/' + openVEData.registryData.identifier + '/history', function (result) {
+                        //         return [
+                        //             {
+                        //                 versionId: "51241",
+                        //                 dateChanged: "01/11/2019",
+                        //                 editedBy: "Hector Plahar",
+                        //                 revisionType: "Feature Add"
+                        //             },
+                        //             {
+                        //                 versionId: "51241",
+                        //                 dateChanged: "01/11/2019",
+                        //                 editedBy: "Hector Plahar",
+                        //                 revisionType: "Feature Remove"
+                        //             }]
+                        //     })
+                        // },
+
                         getVersionList: function () {
-                            return [{
-                                versionId: "51241",
-                                dateChanged: "01/11/2019",
-                                editedBy: "Hector Plahar",
-                                revisionType: "Feature Add"
-                            },
-                                {
-                                    versionId: "51241",
-                                    dateChanged: "01/11/2019",
-                                    editedBy: "Hector Plahar",
-                                    revisionType: "Feature Add"
-                                },
-                                {
-                                    versionId: "51241",
-                                    dateChanged: "01/11/2019",
-                                    editedBy: "Hector Plahar",
-                                    revisionType: "Feature Remove"
-                                }]
+//fake talking to some api
+                            return new Promise(resolve => {
+                                setTimeout(() => {
+                                    resolve([
+                                        {
+                                            dateChanged: "12/30/2211",
+                                            editedBy: "Nara",
+                                            revisionType: "Sequence Deletion",
+                                            versionId: 2
+                                        },
+                                        {
+                                            dateChanged: "8/30/2211",
+                                            editedBy: "Ralph",
+                                            revisionType: "Feature Edit",
+                                            versionId: 3
+                                        }
+                                    ]);
+                                }, 100);
+                            });
                         },
 
                         onSave: function (event, sequenceData, editorState, onSuccessCallback) {
@@ -1188,6 +1205,8 @@ angular.module('ice.entry.controller', [])
                     createVectorEditorNode($scope.existingVectorEditorSequenceModel);
                 } else {
                     Util.get("rest/parts/" + entry.id + "/sequence", function (result) {
+                        console.log(result);
+
                         $scope.sequenceName = result.name;
                         sequence = result;
 
