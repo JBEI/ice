@@ -30,7 +30,10 @@ import org.jbei.ice.storage.model.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Sequence information for a biological part in ICE
@@ -228,7 +231,7 @@ public class PartSequence {
 
         if (existing != null) {
 
-            SequenceVersionHistory history = new SequenceVersionHistory(userId, sequence.getId());
+            SequenceVersionHistory history = new SequenceVersionHistory(userId, existing.getId());
 
             // diff
             existing.setSequenceFeatures(new HashSet<>(sequenceFeatureDAO.getEntrySequenceFeatures(this.entry)));
