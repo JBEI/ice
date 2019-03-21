@@ -209,32 +209,35 @@ public class PartSequence {
      * <br>
      * Write privileges on the entry are required
      *
-     * @param dnaSequence new sequence to associate with this part
+     * @param updatedSequence new sequence to associate with this part
      */
-    public void update(FeaturedDNASequence dnaSequence) {
+    public void update(FeaturedDNASequence updatedSequence) {
         entryAuthorization.expectWrite(userId, entry);
         Sequence existing = sequenceDAO.getByEntry(this.entry);
 
         // update with raw sequence if no sequence object is passed
-        if ((dnaSequence.getFeatures() == null || dnaSequence.getFeatures().isEmpty())) {
+        if ((updatedSequence.getFeatures() == null || updatedSequence.getFeatures().isEmpty())) {
             // sometimes the whole sequence is sent in the string portion (when there are no features)
             // no features to add
-            dnaSequence = GeneralParser.parse(dnaSequence.getSequence());
-        } else if (dnaSequence.getSequence().isEmpty()) {
-            dnaSequence.setSequence(existing.getSequence());
+            updatedSequence = GeneralParser.parse(updatedSequence.getSequence());
+        } else if (updatedSequence.getSequence().isEmpty()) {
+            updatedSequence.setSequence(existing.getSequence());
         }
 
         // convert sequence wrapper to sequence storage model
-        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
+        Sequence sequence = SequenceUtil.dnaSequenceToSequence(updatedSequence);
         if (sequence == null)
             return;
 
         if (existing != null) {
+
+            SequenceVersionHistory history = new SequenceVersionHistory(userId, existing.getId());
+
             // diff
             existing.setSequenceFeatures(new HashSet<>(sequenceFeatureDAO.getEntrySequenceFeatures(this.entry)));
 
             // 1. check sequence string
-            checkSequenceString(existing, sequence);
+            checkSequenceString(history, existing, sequence);
 
             // 2. check features
             checkForNewFeatures(existing, sequence);
@@ -248,7 +251,7 @@ public class PartSequence {
             // rebuild blast
             BlastPlus.scheduleBlastIndexRebuildTask(true);
         } else {
-            save(dnaSequence);
+            save(updatedSequence);
         }
     }
 
@@ -289,11 +292,12 @@ public class PartSequence {
         sequenceFeatureDAO.delete(sequenceFeature);
     }
 
-    private void checkSequenceString(Sequence existing, Sequence sequence) {
+    private void checkSequenceString(SequenceVersionHistory history, Sequence existing, Sequence sequence) {
         if (!existing.getFwdHash().equals(sequence.getFwdHash()) || !existing.getRevHash().equals(sequence.getRevHash())) {
             existing.setSequence(sequence.getSequence()); // hashes are updated in here (probably not a good method name)
             existing.setSequenceFeatures(null);
             sequenceDAO.update(existing);
+            history.add(sequence.getSequence());
         }
     }
 
@@ -494,8 +498,9 @@ public class PartSequence {
 
     private FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {
         Sequence sequence = sequenceDAO.getByEntry(entry);
-        if (sequence == null)
+        if (sequence == null) {
             return null;
+        }
 
         List<SequenceFeature> sequenceFeatures = sequenceFeatureDAO.getEntrySequenceFeatures(entry);
         FeaturedDNASequence featuredDNASequence = SequenceUtil.sequenceToDNASequence(sequence, sequenceFeatures);

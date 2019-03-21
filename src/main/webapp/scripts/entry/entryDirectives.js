@@ -170,6 +170,7 @@ angular.module('ice.entry.directives', [])
                 };
 
                 var convertToVEModel = function (result) {
+                    console.log(result);
                     var data = {
                         sequenceData: {
                             sequence: result.sequence,
@@ -178,6 +179,7 @@ angular.module('ice.entry.directives', [])
                             circular: result.isCircular
                         },
                         registryData: {
+                            sid: result.id,
                             uri: result.uri,
                             identifier: result.identifier,
                             name: result.name,
@@ -226,6 +228,9 @@ angular.module('ice.entry.directives', [])
                     }
 
                     Util.get(url, function (result) {
+                        if (!result.sequence)
+                            return;
+
                         const data = convertToVEModel(result);
                         $rootScope.$emit("VectorEditorSequenceModel", data);
                         $scope.loadVectorEditor(data);

@@ -16,6 +16,7 @@ public class CollectionCounts implements IDataTransferModel {
     private long drafts;
     private long pending;
     private long transferred;
+    private long samples;
 
     public long getAvailable() {
         return available;
@@ -71,5 +72,13 @@ public class CollectionCounts implements IDataTransferModel {
 
     public void setTransferred(long transferred) {
         this.transferred = transferred;
+    }
+
+    public long getSamples() {
+        return samples;
+    }
+
+    public void setSamples(long samples) {
+        this.samples = samples;
     }
 }

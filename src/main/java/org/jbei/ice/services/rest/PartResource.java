@@ -113,7 +113,9 @@ public class PartResource extends RestResource {
             throw new WebApplicationException();
 
         PartDefaults partDefaults = new PartDefaults(userId);
-        return super.respond(partDefaults.get(entryType));
+        PartData partData = partDefaults.get(entryType);
+        partData.setCustomEntryFields(new CustomFields().get(entryType).getData());
+        return super.respond(partData);
     }
 
     /**

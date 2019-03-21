@@ -5,7 +5,7 @@
 </div>
 
 <!--iterate through fields and show if field has value -->
-<div class="row pad_top" ng-repeat="field in entryFields"
+<div class="row pad_top" ng-repeat="field in entry.fields"
      ng-if="entry[field.schema] != null&&entry[field.schema].toString().length!==0">
 
     <div class="col-md-2 entryLabel">
@@ -99,6 +99,22 @@
                     <a class="btn btn-default btn-xs" ng-click="field.edit=false">Cancel</a>
                 </span>
             </div>
+
+            <!--custom field options-->
+            <!--<div class="col-md-10" ng-if="field.options && field.isCustom">-->
+            <!--<select ng-focus="field.edit=true" ng-blur="field.edit=false" class="pull_down"-->
+            <!--ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"-->
+            <!--ng-model="activePart[field.label]" size="1" ng-change="field.invalid=false"-->
+            <!--ng-options="option.value as option.text for option in field.options"></select>-->
+            <!--</div>-->
+
+            <!--&lt;!&ndash;regular (not custom) field options&ndash;&gt;-->
+            <!--<div class="col-md-10" ng-if="field.options && !field.isCustom">-->
+            <!--<select ng-focus="field.edit=true" ng-blur="field.edit=false" class="pull_down"-->
+            <!--ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"-->
+            <!--ng-model="activePart[field.schema]" size="1"-->
+            <!--ng-options="option.value as option.text for option in field.options"></select>-->
+            <!--</div>-->
 
             <!--options-->
             <div class="input-group" ng-if="field.options&&field.edit"

@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.collection.controller', [])
-    // controller for <ice.menu.collections> directive
+// controller for <ice.menu.collections> directive
     .controller('CollectionMenuController', function ($cookies, $scope, $uibModal, $rootScope, $location,
                                                       $stateParams, FolderSelection, EntryContextUtil, Util,
                                                       localStorageService) {
@@ -449,14 +449,24 @@ angular.module('ice.collection.controller', [])
                 console.error(failure);
             });
         }
-    }
-)
+    })
+    .controller('FolderCreateSamplesController', function (Util, $scope, folder, $uibModalInstance) {
+        $scope.submitFolderForSampleCreation = function () {
+            $scope.isConflict = false;
+            Util.update("rest/folders/" + folder.id + "/SAMPLE", {}, {}, function (result) {
+                console.log(result);
+                $uibModalInstance.close();
+            }, function (error) {
+                console.log("error", error);
+                $scope.isConflict = (error.status === 409);
+            })
+        }
+    })
 
-// deals with sub collections e.g. /folders/:id
-// retrieves the contents of folders
-    .
-    controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $stateParams,
-                                                       EntryContextUtil, Selection, Util, localStorageService) {
+    // deals with sub collections e.g. /folders/:id
+    // retrieves the contents of folders
+    .controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $stateParams,
+                                                        EntryContextUtil, Selection, Util, localStorageService) {
         $rootScope.$emit("CollectionSelection", $stateParams.collection);
         var resource = "collections";
 
@@ -709,6 +719,26 @@ angular.module('ice.collection.controller', [])
                     return;
                 $scope.params.currentPage = 1;
                 $scope.folderPageChange();
+            });
+        };
+
+        $scope.openSampleCreationDialog = function () {
+            var modalInstance = $uibModal.open({
+                templateUrl: 'scripts/folder/modal/folder-create-samples.html',
+                controller: "FolderCreateSamplesController",
+                backdrop: "static",
+                resolve: {
+                    folder: function () {
+                        return $scope.folder;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (result) {
+                // if (!result)
+                //     return;
+                // $scope.params.currentPage = 1;
+                // $scope.folderPageChange();
             });
         };
 

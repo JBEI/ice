@@ -21,8 +21,8 @@ angular.module('ice.collection.service', [])
                 selectedFolder = undefined;
                 $rootScope.$emit("CollectionSelected", collection);
             },
-            
-            getSelectedCollection: function() {
+
+            getSelectedCollection: function () {
                 return selectedCollection;
             },
 
@@ -68,6 +68,14 @@ angular.module('ice.collection.service', [])
                 icon: 'fa-share-alt',
                 iconOpen: 'fa-share-alt green',
                 alwaysVisible: true
+            },
+            {
+                name: 'samples',
+                description: 'Folders submitted for sample creation',
+                display: 'Samples',
+                icon: 'fa-flask',
+                iconOpen: 'fa-flask orange',
+                alwaysVisible: false
             },
             {
                 name: 'drafts',

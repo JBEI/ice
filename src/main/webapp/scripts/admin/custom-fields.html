@@ -1,0 +1,59 @@
+<div ng-controller="AdminCustomFieldsController" style="height: 1050px">
+
+    <uib-tabset class="pad_top">
+        <uib-tab select="selectedTab('plasmid')">
+            <uib-tab-heading>Plasmid</uib-tab-heading>
+        </uib-tab>
+
+        <uib-tab select="selectedTab('strain')">
+            <uib-tab-heading>Strain</uib-tab-heading>
+        </uib-tab>
+
+        <uib-tab select="selectedTab('part')">
+            <uib-tab-heading>Part</uib-tab-heading>
+        </uib-tab>
+
+        <uib-tab select="selectedTab('seed')">
+            <uib-tab-heading>Seed</uib-tab-heading>
+        </uib-tab>
+
+        <uib-tab select="selectedTab('protein')">
+            <uib-tab-heading>Protein</uib-tab-heading>
+        </uib-tab>
+
+    </uib-tabset>
+
+    <br>
+    <button class="ice-button" ng-click="addNewCustomField()">Add New Field</button>
+
+    <div ng-if="partCustomFields.length">
+        <table cellspacing="0" class="table table-border-bottom table-hover table-condensed font-95em"
+               ng-class="{'opacity_4':loadingPage}">
+            <thead>
+            <th>Label</th>
+            <th>Field Type</th>
+            <th>Entry Type</th>
+            <th>Required</th>
+            <th>Values</th>
+            <th></th>
+            </thead>
+            <tbody ng-repeat="field in partCustomFields">
+            <tr>
+                <td>{{field.label}}</td>
+                <td>{{field.fieldType}}</td>
+                <td>{{field.entryType}}</td>
+                <td><i class="fa fa-fw fa-check" ng-if="field.required"></i></td>
+                <td>
+                    <div ng-repeat="option in field.options">{{option.name}}</div>
+                </td>
+                <td><i class="fa fa-fw fa-trash-o opacity_hover font-12em"></i></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pad_top" ng-if="!partCustomFields.length">
+        <i>No custom fields available for parts of type <b class="text-muted">{{selection | capitalize}}</b></i>
+    </div>
+
+</div>

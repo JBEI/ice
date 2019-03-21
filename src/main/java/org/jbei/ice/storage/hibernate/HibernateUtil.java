@@ -6,6 +6,10 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.storage.model.CustomEntryFieldModel;
+import org.jbei.ice.storage.model.CustomEntryFieldOptionModel;
+import org.jbei.ice.storage.model.CustomEntryFieldValueModel;
+import org.jbei.ice.storage.model.FeatureCurationModel;
 
 /**
  * Helper class to Initialize Hibernate, and obtain new sessions.
@@ -121,7 +125,10 @@ public class HibernateUtil {
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.RemoteClientModel.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.RemoteAccessModel.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.ManuscriptModel.class);
-                configuration.addAnnotatedClass(org.jbei.ice.storage.model.FeatureCurationModel.class);
+                configuration.addAnnotatedClass(FeatureCurationModel.class);
+                configuration.addAnnotatedClass(CustomEntryFieldModel.class);
+                configuration.addAnnotatedClass(CustomEntryFieldOptionModel.class);
+                configuration.addAnnotatedClass(CustomEntryFieldValueModel.class);
 
                 sessionFactory = configuration.buildSessionFactory(serviceRegistry);
             } catch (Throwable e) {

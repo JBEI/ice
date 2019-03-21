@@ -40,6 +40,7 @@ angular.module('ice.common.service', [])
                 }
 
                 if (!errorMsg) {
+                    console.log("error", response);
                     errorMsg = "Unknown server error";
                     type = "danger";
                 }

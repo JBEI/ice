@@ -3,6 +3,7 @@ package org.jbei.ice.lib.folder.collection;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
+import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.entry.SharedEntries;
 import org.jbei.ice.lib.entry.VisibleEntries;
 import org.jbei.ice.lib.folder.CollectionCounts;
@@ -10,6 +11,7 @@ import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Folder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +49,12 @@ public class Collections {
         // admin only options
         collection.setPending(entryDAO.getByVisibilityCount(Visibility.PENDING));
         collection.setTransferred(entryDAO.getByVisibilityCount(Visibility.TRANSFERRED));
+
+        // get sample entries (this is determined by folder membership
+        List<Folder> sampleFolders = DAOFactory.getFolderDAO().getFoldersByType(FolderType.SAMPLE);
+        if (sampleFolders != null)
+            collection.setSamples(sampleFolders.size());
+
         return collection;
     }
 
@@ -78,6 +86,9 @@ public class Collections {
 
             case TRANSFERRED:
                 return controller.getTransferredFolders(userId);
+
+            case SAMPLES:
+                return controller.getSampleFolders(userId);
 
             case DELETED:
                 // not able to delete folders under the deleted collections yet

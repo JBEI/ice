@@ -123,6 +123,18 @@ public class FolderResource extends RestResource {
         return super.respond(resp);
     }
 
+    @PUT
+    @Path("/{id}/{newStatus}")
+    public Response updateFolderStatus(@PathParam("id") final long folderId,
+                                       @PathParam("newStatus") String newStatus) {
+        String userId = requireUserId();
+        Folders folders = new Folders(userId);
+        FolderType type = FolderType.valueOf(newStatus.toUpperCase());
+        if (!folders.updateFolderType(folderId, type))
+            return super.respond(Response.Status.CONFLICT);
+        return super.respond(true);
+    }
+
     /**
      * Deletes the specified folder resource
      *

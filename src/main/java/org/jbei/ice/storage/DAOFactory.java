@@ -37,6 +37,9 @@ public class DAOFactory {
     private static FeatureCurationModelDAO featureCurationModelDAO;
     private static SelectionMarkerDAO selectionMarkerDAO;
     private static SequenceHistoryDAO sequenceHistoryDAO;
+    private static SequenceHistoryModelDAO sequenceHistoryModelDAO;
+    private static CustomEntryFieldDAO customEntryFieldDAO;
+    private static CustomEntryFieldValueDAO customEntryFieldValueDAO;
 
     public static AccountDAO getAccountDAO() {
         if (accountDAO == null)
@@ -216,5 +219,23 @@ public class DAOFactory {
         if (sequenceHistoryDAO == null)
             sequenceHistoryDAO = new SequenceHistoryDAO();
         return sequenceHistoryDAO;
+    }
+
+    public static SequenceHistoryModelDAO getSequenceHistoryModelDAO() {
+        if (sequenceHistoryModelDAO == null)
+            sequenceHistoryModelDAO = new SequenceHistoryModelDAO();
+        return sequenceHistoryModelDAO;
+    }
+
+    public static CustomEntryFieldDAO getCustomEntryFieldDAO() {
+        if (customEntryFieldDAO == null)
+            customEntryFieldDAO = new CustomEntryFieldDAO();
+        return customEntryFieldDAO;
+    }
+
+    public static CustomEntryFieldValueDAO getCustomEntryFieldValueDAO() {
+        if (customEntryFieldValueDAO == null)
+            customEntryFieldValueDAO = new CustomEntryFieldValueDAO();
+        return customEntryFieldValueDAO;
     }
 }

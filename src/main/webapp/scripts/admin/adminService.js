@@ -76,6 +76,14 @@ adminService.factory('AdminSettings', function () {
             display: 'Editor Tools',
             selected: false,
             icon: 'fa-newspaper-o'
+        },
+        {
+            id: 'custom-fields',
+            url: 'scripts/admin/custom-fields.html',
+            display: 'Custom Fields',
+            selected: false,
+            description: "Customize data input field for entries in this ICE instance",
+            icon: 'fa-paint-brush'
         }
     ];
 
@@ -97,7 +105,7 @@ adminService.factory('AdminSettings', function () {
         },
 
         canAutoInstall: function (key) {
-            return key == 'BLAST_INSTALL_DIR'
+            return key === 'BLAST_INSTALL_DIR'
         },
 
         getMenuOptions: function () {

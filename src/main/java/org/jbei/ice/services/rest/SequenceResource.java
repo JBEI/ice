@@ -45,6 +45,5 @@ public class SequenceResource extends RestResource {
     public Response getSequenceHistory(@PathParam("id") String identifier) {
         String userId = requireUserId();
         return super.respond(false);
-
     }
 }
