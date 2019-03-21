@@ -535,8 +535,8 @@ angular.module('ice.admin.controller', [])
 
         $scope.deletePublicGroup = function (group) {
             Util.remove("rest/groups/" + group.id, null, function () {
-                var i = $scope.groups.indexOf(group);
-                if (i != -1)
+                const i = $scope.groups.indexOf(group);
+                if (i !== -1)
                     $scope.groups.splice(i, 1);
             })
         }
@@ -586,7 +586,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.removeUserFromGroup = function (user) {
-            var index = $scope.newPublicGroup.members.indexOf(user);
+            const index = $scope.newPublicGroup.members.indexOf(user);
             if (index)
                 $scope.newPublicGroup.members.splice(index, 1);
         };
@@ -653,7 +653,7 @@ angular.module('ice.admin.controller', [])
             });
 
             modalInstance.result.then(function (deletedManuscript) {
-                var i = $scope.manuscripts.data.indexOf(deletedManuscript);
+                const i = $scope.manuscripts.data.indexOf(deletedManuscript);
                 $scope.manuscripts.data.splice(i, 1);
             });
         };
@@ -801,7 +801,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.selectFeature = function (feature) {
-            if ($scope.selectedFeature == feature)
+            if ($scope.selectedFeature === feature)
                 $scope.selectedFeature = undefined;
             else
                 $scope.selectedFeature = feature;
@@ -833,5 +833,98 @@ angular.module('ice.admin.controller', [])
         $scope.rebuildFeatures = function () {
             Util.update("rest/annotations/indexes");
         };
-    }
-);
+    })
+    .controller('AdminCustomFieldsController', function (Util, $scope, $uibModal) {
+        $scope.selection = 'plasmid';
+
+        const retrievePartFields = function () {
+            $scope.partCustomFields = undefined;
+            $scope.loading = true;
+            Util.get("rest/fields/" + $scope.selection, function (result) {
+                $scope.partCustomFields = result.data;
+                console.log(result);
+            }, {}, function (error) {
+                $scope.loading = false;
+            })
+        };
+
+        // init
+        retrievePartFields();
+
+        $scope.selectedTab = function (selection) {
+            if (selection === $scope.selection)
+                return;
+
+            $scope.selection = selection;
+            retrievePartFields();
+        };
+
+        $scope.addNewCustomField = function () {
+            const modal = $uibModal.open({
+                templateUrl: 'scripts/admin/modal/new-custom-field.html',
+                controller: "AdminNewCustomField",
+                resolve: {
+                    entryType: function () {
+                        return $scope.selection;
+                    }
+                },
+                backdrop: "static"
+            });
+
+            modal.result.then(function (result) {
+                if (!result)
+                    return;
+
+                if (!$scope.partCustomFields)
+                    $scope.partCustomFields = [];
+                $scope.partCustomFields.push(result);
+            });
+        };
+    })
+    .controller('AdminNewCustomField', function (Util, $scope, $uibModalInstance, entryType) {
+        $scope.field = {required: false, options: [], entryType: entryType.toUpperCase()};
+        $scope.options = [{name: 'Text', value: 'TEXT_INPUT'}, {name: 'Options', value: 'MULTI_CHOICE'}];
+
+        // adds option
+        $scope.addOption = function (afterIndex) {
+            $scope.field.options.push({});
+        };
+
+        $scope.removeOption = function (index) {
+            $scope.field.options.splice(index, 1);
+        };
+
+        $scope.change = function () {
+            if ($scope.field.fieldType.value === "MULTI_CHOICE") {
+                $scope.field.options = [{}];
+            }
+        };
+
+        $scope.createCustomLink = function () {
+            $scope.field.fieldType = $scope.field.fieldType.value;
+            Util.post("rest/fields/" + entryType, $scope.field, function (result) {
+                $uibModalInstance.close(result);
+            })
+        };
+
+        // determines whether the "create" button in the form should be enabled or disabled based on information
+        // entered by user
+        $scope.disableCreateButton = function () {
+            if (!$scope.field.label)
+                return true;
+
+            if (!$scope.field.fieldType)
+                return true;
+
+            switch ($scope.field.fieldType.value) {
+                case "MULTI_CHOICE":
+                    for (var i = 0; i < $scope.field.options.length; i += 1) {
+                        if (!$scope.field.options[i].value)
+                            return true;
+                    }
+                    break;
+            }
+
+            return false;
+        }
+    });

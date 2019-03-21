@@ -4,15 +4,15 @@ import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Data transfer object for parts and associated meta-data
+ * // todo : some of these fields need to be moved; list is too long
  *
  * @author Hector Plahar
  */
 public class PartData implements IDataTransferModel {
-
-    private static final long serialVersionUID = 1l;
 
     private long id;
     private EntryType type;
@@ -60,6 +60,7 @@ public class PartData implements IDataTransferModel {
     private ArrayList<AccessPermission> accessPermissions;
     private boolean publicRead;
     private ArrayList<PartData> linkedParts;
+    private ArrayList<CustomEntryField> customFields;
 
     private StrainData strainData;
     private PlasmidData plasmidData;
@@ -71,6 +72,7 @@ public class PartData implements IDataTransferModel {
         accessPermissions = new ArrayList<>();
         linkedParts = new ArrayList<>();
         parents = new ArrayList<>();
+        customFields = new ArrayList<>();
         status = "";
         bioSafetyLevel = 1;
     }
@@ -233,7 +235,7 @@ public class PartData implements IDataTransferModel {
         this.principalInvestigator = principalInvestigator;
     }
 
-    public ArrayList<CustomField> getCustomFields() {
+    public ArrayList<CustomField> getParameters() {
         return this.parameters;
     }
 
@@ -386,6 +388,14 @@ public class PartData implements IDataTransferModel {
 
     public ArrayList<PartData> getParents() {
         return parents;
+    }
+
+    public List<CustomEntryField> getCustomEntryFields() {
+        return customFields;
+    }
+
+    public void setCustomEntryFields(List<CustomEntryField> fields) {
+        this.customFields = new ArrayList<>(fields);
     }
 
     public StrainData getStrainData() {

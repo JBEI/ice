@@ -281,7 +281,7 @@ public class InfoToModelFactory {
             entry.setKeywords(info.getKeywords());
 
         // parameters
-        List<Parameter> parameters = getParameters(info.getCustomFields(), entry);
+        List<Parameter> parameters = getParameters(info.getParameters(), entry);
         entry.setParameters(parameters);
         return entry;
     }

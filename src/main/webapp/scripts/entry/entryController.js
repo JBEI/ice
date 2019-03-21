@@ -442,22 +442,20 @@ angular.module('ice.entry.controller', [])
         $scope.linkOptions = EntryService.linkOptions($scope.createType.toLowerCase());
 
         // retrieves the defaults for the specified type. Note that $scope.part is the main part
-        var getPartDefaults = function (type, isMain) {
-            //entry.query({partId: type}, function (result) {
+        const getPartDefaults = function (type, isMain) {
             Util.get("rest/parts/defaults/" + type, function (result) {
                 if (isMain) { // or if !$scope.part
                     $scope.part = result;
                     $scope.part = EntryService.setNewEntryFields($scope.part);
                     $scope.part.linkedParts = [];
                     $scope.activePart = $scope.part;
-                    $scope.part.fields = EntryService.getFieldsForType($scope.createType);
-                    angular.forEach($scope.activePart.fields, function (field) {
+
+                    $scope.activePart.fields.forEach(function (field) {
                         field.invalid = false;
                     })
                 } else {
                     var newPart = result;
                     newPart = EntryService.setNewEntryFields(newPart);
-                    newPart.fields = EntryService.getFieldsForType(type);
                     $scope.part.linkedParts.push(newPart);
 
                     $scope.colLength = 11 - $scope.part.linkedParts.length;
@@ -597,7 +595,7 @@ angular.module('ice.entry.controller', [])
                 $scope.part.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.part.linkedParts[i].selectionMarkers);
             }
 
-            // convert the part to a form the server can work with
+            // convert the part to a form the server can work with (including custom fields)
             $scope.part = EntryService.getTypeData($scope.part);
 
             // create or update the part depending on whether there is a current part id
@@ -843,13 +841,13 @@ angular.module('ice.entry.controller', [])
                 var i = -1;
 
                 for (var idx = 0; idx < $scope.activePermissions.length; idx += 1) {
-                    if (permissionId == $scope.activePermissions[idx].id) {
+                    if (permissionId === $scope.activePermissions[idx].id) {
                         i = idx;
                         break;
                     }
                 }
 
-                if (i == -1) {
+                if (i === -1) {
                     return;
                 }
 
@@ -887,7 +885,7 @@ angular.module('ice.entry.controller', [])
                 $scope.entry.id = result.typeId;
                 result.canEdit = $rootScope.user.isAdmin || (result.group && !result.group.autoJoin);
 
-                if (result.type == 'READ_ENTRY') {
+                if (result.type === 'READ_ENTRY') {
                     $scope.readPermissions.push(result);
                     $scope.activePermissions = $scope.readPermissions;
                 } else {
@@ -1482,7 +1480,7 @@ angular.module('ice.entry.controller', [])
                 if ($scope.entry.canEdit)
                     $scope.newParameter = {edit: false};
 
-                $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
+                // $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
                 $scope.entry.remote = params.remote;
 
                 // get sample count, comment count etc

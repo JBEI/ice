@@ -358,11 +358,22 @@ public class FolderController {
         return folderDetails;
     }
 
-    public ArrayList<FolderDetails> getTransferredFolders(String userId) {
+    public List<FolderDetails> getTransferredFolders(String userId) {
         if (!accountController.isAdministrator(userId))
             return new ArrayList<>();
 
-        List<Folder> transferredFolders = dao.getFoldersByType(FolderType.TRANSFERRED);
+        return getFoldersByType(FolderType.TRANSFERRED);
+    }
+
+    public List<FolderDetails> getSampleFolders(String userId) {
+        if (!accountController.isAdministrator(userId))
+            return new ArrayList<>();
+
+        return getFoldersByType(FolderType.SAMPLE);
+    }
+
+    private List<FolderDetails> getFoldersByType(FolderType folderType) {
+        List<Folder> transferredFolders = dao.getFoldersByType(folderType);
         ArrayList<FolderDetails> folderDetails = new ArrayList<>();
 
         for (Folder folder : transferredFolders) {
@@ -392,7 +403,7 @@ public class FolderController {
      * @param folder folder to be promoted
      * @return true if promotion is successful, false otherwise
      */
-    protected FolderDetails promoteFolder(String userId, Folder folder) {
+    private FolderDetails promoteFolder(String userId, Folder folder) {
         if (folder.getType() == FolderType.PUBLIC)
             return folder.toDataTransferObject();
 
@@ -411,7 +422,7 @@ public class FolderController {
      * @param folder to be demoted
      * @return true on successful remote, false otherwise
      */
-    protected FolderDetails demoteFolder(String userId, Folder folder) {
+    private FolderDetails demoteFolder(String userId, Folder folder) {
         if (folder.getType() != FolderType.PUBLIC)
             return folder.toDataTransferObject();
 

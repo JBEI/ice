@@ -475,7 +475,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
             checkAddFilter(predicates, from, filter);
             String fieldName = columnFieldToString(field);
-            query.where(predicates.toArray(new Predicate[predicates.size()]))
+            query.where(predicates.toArray(new Predicate[0]))
                     .orderBy(asc ? getBuilder().asc(from.get(fieldName)) : getBuilder().desc(from.get(fieldName)));
             return currentSession().createQuery(query).setFirstResult(start).setMaxResults(limit).list();
         } catch (HibernateException he) {
@@ -494,7 +494,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             predicates.add(getBuilder().equal(from.get("visibility"), visibility.getValue()));
             checkAddFilter(predicates, from, filter);
             query.select(getBuilder().countDistinct(from.get("id")))
-                    .where(predicates.toArray(new Predicate[predicates.size()]));
+                    .where(predicates.toArray(new Predicate[0]));
             return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);

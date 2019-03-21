@@ -15,5 +15,6 @@ public enum CollectionType {
     DRAFTS,
     PENDING,
     DELETED,
+    SAMPLES,
     TRANSFERRED
 }

@@ -170,7 +170,7 @@ angular.module('ice.entry.service', [])
     .factory('EntryService', function () {
         var toStringArray = function (objArray) {
             var result = [];
-            angular.forEach(objArray, function (object) {
+            objArray.forEach(function (object) {
                 if (!object || !object.value || object.value === "")
                     return;
                 result.push(object.value);
@@ -182,7 +182,7 @@ angular.module('ice.entry.service', [])
         // commons fields to all the different types of parts supported by the system
         // inputType of "withEmail" uses attribute "bothRequired" to indicate that the email portion is required
         //
-        var partFields = [
+        const partFields = [
             {label: "Name", required: true, schema: 'name', inputType: 'short'},
             {label: "Alias", schema: 'alias', inputType: 'short'},
             {
@@ -192,7 +192,7 @@ angular.module('ice.entry.service', [])
                 inputType: 'withEmail',
                 bothRequired: false
             },
-            {label: "Funding Source", schema: 'fundingSource', inputType: 'short'},
+            {label: "Funding Source", schema: 'fundingSource', inputType: 'medium'},
             {
                 label: "Status", schema: 'status', options: [
                     {value: "Complete", text: "Complete"},
@@ -217,7 +217,7 @@ angular.module('ice.entry.service', [])
         ];
 
         // fields peculiar to plasmids
-        var plasmidFields = [
+        const plasmidFields = [
             {label: "Backbone", schema: 'backbone', subSchema: 'plasmidData', inputType: 'medium'},
             {label: "Circular", schema: 'circular', inputType: 'bool', subSchema: 'plasmidData'},
             {
@@ -245,7 +245,7 @@ angular.module('ice.entry.service', [])
         ];
 
         // fields peculiar to arabidopsis seeds
-        var seedFields = [
+        const seedFields = [
             {
                 label: "Sent To ABRC",
                 schema: 'sentToABRC',
@@ -289,8 +289,8 @@ angular.module('ice.entry.service', [])
             }
         ];
 
-        // fields peculiar to seeds
-        var strainFields = [
+        // fields peculiar to strains
+        const strainFields = [
             {
                 label: "Selection Markers", required: true, schema: 'selectionMarkers',
                 inputType: 'autoCompleteAdd', autoCompleteField: 'SELECTION_MARKERS'
@@ -300,14 +300,14 @@ angular.module('ice.entry.service', [])
         ];
 
         // fields peculiar to proteins
-        var proteinFields = [
+        const proteinFields = [
             {label: "Organism", schema: 'organism', inputType: 'medium', subSchema: 'proteinData'},
             {label: "Full Name", schema: 'fullName', inputType: 'medium', subSchema: 'proteinData'},
             {label: "Gene Name", schema: 'geneName', inputType: 'medium', subSchema: 'proteinData'},
             {label: "Uploaded From", schema: 'uploadedFrom', inputType: 'medium', subSchema: 'proteinData'},
         ];
 
-        var generateLinkOptions = function (type) {
+        const generateLinkOptions = function (type) {
             switch (type.toLowerCase()) {
                 case 'plasmid':
                     return [
@@ -341,16 +341,16 @@ angular.module('ice.entry.service', [])
             }
         };
 
-        var validateFields = function (part, fields) {
-            var canSubmit = true;
+        const validateFields = function (part, fields) {
+            let canSubmit = true;
 
             // for each field in the part, check if it validates (only fields that are required)
-            angular.forEach(fields, function (field) {
+            fields.forEach(function (field) {
                 if (!field.required)
                     return;
 
                 if (field.inputType === 'add' || field.inputType === 'autoCompleteAdd') {
-                    if (part[field.schema].length == 0) {
+                    if (part[field.schema].length === 0) {
                         field.invalid = true;
                     } else {
                         for (var i = 0; i < part[field.schema].length; i += 1) {
@@ -359,11 +359,25 @@ angular.module('ice.entry.service', [])
                         }
                     }
                 } else {
-                    if (field.bothRequired) {
-                        // check email portion
-                        field.withEmailInvalid = (part[field.schema + 'Email'] === undefined || part[field.schema + 'Email'] === '');
+                    // validate custom field
+                    if (field.isCustom) { // or field.schema is undefined
+                        // transmitted via part.customFields
+                        field.invalid = (part[field.label] === undefined || part[field.label].trim === '');
+                        // part.customFields.forEach(function (customField) {
+                        //     if (field.label !== customField.label)
+                        //         return;
+                        //
+                        //     field.invalid = (customField.value === undefined);
+                        // });
+                    } else {
+                        if (field.bothRequired) {
+                            // check email portion
+                            field.withEmailInvalid = (part[field.schema + 'Email'] === undefined || part[field.schema + 'Email'] === '');
+                        }
+
+                        // validate regular fields
+                        field.invalid = (part[field.schema] === undefined || part[field.schema] === '');
                     }
-                    field.invalid = (part[field.schema] === undefined || part[field.schema] === '');
                 }
 
                 if (canSubmit) {
@@ -377,41 +391,70 @@ angular.module('ice.entry.service', [])
             return canSubmit;
         };
 
-        var getFieldsForType = function (type, typeFieldsOnly) {
-            const fields = angular.copy(partFields);
+        const getFieldsForType = function (type) {
+            var fields = angular.copy(partFields);
             type = type.toLowerCase();
-            switch (type) {
+
+            switch (type.toLowerCase()) {
                 case 'strain':
-                    if (typeFieldsOnly)
-                        return strainFields;
                     fields.splice.apply(fields, [7, 0].concat(strainFields));
-                    return fields;
+                    break;
 
                 case 'arabidopsis':
                 case 'seed':
-                    if (typeFieldsOnly)
-                        return seedFields;
                     fields.splice.apply(fields, [7, 0].concat(seedFields));
-                    return fields;
+                    break;
 
                 case 'plasmid':
-                    if (typeFieldsOnly)
-                        return plasmidFields;
                     fields.splice.apply(fields, [7, 0].concat(plasmidFields));
-                    return fields;
+                    break;
 
                 case 'protein':
-                    if (typeFieldsOnly)
-                        return proteinFields;
                     fields.splice.apply(fields, [7, 0].concat(proteinFields));
-                    return fields;
-
-                case 'part':
-                default:
-                    return fields;
+                    break;
             }
+
+            return fields;
         };
 
+        const sortEntryFields = function (fields) {
+
+            // ghetto sorting
+            const sortFields = [
+                "short",
+                "withEmail",
+                "date",
+                "bool",
+                "options",
+                "autoComplete",
+                "medium",
+                "autoCompleteAdd",
+                "add",
+                "long",
+            ];
+
+            const sortMap = {};
+            sortFields.forEach(function (value) {
+                sortMap[value] = [];
+            });
+
+            for (var i = 0; i < fields.length; i += 1) {
+                if (!fields[i].inputType)
+                    fields[i].inputType = "options";
+                const type = fields[i].inputType;
+                sortMap[type].push(fields[i]);
+            }
+
+            const sortedFields = [];
+            sortFields.forEach(function (e) {
+                sortMap[e].forEach(function (el) {
+                    sortedFields.push(el);
+                })
+            });
+
+            // sort
+            return sortedFields;
+        };
 
         return {
             toStringArray: function (obj) {
@@ -422,23 +465,28 @@ angular.module('ice.entry.service', [])
                 return generateLinkOptions(type);
             },
 
-            getFieldsForType: function (type, typeFieldsOnly) {
-                return getFieldsForType(type, typeFieldsOnly);
-            },
-
-            getCommonFields: function () {
-                return getFieldsForType('part');
+            getFieldsForType: function (type) {
+                return getFieldsForType(type);
             },
 
             // converts to a form that the backend can work with
             getTypeData: function (entry) {
-                var type = entry.type.toLowerCase();
-                var fields = getFieldsForType(type);
-                angular.forEach(fields, function (field) {
+                // var type = entry.type.toLowerCase();
+                // var fields = getFieldsForType(type);
+
+                entry.fields.forEach(function (field) {
                     if (field.subSchema) {
                         if (entry[field.subSchema] === undefined)
                             entry[field.subSchema] = {};
                         entry[field.subSchema][field.schema] = entry[field.schema];
+                    }
+
+                    if (field.isCustom) {
+                        console.log("custom", field);
+                        entry.customFields.forEach(function (custom) {
+                            custom.value = entry[custom.label];
+                            delete entry[custom.label];
+                        })
                     }
                 });
 
@@ -450,12 +498,26 @@ angular.module('ice.entry.service', [])
                 var type = entry.type.toLowerCase();
                 var fields = getFieldsForType(type);
 
-                angular.forEach(fields, function (field) {
+                fields.forEach(function (field) {
                     if (field.subSchema && entry[field.subSchema]) {
                         entry[field.schema] = entry[field.subSchema][field.schema];
                     }
                 });
 
+                if (!entry.customFields || !entry.customFields.length) {
+                    entry.fields = sortEntryFields(fields);
+                    return entry;
+                }
+
+                entry.customFields.forEach(function (custom) {
+                    if (!custom.label || !custom.value)
+                        return;
+
+                    entry[custom.label] = custom.value;
+                    fields.push({schema: custom.label, label: custom.label});
+                });
+
+                entry.fields = sortEntryFields(fields);
                 return entry;
             },
 
@@ -466,11 +528,12 @@ angular.module('ice.entry.service', [])
             // converts autocomplete fields from an array string to an array of objects in order to be
             // able to use ng-model on the ui
             // also converts entry to form that UI can work with
+            // also sets "fields" parameter
             setNewEntryFields: function (entry) {
                 var type = entry.type.toLowerCase();
                 var fields = getFieldsForType(type);
 
-                angular.forEach(fields, function (field) {
+                fields.forEach(function (field) {
                     if (field.inputType === 'autoCompleteAdd' || field.inputType === 'add') {
                         entry[field.schema] = [
                             {value: ''}
@@ -483,14 +546,38 @@ angular.module('ice.entry.service', [])
                         return;
                     }
 
-                    if (!entry.hasOwnProperty([field.schema]))
-                        entry[field.schema] = undefined;
+                    if (entry.hasOwnProperty(field.schema))
+                        return;
+
+                    entry[field.schema] = undefined;
                 });
 
                 // new entry field defaults
                 entry.bioSafetyLevel = '1';
                 entry.status = 'Complete';
                 entry.parameters = [];
+
+                // deal with custom fields
+                if (!entry.customFields || !entry.customFields.length) {
+                    entry.fields = sortEntryFields(fields);
+                    return entry;
+                }
+
+                entry.customFields.forEach(function (custom) {
+                    const customField = {label: custom.label, required: custom.required, isCustom: true};
+                    switch (custom.fieldType) {
+                        case "MULTI_CHOICE":
+                            customField.options = [];
+                            customField.inputType = "options";
+                            custom.options.forEach(function (each) {
+                                customField.options.push({value: each.name, text: each.name})
+                            });
+                            break;
+                    }
+                    fields.push(customField);
+                });
+
+                entry.fields = sortEntryFields(fields);
                 return entry;
             },
 

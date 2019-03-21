@@ -1,7 +1,9 @@
 package org.jbei.ice.lib.entry;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.access.AccessPermission;
+import org.jbei.ice.lib.dto.entry.CustomEntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
@@ -12,6 +14,7 @@ import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
+import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
@@ -19,6 +22,7 @@ import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Optional;
 
 /**
  * @author Hector Plahar
@@ -180,6 +184,7 @@ public class EntryCreator extends HasEntry {
                     // create new linked (can only do one deep)
                     Entry linkedEntry = InfoToModelFactory.infoToEntry(data);
                     linked = createEntry(account, linkedEntry, data.getAccessPermissions());
+                    setCustomFieldValuesForPart(linkedEntry, data);
                 }
 
                 entry.getLinkedEntries().add(linked);
@@ -187,10 +192,38 @@ public class EntryCreator extends HasEntry {
         }
 
         entry = createEntry(account, entry, part.getAccessPermissions());
+        setCustomFieldValuesForPart(entry, part);
         PartData partData = new PartData(part.getType());
         partData.setId(entry.getId());
         partData.setRecordId(entry.getRecordId());
         return partData;
+    }
+
+    private void setCustomFieldValuesForPart(Entry entry, PartData data) {
+        if (data == null || data.getCustomEntryFields() == null)
+            return;
+
+        CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
+
+        for (CustomEntryField customEntryField : data.getCustomEntryFields()) {
+            CustomEntryFieldValueModel model = new CustomEntryFieldValueModel();
+            model.setEntry(entry);
+            CustomEntryFieldModel customEntryFieldModel = dao.get(customEntryField.getId());
+            if (customEntryFieldModel == null) {
+
+                // try again with label and type
+                Optional<CustomEntryFieldModel> optional = dao.getLabelForType(customEntryField.getEntryType(), customEntryField.getLabel());
+                if (!optional.isPresent()) {
+                    Logger.error("Could not retrieve custom field with id " + customEntryField.getId());
+                    continue;
+                }
+                customEntryFieldModel = optional.get();
+            }
+
+            model.setField(customEntryFieldModel);
+            model.setValue(customEntryField.getValue());
+            DAOFactory.getCustomEntryFieldValueDAO().create(model);
+        }
     }
 
     /**
@@ -216,6 +249,9 @@ public class EntryCreator extends HasEntry {
 
         // copy to data model and back ??
         PartData partData = ModelToInfoFactory.getInfo(entry);
+        if (partData == null)
+            throw new IllegalArgumentException("Cannot retrieve information for entry \"" + sourceId + "\"");
+
         entry = InfoToModelFactory.infoToEntry(partData);
 
         // create entry

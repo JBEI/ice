@@ -369,6 +369,10 @@ public class EntryController extends HasEntry {
         if (partData == null)
             return null;
 
+        // get custom data
+        CustomFields fields = new CustomFields();
+        partData.getCustomEntryFields().addAll(fields.getCustomFieldValuesForPart(entry.getId()));
+
         // retrieve sequence information
         boolean hasSequence = sequenceDAO.hasSequence(entry.getId());
         partData.setHasSequence(hasSequence);

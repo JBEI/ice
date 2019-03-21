@@ -14,7 +14,8 @@ public enum FolderType implements IDataTransferModel {
     SHARED,         // folder shared with other users or group
     TRANSFERRED,    // folder transferred from an external source
     UPLOAD,         // bulk upload; implicit folder
-    REMOTE;         // folder
+    REMOTE,         // remote folder
+    SAMPLE;         // folder submitted for sample creation
 
     FolderType() {
     }
