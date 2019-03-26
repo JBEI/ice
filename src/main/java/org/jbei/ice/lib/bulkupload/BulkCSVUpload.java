@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.bulkupload;
 
 import com.opencsv.CSVParser;
+import com.opencsv.CSVParserBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
@@ -183,123 +184,120 @@ public class BulkCSVUpload {
         HashMap<Integer, HeaderValue> headers = null;
 
         // parse CSV file
-        try {
-            LineIterator it = IOUtils.lineIterator(inputStream, "UTF-8");
-            int index = 0;
-            while (it.hasNext()) {
-                String line = it.nextLine().trim();
+        LineIterator it = IOUtils.lineIterator(inputStream, "UTF-8");
+        int index = 0;
+        while (it.hasNext()) {
+            String line = it.nextLine().trim();
 
-                // check if first time parsing (first line)
-                if (parser == null) {
+            // check if first time parsing (first line)
+            if (parser == null) {
 
-                    // check the separator char (header will use the same separator)
-                    // to indicate the type of parser to use (tab or comma separated)
-                    if (line.contains("\t") && !line.contains(","))
-                        parser = new CSVParser('\t');
+                // check the separator char (header will use the same separator)
+                // to indicate the type of parser to use (tab or comma separated)
+                if (line.contains("\t") && !line.contains(",")) {
+                    parser = new CSVParserBuilder().withSeparator('\t').build();
+                } else {
+                    parser = new CSVParser();
+                }
+
+                // get column headers
+                String[] fieldStrArray = parser.parseLine(line);
+                headers = processColumnHeaders(fieldStrArray);
+                continue;
+            }
+
+            // skip any empty lines (holes) in the csv file
+            if (StringUtils.isBlank(line) || line.replaceAll(",", "").trim().isEmpty())
+                continue;
+
+            // at this point we must have headers since that should be the first item in the file
+            if (headers == null)
+                throw new IOException("Could not parse file headers");
+
+            // parser != null; process line contents with available headers
+            String[] valuesArray = parser.parseLine(line);
+            PartData partData = new PartData(addType);
+            PartSample partSample = null;
+
+            if (subType != null) {
+                partData.getLinkedParts().add(new PartData(subType));
+            }
+
+            // for each column
+            for (int i = 0; i < valuesArray.length; i += 1) {
+                HeaderValue headerForColumn = headers.get(i);
+
+                // process sample information
+                if (headerForColumn.isSampleField()) {
+                    // todo : move to another method
+                    if (partSample == null)
+                        partSample = new PartSample();
+                    setPartSampleData(((SampleHeaderValue) headerForColumn).getSampleField(),
+                            partSample, valuesArray[i]);
+                } else {
+                    EntryHeaderValue entryHeaderValue = (EntryHeaderValue) headerForColumn;
+                    EntryField field = entryHeaderValue.getEntryField();
+                    PartData data;
+                    String value = valuesArray[i];
+                    boolean isSubType = entryHeaderValue.isSubType();
+
+                    if (isSubType)
+                        data = partData.getLinkedParts().get(0);
                     else
-                        parser = new CSVParser();
+                        data = partData;
 
-                    // get column headers
-                    String[] fieldStrArray = parser.parseLine(line);
-                    headers = processColumnHeaders(fieldStrArray);
-                    continue;
-                }
+                    // get the data for the field
+                    switch (field) {
+                        case ATT_FILENAME:
+                            ArrayList<AttachmentInfo> attachments = data.getAttachments();
+                            if (attachments == null) {
+                                attachments = new ArrayList<>();
+                                data.setAttachments(attachments);
+                            }
+                            attachments.clear();
+                            attachments.add(new AttachmentInfo(value));
+                            break;
 
-                // skip any empty lines (holes) in the csv file
-                if (StringUtils.isBlank(line) || line.replaceAll(",", "").trim().isEmpty())
-                    continue;
+                        case SEQ_FILENAME:
+                            data.setSequenceFileName(value);
+                            break;
 
-                // at this point we must have headers since that should be the first item in the file
-                if (headers == null)
-                    throw new IOException("Could not parse file headers");
+                        case SEQ_TRACE_FILES:
+                            // todo
+                            break;
 
-                // parser != null; process line contents with available headers
-                String[] valuesArray = parser.parseLine(line);
-                PartData partData = new PartData(addType);
-                PartSample partSample = null;
+                        case EXISTING_PART_NUMBER:
+                            Entry entry = DAOFactory.getEntryDAO().getByPartNumber(value);
+                            if (entry == null)
+                                throw new IOException("Could not locate part number \"" + value + "\" for linking");
+                            PartData toLink = entry.toDataTransferObject();
+                            data.getLinkedParts().add(toLink);
+                            break;
 
-                if (subType != null) {
-                    partData.getLinkedParts().add(new PartData(subType));
-                }
-
-                // for each column
-                for (int i = 0; i < valuesArray.length; i += 1) {
-                    HeaderValue headerForColumn = headers.get(i);
-
-                    // process sample information
-                    if (headerForColumn.isSampleField()) {
-                        // todo : move to another method
-                        if (partSample == null)
-                            partSample = new PartSample();
-                        setPartSampleData(((SampleHeaderValue) headerForColumn).getSampleField(),
-                                partSample, valuesArray[i]);
-                    } else {
-                        EntryHeaderValue entryHeaderValue = (EntryHeaderValue) headerForColumn;
-                        EntryField field = entryHeaderValue.getEntryField();
-                        PartData data;
-                        String value = valuesArray[i];
-                        boolean isSubType = entryHeaderValue.isSubType();
-
-                        if (isSubType)
-                            data = partData.getLinkedParts().get(0);
-                        else
-                            data = partData;
-
-                        // get the data for the field
-                        switch (field) {
-                            case ATT_FILENAME:
-                                ArrayList<AttachmentInfo> attachments = data.getAttachments();
-                                if (attachments == null) {
-                                    attachments = new ArrayList<>();
-                                    data.setAttachments(attachments);
-                                }
-                                attachments.clear();
-                                attachments.add(new AttachmentInfo(value));
-                                break;
-
-                            case SEQ_FILENAME:
-                                data.setSequenceFileName(value);
-                                break;
-
-                            case SEQ_TRACE_FILES:
-                                // todo
-                                break;
-
-                            case EXISTING_PART_NUMBER:
-                                Entry entry = DAOFactory.getEntryDAO().getByPartNumber(value);
-                                if (entry == null)
-                                    throw new IOException("Could not locate part number \"" + value + "\" for linking");
-                                PartData toLink = entry.toDataTransferObject();
-                                data.getLinkedParts().add(toLink);
-                                break;
-
-                            default:
-                                partData = EntryUtil.setPartDataFromField(partData, value, field, isSubType);
-                        }
+                        default:
+                            partData = EntryUtil.setPartDataFromField(partData, value, field, isSubType);
                     }
                 }
-
-                // validate
-                List<EntryField> fields = EntryUtil.validates(partData);
-                if (!fields.isEmpty()) {
-                    invalidFields.clear();
-                    invalidFields.addAll(fields);
-                    return null;
-                }
-
-                partData.setIndex(index);
-                PartWithSample partWithSample = new PartWithSample(partSample, partData);
-                partDataList.add(partWithSample);
-                index += 1;
             }
-        } finally {
-            IOUtils.closeQuietly(inputStream);
+
+            // validate
+            List<EntryField> fields = EntryUtil.validates(partData);
+            if (!fields.isEmpty()) {
+                invalidFields.clear();
+                invalidFields.addAll(fields);
+                return null;
+            }
+
+            partData.setIndex(index);
+            PartWithSample partWithSample = new PartWithSample(partSample, partData);
+            partDataList.add(partWithSample);
+            index += 1;
         }
 
         return partDataList;
     }
 
-    protected void setPartSampleData(SampleField sampleField, PartSample partSample, String data) {
+    private void setPartSampleData(SampleField sampleField, PartSample partSample, String data) {
         switch (sampleField) {
             case LABEL:
                 partSample.setLabel(data);
