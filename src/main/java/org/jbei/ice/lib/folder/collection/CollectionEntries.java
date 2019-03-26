@@ -5,6 +5,7 @@ import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.OwnerEntries;
+import org.jbei.ice.lib.entry.SampleEntries;
 import org.jbei.ice.lib.entry.SharedEntries;
 import org.jbei.ice.lib.entry.VisibleEntries;
 import org.jbei.ice.lib.shared.ColumnField;
@@ -83,7 +84,20 @@ public class CollectionEntries {
 
             case TRANSFERRED:
                 return this.getEntriesByVisibility(Visibility.TRANSFERRED, field, asc, offset, limit, null, filter);
+
+            case SAMPLES:
+                return this.getSampleEntries(field, asc, offset, limit, filter);
         }
+    }
+
+    private Results<PartData> getSampleEntries(ColumnField field, boolean asc, int offset, int limit, String filter) {
+        SampleEntries entries = new SampleEntries(this.userId);
+        final List<PartData> list = entries.get(field, asc, offset, limit, filter);
+        final long count = entries.getCount(filter);
+        Results<PartData> results = new Results<>();
+        results.setResultCount(count);
+        results.setData(list);
+        return results;
     }
 
     /**
@@ -98,8 +112,8 @@ public class CollectionEntries {
      * of such entries that are available
      * @throws PermissionException on null user id which is required for owner entries
      */
-    protected Results<PartData> getPersonalEntries(ColumnField field, boolean asc, int offset, int limit,
-                                                   String filter) {
+    private Results<PartData> getPersonalEntries(ColumnField field, boolean asc, int offset, int limit,
+                                                 String filter) {
         if (userId == null || userId.isEmpty())
             throw new PermissionException("User id is required to retrieve owner entries");
         OwnerEntries ownerEntries = new OwnerEntries(userId, userId);
@@ -122,8 +136,8 @@ public class CollectionEntries {
      * @return wrapper around list of parts that conform to the parameters and the maximum number
      * of such entries that are available
      */
-    protected Results<PartData> getAvailableEntries(ColumnField field, boolean asc, int offset, int limit,
-                                                    String filter) {
+    private Results<PartData> getAvailableEntries(ColumnField field, boolean asc, int offset, int limit,
+                                                  String filter) {
         VisibleEntries visibleEntries = new VisibleEntries(userId);
         List<PartData> entries = visibleEntries.getEntries(field, asc, offset, limit, filter);
         long count = visibleEntries.getEntryCount(filter);
@@ -144,7 +158,7 @@ public class CollectionEntries {
      * @return wrapper around list of parts matching the parameters along with the maximum number of entries
      * available
      */
-    protected Results<PartData> getSharedEntries(ColumnField field, boolean asc, int offset, int limit, String filter) {
+    private Results<PartData> getSharedEntries(ColumnField field, boolean asc, int offset, int limit, String filter) {
         SharedEntries sharedEntries = new SharedEntries(this.userId);
         List<PartData> entries = sharedEntries.getEntries(field, asc, offset, limit, filter);
         final long count = sharedEntries.getNumberOfEntries(filter);
@@ -168,8 +182,8 @@ public class CollectionEntries {
      * @return wrapper around list of parts that conform to the parameters and the maximum number
      * of such entries that are available
      */
-    protected Results<PartData> getEntriesByVisibility(Visibility visibility, ColumnField field, boolean asc,
-                                                       int offset, int limit, String user, String filter) {
+    private Results<PartData> getEntriesByVisibility(Visibility visibility, ColumnField field, boolean asc,
+                                                     int offset, int limit, String user, String filter) {
         List<Entry> entries = entryDAO.getByVisibility(user, visibility, field, asc, offset, limit, filter);
         Results<PartData> results = new Results<>();
         for (Entry entry : entries) {
