@@ -1,12 +1,14 @@
-FROM maven:3.5 as maven
+FROM maven:3.6 as maven
 
 LABEL maintainer="William Morrell <WCMorrell@lbl.gov>"
 
-ARG ICE_VERSION=5.3.2
+ARG ICE_VERSION=5.5.2
 ARG GIT_BRANCH=master
 ARG GIT_URL=https://github.com/JBEI/ice.git
 RUN git clone --depth 1 -b "${GIT_BRANCH}" "${GIT_URL}" ice \
-    && echo "Cache busting with version ${ICE_VERSION}"
+    && git -C ice rev-parse --short HEAD > ice.hash \
+    && echo "Building ICE ${ICE_VERSION} ($(cat ice.hash))" \
+    && java -version
 
 # overwriting the git version of hibernate config
 COPY hibernate.cfg.xml /ice/src/main/resources/hibernate.cfg.xml
@@ -32,4 +34,9 @@ RUN apt-get clean && apt-get update \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /usr/local/tomcat/webapps/*
+
 COPY --from=maven /ice/target/ice.war /usr/local/tomcat/webapps/ROOT.war
+COPY entrypoint.sh /usr/local/bin/
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["catalina.sh", "run"]
