@@ -363,12 +363,20 @@ angular.module('ice.entry.service', [])
                     if (field.isCustom) { // or field.schema is undefined
                         // transmitted via part.customFields
                         field.invalid = (part[field.label] === undefined || part[field.label].trim === '');
+                        if (!field.invalid) {
+                            if (part[field.label] === 'Other' && !part[field.label + '_plus']) {
+                                field.invalid = true;
+                            }
+                        }
+
+                        // console.log(part[field.label], part[field.label + '_plus']);
                         // part.customFields.forEach(function (customField) {
                         //     if (field.label !== customField.label)
                         //         return;
                         //
                         //     field.invalid = (customField.value === undefined);
                         // });
+
                     } else {
                         if (field.bothRequired) {
                             // check email portion
@@ -484,8 +492,14 @@ angular.module('ice.entry.service', [])
                     if (field.isCustom) {
                         console.log("custom", field);
                         entry.customFields.forEach(function (custom) {
+                            console.log(custom);
                             custom.value = entry[custom.label];
-                            delete entry[custom.label];
+                            if (custom.fieldType === 'MULTI_CHOICE_PLUS' && custom.value === 'Other') {
+                                custom.value = entry[custom.label + '_plus'];
+                                delete entry[custom.label + '_plus'];
+                            } else {
+                                delete entry[custom.label];
+                            }
                         })
                     }
                 });
@@ -567,11 +581,16 @@ angular.module('ice.entry.service', [])
                     const customField = {label: custom.label, required: custom.required, isCustom: true};
                     switch (custom.fieldType) {
                         case "MULTI_CHOICE":
+                        case "MULTI_CHOICE_PLUS":
                             customField.options = [];
                             customField.inputType = "options";
                             custom.options.forEach(function (each) {
                                 customField.options.push({value: each.name, text: each.name})
                             });
+
+                            if (custom.fieldType === "MULTI_CHOICE_PLUS")
+                                customField.options.push({value: "Other", text: "Other"});
+
                             break;
                     }
                     fields.push(customField);
@@ -583,7 +602,7 @@ angular.module('ice.entry.service', [])
 
             // retrieves the submenu options for entry (if param set to true then it is for a remote entry)
             getMenuSubDetails: function (forRemoteEntry) {
-                var details = [
+                const details = [
                     {
                         url: 'scripts/entry/general-information.html',
                         display: 'General Information',

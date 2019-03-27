@@ -24,7 +24,8 @@
     </uib-tabset>
 
     <br>
-    <button class="ice-button" ng-click="addNewCustomField()">Add New Field</button>
+    <button class="ice-button" ng-click="addNewCustomEntryField()">Add New Field</button>
+    <br><br>
 
     <div ng-if="partCustomFields.length">
         <table cellspacing="0" class="table table-border-bottom table-hover table-condensed font-95em"
@@ -34,19 +35,27 @@
             <th>Field Type</th>
             <th>Entry Type</th>
             <th>Required</th>
-            <th>Values</th>
+            <th>Value(s)</th>
             <th></th>
             </thead>
             <tbody ng-repeat="field in partCustomFields">
             <tr>
                 <td>{{field.label}}</td>
-                <td>{{field.fieldType}}</td>
+                <td>{{optionsText(field.fieldType)}}</td>
                 <td>{{field.entryType}}</td>
-                <td><i class="fa fa-fw fa-check" ng-if="field.required"></i></td>
+                <td style="text-align: center; width: 80px">
+                    <i class="fa fa-fw fa-check green" ng-if="field.required"></i></td>
                 <td>
                     <div ng-repeat="option in field.options">{{option.name}}</div>
                 </td>
-                <td><i class="fa fa-fw fa-trash-o opacity_hover font-12em"></i></td>
+                <td style="width: 180px; border: 1px solid #ccc; vertical-align: middle">
+                    <i ng-if="!field.delete" class="fa fa-fw fa-trash-o opacity_hover font-14em"
+                       ng-click="field.delete = true"></i>
+                    <span ng-if="field.delete">Permanently remove field?<br>
+                        <button class="btn btn-xs btn-primary" ng-click="deleteCustomField(field)">Yes</button>
+                        <button class="btn btn-xs btn-default" ng-click="field.delete = false">No</button>
+                    </span>
+                </td>
             </tr>
             </tbody>
         </table>

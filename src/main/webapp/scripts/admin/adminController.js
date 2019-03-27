@@ -837,6 +837,20 @@ angular.module('ice.admin.controller', [])
     .controller('AdminCustomFieldsController', function (Util, $scope, $uibModal) {
         $scope.selection = 'plasmid';
 
+        $scope.options = [
+            {name: 'Text', value: 'TEXT_INPUT'},
+            {name: 'Options', value: 'MULTI_CHOICE'},
+            {name: 'Options with Text', value: 'MULTI_CHOICE_PLUS'}];
+
+        $scope.optionsText = function (value) {
+            for (let i = 0; i < $scope.options.length; i += 1) {
+                if (value === $scope.options[i].value) {
+                    return $scope.options[i].name;
+                }
+            }
+            return value;
+        };
+
         const retrievePartFields = function () {
             $scope.partCustomFields = undefined;
             $scope.loading = true;
@@ -859,7 +873,15 @@ angular.module('ice.admin.controller', [])
             retrievePartFields();
         };
 
-        $scope.addNewCustomField = function () {
+        $scope.deleteCustomField = function (customField) {
+            Util.remove("rest/fields/" + customField.entryType + "/" + customField.id, {}, function (result) {
+                const index = $scope.partCustomFields.indexOf(customField);
+                if (index !== -1)
+                    $scope.partCustomFields.splice(index, 1);
+            })
+        };
+
+        $scope.addNewCustomEntryField = function () {
             const modal = $uibModal.open({
                 templateUrl: 'scripts/admin/modal/new-custom-field.html',
                 controller: "AdminNewCustomField",
@@ -883,7 +905,10 @@ angular.module('ice.admin.controller', [])
     })
     .controller('AdminNewCustomField', function (Util, $scope, $uibModalInstance, entryType) {
         $scope.field = {required: false, options: [], entryType: entryType.toUpperCase()};
-        $scope.options = [{name: 'Text', value: 'TEXT_INPUT'}, {name: 'Options', value: 'MULTI_CHOICE'}];
+        $scope.options = [
+            {name: 'Text', value: 'TEXT_INPUT'},
+            {name: 'Options', value: 'MULTI_CHOICE'},
+            {name: 'Options with Text', value: 'MULTI_CHOICE_PLUS'}];
 
         // adds option
         $scope.addOption = function (afterIndex) {
@@ -895,8 +920,14 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.change = function () {
-            if ($scope.field.fieldType.value === "MULTI_CHOICE") {
-                $scope.field.options = [{}];
+            switch ($scope.field.fieldType.value) {
+                case "MULTI_CHOICE":
+                    $scope.field.options = [{}];
+                    break;
+
+                case "MULTI_CHOICE_PLUS":
+                    $scope.field.options = [{}];
+                    break;
             }
         };
 
@@ -918,6 +949,7 @@ angular.module('ice.admin.controller', [])
 
             switch ($scope.field.fieldType.value) {
                 case "MULTI_CHOICE":
+                case "MULTI_CHOICE_PLUS":
                     for (var i = 0; i < $scope.field.options.length; i += 1) {
                         if (!$scope.field.options[i].value)
                             return true;

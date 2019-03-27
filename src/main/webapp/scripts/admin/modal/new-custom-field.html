@@ -12,12 +12,11 @@
 
     <br><br>
     <b>Select type</b><br>
-    <select class="input_box pull_down" ng-change="change()"
-            ng-model="field.fieldType" size="1"
+    <select class="input_box pull_down" ng-change="change()" ng-model="field.fieldType" size="1"
             ng-options="option.name for option in options"></select>
     <br><br>
 
-    <div ng-if="field.fieldType.value === 'MULTI_CHOICE'">
+    <div ng-if="field.fieldType.value === 'MULTI_CHOICE' || field.fieldType.value === 'MULTI_CHOICE_PLUS'">
         <b>Enter values for options</b><br clear="all">
 
         <div class="input-group pad-top-5" ng-repeat="option in field.options track by $index">
@@ -56,6 +55,12 @@
             <div class="col-md-8" ng-if="field.fieldType.value === 'MULTI_CHOICE'">
                 <select class="input_box pull_down" size="1" ng-model="select"
                         ng-options="option.value as option.value for option in field.options"></select>
+            </div>
+
+            <div class="col-md-8" ng-if="field.fieldType.value === 'MULTI_CHOICE_PLUS'">
+                <select class="input_box pull_down" size="1" ng-model="select"
+                        ng-options="option.value as option.value for option in field.options"></select>
+                <input type="text" maxlength="125" style="width: 150px;" class="text-input">
             </div>
 
             <div class="col-md-8" ng-if="field.fieldType.value === 'TEXT_INPUT'">

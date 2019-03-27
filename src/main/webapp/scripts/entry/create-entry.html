@@ -9,11 +9,11 @@
                     <tr>
                         <td>
                             <h4>
-                        <span style="white-space: nowrap">
-                            <strong ng-hide="part.name" class="color-888">CREATE NEW</strong>
-                            <strong ng-class="{'color-888':part.name}">{{createType.toUpperCase()}}</strong>
-                            <strong ng-show="part.name">{{part.name}}</strong>
-                        </span>
+                                <span style="white-space: nowrap">
+                                    <strong ng-hide="part.name" class="color-888">CREATE NEW</strong>
+                                    <strong ng-class="{'color-888':part.name}">{{createType.toUpperCase()}}</strong>
+                                    <strong ng-show="part.name">{{part.name}}</strong>
+                                </span>
                                 <br>
                                 <small style="white-space: nowrap" class="font-65em"><span
                                         my-current-time="format"></span> -
@@ -45,7 +45,7 @@
                                        uib-typeahead="result for result in getEntriesByPartNumber($viewValue)"
                                        typeahead-editable="true"
                                        typeahead-on-select="addExistingPartLink($item, $model, $label)">
-                        <span class="input-group-addon" data-ng-click="addExisting=false" style="padding:3px;
+                                <span class="input-group-addon" data-ng-click="addExisting=false" style="padding:3px;
                         background-color: #f1f1f1;width: 19px">
                             <i class="fa fa-times delete_icon"></i>
                         </span>
@@ -72,7 +72,8 @@
                 <small class="fluid_no_wrap"><i style="font-weight: 300" class="fa fa-link"></i> {{linkedPart.name ||
                     linkedPart.type | capitalize}}
                 </small>
-        <span ng-click="deleteNewPartLink(linkedPart)" class="pull-right opacity_hover opacity_4" stop-event="click">
+                <span ng-click="deleteNewPartLink(linkedPart)" class="pull-right opacity_hover opacity_4"
+                      stop-event="click">
             <i class="fa fa-times delete_icon font-70em"></i>
         </span>
             </div>
@@ -109,11 +110,10 @@
                     <input type="text" ng-model="activePart[field.schema]" ng-trim="true" ng-focus="field.edit=true"
                            ng-blur="field.edit=false"
                            ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
-                           ng-change="field.invalid=false" maxlength="125" style="width: 205px;">
+                           ng-change="field.invalid=false" maxlength="125" style="width: 205px">
 
                     <input type="text" ng-model="activePart[field.schema+'Email']" ng-trim="true"
-                           ng-focus="field.edit=true"
-                           ng-blur="field.edit=false"
+                           ng-focus="field.edit=true" ng-blur="field.edit=false"
                            ng-class="{'input_box':!field.withEmailInvalid, 'input_box_error':field.withEmailInvalid}"
                            ng-change="field.withEmailInvalid=false" placeholder="Email" style="width: 191px;">
                 </div>
@@ -124,6 +124,12 @@
                             ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
                             ng-model="activePart[field.label]" size="1" ng-change="field.invalid=false"
                             ng-options="option.value as option.text for option in field.options"></select>
+
+                    <!-- show input box if "other" is selected -->
+                    <input type="text" ng-model="activePart[field.label + '_plus']" maxlength="150" style="width:200px"
+                           ng-if="activePart[field.label]==='Other'"
+                           ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                           ng-change="field.invalid=false" ng-focus="field.edit=true" ng-blur="field.edit=false">
                 </div>
 
                 <!--regular (not custom) field options-->
@@ -295,7 +301,7 @@
                         </div>
 
                         <!--file upload-->
-            <span ng-if="!isPaste && !processingFile">
+                        <span ng-if="!isPaste && !processingFile">
                 <div class="margin-top-20"><input nv-file-select type="file" uploader="sequenceFileUpload"/></div>
                 <div style="height: 7px; background-color: #f9f9f9;">
                     <div class="progress-bar" role="progressbar"
@@ -303,13 +309,14 @@
                 </div>
             </span>
 
-            <span ng-if="processingFile&&!serverError">
+                        <span ng-if="processingFile&&!serverError">
                 <i class="fa fa-spinner fa-gear"></i> Processing file {{processingFile}}
             </span>
 
                         <!--sequence paste-->
-            <textarea ng-show="isPaste===true &&!processingFile" ng-model="activePart.pastedSequence" class="input_box"
-                      placeholder="Paste sequence" rows="14" style="width: 100%; height: 100%;"></textarea>
+                        <textarea ng-show="isPaste===true &&!processingFile" ng-model="activePart.pastedSequence"
+                                  class="input_box"
+                                  placeholder="Paste sequence" rows="14" style="width: 100%; height: 100%;"></textarea>
                     </div>
 
                     <div class="margin-top-10" ng-if="activePart.hasSequence" style="height: 600px">

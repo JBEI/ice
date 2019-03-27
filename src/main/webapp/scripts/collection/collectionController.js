@@ -450,7 +450,10 @@ angular.module('ice.collection.controller', [])
             });
         }
     })
-    .controller('FolderCreateSamplesController', function (Util, $scope, folder, $uibModalInstance) {
+    .controller('FolderCreateSamplesController', function (Util, $scope, folder, $uibModalInstance, SampleService) {
+        $scope.Plate96Rows = SampleService.getPlate96Rows();
+        $scope.Plate96Cols = SampleService.getPlate96Cols();
+
         $scope.submitFolderForSampleCreation = function () {
             $scope.isConflict = false;
             Util.update("rest/folders/" + folder.id + "/SAMPLE", {}, {}, function (result) {
@@ -740,6 +743,10 @@ angular.module('ice.collection.controller', [])
                 // $scope.params.currentPage = 1;
                 // $scope.folderPageChange();
             });
+        };
+
+        $scope.exportSampleFolder = function () {
+
         };
 
         $scope.getDisplay = function (permission) {

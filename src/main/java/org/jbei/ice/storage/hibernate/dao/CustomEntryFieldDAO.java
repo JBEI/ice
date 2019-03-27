@@ -16,10 +16,14 @@ public class CustomEntryFieldDAO extends HibernateRepository<CustomEntryFieldMod
         return super.get(CustomEntryFieldModel.class, id);
     }
 
-    public List<CustomEntryFieldModel> getFieldsForType(EntryType type) {
+    public List<CustomEntryFieldModel> getFieldsForType(EntryType type, boolean includeDisabled) {
         CriteriaQuery<CustomEntryFieldModel> query = getBuilder().createQuery(CustomEntryFieldModel.class);
         Root<CustomEntryFieldModel> from = query.from(CustomEntryFieldModel.class);
-        query.where(getBuilder().equal(from.get("entryType"), type));
+        if (includeDisabled)
+            query.where(getBuilder().equal(from.get("entryType"), type));
+        else
+            query.where(getBuilder().equal(from.get("entryType"), type), getBuilder().equal(from.get("disabled"), false));
+
         return currentSession().createQuery(query).list();
     }
 
