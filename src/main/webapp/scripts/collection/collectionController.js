@@ -5,6 +5,13 @@ angular.module('ice.collection.controller', [])
     .controller('CollectionMenuController', function ($cookies, $scope, $uibModal, $rootScope, $location,
                                                       $stateParams, FolderSelection, EntryContextUtil, Util,
                                                       localStorageService) {
+
+        $scope.folderDisplayLimit = 8;
+
+        $scope.adjustCollectionFoldersVisible = function () {
+            $scope.folderDisplayLimit = $scope.folderDisplayLimit ? undefined : 8;
+        };
+
         // retrieve (to refresh the information such as part counts) all the sub folders under
         // $scope.selectedFolder (defaults to "personal" if not set)
         $scope.updateSelectedCollectionFolders = function () {
@@ -746,6 +753,10 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.exportSampleFolder = function () {
+
+        };
+
+        $scope.markSampleFolder = function (approved) {
 
         };
 
