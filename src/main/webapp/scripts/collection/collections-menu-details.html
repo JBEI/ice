@@ -11,6 +11,13 @@
     </form>
 </div>
 
+<div style="margin-left: 3px" ng-show="hideAddCollection===true && showQueryCollectionFolder">
+    <div class="input-group" style="font-weight: normal">
+        <input type="text" class="input_box" placeholder="Enter folder name" maxlength="35"
+               style="width: 210px;" ng-model="newCollectionName">
+    </div>
+</div>
+
 <div data-ng-repeat="folder in selectedCollectionFolders | limitTo: folderDisplayLimit | orderBy:sortParams.field:sortParams.asc">
     <div class="collection-menu-sub-folder" ng-hide="folder.deleteRequested" ng-click="selectCollectionFolder(folder)"
          ng-mouseover="showSubMenu=folder.canEdit; showTransferOptions=folder.type=='TRANSFERRED'"
@@ -68,7 +75,7 @@
 </div>
 
 <div style="padding: 8px; text-align: center; font-size: 11px" class="opacity_hover"
-     ng-click="adjustCollectionFoldersVisible()">
+     ng-if="selectedCollectionFolders.length > 8" ng-click="adjustCollectionFoldersVisible()">
     <i class="fa fa-fw" ng-class="{'fa-caret-up': !folderDisplayLimit, 'fa-caret-down': folderDisplayLimit}"></i> Show
     <span ng-if="folderDisplayLimit">more</span> <span ng-if="!folderDisplayLimit">fewer</span>
     <i class="fa fa-fw" ng-class="{'fa-caret-up': !folderDisplayLimit, 'fa-caret-down': folderDisplayLimit}"></i>

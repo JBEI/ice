@@ -98,6 +98,10 @@ angular.module('ice.collection.controller', [])
             $scope.$broadcast("ShowCollectionFolderAdd");
         };
 
+        $scope.setQueryCollectionFolderValue = function () {
+            $scope.$broadcast("SetShowQueryCollectionFolder");
+        };
+
         // updates the numbers for the collections
         $scope.updateCollectionCounts = function () {
             Util.get("rest/collections/counts", function (result) {
@@ -752,8 +756,21 @@ angular.module('ice.collection.controller', [])
             });
         };
 
-        $scope.exportSampleFolder = function () {
+        const clickEvent = new MouseEvent("click", {
+            "view": window,
+            "bubbles": true,
+            "cancelable": false
+        });
 
+        $scope.exportSampleFolder = function () {
+            Util.download("/rest/folders/" + $scope.folder.id + "/file").$promise.then(function (result) {
+                var url = URL.createObjectURL(new Blob([result.data]));
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = result.filename();
+                a.target = '_blank';
+                a.dispatchEvent(clickEvent);
+            });
         };
 
         $scope.markSampleFolder = function (approved) {
@@ -957,9 +974,14 @@ angular.module('ice.collection.controller', [])
     })
     .controller('CollectionDetailController', function ($scope, $cookies, $stateParams, $location, Util) {
         $scope.hideAddCollection = true;
+        $scope.showQueryCollectionFolder = false;
 
         $scope.$on("ShowCollectionFolderAdd", function (e) {
             $scope.hideAddCollection = false;
+        });
+
+        $scope.$on("SetShowQueryCollectionFolder", function (e) {
+            $scope.showQueryCollectionFolder = !$scope.showQueryCollectionFolder;
         });
 
         // creates a personal folder

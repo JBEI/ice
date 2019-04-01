@@ -215,7 +215,7 @@ angular.module('ice.admin.controller', [])
                 "cancelable": false
             });
 
-            Util.download("rest/samples/requests/file?sid=" + Authentication.getSessionId(), selectedIds).$promise.then(function (result) {
+            Util.download("rest/samples/requests/file", selectedIds).$promise.then(function (result) {
                 var url = URL.createObjectURL(new Blob([result.data]));
                 var a = document.createElement('a');
                 a.href = url;
