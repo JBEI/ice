@@ -11,7 +11,6 @@ import org.jbei.ice.lib.folder.FolderController;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Account;
-import org.jbei.ice.storage.model.Folder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,10 +50,8 @@ public class Collections {
         collection.setTransferred(entryDAO.getByVisibilityCount(Visibility.TRANSFERRED));
 
         // get sample entries (this is determined by folder membership
-        List<Folder> sampleFolders = DAOFactory.getFolderDAO().getFoldersByType(FolderType.SAMPLE);
-        if (sampleFolders != null)
-            collection.setSamples(sampleFolders.size());
-
+        long size = DAOFactory.getFolderDAO().getEntryCountByFolderType(FolderType.SAMPLE, null);
+        collection.setSamples(size);
         return collection;
     }
 
