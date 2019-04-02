@@ -39,4 +39,18 @@ public class PartFieldResource extends RestResource {
             return super.respond(false);
         }
     }
+
+    @DELETE
+    @Path("/{partType}/{id}")
+    public Response deleteField(@PathParam(value = "partType") String partType, @PathParam(value = "id") long fieldId) {
+        try {
+            String userId = requireUserId();
+            CustomFields fields = new CustomFields();
+            fields.deleteCustomField(userId, EntryType.nameToType(partType), fieldId);
+            return super.respond(true);
+        } catch (Exception e) {
+            Logger.error(e);
+            return super.respond(false);
+        }
+    }
 }

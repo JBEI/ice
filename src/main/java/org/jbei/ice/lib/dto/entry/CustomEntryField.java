@@ -14,6 +14,7 @@ public class CustomEntryField implements IDataTransferModel {
     private boolean required;
     private List<CustomField> options = new ArrayList<>();
     private String value;
+    private boolean disabled;
 
     public long getId() {
         return id;
@@ -65,5 +66,13 @@ public class CustomEntryField implements IDataTransferModel {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public boolean isDisabled() {
+        return this.disabled;
+    }
+
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
     }
 }

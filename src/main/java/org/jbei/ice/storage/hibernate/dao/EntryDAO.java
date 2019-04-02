@@ -171,7 +171,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             ArrayList<Predicate> predicates = new ArrayList<>();
             predicates.add(getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()));
 
-            String fieldName = columnFieldToString(sortField);
+            String fieldName = EntryAccessorUtilities.columnFieldToString(sortField);
 
             if (account != null) {
                 predicates.add(getBuilder().or(
@@ -325,7 +325,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 );
             }
             query.select(entry).where(predicates.toArray(new Predicate[predicates.size()])).distinct(true);
-            String fieldName = sort == ColumnField.CREATED ? "id" : columnFieldToString(sort);
+            String fieldName = sort == ColumnField.CREATED ? "id" : EntryAccessorUtilities.columnFieldToString(sort);
             query.orderBy(asc ? getBuilder().asc(entry.get(fieldName)) : getBuilder().desc(entry.get(fieldName)));
             return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
         } catch (HibernateException he) {
@@ -398,8 +398,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
                         )
                 );
             }
-            query.where(predicates.toArray(new Predicate[predicates.size()]));
-            String fieldName = sortField == ColumnField.CREATED ? "id" : columnFieldToString(sortField);
+            query.where(predicates.toArray(new Predicate[0]));
+            String fieldName = sortField == ColumnField.CREATED ? "id" : EntryAccessorUtilities.columnFieldToString(sortField);
             query.orderBy(asc ? getBuilder().asc(join.get(fieldName)) : getBuilder().desc(join.get(fieldName)));
             return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
         } catch (HibernateException he) {
@@ -474,7 +474,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             }
 
             checkAddFilter(predicates, from, filter);
-            String fieldName = columnFieldToString(field);
+            String fieldName = EntryAccessorUtilities.columnFieldToString(field);
             query.where(predicates.toArray(new Predicate[0]))
                     .orderBy(asc ? getBuilder().asc(from.get(fieldName)) : getBuilder().desc(from.get(fieldName)));
             return currentSession().createQuery(query).setFirstResult(start).setMaxResults(limit).list();
@@ -515,35 +515,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    private String columnFieldToString(ColumnField field) {
-        if (field == null)
-            return "creationTime";
-
-        switch (field) {
-            case TYPE:
-                return "recordType";
-
-            case STATUS:
-                return "status";
-
-            case PART_ID:
-                return "partNumber";
-
-            case NAME:
-                return "name";
-
-            case ALIAS:
-                return "alias";
-
-            case SUMMARY:
-                return "shortDescription";
-
-            case CREATED:
-            default:
-                return "creationTime";
-        }
-    }
-
     /**
      * Retrieves entries owned by account with specified email and with visibility of "pending" or "ok"
      *
@@ -565,7 +536,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             List<Predicate> predicates = getOwnerPredicate(from, ownerEmail);
             checkAddFilter(predicates, from, filter);
             query.where(predicates.toArray(new Predicate[0]));
-            String fieldName = columnFieldToString(sort);
+            String fieldName = EntryAccessorUtilities.columnFieldToString(sort);
             query.orderBy(asc ? getBuilder().asc(from.get(fieldName)) : getBuilder().desc(from.get(fieldName)));
             return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
         } catch (HibernateException he) {
@@ -670,7 +641,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class).distinct(true);
             Root<Entry> from = query.from(Entry.class);
             ArrayList<Predicate> predicates = new ArrayList<>();
-            String fieldName = columnFieldToString(sort);
+            String fieldName = EntryAccessorUtilities.columnFieldToString(sort);
             checkAddFilter(predicates, from, filter);
             predicates.add(getBuilder().or(
                     getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()),

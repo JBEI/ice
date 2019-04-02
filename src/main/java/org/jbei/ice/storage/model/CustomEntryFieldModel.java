@@ -31,6 +31,9 @@ public class CustomEntryFieldModel implements DataModel {
     @Column(name = "required")
     private Boolean required = Boolean.FALSE;
 
+    @Column(name = "disabled")
+    private Boolean disabled = Boolean.FALSE;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CustomEntryFieldOptionModel> customFieldLabels = new ArrayList<>();
 
@@ -69,6 +72,14 @@ public class CustomEntryFieldModel implements DataModel {
 
     public void setRequired(Boolean required) {
         this.required = required;
+    }
+
+    public Boolean getDisabled() {
+        return this.disabled;
+    }
+
+    public void setDisabled(Boolean disabled) {
+        this.disabled = disabled;
     }
 
     public List<CustomEntryFieldOptionModel> getCustomFieldLabels() {

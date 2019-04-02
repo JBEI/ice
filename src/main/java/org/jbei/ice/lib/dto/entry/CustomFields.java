@@ -115,7 +115,7 @@ public class CustomFields {
         authorization.expectAdmin(userId);
         CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
         Optional<CustomEntryFieldModel> result = dao.getLabelForType(customField.getEntryType(), customField.getLabel());
-        if (result.isPresent())
+        if (result.isPresent() && !result.get().getDisabled())
             throw new IllegalArgumentException("Field with label \"" + customField.getLabel() + "\" already exists for entry type \"" + customField.getEntryType() + "\"");
 
         CustomEntryFieldModel model = new CustomEntryFieldModel();
@@ -136,7 +136,7 @@ public class CustomFields {
         Results<CustomEntryField> fields = new Results<>();
 
         CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
-        List<CustomEntryFieldModel> results = dao.getFieldsForType(entryType);
+        List<CustomEntryFieldModel> results = dao.getFieldsForType(entryType, false);
         for (CustomEntryFieldModel model : results) {
             fields.getData().add(model.toDataTransferObject());
         }
@@ -156,5 +156,17 @@ public class CustomFields {
         }
 
         return fields;
+    }
+
+    public void deleteCustomField(String userId, EntryType type, long fieldId) {
+        authorization.expectAdmin(userId);
+        CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
+
+        CustomEntryFieldModel value = dao.get(fieldId);
+        if (value == null || value.getEntryType() != type)
+            throw new IllegalArgumentException("Could not retrieve custom field using specified parameters [" + fieldId + ", " + type + "]");
+
+        value.setDisabled(true);
+        dao.update(value);
     }
 }

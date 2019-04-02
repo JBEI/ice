@@ -141,6 +141,12 @@ public class Folders {
         return true;
     }
 
+    /**
+     * Checks if the specified entry matches pre-approved (read: hardcoded) specs for sample requests
+     *
+     * @param entry entry to check
+     * @return true, if entry is approved for sampling, false otherwise
+     */
     private boolean isValidEntry(Entry entry) {
         if (EntryType.PLASMID.getName().equalsIgnoreCase(entry.getRecordType())) {
             Plasmid plasmid = (Plasmid) entry;
@@ -158,11 +164,6 @@ public class Folders {
                 Logger.info(entry.getPartNumber() + " is missing origin of replication information");
                 return false;
             }
-
-            if (!DAOFactory.getSequenceDAO().hasSequence(entry.getId())) {
-                Logger.info(entry.getPartNumber() + " is missing a sequence");
-                return false;
-            }
         }
 
         if (EntryType.STRAIN.getName().equalsIgnoreCase(entry.getRecordType())) {
@@ -178,6 +179,7 @@ public class Folders {
             }
         }
 
-        return true;
+        // only strains and plasmids are allowed
+        return false;
     }
 }

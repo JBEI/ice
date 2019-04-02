@@ -50,7 +50,7 @@ angular.module('ice.entry.traces.controller', [])
                 "cancelable": false
             });
 
-            Util.download("rest/parts/" + entryId + "/traces/all?sid=" + Authentication.getSessionId()).$promise.then(function (result) {
+            Util.download("rest/parts/" + entryId + "/traces/all").$promise.then(function (result) {
                 var url = URL.createObjectURL(new Blob([result.data]));
                 var a = document.createElement('a');
                 a.href = url;

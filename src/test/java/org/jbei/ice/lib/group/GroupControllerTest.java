@@ -57,7 +57,7 @@ public class GroupControllerTest {
 
     @Test
     public void testCreate() throws Exception {
-        Account account = AccountCreator.createTestAccount("testCreate", false);
+        Account account = AccountCreator.createTestAccount("GroupControllerTest.testCreate", false);
         UserGroup userGroup = new UserGroup();
         userGroup.setLabel("test Group");
         userGroup.setDescription("test");
@@ -69,7 +69,7 @@ public class GroupControllerTest {
     public void testCreateOrRetrievePublicGroup() throws Exception {
         Group group = controller.createOrRetrievePublicGroup();
         Assert.assertNotNull(group);
-        Assert.assertTrue(group.getType() == GroupType.SYSTEM);
+        Assert.assertEquals(group.getType(), GroupType.SYSTEM);
     }
 
     @Test

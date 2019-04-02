@@ -292,7 +292,7 @@ public class FileResource extends RestResource {
                                 @QueryParam("entryFields") final List<String> fields,
                                 EntrySelection selection) {
         String userId = super.requireUserId();
-        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId, sequenceFormats.toArray(new String[sequenceFormats.size()]));
+        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId, sequenceFormats.toArray(new String[0]));
         List<EntryField> entryFields = new ArrayList<>();
         try {
             if (fields != null) {
@@ -303,7 +303,7 @@ public class FileResource extends RestResource {
         }
 
         boolean success = entriesAsCSV.setSelectedEntries(selection,
-                entryFields.toArray(new EntryField[entryFields.size()]));
+                entryFields.toArray(new EntryField[0]));
         if (!success)
             return super.respond(false);
 

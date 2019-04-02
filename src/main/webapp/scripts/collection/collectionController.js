@@ -5,6 +5,13 @@ angular.module('ice.collection.controller', [])
     .controller('CollectionMenuController', function ($cookies, $scope, $uibModal, $rootScope, $location,
                                                       $stateParams, FolderSelection, EntryContextUtil, Util,
                                                       localStorageService) {
+
+        $scope.folderDisplayLimit = 8;
+
+        $scope.adjustCollectionFoldersVisible = function () {
+            $scope.folderDisplayLimit = $scope.folderDisplayLimit ? undefined : 8;
+        };
+
         // retrieve (to refresh the information such as part counts) all the sub folders under
         // $scope.selectedFolder (defaults to "personal" if not set)
         $scope.updateSelectedCollectionFolders = function () {
@@ -89,6 +96,10 @@ angular.module('ice.collection.controller', [])
 
         $scope.addCollectionIconClick = function () {
             $scope.$broadcast("ShowCollectionFolderAdd");
+        };
+
+        $scope.setQueryCollectionFolderValue = function () {
+            $scope.$broadcast("SetShowQueryCollectionFolder");
         };
 
         // updates the numbers for the collections
@@ -450,7 +461,10 @@ angular.module('ice.collection.controller', [])
             });
         }
     })
-    .controller('FolderCreateSamplesController', function (Util, $scope, folder, $uibModalInstance) {
+    .controller('FolderCreateSamplesController', function (Util, $scope, folder, $uibModalInstance, SampleService) {
+        $scope.Plate96Rows = SampleService.getPlate96Rows();
+        $scope.Plate96Cols = SampleService.getPlate96Cols();
+
         $scope.submitFolderForSampleCreation = function () {
             $scope.isConflict = false;
             Util.update("rest/folders/" + folder.id + "/SAMPLE", {}, {}, function (result) {
@@ -742,6 +756,27 @@ angular.module('ice.collection.controller', [])
             });
         };
 
+        const clickEvent = new MouseEvent("click", {
+            "view": window,
+            "bubbles": true,
+            "cancelable": false
+        });
+
+        $scope.exportSampleFolder = function () {
+            Util.download("/rest/folders/" + $scope.folder.id + "/file").$promise.then(function (result) {
+                var url = URL.createObjectURL(new Blob([result.data]));
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = result.filename();
+                a.target = '_blank';
+                a.dispatchEvent(clickEvent);
+            });
+        };
+
+        $scope.markSampleFolder = function (approved) {
+
+        };
+
         $scope.getDisplay = function (permission) {
             if (permission.article === 'ACCOUNT')
                 return permission.display.replace(/[^A-Z]/g, '');
@@ -939,9 +974,14 @@ angular.module('ice.collection.controller', [])
     })
     .controller('CollectionDetailController', function ($scope, $cookies, $stateParams, $location, Util) {
         $scope.hideAddCollection = true;
+        $scope.showQueryCollectionFolder = false;
 
         $scope.$on("ShowCollectionFolderAdd", function (e) {
             $scope.hideAddCollection = false;
+        });
+
+        $scope.$on("SetShowQueryCollectionFolder", function (e) {
+            $scope.showQueryCollectionFolder = !$scope.showQueryCollectionFolder;
         });
 
         // creates a personal folder
