@@ -34,7 +34,8 @@
                     'fa-sort-amount-desc': sortParams.asc && sortParams.field=='creationTime'}
                     " ng-click="sortCollectionFolders()"></i>
 
-                    <i ng-show="showAddCollection" stop-event="click" class="opacity_hover fa fa-fw fa-search"></i>
+                    <i ng-show="showAddCollection" stop-event="click" ng-click="setQueryCollectionFolderValue()"
+                       class="opacity_hover fa fa-fw fa-search"></i>
                 </span>
             </div>
 
