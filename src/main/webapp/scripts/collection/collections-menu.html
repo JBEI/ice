@@ -11,7 +11,7 @@
                  ng-mouseleave="showAddCollection=false">
 
                 <span ng-show="collection.name!==selectedFolder">
-                <i class="fa fa-fw" style="font-size: 16px; color: #d1d0d0" ng-class="collection.icon"></i>
+                <i class="fa fa-fw" style="font-size: 16px; opacity: 0.7" ng-class="collection.icon"></i>
                     {{collection.display}}
                 </span>
 
@@ -34,7 +34,9 @@
                     'fa-sort-amount-desc': sortParams.asc && sortParams.field=='creationTime'}
                     " ng-click="sortCollectionFolders()"></i>
 
-                    <i ng-show="showAddCollection" stop-event="click" class="opacity_hover fa fa-fw fa-search"></i>
+                    <i ng-show="showAddCollection" stop-event="click" ng-click="setQueryCollectionFolderValue()"
+                       ng-if="collection.name !='drafts'"
+                       class="opacity_hover fa fa-fw fa-search"></i>
                 </span>
             </div>
 

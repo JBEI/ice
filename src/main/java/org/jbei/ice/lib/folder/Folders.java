@@ -134,7 +134,7 @@ public class Folders {
                 return false;
             }
 
-            if (!isValidEntry(entry))
+            if (!isValidEntry(entry, folder))
                 return false;
         }
 
@@ -147,9 +147,22 @@ public class Folders {
      * @param entry entry to check
      * @return true, if entry is approved for sampling, false otherwise
      */
-    private boolean isValidEntry(Entry entry) {
+    private boolean isValidEntry(Entry entry, Folder folder) {
         if (EntryType.PLASMID.getName().equalsIgnoreCase(entry.getRecordType())) {
             Plasmid plasmid = (Plasmid) entry;
+
+            // check the plasmid parent strain. It must be in same folder
+            List<Entry> parents = DAOFactory.getEntryDAO().getParents(entry.getId());
+            for (Entry parent : parents) {
+                if (parent.getRecordType().equalsIgnoreCase(EntryType.STRAIN.getDisplay()) && !parent.getFolders().contains(folder)) {
+                    Logger.info(parent.getPartNumber() + " is a parent strain but is not contained in same folder");
+                    return false;
+                }
+            }
+
+            if (!entry.getFolders().contains(folder))
+                return false;
+
             if (StringUtils.isEmpty(plasmid.getOriginOfReplication())) {
                 Logger.info(entry.getPartNumber() + " is missing origin of replication");
                 return false;

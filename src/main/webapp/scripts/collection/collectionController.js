@@ -978,10 +978,14 @@ angular.module('ice.collection.controller', [])
 
         $scope.$on("ShowCollectionFolderAdd", function (e) {
             $scope.hideAddCollection = false;
+            $scope.showQueryCollectionFolder = false;
         });
 
         $scope.$on("SetShowQueryCollectionFolder", function (e) {
             $scope.showQueryCollectionFolder = !$scope.showQueryCollectionFolder;
+            $scope.hideAddCollection = true;
+            if ($scope.showQueryCollectionFolder === false)
+                $scope.filterCollectionFoldersText = "";
         });
 
         // creates a personal folder
