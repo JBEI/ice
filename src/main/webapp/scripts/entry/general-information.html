@@ -383,7 +383,7 @@
             </div>
 
             <!--menu if entry sequence exists and entry is not protein-->
-            <div class="pull-right" ng-if='entry.hasSequence&&entry.type!=="PROTEIN"'>
+            <div class="pull-right">
                 <span ng-if="entry.canEdit">
                     <small class="opacity_hover" ng-click="deleteSequence(entry)">Delete <i
                             class="fa fa-trash-o"></i></small>
@@ -398,7 +398,23 @@
                     <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                 </span>
 
-                <small class="btn-group" uib-dropdown>
+                <small class="btn-group" ng-if="entry.type==='PROTEIN'" uib-dropdown>
+                    <div uib-dropdown-toggle class="uib-dropdown-toggle opacity_hover">Download <span
+                            class="caret"></span>
+                    </div>
+                    <ul class="dropdown-menu" uib-dropdown-menu>
+                        <li class="cursor_pointer font-80em" ng-if="entry.hasOriginalSequence">
+                            <a ng-href="rest/file/{{entry.id}}/sequence/original?sid={{sessionId}}"
+                               target="_self">Original</a>
+                        </li>
+                        <li class="cursor_pointer font-80em">
+                            <a ng-href="rest/file/{{entry.id}}/sequence/fasta?sid={{sessionId}}"
+                               target="_self"><i>FASTA</i></a>
+                        </li>
+                    </ul>
+                </small>
+
+                <small class="btn-group" ng-if="entry.type!=='PROTEIN'" uib-dropdown>
 
                     <div uib-dropdown-toggle class="uib-dropdown-toggle opacity_hover">Download <span
                             class="caret"></span>
@@ -431,38 +447,13 @@
                     </ul>
                 </small>
 
-                <span ng-if="entry.canEdit">
+                <span ng-if="entry.canEdit && entry.type!=='PROTEIN'">
                     <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
                     <small class="opacity_hover" ng-click="showAutoAnnotationPopup()">
                         Auto Annotate <i class="fa fa-magic"></i>
                     </small>
                 </span>
             </div>
-
-            <!--menu if entry sequence exists and entry IS protein-->
-            <div class="pull-right" ng-if='entry.hasSequence&&entry.type==="PROTEIN"'>
-                <span ng-if="entry.canEdit">
-                    <small class="opacity_hover" ng-click="deleteSequence(entry)">Delete</small>
-                    <span style="font-weight: normal; color: #e3e3e3">&nbsp;&nbsp;|&nbsp;&nbsp;</span>
-                </span>
-
-                <small class="btn-group" uib-dropdown>
-                    <div uib-dropdown-toggle class="uib-dropdown-toggle opacity_hover">Download <span
-                            class="caret"></span>
-                    </div>
-                    <ul class="dropdown-menu" uib-dropdown-menu>
-                        <li class="cursor_pointer font-80em" ng-if="entry.hasOriginalSequence">
-                            <a ng-href="rest/file/{{entry.id}}/sequence/original?sid={{sessionId}}"
-                               target="_self">Original</a>
-                        </li>
-                        <li class="cursor_pointer font-80em">
-                            <a ng-href="rest/file/{{entry.id}}/sequence/fasta?sid={{sessionId}}"
-                               target="_self"><i>FASTA</i></a>
-                        </li>
-                    </ul>
-                </small>
-            </div>
-
         </div>
 
         <!--area where sequence is when there is no sequence available -->
@@ -501,15 +492,7 @@
         </div>
 
         <div ng-show="entry.hasSequence && entry.basePairCount" style="height: 600px; width: 100%">
-            <ice-vector-viewer ng-if="entry.type!=='PROTEIN'" entry="entry" remote="remoteParams"
-                               reload-info="reloadInfo"></ice-vector-viewer>
-
-            <div ng-if="entry.type==='PROTEIN'" class="pad_top">
-                <i style="font-size: 18px" class="fa fa-info-circle pull-left blue"></i>
-                <i style="color: #999">
-                    <span>The sequence information associated with this entry cannot be visualized. Use the download links to access it</span>
-                </i>
-            </div>
+            <ice-vector-viewer entry="entry" remote="remoteParams" reload-info="reloadInfo"></ice-vector-viewer>
         </div>
 
         <div ng-if="entry.hasSequence && !entry.basePairCount" class="alert alert-info font-90em"

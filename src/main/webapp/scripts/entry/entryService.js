@@ -170,11 +170,13 @@ angular.module('ice.entry.service', [])
     .factory('EntryService', function () {
         var toStringArray = function (objArray) {
             var result = [];
-            objArray.forEach(function (object) {
-                if (!object || !object.value || object.value === "")
-                    return;
-                result.push(object.value);
-            });
+            if (objArray && objArray.length) {
+                objArray.forEach(function (object) {
+                    if (!object || !object.value || object.value === "")
+                        return;
+                    result.push(object.value);
+                });
+            }
             return result;
         };
 

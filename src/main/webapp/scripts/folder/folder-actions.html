@@ -4,32 +4,36 @@
     </span>
 
     <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
-
     <span class="opacity_hover edit_icon" ng-click="openPartsUploadDialog()" style="font-size: 13px">
         <span class="glyphicon glyphicon-cloud-upload" style="color: #555"></span> Upload
     </span>
 
-    <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
-    <span class="opacity_hover edit_icon" ng-if="folder.type !== 'SAMPLE'" ng-click="openSampleCreationDialog()"
-          style="font-size: 13px;">
-        <i class="fa fa-fw fa-flask" style="color: #555"></i> Samples
+    <span ng-if="folder.type !== 'SAMPLE'">
+        <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+        <span class="opacity_hover edit_icon" ng-click="openSampleCreationDialog()"
+              style="font-size: 13px;">
+            <i class="fa fa-fw fa-flask" style="color: #555"></i> Create Samples
+        </span>
     </span>
 
-    <span class="uib-dropdown" uib-dropdown ng-if="folder.type == 'SAMPLE'">
-        <span class="opacity_hover edit_icon uib-dropdown-toggle" style="font-size: 13px;" uib-dropdown-toggle>
-            <i class="fa fa-fw fa-flask" style="color: #555"></i> Samples <span class="caret"></span>
+    <span ng-if="folder.type == 'SAMPLE'">
+        <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
+        <span class="uib-dropdown" uib-dropdown>
+            <span class="opacity_hover edit_icon uib-dropdown-toggle" style="font-size: 13px;" uib-dropdown-toggle>
+                <i class="fa fa-fw fa-flask" style="color: #555"></i> Samples <span class="caret"></span>
+            </span>
+            <ul class="dropdown-menu" uib-dropdown-menu style="padding: 2px">
+                <li class="cursor_pointer font-90em">
+                    <a ng-click="exportSampleFolder()">Export Data</a>
+                </li>
+                <li class="cursor_pointer font-90em">
+                    <a ng-click="markSampleFolder(false)">Declined</a>
+                </li>
+                <li class="cursor_pointer font-90em">
+                    <a ng-click="markSampleFolder(true)">Approved</a>
+                </li>
+            </ul>
         </span>
-        <ul class="dropdown-menu" uib-dropdown-menu style="padding: 2px">
-            <li class="cursor_pointer font-90em">
-                <a ng-click="exportSampleFolder()">Export Data</a>
-            </li>
-            <li class="cursor_pointer font-90em">
-                <a ng-click="markSampleFolder(false)">Declined</a>
-            </li>
-            <li class="cursor_pointer font-90em">
-                <a ng-click="markSampleFolder(true)">Approved</a>
-            </li>
-        </ul>
     </span>
 
 </span>
