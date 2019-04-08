@@ -101,8 +101,7 @@ public class CustomFieldResource extends RestResource {
 
     @DELETE
     @Path("/{id}")
-    public Response delete(
-            @PathParam(value = "id") long id) {
+    public Response delete(@PathParam(value = "id") long id) {
         String userId = requireUserId();
         boolean success = fields.deleteField(userId, id);
         return super.respond(success);

@@ -14,19 +14,19 @@ angular.module('ice.common.service', [])
                             $rootScope.user = undefined;
                             $cookies.loginDestination = $location.path();
                             $location.path('/login');
-                            errorMsg = "Your session has expired. Please login again";
+                            errorMsg = "Expired session. Please login again";
                         } else {
                             errorMsg = response.data.errorMessage;
                         }
                         break;
 
                     case 403:
-                        errorMsg = "Access to requested resource has been denied";
+                        errorMsg = "Access to requested resource denied";
                         type = "warning";
                         break;
 
                     case 404:
-                        errorMsg = "The requested resource could not be found";
+                        errorMsg = "Requested resource not found";
                         type = "warning";
                         break;
 
@@ -40,6 +40,7 @@ angular.module('ice.common.service', [])
                 }
 
                 if (!errorMsg) {
+                    console.log("error", response);
                     errorMsg = "Unknown server error";
                     type = "danger";
                 }

@@ -14,11 +14,11 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "audit")
-@SequenceGenerator(name = "sequence", sequenceName = "audit_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "audit_id", sequenceName = "audit_id_seq", allocationSize = 1)
 public class Audit implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "audit_id")
     private long id;
 
     // what

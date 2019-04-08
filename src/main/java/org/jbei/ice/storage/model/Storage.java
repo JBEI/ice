@@ -59,7 +59,7 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "storage")
-@SequenceGenerator(name = "sequence", sequenceName = "storage_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "storage_id", sequenceName = "storage_id_seq", allocationSize = 1)
 public class Storage implements DataModel {
 
     public enum StorageType {
@@ -67,7 +67,7 @@ public class Storage implements DataModel {
     }
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "storage_id")
     private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)

@@ -1,0 +1,37 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83;font-size: 19px">
+        <i class="fa fa-fw fa-flask"></i> Submit for Sample Creation
+    </span>
+</div>
+
+<div class="modal-body">
+    <div ng-if="!processingFile">
+        <div class="alert alert-info" style="margin-bottom: 10px; margin-top: 10px">
+            <i style="font-size: 40px" class="fa fa-info-circle pull-left"> </i>
+            <div>
+                In order to submit this folder for sample creation, any contained <b>Plasmids</b> are
+                required to have <i>Origin of Replication</i>, <i>Backbone</i> and
+                <i>Intellectual Property</i> fields. For <b>Strains</b>, <i>Host strain</i> and <i>Intellectual
+                Property</i> fields are required.
+            </div>
+        </div>
+
+        <div class="alert alert-danger" style="margin-bottom: 10px" ng-if="isConflict">
+            <i style="font-size: 40px" class="fa fa-exclamation-triangle pull-left"></i>
+            <b>Error submitting folder for sample creation</b><br>
+            Please check the parts contained in the folder to ensure they conform to the above requirements
+        </div>
+    </div>
+
+    <!--<div>-->
+    <!--<ng-include src="'scripts/folder/modal/plate.html'"></ng-include>-->
+    <!--</div>-->
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-link btn-sm" ng-click="$dismiss('cancel')">Cancel</button>
+    <button class="btn btn-primary btn-sm" type="button" ng-click="submitFolderForSampleCreation()">
+        <strong>Submit</strong>
+    </button>
+</div>

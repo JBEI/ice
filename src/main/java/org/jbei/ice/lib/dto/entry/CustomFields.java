@@ -1,14 +1,17 @@
 package org.jbei.ice.lib.dto.entry;
 
+import org.jbei.ice.lib.dto.common.Results;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldDAO;
+import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldValueDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.ParameterDAO;
-import org.jbei.ice.storage.model.Entry;
-import org.jbei.ice.storage.model.Parameter;
+import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Hector Plahar
@@ -106,5 +109,64 @@ public class CustomFields {
         entry.getParameters().remove(parameter);
         dao.delete(parameter);
         return true;
+    }
+
+    public CustomEntryField create(String userId, CustomEntryField customField) {
+        authorization.expectAdmin(userId);
+        CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
+        Optional<CustomEntryFieldModel> result = dao.getLabelForType(customField.getEntryType(), customField.getLabel());
+        if (result.isPresent() && !result.get().getDisabled())
+            throw new IllegalArgumentException("Field with label \"" + customField.getLabel() + "\" already exists for entry type \"" + customField.getEntryType() + "\"");
+
+        CustomEntryFieldModel model = new CustomEntryFieldModel();
+        model.setLabel(customField.getLabel());
+        model.setRequired(customField.isRequired());
+        model.setFieldType(customField.getFieldType()); // todo : validate field type
+        model.setEntryType(customField.getEntryType()); // todo : validate
+
+        for (CustomField field : customField.getOptions()) {
+            model.getCustomFieldLabels().add(new CustomEntryFieldOptionModel(field.getValue()));
+        }
+
+        model = dao.create(model);
+        return model.toDataTransferObject();
+    }
+
+    public Results<CustomEntryField> get(EntryType entryType) {
+        Results<CustomEntryField> fields = new Results<>();
+
+        CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
+        List<CustomEntryFieldModel> results = dao.getFieldsForType(entryType, false);
+        for (CustomEntryFieldModel model : results) {
+            fields.getData().add(model.toDataTransferObject());
+        }
+        return fields;
+    }
+
+    public List<CustomEntryField> getCustomFieldValuesForPart(long partId) {
+        Entry entry = entryDAO.get(partId);
+        List<CustomEntryField> fields = new ArrayList<>();
+        if (entry == null)
+            return fields;
+
+        CustomEntryFieldValueDAO dao = DAOFactory.getCustomEntryFieldValueDAO();
+        List<CustomEntryFieldValueModel> results = dao.getByEntry(entry);
+        for (CustomEntryFieldValueModel valueModel : results) {
+            fields.add(valueModel.toDataTransferObject());
+        }
+
+        return fields;
+    }
+
+    public void deleteCustomField(String userId, EntryType type, long fieldId) {
+        authorization.expectAdmin(userId);
+        CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
+
+        CustomEntryFieldModel value = dao.get(fieldId);
+        if (value == null || value.getEntryType() != type)
+            throw new IllegalArgumentException("Could not retrieve custom field using specified parameters [" + fieldId + ", " + type + "]");
+
+        value.setDisabled(true);
+        dao.update(value);
     }
 }

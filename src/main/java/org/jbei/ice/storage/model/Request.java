@@ -18,11 +18,11 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "REQUEST")
-@SequenceGenerator(name = "sequence", sequenceName = "request_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "request_id", sequenceName = "request_id_seq", allocationSize = 1)
 public class Request implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "request_id")
     private long id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)

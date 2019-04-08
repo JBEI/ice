@@ -17,12 +17,12 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "experiment")
-@SequenceGenerator(name = "sequence", sequenceName = "experiment_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "experiment_id", sequenceName = "experiment_id_seq", allocationSize = 1)
 
 public class Experiment implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "experiment_id")
     private long id;
 
     @Column(name = "label", length = 128)

@@ -1,13 +1,9 @@
 package org.jbei.ice.lib.bulkupload;
 
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.parsers.sbol.ICESBOLParserVisitor;
-import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.model.Entry;
-import org.jbei.ice.storage.model.Sequence;
 import org.sbolstandard.core.SBOLDocument;
 import org.sbolstandard.core.SBOLFactory;
 import org.sbolstandard.core.SBOLRootObject;
@@ -54,15 +50,18 @@ public class BulkFileSBOLUpload {
                     bulkUploadId = update.getBulkUploadId();
 
                 // get "user sequence"
+
+                // todo : sequence user
                 String sequenceUser = getSequenceDocument(rootObject);
-                long entryId = update.getEntryId();
-                DNASequence dnaSequence = visitor.getFeaturedDNASequence();
-                Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-                Entry entry = DAOFactory.getEntryDAO().get(entryId);
-                sequence.setEntry(entry);
-                if (sequenceUser != null)
-                    sequence.setSequenceUser(sequenceUser);
-                new SequenceController().save(userId, sequence);
+//                DNASequence dnaSequence = visitor.getFeaturedDNASequence();
+//                Sequence sequence = Sequences.dnaSequenceToSequence(dnaSequence);
+
+
+////                Entry entry = DAOFactory.getEntryDAO().get(entryId);
+////                sequence.setEntry(entry);
+//                if (sequenceUser != null)
+//                    sequence.setSequenceUser(sequenceUser);
+                new PartSequence(userId, Long.toString(update.getEntryId())).update(visitor.getFeaturedDNASequence());
             }
         } catch (Exception e) {
             Logger.error(e);

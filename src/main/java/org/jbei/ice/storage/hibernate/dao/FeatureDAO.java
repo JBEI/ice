@@ -2,6 +2,8 @@ package org.jbei.ice.storage.hibernate.dao;
 
 import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.utils.SequenceUtils;
+import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Feature;
@@ -11,6 +13,7 @@ import javax.persistence.criteria.Root;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Hibernate data accessor object for {@link Feature}s
@@ -24,15 +27,50 @@ public class FeatureDAO extends HibernateRepository<Feature> {
         return super.get(Feature.class, id);
     }
 
+    /**
+     * Retrieve the {@link Feature} object with the given DNA sequence string.
+     *
+     * @param featureDnaSequence dna sequence of feature
+     * @return Feature object.
+     * @throws DAOException on Hibernate or UtilityException
+     */
+    public Feature getByFeatureSequence(String featureDnaSequence) {
+        featureDnaSequence = featureDnaSequence.toLowerCase();
+
+        try {
+            String hash = SequenceUtils.calculateSequenceHash(featureDnaSequence);
+            CriteriaQuery<Feature> query = getBuilder().createQuery(Feature.class);
+            Root<Feature> from = query.from(Feature.class);
+            query.where(getBuilder().equal(from.get("hash"), hash));
+
+            Optional<Feature> result = currentSession().createQuery(query).uniqueResultOptional();
+            if (result.isPresent())
+                return result.get();
+
+            String reverseComplement = SequenceUtils.reverseComplement(featureDnaSequence);
+            String sequenceHash = SequenceUtils.calculateSequenceHash(reverseComplement);
+            query.getRestriction().getExpressions().clear();
+            query.where(getBuilder().equal(from.get("hash"), sequenceHash));
+            return currentSession().createQuery(query).uniqueResult();
+        } catch (HibernateException | UtilityException e) {
+            Logger.error(e);
+            throw new DAOException("Failed to get Feature by sequence!", e);
+        }
+    }
+
+    private void buildFilter(CriteriaQuery<?> query, Root<Feature> from, String filter) {
+        if (filter != null && !filter.isEmpty())
+            query.where(getBuilder().like(getBuilder().lower(from.get("name")), "%" + filter.toLowerCase() + "%"));
+        else
+            query.where(getBuilder().isNotNull(from.get("name")), getBuilder().notEqual(from.get("name"), ""));
+    }
+
     public long getFeatureCount(String filter) {
         try {
             CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Feature> from = query.from(Feature.class);
             query.select(getBuilder().countDistinct(from.get("id")));
-            if (filter != null && !filter.isEmpty())
-                query.where(getBuilder().like(getBuilder().lower(from.get("name")), "%" + filter.toLowerCase() + "%"));
-            else
-                query.where(getBuilder().isNotNull(from.get("name")), getBuilder().notEqual(from.get("name"), ""));
+            buildFilter(query, from, filter);
             return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);
@@ -44,10 +82,7 @@ public class FeatureDAO extends HibernateRepository<Feature> {
         try {
             CriteriaQuery<Feature> query = getBuilder().createQuery(Feature.class);
             Root<Feature> from = query.from(Feature.class);
-            if (filter != null && !filter.isEmpty())
-                query.where(getBuilder().like(getBuilder().lower(from.get("name")), "%" + filter.toLowerCase() + "%"));
-            else
-                query.where(getBuilder().isNotNull(from.get("name")), getBuilder().notEqual(from.get("name"), ""));
+            buildFilter(query, from, filter);
             return currentSession().createQuery(query).setFirstResult(offset).setMaxResults(size).list();
         } catch (HibernateException he) {
             Logger.error(he);

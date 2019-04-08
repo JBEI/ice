@@ -215,7 +215,7 @@ angular.module('ice.admin.controller', [])
                 "cancelable": false
             });
 
-            Util.download("rest/samples/requests/file?sid=" + Authentication.getSessionId(), selectedIds).$promise.then(function (result) {
+            Util.download("rest/samples/requests/file", selectedIds).$promise.then(function (result) {
                 var url = URL.createObjectURL(new Blob([result.data]));
                 var a = document.createElement('a');
                 a.href = url;
@@ -228,7 +228,7 @@ angular.module('ice.admin.controller', [])
 
         $scope.selectRequest = function (request) {
             var i = $scope.selectedRequests.indexOf(request);
-            if (i == -1) {
+            if (i === -1) {
                 $scope.selectedRequests.push(request);
             } else {
                 $scope.selectedRequests.splice(i, 1);
@@ -268,7 +268,7 @@ angular.module('ice.admin.controller', [])
 
         $scope.sampleFilterChecked = function (filter) {
             var idx = $scope.params.status.indexOf(filter);
-            if (idx == -1)
+            if (idx === -1)
                 $scope.params.status.push(filter);
             else
                 $scope.params.status.splice(idx, 1);
@@ -535,8 +535,8 @@ angular.module('ice.admin.controller', [])
 
         $scope.deletePublicGroup = function (group) {
             Util.remove("rest/groups/" + group.id, null, function () {
-                var i = $scope.groups.indexOf(group);
-                if (i != -1)
+                const i = $scope.groups.indexOf(group);
+                if (i !== -1)
                     $scope.groups.splice(i, 1);
             })
         }
@@ -586,7 +586,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.removeUserFromGroup = function (user) {
-            var index = $scope.newPublicGroup.members.indexOf(user);
+            const index = $scope.newPublicGroup.members.indexOf(user);
             if (index)
                 $scope.newPublicGroup.members.splice(index, 1);
         };
@@ -653,7 +653,7 @@ angular.module('ice.admin.controller', [])
             });
 
             modalInstance.result.then(function (deletedManuscript) {
-                var i = $scope.manuscripts.data.indexOf(deletedManuscript);
+                const i = $scope.manuscripts.data.indexOf(deletedManuscript);
                 $scope.manuscripts.data.splice(i, 1);
             });
         };
@@ -801,7 +801,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.selectFeature = function (feature) {
-            if ($scope.selectedFeature == feature)
+            if ($scope.selectedFeature === feature)
                 $scope.selectedFeature = undefined;
             else
                 $scope.selectedFeature = feature;
@@ -833,5 +833,130 @@ angular.module('ice.admin.controller', [])
         $scope.rebuildFeatures = function () {
             Util.update("rest/annotations/indexes");
         };
-    }
-);
+    })
+    .controller('AdminCustomFieldsController', function (Util, $scope, $uibModal) {
+        $scope.selection = 'plasmid';
+
+        $scope.options = [
+            {name: 'Text', value: 'TEXT_INPUT'},
+            {name: 'Options', value: 'MULTI_CHOICE'},
+            {name: 'Options with Text', value: 'MULTI_CHOICE_PLUS'}];
+
+        $scope.optionsText = function (value) {
+            for (let i = 0; i < $scope.options.length; i += 1) {
+                if (value === $scope.options[i].value) {
+                    return $scope.options[i].name;
+                }
+            }
+            return value;
+        };
+
+        const retrievePartFields = function () {
+            $scope.partCustomFields = undefined;
+            $scope.loading = true;
+            Util.get("rest/fields/" + $scope.selection, function (result) {
+                $scope.partCustomFields = result.data;
+                console.log(result);
+            }, {}, function (error) {
+                $scope.loading = false;
+            })
+        };
+
+        // init
+        retrievePartFields();
+
+        $scope.selectedTab = function (selection) {
+            if (selection === $scope.selection)
+                return;
+
+            $scope.selection = selection;
+            retrievePartFields();
+        };
+
+        $scope.deleteCustomField = function (customField) {
+            Util.remove("rest/fields/" + customField.entryType + "/" + customField.id, {}, function (result) {
+                const index = $scope.partCustomFields.indexOf(customField);
+                if (index !== -1)
+                    $scope.partCustomFields.splice(index, 1);
+            })
+        };
+
+        $scope.addNewCustomEntryField = function () {
+            const modal = $uibModal.open({
+                templateUrl: 'scripts/admin/modal/new-custom-field.html',
+                controller: "AdminNewCustomField",
+                resolve: {
+                    entryType: function () {
+                        return $scope.selection;
+                    }
+                },
+                backdrop: "static"
+            });
+
+            modal.result.then(function (result) {
+                if (!result)
+                    return;
+
+                if (!$scope.partCustomFields)
+                    $scope.partCustomFields = [];
+                $scope.partCustomFields.push(result);
+            });
+        };
+    })
+    .controller('AdminNewCustomField', function (Util, $scope, $uibModalInstance, entryType) {
+        $scope.field = {required: false, options: [], entryType: entryType.toUpperCase()};
+        $scope.options = [
+            {name: 'Text', value: 'TEXT_INPUT'},
+            {name: 'Options', value: 'MULTI_CHOICE'},
+            {name: 'Options with Text', value: 'MULTI_CHOICE_PLUS'}];
+
+        // adds option
+        $scope.addOption = function (afterIndex) {
+            $scope.field.options.push({});
+        };
+
+        $scope.removeOption = function (index) {
+            $scope.field.options.splice(index, 1);
+        };
+
+        $scope.change = function () {
+            switch ($scope.field.fieldType.value) {
+                case "MULTI_CHOICE":
+                    $scope.field.options = [{}];
+                    break;
+
+                case "MULTI_CHOICE_PLUS":
+                    $scope.field.options = [{}];
+                    break;
+            }
+        };
+
+        $scope.createCustomLink = function () {
+            $scope.field.fieldType = $scope.field.fieldType.value;
+            Util.post("rest/fields/" + entryType, $scope.field, function (result) {
+                $uibModalInstance.close(result);
+            })
+        };
+
+        // determines whether the "create" button in the form should be enabled or disabled based on information
+        // entered by user
+        $scope.disableCreateButton = function () {
+            if (!$scope.field.label)
+                return true;
+
+            if (!$scope.field.fieldType)
+                return true;
+
+            switch ($scope.field.fieldType.value) {
+                case "MULTI_CHOICE":
+                case "MULTI_CHOICE_PLUS":
+                    for (var i = 0; i < $scope.field.options.length; i += 1) {
+                        if (!$scope.field.options[i].value)
+                            return true;
+                    }
+                    break;
+            }
+
+            return false;
+        }
+    });

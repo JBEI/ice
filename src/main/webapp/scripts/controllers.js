@@ -397,7 +397,7 @@ iceControllers.controller('ActionMenuController', function ($stateParams, $uibMo
 
     $scope.updateSelectedCollectionFolders = function () {
         var folder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
-        if (folder == "available")
+        if (folder === "available")
             folder = "featured";
 
         Util.list("rest/collections/" + folder.toUpperCase() + "/folders", function (result) {
@@ -711,7 +711,7 @@ iceControllers.controller('RegisterController', function ($scope, $resource, $lo
 
         Util.post("rest/users", $scope.newUser, function (data) {
             $scope.processing = false;
-            if (data.length != 0)
+            if (data.length !== 0)
                 $scope.registerSuccess = true;
             else
                 $scope.errMsg = "Could not create account";
@@ -762,12 +762,12 @@ iceControllers.controller('LoginController', function ($scope, $location, $cooki
 
     Util.get('rest/config/NEW_REGISTRATION_ALLOWED', function (result) {
         $scope.canCreateAccount = (result !== undefined && result.key === 'NEW_REGISTRATION_ALLOWED'
-        && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
+            && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
     });
 
     Util.get('rest/config/PASSWORD_CHANGE_ALLOWED', function (result) {
         $scope.canChangePassword = (result !== undefined && result.key === 'PASSWORD_CHANGE_ALLOWED'
-        && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
+            && (result.value.toLowerCase() === 'yes' || result.value.toLowerCase() === 'true'));
     });
 
     // login function

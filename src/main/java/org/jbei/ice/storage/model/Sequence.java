@@ -31,11 +31,11 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "sequences")
-@SequenceGenerator(name = "sequence", sequenceName = "sequences_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "sequences_id", sequenceName = "sequences_id_seq", allocationSize = 1)
 public class Sequence implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequences_id")
     private long id;
 
     @Column(name = "sequence")
@@ -49,7 +49,7 @@ public class Sequence implements DataModel {
     @Column(name = "sequence_user")
     @Lob
     @Type(type = "org.hibernate.type.TextType")
-    private String sequenceUser;
+    private String sequenceUser; // todo : look into lazy loading
 
     @Column(name = "fwd_hash", length = 40)
     private String fwdHash;
@@ -78,7 +78,6 @@ public class Sequence implements DataModel {
     private Entry entry;
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "sequence")
-    @OrderBy("id")
     private Set<SequenceFeature> sequenceFeatures = new HashSet<>();
 
     public Sequence() {

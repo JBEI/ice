@@ -2,13 +2,13 @@ package org.jbei.ice.lib.parsers.sbol;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.DNASequence;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryLinks;
 import org.jbei.ice.lib.entry.LinkType;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
+import org.jbei.ice.lib.entry.sequence.SequenceUtil;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.genbank.GenBankParser;
@@ -95,7 +95,7 @@ public class SBOLParser extends AbstractParser {
      * @param uri          optional uri to associate with sequence
      * @return Sequence info data transfer object for saved sequence
      */
-    protected SequenceInfo parseToGenBank(SBOLDocument sbolDocument, String fileName, Entry entry, String uri) {
+    private SequenceInfo parseToGenBank(SBOLDocument sbolDocument, String fileName, Entry entry, String uri) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         String rdf;
 
@@ -109,7 +109,7 @@ public class SBOLParser extends AbstractParser {
 
         // convert to genbank
         Sequence sequence = null;
-        DNASequence dnaSequence = null;
+        FeaturedDNASequence dnaSequence = null;
 
         try {
             out.reset();
@@ -117,7 +117,7 @@ public class SBOLParser extends AbstractParser {
             if (out.size() > 0) {
                 GenBankParser parser = new GenBankParser();
                 dnaSequence = parser.parse(new String(out.toByteArray()));
-                sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
+                sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
             }
         } catch (InvalidFormatParserException e) {
             Logger.error("Error parsing generated genBank: " + e.getMessage());
@@ -139,7 +139,7 @@ public class SBOLParser extends AbstractParser {
         if (!StringUtils.isEmpty(uri))
             sequence.setUri(uri);
 
-        sequence = DAOFactory.getSequenceDAO().saveSequence(sequence);
+        sequence = DAOFactory.getSequenceDAO().create(sequence);
         SequenceInfo sequenceInfo = new SequenceInfo();
         sequenceInfo.setEntryId(entry.getId());
         sequenceInfo.setSequence(dnaSequence);

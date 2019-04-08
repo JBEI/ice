@@ -185,7 +185,8 @@ public class BulkEntryCreator {
         if (linkedEntry == null && !StringUtils.isEmpty(linkedPartData.getPartId())) {
             // try partId
             linkedEntry = entryDAO.getByPartNumber(linkedPartData.getPartId());
-            linkedPartData.setId(linkedEntry.getId());
+            if (linkedEntry != null)
+                linkedPartData.setId(linkedEntry.getId());
         }
 
         if (linkedEntry == null) {

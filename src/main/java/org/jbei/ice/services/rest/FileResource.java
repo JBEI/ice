@@ -49,7 +49,6 @@ import java.util.stream.Collectors;
 @Path("/file")
 public class FileResource extends RestResource {
 
-    private SequenceController sequenceController = new SequenceController();
     private Attachments attachments = new Attachments();
 
     @GET
@@ -170,7 +169,7 @@ public class FileResource extends RestResource {
     @GET
     @Path("{partId}/sequence/{type}")
     public Response downloadSequence(
-            @PathParam("partId") final long partId,
+            @PathParam("partId") final String partId,
             @PathParam("type") final String downloadType,
             @DefaultValue("-1") @QueryParam("remoteId") long remoteId,
             @QueryParam("sid") String sid) {
@@ -180,10 +179,10 @@ public class FileResource extends RestResource {
         final String userId = getUserId(sessionId);
         final ByteArrayWrapper wrapper;
         if (remoteId != -1) {
-            RemoteSequence sequence = new RemoteSequence(remoteId, partId);
+            RemoteSequence sequence = new RemoteSequence(remoteId, Long.decode(partId));
             wrapper = sequence.get(downloadType);
         } else {
-            wrapper = sequenceController.getSequenceFile(userId, partId, SequenceFormat.fromString(downloadType));
+            wrapper = new PartSequence(userId, partId).toFile(SequenceFormat.fromString(downloadType));
         }
 
         StreamingOutput stream = output -> {
@@ -272,9 +271,9 @@ public class FileResource extends RestResource {
     public Response createSequenceModel(@FormDataParam("file") InputStream fileInputStream,
                                         @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
         final String fileName = contentDispositionHeader.getFileName();
-        SequenceController sequenceController = new SequenceController();
+        Sequences sequences = new Sequences(requireUserId());
         try {
-            return super.respond(sequenceController.parseSequence(fileInputStream, fileName));
+            return super.respond(sequences.parseSequence(fileInputStream, fileName));
         } catch (InvalidFormatParserException e) {
             throw new WebApplicationException(e.getMessage());
         }
@@ -293,7 +292,7 @@ public class FileResource extends RestResource {
                                 @QueryParam("entryFields") final List<String> fields,
                                 EntrySelection selection) {
         String userId = super.requireUserId();
-        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId, sequenceFormats.toArray(new String[sequenceFormats.size()]));
+        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId, sequenceFormats.toArray(new String[0]));
         List<EntryField> entryFields = new ArrayList<>();
         try {
             if (fields != null) {
@@ -304,7 +303,7 @@ public class FileResource extends RestResource {
         }
 
         boolean success = entriesAsCSV.setSelectedEntries(selection,
-                entryFields.toArray(new EntryField[entryFields.size()]));
+                entryFields.toArray(new EntryField[0]));
         if (!success)
             return super.respond(false);
 

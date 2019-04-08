@@ -1,0 +1,78 @@
+<div class="modal-header">
+    <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
+    <span class="bebas modal-title" style="color: #657B83; font-size: 19px">
+        <i class="fa fa-fw fa-paint-brush"></i> &nbsp;Add new custom field for {{field.entryType}}
+    </span>
+</div>
+
+<div class="modal-body">
+
+    <b>Enter a unique label for field</b><br>
+    <input type="text" maxlength="35" ng-model="field.label"/>
+
+    <br><br>
+    <b>Select type</b><br>
+    <select class="input_box pull_down" ng-change="change()" ng-model="field.fieldType" size="1"
+            ng-options="option.name for option in options"></select>
+    <br><br>
+
+    <div ng-if="field.fieldType.value === 'MULTI_CHOICE' || field.fieldType.value === 'MULTI_CHOICE_PLUS'">
+        <b>Enter values for options</b><br clear="all">
+
+        <div class="input-group pad-top-5" ng-repeat="option in field.options track by $index">
+
+            <input type="text" ng-model="field.options[$index].value" maxlength="125"
+                   ng-change="field.invalid=false" style="width: 400px"
+                   ng-class="{'input_box_group':!field.invalid, 'input_box_error':field.invalid}">
+            <span class="input-group-addon" data-ng-click="removeOption($index)"
+                  style="padding:3px; background-color: #f1f1f1;width: 19px; border-left: 0">
+                    <i class="fa fa-minus delete_icon"></i>
+                </span>&nbsp;
+            <i class="fa fa-plus green opacity_hover" ng-click="addOption($index)"></i>
+        </div>
+        <br>
+    </div>
+
+    <b>Is this field required</b><br>
+    <span ng-click="field.required=false" class="cursor_pointer">
+        No <i class="fa fa-fw"
+              ng-class="{'fa-dot-circle-o': !field.required, 'fa-circle-o': field.required}"></i>
+    </span>
+
+    <span ng-click="field.required=true" class="cursor_pointer">
+        Yes <i class="fa fa-fw" ng-click="field.required===true"
+               ng-class="{'fa-dot-circle-o': field.required, 'fa-circle-o': !field.required}"></i>
+    </span>
+
+    <br><br><br>
+
+    <div class="well">
+        <div class="row">
+            <div class="col-md-4">
+                <b class="text-nowrap">{{field.label}}</b> <span class="required" ng-if="field.required">*</span>
+            </div>
+
+            <div class="col-md-8" ng-if="field.fieldType.value === 'MULTI_CHOICE'">
+                <select class="input_box pull_down" size="1" ng-model="select"
+                        ng-options="option.value as option.value for option in field.options"></select>
+            </div>
+
+            <div class="col-md-8" ng-if="field.fieldType.value === 'MULTI_CHOICE_PLUS'">
+                <select class="input_box pull_down" size="1" ng-model="select"
+                        ng-options="option.value as option.value for option in field.options"></select>
+                <input type="text" maxlength="125" style="width: 150px;" class="text-input">
+            </div>
+
+            <div class="col-md-8" ng-if="field.fieldType.value === 'TEXT_INPUT'">
+                <input type="text" maxlength="125" style="width: 350px;" class="text-input">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-sm btn-link" ng-click="$dismiss('cancel')">Close</button>
+    <button class="btn btn-primary" ng-click="createCustomLink()" ng-disabled="disableCreateButton()">
+        Create
+    </button>
+</div>

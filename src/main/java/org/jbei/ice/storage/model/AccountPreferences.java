@@ -13,12 +13,12 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "account_preferences")
-@SequenceGenerator(name = "sequence", sequenceName = "account_preferences_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "account_preferences_id", sequenceName = "account_preferences_id_seq", allocationSize = 1)
 
 public class AccountPreferences implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "account_preferences_id")
     private long id;
 
     @Column(name = "preferences")

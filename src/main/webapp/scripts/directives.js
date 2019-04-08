@@ -79,6 +79,17 @@ iceDirectives.directive("iceEntryFolders", function () {
     }
 });
 
+iceDirectives.directive("iceUserFolders", function () {
+    return {
+        restrict: "E",
+        scope: {
+            entry: '='
+        },
+        templateUrl: "scripts/profile/user-folders.html",
+        controller: 'UserFoldersController'
+    }
+});
+
 iceDirectives.directive("tabs", function () {
     return {
         restrict: 'E',

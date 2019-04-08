@@ -442,22 +442,20 @@ angular.module('ice.entry.controller', [])
         $scope.linkOptions = EntryService.linkOptions($scope.createType.toLowerCase());
 
         // retrieves the defaults for the specified type. Note that $scope.part is the main part
-        var getPartDefaults = function (type, isMain) {
-            //entry.query({partId: type}, function (result) {
+        const getPartDefaults = function (type, isMain) {
             Util.get("rest/parts/defaults/" + type, function (result) {
                 if (isMain) { // or if !$scope.part
                     $scope.part = result;
                     $scope.part = EntryService.setNewEntryFields($scope.part);
                     $scope.part.linkedParts = [];
                     $scope.activePart = $scope.part;
-                    $scope.part.fields = EntryService.getFieldsForType($scope.createType);
-                    angular.forEach($scope.activePart.fields, function (field) {
+
+                    $scope.activePart.fields.forEach(function (field) {
                         field.invalid = false;
                     })
                 } else {
                     var newPart = result;
                     newPart = EntryService.setNewEntryFields(newPart);
-                    newPart.fields = EntryService.getFieldsForType(type);
                     $scope.part.linkedParts.push(newPart);
 
                     $scope.colLength = 11 - $scope.part.linkedParts.length;
@@ -597,7 +595,7 @@ angular.module('ice.entry.controller', [])
                 $scope.part.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.part.linkedParts[i].selectionMarkers);
             }
 
-            // convert the part to a form the server can work with
+            // convert the part to a form the server can work with (including custom fields)
             $scope.part = EntryService.getTypeData($scope.part);
 
             // create or update the part depending on whether there is a current part id
@@ -843,13 +841,13 @@ angular.module('ice.entry.controller', [])
                 var i = -1;
 
                 for (var idx = 0; idx < $scope.activePermissions.length; idx += 1) {
-                    if (permissionId == $scope.activePermissions[idx].id) {
+                    if (permissionId === $scope.activePermissions[idx].id) {
                         i = idx;
                         break;
                     }
                 }
 
-                if (i == -1) {
+                if (i === -1) {
                     return;
                 }
 
@@ -887,7 +885,7 @@ angular.module('ice.entry.controller', [])
                 $scope.entry.id = result.typeId;
                 result.canEdit = $rootScope.user.isAdmin || (result.group && !result.group.autoJoin);
 
-                if (result.type == 'READ_ENTRY') {
+                if (result.type === 'READ_ENTRY') {
                     $scope.readPermissions.push(result);
                     $scope.activePermissions = $scope.readPermissions;
                 } else {
@@ -1003,6 +1001,52 @@ angular.module('ice.entry.controller', [])
                         handleFullscreenClose: function () { // this will make the editor fullscreen by default, and will allow you to handle the close request
                             $scope.vEeditor.close();         // handle vector editor root removal and clean up
                         },
+
+                        getSequenceAtVersion: function (versionId) {
+                            return openVEData.sequenceData;
+                            // teselagenSequenceData
+                        },
+
+                        // getVersionList: function () {
+                        //     Util.get('rest/sequences/' + openVEData.registryData.identifier + '/history', function (result) {
+                        //         return [
+                        //             {
+                        //                 versionId: "51241",
+                        //                 dateChanged: "01/11/2019",
+                        //                 editedBy: "Hector Plahar",
+                        //                 revisionType: "Feature Add"
+                        //             },
+                        //             {
+                        //                 versionId: "51241",
+                        //                 dateChanged: "01/11/2019",
+                        //                 editedBy: "Hector Plahar",
+                        //                 revisionType: "Feature Remove"
+                        //             }]
+                        //     })
+                        // },
+
+                        getVersionList: function () {
+//fake talking to some api
+                            return new Promise(resolve => {
+                                setTimeout(() => {
+                                    resolve([
+                                        {
+                                            dateChanged: "12/30/2211",
+                                            editedBy: "Nara",
+                                            revisionType: "Sequence Deletion",
+                                            versionId: 2
+                                        },
+                                        {
+                                            dateChanged: "8/30/2211",
+                                            editedBy: "Ralph",
+                                            revisionType: "Feature Edit",
+                                            versionId: 3
+                                        }
+                                    ]);
+                                }, 100);
+                            });
+                        },
+
                         onSave: function (event, sequenceData, editorState, onSuccessCallback) {
                             if (remote.remote || !entry.canEdit)
                                 return;
@@ -1096,6 +1140,7 @@ angular.module('ice.entry.controller', [])
                         ToolBarProps: {
                             //name the tools you want to see in the toolbar in the order you want to see them
                             toolList: [
+                                "versionHistoryTool",
                                 // "saveTool",
                                 "undoTool",
                                 "redoTool",
@@ -1158,6 +1203,8 @@ angular.module('ice.entry.controller', [])
                     createVectorEditorNode($scope.existingVectorEditorSequenceModel);
                 } else {
                     Util.get("rest/parts/" + entry.id + "/sequence", function (result) {
+                        console.log(result);
+
                         $scope.sequenceName = result.name;
                         sequence = result;
 
@@ -1433,7 +1480,7 @@ angular.module('ice.entry.controller', [])
                 if ($scope.entry.canEdit)
                     $scope.newParameter = {edit: false};
 
-                $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
+                // $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
                 $scope.entry.remote = params.remote;
 
                 // get sample count, comment count etc

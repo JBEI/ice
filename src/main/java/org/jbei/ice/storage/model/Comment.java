@@ -18,11 +18,11 @@ import java.util.Set;
  */
 @Entity
 @Table(name = "comments")
-@SequenceGenerator(name = "sequence", sequenceName = "comments_id_seq", allocationSize = 1)
+@SequenceGenerator(name = "comments_id", sequenceName = "comments_id_seq", allocationSize = 1)
 public class Comment implements DataModel {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "comments_id")
     private long id;
 
     @ManyToOne(fetch = FetchType.EAGER)

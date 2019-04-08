@@ -4,18 +4,17 @@ import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
-import org.jbei.ice.storage.model.Account;
-import org.jbei.ice.storage.model.Plasmid;
-import org.jbei.ice.storage.model.Strain;
+import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldDAO;
+import org.jbei.ice.storage.model.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-
 
 /**
  * @author Hector Plahar
@@ -47,7 +46,7 @@ public class CustomFieldsTest {
         long id = fields.createField(userId, strain.getId(), field).getId();
         strain = (Strain) DAOFactory.getEntryDAO().get(strain.getId());
         Assert.assertNotNull(strain);
-        Assert.assertTrue(strain.getParameters().size() == 1);
+        Assert.assertEquals(1, strain.getParameters().size());
         CustomField created = strain.getParameters().get(0).toDataTransferObject();
         Assert.assertEquals(created.getName(), field.getName());
         Assert.assertEquals(created.getValue(), field.getValue());
@@ -199,7 +198,44 @@ public class CustomFieldsTest {
 
         results = fields.getPartsByFields(userId, searchFields);
         Assert.assertNotNull(results);
-        Assert.assertTrue(results.size() == 1);
+        Assert.assertEquals(1, results.size());
         Assert.assertEquals(strain.getId(), results.get(0).getId());
+    }
+
+    @Test
+    public void testCreate() throws Exception {
+        Account account = AccountCreator.createTestAccount("testCreate", true);
+        final String userId = account.getEmail();
+        final String label = "CustomFieldsTest.testCreate";
+
+        List<String> fieldStrings = new ArrayList<>(Arrays.asList("Expression", "Cloning", "Synthetic Biology", "CRISPR", "RNAi"));
+        CustomEntryField customField = new CustomEntryField();
+        customField.setLabel(label);
+        for (String field : fieldStrings) {
+            customField.getOptions().add(new CustomField("", field));
+        }
+        customField.setEntryType(EntryType.PLASMID);
+        customField.setFieldType(FieldType.MULTI_CHOICE);
+        customField = fields.create(userId, customField);
+        Assert.assertNotNull(customField);
+
+        long id = customField.getId();
+
+        // try again should fail
+        boolean caught = false;
+        try {
+            fields.create(userId, customField);
+        } catch (IllegalArgumentException e) {
+            caught = true;
+        }
+        Assert.assertTrue(caught);
+        fields.deleteCustomField(userId, EntryType.PLASMID, id);
+
+        CustomEntryFieldModel model = new CustomEntryFieldDAO().get(id);
+        Assert.assertNotNull(model);
+        Assert.assertTrue(model.getDisabled());
+
+        // try again, should succeed
+        fields.create(userId, customField);
     }
 }

@@ -16,6 +16,9 @@ import org.jbei.ice.lib.shared.ColumnField;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -101,8 +104,8 @@ public class FolderResource extends RestResource {
         String userId = requireUserId();
         log(userId, "Get folder details for \"" + folderId + "\"");
         try {
-            UserFolder folder = new UserFolder(userId);
-            return super.respond(folder.getFolder(folderId));
+            UserFolders folder = new UserFolders(userId);
+            return super.respond(folder.get(folderId));
         } catch (IllegalArgumentException e) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
@@ -121,6 +124,18 @@ public class FolderResource extends RestResource {
         log(userId, "update folder \"" + folderId + "\"");
         final FolderDetails resp = controller.update(userId, folderId, details);
         return super.respond(resp);
+    }
+
+    @PUT
+    @Path("/{id}/{newStatus}")
+    public Response updateFolderStatus(@PathParam("id") final long folderId,
+                                       @PathParam("newStatus") String newStatus) {
+        String userId = requireUserId();
+        Folders folders = new Folders(userId);
+        FolderType type = FolderType.valueOf(newStatus.toUpperCase());
+        if (!folders.updateFolderType(folderId, type))
+            return super.respond(Response.Status.CONFLICT);
+        return super.respond(true);
     }
 
     /**
@@ -335,6 +350,21 @@ public class FolderResource extends RestResource {
             return Response.ok().build();
         } catch (PermissionException pe) {
             throw new WebApplicationException(Response.Status.FORBIDDEN);
+        }
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Path("{id}/file")
+    public Response getFolderAsFile(@PathParam("id") final long folderId) {
+        final String userId = requireUserId();
+
+        try (ByteArrayOutputStream outputStream = new FolderSampleCSV(userId, folderId).write()) {
+            StreamingOutput stream = outputStream::writeTo;
+            return Response.ok(stream).header("Content-Disposition", "attachment;filename=\"folder-sample-data.csv\"").build();
+        } catch (IOException e) {
+            Logger.error(e);
+            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -13,7 +13,7 @@ import org.jbei.ice.lib.entry.EntryFields;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.PartDataUtil;
 import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
-import org.jbei.ice.lib.entry.sequence.SequenceController;
+import org.jbei.ice.lib.entry.sequence.SequenceUtil;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
@@ -164,7 +164,7 @@ public class RemoteEntriesAsCSV {
 
                         // write sequence to zip
                         line[i + 1] = name;
-                        Sequence sequence = SequenceController.dnaSequenceToSequence(featuredDNASequence);
+                        Sequence sequence = SequenceUtil.dnaSequenceToSequence(featuredDNASequence);
                         GenbankFormatter genbankFormatter = new GenbankFormatter(name);
                         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
                         genbankFormatter.format(sequence, byteStream);

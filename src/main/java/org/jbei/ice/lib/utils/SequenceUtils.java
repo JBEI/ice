@@ -32,8 +32,7 @@ public class SequenceUtils {
      * @return Hex digest of SHA-1 hash.
      * @throws UtilityException
      */
-    public static String calculateReverseComplementSequenceHash(String sequence)
-            throws UtilityException {
+    public static String calculateReverseComplementSequenceHash(String sequence) throws UtilityException {
         return calculateSequenceHash(reverseComplement(sequence));
     }
 
@@ -58,26 +57,6 @@ public class SequenceUtils {
     }
 
     /**
-     * Calculate the amino acid translation of the given dnaSequence string.
-     *
-     * @param dnaSequence DNA sequence to translate.
-     * @return String of amino acid symbols.
-     * @throws UtilityException
-     */
-    public static String translateToProtein(String dnaSequence) throws UtilityException {
-        SymbolList symL = null;
-
-        try {
-            symL = DNATools.createDNA(dnaSequence);
-            symL = DNATools.toProtein(symL);
-        } catch (IllegalSymbolException | IllegalAlphabetException e) {
-            throw new UtilityException(e);
-        }
-
-        return symL.seqString();
-    }
-
-    /**
      * Format into 6 column, 10 basepairs per column display.
      *
      * @param input sequence string.
@@ -90,7 +69,7 @@ public class SequenceUtils {
         int index = 0;
         int end = input.length();
         while (index < end) {
-            result = result.append(input.substring(index, index + 1));
+            result = result.append(input, index, index + 1);
             counter = counter + 1;
             index = index + 1;
 

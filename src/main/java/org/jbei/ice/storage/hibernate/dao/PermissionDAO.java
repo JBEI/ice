@@ -193,6 +193,7 @@ public class PermissionDAO extends HibernateRepository<Permission> {
             query.where(
                     getBuilder().isNull(from.get("entry")),
                     getBuilder().equal(from.get("folder"), folder),
+                    getBuilder().equal(from.get("canWrite"), true),
                     getBuilder().equal(from.get("account"), account));
             return currentSession().createQuery(query).setMaxResults(1).uniqueResult() > 0;
         } catch (HibernateException he) {

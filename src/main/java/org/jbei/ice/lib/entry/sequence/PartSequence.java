@@ -2,8 +2,8 @@ package org.jbei.ice.lib.entry.sequence;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationController;
-import org.jbei.ice.lib.dto.*;
+import org.jbei.ice.lib.dto.ConfigurationKey;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.dto.entry.Visibility;
@@ -11,6 +11,7 @@ import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryFactory;
 import org.jbei.ice.lib.entry.HasEntry;
+import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
@@ -19,36 +20,34 @@ import org.jbei.ice.lib.parsers.fasta.FastaParser;
 import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.lib.parsers.sbol.SBOLParser;
 import org.jbei.ice.lib.search.blast.BlastPlus;
-import org.jbei.ice.lib.utils.SequenceUtils;
-import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.hibernate.dao.FeatureDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
+import org.jbei.ice.storage.hibernate.dao.SequenceFeatureDAO;
 import org.jbei.ice.storage.model.*;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 /**
- * Biological part with associated sequence information
+ * Sequence information for a biological part in ICE
  *
  * @author Hector Plahar
  */
-public class PartSequence extends HasEntry {
+public class PartSequence {
 
     private final Entry entry;
     private final String userId;
-    private SequenceDAO sequenceDAO;
-    private EntryAuthorization entryAuthorization;
+    private final SequenceDAO sequenceDAO;
+    private final SequenceFeatureDAO sequenceFeatureDAO;
+    private final FeatureDAO featureDAO;
+    private final EntryAuthorization entryAuthorization;
 
     /**
      * Constructor for creating a new part to associate a sequence with
@@ -57,9 +56,7 @@ public class PartSequence extends HasEntry {
      * @param type   type of part to create.
      */
     public PartSequence(String userId, EntryType type) {
-        this.userId = userId;
         Entry newEntry = EntryFactory.buildEntry(type);
-
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         String entryName = account.getFullName();
         String entryEmail = account.getEmail();
@@ -70,20 +67,40 @@ public class PartSequence extends HasEntry {
         newEntry.setVisibility(Visibility.DRAFT.getValue());
         EntryCreator creator = new EntryCreator();
         entry = creator.createEntry(account, newEntry, null);
+
         this.sequenceDAO = DAOFactory.getSequenceDAO();
+        this.sequenceFeatureDAO = DAOFactory.getSequenceFeatureDAO();
+        this.featureDAO = DAOFactory.getFeatureDAO();
+        this.entryAuthorization = new EntryAuthorization();
+        this.userId = userId;
     }
 
+    /**
+     * Constructor for associating sequence with existing entry
+     *
+     * @param userId  identifier for user
+     * @param entryId identifier for entry
+     */
     public PartSequence(String userId, String entryId) {
-        this.entry = super.getEntry(entryId);
+        this.entry = new HasEntry().getEntry(entryId);
         if (this.entry == null)
             throw new IllegalArgumentException("Could not retrieve entry with identifier " + entryId);
+
         this.sequenceDAO = DAOFactory.getSequenceDAO();
+        this.sequenceFeatureDAO = DAOFactory.getSequenceFeatureDAO();
+        this.featureDAO = DAOFactory.getFeatureDAO();
         this.entryAuthorization = new EntryAuthorization();
         this.userId = userId;
     }
 
     public FeaturedDNASequence get() {
         entryAuthorization.expectRead(userId, entry);
+
+//        if (entry.getVisibility() == Visibility.REMOTE.getValue()) {
+//            WebEntries webEntries = new WebEntries();
+//            return webEntries.getSequence(recordId);
+//        }
+
         boolean canEdit = entryAuthorization.canWrite(userId, entry);
         return getFeaturedSequence(entry, canEdit);
     }
@@ -104,7 +121,7 @@ public class PartSequence extends HasEntry {
             AbstractParser parser;
             String sequenceString = Utils.getString(inputStream);
 
-            switch (detectFormat(sequenceString)) {
+            switch (SequenceUtil.detectFormat(sequenceString)) {
                 case GENBANK:
                     parser = new GenBankParser();
                     break;
@@ -125,12 +142,66 @@ public class PartSequence extends HasEntry {
 
             // parse actual sequence
             String entryType = this.entry.getRecordType();
-            FeaturedDNASequence sequence = parser.parse(sequenceString, entryType);
-            return save(sequence, sequenceString, fileName, entryType);
+            FeaturedDNASequence dnaSequence = parser.parse(sequenceString, entryType);
+            Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
+            sequence.setSequenceUser(sequenceString);
+            saveSequenceObject(sequence);
+
+            sequence = sequenceDAO.getByEntry(this.entry);
+            BlastPlus.scheduleBlastIndexRebuildTask(true);
+            SequenceInfo info = sequence.toDataTransferObject();
+            info.setSequence(dnaSequence);
+            return info;
         } catch (InvalidFormatParserException e) {
             Logger.error(e);
             throw new IOException(e);
         }
+    }
+
+    // creates a new sequence and associates it with entry
+    public void save(FeaturedDNASequence dnaSequence) {
+        entryAuthorization.expectWrite(userId, entry);
+
+        // check if there is already an existing sequence
+        if (sequenceDAO.getByEntry(this.entry) != null)
+            throw new IllegalArgumentException("Entry already has a sequence associated with it. Please delete first");
+
+        // update raw sequence if no sequence is passed
+//        if ((dnaSequence.getFeatures() == null || dnaSequence.getFeatures().isEmpty())) {
+//            // sometimes the whole sequence is sent in the string portion (when there are no features)
+//            // no features to add
+//            dnaSequence = GeneralParser.parse(dnaSequence.getSequence());
+//        }
+
+        // convert sequence wrapper to sequence storage model
+        Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
+        if (sequence == null)
+            return;
+
+        saveSequenceObject(sequence);
+    }
+
+    private void saveSequenceObject(Sequence sequence) {
+        sequence.setEntry(this.entry);
+        Set<SequenceFeature> sequenceFeatureSet = null;
+        sequence = SequenceUtil.normalizeAnnotationLocations(sequence);
+
+        if (sequence.getSequenceFeatures() != null) {
+            sequenceFeatureSet = new HashSet<>(sequence.getSequenceFeatures());
+            sequence.setSequenceFeatures(null);
+        }
+
+        // create sequence
+        sequence = sequenceDAO.create(sequence);
+
+        // separate out sequence features and uniquely create features
+        if (sequenceFeatureSet != null) {
+            for (SequenceFeature sequenceFeature : sequenceFeatureSet) {
+                createSequenceFeature(sequenceFeature, sequence);
+            }
+        }
+
+        BlastPlus.scheduleBlastIndexRebuildTask(true);
     }
 
     /**
@@ -138,157 +209,301 @@ public class PartSequence extends HasEntry {
      * <br>
      * Write privileges on the entry are required
      *
-     * @param dnaSequence new sequence to associate with this part
-     * @return updated sequence information
+     * @param updatedSequence new sequence to associate with this part
      */
-    public FeaturedDNASequence update(FeaturedDNASequence dnaSequence) {
+    public void update(FeaturedDNASequence updatedSequence) {
         entryAuthorization.expectWrite(userId, entry);
         Sequence existing = sequenceDAO.getByEntry(this.entry);
 
-        // update raw sequence if no sequence is passed
-        if ((dnaSequence.getFeatures() == null || dnaSequence.getFeatures().isEmpty())) {
+        // update with raw sequence if no sequence object is passed
+        if ((updatedSequence.getFeatures() == null || updatedSequence.getFeatures().isEmpty())) {
             // sometimes the whole sequence is sent in the string portion (when there are no features)
             // no features to add
-            dnaSequence = GeneralParser.parse(dnaSequence.getSequence());
-        } else if (dnaSequence.getSequence().isEmpty()) {
-            dnaSequence.setSequence(existing.getSequence());
+            updatedSequence = GeneralParser.parse(updatedSequence.getSequence());
+        } else if (updatedSequence.getSequence().isEmpty()) {
+            updatedSequence.setSequence(existing.getSequence());
         }
 
         // convert sequence wrapper to sequence storage model
-        Sequence sequence = dnaSequenceToSequence(dnaSequence);
+        Sequence sequence = SequenceUtil.dnaSequenceToSequence(updatedSequence);
         if (sequence == null)
+            return;
+
+        if (existing != null) {
+
+            SequenceVersionHistory history = new SequenceVersionHistory(userId, existing.getId());
+
+            // diff
+            existing.setSequenceFeatures(new HashSet<>(sequenceFeatureDAO.getEntrySequenceFeatures(this.entry)));
+
+            // 1. check sequence string
+            checkSequenceString(history, existing, sequence);
+
+            // 2. check features
+            checkForNewFeatures(existing, sequence);
+
+            // 3. check for removed features
+            checkRemovedFeatures(existing, sequence);
+
+            // rebuild the trace sequence alignments // todo : this might not be needed for all updates
+            rebuildTraceAlignments();
+
+            // rebuild blast
+            BlastPlus.scheduleBlastIndexRebuildTask(true);
+        } else {
+            save(updatedSequence);
+        }
+    }
+
+    public void delete() {
+        List<SequenceFeature> features = sequenceFeatureDAO.getEntrySequenceFeatures(entry);
+        for (SequenceFeature feature : features)
+            deleteSequenceFeature(feature);
+
+        Sequence sequence = sequenceDAO.getByEntry(this.entry);
+        sequence.setEntry(null);
+        sequence.setSequenceFeatures(null);
+        sequenceDAO.delete(sequence);
+    }
+
+    // features in existing which are not part of new sequence passed and therefore need to be deleted
+    private void checkRemovedFeatures(Sequence existing, Sequence sequence) {
+        // for each existing feature check that it is in new sequence
+        List<SequenceFeature> toRemoveFeatures = new ArrayList<>();
+
+        for (SequenceFeature sequenceFeature : existing.getSequenceFeatures()) {
+            SequenceFeature foundFeature = checkFeature(sequence, sequenceFeature);
+            if (foundFeature == null) {
+                // remove feature
+                Logger.info("Feature " + sequenceFeature.getName() + " was removed by user");
+                deleteSequenceFeature(sequenceFeature);
+                toRemoveFeatures.add(sequenceFeature);
+
+                // todo : check if feature is not referenced by any sequence features then delete it
+            }
+        }
+
+        existing.getSequenceFeatures().removeAll(toRemoveFeatures);
+    }
+
+    private void deleteSequenceFeature(SequenceFeature sequenceFeature) {
+        sequenceFeature.setSequence(null);
+        sequenceFeature.setFeature(null);
+        sequenceFeatureDAO.delete(sequenceFeature);
+    }
+
+    private void checkSequenceString(SequenceVersionHistory history, Sequence existing, Sequence sequence) {
+        if (!existing.getFwdHash().equals(sequence.getFwdHash()) || !existing.getRevHash().equals(sequence.getRevHash())) {
+            existing.setSequence(sequence.getSequence()); // hashes are updated in here (probably not a good method name)
+            existing.setSequenceFeatures(null);
+            sequenceDAO.update(existing);
+            history.add(sequence.getSequence());
+        }
+    }
+
+    // create new feature for the existing sequence
+    private void createSequenceFeature(SequenceFeature sequenceFeature, Sequence existing) {
+        Feature feature = sequenceFeature.getFeature();
+        if (feature == null)
+            return;
+
+        existing = SequenceUtil.normalizeAnnotationLocations(existing);
+
+        Feature existingFeature = featureDAO.getByFeatureSequence(feature.getSequence());
+        if (existingFeature == null) {
+            existingFeature = featureDAO.create(feature);
+        } else {
+            if (!sameFeatureUri(existingFeature, feature)) {
+                existingFeature.setUri(feature.getUri());
+            }
+        }
+
+        sequenceFeature.setFeature(existingFeature);
+        sequenceFeature.setSequence(existing);
+        sequenceFeatureDAO.create(sequenceFeature);
+    }
+
+    private boolean sameFeatureUri(Feature f1, Feature f2) {
+        if (f1.getUri() == null && f2.getUri() == null)
+            return true;
+
+        if (f1.getIdentification() != null && !f1.getIdentification().equalsIgnoreCase(f2.getIdentification()))
+            return false;
+
+        if (f1.getUri() != null && !f1.getUri().equalsIgnoreCase(f2.getUri()))
+            return false;
+
+        return f2.getUri().equalsIgnoreCase(f1.getUri());
+    }
+
+    private void checkForNewFeatures(Sequence existing, Sequence sequence) {
+        // for each new feature, check if it is in existing sequence
+        if (sequence.getSequenceFeatures() != null) {
+            for (SequenceFeature sequenceFeature : sequence.getSequenceFeatures()) {
+                SequenceFeature matchingFeature = checkFeature(existing, sequenceFeature);
+                if (matchingFeature != null)
+                    Logger.info("Feature " + sequenceFeature.getName() + " is an existing feature");
+                else {
+                    Logger.info("Feature " + sequenceFeature.getName() + " is not an existing feature");
+                    // create new feature
+                    createSequenceFeature(sequenceFeature, existing);
+                }
+            }
+        }
+    }
+
+    // look for sequenceFeature in list of existing sequenceFeatures
+    // feature and sequenceFeature are different objects in the database. sequenceFeature is created for each new feature
+    // while feature can be reused
+    // returns matching existing feature or null if no match
+    private SequenceFeature checkFeature(Sequence existing, SequenceFeature sequenceFeature) {
+        if (existing.getSequenceFeatures() == null)
             return null;
 
-        // delete existing sequence for entry
-        if (existing != null)
-            deleteSequence(existing);
+        // is sequence feature already available
+        // important parts are strand and location
+        for (SequenceFeature existingSequenceFeature : existing.getSequenceFeatures()) {
 
-        // associated entry with new one
-        sequence.setEntry(this.entry);
-        sequence = sequenceDAO.saveSequence(sequence);
+            // compare
+            if (existingSequenceFeature.getStrand() != sequenceFeature.getStrand())
+                continue;
 
-        // rebuild blast
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
+            // check annotation locations (doesnt support modification of annotation locations so exact matches are required)
+            if (existingSequenceFeature.getAnnotationLocations().size() != sequenceFeature.getAnnotationLocations().size())
+                continue;
 
-        // rebuild the trace sequence alignments
-        rebuldTraceAlignments();
+            AnnotationLocation location = sequenceFeature.getAnnotationLocations().iterator().next();
+            AnnotationLocation location2 = existingSequenceFeature.getAnnotationLocations().iterator().next();
 
-        return sequenceToDNASequence(sequence);
+            if (location.getGenbankStart() != location2.getGenbankStart() && location.getEnd() != location2.getEnd())
+                continue;
+
+            // check feature
+            if (checkSameFeature(existingSequenceFeature, sequenceFeature))
+                return existingSequenceFeature;    // sequence found in list of existing
+
+//            if (isNotEqual(existingSequenceFeature.getName(), sequenceFeature.getName()))
+//                continue;
+//
+//            if (isNotEqual(existingSequenceFeature.getGenbankType(), sequenceFeature.getGenbankType()))
+//                continue;
+//
+//            if (isNotEqual(existingSequenceFeature.getUri(), sequenceFeature.getUri()))
+//                continue;
+
+
+            // check sequence feature attributes
+            // todo : this is tied to sequenceFeature and so can be modified without creating a new feature
+            // sequenceFeature.getSequenceFeatureAttributes()
+        }
+
+        return null;
+    }
+
+    // check that the feature object both point to are the same
+    // tolerates differences in name etc by only checking the sequence
+    private boolean checkSameFeature(SequenceFeature existingSequenceFeature, SequenceFeature newSequenceFeature) {
+        Feature existingFeature = existingSequenceFeature.getFeature();
+        Feature newFeature = newSequenceFeature.getFeature();
+        return existingFeature.getHash().equals(newFeature.getHash()) &&
+                existingFeature.getSequence().equals(newFeature.getSequence());
     }
 
     /**
-     * Add referenced features to list of features for existing sequence.
-     * Any existing features are preserved
+     * Convert sequence to a byte array of the specified format with the intention of being written to a file
      *
-     * @param features list of features to add
-     * @return DTO for new sequence to include newly added features
-     * @throws IllegalArgumentException if no existing sequence is available for the entry
+     * @param format specified format for sequence conversion
+     * @return wrapper around the byte array for the converted format
      */
-    public FeaturedDNASequence addNewFeatures(List<DNAFeature> features) {
-        entryAuthorization.expectWrite(userId, entry);
-        Sequence existing = sequenceDAO.getByEntry(this.entry);
-        if (existing == null)
-            throw new IllegalArgumentException("Cannot add features to non-existent sequence");
+    public ByteArrayWrapper toFile(SequenceFormat format) {
+        entryAuthorization.expectRead(userId, entry);
+        Sequence sequence = sequenceDAO.getByEntry(entry);
+        if (sequence == null)
+            return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
 
-        FeaturedDNASequence dnaSequence = sequenceToDNASequence(existing);
-        dnaSequence.getFeatures().addAll(features);
-        sequenceDAO.deleteSequence(existing);
+        // if requested format is the same as the original format (if original exist) then get the original instead
+        if (sequence.getFormat() == format && DAOFactory.getSequenceDAO().hasOriginalSequence(entry.getId()))
+            format = SequenceFormat.ORIGINAL;
 
-        Sequence sequence = dnaSequenceToSequence(dnaSequence);
-        sequence.setEntry(entry);
-        sequence = sequenceDAO.saveSequence(sequence);
-        rebuldTraceAlignments();
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
-        return sequenceToDNASequence(sequence);
+        String name;
+        String sequenceString;
+
+        try {
+            switch (format) {
+                case ORIGINAL:
+                    sequenceString = sequence.getSequenceUser();
+                    name = sequence.getFileName();
+                    if (StringUtils.isEmpty(name))
+                        name = entry.getPartNumber() + ".gb";
+                    break;
+
+                case GENBANK:
+                default:
+                    GenbankFormatter genbankFormatter = new GenbankFormatter(entry.getName());
+                    genbankFormatter.setCircular((entry instanceof Plasmid) ? ((Plasmid) entry).getCircular() : false);
+                    sequenceString = compose(sequence, genbankFormatter);
+                    name = entry.getPartNumber() + ".gb";
+                    break;
+
+                case FASTA:
+                    FastaFormatter formatter = new FastaFormatter();
+                    sequenceString = compose(sequence, formatter);
+                    name = entry.getPartNumber() + ".fa";
+                    break;
+
+                case SBOL1:
+                    sequenceString = compose(sequence, new SBOLFormatter());
+                    name = entry.getPartNumber() + ".xml";
+                    break;
+
+                case SBOL2:
+                    sequenceString = compose(sequence, new SBOL2Formatter());
+                    name = entry.getPartNumber() + ".xml";
+                    break;
+
+                case GFF3:
+                    sequenceString = compose(sequence, new GFF3Formatter());
+                    name = entry.getPartNumber() + ".gff3";
+                    break;
+            }
+        } catch (Exception e) {
+            Logger.error("Failed to generate " + format.name() + " file for download!", e);
+            return new ByteArrayWrapper(new byte[]{'\0'}, "sequence_error");
+        }
+
+        return new ByteArrayWrapper(sequenceString.getBytes(), name);
     }
 
-    protected void rebuldTraceAlignments() {
+    /**
+     * Generate a formatted text of a given {@link IFormatter} from the given {@link Sequence}.
+     *
+     * @param sequence  sequence
+     * @param formatter formatter
+     * @return Text of a formatted sequence.
+     */
+    protected String compose(Sequence sequence, IFormatter formatter) {
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        try {
+            formatter.format(sequence, byteStream);
+        } catch (FormatterException | IOException e) {
+            Logger.error(e);
+        }
+        return byteStream.toString();
+    }
+
+    private void rebuildTraceAlignments() {
         SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
         sequenceAnalysisController.rebuildAllAlignments(entry);
     }
 
-    public boolean delete() {
-        entryAuthorization.expectWrite(userId, entry);
+    private FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {
         Sequence sequence = sequenceDAO.getByEntry(entry);
-        if (sequence == null)
-            return true;
-        deleteSequence(sequence);
-        return true;
-    }
-
-    protected void deleteSequence(Sequence sequence) {
-        sequenceDAO.deleteSequence(sequence);
-
-        String tmpDir = new ConfigurationController().getPropertyValue(ConfigurationKey.TEMPORARY_DIRECTORY);
-        Path pigeonPath = Paths.get(tmpDir, sequence.getFwdHash() + ".png");
-
-        try {
-            Files.deleteIfExists(pigeonPath);
-        } catch (IOException e) {
-            // ok to ignore
-            Logger.info("Error deleting pigeon folder " + pigeonPath.toString());
-        }
-
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
-    }
-
-    protected SequenceInfo save(FeaturedDNASequence dnaSequence, String sequenceString, String fileName, String entryType) {
-        Sequence sequence = SequenceController.dnaSequenceToSequence(dnaSequence);
-        sequence.setSequenceUser(sequenceString);
-        sequence.setIdentifier(dnaSequence.getIdentifier());
-        sequence.setEntry(entry);
-        if (!StringUtils.isBlank(fileName))
-            sequence.setFileName(fileName);
-        Sequence result;
-        if (EntryType.PROTEIN.getName().equalsIgnoreCase(entryType)) {
-            result = sequenceDAO.saveProtein(sequence);
-        } else {
-            result = sequenceDAO.saveSequence(sequence);
-        }
-
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
-        SequenceInfo info = result.toDataTransferObject();
-        info.setSequence(dnaSequence);
-        return info;
-    }
-
-    /**
-     * Attempts to detect the sequence format from the first line of a stream using the following heuristics
-     * <ul>
-     * <li>If line starts with <code>LOCUS</code> then assumed to be a genbank file</li>
-     * <li>If line starts with <code>></code> then assumed to be a fasta file</li>
-     * <li>If line starts with <code><</code> then assumed to be an sbol file</li>
-     * <li>Anything else is assumed to be plain nucleotides</li>
-     * </ul>
-     *
-     * @param sequenceString input sequence
-     * @return detected format
-     * @throws IOException
-     */
-    protected SequenceFormat detectFormat(String sequenceString) throws IOException {
-        BufferedReader reader = new BufferedReader(new StringReader(sequenceString));
-        String line = reader.readLine();
-        if (line == null)
-            throw new IOException("Could not obtain line from document");
-
-        if (line.startsWith("LOCUS"))
-            return SequenceFormat.GENBANK;
-
-        if (line.startsWith(">"))
-            return SequenceFormat.FASTA;
-
-        if (line.startsWith("<"))
-            return SequenceFormat.SBOL2;
-
-        return SequenceFormat.PLAIN;
-    }
-
-    protected FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {
-        Sequence sequence = sequenceDAO.getByEntry(entry);
-        if (sequence == null)
+        if (sequence == null) {
             return null;
+        }
 
-        FeaturedDNASequence featuredDNASequence = sequenceToDNASequence(sequence);
+        List<SequenceFeature> sequenceFeatures = sequenceFeatureDAO.getEntrySequenceFeatures(entry);
+        FeaturedDNASequence featuredDNASequence = SequenceUtil.sequenceToDNASequence(sequence, sequenceFeatures);
         featuredDNASequence.setCanEdit(canEdit);
         featuredDNASequence.setIdentifier(entry.getPartNumber());
         Configuration configuration = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
@@ -298,178 +513,5 @@ public class PartSequence extends HasEntry {
             featuredDNASequence.setUri(uriPrefix + "/entry/" + entry.getId());
         }
         return featuredDNASequence;
-    }
-
-    protected FeaturedDNASequence sequenceToDNASequence(Sequence sequence) {
-        if (sequence == null) {
-            return null;
-        }
-
-        List<DNAFeature> features = new LinkedList<>();
-        List<SequenceFeature> sequenceFeatures = DAOFactory.getSequenceFeatureDAO().getEntrySequenceFeatures(this.entry);
-
-        if (sequenceFeatures != null && sequenceFeatures.size() > 0) {
-            for (SequenceFeature sequenceFeature : sequenceFeatures) {
-                DNAFeature dnaFeature = new DNAFeature();
-                dnaFeature.setUri(sequenceFeature.getUri());
-
-                for (SequenceFeatureAttribute attribute : sequenceFeature.getSequenceFeatureAttributes()) {
-                    String key = attribute.getKey();
-                    String value = attribute.getValue();
-                    DNAFeatureNote dnaFeatureNote = new DNAFeatureNote(key, value);
-                    dnaFeatureNote.setQuoted(attribute.getQuoted());
-                    dnaFeature.addNote(dnaFeatureNote);
-                }
-
-                Set<AnnotationLocation> locations = sequenceFeature.getAnnotationLocations();
-                for (AnnotationLocation location : locations) {
-                    dnaFeature.getLocations().add(
-                            new DNAFeatureLocation(location.getGenbankStart(), location.getEnd()));
-                }
-
-                dnaFeature.setId(sequenceFeature.getId());
-                dnaFeature.setType(sequenceFeature.getGenbankType());
-                dnaFeature.setName(sequenceFeature.getName());
-                dnaFeature.setStrand(sequenceFeature.getStrand());
-
-                if (sequenceFeature.getAnnotationType() != null) {
-                    dnaFeature.setAnnotationType(sequenceFeature.getAnnotationType().toString());
-                }
-
-                features.add(dnaFeature);
-            }
-        }
-
-        boolean circular = false;
-        Entry entry = sequence.getEntry();
-        if (entry.getRecordType().equalsIgnoreCase(EntryType.PLASMID.name()))
-            circular = ((Plasmid) sequence.getEntry()).getCircular();
-        FeaturedDNASequence featuredDNASequence = new FeaturedDNASequence(
-                sequence.getSequence(), entry.getName(), circular, features, "");
-        featuredDNASequence.setUri(sequence.getUri());
-
-        return featuredDNASequence;
-    }
-
-    /**
-     * Create a {@link Sequence} object from an {@link DNASequence} object.
-     *
-     * @param dnaSequence object to convert
-     * @return Translated Sequence object.
-     */
-    protected Sequence dnaSequenceToSequence(DNASequence dnaSequence) {
-        if (dnaSequence == null) {
-            return null;
-        }
-
-        String fwdHash = "";
-        String revHash = "";
-
-        String sequenceString = dnaSequence.getSequence();
-        if (!StringUtils.isEmpty(sequenceString)) {
-            fwdHash = SequenceUtils.calculateSequenceHash(sequenceString);
-            try {
-                revHash = SequenceUtils.calculateSequenceHash(SequenceUtils.reverseComplement(sequenceString));
-            } catch (UtilityException e) {
-                revHash = "";
-            }
-        }
-
-        Sequence sequence = new Sequence(sequenceString, "", fwdHash, revHash, null);
-
-        if (dnaSequence instanceof FeaturedDNASequence) {
-            FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) dnaSequence;
-            sequence.setUri(featuredDNASequence.getUri());
-            sequence.setComponentUri(featuredDNASequence.getDcUri());
-            sequence.setIdentifier(featuredDNASequence.getIdentifier());
-
-            // convert dto features
-            convertSequenceFeatures(sequence, featuredDNASequence.getFeatures(), dnaSequence.getSequence());
-        }
-
-        return sequence;
-    }
-
-    protected void convertSequenceFeatures(Sequence sequence, List<DNAFeature> dnaFeatures, String sequenceString) {
-        if (dnaFeatures == null || dnaFeatures.isEmpty())
-            return;
-
-        Set<SequenceFeature> sequenceFeatures = sequence.getSequenceFeatures();
-        for (DNAFeature dnaFeature : dnaFeatures) {
-            List<DNAFeatureLocation> locations = dnaFeature.getLocations();
-            String featureSequence = "";
-
-            for (DNAFeatureLocation location : locations) {
-                int genbankStart = location.getGenbankStart();
-                int end = location.getEnd();
-
-                if (genbankStart < 1) {
-                    genbankStart = 1;
-                } else if (genbankStart > sequenceString.length()) {
-                    genbankStart = sequenceString.length();
-                }
-
-                if (end < 1) {
-                    end = 1;
-                } else if (end > sequenceString.length()) {
-                    end = sequenceString.length();
-                }
-
-                if (genbankStart > end) { // over zero case
-                    featureSequence = sequenceString.substring(
-                            genbankStart - 1, sequenceString.length());
-                    featureSequence += sequenceString.substring(0, end);
-                } else { // normal
-                    featureSequence = sequenceString.substring(genbankStart - 1, end);
-                }
-
-                if (dnaFeature.getStrand() == -1) {
-                    try {
-                        featureSequence = SequenceUtils.reverseComplement(featureSequence);
-                    } catch (UtilityException e) {
-                        featureSequence = "";
-                    }
-                }
-            }
-
-            SequenceFeature.AnnotationType annotationType = null;
-            if (dnaFeature.getAnnotationType() != null && !dnaFeature.getAnnotationType().isEmpty()) {
-                annotationType = SequenceFeature.AnnotationType.valueOf(dnaFeature.getAnnotationType());
-            }
-
-            String name = dnaFeature.getName().length() < 127 ? dnaFeature.getName()
-                    : dnaFeature.getName().substring(0, 123) + "...";
-            Feature feature = new Feature(name, dnaFeature.getIdentifier(), featureSequence,
-                    dnaFeature.getType());
-            if (dnaFeature.getLocations() != null && !dnaFeature.getLocations().isEmpty())
-                feature.setUri(dnaFeature.getLocations().get(0).getUri());
-
-            SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature,
-                    dnaFeature.getStrand(), name,
-                    dnaFeature.getType(), annotationType);
-            sequenceFeature.setUri(dnaFeature.getUri());
-
-            for (DNAFeatureLocation location : locations) {
-                int start = location.getGenbankStart();
-                int end = location.getEnd();
-                AnnotationLocation annotationLocation = new AnnotationLocation(start, end, sequenceFeature);
-                sequenceFeature.getAnnotationLocations().add(annotationLocation);
-            }
-
-            ArrayList<SequenceFeatureAttribute> sequenceFeatureAttributes = new ArrayList<>();
-            if (dnaFeature.getNotes() != null && dnaFeature.getNotes().size() > 0) {
-                for (DNAFeatureNote dnaFeatureNote : dnaFeature.getNotes()) {
-                    SequenceFeatureAttribute sequenceFeatureAttribute = new SequenceFeatureAttribute();
-                    sequenceFeatureAttribute.setSequenceFeature(sequenceFeature);
-                    sequenceFeatureAttribute.setKey(dnaFeatureNote.getName());
-                    sequenceFeatureAttribute.setValue(dnaFeatureNote.getValue());
-                    sequenceFeatureAttribute.setQuoted(dnaFeatureNote.isQuoted());
-                    sequenceFeatureAttributes.add(sequenceFeatureAttribute);
-                }
-            }
-
-            sequenceFeature.getSequenceFeatureAttributes().addAll(sequenceFeatureAttributes);
-            sequenceFeatures.add(sequenceFeature);
-        }
     }
 }
