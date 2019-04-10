@@ -383,7 +383,7 @@
             </div>
 
             <!--menu if entry sequence exists and entry is not protein-->
-            <div class="pull-right">
+            <div class="pull-right" ng-if='entry.hasSequence'>
                 <span ng-if="entry.canEdit">
                     <small class="opacity_hover" ng-click="deleteSequence(entry)">Delete <i
                             class="fa fa-trash-o"></i></small>
