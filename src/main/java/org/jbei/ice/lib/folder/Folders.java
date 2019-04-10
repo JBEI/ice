@@ -177,6 +177,8 @@ public class Folders {
                 Logger.info(entry.getPartNumber() + " is missing origin of replication information");
                 return false;
             }
+
+            return true;
         }
 
         if (EntryType.STRAIN.getName().equalsIgnoreCase(entry.getRecordType())) {
@@ -190,6 +192,8 @@ public class Folders {
                 Logger.info(entry.getPartNumber() + " is missing intellectual property");
                 return false;
             }
+
+            return true;
         }
 
         // only strains and plasmids are allowed
