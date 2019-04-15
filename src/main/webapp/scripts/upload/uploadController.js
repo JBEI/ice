@@ -180,7 +180,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
                     case 'status':
                         object.type = 'autocomplete';
-                        object.source = ['Complete', 'In Progress', 'Planned', ''];
+                        object.source = ['Complete', 'In Progress', 'Planned', 'Abandoned', ''];
                         object.allowInvalid = false;
                         object.validator = function (value, callback) {
                             callback(object.source.indexOf(value) !== -1);
