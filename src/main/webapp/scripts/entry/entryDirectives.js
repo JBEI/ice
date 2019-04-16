@@ -126,7 +126,7 @@ angular.module('ice.entry.directives', [])
                         }
                     });
 
-                    var plasmidActive = data && data.sequenceData && data.sequenceData.circular == true;
+                    let plasmidActive = data && data.sequenceData && data.sequenceData.circular === true;
 
                     $scope.editor.updateEditor({
                         sequenceData: data.sequenceData,
@@ -169,34 +169,44 @@ angular.module('ice.entry.directives', [])
                     });
                 };
 
-                var convertToVEModel = function (result) {
-                    console.log(result);
-                    var data = {
-                        sequenceData: {
-                            sequence: result.sequence,
-                            features: [],
-                            name: $scope.entry.name,
-                            circular: result.isCircular
-                        },
-                        registryData: {
-                            sid: result.id,
-                            uri: result.uri,
-                            identifier: result.identifier,
-                            name: result.name,
-                            circular: result.isCircular
+                let convertToVEModel = function (result) {
+                    let data;
+                    if ($scope.entry.type === 'PROTEIN') {
+                        data = {
+                            sequenceData: {
+                                isProtein: true,
+                                proteinSequence: result.sequence,
+                                name: $scope.entry.name,
+                            }
                         }
-                    };
+                    } else {
+                        data = {
+                            sequenceData: {
+                                sequence: result.sequence,
+                                features: [],
+                                name: $scope.entry.name,
+                                circular: result.isCircular
+                            },
+                            registryData: {
+                                sid: result.id,
+                                uri: result.uri,
+                                identifier: result.identifier,
+                                name: result.name,
+                                circular: result.isCircular
+                            }
+                        };
+                    }
 
-                    for (var i = 0; i < result.features.length; i += 1) {
-                        var feature = result.features[i];
+                    for (let i = 0; i < result.features.length; i += 1) {
+                        let feature = result.features[i];
                         if (!feature.locations.length)
                             continue;
 
-                        var notes = feature.notes.length ? feature.notes[0].value : "";
+                        let notes = feature.notes.length ? feature.notes[0].value : "";
 
-                        for (var j = 0; j < feature.locations.length; j += 1) {
-                            var location = feature.locations[j];
-                            var featureObject = {
+                        for (let j = 0; j < feature.locations.length; j += 1) {
+                            let location = feature.locations[j];
+                            let featureObject = {
                                 start: location.genbankStart - 1,
                                 end: location.end - 1,
                                 fid: feature.id,
@@ -214,7 +224,7 @@ angular.module('ice.entry.directives', [])
 
                 $scope.fetchEntrySequence = function (entryId) {
                     console.log("loading sequence for", entryId, ", remote", $scope.remote);
-                    var url;
+                    let url;
 
                     if ($scope.remote && $scope.remote.folderId) {
                         url = "rest/parts/" + entryId + "/sequence?remote=true&folderId=" + $scope.remote.folderId;
