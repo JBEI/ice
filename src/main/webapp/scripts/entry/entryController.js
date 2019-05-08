@@ -963,28 +963,30 @@ angular.module('ice.entry.controller', [])
                 let convertFeaturedDNASequence = function (result) {
                     let features = [];
 
-                    for (let i = 0; i < result.features.length; i += 1) {
-                        let feature = result.features[i];
-                        if (!feature.locations.length)
-                            continue;
+                    if (result.features) {
+                        for (let i = 0; i < result.features.length; i += 1) {
+                            let feature = result.features[i];
+                            if (!feature.locations.length)
+                                continue;
 
-                        let notes = feature.notes.length ? feature.notes[0].value : "";
+                            let notes = feature.notes.length ? feature.notes[0].value : "";
 
-                        for (let j = 0; j < feature.locations.length; j += 1) {
-                            let location = feature.locations[j];
+                            for (let j = 0; j < feature.locations.length; j += 1) {
+                                let location = feature.locations[j];
 
-                            let featureObject = {
-                                start: location.genbankStart - 1,
-                                end: location.end - 1,
-                                fid: feature.id,
-                                forward: feature.strand === 1,
-                                type: feature.type,
-                                name: feature.name,
-                                notes: notes,
-                                annotationType: feature.type
-                            };
+                                let featureObject = {
+                                    start: location.genbankStart - 1,
+                                    end: location.end - 1,
+                                    fid: feature.id,
+                                    forward: feature.strand === 1,
+                                    type: feature.type,
+                                    name: feature.name,
+                                    notes: notes,
+                                    annotationType: feature.type
+                                };
 
-                            features.push(featureObject);
+                                features.push(featureObject);
+                            }
                         }
                     }
 

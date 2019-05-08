@@ -30,10 +30,7 @@ import org.jbei.ice.storage.model.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Sequence information for a biological part in ICE
@@ -185,6 +182,8 @@ public class PartSequence {
         sequence.setEntry(this.entry);
         Set<SequenceFeature> sequenceFeatureSet = null;
         sequence = SequenceUtil.normalizeAnnotationLocations(sequence);
+        if (sequence == null)
+            throw new IllegalArgumentException("Could not normalize sequence");
 
         if (sequence.getSequenceFeatures() != null) {
             sequenceFeatureSet = new HashSet<>(sequence.getSequenceFeatures());
@@ -216,7 +215,7 @@ public class PartSequence {
         Sequence existing = sequenceDAO.getByEntry(this.entry);
 
         // update with raw sequence if no sequence object is passed
-        if ((updatedSequence.getFeatures() == null || updatedSequence.getFeatures().isEmpty())) {
+        if ((updatedSequence.getFeatures() == null)) {
             // sometimes the whole sequence is sent in the string portion (when there are no features)
             // no features to add
             updatedSequence = GeneralParser.parse(updatedSequence.getSequence());
@@ -233,7 +232,7 @@ public class PartSequence {
 
             SequenceVersionHistory history = new SequenceVersionHistory(userId, existing.getId());
 
-            // diff
+            // diff //todo : check if sequence features is set
             existing.setSequenceFeatures(new HashSet<>(sequenceFeatureDAO.getEntrySequenceFeatures(this.entry)));
 
             // 1. check sequence string
@@ -308,19 +307,25 @@ public class PartSequence {
             return;
 
         existing = SequenceUtil.normalizeAnnotationLocations(existing);
+        if (existing == null)
+            throw new IllegalArgumentException("cannot normalize sequence");
 
-        Feature existingFeature = featureDAO.getByFeatureSequence(feature.getSequence());
-        if (existingFeature == null) {
-            existingFeature = featureDAO.create(feature);
-        } else {
-            if (!sameFeatureUri(existingFeature, feature)) {
+        Optional<Feature> optionalFeature = featureDAO.getByFeatureSequence(feature.getSequence());
+        Feature existingFeature;
+        if (optionalFeature.isPresent()) {
+            existingFeature = optionalFeature.get();
+            if (!sameFeatureUri(optionalFeature.get(), feature)) {
                 existingFeature.setUri(feature.getUri());
             }
+        } else {
+            existingFeature = featureDAO.create(feature);
         }
 
         sequenceFeature.setFeature(existingFeature);
         sequenceFeature.setSequence(existing);
-        sequenceFeatureDAO.create(sequenceFeature);
+        sequenceFeature = sequenceFeatureDAO.create(sequenceFeature);
+        if (existing.getSequenceFeatures() != null)
+            existing.getSequenceFeatures().add(sequenceFeature);
     }
 
     private boolean sameFeatureUri(Feature f1, Feature f2) {
