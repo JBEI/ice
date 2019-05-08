@@ -17,6 +17,7 @@ import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Part;
 import org.jbei.ice.storage.model.Sequence;
+import org.sbolstandard.core2.Module;  // specific callout to avoid clash with java.lang.Module
 import org.sbolstandard.core2.*;
 
 import java.io.ByteArrayInputStream;
