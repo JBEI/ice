@@ -53,7 +53,7 @@ public class ModelToInfoFactory {
         return part;
     }
 
-    public static ArrayList<AttachmentInfo> getAttachments(List<Attachment> attachments) {
+    public static ArrayList<AttachmentInfo> getAttachments(List<Attachment> attachments, boolean canEdit) {
         ArrayList<AttachmentInfo> infos = new ArrayList<>();
         if (attachments == null)
             return infos;
@@ -63,6 +63,7 @@ public class ModelToInfoFactory {
             info.setDescription(attachment.getDescription());
             info.setFilename(attachment.getFileName());
             info.setId(attachment.getId());
+            info.setCanEdit(canEdit);
             info.setFileId(attachment.getFileId());
             infos.add(info);
         }

@@ -41,7 +41,7 @@
         <td class="entry_detail_view_row" ng-click="downloadAttachment(attachment)">
             <div ng-hide="confirmDelete($index)">
                 <span class="font-90em">{{attachment.filename | fileTruncate:20:false}}</span>
-                <i stop-event="click" ng-if="entry.canEdit" class="fa fa-trash-o delete_icon pull-right"
+                <i stop-event="click" ng-if="attachment.canEdit" class="fa fa-trash-o delete_icon pull-right"
                    ng-click="setConfirmDelete($index, true)"></i><br>
                 <span style="color: #999; font-size: 11px">{{attachment.description || "No description provided"}}</span>
             </div>

@@ -34,6 +34,7 @@ angular.module('ice.entry.controller', [])
             response.description = desc;
             $scope.uploadError = undefined;
             Util.post("rest/parts/" + $stateParams.id + "/attachments", response, function (result) {
+                result.canEdit = true;
                 $scope.attachments.push(result);
                 $scope.cancel();
             });
@@ -55,14 +56,15 @@ angular.module('ice.entry.controller', [])
             $window.open("rest/file/attachment/" + attachment.fileId + "?sid=" + Authentication.getSessionId(), "_self");
         };
 
+        const confirmObject = {};
+
         $scope.deleteAttachment = function (index, att) {
-            Util.remove('rest/parts/' + $stateParams.id + '/attachments/' + att.id, function (result) {
+            Util.remove('rest/parts/' + $stateParams.id + '/attachments/' + att.id, {}, function (result) {
                 confirmObject[index] = false;
                 $scope.attachments.splice(index, 1);
             });
         };
 
-        var confirmObject = {};
         $scope.confirmDelete = function (idx) {
             return confirmObject[idx];
         };

@@ -138,8 +138,11 @@ public class Attachments {
 
     public ArrayList<AttachmentInfo> getByEntry(String userId, long entryId) {
         Entry entry = entryDAO.get(entryId);
-        entryAuthorization.expectRead(userId, entry);
-        return ModelToInfoFactory.getAttachments(dao.getByEntry(entry));
+        boolean canEdit = entryAuthorization.canWrite(userId, entry);
+        if (!canEdit)
+            entryAuthorization.expectRead(userId, entry);
+
+        return ModelToInfoFactory.getAttachments(dao.getByEntry(entry), canEdit);
     }
 
     public AttachmentInfo addAttachmentToEntry(String userId, long partId, AttachmentInfo info) {
