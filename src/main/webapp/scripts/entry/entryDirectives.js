@@ -93,8 +93,10 @@ angular.module('ice.entry.directives', [])
                 });
 
                 $scope.loadMessage = undefined;
-                if (!$scope.entry && !$scope.entry.id) // todo : error message?
+                if (!$scope.entry && !$scope.entry.id) {// todo : error message?
+                    console.log("no entry details to retrieve");
                     return;
+                }
 
                 $scope.loadVectorEditor = function (data) {
                     $scope.loadMessage = "Rendering";
@@ -223,18 +225,17 @@ angular.module('ice.entry.directives', [])
                 };
 
                 $scope.fetchEntrySequence = function (entryId) {
-                    console.log("loading sequence for", entryId, ", remote", $scope.remote);
                     let url;
 
                     if ($scope.remote && $scope.remote.folderId) {
                         url = "rest/parts/" + entryId + "/sequence?remote=true&folderId=" + $scope.remote.folderId;
-                        console.log("loading shared sequence");
+                        console.log("loading shared sequence for " + entryId + " remote: " + $scope.remote);
                     } else if ($scope.remote && $scope.remote.partner) {
                         url = "rest/web/" + $scope.remote.partner + "/entries/" + entryId + "/sequence";
-                        console.log("loading remote sequence");
+                        console.log("loading remote sequence: " + $scope.remote);
                     } else {
                         url = "rest/parts/" + entryId + "/sequence";
-                        console.log("loading local sequence");
+                        console.log("loading local sequence for entry " + entryId);
                     }
 
                     Util.get(url, function (result) {

@@ -461,7 +461,7 @@
             <i style="color: #999" class="font-90em" ng-hide="isFileUpload||isPaste">No sequence data provided</i>
 
             <!--file upload-->
-            <span ng-show="isFileUpload">
+            <span ng-if="isFileUpload">
                 <div class="alert alert-info font-90em" style="margin-bottom: 10px; margin-top: 10px">
                     <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i>
                     <span ng-if="entry.type!=='PROTEIN'">Supported file formats are Genbank, Fasta and SBOL</span>
@@ -486,12 +486,12 @@
             </span>
 
             <!--sequence paste-->
-            <textarea ng-show="isPaste" class="input_box"
+            <textarea ng-if="isPaste" class="input_box"
                       placeholder="Paste sequence" rows="14" ng-paste="processPastedSequence($event, entry)"
                       style="width: 100%; height: 100%; color:#111"></textarea>
         </div>
 
-        <div ng-show="entry.hasSequence && entry.basePairCount" style="height: 600px; width: 100%">
+        <div ng-if="entry.hasSequence && entry.basePairCount" style="height: 600px; width: 100%">
             <ice-vector-viewer entry="entry" remote="remoteParams" reload-info="reloadInfo"></ice-vector-viewer>
         </div>
 
