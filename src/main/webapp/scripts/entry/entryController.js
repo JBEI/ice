@@ -1033,18 +1033,18 @@ angular.module('ice.entry.controller', [])
                             return new Promise(resolve => {
                                 setTimeout(() => {
                                     resolve([
-                                        {
-                                            dateChanged: "12/30/2211",
-                                            editedBy: "Nara",
-                                            revisionType: "Sequence Deletion",
-                                            versionId: 2
-                                        },
-                                        {
-                                            dateChanged: "8/30/2211",
-                                            editedBy: "Ralph",
-                                            revisionType: "Feature Edit",
-                                            versionId: 3
-                                        }
+                                        // {
+                                        //     dateChanged: "12/30/2211",
+                                        //     editedBy: "Nara",
+                                        //     revisionType: "Sequence Deletion",
+                                        //     versionId: 2
+                                        // },
+                                        // {
+                                        //     dateChanged: "8/30/2211",
+                                        //     editedBy: "Ralph",
+                                        //     revisionType: "Feature Edit",
+                                        //     versionId: 3
+                                        // }
                                     ]);
                                 }, 100);
                             });
