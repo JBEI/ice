@@ -333,7 +333,7 @@ public class FolderContents {
      * @return wrapper around list of folder entries if folder is found, null otherwise
      * @throws PermissionException if user does not have read permissions on folder
      */
-    public FolderDetails getContents(String userId, long folderId, PageParameters pageParameters) {
+    public FolderDetails getContents(String userId, long folderId, PageParameters pageParameters, List<String> fields) {
         Folder folder = folderDAO.get(folderId);
         if (folder == null)
             return null;
@@ -366,7 +366,7 @@ public class FolderContents {
         // retrieve folder contents
         List<Entry> results = folderDAO.retrieveFolderContents(folderId, pageParameters, visibleOnly);
         for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false);
+            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false, fields);
             details.getEntries().add(info);
         }
         return details;
@@ -420,7 +420,7 @@ public class FolderContents {
 
     // remote request for shared contents
     public FolderDetails getRemotelySharedContents(String remoteUserId, String token, RegistryPartner partner,
-                                                   long folderId, PageParameters pageParameters) {
+                                                   long folderId, PageParameters pageParameters, List<String> fields) {
         RemotePartner remotePartner = DAOFactory.getRemotePartnerDAO().getByUrl(partner.getUrl());
         if (remotePartner == null) {
             Logger.error("Cannot retrieve remote partner " + partner.getUrl());
@@ -459,7 +459,7 @@ public class FolderContents {
         // retrieve folder contents
         List<Entry> results = folderDAO.retrieveFolderContents(folderId, pageParameters, true);
         for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(null, entry, false);
+            PartData info = ModelToInfoFactory.createTableViewData(null, entry, false, fields);
             info.setCanEdit(canEdit);
             details.getEntries().add(info);
         }

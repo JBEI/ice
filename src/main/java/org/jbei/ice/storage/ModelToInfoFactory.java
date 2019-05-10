@@ -264,7 +264,7 @@ public class ModelToInfoFactory {
         return account.getId();
     }
 
-    public static PartData createTableViewData(String userId, Entry entry, boolean includeOwnerInfo) {
+    public static PartData createTableViewData(String userId, Entry entry, boolean includeOwnerInfo, List<String> fields) {
         if (entry == null)
             return null;
 
@@ -275,10 +275,18 @@ public class ModelToInfoFactory {
         view.setPartId(entry.getPartNumber());
         view.setName(entry.getName());
         view.setShortDescription(entry.getShortDescription());
-        view.setCreationTime(entry.getCreationTime().getTime());
-        view.setStatus(entry.getStatus());
-        view.setAlias(entry.getAlias());
-        Visibility visibility = Visibility.valueToEnum(entry.getVisibility());
+
+        if (fields == null || fields.contains("creationTime")) {
+            view.setCreationTime(entry.getCreationTime().getTime());
+        }
+
+        if (fields == null || fields.contains("status")) {
+            view.setStatus(entry.getStatus());
+        }
+
+        if (fields == null || fields.contains("alias")) {
+            view.setAlias(entry.getAlias());
+        }
 
         // information about the owner and creator
         if (includeOwnerInfo) {
@@ -292,35 +300,42 @@ public class ModelToInfoFactory {
         }
 
         // has sample
-        view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));
+        if (fields == null || fields.contains("hasSample")) {
+            view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));
+        }
 
         // has sequence
-        if (visibility == Visibility.REMOTE) {
-            view.setHasSequence(entry.getLongDescriptionType().equalsIgnoreCase("sequence"));
-        } else {
-            SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
-            view.setHasSequence(sequenceDAO.hasSequence(entry.getId()));
-            view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
+        if (fields == null || fields.contains("hasSequence")) {
+            Visibility visibility = Visibility.valueToEnum(entry.getVisibility());
+            if (visibility == Visibility.REMOTE) {
+                view.setHasSequence(entry.getLongDescriptionType().equalsIgnoreCase("sequence"));
+            } else {
+                SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
+                view.setHasSequence(sequenceDAO.hasSequence(entry.getId()));
+                view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
+            }
         }
 
         // has parents
-//        for (Entry linkedEntry : entry.getLinkedEntries()) {
-//            // todo : authorization
-////            if (!authorization.canRead(userId, parent))
-////                continue;
-//            PartData linkedPartData = new PartData(EntryType.nameToType(linkedEntry.getRecordType()));
-//            linkedPartData.setId(linkedEntry.getId());
-//            view.getLinkedParts().add(linkedPartData);
-//        }
+        if (fields == null || fields.contains("links")) {
+            for (Entry linkedEntry : entry.getLinkedEntries()) {
+                // todo : authorization
+//            if (!authorization.canRead(userId, parent))
+//                continue;
+                PartData linkedPartData = new PartData(EntryType.nameToType(linkedEntry.getRecordType()));
+                linkedPartData.setId(linkedEntry.getId());
+                view.getLinkedParts().add(linkedPartData);
+            }
 
-//        List<Entry> parents = DAOFactory.getEntryDAO().getParents(entry.getId());
-//        if (parents != null) {
-//            for (Entry parentEntry : parents) {
-//                PartData partData = new PartData(EntryType.nameToType(parentEntry.getRecordType()));
-//                partData.setId(parentEntry.getId());
-//                view.getParents().add(partData);
-//            }
-//        }
+            List<Entry> parents = DAOFactory.getEntryDAO().getParents(entry.getId());
+            if (parents != null) {
+                for (Entry parentEntry : parents) {
+                    PartData partData = new PartData(EntryType.nameToType(parentEntry.getRecordType()));
+                    partData.setId(parentEntry.getId());
+                    view.getParents().add(partData);
+                }
+            }
+        }
 
         // entry count
         view.setViewCount(DAOFactory.getAuditDAO().getAuditsForEntryCount(entry));

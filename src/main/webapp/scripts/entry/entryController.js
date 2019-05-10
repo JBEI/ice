@@ -1029,7 +1029,7 @@ angular.module('ice.entry.controller', [])
                         // },
 
                         getVersionList: function () {
-//fake talking to some api
+                            //fake talking to some api
                             return new Promise(resolve => {
                                 setTimeout(() => {
                                     resolve([

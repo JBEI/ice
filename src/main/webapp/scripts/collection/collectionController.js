@@ -15,7 +15,7 @@ angular.module('ice.collection.controller', [])
         // retrieve (to refresh the information such as part counts) all the sub folders under
         // $scope.selectedFolder (defaults to "personal" if not set)
         $scope.updateSelectedCollectionFolders = function () {
-            var folder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
+            let folder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
             if (folder == "available")
                 folder = "featured";
 
@@ -108,8 +108,8 @@ angular.module('ice.collection.controller', [])
                 if (result === undefined || $scope.collectionList === undefined)
                     return;
 
-                for (var i = 0; i < $scope.collectionList.length; i += 1) {
-                    var item = $scope.collectionList[i];
+                for (let i = 0; i < $scope.collectionList.length; i += 1) {
+                    let item = $scope.collectionList[i];
                     item.count = result[item.name];
                 }
             });
@@ -132,7 +132,7 @@ angular.module('ice.collection.controller', [])
 
             // type on server is PUBLIC, PRIVATE, SHARED, UPLOAD
             EntryContextUtil.resetContext();
-            var type = folder.type.toLowerCase();
+            let type = folder.type.toLowerCase();
             if (type !== "upload") {
                 FolderSelection.selectFolder(folder);
                 type = "folders";
@@ -180,8 +180,8 @@ angular.module('ice.collection.controller', [])
             if (data === undefined || $scope.selectedFolder !== "bulkUpload" || $scope.selectedCollectionFolders === undefined) // todo : use vars
                 return;
 
-            for (var i = 0; i < $scope.selectedCollectionFolders.length; i += 1) {
-                var subFolder = $scope.selectedCollectionFolders[i];
+            for (let i = 0; i < $scope.selectedCollectionFolders.length; i += 1) {
+                let subFolder = $scope.selectedCollectionFolders[i];
                 if (subFolder.id !== data.id)
                     continue;
 
@@ -210,14 +210,14 @@ angular.module('ice.collection.controller', [])
         // retrieve permissions for folder
         Util.list("rest/folders/" + folder.id + "/permissions", function (result) {
             angular.forEach(result, function (perm) {
-                var permission = angular.copy(perm);
+                let permission = angular.copy(perm);
                 permission.canWrite = perm.type == 'WRITE_FOLDER';
                 permission.canRead = perm.type == 'READ_FOLDER';
                 $scope.permissions.push(permission);
             });
         });
 
-        var getWebPartners = function () {
+        let getWebPartners = function () {
             Util.list("rest/partners", function (result) {
                 $scope.webPartners = result;
             });
@@ -294,12 +294,12 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.removePermission = function (permission) {
-            var pid = permission.id;
+            let pid = permission.id;
             if (permission.article == "REMOTE")
                 pid = permission.articleId;
 
             Util.remove("rest/folders/" + folder.id + "/permissions/" + pid, {}, function (result) {
-                var idx = $scope.permissions.indexOf(permission);
+                let idx = $scope.permissions.indexOf(permission);
                 if (idx < 0)
                     return;
                 $scope.permissions.splice(idx, 1);
@@ -359,10 +359,10 @@ angular.module('ice.collection.controller', [])
                         if (!res || !res.data)
                             return [];
 
-                        var arr = [];
-                        var length = res.data.length;
-                        for (var i = 0; i < length; i++) {
-                            var val = res.data[i];
+                        let arr = [];
+                        let length = res.data.length;
+                        for (let i = 0; i < length; i++) {
+                            let val = res.data[i];
                             arr.push({id: val.id, label: val.firstName + " " + val.lastName, description: val.email});
                         }
                         return arr;
@@ -391,7 +391,7 @@ angular.module('ice.collection.controller', [])
         $scope.checkNames = false;
 
         // file upload
-        var uploader = $scope.partsUploader = new FileUploader({
+        let uploader = $scope.partsUploader = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "rest/file/entries",
             method: 'POST',
@@ -418,8 +418,8 @@ angular.module('ice.collection.controller', [])
 
         uploader.onSuccessItem = function (item, response, status, header) {
             $scope.serverResult = {data: response, total: response.length, valid: []};
-            for (var i = 0; i < response.length; i += 1) {
-                var datum = response[i];
+            for (let i = 0; i < response.length; i += 1) {
+                let datum = response[i];
                 if (datum.partData) {
                     $scope.serverResult.valid.push(datum.partData.id);
                 }
@@ -444,7 +444,7 @@ angular.module('ice.collection.controller', [])
                 return;
 
             $scope.serverResult.addingToFolder = true;
-            var entrySelection = {
+            let entrySelection = {
                 destination: [folder],
                 entries: $scope.serverResult.valid
             };
@@ -482,13 +482,25 @@ angular.module('ice.collection.controller', [])
     .controller('CollectionFolderController', function ($rootScope, $scope, $location, $uibModal, $stateParams,
                                                         EntryContextUtil, Selection, Util, localStorageService) {
         $rootScope.$emit("CollectionSelection", $stateParams.collection);
-        var resource = "collections";
+        let resource = "collections";
 
         $scope.folderPageChange = function () {
             $scope.loadingPage = true;
             $scope.params.offset = ($scope.params.currentPage - 1) * $scope.params.limit;
+
+            $scope.params.fields = [];
+            for (let key in $scope.entryHeaders) {
+                if (!$scope.entryHeaders.hasOwnProperty(key))
+                    continue;
+
+                let header = $scope.entryHeaders[key];
+                if (header.selected) {
+                    $scope.params.fields.push(header.field);
+                }
+            }
+
             Util.get("rest/" + resource + "/" + $scope.params.folderId + "/entries", function (result) {
-                if (resource == "collections") {
+                if (resource === "collections") {
                     $scope.folder = {entries: result.data, count: result.resultCount};
                     $scope.params.count = result.resultCount; // used in context display
                 } else {
@@ -512,7 +524,8 @@ angular.module('ice.collection.controller', [])
             hasSample: {field: "hasSample", display: "Has Sample", selected: true},
             hasSequence: {field: "hasSequence", display: "Has Sequence", selected: true},
             alias: {field: "alias", display: "Alias"},
-            created: {field: "creationTime", display: "Created", selected: true}
+            created: {field: "creationTime", display: "Created", selected: true},
+            links: {field: "links", display: "Links"}
         };
 
         // default init params
@@ -525,15 +538,15 @@ angular.module('ice.collection.controller', [])
         };
 
         // get client stored headers
-        var storedFields = localStorageService.get('entryHeaderFields');
+        let storedFields = localStorageService.get('entryHeaderFields');
         if (!storedFields) {
             // set default headers
-            var entryHeaderFields = [];
-            for (var key in $scope.entryHeaders) {
+            let entryHeaderFields = [];
+            for (let key in $scope.entryHeaders) {
                 if (!$scope.entryHeaders.hasOwnProperty(key))
                     continue;
 
-                var header = $scope.entryHeaders[key];
+                let header = $scope.entryHeaders[key];
                 if (header.selected) {
                     entryHeaderFields.push(header.field);
                 }
@@ -543,17 +556,19 @@ angular.module('ice.collection.controller', [])
             localStorageService.set('entryHeaderFields', entryHeaderFields);
         } else {
             // set user selected
-            for (var key in $scope.entryHeaders) {
+            for (let key in $scope.entryHeaders) {
                 if (!$scope.entryHeaders.hasOwnProperty(key))
                     continue;
 
-                var header = $scope.entryHeaders[key];
-                header.selected = (storedFields.indexOf(header.field) != -1);
+                let header = $scope.entryHeaders[key];
+                header.selected = (storedFields.indexOf(header.field) !== -1);
             }
         }
 
+        console.log($scope.entryHeaders);
+
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
-        var subCollection = $stateParams.collection;   // folder id or one of the defined collections (Shared etc)   ]
+        let subCollection = $stateParams.collection;   // folder id or one of the defined collections (Shared etc)   ]
         // retrieve folder contents. all folders are redirected to /folder/{id} which triggers this
         if (subCollection !== undefined) {
             $scope.folder = undefined;
@@ -563,9 +578,9 @@ angular.module('ice.collection.controller', [])
             else
                 resource = "folders";
 
-            var context = EntryContextUtil.getContext();
+            let context = EntryContextUtil.getContext();
             if (context) {
-                var pageNum = (Math.floor(context.offset / $scope.params.limit)) + 1;
+                let pageNum = (Math.floor(context.offset / $scope.params.limit)) + 1;
                 $scope.params.sort = context.sort;
                 $scope.params.currentPage = pageNum;
             }
@@ -580,7 +595,7 @@ angular.module('ice.collection.controller', [])
                 $event.stopPropagation();
             }
             header.selected = !header.selected;
-            var storedFields = localStorageService.get('entryHeaderFields');
+            let storedFields = localStorageService.get('entryHeaderFields');
 
             if (header.selected) {
                 // selected by user, add to stored list
@@ -588,12 +603,15 @@ angular.module('ice.collection.controller', [])
                 localStorageService.set('entryHeaderFields', storedFields);
             } else {
                 // not selected by user, remove from stored list
-                var i = storedFields.indexOf(header.field);
+                let i = storedFields.indexOf(header.field);
                 if (i != -1) {
                     storedFields.splice(i, 1);
                     localStorageService.set('entryHeaderFields', storedFields);
                 }
             }
+
+            // refresh data
+            $scope.folderPageChange();
         };
 
         $rootScope.$on("RefreshAfterDeletion", function (event, data) {
@@ -652,7 +670,7 @@ angular.module('ice.collection.controller', [])
                 $scope.params.offset = index;
             }
 
-            var offset = (($scope.params.currentPage - 1) * $scope.params.limit) + index;
+            let offset = (($scope.params.currentPage - 1) * $scope.params.limit) + index;
             EntryContextUtil.setContextCallback(function (offset, callback) {
                 $scope.params.offset = offset;
                 $scope.params.limit = 1;
@@ -668,7 +686,7 @@ angular.module('ice.collection.controller', [])
             }, $scope.params.count, offset, "folders/" + $scope.params.folderId, $scope.params.sort);
 
             //$location.search("fid", $scope.folder.id);
-            var url = "entry/" + entry.id;
+            let url = "entry/" + entry.id;
             if (sub)
                 url += '/' + sub;
 
@@ -683,7 +701,7 @@ angular.module('ice.collection.controller', [])
 
         $scope.tooltipDetails = function (e) {
             $scope.currentTooltip = undefined;
-            var params = {};
+            let params = {};
             if ($scope.folder && $scope.folder.type == 'REMOTE') {
                 params.remote = true;
                 params.folderId = $scope.folder.id;
@@ -698,7 +716,7 @@ angular.module('ice.collection.controller', [])
 
         // opens a modal that presents user with options to share selected folder
         $scope.openFolderShareSettings = function () {
-            var modalInstance = $uibModal.open({
+            let modalInstance = $uibModal.open({
                 templateUrl: 'scripts/folder/modal/folder-permissions.html',
                 controller: "FolderPermissionsController",
                 backdrop: "static",
@@ -717,7 +735,7 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.openPartsUploadDialog = function () {
-            var modalInstance = $uibModal.open({
+            let modalInstance = $uibModal.open({
                 templateUrl: 'scripts/folder/modal/folder-upload-parts.html',
                 controller: "FolderPartsUploadController",
                 backdrop: "static",
@@ -737,7 +755,7 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.openSampleCreationDialog = function () {
-            var modalInstance = $uibModal.open({
+            let modalInstance = $uibModal.open({
                 templateUrl: 'scripts/folder/modal/folder-create-samples.html',
                 controller: "FolderCreateSamplesController",
                 backdrop: "static",
@@ -764,8 +782,8 @@ angular.module('ice.collection.controller', [])
 
         $scope.exportSampleFolder = function () {
             Util.download("/rest/folders/" + $scope.folder.id + "/file").$promise.then(function (result) {
-                var url = URL.createObjectURL(new Blob([result.data]));
-                var a = document.createElement('a');
+                let url = URL.createObjectURL(new Blob([result.data]));
+                let a = document.createElement('a');
                 a.href = url;
                 a.download = result.filename();
                 a.target = '_blank';
@@ -789,7 +807,7 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.shareText = function (permission) {
-            var display = "";
+            let display = "";
             if (permission.article === 'GROUP')
                 display = "Members of ";
 
@@ -803,7 +821,7 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.changeFolderType = function (newType) {
-            var tmp = {id: $scope.folder.id, type: newType};
+            let tmp = {id: $scope.folder.id, type: newType};
             Util.update('rest/folders/' + $scope.folder.id, tmp, {}, function (result) {
                 $scope.folder.type = result.type;
                 if (newType === 'PUBLIC')
@@ -817,7 +835,7 @@ angular.module('ice.collection.controller', [])
             if (!$scope.folder.canEdit)
                 return;
 
-            var modalInstance = $uibModal.open({
+            let modalInstance = $uibModal.open({
                 templateUrl: 'scripts/folder/modal/rename-folder.html',
                 controller: function ($scope, $uibModalInstance, folderName) {
                     $scope.newFolderName = folderName;
@@ -835,7 +853,7 @@ angular.module('ice.collection.controller', [])
                 if (newName === $scope.folder.folderName)
                     return;
 
-                var tmp = {id: $scope.folder.id, folderName: newName};
+                let tmp = {id: $scope.folder.id, folderName: newName};
                 Util.update("rest/folders/" + tmp.id, tmp, {}, function (result) {
                     $scope.folder.folderName = result.folderName;
                 })
@@ -846,7 +864,7 @@ angular.module('ice.collection.controller', [])
     .controller('CollectionController', function ($scope, $state, $filter, $location, $rootScope, EntryService,
                                                   Authentication, CollectionMenuOptions, Util) {
         // todo : set on all
-        var searchUrl = "search";
+        let searchUrl = "search";
         if ($location.path().slice(0, searchUrl.length) != searchUrl) {
             $location.search('q', null);
         }
@@ -858,10 +876,10 @@ angular.module('ice.collection.controller', [])
         $scope.pageCounts = function (currentPage, resultCount, maxPageCount) {
             if (maxPageCount == undefined)
                 maxPageCount = 30;
-            var pageNum = ((currentPage - 1) * maxPageCount) + 1;
+            let pageNum = ((currentPage - 1) * maxPageCount) + 1;
 
             // number on this page
-            var pageCount = (currentPage * maxPageCount) > resultCount ? resultCount : (currentPage * maxPageCount);
+            let pageCount = (currentPage * maxPageCount) > resultCount ? resultCount : (currentPage * maxPageCount);
             return $filter('number')(pageNum) + " - " + $filter('number')(pageCount) + " of " + $filter('number')(resultCount);
         };
 
@@ -905,8 +923,8 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.submitShoppingCart = function () {
-            var contentIds = [];
-            for (var idx = 0; idx < $scope.shoppingCartContents.length; idx += 1)
+            let contentIds = [];
+            for (let idx = 0; idx < $scope.shoppingCartContents.length; idx += 1)
                 contentIds.push($scope.shoppingCartContents[idx].id);
 
             Util.update("rest/samples/requests", contentIds, {status: 'PENDING'}, function (result) {
@@ -921,7 +939,7 @@ angular.module('ice.collection.controller', [])
             if (!entry)
                 return false;
 
-            for (var idx = 0; idx < $scope.shoppingCartContents.length; idx += 1) {
+            for (let idx = 0; idx < $scope.shoppingCartContents.length; idx += 1) {
                 if ($scope.shoppingCartContents[idx].partData.id == entry.id) {
                     return true;
                 }
@@ -933,8 +951,8 @@ angular.module('ice.collection.controller', [])
         // remove sample request from cart
         $scope.removeFromCart = function (content, entry) {
             if (entry) {
-                var partId = entry.id;
-                for (var idx = 0; idx < $scope.shoppingCartContents.length; idx += 1) {
+                let partId = entry.id;
+                for (let idx = 0; idx < $scope.shoppingCartContents.length; idx += 1) {
                     if ($scope.shoppingCartContents[idx].partData.id == partId) {
                         content = $scope.shoppingCartContents[idx];
                         break;
@@ -944,7 +962,7 @@ angular.module('ice.collection.controller', [])
 
             if (content) {
                 Util.remove("rest/samples/requests/" + content.id, {}, function () {
-                    var idx = $scope.shoppingCartContents.indexOf(content);
+                    let idx = $scope.shoppingCartContents.indexOf(content);
                     $scope.shoppingCartContents.splice(idx, 1);
                 });
             }
@@ -990,7 +1008,7 @@ angular.module('ice.collection.controller', [])
 
         // creates a personal folder
         $scope.createPersonalFolder = function () {
-            var details = {folderName: $scope.newCollectionName};
+            let details = {folderName: $scope.newCollectionName};
             Util.post("/rest/folders", details, function (result) {
                 $scope.selectedCollectionFolders.splice(0, 0, result);
                 $scope.newCollectionName = "";
@@ -1001,8 +1019,8 @@ angular.module('ice.collection.controller', [])
         $scope.deleteCollection = function (folder) {
             // expected folders that can be deleted have type "PRIVATE" and "UPLOAD"
             Util.remove("rest/folders/" + folder.id, {type: folder.type}, function (result) {
-                var l = $scope.selectedCollectionFolders.length;
-                for (var j = 0; j < l; j += 1) {
+                let l = $scope.selectedCollectionFolders.length;
+                for (let j = 0; j < l; j += 1) {
                     if ($scope.selectedCollectionFolders[j].id === result.id) {
                         $scope.selectedCollectionFolders.splice(j, 1);
                         break;

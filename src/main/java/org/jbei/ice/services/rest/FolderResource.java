@@ -219,14 +219,14 @@ public class FolderResource extends RestResource {
                               @DefaultValue("") @QueryParam("filter") String filter,
                               @QueryParam("token") String token,   // todo: move to headers
                               @QueryParam("userId") String remoteUserId,                   // todo : ditto
-                              @QueryParam("fields") List<String> queryParam) {
+                              @QueryParam("fields") List<String> fields) {
         try {
             final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
             if (folderId.equalsIgnoreCase("public")) {   // todo : move to separate rest resource path
                 RegistryPartner registryPartner = requireWebPartner();
                 // return public entries
                 log(registryPartner.getUrl(), "requesting public entries");
-                return this.controller.getPublicEntries(field, offset, limit, asc);
+                return this.controller.getPublicEntries(field, offset, limit, asc, fields);
             }
 
             // userId can be empty for public folders
@@ -241,15 +241,15 @@ public class FolderResource extends RestResource {
 
                 if (StringUtils.isEmpty(userId)) {
                     if (StringUtils.isEmpty(token))  // todo :verify partner?
-                        return folderContents.getContents(userId, id, pageParameters);
+                        return folderContents.getContents(userId, id, pageParameters, fields);
 
                     // get registry partner
                     RegistryPartner partner = requireWebPartner();
                     log(partner.getUrl(), message);
-                    return folderContents.getRemotelySharedContents(remoteUserId, token, partner, id, pageParameters);
+                    return folderContents.getRemotelySharedContents(remoteUserId, token, partner, id, pageParameters, fields);
                 } else {
                     log(userId, message);
-                    return folderContents.getContents(userId, id, pageParameters);
+                    return folderContents.getContents(userId, id, pageParameters, fields);
                 }
             } catch (final NumberFormatException nfe) {
                 Logger.error("Passed folder id " + folderId + " is not a number");
