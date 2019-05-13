@@ -1244,7 +1244,7 @@ angular.module('ice.entry.controller', [])
 
             $scope.processPastedSequence = function (event, part) {
                 let sequenceString = event.originalEvent.clipboardData.getData('text/plain');
-                Util.update("rest/parts/" + part.id + "/sequence", {sequence: sequenceString}, {},
+                Util.update("rest/parts/" + part.id + "/sequence", {sequence: sequenceString}, {isPaste: true},
                     function (result) {
                         if (!result)
                             return;

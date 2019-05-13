@@ -61,7 +61,7 @@ public class BulkFileSBOLUpload {
 ////                sequence.setEntry(entry);
 //                if (sequenceUser != null)
 //                    sequence.setSequenceUser(sequenceUser);
-                new PartSequence(userId, Long.toString(update.getEntryId())).update(visitor.getFeaturedDNASequence());
+                new PartSequence(userId, Long.toString(update.getEntryId())).update(visitor.getFeaturedDNASequence(), false);
             }
         } catch (Exception e) {
             Logger.error(e);

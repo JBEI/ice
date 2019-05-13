@@ -210,12 +210,12 @@ public class PartSequence {
      *
      * @param updatedSequence new sequence to associate with this part
      */
-    public void update(FeaturedDNASequence updatedSequence) {
+    public void update(FeaturedDNASequence updatedSequence, boolean parseSequence) {
         entryAuthorization.expectWrite(userId, entry);
         Sequence existing = sequenceDAO.getByEntry(this.entry);
 
         // update with raw sequence if no sequence object is passed
-        if ((updatedSequence.getFeatures() == null)) {
+        if (parseSequence) {
             // sometimes the whole sequence is sent in the string portion (when there are no features)
             // no features to add
             updatedSequence = GeneralParser.parse(updatedSequence.getSequence());

@@ -121,7 +121,7 @@ public class PartSequenceTest {
         feature.setType("misc_feature");
         feature.getLocations().add(new DNAFeatureLocation(61, 89));
         dnaSequence.getFeatures().add(feature);
-        partSequence.update(dnaSequence);
+        partSequence.update(dnaSequence, false);
 
         // check for correct update
         List<DNAFeature> currentFeatures = partSequence.get().getFeatures();
@@ -134,7 +134,7 @@ public class PartSequenceTest {
         feature.getLocations().add(new DNAFeatureLocation(20, 40));
         dnaSequence.getFeatures().clear();
         dnaSequence.getFeatures().add(feature);
-        partSequence.update(dnaSequence);
+        partSequence.update(dnaSequence, false);
 
         // check for correct update
         currentFeatures = partSequence.get().getFeatures();
@@ -148,7 +148,7 @@ public class PartSequenceTest {
         secondFeature.setType("promoter");
         secondFeature.getLocations().add(new DNAFeatureLocation(0, 10));
         dnaSequence.getFeatures().add(secondFeature);
-        partSequence.update(dnaSequence);
+        partSequence.update(dnaSequence, false);
 
         // check
         FeaturedDNASequence featuredDNASequence = partSequence.get();

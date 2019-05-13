@@ -593,12 +593,13 @@ public class PartResource extends RestResource {
     @Path("/{id}/sequence")
     public Response updateSequence(@PathParam("id") final String partId,
                                    @DefaultValue("false") @QueryParam("add") boolean add,
+                                   @QueryParam("isPaste") boolean isPaste,
                                    FeaturedDNASequence sequence) {
         try {
             final String userId = requireUserId();
             log(userId, "updating sequence for entry " + partId);
             PartSequence partSequence = new PartSequence(userId, partId);
-            partSequence.update(sequence);
+            partSequence.update(sequence, isPaste);
             return super.respond(true);
         } catch (Exception e) {
             Logger.error(e);
