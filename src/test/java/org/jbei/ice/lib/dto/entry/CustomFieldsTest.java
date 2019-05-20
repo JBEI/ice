@@ -5,7 +5,10 @@ import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
 import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldDAO;
-import org.jbei.ice.storage.model.*;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.CustomEntryFieldModel;
+import org.jbei.ice.storage.model.Plasmid;
+import org.jbei.ice.storage.model.Strain;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -93,7 +96,7 @@ public class CustomFieldsTest {
         // check what is associated with entry
         strain = (Strain) DAOFactory.getEntryDAO().get(strain.getId());
         Assert.assertNotNull(strain);
-        Assert.assertTrue(strain.getParameters().size() == 1);
+        Assert.assertEquals(1, strain.getParameters().size());
         created = strain.getParameters().get(0).toDataTransferObject();
         Assert.assertEquals(created.getName(), field.getName());
         Assert.assertEquals(created.getValue(), field.getValue());
@@ -117,7 +120,7 @@ public class CustomFieldsTest {
 
         List<CustomField> result = fields.getFieldsForPart(userId, strain.getId());
         Assert.assertNotNull(result);
-        Assert.assertTrue(result.size() == 10);
+        Assert.assertEquals(10, result.size());
 
         for (CustomField field : result) {
             Assert.assertTrue(ids.contains(field.getId()));
@@ -137,7 +140,7 @@ public class CustomFieldsTest {
         // verify custom field creation
         strain = (Strain) DAOFactory.getEntryDAO().get(strain.getId());
         Assert.assertNotNull(strain);
-        Assert.assertTrue(strain.getParameters().size() == 1);
+        Assert.assertEquals(1, strain.getParameters().size());
         CustomField created = strain.getParameters().get(0).toDataTransferObject();
         Assert.assertEquals(created.getName(), field.getName());
         Assert.assertEquals(created.getValue(), field.getValue());

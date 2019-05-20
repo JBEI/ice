@@ -18,7 +18,7 @@ public class CustomEntryFieldValueModel implements DataModel {
     @JoinColumn(name = "entries_id", nullable = false)
     private Entry entry;
 
-    @OneToOne(optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "custom_entry_field_id", nullable = false)
     private CustomEntryFieldModel field;
 
@@ -57,6 +57,7 @@ public class CustomEntryFieldValueModel implements DataModel {
     @Override
     public CustomEntryField toDataTransferObject() {
         CustomEntryField field = new CustomEntryField();
+        field.setFieldType(this.field.getFieldType());
         field.setId(this.id);
         field.setLabel(this.field.getLabel());
         field.setValue(this.value);

@@ -838,6 +838,7 @@ angular.module('ice.admin.controller', [])
         $scope.selection = 'plasmid';
 
         $scope.options = [
+            {name: "Built in field", value: 'EXISTING'},
             {name: 'Text', value: 'TEXT_INPUT'},
             {name: 'Options', value: 'MULTI_CHOICE'},
             {name: 'Options with Text', value: 'MULTI_CHOICE_PLUS'}];
@@ -903,12 +904,16 @@ angular.module('ice.admin.controller', [])
             });
         };
     })
-    .controller('AdminNewCustomField', function (Util, $scope, $uibModalInstance, entryType) {
+    .controller('AdminNewCustomField', function (Util, $scope, $uibModalInstance, entryType, EntryService) {
         $scope.field = {required: false, options: [], entryType: entryType.toUpperCase()};
         $scope.options = [
+            {name: "Built in field", value: 'EXISTING'},
             {name: 'Text', value: 'TEXT_INPUT'},
             {name: 'Options', value: 'MULTI_CHOICE'},
             {name: 'Options with Text', value: 'MULTI_CHOICE_PLUS'}];
+
+        $scope.existingOptions = EntryService.getFieldsForType(entryType);
+        console.log($scope.existingOptions);
 
         // adds option
         $scope.addOption = function (afterIndex) {
@@ -929,6 +934,13 @@ angular.module('ice.admin.controller', [])
                     $scope.field.options = [{}];
                     break;
             }
+        };
+
+        $scope.existingFieldSelected = function () {
+            console.log($scope.field.existingField);
+            $scope.field.required = $scope.field.existingField.required;
+            $scope.field.label = $scope.field.existingField.label;
+            $scope.field.options = [{name: "schema", value: $scope.field.existingField.schema}]
         };
 
         $scope.createCustomLink = function () {

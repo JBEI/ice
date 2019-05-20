@@ -1,19 +1,27 @@
 <div class="modal-header">
     <button type="button" class="close" ng-click="$dismiss('cancel')">&times;</button>
     <span class="bebas modal-title" style="color: #657B83; font-size: 19px">
-        <i class="fa fa-fw fa-paint-brush"></i> &nbsp;Add new custom field for {{field.entryType}}
+        <i class="fa fa-fw fa-paint-brush"></i> &nbsp;Create custom field for {{field.entryType}}
     </span>
 </div>
 
 <div class="modal-body">
 
-    <b>Enter a unique label for field</b><br>
-    <input type="text" maxlength="35" ng-model="field.label"/>
-
-    <br><br>
     <b>Select type</b><br>
     <select class="input_box pull_down" ng-change="change()" ng-model="field.fieldType" size="1"
             ng-options="option.name for option in options"></select>
+    <br><br>
+
+    <div ng-if="field.fieldType.value === 'EXISTING'">
+        <b>Select built in field</b><br>
+        <select class="input_box pull_down" ng-change="existingFieldSelected()" ng-model="field.existingField" size="1"
+                ng-options="option.label for option in existingOptions"></select>
+        <br><br>
+    </div>
+
+    <b>Enter a unique label for field</b><br>
+    <input type="text" maxlength="35" ng-model="field.label"/>
+
     <br><br>
 
     <div ng-if="field.fieldType.value === 'MULTI_CHOICE' || field.fieldType.value === 'MULTI_CHOICE_PLUS'">
@@ -46,7 +54,7 @@
 
     <br><br><br>
 
-    <div class="well">
+    <div class="well" ng-if="field.fieldType.value !== 'EXISTING'">
         <div class="row">
             <div class="col-md-4">
                 <b class="text-nowrap">{{field.label}}</b> <span class="required" ng-if="field.required">*</span>

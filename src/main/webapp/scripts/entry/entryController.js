@@ -324,7 +324,7 @@ angular.module('ice.entry.controller', [])
             }
 
             $scope.linkOptions = EntryService.linkOptions(result.type);
-            $scope.selectedFields = EntryService.getFieldsForType(result.type);
+            $scope.selectedFields = $scope.entry.fields; // EntryService.getFieldsForType(result.type);
             $scope.activePart = $scope.entry;
         });
 
@@ -400,8 +400,6 @@ angular.module('ice.entry.controller', [])
                 $anchorScroll();
                 return;
             }
-
-            console.log($scope.entry.bioSafetyLevel);
 
             if ($scope.entry.bioSafetyLevel === 'Level 1')
                 $scope.entry.bioSafetyLevel = 1;

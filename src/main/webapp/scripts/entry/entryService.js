@@ -525,15 +525,49 @@ angular.module('ice.entry.service', [])
                     return entry;
                 }
 
-                entry.customFields.forEach(function (custom) {
-                    if (!custom.label || !custom.value)
-                        return;
+                console.log(entry.customFields);
 
-                    entry[custom.label] = custom.value;
-                    fields.push({schema: custom.label, label: custom.label});
+                entry.customFields.forEach(function (custom) {
+                    if (!custom.label)
+                        return;
+                    //
+                    // entry[custom.label] = custom.value;
+                    // fields.push({schema: custom.label, label: custom.label});
+                    const customField = {label: custom.label, required: custom.required, isCustom: true};
+                    switch (custom.fieldType) {
+                        case "MULTI_CHOICE":
+                        case "MULTI_CHOICE_PLUS":
+                            customField.options = [];
+                            customField.inputType = "options";
+                            custom.options.forEach(function (each) {
+                                customField.options.push({value: each.name, text: each.name})
+                            });
+
+                            if (custom.fieldType === "MULTI_CHOICE_PLUS")
+                                customField.options.push({value: "Other", text: "Other"});
+
+                            fields.push(customField);
+                            break;
+
+                        case "EXISTING":
+                            if (!custom.options || !custom.options.length)
+                                return;
+
+                            // schema is contained in options. assuming only one
+                            // todo : it is set as {name: 'schema', value: schema_value}
+                            const schema = custom.options[0].name;
+                            for (let i = 0; i < fields.length; i += 1) {
+                                if (fields[i].schema === schema) {
+                                    fields[i].required = custom.required;
+                                    fields[i].label = custom.label;
+                                    break;
+                                }
+                            }
+                    }
                 });
 
                 entry.fields = sortEntryFields(fields);
+                console.log(entry);
                 return entry;
             },
 
@@ -546,8 +580,8 @@ angular.module('ice.entry.service', [])
             // also converts entry to form that UI can work with
             // also sets "fields" parameter
             setNewEntryFields: function (entry) {
-                var type = entry.type.toLowerCase();
-                var fields = getFieldsForType(type);
+                let type = entry.type.toLowerCase();
+                let fields = getFieldsForType(type);
 
                 fields.forEach(function (field) {
                     if (field.inputType === 'autoCompleteAdd' || field.inputType === 'add') {
@@ -593,9 +627,24 @@ angular.module('ice.entry.service', [])
                             if (custom.fieldType === "MULTI_CHOICE_PLUS")
                                 customField.options.push({value: "Other", text: "Other"});
 
+                            fields.push(customField);
                             break;
+
+                        case "EXISTING":
+                            if (!custom.options || !custom.options.length)
+                                return;
+
+                            // schema is contained in options. assuming only one
+                            // todo : it is set as {name: 'schema', value: schema_value}
+                            const schema = custom.options[0].name;
+                            for (let i = 0; i < fields.length; i += 1) {
+                                if (fields[i].schema === schema) {
+                                    fields[i].required = custom.required;
+                                    fields[i].label = custom.label;
+                                    break;
+                                }
+                            }
                     }
-                    fields.push(customField);
                 });
 
                 entry.fields = sortEntryFields(fields);
