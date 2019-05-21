@@ -941,8 +941,6 @@ angular.module('ice.entry.controller', [])
             $scope.context = EntryContextUtil.getContext();
 
             $scope.isFileUpload = false;
-            const sessionId = Authentication.getSessionId();
-            $scope.sessionId = sessionId;
             $scope.existingVectorEditorSequenceModel = undefined;
 
             $rootScope.$on("VectorEditorSequenceModel", function (event, data) {
@@ -1684,7 +1682,7 @@ angular.module('ice.entry.controller', [])
                 url: "rest/file/sequence",
                 method: 'POST',
                 removeAfterUpload: true,
-                headers: {"X-ICE-Authentication-SessionId": sessionId},
+                headers: {"X-ICE-Authentication-SessionId": Authentication.getSessionId()},
                 autoUpload: true,
                 queueLimit: 1 // can only upload 1 file
             });
