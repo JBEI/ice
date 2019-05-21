@@ -949,6 +949,14 @@ angular.module('ice.entry.controller', [])
                 $scope.existingVectorEditorSequenceModel = data;
             });
 
+            // determines if the specified field has a value that allows is to be displayed
+            $scope.fieldHasValue = function (field) {
+                if (field.isCustom)
+                    return true;
+
+                return $scope.entry[field.schema] != null && $scope.entry[field.schema].toString().length !== 0;
+            };
+
             // open vector editor modal
             $scope.openSequenceInFullVectorEditor = function () {
                 let sequence;

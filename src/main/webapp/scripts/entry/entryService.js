@@ -2,15 +2,15 @@
 
 angular.module('ice.entry.service', [])
     .factory('Selection', function ($rootScope, $cookies) {
-        var selectedEntries = {};
-        var selectedSearchResultsCount = 0;
-        var selectedSearchNotificationSent = false;  // send notification when at least one is selected and then none
-        var canEdit = false;
-        var allSelection = {};
-        var canDelete = false;
-        var selectedTypes = {};
-        var searchQuery = undefined;
-        var userId = $cookies.get('userId');
+        let selectedEntries = {};
+        let selectedSearchResultsCount = 0;
+        let selectedSearchNotificationSent = false;  // send notification when at least one is selected and then none
+        let canEdit = false;
+        let allSelection = {};
+        let canDelete = false;
+        let selectedTypes = {};
+        let searchQuery = undefined;
+        let userId = $cookies.get('userId');
 
         return {
             selectEntry: function (entry) {
@@ -31,7 +31,7 @@ angular.module('ice.entry.service', [])
 
                     // remove type
                     if (selectedTypes[entry.type] && selectedTypes[entry.type].length) {
-                        var idx = selectedTypes[entry.type].indexOf(entry.id);
+                        let idx = selectedTypes[entry.type].indexOf(entry.id);
                         selectedTypes[entry.type].splice(idx, 1);
                         if (selectedTypes[entry.type].length === 0)
                             delete selectedTypes[entry.type];
@@ -69,7 +69,7 @@ angular.module('ice.entry.service', [])
             },
 
             hasSelection: function () {
-                return (allSelection.type && allSelection.type != 'NONE') || selectedSearchResultsCount > 0;
+                return (allSelection.type && allSelection.type !== 'NONE') || selectedSearchResultsCount > 0;
             },
 
             setTypeSelection: function (type) {
@@ -80,19 +80,19 @@ angular.module('ice.entry.service', [])
 
                 // selects a specific type of entry from the list e.g. all plasmids
                 allSelection.type = type.toUpperCase();
-                if (allSelection.type != 'NONE')
+                if (allSelection.type !== 'NONE')
                     $rootScope.$emit("EntrySelected", 1);
                 else
                     this.reset();
             },
 
             searchEntrySelected: function (entry) {
-                return selectedEntries[entry.id] != undefined;
+                return selectedEntries[entry.id] !== undefined;
             },
 
             getSelectedEntries: function () {
-                var selected = [];
-                for (var k in selectedEntries) {
+                let selected = [];
+                for (let k in selectedEntries) {
                     if (selectedEntries.hasOwnProperty(k) && selectedEntries[k]) {
                         selected.push({id: k, visible: selectedEntries[k].visible});
                     }
@@ -109,10 +109,10 @@ angular.module('ice.entry.service', [])
             },
 
             canEdit: function () {
-                var count = 0;
+                let count = 0;
                 // selectedTypes is the type of entries selected
-                for (var k in selectedTypes) if (selectedTypes.hasOwnProperty(k)) ++count;
-                return !this.allSelected() && canEdit && selectedSearchResultsCount > 0 && count == 1 && !this.canRestore();
+                for (let k in selectedTypes) if (selectedTypes.hasOwnProperty(k)) ++count;
+                return !this.allSelected() && canEdit && selectedSearchResultsCount > 0 && count === 1 && !this.canRestore();
             },
 
             canDelete: function () {
@@ -120,9 +120,9 @@ angular.module('ice.entry.service', [])
             },
 
             canRestore: function () {
-                if (allSelection.type && allSelection.type == 'ALL')
+                if (allSelection.type && allSelection.type === 'ALL')
                     return false;
-                return this.hasSelection() && this.getSelectedEntries()[0].visible == 'DELETED';
+                return this.hasSelection() && this.getSelectedEntries()[0].visible === 'DELETED';
             },
 
             isAdmin: function () {
@@ -137,12 +137,12 @@ angular.module('ice.entry.service', [])
                 if (this.allSelected())
                     return true;
 
-                return allSelection.type == entry.type.toUpperCase();
+                return allSelection.type === entry.type.toUpperCase();
             },
 
             // have all entries been marked for selection?
             allSelected: function () {
-                return allSelection.type == 'ALL';
+                return allSelection.type === 'ALL';
             },
 
             setSearch: function (query) {
@@ -168,8 +168,8 @@ angular.module('ice.entry.service', [])
         }
     })
     .factory('EntryService', function () {
-        var toStringArray = function (objArray) {
-            var result = [];
+        let toStringArray = function (objArray) {
+            let result = [];
             if (objArray && objArray.length) {
                 objArray.forEach(function (object) {
                     if (!object || !object.value || object.value === "")
@@ -355,8 +355,8 @@ angular.module('ice.entry.service', [])
                     if (part[field.schema].length === 0) {
                         field.invalid = true;
                     } else {
-                        for (var i = 0; i < part[field.schema].length; i += 1) {
-                            var fieldValue = part[field.schema][i].value;
+                        for (let i = 0; i < part[field.schema].length; i += 1) {
+                            let fieldValue = part[field.schema][i].value;
                             field.invalid = !fieldValue || fieldValue === '';
                         }
                     }
@@ -402,7 +402,7 @@ angular.module('ice.entry.service', [])
         };
 
         const getFieldsForType = function (type) {
-            var fields = angular.copy(partFields);
+            let fields = angular.copy(partFields);
             type = type.toLowerCase();
 
             switch (type.toLowerCase()) {
@@ -448,7 +448,7 @@ angular.module('ice.entry.service', [])
                 sortMap[value] = [];
             });
 
-            for (var i = 0; i < fields.length; i += 1) {
+            for (let i = 0; i < fields.length; i += 1) {
                 if (!fields[i].inputType)
                     fields[i].inputType = "options";
                 const type = fields[i].inputType;
@@ -481,8 +481,9 @@ angular.module('ice.entry.service', [])
 
             // converts to a form that the backend can work with
             getTypeData: function (entry) {
-                // var type = entry.type.toLowerCase();
-                // var fields = getFieldsForType(type);
+                // let type = entry.type.toLowerCase();
+                // let fields = getFieldsForType(type);
+                console.log(entry);
 
                 entry.fields.forEach(function (field) {
                     if (field.subSchema) {
@@ -511,8 +512,8 @@ angular.module('ice.entry.service', [])
 
             // inverse of the above. converts to form ui can work with
             convertToUIForm: function (entry) {
-                var type = entry.type.toLowerCase();
-                var fields = getFieldsForType(type);
+                let type = entry.type.toLowerCase();
+                let fields = getFieldsForType(type);
 
                 fields.forEach(function (field) {
                     if (field.subSchema && entry[field.subSchema]) {
@@ -533,7 +534,12 @@ angular.module('ice.entry.service', [])
                     //
                     // entry[custom.label] = custom.value;
                     // fields.push({schema: custom.label, label: custom.label});
-                    const customField = {label: custom.label, required: custom.required, isCustom: true};
+                    const customField = {
+                        label: custom.label,
+                        required: custom.required,
+                        isCustom: true,
+                        value: custom.value
+                    };
                     switch (custom.fieldType) {
                         case "MULTI_CHOICE":
                         case "MULTI_CHOICE_PLUS":
