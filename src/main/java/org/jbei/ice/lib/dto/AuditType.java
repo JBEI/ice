@@ -5,7 +5,8 @@ package org.jbei.ice.lib.dto;
  */
 public enum AuditType {
 
-    READ("+r");
+    READ("+r"),
+    EDIT("e");
 
     private String abbrev;
 
