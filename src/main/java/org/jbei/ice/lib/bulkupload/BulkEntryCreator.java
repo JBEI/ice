@@ -29,10 +29,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Creates entries for bulk uploads
@@ -45,7 +42,6 @@ public class BulkEntryCreator {
     private final EntryDAO entryDAO;
     private final EntryCreator creator;
     private final AccountController accountController;
-    private final EntryController entryController;
     private final BulkUploadAuthorization authorization;
     private final BulkUploadController controller;
 
@@ -54,7 +50,6 @@ public class BulkEntryCreator {
         entryDAO = DAOFactory.getEntryDAO();
         creator = new EntryCreator();
         accountController = new AccountController();
-        entryController = new EntryController();
         authorization = new BulkUploadAuthorization();
         controller = new BulkUploadController();
     }
@@ -391,7 +386,7 @@ public class BulkEntryCreator {
                 if (otherEntry.getVisibility() == null || otherEntry.getVisibility() != Visibility.DRAFT.getValue())
                     otherEntry.setVisibility(Visibility.DRAFT.getValue());
 
-                entryController.update(userId, otherEntry);
+                updateEntry(otherEntry);
             }
 
             if ((entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
@@ -408,7 +403,7 @@ public class BulkEntryCreator {
 //            editor.setStrainPlasmids(account, strain, strain.getPlasmids());
 //        }
 
-        entryController.update(userId, entry);
+        updateEntry(entry);
 
         // update bulk upload. even if no new entry was created, entries belonging to it was updated
         if (draft != null) {
@@ -417,6 +412,17 @@ public class BulkEntryCreator {
             dao.update(draft);
         }
         return autoUpdate;
+    }
+
+    private void updateEntry(Entry entry) {
+        if (entry == null) {
+            return;
+        }
+
+        entry.setModificationTime(Calendar.getInstance().getTime());
+        if (entry.getVisibility() == null)
+            entry.setVisibility(Visibility.OK.getValue());
+        entryDAO.update(entry);
     }
 
     public BulkUploadInfo createOrUpdateEntries(String userId, long draftId, List<PartData> data) {

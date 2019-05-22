@@ -389,15 +389,26 @@ public class BulkUploadController {
                 }
             }
 
-            entryController.update(userId, entry);
+            updateEntry(entry);
             if (plasmid != null)
-                entryController.update(userId, plasmid);
+                updateEntry(plasmid);
         }
 
         // when done approving, delete the bulk upload record but not the entries associated with it.
         bulkUpload.getContents().clear();
         dao.delete(bulkUpload);
         return true;
+    }
+
+    private void updateEntry(Entry entry) {
+        if (entry == null) {
+            return;
+        }
+
+        entry.setModificationTime(Calendar.getInstance().getTime());
+        if (entry.getVisibility() == null)
+            entry.setVisibility(Visibility.OK.getValue());
+        entryDAO.update(entry);
     }
 
     public SequenceInfo addSequence(String userId, long bulkUploadId, long entryId, String sequenceString,

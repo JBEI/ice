@@ -675,7 +675,8 @@ public class PartResource extends RestResource {
                            final PartData partData) {
         final String userId = requireUserId();
         try {
-            final long id = controller.updatePart(userId, partId, partData);
+            Entries entries = new Entries(userId);
+            final long id = entries.update(partId, partData);
             log(userId, "update entry " + id);
             partData.setId(id);
             return super.respond(partData);
