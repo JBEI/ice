@@ -79,7 +79,7 @@ public class SequenceUtil {
         String name = dnaFeature.getName().length() < 127 ? dnaFeature.getName() :
                 dnaFeature.getName().substring(0, 123) + "...";
         Feature feature = new Feature(name, dnaFeature.getIdentifier(), featureSequence, dnaFeature.getType());
-        if (dnaFeature.getLocations() != null)
+        if (dnaFeature.getLocations() != null && !dnaFeature.getLocations().isEmpty())
             feature.setUri(dnaFeature.getLocations().get(0).getUri());
 
         SequenceFeature sequenceFeature = new SequenceFeature(sequence, feature,
