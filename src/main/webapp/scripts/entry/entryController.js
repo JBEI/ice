@@ -942,6 +942,7 @@ angular.module('ice.entry.controller', [])
 
             $scope.isFileUpload = false;
             $scope.existingVectorEditorSequenceModel = undefined;
+            $scope.sessionId = Authentication.getSessionId();
 
             $rootScope.$on("VectorEditorSequenceModel", function (event, data) {
                 $scope.existingVectorEditorSequenceModel = data;
