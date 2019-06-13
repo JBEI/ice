@@ -323,6 +323,8 @@ public class InfoToModelFactory {
                     existingMarkers.add(marker);
                 }
 
+                if (currentItem.length() > 50)
+                    currentItem = currentItem.substring(0, 50);
                 marker.setName(currentItem);
                 marker.setEntry(entry);
                 markers.add(marker);
