@@ -16,7 +16,7 @@ angular.module('ice.collection.controller', [])
         // $scope.selectedFolder (defaults to "personal" if not set)
         $scope.updateSelectedCollectionFolders = function () {
             let folder = $scope.selectedFolder ? $scope.selectedFolder : "personal";
-            if (folder == "available")
+            if (folder === "available")
                 folder = "featured";
 
             Util.list("rest/collections/" + folder.toUpperCase() + "/folders", function (result) {
@@ -30,7 +30,7 @@ angular.module('ice.collection.controller', [])
         }
 
         $scope.sortCollectionFolders = function () {
-            if ($scope.sortParams.field == 'creationTime') {
+            if ($scope.sortParams.field === 'creationTime') {
                 if (!$scope.sortParams.asc) {
                     $scope.sortParams.field = 'folderName';
                 }
@@ -57,7 +57,7 @@ angular.module('ice.collection.controller', [])
 
         // retrieve collections contained in the selectedFolder (only if a collection)
         if (isNaN($scope.selectedFolder)) {
-            if ($scope.selectedFolder && $scope.selectedFolder.toLowerCase() == "available")
+            if ($scope.selectedFolder && $scope.selectedFolder.toLowerCase() === "available")
                 $scope.selectedFolder = "featured";
 
             FolderSelection.selectCollection($scope.selectedFolder);
@@ -116,7 +116,7 @@ angular.module('ice.collection.controller', [])
         };
 
         // Menu count change handler
-        $scope.$on("UpdateCollectionCounts", function (event) {
+        $scope.$on("UpdateCollectionCounts", function () {
             $scope.updateCollectionCounts();
         });
 
@@ -204,15 +204,15 @@ angular.module('ice.collection.controller', [])
             if (!result)
                 return;
 
-            $scope.folder.canSetPublicPermission = (result.value.toLowerCase() == "no") || $rootScope.user.isAdmin;
+            $scope.folder.canSetPublicPermission = (result.value.toLowerCase() === "no") || $rootScope.user.isAdmin;
         });
 
         // retrieve permissions for folder
         Util.list("rest/folders/" + folder.id + "/permissions", function (result) {
             angular.forEach(result, function (perm) {
                 let permission = angular.copy(perm);
-                permission.canWrite = perm.type == 'WRITE_FOLDER';
-                permission.canRead = perm.type == 'READ_FOLDER';
+                permission.canWrite = perm.type === 'WRITE_FOLDER';
+                permission.canRead = perm.type === 'READ_FOLDER';
                 $scope.permissions.push(permission);
             });
         });
@@ -289,16 +289,16 @@ angular.module('ice.collection.controller', [])
             return true;
         };
 
-        $scope.userSelectionForPermissionAdd = function (item, model, label) {
+        $scope.userSelectionForPermissionAdd = function (item) {
             $scope.newPermission.articleId = item.id;
         };
 
         $scope.removePermission = function (permission) {
             let pid = permission.id;
-            if (permission.article == "REMOTE")
+            if (permission.article === "REMOTE")
                 pid = permission.articleId;
 
-            Util.remove("rest/folders/" + folder.id + "/permissions/" + pid, {}, function (result) {
+            Util.remove("rest/folders/" + folder.id + "/permissions/" + pid, {}, function () {
                 let idx = $scope.permissions.indexOf(permission);
                 if (idx < 0)
                     return;
@@ -316,15 +316,15 @@ angular.module('ice.collection.controller', [])
             }
             $scope.newPermission.typeId = folder.id;
 
-            if ($scope.newPermission.article.toLowerCase() == "remote") {
+            if ($scope.newPermission.article.toLowerCase() === "remote") {
                 $scope.newPermission.userId = $scope.selectedPermission;
             }
 
             console.log($scope.newPermission);
 
             Util.post("rest/folders/" + folder.id + "/permissions", $scope.newPermission, function (result) {
-                result.canWrite = result.type == 'WRITE_FOLDER';
-                result.canRead = result.type == 'READ_FOLDER';
+                result.canWrite = result.type === 'WRITE_FOLDER';
+                result.canRead = result.type === 'READ_FOLDER';
                 $scope.permissions.push(result);
 
                 $scope.newPermission.articleId = undefined;
@@ -336,12 +336,12 @@ angular.module('ice.collection.controller', [])
         $scope.enableDisablePublicRead = function () {
             if (!$scope.folder.publicReadAccess) {
                 //enable
-                Util.update("rest/folders/" + folder.id + "/permissions/public", {}, {}, function (result) {
+                Util.update("rest/folders/" + folder.id + "/permissions/public", {}, {}, function () {
                     folder.publicReadAccess = true;
                 })
             } else {
                 // disable
-                Util.remove("rest/folders/" + folder.id + "/permissions/public", {}, function (result) {
+                Util.remove("rest/folders/" + folder.id + "/permissions/public", {}, function () {
                     folder.publicReadAccess = false;
                 });
             }
@@ -409,14 +409,14 @@ angular.module('ice.collection.controller', [])
             $scope.serverError = undefined;
             $scope.progress = progress;
 
-            if (progress != "100")  // isUploading is always true until it returns
+            if (progress !== "100")  // isUploading is always true until it returns
                 return;
 
             // upload complete. have processing
             $scope.processingFile = item.file.name;
         };
 
-        uploader.onSuccessItem = function (item, response, status, header) {
+        uploader.onSuccessItem = function (item, response) {
             $scope.serverResult = {data: response, total: response.length, valid: []};
             for (let i = 0; i < response.length; i += 1) {
                 let datum = response[i];
@@ -430,7 +430,7 @@ angular.module('ice.collection.controller', [])
             $scope.processingFile = undefined;
         };
 
-        uploader.onErrorItem = function (item, response, status, headers) {
+        uploader.onErrorItem = function () {
             $scope.serverError = true;
             $scope.processingFile = undefined;
         };
@@ -565,8 +565,6 @@ angular.module('ice.collection.controller', [])
             }
         }
 
-        console.log($scope.entryHeaders);
-
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
         let subCollection = $stateParams.collection;   // folder id or one of the defined collections (Shared etc)   ]
         // retrieve folder contents. all folders are redirected to /folder/{id} which triggers this
@@ -604,7 +602,7 @@ angular.module('ice.collection.controller', [])
             } else {
                 // not selected by user, remove from stored list
                 let i = storedFields.indexOf(header.field);
-                if (i != -1) {
+                if (i !== -1) {
                     storedFields.splice(i, 1);
                     localStorageService.set('entryHeaderFields', storedFields);
                 }
@@ -614,7 +612,7 @@ angular.module('ice.collection.controller', [])
             $scope.folderPageChange();
         };
 
-        $rootScope.$on("RefreshAfterDeletion", function (event, data) {
+        $rootScope.$on("RefreshAfterDeletion", function () {
             $scope.params.currentPage = 1;
             $scope.folderPageChange();
         });
@@ -622,7 +620,7 @@ angular.module('ice.collection.controller', [])
         $scope.sort = function (sortType) {
             $scope.folder = null;
             $scope.params.offset = 0;
-            if ($scope.params.sort == sortType)
+            if ($scope.params.sort === sortType)
                 $scope.params.asc = !$scope.params.asc;
             else
                 $scope.params.asc = false;
@@ -676,7 +674,7 @@ angular.module('ice.collection.controller', [])
                 $scope.params.limit = 1;
 
                 Util.get("rest/" + resource + "/" + $scope.params.folderId + "/entries", function (result) {
-                    if (resource == "collections") {
+                    if (resource === "collections") {
                         callback(result.data[0].id);
                     } else {
                         callback(result.entries[0].id);
@@ -693,7 +691,7 @@ angular.module('ice.collection.controller', [])
             $location.path(url);
             $location.search({});
 
-            if ($scope.folder && $scope.folder.type == 'REMOTE') {
+            if ($scope.folder && $scope.folder.type === 'REMOTE') {
                 $location.search("folderId", $scope.folder.id);
                 $location.search("remote", true);
             }
@@ -702,7 +700,7 @@ angular.module('ice.collection.controller', [])
         $scope.tooltipDetails = function (e) {
             $scope.currentTooltip = undefined;
             let params = {};
-            if ($scope.folder && $scope.folder.type == 'REMOTE') {
+            if ($scope.folder && $scope.folder.type === 'REMOTE') {
                 params.remote = true;
                 params.folderId = $scope.folder.id;
             }
@@ -865,7 +863,7 @@ angular.module('ice.collection.controller', [])
                                                   Authentication, CollectionMenuOptions, Util) {
         // todo : set on all
         let searchUrl = "search";
-        if ($location.path().slice(0, searchUrl.length) != searchUrl) {
+        if ($location.path().slice(0, searchUrl.length) !== searchUrl) {
             $location.search('q', null);
         }
 
@@ -874,7 +872,7 @@ angular.module('ice.collection.controller', [])
 
         // retrieve site wide settings
         $scope.pageCounts = function (currentPage, resultCount, maxPageCount) {
-            if (maxPageCount == undefined)
+            if (maxPageCount === undefined)
                 maxPageCount = 30;
             let pageNum = ((currentPage - 1) * maxPageCount) + 1;
 
@@ -927,7 +925,7 @@ angular.module('ice.collection.controller', [])
             for (let idx = 0; idx < $scope.shoppingCartContents.length; idx += 1)
                 contentIds.push($scope.shoppingCartContents[idx].id);
 
-            Util.update("rest/samples/requests", contentIds, {status: 'PENDING'}, function (result) {
+            Util.update("rest/samples/requests", contentIds, {status: 'PENDING'}, function () {
                 $scope.shoppingCartContents = [];
                 $scope.openShoppingCart = false;
             });
@@ -940,7 +938,7 @@ angular.module('ice.collection.controller', [])
                 return false;
 
             for (let idx = 0; idx < $scope.shoppingCartContents.length; idx += 1) {
-                if ($scope.shoppingCartContents[idx].partData.id == entry.id) {
+                if ($scope.shoppingCartContents[idx].partData.id === entry.id) {
                     return true;
                 }
             }
@@ -953,7 +951,7 @@ angular.module('ice.collection.controller', [])
             if (entry) {
                 let partId = entry.id;
                 for (let idx = 0; idx < $scope.shoppingCartContents.length; idx += 1) {
-                    if ($scope.shoppingCartContents[idx].partData.id == partId) {
+                    if ($scope.shoppingCartContents[idx].partData.id === partId) {
                         content = $scope.shoppingCartContents[idx];
                         break;
                     }
@@ -994,12 +992,12 @@ angular.module('ice.collection.controller', [])
         $scope.hideAddCollection = true;
         $scope.showQueryCollectionFolder = false;
 
-        $scope.$on("ShowCollectionFolderAdd", function (e) {
+        $scope.$on("ShowCollectionFolderAdd", function () {
             $scope.hideAddCollection = false;
             $scope.showQueryCollectionFolder = false;
         });
 
-        $scope.$on("SetShowQueryCollectionFolder", function (e) {
+        $scope.$on("SetShowQueryCollectionFolder", function () {
             $scope.showQueryCollectionFolder = !$scope.showQueryCollectionFolder;
             $scope.hideAddCollection = true;
             if ($scope.showQueryCollectionFolder === false)
@@ -1028,7 +1026,7 @@ angular.module('ice.collection.controller', [])
                 }
 
                 // if the deleted folder is one user is currently on, re-direct to personal collection
-                if (folder.id == $stateParams.collection) {
+                if (folder.id === $stateParams.collection) {
                     $location.path("folders/personal");
                 }
             });
