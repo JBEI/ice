@@ -26,7 +26,6 @@ import java.util.Map;
  * @author Hector Plahar
  */
 public class Annotations {
-
     private final SequenceDAO sequenceDAO;
     private final String userId;
     private final FeatureDAO featureDAO;
@@ -36,6 +35,7 @@ public class Annotations {
     private final FeatureCurationModelDAO curationModelDAO;
     private final EntryDAO entryDAO;
     private final AccountDAO accountDAO;
+    private final BlastPlus blastPlus;
 
     public Annotations(String userId) {
         this.sequenceDAO = DAOFactory.getSequenceDAO();
@@ -47,6 +47,7 @@ public class Annotations {
         this.curationModelDAO = DAOFactory.getFeatureCurationModelDAO();
         this.entryDAO = DAOFactory.getEntryDAO();
         this.accountDAO = DAOFactory.getAccountDAO();
+        this.blastPlus = new BlastPlus("auto-annotation", "ice");
     }
 
     /**
@@ -133,7 +134,7 @@ public class Annotations {
         query.setSequence(sequenceString);
 
         try {
-            List<DNAFeature> features = BlastPlus.runCheckFeatures(query);
+            List<DNAFeature> features = blastPlus.runCheckFeatures(query);
             FeaturedDNASequence dnaSequence = new FeaturedDNASequence();
             if (features.isEmpty())
                 return dnaSequence;
@@ -187,7 +188,7 @@ public class Annotations {
         query.setSequence(sequence.getSequence());
 
         try {
-            List<DNAFeature> features = BlastPlus.runCheckFeatures(query);
+            List<DNAFeature> features = blastPlus.runCheckFeatures(query);
             sequence.getFeatures().addAll(features);
             return sequence;
         } catch (BlastException e) {

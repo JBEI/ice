@@ -174,6 +174,7 @@ angular.module('ice.entry.service', [])
                 objArray.forEach(function (object) {
                     if (!object || !object.value || object.value === "")
                         return;
+
                     result.push(object.value);
                 });
             }
@@ -196,7 +197,7 @@ angular.module('ice.entry.service', [])
             },
             {label: "Funding Source", schema: 'fundingSource', inputType: 'medium'},
             {
-                label: "Status", schema: 'status', options: [
+                label: "Status", schema: 'status', required: true, options: [
                     {value: "Complete", text: "Complete"},
                     {value: "In Progress", text: "In Progress"},
                     {value: "Abandoned", text: "Abandoned"},
@@ -204,7 +205,7 @@ angular.module('ice.entry.service', [])
                 ]
             },
             {
-                label: "Bio Safety Level", schema: 'bioSafetyLevel', options: [
+                label: "Bio Safety Level", schema: 'bioSafetyLevel', required: true, options: [
                     {value: "1", text: "Level 1"},
                     {value: "2", text: "Level 2"},
                     {value: "-1", text: "Restricted"}
@@ -493,8 +494,13 @@ angular.module('ice.entry.service', [])
                     }
 
                     if (field.isCustom) {
-                        console.log("custom", field);
                         entry.customFields.forEach(function (custom) {
+                            if (custom.fieldType === "EXISTING") {
+                                const idx = entry.customFields.indexOf(custom);
+                                entry.customFields.splice(idx, 1);
+                                return;
+                            }
+
                             console.log(custom);
                             custom.value = entry[custom.label];
                             if (custom.fieldType === 'MULTI_CHOICE_PLUS' && custom.value === 'Other') {
@@ -513,6 +519,14 @@ angular.module('ice.entry.service', [])
             // inverse of the above. converts to form ui can work with
             convertToUIForm: function (entry) {
                 let type = entry.type.toLowerCase();
+
+                if (entry.bioSafetyLevel === 2)
+                    entry.bioSafetyLevel = "Level 2";
+                else if (entry.bioSafetyLevel === -1)
+                    entry.bioSafetyLevel = "Restricted";
+                else
+                    entry.bioSafetyLevel = "Level 1";
+
                 let fields = getFieldsForType(type);
 
                 fields.forEach(function (field) {
@@ -526,8 +540,6 @@ angular.module('ice.entry.service', [])
                     return entry;
                 }
 
-                console.log(entry.customFields);
-
                 entry.customFields.forEach(function (custom) {
                     if (!custom.label)
                         return;
@@ -540,6 +552,7 @@ angular.module('ice.entry.service', [])
                         isCustom: true,
                         value: custom.value
                     };
+
                     switch (custom.fieldType) {
                         case "MULTI_CHOICE":
                         case "MULTI_CHOICE_PLUS":
@@ -573,7 +586,6 @@ angular.module('ice.entry.service', [])
                 });
 
                 entry.fields = sortEntryFields(fields);
-                console.log(entry);
                 return entry;
             },
 

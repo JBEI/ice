@@ -12,6 +12,7 @@ import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryFactory;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
@@ -19,7 +20,7 @@ import org.jbei.ice.lib.parsers.PlainParser;
 import org.jbei.ice.lib.parsers.fasta.FastaParser;
 import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.lib.parsers.sbol.SBOLParser;
-import org.jbei.ice.lib.search.blast.BlastPlus;
+import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.FeatureDAO;
@@ -145,7 +146,7 @@ public class PartSequence {
             saveSequenceObject(sequence);
 
             sequence = sequenceDAO.getByEntry(this.entry);
-            BlastPlus.scheduleBlastIndexRebuildTask(true);
+            scheduleBlastIndexRebuildTask();
             SequenceInfo info = sequence.toDataTransferObject();
             info.setSequence(dnaSequence);
             return info;
@@ -200,7 +201,12 @@ public class PartSequence {
             }
         }
 
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
+        scheduleBlastIndexRebuildTask();
+    }
+
+    private void scheduleBlastIndexRebuildTask() {
+        RebuildBlastIndexTask task = new RebuildBlastIndexTask(true);
+        IceExecutorService.getInstance().runTask(task);
     }
 
     /**
@@ -248,7 +254,7 @@ public class PartSequence {
             rebuildTraceAlignments();
 
             // rebuild blast
-            BlastPlus.scheduleBlastIndexRebuildTask(true);
+            scheduleBlastIndexRebuildTask();
         } else {
             save(updatedSequence);
         }
@@ -490,7 +496,7 @@ public class PartSequence {
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         try {
             formatter.format(sequence, byteStream);
-        } catch (FormatterException | IOException e) {
+        } catch (IOException e) {
             Logger.error(e);
         }
         return byteStream.toString();

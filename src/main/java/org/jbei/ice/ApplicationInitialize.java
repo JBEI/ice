@@ -5,7 +5,7 @@ import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.entry.sequence.annotation.AutoAnnotationBlastDbBuildTask;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.search.blast.BlastPlus;
+import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
 
 /**
  * Responsible for initializing the ICE application
@@ -33,7 +33,8 @@ public class ApplicationInitialize {
         configurationController.initPropertyValues();
 
         // check blast
-        BlastPlus.scheduleBlastIndexRebuildTask(false);
+        RebuildBlastIndexTask task = new RebuildBlastIndexTask(false);
+        IceExecutorService.getInstance().runTask(task);
 
         AutoAnnotationBlastDbBuildTask autoAnnotationBlastDbBuildTask = new AutoAnnotationBlastDbBuildTask();
         IceExecutorService.getInstance().runTask(autoAnnotationBlastDbBuildTask);

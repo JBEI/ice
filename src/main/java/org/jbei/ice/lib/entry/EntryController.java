@@ -276,7 +276,7 @@ public class EntryController extends HasEntry {
         return partData;
     }
 
-    protected PartData retrieveEntryDetails(String userId, Entry entry) throws PermissionException {
+    private PartData retrieveEntryDetails(String userId, Entry entry) throws PermissionException {
         if (entry.getVisibility() == Visibility.REMOTE.getValue()) {
             WebEntries webEntries = new WebEntries();
             PartData partData = webEntries.getPart(entry.getRecordId());

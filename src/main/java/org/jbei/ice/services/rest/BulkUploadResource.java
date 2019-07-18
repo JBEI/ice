@@ -170,10 +170,18 @@ public class BulkUploadResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public BulkUploadInfo updateList(@PathParam("id") long id,
-                                     BulkUploadInfo info) {
+    public BulkUploadInfo updateList(@PathParam("id") long id, BulkUploadInfo info) {
         String userId = requireUserId();
         return creator.createOrUpdateEntries(userId, id, info.getEntryList());
+    }
+
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/link/{linkType}")
+    public Response setLink(@PathParam("id") long id, @PathParam("linkType") String linkType) {
+        String userId = requireUserId();
+        controller.updateLinkType(userId, id, linkType);
+        return Response.status(Response.Status.OK).build();
     }
 
     /**
@@ -220,8 +228,7 @@ public class BulkUploadResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/status")
-    public Response updateStatus(@PathParam("id") long id,
-                                 BulkUploadInfo info) {
+    public Response updateStatus(@PathParam("id") long id, BulkUploadInfo info) {
         String userId = requireUserId();
         Logger.info(userId + ": updating bulk upload status for \"" + info.getId() + "\" to " + info.getStatus());
         ProcessedBulkUpload resp = creator.updateStatus(userId, id, info.getStatus());

@@ -3,13 +3,11 @@ package org.jbei.ice.lib.entry;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.entry.CustomEntryField;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.search.blast.BlastPlus;
+import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
@@ -121,13 +119,14 @@ public class EntryCreator extends HasEntry {
 
         // rebuild blast database
         if (sequenceDAO.hasSequence(entry.getId())) {
-            BlastPlus.scheduleBlastIndexRebuildTask(true);
+            RebuildBlastIndexTask task = new RebuildBlastIndexTask(true);
+            IceExecutorService.getInstance().runTask(task);
         }
 
         return entry;
     }
 
-    protected void addReadPermission(Account account, Group group, Entry entry) {
+    private void addReadPermission(Account account, Group group, Entry entry) {
         Permission permission = new Permission();
         if (group != null)
             permission.setGroup(group);
@@ -142,7 +141,7 @@ public class EntryCreator extends HasEntry {
         permissionDAO.create(permission);
     }
 
-    protected void addWritePermission(Account account, Entry entry) {
+    private void addWritePermission(Account account, Entry entry) {
         Permission permission = new Permission();
         permission.setCanWrite(true);
         permission.setEntry(entry);
@@ -206,6 +205,9 @@ public class EntryCreator extends HasEntry {
         CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
 
         for (CustomEntryField customEntryField : data.getCustomEntryFields()) {
+            if (customEntryField.getFieldType() == FieldType.EXISTING)
+                continue;
+
             CustomEntryFieldValueModel model = new CustomEntryFieldValueModel();
             model.setEntry(entry);
             CustomEntryFieldModel customEntryFieldModel = dao.get(customEntryField.getId());

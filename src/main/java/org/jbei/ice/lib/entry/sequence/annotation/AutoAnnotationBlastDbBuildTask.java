@@ -26,9 +26,11 @@ public class AutoAnnotationBlastDbBuildTask extends Task {
     private int exceptionCount;
     private static final int RUN_HOUR = 1;    // make config param
     private final boolean runOnce;
+    private final BlastPlus blastPlus;
 
-    public AutoAnnotationBlastDbBuildTask(boolean runOnce) {
+    AutoAnnotationBlastDbBuildTask(boolean runOnce) {
         this.runOnce = runOnce;
+        this.blastPlus = new BlastPlus("auto-annotation", "ice");
     }
 
     public AutoAnnotationBlastDbBuildTask() {
@@ -41,7 +43,7 @@ public class AutoAnnotationBlastDbBuildTask extends Task {
 
         // first run on task start up
         try {
-            BlastPlus.rebuildFeaturesBlastDatabase("auto-annotation");
+            blastPlus.rebuildFeaturesBlastDatabase();
         } catch (IOException e) {
             Logger.error(e);
             exceptionCount += 1;
@@ -55,7 +57,7 @@ public class AutoAnnotationBlastDbBuildTask extends Task {
 
             try {
                 Logger.info("Rebuilding auto annotation blast database");
-                BlastPlus.rebuildFeaturesBlastDatabase("auto-annotation");
+                blastPlus.rebuildFeaturesBlastDatabase();
             } catch (IOException ioe) {
                 Logger.error(ioe);
                 if (exceptionCount++ >= 10) {
@@ -73,7 +75,7 @@ public class AutoAnnotationBlastDbBuildTask extends Task {
         this.stopped = true;
     }
 
-    protected Date timeTillRun() {
+    private Date timeTillRun() {
         Calendar calendar = Calendar.getInstance();
         int currentHour = calendar.get(Calendar.HOUR_OF_DAY);
         if (currentHour >= RUN_HOUR) {
@@ -93,7 +95,7 @@ public class AutoAnnotationBlastDbBuildTask extends Task {
      *
      * @param date date to notify lock object (awake thread)
      */
-    public void waitUntil(Date date) {
+    private void waitUntil(Date date) {
         Logger.info("Waiting till " + date);
 
         // lock object

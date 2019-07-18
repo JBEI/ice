@@ -26,11 +26,11 @@ angular.module('ice.entry.controller', [])
             }
         });
 
-        uploader.onAfterAddingFile = function (item) {
+        uploader.onAfterAddingFile = function () {
             $scope.uploadError = undefined;
         };
 
-        uploader.onSuccessItem = function (item, response, status, headers) {
+        uploader.onSuccessItem = function (item, response) {
             response.description = desc;
             $scope.uploadError = undefined;
             Util.post("rest/parts/" + $stateParams.id + "/attachments", response, function (result) {
@@ -109,7 +109,7 @@ angular.module('ice.entry.controller', [])
          */
         $scope.addRemoveSample = function (sample) {
             let idx = $scope.newComment.samples.indexOf(sample);
-            if (idx == -1)
+            if (idx === -1)
                 $scope.newComment.samples.push(sample);
             else
                 $scope.newComment.samples.splice(idx, 1);
@@ -170,7 +170,7 @@ angular.module('ice.entry.controller', [])
             }
 
             if (foundSequence !== undefined) {
-                Util.remove("rest/parts/" + entryId + "/shotgunsequences/" + foundSequence.id, {}, function (result) {
+                Util.remove("rest/parts/" + entryId + "/shotgunsequences/" + foundSequence.id, {}, function () {
                     $scope.shotgunSequences.splice(foundIndex, 1);
                     $scope.entryStatistics.sequenceCount = $scope.shotgunSequences.length;
                 });
@@ -204,8 +204,8 @@ angular.module('ice.entry.controller', [])
             ]
         });
 
-        $scope.shotgunSequenceUploader.onSuccessItem = function (item, response, status, headers) {
-            if (status != "200") {
+        $scope.shotgunSequenceUploader.onSuccessItem = function (item, response, status) {
+            if (status !== "200") {
                 $scope.shotgunUploadError = true;
                 return;
             }
@@ -213,7 +213,7 @@ angular.module('ice.entry.controller', [])
             $uibModalInstance.close();
         };
 
-        $scope.shotgunSequenceUploader.onErrorItem = function (item, response, status, headers) {
+        $scope.shotgunSequenceUploader.onErrorItem = function () {
             $scope.shotgunUploadError = true;
         };
     })
@@ -243,7 +243,7 @@ angular.module('ice.entry.controller', [])
         };
 
         $scope.deleteStudy = function (study) {
-            Util.remove("/rest/parts/" + entryId + "/experiments/" + study.id, {}, function (result) {
+            Util.remove("/rest/parts/" + entryId + "/experiments/" + study.id, {}, function () {
                 let idx = $scope.entryExperiments.indexOf(study);
                 if (idx >= 0) {
                     $scope.entryExperiments.splice(idx, 1);
@@ -266,7 +266,7 @@ angular.module('ice.entry.controller', [])
         $scope.historyPageChanged(); // init
 
         $scope.deleteHistory = function (history) {
-            Util.remove('rest/parts/' + entryId + '/history/' + history.id, {}, function (result) {
+            Util.remove('rest/parts/' + entryId + '/history/' + history.id, {}, function () {
                 let idx = $scope.history.data.indexOf(history);
                 if (idx === -1)
                     return;
@@ -349,7 +349,7 @@ angular.module('ice.entry.controller', [])
             $scope.processingFile = item.file.name;
         };
 
-        uploader.onSuccessItem = function (item, response, status, header) {
+        uploader.onSuccessItem = function () {
             $scope.entry.hasSequence = true;
         };
 
@@ -362,7 +362,7 @@ angular.module('ice.entry.controller', [])
             item.formData.push({entryRecordId: $scope.entry.recordId});
         };
 
-        uploader.onErrorItem = function (item, response, status, headers) {
+        uploader.onErrorItem = function () {
             $scope.serverError = true;
         };
 
@@ -679,7 +679,7 @@ angular.module('ice.entry.controller', [])
         };
 
         // REGISTER HANDLERS
-        uploader.onAfterAddingAll = function (item) {
+        uploader.onAfterAddingAll = function () {
             $scope.serverError = false;
         };
 
@@ -693,14 +693,14 @@ angular.module('ice.entry.controller', [])
         };
 
         uploader.onProgressItem = function (item, progress) {
-            if (progress != "100")  // isUploading is always true until it returns
+            if (progress !== "100")  // isUploading is always true until it returns
                 return;
 
             // upload complete. have processing
             $scope.processingFile = item.file.name;
         };
 
-        uploader.onSuccessItem = function (item, response, status, headers) {
+        uploader.onSuccessItem = function (item, response) {
             if ($scope.active === undefined || isNaN($scope.active)) {
                 // set main entry id
                 $scope.part.id = response.entryId;
@@ -719,7 +719,6 @@ angular.module('ice.entry.controller', [])
             console.log(item, response, status, headers);
             $scope.serverError = true;
             $scope.processingFile = undefined;
-            uploader.resetAll();
         };
 
         uploader.onCompleteAll = function () {
@@ -740,10 +739,10 @@ angular.module('ice.entry.controller', [])
                 if (!$rootScope.settings)
                     $rootScope.settings = {};
                 $rootScope.settings['RESTRICT_PUBLIC_ENABLE'] = result.value;
-                $scope.canSetPublicPermission = (result.value == "no") || $rootScope.user.isAdmin;
+                $scope.canSetPublicPermission = (result.value === "no") || $rootScope.user.isAdmin;
             });
         } else {
-            $scope.canSetPublicPermission = ($rootScope.settings['RESTRICT_PUBLIC_ENABLE'].value == "no") || $rootScope.user.isAdmin;
+            $scope.canSetPublicPermission = ($rootScope.settings['RESTRICT_PUBLIC_ENABLE'].value === "no") || $rootScope.user.isAdmin;
         }
 
         $scope.setPermissionArticle = function (type) {
@@ -793,7 +792,7 @@ angular.module('ice.entry.controller', [])
             let resource;
             let queryParams;
 
-            if ($scope.selectedArticle.type == 'ACCOUNT') {
+            if ($scope.selectedArticle.type === 'ACCOUNT') {
                 resource = "users";
                 queryParams = {limit: 8, val: val};
             } else {
@@ -802,7 +801,7 @@ angular.module('ice.entry.controller', [])
             }
 
             Util.list("rest/" + resource + "/autocomplete", function (result) {
-                if ($scope.selectedArticle.type == "ACCOUNT") {
+                if ($scope.selectedArticle.type === "ACCOUNT") {
                     angular.forEach(result, function (item) {
                         item.label = item.firstName + " " + item.lastName;
                     });
@@ -812,6 +811,7 @@ angular.module('ice.entry.controller', [])
                 $scope.filtering = false;
 
             }, queryParams, function (error) {
+                console.error(error);
                 $scope.filtering = false;
                 $scope.autoCompleteUsersOrGroups = undefined;
             });
@@ -1327,7 +1327,7 @@ angular.module('ice.entry.controller', [])
                         };
 
                         // todo : todo
-                        $scope.addExistingPartLink = function ($item, $model, $label) {
+                        $scope.addExistingPartLink = function ($item) {
                             $scope.errorMessage = undefined;
 
                             // prevent selecting current entry
@@ -1347,10 +1347,10 @@ angular.module('ice.entry.controller', [])
                             // fetch entry being added from server
                             Util.get("rest/parts/" + $item, function (result) {
                                 $scope.selectedLink = result;
-                                if ($scope.role == 'CHILD') {
+                                if ($scope.role === 'CHILD') {
 
                                     // if item being added as a child is of type part then
-                                    if (result.type.toLowerCase() == 'part') {
+                                    if (result.type.toLowerCase() === 'part') {
 
                                         // check if it has a sequence
                                         if (!result.hasSequence) {
@@ -1371,7 +1371,7 @@ angular.module('ice.entry.controller', [])
                                     }
                                 } else {
                                     // parent of main entry being added
-                                    if ($scope.mainEntry.type.toLowerCase() == 'part') {
+                                    if ($scope.mainEntry.type.toLowerCase() === 'part') {
 
                                         // if child (main) does not have a attached sequence
                                         if (!$scope.mainEntry.hasSequence) {
@@ -1395,7 +1395,7 @@ angular.module('ice.entry.controller', [])
                                 return;
 
                             Util.remove('rest/parts/' + $scope.mainEntry.id + '/links/' + link.id,
-                                {linkType: $scope.role}, function (result) {
+                                {linkType: $scope.role}, function () {
                                     $scope.links.splice(i, 1);
                                 });
                         };
@@ -1438,14 +1438,14 @@ angular.module('ice.entry.controller', [])
                             };
 
                             let sequencePartId;
-                            if ($scope.role == 'CHILD') {
+                            if ($scope.role === 'CHILD') {
                                 sequencePartId = $scope.selectedLink.id;
                             } else {
                                 sequencePartId = $scope.mainEntry.id;
                             }
 
                             // add sequence to entry
-                            Util.update("rest/parts/" + sequencePartId + "/sequence", linkSequence, {}, function (result) {
+                            Util.update("rest/parts/" + sequencePartId + "/sequence", linkSequence, {}, function () {
                                 linkPartToMainEntry($scope.addExistingPartNumber);
                             });
                         };
@@ -1572,7 +1572,7 @@ angular.module('ice.entry.controller', [])
                 if (field.inputType === "autoCompleteAdd") {
                     $scope.entry[field.schema] = [];
                     angular.forEach($scope.convertedAutoCompleteAdd, function (val) {
-                        if (val.value.trim() == "")
+                        if (val.value.trim() === "")
                             return;
 
                         $scope.entry[field.schema].push(val.value);
@@ -1596,6 +1596,7 @@ angular.module('ice.entry.controller', [])
                     field.dirty = false;
                     field.updating = false;
                 }, function (error) {
+                    console.error(error);
                     field.updating = false;
                     field.errorUpdating = true;
                     Util.setFeedback("Error updating entry", "danger")
@@ -1603,13 +1604,9 @@ angular.module('ice.entry.controller', [])
             };
 
             $scope.displayForBLSValue = function (bslValue) {
-                switch (bslValue) {
-                    case -1:
-                        return "Restricted";
-
-                    default:
-                        return bslValue;
-                }
+                if (bslValue === -1)
+                    return "Restricted";
+                return bslValue;
             };
 
 // converts an array of string (currently only for autoCompleteAdd) to object so it can be edited
@@ -1630,8 +1627,8 @@ angular.module('ice.entry.controller', [])
                 let index = $scope.entry.parameters.indexOf(parameter);
                 if (index >= 0) {
                     let currentParam = $scope.entry.parameters[index];
-                    if (currentParam.id == parameter.id) {
-                        Util.remove("rest/custom-fields/" + parameter.id, {}, function (result) {
+                    if (currentParam.id === parameter.id) {
+                        Util.remove("rest/custom-fields/" + parameter.id, {}, function () {
                             $scope.entry.parameters.splice(index, 1);
                         })
                     }
@@ -1661,7 +1658,7 @@ angular.module('ice.entry.controller', [])
             $scope.removeLink = function (mainEntry, linkedEntry) {
                 Util.remove('rest/parts/' + mainEntry.id + '/links/' + linkedEntry.id, {}, function () {
                     let idx = mainEntry.linkedParts.indexOf(linkedEntry);
-                    if (idx != -1) {
+                    if (idx !== -1) {
                         mainEntry.linkedParts.splice(idx, 1);
                     }
                 });
@@ -1691,7 +1688,7 @@ angular.module('ice.entry.controller', [])
             uploader.onProgressItem = function (item, progress) {
                 $scope.serverError = undefined;
 
-                if (progress != "100")  // isUploading is always true until it returns
+                if (progress !== "100")  // isUploading is always true until it returns
                     return;
 
                 // upload complete. have processing

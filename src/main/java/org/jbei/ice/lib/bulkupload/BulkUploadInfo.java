@@ -18,6 +18,7 @@ public class BulkUploadInfo extends AbstractFolder {
 
     private String name;
     private String type;
+    private String linkType;
     private int count;
     private long created;
     private long lastUpdate;
@@ -45,6 +46,10 @@ public class BulkUploadInfo extends AbstractFolder {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public void setLinkType(String linkType) {
+        this.linkType = linkType;
     }
 
     public int getCount() {

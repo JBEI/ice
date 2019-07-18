@@ -30,41 +30,43 @@ public class SearchController {
      * @return wrapper around the list of search results
      */
     public SearchResults runSearch(String userId, SearchQuery query) {
-        String queryString = query.getQueryString();
-        HashMap<String, SearchResult> blastResults = null;
+        try (BlastPlus blastPlus = new BlastPlus()) {
+            String queryString = query.getQueryString();
+            HashMap<String, SearchResult> blastResults = null;
 
-        // check if there is a blast result and run first
-        if (query.hasBlastQuery()) {
-            if (query.getBlastQuery().getBlastProgram() == null)
-                query.getBlastQuery().setBlastProgram(BlastProgram.BLAST_N);
+            // check if there is a blast result and run first
+            if (query.hasBlastQuery()) {
+                if (query.getBlastQuery().getBlastProgram() == null)
+                    query.getBlastQuery().setBlastProgram(BlastProgram.BLAST_N);
 
-            try {
-                blastResults = BlastPlus.runBlast(query.getBlastQuery());
-            } catch (BlastException e) {
-                Logger.error("Exception running blast " + e.getMessage());
-                return null;
+                try {
+                    blastResults = blastPlus.runBlast(query.getBlastQuery());
+                } catch (BlastException e) {
+                    Logger.error("Exception running blast " + e.getMessage());
+                    return null;
+                }
             }
-        }
 
-        // if no other search query or filter and there are blast results (not null) then return the blast results
-        if (StringUtils.isEmpty(queryString) && blastResults != null && !query.hasFilter()) {
-            if (blastResults.isEmpty())
-                return new SearchResults();
+            // if no other search query or filter and there are blast results (not null) then return the blast results
+            if (StringUtils.isEmpty(queryString) && blastResults != null && !query.hasFilter()) {
+                if (blastResults.isEmpty())
+                    return new SearchResults();
 
-            int start = query.getParameters().getStart();
-            int count = query.getParameters().getRetrieveCount();
-            return HibernateSearch.getInstance().filterBlastResults(userId, start, count, query, blastResults);
-        }
+                int start = query.getParameters().getStart();
+                int count = query.getParameters().getRetrieveCount();
+                return HibernateSearch.getInstance().filterBlastResults(userId, start, count, query, blastResults);
+            }
 
-        // text query (may also include blast)
-        // no filter type indicates a term or phrase query
-        HibernateSearch hibernateSearch = HibernateSearch.getInstance();
+            // text query (may also include blast)
+            // no filter type indicates a term or phrase query
+            HibernateSearch hibernateSearch = HibernateSearch.getInstance();
 
-        if (!StringUtils.isEmpty(queryString)) {
-            HashMap<String, QueryType> terms = parseQueryString(queryString);
-            return hibernateSearch.executeSearch(userId, terms, query, blastResults);
-        } else {
-            return hibernateSearch.executeSearchNoTerms(userId, blastResults, query);
+            if (!StringUtils.isEmpty(queryString)) {
+                HashMap<String, QueryType> terms = parseQueryString(queryString);
+                return hibernateSearch.executeSearch(userId, terms, query, blastResults);
+            } else {
+                return hibernateSearch.executeSearchNoTerms(userId, blastResults, query);
+            }
         }
     }
 
@@ -77,38 +79,42 @@ public class SearchController {
      * @throws IllegalArgumentException on unsupported index type
      */
     public void rebuildIndexes(String userId, IndexType type) {
-        if (!accountController.isAdministrator(userId)) {
-            Logger.warn(userId + " attempting to rebuild search index " + type + " without admin privs");
-            throw new PermissionException("Administrative privileges required to perform this action");
-        }
+        try (BlastPlus blastPlus = new BlastPlus()) {
+            if (!accountController.isAdministrator(userId)) {
+                Logger.warn(userId + " attempting to rebuild search index " + type + " without admin privs");
+                throw new PermissionException("Administrative privileges required to perform this action");
+            }
 
-        Logger.info(userId + ": rebuilding search index " + type);
-        switch (type) {
-            case LUCENE:
-                IceExecutorService.getInstance().runTask(new RebuildLuceneIndexTask());
-                break;
+            Logger.info(userId + ": rebuilding search index " + type);
+            switch (type) {
+                case LUCENE:
+                    IceExecutorService.getInstance().runTask(new RebuildLuceneIndexTask());
+                    break;
 
-            case BLAST:
-                try {
-                    BlastPlus.rebuildDatabase(true);
-                } catch (BlastException e) {
-                    Logger.error(e);
-                }
-                break;
+                case BLAST:
+                    try {
+                        blastPlus.rebuildDatabase(true);
+                    } catch (BlastException e) {
+                        Logger.error(e);
+                    }
+                    break;
 
-            default:
-                throw new IllegalArgumentException("Invalid type");
+                default:
+                    throw new IllegalArgumentException("Invalid type");
+            }
         }
     }
 
     public IndexBuildStatus getIndexStatus(IndexType type) {
-        switch (type) {
-            case LUCENE:
-            default:
-                return IndexerProgressMonitor.getInstance().getStatus();
+        try (BlastPlus blastPlus = new BlastPlus()) {
+            switch (type) {
+                case LUCENE:
+                default:
+                    return IndexerProgressMonitor.getInstance().getStatus();
 
-            case BLAST:
-                return BlastPlus.getStatus();
+                case BLAST:
+                    return blastPlus.getStatus();
+            }
         }
     }
 
