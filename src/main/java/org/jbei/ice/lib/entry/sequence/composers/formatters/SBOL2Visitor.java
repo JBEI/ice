@@ -3,8 +3,8 @@ package org.jbei.ice.lib.entry.sequence.composers.formatters;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.storage.model.*;
 import org.jbei.ice.storage.model.Sequence;
+import org.jbei.ice.storage.model.*;
 import org.sbolstandard.core2.*;
 
 import javax.xml.namespace.QName;
@@ -37,7 +37,7 @@ public class SBOL2Visitor {
         doc.addNamespace(new URI(ICE_NS), ICE_PREFIX);
     }
 
-    public void visit(Sequence sequence) throws SBOLValidationException, URISyntaxException {
+    public void visit(Sequence sequence) throws SBOLValidationException {
         // ice data model conflates the sequence and component
         Entry entry = sequence.getEntry();
 
@@ -147,7 +147,7 @@ public class SBOL2Visitor {
         // TODO: attachments
     }
 
-    public void visit(SequenceFeature feature) throws SBOLValidationException, URISyntaxException {
+    public void visit(SequenceFeature feature) throws SBOLValidationException {
         annotationCount++;
 
         if (feature.getAnnotationLocations() != null && !feature.getAnnotationLocations().isEmpty()) {

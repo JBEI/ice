@@ -19,7 +19,7 @@ public class AbstractFormatter implements IFormatter {
     /**
      * Format the {@link Sequence} and output to the {@link OutputStream}.
      */
-    public void format(Sequence sequence, OutputStream outputStream) throws FormatterException, IOException {
+    public void format(Sequence sequence, OutputStream outputStream) throws IOException {
         throw new UnsupportedOperationException("Unsupported");
     }
 
