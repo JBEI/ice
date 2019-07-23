@@ -11,10 +11,10 @@ angular.module('ice.upload.service', [])
                             return "sequence";
 
                         default:
-                        case 0:
+                        case 2:
                             return "attachment";
 
-                        case 2:
+                        case 0:
                             return "trace";
                     }
                 },
@@ -124,7 +124,7 @@ angular.module('ice.upload.service', [])
                     return entry[field.schema];
                 },
 
-                getCellProperties: function (field, autoComplete) {
+                getCellProperties: function (field, autoComplete, uploadedFiles) {
                     const cellProperties = {};
 
                     switch (field.inputType) {
@@ -164,8 +164,8 @@ angular.module('ice.upload.service', [])
                             cellProperties.strict = true;
                             cellProperties.copyable = false; // file cells cannot be copied
                             cellProperties.source = function (query, process) {
-                                if ($scope.uploadedFiles.arr.length > 1)
-                                    return process($scope.uploadedFiles.arr);
+                                if (uploadedFiles.arr.length > 1)
+                                    return process(uploadedFiles.arr);
                                 else
                                     alert("No files available. Drag and drop files to be able to select them")
                             };
@@ -173,7 +173,7 @@ angular.module('ice.upload.service', [])
                                 if (!value || value.trim() === "")
                                     callback(true);
                                 else
-                                    callback($scope.uploadedFiles.map.get(value) !== undefined);
+                                    callback(uploadedFiles.map.get(value) !== undefined);
                             };
                             break;
                     }
