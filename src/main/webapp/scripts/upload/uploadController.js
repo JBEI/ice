@@ -17,6 +17,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
         $scope.linkedSelection = undefined;
         let partTypeDefault;
         let linkedPartTypeDefault;
+        const FILE_FIELDS_COUNT = 3;
 
         $scope.setNameEditMode = function (value) {
             $scope.uploadNameEditMode = value;
@@ -28,7 +29,8 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
         //
         $scope.addNewPartLink = function (type) {
             // todo : if there is already a link
-            // if( $scope.linkedSelection)
+            if ($scope.linkedSelection)
+                return;
 
             // todo : if $scope.bulkUpload.id has not been created yet
             Util.update("rest/uploads/" + $scope.bulkUpload.id + "/link/" + type, {}, {}, function (linkedDefaults) {
@@ -107,7 +109,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                 } else {
                     if ($scope.linkedSelection) {
                         entryId = $scope.bulkUpload.linkedEntryIdData[row];
-                        const index = col - (partTypeDefault.fields.length + 3) - linkedPartTypeDefault.fields.length;
+                        const index = col - (partTypeDefault.fields.length + FILE_FIELDS_COUNT) - linkedPartTypeDefault.fields.length;
                         restEndPoint = UploadUtil.indexToRestResource(index);
                     }
                 }
@@ -135,49 +137,45 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                 let field = partTypeDefault.fields[col];
                 if (!field) {
                     const fileFieldIndex = col - partTypeDefault.fields.length;
-                    if (fileFieldIndex < 3) {
-                        // main entry default
+                    if (fileFieldIndex < FILE_FIELDS_COUNT) {
                         field = {inputType: "file"};
                     } else {
-                        // deal with links
-                        if ($scope.linkedSelection) {
-                            switch ($scope.linkedSelection.toLowerCase()) {
-                                case "existing":
-                                    const cellProperties = {};
-                                    cellProperties.type = 'autocomplete';
-                                    cellProperties.strict = true;
-                                    cellProperties.source = function (query, process) {
-                                        $http.get('rest/uploads/partNumbers', {
-                                            headers: {'X-ICE-Authentication-SessionId': Authentication.getSessionId()},
-                                            params: {
-                                                token: query,
-                                                // field: field
-                                                type: $scope.importType.toUpperCase()
-                                            }
-                                        }).then(function (res) {
-                                            console.log(res, process);
-                                            return process(res.data);
-                                        });
-                                    };
-                                    break;
-
-                                default:
-                                    const index = col - (3 + partTypeDefault.fields.length);
-                                    field = linkedPartTypeDefault.fields[index];
-                                    if (!field) {
-                                        return {};
-                                    } else {
-                                        return UploadUtil.getCellProperties(field, autoComplete);
+                        // deal with existing linked entries
+                        if ($scope.linkedSelection && $scope.linkedSelection.toLowerCase() === "existing") {
+                            const cellProperties = {};
+                            cellProperties.type = 'autocomplete';
+                            cellProperties.strict = true;
+                            cellProperties.source = function (query, process) {
+                                $http.get('rest/uploads/partNumbers', {
+                                    headers: {'X-ICE-Authentication-SessionId': Authentication.getSessionId()},
+                                    params: {
+                                        token: query,
+                                        // field: field
+                                        type: $scope.importType.toUpperCase()
                                     }
-                            }
+                                }).then(function (res) {
+                                    console.log(res, process);
+                                    return process(res.data);
+                                });
+                            };
                         } else {
-                            console.log("Unknown cell property " + col);
-                            return {};
+                            // deal with linked entries
+                            const index = col - (FILE_FIELDS_COUNT + partTypeDefault.fields.length);
+                            field = linkedPartTypeDefault.fields[index];
+
+                            if (!field) {
+                                const linkedFileFieldIndex = index - linkedPartTypeDefault.fields.length;
+                                if (linkedFileFieldIndex < FILE_FIELDS_COUNT) {
+                                    field = {inputType: "file"}
+                                }
+                            } else {
+                                return UploadUtil.getCellProperties(field, autoComplete, $scope.uploadedFiles);
+                            }
                         }
                     }
                 }
 
-                return UploadUtil.getCellProperties(field, autoComplete);
+                return UploadUtil.getCellProperties(field, autoComplete, $scope.uploadedFiles);
             };
 
             // Callback
@@ -185,7 +183,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
             // has been added in which case we need to check for the linked selection's headers as appropriate
             //
             const getSheetHeaders = function (index) {
-                const mainHeadersSize = partTypeDefault.fields.length + 3;
+                const mainHeadersSize = partTypeDefault.fields.length + FILE_FIELDS_COUNT;
 
                 if (index < mainHeadersSize) {
                     let headerString = UploadUtil.getHeaderForIndex(partTypeDefault.fields, index);
@@ -225,7 +223,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
             // calculates the column width for each header type
             const getColWidth = function (index) {
-                const mainHeadersSize = partTypeDefault.fields.length + 3;
+                const mainHeadersSize = partTypeDefault.fields.length + FILE_FIELDS_COUNT;
                 if (index < mainHeadersSize)
                     return UploadUtil.getColumnWidth(partTypeDefault.fields, index);
 
@@ -264,19 +262,19 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
                 // check if there is a link
                 if ($scope.linkedSelection) {
-                    // todo: sequence traces
                     formDataType = $scope.linkedSelection;
-                    resource = getFieldProperty(col) === "attachments" ? "attachment" : "sequence";
 
-                    // col determines which id we are operating with
-                    if (col < UploadUtil.getSheetHeaders($scope.importType).length) {
-                        // retrieve the id for the main entry
+                    let index;
+                    if (col < partTypeDefault.fields.length + FILE_FIELDS_COUNT) {
+                        index = col - partTypeDefault.fields.length;
                         actualEntryId = $scope.bulkUpload.entryIdData[row];
                     } else {
+                        index = col - (partTypeDefault.fields.length + FILE_FIELDS_COUNT) - linkedPartTypeDefault.fields.length;
                         actualEntryId = $scope.bulkUpload.linkedEntryIdData[row];
                     }
+                    resource = UploadUtil.indexToRestResource(index);
                 } else {
-                    resource = UploadUtil.indexToRestResource($scope.importType, col);
+                    resource = UploadUtil.indexToRestResource(col - partTypeDefault.fields.length);
                     formDataType = $scope.importType;
                     actualEntryId = $scope.bulkUpload.entryIdData[row];
                 }
@@ -350,7 +348,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
                 // check if it is a file upload field
                 const col = data[1];
-                if (col > partTypeDefault.fields.length && col < partTypeDefault.fields.length + 3) {
+                if (col > partTypeDefault.fields.length && col < partTypeDefault.fields.length + FILE_FIELDS_COUNT) {
                     dealWithFileField(data[0], data[1], data[3], data[2]);
                     return;
                 }
@@ -360,10 +358,8 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
                 // retrieve object at specified row
                 let object = getEntryObject(row, data[1], data[3]);
-                console.log(object);
                 if (!object)
                     return;
-
 
                 $scope.saving = true;
 
@@ -396,23 +392,13 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                         });
                     } else {
                         // update entry for existing upload
-                        console.log(object);
+                        // check if we are updating main or linked
+                        if (col >= partTypeDefault.fields.length + FILE_FIELDS_COUNT)
+                            object = object.linkedParts[0];
 
                         Util.post('rest/uploads/' + $scope.bulkUpload.id + '/entry/' + object.id, object,
                             function (updatedEntry) {
                                 $scope.bulkUpload.lastUpdate = updatedEntry.modificationTime;
-
-                                // todo : this will be an actual problem if there is a different value; undefined is ok
-                                if ($scope.bulkUpload.entryIdData[row] !== updatedEntry.id) {
-                                    $scope.bulkUpload.entryIdData[row] = updatedEntry.id;
-                                }
-
-                                if (updatedEntry.linkedParts && updatedEntry.linkedParts.length) {
-                                    let linkedId = updatedEntry.linkedParts[0].id;
-                                    if (linkedId) {
-                                        $scope.bulkUpload.linkedEntryIdData[row] = linkedId;
-                                    }
-                                }
                                 $scope.saving = false;
                             },
                             function (error) {
@@ -511,17 +497,20 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                 if (col < partTypeDefault.fields.length) {
                     // updating main entry
                     UploadUtil.setDataValue($scope.importType.toUpperCase(), col, object, value, partTypeDefault);
-                } else {
+                } else if ($scope.linkedSelection) {
                     // updating linked entry
                     const linkedObject = UploadUtil.createPartObject($scope.bulkUpload.linkedEntryIdData[row], $scope.linkedSelection);
                     if ($scope.linkedSelection.toUpperCase() === "EXISTING")
                         linkedObject.partId = value;
                     else {
-                        const newIndex = col - partTypeDefault.fields.length;
+                        const newIndex = col - partTypeDefault.fields.length - 3;
                         UploadUtil.setDataValue($scope.linkedSelection.toUpperCase(), newIndex, linkedObject, value, partTypeDefault);
                     }
 
                     object.linkedParts = [linkedObject];
+                } else {
+                    // todo : else file
+                    console.log("don't know what to do with", row, col, value);
                 }
 
                 object.index = row;
@@ -657,7 +646,6 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                 }, {}, function (error) {
                 });
             } else {
-                console.log($scope.linkedSelection.toLowerCase());
                 if (!$scope.linkedSelection) {
                     sheetData[0].length = partTypeDefault.fields.length + 3;
                 } else {
@@ -829,8 +817,6 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
             // init : retrieve upload to get information
             //
             Util.get("rest/uploads/" + $stateParams.type, function (result) {
-                console.log(result);
-
                 Util.get("rest/parts/defaults/" + result.type, function (defaults) {
                     partTypeDefault = EntryService.convertToUIForm(defaults);
                     loop(0, partTypeDefault);
@@ -850,6 +836,8 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                         function (result) {
                             if (!result || !result.type)
                                 return;
+
+                            console.log(result);
 
                             $scope.bulkUpload.name = result.name;
                             $scope.bulkUpload.status = result.status;
@@ -885,28 +873,33 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                                         sheetData[numberOfExistingEntries + i][j] = UploadUtil.getPartValue(field, entry);
                                     }
 
-                                    // todo : get attachments, sequences and traces
+                                    // traces, attachments and sequences
+                                    sheetData[numberOfExistingEntries + i][entry.fields.length] = "";
+                                    sheetData[numberOfExistingEntries + i][entry.fields.length + 1] = entry.sequenceFileName;
+                                    if (entry.hasAttachment) {
+                                        const attachment = entry.attachments[0];
+                                        sheetData[numberOfExistingEntries + i][entry.fields.length + 2] = attachment.filename;
+                                    }
 
                                     // check if there is a linked entry
                                     if (entry.linkedParts && entry.linkedParts.length) {
                                         let linkedPart = entry.linkedParts[0];
-                                        // const linkType = linkedPart.type.toLowerCase();
-
-                                        // check if there is a linked type and the link on the ui has not been created
-                                        // if (linkedDataSchema === undefined || linkedDataSchema.length === 0) {
-                                        //     if (linkedPart.visible === "OK")
-                                        //         $scope.addExistingPart();
-                                        //     else
-                                        //         $scope.addNewPartLink(linkType);
-                                        // }
-
                                         $scope.bulkUpload.linkedEntryIdData.push(linkedPart.id);
-                                        linkedPart = EntryService.convertToUIForm(entry);
+                                        linkedPart = EntryService.convertToUIForm(linkedPart);
 
                                         // linked part fields display
                                         for (let k = 0; k < linkedPart.fields.length; k += 1) {
                                             const linkedField = linkedPart.fields[k];
-                                            sheetData[numberOfExistingEntries + i][k + linkedPart.fields.length] = UploadUtil.getPartValue(linkedField, linkedPart);
+                                            sheetData[numberOfExistingEntries + i][k + entry.fields.length + FILE_FIELDS_COUNT] = UploadUtil.getPartValue(linkedField, linkedPart);
+                                        }
+
+                                        // todo : get traces
+                                        const linkedFilesIndex = entry.fields.length + FILE_FIELDS_COUNT + linkedPart.fields.length;
+                                        sheetData[numberOfExistingEntries + i][linkedFilesIndex] = '';
+                                        sheetData[numberOfExistingEntries + i][linkedFilesIndex + 1] = linkedPart.sequenceFileName;
+                                        if (linkedPart.hasAttachment) {
+                                            const attachment = linkedPart.attachments[0];
+                                            sheetData[numberOfExistingEntries + i][linkedFilesIndex + 2] = attachment.filename;
                                         }
                                     }
                                 }
@@ -916,7 +909,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                                 loop(start + result.entryList.length, partTypeDefault);
                             }
                             angular.element("#dataTable").handsontable('render');
-                        }, {offset: start, limit: 4});
+                        }, {offset: start, limit: 40});
                 }
             });
             // }, {}, function (error) {

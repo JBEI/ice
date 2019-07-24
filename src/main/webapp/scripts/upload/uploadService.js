@@ -7,15 +7,15 @@ angular.module('ice.upload.service', [])
                 // converts the index (which depends on type) of the schema to the specific rest resource name
                 indexToRestResource: function (index) {
                     switch (index) {
+                        case 0:
+                            return "trace";
+
                         case 1:
                             return "sequence";
 
                         default:
                         case 2:
                             return "attachment";
-
-                        case 0:
-                            return "trace";
                     }
                 },
 
@@ -257,7 +257,15 @@ angular.module('ice.upload.service', [])
                     }
 
                     return part;
-                }
+                },
+
+                // checks if, based on index, columning being edited is a main entry column
+                // isMainEntryCol: function (index, mainFields) {
+                //     if (index < mainFields.length)
+                //         return true;
+                //
+                //     return false;
+                // }
             }
         }
     );
