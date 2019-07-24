@@ -118,8 +118,9 @@ public class PartSequence {
         try {
             AbstractParser parser;
             String sequenceString = Utils.getString(inputStream);
+            SequenceFormat format = SequenceUtil.detectFormat(sequenceString);
 
-            switch (SequenceUtil.detectFormat(sequenceString)) {
+            switch (format) {
                 case GENBANK:
                     parser = new GenBankParser();
                     break;
@@ -142,11 +143,14 @@ public class PartSequence {
             String entryType = this.entry.getRecordType();
             FeaturedDNASequence dnaSequence = parser.parse(sequenceString, entryType);
             Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
-            sequence.setSequenceUser(sequenceString);
-            saveSequenceObject(sequence);
+            if (sequence == null)
+                throw new IOException("Could not create sequence object");
 
-            sequence = sequenceDAO.getByEntry(this.entry);
-            scheduleBlastIndexRebuildTask();
+            sequence.setSequenceUser(sequenceString);
+            sequence.setFileName(fileName);
+            sequence.setFormat(format);
+            sequence = saveSequenceObject(sequence);
+
             SequenceInfo info = sequence.toDataTransferObject();
             info.setSequence(dnaSequence);
             return info;
@@ -179,7 +183,7 @@ public class PartSequence {
         saveSequenceObject(sequence);
     }
 
-    private void saveSequenceObject(Sequence sequence) {
+    private Sequence saveSequenceObject(Sequence sequence) {
         sequence.setEntry(this.entry);
         Set<SequenceFeature> sequenceFeatureSet = null;
         sequence = SequenceUtil.normalizeAnnotationLocations(sequence);
@@ -202,6 +206,7 @@ public class PartSequence {
         }
 
         scheduleBlastIndexRebuildTask();
+        return sequence;
     }
 
     private void scheduleBlastIndexRebuildTask() {
