@@ -85,7 +85,7 @@ angular.module('ice.upload.service', [])
                 },
 
                 isFileColumn: function (fields, col) {
-                    return (col >= fields.length || col > fields.length + 3);
+                    return (col >= fields.length && col > fields.length + 3);
                 },
 
                 // type can also be "EXISTING"

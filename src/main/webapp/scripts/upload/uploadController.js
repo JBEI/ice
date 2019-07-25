@@ -459,8 +459,17 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
                     let row = data[0];
                     let col = data[1];
-                    if (UploadUtil.isFileColumn(partTypeDefault.fields, col)) {
-                        console.log("skipping", data);
+
+                    let fields;
+                    if (col < partTypeDefault.fields + FILE_FIELDS_COUNT) {
+                        fields = partTypeDefault.fields;
+                    } else {
+                        fields = linkedPartTypeDefault.fields;
+                        col = col - (partTypeDefault.fields + FILE_FIELDS_COUNT);
+                    }
+
+                    if (UploadUtil.isFileColumn(fields, col)) {
+                        console.log("skipping file col", data);
                         continue;
                     }
 
