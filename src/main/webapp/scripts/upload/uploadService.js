@@ -84,8 +84,19 @@ angular.module('ice.upload.service', [])
                     }
                 },
 
-                isFileColumn: function (fields, col) {
-                    return (col >= fields.length && col > fields.length + 3);
+                isFileColumn: function (partTypeDefault, linkedPartTypeDefault, col) {
+                    console.log(col);
+                    const FILE_FIELDS_COUNT = 3;
+                    let fields;
+                    if (col < partTypeDefault.fields.length + FILE_FIELDS_COUNT) {
+                        fields = partTypeDefault.fields;
+                    } else {
+                        fields = linkedPartTypeDefault.fields;
+                        col = col - (partTypeDefault.fields.length + FILE_FIELDS_COUNT);
+                    }
+
+                    console.log(col);
+                    return (col >= fields.length && col < fields.length + 3);
                 },
 
                 // type can also be "EXISTING"

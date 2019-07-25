@@ -345,14 +345,13 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
             // data: 4 element array [row, col, oldValue, newValue]
             //
             const createOrUpdateEntry = function (data) {
+                console.log(data);
 
                 // check if it is a file upload field
-                const col = data[1];
-                if (col > partTypeDefault.fields.length && col < partTypeDefault.fields.length + FILE_FIELDS_COUNT) {
+                if (UploadUtil.isFileColumn(partTypeDefault, linkedPartTypeDefault, data[1])) {
                     dealWithFileField(data[0], data[1], data[3], data[2]);
                     return;
                 }
-                // todo : linked
 
                 const row = data[0];
 
@@ -457,22 +456,12 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                 for (let i = 0; i < change.length; i += 1) {
                     let data = change[i];
 
-                    let row = data[0];
-                    let col = data[1];
-
-                    let fields;
-                    if (col < partTypeDefault.fields + FILE_FIELDS_COUNT) {
-                        fields = partTypeDefault.fields;
-                    } else {
-                        fields = linkedPartTypeDefault.fields;
-                        col = col - (partTypeDefault.fields + FILE_FIELDS_COUNT);
-                    }
-
-                    if (UploadUtil.isFileColumn(fields, col)) {
+                    if (UploadUtil.isFileColumn(partTypeDefault, linkedPartTypeDefault, data[1])) {
                         console.log("skipping file col", data);
                         continue;
                     }
 
+                    let row = data[0];
                     const object = getEntryObject(row, data[1], data[3]);
                     object.index = row;
                     objects[index++] = object;
