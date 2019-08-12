@@ -220,43 +220,39 @@ public class FolderResource extends RestResource {
                               @QueryParam("token") String token,   // todo: move to headers
                               @QueryParam("userId") String remoteUserId,                   // todo : ditto
                               @QueryParam("fields") List<String> fields) {
+        final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
+        if (folderId.equalsIgnoreCase("public")) {   // todo : move to separate rest resource path
+            RegistryPartner registryPartner = requireWebPartner();
+            // return public entries
+            log(registryPartner.getUrl(), "requesting public entries");
+            return this.controller.getPublicEntries(field, offset, limit, asc, fields);
+        }
+
+        // userId can be empty for public folders
+        String userId = super.getUserId();
         try {
-            final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
-            if (folderId.equalsIgnoreCase("public")) {   // todo : move to separate rest resource path
-                RegistryPartner registryPartner = requireWebPartner();
-                // return public entries
-                log(registryPartner.getUrl(), "requesting public entries");
-                return this.controller.getPublicEntries(field, offset, limit, asc, fields);
-            }
+            final long id = Long.decode(folderId);
+            String message = "retrieving folder " + id + " entries";
+            if (filter.length() > 0)
+                message += " filtered by \"" + filter + "\"";
+            FolderContents folderContents = new FolderContents();
+            PageParameters pageParameters = new PageParameters(offset, limit, field, asc, filter);
 
-            // userId can be empty for public folders
-            String userId = super.getUserId();
-            try {
-                final long id = Long.decode(folderId);
-                String message = "retrieving folder " + id + " entries";
-                if (filter.length() > 0)
-                    message += " filtered by \"" + filter + "\"";
-                FolderContents folderContents = new FolderContents();
-                PageParameters pageParameters = new PageParameters(offset, limit, field, asc, filter);
-
-                if (StringUtils.isEmpty(userId)) {
-                    if (StringUtils.isEmpty(token))  // todo :verify partner?
-                        return folderContents.getContents(userId, id, pageParameters, fields);
-
-                    // get registry partner
-                    RegistryPartner partner = requireWebPartner();
-                    log(partner.getUrl(), message);
-                    return folderContents.getRemotelySharedContents(remoteUserId, token, partner, id, pageParameters, fields);
-                } else {
-                    log(userId, message);
+            if (StringUtils.isEmpty(userId)) {
+                if (StringUtils.isEmpty(token))  // todo :verify partner?
                     return folderContents.getContents(userId, id, pageParameters, fields);
-                }
-            } catch (final NumberFormatException nfe) {
-                Logger.error("Passed folder id " + folderId + " is not a number");
-                return null;
+
+                // get registry partner
+                RegistryPartner partner = requireWebPartner();
+                log(partner.getUrl(), message);
+                return folderContents.getRemotelySharedContents(remoteUserId, token, partner, id, pageParameters, fields);
+            } else {
+                log(userId, message);
+                return folderContents.getContents(userId, id, pageParameters, fields);
             }
-        } catch (PermissionException e) {
-            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+        } catch (final NumberFormatException nfe) {
+            Logger.error("Passed folder id " + folderId + " is not a number");
+            return null;
         }
     }
 
@@ -330,12 +326,8 @@ public class FolderResource extends RestResource {
         final String userId = requireUserId();
         log(userId, "adding public read access to folder " + folderId);
         FolderPermissions folderPermissions = new FolderPermissions(userId, folderId);
-        try {
-            folderPermissions.enablePublicReadAccess();
-            return Response.ok().build();
-        } catch (PermissionException pe) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
-        }
+        folderPermissions.enablePublicReadAccess();
+        return Response.ok().build();
     }
 
     @DELETE
@@ -345,12 +337,8 @@ public class FolderResource extends RestResource {
         final String userId = requireUserId();
         log(userId, "removing public read access from folder " + folderId);
         FolderPermissions folderPermissions = new FolderPermissions(userId, folderId);
-        try {
-            folderPermissions.disablePublicReadAccess();
-            return Response.ok().build();
-        } catch (PermissionException pe) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
-        }
+        folderPermissions.disablePublicReadAccess();
+        return Response.ok().build();
     }
 
     @GET

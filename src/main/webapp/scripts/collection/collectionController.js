@@ -485,6 +485,7 @@ angular.module('ice.collection.controller', [])
         let resource = "collections";
 
         $scope.folderPageChange = function () {
+            $scope.notFound = undefined;
             $scope.loadingPage = true;
             $scope.params.offset = ($scope.params.currentPage - 1) * $scope.params.limit;
 
@@ -511,7 +512,10 @@ angular.module('ice.collection.controller', [])
                         $scope.folderNameTooltip = "Click to rename";
                 }
                 $scope.loadingPage = false;
-            }, $scope.params);
+            }, $scope.params, function (err) {
+                $scope.notFound = true;
+                $scope.loadingPage = false;
+            });
         };
 
         //
