@@ -5,7 +5,6 @@ angular.module('ice.entry.service', [])
         let selectedEntries = {};
         let selectedSearchResultsCount = 0;
         let selectedSearchNotificationSent = false;  // send notification when at least one is selected and then none
-        let canEdit = false;
         let allSelection = {};
         let canDelete = false;
         let selectedTypes = {};
@@ -18,10 +17,6 @@ angular.module('ice.entry.service', [])
                     return;
                 }
 
-                // todo : this may be a problem when a user selects 3 entries (can edit 2) and deselects the 3rd
-                // todo : that user cannot edit
-
-                canEdit = entry.canEdit;
                 canDelete = entry.ownerEmail === userId;
 
                 if (selectedEntries[entry.id]) {
@@ -111,8 +106,12 @@ angular.module('ice.entry.service', [])
             canEdit: function () {
                 let count = 0;
                 // selectedTypes is the type of entries selected
-                for (let k in selectedTypes) if (selectedTypes.hasOwnProperty(k)) ++count;
-                return !this.allSelected() && canEdit && selectedSearchResultsCount > 0 && count === 1 && !this.canRestore();
+                for (let k in selectedTypes) {
+                    if (selectedTypes.hasOwnProperty(k))
+                        ++count;
+                }
+
+                return !this.allSelected() && selectedSearchResultsCount && count && !this.canRestore();
             },
 
             canDelete: function () {
@@ -160,7 +159,6 @@ angular.module('ice.entry.service', [])
                 selectedSearchResultsCount = 0;
                 selectedSearchNotificationSent = false;
                 allSelection = {};
-                canEdit = false;
                 canDelete = false;
                 searchQuery = undefined;
                 $rootScope.$emit("EntrySelected", selectedSearchResultsCount);
