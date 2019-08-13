@@ -28,11 +28,12 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
         // this will be allowed as long as the user has not entered any data into the linked portion
         //
         $scope.addNewPartLink = function (type) {
-            // todo : if there is already a link
-            if ($scope.linkedSelection)
+            if ($scope.linkedSelection) {
+                Util.setFeedback("Link already set", "warning");
                 return;
+            }
 
-            // todo : if $scope.bulkUpload.id has not been created yet
+            // TODO : if $scope.bulkUpload.id has not been created yet
             Util.update("rest/uploads/" + $scope.bulkUpload.id + "/link/" + type, {}, {}, function (linkedDefaults) {
                 let ht = angular.element('#dataTable').handsontable('getInstance');
                 $scope.linkedSelection = type;
@@ -46,10 +47,12 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
         // add a part_id column to enable linking to existing entries
         //
         $scope.addExistingPart = function () {
-            // todo : if there is already a link
-            // if( $scope.linkedSelection)
+            if ($scope.linkedSelection) {
+                Util.setFeedback("Link already set", "warning");
+                return;
+            }
 
-            // todo : if $scope.bulkUpload.id has not been created yet
+            // TODO : if $scope.bulkUpload.id has not been created yet
             Util.update("rest/uploads/" + $scope.bulkUpload.id + "/link/existing", {}, {}, function () {
                 let ht = angular.element('#dataTable').handsontable('getInstance');
                 $scope.linkedSelection = "Existing";
@@ -208,7 +211,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                         console.log("Could not retrieve header string for index " + linkIndex);
                         return "";
                     }
-                    return headerString;
+                    return "<i class='fa fa-fw fa-link text-info'></i> " + headerString;
                 }
             };
 
@@ -345,24 +348,25 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
             // data: 4 element array [row, col, oldValue, newValue]
             //
             const createOrUpdateEntry = function (data) {
-                console.log(data);
+                const row = data[0];
+                const column = data[1];
+                const newValue = data[3];    // value that user just entered into row and column
 
                 // check if it is a file upload field
                 if (UploadUtil.isFileColumn(partTypeDefault, linkedPartTypeDefault, data[1])) {
-                    dealWithFileField(data[0], data[1], data[3], data[2]);
+                    dealWithFileField(row, column, newValue, data[2]);
                     return;
                 }
 
-                const row = data[0];
-
                 // retrieve object at specified row
-                let object = getEntryObject(row, data[1], data[3]);
+                let object = getEntryObject(row, column, newValue);
                 if (!object)
                     return;
 
                 $scope.saving = true;
 
                 // first create a new upload if we are not updating an existing one
+                // this is a factor if the user manually enters the url (e.g. "upload/strain")
                 if (!$scope.bulkUpload.id) {
                     // create draft of specified type
                     Util.update("rest/uploads", {type: $scope.importType}, {}, function (result) {
@@ -391,10 +395,6 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                         });
                     } else {
                         // update entry for existing upload
-                        // check if we are updating main or linked
-                        if (col >= partTypeDefault.fields.length + FILE_FIELDS_COUNT)
-                            object = object.linkedParts[0];
-
                         Util.post('rest/uploads/' + $scope.bulkUpload.id + '/entry/' + object.id, object,
                             function (updatedEntry) {
                                 $scope.bulkUpload.lastUpdate = updatedEntry.modificationTime;
