@@ -161,6 +161,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                                     return process(res.data);
                                 });
                             };
+                            return cellProperties;
                         } else {
                             // deal with linked entries
                             const index = col - (FILE_FIELDS_COUNT + partTypeDefault.fields.length);
@@ -226,6 +227,9 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
             // calculates the column width for each header type
             const getColWidth = function (index) {
+                if ($scope.linkedSelection && $scope.linkedSelection.toLowerCase() === "existing")
+                    return "150";
+
                 const mainHeadersSize = partTypeDefault.fields.length + FILE_FIELDS_COUNT;
                 if (index < mainHeadersSize)
                     return UploadUtil.getColumnWidth(partTypeDefault.fields, index);

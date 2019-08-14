@@ -8,10 +8,8 @@ import org.jbei.ice.lib.bulkupload.*;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.SequenceInfo;
+import org.jbei.ice.lib.dto.entry.*;
+import org.jbei.ice.lib.entry.PartDefaults;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -180,8 +178,16 @@ public class BulkUploadResource extends RestResource {
     @Path("/{id}/link/{linkType}")
     public Response setLink(@PathParam("id") long id, @PathParam("linkType") String linkType) {
         String userId = requireUserId();
-        controller.updateLinkType(userId, id, linkType);
-        return Response.status(Response.Status.OK).build();
+        final EntryType entryType = EntryType.nameToType(linkType);
+        if (entryType == null)
+            throw new WebApplicationException();
+
+        controller.updateLinkType(userId, id, entryType);
+
+        PartDefaults partDefaults = new PartDefaults(userId);
+        PartData partData = partDefaults.get(entryType);
+        partData.setCustomEntryFields(new CustomFields().get(entryType).getData());
+        return super.respond(partData);
     }
 
     /**

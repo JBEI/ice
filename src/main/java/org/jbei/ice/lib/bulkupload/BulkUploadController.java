@@ -105,13 +105,13 @@ public class BulkUploadController {
         return upload.toDataTransferObject();
     }
 
-    public void updateLinkType(String userId, long id, String linkType) {
+    public void updateLinkType(String userId, long id, EntryType linkType) {
         BulkUpload upload = dao.get(id);
         if (upload == null)
             throw new IllegalArgumentException("Could not retrieve upload with id " + id);
 
         authorization.expectWrite(userId, upload);
-        upload.setLinkType(linkType);
+        upload.setLinkType(linkType.getName());
         dao.update(upload);
     }
 
