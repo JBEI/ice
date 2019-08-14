@@ -905,6 +905,9 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                                         }
                                     }
                                 }
+                            } else {
+                                // todo : length should probably be based on the selected type of entry and length
+                                sheetData[0].length = 50;
                             }
 
                             if ($scope.bulkUpload.entryIdData.length < result.count) {
