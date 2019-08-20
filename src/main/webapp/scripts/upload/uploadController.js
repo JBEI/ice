@@ -33,7 +33,6 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                 return;
             }
 
-            // TODO : if $scope.bulkUpload.id has not been created yet
             Util.update("rest/uploads/" + $scope.bulkUpload.id + "/link/" + type, {}, {}, function (linkedDefaults) {
                 let ht = angular.element('#dataTable').handsontable('getInstance');
                 $scope.linkedSelection = type;
@@ -165,9 +164,9 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                         } else {
                             // deal with linked entries
                             const index = col - (FILE_FIELDS_COUNT + partTypeDefault.fields.length);
-                            field = linkedPartTypeDefault.fields[index];
+                            field = partTypeDefault.fields[index];
 
-                            if (!field) {
+                            if (!field && $scope.linkedSelection) {
                                 const linkedFileFieldIndex = index - linkedPartTypeDefault.fields.length;
                                 if (linkedFileFieldIndex < FILE_FIELDS_COUNT) {
                                     field = {inputType: "file"}
@@ -231,10 +230,14 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                     return "150";
 
                 const mainHeadersSize = partTypeDefault.fields.length + FILE_FIELDS_COUNT;
+
                 if (index < mainHeadersSize)
                     return UploadUtil.getColumnWidth(partTypeDefault.fields, index);
 
-                return UploadUtil.getColumnWidth(linkedPartTypeDefault.fields, (index - mainHeadersSize));
+                if (!$scope.linkedSelection)
+                    return "150";
+
+                return UploadUtil.getColumnWidth(linkedPartTypeDefault.fields, ((index) - mainHeadersSize));
             };
 
             const calculateSize = function () {
@@ -906,8 +909,22 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                                     }
                                 }
                             } else {
-                                // todo : length should probably be based on the selected type of entry and length
-                                sheetData[0].length = 50;
+                                if (!$scope.linkedSelection) {
+                                    sheetData[0].length = partTypeDefault.fields.length + 3;
+                                } else {
+                                    if ($scope.linkedSelection.toLowerCase() === "existing") {
+                                        sheetData[0].length = partTypeDefault.fields.length + 3 + 1;
+                                    } else {
+                                        Util.get("rest/parts/defaults/" + $scope.linkedSelection, function (defaults) {
+                                            linkedPartTypeDefault = EntryService.convertToUIForm(defaults);
+                                            sheetData[0].length = partTypeDefault.fields.length + 3 + linkedPartTypeDefault.fields.length + 3;
+                                            createSheet();
+                                        }, {}, function (error) {
+                                            sheetData[0].length = 40;
+                                        });
+                                    }
+                                }
+                                createSheet();
                             }
 
                             if ($scope.bulkUpload.entryIdData.length < result.count) {
