@@ -925,13 +925,17 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.createBulkUpload = function (type) {
-            Util.update("rest/uploads", {type: type}, {}, function (result) {
-                if (result && result.id) {
-                    $location.path("upload/" + result.id);
-                } else {
-                    Util.setFeedback("Error creating upload", "danger");
-                }
-            });
+            if ("upload" === $scope.createType) {
+                Util.update("rest/uploads", {type: type}, {}, function (result) {
+                    if (result && result.id) {
+                        $location.path("upload/" + result.id);
+                    } else {
+                        Util.setFeedback("Error creating upload", "danger");
+                    }
+                });
+            } else {
+                $location.path($scope.createType + "/" + type);
+            }
         };
 
         $scope.submitShoppingCart = function () {
