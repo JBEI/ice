@@ -20,9 +20,9 @@ angular.module('ice.upload.service', [])
                 },
 
                 setDataValue: function (type, index, object, value, partTypeDefault) {
-                    // todo if index > length
-
                     const field = partTypeDefault.fields[index];
+                    if (!field)
+                        return;
 
                     if (field.isCustom) {
                         if (!object.customFields)
@@ -135,6 +135,9 @@ angular.module('ice.upload.service', [])
                 getCellProperties: function (field, autoComplete, uploadedFiles) {
                     const cellProperties = {};
 
+                    if (!field)
+                        return cellProperties;
+
                     switch (field.inputType) {
                         case 'bool':
                             cellProperties.type = 'checkbox';
@@ -234,7 +237,7 @@ angular.module('ice.upload.service', [])
                     } else {
                         switch (field.inputType) {
                             case 'bool':
-                                return 50;
+                                return 80;
 
                             case 'long':
                                 return 200;
