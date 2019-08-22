@@ -2,15 +2,14 @@
 
 angular.module('ice.entry.service', [])
     .factory('Selection', function ($rootScope, $cookies) {
-        var selectedEntries = {};
-        var selectedSearchResultsCount = 0;
-        var selectedSearchNotificationSent = false;  // send notification when at least one is selected and then none
-        var canEdit = false;
-        var allSelection = {};
-        var canDelete = false;
-        var selectedTypes = {};
-        var searchQuery = undefined;
-        var userId = $cookies.get('userId');
+        let selectedEntries = {};
+        let selectedSearchResultsCount = 0;
+        let selectedSearchNotificationSent = false;  // send notification when at least one is selected and then none
+        let allSelection = {};
+        let canDelete = false;
+        let selectedTypes = {};
+        let searchQuery = undefined;
+        let userId = $cookies.get('userId');
 
         return {
             selectEntry: function (entry) {
@@ -18,10 +17,6 @@ angular.module('ice.entry.service', [])
                     return;
                 }
 
-                // todo : this may be a problem when a user selects 3 entries (can edit 2) and deselects the 3rd
-                // todo : that user cannot edit
-
-                canEdit = entry.canEdit;
                 canDelete = entry.ownerEmail === userId;
 
                 if (selectedEntries[entry.id]) {
@@ -31,7 +26,7 @@ angular.module('ice.entry.service', [])
 
                     // remove type
                     if (selectedTypes[entry.type] && selectedTypes[entry.type].length) {
-                        var idx = selectedTypes[entry.type].indexOf(entry.id);
+                        let idx = selectedTypes[entry.type].indexOf(entry.id);
                         selectedTypes[entry.type].splice(idx, 1);
                         if (selectedTypes[entry.type].length === 0)
                             delete selectedTypes[entry.type];
@@ -69,7 +64,7 @@ angular.module('ice.entry.service', [])
             },
 
             hasSelection: function () {
-                return (allSelection.type && allSelection.type != 'NONE') || selectedSearchResultsCount > 0;
+                return (allSelection.type && allSelection.type !== 'NONE') || selectedSearchResultsCount > 0;
             },
 
             setTypeSelection: function (type) {
@@ -80,19 +75,19 @@ angular.module('ice.entry.service', [])
 
                 // selects a specific type of entry from the list e.g. all plasmids
                 allSelection.type = type.toUpperCase();
-                if (allSelection.type != 'NONE')
+                if (allSelection.type !== 'NONE')
                     $rootScope.$emit("EntrySelected", 1);
                 else
                     this.reset();
             },
 
             searchEntrySelected: function (entry) {
-                return selectedEntries[entry.id] != undefined;
+                return selectedEntries[entry.id] !== undefined;
             },
 
             getSelectedEntries: function () {
-                var selected = [];
-                for (var k in selectedEntries) {
+                let selected = [];
+                for (let k in selectedEntries) {
                     if (selectedEntries.hasOwnProperty(k) && selectedEntries[k]) {
                         selected.push({id: k, visible: selectedEntries[k].visible});
                     }
@@ -109,10 +104,14 @@ angular.module('ice.entry.service', [])
             },
 
             canEdit: function () {
-                var count = 0;
+                let count = 0;
                 // selectedTypes is the type of entries selected
-                for (var k in selectedTypes) if (selectedTypes.hasOwnProperty(k)) ++count;
-                return !this.allSelected() && canEdit && selectedSearchResultsCount > 0 && count == 1 && !this.canRestore();
+                for (let k in selectedTypes) {
+                    if (selectedTypes.hasOwnProperty(k))
+                        ++count;
+                }
+
+                return !this.allSelected() && selectedSearchResultsCount && count && !this.canRestore();
             },
 
             canDelete: function () {
@@ -120,9 +119,9 @@ angular.module('ice.entry.service', [])
             },
 
             canRestore: function () {
-                if (allSelection.type && allSelection.type == 'ALL')
+                if (allSelection.type && allSelection.type === 'ALL')
                     return false;
-                return this.hasSelection() && this.getSelectedEntries()[0].visible == 'DELETED';
+                return this.hasSelection() && this.getSelectedEntries()[0].visible === 'DELETED';
             },
 
             isAdmin: function () {
@@ -137,12 +136,12 @@ angular.module('ice.entry.service', [])
                 if (this.allSelected())
                     return true;
 
-                return allSelection.type == entry.type.toUpperCase();
+                return allSelection.type === entry.type.toUpperCase();
             },
 
             // have all entries been marked for selection?
             allSelected: function () {
-                return allSelection.type == 'ALL';
+                return allSelection.type === 'ALL';
             },
 
             setSearch: function (query) {
@@ -160,7 +159,6 @@ angular.module('ice.entry.service', [])
                 selectedSearchResultsCount = 0;
                 selectedSearchNotificationSent = false;
                 allSelection = {};
-                canEdit = false;
                 canDelete = false;
                 searchQuery = undefined;
                 $rootScope.$emit("EntrySelected", selectedSearchResultsCount);
@@ -168,12 +166,13 @@ angular.module('ice.entry.service', [])
         }
     })
     .factory('EntryService', function () {
-        var toStringArray = function (objArray) {
-            var result = [];
+        let toStringArray = function (objArray) {
+            let result = [];
             if (objArray && objArray.length) {
                 objArray.forEach(function (object) {
                     if (!object || !object.value || object.value === "")
                         return;
+
                     result.push(object.value);
                 });
             }
@@ -196,7 +195,7 @@ angular.module('ice.entry.service', [])
             },
             {label: "Funding Source", schema: 'fundingSource', inputType: 'medium'},
             {
-                label: "Status", schema: 'status', options: [
+                label: "Status", schema: 'status', required: true, options: [
                     {value: "Complete", text: "Complete"},
                     {value: "In Progress", text: "In Progress"},
                     {value: "Abandoned", text: "Abandoned"},
@@ -204,7 +203,7 @@ angular.module('ice.entry.service', [])
                 ]
             },
             {
-                label: "Bio Safety Level", schema: 'bioSafetyLevel', options: [
+                label: "Bio Safety Level", schema: 'bioSafetyLevel', required: true, options: [
                     {value: "1", text: "Level 1"},
                     {value: "2", text: "Level 2"},
                     {value: "-1", text: "Restricted"}
@@ -355,8 +354,8 @@ angular.module('ice.entry.service', [])
                     if (part[field.schema].length === 0) {
                         field.invalid = true;
                     } else {
-                        for (var i = 0; i < part[field.schema].length; i += 1) {
-                            var fieldValue = part[field.schema][i].value;
+                        for (let i = 0; i < part[field.schema].length; i += 1) {
+                            let fieldValue = part[field.schema][i].value;
                             field.invalid = !fieldValue || fieldValue === '';
                         }
                     }
@@ -402,7 +401,7 @@ angular.module('ice.entry.service', [])
         };
 
         const getFieldsForType = function (type) {
-            var fields = angular.copy(partFields);
+            let fields = angular.copy(partFields);
             type = type.toLowerCase();
 
             switch (type.toLowerCase()) {
@@ -448,7 +447,7 @@ angular.module('ice.entry.service', [])
                 sortMap[value] = [];
             });
 
-            for (var i = 0; i < fields.length; i += 1) {
+            for (let i = 0; i < fields.length; i += 1) {
                 if (!fields[i].inputType)
                     fields[i].inputType = "options";
                 const type = fields[i].inputType;
@@ -481,8 +480,9 @@ angular.module('ice.entry.service', [])
 
             // converts to a form that the backend can work with
             getTypeData: function (entry) {
-                // var type = entry.type.toLowerCase();
-                // var fields = getFieldsForType(type);
+                // let type = entry.type.toLowerCase();
+                // let fields = getFieldsForType(type);
+                console.log(entry);
 
                 entry.fields.forEach(function (field) {
                     if (field.subSchema) {
@@ -492,8 +492,13 @@ angular.module('ice.entry.service', [])
                     }
 
                     if (field.isCustom) {
-                        console.log("custom", field);
                         entry.customFields.forEach(function (custom) {
+                            if (custom.fieldType === "EXISTING") {
+                                const idx = entry.customFields.indexOf(custom);
+                                entry.customFields.splice(idx, 1);
+                                return;
+                            }
+
                             console.log(custom);
                             custom.value = entry[custom.label];
                             if (custom.fieldType === 'MULTI_CHOICE_PLUS' && custom.value === 'Other') {
@@ -511,8 +516,16 @@ angular.module('ice.entry.service', [])
 
             // inverse of the above. converts to form ui can work with
             convertToUIForm: function (entry) {
-                var type = entry.type.toLowerCase();
-                var fields = getFieldsForType(type);
+                let type = entry.type.toLowerCase();
+
+                if (entry.bioSafetyLevel === 2)
+                    entry.bioSafetyLevel = "Level 2";
+                else if (entry.bioSafetyLevel === -1)
+                    entry.bioSafetyLevel = "Restricted";
+                else
+                    entry.bioSafetyLevel = "Level 1";
+
+                let fields = getFieldsForType(type);
 
                 fields.forEach(function (field) {
                     if (field.subSchema && entry[field.subSchema]) {
@@ -526,11 +539,48 @@ angular.module('ice.entry.service', [])
                 }
 
                 entry.customFields.forEach(function (custom) {
-                    if (!custom.label || !custom.value)
+                    if (!custom.label)
                         return;
+                    //
+                    // entry[custom.label] = custom.value;
+                    // fields.push({schema: custom.label, label: custom.label});
+                    const customField = {
+                        label: custom.label,
+                        required: custom.required,
+                        isCustom: true,
+                        value: custom.value
+                    };
 
-                    entry[custom.label] = custom.value;
-                    fields.push({schema: custom.label, label: custom.label});
+                    switch (custom.fieldType) {
+                        case "MULTI_CHOICE":
+                        case "MULTI_CHOICE_PLUS":
+                            customField.options = [];
+                            customField.inputType = "options";
+                            custom.options.forEach(function (each) {
+                                customField.options.push({value: each.name, text: each.name})
+                            });
+
+                            if (custom.fieldType === "MULTI_CHOICE_PLUS")
+                                customField.options.push({value: "Other", text: "Other"});
+
+                            fields.push(customField);
+                            break;
+
+                        case "EXISTING":
+                            if (!custom.options || !custom.options.length)
+                                return;
+
+                            // schema is contained in options. assuming only one
+                            // todo : it is set as {name: 'schema', value: schema_value}
+                            const schema = custom.options[0].name;
+                            for (let i = 0; i < fields.length; i += 1) {
+                                if (fields[i].schema === schema) {
+                                    fields[i].required = custom.required;
+                                    fields[i].label = custom.label;
+                                    break;
+                                }
+                            }
+                    }
                 });
 
                 entry.fields = sortEntryFields(fields);
@@ -546,8 +596,8 @@ angular.module('ice.entry.service', [])
             // also converts entry to form that UI can work with
             // also sets "fields" parameter
             setNewEntryFields: function (entry) {
-                var type = entry.type.toLowerCase();
-                var fields = getFieldsForType(type);
+                let type = entry.type.toLowerCase();
+                let fields = getFieldsForType(type);
 
                 fields.forEach(function (field) {
                     if (field.inputType === 'autoCompleteAdd' || field.inputType === 'add') {
@@ -593,9 +643,24 @@ angular.module('ice.entry.service', [])
                             if (custom.fieldType === "MULTI_CHOICE_PLUS")
                                 customField.options.push({value: "Other", text: "Other"});
 
+                            fields.push(customField);
                             break;
+
+                        case "EXISTING":
+                            if (!custom.options || !custom.options.length)
+                                return;
+
+                            // schema is contained in options. assuming only one
+                            // todo : it is set as {name: 'schema', value: schema_value}
+                            const schema = custom.options[0].name;
+                            for (let i = 0; i < fields.length; i += 1) {
+                                if (fields[i].schema === schema) {
+                                    fields[i].required = custom.required;
+                                    fields[i].label = custom.label;
+                                    break;
+                                }
+                            }
                     }
-                    fields.push(customField);
                 });
 
                 entry.fields = sortEntryFields(fields);

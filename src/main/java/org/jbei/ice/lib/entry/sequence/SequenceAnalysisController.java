@@ -143,7 +143,7 @@ public class SequenceAnalysisController {
         }
 
         try {
-            List<Bl2SeqResult> bl2seqAlignmentResults = BlastPlus.runBlast2Seq(entrySequenceString, traceSequenceString);
+            List<Bl2SeqResult> bl2seqAlignmentResults = new BlastPlus().runBlast2Seq(entrySequenceString, traceSequenceString);
 
             if (bl2seqAlignmentResults.size() > 0) {
                 int maxAlignedSequenceLength = -1;

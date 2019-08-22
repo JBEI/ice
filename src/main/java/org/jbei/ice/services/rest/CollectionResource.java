@@ -89,7 +89,7 @@ public class CollectionResource extends RestResource {
                          @DefaultValue("created") @QueryParam("sort") final String sort,
                          @DefaultValue("false") @QueryParam("asc") final boolean asc,
                          @DefaultValue("") @QueryParam("filter") String filter,
-                         @QueryParam("fields") List<String> queryParam) {
+                         @QueryParam("fields") List<String> fields) {
         String userId = requireUserId();
 
         try {
@@ -97,7 +97,7 @@ public class CollectionResource extends RestResource {
             ColumnField sortField = ColumnField.valueOf(sort.toUpperCase());
             log(userId, "retrieving entries for collection " + type);
             CollectionEntries entries = new CollectionEntries(userId, type);
-            return super.respond(entries.getEntries(sortField, asc, offset, limit, filter));
+            return super.respond(entries.getEntries(sortField, asc, offset, limit, filter, fields));
         } catch (PermissionException pe) {
             return super.respond(Response.Status.FORBIDDEN);
         } catch (IllegalArgumentException ie) {

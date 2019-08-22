@@ -15,7 +15,7 @@ public class SBOL2Formatter extends AbstractFormatter {
     }
 
     @Override
-    public void format(Sequence sequence, OutputStream outputStream) throws FormatterException, IOException {
+    public void format(Sequence sequence, OutputStream outputStream) throws IOException {
 
         SBOLDocument doc = new SBOLDocument();
 
@@ -24,7 +24,7 @@ public class SBOL2Formatter extends AbstractFormatter {
             visitor.visit(sequence);
             doc.write(outputStream);
         } catch (SBOLValidationException | SBOLConversionException | URISyntaxException e) {
-            throw new FormatterException(e);
+            throw new IOException(e);
         }
     }
 }

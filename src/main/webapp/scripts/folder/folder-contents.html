@@ -166,8 +166,10 @@
                     <img src="img/dna.svg" uib-tooltip="Has Sequence" width="16px"
                          style="margin-left: 3px; margin-right: 3px;"
                          ng-if="entryHeaders.hasSequence.selected"/>
-                    <!--<span uib-tooltip="Has Link" style="font-size: 14px; margin-left: 8px"-->
-                    <!--class="glyphicon glyphicon-link"></span>-->
+
+                    <span uib-tooltip="Has Link" ng-if="entryHeaders.links.selected"
+                          style="font-size: 14px; margin-left: 8px"
+                          class="glyphicon glyphicon-link"></span>
                 </th>
                 <th class="entry-table-header" ng-if="entryHeaders.created.selected">
                     <span ng-click="sort('created')">Created</span>
@@ -244,7 +246,7 @@
                     'ice-label-info': entry.status.toUpperCase()=='Planned'.toUpperCase()}">{{entry.status | capitalize}}
                     </span>
                 </td>
-                <td style="vertical-align: middle;">
+                <td style="vertical-align: middle; white-space: nowrap">
                     <span ng-if="entryHeaders.hasSample.selected">
                         <i ng-show="entry.hasSample" class="fa fa-flask fa-fw dark-gray"
                            style="color: #555; font-size: 14px;"></i>
@@ -258,14 +260,17 @@
                          <i ng-show="!entry.hasSequence" class="fa fa-square fa-fw"
                             style="opacity: 0; font-size: 14px"></i>
                     </span>
-                    <!--<span ng-if="entry.linkedParts.length || entry.parents.length">-->
-                    <!--<span class="opacity_hover link-sup">{{entry.parents.length}}</span>-->
-                    <!--<span class="glyphicon glyphicon-link"></span>-->
-                    <!--&lt;!&ndash;<sub style="vertical-align: bottom; left: -7px">{{entry.linkedParts.length}}</sub>&ndash;&gt;-->
-                    <!--<span class="opacity_hover link-sub">{{entry.linkedParts.length}}</span>-->
-                    <!--</span>-->
-                    <!--<i ng-show="!entry.linkedParts.length && !entry.parents.length" class="fa fa-square fa-fw"-->
-                    <!--style="opacity: 0; font-size: 14px;"></i>-->
+
+                    <span ng-if="entryHeaders.links.selected">
+                        <span ng-if="entry.linkedParts.length || entry.parents.length">
+                            <span class="opacity_hover link-sup">{{entry.parents.length}}</span>
+                            <span class="glyphicon glyphicon-link"></span>
+                            <span class="opacity_hover link-sub">{{entry.linkedParts.length}}</span>
+                        </span>
+
+                        <i ng-show="!entry.linkedParts.length && !entry.parents.length" class="fa fa-square fa-fw"
+                           style="opacity: 0; font-size: 14px;"></i>
+                    </span>
                 </td>
                 <td style="width: 130px; white-space: nowrap; vertical-align: middle;"
                     ng-if="entryHeaders.created.selected">

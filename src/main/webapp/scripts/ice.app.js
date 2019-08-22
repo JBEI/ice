@@ -6,11 +6,11 @@ angular
 
     .run(function (Authentication, $route, $location, $rootScope, Util) {
         // change path without re-loading
-        var original = $location.path;
+        let original = $location.path;
         $location.path = function (path, reload) {
             if (reload === false) {
-                var lastRoute = $route.current;
-                var un = $rootScope.$on('$locationChangeSuccess', function () {
+                let lastRoute = $route.current;
+                let un = $rootScope.$on('$locationChangeSuccess', function () {
                     $route.current = lastRoute;
                     un();
                 });
@@ -18,9 +18,9 @@ angular
             return original.apply($location, [path]);
         };
 
-        //$rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
-        //    console.log(event, toState, toParams, fromState, fromParams);
-        //});
+        $rootScope.$on('$stateChangeStart', function (event, toState, toParams, fromState, fromParams) {
+            console.log(event, toState, toParams, fromState, fromParams);
+        });
 
         $rootScope.logout = function () {
             Authentication.logout();

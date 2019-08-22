@@ -20,8 +20,9 @@ public class RebuildBlastIndexTask extends Task {
     public void execute() {
         Logger.info("Running blast rebuild task");
         try {
-            BlastPlus.rebuildDatabase(force);
-        } catch (BlastException e) {
+            BlastPlus blastPlus = new BlastPlus("blast", "ice");
+            blastPlus.rebuildDatabase(force);
+        } catch (Exception e) {
             Logger.error(e);
         }
     }

@@ -19,7 +19,7 @@ public class SBOLFormatter extends AbstractFormatter {
     }
 
     @Override
-    public void format(Sequence sequence, OutputStream outputStream) throws FormatterException, IOException {
+    public void format(Sequence sequence, OutputStream outputStream) throws IOException {
         SBOLVisitor visitor = new SBOLVisitor();
         visitor.visit(sequence);
         SBOLDocument sbolDocument = createXmlDocument(visitor.getDnaComponent());

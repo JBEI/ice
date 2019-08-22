@@ -3,262 +3,280 @@
 angular.module('ice.upload.service', [])
     .factory('UploadUtil', function () {
 
-        //
-        // headers
-        //
-        const partHeaders = ["Principal Investigator <span class='required'>*</span>"
-            , "PI Email"
-            , "Funding Source"
-            , "Intellectual Property"
-            , "BioSafety Level <span class='required'>*</span>"
-            , "Name <span class='required'>*</span>"
-            , "Alias"
-            , "Keywords"
-            , "Summary <span class='required'>*</span>"
-            , "Notes"
-            , "References"
-            , "External URL"
-            , "Status <span class='required'>*</span>"
-            , "Creator <span class='required'>*</span>"
-            , "Creator Email <span class='required'>*</span>"
-            // other headers are inserted here
-            , "Sequence Trace File"
-            , "Sequence File"
-            , "Attachment File"];
+            return {
+                // converts the index (which depends on type) of the schema to the specific rest resource name
+                indexToRestResource: function (index) {
+                    switch (index) {
+                        case 0:
+                            return "trace";
 
-        const strainHeaders = angular.copy(partHeaders);
-        strainHeaders.splice.apply(strainHeaders, [15, 0].concat(["Host", "Genotype or Phenotype",
-            "Selection Markers <span class='required'>*</span>"]));
+                        case 1:
+                            return "sequence";
 
-        const plasmidHeaders = angular.copy(partHeaders);
-        plasmidHeaders.splice.apply(plasmidHeaders, [15, 0].concat(["Circular", "Backbone", "Promoters", "Replicates In",
-            "Origin of Replication", "Selection Markers <span class='required'>*</span>"]));
+                        default:
+                        case 2:
+                            return "attachment";
+                    }
+                },
 
-        const seedHeaders = angular.copy(partHeaders);
-        seedHeaders.splice.apply(seedHeaders, [15, 0].concat(["Homozygosity", "Ecotype", "Harvest Date", "Parents",
-            "Plant Type", "Generation", "Sent to ABRC?", "Selection Markers <span class='required'>*</span>"]));
+                setDataValue: function (type, index, object, value, partTypeDefault) {
+                    const field = partTypeDefault.fields[index];
+                    if (!field)
+                        return;
 
-        const proteinHeaders = angular.copy(partHeaders);
-        proteinHeaders.splice.apply(proteinHeaders, [15, 0].concat(["Organism", "Full Name", "Gene Name", "Uploaded From"]));
+                    if (field.isCustom) {
+                        if (!object.customFields)
+                            object.customFields = [];
 
-        //
-        // data schema (should map exactly to headers)
-        //
-        const dataSchema = ['principalInvestigator', 'principalInvestigatorEmail', 'fundingSource',
-            'intellectualProperty', 'bioSafetyLevel', 'name', 'alias', 'keywords', 'shortDescription',
-            'longDescription', 'references', 'links', 'status', 'creator', 'creatorEmail',
-            // other schema entered here
-            'sequenceTrace', 'sequenceFileName', 'attachments'];
+                        field.value = value;
+                        field.entryType = type;
+                        object.customFields.push(field);
+                    } else {
+                        if (field.subSchema) {
+                            object[field.subSchema][field.schema] = value;
+                        } else {
+                            object[field.schema] = value;
 
-        const strainSchema = angular.copy(dataSchema);
-        strainSchema.splice.apply(strainSchema, [15, 0].concat('host', 'genotypePhenotype', 'selectionMarkers'));
+                            // todo : find a way to avoid this explicit callout to specific fields
+                            if (field.schema === "bioSafetyLevel") {
+                                if (object.bioSafetyLevel === "Level 2")
+                                    object.bioSafetyLevel = 2;
+                                else if (object.bioSafetyLevel === "Restricted")
+                                    object.bioSafetyLevel = "-1";
+                                else
+                                    object.bioSafetyLevel = 1;
+                            }
+                        }
+                    }
+                },
 
-        const plasmidSchema = angular.copy(dataSchema);
-        plasmidSchema.splice.apply(plasmidSchema, [15, 0].concat('circular', 'backbone', 'promoters', 'replicatesIn',
-            'originOfReplication', 'selectionMarkers'));
+                generateLinkOptions: function (type) {
+                    switch (type) {
+                        case 'plasmid':
+                            return [
+                                {type: 'part', display: 'Part'},
+                                {type: 'plasmid', display: 'Plasmid'}
+                            ];
 
-        const seedSchema = angular.copy(dataSchema);
-        seedSchema.splice.apply(seedSchema, [15, 0].concat('homozygosity', 'ecotype', 'harvestDate', 'parents',
-            'plantType', 'generation', 'sentToAbrc', 'selectionMarkers'));
+                        case 'part':
+                            return [
+                                {type: 'part', display: 'Part'}
+                            ];
 
-        const proteinSchema = angular.copy(dataSchema);
-        proteinSchema.splice.apply(proteinSchema, [15, 0].concat('organism', 'fullName', 'geneName',
-            'uploadedFrom'));
+                        case 'strain':
+                            return [
+                                {type: 'part', display: 'Part'},
+                                {type: 'plasmid', display: 'Plasmid'},
+                                {type: 'strain', display: 'Strain'}
+                            ];
 
-        return {
-            getDataSchema: function (type) {
-                switch (type.toLowerCase()) {
-                    case "strain":
-                        return strainSchema;
+                        case 'seed':
+                            return [
+                                {type: 'part', display: 'Part'},
+                                {type: 'seed', display: 'Seed'}
+                            ];
 
-                    case "plasmid":
-                        return plasmidSchema;
+                        case 'protein':
+                            return [
+                                {type: 'part', display: 'Part'},
+                                {type: 'protein', display: 'Protein'}
+                            ];
+                    }
+                },
 
-                    case "seed":
-                        return seedSchema;
+                isFileColumn: function (partTypeDefault, linkedPartTypeDefault, col) {
+                    const FILE_FIELDS_COUNT = 3;
+                    let fields;
+                    if (col < partTypeDefault.fields.length + FILE_FIELDS_COUNT) {
+                        fields = partTypeDefault.fields;
+                    } else {
+                        fields = linkedPartTypeDefault.fields;
+                        col = col - (partTypeDefault.fields.length + FILE_FIELDS_COUNT);
+                    }
+                    return (col >= fields.length && col < fields.length + 3);
+                },
 
-                    case "protein":
-                        return proteinSchema;
+                // type can also be "EXISTING"
+                createPartObject: function (id, type) {
+                    let object = {id: id, type: type.toUpperCase()};
 
-                    case "part":
-                    default:
-                        return dataSchema;
-                }
-            },
+                    switch (type.toLowerCase()) {
+                        case "strain":
+                            object.strainData = {};
+                            break;
 
-            // returns field for the specified type at specified index
-            getTypeField: function (type, index) {
-                return this.getDataSchema(type)[index];
-            },
+                        case "plasmid":
+                            object.plasmidData = {};
+                            break;
 
-            // returns array of headers for specified type
-            getSheetHeaders: function (type) {
-                switch (type.toLowerCase()) {
-                    case "strain":
-                        return strainHeaders;
+                        case "seed":
+                            object.arabidopsisSeedData = {};
+                            break;
 
-                    case "plasmid":
-                        return plasmidHeaders;
-
-                    case "part":
-                        return partHeaders;
-
-                    case "seed":
-                        return seedHeaders;
-
-                    case "protein":
-                        return proteinHeaders;
-                }
-            },
-
-            // converts the index (which depends on type) of the schema to the specific rest resource name
-            indexToRestResource: function (type, index) {
-                const schema = this.getDataSchema(type);
-                switch (index) {
-                    case schema.indexOf('sequenceFileName'):
-                        return "sequence";
-
-                    default:
-                    case schema.indexOf('attachments'):
-                        return "attachment";
-
-                    // todo :
-                    case schema.indexOf("sequenceTrace"):
-                        return "trace";
-                }
-            },
-
-            setDataValue: function (type, index, object, value) {
-                const dataSchema = this.getDataSchema(type);
-                // links is an array
-                if (dataSchema[index] === "links") {
-                    object[dataSchema[index]] = [value];
-                    return object;
-                }
-
-                if (index < 15) {
-                    object[dataSchema[index]] = value;
-                    return object;
-                }
-
-                // selection marker is an array
-                if (dataSchema[index] === "selectionMarkers") {
-                    object[dataSchema[index]] = [value];
-                    return object;
-                }
-
-                // index is greater than 15 so it is one of the specialized types (strain, plasmid, seed)
-                switch (type.toLowerCase()) {
-                    case "strain":
-                        object.strainData[dataSchema[index]] = value;
-                        return object;
-
-                    default:
-                        return object;
-
-                    case "plasmid":
-                        object.plasmidData[dataSchema[index]] = value;
-                        return object;
-
-                    case "seed":
-                        object.arabidopsisSeedData[dataSchema[index]] = value;
-                        return object;
-
-                    case "protein":
-                        object.proteinData[dataSchema[index]] = value;
-                        return object;
-                }
-            },
-
-            // retrieves the value to be displayed in the spreadsheet from the entry object retrieved from the
-            // server side. sort of acts as a mapping to handle the case of "strainData" etc
-            // with selection markers being the exception
-            getEntryValue: function (type, entry, index) {
-                const dataSchema = this.getDataSchema(type);
-
-                if (index < 15 || dataSchema[index] === "selectionMarkers") {
-                    const val = entry[dataSchema[index]];
-                    if (dataSchema[index] === "bioSafetyLevel") {
-                        if (val === 0)
-                            return '';
-                        if (val === -1)
-                            return "Restricted";
+                        case "protein":
+                            object.proteinData = {};
+                            break;
                     }
 
-                    if (dataSchema[index] === "selectionMarkers")
-                        return val.toString();
+                    return object;
+                },
 
-                    return val;
-                }
 
-                switch (type.toLowerCase()) {
-                    case "strain":
-                        // 3 custom fields
-                        if (index >= 18)
-                            return entry[this.getDataSchema("part")[index - 3]];
-                        return entry.strainData[dataSchema[index]];
+                getPartValue: function (field, entry) {
+                    if (field.isCustom)
+                        return field.value;
 
-                    case "plasmid":
-                        // 6 custom fields
-                        if (index >= 21)
-                            return entry[this.getDataSchema("part")[index - 6]];
-                        return entry.plasmidData[dataSchema[index]];
+                    if (field.subSchema)
+                        return entry[field.subSchema][field.schema];
 
-                    case "seed":
-                        // 7 custom fields
-                        if (index >= 22)
-                            return entry[this.getDataSchema("part")[index - 7]];
-                        return entry.arabidopsisSeedData[dataSchema[index]];
+                    return entry[field.schema];
+                },
 
-                    case "protein":
-                        // 1 custom field
-                        if (index >= 16)
-                            return entry[this.getDataSchema("part")[index - 1]];
-                        return entry.proteinData[dataSchema[index]];
+                getCellProperties: function (field, autoComplete, uploadedFiles) {
+                    const cellProperties = {};
 
-                    case "part":
-                        return entry[dataSchema[index]];
-                }
-                return undefined;
-            },
+                    if (!field)
+                        return cellProperties;
 
-            generateLinkOptions: function (type) {
-                switch (type) {
-                    case 'plasmid':
-                        return [
-                            {type: 'part', display: 'Part'},
-                            {type: 'plasmid', display: 'Plasmid'}
-                        ];
+                    switch (field.inputType) {
+                        case 'bool':
+                            cellProperties.type = 'checkbox';
+                            break;
 
-                    case 'part':
-                        return [
-                            {type: 'part', display: 'Part'}
-                        ];
+                        case 'options':
+                            cellProperties.type = 'autocomplete';
+                            cellProperties.source = [''];
+                            for (let i = 0; i < field.options.length; i += 1) {
+                                cellProperties.source.push(field.options[i].text);
+                            }
+                            cellProperties.allowInvalid = false;
+                            cellProperties.validator = function (value, callback) {
+                                callback(cellProperties.source.indexOf(value) !== -1);
+                            };
+                            break;
 
-                    case 'strain':
-                        return [
-                            {type: 'part', display: 'Part'},
-                            {type: 'plasmid', display: 'Plasmid'},
-                            {type: 'strain', display: 'Strain'}
-                        ];
+                        case "autoComplete":
+                        case "autoCompleteAdd":
+                            cellProperties.type = 'autocomplete';
+                            cellProperties.strict = false;
+                            cellProperties.source = function (query, process) {
+                                autoComplete(field.autoCompleteField, query, process);
+                            };
+                            break;
 
-                    case 'seed':
-                        return [
-                            {type: 'part', display: 'Part'},
-                            {type: 'seed', display: 'Seed'}
-                        ];
+                        case "date":
+                            cellProperties.type = "date";
+                            cellProperties.dateFormat = "MM/DD/YYYY";
+                            cellProperties.correctFormat = true;
+                            break;
 
-                    case 'protein':
-                        return [
-                            {type: 'part', display: 'Part'},
-                            {type: 'protein', display: 'Protein'}
-                        ];
-                }
-            },
+                        case "file":
+                            cellProperties.type = 'autocomplete';
+                            cellProperties.strict = true;
+                            cellProperties.copyable = false; // file cells cannot be copied
+                            cellProperties.source = function (query, process) {
+                                if (uploadedFiles.arr.length > 1)
+                                    return process(uploadedFiles.arr);
+                                else
+                                    alert("No files available. Drag and drop files to be able to select them")
+                            };
+                            cellProperties.validator = function (value, callback) {
+                                if (!value || value.trim() === "")
+                                    callback(true);
+                                else
+                                    callback(uploadedFiles.map.get(value) !== undefined);
+                            };
+                            break;
+                    }
 
-            // determines if the field (column) is for a file upload column
-            isFileField: function (fieldName) {
-                return ["attachments", "sequenceFileName", "sequenceTrace"].indexOf(fieldName) !== -1;
+                    return cellProperties;
+                },
+
+                getHeaderForIndex: function (fields, index) {
+                    let field = fields[index];
+                    if (!field) {
+                        index = index - fields.length;
+                        // files
+                        switch (index) {
+                            case 0:
+                                return "Sequence Trace File";
+
+                            case 1:
+                                return "Sequence File";
+
+                            case 2:
+                                return "Attachment File";
+
+                            default:
+                                return undefined;
+                        }
+                    } else {
+                        let sheetHeaderString = field.label;
+                        if (field.required)
+                            sheetHeaderString += "<span class='required'>*</span>";
+                        return sheetHeaderString;
+                    }
+                },
+
+                getColumnWidth: function (fields, index) {
+                    let field = fields[index];
+                    if (!field) {
+                        index = index - fields.length;
+                        if (index < 3) {
+                            switch (index) {
+                                case 0:
+                                    return 170;
+
+                                case 1:
+                                    return 160;
+
+                                case 2:
+                                    return 150;
+                            }
+                        }
+                    } else {
+                        switch (field.inputType) {
+                            case 'bool':
+                                return 80;
+
+                            case 'long':
+                                return 200;
+
+                            default:
+                                return 150;
+                        }
+                    }
+                },
+
+                cleanBSL: function (part) {
+                    if (!part.bioSafetyLevel)
+                        return part;
+
+                    switch (part.bioSafetyLevel) {
+
+                        case "Level 1":
+                            part.bioSafetyLevel = 1;
+                            break;
+
+                        case "Level 2":
+                            part.bioSafetyLevel = 2;
+                            break;
+
+                        case "Restricted":
+                            part.bioSafetyLevel = -1;
+                            break;
+                    }
+
+                    return part;
+                },
+
+                // checks if, based on index, columning being edited is a main entry column
+                // isMainEntryCol: function (index, mainFields) {
+                //     if (index < mainFields.length)
+                //         return true;
+                //
+                //     return false;
+                // }
             }
         }
-    });
+    );

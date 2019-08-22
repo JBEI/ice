@@ -10,7 +10,6 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.*;
-import org.jbei.ice.lib.entry.EntryController;
 import org.jbei.ice.lib.entry.attachment.Attachments;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.executor.IceExecutorService;
@@ -42,7 +41,6 @@ public class BulkUploadController {
     private final EntryDAO entryDAO;
     private final BulkUploadAuthorization authorization;
     private final AccountController accountController;
-    private final EntryController entryController;
     private final Attachments attachments;
 
     public BulkUploadController() {
@@ -50,7 +48,6 @@ public class BulkUploadController {
         entryDAO = DAOFactory.getEntryDAO();
         authorization = new BulkUploadAuthorization();
         accountController = new AccountController();
-        entryController = new EntryController();
         attachments = new Attachments();
     }
 
@@ -108,12 +105,22 @@ public class BulkUploadController {
         return upload.toDataTransferObject();
     }
 
+    public void updateLinkType(String userId, long id, EntryType linkType) {
+        BulkUpload upload = dao.get(id);
+        if (upload == null)
+            throw new IllegalArgumentException("Could not retrieve upload with id " + id);
+
+        authorization.expectWrite(userId, upload);
+        upload.setLinkType(linkType.getName());
+        dao.update(upload);
+    }
+
     /**
      * Removes any bulk edits belonging to the specified user
      *
      * @param userId unique identifier for user whose bulk edits are to be removed
      */
-    protected void clearBulkEdits(String userId) {
+    private void clearBulkEdits(String userId) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         if (account == null)
             return;
@@ -205,6 +212,10 @@ public class BulkUploadController {
         for (Entry entry : list) {
             PartData partData = setFileData(userId, entry, ModelToInfoFactory.getInfo(entry));
 
+            // get custom data
+            CustomFields fields = new CustomFields();
+            partData.getCustomEntryFields().addAll(fields.getCustomFieldValuesForPart(entry.getId()));
+
             // check if any links and convert
             if (!entry.getLinkedEntries().isEmpty()) {
                 Entry linked = (Entry) entry.getLinkedEntries().toArray()[0];
@@ -219,7 +230,7 @@ public class BulkUploadController {
         return info;
     }
 
-    protected PartData setFileData(String userId, Entry entry, PartData partData) {
+    private PartData setFileData(String userId, Entry entry, PartData partData) {
         SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
 
         if (sequenceDAO.hasSequence(entry.getId())) {
@@ -389,15 +400,26 @@ public class BulkUploadController {
                 }
             }
 
-            entryController.update(userId, entry);
+            updateEntry(entry);
             if (plasmid != null)
-                entryController.update(userId, plasmid);
+                updateEntry(plasmid);
         }
 
         // when done approving, delete the bulk upload record but not the entries associated with it.
         bulkUpload.getContents().clear();
         dao.delete(bulkUpload);
         return true;
+    }
+
+    private void updateEntry(Entry entry) {
+        if (entry == null) {
+            return;
+        }
+
+        entry.setModificationTime(Calendar.getInstance().getTime());
+        if (entry.getVisibility() == null)
+            entry.setVisibility(Visibility.OK.getValue());
+        entryDAO.update(entry);
     }
 
     public SequenceInfo addSequence(String userId, long bulkUploadId, long entryId, String sequenceString,

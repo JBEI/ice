@@ -8,10 +8,8 @@ import org.jbei.ice.lib.bulkupload.*;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.access.AccessPermission;
-import org.jbei.ice.lib.dto.entry.AttachmentInfo;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.SequenceInfo;
+import org.jbei.ice.lib.dto.entry.*;
+import org.jbei.ice.lib.entry.PartDefaults;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.utils.Utils;
 
@@ -170,10 +168,26 @@ public class BulkUploadResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}")
-    public BulkUploadInfo updateList(@PathParam("id") long id,
-                                     BulkUploadInfo info) {
+    public BulkUploadInfo updateList(@PathParam("id") long id, BulkUploadInfo info) {
         String userId = requireUserId();
         return creator.createOrUpdateEntries(userId, id, info.getEntryList());
+    }
+
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/{id}/link/{linkType}")
+    public Response setLink(@PathParam("id") long id, @PathParam("linkType") String linkType) {
+        String userId = requireUserId();
+        final EntryType entryType = EntryType.nameToType(linkType);
+        if (entryType == null)
+            throw new WebApplicationException();
+
+        controller.updateLinkType(userId, id, entryType);
+
+        PartDefaults partDefaults = new PartDefaults(userId);
+        PartData partData = partDefaults.get(entryType);
+        partData.setCustomEntryFields(new CustomFields().get(entryType).getData());
+        return super.respond(partData);
     }
 
     /**
@@ -220,8 +234,7 @@ public class BulkUploadResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/status")
-    public Response updateStatus(@PathParam("id") long id,
-                                 BulkUploadInfo info) {
+    public Response updateStatus(@PathParam("id") long id, BulkUploadInfo info) {
         String userId = requireUserId();
         Logger.info(userId + ": updating bulk upload status for \"" + info.getId() + "\" to " + info.getStatus());
         ProcessedBulkUpload resp = creator.updateStatus(userId, id, info.getStatus());

@@ -39,7 +39,7 @@ public class VisibleEntries {
         this.everybodyGroup = new GroupController().createOrRetrievePublicGroup();
     }
 
-    public List<PartData> getEntries(ColumnField field, boolean asc, int start, int limit, String filter) {
+    public List<PartData> getEntries(ColumnField field, boolean asc, int start, int limit, String filter, List<String> fields) {
         List<Entry> results;
 
         if (isAdmin) {
@@ -54,7 +54,7 @@ public class VisibleEntries {
 
         ArrayList<PartData> data = new ArrayList<>();
         for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false);
+            PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false, fields);
             data.add(info);
         }
 

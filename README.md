@@ -20,7 +20,7 @@ To install in a production environment, please [consult our manual](http://ice.j
 ### Development
 To set up a development environment or local machine installation make sure you have the following dependencies installed
 
-* [Java JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+* [Java OpenJDK 12](https://jdk.java.net/12/)
 * [Maven 3](https://maven.apache.org/download.cgi)
 * [Git](https://git-scm.com/downloads)
 

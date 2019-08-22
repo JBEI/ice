@@ -21,7 +21,7 @@
                     <a ng-href="profile/{{user.id}}">{{user.email}}</a>
                 </div>
 
-            <span class="form-group" ng-if="false">&nbsp;
+                <span class="form-group" ng-if="false">&nbsp;
                 <button style="background: transparent; border: none !important;" title=""
                         data-placement="bottom" data-content="contents"
                         data-template="views/popover.html" data-trigger="focus" bs-popover>
@@ -34,21 +34,21 @@
                 <!--<i class="fa fa-envelope" style="font-size: 16px"></i>-->
                 <!--<sup class="count-badge">8</sup>-->
                 <!--</span>-->
-            <span class="cursor_pointer"
-                  ng-if="shoppingCartContents.length"
-                  popover-trigger="click"
-                  popover-placement="bottom" popover-title="Samples Cart"
-                  uib-popover-template="shoppingCartTemplate">
+                <span class="cursor_pointer"
+                      ng-if="shoppingCartContents.length"
+                      popover-trigger="click"
+                      popover-placement="bottom" popover-title="Samples Cart"
+                      uib-popover-template="shoppingCartTemplate">
                 &nbsp;
                 <i class="fa fa-shopping-cart" style="font-size: 16px"></i>
                 <sup class="count-badge">{{shoppingCartContents.length}}</sup>
             </span>
-            <span class="cursor_pointer" ng-if="user.isAdmin">&nbsp;
+                <span class="cursor_pointer" ng-if="user.isAdmin">&nbsp;
                 <a href="admin" style="color: #ff4500;" class="opacity_hover"><i
                         class="fa fa-sliders" style="font-size: 20px"></i></a>
             </span>
                 &nbsp;
-            <span class="cursor_pointer opacity_hover">
+                <span class="cursor_pointer opacity_hover">
                 <i class="fa fa-sign-out" style="font-size: 20px" uib-tooltip="Logout"
                    tooltip-placement="bottom"
                    data-ng-click="logout()"></i>
@@ -72,9 +72,10 @@
 
                 <ul class="dropdown-menu" uib-dropdown-menu>
                     <li ng-repeat="choice in items">
-                        <a ng-href="{{createType}}/{{choice.type}}" class="cursor_pointer">
+                        <a class="cursor_pointer" ng-click="createBulkUpload(choice.type)">
                             <i ng-if="createType==='upload'"
-                               class="opacity_4 color_444 fa fa-fw fa-table"></i> {{choice.name}}</a>
+                               class="opacity_4 color_444 fa fa-fw fa-table"></i> {{choice.name}}
+                        </a>
                     </li>
                 </ul>
             </div>

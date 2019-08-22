@@ -24,32 +24,6 @@ public class EntryControllerTest extends HibernateRepositoryTest {
     private EntryController controller = new EntryController();
 
     @Test
-    public void testUpdatePart() throws Exception {
-        Account account = AccountCreator.createTestAccount("testUpdatePart", false);
-        String email = account.getEmail();
-
-        long id = TestEntryCreator.createTestPart(email);
-        Entry entry = controller.getEntry(Long.toString(id));
-        Assert.assertNotNull(entry);
-        PartData partData = ModelToInfoFactory.getInfo(entry);
-        Assert.assertNotNull(partData);
-        partData.setAlias("testUpdatePartAlias");
-        long updated = controller.updatePart(email, id, partData);
-        Assert.assertEquals(id, updated);
-        entry = controller.getEntry(Long.toString(id));
-        Assert.assertEquals("testUpdatePartAlias", entry.getAlias());
-
-        // add links
-        partData.getLinks().add("a");
-        partData.getLinks().add("b");
-
-        controller.updatePart(email, id, partData);
-        entry = controller.getEntry(Long.toString(id));
-        Assert.assertNotNull(entry);
-        Assert.assertEquals(2, entry.getLinks().size());
-    }
-
-    @Test
     public void testMoveEntriesToTrash() throws Exception {
         Account account = AccountCreator.createTestAccount("testMoveEntriesToTrash", false);
         String email = account.getEmail();

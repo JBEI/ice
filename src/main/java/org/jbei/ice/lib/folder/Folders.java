@@ -3,11 +3,14 @@ package org.jbei.ice.lib.folder;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
+import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.group.GroupController;
+import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
@@ -117,7 +120,28 @@ public class Folders {
             return false;
 
         folder.setType(type);
-        return dao.update(folder) != null;
+        folder = dao.update(folder);
+        if (folder == null)
+            return false;
+
+        // send email notification
+        String archiveEmail = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
+        try {
+            if (!StringUtils.isEmpty(archiveEmail))
+                EmailFactory.getEmail().send(archiveEmail, "Sample creation requested", createEmailBody(folderId));
+        } catch (Exception e) {
+            Logger.error("Exception sending email " + e);
+        }
+
+        return true;
+    }
+
+    private String createEmailBody(long folderId) {
+        Account account = accountDAO.getByEmail(userId);
+        String body = "A sample creation request have been received from " + account.getFullName() + " for a folder";
+        body += "\n\nPlease go to the following link to review its contents.\n";
+        body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/folders/" + folderId;
+        return body;
     }
 
     private boolean validateFolderForSamples(Folder folder) {
@@ -177,6 +201,8 @@ public class Folders {
                 Logger.info(entry.getPartNumber() + " is missing origin of replication information");
                 return false;
             }
+
+            return true;
         }
 
         if (EntryType.STRAIN.getName().equalsIgnoreCase(entry.getRecordType())) {
@@ -190,6 +216,8 @@ public class Folders {
                 Logger.info(entry.getPartNumber() + " is missing intellectual property");
                 return false;
             }
+
+            return true;
         }
 
         // only strains and plasmids are allowed

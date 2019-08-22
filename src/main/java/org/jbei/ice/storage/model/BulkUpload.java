@@ -34,6 +34,9 @@ public class BulkUpload implements DataModel {
     @Column(name = "import_type", length = 50)
     private String importType;
 
+    @Column(name = "link_type", length = 50)
+    private String linkType;
+
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
@@ -116,6 +119,10 @@ public class BulkUpload implements DataModel {
         this.importType = importType;
     }
 
+    public void setLinkType(String linkType) {
+        this.linkType = linkType;
+    }
+
     public BulkUploadStatus getStatus() {
         return status;
     }
@@ -130,21 +137,20 @@ public class BulkUpload implements DataModel {
 
     public BulkUploadInfo toDataTransferObject() {
         BulkUploadInfo bulkUploadInfo = new BulkUploadInfo();
-        bulkUploadInfo.setCreated(getCreationTime());
-        bulkUploadInfo.setId(getId());
-        bulkUploadInfo.setLastUpdate(getLastUpdateTime());
-        bulkUploadInfo.setStatus(getStatus());
+        bulkUploadInfo.setCreated(creationTime);
+        bulkUploadInfo.setId(id);
+        bulkUploadInfo.setLastUpdate(lastUpdateTime);
+        bulkUploadInfo.setStatus(status);
+        bulkUploadInfo.setName(name);
+        bulkUploadInfo.setType(this.importType);
+        bulkUploadInfo.setLinkType(this.linkType);
 
-        // draft account
         Account draftAccount = getAccount();
-        bulkUploadInfo.setName(getName());
         AccountTransfer accountTransfer = new AccountTransfer();
         accountTransfer.setEmail(draftAccount.getEmail());
         accountTransfer.setFirstName(draftAccount.getFirstName());
         accountTransfer.setLastName(draftAccount.getLastName());
         bulkUploadInfo.setAccount(accountTransfer);
-
-        bulkUploadInfo.setType(getImportType());
 
         if (permissions != null) {
             for (Permission permission : permissions) {

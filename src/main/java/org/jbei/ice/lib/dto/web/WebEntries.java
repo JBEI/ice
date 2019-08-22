@@ -1,11 +1,16 @@
 package org.jbei.ice.lib.dto.web;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.PartSource;
+import org.jbei.ice.lib.dto.entry.PartWithSequence;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.net.RemoteContact;
+import org.jbei.ice.services.rest.IceRestClient;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
@@ -13,7 +18,10 @@ import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.RemotePartner;
 
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Represents entries that are available for the web (public)
@@ -31,6 +39,10 @@ public class WebEntries {
         this.remotePartnerDAO = DAOFactory.getRemotePartnerDAO();
         this.entryDAO = DAOFactory.getEntryDAO();
         this.remoteContact = new RemoteContact();
+    }
+
+    public static Iterator<PartWithSequence> iterator() {
+        return new WebEntriesIterator();
     }
 
     /**
@@ -91,5 +103,99 @@ public class WebEntries {
                 return sequence;
         }
         return null;
+    }
+
+    private static class WebEntriesIterator implements Iterator<PartWithSequence> {
+        private List<RemotePartner> partners;
+        private List<PartWithSequence> parts;
+        private RemotePartner nextPartner;
+        private int start;
+        private final int fetchCount = 30;
+
+        WebEntriesIterator() {
+            partners = DAOFactory.getRemotePartnerDAO().getRegistryPartners();
+            nextPartner = partners.remove(0);
+            fetchMore();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return !parts.isEmpty();
+        }
+
+        @Override
+        public PartWithSequence next() {
+            if (!hasNext())
+                return null;
+
+            PartWithSequence sequence = parts.remove(0);
+            if (parts.isEmpty()) {
+                fetchMore();
+            }
+
+            return sequence;
+        }
+
+        private void fetchMore() {
+            if (nextPartner == null)
+                return;
+
+            int retrieved = fetchPartnerEntries(nextPartner);
+
+            if (retrieved == -1) {
+                nextPartner = partners.isEmpty() ? null : partners.remove(0);
+            }
+
+            // set next start
+            if (retrieved < fetchCount) {
+                start = 0;
+                nextPartner = partners.isEmpty() ? null : partners.remove(0);
+            } else {
+                start += retrieved;
+            }
+        }
+
+        private int fetchPartnerEntries(RemotePartner partner) {
+            if (partner == null || StringUtils.isEmpty(partner.getUrl()))
+                return -1;
+
+            String url = partner.getUrl();
+            String registryName = StringUtils.isEmpty(partner.getName()) ? url : partner.getName();
+
+            // fetch "limit" number of entries
+            PartnerEntries results = getPartnerEntries(partner);
+            if (results == null || results.getEntries().getResultCount() == 0) {
+                Logger.error("No results from partner: " + partner.getUrl());
+                return 0;
+            }
+
+            PartSource source = new PartSource(url, registryName, Long.toString(partner.getId()));
+
+            // index each part and sequence (if available)
+            for (PartData result : results.getEntries().getData()) {
+                PartWithSequence partSequence = new PartWithSequence();
+                partSequence.setPartSource(source);
+
+                if (result.isHasSequence()) {
+                    // retrieve sequence
+                    FeaturedDNASequence sequence = IceRestClient.getInstance().getWor(partner.getUrl(), "/rest/web/" + partner.getId() + "/entries/" + result.getRecordId() + "/sequence", FeaturedDNASequence.class, null, partner.getApiKey());
+                    if (sequence != null) {
+                        partSequence.setSequence(sequence);
+                    }
+                }
+
+                parts.add(partSequence);
+            }
+
+            return results.getEntries().getData().size();
+        }
+
+        private PartnerEntries getPartnerEntries(RemotePartner partner) {
+            Map<String, Object> queryParams = new HashMap<>();
+            queryParams.put("offset", start);
+            queryParams.put("limit", fetchCount);
+
+            return IceRestClient.getInstance().getWor(partner.getUrl(), "/rest/partners/" + partner.getId() + "/entries", PartnerEntries.class, queryParams, partner.getApiKey());
+        }
     }
 }

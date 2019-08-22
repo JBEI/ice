@@ -46,8 +46,22 @@
                placeholder="Email if known" style="width: 191px;">
     </div>
 
-    <!--options-->
-    <div class="col-md-10" ng-if="field.options">
+    <!--custom field options-->
+    <div class="col-md-10" ng-if="field.options && field.isCustom">
+        <select ng-focus="field.edit=true" ng-blur="field.edit=false" class="pull_down"
+                ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+                ng-model="activePart[field.label]" size="1" ng-change="field.invalid=false"
+                ng-options="option.value as option.text for option in field.options"></select>
+
+        <!-- show input box if "other" is selected -->
+        <input type="text" ng-model="activePart[field.label + '_plus']" maxlength="150" style="width:200px"
+               ng-if="activePart[field.label]==='Other'"
+               ng-class="{'input_box':!field.invalid, 'input_box_error':field.invalid}"
+               ng-change="field.invalid=false" ng-focus="field.edit=true" ng-blur="field.edit=false">
+    </div>
+
+    <!--regular (not custom) field options-->
+    <div class="col-md-10" ng-if="field.options && !field.isCustom">
         <select ng-focus="field.edit=true" ng-blur="field.edit=false" class="input_box pull_down"
                 ng-model="activePart[field.schema]" size="1"
                 ng-options="option.text as option.text for option in field.options"></select>

@@ -6,15 +6,15 @@
                     <td>
                         <h4>
                             <span style="white-space: nowrap">
-                            <strong style="color: #888;text-transform: uppercase">{{importType}}
-                                <span ng-if="linkedSelection"> + {{linkedSelection}}</span> UPLOAD
-                            </strong>
+                                <strong style="color: #888;text-transform: uppercase">{{importType}}
+                                    <span ng-if="linkedSelection"> + {{linkedSelection}}</span> UPLOAD
+                                </strong>
 
-                            <strong style="white-space: nowrap" class="folder_name" uib-tooltip="Click to rename"
-                                    ng-click="showBulkUploadRenameModal()">
-                                <span ng-if="bulkUpload.name">{{bulkUpload.name}}</span>
-                                <i ng-if="!bulkUpload.name">Untitled upload</i>
-                            </strong>
+                                <strong style="white-space: nowrap" class="folder_name" uib-tooltip="Click to rename"
+                                        ng-click="showBulkUploadRenameModal()">
+                                    <span ng-if="bulkUpload.name">{{bulkUpload.name}}</span>
+                                    <i ng-if="!bulkUpload.name">Untitled upload</i>
+                                </strong>
                             </span>
 
                             <div class="font-85em">
@@ -92,5 +92,8 @@
 
 <div id="dataTable" style="overflow: auto; position: fixed; right:0; left: 260px; top: 182px"
      class="font-85em" ngf-drop="upload(files)" ng-model="files" class="drop-box"
-     ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"></div>
+     ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true">
+    <br>
+    <img src="img/loader-mini.gif"> Generating table...
+</div>
 
