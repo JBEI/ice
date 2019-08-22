@@ -33,12 +33,12 @@ public class SampleEntries {
         return this.dao.getEntryCountByFolderType(FolderType.SAMPLE, filter);
     }
 
-    public List<PartData> get(ColumnField field, boolean asc, int start, int limit, String filter) {
+    public List<PartData> get(ColumnField field, boolean asc, int start, int limit, String filter, List<String> fields) {
         List<Entry> entries = this.dao.getEntrysByFolderType(FolderType.SAMPLE, field, asc, start, limit, filter);
 
         ArrayList<PartData> data = new ArrayList<>();
         for (Entry entry : entries) {
-            PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false);
+            PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false, fields);
             data.add(info);
         }
         return data;

@@ -17,10 +17,8 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.search.BlastProgram;
 import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
-import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.parsers.bl2seq.Bl2SeqResult;
 import org.jbei.ice.lib.search.IndexBuildStatus;
-import org.jbei.ice.lib.utils.SequenceUtils;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.FeatureDAO;
@@ -40,6 +38,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import static org.jbei.ice.lib.utils.SequenceUtils.breakUpLines;
+
 /**
  * Enables (command line) interaction with BLAST+
  * <p>
@@ -47,31 +47,48 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Hector Plahar
  */
-public class BlastPlus {
+public class BlastPlus implements Closeable {
 
-    private static final String BLAST_DB_FOLDER = "blast";
-    private static final String BLAST_DB_NAME = "ice";
     private static final String DELIMITER = ",";
     private static final String LOCK_FILE_NAME = "write.lock";
-    private static final String AUTO_ANNOTATION_FOLDER_NAME = "auto-annotation";
+    private static final String NEW_INDEX_FILE_NAME = "bigfastafile.new";
+
+    private final Path indexPath;
+    private final String dbName;
+    private final Path blastInstallDirectory;
+
+    public BlastPlus() {
+        this("blast", "ice");
+    }
+
+    /**
+     * @param folderName folder location of the index folder
+     * @param dbName     name of the blast database
+     */
+    public BlastPlus(String folderName, String dbName) {
+        this.indexPath = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), folderName);
+        this.dbName = dbName;
+        this.blastInstallDirectory = Paths.get(Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR));
+    }
 
     /**
      * Runs a blast query in the specified database folder
      * using the specified options
      *
-     * @param dbFolder location of the blast database
-     * @param query    wrapper around blast query including options such as blast type
-     * @param options  command line options for blast
+     * @param query   wrapper around blast query including options such as blast type
+     * @param options command line options for blast
      * @return results of the query run. An empty string is returned if the specified blast database does not exist
      * in the ice data directory
      * @throws BlastException on exception running blast on the command line
      */
-    static String runBlastQuery(String dbFolder, BlastQuery query, String... options) throws BlastException {
+    private String runBlastQuery(BlastQuery query, String... options) throws BlastException {
+        if (query.getBlastProgram() == null)
+            query.setBlastProgram(BlastProgram.BLAST_N);
+
         try {
             Path commandPath = Paths.get(Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR),
                     query.getBlastProgram().getName());
-            String blastDb = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY), dbFolder,
-                    BLAST_DB_NAME).toString();
+            String blastDb = Paths.get(this.indexPath.toString(), this.dbName).toString();
             if (!Files.exists(Paths.get(blastDb + ".nsq"))) {
                 return "";
             }
@@ -133,10 +150,10 @@ public class BlastPlus {
      *
      * @param query wrapper around blast query
      * @return map of unique entry identifier (whose sequence was a subject) to the search result hit details
-     * @throws BlastException
+     * @throws BlastException if results of running blast is null
      */
-    public static HashMap<String, SearchResult> runBlast(BlastQuery query) throws BlastException {
-        String result = runBlastQuery(BLAST_DB_FOLDER, query, "-perc_identity", "95", "-outfmt",
+    public HashMap<String, SearchResult> runBlast(BlastQuery query) throws BlastException {
+        String result = runBlastQuery(query, "-perc_identity", "95", "-outfmt",
                 "10 stitle qstart qend sstart send sstrand evalue bitscore score length nident");
         if (result == null)
             throw new BlastException("Exception running blast");
@@ -150,8 +167,8 @@ public class BlastPlus {
      * @return list of DNA features that match the query according to the parameters
      * @throws BlastException on null result or exception processing the result
      */
-    public static List<DNAFeature> runCheckFeatures(BlastQuery query) throws BlastException {   // todo add evalue
-        String result = runBlastQuery(AUTO_ANNOTATION_FOLDER_NAME, query, "-perc_identity", "100",
+    public List<DNAFeature> runCheckFeatures(BlastQuery query) throws BlastException {   // todo add evalue
+        String result = runBlastQuery(query, "-perc_identity", "100",
                 "-outfmt", "10 stitle qstart qend sstart send sstrand");
         if (result == null)
             throw new BlastException("Exception running blast");
@@ -173,7 +190,7 @@ public class BlastPlus {
      * @param blastOutput blast program output
      * @return list of feature objects resulting from processing the blast output
      */
-    public static List<DNAFeature> processFeaturesBlastOutput(String blastOutput) {
+    private static List<DNAFeature> processFeaturesBlastOutput(String blastOutput) {
         List<DNAFeature> hashMap = new ArrayList<>();
         HashSet<String> duplicates = new HashSet<>();
 
@@ -274,10 +291,8 @@ public class BlastPlus {
 
                 info.setQueryLength(queryLength);
                 String idString = Long.toString(info.getEntryInfo().getId());
-                SearchResult currentResult = hashMap.get(idString);
                 // if there is an existing record for same entry with a lower relative score then replace
-                if (currentResult == null)
-                    hashMap.put(idString, info);
+                hashMap.putIfAbsent(idString, info);
             }
         } catch (IOException e) {
             Logger.error(e);
@@ -293,67 +308,48 @@ public class BlastPlus {
      *
      * @return true is a blast database is found, false otherwise
      */
-    private static boolean blastDatabaseExists() {
-        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-        Path path = FileSystems.getDefault().getPath(dataDir, BLAST_DB_FOLDER, BLAST_DB_NAME + ".nsq");
-        return Files.exists(path, LinkOption.NOFOLLOW_LINKS);
+    private boolean blastDatabaseExists() {
+        return Files.exists(Paths.get(indexPath.toString(), this.dbName + ".nsq"), LinkOption.NOFOLLOW_LINKS);
     }
 
-    public static void rebuildFeaturesBlastDatabase(String featureFolder) throws IOException {
-        String blastInstallDir = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR);
-        if (StringUtils.isEmpty(blastInstallDir)) {
-            Logger.warn("Blast install directory not available. Aborting blast features rebuild");
-            return;
-        }
-        Path blastDir = Paths.get(blastInstallDir);
-        if (!Files.exists(blastDir))
-            throw new IOException("Could not locate Blast installation in " + blastInstallDir);
-
-        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-        final Path blastFolder = Paths.get(dataDir, featureFolder);
-        File lockFile = Paths.get(blastFolder.toString(), LOCK_FILE_NAME).toFile();
-        if (lockFile.exists()) {
-            if (lockFile.lastModified() <= (System.currentTimeMillis() - (1000 * 60 * 60 * 24)))
-                if (!lockFile.delete()) {
-                    Logger.warn("Could not delete outdated features blast lockfile. Delete the following file manually: "
-                            + lockFile.getAbsolutePath());
-                } else {
-                    Logger.info("Features blast db locked (lockfile - " + lockFile.getAbsolutePath() + "). Rebuild aborted!");
-                    return;
-                }
-        }
+    public void rebuildFeaturesBlastDatabase() throws IOException {
+        File lockFile = Paths.get(blastInstallDirectory.toString(), LOCK_FILE_NAME).toFile();
 
         try {
-            if (!Files.exists(blastFolder)) {
-                Logger.info("Features blast folder (" + blastFolder.toString() + ") does not exist. Creating...");
-                try {
-                    Files.createDirectories(blastFolder);
-                } catch (Exception e) {
-                    Logger.warn("Could not create features blast folder. Create it manually or all blast features runs will fail");
+            if (lockFile.exists()) {
+                if (lockFile.lastModified() <= (System.currentTimeMillis() - (1000 * 60 * 60 * 24)))
+                    if (!lockFile.delete()) {
+                        Logger.warn("Could not delete outdated features blast lockfile. Delete the following file manually: "
+                                + lockFile.getAbsolutePath());
+                    } else {
+                        Logger.info("Features blast db locked (lockfile - " + lockFile.getAbsolutePath() + "). Rebuild aborted!");
+                        return;
+                    }
+            }
+
+            try {
+                if (!lockFile.createNewFile()) {
+                    Logger.warn("Could not create lock file for features blast rebuild");
                     return;
                 }
-            }
 
-            if (!lockFile.createNewFile()) {
-                Logger.warn("Could not create lock file for features blast rebuild");
-                return;
+                FileOutputStream fos = new FileOutputStream(lockFile);
+                try (FileLock lock = fos.getChannel().tryLock()) {
+                    if (lock == null)
+                        return;
+                    Logger.info("Rebuilding features blast database...");
+                    rebuildSequenceDatabase(true);
+                    Logger.info("Blast features database rebuild complete");
+                }
+            } catch (OverlappingFileLockException l) {
+                Logger.warn("Could not obtain lock file for blast at " + blastInstallDirectory.toString());
+            } catch (BlastException be) {
+                FileUtils.deleteQuietly(lockFile);
+                Logger.error(be);
             }
-
-            FileOutputStream fos = new FileOutputStream(lockFile);
-            try (FileLock lock = fos.getChannel().tryLock()) {
-                if (lock == null)
-                    return;
-                Logger.info("Rebuilding features blast database...");
-                rebuildSequenceDatabase(blastDir, blastFolder, true);
-                Logger.info("Blast features database rebuild complete");
-            }
-        } catch (OverlappingFileLockException l) {
-            Logger.warn("Could not obtain lock file for blast at " + blastFolder.toString());
-        } catch (BlastException be) {
+        } finally {
             FileUtils.deleteQuietly(lockFile);
-            Logger.error(be);
         }
-        FileUtils.deleteQuietly(lockFile);
     }
 
     /**
@@ -363,71 +359,66 @@ public class BlastPlus {
      * Also, a rebuild can be forced even if a lock file exists which is less than a day old
      *
      * @param force set to true to force a rebuild. Use with caution
-     * @throws BlastException
+     * @throws BlastException on exception rebuilding
      */
-    public static void rebuildDatabase(boolean force) throws BlastException {
-        String blastInstallDir = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR);
-        if (StringUtils.isEmpty(blastInstallDir)) {
-            Logger.warn("Blast install directory not available. Aborting blast rebuild");
-            return;
-        }
-
-        Path blastDir = Paths.get(blastInstallDir);
-        if (!Files.exists(blastDir))
-            throw new BlastException("Could not locate Blast installation in " + blastInstallDir);
-
-        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-        final Path blastFolder = Paths.get(dataDir, BLAST_DB_FOLDER);
-        File lockFile = Paths.get(blastFolder.toString(), LOCK_FILE_NAME).toFile();
-        if (lockFile.exists()) {
-            if (lockFile.lastModified() <= (System.currentTimeMillis() - (1000 * 60 * 60 * 24))) {
-                if (!lockFile.delete()) {
-                    Logger.warn("Could not delete outdated blast lockfile. Delete the following file manually: "
-                            + lockFile.getAbsolutePath());
-                    return;
-                }
-            } else {
-                Logger.info("Blast db locked (lockfile - " + lockFile.getAbsolutePath() + "). Rebuild aborted!");
-                return;
-            }
-        }
+    public void rebuildDatabase(boolean force) throws BlastException {
+        File lockFile = Paths.get(this.indexPath.toString(), LOCK_FILE_NAME).toFile();
 
         try {
-            if (!Files.exists(blastFolder)) {
-                Logger.info("Blast folder (" + blastFolder.toString() + ") does not exist. Creating...");
-                try {
-                    Files.createDirectories(blastFolder);
-                } catch (Exception e) {
-                    Logger.warn("Could not create blast folder. Create it manually or all blast runs will fail");
+            // check if db is locked
+            if (lockFile.exists()) {
+                if (lockFile.lastModified() <= (System.currentTimeMillis() - (1000 * 60 * 60 * 24))) {
+                    if (!lockFile.delete()) {
+                        Logger.warn("Could not delete outdated blast lockfile. Delete the following file manually: "
+                                + lockFile.getAbsolutePath());
+                        return;
+                    }
+                } else {
+                    Logger.info("Blast db locked (lockfile - " + lockFile.getAbsolutePath() + "). Rebuild aborted!");
                     return;
                 }
             }
 
-            if (!force && blastDatabaseExists()) {
-                Logger.info("Blast database found in " + blastFolder.toAbsolutePath().toString());
-                return;
-            }
+            try {
+                if (!Files.exists(this.indexPath)) {
+                    Logger.info("Blast folder (" + this.indexPath.toString() + ") does not exist. Creating...");
+                    try {
+                        Files.createDirectories(this.indexPath);
+                    } catch (Exception e) {
+                        Logger.warn("Could not create blast folder. Create it manually or all blast runs will fail");
+                        return;
+                    }
+                } else if (!Files.isDirectory(this.indexPath)) {
+                    throw new IllegalArgumentException(this.indexPath.toString() + " is not a directory");
+                }
 
-            if (!lockFile.createNewFile()) {
-                Logger.warn("Could not create lock file for blast rebuild");
-                return;
-            }
-
-            FileOutputStream fos = new FileOutputStream(lockFile);
-            try (FileLock lock = fos.getChannel().tryLock()) {
-                if (lock == null)
+                if (!force && blastDatabaseExists()) {
+                    Logger.info("Blast database found in " + this.indexPath.toAbsolutePath().toString());
                     return;
-                Logger.info("Rebuilding blast database");
-                rebuildSequenceDatabase(blastDir, blastFolder, false);
-                Logger.info("Blast database rebuild complete");
+                }
+
+                if (!lockFile.createNewFile()) {
+                    Logger.warn("Could not create lock file for blast rebuild");
+                    return;
+                }
+
+                FileOutputStream fos = new FileOutputStream(lockFile);
+                try (FileLock lock = fos.getChannel().tryLock()) {
+                    if (lock == null)
+                        return;
+                    Logger.info("Rebuilding blast database");
+                    rebuildSequenceDatabase(false);
+                    Logger.info("Blast database rebuild complete");
+                }
+            } catch (OverlappingFileLockException l) {
+                Logger.warn("Could not obtain lock file for blast at " + indexPath.toString());
+            } catch (IOException eio) {
+                FileUtils.deleteQuietly(lockFile);
+                throw new BlastException(eio);
             }
-        } catch (OverlappingFileLockException l) {
-            Logger.warn("Could not obtain lock file for blast at " + blastFolder.toString());
-        } catch (IOException eio) {
+        } finally {
             FileUtils.deleteQuietly(lockFile);
-            throw new BlastException(eio);
         }
-        FileUtils.deleteQuietly(lockFile);
     }
 
     /**
@@ -438,15 +429,12 @@ public class BlastPlus {
      * @param query   reference sequence.
      * @param subject query sequence.
      * @return List of output string from bl2seq program.
-     * @throws BlastException
+     * @throws BlastException on exception running blast 2 seq
      */
-    public static List<Bl2SeqResult> runBlast2Seq(String query, String subject) throws BlastException {
+    public List<Bl2SeqResult> runBlast2Seq(String query, String subject) throws BlastException {
         try {
             Path queryFilePath = Files.write(Files.createTempFile("query-", ".seq"), query.getBytes());
             Path subjectFilePath = Files.write(Files.createTempFile("subject-", ".seq"), subject.getBytes());
-
-            if (queryFilePath == null || subjectFilePath == null)
-                throw new BlastException("Subject or query is null");
 
             String blastN = Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR) + File.separator
                     + BlastProgram.BLAST_N.getName();
@@ -489,27 +477,17 @@ public class BlastPlus {
     }
 
     /**
-     * Schedule task to rebuild the blast index
-     */
-    public static void scheduleBlastIndexRebuildTask(boolean force) {
-        RebuildBlastIndexTask task = new RebuildBlastIndexTask(force);
-        IceExecutorService.getInstance().runTask(task);
-    }
-
-    /**
      * Build the blast search or sequence database database.
      * <p>
      * <p/>First dump the sequences from the sql database into a fasta file, than create the blast
      * database by calling formatBlastDb.
      *
-     * @param blastInstall the installation directory path for blast
-     * @param blastDb      folder location for the blast database
-     * @param isFeatures   determines which database to rebuild. True for sequence features database, false for
-     *                     blast search database
-     * @throws BlastException
+     * @param isFeatures determines which database to rebuild. True for sequence features database, false for
+     *                   blast search database
+     * @throws BlastException on exception rebuilding sequence db
      */
-    private static void rebuildSequenceDatabase(Path blastInstall, Path blastDb, boolean isFeatures) throws BlastException {
-        Path newFastaFile = Paths.get(blastDb.toString(), "bigfastafile.new");
+    private void rebuildSequenceDatabase(boolean isFeatures) throws BlastException {
+        Path newFastaFile = Paths.get(this.indexPath.toString(), NEW_INDEX_FILE_NAME);
 
         // check if file exists
         if (Files.exists(newFastaFile)) {
@@ -531,26 +509,26 @@ public class BlastPlus {
             throw new BlastException(ioe);
         }
 
-        formatBlastDb(blastDb, blastInstall);
+        formatBlastDb();
         try {
-            Path fastaFile = Paths.get(blastDb.toString(), "bigfastafile");
+            Path fastaFile = Paths.get(this.indexPath.toString(), "bigfastafile");
             Files.move(newFastaFile, fastaFile, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ioe) {
             Logger.error(ioe);
         }
     }
 
-    private static void formatBlastDb(Path blastDb, Path blastInstall) throws BlastException {
+    private void formatBlastDb() throws BlastException {
         ArrayList<String> commands = new ArrayList<>();
-        String makeBlastDbCmd = blastInstall.toAbsolutePath().toString() + File.separator + "makeblastdb";
+        String makeBlastDbCmd = this.blastInstallDirectory.toAbsolutePath().toString() + File.separator + "makeblastdb";
         commands.add(makeBlastDbCmd);
         commands.add("-dbtype nucl");
         commands.add("-in");
         commands.add("bigfastafile.new");
         commands.add("-logfile");
-        commands.add(BLAST_DB_NAME + ".log");
+        commands.add(this.dbName + ".log");
         commands.add("-out");
-        commands.add(BLAST_DB_NAME);
+        commands.add(this.dbName);
 //        commands.add("-title");
 //        commands.add("ICE Blast DB");
         String commandString = Utils.join(" ", commands);
@@ -559,7 +537,7 @@ public class BlastPlus {
         Runtime runTime = Runtime.getRuntime();
 
         try {
-            Process process = runTime.exec(commandString, new String[0], blastDb.toFile());
+            Process process = runTime.exec(commandString, new String[0], indexPath.toFile());
             InputStream blastOutputStream = process.getInputStream();
             InputStream blastErrorStream = process.getErrorStream();
             process.waitFor();
@@ -577,15 +555,14 @@ public class BlastPlus {
                 throw new IOException("Could not make blast db");
             }
         } catch (InterruptedException e) {
-            throw new BlastException("Could not run makeblastdb [BlastDBPath is " + blastDb.toString() + "]", e);
+            throw new BlastException("Could not run makeblastdb [BlastDBPath is " + blastInstallDirectory.toString() + "]", e);
         } catch (IOException e) {
             throw new BlastException(e);
         }
     }
 
-    public static IndexBuildStatus getStatus() {
-        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-        Path path = Paths.get(dataDir, BLAST_DB_FOLDER, LOCK_FILE_NAME);
+    public IndexBuildStatus getStatus() {
+        Path path = Paths.get(indexPath.toString(), LOCK_FILE_NAME);
 
         if (Files.exists(path)) {
             try {
@@ -606,9 +583,9 @@ public class BlastPlus {
     /**
      * Retrieve all the sequences from the database, and writes it out to a fasta file on disk.
      *
-     * @throws BlastException
+     * @throws BlastException on {@link IOException}
      */
-    private static void writeBigFastaFile(BufferedWriter writer) throws BlastException {
+    private void writeBigFastaFile(BufferedWriter writer) throws BlastException {
         SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
         long count = sequenceDAO.getSequenceCount();
         if (count <= 0)
@@ -642,7 +619,7 @@ public class BlastPlus {
                 }
 
 //                sequenceLength = symL.seqString().length();
-                sequenceString = SequenceUtils.breakUpLines(symL.seqString() + symL.seqString());
+                sequenceString = breakUpLines(symL.seqString() + symL.seqString());
             }
 
             if (sequenceString.length() > 0) {
@@ -668,9 +645,9 @@ public class BlastPlus {
      * This routine is expected to be called as part of the blast sequence feature database rebuild
      *
      * @param writer writer for fasta file
-     * @throws BlastException
+     * @throws BlastException on {@link IOException}
      */
-    private static void writeBigFastaFileForFeatures(BufferedWriter writer) throws BlastException {
+    private void writeBigFastaFileForFeatures(BufferedWriter writer) throws BlastException {
         FeatureDAO featureDAO = DAOFactory.getFeatureDAO();
         SequenceFeatureDAO sequenceFeatureDAO = DAOFactory.getSequenceFeatureDAO();
 
@@ -730,16 +707,21 @@ public class BlastPlus {
         }
     }
 
-    private static void writeSequenceString(Feature feature, BufferedWriter writer, String seq, int strand)
+    private void writeSequenceString(Feature feature, BufferedWriter writer, String seq, int strand)
             throws IOException {
         String idString = ">"
                 + feature.getId() + DELIMITER
                 + feature.getName() + DELIMITER
                 + feature.getGenbankType() + DELIMITER
-                + Integer.toString(strand);
+                + strand;
         idString += "\n";
         writer.write(idString);
         writer.write(seq + "\n");
+    }
+
+    @Override
+    public void close() {
+        FileUtils.deleteQuietly(Paths.get(indexPath.toString(), File.separator, NEW_INDEX_FILE_NAME).toFile());
     }
 
     /**

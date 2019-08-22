@@ -40,7 +40,7 @@ public class SharedEntries {
         return this.entryDAO.sharedEntryCount(account, accountGroups, filter);
     }
 
-    public List<PartData> getEntries(ColumnField field, boolean asc, int start, int limit, String filter) {
+    public List<PartData> getEntries(ColumnField field, boolean asc, int start, int limit, String filter, List<String> fields) {
         GroupController groupController = new GroupController();
         Group publicGroup = groupController.createOrRetrievePublicGroup();
         Set<Group> accountGroups = account.getGroups();
@@ -49,7 +49,7 @@ public class SharedEntries {
 
         ArrayList<PartData> data = new ArrayList<>();
         for (Entry entry : entries) {
-            PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false);
+            PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false, fields);
             data.add(info);
         }
         return data;

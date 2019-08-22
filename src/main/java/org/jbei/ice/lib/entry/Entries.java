@@ -1,11 +1,11 @@
 package org.jbei.ice.lib.entry;
 
 import com.opencsv.CSVReader;
+import org.apache.commons.lang3.StringUtils;
+import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountType;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.ParsedEntryId;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.access.AccessPermission;
+import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderType;
 import org.jbei.ice.lib.dto.search.SearchQuery;
@@ -13,6 +13,7 @@ import org.jbei.ice.lib.dto.search.SearchResult;
 import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.SearchController;
+import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
@@ -26,6 +27,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -48,6 +50,55 @@ public class Entries extends HasEntry {
         this.accountDAO = DAOFactory.getAccountDAO();
         this.authorization = new EntryAuthorization();
         this.userId = userId;
+    }
+
+    /**
+     * Update the information associated with the specified part.<br>
+     * <b>Note</b> that any missing information will be deleted from the original entry.
+     * In other words, if the part referenced by id <code>partId</code> has an alias value
+     * of <code>alias</code> and the part object passed in the parameter does not contain this value,
+     * when this method returns, the original entry's alias field will be removed.
+     *
+     * @param partId   unique identifier for part being updated. This overrides the id in the partData object
+     * @param partData information to update part with
+     * @return unique identifier for part that was updated
+     * @throws IllegalArgumentException if the entry associated with the partId cannot be located
+     */
+    public long update(long partId, PartData partData) {
+        Entry existing = dao.get(partId);
+        if (existing == null)
+            throw new IllegalArgumentException();
+
+        authorization.expectWrite(userId, existing);
+
+        Entry entry = InfoToModelFactory.updateEntryField(partData, existing);
+        entry.setModificationTime(Calendar.getInstance().getTime());
+        if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
+            List<EntryField> invalidFields = EntryUtil.validates(partData);
+            if (invalidFields.isEmpty())
+                entry.setVisibility(Visibility.OK.getValue());
+        }
+        entry = dao.update(entry);
+
+        EntryHistory history = new EntryHistory(userId, partId);
+        history.addEdit();
+
+        // check pi email
+        String piEmail = entry.getPrincipalInvestigatorEmail();
+        if (StringUtils.isNotEmpty(piEmail)) {
+            Account pi = DAOFactory.getAccountDAO().getByEmail(piEmail);
+            if (pi != null) {
+                // add write permission for the PI (method also checks to see if permission already exists)
+                AccessPermission accessPermission = new AccessPermission();
+                accessPermission.setArticle(AccessPermission.Article.ACCOUNT);
+                accessPermission.setArticleId(pi.getId());
+                accessPermission.setType(AccessPermission.Type.WRITE_ENTRY);
+                accessPermission.setTypeId(entry.getId());
+                new PermissionsController().addPermission(userId, accessPermission);
+            }
+        }
+
+        return entry.getId();
     }
 
     public List<Long> updateVisibility(List<Long> entryIds, Visibility visibility) {
@@ -142,7 +193,7 @@ public class Entries extends HasEntry {
         return accepted;
     }
 
-    protected List<Long> getCollectionEntries(String collection, boolean all, EntryType type) {
+    private List<Long> getCollectionEntries(String collection, boolean all, EntryType type) {
         if (collection == null || collection.isEmpty())
             return null;
 
@@ -171,7 +222,7 @@ public class Entries extends HasEntry {
     }
 
     // todo : folder controller
-    protected List<Long> getFolderEntries(long folderId, boolean all, EntryType type) {
+    private List<Long> getFolderEntries(long folderId, boolean all, EntryType type) {
         Folder folder = DAOFactory.getFolderDAO().get(folderId);
         FolderAuthorization folderAuthorization = new FolderAuthorization();
         folderAuthorization.expectRead(userId, folder);
@@ -183,7 +234,7 @@ public class Entries extends HasEntry {
         return DAOFactory.getFolderDAO().getFolderContentIds(folderId, type, visibleOnly);
     }
 
-    protected List<Long> getSearchResults(SearchQuery searchQuery) {
+    private List<Long> getSearchResults(SearchQuery searchQuery) {
         SearchController searchController = new SearchController();
         SearchResults searchResults = searchController.runSearch(userId, searchQuery);
         // todo : inefficient: have search return ids only

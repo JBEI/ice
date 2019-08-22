@@ -58,7 +58,7 @@ public class OwnerEntries {
         this.isSelf = userId.equalsIgnoreCase(ownerEmail);
     }
 
-    public List<PartData> retrieveOwnerEntries(ColumnField sort, boolean asc, int start, int limit, String filter) {
+    public List<PartData> retrieveOwnerEntries(ColumnField sort, boolean asc, int start, int limit, String filter, List<String> fields) {
         List<Entry> entries;
 
         if (this.isAdmin || this.isSelf) {
@@ -75,7 +75,7 @@ public class OwnerEntries {
 
         ArrayList<PartData> data = new ArrayList<>();
         for (Entry entry : entries) {
-            PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false);
+            PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false, fields);
             data.add(info);
         }
         return data;

@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.parsers.genbank;
 
 import org.jbei.ice.lib.dto.DNAFeatureNote;
-import org.jbei.ice.lib.dto.DNASequence;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,14 +13,13 @@ public class GenBankParserTest {
     @Test
     public void testParse() throws Exception {
         GenBankParser parser = new GenBankParser();
-        DNASequence sequence = parser.parse(genbank);
+        FeaturedDNASequence sequence = parser.parse(genbank);
         Assert.assertNotNull(sequence);
-        FeaturedDNASequence featuredDNASequence = (FeaturedDNASequence) sequence;
-        Assert.assertEquals(3, featuredDNASequence.getFeatures().size());
-        Assert.assertEquals(936, featuredDNASequence.getSequence().length());
+        Assert.assertEquals(3, sequence.getFeatures().size());
+        Assert.assertEquals(936, sequence.getSequence().length());
 
         // parse genbank 2
-        FeaturedDNASequence sequence2 = (FeaturedDNASequence) parser.parse(getGenbank2);
+        FeaturedDNASequence sequence2 = parser.parse(getGenbank2);
         Assert.assertNotNull(sequence2);
         Assert.assertEquals(3, sequence2.getFeatures().size());
     }

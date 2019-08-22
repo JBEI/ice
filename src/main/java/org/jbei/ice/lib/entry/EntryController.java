@@ -1,19 +1,16 @@
 package org.jbei.ice.lib.entry;
 
-import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
-import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
@@ -43,81 +40,6 @@ public class EntryController extends HasEntry {
         accountController = new AccountController();
         authorization = new EntryAuthorization();
         sequenceDAO = DAOFactory.getSequenceDAO();
-    }
-
-    /**
-     * Update the information associated with the specified part.<br>
-     * <b>Note</b> that any missing information will be deleted from the original entry.
-     * In other words, if the part referenced by id <code>partId</code> has an alias value
-     * of <code>alias</code> and the part object passed in the parameter does not contain this value,
-     * when this method returns, the original entry's alias field will be removed.
-     *
-     * @param userId unique identifier for user making request
-     * @param partId unique identifier for part being updated. This overrides the id in the partData object
-     * @param part   information to update part with
-     * @return unique identifier for part that was updated
-     * @throws IllegalArgumentException if the entry associated with the partId cannot be located
-     */
-    public long updatePart(String userId, long partId, PartData part) {
-        Entry existing = dao.get(partId);
-        if (existing == null)
-            throw new IllegalArgumentException();
-
-        authorization.expectWrite(userId, existing);
-
-        Entry entry = InfoToModelFactory.updateEntryField(part, existing);
-        entry.setModificationTime(Calendar.getInstance().getTime());
-        if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
-            List<EntryField> invalidFields = EntryUtil.validates(part);
-            if (invalidFields.isEmpty())
-                entry.setVisibility(Visibility.OK.getValue());
-        }
-        entry = dao.update(entry);
-
-        // check pi email
-        String piEmail = entry.getPrincipalInvestigatorEmail();
-        if (StringUtils.isNotEmpty(piEmail)) {
-            Account pi = DAOFactory.getAccountDAO().getByEmail(piEmail);
-            if (pi != null) {
-                // add write permission for the PI (method also checks to see if permission already exists)
-                AccessPermission accessPermission = new AccessPermission();
-                accessPermission.setArticle(AccessPermission.Article.ACCOUNT);
-                accessPermission.setArticleId(pi.getId());
-                accessPermission.setType(AccessPermission.Type.WRITE_ENTRY);
-                accessPermission.setTypeId(entry.getId());
-                permissionsController.addPermission(userId, accessPermission);
-            }
-        }
-
-        return entry.getId();
-    }
-
-    public void update(String userId, Entry entry) {
-        if (entry == null) {
-            return;
-        }
-
-        authorization.expectWrite(userId, entry);
-
-        entry.setModificationTime(Calendar.getInstance().getTime());
-        if (entry.getVisibility() == null)
-            entry.setVisibility(Visibility.OK.getValue());
-        entry = dao.update(entry);
-
-        // check pi email
-        String piEmail = entry.getPrincipalInvestigatorEmail();
-        if (StringUtils.isNotEmpty(piEmail)) {
-            Account pi = DAOFactory.getAccountDAO().getByEmail(piEmail);
-            if (pi != null) {
-                // add write permission for the PI (method also checks to see if permission already exists)
-                AccessPermission accessPermission = new AccessPermission();
-                accessPermission.setArticle(AccessPermission.Article.ACCOUNT);
-                accessPermission.setArticleId(pi.getId());
-                accessPermission.setType(AccessPermission.Type.WRITE_ENTRY);
-                accessPermission.setTypeId(entry.getId());
-                permissionsController.addPermission(userId, accessPermission);
-            }
-        }
     }
 
     public PartData retrieveEntryTipDetails(String id) {
@@ -354,7 +276,7 @@ public class EntryController extends HasEntry {
         return partData;
     }
 
-    protected PartData retrieveEntryDetails(String userId, Entry entry) throws PermissionException {
+    private PartData retrieveEntryDetails(String userId, Entry entry) throws PermissionException {
         if (entry.getVisibility() == Visibility.REMOTE.getValue()) {
             WebEntries webEntries = new WebEntries();
             PartData partData = webEntries.getPart(entry.getRecordId());

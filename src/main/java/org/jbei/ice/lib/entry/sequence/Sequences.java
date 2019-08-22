@@ -211,7 +211,7 @@ public class Sequences {
                 for (Entry entry : entries) {
                     Logger.info("Updating sequence for entry " + entry.getPartNumber());
                     PartSequence partSequence = new PartSequence(userId, entry.getPartNumber());
-                    partSequence.update(dnaSequence);
+                    partSequence.update(dnaSequence, false);
                 }
             }
         }

@@ -11,6 +11,7 @@ public class AttachmentInfo implements IDataTransferModel {
     private String filename;
     private String description;
     private String fileId;
+    private boolean canEdit;
 
     public AttachmentInfo() {
     }
@@ -49,5 +50,13 @@ public class AttachmentInfo implements IDataTransferModel {
 
     public String getFileId() {
         return this.fileId;
+    }
+
+    public boolean isCanEdit() {
+        return canEdit;
+    }
+
+    public void setCanEdit(boolean canEdit) {
+        this.canEdit = canEdit;
     }
 }

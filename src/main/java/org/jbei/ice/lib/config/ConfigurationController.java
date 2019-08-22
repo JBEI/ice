@@ -29,8 +29,8 @@ import java.util.ArrayList;
  */
 public class ConfigurationController {
 
-    public static final String UI_CONFIG_DIR = "asset";
-    public static final String BLAST_FTP_DIR = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.6.0/";
+    private static final String UI_CONFIG_DIR = "asset";
+    private static final String BLAST_FTP_DIR = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.6.0/";
 
     private final ConfigurationDAO dao;
 
@@ -94,9 +94,6 @@ public class ConfigurationController {
             throw new PermissionException("Cannot update system setting without admin privileges");
 
         ConfigurationKey key = ConfigurationKey.valueOf(setting.getKey());
-        if (key == null)
-            throw new IllegalArgumentException("Invalid system key " + setting.getKey());
-
         Configuration configuration = setPropertyValue(key, setting.getValue());
 
         // check if the setting being updated is related to the web of registries

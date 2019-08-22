@@ -7,10 +7,7 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.bulkupload.EditMode;
-import org.jbei.ice.lib.dto.entry.EntryField;
-import org.jbei.ice.lib.dto.entry.EntryType;
-import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.entry.*;
@@ -20,6 +17,7 @@ import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.BulkUploadDAO;
+import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.*;
 
@@ -29,10 +27,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Creates entries for bulk uploads
@@ -45,7 +40,6 @@ public class BulkEntryCreator {
     private final EntryDAO entryDAO;
     private final EntryCreator creator;
     private final AccountController accountController;
-    private final EntryController entryController;
     private final BulkUploadAuthorization authorization;
     private final BulkUploadController controller;
 
@@ -54,13 +48,12 @@ public class BulkEntryCreator {
         entryDAO = DAOFactory.getEntryDAO();
         creator = new EntryCreator();
         accountController = new AccountController();
-        entryController = new EntryController();
         authorization = new BulkUploadAuthorization();
         controller = new BulkUploadController();
     }
 
-    protected BulkUpload createOrRetrieveBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,
-                                                    EntryType addType) {
+    private BulkUpload createOrRetrieveBulkUpload(Account account, BulkUploadAutoUpdate autoUpdate,
+                                                  EntryType addType) {
         BulkUpload draft = dao.get(autoUpdate.getBulkUploadId());
         if (draft == null) {
             long id = createBulkUpload(account.getEmail(), addType);
@@ -69,7 +62,7 @@ public class BulkEntryCreator {
         return draft;
     }
 
-    public long createBulkUpload(String userId, EntryType entryType) {
+    long createBulkUpload(String userId, EntryType entryType) {
         BulkUploadInfo info = new BulkUploadInfo();
         info.setStatus(BulkUploadStatus.IN_PROGRESS);
         info.setType(entryType.getName());
@@ -82,7 +75,7 @@ public class BulkEntryCreator {
         return createEntryForUpload(userId, data, upload);
     }
 
-    protected PartData createEntryForUpload(String userId, PartData data, BulkUpload upload) {
+    private PartData createEntryForUpload(String userId, PartData data, BulkUpload upload) {
         Entry entry = InfoToModelFactory.infoToEntry(data);
         if (entry == null)
             return null;
@@ -118,9 +111,7 @@ public class BulkEntryCreator {
             } else {
                 // link existing
                 Entry linkedEntry = entryDAO.getByPartNumber(linked.getPartId());
-                if (!entry.getLinkedEntries().contains(linkedEntry)) {
-                    entry.getLinkedEntries().add(linkedEntry);
-                }
+                entry.getLinkedEntries().add(linkedEntry);
             }
         }
 
@@ -163,7 +154,7 @@ public class BulkEntryCreator {
         return data;
     }
 
-    protected PartData doUpdate(String userId, Entry entry, PartData data) {
+    private PartData doUpdate(String userId, Entry entry, PartData data) {
         if (entry == null)
             return null;
 
@@ -174,6 +165,9 @@ public class BulkEntryCreator {
         entry.setModificationTime(new Date());
         entry = entryDAO.update(entry);
         data.setModificationTime(entry.getModificationTime().getTime());
+
+        // custom fields
+        setCustomFieldValuesForPart(entry, data);
 
         // check if there is any linked parts. update if so (expect a max of 1)
         if (data.getLinkedParts() == null || data.getLinkedParts().size() == 0)
@@ -213,6 +207,40 @@ public class BulkEntryCreator {
             data.getLinkedParts().add(linked);
 
         return data;
+    }
+
+    private void setCustomFieldValuesForPart(Entry entry, PartData data) {
+        if (data == null || data.getCustomEntryFields() == null || entry == null)
+            return;
+
+        CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
+
+        for (CustomEntryField customEntryField : data.getCustomEntryFields()) {
+            if (customEntryField.getFieldType() == FieldType.EXISTING)
+                continue;
+
+            CustomEntryFieldValueModel model = new CustomEntryFieldValueModel();
+            model.setEntry(entry);
+            CustomEntryFieldModel customEntryFieldModel = dao.get(customEntryField.getId());
+            if (customEntryFieldModel == null) {
+
+                if (customEntryField.getEntryType() == null) {
+                    customEntryField.setEntryType(EntryType.nameToType(entry.getRecordType()));
+                }
+
+                // try again with label and type
+                Optional<CustomEntryFieldModel> optional = dao.getLabelForType(customEntryField.getEntryType(), customEntryField.getLabel());
+                if (!optional.isPresent()) {
+                    Logger.error("Could not retrieve custom field with id " + customEntryField.getId());
+                    continue;
+                }
+                customEntryFieldModel = optional.get();
+            }
+
+            model.setField(customEntryFieldModel);
+            model.setValue(customEntryField.getValue());
+            DAOFactory.getCustomEntryFieldValueDAO().create(model);
+        }
     }
 
     public ProcessedBulkUpload updateStatus(String userId, long id, BulkUploadStatus status) {
@@ -267,8 +295,8 @@ public class BulkEntryCreator {
      * Submits a bulk import that has been saved. This action is restricted to the owner of the
      * draft or to administrators.
      */
-    protected ProcessedBulkUpload submitBulkImportDraft(String userId, BulkUpload draft,
-                                                        ProcessedBulkUpload processedBulkUpload) throws PermissionException {
+    private ProcessedBulkUpload submitBulkImportDraft(String userId, BulkUpload draft,
+                                                      ProcessedBulkUpload processedBulkUpload) throws PermissionException {
         // validate entries
         BulkUploadValidation validation = new BulkUploadValidation(draft);
         if (!validation.isValid()) {
@@ -339,7 +367,7 @@ public class BulkEntryCreator {
      * @return updated wrapper for information used to create entry. Will contain additional information
      * such as the unique identifier for the part, if one was created
      */
-    public BulkUploadAutoUpdate createOrUpdateEntry(String userId, BulkUploadAutoUpdate autoUpdate, EntryType addType) {
+    BulkUploadAutoUpdate createOrUpdateEntry(String userId, BulkUploadAutoUpdate autoUpdate, EntryType addType) {
         Account account = accountController.getByEmail(userId);
         BulkUpload draft = null;
 
@@ -356,8 +384,6 @@ public class BulkEntryCreator {
         // if entry is null, create entry
         if (entry == null) {
             entry = EntryFactory.buildEntry(autoUpdate.getType());
-            if (entry == null)
-                return null;
 
             String name = account.getFullName();
             String email = account.getEmail();
@@ -391,7 +417,7 @@ public class BulkEntryCreator {
                 if (otherEntry.getVisibility() == null || otherEntry.getVisibility() != Visibility.DRAFT.getValue())
                     otherEntry.setVisibility(Visibility.DRAFT.getValue());
 
-                entryController.update(userId, otherEntry);
+                updateEntry(otherEntry);
             }
 
             if ((entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
@@ -408,7 +434,7 @@ public class BulkEntryCreator {
 //            editor.setStrainPlasmids(account, strain, strain.getPlasmids());
 //        }
 
-        entryController.update(userId, entry);
+        updateEntry(entry);
 
         // update bulk upload. even if no new entry was created, entries belonging to it was updated
         if (draft != null) {
@@ -417,6 +443,17 @@ public class BulkEntryCreator {
             dao.update(draft);
         }
         return autoUpdate;
+    }
+
+    private void updateEntry(Entry entry) {
+        if (entry == null) {
+            return;
+        }
+
+        entry.setModificationTime(Calendar.getInstance().getTime());
+        if (entry.getVisibility() == null)
+            entry.setVisibility(Visibility.OK.getValue());
+        entryDAO.update(entry);
     }
 
     public BulkUploadInfo createOrUpdateEntries(String userId, long draftId, List<PartData> data) {
@@ -452,7 +489,7 @@ public class BulkEntryCreator {
         return uploadInfo;
     }
 
-    protected void addWritePermission(Account account, Entry entry) {
+    private void addWritePermission(Account account, Entry entry) {
         Permission permission = new Permission();
         permission.setCanWrite(true);
         permission.setEntry(entry);
@@ -461,7 +498,7 @@ public class BulkEntryCreator {
         DAOFactory.getPermissionDAO().create(permission);
     }
 
-    public boolean createEntries(String userId, long draftId, List<PartWithSample> data, HashMap<String, InputStream> files) {
+    boolean createEntries(String userId, long draftId, List<PartWithSample> data, HashMap<String, InputStream> files) {
         BulkUpload draft = dao.get(draftId);
         if (draft == null)
             return false;
@@ -561,7 +598,7 @@ public class BulkEntryCreator {
         return true;
     }
 
-    protected void saveFiles(PartData data, Entry entry, HashMap<String, InputStream> files) {
+    private void saveFiles(PartData data, Entry entry, HashMap<String, InputStream> files) {
         // check sequence
         try {
             String sequenceName = data.getSequenceFileName();

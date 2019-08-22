@@ -87,6 +87,15 @@ public class EntryHistory {
         return dao.create(audit) != null;
     }
 
+    public void addEdit() {
+        Audit audit = new Audit();
+        audit.setAction(AuditType.EDIT.getAbbrev());
+        audit.setEntry(entry);
+        audit.setUserId(userId);
+        audit.setTime(new Date());
+        dao.create(audit);
+    }
+
     /**
      * Delete all available history for a specified entry
      * Due to the destructive nature, it is required that the user be

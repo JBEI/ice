@@ -10,6 +10,7 @@ import org.jbei.ice.storage.hibernate.dao.ParameterDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -149,10 +150,31 @@ public class CustomFields {
         if (entry == null)
             return fields;
 
+        // get fields for entry type
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+        List<CustomEntryFieldModel> typeFields = DAOFactory.getCustomEntryFieldDAO().getFieldsForType(type, false);
+
+        // get custom fields values
         CustomEntryFieldValueDAO dao = DAOFactory.getCustomEntryFieldValueDAO();
         List<CustomEntryFieldValueModel> results = dao.getByEntry(entry);
         for (CustomEntryFieldValueModel valueModel : results) {
             fields.add(valueModel.toDataTransferObject());
+        }
+
+        // add entry field types that are not in custom field values (I am sure there is a query for this)
+        Iterator<CustomEntryFieldModel> iterator = typeFields.iterator();
+        while (iterator.hasNext()) {
+            CustomEntryFieldModel next = iterator.next();
+            for (CustomEntryFieldValueModel valueModel : results) {
+                if (next.getLabel().equals(valueModel.getField().getLabel())) {
+                    iterator.remove();
+                    break;
+                }
+            }
+        }
+
+        for (CustomEntryFieldModel model : typeFields) {
+            fields.add(model.toDataTransferObject());
         }
 
         return fields;

@@ -87,7 +87,7 @@ public class FolderContentsTest {
 
 
         // test with null id
-        folderContents.getContents(null, 0, new PageParameters(0, 10, ColumnField.PART_ID, false, null));
+        folderContents.getContents(null, 0, new PageParameters(0, 10, ColumnField.PART_ID, false, null), null);
 
         Account account = AccountCreator.createTestAccount("testRetrieveFolderContents", false);
         String userId = account.getEmail();
@@ -122,7 +122,7 @@ public class FolderContentsTest {
 
         // retrieve (supported sort types created, status, name, part_id, type)
         FolderDetails details = folderContents.getContents(account.getEmail(), folder.getId(),
-                new PageParameters(0, 15, ColumnField.PART_ID, false, null));
+                new PageParameters(0, 15, ColumnField.PART_ID, false, null), null);
         Assert.assertNotNull(details);
 
         short pageSize = 15;
@@ -138,7 +138,7 @@ public class FolderContentsTest {
             // check remaining
             Assert.assertEquals((size - (it * pageSize)), parts.size());
             details = folderContents.getContents(account.getEmail(), folder.getId(),
-                    new PageParameters(pageSize * it, pageSize, ColumnField.PART_ID, false, null));
+                    new PageParameters(pageSize * it, pageSize, ColumnField.PART_ID, false, null), null);
             it += 1;
         }
     }

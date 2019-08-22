@@ -96,7 +96,7 @@ public class GenbankFormatter extends AbstractFormatter {
     }
 
     @Override
-    public void format(Sequence sequence, OutputStream outputStream) throws FormatterException, IOException {
+    public void format(Sequence sequence, OutputStream outputStream) throws IOException {
         if (sequence == null || outputStream == null || sequence.getSequence().isEmpty()) {
             return;
         }
@@ -162,7 +162,7 @@ public class GenbankFormatter extends AbstractFormatter {
                 simpleRichSequence.setFeatureSet(featureSet);
             }
         } catch (Exception e) {
-            throw new FormatterException("Failed to create generate genbank file", e);
+            throw new IOException("Failed to create generate genbank file", e);
         }
 
         RichSequence.IOTools.writeGenbank(outputStream, simpleRichSequence, getNamespace());

@@ -65,7 +65,7 @@ public class InfoToModelFactory {
         return entry;
     }
 
-    protected static Entry setPlasmidFields(PlasmidData plasmidData, Entry entry) {
+    private static Entry setPlasmidFields(PlasmidData plasmidData, Entry entry) {
         if (plasmidData == null)
             return entry;
 
@@ -89,7 +89,7 @@ public class InfoToModelFactory {
         return entry;
     }
 
-    protected static Entry setStrainFields(StrainData strainData, Entry entry) {
+    private static Entry setStrainFields(StrainData strainData, Entry entry) {
         Strain strain = (Strain) entry;
         if (strainData == null)
             return entry;
@@ -103,7 +103,7 @@ public class InfoToModelFactory {
         return entry;
     }
 
-    protected static Entry setSeedFields(ArabidopsisSeedData seedData, Entry entry) {
+    private static Entry setSeedFields(ArabidopsisSeedData seedData, Entry entry) {
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
         if (seedData == null)
             return entry;
@@ -145,7 +145,7 @@ public class InfoToModelFactory {
         return entry;
     }
 
-    protected static Entry setProteinFields(ProteinData proteinData, Entry entry) {
+    private static Entry setProteinFields(ProteinData proteinData, Entry entry) {
         Protein protein = (Protein) entry;
         if (proteinData == null)
             return entry;
@@ -323,6 +323,8 @@ public class InfoToModelFactory {
                     existingMarkers.add(marker);
                 }
 
+                if (currentItem.length() > 50)
+                    currentItem = currentItem.substring(0, 50);
                 marker.setName(currentItem);
                 marker.setEntry(entry);
                 markers.add(marker);

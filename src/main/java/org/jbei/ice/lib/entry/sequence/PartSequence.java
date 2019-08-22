@@ -12,6 +12,7 @@ import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.EntryFactory;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.GeneralParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
@@ -19,7 +20,7 @@ import org.jbei.ice.lib.parsers.PlainParser;
 import org.jbei.ice.lib.parsers.fasta.FastaParser;
 import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.lib.parsers.sbol.SBOLParser;
-import org.jbei.ice.lib.search.blast.BlastPlus;
+import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.FeatureDAO;
@@ -30,10 +31,7 @@ import org.jbei.ice.storage.model.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Sequence information for a biological part in ICE
@@ -120,8 +118,9 @@ public class PartSequence {
         try {
             AbstractParser parser;
             String sequenceString = Utils.getString(inputStream);
+            SequenceFormat format = SequenceUtil.detectFormat(sequenceString);
 
-            switch (SequenceUtil.detectFormat(sequenceString)) {
+            switch (format) {
                 case GENBANK:
                     parser = new GenBankParser();
                     break;
@@ -144,11 +143,14 @@ public class PartSequence {
             String entryType = this.entry.getRecordType();
             FeaturedDNASequence dnaSequence = parser.parse(sequenceString, entryType);
             Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
-            sequence.setSequenceUser(sequenceString);
-            saveSequenceObject(sequence);
+            if (sequence == null)
+                throw new IOException("Could not create sequence object");
 
-            sequence = sequenceDAO.getByEntry(this.entry);
-            BlastPlus.scheduleBlastIndexRebuildTask(true);
+            sequence.setSequenceUser(sequenceString);
+            sequence.setFileName(fileName);
+            sequence.setFormat(format);
+            sequence = saveSequenceObject(sequence);
+
             SequenceInfo info = sequence.toDataTransferObject();
             info.setSequence(dnaSequence);
             return info;
@@ -181,10 +183,12 @@ public class PartSequence {
         saveSequenceObject(sequence);
     }
 
-    private void saveSequenceObject(Sequence sequence) {
+    private Sequence saveSequenceObject(Sequence sequence) {
         sequence.setEntry(this.entry);
         Set<SequenceFeature> sequenceFeatureSet = null;
         sequence = SequenceUtil.normalizeAnnotationLocations(sequence);
+        if (sequence == null)
+            throw new IllegalArgumentException("Could not normalize sequence");
 
         if (sequence.getSequenceFeatures() != null) {
             sequenceFeatureSet = new HashSet<>(sequence.getSequenceFeatures());
@@ -201,7 +205,13 @@ public class PartSequence {
             }
         }
 
-        BlastPlus.scheduleBlastIndexRebuildTask(true);
+        scheduleBlastIndexRebuildTask();
+        return sequence;
+    }
+
+    private void scheduleBlastIndexRebuildTask() {
+        RebuildBlastIndexTask task = new RebuildBlastIndexTask(true);
+        IceExecutorService.getInstance().runTask(task);
     }
 
     /**
@@ -211,12 +221,12 @@ public class PartSequence {
      *
      * @param updatedSequence new sequence to associate with this part
      */
-    public void update(FeaturedDNASequence updatedSequence) {
+    public void update(FeaturedDNASequence updatedSequence, boolean parseSequence) {
         entryAuthorization.expectWrite(userId, entry);
         Sequence existing = sequenceDAO.getByEntry(this.entry);
 
         // update with raw sequence if no sequence object is passed
-        if ((updatedSequence.getFeatures() == null || updatedSequence.getFeatures().isEmpty())) {
+        if (parseSequence) {
             // sometimes the whole sequence is sent in the string portion (when there are no features)
             // no features to add
             updatedSequence = GeneralParser.parse(updatedSequence.getSequence());
@@ -233,7 +243,7 @@ public class PartSequence {
 
             SequenceVersionHistory history = new SequenceVersionHistory(userId, existing.getId());
 
-            // diff
+            // diff //todo : check if sequence features is set
             existing.setSequenceFeatures(new HashSet<>(sequenceFeatureDAO.getEntrySequenceFeatures(this.entry)));
 
             // 1. check sequence string
@@ -249,7 +259,7 @@ public class PartSequence {
             rebuildTraceAlignments();
 
             // rebuild blast
-            BlastPlus.scheduleBlastIndexRebuildTask(true);
+            scheduleBlastIndexRebuildTask();
         } else {
             save(updatedSequence);
         }
@@ -308,19 +318,25 @@ public class PartSequence {
             return;
 
         existing = SequenceUtil.normalizeAnnotationLocations(existing);
+        if (existing == null)
+            throw new IllegalArgumentException("cannot normalize sequence");
 
-        Feature existingFeature = featureDAO.getByFeatureSequence(feature.getSequence());
-        if (existingFeature == null) {
-            existingFeature = featureDAO.create(feature);
-        } else {
-            if (!sameFeatureUri(existingFeature, feature)) {
+        Optional<Feature> optionalFeature = featureDAO.getByFeatureSequence(feature.getSequence());
+        Feature existingFeature;
+        if (optionalFeature.isPresent()) {
+            existingFeature = optionalFeature.get();
+            if (!sameFeatureUri(optionalFeature.get(), feature)) {
                 existingFeature.setUri(feature.getUri());
             }
+        } else {
+            existingFeature = featureDAO.create(feature);
         }
 
         sequenceFeature.setFeature(existingFeature);
         sequenceFeature.setSequence(existing);
-        sequenceFeatureDAO.create(sequenceFeature);
+        sequenceFeature = sequenceFeatureDAO.create(sequenceFeature);
+        if (existing.getSequenceFeatures() != null)
+            existing.getSequenceFeatures().add(sequenceFeature);
     }
 
     private boolean sameFeatureUri(Feature f1, Feature f2) {
@@ -485,7 +501,7 @@ public class PartSequence {
         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         try {
             formatter.format(sequence, byteStream);
-        } catch (FormatterException | IOException e) {
+        } catch (IOException e) {
             Logger.error(e);
         }
         return byteStream.toString();

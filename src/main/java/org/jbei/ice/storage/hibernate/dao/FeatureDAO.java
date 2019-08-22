@@ -3,7 +3,6 @@ package org.jbei.ice.storage.hibernate.dao;
 import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.utils.SequenceUtils;
-import org.jbei.ice.lib.utils.UtilityException;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.Feature;
@@ -31,10 +30,10 @@ public class FeatureDAO extends HibernateRepository<Feature> {
      * Retrieve the {@link Feature} object with the given DNA sequence string.
      *
      * @param featureDnaSequence dna sequence of feature
-     * @return Feature object.
+     * @return Optional Feature object.
      * @throws DAOException on Hibernate or UtilityException
      */
-    public Feature getByFeatureSequence(String featureDnaSequence) {
+    public Optional<Feature> getByFeatureSequence(String featureDnaSequence) {
         featureDnaSequence = featureDnaSequence.toLowerCase();
 
         try {
@@ -42,17 +41,8 @@ public class FeatureDAO extends HibernateRepository<Feature> {
             CriteriaQuery<Feature> query = getBuilder().createQuery(Feature.class);
             Root<Feature> from = query.from(Feature.class);
             query.where(getBuilder().equal(from.get("hash"), hash));
-
-            Optional<Feature> result = currentSession().createQuery(query).uniqueResultOptional();
-            if (result.isPresent())
-                return result.get();
-
-            String reverseComplement = SequenceUtils.reverseComplement(featureDnaSequence);
-            String sequenceHash = SequenceUtils.calculateSequenceHash(reverseComplement);
-            query.getRestriction().getExpressions().clear();
-            query.where(getBuilder().equal(from.get("hash"), sequenceHash));
-            return currentSession().createQuery(query).uniqueResult();
-        } catch (HibernateException | UtilityException e) {
+            return currentSession().createQuery(query).uniqueResultOptional();
+        } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException("Failed to get Feature by sequence!", e);
         }

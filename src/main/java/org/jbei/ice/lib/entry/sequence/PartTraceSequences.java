@@ -41,7 +41,7 @@ public class PartTraceSequences {
     private final EntryAuthorization entryAuthorization;
     private final Entry entry;
     private final String userId;
-    public static final String TRACES_DIR_NAME = "traces";
+    private final String TRACES_DIR_NAME = "traces";
 
     public PartTraceSequences(String userId, long partId) {
         this.dao = DAOFactory.getTraceSequenceDAO();
@@ -281,7 +281,7 @@ public class PartTraceSequences {
         }
 
         try {
-            List<Bl2SeqResult> bl2seqAlignmentResults = BlastPlus.runBlast2Seq(entrySequenceString, traceSequenceString);
+            List<Bl2SeqResult> bl2seqAlignmentResults = new BlastPlus().runBlast2Seq(entrySequenceString, traceSequenceString);
 
             if (bl2seqAlignmentResults.size() > 0) {
                 int maxAlignedSequenceLength = -1;

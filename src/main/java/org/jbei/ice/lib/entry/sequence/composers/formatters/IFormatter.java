@@ -17,8 +17,7 @@ public interface IFormatter {
      *
      * @param sequence
      * @param outputStream
-     * @throws FormatterException
      * @throws IOException
      */
-    void format(Sequence sequence, OutputStream outputStream) throws FormatterException, IOException;
+    void format(Sequence sequence, OutputStream outputStream) throws IOException;
 }

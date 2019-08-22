@@ -61,8 +61,7 @@ public class FolderController {
      * @return list of folders that are contained under the "Available" section
      */
     public ArrayList<FolderDetails> getAvailableFolders(String userId) {
-        Set<Folder> folders = new HashSet<>();
-        folders.addAll(dao.getFoldersByType(FolderType.PUBLIC));
+        Set<Folder> folders = new HashSet<>(dao.getFoldersByType(FolderType.PUBLIC));
         boolean isAdmin = accountController.isAdministrator(userId);
 
         ArrayList<FolderDetails> list = new ArrayList<>();
@@ -108,7 +107,7 @@ public class FolderController {
      * @param asc    whether to retrieve the entries in ascending order
      * @return wrapper around the retrieved entries
      */
-    public FolderDetails getPublicEntries(ColumnField sort, int offset, int limit, boolean asc) {
+    public FolderDetails getPublicEntries(ColumnField sort, int offset, int limit, boolean asc, List<String> fields) {
         Group publicGroup = new GroupController().createOrRetrievePublicGroup();
         Set<Group> groups = new HashSet<>();
         groups.add(publicGroup);
@@ -122,7 +121,7 @@ public class FolderController {
 
         for (Entry entry : results) {
             try {
-                PartData info = ModelToInfoFactory.createTableViewData(null, entry, false);
+                PartData info = ModelToInfoFactory.createTableViewData(null, entry, false, fields);
                 info.setPublicRead(true);
                 details.getEntries().add(info);
             } catch (Exception e) {

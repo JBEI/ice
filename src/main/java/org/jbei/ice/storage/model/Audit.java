@@ -30,10 +30,10 @@ public class Audit implements DataModel {
     private String userId;
 
     @OneToOne
-    @JoinColumn(name = "remote_client_id", nullable = true)
+    @JoinColumn(name = "remote_client_id")
     private RemoteClientModel remoteClientModel;
 
-    @Column(name = "institution", length = 255)
+    @Column(name = "institution")
     private String institution;
 
     @Column(name = "firstname", length = 50)

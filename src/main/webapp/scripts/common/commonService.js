@@ -4,12 +4,12 @@ angular.module('ice.common.service', [])
     .factory('Util', function ($rootScope, $location, $cookies, $resource) {
         return {
             handleError: function (response) {
-                var type;
-                var errorMsg = response.data ? response.data.errorMessage : "Unknown error";
+                let type;
+                let errorMsg = response.data ? response.data.errorMessage : "Unknown error";
 
                 switch (response.status) {
                     case 401:
-                        if ($location.path() != '/login') {
+                        if ($location.path() !== '/login') {
                             $cookies.remove('user');
                             $rootScope.user = undefined;
                             $cookies.loginDestination = $location.path();
@@ -68,7 +68,7 @@ angular.module('ice.common.service', [])
             },
 
             get: function (url, successHandler, queryParams, errorHandler) {
-                var errorCallback = this.handleError;
+                let errorCallback = this.handleError;
                 if (errorHandler)
                     errorCallback = errorHandler;
 
@@ -99,7 +99,7 @@ angular.module('ice.common.service', [])
                     }
                 }
 
-                var errorCallback = this.handleError;
+                let errorCallback = this.handleError;
                 if (errorHandler)
                     errorCallback = errorHandler;
 
@@ -114,7 +114,7 @@ angular.module('ice.common.service', [])
             },
 
             post: function (url, obj, successHandler, params, errHandler) {
-                var errorCallback = this.handleError;
+                let errorCallback = this.handleError;
                 if (errHandler)
                     errorCallback = errHandler;
 
@@ -130,7 +130,7 @@ angular.module('ice.common.service', [])
             },
 
             update: function (url, obj, params, successHandler, failureHandler) {
-                var errorCallback = this.handleError;
+                let errorCallback = this.handleError;
                 if (failureHandler)
                     errorCallback = failureHandler;
 
@@ -155,7 +155,7 @@ angular.module('ice.common.service', [])
                     successHandler = function (resp) {
                     }
                 }
-                var errorCallback = this.handleError;
+                let errorCallback = this.handleError;
                 if (errHandler)
                     errorCallback = errHandler;
 
@@ -168,8 +168,8 @@ angular.module('ice.common.service', [])
             },
 
             download: function (url, postData) {
-                var m = postData ? "POST" : "GET";
-                var down = $resource(url, {}, {
+                let m = postData ? "POST" : "GET";
+                let down = $resource(url, {}, {
                     download: {
                         method: m,
                         headers: {'X-ICE-Authentication-SessionId': $cookies.get('sessionId')},
@@ -178,8 +178,8 @@ angular.module('ice.common.service', [])
                             return {
                                 data: data,
                                 filename: function () {
-                                    var header = headers('content-disposition');
-                                    var result = header.split(';')[1].trim().split('=')[1];
+                                    let header = headers('content-disposition');
+                                    let result = header.split(';')[1].trim().split('=')[1];
                                     return result.replace(/"/g, '');
                                 }
                             }

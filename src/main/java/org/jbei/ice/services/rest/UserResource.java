@@ -131,7 +131,7 @@ public class UserResource extends RestResource {
         String userIdString = getUserId();
         ColumnField field = ColumnField.valueOf(sort.toUpperCase());
         OwnerEntries ownerEntries = new OwnerEntries(userIdString, userId);
-        List<PartData> entries = ownerEntries.retrieveOwnerEntries(field, asc, offset, limit, filter);
+        List<PartData> entries = ownerEntries.retrieveOwnerEntries(field, asc, offset, limit, filter, null);
         long count = ownerEntries.getNumberOfOwnerEntries();
         FolderDetails details = new FolderDetails();
         details.getEntries().addAll(entries);

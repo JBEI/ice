@@ -21,7 +21,7 @@ public class GFF3Formatter extends AbstractFormatter {
     };
 
     @Override
-    public void format(Sequence sequence, OutputStream outputStream) throws FormatterException, IOException {
+    public void format(Sequence sequence, OutputStream outputStream) throws IOException {
         if (sequence == null)
             throw new IllegalArgumentException("Cannot write null sequence");
 
