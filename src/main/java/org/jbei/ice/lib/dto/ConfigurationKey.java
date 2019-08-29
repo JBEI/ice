@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.dto;
 
+import org.jbei.ice.lib.account.authentication.LocalAuthentication;
 import org.jbei.ice.lib.email.Type;
 import org.jbei.ice.storage.IDataTransferModel;
 
@@ -35,7 +36,8 @@ public enum ConfigurationKey implements IDataTransferModel {
     RESTRICT_PUBLIC_ENABLE("NO"),
     EMAILER(Type.CUSTOM.name()),
     GMAIL_APPLICATION_PASSWORD(""),
-    WEB_OF_REGISTRIES_MASTER("registry.jbei.org");
+    WEB_OF_REGISTRIES_MASTER("registry.jbei.org"),
+    AUTHENTICATION_CLASS(LocalAuthentication.class.getName());
 
     private String defaultValue;
 

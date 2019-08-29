@@ -130,7 +130,7 @@ public class SampleService extends HasEntry {
      * @param mainLocation    96 well plate location
      * @return sample storage with a complete hierarchy or null
      */
-    protected Storage createPlate96Location(String sampleDepositor, StorageLocation mainLocation) {
+    private Storage createPlate96Location(String sampleDepositor, StorageLocation mainLocation) {
         // validate: expected format is [PLATE96, WELL, (optional - TUBE)]
         StorageLocation well = mainLocation.getChild();
         StorageLocation tube;

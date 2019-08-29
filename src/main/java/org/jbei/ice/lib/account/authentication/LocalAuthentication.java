@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.account.authentication;
 
+import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.account.AccountUtils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.Account;
@@ -15,14 +16,14 @@ public class LocalAuthentication implements IAuthentication {
     }
 
     @Override
-    public String authenticates(String userId, String password) throws AuthenticationException {
+    public AccountTransfer authenticates(String userId, String password, String ip) throws AuthenticationException {
         if (userId == null || password == null)
             throw new AuthenticationException("Invalid username and password");
 
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        if (account == null || !isValidPassword(account, password))
+        if (!isValidPassword(account, password))
             return null;
-        return account.getEmail();
+        return account.toDataTransferObject();
     }
 
     /**
@@ -33,7 +34,7 @@ public class LocalAuthentication implements IAuthentication {
      * @param password user entered password being checked for validation
      * @return True if entered password matches one of encrypted schemes, false otherwise.
      */
-    protected boolean isValidPassword(Account account, String password) {
+    private boolean isValidPassword(Account account, String password) {
         if (account == null) {
             return false;
         }

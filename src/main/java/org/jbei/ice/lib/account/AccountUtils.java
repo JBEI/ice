@@ -2,8 +2,6 @@ package org.jbei.ice.lib.account;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.storage.model.Account;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -17,18 +15,6 @@ import java.security.spec.KeySpec;
  * @author Hector Plahar
  */
 public class AccountUtils {
-
-    /**
-     * Return the encrypted version of the given password, using the salt from the settings file.
-     *
-     * @param password non-empty string
-     * @return 40 character encrypted string.
-     */
-    public static String encryptPassword(String password, String userSalt) {
-        if (password == null || password.isEmpty())
-            throw new IllegalArgumentException("Cannot encrypt null or empty password");
-        return Utils.encryptSHA(userSalt + password);
-    }
 
     public static String encryptNewUserPassword(String password, String salt) {
         if (StringUtils.isEmpty(password) || StringUtils.isEmpty(salt))
@@ -46,7 +32,7 @@ public class AccountUtils {
         }
     }
 
-    protected static String bytesToHex(byte[] bytes) {
+    private static String bytesToHex(byte[] bytes) {
         char[] hexChars = new char[bytes.length * 2];
         char[] hexArray = "0123456789ABCDEF".toCharArray();
 
@@ -56,17 +42,5 @@ public class AccountUtils {
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
         return new String(hexChars);
-    }
-
-    public static Account fromDTO(AccountTransfer info) {
-        Account account = new Account();
-        account.setFirstName(info.getFirstName());
-        account.setLastName(info.getLastName());
-        account.setInitials(info.getInitials());
-        account.setEmail(info.getEmail().trim().toLowerCase());
-        account.setDescription(info.getDescription());
-        account.setInstitution(info.getInstitution());
-        account.setIp("");
-        return account;
     }
 }

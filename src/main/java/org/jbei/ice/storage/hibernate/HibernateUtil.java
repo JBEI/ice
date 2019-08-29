@@ -99,7 +99,6 @@ public class HibernateUtil {
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.Account.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.Attachment.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.Sample.class);
-                configuration.addAnnotatedClass(org.jbei.ice.storage.model.AccountPreferences.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.Group.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.TraceSequence.class);
                 configuration.addAnnotatedClass(org.jbei.ice.storage.model.TraceSequenceAlignment.class);

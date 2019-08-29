@@ -1,15 +1,15 @@
 'use strict';
 
 angular.module('ice.admin.controller', [])
-    .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, AdminSettings, Util, $interval) {
+    .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, AdminSettings, Util, $interval, $uibModal) {
         $scope.luceneRebuild = undefined;
         $scope.blastRebuild = undefined;
-        var lucenePromise;
-        var blastPromise;
+        let lucenePromise;
+        let blastPromise;
 
-        var getLuceneIndexStatus = function () {
+        let getLuceneIndexStatus = function () {
             Util.get("rest/search/indexes/LUCENE/status", function (result) {
-                if (result.total == 0)
+                if (result.total === 0)
                     $interval.cancel(lucenePromise);
                 $scope.luceneRebuild = {done: result.done, total: result.total};
             }, {}, function (error) {
@@ -19,7 +19,7 @@ angular.module('ice.admin.controller', [])
         };
         lucenePromise = $interval(getLuceneIndexStatus, 2000);
 
-        var getBlastStatus = function () {
+        let getBlastStatus = function () {
             Util.get("rest/search/indexes/BLAST/status", function (result) {
                 if (!result.total)
                     $interval.cancel(blastPromise);
@@ -43,7 +43,7 @@ angular.module('ice.admin.controller', [])
         $scope.saveEmailConfig = function () {
             $scope.submitSetting({key: "EMAILER", value: $scope.emailConfig.type});
 
-            if ($scope.emailConfig.type == "GMAIL") {
+            if ($scope.emailConfig.type === "GMAIL") {
                 $scope.submitSetting({key: "GMAIL_APPLICATION_PASSWORD", value: $scope.emailConfig.pass});
                 $scope.submitSetting({key: "SMTP_HOST", value: ""});
             } else {
@@ -53,36 +53,57 @@ angular.module('ice.admin.controller', [])
             $scope.emailConfig.edit = false;
         };
 
+        $scope.showChangeAuthClassModal = function () {
+            let modalInstance = $uibModal.open({
+                templateUrl: 'scripts/admin/modal/change-authentication-class.html',
+                controller: "AdminChangeAuthentication",
+                backdrop: "static",
+                resolve: {
+                    selection: function () {
+                        return $scope.authenticationClass.value;
+                    }
+                }
+            });
+
+            modalInstance.result.then(function (result) {
+                if (!result || !result.value)
+                    return;
+
+                $scope.authenticationClass.value = result.value;
+            })
+        };
+
         // retrieve general setting
         $scope.getSetting = function () {
             $scope.generalSettings = [];
             $scope.emailSettings = [];
+
             $scope.emailConfig = {type: "", smtp: "", pass: "", edit: false, showEdit: false, showPass: false};
 
             // retrieve site wide settings
             Util.list('rest/config', function (result) {
                 angular.forEach(result, function (setting) {
-                    if (AdminSettings.generalSettingKeys().indexOf(setting.key) != -1) {
+                    if (AdminSettings.generalSettingKeys().indexOf(setting.key) !== -1) {
                         $scope.generalSettings.push({
                             'originalKey': setting.key,
                             'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
                             'value': setting.value,
                             'editMode': false,
-                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) != -1,
+                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) !== -1,
                             'canAutoInstall': AdminSettings.canAutoInstall(setting.key)
                         });
                     }
 
-                    if (AdminSettings.getEmailKeys().indexOf(setting.key) != -1) {
+                    if (AdminSettings.getEmailKeys().indexOf(setting.key) !== -1) {
                         $scope.emailSettings.push({
                             'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
                             'value': setting.value,
                             'editMode': false,
-                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) != -1
+                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) !== -1
                         });
                     }
 
-                    if (AdminSettings.getEmailTypeKeys().indexOf(setting.key) != -1) {
+                    if (AdminSettings.getEmailTypeKeys().indexOf(setting.key) !== -1) {
                         switch (setting.key) {
                             case 'EMAILER':
                                 $scope.emailConfig.type = setting.value;
@@ -97,12 +118,21 @@ angular.module('ice.admin.controller', [])
                                 break;
                         }
                     }
+
+                    if (setting.key === 'AUTHENTICATION_CLASS') {
+                        // expect there to be only one
+                        $scope.authenticationClass = {
+                            'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
+                            'value': setting.value,
+                            'editMode': false,
+                        };
+                    }
                 });
             });
         };
 
-        var menuOption = $stateParams.option;
-        var menuOptions = $scope.adminMenuOptions = AdminSettings.getMenuOptions();
+        let menuOption = $stateParams.option;
+        let menuOptions = $scope.adminMenuOptions = AdminSettings.getMenuOptions();
 
         $scope.showSelection = function (index) {
             angular.forEach(menuOptions, function (details) {
@@ -125,7 +155,7 @@ angular.module('ice.admin.controller', [])
             $scope.selectedOption = menuOptions[0];
         } else {
             menuOptions[0].selected = false;
-            for (var i = 1; i < menuOptions.length; i += 1) {
+            for (let i = 1; i < menuOptions.length; i += 1) {
                 if (menuOptions[i].id === menuOption) {
                     $scope.adminOptionSelection = menuOptions[i].url;
                     menuOptions[i].selected = true;
@@ -154,7 +184,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.submitSetting = function (newSetting) {
-            var visualKey = newSetting.key;
+            let visualKey = newSetting.key;
             newSetting.key = (newSetting.key.replace(/ /g, '_')).toUpperCase();
 
             Util.update("rest/config", newSetting, {}, function (result) {
@@ -165,7 +195,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.submitBooleanSetting = function (booleanSetting) {
-            if (booleanSetting.value == undefined || booleanSetting.value.toLowerCase() === "no")
+            if (booleanSetting.value === undefined || booleanSetting.value.toLowerCase() === "no")
                 booleanSetting.value = "yes";
             else
                 booleanSetting.value = "no";
@@ -178,8 +208,7 @@ angular.module('ice.admin.controller', [])
             $scope.autoInstalling = setting.originalKey;
             // put to /rest/config/value
             Util.update("/rest/config/value", {key: setting.originalKey}, {}, function (result) {
-                console.log(result);
-                if (result.key == setting.originalKey)
+                if (result.key === setting.originalKey)
                     setting.value = result.value;
                 $scope.autoInstalling = undefined;
             }, function (error) {
@@ -187,8 +216,29 @@ angular.module('ice.admin.controller', [])
             });
         }
     })
-    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookies, $uibModal, Util,
-                                                          Authentication) {
+    .controller('AdminChangeAuthentication', function ($scope, $uibModalInstance, selection, Util) {
+        $scope.authClass = {
+            selection: selection,
+            options: [
+                {display: "Default", key: "org.jbei.ice.lib.account.authentication.LocalAuthentication"},
+                {display: "LDAP", key: "org.jbei.ice.lib.account.authentication.ldap.LdapAuthentication"},
+                {display: "None", key: "org.jbei.ice.lib.account.authentication.UserIdAuthentication"}
+            ]
+        };
+
+        $scope.applyAuthentication = function () {
+            Util.update("/rest/config", {
+                key: 'AUTHENTICATION_CLASS',
+                value: $scope.authClass.selection
+            }, {}, function (result) {
+                console.log(result);
+                $uibModalInstance.close(result);
+            }, function (failure) {
+
+            })
+        }
+    })
+    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookies, $uibModal, Util) {
         $rootScope.error = undefined;
 
         $scope.selectOptions = ['ALL', 'PENDING', 'FULFILLED', 'REJECTED'];
@@ -204,20 +254,20 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.exportSelectedSamples = function () {
-            var selectedIds = [];
-            for (var i = 0; i < $scope.selectedRequests.length; i += 1) {
+            let selectedIds = [];
+            for (let i = 0; i < $scope.selectedRequests.length; i += 1) {
                 selectedIds.push($scope.selectedRequests[i].id);
             }
 
-            var clickEvent = new MouseEvent("click", {
+            let clickEvent = new MouseEvent("click", {
                 "view": window,
                 "bubbles": true,
                 "cancelable": false
             });
 
             Util.download("rest/samples/requests/file", selectedIds).$promise.then(function (result) {
-                var url = URL.createObjectURL(new Blob([result.data]));
-                var a = document.createElement('a');
+                let url = URL.createObjectURL(new Blob([result.data]));
+                let a = document.createElement('a');
                 a.href = url;
                 a.download = result.filename();
                 a.target = '_blank';
@@ -227,7 +277,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.selectRequest = function (request) {
-            var i = $scope.selectedRequests.indexOf(request);
+            let i = $scope.selectedRequests.indexOf(request);
             if (i === -1) {
                 $scope.selectedRequests.push(request);
             } else {
@@ -251,7 +301,7 @@ angular.module('ice.admin.controller', [])
 
         $scope.requestSamples = function () {
             $scope.loadingPage = true;
-            var params = angular.copy($scope.params);
+            let params = angular.copy($scope.params);
 
             Util.get("rest/samples/requests", function (result) {
                 $scope.sampleRequests = result;
@@ -267,7 +317,7 @@ angular.module('ice.admin.controller', [])
         $scope.samplesRequesterNameTemplate = "scripts/admin/popover/sample-requester-name-filter-template.html";
 
         $scope.sampleFilterChecked = function (filter) {
-            var idx = $scope.params.status.indexOf(filter);
+            let idx = $scope.params.status.indexOf(filter);
             if (idx === -1)
                 $scope.params.status.push(filter);
             else
@@ -292,7 +342,7 @@ angular.module('ice.admin.controller', [])
                 if (result === undefined || result.id != request.id)
                     return;
 
-                var i = $scope.sampleRequests.requests.indexOf(request);
+                let i = $scope.sampleRequests.requests.indexOf(request);
                 if (i != -1) {
                     $scope.sampleRequests.requests[i].status = result.status;
                 }
@@ -342,7 +392,7 @@ angular.module('ice.admin.controller', [])
             if (locations.length != 3)
                 return locations[0];
 
-            for (var i = 0; i < locations.length; i += 1) {
+            for (let i = 0; i < locations.length; i += 1) {
                 if (locations[i].label.indexOf("backup") == -1)
                     return locations[i];
             }
@@ -386,7 +436,7 @@ angular.module('ice.admin.controller', [])
     .controller('AdminSampleImport', function ($scope, $uibModalInstance, Util, FileUploader, Authentication) {
         $scope.progress = 0;
 
-        var uploader = $scope.sampleImportUploader = new FileUploader({
+        let uploader = $scope.sampleImportUploader = new FileUploader({
             scope: $scope, // to automatically update the html. Default: $rootScope
             url: "rest/samples",
             method: 'POST',
@@ -446,7 +496,7 @@ angular.module('ice.admin.controller', [])
         $scope.newProfile = {show: false};
         $scope.userListParams = {sort: 'lastName', asc: true, currentPage: 1, limit: 15, status: undefined};
 
-        var getUsers = function () {
+        let getUsers = function () {
             $scope.loadingPage = true;
 
             Util.get("rest/users", function (result) {
@@ -473,7 +523,7 @@ angular.module('ice.admin.controller', [])
             if (!accountType)
                 accountType = 'NORMAL';
 
-            var userCopy = angular.copy(userItem);
+            let userCopy = angular.copy(userItem);
             userCopy.accountType = accountType;
 
             Util.update("rest/users/" + userItem.id, userCopy, {}, function (result) {
@@ -507,7 +557,7 @@ angular.module('ice.admin.controller', [])
         $scope.groupListPageChanged();
 
         $scope.openCreatePublicGroupModal = function (group) {
-            var modalInstance = $uibModal.open({
+            let modalInstance = $uibModal.open({
                 templateUrl: 'scripts/admin/modal/create-public-group.html',
                 controller: 'AdminGroupsModalController',
                 backdrop: "static",
@@ -523,7 +573,7 @@ angular.module('ice.admin.controller', [])
                 if (!result)
                     return;
 
-                var msg = "Group successfully ";
+                let msg = "Group successfully ";
                 if (group && group.id)
                     msg += "updated";
                 else
@@ -622,7 +672,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.openManuscriptAddRequest = function (selectedManuscript) {
-            var modalInstance = $uibModal.open({
+            let modalInstance = $uibModal.open({
                 templateUrl: 'scripts/admin/modal/manuscript-create.html',
                 controller: 'CreateManuscriptController',
                 resolve: {
@@ -642,7 +692,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.confirmManuscriptDelete = function (manuscript) {
-            var modalInstance = $uibModal.open({
+            let modalInstance = $uibModal.open({
                 templateUrl: 'scripts/admin/modal/manuscript-delete.html',
                 controller: 'DeleteManuscriptController',
                 resolve: {
@@ -728,9 +778,9 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.pasteFolder = function (event) {
-            var pasted = event.originalEvent.clipboardData.getData('text/plain');
-            var replace = event.currentTarget.baseURI + "folders/";
-            var idx = pasted.indexOf(replace);
+            let pasted = event.originalEvent.clipboardData.getData('text/plain');
+            let replace = event.currentTarget.baseURI + "folders/";
+            let idx = pasted.indexOf(replace);
 
             if (idx != 0) {
                 console.error("Could not parse pasted");
@@ -773,14 +823,14 @@ angular.module('ice.admin.controller', [])
         $scope.selectedFeature = undefined;
         $scope.dynamicPopover = {templateUrl: 'entryPopoverTemplate.html'}
 
-        var getFeatures = function () {
+        let getFeatures = function () {
             $scope.loadingCurationTableData = true;
             Util.get("rest/annotations", function (result) {
                 $scope.features = result.data;
 
                 angular.forEach($scope.features, function (feature) {
-                    for (var i = 0; i < feature.features.length; i += 1) {
-                        var f = feature.features[i];
+                    for (let i = 0; i < feature.features.length; i += 1) {
+                        let f = feature.features[i];
                         if (f.curation == undefined || !f.curation.exclude) {
                             feature.allSelected = false;
                             return;
@@ -810,9 +860,9 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.selectAllFeatures = function (feature) {
-            var features = [];
-            for (var i = 0; i < feature.features.length; i += 1) {
-                var f = feature.features[i];
+            let features = [];
+            for (let i = 0; i < feature.features.length; i += 1) {
+                let f = feature.features[i];
                 features.push({id: f.id, curation: {exclude: !feature.allSelected}});
             }
 
@@ -962,7 +1012,7 @@ angular.module('ice.admin.controller', [])
             switch ($scope.field.fieldType.value) {
                 case "MULTI_CHOICE":
                 case "MULTI_CHOICE_PLUS":
-                    for (var i = 0; i < $scope.field.options.length; i += 1) {
+                    for (let i = 0; i < $scope.field.options.length; i += 1) {
                         if (!$scope.field.options[i].value)
                             return true;
                     }

@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.account.authentication;
 
+import org.jbei.ice.lib.account.AccountTransfer;
+
 /**
  * Interface for different authentication types.
  *
@@ -12,9 +14,10 @@ public interface IAuthentication {
      *
      * @param loginId  user login Identifier
      * @param password user password
+     * @param ip       user ip address
      * @return the account identifier (usually email) on successful authentication with the credentials provided,
-     *         null otherwise
+     * null otherwise
      * @throws AuthenticationException on exception authenticating
      */
-    String authenticates(String loginId, String password) throws AuthenticationException;
+    AccountTransfer authenticates(String loginId, String password, String ip) throws AuthenticationException;
 }

@@ -3,7 +3,7 @@
 var adminService = angular.module('ice.admin.service', []);
 
 adminService.factory('AdminSettings', function () {
-    var generalSettingKeys = [
+    const generalSettingKeys = [
         'TEMPORARY_DIRECTORY',
         'DATA_DIRECTORY',
         'PROJECT_NAME',
@@ -18,21 +18,21 @@ adminService.factory('AdminSettings', function () {
         //'ADD_TO_CART_DEFAULT_SET_TO_LOCAL'
     ];
 
-    var emailSettingKeys = [
+    const emailSettingKeys = [
         'ADMIN_EMAIL',
         'BULK_UPLOAD_APPROVER_EMAIL',
         'SEND_EMAIL_ON_ERRORS',
         'ERROR_EMAIL_EXCEPTION_PREFIX'
     ];
 
-    var emailTypeKeys = [
+    const emailTypeKeys = [
         'EMAILER',
         'GMAIL_APPLICATION_PASSWORD',
         'SMTP_HOST'
     ];
 
     // indicates which of the keys are boolean
-    var booleanKeys = [
+    const booleanKeys = [
         'NEW_REGISTRATION_ALLOWED',
         'PASSWORD_CHANGE_ALLOWED',
         'PROFILE_EDIT_ALLOWED',
@@ -40,7 +40,7 @@ adminService.factory('AdminSettings', function () {
         //'ADD_TO_CART_DEFAULT_SET_TO_LOCAL'
     ];
 
-    var menuOptions = [
+    const menuOptions = [
         {url: 'scripts/admin/settings.html', display: 'Settings', selected: true, icon: 'fa-cogs'},
         {
             id: 'web',

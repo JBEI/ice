@@ -178,6 +178,11 @@
             <artifactId>undertow-servlet</artifactId>
             <version>1.4.18.Final</version>
         </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.11</version>
+        </dependency>
     </dependencies>
     <build>
         <outputDirectory>target</outputDirectory>

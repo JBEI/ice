@@ -69,14 +69,28 @@
                     <div class="input-group" data-ng-if="setting.editMode">
                         <form ng-submit="submitSetting(setting)">
                             <input type="text" ng-model="setting.value" class="input_box_group" maxlength="125"
-                                   style="width: 205px;">
+                                   style="width: 205px">
                         </form>
-        <span class="input-group-addon" data-ng-click="setting.editMode=false" style="padding:3px; background-color:
+                        <span class="input-group-addon" data-ng-click="setting.editMode=false" style="padding:3px; background-color:
         #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
                     </div>
                 </div>
 
+            </div>
+        </uib-tab>
 
+        <uib-tab>
+            <uib-tab-heading><i class="fa fa-fw fa-lock"></i> Authentication</uib-tab-heading>
+            <div class="pad_top row">
+                <div class="col-md-3 entryLabel text-right">
+                    <span class='entryLabel'>{{authenticationClass.key}}</span>
+                </div>
+
+                <div class="col-md-9">
+                    {{authenticationClass.value}}
+                    <i class="fa fa-pencil edit_icon" ng-click="showChangeAuthClassModal()" uib-tooltip="Change Class"
+                       style="margin-left: 5px; font-size: 14px"></i>
+                </div>
             </div>
         </uib-tab>
 
@@ -153,7 +167,7 @@
                             <input type="text" ng-model="setting.value" class="input_box_group" maxlength="125"
                                    style="width: 205px;">
                         </form>
-        <span class="input-group-addon" data-ng-click="setting.editMode=false" style="padding:3px; background-color:
+                        <span class="input-group-addon" data-ng-click="setting.editMode=false" style="padding:3px; background-color:
      #f1f1f1;width: 19px"><i class="fa fa-times delete_icon"></i></span>
                     </div>
                 </div>

@@ -6,6 +6,7 @@ import org.jbei.ice.lib.account.authentication.AuthenticationException;
 import org.jbei.ice.lib.account.authentication.IAuthentication;
 import org.jbei.ice.lib.account.authentication.LocalAuthentication;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.config.ConfigurationController;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.email.EmailFactory;
@@ -290,19 +291,6 @@ public class AccountController {
     }
 
     /**
-     * @param email an account identifier (usually email)
-     * @return database identifier of account matching account identifier (email)
-     * @throws IllegalArgumentException for an invalid account identifier
-     */
-    public long getAccountId(final String email) {
-        final Account account = dao.getByEmail(email);
-        if (account == null) {
-            throw new IllegalArgumentException("No account found with email " + email);
-        }
-        return account.getId();
-    }
-
-    /**
      * @param sessionKey
      * @return Account object matching a session key, or {@code null}
      */
@@ -351,24 +339,35 @@ public class AccountController {
         return account != null && account.getType() == AccountType.ADMIN;
     }
 
+    private IAuthentication getAuthentication() {
+        try {
+            String clazz = new ConfigurationController().getPropertyValue(ConfigurationKey.AUTHENTICATION_CLASS);
+            Class<?> authentication = Class.forName(clazz);
+            return (IAuthentication) authentication.getDeclaredConstructor().newInstance();
+        } catch (Exception e) {
+            Logger.error(e);
+            return new LocalAuthentication();
+        }
+    }
+
     /**
      * Authenticate a user in the database.
      * <p>
      * Using the {@link org.jbei.ice.lib.account.authentication.IAuthentication} specified in the
      * settings file, authenticate the user, and return the sessionData
      *
-     * @param login
-     * @param password
+     * @param login    user login (typically email address)
+     * @param password user password
      * @param ip       IP Address of the user.
      * @return the account identifier (email) on a successful login, otherwise {@code null}
      */
-    protected Account authenticate(final String login, final String password, final String ip) {
-        final IAuthentication authentication = new LocalAuthentication();
-        String email;
+    private Account authenticate(final String login, final String password, final String ip) {
+        final IAuthentication authentication = getAuthentication();
+        AccountTransfer accountTransfer;
 
         try {
-            email = authentication.authenticates(login.trim(), password);
-            if (email == null) {
+            accountTransfer = authentication.authenticates(login.trim(), password, ip);
+            if (accountTransfer == null) {
                 loginFailureCooldown();
                 return null;
             }
@@ -377,7 +376,8 @@ public class AccountController {
             return null;
         }
 
-        Account account = dao.getByEmail(email);
+        // check if there is an account for the user trying to login
+        Account account = dao.getByEmail(accountTransfer.getEmail());
         if (account == null)
             return null;
 
@@ -386,9 +386,7 @@ public class AccountController {
         try {
             if (groups != null) {
                 for (Group group : groups) {
-                    if (!account.getGroups().contains(group)) {
-                        account.getGroups().add(group);
-                    }
+                    account.getGroups().add(group);
                 }
                 dao.update(account);
             }
