@@ -19,8 +19,10 @@ import java.text.MessageFormat;
 import java.util.*;
 
 /**
- * Authentication for LBL's LDAP system. Uses local authentication as a fallback
- * if the account does not exist with LBL LDAP directory
+ * Authentication using LDAP.
+ * <b>Note</b>
+ * This expects a property file named <code>ldap-config.properties</code>
+ * located in <code>{data-dir}/config</code> directory
  *
  * @author Hector Plahar
  */
