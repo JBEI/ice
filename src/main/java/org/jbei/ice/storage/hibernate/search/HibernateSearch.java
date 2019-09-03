@@ -57,8 +57,7 @@ public class HibernateSearch {
     public SearchResults executeSearchNoTerms(String userId, HashMap<String, SearchResult> blastResults, SearchQuery searchQuery) {
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null || entryTypes.isEmpty()) {
-            entryTypes = new ArrayList<>();
-            entryTypes.addAll(Arrays.asList(EntryType.values()));
+            entryTypes = new ArrayList<>(Arrays.asList(EntryType.values()));
         }
 
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -460,7 +459,7 @@ public class HibernateSearch {
         fullTextQuery.enableFullTextFilter("boolean").setParameter("field", terms);
     }
 
-    protected static String cleanQuery(String query) {
+    private static String cleanQuery(String query) {
         if (query == null)
             return null;
         String cleanedQuery = query;
