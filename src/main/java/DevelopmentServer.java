@@ -1,9 +1,10 @@
 import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.predicate.PredicatesHandler;
+import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.builder.PredicatedHandlersParser;
 import io.undertow.server.handlers.resource.FileResourceManager;
-import io.undertow.server.handlers.resource.PathResourceManager;
-import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
 import io.undertow.servlet.api.DeploymentManager;
@@ -11,7 +12,6 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import org.jbei.ice.servlet.IceServletContextListener;
 
 import java.io.File;
-import java.nio.file.Paths;
 
 /**
  * Embedded (Undertow) server for development. Uses the settings from <code>web.xml</code>
@@ -38,24 +38,22 @@ public class DevelopmentServer {
                                 .addMapping("/rest/*")
                 );
 
+        // deploy servlet
         DeploymentManager manager = Servlets.defaultContainer().addDeployment(servletBuilder);
         manager.deploy();
+        HttpHandler servletHandler = manager.start();
+
+        PredicatesHandler handler = Handlers.predicates(PredicatedHandlersParser.parse(
+                "path-prefix('folders') or path-prefix('entry') or path-prefix('admin') and regex('/.+') -> rewrite('/')",
+                ClassLoader.getSystemClassLoader()), servletHandler);
 
         PathHandler path = Handlers.path(Handlers.redirect("/"))
-                .addPrefixPath("/", manager.start());
+                .addPrefixPath("/", handler);
 
-//        // Redirect root path to /static to serve the index.html by default
-//        .addExactPath("/", Handlers.redirect("/static"))
-//
-//                // Serve all static files from a folder
-        path.addPrefixPath("login", new ResourceHandler(
-                new PathResourceManager(Paths.get("src/main/webapp/views/"), 100))
-                .addWelcomeFiles("index.htm"));
-
-        Undertow.builder()
+        Undertow server = Undertow.builder()
                 .addHttpListener(8080, "localhost")
                 .setHandler(path)
-                .build()
-                .start();
+                .build();
+        server.start();
     }
 }
