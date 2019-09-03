@@ -176,6 +176,18 @@ public class AccountController {
         return dao.update(account).toDataTransferObject();
     }
 
+    private static Account fromDTO(AccountTransfer info) {
+        Account account = new Account();
+        account.setFirstName(info.getFirstName());
+        account.setLastName(info.getLastName());
+        account.setInitials(info.getInitials());
+        account.setEmail(info.getEmail().trim().toLowerCase());
+        account.setDescription(info.getDescription());
+        account.setInstitution(info.getInstitution());
+        account.setIp("");
+        return account;
+    }
+
     /**
      * Creates a new account using the parameters passed. A random password is initially generated ,
      * encrypted and assigned to the account
@@ -199,7 +211,7 @@ public class AccountController {
         final String newPassword = Utils.generateUUID().substring(24);
         final String encryptedPassword = AccountUtils.encryptNewUserPassword(newPassword, salt);
 
-        Account account = AccountUtils.fromDTO(info);
+        Account account = fromDTO(info);
         account.setPassword(encryptedPassword);
         account.setSalt(salt);
         account.setCreationTime(Calendar.getInstance().getTime());
