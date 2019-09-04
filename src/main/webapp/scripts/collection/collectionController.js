@@ -768,11 +768,9 @@ angular.module('ice.collection.controller', [])
                 }
             });
 
-            modalInstance.result.then(function (result) {
-                // if (!result)
-                //     return;
-                // $scope.params.currentPage = 1;
-                // $scope.folderPageChange();
+            modalInstance.result.then(function () {
+                $scope.params.currentPage = 1;
+                $scope.folderPageChange();
             });
         };
 
@@ -794,7 +792,7 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.markSampleFolder = function (approved) {
-
+            // "/rest/folders/" + $scope.folder.id +
         };
 
         $scope.getDisplay = function (permission) {
