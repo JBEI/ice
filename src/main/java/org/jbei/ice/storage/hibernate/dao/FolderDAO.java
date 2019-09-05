@@ -351,7 +351,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
 
     public List<Entry> getEntrysByFolderType(FolderType type, ColumnField field, boolean asc, int start, int limit, String filter) {
         try {
-            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
+            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class).distinct(true);
             Root<Folder> from = query.from(Folder.class);
             Join<Folder, Entry> entry = from.join("contents");
             List<Predicate> predicates = getPredicates(entry, filter);
