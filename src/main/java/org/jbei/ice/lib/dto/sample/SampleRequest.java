@@ -2,6 +2,7 @@ package org.jbei.ice.lib.dto.sample;
 
 import org.jbei.ice.lib.account.AccountTransfer;
 import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.storage.IDataTransferModel;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class SampleRequest implements IDataTransferModel {
     private AccountTransfer requester;
     private SampleRequestType requestType;
     private PartData partData;
+    private FolderDetails folderDetails;
     private SampleRequestStatus status;
     private String plateDescription;
     private long requestTime;
@@ -106,5 +108,13 @@ public class SampleRequest implements IDataTransferModel {
 
     public void setPlateDescription(String plateDescription) {
         this.plateDescription = plateDescription;
+    }
+
+    public FolderDetails getFolderDetails() {
+        return folderDetails;
+    }
+
+    public void setFolderDetails(FolderDetails folderDetails) {
+        this.folderDetails = folderDetails;
     }
 }

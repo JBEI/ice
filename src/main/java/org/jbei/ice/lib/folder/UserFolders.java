@@ -2,14 +2,18 @@ package org.jbei.ice.lib.folder;
 
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
+import org.jbei.ice.lib.dto.folder.FolderType;
+import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.FolderDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Folder;
+import org.jbei.ice.storage.model.SampleCreateModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents a folder created or owned by a user
@@ -45,6 +49,19 @@ public class UserFolders {
         if (owner != null) {
             folderDetails.setOwner(owner.toDataTransferObject());
         }
+
+        // get sample details
+        if (folder.getType() == FolderType.SAMPLE) {
+            Optional<SampleCreateModel> optional = DAOFactory.getSampleCreateModelDAO().getByFolder(folder);
+            if (optional.isPresent()) {
+                SampleCreateModel model = optional.get();
+                SampleRequest request = new SampleRequest();
+                request.setId(model.getId());
+                request.setStatus(model.getStatus());
+                folderDetails.setSampleRequest(request);
+            }
+        }
+
         return folderDetails;
     }
 

@@ -37,7 +37,7 @@ public class SampleServiceTest {
 
     @Test
     public void createStorage() throws Exception {
-        Storage storage = service.createStorage("user1", "test1", SampleType.ADDGENE);
+        Storage storage = service.createStorageObject("user1", "test1", SampleType.ADDGENE);
         Assert.assertNotNull(storage);
         Assert.assertEquals(storage.getIndex(), "test1");
         Assert.assertEquals(storage.getOwnerEmail(), "user1");

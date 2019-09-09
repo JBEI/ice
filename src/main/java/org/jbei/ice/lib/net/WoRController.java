@@ -2,7 +2,7 @@ package org.jbei.ice.lib.net;
 
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.RemotePartnerStatus;
@@ -35,7 +35,7 @@ public class WoRController {
      * enable the web of registries functionality
      */
     public boolean isWebEnabled() {
-        String value = new ConfigurationController().getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
+        String value = new ConfigurationSettings().getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
         return "yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
     }
 
@@ -120,8 +120,8 @@ public class WoRController {
         String thisUrl = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);
         if (!thisUrl.equalsIgnoreCase(url)) {
             Logger.info("Auto updating uri to " + url);
-            ConfigurationController configurationController = new ConfigurationController();
-            configurationController.setPropertyValue(ConfigurationKey.URI_PREFIX, url);
+            ConfigurationSettings settings = new ConfigurationSettings();
+            settings.setPropertyValue(ConfigurationKey.URI_PREFIX, url);
         }
 
         WebOfRegistriesTask contactTask = new WebOfRegistriesTask(userId, url, enable);

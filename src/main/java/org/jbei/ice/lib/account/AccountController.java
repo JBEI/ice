@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.account.authentication.AuthenticationException;
 import org.jbei.ice.lib.account.authentication.IAuthentication;
-import org.jbei.ice.lib.account.authentication.LocalAuthentication;
+import org.jbei.ice.lib.account.authentication.UserIdAuthentication;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.group.GroupType;
@@ -363,7 +363,7 @@ public class AccountController {
      * @return the account identifier (email) on a successful login, otherwise {@code null}
      */
     protected Account authenticate(final String login, final String password, final String ip) {
-        final IAuthentication authentication = new LocalAuthentication();
+        final IAuthentication authentication = new UserIdAuthentication();
         String email;
 
         try {

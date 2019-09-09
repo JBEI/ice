@@ -8,20 +8,15 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
+import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.dao.AccountDAO;
-import org.jbei.ice.storage.hibernate.dao.EntryDAO;
-import org.jbei.ice.storage.hibernate.dao.FolderDAO;
-import org.jbei.ice.storage.hibernate.dao.RemoteAccessModelDAO;
+import org.jbei.ice.storage.hibernate.dao.*;
 import org.jbei.ice.storage.model.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -54,7 +49,8 @@ public class Folders {
     }
 
     /**
-     * Retrieves list of folders that specified user has write privileges on
+     * Retrieves list of folders that specified user has write privileges on.
+     * This excludes folders that are of type <code>SAMPLE</code>
      *
      * @return list of folders
      */
@@ -62,7 +58,6 @@ public class Folders {
         Account account = this.accountDAO.getByEmail(userId);
         Set<Group> accountGroups = getAccountGroups(account);
         List<Folder> folders = dao.getCanEditFolders(account, accountGroups);
-        folders.addAll(dao.getFoldersByOwner(account));
         ArrayList<FolderDetails> result = new ArrayList<>();
 
         for (Folder folder : folders) {
@@ -124,11 +119,23 @@ public class Folders {
         if (folder == null)
             return false;
 
+        Account account = accountDAO.getByEmail(userId);
+
+        // create model
+        SampleCreateModel model = new SampleCreateModel();
+        model.setRequested(new Date());
+        model.setUpdated(new Date());
+        model.setFolder(folder);
+        model.setAccount(account);
+        DAOFactory.getSampleCreateModelDAO().create(model);
+
         // send email notification
         String archiveEmail = Utils.getConfigValue(ConfigurationKey.BULK_UPLOAD_APPROVER_EMAIL);
         try {
-            if (!StringUtils.isEmpty(archiveEmail))
-                EmailFactory.getEmail().send(archiveEmail, "Sample creation requested", createEmailBody(folderId));
+            if (!StringUtils.isEmpty(archiveEmail)) {
+                String emailBody = createEmailBody(account, folderId);
+                EmailFactory.getEmail().send(archiveEmail, "Sample creation requested", emailBody);
+            }
         } catch (Exception e) {
             Logger.error("Exception sending email " + e);
         }
@@ -136,8 +143,59 @@ public class Folders {
         return true;
     }
 
-    private String createEmailBody(long folderId) {
+    public void setFolderApproval(long folderId, boolean approve) {
+        Folder folder = dao.get(folderId);
+        if (folder == null)
+            throw new IllegalArgumentException("Cannot find folder with id " + folderId);
+
+        if (folder.getType() != FolderType.SAMPLE)
+            throw new IllegalStateException("Can only approve folders of type 'SAMPLE'");
+
+        // only admins can approve or deny
+        authorization.expectAdmin(userId);
+
+        SampleCreateModelDAO createModelDAO = DAOFactory.getSampleCreateModelDAO();
+        Optional<SampleCreateModel> optional = createModelDAO.getByFolder(folder);
         Account account = accountDAO.getByEmail(userId);
+
+        if (optional.isPresent()) {
+            // update
+            SampleCreateModel model = optional.get();
+            model.setStatus(approve ? SampleRequestStatus.APPROVED : SampleRequestStatus.REJECTED);
+            model.setUpdated(new Date());
+            createModelDAO.update(model);
+        } else {
+            // create new
+            SampleCreateModel model = new SampleCreateModel();
+            model.setAccount(account);
+            model.setFolder(folder);
+            model.setStatus(approve ? SampleRequestStatus.APPROVED : SampleRequestStatus.REJECTED);
+            model.setRequested(new Date());
+            model.setUpdated(new Date());
+            createModelDAO.create(model);
+        }
+
+        // if a request is rejected then folder is returned to private state
+        if (!approve) {
+            folder.setType(FolderType.PRIVATE);
+            folder.setModificationTime(new Date());
+            dao.update(folder);
+        } else {
+            // send email
+            String emailMessage = Utils.getConfigValue(ConfigurationKey.SAMPLE_CREATE_APPROVAL_MESSAGE);
+            if (!StringUtils.isEmpty(emailMessage)) {
+                String body = "Dear " + account.getFullName() + ",";
+                body += "\n\n";
+                body += emailMessage;
+                body += "\n\n";
+                body += "Thank you!";
+
+                EmailFactory.getEmail().send(account.getEmail(), "Sample creation request approved", body);
+            }
+        }
+    }
+
+    private String createEmailBody(Account account, long folderId) {
         String body = "A sample creation request have been received from " + account.getFullName() + " for a folder";
         body += "\n\nPlease go to the following link to review its contents.\n";
         body += Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/folders/" + folderId;

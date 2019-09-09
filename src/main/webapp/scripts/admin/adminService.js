@@ -1,9 +1,9 @@
 'use strict';
 
-var adminService = angular.module('ice.admin.service', []);
+const adminService = angular.module('ice.admin.service', []);
 
 adminService.factory('AdminSettings', function () {
-    var generalSettingKeys = [
+    const generalSettingKeys = [
         'TEMPORARY_DIRECTORY',
         'DATA_DIRECTORY',
         'PROJECT_NAME',
@@ -18,21 +18,25 @@ adminService.factory('AdminSettings', function () {
         //'ADD_TO_CART_DEFAULT_SET_TO_LOCAL'
     ];
 
-    var emailSettingKeys = [
+    const emailSettingKeys = [
         'ADMIN_EMAIL',
         'BULK_UPLOAD_APPROVER_EMAIL',
         'SEND_EMAIL_ON_ERRORS',
         'ERROR_EMAIL_EXCEPTION_PREFIX'
     ];
 
-    var emailTypeKeys = [
+    const sampleRequestSettingKeys = [
+        'SAMPLE_CREATE_APPROVAL_MESSAGE'
+    ];
+
+    const emailTypeKeys = [
         'EMAILER',
         'GMAIL_APPLICATION_PASSWORD',
         'SMTP_HOST'
     ];
 
     // indicates which of the keys are boolean
-    var booleanKeys = [
+    const booleanKeys = [
         'NEW_REGISTRATION_ALLOWED',
         'PASSWORD_CHANGE_ALLOWED',
         'PROFILE_EDIT_ALLOWED',
@@ -40,8 +44,13 @@ adminService.factory('AdminSettings', function () {
         //'ADD_TO_CART_DEFAULT_SET_TO_LOCAL'
     ];
 
-    var menuOptions = [
-        {url: 'scripts/admin/settings.html', display: 'Settings', selected: true, icon: 'fa-cogs'},
+    const menuOptions = [
+        {
+            url: 'scripts/admin/settings.html',
+            display: 'Settings',
+            selected: true,
+            icon: 'fa-cogs'
+        },
         {
             id: 'web',
             url: 'scripts/admin/wor.html',
@@ -50,7 +59,13 @@ adminService.factory('AdminSettings', function () {
             icon: 'fa-globe',
             description: 'Share/access entries with/on other ICE instances'
         },
-        {id: 'users', url: 'scripts/admin/users.html', display: 'Users', selected: false, icon: 'fa-user'},
+        {
+            id: 'users',
+            url: 'scripts/admin/users.html',
+            display: 'Users',
+            selected: false,
+            icon: 'fa-user'
+        },
         {
             id: 'groups',
             url: 'scripts/admin/groups.html',
@@ -59,8 +74,11 @@ adminService.factory('AdminSettings', function () {
             icon: 'fa-group'
         },
         {
-            id: 'samples', url: 'scripts/admin/sample-requests.html', display: 'Sample Requests', selected: false,
-            icon: 'fa-shopping-cart'
+            id: 'samples',
+            url: 'scripts/admin/samples.html',
+            display: 'Samples',
+            selected: false,
+            icon: 'fa-flask'
         },
         {
             id: 'annotations-curation',
@@ -96,12 +114,26 @@ adminService.factory('AdminSettings', function () {
             return emailSettingKeys;
         },
 
+        getSampleRequestKeys: function () {
+            return sampleRequestSettingKeys;
+        },
+
         getEmailTypeKeys: function () {
             return emailTypeKeys;
         },
 
         getBooleanKeys: function () {
             return booleanKeys;
+        },
+
+        getKeyType: function (key) {
+            if (booleanKeys.indexOf(key) !== -1)
+                return 'boolean';
+
+            if (key === 'SAMPLE_CREATE_APPROVAL_MESSAGE')
+                return 'long';
+
+            return 'regular';
         },
 
         canAutoInstall: function (key) {

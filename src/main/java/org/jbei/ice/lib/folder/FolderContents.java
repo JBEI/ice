@@ -90,7 +90,7 @@ public class FolderContents {
      * @param folders       list of folders that the remote entries are to be added to
      * @return List of folders that the specified entries were added to
      */
-    protected List<FolderDetails> addRemoteEntries(String userId, List<PartData> remoteEntries, List<FolderDetails> folders) {
+    private List<FolderDetails> addRemoteEntries(String userId, List<PartData> remoteEntries, List<FolderDetails> folders) {
         // nothing adding to destination
         if (remoteEntries == null)
             return new ArrayList<>();
@@ -255,7 +255,7 @@ public class FolderContents {
      * @param folders list of folders that that entries are to be added to
      * @return list of destination folders that were updated successfully
      */
-    protected List<FolderDetails> addEntriesToFolders(String userId, List<Long> entries, List<FolderDetails> folders) {
+    List<FolderDetails> addEntriesToFolders(String userId, List<Long> entries, List<FolderDetails> folders) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
         List<Group> accountGroups = new GroupController().getAllGroups(account);
         if (!folderAuthorization.isAdmin(userId))
@@ -297,7 +297,7 @@ public class FolderContents {
     }
 
     // transfer entries to remote partner and add to folder
-    protected void addToRemoteFolder(Account account, Folder folder, List<Long> entries) {
+    private void addToRemoteFolder(Account account, Folder folder, List<Long> entries) {
         RemoteAccessModel remoteAccessModel = remoteAccessModelDAO.getByFolder(account, folder);
         if (remoteAccessModel == null) {
             Logger.error("Could not retrieve remote access for folder " + folder.getId());
@@ -354,7 +354,7 @@ public class FolderContents {
         if (userId != null) {
             List<AccessPermission> permissions = getAndFilterFolderPermissions(userId, folder);
             details.setAccessPermissions(permissions);
-            boolean canEdit = permissionsController.hasWritePermission(userId, folder);
+            boolean canEdit = folderAuthorization.canWrite(userId, folder);
             details.setCanEdit(canEdit);
         }
 
@@ -380,7 +380,7 @@ public class FolderContents {
      * @return wrapper around entries conforming to specified parameters
      * @throws IllegalArgumentException if the folder is not of type <code>REMOTE</code>
      */
-    protected FolderDetails getRemoteContents(String userId, Folder folder, PageParameters pageParameters) {
+    private FolderDetails getRemoteContents(String userId, Folder folder, PageParameters pageParameters) {
         if (folder.getType() != FolderType.REMOTE) {
             String errorMessage = "Folder " + folder.getId() + " is not remote and therefore cannot retrieve contents";
             Logger.error(errorMessage);
@@ -477,7 +477,7 @@ public class FolderContents {
      * @param folder Folder whose permissions are to be retrieved
      * @return list of filtered permissions
      */
-    protected List<AccessPermission> getAndFilterFolderPermissions(String userId, Folder folder) {
+    private List<AccessPermission> getAndFilterFolderPermissions(String userId, Folder folder) {
         List<AccessPermission> permissions = permissionsController.retrieveSetFolderPermission(folder, false);
         if (accountController.isAdministrator(userId) || folder.getOwnerEmail().equalsIgnoreCase(userId)) {
             return permissions;

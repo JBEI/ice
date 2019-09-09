@@ -48,7 +48,7 @@ public class Authorization<T extends DataModel> {
         return null;
     }
 
-    protected T getObjectById(long id) {
+    private T getObjectById(long id) {
         return repository.get(id);
     }
 
@@ -64,7 +64,7 @@ public class Authorization<T extends DataModel> {
         return (isOwner(userId, object) || isAdmin(userId));
     }
 
-    protected boolean isOwner(String userId, T object) {
+    private boolean isOwner(String userId, T object) {
         String owner = getOwner(object);
         return owner == null || userId.equalsIgnoreCase(owner);
     }

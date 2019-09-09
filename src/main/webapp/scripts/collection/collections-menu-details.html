@@ -73,10 +73,10 @@
         </span>
     </div>
 
-    <div style="border-top: 1px solid #F2F2F2; color: #233559; line-height: 90%; padding: 4px;
+    <div style="border-top: 1px solid #F2F2F2; color: #233559; line-height: 90%; padding: 4px 0 4px 20px;
             background-color: #f9f9f9" ng-show="folder.deleteRequested">
         <i class="fa fa-exclamation-triangle alert_color fa-fw" style="font-size: 12px"></i>
-        <b class="font-85em" style="color:#CC3333">Permanently delete?</b>
+        <b class="font-85em" style="color:#CC3333">Permanently delete?</b>&nbsp;&nbsp;&nbsp;
 
         <button stop-event="click" class="btn btn-xs btn-primary" ng-click="deleteCollection(folder)">Yes</button>
         <button stop-event="click" class="btn btn-xs btn-default" ng-click="folder.deleteRequested=false">No</button>

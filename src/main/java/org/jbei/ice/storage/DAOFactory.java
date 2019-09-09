@@ -40,6 +40,7 @@ public class DAOFactory {
     private static SequenceHistoryModelDAO sequenceHistoryModelDAO;
     private static CustomEntryFieldDAO customEntryFieldDAO;
     private static CustomEntryFieldValueDAO customEntryFieldValueDAO;
+    private static SampleCreateModelDAO sampleCreateModelDAO;
 
     public static AccountDAO getAccountDAO() {
         if (accountDAO == null)
@@ -237,5 +238,11 @@ public class DAOFactory {
         if (customEntryFieldValueDAO == null)
             customEntryFieldValueDAO = new CustomEntryFieldValueDAO();
         return customEntryFieldValueDAO;
+    }
+
+    public static SampleCreateModelDAO getSampleCreateModelDAO() {
+        if (sampleCreateModelDAO == null)
+            sampleCreateModelDAO = new SampleCreateModelDAO();
+        return sampleCreateModelDAO;
     }
 }

@@ -12,10 +12,7 @@ import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.*;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.util.*;
 
 /**
@@ -269,20 +266,27 @@ public class FolderDAO extends HibernateRepository<Folder> {
     public List<Folder> getCanEditFolders(Account account, Set<Group> accountGroups) {
         try {
             CriteriaQuery<Folder> query = getBuilder().createQuery(Folder.class);
-            Root<Permission> from = query.from(Permission.class);
-            Join<Permission, Folder> folder = from.join("folder");
+            Root<Folder> from = query.from(Folder.class);
+            Join<Folder, Permission> permission = from.join("permissions", JoinType.LEFT);
 
             // where ((account = account or group in groups) and canWrite)) or is owner
-            Predicate predicate = getBuilder().and(
+            Predicate permissionPredicate = getBuilder().and(
                     getBuilder().or(
-                            getBuilder().equal(from.get("account"), account),
-                            from.get("group").in(accountGroups)
+                            getBuilder().equal(permission.get("account"), account),
+                            permission.get("group").in(accountGroups)
                     ),
-                    getBuilder().equal(from.get("canWrite"), true),
-                    getBuilder().isNotNull(from.get("folder"))
+                    getBuilder().equal(permission.get("canWrite"), true),
+                    getBuilder().notEqual(from.get("type"), FolderType.SAMPLE)
             );
 
-            query.select(folder).where(predicate);
+            // non sample folders that user owns
+            Predicate folderPredicate = getBuilder().and(
+                    getBuilder().equal(getBuilder().lower(from.get("ownerEmail")), account.getEmail().toLowerCase()),
+                    getBuilder().notEqual(from.get("type"), FolderType.REMOTE),
+                    getBuilder().notEqual(from.get("type"), FolderType.SAMPLE)
+            );
+
+            query.where(getBuilder().or(permissionPredicate, folderPredicate)).distinct(true);
             return currentSession().createQuery(query).list();
         } catch (Exception e) {
             Logger.error(e);

@@ -2,10 +2,8 @@
 
 angular.module('ice.collection.controller', [])
 // controller for <ice.menu.collections> directive
-    .controller('CollectionMenuController', function ($cookies, $scope, $uibModal, $rootScope, $location,
-                                                      $stateParams, FolderSelection, EntryContextUtil, Util,
-                                                      localStorageService) {
-
+    .controller('CollectionMenuController', function ($scope, $uibModal, $rootScope, $location, $stateParams,
+                                                      FolderSelection, EntryContextUtil, Util, localStorageService) {
         $scope.folderDisplayLimit = 8;
 
         $scope.adjustCollectionFoldersVisible = function () {
@@ -190,8 +188,7 @@ angular.module('ice.collection.controller', [])
             }
         });
     })
-    .controller('FolderPermissionsController', function ($rootScope, $scope, $http, $uibModalInstance, $cookies,
-                                                         Util, folder) {
+    .controller('FolderPermissionsController', function ($rootScope, $scope, $http, $uibModalInstance, Util, folder) {
         $scope.folder = folder;
         $scope.selectedPermission = undefined;
         $scope.newPermission = {canWrite: false, canRead: true, article: 'ACCOUNT', typeId: folder.id};
@@ -351,7 +348,7 @@ angular.module('ice.collection.controller', [])
             switch ($scope.newPermission.article.toLowerCase()) {
                 case "account":
                     return $http.get('rest/users/autocomplete', {
-                        headers: {'X-ICE-Authentication-SessionId': $cookies.get("sessionId")},
+                        headers: {'X-ICE-Authentication-SessionId': Authentication.getSessionId()},
                         params: {
                             val: val
                         }
@@ -370,7 +367,7 @@ angular.module('ice.collection.controller', [])
 
                 case "group":
                     return $http.get('rest/groups/autocomplete', {
-                        headers: {'X-ICE-Authentication-SessionId': $cookies.get("sessionId")},
+                        headers: {'X-ICE-Authentication-SessionId': Authentication.getSessionId()},
                         params: {
                             token: val
                         }
@@ -1004,7 +1001,7 @@ angular.module('ice.collection.controller', [])
             }, {limit: 1000, status: 'IN_CART'});
         });
     })
-    .controller('CollectionDetailController', function ($scope, $cookies, $stateParams, $location, Util) {
+    .controller('CollectionDetailController', function ($scope, $stateParams, $location, Util) {
         $scope.hideAddCollection = true;
         $scope.showQueryCollectionFolder = false;
 
