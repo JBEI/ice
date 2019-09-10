@@ -14,6 +14,7 @@ import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
+import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
@@ -362,6 +363,15 @@ public class FolderContents {
         Account owner = DAOFactory.getAccountDAO().getByEmail(folder.getOwnerEmail());
         if (owner != null)
             details.setOwner(owner.toDataTransferObject());
+
+        // check for sample request information
+        if (folder.getType() == FolderType.SAMPLE) {
+            SampleCreateModel model = DAOFactory.getSampleCreateModelDAO().getByFolder(folder);
+            SampleRequest request = new SampleRequest();
+            request.setStatus(model.getStatus());
+            request.setId(model.getId());
+            details.setSampleRequest(request);
+        }
 
         // retrieve folder contents
         List<Entry> results = folderDAO.retrieveFolderContents(folderId, pageParameters, visibleOnly);

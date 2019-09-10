@@ -789,7 +789,13 @@ angular.module('ice.collection.controller', [])
         };
 
         $scope.markSampleFolder = function (approved) {
-            // "/rest/folders/" + $scope.folder.id +
+            const newStatus = approved ? "FULFILLED" : "REJECTED";
+            Util.update("rest/samples/requests/" + $scope.folder.sampleRequest.id + "?status=" + newStatus, {}, {isFolder: true}, function (result) {
+                if (result === undefined || result.id !== $scope.folder.sampleRequest.id)
+                    return;
+
+                $scope.folder.sampleRequest.status = result.status;
+            });
         };
 
         $scope.getDisplay = function (permission) {

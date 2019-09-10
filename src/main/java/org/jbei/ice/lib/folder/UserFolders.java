@@ -13,7 +13,6 @@ import org.jbei.ice.storage.model.SampleCreateModel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Represents a folder created or owned by a user
@@ -52,14 +51,11 @@ public class UserFolders {
 
         // get sample details
         if (folder.getType() == FolderType.SAMPLE) {
-            Optional<SampleCreateModel> optional = DAOFactory.getSampleCreateModelDAO().getByFolder(folder);
-            if (optional.isPresent()) {
-                SampleCreateModel model = optional.get();
-                SampleRequest request = new SampleRequest();
-                request.setId(model.getId());
-                request.setStatus(model.getStatus());
-                folderDetails.setSampleRequest(request);
-            }
+            SampleCreateModel model = DAOFactory.getSampleCreateModelDAO().getByFolder(folder);
+            SampleRequest request = new SampleRequest();
+            request.setId(model.getId());
+            request.setStatus(model.getStatus());
+            folderDetails.setSampleRequest(request);
         }
 
         return folderDetails;

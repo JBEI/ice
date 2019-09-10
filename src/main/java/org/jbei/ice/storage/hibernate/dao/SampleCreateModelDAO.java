@@ -10,7 +10,6 @@ import org.jbei.ice.storage.model.SampleCreateModel;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Data accessor object for {@link SampleCreateModel}
@@ -38,12 +37,12 @@ public class SampleCreateModelDAO extends HibernateRepository<SampleCreateModel>
         return currentSession().createQuery(query).uniqueResult();
     }
 
-    public Optional<SampleCreateModel> getByFolder(Folder folder) {
+    public SampleCreateModel getByFolder(Folder folder) {
         try {
             CriteriaQuery<SampleCreateModel> query = getBuilder().createQuery(SampleCreateModel.class);
             Root<SampleCreateModel> from = query.from(SampleCreateModel.class);
             query.where(getBuilder().equal(from.get("folder"), folder));
-            return currentSession().createQuery(query).uniqueResultOptional();
+            return currentSession().createQuery(query).uniqueResult();
         } catch (Exception he) {
             Logger.error(he);
             throw new DAOException(he);

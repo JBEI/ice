@@ -10,8 +10,7 @@
         </span>
 
         <span style="color: #ccc; width: 1px">&nbsp;|&nbsp;</span>
-        <span class="opacity_hover edit_icon" ng-click="openSampleCreationDialog()"
-              style="font-size: 13px;">
+        <span class="opacity_hover edit_icon" ng-click="openSampleCreationDialog()" style="font-size: 13px">
             <i class="fa fa-fw fa-flask" style="color: #555"></i> Create Samples
         </span>
     </span>
@@ -26,11 +25,10 @@
                 <li class="cursor_pointer font-90em">
                     <a ng-click="exportSampleFolder()">Export Data</a>
                 </li>
-                <li class="cursor_pointer font-90em">
-<!--                    folder.sampleRequest-->
+                <li class="cursor_pointer font-90em" ng-if="folder.sampleRequest.status=='PENDING'">
                     <a ng-click="markSampleFolder(false)">Declined</a>
                 </li>
-                <li class="cursor_pointer font-90em">
+                <li class="cursor_pointer font-90em" ng-if="folder.sampleRequest.status=='PENDING'">
                     <a ng-click="markSampleFolder(true)">Approved</a>
                 </li>
             </ul>

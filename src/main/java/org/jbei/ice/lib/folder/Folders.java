@@ -155,18 +155,17 @@ public class Folders {
         authorization.expectAdmin(userId);
 
         SampleCreateModelDAO createModelDAO = DAOFactory.getSampleCreateModelDAO();
-        Optional<SampleCreateModel> optional = createModelDAO.getByFolder(folder);
+        SampleCreateModel model = createModelDAO.getByFolder(folder);
         Account account = accountDAO.getByEmail(userId);
 
-        if (optional.isPresent()) {
+        if (model != null) {
             // update
-            SampleCreateModel model = optional.get();
             model.setStatus(approve ? SampleRequestStatus.APPROVED : SampleRequestStatus.REJECTED);
             model.setUpdated(new Date());
             createModelDAO.update(model);
         } else {
             // create new
-            SampleCreateModel model = new SampleCreateModel();
+            model = new SampleCreateModel();
             model.setAccount(account);
             model.setFolder(folder);
             model.setStatus(approve ? SampleRequestStatus.APPROVED : SampleRequestStatus.REJECTED);
