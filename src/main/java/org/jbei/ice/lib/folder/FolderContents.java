@@ -345,7 +345,7 @@ public class FolderContents {
         if (folder.getType() == FolderType.REMOTE)
             return getRemoteContents(userId, folder, pageParameters);
 
-        boolean visibleOnly = folder.getType() != FolderType.TRANSFERRED;
+        boolean visibleOnly = folder.getType() != FolderType.TRANSFERRED && !userId.equalsIgnoreCase(folder.getOwnerEmail()) && !folderAuthorization.isAdmin(userId);
         FolderDetails details = folder.toDataTransferObject();
 
         // all local entries at this point
