@@ -35,7 +35,10 @@ public enum ConfigurationKey implements IDataTransferModel {
     RESTRICT_PUBLIC_ENABLE("NO"),
     EMAILER(Type.CUSTOM.name()),
     GMAIL_APPLICATION_PASSWORD(""),
-    WEB_OF_REGISTRIES_MASTER("registry.jbei.org");
+    WEB_OF_REGISTRIES_MASTER("registry.jbei.org"),
+
+    // sample request config
+    SAMPLE_CREATE_APPROVAL_MESSAGE("");
 
     private String defaultValue;
 

@@ -1,6 +1,9 @@
 import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.predicate.PredicatesHandler;
+import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
+import io.undertow.server.handlers.builder.PredicatedHandlersParser;
 import io.undertow.server.handlers.resource.FileResourceManager;
 import io.undertow.servlet.Servlets;
 import io.undertow.servlet.api.DeploymentInfo;
@@ -35,11 +38,17 @@ public class DevelopmentServer {
                                 .addMapping("/rest/*")
                 );
 
+        // deploy servlet
         DeploymentManager manager = Servlets.defaultContainer().addDeployment(servletBuilder);
         manager.deploy();
+        HttpHandler servletHandler = manager.start();
+
+        PredicatesHandler handler = Handlers.predicates(PredicatedHandlersParser.parse(
+                "path-prefix('folders') or path-prefix('entry') or path-prefix('admin') and regex('/.+') -> rewrite('/')",
+                ClassLoader.getSystemClassLoader()), servletHandler);
 
         PathHandler path = Handlers.path(Handlers.redirect("/"))
-                .addPrefixPath("/", manager.start());
+                .addPrefixPath("/", handler);
 
         Undertow server = Undertow.builder()
                 .addHttpListener(8080, "localhost")

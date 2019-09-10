@@ -1,15 +1,17 @@
 package org.jbei.ice.lib.dto.folder;
 
 import org.jbei.ice.lib.account.AccountTransfer;
+import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.folder.AbstractFolder;
+
+import java.util.Objects;
 
 /**
  * Folder Transfer Object
  *
  * @author Hector Plahar
  */
-
 public class FolderDetails extends AbstractFolder {
 
     private String folderName;
@@ -22,6 +24,7 @@ public class FolderDetails extends AbstractFolder {
     private boolean canEdit;
     private FolderDetails parent;
     private RegistryPartner remotePartner;
+    private SampleRequest sampleRequest;
 
     public FolderDetails() {
         super();
@@ -61,10 +64,7 @@ public class FolderDetails extends AbstractFolder {
     }
 
     public void setType(FolderType type) {
-        if (type == null)
-            this.type = FolderType.PRIVATE;
-        else
-            this.type = type;
+        this.type = Objects.requireNonNullElse(type, FolderType.PRIVATE);
     }
 
     public AccountTransfer getOwner() {
@@ -113,5 +113,13 @@ public class FolderDetails extends AbstractFolder {
 
     public void setRemotePartner(RegistryPartner remotePartner) {
         this.remotePartner = remotePartner;
+    }
+
+    public SampleRequest getSampleRequest() {
+        return sampleRequest;
+    }
+
+    public void setSampleRequest(SampleRequest sampleRequest) {
+        this.sampleRequest = sampleRequest;
     }
 }

@@ -94,8 +94,4 @@ public class FolderSampleCSV {
 
         return "";
     }
-
-    public static void main(String[] args) {
-        System.out.println((char) (((int) 'A' + 1)));
-    }
 }

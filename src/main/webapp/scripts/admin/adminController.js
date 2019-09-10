@@ -4,12 +4,21 @@ angular.module('ice.admin.controller', [])
     .controller('AdminController', function ($rootScope, $location, $scope, $stateParams, AdminSettings, Util, $interval) {
         $scope.luceneRebuild = undefined;
         $scope.blastRebuild = undefined;
-        var lucenePromise;
-        var blastPromise;
+        let lucenePromise;
+        let blastPromise;
+        const menuOption = $stateParams.option;
+        const menuOptions = $scope.adminMenuOptions = AdminSettings.getMenuOptions();
 
-        var getLuceneIndexStatus = function () {
+        //
+        // init : reset menu options
+        //
+        angular.forEach(menuOptions, function (details) {
+            details.selected = (details.id === menuOption && menuOption !== undefined);
+        });
+
+        const getLuceneIndexStatus = function () {
             Util.get("rest/search/indexes/LUCENE/status", function (result) {
-                if (result.total == 0)
+                if (result.total === 0)
                     $interval.cancel(lucenePromise);
                 $scope.luceneRebuild = {done: result.done, total: result.total};
             }, {}, function (error) {
@@ -19,7 +28,7 @@ angular.module('ice.admin.controller', [])
         };
         lucenePromise = $interval(getLuceneIndexStatus, 2000);
 
-        var getBlastStatus = function () {
+        const getBlastStatus = function () {
             Util.get("rest/search/indexes/BLAST/status", function (result) {
                 if (!result.total)
                     $interval.cancel(blastPromise);
@@ -43,7 +52,7 @@ angular.module('ice.admin.controller', [])
         $scope.saveEmailConfig = function () {
             $scope.submitSetting({key: "EMAILER", value: $scope.emailConfig.type});
 
-            if ($scope.emailConfig.type == "GMAIL") {
+            if ($scope.emailConfig.type === "GMAIL") {
                 $scope.submitSetting({key: "GMAIL_APPLICATION_PASSWORD", value: $scope.emailConfig.pass});
                 $scope.submitSetting({key: "SMTP_HOST", value: ""});
             } else {
@@ -57,32 +66,33 @@ angular.module('ice.admin.controller', [])
         $scope.getSetting = function () {
             $scope.generalSettings = [];
             $scope.emailSettings = [];
+            $scope.sampleRequestSettings = [];
             $scope.emailConfig = {type: "", smtp: "", pass: "", edit: false, showEdit: false, showPass: false};
 
             // retrieve site wide settings
             Util.list('rest/config', function (result) {
                 angular.forEach(result, function (setting) {
-                    if (AdminSettings.generalSettingKeys().indexOf(setting.key) != -1) {
+                    if (AdminSettings.generalSettingKeys().indexOf(setting.key) !== -1) {
                         $scope.generalSettings.push({
                             'originalKey': setting.key,
                             'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
                             'value': setting.value,
                             'editMode': false,
-                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) != -1,
+                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) !== -1,
                             'canAutoInstall': AdminSettings.canAutoInstall(setting.key)
                         });
                     }
 
-                    if (AdminSettings.getEmailKeys().indexOf(setting.key) != -1) {
+                    if (AdminSettings.getEmailKeys().indexOf(setting.key) !== -1) {
                         $scope.emailSettings.push({
                             'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
                             'value': setting.value,
                             'editMode': false,
-                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) != -1
+                            'isBoolean': AdminSettings.getBooleanKeys().indexOf(setting.key) !== -1
                         });
                     }
 
-                    if (AdminSettings.getEmailTypeKeys().indexOf(setting.key) != -1) {
+                    if (AdminSettings.getEmailTypeKeys().indexOf(setting.key) !== -1) {
                         switch (setting.key) {
                             case 'EMAILER':
                                 $scope.emailConfig.type = setting.value;
@@ -100,9 +110,6 @@ angular.module('ice.admin.controller', [])
                 });
             });
         };
-
-        var menuOption = $stateParams.option;
-        var menuOptions = $scope.adminMenuOptions = AdminSettings.getMenuOptions();
 
         $scope.showSelection = function (index) {
             angular.forEach(menuOptions, function (details) {
@@ -165,7 +172,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.submitBooleanSetting = function (booleanSetting) {
-            if (booleanSetting.value == undefined || booleanSetting.value.toLowerCase() === "no")
+            if (booleanSetting.value === undefined || booleanSetting.value.toLowerCase() === "no")
                 booleanSetting.value = "yes";
             else
                 booleanSetting.value = "no";
@@ -179,7 +186,7 @@ angular.module('ice.admin.controller', [])
             // put to /rest/config/value
             Util.update("/rest/config/value", {key: setting.originalKey}, {}, function (result) {
                 console.log(result);
-                if (result.key == setting.originalKey)
+                if (result.key === setting.originalKey)
                     setting.value = result.value;
                 $scope.autoInstalling = undefined;
             }, function (error) {
@@ -187,8 +194,7 @@ angular.module('ice.admin.controller', [])
             });
         }
     })
-    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookies, $uibModal, Util,
-                                                          Authentication) {
+    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookies, $uibModal, Util, AdminSettings) {
         $rootScope.error = undefined;
 
         $scope.selectOptions = ['ALL', 'PENDING', 'FULFILLED', 'REJECTED'];
@@ -251,7 +257,7 @@ angular.module('ice.admin.controller', [])
 
         $scope.requestSamples = function () {
             $scope.loadingPage = true;
-            var params = angular.copy($scope.params);
+            const params = angular.copy($scope.params);
 
             Util.get("rest/samples/requests", function (result) {
                 $scope.sampleRequests = result;
@@ -287,14 +293,68 @@ angular.module('ice.admin.controller', [])
             $scope.requestSamples();
         };
 
-        $scope.updateStatus = function (request, newStatus) {
-            Util.update("rest/samples/requests/" + request.id + "?status=" + newStatus, {}, {}, function (result) {
-                if (result === undefined || result.id != request.id)
+        $scope.exportSampleFolder = function (folderId) {
+            const clickEvent = new MouseEvent("click", {
+                "view": window,
+                "bubbles": true,
+                "cancelable": false
+            });
+
+            Util.download("/rest/folders/" + folderId + "/file").$promise.then(function (result) {
+                let url = URL.createObjectURL(new Blob([result.data]));
+                let a = document.createElement('a');
+                a.href = url;
+                a.download = result.filename();
+                a.target = '_blank';
+                a.dispatchEvent(clickEvent);
+            });
+        };
+
+        $scope.folderRequestPageChanged = function () {
+            Util.get("rest/samples/requests", function (result) {
+                $scope.folderRequests.available = result.count;
+                $scope.folderRequests.results = result.requests;
+            }, {isFolder: true});
+        };
+
+        $scope.initFolderRequests = function () {
+            $scope.folderRequests = {available: 0, results: [], params: {limit: 15, currentPage: 1}};
+            $scope.folderRequestPageChanged();
+        };
+
+        $scope.retrieveSampleSettings = function () {
+            Util.list("rest/samples/requests/settings", function (result) {
+                angular.forEach(result, function (setting) {
+                    if (AdminSettings.getSampleRequestKeys().indexOf(setting.key) !== -1) {
+                        $scope.sampleRequestSettings.push({
+                            'originalKey': setting.key,
+                            'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
+                            'value': setting.value,
+                            'editMode': false,
+                            'type': AdminSettings.getKeyType(setting.key)
+                        });
+                    }
+                });
+            }, {}, function (error) {
+                console.log(error);
+            })
+        };
+
+        $scope.updateStatus = function (request, newStatus, isFolder) {
+            Util.update("rest/samples/requests/" + request.id + "?status=" + newStatus, {}, {isFolder: isFolder ? isFolder : false}, function (result) {
+                if (result === undefined || result.id !== request.id)
                     return;
 
-                var i = $scope.sampleRequests.requests.indexOf(request);
-                if (i != -1) {
-                    $scope.sampleRequests.requests[i].status = result.status;
+                if (!isFolder) {
+                    let i = $scope.sampleRequests.requests.indexOf(request);
+                    if (i !== -1) {
+                        $scope.sampleRequests.requests[i].status = result.status;
+                    }
+                } else {
+                    const i = $scope.folderRequests.results.indexOf(request);
+                    if (i !== -1) {
+                        $scope.folderRequests.results[i].status = result.status;
+                    }
                 }
             });
         };

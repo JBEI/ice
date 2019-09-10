@@ -2,7 +2,7 @@ package org.jbei.ice.lib.utils;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 
 import java.io.*;
@@ -60,9 +60,8 @@ public class Utils {
      *
      * @param bytes bytes to convert.
      * @return String of Hex representation
-     * @throws UnsupportedEncodingException
      */
-    public static String getHexString(byte[] bytes) throws UnsupportedEncodingException {
+    private static String getHexString(byte[] bytes) {
         byte[] HEX_CHAR_TABLE = {(byte) '0', (byte) '1', (byte) '2', (byte) '3', (byte) '4',
                 (byte) '5', (byte) '6', (byte) '7', (byte) '8', (byte) '9', (byte) 'a', (byte) 'b',
                 (byte) 'c', (byte) 'd', (byte) 'e', (byte) 'f'
@@ -76,7 +75,7 @@ public class Utils {
             hex[index++] = HEX_CHAR_TABLE[v >>> 4];
             hex[index++] = HEX_CHAR_TABLE[v & 0xF];
         }
-        return new String(hex, "ASCII");
+        return new String(hex, StandardCharsets.US_ASCII);
     }
 
     /**
@@ -101,25 +100,14 @@ public class Utils {
      * @return Hex digest of give string.
      */
     public static String encryptSHA(String string) {
-        return encrypt(string, "SHA-1");
-    }
-
-    /**
-     * Calculate the message digest of the given message string using the given algorithm.
-     *
-     * @param string    Plain text message.
-     * @param algorithm Algorithm to be used.
-     * @return Hex digest of the given string.
-     */
-    private static String encrypt(String string, String algorithm) {
         String result = "";
 
         try {
-            MessageDigest digest = MessageDigest.getInstance(algorithm);
-            digest.update(string.getBytes("UTF-8"));
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            digest.update(string.getBytes(StandardCharsets.UTF_8));
             byte[] hashed = digest.digest();
             result = Utils.getHexString(hashed);
-        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+        } catch (NoSuchAlgorithmException e) {
             Logger.error(e);
         }
 
@@ -140,7 +128,7 @@ public class Utils {
     }
 
     public static String getConfigValue(ConfigurationKey key) {
-        ConfigurationController controller = new ConfigurationController();
+        ConfigurationSettings controller = new ConfigurationSettings();
         String value = controller.getPropertyValue(key);
         if (value != null)
             return value;

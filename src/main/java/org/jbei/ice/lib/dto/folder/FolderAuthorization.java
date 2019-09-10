@@ -58,7 +58,7 @@ public class FolderAuthorization extends Authorization<Folder> {
         if (account == null)
             return false;
 
-        if (folder.getType() == FolderType.SAMPLE)
+        if (folder.getType() == FolderType.SAMPLE && !isAdmin(userId))
             return false;
 
         if (super.canWrite(userId, folder))

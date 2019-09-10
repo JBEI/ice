@@ -1,7 +1,7 @@
 package org.jbei.ice;
 
 import org.jbei.ice.lib.account.AccountController;
-import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.entry.sequence.annotation.AutoAnnotationBlastDbBuildTask;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.GroupController;
@@ -29,8 +29,8 @@ public class ApplicationInitialize {
         accountController.createAdminAccount();
 
         // check for and create default settings
-        ConfigurationController configurationController = new ConfigurationController();
-        configurationController.initPropertyValues();
+        ConfigurationSettings settings = new ConfigurationSettings();
+        settings.initPropertyValues();
 
         // check blast
         RebuildBlastIndexTask task = new RebuildBlastIndexTask(false);
