@@ -31,11 +31,11 @@ Command line installation steps (linux environment):
         git clone https://github.com/JBEI/ice.git ./ice
         cd ice
         
-* Build ICE. This may take a few minutes to download additional dependencies.
+* Build ICE. This may take a few minutes to download additional dependencies
 
         mvn clean install -DskipTests=true
         
-  If you run into problems at this step, make sure maven is using Java version 12 by running.
+  If you run into problems at this step, make sure maven is using Java version 12 by running
   
         mvn -version
         
@@ -53,7 +53,7 @@ Command line installation steps (linux environment):
         
   Where "ice-{version-number}" is the version of ICE that was cloned. e.g. "ice-5.6.0"
 
-* Access the application at [http://localhost:8080](https://localhost:8080) and login using username and password "Administrator"
+* Access the application at [http://localhost:8080](http://localhost:8080) and login using username and password "Administrator"
 
 * Ctrl + C to stop the application
 
