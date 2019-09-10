@@ -2,7 +2,7 @@ package org.jbei.ice.lib.access;
 
 import org.jbei.ice.lib.AccountCreator;
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
@@ -39,7 +39,7 @@ public class RemoteAccessTest {
 
     @Test
     public void testAdd() throws Exception {
-        new ConfigurationController().setPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES, "true");
+        new ConfigurationSettings().setPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES, "true");
 
         // this tests the scenario where a WoR partner shares a remote resource (folder or entry) with a user
         // on another instance

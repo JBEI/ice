@@ -29,11 +29,9 @@ public class BulkZipUpload extends BulkCSVUpload {
 
     private final Path zipFilePath;
     private final EntryType addType;
-    private final String userId;
 
-    public BulkZipUpload(String userId, Path path, EntryType addType) {
+    BulkZipUpload(String userId, Path path, EntryType addType) {
         super(userId, path, addType);
-        this.userId = userId;
         this.zipFilePath = path;
         this.addType = addType;
     }

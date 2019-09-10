@@ -215,7 +215,7 @@ public class EntryCreator extends HasEntry {
 
                 // try again with label and type
                 Optional<CustomEntryFieldModel> optional = dao.getLabelForType(customEntryField.getEntryType(), customEntryField.getLabel());
-                if (!optional.isPresent()) {
+                if (optional.isEmpty()) {
                     Logger.error("Could not retrieve custom field with id " + customEntryField.getId());
                     continue;
                 }

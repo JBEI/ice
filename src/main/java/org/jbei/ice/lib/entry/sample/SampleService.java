@@ -44,7 +44,7 @@ public class SampleService extends HasEntry {
         sampleAuthorization = new SampleAuthorization();
     }
 
-    protected Storage createStorage(String userId, String name, SampleType sampleType) {
+    Storage createStorageObject(String userId, String name, SampleType sampleType) {
         Storage storage = new Storage();
         storage.setName(sampleType.name());
         storage.setIndex(name);
@@ -80,12 +80,12 @@ public class SampleService extends HasEntry {
             Storage currentStorage;
             switch (mainLocation.getType()) {
                 case ADDGENE:
-                    currentStorage = createStorage(depositor, mainLocation.getDisplay(), mainLocation.getType());
+                    currentStorage = createStorageObject(depositor, mainLocation.getDisplay(), mainLocation.getType());
                     currentStorage = storageDAO.create(currentStorage);
                     break;
 
                 case GENSCRIPT:
-                    currentStorage = createStorage(depositor, mainLocation.getDisplay(), mainLocation.getType());
+                    currentStorage = createStorageObject(depositor, mainLocation.getDisplay(), mainLocation.getType());
                     currentStorage.setName(mainLocation.getName());
                     currentStorage = storageDAO.create(currentStorage);
                     break;
@@ -101,7 +101,7 @@ public class SampleService extends HasEntry {
                 default:
                     currentStorage = storageDAO.get(mainLocation.getId());
                     if (currentStorage == null) {
-                        currentStorage = createStorage(userId, mainLocation.getDisplay(), mainLocation.getType());
+                        currentStorage = createStorageObject(userId, mainLocation.getDisplay(), mainLocation.getType());
                         currentStorage = storageDAO.create(currentStorage);
                     }
 
@@ -130,7 +130,7 @@ public class SampleService extends HasEntry {
      * @param mainLocation    96 well plate location
      * @return sample storage with a complete hierarchy or null
      */
-    protected Storage createPlate96Location(String sampleDepositor, StorageLocation mainLocation) {
+    private Storage createPlate96Location(String sampleDepositor, StorageLocation mainLocation) {
         // validate: expected format is [PLATE96, WELL, (optional - TUBE)]
         StorageLocation well = mainLocation.getChild();
         StorageLocation tube;
@@ -176,7 +176,7 @@ public class SampleService extends HasEntry {
                 }
             }
         } else {
-            currentStorage = createStorage(sampleDepositor, mainLocation.getDisplay(), mainLocation.getType());
+            currentStorage = createStorageObject(sampleDepositor, mainLocation.getDisplay(), mainLocation.getType());
             currentStorage = storageDAO.create(currentStorage);
         }
 
@@ -185,24 +185,15 @@ public class SampleService extends HasEntry {
         return currentStorage;
     }
 
-    protected Storage createShelfStorage(String depositor, StorageLocation shelf) {
+    private Storage createShelfStorage(String depositor, StorageLocation shelf) {
         // expecting [SHELF, BOX, WELL, TUBE]. ultimately the children of the main location
-        try {
-            StorageLocation box = shelf.getChild();
-            StorageLocation well = box.getChild();
-            well.getChild();
-        } catch (Exception e) {
-            return null;
-        }
 
         // should contain type and therefore allow for general hierarchy and more intelligence
         // where it checks if the location is already taken
 
         // create storage locations
-        Storage currentStorage = createStorage(depositor, shelf.getDisplay(), shelf.getType());
-
+        Storage currentStorage = createStorageObject(depositor, shelf.getDisplay(), shelf.getType());
         currentStorage = createChildrenStorage(shelf, storageDAO.create(currentStorage), depositor);
-
         return currentStorage;
     }
 
@@ -214,12 +205,12 @@ public class SampleService extends HasEntry {
      * @param depositor       userID - unique identifier for user performing action
      * @return updated storage
      */
-    protected Storage createChildrenStorage(StorageLocation currentLocation, Storage currentStorage, String depositor) {
+    private Storage createChildrenStorage(StorageLocation currentLocation, Storage currentStorage, String depositor) {
         while (currentLocation.getChild() != null) {
             StorageLocation child = currentLocation.getChild();
             Storage childStorage = storageDAO.get(child.getId());
             if (childStorage == null) {
-                childStorage = createStorage(depositor, child.getDisplay(), child.getType());
+                childStorage = createStorageObject(depositor, child.getDisplay(), child.getType());
                 childStorage.setParent(currentStorage);
                 childStorage = storageDAO.create(childStorage);
             }
@@ -271,7 +262,7 @@ public class SampleService extends HasEntry {
                 location.setType(SampleType.GENERIC);
                 location.setDisplay(sample.getLabel());
                 generic.setLocation(location);
-                generic = setAccountInfo(generic, sample.getDepositor());
+                setAccountInfo(generic, sample.getDepositor());
                 generic.setCanEdit(sampleAuthorization.canWrite(userId, sample));
                 samples.add(generic);
                 continue;
@@ -316,7 +307,7 @@ public class SampleService extends HasEntry {
                 partSample.setCanEdit(false);
             }
 
-            partSample = setAccountInfo(partSample, sample.getDepositor());
+            setAccountInfo(partSample, sample.getDepositor());
             samples.add(partSample);
         }
 
@@ -336,7 +327,7 @@ public class SampleService extends HasEntry {
         return plateSamples;
     }
 
-    protected PartSample setAccountInfo(PartSample partSample, String email) {
+    private void setAccountInfo(PartSample partSample, String email) {
         Account account = accountDAO.getByEmail(email);
         if (account != null)
             partSample.setDepositor(account.toDataTransferObject());
@@ -345,7 +336,6 @@ public class SampleService extends HasEntry {
             accountTransfer.setEmail(email);
             partSample.setDepositor(accountTransfer);
         }
-        return partSample;
     }
 
     /**
@@ -423,9 +413,7 @@ public class SampleService extends HasEntry {
 
     public List<StorageLocation> getStorageLocations(String userId, SampleType type, int offset, int limit) {
         sampleAuthorization.expectAdmin(userId);
-        List<StorageLocation> locations = new ArrayList<>();
         List<Storage> storages = storageDAO.get(type, offset, limit);
-        locations.addAll(storages.stream().map(Storage::toDataTransferObject).collect(Collectors.toList()));
-        return locations;
+        return storages.stream().map(Storage::toDataTransferObject).collect(Collectors.toList());
     }
 }

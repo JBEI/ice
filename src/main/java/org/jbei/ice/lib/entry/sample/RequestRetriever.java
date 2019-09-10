@@ -3,10 +3,12 @@ package org.jbei.ice.lib.entry.sample;
 import com.opencsv.CSVWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.StorageLocation;
+import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.sample.*;
 import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.utils.Utils;
@@ -17,6 +19,7 @@ import org.jbei.ice.storage.hibernate.dao.RequestDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Request;
+import org.jbei.ice.storage.model.SampleCreateModel;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -89,6 +92,34 @@ public class RequestRetriever {
         return samples;
     }
 
+    public UserSamples getFolderRequests(String userId, int start, int limit, String sort, boolean asc) {
+        // admin feature
+        if (!new AccountController().isAdministrator(userId))
+            throw new PermissionException("Admin privileges required for this action");
+
+        List<SampleCreateModel> models = DAOFactory.getSampleCreateModelDAO().list(start, limit, sort, asc);
+        UserSamples result = new UserSamples();
+
+        for (SampleCreateModel model : models) {
+            SampleRequest request = new SampleRequest();
+            request.setId(model.getId());
+            request.setStatus(model.getStatus());
+
+            FolderDetails details = model.getFolder().toDataTransferObject();
+            request.setFolderDetails(details);
+
+            request.setRequester(model.getAccount().toDataTransferObject());
+            request.setRequestTime(model.getRequested().getTime());
+            request.setUpdateTime(model.getUpdated().getTime());
+            result.getRequests().add(request);
+        }
+
+        long available = DAOFactory.getSampleCreateModelDAO().availableCount();
+        result.setCount(Long.valueOf(available).intValue());
+
+        return result;
+    }
+
     public UserSamples getRequests(String userId, int start, int limit, String sort, boolean asc,
                                    List<SampleRequestStatus> status, String filter) {
         Account account = DAOFactory.getAccountDAO().getByEmail(userId);
@@ -130,15 +161,37 @@ public class RequestRetriever {
         }
     }
 
-    public SampleRequest updateStatus(String userId, long requestId, SampleRequestStatus newStatus) {
+    public SampleRequest updateStatus(String userId, long requestId, SampleRequestStatus newStatus, boolean isFolder) {
+        if (!new AccountController().isAdministrator(userId)) {
+            throw new PermissionException("Admin privileges required for this action");
+        }
+
+        if (isFolder) {
+            return updateFolderRequest(requestId, newStatus);
+        }
+
+        return updateSampleRequest(requestId, newStatus);
+    }
+
+    private SampleRequest updateFolderRequest(long requestId, SampleRequestStatus newStatus) {
+        SampleCreateModel model = DAOFactory.getSampleCreateModelDAO().get(requestId);
+        if (model == null)
+            return null;
+
+        model.setStatus(newStatus);
+        model.setUpdated(new Date());
+        model = DAOFactory.getSampleCreateModelDAO().update(model);
+        SampleRequest request = new SampleRequest();
+        request.setId(model.getId());
+        request.setUpdateTime(model.getUpdated().getTime());
+        request.setStatus(model.getStatus());
+        return request;
+    }
+
+    private SampleRequest updateSampleRequest(long requestId, SampleRequestStatus newStatus) {
         Request request = dao.get(requestId);
         if (request == null)
             return null;
-
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        if (!request.getAccount().getEmail().equalsIgnoreCase(userId) && account.getType() != AccountType.ADMIN) {
-            throw new PermissionException("No permissions for request");
-        }
 
         if (request.getStatus() == newStatus)
             return request.toDataTransferObject();

@@ -13,7 +13,9 @@ public enum SampleRequestStatus implements IDataTransferModel {
 
     PENDING,    // request has been submitted and is pending action from archivist
 
-    FULFILLED,   // archivist has made sample available to user
+    APPROVED,   // request has been approved
+
+    FULFILLED,  // request tasks have been completed
 
     REJECTED    // rejected by the archivist. Sample will not be delivered
 }
