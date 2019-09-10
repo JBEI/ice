@@ -2,7 +2,7 @@ package org.jbei.ice.services.rest;
 
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.Setting;
 
 import javax.ws.rs.*;
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 @Path("/config")
 public class ConfigResource extends RestResource {
 
-    private ConfigurationController controller = new ConfigurationController();
+    private ConfigurationSettings controller = new ConfigurationSettings();
 
     /**
      * Retrieves list of system settings available

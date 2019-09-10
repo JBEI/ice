@@ -126,6 +126,7 @@ public class HibernateUtil {
                 configuration.addAnnotatedClass(CustomEntryFieldOptionModel.class);
                 configuration.addAnnotatedClass(CustomEntryFieldValueModel.class);
                 configuration.addAnnotatedClass(SequenceHistoryModel.class);
+                configuration.addAnnotatedClass(SampleCreateModel.class);
 
                 sessionFactory = configuration.buildSessionFactory(serviceRegistry);
             } catch (Throwable e) {

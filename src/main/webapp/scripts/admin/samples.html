@@ -1,0 +1,318 @@
+<div ng-controller="AdminSampleRequestController" style="height: 970px">
+    <div class="pad_top">
+        <button type="button" class="ice-button" ng-click="exportSelectedSamples()"
+                ng-disabled="!sampleRequests.requests.length">Export
+        </button>
+        <button type="button" ng-click="searchSampleLocations()" class="ice-button">
+            Search Sample Locations
+        </button>
+        <div class="pull-right">
+            <button type="button" class="ice-button" ng-click="sanitizeCsv()">
+                Sanitize
+            </button>
+
+            <button type="button" class="ice-button" style="margin-right: 28px" ng-click="importSamples()">
+                <span class="glyphicon glyphicon-arrow-up"></span>
+                Import Samples
+            </button>
+        </div>
+    </div>
+
+    <div class="pad_top" ng-init="getSetting()" style="width: 98%">
+        <uib-tabset>
+            <uib-tab>
+                <uib-tab-heading><i class="fa fa-fw fa-shopping-cart"></i> Sample Requests</uib-tab-heading>
+
+                <div class="pad_top" ng-if="sampleRequests.requests && !sampleRequests.requests.length">
+                    <i class="text-muted">No sample requests available</i>
+                </div>
+
+                <div class="pad_top">
+                    <div ng-if='!sampleRequests'><img src="img/loader-mini.gif"> Loading...</div>
+
+                    <table cellspacing="0" style="width: 98%"
+                           ng-if='sampleRequests && sampleRequests.requests.length > 0'
+                           class="table table-responsive table-condensed table-hover table-border-bottom font-95em"
+                           ng-class="{'opacity_4':loadingPage}">
+                        <thead>
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th style="width: 80px;" class="entry-table-header">TYPE</th>
+                            <th style="width: 140px;" class="entry-table-header">Entry</th>
+                            <th class="entry-table-header" style="width: 85px">
+                                <span ng-click="sort('type')">Type</span>
+                                <i ng-show="params.sort=='type'" class="fa"
+                                   ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
+                            </th>
+                            <th class="entry-table-header">Location</th>
+                            <th style="width: 85px" class="entry-table-header">
+                                <i class="fa fa-filter font-12em opacity_hover" uib-tooltip="Filter Status"
+                                   ng-class="{'brown': params.status.length != 4}" popover-trigger="click"
+                                   popover-placement="bottom" uib-popover-template="samplesFilterTemplate"></i>
+                                Status
+                            </th>
+                            <th>&nbsp;</th>
+                            <th class="entry-table-header">
+                                <i class="fa fa-filter font-12em opacity_hover" uib-tooltip="Filter Requester Name"
+                                   ng-class="{'brown': params.filter.length}" popover-trigger="click"
+                                   popover-placement="bottom"
+                                   uib-popover-template="samplesRequesterNameTemplate"></i>
+
+                                <span ng-click="sort('requested')">Requested</span>
+                                <i ng-show="params.sort=='requested'" class="fa"
+                                   ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="request in sampleRequests.requests" class="highlight-row-icons">
+                            <td>
+                                <i class="fa fa-fw cursor_pointer" ng-class="{'fa-square-o': selectedRequests.indexOf(request) == -1,
+                     'fa-check-square-o': selectedRequests.indexOf(request) != -1}"
+                                   ng-click="selectRequest(request)"></i>
+                            </td>
+                            <td class="entry-type">{{request.partData.type}}<br>
+                                <span class="font-weight: normal">{{getBSLLabel(request.partData.bioSafetyLevel)}}</span>
+                            </td>
+                            <td>
+                                <a ng-href="entry/{{request.partData.id}}">{{request.partData.name}}</a>
+                                <br>
+                                <small>{{request.plateDescription}}</small>
+                            </td>
+                            <td>
+                                <div style="margin-left: 4px">
+                        <span ng-if="request.requestType==='LIQUID_CULTURE'">
+                            <i class="fa fa-fw fa-flask cursor_default font-12em" uib-tooltip="Liquid Culture"></i>
+                        </span>
+                                    <span ng-if="request.requestType!=='LIQUID_CULTURE'">
+                            <i class="fa fa-fw fa-circle-o cursor_default font-12em"
+                               uib-tooltip="Streak on Agar Plate"></i>
+                        </span>
+                                </div>
+
+                                <div class="small" ng-if="request.growthTemperature"> {{request.growthTemperature}}
+                                    &deg;C
+                                </div>
+                            </td>
+                            <td>
+                                <div ng-if="request.location[0].location.type==='SHELF'">
+                                    <strong style="color: #a52a2a;">SHELF
+                                        {{request.location[0].location.display}}</strong><br>
+                                    Box
+                                    <small class="no_wrap">{{request.location[0].location.child.display ||
+                                        "&nbsp;"}}</small>
+                                    /
+                                    Well
+                                    <small class="no_wrap">{{request.location[0].location.child.child.display || "&nbsp;"}}</small>
+                                    /
+                                    Tube
+                                    <small class="no_wrap">{{request.location[0].location.child.child.child.display || "&nbsp;"}}
+                                    </small>
+                                </div>
+
+                                <div ng-if="request.location[0].location.type === 'PLATE96'"
+                                     ng-init="mainSample = getPrimarySample(request.location)">
+                                    <strong style="color: #a52a2a;">96 WELL
+                                        PLATE{{mainSample.location.display}}</strong>
+                                    <br>
+                                    Well
+                                    <small class="no_wrap">{{mainSample.location.child.display || "&nbsp;"}}</small>
+                                    /
+                                    Tube
+                                    <small class="no_wrap">{{mainSample.location.child.child.display ||
+                                        "&nbsp;"}}</small>
+                                </div>
+
+                                <div ng-if="request.location[0].location.type === 'GENERIC'">
+                                    <strong style="color: #a52a2a;">GENERIC </strong><br>
+                                    <small class="no_wrap">{{request.location[0].location.display || "&nbsp;"}}</small>
+                                </div>
+                            </td>
+
+                            <td style="vertical-align: middle; width:65px; white-space:nowrap"> &nbsp;
+                                <span class="label" style="font-size: 85%" ng-class="{
+                        'ice-label-success':request.status==='FULFILLED',
+                        'label-default': request.status==='PENDING',
+                        'ice-label-danger': request.status==='REJECTED',
+                        'ice-label-info': request.status==='IN_CART'}">{{request.status | capitalize}}
+                    </span>
+                            </td>
+                            <td style="width: 80px; vertical-align: middle">
+                                <div ng-if="request.status==='PENDING'">
+                                    <i uib-tooltip="Fulfilled" class="fa fa-check font-14em green action"
+                                       ng-click="updateStatus(request, 'FULFILLED')"></i>
+                                    <i uib-tooltip="Reject" class="fa fa-ban font-14em red action"
+                                       ng-click="updateStatus(request, 'REJECTED')"></i>
+                                </div>
+                            </td>
+                            <td>
+                                {{request.requestTime | date:'MMM dd, yyyy hh:mm a'}} <br>
+                                <a ng-href="profile/{{request.requester.id}}" class="no_wrap small">{{request.requester.firstName}}
+                                    {{request.requester.lastName}}
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div ng-if='sampleRequests && sampleRequests.requests.length > 0'>
+                    <div class="col-md-6" style="padding-left: 0">
+                        <ul uib-pagination total-items="sampleRequests.count" ng-change="sampleRequestPageChanged()"
+                            ng-model="params.currentPage" max-size="maxSize"
+                            class="pagination-sm" items-per-page="15" boundary-links="true"></ul>
+                    </div>
+                    <div class="col-md-4" style="margin-top: 20px;"><strong class="small">
+                        <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
+                        {{pageCounts(params.currentPage, sampleRequests.count, params.limit)}}</strong>
+                    </div>
+
+                    <div class="col-md-2" style="margin-top: 25px;">
+                        <small class="text-muted pull-right">Show:
+                            <select ng-change="requestSamples()" ng-model="params.limit"
+                                    ng-options="opt for opt in params.hstep"></select></small>
+                    </div>
+                </div>
+
+                <br><br><br> <br><br><br><br>
+            </uib-tab>
+
+            <uib-tab select="initFolderRequests()">
+                <uib-tab-heading><i class="fa fa-fw fa-folder"></i> Folder Requests</uib-tab-heading>
+
+                <div class="pad_top">
+                    <table style="width: 98%"
+                           ng-if='folderRequests && folderRequests.results.length'
+                           class="table table-responsive table-condensed table-hover table-border-bottom font-95em"
+                           ng-class="{'opacity_4':folderRequests.loadingPage}">
+                        <thead>
+                        <tr>
+                            <th style="width: 250px;" class="entry-table-header">Folder</th>
+                            <th style="width: 120px;" class="entry-table-header">Status</th>
+                            <th style="width: 250px;" class="entry-table-header">Actions</th>
+                            <th class="entry-table-header" style="width: 150px">
+                                <span ng-click="sort('type')">Requested</span>
+                                <i ng-show="params.sort=='type'" class="fa"
+                                   ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="request in folderRequests.results" class="highlight-row-icons">
+                            <td>
+                                <a ng-href="folders/{{request.folderDetails.id}}">{{request.folderDetails.folderName}}</a>
+                                <br>
+                                <small><b>{{request.folderDetails.count}}</b> entries</small>
+                            </td>
+                            <td style="vertical-align: middle; width:65px; white-space:nowrap"> &nbsp;
+                                <span class="label" style="font-size: 85%" ng-class="{
+                                    'ice-label-success':request.status==='FULFILLED',
+                                    'label-default': request.status==='PENDING',
+                                    'ice-label-danger': request.status==='REJECTED',
+                                    'ice-label-info': request.status==='IN_CART'}">{{request.status | capitalize}}
+                                </span>
+                            </td>
+                            <td style="width: 80px; vertical-align: middle">
+                                <button uib-tooltip="Pending" ng-if="request.status!=='PENDING'"
+                                        class="btn btn-xs btn-primary fa fa-hourglass-2 opacity_hover"
+                                        ng-click="updateStatus(request, 'PENDING', true)"></button>
+                                <button uib-tooltip="Accept" ng-if="request.status!=='FULFILLED'"
+                                        class="btn btn-xs btn-success fa fa-check green opacity_hover"
+                                        ng-click="updateStatus(request, 'FULFILLED', true)"></button>
+                                <button uib-tooltip="Reject" ng-if="request.status!=='REJECTED'"
+                                        class="fa btn btn-xs btn-danger fa-ban opacity_hover"
+                                        ng-click="updateStatus(request, 'REJECTED', true)"></button>
+                                <button uib-tooltip="Export Data"
+                                        ng-click="exportSampleFolder(request.folderDetails.id)"
+                                        class="fa fa-cloud-download btn btn-xs btn-default opacity_hover"></button>
+                            </td>
+                            <td>
+                                {{request.requestTime | date:'MMM dd, yyyy hh:mm a'}} <br>
+                                <a ng-href="profile/{{request.requester.id}}" class="no_wrap small">
+                                    {{request.requester.firstName}} {{request.requester.lastName}}
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div ng-if='folderRequests && folderRequests.results.length'>
+                    <div class="col-md-6" style="padding-left: 0">
+                        <ul uib-pagination total-items="folderRequests.available" ng-change="folderRequestPageChanged()"
+                            ng-model="folderRequests.params.currentPage" max-size="5"
+                            class="pagination-sm" items-per-page="15" boundary-links="true"></ul>
+                    </div>
+                    <div class="col-md-4" style="margin-top: 20px;"><strong class="small">
+                        <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
+                        {{pageCounts(folderRequests.params.currentPage, folderRequests.available,
+                        folderRequests.params.limit)}}</strong>
+                    </div>
+
+                    <div class="col-md-2" style="margin-top: 25px;">
+                        <small class="text-muted pull-right">Show:
+                            <select ng-change="requestSamples()" ng-model="params.limit"
+                                    ng-options="opt for opt in params.hstep"></select>
+                        </small>
+                    </div>
+                </div>
+            </uib-tab>
+
+            <uib-tab select="retrieveSampleSettings()">
+                <uib-tab-heading><i class="fa fa-fw fa-gear"></i> Settings</uib-tab-heading>
+
+                <div class="pad_top" ng-repeat="setting in sampleRequestSettings">
+                    <div class="col-md-3 entryLabel text-right">
+                        <span ng-class="{'entryLabel':!setting.editMode, 'entryEditLabel':setting.editMode}">
+                            {{setting.key}}
+                        </span>
+                    </div>
+
+                    <!--for non boolean fields-->
+                    <div class="col-md-9" ng-if="setting.type=='regular'" ng-mouseover="partIdEdit=true"
+                         ng-mouseout="partIdEdit=false">
+                        <div data-ng-if="!setting.editMode">
+                            <span ng-if="setting.value&&setting.value.trim()!=''">{{setting.value}}</span>
+                            <i class='opacity_4' ng-if="!setting.value">No value entered</i>
+                            <span ng-click="setting.editMode=true">
+                                <i ng-show="partIdEdit" class="fa fa-pencil edit_icon"
+                                   style="margin-left: 5px; font-size: 14px;"></i>
+                            </span>
+                        </div>
+
+                        <div class="input-group" data-ng-if="setting.editMode">
+                            <form ng-submit="submitSetting(setting)">
+                                <input type="text" ng-model="setting.value" class="input_box_group" maxlength="125"
+                                       style="width: 205px;">
+                            </form>
+                            <span class="input-group-addon" data-ng-click="setting.editMode=false" style="padding:3px;
+                            background-color: #f1f1f1; width: 19px"><i class="fa fa-times delete_icon"></i></span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-9" ng-if="setting.type==='long'">
+                        <div data-ng-if="!setting.editMode">
+                            <textarea disabled ng-if="setting.value&&setting.value.trim()!=''" ng-model="setting.value"
+                                      style="width: 350px; height: 150px">
+                            </textarea>
+                            <i class='opacity_4' ng-if="!setting.value">No value entered</i>
+                            <span ng-click="setting.editMode=true">
+                                <i class="fa fa-pencil edit_icon"
+                                   style="margin-left: 5px; font-size: 14px;"></i>
+                            </span>
+                        </div>
+
+                        <div data-ng-if="setting.editMode">
+                            <textarea type="text" ng-model="setting.value"
+                                      style="width: 350px; height: 150px"></textarea>
+                            <br>
+                            <button class="btn btn-xs btn-primary" ng-click="submitSetting(setting)">Save</button>
+                            <button class="btn btn-xs btn-default" ng-click="setting.editMode=false">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </uib-tab>
+
+        </uib-tabset>
+    </div>
+</div>

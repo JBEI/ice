@@ -34,16 +34,16 @@ import java.util.List;
  */
 public class BulkCSVUpload {
 
-    protected final Path csvFilePath;
+    private final Path csvFilePath;
     protected final String userId;
-    protected final EntryType addType;
-    protected EntryType subType;    // optional subType
-    protected final List<EntryField> headerFields;
-    protected final List<EntryField> linkedHeaders;
-    protected final List<EntryField> requiredFields;
-    protected final List<EntryField> invalidFields; // fields that failed validation
+    private final EntryType addType;
+    private EntryType subType;    // optional subType
+    private final List<EntryField> headerFields;
+    private final List<EntryField> linkedHeaders;
+    private final List<EntryField> requiredFields;
+    final List<EntryField> invalidFields; // fields that failed validation
 
-    public BulkCSVUpload(String userId, Path csvFilePath, EntryType addType) {
+    BulkCSVUpload(String userId, Path csvFilePath, EntryType addType) {
         this.addType = addType;
         this.userId = userId;
         this.csvFilePath = csvFilePath;
@@ -104,12 +104,12 @@ public class BulkCSVUpload {
         return processedBulkUpload;
     }
 
-    EntryType detectSubType(String field) {
+    private EntryType detectSubType(String field) {
         String[] fieldNames = field.split("\\s+");
         return EntryType.nameToType(fieldNames[0]);
     }
 
-    HeaderValue detectSubTypeHeaderValue(EntryType subType, String fieldStr) throws IOException {
+    private HeaderValue detectSubTypeHeaderValue(EntryType subType, String fieldStr) throws IOException {
         int k = fieldStr.indexOf(subType.getDisplay());
         String headerValue = fieldStr.substring(k + subType.getDisplay().length());
 
@@ -124,9 +124,9 @@ public class BulkCSVUpload {
     /**
      * @param headerArray list of column header values representing the entry fields
      * @return mapping of col number to the entry type
-     * @throws IOException
+     * @throws IOException on exception
      */
-    HashMap<Integer, HeaderValue> processColumnHeaders(String[] headerArray) throws IOException {
+    private HashMap<Integer, HeaderValue> processColumnHeaders(String[] headerArray) throws IOException {
         HashMap<Integer, HeaderValue> headers = new HashMap<>();
 
         for (int i = 0; i < headerArray.length; i += 1) {
@@ -210,10 +210,6 @@ public class BulkCSVUpload {
             if (StringUtils.isBlank(line) || line.replaceAll(",", "").trim().isEmpty())
                 continue;
 
-            // at this point we must have headers since that should be the first item in the file
-            if (headers == null)
-                throw new IOException("Could not parse file headers");
-
             // parser != null; process line contents with available headers
             String[] valuesArray = parser.parseLine(line);
             PartData partData = new PartData(addType);
@@ -275,7 +271,7 @@ public class BulkCSVUpload {
                             break;
 
                         default:
-                            partData = EntryUtil.setPartDataFromField(partData, value, field, isSubType);
+                            EntryUtil.setPartDataFromField(partData, value, field, isSubType);
                     }
                 }
             }

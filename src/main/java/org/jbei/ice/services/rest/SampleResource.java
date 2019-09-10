@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.sample.*;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
@@ -36,8 +37,8 @@ public class SampleResource extends RestResource {
     @Path("/locations")
     public Response getSamplesLocations(
             @DefaultValue("PLATE96") @QueryParam("type") SampleType sampleType,
-            @DefaultValue("0") @QueryParam("offset") final int offset,
-            @DefaultValue("15") @QueryParam("limit") final int limit) {
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("15") @QueryParam("limit") int limit) {
         String userId = getUserId();
         return super.respond(sampleService.getStorageLocations(userId, sampleType, offset, limit));
     }
@@ -66,19 +67,25 @@ public class SampleResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/requests")
     public Response getRequests(
-            @DefaultValue("0") @QueryParam("offset") final int offset,
-            @DefaultValue("15") @QueryParam("limit") final int limit,
-            @DefaultValue("requested") @QueryParam("sort") final String sort,
-            @DefaultValue("false") @QueryParam("asc") final boolean asc,
-            @QueryParam("filter") final String filter,
+            @DefaultValue("0") @QueryParam("offset") int offset,
+            @DefaultValue("15") @QueryParam("limit") int limit,
+            @DefaultValue("requested") @QueryParam("sort") String sort,
+            @DefaultValue("false") @QueryParam("asc") boolean asc,
+            @QueryParam("filter") String filter,
+            @QueryParam("isFolder") boolean isFolder, // whether we are retrieving folder requests
             @QueryParam("status") List<String> options) {
-        final String userId = requireUserId();
+        String userId = requireUserId();
         Logger.info(userId + ": retrieving sample requests");
-        List<SampleRequestStatus> sampleList = new ArrayList<>(options.size());
-        for (String option : options)
-            sampleList.add(SampleRequestStatus.valueOf(option.toUpperCase()));
-        final UserSamples samples = requestRetriever.getRequests(userId, offset, limit, sort, asc, sampleList, filter);
-        return super.respond(Response.Status.OK, samples);
+        if (isFolder) {
+            UserSamples samples = requestRetriever.getFolderRequests(userId, offset, limit, sort, asc);
+            return super.respond(samples);
+        } else {
+            List<SampleRequestStatus> sampleList = new ArrayList<>(options.size());
+            for (String option : options)
+                sampleList.add(SampleRequestStatus.valueOf(option.toUpperCase()));
+            UserSamples samples = requestRetriever.getRequests(userId, offset, limit, sort, asc, sampleList, filter);
+            return super.respond(Response.Status.OK, samples);
+        }
     }
 
     /**
@@ -89,19 +96,19 @@ public class SampleResource extends RestResource {
      */
     @PUT
     @Path("/requests")
-    public Response setRequestStatus(@QueryParam("status") final SampleRequestStatus status,
-                                     final ArrayList<Long> requestIds) {
-        final String userId = requireUserId();
+    public Response setRequestStatus(@QueryParam("status") SampleRequestStatus status,
+                                     ArrayList<Long> requestIds) {
+        String userId = requireUserId();
         if (requestIds == null || requestIds.isEmpty()) {
             return super.respond(Response.Status.OK);
         }
 
-        final ArrayList<Long> sampleRequestIds = new ArrayList<>();
-        for (final Number number : requestIds) {
+        ArrayList<Long> sampleRequestIds = new ArrayList<>();
+        for (Number number : requestIds) {
             sampleRequestIds.add(number.longValue());
         }
 
-        final boolean success = requestRetriever.setRequestsStatus(userId, sampleRequestIds, status);
+        boolean success = requestRetriever.setRequestsStatus(userId, sampleRequestIds, status);
         return super.respond(success);
     }
 
@@ -109,14 +116,14 @@ public class SampleResource extends RestResource {
     @Path("/requests/file")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response getRequestFile(@QueryParam("sid") String sid,
-                                   final ArrayList<Long> requestIds) {
+                                   ArrayList<Long> requestIds) {
         // only supports csv for now
         if (StringUtils.isEmpty(sessionId))
             sessionId = sid;
 
-        final String userId = getUserId(sessionId);
-        final ArrayList<Long> sampleRequestIds = new ArrayList<>();
-        for (final Number number : requestIds) {
+        String userId = getUserId(sessionId);
+        ArrayList<Long> sampleRequestIds = new ArrayList<>();
+        for (Number number : requestIds) {
             sampleRequestIds.add(number.longValue());
         }
 
@@ -132,8 +139,8 @@ public class SampleResource extends RestResource {
 
     @DELETE
     @Path("/requests/{id}")
-    public Response deleteSampleRequest(@PathParam("id") final long requestId) {
-        final String userId = requireUserId();
+    public Response deleteSampleRequest(@PathParam("id") long requestId) {
+        String userId = requireUserId();
         return respond(Response.Status.OK, requestRetriever.removeSampleFromCart(userId, requestId));
     }
 
@@ -142,10 +149,11 @@ public class SampleResource extends RestResource {
      */
     @PUT
     @Path("/requests/{id}")
-    public Response updateSampleRequest(@PathParam("id") final long requestId,
-                                        @QueryParam("status") final SampleRequestStatus status) {
-        final String userId = requireUserId();
-        final SampleRequest request = requestRetriever.updateStatus(userId, requestId, status);
+    public Response updateSampleRequest(@PathParam("id") long requestId,
+                                        @QueryParam("isFolder") boolean isFolder,
+                                        @QueryParam("status") SampleRequestStatus status) {
+        String userId = requireUserId();
+        SampleRequest request = requestRetriever.updateStatus(userId, requestId, status, isFolder);
         return respond(Response.Status.OK, request);
     }
 
@@ -155,15 +163,15 @@ public class SampleResource extends RestResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/requests/{userId}")
-    public Response getUserRequests(@DefaultValue("0") @QueryParam("offset") final int offset,
-                                    @DefaultValue("15") @QueryParam("limit") final int limit,
-                                    @DefaultValue("requested") @QueryParam("sort") final String sort,
-                                    @DefaultValue("false") @QueryParam("asc") final boolean asc,
-                                    @PathParam("userId") final long uid,
-                                    @DefaultValue("IN_CART") @QueryParam("status") final SampleRequestStatus status) {
-        final String userId = requireUserId();
-        Logger.info(userId + ": retrieving sample requests ");
-        final UserSamples userSamples = requestRetriever.getUserSamples(userId, status, offset, limit, sort, asc);
+    public Response getUserRequests(@DefaultValue("0") @QueryParam("offset") int offset,
+                                    @DefaultValue("15") @QueryParam("limit") int limit,
+                                    @DefaultValue("requested") @QueryParam("sort") String sort,
+                                    @DefaultValue("false") @QueryParam("asc") boolean asc,
+                                    @PathParam("userId") long uid,
+                                    @DefaultValue("IN_CART") @QueryParam("status") SampleRequestStatus status) {
+        String userId = requireUserId();
+        Logger.info(userId + ": retrieving user sample requests ");
+        UserSamples userSamples = requestRetriever.getUserSamples(userId, status, offset, limit, sort, asc);
         return super.respond(Response.Status.OK, userSamples);
     }
 
@@ -173,8 +181,8 @@ public class SampleResource extends RestResource {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/requests")
-    public Response addRequest(final SampleRequest request) {
-        final String userId = requireUserId();
+    public Response addRequest(SampleRequest request) {
+        String userId = requireUserId();
         log(userId, "add sample request to cart for " + request.getPartData().getId());
         return super.respond(requestRetriever.placeSampleInCart(userId, request));
     }
@@ -237,5 +245,14 @@ public class SampleResource extends RestResource {
                                           @DefaultValue("PLATE96") @QueryParam("type") SampleType sampleType) {
         String userId = requireUserId();
         return super.respond(sampleService.retrievePlate(userId, locationId, sampleType));
+    }
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/requests/settings")
+    public Response getRequestConfiguration() {
+        String userId = getUserId();
+        ConfigurationSettings settings = new ConfigurationSettings();
+        return super.respond(settings.getSampleRequestSettings(userId));
     }
 }

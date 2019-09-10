@@ -24,29 +24,42 @@ To set up a development environment or local machine installation make sure you 
 * [Maven 3](https://maven.apache.org/download.cgi)
 * [Git](https://git-scm.com/downloads)
 
-Command line installation steps:
+Command line installation steps (linux environment):
 
 * Clone this repo
      
         git clone https://github.com/JBEI/ice.git ./ice
         cd ice
-
-* Generate a self-signed certificate. When prompted for a password, use **changeit**.
-
-        keytool -genkey -alias tomcat -keyalg RSA -keystore ./.keystore
-
-* Start the built in jetty server. This may take a few minutes to download additional dependencies.
         
-        mvn jetty:run
+* Build ICE. This may take a few minutes to download additional dependencies
 
-* Access the application at [https://localhost:8443](https://localhost:8443)
+        mvn clean install -DskipTests=true
+        
+  If you run into problems at this step, make sure maven is using Java version 12 by running
+  
+        mvn -version
+        
+  The output should look similar to the following
+  
+        Apache Maven 3.6.0
+        Maven home: /usr/share/maven
+        Java version: 12.x.x, vendor: Private Build, runtime: /usr/lib/jvm/java-12-openjdk-amd64
+        Default locale: en_US, platform encoding: UTF-8
+        OS name: "linux", version: "5.0.0-27-generic", arch: "amd64", family: "unix" 
+
+* Start the embedded undertow server 
+        
+        java -cp "./target/ice-{version-number}-classes.jar:./target/ice-{version-number}/WEB-INF/lib/*" DevelopmentServer
+        
+  Where "ice-{version-number}" is the version of ICE that was cloned. e.g. "ice-5.6.0"
+
+* Access the application at [http://localhost:8080](http://localhost:8080) and login using username and password "Administrator"
 
 * Ctrl + C to stop the application
 
 
 ## Links
 * [Documentation](http://ice.jbei.org/) including user manual and API documentation
-* [ICE Google Group](http://groups.google.com/group/gd-ice)
 
 ## Build Status:
 [![Build Status](https://travis-ci.org/JBEI/ice.svg?branch=dev)](https://travis-ci.org/JBEI/ice)

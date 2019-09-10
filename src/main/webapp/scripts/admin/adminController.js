@@ -7,7 +7,14 @@ angular.module('ice.admin.controller', [])
         let lucenePromise;
         let blastPromise;
 
-        let getLuceneIndexStatus = function () {
+        //
+        // init : reset menu options
+        //
+        angular.forEach(menuOptions, function (details) {
+            details.selected = (details.id === menuOption && menuOption !== undefined);
+        });
+
+        const getLuceneIndexStatus = function () {
             Util.get("rest/search/indexes/LUCENE/status", function (result) {
                 if (result.total === 0)
                     $interval.cancel(lucenePromise);
@@ -19,7 +26,7 @@ angular.module('ice.admin.controller', [])
         };
         lucenePromise = $interval(getLuceneIndexStatus, 2000);
 
-        let getBlastStatus = function () {
+        const getBlastStatus = function () {
             Util.get("rest/search/indexes/BLAST/status", function (result) {
                 if (!result.total)
                     $interval.cancel(blastPromise);
@@ -77,7 +84,7 @@ angular.module('ice.admin.controller', [])
         $scope.getSetting = function () {
             $scope.generalSettings = [];
             $scope.emailSettings = [];
-
+            $scope.sampleRequestSettings = [];
             $scope.emailConfig = {type: "", smtp: "", pass: "", edit: false, showEdit: false, showPass: false};
 
             // retrieve site wide settings
@@ -238,7 +245,7 @@ angular.module('ice.admin.controller', [])
             })
         }
     })
-    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookies, $uibModal, Util) {
+    .controller('AdminSampleRequestController', function ($scope, $location, $rootScope, $cookies, $uibModal, Util, AdminSettings) {
         $rootScope.error = undefined;
 
         $scope.selectOptions = ['ALL', 'PENDING', 'FULFILLED', 'REJECTED'];
@@ -301,7 +308,7 @@ angular.module('ice.admin.controller', [])
 
         $scope.requestSamples = function () {
             $scope.loadingPage = true;
-            let params = angular.copy($scope.params);
+            const params = angular.copy($scope.params);
 
             Util.get("rest/samples/requests", function (result) {
                 $scope.sampleRequests = result;
@@ -337,14 +344,68 @@ angular.module('ice.admin.controller', [])
             $scope.requestSamples();
         };
 
-        $scope.updateStatus = function (request, newStatus) {
-            Util.update("rest/samples/requests/" + request.id + "?status=" + newStatus, {}, {}, function (result) {
-                if (result === undefined || result.id != request.id)
+        $scope.exportSampleFolder = function (folderId) {
+            const clickEvent = new MouseEvent("click", {
+                "view": window,
+                "bubbles": true,
+                "cancelable": false
+            });
+
+            Util.download("/rest/folders/" + folderId + "/file").$promise.then(function (result) {
+                let url = URL.createObjectURL(new Blob([result.data]));
+                let a = document.createElement('a');
+                a.href = url;
+                a.download = result.filename();
+                a.target = '_blank';
+                a.dispatchEvent(clickEvent);
+            });
+        };
+
+        $scope.folderRequestPageChanged = function () {
+            Util.get("rest/samples/requests", function (result) {
+                $scope.folderRequests.available = result.count;
+                $scope.folderRequests.results = result.requests;
+            }, {isFolder: true});
+        };
+
+        $scope.initFolderRequests = function () {
+            $scope.folderRequests = {available: 0, results: [], params: {limit: 15, currentPage: 1}};
+            $scope.folderRequestPageChanged();
+        };
+
+        $scope.retrieveSampleSettings = function () {
+            Util.list("rest/samples/requests/settings", function (result) {
+                angular.forEach(result, function (setting) {
+                    if (AdminSettings.getSampleRequestKeys().indexOf(setting.key) !== -1) {
+                        $scope.sampleRequestSettings.push({
+                            'originalKey': setting.key,
+                            'key': (setting.key.replace(/_/g, ' ')).toLowerCase(),
+                            'value': setting.value,
+                            'editMode': false,
+                            'type': AdminSettings.getKeyType(setting.key)
+                        });
+                    }
+                });
+            }, {}, function (error) {
+                console.log(error);
+            })
+        };
+
+        $scope.updateStatus = function (request, newStatus, isFolder) {
+            Util.update("rest/samples/requests/" + request.id + "?status=" + newStatus, {}, {isFolder: isFolder ? isFolder : false}, function (result) {
+                if (result === undefined || result.id !== request.id)
                     return;
 
-                let i = $scope.sampleRequests.requests.indexOf(request);
-                if (i != -1) {
-                    $scope.sampleRequests.requests[i].status = result.status;
+                if (!isFolder) {
+                    let i = $scope.sampleRequests.requests.indexOf(request);
+                    if (i !== -1) {
+                        $scope.sampleRequests.requests[i].status = result.status;
+                    }
+                } else {
+                    const i = $scope.folderRequests.results.indexOf(request);
+                    if (i !== -1) {
+                        $scope.folderRequests.results[i].status = result.status;
+                    }
                 }
             });
         };

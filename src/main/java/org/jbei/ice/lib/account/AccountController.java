@@ -6,7 +6,7 @@ import org.jbei.ice.lib.account.authentication.AuthenticationException;
 import org.jbei.ice.lib.account.authentication.IAuthentication;
 import org.jbei.ice.lib.account.authentication.LocalAuthentication;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.group.GroupType;
 import org.jbei.ice.lib.email.EmailFactory;
@@ -353,7 +353,7 @@ public class AccountController {
 
     private IAuthentication getAuthentication() {
         try {
-            String clazz = new ConfigurationController().getPropertyValue(ConfigurationKey.AUTHENTICATION_CLASS);
+            String clazz = new ConfigurationSettings().getPropertyValue(ConfigurationKey.AUTHENTICATION_CLASS);
             Class<?> authentication = Class.forName(clazz);
             return (IAuthentication) authentication.getDeclaredConstructor().newInstance();
         } catch (Exception e) {

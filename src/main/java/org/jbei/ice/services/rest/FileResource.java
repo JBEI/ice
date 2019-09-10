@@ -7,7 +7,7 @@ import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.bulkupload.FileBulkUpload;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.Setting;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
@@ -54,8 +54,8 @@ public class FileResource extends RestResource {
     @GET
     @Path("asset/{assetName}")
     public Response getAsset(@PathParam("assetName") final String assetName) {
-        ConfigurationController configurationController = new ConfigurationController();
-        File assetFile = configurationController.getUIAsset(assetName);
+        ConfigurationSettings settings = new ConfigurationSettings();
+        File assetFile = settings.getUIAsset(assetName);
         if (assetFile == null)
             return super.respond(Response.Status.NOT_FOUND);
         return addHeaders(Response.ok(assetFile), assetFile.getName());

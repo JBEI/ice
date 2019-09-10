@@ -69,8 +69,7 @@ public class FolderResource extends RestResource {
      */
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Response create(@DefaultValue("false") @QueryParam("isTransfer") boolean isTransfer,
-                           final FolderDetails folder) {
+    public Response create(@DefaultValue("false") @QueryParam("isTransfer") boolean isTransfer, FolderDetails folder) {
         FolderDetails created;
         if (!isTransfer) {
             final String userId = requireUserId();
@@ -354,5 +353,16 @@ public class FolderResource extends RestResource {
             Logger.error(e);
             throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @PUT
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("{id}/approved")
+    public Response approveFolder(@PathParam("id") long folderId) {
+        final String userId = requireUserId();
+        log(userId, "approving folder " + folderId);
+        Folders folders = new Folders(userId);
+        folders.setFolderApproval(folderId, true);
+        return super.respond(true);
     }
 }

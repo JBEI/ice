@@ -13,6 +13,7 @@ import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.folder.FolderAuthorization;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.folder.FolderType;
+import org.jbei.ice.lib.dto.sample.SampleRequestStatus;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
@@ -361,21 +362,22 @@ public class FolderController {
         if (!accountController.isAdministrator(userId))
             return new ArrayList<>();
 
-        return getFoldersByType(FolderType.TRANSFERRED);
+        List<Folder> folders = dao.getFoldersByType(FolderType.TRANSFERRED);
+        return toDTOList(folders);
     }
 
     public List<FolderDetails> getSampleFolders(String userId) {
         if (!accountController.isAdministrator(userId))
             return new ArrayList<>();
 
-        return getFoldersByType(FolderType.SAMPLE);
+        List<Folder> folders = DAOFactory.getSampleCreateModelDAO().getFoldersByStatus(SampleRequestStatus.PENDING);
+        return toDTOList(folders);
     }
 
-    private List<FolderDetails> getFoldersByType(FolderType folderType) {
-        List<Folder> transferredFolders = dao.getFoldersByType(folderType);
-        ArrayList<FolderDetails> folderDetails = new ArrayList<>();
+    private List<FolderDetails> toDTOList(List<Folder> folders) {
+        List<FolderDetails> folderDetails = new ArrayList<>();
 
-        for (Folder folder : transferredFolders) {
+        for (Folder folder : folders) {
             FolderDetails details = folder.toDataTransferObject();
             long folderSize = dao.getFolderSize(folder.getId(), null, false);
             details.setCount(folderSize);

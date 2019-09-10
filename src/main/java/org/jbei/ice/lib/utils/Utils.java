@@ -2,7 +2,7 @@ package org.jbei.ice.lib.utils;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 
 import java.io.*;
@@ -128,7 +128,7 @@ public class Utils {
     }
 
     public static String getConfigValue(ConfigurationKey key) {
-        ConfigurationController controller = new ConfigurationController();
+        ConfigurationSettings controller = new ConfigurationSettings();
         String value = controller.getPropertyValue(key);
         if (value != null)
             return value;

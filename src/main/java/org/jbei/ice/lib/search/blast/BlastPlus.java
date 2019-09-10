@@ -153,8 +153,15 @@ public class BlastPlus implements Closeable {
      * @throws BlastException if results of running blast is null
      */
     public HashMap<String, SearchResult> runBlast(BlastQuery query) throws BlastException {
-        String result = runBlastQuery(query, "-perc_identity", "95", "-outfmt",
-                "10 stitle qstart qend sstart send sstrand evalue bitscore score length nident");
+        List<String> options;
+        if (query.getBlastProgram() == null || query.getBlastProgram() == BlastProgram.BLAST_N)
+            options = Arrays.asList("-perc_identity", "70", "-outfmt",
+                    "10 stitle qstart qend sstart send sstrand evalue bitscore score length nident");
+        else
+            options = Arrays.asList("-outfmt",
+                    "10 stitle qstart qend sstart send sstrand evalue bitscore score length nident");
+
+        String result = runBlastQuery(query, options.toArray(new String[]{}));
         if (result == null)
             throw new BlastException("Exception running blast");
         return processBlastOutput(result, query.getSequence().length());

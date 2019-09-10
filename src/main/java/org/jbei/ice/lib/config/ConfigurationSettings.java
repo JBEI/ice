@@ -23,18 +23,19 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Hector Plahar
  */
-public class ConfigurationController {
+public class ConfigurationSettings {
 
     private static final String UI_CONFIG_DIR = "asset";
     private static final String BLAST_FTP_DIR = "ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.6.0/";
 
     private final ConfigurationDAO dao;
 
-    public ConfigurationController() {
+    public ConfigurationSettings() {
         dao = DAOFactory.getConfigurationDAO();
     }
 
@@ -63,16 +64,26 @@ public class ConfigurationController {
             return settings;
 
         for (ConfigurationKey key : ConfigurationKey.values()) {
-            Configuration configuration = dao.get(key);
-            Setting setting;
-            if (configuration == null)
-                setting = new Setting(key.name(), "");
-            else
-                setting = new Setting(configuration.getKey(), configuration.getValue());
-
+            Setting setting = getConfigValue(key);
             settings.add(setting);
         }
         return settings;
+    }
+
+    public List<Setting> getSampleRequestSettings(String userId) {
+        List<Setting> settings = new ArrayList<>();
+        if (!new AccountController().isAdministrator(userId))
+            return settings;
+
+        settings.add(getConfigValue(ConfigurationKey.SAMPLE_CREATE_APPROVAL_MESSAGE));
+        return settings;
+    }
+
+    private Setting getConfigValue(ConfigurationKey key) {
+        Configuration configuration = dao.get(key);
+        if (configuration == null)
+            return new Setting(key.name(), "");
+        return new Setting(configuration.getKey(), configuration.getValue());
     }
 
     public Configuration setPropertyValue(ConfigurationKey key, String value) {

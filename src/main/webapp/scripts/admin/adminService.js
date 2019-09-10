@@ -1,6 +1,6 @@
 'use strict';
 
-var adminService = angular.module('ice.admin.service', []);
+const adminService = angular.module('ice.admin.service', []);
 
 adminService.factory('AdminSettings', function () {
     const generalSettingKeys = [
@@ -25,6 +25,10 @@ adminService.factory('AdminSettings', function () {
         'ERROR_EMAIL_EXCEPTION_PREFIX'
     ];
 
+    const sampleRequestSettingKeys = [
+        'SAMPLE_CREATE_APPROVAL_MESSAGE'
+    ];
+
     const emailTypeKeys = [
         'EMAILER',
         'GMAIL_APPLICATION_PASSWORD',
@@ -41,7 +45,12 @@ adminService.factory('AdminSettings', function () {
     ];
 
     const menuOptions = [
-        {url: 'scripts/admin/settings.html', display: 'Settings', selected: true, icon: 'fa-cogs'},
+        {
+            url: 'scripts/admin/settings.html',
+            display: 'Settings',
+            selected: true,
+            icon: 'fa-cogs'
+        },
         {
             id: 'web',
             url: 'scripts/admin/wor.html',
@@ -50,7 +59,13 @@ adminService.factory('AdminSettings', function () {
             icon: 'fa-globe',
             description: 'Share/access entries with/on other ICE instances'
         },
-        {id: 'users', url: 'scripts/admin/users.html', display: 'Users', selected: false, icon: 'fa-user'},
+        {
+            id: 'users',
+            url: 'scripts/admin/users.html',
+            display: 'Users',
+            selected: false,
+            icon: 'fa-user'
+        },
         {
             id: 'groups',
             url: 'scripts/admin/groups.html',
@@ -59,8 +74,11 @@ adminService.factory('AdminSettings', function () {
             icon: 'fa-group'
         },
         {
-            id: 'samples', url: 'scripts/admin/sample-requests.html', display: 'Sample Requests', selected: false,
-            icon: 'fa-shopping-cart'
+            id: 'samples',
+            url: 'scripts/admin/samples.html',
+            display: 'Samples',
+            selected: false,
+            icon: 'fa-flask'
         },
         {
             id: 'annotations-curation',
@@ -96,12 +114,26 @@ adminService.factory('AdminSettings', function () {
             return emailSettingKeys;
         },
 
+        getSampleRequestKeys: function () {
+            return sampleRequestSettingKeys;
+        },
+
         getEmailTypeKeys: function () {
             return emailTypeKeys;
         },
 
         getBooleanKeys: function () {
             return booleanKeys;
+        },
+
+        getKeyType: function (key) {
+            if (booleanKeys.indexOf(key) !== -1)
+                return 'boolean';
+
+            if (key === 'SAMPLE_CREATE_APPROVAL_MESSAGE')
+                return 'long';
+
+            return 'regular';
         },
 
         canAutoInstall: function (key) {
