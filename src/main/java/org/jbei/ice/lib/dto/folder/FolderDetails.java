@@ -5,8 +5,6 @@ import org.jbei.ice.lib.dto.sample.SampleRequest;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.folder.AbstractFolder;
 
-import java.util.Objects;
-
 /**
  * Folder Transfer Object
  *
@@ -64,7 +62,10 @@ public class FolderDetails extends AbstractFolder {
     }
 
     public void setType(FolderType type) {
-        this.type = Objects.requireNonNullElse(type, FolderType.PRIVATE);
+        if (type == null)
+            this.type = FolderType.PRIVATE;
+        else
+            this.type = type;
     }
 
     public AccountTransfer getOwner() {
