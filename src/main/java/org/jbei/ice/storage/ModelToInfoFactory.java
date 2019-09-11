@@ -264,7 +264,7 @@ public class ModelToInfoFactory {
         return account.getId();
     }
 
-    public static PartData createTableViewData(String userId, Entry entry, boolean includeOwnerInfo, List<String> fields) {
+    public static PartData createTableViewData(Entry entry, boolean includeOwnerInfo, List<String> fields) {
         if (entry == null)
             return null;
 
