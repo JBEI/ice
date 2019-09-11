@@ -10,6 +10,9 @@ angular.module('ice.admin.controller', [])
         //
         // init : reset menu options
         //
+        let menuOption = $stateParams.option;
+        let menuOptions = $scope.adminMenuOptions = AdminSettings.getMenuOptions();
+
         angular.forEach(menuOptions, function (details) {
             details.selected = (details.id === menuOption && menuOption !== undefined);
         });
@@ -137,9 +140,6 @@ angular.module('ice.admin.controller', [])
                 });
             });
         };
-
-        let menuOption = $stateParams.option;
-        let menuOptions = $scope.adminMenuOptions = AdminSettings.getMenuOptions();
 
         $scope.showSelection = function (index) {
             angular.forEach(menuOptions, function (details) {
