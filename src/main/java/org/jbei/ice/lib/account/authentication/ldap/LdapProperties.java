@@ -1,7 +1,7 @@
 package org.jbei.ice.lib.account.authentication.ldap;
 
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.config.ConfigurationController;
+import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 
 import java.io.FileInputStream;
@@ -19,7 +19,7 @@ class LdapProperties {
     }
 
     void load() throws IOException {
-        String dataDirectory = new ConfigurationController().getPropertyValue(ConfigurationKey.DATA_DIRECTORY);
+        String dataDirectory = new ConfigurationSettings().getPropertyValue(ConfigurationKey.DATA_DIRECTORY);
         Path path = Paths.get(dataDirectory, "config", "ldap-config.properties");
         Logger.info("Loading LDAP config properties from '" + path.toString() + "'");
         FileInputStream in = new FileInputStream(path.toFile());
