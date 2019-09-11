@@ -4,9 +4,9 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.services.rest.IceRestClient;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
 import org.jbei.ice.storage.model.RemotePartner;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -15,13 +15,11 @@ import java.util.HashMap;
 public class RemoteFolder {
 
     private final RemotePartner partner;
-    private final RemotePartnerDAO remotePartnerDAO;
     private final long folderId;
     private IceRestClient restClient;
 
     public RemoteFolder(long partnerId, long remoteFolderId) {
-        this.remotePartnerDAO = DAOFactory.getRemotePartnerDAO();
-        this.partner = this.remotePartnerDAO.get(partnerId);
+        this.partner = DAOFactory.getRemotePartnerDAO().get(partnerId);
         if (this.partner == null)
             throw new IllegalArgumentException("Cannot retrieve partner with id " + partnerId);
         this.folderId = remoteFolderId;
@@ -36,12 +34,12 @@ public class RemoteFolder {
             queryParams.put("limit", limit);
             queryParams.put("asc", asc);
             queryParams.put("sort", sort);
-            FolderDetails result = this.restClient.getWor(partner.getUrl(), restPath, FolderDetails.class, queryParams,
-                    partner.getApiKey());
-            if (result == null)
-                return null;
 
-            return result;
+            // set default fields
+            queryParams.put("fields", Arrays.asList("creationTime", "hasSequence", "status"));
+
+            return this.restClient.getWor(partner.getUrl(), restPath, FolderDetails.class, queryParams,
+                    partner.getApiKey());
         } catch (Exception e) {
             Logger.error("Error getting public folder entries from \"" + partner.getUrl() + "\": " + e.getMessage());
             return null;
