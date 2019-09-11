@@ -164,7 +164,7 @@ public class IceRestClient extends RestClient {
         return invocationBuilder.buildGet().invoke(clazz);
     }
 
-    protected void setHeaders(Invocation.Builder invocationBuilder, String token) {
+    private void setHeaders(Invocation.Builder invocationBuilder, String token) {
         invocationBuilder.header(Headers.WOR_API_KEY_TOKEN, token);
 
         String clientId = Utils.getConfigValue(ConfigurationKey.URI_PREFIX);

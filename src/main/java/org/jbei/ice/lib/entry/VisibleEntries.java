@@ -54,7 +54,7 @@ public class VisibleEntries {
 
         ArrayList<PartData> data = new ArrayList<>();
         for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false, fields);
+            PartData info = ModelToInfoFactory.createTableViewData(entry, false, fields);
             data.add(info);
         }
 

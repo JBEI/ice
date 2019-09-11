@@ -49,7 +49,7 @@ public class SharedEntries {
 
         ArrayList<PartData> data = new ArrayList<>();
         for (Entry entry : entries) {
-            PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false, fields);
+            PartData info = ModelToInfoFactory.createTableViewData(entry, false, fields);
             data.add(info);
         }
         return data;

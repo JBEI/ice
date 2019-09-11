@@ -188,7 +188,7 @@ public class CollectionEntries {
         List<Entry> entries = entryDAO.getByVisibility(user, visibility, field, asc, offset, limit, filter);
         Results<PartData> results = new Results<>();
         for (Entry entry : entries) {
-            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false, fields);
+            PartData info = ModelToInfoFactory.createTableViewData(entry, false, fields);
             results.getData().add(info);
         }
         results.setResultCount(entryDAO.getByVisibilityCount(user, visibility, filter));

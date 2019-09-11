@@ -216,11 +216,11 @@ public class FolderResource extends RestResource {
                               @DefaultValue("created") @QueryParam("sort") final String sort,
                               @DefaultValue("false") @QueryParam("asc") final boolean asc,
                               @DefaultValue("") @QueryParam("filter") String filter,
-                              @QueryParam("token") String token,   // todo: move to headers
-                              @QueryParam("userId") String remoteUserId,                   // todo : ditto
+                              @QueryParam("token") String token,                            // todo: move to headers
+                              @QueryParam("userId") String remoteUserId,                    // todo : ditto
                               @QueryParam("fields") List<String> fields) {
         final ColumnField field = ColumnField.valueOf(sort.toUpperCase());
-        if (folderId.equalsIgnoreCase("public")) {   // todo : move to separate rest resource path
+        if (folderId.equalsIgnoreCase("public")) {                              // todo : move to separate rest resource path
             RegistryPartner registryPartner = requireWebPartner();
             // return public entries
             log(registryPartner.getUrl(), "requesting public entries");
@@ -277,8 +277,7 @@ public class FolderResource extends RestResource {
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/{id}/permissions")
-    public FolderDetails setPermissions(@PathParam("id") final long folderId,
-                                        final ArrayList<AccessPermission> permissions) {
+    public FolderDetails setPermissions(@PathParam("id") final long folderId, ArrayList<AccessPermission> permissions) {
         final String userId = getUserId();
         return permissionsController.setFolderPermissions(userId, folderId, permissions);
     }

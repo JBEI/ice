@@ -266,7 +266,7 @@ public class BlastPlus implements Closeable {
             SearchResult searchResult = new SearchResult();
             searchResult.setEntryInfo(view);
             searchResult.seteValue(line[9]);
-            searchResult.setScore(Float.valueOf(line[11].trim()));
+            searchResult.setScore(Float.parseFloat(line[11].trim()));
             searchResult.setAlignment(line[13]);
             searchResult.setQueryLength(Integer.parseInt(line[12].trim()));
             searchResult.setNident(Integer.parseInt(line[13].trim()));

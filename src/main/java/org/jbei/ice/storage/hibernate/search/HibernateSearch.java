@@ -140,7 +140,7 @@ public class HibernateSearch {
             } else {
                 searchResult = new SearchResult();
                 searchResult.setScore(1f);
-                PartData info = ModelToInfoFactory.createTableViewData(userId, entry, true, null);
+                PartData info = ModelToInfoFactory.createTableViewData(entry, true, null);
                 searchResult.setEntryInfo(info);
             }
 
@@ -305,7 +305,7 @@ public class HibernateSearch {
             } else {
                 searchResult = new SearchResult();
                 searchResult.setScore(score);
-                PartData info = ModelToInfoFactory.createTableViewData(userId, entry, true, null);
+                PartData info = ModelToInfoFactory.createTableViewData(entry, true, null);
                 if (info == null)
                     continue;
                 searchResult.setEntryInfo(info);
