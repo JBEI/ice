@@ -342,6 +342,7 @@ public class FolderContents {
         // should have permission to read folder
         folderAuthorization.expectRead(userId, folder);
 
+        // check if folder doesn't exist on this instance and has to be retrieved from another
         if (folder.getType() == FolderType.REMOTE)
             return getRemoteContents(userId, folder, pageParameters);
 

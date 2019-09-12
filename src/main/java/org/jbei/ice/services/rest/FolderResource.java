@@ -20,6 +20,7 @@ import javax.ws.rs.core.StreamingOutput;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -238,8 +239,10 @@ public class FolderResource extends RestResource {
             PageParameters pageParameters = new PageParameters(offset, limit, field, asc, filter);
 
             if (StringUtils.isEmpty(userId)) {
-                if (StringUtils.isEmpty(token))  // todo :verify partner?
+                if (StringUtils.isEmpty(token)) {  // todo :verify partner? {
+                    fields = Arrays.asList("creationTime", "hasSequence", "status"); // todo
                     return folderContents.getContents(userId, id, pageParameters, fields);
+                }
 
                 // get registry partner
                 RegistryPartner partner = requireWebPartner();

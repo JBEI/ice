@@ -277,7 +277,7 @@ public class PartnerResource extends RestResource {
      */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/parts/{partId}/samples")
+    @Path("{id}/parts/{partId}/samples")
     public Response getRemotePartSamples(@PathParam("id") long remoteId,
                                          @PathParam("partId") long partId) {
         requireUserId();
