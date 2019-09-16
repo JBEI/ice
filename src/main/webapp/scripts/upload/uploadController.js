@@ -36,9 +36,10 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
             Util.update("rest/uploads/" + $scope.bulkUpload.id + "/link/" + type, {}, {}, function (linkedDefaults) {
                 let ht = angular.element('#dataTable').handsontable('getInstance');
                 $scope.linkedSelection = type;
+                linkedPartTypeDefault = EntryService.convertToUIForm(linkedDefaults);
 
                 // add linkedHeaders.length number of columns after the last column
-                ht.alter('insert_col', undefined, linkedDefaults.fields.length);
+                ht.alter('insert_col', undefined, linkedPartTypeDefault.fields.length);
             });
         };
 
@@ -423,6 +424,8 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                     return;
                 }
 
+                console.log("updating", objects);
+
                 let entryList = [];
                 for (let idx = 0; idx < objects.length; idx += 1) {
                     let o = objects[idx];
@@ -454,6 +457,8 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
             // bulk create or update from auto-fill or paste
             // change = [[row, col, oldValue, newValue], [....]] {array of arrays}
             const bulkCreateOrUpdate = function (change) {
+                console.log("bulk", change);
+
                 $scope.saving = true;
 
                 // array of objects that will be created or updated
@@ -842,8 +847,6 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                             if (!result || !result.type)
                                 return;
 
-                            console.log(result);
-
                             $scope.bulkUpload.name = result.name;
                             $scope.bulkUpload.status = result.status;
                             $scope.importType = result.type.toLowerCase();
@@ -866,7 +869,17 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
                                     // store the ids of the entries
                                     $scope.bulkUpload.entryIdData.push(entry.id);
+
+                                    //
+                                    // todo : move to BulkUploadService
                                     entry = EntryService.convertToUIForm(entry);
+                                    if (entry.selectionMarkers && entry.selectionMarkers.length) {
+                                        entry.selectionMarkers = entry.selectionMarkers[0];
+                                    } else {
+                                        entry.selectionMarkers = "";
+                                    }
+                                    // todo
+                                    //
 
                                     // ensure capacity
                                     if (!sheetData[numberOfExistingEntries + i])

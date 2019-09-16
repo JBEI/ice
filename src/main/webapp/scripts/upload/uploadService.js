@@ -35,8 +35,6 @@ angular.module('ice.upload.service', [])
                         if (field.subSchema) {
                             object[field.subSchema][field.schema] = value;
                         } else {
-                            object[field.schema] = value;
-
                             // todo : find a way to avoid this explicit callout to specific fields
                             if (field.schema === "bioSafetyLevel") {
                                 if (object.bioSafetyLevel === "Level 2")
@@ -45,6 +43,13 @@ angular.module('ice.upload.service', [])
                                     object.bioSafetyLevel = "-1";
                                 else
                                     object.bioSafetyLevel = 1;
+                            }
+
+                            if (field.schema === "selectionMarkers") {
+                                // todo : allow comma separation
+                                object[field.schema] = [value];
+                            } else {
+                                object[field.schema] = value;
                             }
                         }
                     }
