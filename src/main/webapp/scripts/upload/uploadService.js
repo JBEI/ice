@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.upload.service', [])
-    .factory('UploadUtil', function () {
+    .factory('UploadUtil', function (EntryService) {
 
             return {
                 // converts the index (which depends on type) of the schema to the specific rest resource name
@@ -275,13 +275,15 @@ angular.module('ice.upload.service', [])
                     return part;
                 },
 
-                // checks if, based on index, columning being edited is a main entry column
-                // isMainEntryCol: function (index, mainFields) {
-                //     if (index < mainFields.length)
-                //         return true;
-                //
-                //     return false;
-                // }
+                convertToUIForm: function (part) {
+                    part = EntryService.convertToUIForm(part);
+                    if (part.selectionMarkers && part.selectionMarkers.length) {
+                        part.selectionMarkers = part.selectionMarkers[0];
+                    } else {
+                        part.selectionMarkers = "";
+                    }
+                    return part;
+                }
             }
         }
     );

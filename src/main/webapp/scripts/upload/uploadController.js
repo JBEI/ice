@@ -2,7 +2,7 @@
 
 angular.module('ice.upload.controller', ['ngFileUpload'])
     .controller('UploadController', function ($rootScope, $location, $scope, $uibModal, $resource, $http, $stateParams,
-                                              FileUploader, UploadUtil, Util, Authentication, Upload, EntryService) {
+                                              FileUploader, UploadUtil, Util, Authentication, Upload) {
         let sheetData = [
             []
         ];
@@ -36,7 +36,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
             Util.update("rest/uploads/" + $scope.bulkUpload.id + "/link/" + type, {}, {}, function (linkedDefaults) {
                 let ht = angular.element('#dataTable').handsontable('getInstance');
                 $scope.linkedSelection = type;
-                linkedPartTypeDefault = EntryService.convertToUIForm(linkedDefaults);
+                linkedPartTypeDefault = UploadUtil.convertToUIForm(linkedDefaults);
 
                 // add linkedHeaders.length number of columns after the last column
                 ht.alter('insert_col', undefined, linkedPartTypeDefault.fields.length);
@@ -645,9 +645,8 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
             if (!partTypeDefault) {
                 Util.get("rest/parts/defaults/" + $scope.importType, function (result) {
-                    partTypeDefault = EntryService.convertToUIForm(result);
+                    partTypeDefault = UploadUtil.convertToUIForm(result);
                     $scope.linkedSelection = result.linkType;
-                    console.log(result);
 
                     // headers for the current selection and initialize first row
                     sheetData[0].length = partTypeDefault.fields.length + 3;
@@ -663,7 +662,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                         sheetData[0].length = partTypeDefault.fields.length + 3 + 1;
                     } else {
                         Util.get("rest/parts/defaults/" + $scope.linkedSelection, function (defaults) {
-                            linkedPartTypeDefault = EntryService.convertToUIForm(defaults);
+                            linkedPartTypeDefault = UploadUtil.convertToUIForm(defaults);
                             sheetData[0].length = partTypeDefault.fields.length + 3 + linkedPartTypeDefault.fields.length + 3;
                         }, {}, function (error) {
                             // todo
@@ -828,7 +827,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
             //
             Util.get("rest/uploads/" + $stateParams.type, function (result) {
                 Util.get("rest/parts/defaults/" + result.type, function (defaults) {
-                    partTypeDefault = EntryService.convertToUIForm(defaults);
+                    partTypeDefault = UploadUtil.convertToUIForm(defaults);
                     loop(0, partTypeDefault);
                 }, {}, function (error) {
                     // todo
@@ -869,17 +868,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
                                     // store the ids of the entries
                                     $scope.bulkUpload.entryIdData.push(entry.id);
-
-                                    //
-                                    // todo : move to BulkUploadService
-                                    entry = EntryService.convertToUIForm(entry);
-                                    if (entry.selectionMarkers && entry.selectionMarkers.length) {
-                                        entry.selectionMarkers = entry.selectionMarkers[0];
-                                    } else {
-                                        entry.selectionMarkers = "";
-                                    }
-                                    // todo
-                                    //
+                                    entry = UploadUtil.convertToUIForm(entry);
 
                                     // ensure capacity
                                     if (!sheetData[numberOfExistingEntries + i])
@@ -903,7 +892,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                                     if (entry.linkedParts && entry.linkedParts.length) {
                                         let linkedPart = entry.linkedParts[0];
                                         $scope.bulkUpload.linkedEntryIdData.push(linkedPart.id);
-                                        linkedPart = EntryService.convertToUIForm(linkedPart);
+                                        linkedPart = UploadUtil.convertToUIForm(linkedPart);
 
                                         // linked part fields display
                                         for (let k = 0; k < linkedPart.fields.length; k += 1) {
@@ -929,7 +918,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                                         sheetData[0].length = partTypeDefault.fields.length + 3 + 1;
                                     } else {
                                         Util.get("rest/parts/defaults/" + $scope.linkedSelection, function (defaults) {
-                                            linkedPartTypeDefault = EntryService.convertToUIForm(defaults);
+                                            linkedPartTypeDefault = UploadUtil.convertToUIForm(defaults);
                                             sheetData[0].length = partTypeDefault.fields.length + 3 + linkedPartTypeDefault.fields.length + 3;
                                             createSheet();
                                         }, {}, function (error) {
