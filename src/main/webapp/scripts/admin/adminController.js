@@ -314,11 +314,11 @@ angular.module('ice.admin.controller', [])
             Util.get("rest/samples/requests", function (result) {
                 $scope.folderRequests.available = result.count;
                 $scope.folderRequests.results = result.requests;
-            }, {isFolder: true});
+            }, $scope.folderRequests);
         };
 
         $scope.initFolderRequests = function () {
-            $scope.folderRequests = {available: 0, results: [], params: {limit: 15, currentPage: 1}};
+            $scope.folderRequests = {available: 0, results: [], params: {limit: 15, currentPage: 1}, isFolder: true};
             $scope.folderRequestPageChanged();
         };
 

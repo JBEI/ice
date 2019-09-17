@@ -202,7 +202,10 @@
                             <td>
                                 <a ng-href="folders/{{request.folderDetails.id}}">{{request.folderDetails.folderName}}</a>
                                 <br>
-                                <small><b>{{request.folderDetails.count}}</b> entries</small>
+                                <small><b>{{request.folderDetails.count}}</b>
+                                    <ng-pluralize count="request.folderDetails.count"
+                                                  when="{'1': 'entry', 'other': 'entries'}"></ng-pluralize>
+                                </small>
                             </td>
                             <td style="vertical-align: middle; width:65px; white-space:nowrap"> &nbsp;
                                 <span class="label" style="font-size: 85%" ng-class="{

@@ -106,6 +106,7 @@ public class RequestRetriever {
             request.setStatus(model.getStatus());
 
             FolderDetails details = model.getFolder().toDataTransferObject();
+            details.setCount(DAOFactory.getFolderDAO().getFolderSize(details.getId(), null, true));
             request.setFolderDetails(details);
 
             request.setRequester(model.getAccount().toDataTransferObject());
