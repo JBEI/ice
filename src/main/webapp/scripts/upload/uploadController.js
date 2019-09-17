@@ -165,7 +165,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                         } else {
                             // deal with linked entries
                             const index = col - (FILE_FIELDS_COUNT + partTypeDefault.fields.length);
-                            field = partTypeDefault.fields[index];
+                            field = linkedPartTypeDefault.fields[index];
 
                             if (!field && $scope.linkedSelection) {
                                 const linkedFileFieldIndex = index - linkedPartTypeDefault.fields.length;
@@ -419,11 +419,6 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
             // upload set of entries associated with an upload, in bulk
             const updateEntryList = function (objects) {
-                if ($scope.bulkUpload.id === undefined) {
-                    console.error("cannot update upload list. no bulk upload object"); // todo : need to create?
-                    return;
-                }
-
                 let entryList = [];
                 for (let idx = 0; idx < objects.length; idx += 1) {
                     let o = objects[idx];

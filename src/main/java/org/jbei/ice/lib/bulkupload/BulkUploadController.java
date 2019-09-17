@@ -195,7 +195,7 @@ public class BulkUploadController {
      * @param offset offset for upload entries (start)
      * @param limit  maximum number of entries to return with the upload
      * @return data transfer object with the retrieved bulk import data and associated entries
-     * @throws PermissionException
+     * @throws PermissionException if user doesn't have read permissions for specified bulk import
      */
     public BulkUploadInfo getBulkImport(String userId, long id, int offset, int limit) {
         BulkUpload draft = dao.get(id);
@@ -220,6 +220,8 @@ public class BulkUploadController {
             if (!entry.getLinkedEntries().isEmpty()) {
                 Entry linked = (Entry) entry.getLinkedEntries().toArray()[0];
                 PartData linkedData = setFileData(userId, linked, ModelToInfoFactory.getInfo(linked));
+                CustomFields linkedFields = new CustomFields();
+                linkedData.getCustomEntryFields().addAll(linkedFields.getCustomFieldValuesForPart(linked.getId()));
                 partData.getLinkedParts().set(0, linkedData);
             }
 
