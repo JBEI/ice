@@ -424,8 +424,6 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                     return;
                 }
 
-                console.log("updating", objects);
-
                 let entryList = [];
                 for (let idx = 0; idx < objects.length; idx += 1) {
                     let o = objects[idx];
@@ -457,8 +455,6 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
             // bulk create or update from auto-fill or paste
             // change = [[row, col, oldValue, newValue], [....]] {array of arrays}
             const bulkCreateOrUpdate = function (change) {
-                console.log("bulk", change);
-
                 $scope.saving = true;
 
                 // array of objects that will be created or updated
@@ -496,7 +492,6 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                 } else {
                     updateEntryList(objects);
                 }
-                // $dataTable.handsontable('getInstance').render();
             };
 
             const getEntryObject = function (row, col, value) {
@@ -514,7 +509,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                         linkedObject.partId = value;
                     else {
                         const newIndex = col - partTypeDefault.fields.length - 3;
-                        UploadUtil.setDataValue($scope.linkedSelection.toUpperCase(), newIndex, linkedObject, value, partTypeDefault);
+                        UploadUtil.setDataValue($scope.linkedSelection.toUpperCase(), newIndex, linkedObject, value, linkedPartTypeDefault);
                     }
 
                     object.linkedParts = [linkedObject];
