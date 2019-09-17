@@ -64,13 +64,12 @@ public class RemoteEntries {
 
         FolderDetails details;
         try {
-            final String restPath = "rest/folders/public/entries";
             HashMap<String, Object> queryParams = new HashMap<>();
             queryParams.put("offset", offset);
             queryParams.put("limit", limit);
             queryParams.put("asc", asc);
             queryParams.put("sort", sort);
-            details = this.remoteContact.getFolderEntries(partner.getUrl(), restPath, queryParams, partner.getApiKey());
+            details = this.remoteContact.getFolderEntries(partner.getUrl(), queryParams, partner.getApiKey());
             if (details == null)
                 return null;
         } catch (Exception e) {

@@ -24,7 +24,7 @@ public class ModelToInfoFactory {
     public static PartData getInfo(Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
-            return null;
+            throw new IllegalArgumentException("Invalid entry type: " + entry.getRecordType());
 
         PartData partData = new PartData(type);
         PartData part = getCommon(partData, entry);
@@ -264,7 +264,7 @@ public class ModelToInfoFactory {
         return account.getId();
     }
 
-    public static PartData createTableViewData(String userId, Entry entry, boolean includeOwnerInfo, List<String> fields) {
+    public static PartData createTableViewData(Entry entry, boolean includeOwnerInfo, List<String> fields) {
         if (entry == null)
             return null;
 

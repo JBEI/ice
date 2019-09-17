@@ -122,7 +122,7 @@ public class FolderController {
 
         for (Entry entry : results) {
             try {
-                PartData info = ModelToInfoFactory.createTableViewData(null, entry, false, fields);
+                PartData info = ModelToInfoFactory.createTableViewData(entry, false, fields);
                 info.setPublicRead(true);
                 details.getEntries().add(info);
             } catch (Exception e) {

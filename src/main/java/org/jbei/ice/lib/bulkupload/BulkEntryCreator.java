@@ -18,6 +18,7 @@ import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.BulkUploadDAO;
 import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldDAO;
+import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldValueDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.*;
 
@@ -219,11 +220,9 @@ public class BulkEntryCreator {
             if (customEntryField.getFieldType() == FieldType.EXISTING)
                 continue;
 
-            CustomEntryFieldValueModel model = new CustomEntryFieldValueModel();
-            model.setEntry(entry);
             CustomEntryFieldModel customEntryFieldModel = dao.get(customEntryField.getId());
             if (customEntryFieldModel == null) {
-
+                // get details about custom field (note: this is different from value)
                 if (customEntryField.getEntryType() == null) {
                     customEntryField.setEntryType(EntryType.nameToType(entry.getRecordType()));
                 }
@@ -237,9 +236,20 @@ public class BulkEntryCreator {
                 customEntryFieldModel = optional.get();
             }
 
-            model.setField(customEntryFieldModel);
-            model.setValue(customEntryField.getValue());
-            DAOFactory.getCustomEntryFieldValueDAO().create(model);
+            CustomEntryFieldValueDAO customValueDAO = DAOFactory.getCustomEntryFieldValueDAO();
+
+            // values for custom field currently stored in the database.
+            CustomEntryFieldValueModel model = customValueDAO.getByFieldAndEntry(entry, customEntryFieldModel);
+            if (model == null) {
+                model = new CustomEntryFieldValueModel();
+                model.setEntry(entry);
+                model.setField(customEntryFieldModel);
+                model.setValue(customEntryField.getValue());
+                customValueDAO.create(model);
+            } else {
+                model.setValue(customEntryField.getValue());
+                customValueDAO.update(model);
+            }
         }
     }
 

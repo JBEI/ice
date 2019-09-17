@@ -188,12 +188,17 @@
                         <thead>
                         <tr>
                             <th style="width: 250px;" class="entry-table-header">Folder</th>
-                            <th style="width: 120px;" class="entry-table-header">Status</th>
+                            <th style="width: 120px" class="entry-table-header">
+                                <span ng-click="sortFolderRequests('status')">Status</span>
+                                <i ng-show="folderRequests.params.sort==='status'" class="fa"
+                                   ng-class="{'fa-angle-down':folderRequests.params.asc==false, 'fa-angle-up':folderRequests.params.asc==true}"></i>
+
+                            </th>
                             <th style="width: 250px;" class="entry-table-header">Actions</th>
                             <th class="entry-table-header" style="width: 150px">
-                                <span ng-click="sort('type')">Requested</span>
-                                <i ng-show="params.sort=='type'" class="fa"
-                                   ng-class="{'fa-angle-down':params.asc==false, 'fa-angle-up':params.asc==true}"></i>
+                                <span ng-click="sortFolderRequests('requested')">Requested</span>
+                                <i ng-show="folderRequests.params.sort==='requested'" class="fa fa-fw"
+                                   ng-class="{'fa-angle-down':folderRequests.params.asc==false, 'fa-angle-up':folderRequests.params.asc==true}"></i>
                             </th>
                         </tr>
                         </thead>
@@ -202,7 +207,10 @@
                             <td>
                                 <a ng-href="folders/{{request.folderDetails.id}}">{{request.folderDetails.folderName}}</a>
                                 <br>
-                                <small><b>{{request.folderDetails.count}}</b> entries</small>
+                                <small><b>{{request.folderDetails.count}}</b>
+                                    <ng-pluralize count="request.folderDetails.count"
+                                                  when="{'1': 'entry', 'other': 'entries'}"></ng-pluralize>
+                                </small>
                             </td>
                             <td style="vertical-align: middle; width:65px; white-space:nowrap"> &nbsp;
                                 <span class="label" style="font-size: 85%" ng-class="{
@@ -241,18 +249,21 @@
                     <div class="col-md-6" style="padding-left: 0">
                         <ul uib-pagination total-items="folderRequests.available" ng-change="folderRequestPageChanged()"
                             ng-model="folderRequests.params.currentPage" max-size="5"
-                            class="pagination-sm" items-per-page="15" boundary-links="true"></ul>
+                            class="pagination-sm" items-per-page="folderRequests.params.limit"
+                            boundary-links="true"></ul>
                     </div>
-                    <div class="col-md-4" style="margin-top: 20px;"><strong class="small">
-                        <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
-                        {{pageCounts(folderRequests.params.currentPage, folderRequests.available,
-                        folderRequests.params.limit)}}</strong>
+                    <div class="col-md-4" style="margin-top: 20px;">
+                        <strong class="small">
+                            <i ng-show="loadingPage" class="fa fa-spin fa-gear opacity_4"></i>
+                            {{pageCounts(folderRequests.params.currentPage, folderRequests.available,
+                            folderRequests.params.limit)}}
+                        </strong>
                     </div>
 
                     <div class="col-md-2" style="margin-top: 25px;">
                         <small class="text-muted pull-right">Show:
-                            <select ng-change="requestSamples()" ng-model="params.limit"
-                                    ng-options="opt for opt in params.hstep"></select>
+                            <select ng-change="folderRequestPageChanged()" ng-model="folderRequests.params.limit"
+                                    ng-options="opt for opt in folderRequests.params.hstep"></select>
                         </small>
                     </div>
                 </div>
@@ -276,7 +287,7 @@
                             <i class='opacity_4' ng-if="!setting.value">No value entered</i>
                             <span ng-click="setting.editMode=true">
                                 <i ng-show="partIdEdit" class="fa fa-pencil edit_icon"
-                                   style="margin-left: 5px; font-size: 14px;"></i>
+                                   style="margin-left: 5px; font-size: 14px"></i>
                             </span>
                         </div>
 
