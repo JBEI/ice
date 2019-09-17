@@ -260,6 +260,8 @@ angular.module('ice.admin.controller', [])
             const params = angular.copy($scope.params);
 
             Util.get("rest/samples/requests", function (result) {
+                console.log(result);
+
                 $scope.sampleRequests = result;
                 $scope.loadingPage = false;
                 $scope.indexStart = ($scope.currentPage - 1) * $scope.params.limit;
@@ -310,15 +312,35 @@ angular.module('ice.admin.controller', [])
             });
         };
 
+        $scope.sortFolderRequests = function (sort) {
+            $scope.folderRequests.params.asc = ($scope.folderRequests.params.sort === sort ? !$scope.folderRequests.params.asc : false);
+            $scope.folderRequests.params.currentPage = 1;
+            $scope.folderRequests.params.sort = sort;
+            $scope.folderRequestPageChanged();
+        };
+
         $scope.folderRequestPageChanged = function () {
+            $scope.folderRequests.params.offset = ($scope.folderRequests.params.currentPage - 1) * $scope.folderRequests.params.limit;
+
             Util.get("rest/samples/requests", function (result) {
                 $scope.folderRequests.available = result.count;
                 $scope.folderRequests.results = result.requests;
-            }, $scope.folderRequests);
+            }, $scope.folderRequests.params);
         };
 
         $scope.initFolderRequests = function () {
-            $scope.folderRequests = {available: 0, results: [], params: {limit: 15, currentPage: 1}, isFolder: true};
+            $scope.folderRequests = {
+                available: 0,
+                results: [],
+                params: {
+                    asc: false,
+                    sort: 'requested',
+                    limit: 15,
+                    currentPage: 1,
+                    hstep: [15, 30, 50, 100],
+                    isFolder: true
+                },
+            };
             $scope.folderRequestPageChanged();
         };
 
