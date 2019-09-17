@@ -24,7 +24,7 @@ public class ModelToInfoFactory {
     public static PartData getInfo(Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
-            return null;
+            throw new IllegalArgumentException("Invalid entry type: " + entry.getRecordType());
 
         PartData partData = new PartData(type);
         PartData part = getCommon(partData, entry);
