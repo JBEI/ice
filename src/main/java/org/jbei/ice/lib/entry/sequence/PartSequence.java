@@ -278,6 +278,9 @@ public class PartSequence {
 
     // features in existing which are not part of new sequence passed and therefore need to be deleted
     private void checkRemovedFeatures(Sequence existing, Sequence sequence) {
+        if (existing == null || existing.getSequenceFeatures() == null)
+            return;
+
         // for each existing feature check that it is in new sequence
         List<SequenceFeature> toRemoveFeatures = new ArrayList<>();
 
