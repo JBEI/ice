@@ -855,15 +855,15 @@ angular.module('ice.admin.controller', [])
         $scope.selectedFeature = undefined;
         $scope.dynamicPopover = {templateUrl: 'entryPopoverTemplate.html'}
 
-        var getFeatures = function () {
+        const getFeatures = function () {
             $scope.loadingCurationTableData = true;
             Util.get("rest/annotations", function (result) {
                 $scope.features = result.data;
 
                 angular.forEach($scope.features, function (feature) {
-                    for (var i = 0; i < feature.features.length; i += 1) {
-                        var f = feature.features[i];
-                        if (f.curation == undefined || !f.curation.exclude) {
+                    for (let i = 0; i < feature.features.length; i += 1) {
+                        const f = feature.features[i];
+                        if (!f.curation || !f.curation.exclude) {
                             feature.allSelected = false;
                             return;
                         }
@@ -892,9 +892,9 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.selectAllFeatures = function (feature) {
-            var features = [];
-            for (var i = 0; i < feature.features.length; i += 1) {
-                var f = feature.features[i];
+            const features = [];
+            for (let i = 0; i < feature.features.length; i += 1) {
+                let f = feature.features[i];
                 features.push({id: f.id, curation: {exclude: !feature.allSelected}});
             }
 
@@ -939,7 +939,6 @@ angular.module('ice.admin.controller', [])
             $scope.loading = true;
             Util.get("rest/fields/" + $scope.selection, function (result) {
                 $scope.partCustomFields = result.data;
-                console.log(result);
             }, {}, function (error) {
                 $scope.loading = false;
             })
@@ -995,7 +994,6 @@ angular.module('ice.admin.controller', [])
             {name: 'Options with Text', value: 'MULTI_CHOICE_PLUS'}];
 
         $scope.existingOptions = EntryService.getFieldsForType(entryType);
-        console.log($scope.existingOptions);
 
         // adds option
         $scope.addOption = function (afterIndex) {
@@ -1019,10 +1017,10 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.existingFieldSelected = function () {
-            console.log($scope.field.existingField);
-            $scope.field.required = $scope.field.existingField.required;
-            $scope.field.label = $scope.field.existingField.label;
-            $scope.field.options = [{name: "schema", value: $scope.field.existingField.schema}]
+            $scope.field.required = $scope.field.existingFieldObject.required;
+            $scope.field.label = $scope.field.existingFieldObject.label;
+            $scope.field.options = [{name: "schema", value: $scope.field.existingFieldObject.schema}]
+            $scope.field.existingField = $scope.field.existingFieldObject.label.toUpperCase();
         };
 
         $scope.createCustomLink = function () {
@@ -1044,7 +1042,7 @@ angular.module('ice.admin.controller', [])
             switch ($scope.field.fieldType.value) {
                 case "MULTI_CHOICE":
                 case "MULTI_CHOICE_PLUS":
-                    for (var i = 0; i < $scope.field.options.length; i += 1) {
+                    for (let i = 0; i < $scope.field.options.length; i += 1) {
                         if (!$scope.field.options[i].value)
                             return true;
                     }
