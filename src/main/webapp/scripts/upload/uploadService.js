@@ -20,8 +20,6 @@ angular.module('ice.upload.service', [])
                 },
 
                 setDataValue: function (type, index, object, value, partTypeDefault) {
-                    console.log(type, index, object, value, partTypeDefault);
-
                     const field = partTypeDefault.fields[index];
                     if (!field)
                         return;

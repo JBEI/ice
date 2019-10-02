@@ -9,8 +9,8 @@ import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.InfoToModelFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
@@ -50,7 +50,7 @@ public class EntryCreator extends HasEntry {
      * @param accessPermissions list of permissions to associate with created entry
      * @return entry that was saved in the database.
      */
-    public Entry createEntry(Account account, Entry entry, ArrayList<AccessPermission> accessPermissions) {
+    private Entry createEntry(Account account, Entry entry, ArrayList<AccessPermission> accessPermissions) {
         if (entry.getRecordId() == null) {
             entry.setRecordId(Utils.generateUUID());
             entry.setVersionId(entry.getRecordId());
@@ -205,11 +205,11 @@ public class EntryCreator extends HasEntry {
         CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
 
         for (CustomEntryField customEntryField : data.getCustomEntryFields()) {
+            // skip existing because that is covered by "existing" fields
             if (customEntryField.getFieldType() == FieldType.EXISTING)
                 continue;
 
-            CustomEntryFieldValueModel model = new CustomEntryFieldValueModel();
-            model.setEntry(entry);
+
             CustomEntryFieldModel customEntryFieldModel = dao.get(customEntryField.getId());
             if (customEntryFieldModel == null) {
 
@@ -222,6 +222,8 @@ public class EntryCreator extends HasEntry {
                 customEntryFieldModel = optional.get();
             }
 
+            CustomEntryFieldValueModel model = new CustomEntryFieldValueModel();
+            model.setEntry(entry);
             model.setField(customEntryFieldModel);
             model.setValue(customEntryField.getValue());
             DAOFactory.getCustomEntryFieldValueDAO().create(model);
@@ -251,8 +253,6 @@ public class EntryCreator extends HasEntry {
 
         // copy to data model and back ??
         PartData partData = ModelToInfoFactory.getInfo(entry);
-        if (partData == null)
-            throw new IllegalArgumentException("Cannot retrieve information for entry \"" + sourceId + "\"");
 
         entry = InfoToModelFactory.infoToEntry(partData);
 

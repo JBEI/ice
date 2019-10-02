@@ -35,7 +35,7 @@ import java.util.*;
  *
  * @author Hector Plahar
  */
-public class BulkUploadController {
+public class BulkUploads {
 
     private final BulkUploadDAO dao;
     private final EntryDAO entryDAO;
@@ -43,7 +43,7 @@ public class BulkUploadController {
     private final AccountController accountController;
     private final Attachments attachments;
 
-    public BulkUploadController() {
+    public BulkUploads() {
         dao = DAOFactory.getBulkUploadDAO();
         entryDAO = DAOFactory.getEntryDAO();
         authorization = new BulkUploadAuthorization();
@@ -175,11 +175,7 @@ public class BulkUploadController {
             info.setName(draft.getName());
 
             // add to list
-            ArrayList<BulkUploadInfo> userList = infoList.get(userEmail);
-            if (userList == null) {
-                userList = new ArrayList<>();
-                infoList.put(userEmail, userList);
-            }
+            ArrayList<BulkUploadInfo> userList = infoList.computeIfAbsent(userEmail, k -> new ArrayList<>());
             userList.add(info);
         }
 
@@ -301,7 +297,7 @@ public class BulkUploadController {
      * @param userId  account of user making the request
      * @param draftId unique identifier for bulk import
      * @return deleted bulk import
-     * @throws PermissionException
+     * @throws PermissionException if lacking permissions
      */
     public BulkUploadInfo deleteDraftById(String userId, long draftId) throws PermissionException {
         BulkUpload draft = dao.get(draftId);
@@ -321,14 +317,12 @@ public class BulkUploadController {
         return draftInfo;
     }
 
-    public BulkUploadAutoUpdate autoUpdateBulkUpload(String userId, BulkUploadAutoUpdate autoUpdate,
-                                                     EntryType addType) {
-        BulkEntryCreator creator = new BulkEntryCreator();
-        return creator.createOrUpdateEntry(userId, autoUpdate, addType);
+    BulkUploadAutoUpdate autoUpdateBulkUpload(String userId, BulkUploadAutoUpdate autoUpdate) {
+        BulkUploadEntries creator = new BulkUploadEntries(userId, autoUpdate.getBulkUploadId());
+        return creator.createOrUpdateEntry(autoUpdate);
     }
 
-
-    public boolean revertSubmitted(Account account, long uploadId) {
+    boolean revertSubmitted(Account account, long uploadId) {
         boolean isAdmin = accountController.isAdministrator(account.getEmail());
         if (!isAdmin) {
             Logger.warn(account.getEmail() + " attempting to revert submitted bulk upload "
@@ -353,7 +347,7 @@ public class BulkUploadController {
         return true;
     }
 
-    public boolean approveBulkImport(String userId, long id) {
+    boolean approveBulkImport(String userId, long id) {
         // only admins allowed
         if (!accountController.isAdministrator(userId)) {
             Logger.warn("Only administrators can approve bulk imports");

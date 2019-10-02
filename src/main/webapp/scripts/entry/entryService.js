@@ -465,6 +465,56 @@ angular.module('ice.entry.service', [])
             return sortedFields;
         };
 
+        // add custom fields to set of regular fields and sorts the fields
+        const addEntryCustomFields = function (entry, fields) {
+            entry.customFields.forEach(function (custom) {
+                if (!custom.label)
+                    return;
+                //
+                // entry[custom.label] = custom.value;
+                // fields.push({schema: custom.label, label: custom.label});
+                const customField = {
+                    label: custom.label,
+                    required: custom.required,
+                    isCustom: true,
+                    value: custom.value
+                };
+
+                switch (custom.fieldType) {
+                    case "MULTI_CHOICE":
+                    case "MULTI_CHOICE_PLUS":
+                        customField.options = [];
+                        customField.inputType = "options";
+                        custom.options.forEach(function (each) {
+                            customField.options.push({value: each.name, text: each.name})
+                        });
+
+                        if (custom.fieldType === "MULTI_CHOICE_PLUS")
+                            customField.options.push({value: "Other", text: "Other"});
+
+                        fields.push(customField);
+                        break;
+
+                    case "EXISTING":
+                        if (!custom.options || !custom.options.length)
+                            return;
+
+                        // schema is contained in options. assuming only one
+                        // todo : it is set as {name: 'schema', value: schema_value}
+                        const schema = custom.options[0].name;
+                        for (let i = 0; i < fields.length; i += 1) {
+                            if (fields[i].schema === schema) {
+                                fields[i].required = custom.required;
+                                fields[i].label = custom.label;
+                                break;
+                            }
+                        }
+                }
+            });
+            entry.fields = sortEntryFields(fields);
+            return entry;
+        };
+
         return {
             toStringArray: function (obj) {
                 return toStringArray(obj);
@@ -538,53 +588,7 @@ angular.module('ice.entry.service', [])
                     return entry;
                 }
 
-                entry.customFields.forEach(function (custom) {
-                    if (!custom.label)
-                        return;
-                    //
-                    // entry[custom.label] = custom.value;
-                    // fields.push({schema: custom.label, label: custom.label});
-                    const customField = {
-                        label: custom.label,
-                        required: custom.required,
-                        isCustom: true,
-                        value: custom.value
-                    };
-
-                    switch (custom.fieldType) {
-                        case "MULTI_CHOICE":
-                        case "MULTI_CHOICE_PLUS":
-                            customField.options = [];
-                            customField.inputType = "options";
-                            custom.options.forEach(function (each) {
-                                customField.options.push({value: each.name, text: each.name})
-                            });
-
-                            if (custom.fieldType === "MULTI_CHOICE_PLUS")
-                                customField.options.push({value: "Other", text: "Other"});
-
-                            fields.push(customField);
-                            break;
-
-                        case "EXISTING":
-                            if (!custom.options || !custom.options.length)
-                                return;
-
-                            // schema is contained in options. assuming only one
-                            // todo : it is set as {name: 'schema', value: schema_value}
-                            const schema = custom.options[0].name;
-                            for (let i = 0; i < fields.length; i += 1) {
-                                if (fields[i].schema === schema) {
-                                    fields[i].required = custom.required;
-                                    fields[i].label = custom.label;
-                                    break;
-                                }
-                            }
-                    }
-                });
-
-                entry.fields = sortEntryFields(fields);
-                return entry;
+                return addEntryCustomFields(entry, fields);
             },
 
             validateFields: function (part, fields) {
@@ -629,42 +633,7 @@ angular.module('ice.entry.service', [])
                     return entry;
                 }
 
-                entry.customFields.forEach(function (custom) {
-                    const customField = {label: custom.label, required: custom.required, isCustom: true};
-                    switch (custom.fieldType) {
-                        case "MULTI_CHOICE":
-                        case "MULTI_CHOICE_PLUS":
-                            customField.options = [];
-                            customField.inputType = "options";
-                            custom.options.forEach(function (each) {
-                                customField.options.push({value: each.name, text: each.name})
-                            });
-
-                            if (custom.fieldType === "MULTI_CHOICE_PLUS")
-                                customField.options.push({value: "Other", text: "Other"});
-
-                            fields.push(customField);
-                            break;
-
-                        case "EXISTING":
-                            if (!custom.options || !custom.options.length)
-                                return;
-
-                            // schema is contained in options. assuming only one
-                            // todo : it is set as {name: 'schema', value: schema_value}
-                            const schema = custom.options[0].name;
-                            for (let i = 0; i < fields.length; i += 1) {
-                                if (fields[i].schema === schema) {
-                                    fields[i].required = custom.required;
-                                    fields[i].label = custom.label;
-                                    break;
-                                }
-                            }
-                    }
-                });
-
-                entry.fields = sortEntryFields(fields);
-                return entry;
+                return addEntryCustomFields(entry, fields);
             },
 
             // retrieves the submenu options for entry (if param set to true then it is for a remote entry)

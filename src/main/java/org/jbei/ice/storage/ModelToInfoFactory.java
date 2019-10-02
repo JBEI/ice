@@ -225,6 +225,8 @@ public class ModelToInfoFactory {
         view.setRecordId(entry.getRecordId());
         view.setPartId(entry.getPartNumber());
         view.setName(entry.getName());
+        view.setShortDescription(entry.getShortDescription());
+
         view.setAlias(entry.getAlias());
         view.setCreator(entry.getCreator());
         view.setCreatorEmail(entry.getCreatorEmail());
@@ -244,7 +246,6 @@ public class ModelToInfoFactory {
             view.setCreatorId(account.getId());
 
         view.setKeywords(entry.getKeywords());
-        view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime().getTime());
         view.setModificationTime(entry.getModificationTime().getTime());
         view.setBioSafetyLevel(entry.getBioSafetyLevel());

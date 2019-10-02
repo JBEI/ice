@@ -1,6 +1,7 @@
 package org.jbei.ice.storage.model;
 
 import org.jbei.ice.lib.dto.entry.CustomEntryField;
+import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.FieldType;
 import org.jbei.ice.storage.DataModel;
@@ -18,12 +19,17 @@ public class CustomEntryFieldModel implements DataModel {
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "custom_entry_field_id")
     private long id;
 
+    // unique across same entry types for non-disabled fields
     @Column(name = "label")
     private String label;
 
     // type of field (e.g. multi choice etc)
     @Enumerated(EnumType.STRING)
     private FieldType fieldType;
+
+    @Column(name = "existing_entry_field")
+    @Enumerated(EnumType.STRING)
+    private EntryField existingField;
 
     @Enumerated(EnumType.STRING)
     private EntryType entryType;    // type of entry this custom field is for
@@ -82,6 +88,14 @@ public class CustomEntryFieldModel implements DataModel {
         this.disabled = disabled;
     }
 
+    public EntryField getExistingField() {
+        return existingField;
+    }
+
+    public void setExistingField(EntryField existingField) {
+        this.existingField = existingField;
+    }
+
     public List<CustomEntryFieldOptionModel> getCustomFieldLabels() {
         return customFieldLabels;
     }
@@ -94,6 +108,7 @@ public class CustomEntryFieldModel implements DataModel {
         field.setEntryType(entryType);
         field.setFieldType(fieldType);
         field.setRequired(required);
+        field.setExistingField(existingField);
 
         for (CustomEntryFieldOptionModel model : customFieldLabels) {
             field.getOptions().add(model.toDataTransferObject());

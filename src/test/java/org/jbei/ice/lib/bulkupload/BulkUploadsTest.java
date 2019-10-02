@@ -8,36 +8,23 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.lib.shared.StatusType;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author Hector Plahar
  */
-public class BulkUploadControllerTest {
+public class BulkUploadsTest extends HibernateRepositoryTest {
 
-    private BulkUploadController controller;
-
-    @Before
-    public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
-        controller = new BulkUploadController();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
-    }
+    private final BulkUploads uploads = new BulkUploads();
 
     @Test
     public void testCreate() throws Exception {
@@ -47,17 +34,17 @@ public class BulkUploadControllerTest {
         info.setName("testCreateName");
         info.setType(EntryType.PLASMID.getName());
         info.setAccount(account.toDataTransferObject());
-        info = controller.create(account.getEmail(), info);
+        info = uploads.create(account.getEmail(), info);
         Assert.assertNotNull(info);
     }
 
     @Test
     public void testGetBulkImport() throws Exception {
         Account account = AccountCreator.createTestAccount("testGetBulkImport", false);
-        BulkEntryCreator creator = new BulkEntryCreator();
+        BulkUploadEntries creator = new BulkUploadEntries(account.getEmail(), EntryType.PART);
 
         // create bulk upload
-        long id = creator.createBulkUpload(account.getEmail(), EntryType.PART);
+        long id = creator.getUploadId();
         Assert.assertTrue(id > 0);
 
         int count = 100;
@@ -68,19 +55,19 @@ public class BulkUploadControllerTest {
             partData.setShortDescription("part description");
             partData.setName("part" + i);
 
-            partData = creator.createEntry(account.getEmail(), id, partData);
+            partData = creator.createEntry(partData);
             Assert.assertNotNull(partData);
 
             // add to bulk upload
         }
 
-        BulkUploadInfo info = controller.getBulkImport(account.getEmail(), id, 0, 100);
+        BulkUploadInfo info = uploads.getBulkImport(account.getEmail(), id, 0, 100);
         Assert.assertNotNull(info);
         Assert.assertEquals(info.getEntryList().size(), 100);
 
         // test retrieval in order
         for (int i = 0; i < 100; i += 10) {
-            info = controller.getBulkImport(account.getEmail(), id, i, 10);
+            info = uploads.getBulkImport(account.getEmail(), id, i, 10);
             Assert.assertNotNull(info);
             Assert.assertEquals(info.getEntryList().size(), 10);
 
@@ -95,105 +82,117 @@ public class BulkUploadControllerTest {
 
     @Test
     public void testRetrieveByUser() throws Exception {
+        // create account 1. should not have any bulk uploads
         Account account = AccountCreator.createTestAccount("testRetrieveByUser", false);
-        ArrayList<BulkUploadInfo> results = controller.retrieveByUser("testRetrieveByUser", "testRetrieveByUser");
+        ArrayList<BulkUploadInfo> results = uploads.retrieveByUser("testRetrieveByUser", "testRetrieveByUser");
         Assert.assertEquals(0, results.size());
 
         // create strain with plasmid
+        BulkUploadInfo info = createUpload(account.getEmail(), EntryType.STRAIN);
+        Assert.assertNotNull(info);
+
+        // update
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.STRAIN);
         autoUpdate.getKeyValue().put(EntryField.NAME, "strainPlasmid");
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "strainPlasmidSummary");
         autoUpdate.getKeyValue().put(EntryField.BIO_SAFETY_LEVEL, "Level 2");
         autoUpdate.getKeyValue().put(EntryField.STATUS, "In Progress");
         autoUpdate.getKeyValue().put(EntryField.PI, "Principal Investigator");
-        autoUpdate.getKeyValue().put(EntryField.SUMMARY, "strain summary");
         autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "strain selection markers");
-        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.STRAIN);
+        autoUpdate.setBulkUploadId(info.getId());
+        autoUpdate = uploads.autoUpdateBulkUpload(account.getEmail(), autoUpdate);
         Assert.assertNotNull(autoUpdate);
-        ArrayList<BulkUploadInfo> userUpload = controller.retrieveByUser(account.getEmail(), account.getEmail());
+
+        // verify
+        ArrayList<BulkUploadInfo> userUpload = uploads.retrieveByUser(account.getEmail(), account.getEmail());
         Assert.assertNotNull(userUpload);
         Assert.assertEquals(1, userUpload.size());
 
+        // create account 2
         Account account2 = AccountCreator.createTestAccount("testRetrieveByUser2", false);
-        int count = 10;
+
+        // create second upload object
+        info = createUpload(account2.getEmail(), EntryType.PART);
+        Assert.assertNotNull(info);
+
+        final int count = new Random().nextInt(10);
         for (int i = 0; i < count; i += 1) {
             autoUpdate = new BulkUploadAutoUpdate(EntryType.PART);
             autoUpdate.getKeyValue().put(EntryField.NAME, "Name" + i);
             autoUpdate.getKeyValue().put(EntryField.PI, "PI" + i);
             autoUpdate.getKeyValue().put(EntryField.SUMMARY, "Summary" + i);
-            if (i % 2 == 0)
-                Assert.assertNotNull(controller.autoUpdateBulkUpload(account2.getEmail(), autoUpdate,
-                        EntryType.PART));
-            else
-                Assert.assertNotNull(controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate,
-                        EntryType.PART));
+            autoUpdate.setBulkUploadId(info.getId());
+            Assert.assertNotNull(uploads.autoUpdateBulkUpload(account2.getEmail(), autoUpdate));
         }
-        userUpload = controller.retrieveByUser(account2.getEmail(), account2.getEmail());
-        Assert.assertEquals(count / 2, userUpload.size());
-        userUpload = controller.retrieveByUser(account.getEmail(), account.getEmail());
-        Assert.assertEquals(count / 2 + 1, userUpload.size());
+
+        userUpload = uploads.retrieveByUser(account2.getEmail(), account2.getEmail());
+        Assert.assertEquals(1, userUpload.size());
+
+        // attempt to retrieve each others entries (should not work due to lack of permissions)
+        Assert.assertEquals(0, uploads.retrieveByUser(account.getEmail(), account2.getEmail()).size());
+        Assert.assertEquals(0, uploads.retrieveByUser(account2.getEmail(), account.getEmail()).size());
+    }
+
+    private BulkUploadInfo createUpload(String email, EntryType entryType) {
+        // create upload object
+        BulkUploadInfo info = new BulkUploadInfo();
+        info.setType(entryType.getName());
+        info.setName("my upload");
+        info.setStatus(BulkUploadStatus.IN_PROGRESS);
+        info = uploads.create(email, info);
+        Assert.assertNotNull(info);
+        return info;
     }
 
     @Test
     public void testDeleteDraftById() throws Exception {
         Account account = AccountCreator.createTestAccount("testDeleteDraftById", false);
-        BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
-        autoUpdate.getKeyValue().put(EntryField.SUMMARY, "plasmid summary");
-        autoUpdate.getKeyValue().put(EntryField.NAME, "plasmid name");
-        autoUpdate.getKeyValue().put(EntryField.PI, "plasmid principal investigator");
-        autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "plasmid select markers");
-        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.PLASMID);
-        Assert.assertNotNull(autoUpdate);
+        BulkUploadInfo info = createUpload(account.getEmail(), EntryType.STRAIN);
+        Assert.assertNotNull(uploads.getBulkImport(account.getEmail(), info.getId(), 0, 0));
 
         // delete bulk upload
-        BulkUploadDeleteTask task = new BulkUploadDeleteTask(account.getEmail(), autoUpdate.getBulkUploadId());
+        BulkUploadDeleteTask task = new BulkUploadDeleteTask(account.getEmail(), info.getId());
         task.execute();
-        Assert.assertNull(controller.getBulkImport(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0));
+        Assert.assertNull(uploads.getBulkImport(account.getEmail(), info.getId(), 0, 0));
     }
 
     @Test
     public void testAutoUpdateBulkUpload() throws Exception {
-        EntryType type = EntryType.STRAIN;
         Account account = AccountCreator.createTestAccount("testAutoUpdateBulkUpload", false);
+        BulkUploadInfo info = createUpload(account.getEmail(), EntryType.STRAIN);
+
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.STRAIN);
         autoUpdate.getKeyValue().put(EntryField.LINKS, "google");
+        autoUpdate.setBulkUploadId(info.getId());
 
-        // first auto update. expect it to create a new bulk upload and entry
-        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, type);
+        // first auto update. expect it to create a new entry
+        autoUpdate = uploads.autoUpdateBulkUpload(account.getEmail(), autoUpdate);
         Assert.assertNotNull(autoUpdate);
+
         long entryId = autoUpdate.getEntryId();
         long bulkId = autoUpdate.getBulkUploadId();
-        Assert.assertTrue(entryId > 0);
-        Assert.assertTrue(bulkId > 0);
 
-        BulkUploadInfo bulkUploadInfo = controller.getBulkImport(account.getEmail(), bulkId, 0, 1000);
+        // check bulk upload
+        BulkUploadInfo bulkUploadInfo = uploads.getBulkImport(account.getEmail(), bulkId, 0, 1000);
         Assert.assertNotNull(bulkUploadInfo);
 
+        // check entry
         EntryDAO dao = DAOFactory.getEntryDAO();
         Entry entry = dao.get(entryId);
         Assert.assertNotNull(entry);
         Assert.assertNotNull(entry.getLinks());
         Assert.assertEquals(1, entry.getLinks().size());
-
-        autoUpdate = new BulkUploadAutoUpdate(EntryType.PLASMID);
-
-        // auto update: expect plasmid and bulk upload with no fields set
-        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, type);
-        Assert.assertNotNull(autoUpdate);
-        entryId = autoUpdate.getEntryId();
-        bulkId = autoUpdate.getBulkUploadId();
-
-        Assert.assertTrue(entryId > 0);
-        Assert.assertTrue(bulkId > 0);
-
-        entry = dao.get(entryId);
-        Assert.assertNotNull(entry);
+        Assert.assertEquals("google", entry.getLinks().iterator().next().getLink());
     }
 
     @Test
     public void testRevertSubmitted() throws Exception {
+        // create accounts
         Account account = AccountCreator.createTestAccount("testRevertSubmitted", false);
         Account admin = AccountCreator.createTestAccount("testRevertSubmitted+Admin", true);
+        BulkUploadInfo info = createUpload(account.getEmail(), EntryType.SEED);
+
+        // update object
         BulkUploadAutoUpdate autoUpdate = new BulkUploadAutoUpdate(EntryType.SEED);
         autoUpdate.getKeyValue().put(EntryField.NAME, "JBEI-0001");
         autoUpdate.getKeyValue().put(EntryField.SUMMARY, "this is a test");
@@ -201,24 +200,26 @@ public class BulkUploadControllerTest {
         autoUpdate.getKeyValue().put(EntryField.STATUS, StatusType.COMPLETE.toString());
         autoUpdate.getKeyValue().put(EntryField.BIO_SAFETY_LEVEL, BioSafetyOption.LEVEL_TWO.getValue());
         autoUpdate.getKeyValue().put(EntryField.SELECTION_MARKERS, "test");
+        autoUpdate.setBulkUploadId(info.getId());
 
-        autoUpdate = controller.autoUpdateBulkUpload(account.getEmail(), autoUpdate, EntryType.SEED);
+        autoUpdate = uploads.autoUpdateBulkUpload(account.getEmail(), autoUpdate);
         Assert.assertNotNull(autoUpdate);
         Assert.assertTrue(autoUpdate.getEntryId() > 0);
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
         Assert.assertNotNull(autoUpdate.getLastUpdate());
 
-        Assert.assertNotNull(controller.getBulkImport(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0));
+        Assert.assertNotNull(uploads.getBulkImport(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0));
 
         // try to revert. not submitted
-        Assert.assertFalse(controller.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
+        Assert.assertFalse(uploads.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
 
         // actual submission (update status)
-        BulkEntryCreator bulkEntryCreator = new BulkEntryCreator();
-        bulkEntryCreator.updateStatus(account.getEmail(), autoUpdate.getBulkUploadId(), BulkUploadStatus.PENDING_APPROVAL);
-        BulkUploadInfo info = controller.getBulkImport(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
-        Assert.assertNotNull(info);
-        Assert.assertTrue(controller.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
+        BulkUploadEntries bulkUploadEntries = new BulkUploadEntries(account.getEmail(), autoUpdate.getBulkUploadId());
+        bulkUploadEntries.updateStatus(account.getEmail(), autoUpdate.getBulkUploadId(), BulkUploadStatus.PENDING_APPROVAL);
+
+        BulkUploadInfo retrieved = uploads.getBulkImport(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
+        Assert.assertNotNull(retrieved);
+        Assert.assertTrue(uploads.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
     }
 
     @Test
@@ -233,11 +234,11 @@ public class BulkUploadControllerTest {
         BulkUploadInfo testInfo = new BulkUploadInfo();
         testInfo.setName("testing");
         testInfo.setType(EntryType.STRAIN.getName());
-        testInfo = controller.create(userId, testInfo);
+        testInfo = uploads.create(userId, testInfo);
         Assert.assertNotNull(testInfo);
 
         // create entry for upload
-        BulkEntryCreator creator = new BulkEntryCreator();
+        BulkUploadEntries creator = new BulkUploadEntries(userId, testInfo.getId());
         PartData strainData = new PartData(EntryType.STRAIN);
         strainData.setName("testStrain");
         ArrayList<String> selectionMarkers = new ArrayList<>();
@@ -264,11 +265,11 @@ public class BulkUploadControllerTest {
 
         strainData.getLinkedParts().add(plasmidData);
 
-        PartData returnStrainData = creator.createEntry(userId, testInfo.getId(), strainData);
+        PartData returnStrainData = creator.createEntry(strainData);
         Assert.assertNotNull(returnStrainData);
 
         plasmidData.setStatus("In Progress");
-        plasmidData = creator.updateEntry(userId, testInfo.getId(), returnStrainData.getLinkedParts().get(0).getId(), plasmidData);
+        plasmidData = creator.updateEntry(returnStrainData.getLinkedParts().get(0).getId(), plasmidData);
         Assert.assertNotNull(plasmidData);
 //        testInfo = controller.submitBulkImportDraft(userId, testInfo.getId());
 //        Assert.assertNotNull(testInfo);
@@ -281,7 +282,7 @@ public class BulkUploadControllerTest {
         BulkUploadInfo info = new BulkUploadInfo();
         info.setAccount(account.toDataTransferObject());
         info.setType(EntryType.PART.toString());
-        BulkUploadInfo uploadInfo = controller.create(account.getEmail(), info);
+        BulkUploadInfo uploadInfo = uploads.create(account.getEmail(), info);
         Assert.assertNotNull(uploadInfo);
 
         Account accountFriend = AccountCreator.createTestAccount("testAddPermission2", false);
@@ -292,11 +293,11 @@ public class BulkUploadControllerTest {
         permission.setType(AccessPermission.Type.READ_UPLOAD);
         permission.setTypeId(id);
 
-        controller.addPermission(account.getEmail(), id, permission);
+        uploads.addPermission(account.getEmail(), id, permission);
 
-        List<AccessPermission> permissions = controller.getUploadPermissions(account.getEmail(), id);
+        List<AccessPermission> permissions = uploads.getUploadPermissions(account.getEmail(), id);
         Assert.assertNotNull(permissions);
-        Assert.assertTrue(permissions.size() == 1);
+        Assert.assertEquals(1, permissions.size());
 
         AccessPermission returnedPermission = permissions.get(0);
         Assert.assertEquals(returnedPermission.getArticle(), AccessPermission.Article.ACCOUNT);
@@ -311,7 +312,7 @@ public class BulkUploadControllerTest {
         BulkUploadInfo info = new BulkUploadInfo();
         info.setAccount(account.toDataTransferObject());
         info.setType(EntryType.PART.toString());
-        BulkUploadInfo uploadInfo = controller.create(account.getEmail(), info);
+        BulkUploadInfo uploadInfo = uploads.create(account.getEmail(), info);
         Assert.assertNotNull(uploadInfo);
 
         Account accountFriend = AccountCreator.createTestAccount("testDeletePermission2", false);
@@ -322,17 +323,17 @@ public class BulkUploadControllerTest {
         permission.setType(AccessPermission.Type.READ_UPLOAD);
         permission.setTypeId(id);
 
-        permission = controller.addPermission(account.getEmail(), id, permission);
+        permission = uploads.addPermission(account.getEmail(), id, permission);
 
-        List<AccessPermission> permissions = controller.getUploadPermissions(account.getEmail(), id);
+        List<AccessPermission> permissions = uploads.getUploadPermissions(account.getEmail(), id);
         Assert.assertNotNull(permissions);
-        Assert.assertTrue(permissions.size() == 1);
+        Assert.assertEquals(1, permissions.size());
 
         //delete
         AccessPermission returnedPermission = permissions.get(0);
-        Assert.assertTrue(controller.deletePermission(account.getEmail(), id, returnedPermission.getId()));
+        Assert.assertTrue(uploads.deletePermission(account.getEmail(), id, returnedPermission.getId()));
 
-        permissions = controller.getUploadPermissions(account.getEmail(), id);
+        permissions = uploads.getUploadPermissions(account.getEmail(), id);
         Assert.assertTrue(permissions.isEmpty());
 
         // check that the permission record has been deleted

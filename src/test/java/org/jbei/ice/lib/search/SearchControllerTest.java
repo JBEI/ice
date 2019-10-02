@@ -8,7 +8,7 @@ import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.shared.BioSafetyOption;
-import org.jbei.ice.servlet.InfoToModelFactory;
+import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
@@ -39,7 +39,7 @@ public class SearchControllerTest {
     }
 
     @Test
-    public void testParseQueryString() throws Exception {
+    public void testParseQueryString() {
         String query = "\"the quick\" brown fox jumped \"over\" \"the\" moon";
         HashMap<String, QueryType> result = controller.parseQueryString(query);
         Assert.assertNotNull(result);
@@ -70,8 +70,10 @@ public class SearchControllerTest {
         partData.setFundingSource("DOE");
         partData.setPrincipalInvestigator("Nathan");
         partData.setPlasmidData(plasmidData);
-        Entry entry = InfoToModelFactory.infoToEntry(partData);
-        entry = new EntryCreator().createEntry(account, entry, null);
+
+        partData = new EntryCreator().createPart(account.getEmail(), partData);
+        Entry entry = DAOFactory.getEntryDAO().get(partData.getId());
+
         Assert.assertNotNull(entry);
         Assert.assertTrue(entry.getId() > 0);
         HibernateUtil.commitTransaction();   // commit triggers indexing

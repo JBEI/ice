@@ -3,8 +3,8 @@ package org.jbei.ice.lib.net;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
-import org.jbei.ice.servlet.InfoToModelFactory;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.InfoToModelFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Entry;
 

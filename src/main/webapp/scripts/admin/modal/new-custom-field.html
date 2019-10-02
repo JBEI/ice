@@ -14,7 +14,8 @@
 
     <div ng-if="field.fieldType.value === 'EXISTING'">
         <b>Select built in field</b><br>
-        <select class="input_box pull_down" ng-change="existingFieldSelected()" ng-model="field.existingField" size="1"
+        <select class="input_box pull_down" ng-change="existingFieldSelected()" ng-model="field.existingFieldObject"
+                size="1"
                 ng-options="option.label for option in existingOptions"></select>
         <br><br>
     </div>

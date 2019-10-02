@@ -1,4 +1,4 @@
-package org.jbei.ice.servlet;
+package org.jbei.ice.storage;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -62,6 +62,9 @@ public class InfoToModelFactory {
 
         entry.setModificationTime(entry.getCreationTime());
         entry = setCommon(entry, info);
+
+        if (info.getVisibility() != null)
+            entry.setVisibility(info.getVisibility().getValue());
         return entry;
     }
 
@@ -406,6 +409,8 @@ public class InfoToModelFactory {
                         level = 1;
                     else if (value.contains("2"))
                         level = 2;
+                    else if ("restricted".equalsIgnoreCase(value))
+                        level = -1;
                     else
                         break;
                 }

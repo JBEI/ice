@@ -3,20 +3,13 @@ package org.jbei.ice.lib.bulkupload;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.EntryField;
-import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.utils.Utils;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.util.Enumeration;
+import java.io.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /**
  * Bulk Upload with zip files. It is expected that the zip contains a csv
@@ -27,13 +20,8 @@ import java.util.zip.ZipFile;
  */
 public class BulkZipUpload extends BulkCSVUpload {
 
-    private final Path zipFilePath;
-    private final EntryType addType;
-
-    BulkZipUpload(String userId, Path path, EntryType addType) {
-        super(userId, path, addType);
-        this.zipFilePath = path;
-        this.addType = addType;
+    BulkZipUpload(String userId, InputStream inputStream, long uploadId) {
+        super(userId, inputStream, uploadId);
     }
 
     /**
@@ -44,17 +32,15 @@ public class BulkZipUpload extends BulkCSVUpload {
      */
     public ProcessedBulkUpload processUpload() {
         ProcessedBulkUpload processedBulkUpload = new ProcessedBulkUpload();
-        String csvFile = null;
+        InputStream csvFile = null;
         HashMap<String, InputStream> files = new HashMap<>();
 
-        try {
-            ZipFile zipFile = new ZipFile(zipFilePath.toFile());
-            Enumeration<? extends ZipEntry> enumeration = zipFile.entries();
+        try (BufferedInputStream bis = new BufferedInputStream(inputStream);
+             ZipInputStream zis = new ZipInputStream(bis)) {
 
-            // go through zip elements
-            while (enumeration.hasMoreElements()) {
-                ZipEntry zipEntry = enumeration.nextElement();
-                // does not go into directories for now
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+
                 if (zipEntry.isDirectory())
                     continue;
 
@@ -66,17 +52,25 @@ public class BulkZipUpload extends BulkCSVUpload {
                 if (name.startsWith("."))
                     continue;
 
+                if (csvFile != null) {
+                    processedBulkUpload.setSuccess(false);
+                    processedBulkUpload.setUserMessage("Duplicate csv file in zip archive. It should only contain one.");
+                    return processedBulkUpload;
+                }
+
+                int len;
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                byte[] buffer = new byte[1024];
+                while ((len = zis.read(buffer)) > 0) {
+                    byteArrayOutputStream.write(buffer, 0, len);
+                }
+                zis.closeEntry();
+
                 // get main csv
                 if (name.endsWith(".csv")) {
-                    if (csvFile != null) {
-                        processedBulkUpload.setSuccess(false);
-                        processedBulkUpload.setUserMessage("Duplicate csv file in zip archive. It should only contain one.");
-                        return processedBulkUpload;
-                    }
-                    csvFile = Utils.getString(zipFile.getInputStream(zipEntry));
+                    csvFile = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
                 } else {
-                    InputStream inputStream = zipFile.getInputStream(zipEntry);
-                    files.put(name, inputStream);
+                    files.put(name, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
                 }
             }
         } catch (IOException e) {
@@ -92,14 +86,13 @@ public class BulkZipUpload extends BulkCSVUpload {
         }
 
         try {
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(csvFile.getBytes(StandardCharsets.UTF_8));
             // retrieve the partData and validates
-            List<PartWithSample> updates = super.getBulkUploadDataFromFile(inputStream);
+            List<PartWithSample> updates = super.getBulkUploadDataFromFile(csvFile);
             if (updates == null) {
                 processedBulkUpload.setSuccess(false);
                 processedBulkUpload.setUserMessage("Validation failed");
                 for (EntryField field : invalidFields) {
-                    processedBulkUpload.getHeaders().add(new EntryHeaderValue(false, field));
+                    processedBulkUpload.getHeaders().add(new EntryHeaderValue(field));
                 }
                 return processedBulkUpload;
             }
@@ -133,11 +126,10 @@ public class BulkZipUpload extends BulkCSVUpload {
             }
 
             // create actual registry parts
-            BulkEntryCreator creator = new BulkEntryCreator();
-            long uploadId = creator.createBulkUpload(userId, addType);
+            BulkUploadEntries creator = new BulkUploadEntries(userId, this.uploadId);
 
             // create entries
-            if (!creator.createEntries(userId, uploadId, updates, files)) {
+            if (!creator.createEntries(updates, files)) {
                 String errorMsg = "Error creating entries for upload";
                 throw new IOException(errorMsg);
                 //todo: delete upload id

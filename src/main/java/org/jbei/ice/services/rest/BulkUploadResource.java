@@ -1,12 +1,10 @@
 package org.jbei.ice.services.rest;
 
-import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jbei.ice.lib.access.AuthorizationException;
 import org.jbei.ice.lib.bulkupload.*;
 import org.jbei.ice.lib.common.logging.Logger;
-import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.entry.PartDefaults;
@@ -16,10 +14,8 @@ import org.jbei.ice.lib.utils.Utils;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,8 +28,7 @@ import java.util.List;
 @Path("/uploads")
 public class BulkUploadResource extends RestResource {
 
-    private BulkUploadController controller = new BulkUploadController();
-    private BulkEntryCreator creator = new BulkEntryCreator();
+    private BulkUploads controller = new BulkUploads();
 
     /**
      * Retrieves specified bulk upload resource including
@@ -170,7 +165,8 @@ public class BulkUploadResource extends RestResource {
     @Path("/{id}")
     public BulkUploadInfo updateList(@PathParam("id") long id, BulkUploadInfo info) {
         String userId = requireUserId();
-        return creator.createOrUpdateEntries(userId, id, info.getEntryList());
+        BulkUploadEntries entries = new BulkUploadEntries(userId, id);
+        return entries.createOrUpdateEntries(info.getEntryList());
     }
 
     @PUT
@@ -217,7 +213,8 @@ public class BulkUploadResource extends RestResource {
     public Response updateName(@PathParam("id") long id, BulkUploadInfo info) {
         String userId = getUserId();
         Logger.info(userId + ": updating bulk upload name for " + info.getId() + " with value " + info.getName());
-        BulkUploadInfo result = creator.renameBulkUpload(userId, id, info.getName());
+        BulkUploadEntries entries = new BulkUploadEntries(userId, id);
+        BulkUploadInfo result = entries.renameBulkUpload(userId, id, info.getName());
         if (result == null) {
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
@@ -237,7 +234,8 @@ public class BulkUploadResource extends RestResource {
     public Response updateStatus(@PathParam("id") long id, BulkUploadInfo info) {
         String userId = requireUserId();
         Logger.info(userId + ": updating bulk upload status for \"" + info.getId() + "\" to " + info.getStatus());
-        ProcessedBulkUpload resp = creator.updateStatus(userId, id, info.getStatus());
+        BulkUploadEntries entries = new BulkUploadEntries(userId, id);
+        ProcessedBulkUpload resp = entries.updateStatus(userId, id, info.getStatus());
         if (resp.isSuccess())
             return super.respond(resp);
         return super.respond(Response.Status.BAD_REQUEST, resp);
@@ -254,7 +252,8 @@ public class BulkUploadResource extends RestResource {
     public Response createEntry(@PathParam("id") long uploadId, PartData data) {
         String userId = getUserId();
         Logger.info(userId + ": adding entry to upload \"" + uploadId + "\"");
-        PartData result = creator.createEntry(userId, uploadId, data);
+        BulkUploadEntries entries = new BulkUploadEntries(userId, uploadId);
+        PartData result = entries.createEntry(data);
         return respond(result);
     }
 
@@ -271,7 +270,8 @@ public class BulkUploadResource extends RestResource {
                                 @PathParam("entryId") long entryId, PartData data) {
         String userId = getUserId();
         Logger.info(userId + ": updating entry \"" + entryId + "\" for upload \"" + uploadId + "\"");
-        PartData result = creator.updateEntry(userId, uploadId, entryId, data);
+        BulkUploadEntries entries = new BulkUploadEntries(userId, uploadId);
+        PartData result = entries.updateEntry(entryId, data);
         return respond(result);
     }
 
@@ -302,23 +302,23 @@ public class BulkUploadResource extends RestResource {
      * @return Response with the id of the imported bulk upload
      */
     @POST
-    @Path("file")
+    @Path("{id}/file")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response post(@FormDataParam("file") InputStream fileInputStream,
+    public Response post(@PathParam("id") long uploadId,
+                         @FormDataParam("file") InputStream inputStream,
                          @FormDataParam("type") String type,
                          @FormDataParam("file") FormDataContentDisposition contentDispositionHeader) {
-        try {
-            String userId = getUserId();
-            String fileName = userId + "-" + System.currentTimeMillis() + "-" +
-                    contentDispositionHeader.getFileName();
-            File file = Paths.get(Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY),
-                    "bulk-import", fileName).toFile();
-            FileUtils.copyInputStreamToFile(fileInputStream, file);
+        String userId = getUserId();
+        EntryType addType = EntryType.valueOf(type.toUpperCase());
 
-            EntryType addType = EntryType.valueOf(type.toUpperCase());
-            FileBulkUpload bulkUpload = new FileBulkUpload(userId, file.toPath(), addType);
-            ProcessedBulkUpload processedBulkUpload = bulkUpload.process();
+        // determine upload format
+        String fileName = contentDispositionHeader.getFileName();
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+        FileUploadFormat format = FileUploadFormat.fromString(extension);
+
+        try (FileBulkUpload upload = new FileBulkUpload(userId, inputStream, uploadId, addType, format)) { // todo
+            ProcessedBulkUpload processedBulkUpload = upload.process();
             if (processedBulkUpload.isSuccess())
                 return Response.status(Response.Status.OK).entity(processedBulkUpload).build();
             return Response.status(Response.Status.BAD_REQUEST).entity(processedBulkUpload).build();

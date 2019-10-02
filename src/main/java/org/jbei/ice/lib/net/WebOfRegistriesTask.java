@@ -23,7 +23,7 @@ public class WebOfRegistriesTask extends Task {
     private final String userId;
     private final RemoteContact remoteContact;
 
-    public WebOfRegistriesTask(String userId, String thisUrl, boolean enable) {
+    WebOfRegistriesTask(String userId, String thisUrl, boolean enable) {
         this.enable = enable;
         this.myUrl = thisUrl;
         this.userId = userId;
