@@ -682,8 +682,8 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                     }
                 });
 
-                modalInstance.result.then(function (msg) {
-                    // todo : reload
+                modalInstance.result.then(function () {
+                    location.reload();
                 });
             };
 
