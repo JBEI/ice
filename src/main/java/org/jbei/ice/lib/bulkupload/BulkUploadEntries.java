@@ -110,14 +110,18 @@ public class BulkUploadEntries {
             partData.setOwnerEmail(account.getEmail());
         }
         EntryCreator creator = new EntryCreator();
-        partData = creator.createPart(this.userId, partData);
-        Entry entry = entryDAO.get(partData.getId());
+        PartData created = creator.createPart(this.userId, partData);
 
+        // add to upload list
+        Entry entry = entryDAO.get(created.getId());
         upload.getContents().add(entry);
         dao.update(upload);
 
-        partData.setId(entry.getId());
-        partData.setModificationTime(entry.getModificationTime().getTime());
+        // update partData
+        partData.setId(created.getId());
+        if (!partData.getLinkedParts().isEmpty() && !created.getLinkedParts().isEmpty()) {
+            partData.getLinkedParts().get(0).setId(created.getLinkedParts().get(0).getId());
+        }
         return partData;
     }
 
