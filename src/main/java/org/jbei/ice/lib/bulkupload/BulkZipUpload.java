@@ -52,12 +52,6 @@ public class BulkZipUpload extends BulkCSVUpload {
                 if (name.startsWith("."))
                     continue;
 
-                if (csvFile != null) {
-                    processedBulkUpload.setSuccess(false);
-                    processedBulkUpload.setUserMessage("Duplicate csv file in zip archive. It should only contain one.");
-                    return processedBulkUpload;
-                }
-
                 int len;
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 byte[] buffer = new byte[1024];
@@ -68,7 +62,13 @@ public class BulkZipUpload extends BulkCSVUpload {
 
                 // get main csv
                 if (name.endsWith(".csv")) {
-                    csvFile = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+                    if (csvFile != null) {
+                        processedBulkUpload.setSuccess(false);
+                        processedBulkUpload.setUserMessage("Duplicate csv file in zip archive. It should only contain one.");
+                        return processedBulkUpload;
+                    } else {
+                        csvFile = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+                    }
                 } else {
                     files.put(name, new ByteArrayInputStream(byteArrayOutputStream.toByteArray()));
                 }
