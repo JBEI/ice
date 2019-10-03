@@ -234,6 +234,7 @@ public class BulkUploadsTest extends HibernateRepositoryTest {
         BulkUploadInfo testInfo = new BulkUploadInfo();
         testInfo.setName("testing");
         testInfo.setType(EntryType.STRAIN.getName());
+        testInfo.setLinkType(EntryType.PLASMID.getName());
         testInfo = uploads.create(userId, testInfo);
         Assert.assertNotNull(testInfo);
 
