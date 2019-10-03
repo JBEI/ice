@@ -472,8 +472,9 @@ public class BulkUploadEntries {
     }
 
     boolean createEntries(List<PartWithSample> data, HashMap<String, InputStream> files) {
-        // check permissions
+        // check permissions for upload
         authorization.expectWrite(userId, upload);
+
         SampleService sampleService = new SampleService();
 
         if (data == null)
@@ -504,52 +505,78 @@ public class BulkUploadEntries {
         return true;
     }
 
+    private void saveSequence(PartData data, Entry entry, HashMap<String, InputStream> files) throws IOException {
+        // check main entry
+        if (!StringUtils.isEmpty(data.getSequenceFileName())) {
+            String sequenceName = data.getSequenceFileName();
+            PartSequence partSequence = new PartSequence(entry.getOwnerEmail(), entry.getRecordId());
+            partSequence.parseSequenceFile(files.get(sequenceName), sequenceName, false);
+        }
+
+        // check linked
+        if (data.getLinkedParts() != null && !data.getLinkedParts().isEmpty()) {
+            Iterator<Entry> entryIterator = entry.getLinkedEntries().iterator();
+            if (entryIterator.hasNext()) {
+                saveSequence(data.getLinkedParts().get(0), entryIterator.next(), files);
+            }
+        }
+    }
+
+    private void saveAttachment(PartData data, Entry entry, HashMap<String, InputStream> files) throws IOException {
+        // check main
+        if (data.getAttachments() != null && !data.getAttachments().isEmpty()) {
+            String attachmentName = data.getAttachments().get(0).getFilename();
+            if (StringUtils.isEmpty(attachmentName))
+                return;
+
+            InputStream attachmentStream = files.get(attachmentName);
+            if (attachmentStream == null)
+                return;
+
+            // clear
+            List<Attachment> attachments = DAOFactory.getAttachmentDAO().getByEntry(entry);
+            if (attachments != null && !attachments.isEmpty()) {
+                for (Attachment attachment : attachments) {
+                    String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+                    File attachmentDir = Paths.get(dataDir, "attachments").toFile();
+                    DAOFactory.getAttachmentDAO().delete(attachmentDir, attachment);
+                }
+            }
+
+            Attachment attachment = new Attachment();
+            attachment.setEntry(entry);
+            attachment.setDescription("");
+            String fileId = Utils.generateUUID();
+            attachment.setFileId(fileId);
+            attachment.setFileName(attachmentName);
+            String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
+            Path path = Paths.get(dataDir, "attachments", attachment.getFileId());
+            Files.write(path, IOUtils.toByteArray(attachmentStream));
+            DAOFactory.getAttachmentDAO().create(attachment);
+        }
+
+        // check linked
+        if (data.getLinkedParts() != null && !data.getLinkedParts().isEmpty()) {
+            Iterator<Entry> entryIterator = entry.getLinkedEntries().iterator();
+            if (entryIterator.hasNext()) {
+                saveAttachment(data.getLinkedParts().get(0), entryIterator.next(), files);
+            }
+        }
+    }
+
     private void saveFiles(PartData data, Entry entry, HashMap<String, InputStream> files) {
         // check sequence
         try {
-            String sequenceName = data.getSequenceFileName();
-            if (!StringUtils.isBlank(sequenceName)) {
-                PartSequence partSequence = new PartSequence(entry.getOwnerEmail(), entry.getRecordId());
-                partSequence.parseSequenceFile(files.get(sequenceName), sequenceName, false);
-            }
+            saveSequence(data, entry, files);
         } catch (IOException e) {
-            Logger.error(e);
+            Logger.error("Exception saving sequence", e);
         }
 
         // check attachment
         try {
-            if (data.getAttachments() != null && !data.getAttachments().isEmpty()) {
-                String attachmentName = data.getAttachments().get(0).getFilename();
-                if (StringUtils.isEmpty(attachmentName))
-                    return;
-
-                InputStream attachmentStream = files.get(attachmentName);
-                if (attachmentStream == null)
-                    return;
-
-                // clear
-                List<Attachment> attachments = DAOFactory.getAttachmentDAO().getByEntry(entry);
-                if (attachments != null && !attachments.isEmpty()) {
-                    for (Attachment attachment : attachments) {
-                        String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-                        File attachmentDir = Paths.get(dataDir, "attachments").toFile();
-                        DAOFactory.getAttachmentDAO().delete(attachmentDir, attachment);
-                    }
-                }
-
-                Attachment attachment = new Attachment();
-                attachment.setEntry(entry);
-                attachment.setDescription("");
-                String fileId = Utils.generateUUID();
-                attachment.setFileId(fileId);
-                attachment.setFileName(attachmentName);
-                String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
-                Path path = Paths.get(dataDir, "attachments", attachment.getFileId());
-                Files.write(path, IOUtils.toByteArray(attachmentStream));
-                DAOFactory.getAttachmentDAO().create(attachment);
-            }
-        } catch (Exception e) {
-            Logger.error(e);
+            saveAttachment(data, entry, files);
+        } catch (IOException e) {
+            Logger.error("Exception saving sequence", e);
         }
     }
 }
