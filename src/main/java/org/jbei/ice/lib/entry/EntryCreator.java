@@ -195,6 +195,11 @@ public class EntryCreator extends HasEntry {
         PartData partData = new PartData(part.getType());
         partData.setId(entry.getId());
         partData.setRecordId(entry.getRecordId());
+        for (Entry linked : entry.getLinkedEntries()) {
+            PartData linkedData = new PartData(EntryType.nameToType(linked.getRecordType()));
+            linkedData.setId(linked.getId());
+            partData.getLinkedParts().add(linkedData);
+        }
         return partData;
     }
 
