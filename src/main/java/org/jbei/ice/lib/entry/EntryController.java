@@ -288,8 +288,6 @@ public class EntryController extends HasEntry {
         }
 
         PartData partData = ModelToInfoFactory.getInfo(entry);
-        if (partData == null)
-            return null;
 
         // get custom data
         CustomFields fields = new CustomFields();

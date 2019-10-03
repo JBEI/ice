@@ -12,7 +12,7 @@ class TaskHandler implements Runnable {
 
     private final Task task;
 
-    public TaskHandler(Task task) {
+    TaskHandler(Task task) {
         this.task = task;
     }
 

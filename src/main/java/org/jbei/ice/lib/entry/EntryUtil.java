@@ -61,7 +61,7 @@ public class EntryUtil {
      *
      * @return Comma separated list of links.
      */
-    public static String getLinksAsString(Set<Link> links) {
+    private static String getLinksAsString(Set<Link> links) {
         String result;
         ArrayList<String> linksStr = new ArrayList<>();
         for (Link link : links) {
@@ -72,7 +72,7 @@ public class EntryUtil {
         return result;
     }
 
-    protected static String getCommonFieldValues(Entry entry, EntryField field) {
+    private static String getCommonFieldValues(Entry entry, EntryField field) {
         switch (field) {
             case PI:
                 return entry.getPrincipalInvestigator();
@@ -127,7 +127,7 @@ public class EntryUtil {
         }
     }
 
-    protected static String getStrainFieldValues(Strain strain, EntryField field) {
+    private static String getStrainFieldValues(Strain strain, EntryField field) {
         switch (field) {
             case HOST:
                 return strain.getHost();
@@ -140,7 +140,7 @@ public class EntryUtil {
         }
     }
 
-    protected static String getPlasmidFieldValues(Plasmid plasmid, EntryField field) {
+    private static String getPlasmidFieldValues(Plasmid plasmid, EntryField field) {
         switch (field) {
             case BACKBONE:
                 return plasmid.getBackbone();
@@ -161,7 +161,7 @@ public class EntryUtil {
         }
     }
 
-    protected static String getSeedFieldValues(ArabidopsisSeed seed, EntryField field) {
+    private static String getSeedFieldValues(ArabidopsisSeed seed, EntryField field) {
         switch (field) {
             case HOMOZYGOSITY:
                 return seed.getHomozygosity();
@@ -193,7 +193,7 @@ public class EntryUtil {
         }
     }
 
-    protected static String getProteinFieldValues(Protein protein, EntryField field) {
+    private static String getProteinFieldValues(Protein protein, EntryField field) {
         switch (field) {
             case ORGANISM:
                 return protein.getOrganism();
@@ -236,9 +236,6 @@ public class EntryUtil {
      */
     public static List<EntryField> validates(PartData partData) {
         List<EntryField> invalidFields = new ArrayList<>();
-        EntryType type = partData.getType();
-        if (type == null)
-            type = EntryType.PART;
 
         if (StringUtils.isEmpty(partData.getName()))
             invalidFields.add(EntryField.NAME);
@@ -258,13 +255,10 @@ public class EntryUtil {
         if (StringUtils.isEmpty(partData.getShortDescription()))
             invalidFields.add(EntryField.SUMMARY);
 
-        // if ((type != EntryType.PART && type != EntryType.PROTEIN) && (partData.getSelectionMarkers() == null || partData.getSelectionMarkers().isEmpty()))
-        //     invalidFields.add(EntryField.SELECTION_MARKERS);
-
         return invalidFields;
     }
 
-    public static PartData setPartDefaults(PartData partData) {
+    static PartData setPartDefaults(PartData partData) {
         if (partData.getType() == EntryType.PLASMID) {
             if (partData.getPlasmidData() == null) {
                 PlasmidData plasmidData = new PlasmidData();
@@ -366,7 +360,7 @@ public class EntryUtil {
     }
 
     private static ProteinData setProteinDataFromField(ProteinData proteinData, String value,
-                                                            EntryField field) {
+                                                       EntryField field) {
         if (proteinData == null)
             proteinData = new ProteinData();
 
@@ -395,19 +389,11 @@ public class EntryUtil {
      * Updates the partData based on the field that is specified.
      * Mainly created for use by the bulk import auto update
      *
-     * @param partData  entry to be updated
-     * @param value     value to be set
-     * @param field     to set
-     * @param isSubType whether the field value to set is a subType of the entry to be updated
-     * @return partData passed in the parameter but updated with the new values
+     * @param data  entry to be updated
+     * @param value value to be set
+     * @param field entry field whose value is to be set
      */
-    public static PartData setPartDataFromField(PartData partData, String value, EntryField field, boolean isSubType) {
-        PartData data;
-        if (isSubType) {
-            data = partData.getLinkedParts().get(0);
-        } else
-            data = partData;
-
+    public static void setPartDataFromField(PartData data, String value, EntryField field) {
         switch (field) {
             case PI:
                 data.setPrincipalInvestigator(value);
@@ -434,6 +420,8 @@ public class EntryUtil {
                         level = 1;
                     else if (value.contains("2"))
                         level = 2;
+                    else if ("restricted".equalsIgnoreCase(value))
+                        level = -1;
                     else
                         break;
                 }
@@ -521,6 +509,5 @@ public class EntryUtil {
             default:
                 break;
         }
-        return partData;
     }
 }

@@ -124,6 +124,7 @@ public class CustomFields {
         model.setRequired(customField.isRequired());
         model.setFieldType(customField.getFieldType()); // todo : validate field type
         model.setEntryType(customField.getEntryType()); // todo : validate
+        model.setExistingField(customField.getExistingField());
 
         for (CustomField field : customField.getOptions()) {
             model.getCustomFieldLabels().add(new CustomEntryFieldOptionModel(field.getValue()));

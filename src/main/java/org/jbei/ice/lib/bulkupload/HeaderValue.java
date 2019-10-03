@@ -9,4 +9,5 @@ public interface HeaderValue {
 
     boolean isSampleField();
 
+    boolean isCustomField();
 }

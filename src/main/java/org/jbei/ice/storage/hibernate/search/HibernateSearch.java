@@ -57,8 +57,7 @@ public class HibernateSearch {
     public SearchResults executeSearchNoTerms(String userId, HashMap<String, SearchResult> blastResults, SearchQuery searchQuery) {
         ArrayList<EntryType> entryTypes = searchQuery.getEntryTypes();
         if (entryTypes == null || entryTypes.isEmpty()) {
-            entryTypes = new ArrayList<>();
-            entryTypes.addAll(Arrays.asList(EntryType.values()));
+            entryTypes = new ArrayList<>(Arrays.asList(EntryType.values()));
         }
 
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -211,15 +210,10 @@ public class HibernateSearch {
             resultSet.add(result.toString());
         }
 
-        Iterator<String> iterator = blastResults.keySet().iterator();
-        while (iterator.hasNext()) {
-            String key = iterator.next();
-            if (!resultSet.contains(key))
-                iterator.remove();
-        }
+        blastResults.keySet().removeIf(key -> !resultSet.contains(key));
 
-        SearchResult searchResults[] = new SearchResult[count];
-        int limit = (start + count) > blastResults.size() ? blastResults.size() : (start + count);
+        SearchResult[] searchResults = new SearchResult[count];
+        int limit = Math.min((start + count), blastResults.size());
         LinkedList<SearchResult> list = new LinkedList<>(Arrays.asList(blastResults.values().toArray(searchResults))
                 .subList(start, limit));
 
@@ -239,8 +233,7 @@ public class HibernateSearch {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
         // get classes for search
-        HashSet<String> fields = new HashSet<>();
-        fields.addAll(SearchFieldFactory.entryFields(searchQuery.getEntryTypes()));
+        HashSet<String> fields = new HashSet<>(SearchFieldFactory.entryFields(searchQuery.getEntryTypes()));
         Class<?>[] classes = SearchFieldFactory.classesForTypes(searchQuery.getEntryTypes());
 
         // generate queries for terms filtering stop words
@@ -321,14 +314,14 @@ public class HibernateSearch {
         return results;
     }
 
-    protected BooleanQuery.Builder generateQueriesForType(FullTextSession fullTextSession, HashSet<String> fields,
-                                                          BooleanQuery.Builder builder, String term, QueryType type,
-                                                          BioSafetyOption option) {
+    private void generateQueriesForType(FullTextSession fullTextSession, HashSet<String> fields,
+                                        BooleanQuery.Builder builder, String term, QueryType type,
+                                        BioSafetyOption option) {
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
         if (!StringUtils.isEmpty(term)) {
             // generate term queries for each search term
             Query query;
-            String[] queryFields = fields.toArray(new String[fields.size()]);
+            String[] queryFields = fields.toArray(new String[0]);
             if (type == QueryType.PHRASE) {
                 // phrase types are for quotes so slop is omitted
                 for (String field : fields) {
@@ -367,10 +360,9 @@ public class HibernateSearch {
                 builder.add(biosafetyQuery, BooleanClause.Occur.MUST);
             }
         }
-        return builder;
     }
 
-    protected Sort getSort(boolean asc, ColumnField sortField) {
+    private Sort getSort(boolean asc, ColumnField sortField) {
         if (sortField == null)
             sortField = ColumnField.CREATED;
 
@@ -391,9 +383,9 @@ public class HibernateSearch {
     }
 
     // empty blast results indicates valid results
-    protected void createBlastFilterQuery(FullTextSession fullTextSession,
-                                          final HashMap<String, SearchResult> blastResults,
-                                          BooleanQuery.Builder builder) {
+    private void createBlastFilterQuery(FullTextSession fullTextSession,
+                                        final HashMap<String, SearchResult> blastResults,
+                                        BooleanQuery.Builder builder) {
         // null blast results indicates no blast query
         if (blastResults == null)
             return;
@@ -414,7 +406,7 @@ public class HibernateSearch {
      * @param userId        identifier for account which is checked for administrative privs
      * @param fullTextQuery search fulltextquery for which filter is enabled
      */
-    protected FullTextQuery checkEnableSecurityFilter(String userId, FullTextQuery fullTextQuery) {
+    private FullTextQuery checkEnableSecurityFilter(String userId, FullTextQuery fullTextQuery) {
         Set<String> groupUUIDs = new HashSet<>();
         Set<String> folderIds = new HashSet<>();
 
@@ -436,7 +428,7 @@ public class HibernateSearch {
         return fullTextQuery;
     }
 
-    protected void checkEnableHasAttribute(FullTextQuery fullTextQuery, SearchQuery.Parameters parameters) {
+    private void checkEnableHasAttribute(FullTextQuery fullTextQuery, SearchQuery.Parameters parameters) {
         if (parameters == null)
             return;
 
@@ -460,7 +452,7 @@ public class HibernateSearch {
         fullTextQuery.enableFullTextFilter("boolean").setParameter("field", terms);
     }
 
-    protected static String cleanQuery(String query) {
+    private static String cleanQuery(String query) {
         if (query == null)
             return null;
         String cleanedQuery = query;

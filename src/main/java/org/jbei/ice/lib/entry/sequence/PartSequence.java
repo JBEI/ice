@@ -5,11 +5,11 @@ import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.EntryCreator;
-import org.jbei.ice.lib.entry.EntryFactory;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.executor.IceExecutorService;
@@ -54,18 +54,8 @@ public class PartSequence {
      * @param type   type of part to create.
      */
     public PartSequence(String userId, EntryType type) {
-        Entry newEntry = EntryFactory.buildEntry(type);
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-        String entryName = account.getFullName();
-        String entryEmail = account.getEmail();
-        newEntry.setOwner(entryName);
-        newEntry.setOwnerEmail(entryEmail);
-        newEntry.setCreator(entryName);
-        newEntry.setCreatorEmail(entryEmail);
-        newEntry.setVisibility(Visibility.DRAFT.getValue());
-        EntryCreator creator = new EntryCreator();
-        entry = creator.createEntry(account, newEntry, null);
-
+        long partId = createNewPart(userId, type);
+        entry = DAOFactory.getEntryDAO().get(partId);
         this.sequenceDAO = DAOFactory.getSequenceDAO();
         this.sequenceFeatureDAO = DAOFactory.getSequenceFeatureDAO();
         this.featureDAO = DAOFactory.getFeatureDAO();
@@ -89,6 +79,22 @@ public class PartSequence {
         this.featureDAO = DAOFactory.getFeatureDAO();
         this.entryAuthorization = new EntryAuthorization();
         this.userId = userId;
+    }
+
+    private long createNewPart(String userId, EntryType type) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+        String entryName = account.getFullName();
+        String entryEmail = account.getEmail();
+
+        PartData partData = new PartData(type);
+        partData.setOwner(entryName);
+        partData.setOwnerEmail(entryEmail);
+        partData.setCreator(entryName);
+        partData.setCreatorEmail(entryEmail);
+        partData.setVisibility(Visibility.DRAFT);
+        EntryCreator creator = new EntryCreator();
+        partData = creator.createPart(userId, partData);
+        return partData.getId();
     }
 
     public FeaturedDNASequence get() {
@@ -278,6 +284,9 @@ public class PartSequence {
 
     // features in existing which are not part of new sequence passed and therefore need to be deleted
     private void checkRemovedFeatures(Sequence existing, Sequence sequence) {
+        if (existing == null || existing.getSequenceFeatures() == null)
+            return;
+
         // for each existing feature check that it is in new sequence
         List<SequenceFeature> toRemoveFeatures = new ArrayList<>();
 
