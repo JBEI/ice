@@ -52,6 +52,32 @@ public class BulkUploads {
     }
 
     /**
+     * Renames the bulk upload referenced by the id in the parameter
+     *
+     * @param userId unique identifier of user performing action. Must with be an administrator
+     *               own the bulk upload
+     * @param id     unique identifier referencing the bulk upload
+     * @param name   name to assign to the bulk upload
+     * @return data transfer object for the bulk upload.
+     * returns null if no
+     * @throws PermissionException user performing action doesn't have privileges
+     */
+    public BulkUploadInfo rename(String userId, long id, String name) {
+        BulkUpload upload = dao.get(id);
+        if (upload == null)
+            return null;
+
+        authorization.expectWrite(userId, upload);
+
+        if (StringUtils.isEmpty(name))
+            return upload.toDataTransferObject();
+
+        upload.setName(name);
+        upload.setLastUpdateTime(new Date());
+        return dao.update(upload).toDataTransferObject();
+    }
+
+    /**
      * Creates a new bulk upload. If upload type is not bulk edit, then the status is set to in progress.
      * Default permissions consisting of read permissions for the public groups that the requesting user is
      * a part of are added
@@ -193,7 +219,7 @@ public class BulkUploads {
      * @return data transfer object with the retrieved bulk import data and associated entries
      * @throws PermissionException if user doesn't have read permissions for specified bulk import
      */
-    public BulkUploadInfo getBulkImport(String userId, long id, int offset, int limit) {
+    public BulkUploadInfo get(String userId, long id, int offset, int limit) {
         BulkUpload draft = dao.get(id);
         if (draft == null)
             return null;

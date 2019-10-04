@@ -26,7 +26,7 @@ public class PartDataUtil {
                 break;
 
             case SEED:
-                value = getSeedFieldValues(data.getArabidopsisSeedData(), field);
+                value = getSeedFieldValues(data.getSeedData(), field);
                 break;
 
             case PROTEIN:
@@ -159,7 +159,7 @@ public class PartDataUtil {
         }
     }
 
-    protected static String getSeedFieldValues(ArabidopsisSeedData seed, EntryField field) {
+    protected static String getSeedFieldValues(SeedData seed, EntryField field) {
         if (seed == null)
             return "";
 

@@ -44,20 +44,8 @@ public class BulkUploadEntries {
     private final EntryCreator creator;
     private final AccountController accountController;
     private final BulkUploadAuthorization authorization;
-    private final BulkUploads uploads;
     private final String userId;
     private final BulkUpload upload;
-
-    BulkUploadEntries(String userId, EntryType addType) {
-        dao = DAOFactory.getBulkUploadDAO();
-        entryDAO = DAOFactory.getEntryDAO();
-        creator = new EntryCreator();
-        accountController = new AccountController();
-        authorization = new BulkUploadAuthorization();
-        uploads = new BulkUploads();
-        this.userId = userId;
-        this.upload = createBulkUpload(addType);
-    }
 
     public BulkUploadEntries(String userId, long uploadId) {
         dao = DAOFactory.getBulkUploadDAO();
@@ -65,39 +53,26 @@ public class BulkUploadEntries {
         creator = new EntryCreator();
         accountController = new AccountController();
         authorization = new BulkUploadAuthorization();
-        uploads = new BulkUploads();
         this.userId = userId;
         this.upload = dao.get(uploadId);
         if (this.upload == null)
             throw new IllegalArgumentException("Invalid upload id \"" + uploadId + "\"");
     }
 
-    long getUploadId() {
-        return this.upload.getId();
-    }
-
     /**
-     * Creates a new bulk upload record in the database
-     *
-     * @param entryType type of bulk upload
-     * @return unique identifier for bulk upload created
-     */
-    private BulkUpload createBulkUpload(EntryType entryType) {
-        BulkUploadInfo info = new BulkUploadInfo();
-        info.setStatus(BulkUploadStatus.IN_PROGRESS);
-        info.setType(entryType.getName());
-        long uploadId = uploads.create(userId, info).getId();
-        return dao.get(uploadId);
-    }
-
-    /**
-     * Using data in the parameter, creates an entry for the specified upload
+     * Using data in the parameter, creates an entry for the specified upload.
+     * The entry type should be the same as the upload type. i.e. cannot attempt
+     * to create a <code>strain</code entry and associate it with a
+     * bulk upload of type <code>plasmid</code>
      *
      * @param data information (including field values) for creating entry object
-     * @return c
+     * @return created part data
+     * @throws IllegalArgumentException if entry type is different from upload type
      */
     public PartData createEntry(PartData data) {
         authorization.expectWrite(userId, upload);
+        if (!upload.getImportType().equalsIgnoreCase(data.getType().getName()))
+            throw new IllegalArgumentException("Attempting to add entry with different type from upload");
         return createEntryForUpload(data);
     }
 
@@ -119,18 +94,30 @@ public class BulkUploadEntries {
 
         // update partData
         partData.setId(created.getId());
-        if (!partData.getLinkedParts().isEmpty() && !created.getLinkedParts().isEmpty()) {
+        if (partData.getLinkedParts() != null && !partData.getLinkedParts().isEmpty()
+                && created.getLinkedParts() != null && !created.getLinkedParts().isEmpty()) {
             partData.getLinkedParts().get(0).setId(created.getLinkedParts().get(0).getId());
         }
         return partData;
     }
 
+    /**
+     * Updates and existing bulk upload entry with the referenced data
+     *
+     * @param entryId unique identifier for entry being updated. Must be part of the upload
+     * @param data    information used to update referenced entry
+     * @return updated entry DTO
+     * @throws PermissionException if user doesn't have write privileges on upload
+     */
     public PartData updateEntry(long entryId, PartData data) {
         authorization.expectWrite(userId, upload);
 
         Entry entry = entryDAO.get(entryId);
         if (upload.getStatus() != BulkUploadStatus.BULK_EDIT)
             entry.setVisibility(Visibility.DRAFT.getValue());
+
+        // todo : check to ensure that
+
         data = doUpdate(userId, entry, data);
         if (data == null)
             return null;
@@ -238,18 +225,19 @@ public class BulkUploadEntries {
         }
     }
 
-    public ProcessedBulkUpload updateStatus(String userId, long id, BulkUploadStatus status) {
+    /**
+     * Updates the status of entries contained in the referenced BulkUpload to the referenced status
+     *
+     * @param status new upload status to propagate to the entries
+     * @return information about the status of the request including any potential errors or failures fulfilling it
+     */
+    public ProcessedBulkUpload updateStatus(BulkUploadStatus status) {
         if (status == null)
-            return null;
-
-        // upload is allowed to be null
-        BulkUpload upload = dao.get(id);
-        if (upload == null)
             return null;
 
         authorization.expectWrite(userId, upload);
         ProcessedBulkUpload processedBulkUpload = new ProcessedBulkUpload();
-        processedBulkUpload.setUploadId(id);
+        processedBulkUpload.setUploadId(upload.getId());
 
         switch (status) {
             case PENDING_APPROVAL:
@@ -275,9 +263,10 @@ public class BulkUploadEntries {
 
             // approved by an administrator
             case APPROVED:
-                if (new BulkUploads().approveBulkImport(userId, id))
+                if (new BulkUploads().approveBulkImport(userId, upload.getId()))
                     return processedBulkUpload;
-                return null;
+                processedBulkUpload.setSuccess(false);
+                return processedBulkUpload;
 
             case BULK_EDIT:
                 upload.getContents().clear();
@@ -324,33 +313,6 @@ public class BulkUploadEntries {
             return processedBulkUpload;
         }
         return null;
-    }
-
-
-    /**
-     * Renames the bulk upload referenced by the id in the parameter
-     *
-     * @param userId unique identifier of user performing action. Must with be an administrator
-     *               own the bulk upload
-     * @param id     unique identifier referencing the bulk upload
-     * @param name   name to assign to the bulk upload
-     * @return data transfer object for the bulk upload.
-     * returns null if no
-     * @throws org.jbei.ice.lib.access.AuthorizationException is user performing action doesn't have privileges
-     */
-    public BulkUploadInfo renameBulkUpload(String userId, long id, String name) {
-        BulkUpload upload = dao.get(id);
-        if (upload == null)
-            return null;
-
-        authorization.expectWrite(userId, upload);
-
-        if (StringUtils.isEmpty(name))
-            return upload.toDataTransferObject();
-
-        upload.setName(name);
-        upload.setLastUpdateTime(new Date());
-        return dao.update(upload).toDataTransferObject();
     }
 
     /**
@@ -415,15 +377,6 @@ public class BulkUploadEntries {
                 entry.setVisibility(Visibility.DRAFT.getValue());
         }
 
-        // todo : que?
-//        EntryEditor editor = new EntryEditor();
-//        // set the plasmids and update
-//        if (entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString())
-//                && entry.getLinkedEntries().isEmpty()) {
-//            Strain strain = (Strain) entry;
-//            editor.setStrainPlasmids(account, strain, strain.getPlasmids());
-//        }
-
         updateEntry(entry);
 
         // update bulk upload. even if no new entry was created, entries belonging to it was updated
@@ -463,8 +416,9 @@ public class BulkUploadEntries {
                 if (upload.getStatus() != BulkUploadStatus.BULK_EDIT)
                     entry.setVisibility(Visibility.DRAFT.getValue());
                 datum = doUpdate(userId, entry, datum);
-            } else
-                datum = createEntryForUpload(datum);
+            } else {
+                createEntryForUpload(datum);
+            }
 
             if (datum == null)
                 return null;
@@ -492,7 +446,7 @@ public class BulkUploadEntries {
             if (partData == null)
                 continue;
 
-            partData = createEntryForUpload(partData);
+            createEntryForUpload(partData);
             Entry entry = entryDAO.get(partData.getId());
 
             // save files

@@ -252,10 +252,10 @@ angular.module('ice.entry.service', [])
                 schema: 'sentToABRC',
                 help: "Help Text",
                 inputType: 'bool',
-                subSchema: 'arabidopsisSeedData'
+                subSchema: 'seedData'
             },
             {
-                label: "Plant Type", schema: 'plantType', subSchema: 'arabidopsisSeedData', options: [
+                label: "Plant Type", schema: 'plantType', subSchema: 'seedData', options: [
                     {value: "EMS", text: "EMS"},
                     {value: "OVER_EXPRESSION", text: "OVER_EXPRESSION"},
                     {value: "RNAI", text: "RNAi"},
@@ -265,7 +265,7 @@ angular.module('ice.entry.service', [])
                 ]
             },
             {
-                label: "Generation", schema: 'generation', subSchema: 'arabidopsisSeedData', options: [
+                label: "Generation", schema: 'generation', subSchema: 'seedData', options: [
                     {value: "UNKNOWN", text: "UNKNOWN"},
                     {value: "F1", text: "F1"},
                     {value: "F2", text: "F2"},
@@ -281,9 +281,9 @@ angular.module('ice.entry.service', [])
                     {value: "T5", text: "T5"}
                 ]
             },
-            {label: "Harvest Date", schema: 'harvestDate', subSchema: 'arabidopsisSeedData', inputType: 'date'},
-            {label: "Homozygosity", schema: 'homozygosity', subSchema: 'arabidopsisSeedData', inputType: 'medium'},
-            {label: "Ecotype", schema: 'ecotype', subSchema: 'arabidopsisSeedData', inputType: 'medium'},
+            {label: "Harvest Date", schema: 'harvestDate', subSchema: 'seedData', inputType: 'date'},
+            {label: "Homozygosity", schema: 'homozygosity', subSchema: 'seedData', inputType: 'medium'},
+            {label: "Ecotype", schema: 'ecotype', subSchema: 'seedData', inputType: 'medium'},
             {
                 label: "Selection Markers", required: true, schema: 'selectionMarkers', inputType: 'autoCompleteAdd',
                 autoCompleteField: 'SELECTION_MARKERS'

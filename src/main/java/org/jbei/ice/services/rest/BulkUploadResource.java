@@ -2,7 +2,6 @@ package org.jbei.ice.services.rest;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.jbei.ice.lib.access.AuthorizationException;
 import org.jbei.ice.lib.bulkupload.*;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.access.AccessPermission;
@@ -46,7 +45,7 @@ public class BulkUploadResource extends RestResource {
                                @DefaultValue("50") @QueryParam("limit") int limit) {
         String userId = requireUserId();
         Logger.info(userId + ": retrieving bulk import with id \"" + id + "\"");
-        return controller.getBulkImport(userId, id, offset, limit);
+        return controller.get(userId, id, offset, limit);
     }
 
     /**
@@ -193,13 +192,9 @@ public class BulkUploadResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/pending")
     public Response getPendingUploads() {
-        try {
-            String userId = requireUserId();
-            HashMap<String, ArrayList<BulkUploadInfo>> pending = controller.getPendingImports(userId);
-            return Response.status(Response.Status.OK).entity(pending).build();
-        } catch (AuthorizationException ae) {
-            return respond(Response.Status.INTERNAL_SERVER_ERROR);
-        }
+        String userId = requireUserId();
+        HashMap<String, ArrayList<BulkUploadInfo>> pending = controller.getPendingImports(userId);
+        return Response.status(Response.Status.OK).entity(pending).build();
     }
 
     /**
@@ -213,8 +208,8 @@ public class BulkUploadResource extends RestResource {
     public Response updateName(@PathParam("id") long id, BulkUploadInfo info) {
         String userId = getUserId();
         Logger.info(userId + ": updating bulk upload name for " + info.getId() + " with value " + info.getName());
-        BulkUploadEntries entries = new BulkUploadEntries(userId, id);
-        BulkUploadInfo result = entries.renameBulkUpload(userId, id, info.getName());
+        BulkUploads uploads = new BulkUploads();
+        BulkUploadInfo result = uploads.rename(userId, id, info.getName());
         if (result == null) {
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
@@ -235,7 +230,7 @@ public class BulkUploadResource extends RestResource {
         String userId = requireUserId();
         Logger.info(userId + ": updating bulk upload status for \"" + info.getId() + "\" to " + info.getStatus());
         BulkUploadEntries entries = new BulkUploadEntries(userId, id);
-        ProcessedBulkUpload resp = entries.updateStatus(userId, id, info.getStatus());
+        ProcessedBulkUpload resp = entries.updateStatus(info.getStatus());
         if (resp.isSuccess())
             return super.respond(resp);
         return super.respond(Response.Status.BAD_REQUEST, resp);

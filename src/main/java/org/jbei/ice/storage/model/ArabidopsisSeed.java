@@ -131,7 +131,7 @@ public class ArabidopsisSeed extends Entry {
     @Override
     public PartData toDataTransferObject() {
         PartData data = super.toDataTransferObject();
-        ArabidopsisSeedData seedData = new ArabidopsisSeedData();
+        SeedData seedData = new SeedData();
         seedData.setEcotype(this.ecotype);
         seedData.setGeneration(this.generation);
         if (this.harvestDate != null) {
@@ -143,7 +143,7 @@ public class ArabidopsisSeed extends Entry {
         seedData.setSeedParents(this.parents);
         seedData.setPlantType(this.plantType);
         seedData.setSentToAbrc(this.sentToABRC);
-        data.setArabidopsisSeedData(seedData);
+        data.setSeedData(seedData);
         return data;
     }
 }

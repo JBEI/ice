@@ -317,10 +317,10 @@ public class EntryUtil {
         return plasmidData;
     }
 
-    private static ArabidopsisSeedData setSeedDataFromField(ArabidopsisSeedData seedData, String value,
-                                                            EntryField field) {
+    private static SeedData setSeedDataFromField(SeedData seedData, String value,
+                                                 EntryField field) {
         if (seedData == null)
-            seedData = new ArabidopsisSeedData();
+            seedData = new SeedData();
 
         switch (field) {
             case HOMOZYGOSITY:
@@ -488,7 +488,7 @@ public class EntryUtil {
             case SENT_TO_ABRC:
             case PLANT_TYPE:
             case PARENTS:
-                data.setArabidopsisSeedData(setSeedDataFromField(data.getArabidopsisSeedData(), value, field));
+                data.setSeedData(setSeedDataFromField(data.getSeedData(), value, field));
                 break;
 
             case ORGANISM:

@@ -39,7 +39,7 @@ public class ModelToInfoFactory {
                 break;
 
             case SEED:
-                part.setArabidopsisSeedData(seedInfo(entry));
+                part.setSeedData(seedInfo(entry));
                 break;
 
             case PROTEIN:
@@ -71,8 +71,8 @@ public class ModelToInfoFactory {
         return infos;
     }
 
-    private static ArabidopsisSeedData seedInfo(Entry entry) {
-        ArabidopsisSeedData data = new ArabidopsisSeedData();
+    private static SeedData seedInfo(Entry entry) {
+        SeedData data = new SeedData();
 
         // seed specific
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
@@ -362,7 +362,7 @@ public class ModelToInfoFactory {
                 break;
 
             case SEED:
-                ArabidopsisSeedData seedData = new ArabidopsisSeedData();
+                SeedData seedData = new SeedData();
                 ArabidopsisSeed seed = (ArabidopsisSeed) entry;
                 PlantType plantType = PlantType.fromString(seed.getPlantType().toString());
                 seedData.setPlantType(plantType);
@@ -377,7 +377,7 @@ public class ModelToInfoFactory {
                     String dateFormat = format.format(seed.getHarvestDate());
                     seedData.setHarvestDate(dateFormat);
                 }
-                part.setArabidopsisSeedData(seedData);
+                part.setSeedData(seedData);
                 break;
 
             default:

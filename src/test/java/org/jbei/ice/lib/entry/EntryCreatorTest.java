@@ -55,12 +55,12 @@ public class EntryCreatorTest {
 
         // create arabidopsis seed
         PartData seed = new PartData(EntryType.SEED);
-        ArabidopsisSeedData seedData = new ArabidopsisSeedData();
+        SeedData seedData = new SeedData();
         seedData.setGeneration(Generation.F3);
         seedData.setPlantType(PlantType.OTHER);
         seedData.setHarvestDate("01/02/2014");
         seed.setBioSafetyLevel(2);
-        seed.setArabidopsisSeedData(seedData);
+        seed.setSeedData(seedData);
 
         long seedId = creator.createPart(userId, seed).getId();
         ArabidopsisSeed entrySeed = (ArabidopsisSeed) DAOFactory.getEntryDAO().get(seedId);

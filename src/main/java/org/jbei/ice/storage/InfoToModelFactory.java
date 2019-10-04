@@ -32,7 +32,7 @@ public class InfoToModelFactory {
                 break;
 
             case SEED:
-                entry = setSeedFields(info.getArabidopsisSeedData(), new ArabidopsisSeed());
+                entry = setSeedFields(info.getSeedData(), new ArabidopsisSeed());
                 break;
 
             case PROTEIN:
@@ -106,7 +106,7 @@ public class InfoToModelFactory {
         return entry;
     }
 
-    private static Entry setSeedFields(ArabidopsisSeedData seedData, Entry entry) {
+    private static Entry setSeedFields(SeedData seedData, Entry entry) {
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
         if (seedData == null)
             return entry;
@@ -193,7 +193,7 @@ public class InfoToModelFactory {
                 break;
 
             case SEED:
-                entry = setSeedFields(data.getArabidopsisSeedData(), entry);
+                entry = setSeedFields(data.getSeedData(), entry);
                 break;
 
             case PROTEIN:

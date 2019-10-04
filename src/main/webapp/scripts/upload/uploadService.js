@@ -117,7 +117,7 @@ angular.module('ice.upload.service', [])
                             break;
 
                         case "seed":
-                            object.arabidopsisSeedData = {};
+                            object.seedData = {};
                             break;
 
                         case "protein":

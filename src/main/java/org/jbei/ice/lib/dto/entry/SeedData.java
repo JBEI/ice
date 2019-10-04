@@ -2,7 +2,7 @@ package org.jbei.ice.lib.dto.entry;
 
 import org.jbei.ice.storage.IDataTransferModel;
 
-public class ArabidopsisSeedData implements IDataTransferModel {
+public class SeedData implements IDataTransferModel {
 
     private static final long serialVersionUID = 1L;
 

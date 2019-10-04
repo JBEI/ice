@@ -41,14 +41,17 @@ public class BulkUploadsTest extends HibernateRepositoryTest {
     @Test
     public void testGetBulkImport() throws Exception {
         Account account = AccountCreator.createTestAccount("testGetBulkImport", false);
-        BulkUploadEntries creator = new BulkUploadEntries(account.getEmail(), EntryType.PART);
+
+        BulkUploads uploads = new BulkUploads();
+        BulkUploadInfo info = new BulkUploadInfo();
+        info.setStatus(BulkUploadStatus.IN_PROGRESS);
+        info.setType(EntryType.PLASMID.getName());
+        long uploadId = uploads.create(account.getEmail(), info).getId();
+
+        BulkUploadEntries creator = new BulkUploadEntries(account.getEmail(), uploadId);
 
         // create bulk upload
-        long id = creator.getUploadId();
-        Assert.assertTrue(id > 0);
-
         int count = 100;
-
         for (int i = 0; i < count; i += 1) {
             PartData partData = new PartData(EntryType.PLASMID);
             partData.setBioSafetyLevel(1);
@@ -61,13 +64,13 @@ public class BulkUploadsTest extends HibernateRepositoryTest {
             // add to bulk upload
         }
 
-        BulkUploadInfo info = uploads.getBulkImport(account.getEmail(), id, 0, 100);
+        info = uploads.get(account.getEmail(), uploadId, 0, 100);
         Assert.assertNotNull(info);
         Assert.assertEquals(info.getEntryList().size(), 100);
 
         // test retrieval in order
         for (int i = 0; i < 100; i += 10) {
-            info = uploads.getBulkImport(account.getEmail(), id, i, 10);
+            info = uploads.get(account.getEmail(), uploadId, i, 10);
             Assert.assertNotNull(info);
             Assert.assertEquals(info.getEntryList().size(), 10);
 
@@ -148,12 +151,12 @@ public class BulkUploadsTest extends HibernateRepositoryTest {
     public void testDeleteDraftById() throws Exception {
         Account account = AccountCreator.createTestAccount("testDeleteDraftById", false);
         BulkUploadInfo info = createUpload(account.getEmail(), EntryType.STRAIN);
-        Assert.assertNotNull(uploads.getBulkImport(account.getEmail(), info.getId(), 0, 0));
+        Assert.assertNotNull(uploads.get(account.getEmail(), info.getId(), 0, 0));
 
         // delete bulk upload
         BulkUploadDeleteTask task = new BulkUploadDeleteTask(account.getEmail(), info.getId());
         task.execute();
-        Assert.assertNull(uploads.getBulkImport(account.getEmail(), info.getId(), 0, 0));
+        Assert.assertNull(uploads.get(account.getEmail(), info.getId(), 0, 0));
     }
 
     @Test
@@ -173,7 +176,7 @@ public class BulkUploadsTest extends HibernateRepositoryTest {
         long bulkId = autoUpdate.getBulkUploadId();
 
         // check bulk upload
-        BulkUploadInfo bulkUploadInfo = uploads.getBulkImport(account.getEmail(), bulkId, 0, 1000);
+        BulkUploadInfo bulkUploadInfo = uploads.get(account.getEmail(), bulkId, 0, 1000);
         Assert.assertNotNull(bulkUploadInfo);
 
         // check entry
@@ -208,16 +211,16 @@ public class BulkUploadsTest extends HibernateRepositoryTest {
         Assert.assertTrue(autoUpdate.getBulkUploadId() > 0);
         Assert.assertNotNull(autoUpdate.getLastUpdate());
 
-        Assert.assertNotNull(uploads.getBulkImport(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0));
+        Assert.assertNotNull(uploads.get(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0));
 
         // try to revert. not submitted
         Assert.assertFalse(uploads.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
 
         // actual submission (update status)
         BulkUploadEntries bulkUploadEntries = new BulkUploadEntries(account.getEmail(), autoUpdate.getBulkUploadId());
-        bulkUploadEntries.updateStatus(account.getEmail(), autoUpdate.getBulkUploadId(), BulkUploadStatus.PENDING_APPROVAL);
+        bulkUploadEntries.updateStatus(BulkUploadStatus.PENDING_APPROVAL);
 
-        BulkUploadInfo retrieved = uploads.getBulkImport(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
+        BulkUploadInfo retrieved = uploads.get(account.getEmail(), autoUpdate.getBulkUploadId(), 0, 0);
         Assert.assertNotNull(retrieved);
         Assert.assertTrue(uploads.revertSubmitted(admin, autoUpdate.getBulkUploadId()));
     }

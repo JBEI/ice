@@ -31,7 +31,7 @@ public class Authorization<T extends DataModel> {
     }
 
     // performs validation based on owner or same group membership
-    public IDataTransferModel get(String userId, long id) throws AuthorizationException {
+    public IDataTransferModel get(String userId, long id) throws PermissionException {
         T object = getObjectById(id);
         if (object == null)
             return null;
@@ -41,7 +41,7 @@ public class Authorization<T extends DataModel> {
         if (isAdmin || canRead(userId, object))
             return object.toDataTransferObject();
 
-        throw new AuthorizationException(userId + " does not have authorization for this action");
+        throw new PermissionException(userId + " does not have permission for this action");
     }
 
     protected String getOwner(T object) {
