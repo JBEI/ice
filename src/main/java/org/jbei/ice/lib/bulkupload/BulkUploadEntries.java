@@ -119,7 +119,8 @@ public class BulkUploadEntries {
 
         // update partData
         partData.setId(created.getId());
-        if (!partData.getLinkedParts().isEmpty() && !created.getLinkedParts().isEmpty()) {
+        if (partData.getLinkedParts() != null && !partData.getLinkedParts().isEmpty()
+                && created.getLinkedParts() != null && !created.getLinkedParts().isEmpty()) {
             partData.getLinkedParts().get(0).setId(created.getLinkedParts().get(0).getId());
         }
         return partData;
