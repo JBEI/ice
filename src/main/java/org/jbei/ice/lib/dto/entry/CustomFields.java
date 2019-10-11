@@ -162,7 +162,7 @@ public class CustomFields {
             fields.add(valueModel.toDataTransferObject());
         }
 
-        // add entry field types that are not in custom field values (I am sure there is a query for this)
+        // add entry field types that are not in custom field values
         Iterator<CustomEntryFieldModel> iterator = typeFields.iterator();
         while (iterator.hasNext()) {
             CustomEntryFieldModel next = iterator.next();

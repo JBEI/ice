@@ -6,7 +6,7 @@ import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
-import org.jbei.ice.lib.entry.EntryCreator;
+import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryLinks;
 import org.jbei.ice.lib.entry.LinkType;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
@@ -167,8 +167,8 @@ public class SBOLParser extends AbstractParser {
         partData.setShortDescription(description);
         partData.setName(name);
 
-        EntryCreator entryCreator = new EntryCreator();
-        partData = entryCreator.createPart(partData.getCreatorEmail(), partData);
+        Entries entryCreator = new Entries(partData.getCreatorEmail());
+        partData = entryCreator.create(partData);
         Entry entry = entryDAO.get(partData.getId());
         parseToGenBank(document, entry.getName(), entry, moduleDefinition.getIdentity().toString());
 

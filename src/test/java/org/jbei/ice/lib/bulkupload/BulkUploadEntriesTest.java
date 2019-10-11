@@ -143,7 +143,7 @@ public class BulkUploadEntriesTest extends HibernateRepositoryTest {
         PartData retrievedPart = retrieved.getEntryList().get(0);
 
         Assert.assertEquals(1, retrievedPart.getLinkedParts().size());
-        Assert.assertEquals("test 1", strainData.getPrincipalInvestigator());
+        Assert.assertEquals("test 1", strainData.getPrincipalInvestigator()); // todo check for plasmid
 
         // update
         strainData.setPrincipalInvestigator("ICE");

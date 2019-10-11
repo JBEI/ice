@@ -7,10 +7,12 @@ import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.bulkupload.EditMode;
-import org.jbei.ice.lib.dto.entry.*;
+import org.jbei.ice.lib.dto.entry.EntryField;
+import org.jbei.ice.lib.dto.entry.PartData;
+import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.email.EmailFactory;
-import org.jbei.ice.lib.entry.EntryCreator;
+import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryLinks;
 import org.jbei.ice.lib.entry.LinkType;
 import org.jbei.ice.lib.entry.sample.SampleService;
@@ -19,10 +21,11 @@ import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.InfoToModelFactory;
 import org.jbei.ice.storage.hibernate.dao.BulkUploadDAO;
-import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldDAO;
-import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldValueDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
-import org.jbei.ice.storage.model.*;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Attachment;
+import org.jbei.ice.storage.model.BulkUpload;
+import org.jbei.ice.storage.model.Entry;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,7 +44,7 @@ public class BulkUploadEntries {
 
     private final BulkUploadDAO dao;
     private final EntryDAO entryDAO;
-    private final EntryCreator creator;
+    private final Entries entries;
     private final AccountController accountController;
     private final BulkUploadAuthorization authorization;
     private final String userId;
@@ -50,7 +53,7 @@ public class BulkUploadEntries {
     public BulkUploadEntries(String userId, long uploadId) {
         dao = DAOFactory.getBulkUploadDAO();
         entryDAO = DAOFactory.getEntryDAO();
-        creator = new EntryCreator();
+        entries = new Entries(userId);
         accountController = new AccountController();
         authorization = new BulkUploadAuthorization();
         this.userId = userId;
@@ -84,8 +87,7 @@ public class BulkUploadEntries {
             partData.setOwner(account.getFullName());
             partData.setOwnerEmail(account.getEmail());
         }
-        EntryCreator creator = new EntryCreator();
-        PartData created = creator.createPart(this.userId, partData);
+        PartData created = entries.create(partData);
 
         // add to upload list
         Entry entry = entryDAO.get(created.getId());
@@ -131,19 +133,11 @@ public class BulkUploadEntries {
         if (entry == null)
             return null;
 
-        entry = InfoToModelFactory.updateEntryField(data, entry);
-        if (entry == null)
-            return null;
-
-        entry.setModificationTime(new Date());
-        entry = entryDAO.update(entry);
-        data.setModificationTime(entry.getModificationTime().getTime());
-
-        // custom fields
-        setCustomFieldValuesForPart(entry, data);
+        Entries entries = new Entries(userId);
+        entries.update(entry.getId(), data);
 
         // check if there is any linked parts. update if so (expect a max of 1)
-        if (data.getLinkedParts() == null || data.getLinkedParts().size() == 0)
+        if (data.getLinkedParts() == null || data.getLinkedParts().isEmpty())
             return data;
 
         // retrieve the entry (this is the only time you can create another entry on update)
@@ -157,6 +151,7 @@ public class BulkUploadEntries {
         }
 
         if (linkedEntry == null) {
+            // create new object for linked entry
             linkedEntry = InfoToModelFactory.infoToEntry(linkedPartData);
             if (linkedEntry != null) {
                 linkedEntry.setVisibility(Visibility.DRAFT.getValue());
@@ -164,8 +159,10 @@ public class BulkUploadEntries {
                 linkedEntry.setOwner(account.getFullName());
                 linkedEntry.setOwnerEmail(account.getEmail());
                 linkedEntry = entryDAO.create(linkedEntry);
+
                 entry.getLinkedEntries().add(linkedEntry);
                 entryDAO.update(linkedEntry);
+                linkedPartData.setId(linkedEntry.getId());
             }
         } else {
             // linking to existing
@@ -180,49 +177,6 @@ public class BulkUploadEntries {
             data.getLinkedParts().add(linked);
 
         return data;
-    }
-
-    private void setCustomFieldValuesForPart(Entry entry, PartData data) {
-        if (data == null || data.getCustomEntryFields() == null || entry == null)
-            return;
-
-        CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
-
-        for (CustomEntryField customEntryField : data.getCustomEntryFields()) {
-            if (customEntryField.getFieldType() == FieldType.EXISTING)
-                continue;
-
-            CustomEntryFieldModel customEntryFieldModel = dao.get(customEntryField.getId());
-            if (customEntryFieldModel == null) {
-                // get details about custom field (note: this is different from value)
-                if (customEntryField.getEntryType() == null) {
-                    customEntryField.setEntryType(EntryType.nameToType(entry.getRecordType()));
-                }
-
-                // try again with label and type
-                Optional<CustomEntryFieldModel> optional = dao.getLabelForType(customEntryField.getEntryType(), customEntryField.getLabel());
-                if (!optional.isPresent()) {
-                    Logger.error("Could not retrieve custom field with id " + customEntryField.getId());
-                    continue;
-                }
-                customEntryFieldModel = optional.get();
-            }
-
-            CustomEntryFieldValueDAO customValueDAO = DAOFactory.getCustomEntryFieldValueDAO();
-
-            // values for custom field currently stored in the database.
-            CustomEntryFieldValueModel model = customValueDAO.getByFieldAndEntry(entry, customEntryFieldModel);
-            if (model == null) {
-                model = new CustomEntryFieldValueModel();
-                model.setEntry(entry);
-                model.setField(customEntryFieldModel);
-                model.setValue(customEntryField.getValue());
-                customValueDAO.create(model);
-            } else {
-                model.setValue(customEntryField.getValue());
-                customValueDAO.update(model);
-            }
-        }
     }
 
     /**
@@ -333,7 +287,6 @@ public class BulkUploadEntries {
 
         // for strain with plasmid this is the strain
         Entry entry = entryDAO.get(autoUpdate.getEntryId());
-        Entry otherEntry = null;  // for strain with plasmid this is the entry
 
         // if entry is null, create entry
         if (entry == null) {
@@ -342,7 +295,7 @@ public class BulkUploadEntries {
             partData.setOwnerEmail(account.getEmail());
             partData.setCreator(account.getFullName());
             partData.setCreatorEmail(account.getEmail());
-            partData = creator.createPart(userId, partData);
+            partData = entries.create(partData);
             entry = entryDAO.get(partData.getId());
 
             autoUpdate.setEntryId(entry.getId());
@@ -355,27 +308,21 @@ public class BulkUploadEntries {
         for (Map.Entry<EntryField, String> set : autoUpdate.getKeyValue().entrySet()) {
             String value = set.getValue();
             EntryField field = set.getKey();
-
-            Entry[] ret = InfoToModelFactory.infoToEntryForField(entry, otherEntry, value, field);
-            entry = ret[0];
-
-            if (ret.length == 2) {
-                otherEntry = ret[1];
-            }
+            InfoToModelFactory.infoToEntryForField(entry, new String[]{value}, field);
         }
 
-        if (this.upload != null && this.upload.getStatus() != BulkUploadStatus.PENDING_APPROVAL) {
-            if (otherEntry != null && autoUpdate.getEditMode() != EditMode.BULK_EDIT) {
-                if (otherEntry.getVisibility() == null || otherEntry.getVisibility() != Visibility.DRAFT.getValue())
-                    otherEntry.setVisibility(Visibility.DRAFT.getValue());
-
-                updateEntry(otherEntry);
-            }
-
-            if ((entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
-                    && autoUpdate.getEditMode() != EditMode.BULK_EDIT)
-                entry.setVisibility(Visibility.DRAFT.getValue());
-        }
+//        if (this.upload != null && this.upload.getStatus() != BulkUploadStatus.PENDING_APPROVAL) {
+//            if (otherEntry != null && autoUpdate.getEditMode() != EditMode.BULK_EDIT) {
+//                if (otherEntry.getVisibility() == null || otherEntry.getVisibility() != Visibility.DRAFT.getValue())
+//                    otherEntry.setVisibility(Visibility.DRAFT.getValue());
+//
+//                updateEntry(otherEntry);
+//            }
+//
+//            if ((entry.getVisibility() == null || entry.getVisibility() != Visibility.DRAFT.getValue())
+//                    && autoUpdate.getEditMode() != EditMode.BULK_EDIT)
+//                entry.setVisibility(Visibility.DRAFT.getValue());
+//        }
 
         updateEntry(entry);
 

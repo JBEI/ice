@@ -6,7 +6,7 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.PlasmidData;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResults;
-import org.jbei.ice.lib.entry.EntryCreator;
+import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.shared.BioSafetyOption;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateUtil;
@@ -71,7 +71,7 @@ public class SearchControllerTest {
         partData.setPrincipalInvestigator("Nathan");
         partData.setPlasmidData(plasmidData);
 
-        partData = new EntryCreator().createPart(account.getEmail(), partData);
+        partData = new Entries(account.getEmail()).create(partData);
         Entry entry = DAOFactory.getEntryDAO().get(partData.getId());
 
         Assert.assertNotNull(entry);

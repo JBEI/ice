@@ -3,8 +3,7 @@ package org.jbei.ice.lib.dto.entry;
 import org.jbei.ice.storage.IDataTransferModel;
 
 /**
- * Represents the complete list of fields for parts.
- * These are mostly used in bulk uploads as headers
+ * Represents the complete (default) list of fields for parts.
  *
  * @author Hector Plahar
  */

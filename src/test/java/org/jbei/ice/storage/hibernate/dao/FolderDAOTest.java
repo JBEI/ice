@@ -6,7 +6,7 @@ import org.jbei.ice.lib.dto.common.PageParameters;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.entry.EntryCreator;
+import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
@@ -193,7 +193,7 @@ public class FolderDAOTest extends HibernateRepositoryTest {
             part.setOwnerEmail(email);
             part.setAlias("alias" + i);
             part.setShortDescription("short description");
-            part = new EntryCreator().createPart(account.getEmail(), part);
+            part = new Entries(account.getEmail()).create(part);
             Entry entry = DAOFactory.getEntryDAO().get(part.getId());
             entries.add(entry);
         }

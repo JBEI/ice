@@ -367,39 +367,45 @@ public class InfoToModelFactory {
     }
 
     /**
-     * Updates the entry based on the field that is specified. Mainly created for use by the bulk import auto update
+     * Updates the entry based on the field that is specified.
      *
-     * @param entry   entry to be updated
-     * @param plasmid should be set if updating strain with plasmid
-     * @param value   value to be set
-     * @param field   to set
-     * @return updated entry array containing both entry and plasmid. if plasmid is null only entry is returned
+     * @param entry  entry to be updated
+     * @param values list of value to set. some fields like selections markers can handle multiple values.
+     * @param field  to set
      */
-    public static Entry[] infoToEntryForField(Entry entry, Entry plasmid, String value, EntryField field) {
-        switch (field) {
-            case PI: {
-                entry.setPrincipalInvestigator(value);
-                if (plasmid != null)
-                    plasmid.setPrincipalInvestigator(value);
-                break;
-            }
+    public static void infoToEntryForField(Entry entry, String[] values, EntryField field) {
+        if (entry == null || values.length == 0)
+            return;
 
-            case PI_EMAIL: {
+        String value = values[0];
+
+        switch (field) {
+            case PI:
+                entry.setPrincipalInvestigator(value);
+                if (values.length > 1)
+                    entry.setPrincipalInvestigatorEmail(values[1]);
+                break;
+
+            case PI_EMAIL:
                 entry.setPrincipalInvestigatorEmail(value);
                 break;
-            }
 
-            case FUNDING_SOURCE: {
-                entry.setFundingSource(value);
-                if (plasmid != null)
-                    plasmid.setFundingSource(value);
+            case CREATOR:
+                entry.setCreator(value);
+                if (values.length > 1)
+                    entry.setCreatorEmail(values[1]);
                 break;
-            }
+
+            case CREATOR_EMAIL:
+                entry.setCreatorEmail(value);
+                break;
+
+            case FUNDING_SOURCE:
+                entry.setFundingSource(value);
+                break;
 
             case IP:
                 entry.setIntellectualProperty(value);
-                if (plasmid != null)
-                    plasmid.setIntellectualProperty(value);
                 break;
 
             case BIO_SAFETY_LEVEL:
@@ -415,9 +421,6 @@ public class InfoToModelFactory {
                         break;
                 }
                 entry.setBioSafetyLevel(level);
-                if (plasmid != null) {
-                    plasmid.setBioSafetyLevel(level);
-                }
                 break;
 
             case NAME:
@@ -446,29 +449,30 @@ public class InfoToModelFactory {
 
             case LINKS:
                 HashSet<Link> links = new HashSet<>();
-                Link link = new Link();
-                link.setLink(value);
-                link.setEntry(entry);
-                links.add(link);
+                for (String linkValue : values) {
+                    Link link = new Link();
+                    link.setLink(linkValue);
+                    link.setEntry(entry);
+                    links.add(link);
+                }
                 entry.setLinks(links);
                 break;
 
             case STATUS:
                 entry.setStatus(value);
-                if (plasmid != null)
-                    plasmid.setStatus(value);
                 break;
 
             case SELECTION_MARKERS:
                 HashSet<SelectionMarker> markers = new HashSet<>();
-                SelectionMarker marker = new SelectionMarker(value, entry);
-                markers.add(marker);
+                for (String markerValue : values) {
+                    markers.add(new SelectionMarker(markerValue, entry));
+                }
                 entry.setSelectionMarkers(markers);
                 break;
 
             case HOST:
             case GENOTYPE_OR_PHENOTYPE:
-                entry = infoToStrainForField(entry, value, field);
+                infoToStrainForField(entry, value, field);
                 break;
 
             case BACKBONE:
@@ -476,7 +480,7 @@ public class InfoToModelFactory {
             case CIRCULAR:
             case PROMOTERS:
             case REPLICATES_IN:
-                entry = infoToPlasmidForField(entry, value, field);
+                infoToPlasmidForField(entry, value, field);
                 break;
 
             case HOMOZYGOSITY:
@@ -486,94 +490,86 @@ public class InfoToModelFactory {
             case SENT_TO_ABRC:
             case PLANT_TYPE:
             case PARENTS:
-                entry = infoToSeedForField(entry, value, field);
+                infoToSeedForField(entry, value, field);
                 break;
 
             case ORGANISM:
             case FULL_NAME:
             case GENE_NAME:
             case UPLOADED_FROM:
-                entry = infoToProteinForField(entry, value, field);
+                infoToProteinForField(entry, value, field);
                 break;
 
             default:
                 break;
 
         }
-        if (plasmid == null)
-            return new Entry[]{entry};
-
-        return new Entry[]{entry, plasmid};
     }
 
-    private static Entry infoToStrainForField(Entry entry, String value, EntryField field) {
+    private static void infoToStrainForField(Entry entry, String value, EntryField field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.STRAIN.toString()))
-            return entry;
+            return;
 
         Strain strain = (Strain) entry;
 
         switch (field) {
             case HOST:
                 strain.setHost(value);
-                return strain;
+                return;
 
             case GENOTYPE_OR_PHENOTYPE:
                 strain.setGenotypePhenotype(value);
-                return strain;
-
-            default:
-                return strain;
+                break;
         }
     }
 
-    private static Entry infoToPlasmidForField(Entry entry, String value, EntryField field) {
+    private static void infoToPlasmidForField(Entry entry, String value, EntryField field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.PLASMID.toString()))
-            return entry;
+            return;
 
         Plasmid plasmid = (Plasmid) entry;
 
         switch (field) {
             case BACKBONE:
                 plasmid.setBackbone(value);
-                return plasmid;
+                return;
 
             case PROMOTERS:
                 plasmid.setPromoters(value);
-                return plasmid;
+                return;
 
             case REPLICATES_IN:
                 plasmid.setReplicatesIn(value);
-                return plasmid;
+                return;
 
             case CIRCULAR:
                 plasmid.setCircular("yes".equalsIgnoreCase(value)
                         || "true".equalsIgnoreCase(value)
                         || "circular".equalsIgnoreCase(value));
-                return plasmid;
+                return;
 
             case ORIGIN_OF_REPLICATION:
                 plasmid.setOriginOfReplication(value);
-                return plasmid;
+                return;
 
             default:
-                return plasmid;
         }
     }
 
-    private static Entry infoToSeedForField(Entry entry, String value, EntryField field) {
+    private static void infoToSeedForField(Entry entry, String value, EntryField field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.SEED.toString()))
-            return entry;
+            return;
 
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
 
         switch (field) {
             case HOMOZYGOSITY:
                 seed.setHomozygosity(value);
-                return seed;
+                return;
 
             case ECOTYPE:
                 seed.setEcotype(value);
-                return seed;
+                return;
 
             case HARVEST_DATE:
                 if (value != null && !value.isEmpty()) {
@@ -584,54 +580,52 @@ public class InfoToModelFactory {
                         Logger.error(ia);
                     }
                 }
-                return seed;
+                return;
 
             case GENERATION:
                 seed.setGeneration(Generation.fromString(value));
-                return seed;
+                return;
 
             case SENT_TO_ABRC:
                 seed.setSentToABRC("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
-                return seed;
+                return;
 
             case PLANT_TYPE:
                 seed.setPlantType(PlantType.fromString(value));
-                return seed;
+                return;
 
             case PARENTS:
                 seed.setParents(value);
-                return seed;
+                return;
 
             default:
-                return seed;
         }
     }
 
-    private static Entry infoToProteinForField(Entry entry, String value, EntryField field) {
+    private static void infoToProteinForField(Entry entry, String value, EntryField field) {
         if (!entry.getRecordType().equalsIgnoreCase(EntryType.PROTEIN.toString()))
-            return entry;
+            return;
 
         Protein protein = (Protein) entry;
 
         switch (field) {
             case ORGANISM:
                 protein.setOrganism(value);
-                return protein;
+                return;
 
             case FULL_NAME:
                 protein.setFullName(value);
-                return protein;
+                return;
 
             case GENE_NAME:
                 protein.setGeneName(value);
-                return protein;
+                return;
 
             case UPLOADED_FROM:
                 protein.setUploadedFrom(value);
-                return protein;
+                return;
 
             default:
-                return protein;
         }
     }
 }

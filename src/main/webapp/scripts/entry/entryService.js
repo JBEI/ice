@@ -561,6 +561,14 @@ angular.module('ice.entry.service', [])
                     }
                 });
 
+                // check biosafety
+                if (entry.bioSafetyLevel === "Level 2")
+                    entry.bioSafetyLevel = 2;
+                else if (entry.bioSafetyLevel === "Restricted")
+                    entry.bioSafetyLevel = -1;
+                else
+                    entry.bioSafetyLevel = 1;
+
                 return entry;
             },
 
@@ -568,6 +576,7 @@ angular.module('ice.entry.service', [])
             convertToUIForm: function (entry) {
                 let type = entry.type.toLowerCase();
 
+                // note that this is for display; when in edit mode this will not work for options bSL field
                 if (entry.bioSafetyLevel === 2)
                     entry.bioSafetyLevel = "Level 2";
                 else if (entry.bioSafetyLevel === -1)

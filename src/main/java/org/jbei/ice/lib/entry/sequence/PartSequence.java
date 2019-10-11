@@ -8,8 +8,8 @@ import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.dto.entry.Visibility;
+import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
-import org.jbei.ice.lib.entry.EntryCreator;
 import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.executor.IceExecutorService;
@@ -92,8 +92,8 @@ public class PartSequence {
         partData.setCreator(entryName);
         partData.setCreatorEmail(entryEmail);
         partData.setVisibility(Visibility.DRAFT);
-        EntryCreator creator = new EntryCreator();
-        partData = creator.createPart(userId, partData);
+        Entries entries = new Entries(userId);
+        partData = entries.create(partData);
         return partData.getId();
     }
 

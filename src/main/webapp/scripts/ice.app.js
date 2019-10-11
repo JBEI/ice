@@ -18,6 +18,11 @@ angular
             return original.apply($location, [path]);
         };
 
+        $rootScope.$on("$routeChangeStart", function (event, next, current) {
+            // todo
+            console.log(event, next, current);
+        });
+
         $rootScope.logout = function () {
             Authentication.logout();
         };
@@ -112,7 +117,7 @@ angular
             .state('main.edit', {
                 url: 'entry/edit/:id',
                 controller: 'EditEntryController',
-                templateUrl: 'scripts/entry/edit.html'
+                templateUrl: 'scripts/entry/edit/edit.html'
             })
             .state('main.entry', {
                 url: 'entry/:id',
@@ -124,7 +129,7 @@ angular
             .state('main.create', {
                 url: 'create/:type',
                 controller: 'CreateEntryController',
-                templateUrl: 'scripts/entry/create-entry.html'
+                templateUrl: 'scripts/entry/create/create-entry.html'
             })
             .state('main.profile', {
                 url: 'profile/:id',
