@@ -186,7 +186,7 @@ public class LblLdapAuthentication implements IAuthentication {
     public boolean isWikiUser(String loginName) throws AuthenticationException {
         boolean result = false;
         ArrayList<String> whitelistGroups = new ArrayList<String>();
-        String whitelistString = "JBEI,Keasling Lab,DNA DIVA, BIOFAB, Mukhopadhyay GTL, Cell Wall Synthesis";
+        String whitelistString = "JBEI, Keasling Lab, DNA DIVA, Mukhopadhyay GTL";
         String[] whiteListArray = whitelistString.split(",");
         for (String element : whiteListArray) {
             whitelistGroups.add(element);
