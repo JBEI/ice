@@ -189,7 +189,7 @@ public class LblLdapAuthentication implements IAuthentication {
         String whitelistString = "JBEI, Keasling Lab, DNA DIVA, Mukhopadhyay GTL";
         String[] whiteListArray = whitelistString.split(",");
         for (String element : whiteListArray) {
-            whitelistGroups.add(element);
+            whitelistGroups.add(element.trim());
         }
 
         String groupDn = "ou=JBEI-Groups,ou=Groups,dc=lbl,dc=gov";
