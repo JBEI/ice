@@ -135,7 +135,7 @@ public class BulkCSVUpload {
             fieldStr = fieldStr.replace(FileBulkUpload.ASTERISK_SYMBOL, "");
 
             // check if a switchover (to the linked fields) has occurred
-            if (subType == null)
+            if (subType == null && i == 0)
                 subType = detectSubType(fieldStr);
 
             HeaderValue headerValue;
