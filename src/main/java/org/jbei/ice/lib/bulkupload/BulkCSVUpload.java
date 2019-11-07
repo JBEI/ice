@@ -135,7 +135,7 @@ public class BulkCSVUpload {
             fieldStr = fieldStr.replace(FileBulkUpload.ASTERISK_SYMBOL, "");
 
             // check if a switchover (to the linked fields) has occurred
-            if (subType == null && i == 0)
+            if (subType == null) // todo : "i" should be length of type number of fields
                 subType = detectSubType(fieldStr);
 
             HeaderValue headerValue;
@@ -143,8 +143,15 @@ public class BulkCSVUpload {
             if (subType != null && fieldStr.startsWith(subType.getDisplay())) {
                 // process subType
                 int k = fieldStr.indexOf(subType.getDisplay());
-                fieldStr = fieldStr.substring(k + subType.getDisplay().length());
-                headerValue = detectHeaderValue(subType, fieldStr.trim(), true);
+                String subSypeString = fieldStr.substring(k + subType.getDisplay().length());
+                headerValue = detectHeaderValue(subType, subSypeString.trim(), true);
+
+                // verify
+                if (headerValue == null)
+                    headerValue = detectHeaderValue(addType, fieldStr.trim(), false);
+
+                if (headerValue != null)
+                    subType = null;
             } else {
                 // process main add type
                 headerValue = detectHeaderValue(addType, fieldStr.trim(), false);
