@@ -81,6 +81,10 @@ public class Entries extends HasEntry {
         if (entry.getVisibility() == Visibility.OK.getValue()) {
             EntryHistory history = new EntryHistory(userId, partId);
             history.addEdit();
+        } else if (entry.getVisibility() == Visibility.DRAFT.getValue()) {
+            List<EntryField> invalidFields = EntryUtil.validates(partData);
+            if (invalidFields.isEmpty())
+                entry.setVisibility(Visibility.OK.getValue());
         }
 
         // check pi email
