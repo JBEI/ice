@@ -46,6 +46,8 @@ public class BulkCSVUpload {
         if (upload == null)
             throw new IllegalArgumentException("Invalid bulk upload \"" + uploadId + "\"");
         this.addType = EntryType.nameToType(upload.getImportType());
+        if (!StringUtils.isEmpty(upload.getLinkType()))
+            this.subType = EntryType.nameToType(upload.getLinkType());
     }
 
     /**
@@ -135,8 +137,8 @@ public class BulkCSVUpload {
             fieldStr = fieldStr.replace(FileBulkUpload.ASTERISK_SYMBOL, "");
 
             // check if a switchover (to the linked fields) has occurred
-            if (subType == null) // todo : "i" should be length of type number of fields
-                subType = detectSubType(fieldStr);
+//            if (subType == null) // todo : "i" should be length of type number of fields
+//                subType = detectSubType(fieldStr);
 
             HeaderValue headerValue;
 
@@ -150,8 +152,8 @@ public class BulkCSVUpload {
                 if (headerValue == null)
                     headerValue = detectHeaderValue(addType, fieldStr.trim(), false);
 
-                if (headerValue != null)
-                    subType = null;
+//                if (headerValue != null)
+//                    subType = null;
             } else {
                 // process main add type
                 headerValue = detectHeaderValue(addType, fieldStr.trim(), false);
