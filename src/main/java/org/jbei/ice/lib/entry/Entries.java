@@ -14,7 +14,8 @@ import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.GroupController;
-import org.jbei.ice.lib.search.SearchController;
+import org.jbei.ice.lib.search.SearchIndexes;
+import org.jbei.ice.lib.search.blast.Action;
 import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -292,8 +293,8 @@ public class Entries extends HasEntry {
     }
 
     private List<Long> getSearchResults(SearchQuery searchQuery) {
-        SearchController searchController = new SearchController();
-        SearchResults searchResults = searchController.runSearch(userId, searchQuery);
+        SearchIndexes searchIndexes = new SearchIndexes();
+        SearchResults searchResults = searchIndexes.runSearch(userId, searchQuery);
         // todo : inefficient: have search return ids only
         List<Long> results = new LinkedList<>();
         for (SearchResult result : searchResults.getResults()) {
@@ -418,7 +419,7 @@ public class Entries extends HasEntry {
 
         // rebuild blast database
         if (sequenceDAO.hasSequence(entry.getId())) {
-            RebuildBlastIndexTask task = new RebuildBlastIndexTask(true);
+            RebuildBlastIndexTask task = new RebuildBlastIndexTask(Action.CREATE, entry.getPartNumber());
             IceExecutorService.getInstance().runTask(task);
         }
 

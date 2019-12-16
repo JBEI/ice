@@ -22,15 +22,15 @@ import java.util.HashMap;
 /**
  * @author Hector Plahar
  */
-public class SearchControllerTest {
+public class SearchIndexesTest {
 
-    private SearchController controller;
+    private SearchIndexes controller;
 
     @Before
     public void setUp() throws Exception {
         HibernateUtil.initializeMock();
         HibernateUtil.beginTransaction();
-        controller = new SearchController();
+        controller = new SearchIndexes();
     }
 
     @After

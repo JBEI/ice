@@ -20,6 +20,7 @@ import org.jbei.ice.lib.parsers.PlainParser;
 import org.jbei.ice.lib.parsers.fasta.FastaParser;
 import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.lib.parsers.sbol.SBOLParser;
+import org.jbei.ice.lib.search.blast.Action;
 import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
@@ -211,12 +212,12 @@ public class PartSequence {
             }
         }
 
-        scheduleBlastIndexRebuildTask();
+        scheduleBlastIndexRebuildTask(Action.CREATE, sequence.getEntry().getPartNumber());
         return sequence;
     }
 
-    private void scheduleBlastIndexRebuildTask() {
-        RebuildBlastIndexTask task = new RebuildBlastIndexTask(true);
+    private void scheduleBlastIndexRebuildTask(Action action, String partId) {
+        RebuildBlastIndexTask task = new RebuildBlastIndexTask(action, partId);
         IceExecutorService.getInstance().runTask(task);
     }
 
@@ -265,7 +266,7 @@ public class PartSequence {
             rebuildTraceAlignments();
 
             // rebuild blast
-            scheduleBlastIndexRebuildTask();
+            scheduleBlastIndexRebuildTask(Action.UPDATE, this.entry.getPartNumber());
         } else {
             save(updatedSequence);
         }
@@ -280,6 +281,7 @@ public class PartSequence {
         sequence.setEntry(null);
         sequence.setSequenceFeatures(null);
         sequenceDAO.delete(sequence);
+        scheduleBlastIndexRebuildTask(Action.DELETE, this.entry.getPartNumber());
     }
 
     // features in existing which are not part of new sequence passed and therefore need to be deleted

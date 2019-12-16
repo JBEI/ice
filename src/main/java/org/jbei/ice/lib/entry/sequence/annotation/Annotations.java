@@ -12,7 +12,7 @@ import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.blast.BlastException;
-import org.jbei.ice.lib.search.blast.BlastPlus;
+import org.jbei.ice.lib.search.blast.FeaturesBlastDatabase;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.*;
 import org.jbei.ice.storage.model.*;
@@ -35,7 +35,7 @@ public class Annotations {
     private final FeatureCurationModelDAO curationModelDAO;
     private final EntryDAO entryDAO;
     private final AccountDAO accountDAO;
-    private final BlastPlus blastPlus;
+    private final FeaturesBlastDatabase featuresBlastDatabase;
 
     public Annotations(String userId) {
         this.sequenceDAO = DAOFactory.getSequenceDAO();
@@ -47,7 +47,7 @@ public class Annotations {
         this.curationModelDAO = DAOFactory.getFeatureCurationModelDAO();
         this.entryDAO = DAOFactory.getEntryDAO();
         this.accountDAO = DAOFactory.getAccountDAO();
-        this.blastPlus = new BlastPlus("auto-annotation", "ice");
+        this.featuresBlastDatabase = new FeaturesBlastDatabase();
     }
 
     /**
@@ -134,7 +134,7 @@ public class Annotations {
         query.setSequence(sequenceString);
 
         try {
-            List<DNAFeature> features = blastPlus.runCheckFeatures(query);
+            List<DNAFeature> features = featuresBlastDatabase.runBlast(query);
             FeaturedDNASequence dnaSequence = new FeaturedDNASequence();
             if (features.isEmpty())
                 return dnaSequence;
@@ -188,7 +188,7 @@ public class Annotations {
         query.setSequence(sequence.getSequence());
 
         try {
-            List<DNAFeature> features = blastPlus.runCheckFeatures(query);
+            List<DNAFeature> features = featuresBlastDatabase.runBlast(query);
             sequence.getFeatures().addAll(features);
             return sequence;
         } catch (BlastException e) {

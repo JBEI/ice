@@ -7,7 +7,7 @@ import org.jbei.ice.lib.dto.search.IndexType;
 import org.jbei.ice.lib.dto.search.SearchQuery;
 import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.search.IndexBuildStatus;
-import org.jbei.ice.lib.search.SearchController;
+import org.jbei.ice.lib.search.SearchIndexes;
 import org.jbei.ice.lib.search.WebSearch;
 import org.jbei.ice.lib.shared.ColumnField;
 
@@ -26,7 +26,7 @@ import java.util.List;
 @Path("/search")
 public class SearchResource extends RestResource {
 
-    private SearchController controller = new SearchController();
+    private SearchIndexes controller = new SearchIndexes();
 
     /**
      * Search entries by using filters on the values

@@ -10,18 +10,48 @@ import org.jbei.ice.lib.executor.Task;
  */
 public class RebuildBlastIndexTask extends Task {
 
-    private final boolean force;
+    private final Action action;
+    private final String partId;
 
-    public RebuildBlastIndexTask(boolean force) {
-        this.force = force;
+    public RebuildBlastIndexTask(Action action, String partId) {
+        this.action = action;
+        this.partId = partId;
+    }
+
+    /**
+     * Constructor for checking if the blast index exists and rebuilding if it doesn't
+     */
+    public RebuildBlastIndexTask() {
+        this(Action.CHECK, null);
     }
 
     @Override
     public void execute() {
-        Logger.info("Running blast rebuild task");
+        Logger.info("Running blast task with action: " + action.name());
         try {
-            BlastPlus blastPlus = new BlastPlus("blast", "ice");
-            blastPlus.rebuildDatabase(force);
+            StandardBlastDatabase standardBlastDatabase = StandardBlastDatabase.getInstance();
+
+            switch (this.action) {
+                case CHECK:
+                    standardBlastDatabase.checkRebuild(false);
+                    break;
+
+                case CREATE:
+                    standardBlastDatabase.addSequence(this.partId);
+                    break;
+
+                case DELETE:
+                    standardBlastDatabase.removeSequence(this.partId);
+                    break;
+
+                case UPDATE:
+                    standardBlastDatabase.updateSequence(this.partId);
+                    break;
+
+                case FORCE_BUILD:
+                    standardBlastDatabase.checkRebuild(true);
+                    break;
+            }
         } catch (Exception e) {
             Logger.error(e);
         }

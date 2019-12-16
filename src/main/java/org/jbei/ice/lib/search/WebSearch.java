@@ -63,8 +63,8 @@ public class WebSearch {
         // search this instance (gives the threads time to complete)
 //        String inWWoR = Utils.getConfigValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
         if (includeThisInstance) {
-            SearchController searchController = new SearchController();
-            SearchResults results = searchController.runSearch(null, query);
+            SearchIndexes searchIndexes = new SearchIndexes();
+            SearchResults results = searchIndexes.runSearch(null, query);
             searchResults.setQuery(query);
 
             WebResult thisResult = new WebResult();
