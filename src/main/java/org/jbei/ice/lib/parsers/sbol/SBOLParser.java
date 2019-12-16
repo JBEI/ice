@@ -17,6 +17,7 @@ import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Sequence;
+import org.sbolstandard.core2.Module;
 import org.sbolstandard.core2.*;
 
 import java.io.ByteArrayInputStream;
