@@ -188,7 +188,7 @@ angular.module('ice.collection.controller', [])
             }
         });
     })
-    .controller('FolderPermissionsController', function ($rootScope, $scope, $http, $uibModalInstance, Util, folder) {
+    .controller('FolderPermissionsController', function ($rootScope, $scope, $http, $uibModalInstance, Util, folder, Authentication) {
         $scope.folder = folder;
         $scope.selectedPermission = undefined;
         $scope.newPermission = {canWrite: false, canRead: true, article: 'ACCOUNT', typeId: folder.id};

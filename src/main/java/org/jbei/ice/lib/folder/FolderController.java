@@ -5,8 +5,8 @@ import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.AccountTransfer;
-import org.jbei.ice.lib.bulkupload.BulkUploadController;
 import org.jbei.ice.lib.bulkupload.BulkUploadInfo;
+import org.jbei.ice.lib.bulkupload.BulkUploads;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
@@ -39,7 +39,7 @@ public class FolderController {
     private final GroupController groupController;
     private final PermissionDAO permissionDAO;
     private final PermissionsController permissionsController;
-    private final BulkUploadController bulkUploadController;
+    private final BulkUploads bulkUploads;
     private final AccountDAO accountDAO;
     private final FolderAuthorization authorization;
 
@@ -49,7 +49,7 @@ public class FolderController {
         groupController = new GroupController();
         permissionDAO = DAOFactory.getPermissionDAO();
         permissionsController = new PermissionsController();
-        bulkUploadController = new BulkUploadController();
+        bulkUploads = new BulkUploads();
         accountDAO = DAOFactory.getAccountDAO();
         authorization = new FolderAuthorization();
     }
@@ -122,7 +122,7 @@ public class FolderController {
 
         for (Entry entry : results) {
             try {
-                PartData info = ModelToInfoFactory.createTableViewData(null, entry, false, fields);
+                PartData info = ModelToInfoFactory.createTableViewData(entry, false, fields);
                 info.setPublicRead(true);
                 details.getEntries().add(info);
             } catch (Exception e) {
@@ -134,7 +134,7 @@ public class FolderController {
 
     public ArrayList<FolderDetails> getBulkUploadDrafts(String userId) {
         ArrayList<FolderDetails> folders = new ArrayList<>();
-        ArrayList<BulkUploadInfo> list = bulkUploadController.retrieveByUser(userId, userId);
+        ArrayList<BulkUploadInfo> list = bulkUploads.retrieveByUser(userId, userId);
         for (BulkUploadInfo info : list) {
             FolderDetails details = new FolderDetails();
             details.setName(info.getName());
@@ -155,7 +155,7 @@ public class FolderController {
      */
     public ArrayList<FolderDetails> getPendingBulkUploads(String userId) {
         ArrayList<FolderDetails> folders = new ArrayList<>();
-        ArrayList<BulkUploadInfo> list = bulkUploadController.getPendingUploads(userId);
+        ArrayList<BulkUploadInfo> list = bulkUploads.getPendingUploads(userId);
         for (BulkUploadInfo info : list) {
             FolderDetails details = new FolderDetails();
             String name = info.getAccount() != null ? info.getAccount().getEmail() : info.getName();
@@ -240,7 +240,7 @@ public class FolderController {
     public FolderDetails delete(String userId, long folderId, FolderType type) {
         switch (type) {
             case UPLOAD:
-                BulkUploadController controller = new BulkUploadController();
+                BulkUploads controller = new BulkUploads();
                 BulkUploadInfo info = controller.deleteDraftById(userId, folderId);
                 if (info == null) {
                     Logger.error("Could not locate bulk upload id " + folderId + " for deletion");

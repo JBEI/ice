@@ -3,7 +3,7 @@ package org.jbei.ice.lib.dto.search;
 import org.jbei.ice.storage.IDataTransferModel;
 
 /**
- * Blast query. Program type defaults to blastn
+ * Blast query object. Program type defaults to blastn
  *
  * @author Hector Plahar
  */

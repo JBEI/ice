@@ -29,7 +29,7 @@
         <!--non-blast results remote search results-->
         <table cellspacing="0"
                class="table table-hover font-95em table-condensed table-border-bottom"
-               ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
+               ng-if="!searchFilters.blastSearch || !searchFilters.blastSearch.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
             <tr ng-show="searchResults.results.length>0">
@@ -127,7 +127,7 @@
         <!-- remote blast results -->
         <table cellspacing="0"
                class="table table-condensed table-border-bottom table-hover font-95em"
-               ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
+               ng-if="searchFilters.blastSearch && searchFilters.blastSearch.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
             <tr data-ng-show="searchResults.results.length>0">
@@ -203,7 +203,7 @@
         <!--local blast search results-->
         <table cellspacing="0"
                class="table table-hover table-condensed table-border-bottom font-95em"
-               ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
+               ng-if="searchFilters.blastSearch && searchFilters.blastSearch.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
             <tr data-ng-show="searchResults.results.length>0">
@@ -279,7 +279,7 @@
 
         <!--local non-blast search results-->
         <table cellspacing="0" class="table table-hover table-condensed font-95em table-border-bottom"
-               ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
+               ng-if="!searchFilters.blastSearch || !searchFilters.blastSearch.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
             <tr data-ng-show='!searchResults'>

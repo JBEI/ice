@@ -24,7 +24,7 @@ public class ModelToInfoFactory {
     public static PartData getInfo(Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
-            return null;
+            throw new IllegalArgumentException("Invalid entry type: " + entry.getRecordType());
 
         PartData partData = new PartData(type);
         PartData part = getCommon(partData, entry);
@@ -39,7 +39,7 @@ public class ModelToInfoFactory {
                 break;
 
             case SEED:
-                part.setArabidopsisSeedData(seedInfo(entry));
+                part.setSeedData(seedInfo(entry));
                 break;
 
             case PROTEIN:
@@ -71,8 +71,8 @@ public class ModelToInfoFactory {
         return infos;
     }
 
-    private static ArabidopsisSeedData seedInfo(Entry entry) {
-        ArabidopsisSeedData data = new ArabidopsisSeedData();
+    private static SeedData seedInfo(Entry entry) {
+        SeedData data = new SeedData();
 
         // seed specific
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
@@ -225,6 +225,8 @@ public class ModelToInfoFactory {
         view.setRecordId(entry.getRecordId());
         view.setPartId(entry.getPartNumber());
         view.setName(entry.getName());
+        view.setShortDescription(entry.getShortDescription());
+
         view.setAlias(entry.getAlias());
         view.setCreator(entry.getCreator());
         view.setCreatorEmail(entry.getCreatorEmail());
@@ -244,7 +246,6 @@ public class ModelToInfoFactory {
             view.setCreatorId(account.getId());
 
         view.setKeywords(entry.getKeywords());
-        view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime().getTime());
         view.setModificationTime(entry.getModificationTime().getTime());
         view.setBioSafetyLevel(entry.getBioSafetyLevel());
@@ -264,7 +265,7 @@ public class ModelToInfoFactory {
         return account.getId();
     }
 
-    public static PartData createTableViewData(String userId, Entry entry, boolean includeOwnerInfo, List<String> fields) {
+    public static PartData createTableViewData(Entry entry, boolean includeOwnerInfo, List<String> fields) {
         if (entry == null)
             return null;
 
@@ -361,7 +362,7 @@ public class ModelToInfoFactory {
                 break;
 
             case SEED:
-                ArabidopsisSeedData seedData = new ArabidopsisSeedData();
+                SeedData seedData = new SeedData();
                 ArabidopsisSeed seed = (ArabidopsisSeed) entry;
                 PlantType plantType = PlantType.fromString(seed.getPlantType().toString());
                 seedData.setPlantType(plantType);
@@ -376,7 +377,7 @@ public class ModelToInfoFactory {
                     String dateFormat = format.format(seed.getHarvestDate());
                     seedData.setHarvestDate(dateFormat);
                 }
-                part.setArabidopsisSeedData(seedData);
+                part.setSeedData(seedData);
                 break;
 
             default:

@@ -1,6 +1,5 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.entry.CustomEntryField;
 import org.jbei.ice.lib.dto.entry.CustomFields;
 import org.jbei.ice.lib.dto.entry.EntryType;
@@ -30,27 +29,17 @@ public class PartFieldResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response getCustomFields(@PathParam(value = "partType") String partType) {
-        try {
-            requireUserId();
-            CustomFields fields = new CustomFields();
-            return super.respond(fields.get(EntryType.nameToType(partType)));
-        } catch (Exception e) {
-            Logger.error(e);
-            return super.respond(false);
-        }
+        requireUserId();
+        CustomFields fields = new CustomFields();
+        return super.respond(fields.get(EntryType.nameToType(partType)));
     }
 
     @DELETE
     @Path("/{partType}/{id}")
     public Response deleteField(@PathParam(value = "partType") String partType, @PathParam(value = "id") long fieldId) {
-        try {
-            String userId = requireUserId();
-            CustomFields fields = new CustomFields();
-            fields.deleteCustomField(userId, EntryType.nameToType(partType), fieldId);
-            return super.respond(true);
-        } catch (Exception e) {
-            Logger.error(e);
-            return super.respond(false);
-        }
+        String userId = requireUserId();
+        CustomFields fields = new CustomFields();
+        fields.deleteCustomField(userId, EntryType.nameToType(partType), fieldId);
+        return super.respond(true);
     }
 }

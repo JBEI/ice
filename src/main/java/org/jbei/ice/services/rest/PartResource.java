@@ -183,7 +183,7 @@ public class PartResource extends RestResource {
         final String userId = requireUserId();
         try {
             EntryPermissions permissions = new EntryPermissions(partId, userId);
-            return permissions.add(permission);
+            return permissions.addAccount(permission);
         } catch (PermissionException pe) {
             throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
@@ -632,11 +632,11 @@ public class PartResource extends RestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response create(@QueryParam("source") String sourceId, PartData partData) {
         final String userId = requireUserId();
-        final EntryCreator creator = new EntryCreator();
+        final Entries creator = new Entries(userId);
         try {
             if (StringUtils.isEmpty(sourceId)) {
                 log(userId, "created new " + partData.getType().getDisplay());
-                return super.respond(creator.createPart(userId, partData));
+                return super.respond(creator.create(partData));
             }
         } catch (Exception e) {
             Logger.error(e);
@@ -645,7 +645,7 @@ public class PartResource extends RestResource {
 
         try {
             log(userId, "creating copy of entry " + sourceId);
-            return super.respond(creator.copyPart(userId, sourceId));
+            return super.respond(creator.copy(sourceId));
         } catch (IllegalArgumentException e) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
         }
@@ -685,6 +685,21 @@ public class PartResource extends RestResource {
         } catch (PermissionException pe) {
             throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
+    }
+
+    /**
+     * Updates the specified part field. Should probably be a "PATCH"
+     */
+    @PUT
+    @Path("/{id}/{field}")
+    public Response updateField(@PathParam("id") String partId,
+                                @PathParam("field") String field,
+                                List<String> values) {
+        String userId = requireUserId();
+        log(userId, "updating \"" + field + "\" for entry " + partId);
+        Entries entries = new Entries(userId);
+        entries.updateField(partId, field, values);
+        return super.respond(controller.retrieveEntryDetails(userId, partId));
     }
 
     @POST

@@ -11,6 +11,7 @@ public class CustomEntryField implements IDataTransferModel {
     private String label;
     private FieldType fieldType;
     private EntryType entryType;
+    private EntryField existingField;
     private boolean required;
     private List<CustomField> options = new ArrayList<>();
     private String value;
@@ -74,5 +75,13 @@ public class CustomEntryField implements IDataTransferModel {
 
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
+    }
+
+    public EntryField getExistingField() {
+        return existingField;
+    }
+
+    public void setExistingField(EntryField existingField) {
+        this.existingField = existingField;
     }
 }

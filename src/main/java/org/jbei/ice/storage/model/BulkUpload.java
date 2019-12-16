@@ -123,6 +123,10 @@ public class BulkUpload implements DataModel {
         this.linkType = linkType;
     }
 
+    public String getLinkType() {
+        return this.linkType;
+    }
+
     public BulkUploadStatus getStatus() {
         return status;
     }

@@ -32,8 +32,8 @@ public class ApplicationInitialize {
         ConfigurationSettings settings = new ConfigurationSettings();
         settings.initPropertyValues();
 
-        // check blast
-        RebuildBlastIndexTask task = new RebuildBlastIndexTask(false);
+        // check blast database exists and build if it doesn't
+        RebuildBlastIndexTask task = new RebuildBlastIndexTask();
         IceExecutorService.getInstance().runTask(task);
 
         AutoAnnotationBlastDbBuildTask autoAnnotationBlastDbBuildTask = new AutoAnnotationBlastDbBuildTask();

@@ -1,15 +1,18 @@
 package org.jbei.ice.storage.hibernate.dao;
 
 import org.jbei.ice.lib.AccountCreator;
+import org.jbei.ice.lib.TestEntryCreator;
 import org.jbei.ice.lib.dto.common.PageParameters;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.folder.FolderType;
-import org.jbei.ice.lib.entry.EntryCreator;
+import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.shared.ColumnField;
+import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Folder;
-import org.jbei.ice.storage.model.Part;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -24,7 +27,7 @@ public class FolderDAOTest extends HibernateRepositoryTest {
     private FolderDAO dao = new FolderDAO();
 
     @Test
-    public void testGet() throws Exception {
+    public void testGet() {
         Folder folder = createFolderObject("testGet");
         folder = dao.create(folder);
         Assert.assertNotNull(folder);
@@ -35,7 +38,7 @@ public class FolderDAOTest extends HibernateRepositoryTest {
     }
 
     @Test
-    public void testGetRemote() throws Exception {
+    public void testGetRemote() {
         Folder folder = createFolderObject("testGetRemote");
         folder.setType(FolderType.REMOTE);
         folder.setDescription("remoteFolderId");
@@ -62,16 +65,11 @@ public class FolderDAOTest extends HibernateRepositoryTest {
         Assert.assertNotNull(folder);
 
         List<Entry> entries = new ArrayList<>();
-        EntryCreator creator = new EntryCreator();
 
         // create 10 entries
         for (int i = 0; i < 10; i += 1) {
-            Part part = new Part();
-            part.setName("name" + i);
-            part.setOwnerEmail(email);
-            part.setAlias("alias" + i);
-            part.setShortDescription("short description");
-            Entry entry = creator.createEntry(account, part, null);
+            long id = TestEntryCreator.createTestPart(email);
+            Entry entry = new EntryDAO().get(id);
             entries.add(entry);
         }
 
@@ -102,16 +100,11 @@ public class FolderDAOTest extends HibernateRepositoryTest {
         Assert.assertNotNull(folder);
 
         List<Entry> entries = new ArrayList<>();
-        EntryCreator creator = new EntryCreator();
 
         // create 10 entries
         for (int i = 0; i < 10; i += 1) {
-            Part part = new Part();
-            part.setName("name" + i);
-            part.setOwnerEmail(email);
-            part.setAlias("alias" + i);
-            part.setShortDescription("short description");
-            Entry entry = creator.createEntry(account, part, null);
+            long id = TestEntryCreator.createTestPart(email);
+            Entry entry = new EntryDAO().get(id);
             entries.add(entry);
         }
 
@@ -121,12 +114,12 @@ public class FolderDAOTest extends HibernateRepositoryTest {
     }
 
     @Test
-    public void testGetFolderContentIds() throws Exception {
+    public void testGetFolderContentIds() {
 
     }
 
     @Test
-    public void testDelete() throws Exception {
+    public void testDelete() {
         Folder folder = createFolderObject("testDelete");
         folder = dao.create(folder);
         Assert.assertNotNull(folder);
@@ -146,16 +139,11 @@ public class FolderDAOTest extends HibernateRepositoryTest {
         Assert.assertNotNull(folder);
 
         List<Entry> entries = new ArrayList<>();
-        EntryCreator creator = new EntryCreator();
 
         // create 10 entries
         for (int i = 0; i < 10; i += 1) {
-            Part part = new Part();
-            part.setName("name" + i);
-            part.setOwnerEmail(email);
-            part.setAlias("alias" + i);
-            part.setShortDescription("short description");
-            Entry entry = creator.createEntry(account, part, null);
+            long id = TestEntryCreator.createTestPart(email);
+            Entry entry = new EntryDAO().get(id);
             entries.add(entry);
         }
 
@@ -175,16 +163,11 @@ public class FolderDAOTest extends HibernateRepositoryTest {
         Assert.assertNotNull(folder);
 
         List<Entry> entries = new ArrayList<>();
-        EntryCreator creator = new EntryCreator();
 
         // create 10 entries
         for (int i = 0; i < 10; i += 1) {
-            Part part = new Part();
-            part.setName("name" + i);
-            part.setOwnerEmail(email);
-            part.setAlias("alias" + i);
-            part.setShortDescription("short description");
-            Entry entry = creator.createEntry(account, part, null);
+            long id = TestEntryCreator.createTestPart(email);
+            Entry entry = new EntryDAO().get(id);
             entries.add(entry);
         }
 
@@ -202,16 +185,16 @@ public class FolderDAOTest extends HibernateRepositoryTest {
         Assert.assertNotNull(folder);
 
         // add entries to folder
-        EntryCreator creator = new EntryCreator();
         List<Entry> entries = new ArrayList<>();
 
         for (int i = 1; i <= 9; i += 1) {
-            Part part = new Part();
+            PartData part = new PartData(EntryType.PART);
             part.setName("name" + i);
             part.setOwnerEmail(email);
             part.setAlias("alias" + i);
             part.setShortDescription("short description");
-            Entry entry = creator.createEntry(account, part, null);
+            part = new Entries(account.getEmail()).create(part);
+            Entry entry = DAOFactory.getEntryDAO().get(part.getId());
             entries.add(entry);
         }
 

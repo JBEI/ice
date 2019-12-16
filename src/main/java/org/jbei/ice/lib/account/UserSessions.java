@@ -44,11 +44,7 @@ public class UserSessions {
     }
 
     protected static void putSession(String userId, String sessionId) {
-        Set<String> sessionIds = userSessionMap.get(userId);
-        if (sessionIds == null) {
-            sessionIds = new HashSet<>();
-            userSessionMap.put(userId, sessionIds);
-        }
+        Set<String> sessionIds = userSessionMap.computeIfAbsent(userId, k -> new HashSet<>());
         sessionIds.add(sessionId);
     }
 

@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.upload.service', [])
-    .factory('UploadUtil', function () {
+    .factory('UploadUtil', function (EntryService) {
 
             return {
                 // converts the index (which depends on type) of the schema to the specific rest resource name
@@ -35,16 +35,23 @@ angular.module('ice.upload.service', [])
                         if (field.subSchema) {
                             object[field.subSchema][field.schema] = value;
                         } else {
-                            object[field.schema] = value;
+                            switch (field.schema) {
+                                case "bioSafetyLevel":
+                                    if (value === "Level 2")
+                                        object.bioSafetyLevel = 2;
+                                    else if (value === "Restricted")
+                                        object.bioSafetyLevel = "-1";
+                                    else
+                                        object.bioSafetyLevel = 1;
+                                    break;
 
-                            // todo : find a way to avoid this explicit callout to specific fields
-                            if (field.schema === "bioSafetyLevel") {
-                                if (object.bioSafetyLevel === "Level 2")
-                                    object.bioSafetyLevel = 2;
-                                else if (object.bioSafetyLevel === "Restricted")
-                                    object.bioSafetyLevel = "-1";
-                                else
-                                    object.bioSafetyLevel = 1;
+                                case "selectionMarkers":
+                                    object[field.schema] = [value];
+                                    break;
+
+                                default:
+                                    object[field.schema] = value;
+                                    break;
                             }
                         }
                     }
@@ -110,7 +117,7 @@ angular.module('ice.upload.service', [])
                             break;
 
                         case "seed":
-                            object.arabidopsisSeedData = {};
+                            object.seedData = {};
                             break;
 
                         case "protein":
@@ -266,17 +273,18 @@ angular.module('ice.upload.service', [])
                             part.bioSafetyLevel = -1;
                             break;
                     }
-
                     return part;
                 },
 
-                // checks if, based on index, columning being edited is a main entry column
-                // isMainEntryCol: function (index, mainFields) {
-                //     if (index < mainFields.length)
-                //         return true;
-                //
-                //     return false;
-                // }
+                convertToUIForm: function (part) {
+                    part = EntryService.convertToUIForm(part);
+                    if (part.selectionMarkers && part.selectionMarkers.length) {
+                        part.selectionMarkers = part.selectionMarkers[0];
+                    } else {
+                        part.selectionMarkers = "";
+                    }
+                    return part;
+                }
             }
         }
     );

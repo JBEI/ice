@@ -3,8 +3,10 @@ package org.jbei.ice.lib.parsers.sbol;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
+import org.jbei.ice.lib.dto.entry.EntryType;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
-import org.jbei.ice.lib.entry.EntryCreator;
+import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryLinks;
 import org.jbei.ice.lib.entry.LinkType;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
@@ -13,9 +15,7 @@ import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
-import org.jbei.ice.storage.model.Part;
 import org.jbei.ice.storage.model.Sequence;
 import org.sbolstandard.core2.Module;
 import org.sbolstandard.core2.*;
@@ -37,14 +37,13 @@ import java.util.Map;
 public class SBOLParser extends AbstractParser {
 
     private boolean extractHierarchy;
+    // map of component identity to entry id
+    private Map<String, Long> identityEntryMap = new HashMap<>();
 
     public SBOLParser(String userId, String entryId, boolean extractHierarchy) {
         super(userId, entryId);
         this.extractHierarchy = extractHierarchy;
     }
-
-    // map of component identity to entry id
-    private Map<String, Long> identityEntryMap = new HashMap<>();
 
     public SequenceInfo parseToEntry(String textSequence, String fileName) throws InvalidFormatParserException {
         SBOLDocument document;
@@ -150,28 +149,28 @@ public class SBOLParser extends AbstractParser {
         return sequenceInfo;
     }
 
-    protected long createNewEntry(TopLevel moduleDefinition, SBOLDocument document) {
+    private long createNewEntry(TopLevel moduleDefinition, SBOLDocument document) {
         String identity = moduleDefinition.getIdentity().toString();
         String description = moduleDefinition.getDescription();
         String name = moduleDefinition.getName();
 
-        Part part = new Part();
-        part.setOwner(partData.getOwner());
-        part.setOwnerEmail(partData.getOwnerEmail());
-        part.setCreator(partData.getCreator());
-        part.setCreatorEmail(partData.getCreatorEmail());
-        part.setPrincipalInvestigator(partData.getPrincipalInvestigator());
-        part.setPrincipalInvestigatorEmail(partData.getPrincipalInvestigatorEmail());
-        part.setBioSafetyLevel(partData.getBioSafetyLevel());
-        part.setStatus(partData.getStatus());
+        PartData partData = new PartData(EntryType.PART);
+        partData.setOwner(partData.getOwner());
+        partData.setOwnerEmail(partData.getOwnerEmail());
+        partData.setCreator(partData.getCreator());
+        partData.setCreatorEmail(partData.getCreatorEmail());
+        partData.setPrincipalInvestigator(partData.getPrincipalInvestigator());
+        partData.setPrincipalInvestigatorEmail(partData.getPrincipalInvestigatorEmail());
+        partData.setBioSafetyLevel(partData.getBioSafetyLevel());
+        partData.setStatus(partData.getStatus());
         description = StringUtils.isEmpty(description) ? partData.getShortDescription() : description;
         name = StringUtils.isEmpty(name) ? moduleDefinition.getDisplayId() : name;
-        part.setShortDescription(description);
-        part.setName(name);
+        partData.setShortDescription(description);
+        partData.setName(name);
 
-        EntryCreator entryCreator = new EntryCreator();
-        Account account = DAOFactory.getAccountDAO().getByEmail(part.getCreatorEmail());
-        Entry entry = entryCreator.createEntry(account, part, null);
+        Entries entryCreator = new Entries(partData.getCreatorEmail());
+        partData = entryCreator.create(partData);
+        Entry entry = entryDAO.get(partData.getId());
         parseToGenBank(document, entry.getName(), entry, moduleDefinition.getIdentity().toString());
 
         identityEntryMap.put(identity, entry.getId());

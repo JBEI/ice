@@ -9,7 +9,7 @@ public class SampleHeaderValue implements HeaderValue {
 
     private final SampleField sampleField;
 
-    public SampleHeaderValue(SampleField field) {
+    SampleHeaderValue(SampleField field) {
         this.sampleField = field;
     }
 
@@ -18,7 +18,12 @@ public class SampleHeaderValue implements HeaderValue {
         return true;
     }
 
-    public SampleField getSampleField() {
+    @Override
+    public boolean isCustomField() {
+        return false;
+    }
+
+    SampleField getSampleField() {
         return sampleField;
     }
 }

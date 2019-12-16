@@ -1,7 +1,7 @@
 package org.jbei.ice.services.rest;
 
-import com.google.common.io.ByteStreams;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -96,7 +96,7 @@ public class FileResource extends RestResource {
                                @QueryParam("filename") String fileName,
                                @DefaultValue("false") @QueryParam("delete") boolean delete) {
         final File tmpFile = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY), fileId).toFile();
-        if (tmpFile == null || !tmpFile.exists()) {
+        if (!tmpFile.exists()) {
             return super.respond(Response.Status.NOT_FOUND);
         }
         if (StringUtils.isEmpty(fileName))
@@ -151,11 +151,12 @@ public class FileResource extends RestResource {
             linked = null;
         }
 
+        final byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType, linked,
+                "existing".equalsIgnoreCase(linkedType));
+
         final StreamingOutput stream = output -> {
-            byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType, linked,
-                    "existing".equalsIgnoreCase(linkedType));
             ByteArrayInputStream input = new ByteArrayInputStream(template);
-            ByteStreams.copy(input, output);
+            IOUtils.copy(input, output);
         };
 
         String filename = type.toLowerCase();
@@ -187,7 +188,7 @@ public class FileResource extends RestResource {
 
         StreamingOutput stream = output -> {
             final ByteArrayInputStream input = new ByteArrayInputStream(wrapper.getBytes());
-            ByteStreams.copy(input, output);
+            IOUtils.copy(input, output);
         };
 
         return addHeaders(Response.ok(stream), wrapper.getName());
@@ -195,8 +196,7 @@ public class FileResource extends RestResource {
 
     @GET
     @Path("trace/{fileId}")
-    public Response getTraceSequenceFile(@PathParam("fileId") String fileId,
-                                         @QueryParam("sid") String sid) {
+    public Response getTraceSequenceFile(@PathParam("fileId") String fileId, @QueryParam("sid") String sid) {
         final SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
         final TraceSequence traceSequence = sequenceAnalysisController.getTraceSequenceByFileId(fileId);
         if (traceSequence != null) {

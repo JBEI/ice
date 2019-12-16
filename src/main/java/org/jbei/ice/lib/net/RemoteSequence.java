@@ -25,7 +25,6 @@ public class RemoteSequence {
     private final RemoteContact remoteContact;
     private final RemotePartner partner;
     private final long remotePartId;
-    private final IceRestClient iceRestClient;
 
     public RemoteSequence(long remoteId, long remotePartId) {
         if (!hasRemoteAccessEnabled())
@@ -38,7 +37,6 @@ public class RemoteSequence {
 
         this.remoteContact = new RemoteContact();
         this.remotePartId = remotePartId;
-        this.iceRestClient = IceRestClient.getInstance();
     }
 
     /**
@@ -55,11 +53,8 @@ public class RemoteSequence {
     public FeaturedDNASequence getRemoteSequence() {
         try {
             String restPath = "rest/parts/" + remotePartId + "/sequence";
-            Object result = iceRestClient.getWor(partner.getUrl(), restPath, FeaturedDNASequence.class, null, partner.getApiKey());
-            if (result == null)
-                return null;
-
-            return (FeaturedDNASequence) result;
+            IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey(), restPath);
+            return client.get(FeaturedDNASequence.class);
         } catch (Exception e) {
             Logger.error(e.getMessage());
             return null;

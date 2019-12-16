@@ -41,7 +41,7 @@ public class RemoteAccess {
      *
      * @return true if value has been set to the affirmative, false otherwise
      */
-    protected boolean isInWebOfRegistries() {
+    private boolean isInWebOfRegistries() {
         String value = Utils.getConfigValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
         return ("yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value));
     }
@@ -109,7 +109,7 @@ public class RemoteAccess {
         return remoteAccessModel.toDataTransferObject();
     }
 
-    public Folder getOrCreateRemoteFolder(String display, String remoteFolderId, String remoteEmail) {
+    private Folder getOrCreateRemoteFolder(String display, String remoteFolderId, String remoteEmail) {
         Folder folder = this.folderDAO.getRemote(remoteFolderId, remoteEmail);
         if (folder == null) {
             folder = new Folder();
@@ -127,12 +127,8 @@ public class RemoteAccess {
         if (partner == null)
             return null;
 
-        AccountTransfer result = IceRestClient.getInstance().getWor(partner.getUrl(), "rest/users/" + email,
-                AccountTransfer.class, null, partner.getApiKey());
-        if (result == null)
-            return null;
-
-        return result;
+        IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey(), "rest/users/" + email);
+        return client.get(AccountTransfer.class);
     }
 
     /**
@@ -143,7 +139,7 @@ public class RemoteAccess {
      * @param remotePartner remote partner
      * @return client model stored in the database with specified user id and partner
      */
-    protected RemoteClientModel getOrCreateRemoteClient(String remoteUserId, RemotePartner remotePartner) {
+    private RemoteClientModel getOrCreateRemoteClient(String remoteUserId, RemotePartner remotePartner) {
         RemoteClientModel remoteClientModel = remoteClientModelDAO.getModel(remoteUserId, remotePartner);
         if (remoteClientModel == null) {
             remoteClientModel = new RemoteClientModel();
@@ -154,7 +150,7 @@ public class RemoteAccess {
         return remoteClientModel;
     }
 
-    protected Permission createPermissionModel(AccessPermission accessPermission, Folder folder, Account account) {
+    private Permission createPermissionModel(AccessPermission accessPermission, Folder folder, Account account) {
         Permission permission = new Permission();
         permission.setFolder(folder);
         permission.setCanWrite(accessPermission.isCanWrite());
@@ -163,8 +159,8 @@ public class RemoteAccess {
         return this.permissionDAO.create(permission);
     }
 
-    protected RemoteAccessModel createRemoteAccessModel(AccessPermission accessPermission,
-                                                        RemoteClientModel remoteClientModel, Permission permission) {
+    private RemoteAccessModel createRemoteAccessModel(AccessPermission accessPermission,
+                                                      RemoteClientModel remoteClientModel, Permission permission) {
         RemoteAccessModel remoteAccessModel = new RemoteAccessModel();
         remoteAccessModel.setToken(accessPermission.getSecret());
         remoteAccessModel.setRemoteClientModel(remoteClientModel);

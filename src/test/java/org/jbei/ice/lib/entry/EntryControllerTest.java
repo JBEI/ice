@@ -87,7 +87,7 @@ public class EntryControllerTest extends HibernateRepositoryTest {
             permission.setTypeId(strain.getId());
 
             EntryPermissions entryPermissions = new EntryPermissions(strain.getRecordId(), admin.getEmail());
-            AccessPermission result = entryPermissions.add(permission);
+            AccessPermission result = entryPermissions.addAccount(permission);
             Assert.assertNotNull(result);
             permissions.add(strain.getRecordId());
         }

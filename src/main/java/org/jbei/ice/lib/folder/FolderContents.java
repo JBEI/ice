@@ -342,10 +342,11 @@ public class FolderContents {
         // should have permission to read folder
         folderAuthorization.expectRead(userId, folder);
 
+        // check if folder doesn't exist on this instance and has to be retrieved from another
         if (folder.getType() == FolderType.REMOTE)
             return getRemoteContents(userId, folder, pageParameters);
 
-        boolean visibleOnly = folder.getType() != FolderType.TRANSFERRED && !userId.equalsIgnoreCase(folder.getOwnerEmail()) && !folderAuthorization.isAdmin(userId);
+        boolean visibleOnly = showVisibleOnlyEntries(userId, folder);
         FolderDetails details = folder.toDataTransferObject();
 
         // all local entries at this point
@@ -376,10 +377,26 @@ public class FolderContents {
         // retrieve folder contents
         List<Entry> results = folderDAO.retrieveFolderContents(folderId, pageParameters, visibleOnly);
         for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false, fields);
+            PartData info = ModelToInfoFactory.createTableViewData(entry, false, fields);
             details.getEntries().add(info);
         }
         return details;
+    }
+
+    /**
+     * Determines (based on user access privileges and folder type), if the
+     *
+     * @return true if folder contents with visibility of "OK" or "REMOTE" should be displayed
+     */
+    private boolean showVisibleOnlyEntries(String userId, Folder folder) {
+        if (folder.getType() == FolderType.TRANSFERRED)
+            return false;
+
+        // owners can see everything in the folder
+        if (StringUtils.isEmpty(userId) || folder.getOwnerEmail().equalsIgnoreCase(userId))
+            return false;
+
+        return !folderAuthorization.isAdmin(userId);
     }
 
     /**
@@ -469,7 +486,7 @@ public class FolderContents {
         // retrieve folder contents
         List<Entry> results = folderDAO.retrieveFolderContents(folderId, pageParameters, true);
         for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(null, entry, false, fields);
+            PartData info = ModelToInfoFactory.createTableViewData(entry, false, fields);
             info.setCanEdit(canEdit);
             details.getEntries().add(info);
         }

@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('ice.upload.controller', ['ngFileUpload'])
-    .controller('UploadController', function ($rootScope, $location, $scope, $uibModal, $resource, $http, $stateParams,
-                                              FileUploader, UploadUtil, Util, Authentication, Upload, EntryService) {
+    .controller('UploadController', function ($rootScope, $location, $scope, $uibModal, $route, $http, $stateParams,
+                                              FileUploader, UploadUtil, Util, Authentication, Upload) {
         let sheetData = [
             []
         ];
@@ -36,9 +36,10 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
             Util.update("rest/uploads/" + $scope.bulkUpload.id + "/link/" + type, {}, {}, function (linkedDefaults) {
                 let ht = angular.element('#dataTable').handsontable('getInstance');
                 $scope.linkedSelection = type;
+                linkedPartTypeDefault = UploadUtil.convertToUIForm(linkedDefaults);
 
                 // add linkedHeaders.length number of columns after the last column
-                ht.alter('insert_col', undefined, linkedDefaults.fields.length);
+                ht.alter('insert_col', undefined, linkedPartTypeDefault.fields.length);
             });
         };
 
@@ -164,7 +165,8 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                         } else {
                             // deal with linked entries
                             const index = col - (FILE_FIELDS_COUNT + partTypeDefault.fields.length);
-                            field = partTypeDefault.fields[index];
+                            if (linkedPartTypeDefault && linkedPartTypeDefault.fields.length > index)
+                                field = linkedPartTypeDefault.fields[index];
 
                             if (!field && $scope.linkedSelection) {
                                 const linkedFileFieldIndex = index - linkedPartTypeDefault.fields.length;
@@ -374,55 +376,50 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
                 // first create a new upload if we are not updating an existing one
                 // this is a factor if the user manually enters the url (e.g. "upload/strain")
-                if (!$scope.bulkUpload.id) {
-                    // create draft of specified type
-                    Util.update("rest/uploads", {type: $scope.importType}, {}, function (result) {
-                        $scope.bulkUpload.id = result.id;
-                        $scope.bulkUpload.lastUpdate = result.lastUpdate;
-                        $scope.bulkUpload.name = result.name;
-
-                        // attempt to change url without reloading page
-                        $location.path("upload/" + $scope.bulkUpload.id, false);
-
-                        // then create entry and associate with draft
-                        createEntry(result.id, object, row);
+                // if (!$scope.bulkUpload.id) {
+                //     // create draft of specified type
+                //     Util.update("rest/uploads", {type: $scope.importType}, {}, function (result) {
+                //         $scope.bulkUpload.id = result.id;
+                //         $scope.bulkUpload.lastUpdate = result.lastUpdate;
+                //         $scope.bulkUpload.name = result.name;
+                //
+                //         // attempt to change url without reloading page
+                //         $location.path("upload/" + $scope.bulkUpload.id, false);
+                //
+                //         // then create entry and associate with draft
+                //         createEntry(result.id, object, row);
+                //     });
+                // } else {
+                // check if row being updated has existing entry
+                if (!object.id) {
+                    // create new entry for existing upload
+                    createEntry($scope.bulkUpload.id, object, row);
+                } else if (isRowEmpty(sheetData[row])) {
+                    // last field has been cleared, then delete the row
+                    Util.remove('rest/uploads/' + $scope.bulkUpload.id + '/entry/' + $scope.bulkUpload.entryIdData[row], {}, function () {
+                        $scope.saving = false;
+                    }, function (error) {
+                        console.error(error);
+                        $scope.saving = false;
                     });
                 } else {
-                    // check if row being updated has existing entry
-                    if (!object.id) {
-                        // create new entry for existing upload
-                        createEntry($scope.bulkUpload.id, object, row);
-                    } else if (isRowEmpty(sheetData[row])) {
-                        // last field has been cleared, then delete the row
-                        Util.remove('rest/uploads/' + $scope.bulkUpload.id + '/entry/' + $scope.bulkUpload.entryIdData[row], {}, function () {
+                    // update entry for existing upload
+                    Util.post('rest/uploads/' + $scope.bulkUpload.id + '/entry/' + object.id, object,
+                        function (updatedEntry) {
+                            $scope.bulkUpload.lastUpdate = updatedEntry.modificationTime;
                             $scope.saving = false;
-                        }, function (error) {
+                        },
+                        function (error) {
+                            // todo : this should revert the change in the ui and display a message
                             console.error(error);
                             $scope.saving = false;
                         });
-                    } else {
-                        // update entry for existing upload
-                        Util.post('rest/uploads/' + $scope.bulkUpload.id + '/entry/' + object.id, object,
-                            function (updatedEntry) {
-                                $scope.bulkUpload.lastUpdate = updatedEntry.modificationTime;
-                                $scope.saving = false;
-                            },
-                            function (error) {
-                                // todo : this should revert the change in the ui and display a message
-                                console.error(error);
-                                $scope.saving = false;
-                            });
-                    }
                 }
+                // }
             };
 
             // upload set of entries associated with an upload, in bulk
             const updateEntryList = function (objects) {
-                if ($scope.bulkUpload.id === undefined) {
-                    console.error("cannot update upload list. no bulk upload object"); // todo : need to create?
-                    return;
-                }
-
                 let entryList = [];
                 for (let idx = 0; idx < objects.length; idx += 1) {
                     let o = objects[idx];
@@ -491,7 +488,6 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                 } else {
                     updateEntryList(objects);
                 }
-                // $dataTable.handsontable('getInstance').render();
             };
 
             const getEntryObject = function (row, col, value) {
@@ -509,7 +505,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                         linkedObject.partId = value;
                     else {
                         const newIndex = col - partTypeDefault.fields.length - 3;
-                        UploadUtil.setDataValue($scope.linkedSelection.toUpperCase(), newIndex, linkedObject, value, partTypeDefault);
+                        UploadUtil.setDataValue($scope.linkedSelection.toUpperCase(), newIndex, linkedObject, value, linkedPartTypeDefault);
                     }
 
                     object.linkedParts = [linkedObject];
@@ -640,9 +636,8 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
             if (!partTypeDefault) {
                 Util.get("rest/parts/defaults/" + $scope.importType, function (result) {
-                    partTypeDefault = EntryService.convertToUIForm(result);
+                    partTypeDefault = UploadUtil.convertToUIForm(result);
                     $scope.linkedSelection = result.linkType;
-                    console.log(result);
 
                     // headers for the current selection and initialize first row
                     sheetData[0].length = partTypeDefault.fields.length + 3;
@@ -658,7 +653,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                         sheetData[0].length = partTypeDefault.fields.length + 3 + 1;
                     } else {
                         Util.get("rest/parts/defaults/" + $scope.linkedSelection, function (defaults) {
-                            linkedPartTypeDefault = EntryService.convertToUIForm(defaults);
+                            linkedPartTypeDefault = UploadUtil.convertToUIForm(defaults);
                             sheetData[0].length = partTypeDefault.fields.length + 3 + linkedPartTypeDefault.fields.length + 3;
                         }, {}, function (error) {
                             // todo
@@ -669,7 +664,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
             }
 
             $scope.fileUploadModal = function () {
-                $uibModal.open({
+                let modalInstance = $uibModal.open({
                     templateUrl: 'scripts/upload/modal/file-upload.html',
                     controller: 'BulkUploadModalController',
                     backdrop: 'static',
@@ -686,6 +681,10 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                             return $scope.bulkUpload.id;
                         }
                     }
+                });
+
+                modalInstance.result.then(function () {
+                    location.reload();
                 });
             };
 
@@ -823,7 +822,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
             //
             Util.get("rest/uploads/" + $stateParams.type, function (result) {
                 Util.get("rest/parts/defaults/" + result.type, function (defaults) {
-                    partTypeDefault = EntryService.convertToUIForm(defaults);
+                    partTypeDefault = UploadUtil.convertToUIForm(defaults);
                     loop(0, partTypeDefault);
                 }, {}, function (error) {
                     // todo
@@ -841,8 +840,6 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                         function (result) {
                             if (!result || !result.type)
                                 return;
-
-                            console.log(result);
 
                             $scope.bulkUpload.name = result.name;
                             $scope.bulkUpload.status = result.status;
@@ -866,7 +863,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
 
                                     // store the ids of the entries
                                     $scope.bulkUpload.entryIdData.push(entry.id);
-                                    entry = EntryService.convertToUIForm(entry);
+                                    entry = UploadUtil.convertToUIForm(entry);
 
                                     // ensure capacity
                                     if (!sheetData[numberOfExistingEntries + i])
@@ -890,7 +887,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                                     if (entry.linkedParts && entry.linkedParts.length) {
                                         let linkedPart = entry.linkedParts[0];
                                         $scope.bulkUpload.linkedEntryIdData.push(linkedPart.id);
-                                        linkedPart = EntryService.convertToUIForm(linkedPart);
+                                        linkedPart = UploadUtil.convertToUIForm(linkedPart);
 
                                         // linked part fields display
                                         for (let k = 0; k < linkedPart.fields.length; k += 1) {
@@ -916,7 +913,7 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
                                         sheetData[0].length = partTypeDefault.fields.length + 3 + 1;
                                     } else {
                                         Util.get("rest/parts/defaults/" + $scope.linkedSelection, function (defaults) {
-                                            linkedPartTypeDefault = EntryService.convertToUIForm(defaults);
+                                            linkedPartTypeDefault = UploadUtil.convertToUIForm(defaults);
                                             sheetData[0].length = partTypeDefault.fields.length + 3 + linkedPartTypeDefault.fields.length + 3;
                                             createSheet();
                                         }, {}, function (error) {
@@ -964,103 +961,6 @@ angular.module('ice.upload.controller', ['ngFileUpload'])
         $scope.cancel = function () {
             $uibModalInstance.dismiss('cancel');
         };
-    })
-    .controller('BulkUploadModalController', function ($window, $scope, $location, $cookies, $routeParams, uploadId,
-                                                       $uibModalInstance, FileUploader, addType, linkedAddType, Util,
-                                                       Authentication) {
-        $scope.addType = addType;
-        $scope.processing = false;
-
-        //
-        // reset the current bulk upload. involves deleting all entries and showing user new upload form
-        //
-        $scope.resetBulkUpload = function () {
-            // expected folders that can be deleted have type "PRIVATE" and "UPLOAD"
-            Util.remove("rest/folders/" + uploadId, {folderId: uploadId, type: "UPLOAD"}, function () {
-                $location.path("/upload/" + addType);
-                $uibModalInstance.dismiss('cancel');
-            }, function (error) {
-                console.error(error);
-            });
-        };
-
-        $scope.retryUpload = function () {
-            $scope.uploadError = undefined;
-            createUploader();
-        };
-
-        let createUploader = function () {
-
-            if ($scope.importUploader) {
-                $scope.importUploader.cancelAll();
-                $scope.importUploader.clearQueue();
-                $scope.importUploader.destroy();
-            }
-
-            $scope.importUploader = new FileUploader({
-                url: "rest/uploads/file",
-                method: 'POST',
-                removeAfterUpload: true,
-                headers: {"X-ICE-Authentication-SessionId": Authentication.getSessionId()},
-                formData: [
-                    {type: addType}
-                ]
-            });
-        };
-
-        createUploader();
-
-        $scope.importUploader.onSuccessItem = function (item, response) {
-            $scope.modalClose = "Close";
-            $scope.processing = false;
-            if (response.success && response.uploadInfo.id) {
-                $uibModalInstance.close();
-                $location.path("upload/" + response.uploadInfo.id);
-            } else {
-                $scope.uploadError = {};
-                if (response.userMessage)
-                    $scope.uploadError.message = response.userMessage;
-            }
-        };
-
-        $scope.importUploader.onErrorItem = function (item, response, status) {
-            $scope.processing = false;
-            $scope.uploadError = {};
-            if (response.userMessage)
-                $scope.uploadError.message = response.userMessage;
-            else
-                $scope.uploadError.message = "Unknown server error";
-
-            if (status === 400) {
-                $scope.uploadError.message = "Validation error processing file \'" + item.file.name + "\'";
-                if (response.userMessage)
-                    $scope.uploadError.details = response.userMessage;
-                $scope.uploadError.headers = response.headers;
-            }
-        };
-
-        $scope.importUploader.onBeforeUploadItem = function () {
-            $scope.processing = true;
-        };
-
-        $scope.importUploader.onCompleteItem = function () {
-            $scope.processing = false;
-        };
-
-        $scope.ok = function () {
-            $uibModalInstance.close($scope.selected.item);
-        };
-
-        $scope.cancel = function () {
-            $uibModalInstance.dismiss('cancel');
-        };
-
-        $scope.downloadCSVTemplate = function () {
-            let url = "rest/file/upload/" + $scope.addType;
-            if (linkedAddType)
-                url += "?link=" + linkedAddType;
-            $window.open(url, "_self");
-        }
     })
     .controller('BulkUploadPermissionsController', function ($scope, $cookies, $location, $uibModalInstance,
                                                              upload, Util) {

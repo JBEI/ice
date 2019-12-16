@@ -30,7 +30,7 @@ public class SequenceVersionHistory {
 
     public void add(String sequenceString) {
         SequenceHistoryModel model = new SequenceHistoryModel();
-        model.setAction("Sequence string modified"); // todo
+        model.setAction("m"); // todo
         model.setSequence(this.sequence);
         model.setSessionId(session);
         model.setSequenceString(sequenceString);

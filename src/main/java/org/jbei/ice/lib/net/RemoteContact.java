@@ -22,9 +22,9 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
 import org.jbei.ice.storage.model.RemotePartner;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,31 +35,29 @@ import java.util.Map;
  *
  * @author Hector Plahar
  */
-@SuppressWarnings("unchecked")
 public class RemoteContact {
 
     private final RemotePartnerDAO dao;
     private final TokenHash tokenHash;
-    private final IceRestClient restClient;
 
     public RemoteContact() {
         dao = DAOFactory.getRemotePartnerDAO();
         tokenHash = new TokenHash();
-        restClient = IceRestClient.getInstance();
     }
 
     // exchange api key with remote partner
     // send to remote in order to trigger an api exchange. Note that the remote partner will
     public RegistryPartner contactPotentialPartner(RegistryPartner thisPartner, String remotePartnerUrl) {
         AccessTokens.setToken(remotePartnerUrl, thisPartner.getApiKey());
-        RegistryPartner newPartner = restClient.post(remotePartnerUrl, "/rest/partners",
-                thisPartner, RegistryPartner.class, null);
+        IceRestClient client = new IceRestClient(remotePartnerUrl, "/rest/partners");
+        RegistryPartner newPartner = client.post(thisPartner, RegistryPartner.class);
         AccessTokens.removeToken(remotePartnerUrl);
         return newPartner;
     }
 
     public RegistryPartner refreshPartnerKey(RegistryPartner partner, String url, String worToken) {
-        return restClient.putWor(url, "rest/partners", partner, RegistryPartner.class, null, worToken);
+        IceRestClient client = new IceRestClient(url, worToken, "/rest/partners");
+        return client.put(partner, RegistryPartner.class);
     }
 
     /**
@@ -74,10 +72,9 @@ public class RemoteContact {
         if (StringUtils.isEmpty(registryPartner.getApiKey()))
             return false;
 
-        HashMap<String, Object> queryParams = new HashMap<>();
-        queryParams.put("url", myURL);
-        RegistryPartner response = restClient.getWor(registryPartner.getUrl(), "/rest/accesstokens/web",
-                RegistryPartner.class, queryParams, registryPartner.getApiKey());
+        IceRestClient client = new IceRestClient(registryPartner.getUrl(), registryPartner.getApiKey(), "/rest/accesstokens/web");
+        client.queryParam("url", myURL);
+        RegistryPartner response = client.get(RegistryPartner.class);
         if (response == null) { // todo : should retry up to a certain number of times
             Logger.error("Could not validate request");
             return false;
@@ -103,104 +100,120 @@ public class RemoteContact {
         return true;
     }
 
-    public PartData transferPart(String url, PartData data) {
-        return restClient.put(url, "/rest/parts/transfer", data, PartData.class);
+    PartData transferPart(String url, PartData data) {
+        IceRestClient client = new IceRestClient(url, "/rest/parts/transfer");
+        return client.put(data, PartData.class);
     }
 
-    public void transferSequence(String url, String recordId, EntryType entryType, String sequenceString) {
-        restClient.postSequenceFile(url, recordId, entryType, sequenceString);
+    void transferSequence(String url, String recordId, EntryType entryType, String sequenceString) {
+        IceRestClient client = new IceRestClient(url, "/rest/parts/transfer");
+        client.postSequenceFile(recordId, entryType, sequenceString);
     }
 
-    public FolderDetails transferFolder(String url, FolderDetails folderDetails) {
-        Map<String, Object> queryParams = new HashMap<>();
-        queryParams.put("isTransfer", true);
-        return restClient.post(url, "/rest/folders", folderDetails, FolderDetails.class, queryParams);
+    FolderDetails transferFolder(String url, FolderDetails folderDetails) {
+        IceRestClient client = new IceRestClient(url, "/rest/folders");
+        client.queryParam("isTransfer", true);
+        return client.post(folderDetails, FolderDetails.class);
     }
 
-    public void addTransferredEntriesToFolder(String url, EntrySelection entrySelection) {
-        restClient.put(url, "/rest/folders/entries", entrySelection, FolderDetails.class);
+    void addTransferredEntriesToFolder(String url, EntrySelection entrySelection) {
+        IceRestClient client = new IceRestClient(url, "/rest/folders/entries");
+        client.put(entrySelection, FolderDetails.class);
     }
 
-    public List<RegistryPartner> getPartners(String url, String token) {
-        return restClient.getWor(url, "/rest/partners", ArrayList.class, null, token);
+    @SuppressWarnings("unchecked")
+    List<RegistryPartner> getPartners(String url, String token) {
+        IceRestClient client = new IceRestClient(url, token, "/rest/partners");
+        return client.get(ArrayList.class);
     }
 
     public AccountTransfer getUser(String url, String email, String token) {
-        return restClient.getWor(url, "rest/users/" + email, AccountTransfer.class, null, token);
+        IceRestClient client = new IceRestClient(url, token, "/rest/users/" + email);
+        return client.get(AccountTransfer.class);
     }
 
     public AccessPermission shareFolder(String url, AccessPermission permission, String token) {
-        return restClient.postWor(url, "rest/permissions/remote", permission, AccessPermission.class, null, token);
+        IceRestClient client = new IceRestClient(url, token, "rest/permissions/remote");
+        return client.post(permission, AccessPermission.class);
     }
 
-    public FolderDetails getRemoteContents(String url, String userId, long folderId, String token, PageParameters pageParameters,
-                                           String worToken) {
-        Map<String, Object> queryParams = new HashMap<>();
+    public FolderDetails getRemoteContents(String url, String userId, long folderId, String token,
+                                           PageParameters pageParameters, String worToken) {
+        IceRestClient client = new IceRestClient(url, worToken, "rest/folders/" + folderId + "/entries");
         try {
             String encodedToken = URLEncoder.encode(token, "UTF-8");
-            queryParams.put("token", encodedToken);
-            queryParams.put("userId", userId);
-            queryParams.put("sort", pageParameters.getSortField().name());
-            queryParams.put("asc", Boolean.toString(pageParameters.isAscending()));
-            queryParams.put("offset", pageParameters.getOffset());
-            queryParams.put("limit", pageParameters.getLimit());
-            return restClient.getWor(url, "rest/folders/" + folderId + "/entries", FolderDetails.class, queryParams, worToken);
-        } catch (Exception e) {
+            client.queryParam("token", encodedToken);
+            client.queryParam("userId", userId);
+            client.queryParam("sort", pageParameters.getSortField().name());
+            client.queryParam("asc", Boolean.toString(pageParameters.isAscending()));
+            client.queryParam("offset", pageParameters.getOffset());
+            client.queryParam("limit", pageParameters.getLimit());
+            return client.get(FolderDetails.class);
+        } catch (IOException e) {
             Logger.error(e);
             return null;
         }
     }
 
-    public FolderDetails getFolderEntries(String url, String resourcePath, Map<String, Object> queryParams, String apiKey) {
-        return restClient.getWor(url, resourcePath, FolderDetails.class, queryParams, apiKey);
+    FolderDetails getFolderEntries(String url, Map<String, Object> queryParams, String apiKey) {
+        IceRestClient client = new IceRestClient(url, apiKey, "rest/folders/public/entries");
+        for (Map.Entry<String, Object> entry : queryParams.entrySet())
+            client.queryParam(entry.getKey(), entry.getValue());
+        client.queryParam("fields", "hasSequence", "status", "creationTime");
+        return client.get(FolderDetails.class);
     }
 
-    public List<AttachmentInfo> getAttachmentList(String url, long entryId, String apiKey) {
+    @SuppressWarnings("unchecked")
+    List<AttachmentInfo> getAttachmentList(String url, long entryId, String apiKey) {
         String path = "rest/parts/" + entryId + "/attachments";
-        return restClient.getWor(url, path, ArrayList.class, null, apiKey);
+        IceRestClient client = new IceRestClient(url, apiKey, path);
+        return client.get(ArrayList.class);
     }
 
     public void addTransferredEntriesToFolder(String url, String userId, EntrySelection entrySelection, long folderId,
                                               String token, String worToken) {
         try {
+            IceRestClient client = new IceRestClient(url, worToken, "rest/folders/entries");
             String encodedToken = URLEncoder.encode(token, "UTF-8");
-            Map<String, Object> queryParams = new HashMap<>();
-            queryParams.put("token", encodedToken);
-            queryParams.put("userId", userId);
-            queryParams.put("folderId", folderId);
-            restClient.putWor(url, "rest/folders/entries", entrySelection, FolderDetails.class, queryParams, worToken);
+            client.queryParam("token", encodedToken);
+            client.queryParam("userId", userId);
+            client.queryParam("folderId", folderId);
+            client.put(entrySelection, FolderDetails.class);
         } catch (Exception e) {
             Logger.error(e);
         }
     }
 
-    public PartData getToolTipDetails(String url, String userId, long partId, String token, String worToken) {
+    PartData getToolTipDetails(String url, String userId, long partId, String token, String worToken) {
         try {
+            IceRestClient client = new IceRestClient(url, worToken, "rest/parts/" + partId + "/tooltip");
             String encodedToken = URLEncoder.encode(token, "UTF-8");
-            Map<String, Object> queryParams = new HashMap<>();
-            queryParams.put("token", encodedToken);
-            queryParams.put("userId", userId);
-            return restClient.getWor(url, "rest/parts/" + partId + "/tooltip", PartData.class, queryParams, worToken);
+            client.queryParam("token", encodedToken);
+            client.queryParam("userId", userId);
+            return client.get(PartData.class);
         } catch (Exception e) {
             Logger.error(e);
             return null;
         }
     }
 
-    public PartData getPublicTooltipDetails(String url, long partId, String apiKey) {
+    PartData getPublicTooltipDetails(String url, long partId, String apiKey) {
         String path = "rest/parts/" + partId + "/tooltip";
-        return restClient.getWor(url, path, PartData.class, null, apiKey);
+        IceRestClient client = new IceRestClient(url, apiKey, path);
+        return client.get(PartData.class);
     }
 
-    public PartStatistics getPublicEntryStatistics(String url, long partId, String apiKey) {
+    PartStatistics getPublicEntryStatistics(String url, long partId, String apiKey) {
         String path = "/rest/parts/" + partId + "/statistics";
-        return restClient.getWor(url, path, PartStatistics.class, null, apiKey);
+        IceRestClient client = new IceRestClient(url, apiKey, path);
+        return client.get(PartStatistics.class);
     }
 
     public FeaturedDNASequence getPublicEntrySequence(String url, String partId, String apiKey) {
         try {
             String path = "/rest/parts/" + partId + "/sequence";
-            return restClient.getWor(url, path, FeaturedDNASequence.class, null, apiKey);
+            IceRestClient client = new IceRestClient(url, apiKey, path);
+            return client.get(FeaturedDNASequence.class);
         } catch (Exception e) {
             // this is fine since it could be searching multiple instances
             return null;
@@ -212,25 +225,25 @@ public class RemoteContact {
         try {
             String path = "rest/parts/" + partId + "/sequence";
             String encodedToken = URLEncoder.encode(token, "UTF-8");
-            Map<String, Object> queryParams = new HashMap<>();
-            queryParams.put("token", encodedToken);
-            queryParams.put("userId", userId);
-            queryParams.put("folderId", folderId);
-            return restClient.getWor(url, path, FeaturedDNASequence.class, queryParams, apiKey);
+            IceRestClient client = new IceRestClient(url, apiKey, path);
+            client.queryParam("token", encodedToken);
+            client.queryParam("userId", userId);
+            client.queryParam("folderId", folderId);
+            return client.get(FeaturedDNASequence.class);
         } catch (Exception e) {
             Logger.error(e);
             return null;
         }
     }
 
-    public PartData getRemoteEntry(String url, String userId, long partId, long folderId, String token, String worToken) {
+    PartData getRemoteEntry(String url, String userId, long partId, long folderId, String token, String worToken) {
         try {
             String encodedToken = URLEncoder.encode(token, "UTF-8");
-            Map<String, Object> queryParams = new HashMap<>();
-            queryParams.put("token", encodedToken);
-            queryParams.put("userId", userId);
-            queryParams.put("folderId", folderId);
-            return restClient.getWor(url, "rest/parts/" + partId, PartData.class, queryParams, worToken);
+            IceRestClient client = new IceRestClient(url, worToken, "rest/parts/" + partId);
+            client.queryParam("token", encodedToken);
+            client.queryParam("userId", userId);
+            client.queryParam("folderId", folderId);
+            return client.get(PartData.class);
         } catch (Exception e) {
             Logger.error(e);
             return null;
@@ -239,7 +252,8 @@ public class RemoteContact {
 
     public PartData getPublicEntry(String url, String entryId, String apiKey) {
         try {
-            return restClient.getWor(url, "rest/parts/" + entryId, PartData.class, null, apiKey);
+            IceRestClient client = new IceRestClient(url, apiKey, "rest/parts/" + entryId);
+            return client.get(PartData.class);
         } catch (Exception e) {
             // this is fine since it could be searching all instances
             return null;
@@ -251,9 +265,13 @@ public class RemoteContact {
      *
      * @return true, if the master reports correct execution of the request. false otherwise
      */
-    public boolean deleteInstanceFromMaster(String thisUrl) {
+    boolean deleteInstanceFromMaster(String thisUrl) {
         final String NODE_MASTER = Utils.getConfigValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER);
         RemotePartner masterPartner = DAOFactory.getRemotePartnerDAO().getByUrl(NODE_MASTER);
-        return masterPartner != null && restClient.delete(masterPartner.getApiKey(), masterPartner.getUrl(), "rest/partners/" + thisUrl);
+        if (masterPartner == null)
+            return false;
+
+        IceRestClient client = new IceRestClient(masterPartner.getUrl(), masterPartner.getApiKey(), "rest/partners/" + thisUrl);
+        return client.delete();
     }
 }

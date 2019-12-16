@@ -4,6 +4,7 @@ import org.hibernate.HibernateException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.hibernate.HibernateRepository;
+import org.jbei.ice.storage.model.CustomEntryFieldModel;
 import org.jbei.ice.storage.model.CustomEntryFieldValueModel;
 import org.jbei.ice.storage.model.Entry;
 
@@ -24,6 +25,18 @@ public class CustomEntryFieldValueDAO extends HibernateRepository<CustomEntryFie
             Root<CustomEntryFieldValueModel> from = query.from(CustomEntryFieldValueModel.class);
             query.where(getBuilder().equal(from.get("entry"), entry));
             return currentSession().createQuery(query).list();
+        } catch (HibernateException e) {
+            Logger.error(e);
+            throw new DAOException(e);
+        }
+    }
+
+    public CustomEntryFieldValueModel getByFieldAndEntry(Entry entry, CustomEntryFieldModel model) {
+        try {
+            CriteriaQuery<CustomEntryFieldValueModel> query = getBuilder().createQuery(CustomEntryFieldValueModel.class);
+            Root<CustomEntryFieldValueModel> from = query.from(CustomEntryFieldValueModel.class);
+            query.where(getBuilder().equal(from.get("entry"), entry), getBuilder().equal(from.get("field"), model));
+            return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException e) {
             Logger.error(e);
             throw new DAOException(e);
