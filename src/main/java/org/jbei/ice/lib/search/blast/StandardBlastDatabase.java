@@ -201,9 +201,11 @@ public class StandardBlastDatabase extends BlastDatabase {
             return;
         }
 
+        // delete fasta file and create a new one with all sequences in database
+        blastFastaFile.createNew();
         Iterable<String> iterable = () -> new AllSequencesStream(sequenceDAO);
         blastFastaFile.write(iterable);
-        blastPlus.formatBlastDb(blastFastaFile, this.dbName); // todo
+        blastPlus.formatBlastDb(blastFastaFile, this.dbName);
     }
 
     public void addSequence(String partId) {

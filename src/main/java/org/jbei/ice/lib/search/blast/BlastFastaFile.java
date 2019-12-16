@@ -77,6 +77,18 @@ public class BlastFastaFile {
         FileUtils.deleteQuietly(lockFile);
     }
 
+    /**
+     * Create a new (empty) fasta file
+     */
+    public void createNew() {
+        try {
+            Files.deleteIfExists(this.filePath);
+            Files.createFile(this.filePath);
+        } catch (IOException e) {
+            Logger.error(e);
+        }
+    }
+
     public boolean write(Iterable<String> iterable) {
         File lockFile = createLock();
 
