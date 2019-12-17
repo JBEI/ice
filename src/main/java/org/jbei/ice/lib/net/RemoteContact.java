@@ -106,7 +106,7 @@ public class RemoteContact {
     }
 
     void transferSequence(String url, String recordId, EntryType entryType, String sequenceString) {
-        IceRestClient client = new IceRestClient(url, "/rest/parts/transfer");
+        IceRestClient client = new IceRestClient(url, "/rest/file/sequence");
         client.postSequenceFile(recordId, entryType, sequenceString);
     }
 
