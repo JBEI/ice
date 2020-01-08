@@ -27,6 +27,8 @@ public class BlastPlus {
 
     public BlastPlus() {
         this.blastInstallDirectory = Paths.get(Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR));
+        if (!Files.exists(this.blastInstallDirectory))
+            throw new IllegalArgumentException("Cannot locate blast in " + this.blastInstallDirectory + ". Please install");
     }
 
     /**
