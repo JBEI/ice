@@ -23,14 +23,14 @@ public class RemoteFolder {
 
     public FolderDetails getEntries(String sort, boolean asc, int offset, int limit) {
         try {
-            String restPath = "rest/folders/" + folderId + "/entries";
-            IceRestClient restClient = new IceRestClient(this.partner.getUrl(), this.partner.getApiKey(), restPath);
+            IceRestClient restClient = new IceRestClient(this.partner.getUrl(), this.partner.getApiKey());
             restClient.queryParam("offset", offset);
             restClient.queryParam("limit", limit);
             restClient.queryParam("asc", asc);
             restClient.queryParam("sort", sort);
             restClient.queryParam("fields", "creationTime", "hasSequence", "status");
-            return restClient.get(FolderDetails.class);
+            String restPath = "rest/folders/" + folderId + "/entries";
+            return restClient.get(restPath, FolderDetails.class);
         } catch (Exception e) {
             Logger.error("Error getting public folder entries from \"" + partner.getUrl() + "\": " + e.getMessage());
             return null;

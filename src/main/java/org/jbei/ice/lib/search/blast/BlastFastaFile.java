@@ -113,6 +113,8 @@ public class BlastFastaFile {
         Path tmpFile = Paths.get(filePath.getParent().toString(), FILE_NAME + ".tmp");
         Files.deleteIfExists(tmpFile);
         Files.createFile(tmpFile);
+        if (!Files.exists(tmpFile))
+            throw new IOException(tmpFile + " could not be created");
 
         Stream<String> lines = Files.lines(this.filePath);
 
