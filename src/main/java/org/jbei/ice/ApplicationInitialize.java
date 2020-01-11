@@ -20,6 +20,8 @@ public class ApplicationInitialize {
      * data (such as settings) and creating as needed
      */
     public static void startUp() {
+        IceExecutorService.getInstance().startService();
+
         // check for and create public group
         GroupController groupController = new GroupController();
         groupController.createOrRetrievePublicGroup();
