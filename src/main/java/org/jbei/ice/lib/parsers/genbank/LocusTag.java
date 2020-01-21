@@ -1,30 +1,28 @@
 package org.jbei.ice.lib.parsers.genbank;
 
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
+
+import java.util.Arrays;
+
 /**
  * @author Hector Plahar
  */
-class LocusTag extends Tag {
+public class LocusTag extends Tag {
 
-    private String locusName = "";
-    private boolean isCircular = true;
-
-    public LocusTag() {
-        super(Type.LOCUS);
+    public LocusTag(FeaturedDNASequence sequence) {
+        super(sequence);
     }
 
-    public String getLocusName() {
-        return locusName;
-    }
+    @Override
+    public void process(String line) {
+        line = cleanSequence(line);
+        String[] split = line.split("\\s+");
+        sequence.setIsCircular(Arrays.asList(split).contains("circular") || Arrays.asList(split).contains("CIRCULAR"));
 
-    public void setLocusName(String locusName) {
-        this.locusName = locusName;
-    }
-
-    public boolean isCircular() {
-        return isCircular;
-    }
-
-    public void setCircular(boolean isCircular) {
-        this.isCircular = isCircular;
+        if (Arrays.asList(split).indexOf("bp") == 3) {
+            sequence.setName(split[1].trim());
+        } else {
+            sequence.setName("undefined");
+        }
     }
 }

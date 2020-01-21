@@ -1,26 +1,18 @@
 package org.jbei.ice.lib.parsers.genbank;
 
-import java.util.ArrayList;
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
 
 /**
  * @author Hector Plahar
  */
 public class ReferenceTag extends Tag {
 
-    private ArrayList<Tag> references = new ArrayList<>();
-
-    public ReferenceTag() {
-        super(Type.REFERENCE);
+    public ReferenceTag(FeaturedDNASequence sequence) {
+        super(sequence);
     }
 
-    @SuppressWarnings("unused")
-    public void setReferences(ArrayList<Tag> references) {
-        this.references = references;
+    @Override
+    public void process(String line) {
+        final String putativeValue = line.split(" +")[1];
     }
-
-    @SuppressWarnings("unused")
-    public ArrayList<Tag> getReferences() {
-        return references;
-    }
-
 }

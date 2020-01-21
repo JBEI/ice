@@ -1,21 +1,34 @@
 package org.jbei.ice.lib.parsers.genbank;
 
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
+import org.jbei.ice.lib.utils.Utils;
+
+import java.util.Arrays;
+
 /**
  * @author Hector Plahar
  */
 public class OriginTag extends Tag {
 
-    public OriginTag() {
-        super(Type.ORIGIN);
+    private StringBuilder sequenceString;
+
+    public OriginTag(FeaturedDNASequence sequence) {
+        super(sequence);
+        sequenceString = new StringBuilder();
     }
 
-    private String sequence;
+    public void process(String line) {
+        if (line.contains("ORIGIN"))
+            return;
 
-    public String getSequence() {
-        return sequence;
-    }
+        if (line.trim().equals("//"))
+            sequence.setSequence(sequenceString.toString());
 
-    public void setSequence(String sequence) {
-        this.sequence = sequence;
+        line = cleanSequence(line);
+        String[] chunks = line.split("\\s+");
+        if (chunks[0].matches("\\d*")) { // sometimes sequence block is un-numbered fasta
+            chunks[0] = "";
+        }
+        sequenceString.append(Utils.join("", Arrays.asList(chunks)).toLowerCase());
     }
 }

@@ -2,11 +2,13 @@ package org.jbei.ice.lib.parsers;
 
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 
+import java.io.InputStream;
+
 public abstract class AbstractParser {
 
     protected String fileName;
 
-    public FeaturedDNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
+    public FeaturedDNASequence parse(InputStream stream, String... entryType) throws InvalidFormatParserException {
         throw new UnsupportedOperationException("Not implemented for this parser");
     }
 

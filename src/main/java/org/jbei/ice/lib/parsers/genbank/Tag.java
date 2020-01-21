@@ -1,48 +1,36 @@
 package org.jbei.ice.lib.parsers.genbank;
 
+import org.jbei.ice.lib.dto.FeaturedDNASequence;
+
 /**
  * @author Hector Plahar
  */
-public class Tag {
+public abstract class Tag {
 
-    private String key;
-    private String rawBody;
-    private String value;
-    private final Type type;
+    protected FeaturedDNASequence sequence;
 
-    public Tag(Type type) {
-        this.type = type;
+    public Tag(FeaturedDNASequence sequence) {
+        this.sequence = sequence;
     }
 
-    public String getKey() {
-        return key;
+    public abstract void process(String line);
+
+    public FeaturedDNASequence getSequence() {
+        return this.sequence;
     }
 
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public String getRawBody() {
-        return rawBody;
-    }
-
-    public void setRawBody(String rawBody) {
-        this.rawBody = rawBody;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public enum Type {
-        ORIGIN, LOCUS, FEATURES, REFERENCE, REGULAR, ACCESSION
+    /**
+     * Replace different line termination characters with the newline character (\n).
+     *
+     * @param sequence Text to clean.
+     * @return String with only newline character (\n).
+     */
+    protected String cleanSequence(String sequence) {
+        sequence = sequence.trim();
+        sequence = sequence.replace("\n\n", "\n"); // *nix
+        sequence = sequence.replace("\n\r\n\r", "\n"); // win
+        sequence = sequence.replace("\r\r", "\n"); // mac
+        sequence = sequence.replace("\n\r", "\n"); // *win
+        return sequence;
     }
 }

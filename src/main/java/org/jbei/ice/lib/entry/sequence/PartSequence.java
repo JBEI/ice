@@ -124,6 +124,8 @@ public class PartSequence {
             throws IOException {
         try {
             AbstractParser parser;
+            inputStream.mark(Integer.MAX_VALUE);
+
             String sequenceString = Utils.getString(inputStream);
             SequenceFormat format = SequenceUtil.detectFormat(sequenceString);
 
@@ -134,7 +136,7 @@ public class PartSequence {
 
                 case SBOL2:
                     SBOLParser sbolParser = new SBOLParser(this.userId, Long.toString(this.entry.getId()), extractHierarchy);
-                    return sbolParser.parseToEntry(sequenceString, fileName);
+                    return sbolParser.parseToEntry(inputStream, fileName);
 
                 case FASTA:
                     parser = new FastaParser();
@@ -148,12 +150,14 @@ public class PartSequence {
 
             // parse actual sequence
             String entryType = this.entry.getRecordType();
-            FeaturedDNASequence dnaSequence = parser.parse(sequenceString, entryType);
+
+            inputStream.reset();
+            FeaturedDNASequence dnaSequence = parser.parse(inputStream, entryType);
             Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
             if (sequence == null)
                 throw new IOException("Could not create sequence object");
 
-            sequence.setSequenceUser(sequenceString);
+            sequence.setSequenceUser(sequenceString); // todo sequence user now might not be such a good idea
             sequence.setFileName(fileName);
             sequence.setFormat(format);
             sequence = saveSequenceObject(sequence);

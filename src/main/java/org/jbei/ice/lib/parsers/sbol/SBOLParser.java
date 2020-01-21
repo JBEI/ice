@@ -24,7 +24,7 @@ import org.sbolstandard.core2.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,10 +55,10 @@ public class SBOLParser extends AbstractParser {
         this.userId = userId;
     }
 
-    public SequenceInfo parseToEntry(String textSequence, String fileName) throws InvalidFormatParserException {
+    public SequenceInfo parseToEntry(InputStream stream, String fileName) throws InvalidFormatParserException {
         SBOLDocument document;
         try {
-            document = SBOLReader.read(new ByteArrayInputStream(textSequence.getBytes(StandardCharsets.UTF_8)));
+            document = SBOLReader.read(stream);
         } catch (SBOLValidationException e) {
             Logger.error(e);
             throw new InvalidFormatParserException("Invalid SBOL file: " + e.getMessage());
@@ -126,7 +126,7 @@ public class SBOLParser extends AbstractParser {
             SBOLWriter.write(sbolDocument, out, "GENBANK");
             if (out.size() > 0) {
                 GenBankParser parser = new GenBankParser();
-                dnaSequence = parser.parse(new String(out.toByteArray()));
+                dnaSequence = parser.parse(new ByteArrayInputStream(out.toByteArray()));
                 sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
             }
         } catch (InvalidFormatParserException e) {

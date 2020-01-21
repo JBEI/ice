@@ -7,6 +7,7 @@ import org.jbei.ice.lib.entry.sequence.SequenceUtil;
 import org.jbei.ice.lib.parsers.fasta.FastaParser;
 import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 /**
@@ -37,7 +38,7 @@ public class GeneralParser {
                         break;
                 }
             }
-            return parser.parse(sequence);
+            return parser.parse(new ByteArrayInputStream(sequence.getBytes()));
         } catch (IOException | InvalidFormatParserException e) {
             Logger.error(e);
             return null;
