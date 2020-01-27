@@ -51,8 +51,6 @@ public class StandardBlastDatabase extends BlastDatabase {
     }
 
     private static String getSequenceFasta(Sequence sequence) {
-        long id = sequence.getEntry().getId();
-
         String sequenceString = "";
         String temp = sequence.getSequence();
 
@@ -79,6 +77,7 @@ public class StandardBlastDatabase extends BlastDatabase {
         if (StringUtils.isEmpty(sequenceString))
             return null;
 
+        long id = sequence.getEntry().getId();
         String idString = ">" + id;
         idString += DELIMITER + sequence.getEntry().getRecordType();
         String name = sequence.getEntry().getName() == null ? "None" : sequence.getEntry().getName();
@@ -88,7 +87,6 @@ public class StandardBlastDatabase extends BlastDatabase {
         idString += "\n";
         return (idString + sequenceString + "\n");
     }
-
 
     /**
      * Run a blast query using the following output format options
