@@ -12,6 +12,7 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.search.BlastProgram;
 import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
+import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.Entry;
@@ -212,7 +213,7 @@ public class StandardBlastDatabase extends BlastDatabase {
     }
 
     public void addSequence(String partId) {
-        Entry entry = DAOFactory.getEntryDAO().getByPartNumber(partId);
+        Entry entry = new HasEntry().getEntry(partId);
         if (entry == null) {
             Logger.error("Could not retrieve entry with id " + partId);
             return;
