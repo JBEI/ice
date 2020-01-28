@@ -255,27 +255,28 @@ public class RequestRetriever {
                 line[0] = entry.getName();
 
                 List<PartSample> samples = sampleService.retrieveEntrySamples(userId, Long.toString(request.getEntry().getId()));
+                if (samples.isEmpty()) {
+                    Logger.info("No samples found for " + line[0]);
+                    continue;
+                }
+
                 String plate = null;
                 String well = null;
 
-                if (samples.size() == 1) {
-                    if (samples.get(0).getLocation().getType() == SampleType.GENERIC) {
+                for (PartSample sample : samples) {
+                    StorageLocation location = sample.getLocation();
+                    if (location == null)
+                        continue;
+
+                    if (location.getType() == SampleType.GENERIC) {
                         plate = "generic";
                         well = "";
-                    }
-                } else {
-                    for (PartSample partSample : samples) {
-                        if (partSample.getLabel().contains("backup"))
+                        break;
+                    } else if (location.getType() == SampleType.PLATE96) {
+                        if (sample.getLabel().contains("backup"))
                             continue;
 
-                        // get plate
-                        StorageLocation location = partSample.getLocation();
-                        if (location == null)
-                            continue;
-
-                        if (location.getType() == SampleType.PLATE96) {
-                            plate = location.getDisplay().replaceFirst("^0+(?!$)", "");
-                        }
+                        plate = location.getDisplay().replaceFirst("^0+(?!$)", "");
 
                         StorageLocation child = location.getChild();
                         while (child != null) {
