@@ -1,6 +1,7 @@
 package org.jbei.ice;
 
 import org.jbei.ice.lib.account.AccountController;
+import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.config.ConfigurationSettings;
 import org.jbei.ice.lib.entry.sequence.annotation.AutoAnnotationBlastDbBuildTask;
 import org.jbei.ice.lib.executor.IceExecutorService;
@@ -34,11 +35,15 @@ public class ApplicationInitialize {
         ConfigurationSettings settings = new ConfigurationSettings();
         settings.initPropertyValues();
 
-        // check blast database exists and build if it doesn't
-        RebuildBlastIndexTask task = new RebuildBlastIndexTask();
-        IceExecutorService.getInstance().runTask(task);
+        try {
+            // check blast database exists and build if it doesn't
+            RebuildBlastIndexTask task = new RebuildBlastIndexTask();
+            IceExecutorService.getInstance().runTask(task);
 
-        AutoAnnotationBlastDbBuildTask autoAnnotationBlastDbBuildTask = new AutoAnnotationBlastDbBuildTask();
-        IceExecutorService.getInstance().runTask(autoAnnotationBlastDbBuildTask);
+            AutoAnnotationBlastDbBuildTask autoAnnotationBlastDbBuildTask = new AutoAnnotationBlastDbBuildTask();
+            IceExecutorService.getInstance().runTask(autoAnnotationBlastDbBuildTask);
+        } catch (Exception e) {
+            Logger.error(e);
+        }
     }
 }
