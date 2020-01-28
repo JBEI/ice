@@ -89,6 +89,9 @@ public class StandardBlastDatabase extends BlastDatabase {
         return (idString + sequenceString + "\n");
     }
 
+    public boolean isLocked() {
+        return blastFastaFile.isLocked();
+    }
 
     /**
      * Run a blast query using the following output format options
