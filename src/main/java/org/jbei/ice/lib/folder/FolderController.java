@@ -23,7 +23,6 @@ import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.FolderDAO;
 import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
 import org.jbei.ice.storage.model.Account;
-import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Folder;
 import org.jbei.ice.storage.model.Group;
 
@@ -114,15 +113,15 @@ public class FolderController {
         groups.add(publicGroup);
 
         EntryDAO entryDAO = DAOFactory.getEntryDAO();
-        List<Entry> results = entryDAO.retrieveVisibleEntries(null, groups, sort, asc, offset, limit, null);
+        List<Long> results = entryDAO.retrieveVisibleEntries(null, groups, sort, asc, offset, limit, null);
         long visibleCount = entryDAO.visibleEntryCount(null, groups, null);
 
         FolderDetails details = new FolderDetails();
         details.setCount(visibleCount);
 
-        for (Entry entry : results) {
+        for (Long id : results) {
             try {
-                PartData info = ModelToInfoFactory.createTableViewData(entry, false, fields);
+                PartData info = ModelToInfoFactory.createTableView(id, fields);
                 info.setPublicRead(true);
                 details.getEntries().add(info);
             } catch (Exception e) {

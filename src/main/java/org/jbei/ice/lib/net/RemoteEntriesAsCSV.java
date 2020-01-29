@@ -124,7 +124,7 @@ public class RemoteEntriesAsCSV {
                 groups.add(publicGroup);
 
                 EntryDAO entryDAO = DAOFactory.getEntryDAO();
-                List<Entry> results = entryDAO.retrieveVisibleEntries(null, groups, ColumnField.CREATED, true, 0, Integer.MAX_VALUE, null);
+                List<Long> results = entryDAO.retrieveVisibleEntries(null, groups, ColumnField.CREATED, true, 0, Integer.MAX_VALUE, null);
                 writeLocalEntries(results, fields, writer, zos);
             }
 
@@ -184,7 +184,7 @@ public class RemoteEntriesAsCSV {
         }
     }
 
-    protected void writeLocalEntries(List<Entry> entries, List<EntryField> fields,
+    protected void writeLocalEntries(List<Long> entries, List<EntryField> fields,
                                      CSVWriter writer, ZipOutputStream zos) {
         if (entries == null)
             return;
@@ -193,7 +193,8 @@ public class RemoteEntriesAsCSV {
         Configuration configuration = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
         String thisUrl = configuration == null ? "" : configuration.getValue();
 
-        for (Entry entry : entries) {
+        for (Long id : entries) {
+            Entry entry = DAOFactory.getEntryDAO().get(id);
             String[] line = new String[fields.size() + 4];
             line[0] = thisUrl;
             line[1] = entry.getCreationTime().toString();

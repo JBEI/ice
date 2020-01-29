@@ -7,7 +7,6 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Account;
-import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Group;
 
 import java.util.ArrayList;
@@ -40,21 +39,21 @@ public class VisibleEntries {
     }
 
     public List<PartData> getEntries(ColumnField field, boolean asc, int start, int limit, String filter, List<String> fields) {
-        List<Entry> results;
+        List<Long> resultIds;
 
         if (isAdmin) {
             // no filters
-            results = dao.retrieveAllEntries(field, asc, start, limit, filter);
+            resultIds = dao.retrieveAllEntryIds(field, asc, start, limit, filter);
         } else {
             // retrieve groups for account and filter by permission
             Set<Group> accountGroups = new HashSet<>(account.getGroups());
             accountGroups.add(everybodyGroup);
-            results = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit, filter);
+            resultIds = dao.retrieveVisibleEntries(account, accountGroups, field, asc, start, limit, filter);
         }
 
         ArrayList<PartData> data = new ArrayList<>();
-        for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(entry, false, fields);
+        for (Long id : resultIds) {
+            PartData info = ModelToInfoFactory.createTableView(id, fields);
             data.add(info);
         }
 

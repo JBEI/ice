@@ -2,7 +2,6 @@ package org.jbei.ice.lib.entry;
 
 import com.opencsv.CSVReader;
 import org.apache.commons.lang3.StringUtils;
-import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.dto.entry.*;
@@ -13,6 +12,8 @@ import org.jbei.ice.lib.dto.search.SearchResult;
 import org.jbei.ice.lib.dto.search.SearchResults;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.executor.IceExecutorService;
+import org.jbei.ice.lib.folder.collection.CollectionEntries;
+import org.jbei.ice.lib.folder.collection.CollectionType;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.search.SearchIndexes;
 import org.jbei.ice.lib.search.blast.Action;
@@ -21,7 +22,10 @@ import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.InfoToModelFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
-import org.jbei.ice.storage.hibernate.dao.*;
+import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldDAO;
+import org.jbei.ice.storage.hibernate.dao.CustomEntryFieldValueDAO;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.io.IOException;
@@ -36,7 +40,6 @@ import java.util.*;
 public class Entries extends HasEntry {
 
     private final EntryDAO dao;
-    private final AccountDAO accountDAO;
     private final String userId;
     private final EntryAuthorization authorization;
     private final SequenceDAO sequenceDAO;
@@ -48,7 +51,6 @@ public class Entries extends HasEntry {
      */
     public Entries(String userId) {
         this.dao = DAOFactory.getEntryDAO();
-        this.accountDAO = DAOFactory.getAccountDAO();
         this.authorization = new EntryAuthorization();
         this.userId = userId;
         sequenceDAO = DAOFactory.getSequenceDAO();
@@ -255,28 +257,11 @@ public class Entries extends HasEntry {
         if (collection == null || collection.isEmpty())
             return null;
 
-        Account account = accountDAO.getByEmail(userId);
-        List<Long> entries;
-
-        switch (collection.toLowerCase()) {
-            case "personal":
-                if (all)
-                    type = null;
-                entries = dao.getOwnerEntryIds(userId, type);
-                break;
-            case "shared":
-                entries = dao.sharedWithUserEntryIds(account, account.getGroups());
-                break;
-            case "available":
-            case "featured":
-                Group publicGroup = new GroupController().createOrRetrievePublicGroup();
-                entries = dao.getVisibleEntryIds(account.getType() == AccountType.ADMIN, publicGroup);
-                break;
-            default:
-                return null;
-        }
-
-        return entries;
+        CollectionType collectionType = CollectionType.valueOf(collection.trim().toUpperCase());
+        CollectionEntries collectionEntries = new CollectionEntries(userId, collectionType);
+        if (all)
+            type = null;
+        return collectionEntries.getEntriesById(type);
     }
 
     // todo : folder controller
