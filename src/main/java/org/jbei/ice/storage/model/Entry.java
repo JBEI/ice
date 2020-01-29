@@ -4,8 +4,8 @@ import org.apache.lucene.analysis.core.LowerCaseFilterFactory;
 import org.apache.lucene.analysis.pattern.PatternReplaceFilterFactory;
 import org.apache.lucene.analysis.standard.StandardTokenizerFactory;
 import org.hibernate.annotations.Type;
-import org.hibernate.search.annotations.*;
 import org.hibernate.search.annotations.Index;
+import org.hibernate.search.annotations.*;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
@@ -16,8 +16,6 @@ import org.jbei.ice.storage.hibernate.filter.EntrySecurityFilterFactory;
 
 import javax.persistence.*;
 import java.util.*;
-
-import org.jbei.ice.storage.model.Parameter;
 
 /**
  * Entry class is the most important class in gd-ice. Other record types extend this class.
@@ -221,7 +219,7 @@ public class Entry implements DataModel {
     @IndexedEmbedded(depth = 1)
     private final Set<Permission> permissions = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "contents")
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "contents", fetch = FetchType.LAZY)
     @IndexedEmbedded(depth = 1)
     private Set<Folder> folders = new HashSet<>();
 
