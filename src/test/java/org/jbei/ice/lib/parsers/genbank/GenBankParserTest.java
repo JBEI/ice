@@ -1,10 +1,12 @@
 package org.jbei.ice.lib.parsers.genbank;
 
+import org.apache.commons.io.IOUtils;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
 
 /**
  * @author Hector Plahar
@@ -103,13 +105,13 @@ public class GenBankParserTest {
     @Test
     public void testParse() throws Exception {
         GenBankParser parser = new GenBankParser();
-        FeaturedDNASequence sequence = parser.parse(new ByteArrayInputStream(genbank.getBytes()));
+        FeaturedDNASequence sequence = parser.parse(IOUtils.lineIterator(new ByteArrayInputStream(genbank.getBytes()), Charset.defaultCharset()));
         Assert.assertNotNull(sequence);
         Assert.assertEquals(3, sequence.getFeatures().size());
         Assert.assertEquals(936, sequence.getSequence().length());
 
         // parse genbank 2
-        FeaturedDNASequence sequence2 = parser.parse(new ByteArrayInputStream(getGenbank2.getBytes()));
+        FeaturedDNASequence sequence2 = parser.parse(IOUtils.lineIterator(new ByteArrayInputStream(getGenbank2.getBytes()), Charset.defaultCharset()));
         Assert.assertNotNull(sequence2);
         Assert.assertEquals(3, sequence2.getFeatures().size());
     }

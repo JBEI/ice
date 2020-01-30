@@ -12,9 +12,7 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.sample.*;
 import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.RequestDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
@@ -34,47 +32,9 @@ import java.util.*;
 public class RequestRetriever {
 
     private final RequestDAO dao;
-    private final EntryDAO entryDAO;
 
     public RequestRetriever() {
         this.dao = DAOFactory.getRequestDAO();
-        this.entryDAO = DAOFactory.getEntryDAO();
-    }
-
-    /**
-     * Creates a new sample request for the specified user and specified entry.
-     * The default status is "IN CART"
-     */
-    public boolean placeSampleInCart(String userId, SampleRequest sampleRequest) {
-        long partId = sampleRequest.getPartData().getId();
-        Entry entry = entryDAO.get(sampleRequest.getPartData().getId());
-
-        if (entry == null)
-            throw new IllegalArgumentException("Cannot find entry with id: " + partId);
-
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-
-        // check if sample is already in cart with status of "IN CART"
-        try {
-            List<Request> requests = dao.getSampleRequestByStatus(account, entry, SampleRequestStatus.IN_CART);
-            if (requests != null && !requests.isEmpty())
-                return true;
-
-            Request request = new Request();
-            request.setAccount(account);
-            request.setGrowthTemperature(sampleRequest.getGrowthTemperature());
-            request.setEntry(entry);
-            if (sampleRequest.getRequestType() == null)
-                sampleRequest.setRequestType(SampleRequestType.LIQUID_CULTURE);
-            request.setType(sampleRequest.getRequestType());
-            request.setRequested(new Date(System.currentTimeMillis()));
-            request.setUpdated(request.getRequested());
-            request.setPlateDescription(sampleRequest.getPlateDescription());
-            return dao.create(request) != null;
-        } catch (DAOException e) {
-            Logger.error(e);
-            return false;
-        }
     }
 
     public UserSamples getUserSamples(String userId, SampleRequestStatus status, int start, int limit, String sort,
@@ -144,23 +104,6 @@ public class RequestRetriever {
         return samples;
     }
 
-    public SampleRequest removeSampleFromCart(String userId, long requestId) {
-        try {
-            Request request = dao.get(requestId);
-            if (request == null)
-                return null;
-
-            if (!request.getAccount().getEmail().equalsIgnoreCase(userId))
-                return null;
-
-            Logger.info(userId + ": Removing sample from cart for entry " + request.getEntry().getId());
-            dao.delete(request);
-            return request.toDataTransferObject();
-        } catch (DAOException de) {
-            Logger.error(de);
-            return null;
-        }
-    }
 
     public SampleRequest updateStatus(String userId, long requestId, SampleRequestStatus newStatus, boolean isFolder) {
         if (!new AccountController().isAdministrator(userId)) {

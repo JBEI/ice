@@ -5,9 +5,9 @@ import org.jbei.ice.lib.dto.FeaturedDNASequence;
 /**
  * @author Hector Plahar
  */
-public class ReferenceTag extends Tag {
+public class ReferenceSection extends GenBankSection {
 
-    public ReferenceTag(FeaturedDNASequence sequence) {
+    public ReferenceSection(FeaturedDNASequence sequence) {
         super(sequence);
     }
 

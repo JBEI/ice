@@ -12,6 +12,7 @@ import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebEntries;
 import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
+import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
@@ -272,8 +273,7 @@ public class EntryController extends HasEntry {
             return null;
 
         // user must be able to read if not public entry
-        if (!permissionsController.isPubliclyVisible(entry))
-            authorization.expectRead(userId, entry);
+        authorization.expectRead(userId, entry);
 
         PartData partData = retrieveEntryDetails(userId, entry);
         if (partData.getVisibility() == Visibility.REMOTE)
@@ -282,6 +282,8 @@ public class EntryController extends HasEntry {
             partData.setCanEdit(authorization.canWrite(userId, entry));
             partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
         }
+        Optional<SequenceFormat> format = sequenceDAO.getSequenceFormat(entry.getId());
+        format.ifPresent(sequenceFormat -> partData.setBasePairCount(sequenceFormat.toString()));
         return partData;
     }
 
@@ -308,10 +310,7 @@ public class EntryController extends HasEntry {
         boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
         partData.setHasOriginalSequence(hasOriginalSequence);
         Optional<String> sequenceString = sequenceDAO.getSequenceString(entry);
-        if (sequenceString.isPresent())
-            partData.setBasePairCount(sequenceString.get().trim().length());
-        else
-            partData.setBasePairCount(0);
+        sequenceString.ifPresent(s -> partData.setBasePairCount(Integer.toString(s.trim().length())));
 
         // create audit event if not owner
         // todo : remote access check
@@ -334,7 +333,7 @@ public class EntryController extends HasEntry {
                 Optional<String> linkedSequenceString = sequenceDAO.getSequenceString(linkedEntry);
 
                 if (linkedSequenceString.isPresent()) {
-                    link.setBasePairCount(linkedSequenceString.get().trim().length());
+                    link.setBasePairCount(Integer.toString(linkedSequenceString.get().trim().length()));
                     link.setFeatureCount(DAOFactory.getSequenceFeatureDAO().getFeatureCount(linkedEntry));
                 }
 

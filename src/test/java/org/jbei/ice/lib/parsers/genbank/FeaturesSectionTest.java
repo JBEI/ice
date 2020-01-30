@@ -5,7 +5,7 @@ import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class FeaturesTagTest {
+public class FeaturesSectionTest {
 
     private static final String feature =
             "FEATURES             Location/Qualifiers\n" +
@@ -78,7 +78,7 @@ public class FeaturesTagTest {
     @Test
     public void process() {
         FeaturedDNASequence sequence = new FeaturedDNASequence();
-        FeaturesTag tag = new FeaturesTag(sequence);
+        FeaturesSection tag = new FeaturesSection(sequence);
 
         String[] lines = feature.split("\n");
         for (String line : lines)
@@ -96,7 +96,7 @@ public class FeaturesTagTest {
     @Test
     public void processFeatures() {
         FeaturedDNASequence sequence = new FeaturedDNASequence();
-        FeaturesTag tag = new FeaturesTag(sequence);
+        FeaturesSection tag = new FeaturesSection(sequence);
         String[] lines = features.split("\n");
         for (String line : lines)
             tag.process(line);
@@ -108,7 +108,7 @@ public class FeaturesTagTest {
     @Test
     public void processFeatures2() {
         FeaturedDNASequence sequence = new FeaturedDNASequence();
-        FeaturesTag tag = new FeaturesTag(sequence);
+        FeaturesSection tag = new FeaturesSection(sequence);
         String[] lines = features2.split("\n");
         for (String line : lines)
             tag.process(line);
@@ -132,7 +132,7 @@ public class FeaturesTagTest {
     @Test
     public void processFeatures3() {
         FeaturedDNASequence sequence = new FeaturedDNASequence();
-        FeaturesTag tag = new FeaturesTag(sequence);
+        FeaturesSection tag = new FeaturesSection(sequence);
         String[] lines = features3.split("\n");
         for (String line : lines)
             tag.process(line);

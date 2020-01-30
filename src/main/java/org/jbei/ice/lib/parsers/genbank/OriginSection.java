@@ -8,11 +8,11 @@ import java.util.Arrays;
 /**
  * @author Hector Plahar
  */
-public class OriginTag extends Tag {
+public class OriginSection extends GenBankSection {
 
     private StringBuilder sequenceString;
 
-    public OriginTag(FeaturedDNASequence sequence) {
+    public OriginSection(FeaturedDNASequence sequence) {
         super(sequence);
         sequenceString = new StringBuilder();
     }

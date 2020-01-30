@@ -2,13 +2,13 @@ package org.jbei.ice.lib.parsers;
 
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 
-import java.io.InputStream;
+import java.util.Iterator;
 
 public abstract class AbstractParser {
 
     protected String fileName;
 
-    public FeaturedDNASequence parse(InputStream stream, String... entryType) throws InvalidFormatParserException {
+    public FeaturedDNASequence parse(Iterator<String> iterator, String... entryType) throws InvalidFormatParserException {
         throw new UnsupportedOperationException("Not implemented for this parser");
     }
 
@@ -25,5 +25,12 @@ public abstract class AbstractParser {
         sequence = sequence.replace("\r\r", "\n"); // mac
         sequence = sequence.replace("\n\r", "\n"); // *win
         return sequence;
+    }
+
+    protected String getSequence(Iterator<String> iterator) {
+        StringBuilder builder = new StringBuilder();
+        while (iterator.hasNext())
+            builder.append(iterator.next());
+        return builder.toString();
     }
 }

@@ -162,7 +162,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
     public List<Long> retrieveVisibleEntries(Account account, Set<Group> groups, ColumnField sortField, boolean asc,
                                              int start, int count, String filter) {
         try {
-            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class).distinct(true);
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Entry> from = query.from(Entry.class);
             Join<Entry, Permission> entryPermission = from.join("permissions");
 
@@ -183,7 +183,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
             // check filter
             createFilterPredicate(from, filter, predicates);
 
-            query.where(predicates.toArray(new Predicate[0]));
+            query.select(from.get("id")).where(predicates.toArray(new Predicate[0]));
             query.orderBy(asc ? getBuilder().asc(from.get(fieldName)) : getBuilder().desc(from.get(fieldName)));
             return currentSession().createQuery(query).setMaxResults(count).setFirstResult(start).list();
         } catch (HibernateException he) {

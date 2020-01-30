@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.parsers.sbol;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
@@ -25,6 +26,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -126,11 +128,9 @@ public class SBOLParser extends AbstractParser {
             SBOLWriter.write(sbolDocument, out, "GENBANK");
             if (out.size() > 0) {
                 GenBankParser parser = new GenBankParser();
-                dnaSequence = parser.parse(new ByteArrayInputStream(out.toByteArray()));
+                dnaSequence = parser.parse(IOUtils.lineIterator(new ByteArrayInputStream(out.toByteArray()), Charset.defaultCharset()));
                 sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
             }
-        } catch (InvalidFormatParserException e) {
-            Logger.error("Error parsing generated genBank: " + e.getMessage());
         } catch (SBOLConversionException | IOException e) {
             Logger.error("Error converting SBOL to genBank: " + e.getMessage());
         }

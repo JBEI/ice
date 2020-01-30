@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.entry.service', [])
-    .factory('Selection', function ($rootScope, $cookies) {
+    .factory('Selection', function ($rootScope, Authentication) {
         let selectedEntries = {};
         let selectedSearchResultsCount = 0;
         let selectedSearchNotificationSent = false;  // send notification when at least one is selected and then none
@@ -9,7 +9,6 @@ angular.module('ice.entry.service', [])
         let canDelete = false;
         let selectedTypes = {};
         let searchQuery = undefined;
-        let userId = $cookies.get('userId');
 
         return {
             selectEntry: function (entry) {
@@ -17,7 +16,7 @@ angular.module('ice.entry.service', [])
                     return;
                 }
 
-                canDelete = entry.ownerEmail === userId;
+                canDelete = entry.ownerEmail === Authentication.getUserId();
 
                 if (selectedEntries[entry.id]) {
                     // remove entry id
@@ -532,7 +531,6 @@ angular.module('ice.entry.service', [])
             getTypeData: function (entry) {
                 // let type = entry.type.toLowerCase();
                 // let fields = getFieldsForType(type);
-                console.log(entry);
 
                 entry.fields.forEach(function (field) {
                     if (field.subSchema) {
@@ -549,7 +547,6 @@ angular.module('ice.entry.service', [])
                                 return;
                             }
 
-                            console.log(custom);
                             custom.value = entry[custom.label];
                             if (custom.fieldType === 'MULTI_CHOICE_PLUS' && custom.value === 'Other') {
                                 custom.value = entry[custom.label + '_plus'];

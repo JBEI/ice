@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.entry.sequence;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -22,7 +24,6 @@ import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.lib.parsers.sbol.SBOLParser;
 import org.jbei.ice.lib.search.blast.Action;
 import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.FeatureDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
@@ -32,6 +33,7 @@ import org.jbei.ice.storage.model.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -124,47 +126,69 @@ public class PartSequence {
             throws IOException {
         try {
             AbstractParser parser;
-            inputStream.mark(Integer.MAX_VALUE);
+            try (LineIterator iterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8)) {
+                if (!iterator.hasNext())
+                    throw new IOException("Cannot read stream for " + fileName);
 
-            String sequenceString = Utils.getString(inputStream);
-            SequenceFormat format = SequenceUtil.detectFormat(sequenceString);
+                String firstLine = iterator.next();
+                SequenceFormat format = SequenceUtil.detectFormat(firstLine);
 
-            switch (format) {
-                case GENBANK:
-                    parser = new GenBankParser();
-                    break;
+                switch (format) {
+                    case GENBANK:
+                        parser = new GenBankParser();
+                        break;
 
-                case SBOL2:
-                    SBOLParser sbolParser = new SBOLParser(this.userId, Long.toString(this.entry.getId()), extractHierarchy);
-                    return sbolParser.parseToEntry(inputStream, fileName);
+                    case SBOL2:
+                        SBOLParser sbolParser = new SBOLParser(this.userId, Long.toString(this.entry.getId()), extractHierarchy);
+                        return sbolParser.parseToEntry(inputStream, fileName);
 
-                case FASTA:
-                    parser = new FastaParser();
-                    break;
+                    case FASTA:
+                        parser = new FastaParser();
+                        break;
 
-                default:
-                case PLAIN:
-                    parser = new PlainParser();
-                    break;
+                    default:
+                    case PLAIN:
+                        parser = new PlainParser();
+                        break;
+                }
+
+                Iterator<String> customIterator = new Iterator<String>() {
+
+                    private boolean firstLineRetrieved = false;
+
+                    @Override
+                    public boolean hasNext() {
+                        if (firstLineRetrieved)
+                            return iterator.hasNext();
+                        return true;
+                    }
+
+                    @Override
+                    public String next() {
+                        if (firstLineRetrieved)
+                            return iterator.next();
+                        firstLineRetrieved = true;
+                        return firstLine;
+                    }
+                };
+
+                // parse actual sequence
+                String entryType = this.entry.getRecordType();
+
+                FeaturedDNASequence dnaSequence = parser.parse(customIterator, entryType);
+                Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
+                if (sequence == null)
+                    throw new IOException("Could not create sequence object");
+
+//            sequence.setSequenceUser(sequenceString); // todo sequence user now might not be such a good idea
+                sequence.setFileName(fileName);
+                sequence.setFormat(format);
+                sequence = saveSequenceObject(sequence);
+
+                SequenceInfo info = sequence.toDataTransferObject();
+                info.setSequence(dnaSequence);
+                return info;
             }
-
-            // parse actual sequence
-            String entryType = this.entry.getRecordType();
-
-            inputStream.reset();
-            FeaturedDNASequence dnaSequence = parser.parse(inputStream, entryType);
-            Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
-            if (sequence == null)
-                throw new IOException("Could not create sequence object");
-
-            sequence.setSequenceUser(sequenceString); // todo sequence user now might not be such a good idea
-            sequence.setFileName(fileName);
-            sequence.setFormat(format);
-            sequence = saveSequenceObject(sequence);
-
-            SequenceInfo info = sequence.toDataTransferObject();
-            info.setSequence(dnaSequence);
-            return info;
         } catch (InvalidFormatParserException e) {
             Logger.error(e);
             throw new IOException(e);

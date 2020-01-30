@@ -110,33 +110,39 @@ public class BlastFastaFile {
     }
 
     public void delete(String partNumber) throws IOException {
-        Path tmpFile = Paths.get(filePath.getParent().toString(), FILE_NAME + ".tmp");
-        Files.deleteIfExists(tmpFile);
-        Files.createFile(tmpFile);
-        if (!Files.exists(tmpFile))
-            throw new IOException(tmpFile + " could not be created");
+        File lockFile = createLock();
 
-        Stream<String> lines = Files.lines(this.filePath);
+        try {
+            Path tmpFile = Paths.get(filePath.getParent().toString(), FILE_NAME + ".tmp");
+            Files.deleteIfExists(tmpFile);
+            Files.createFile(tmpFile);
+            if (!Files.exists(tmpFile))
+                throw new IOException(tmpFile + " could not be created");
 
-        lines.forEach(line -> {
+            Stream<String> lines = Files.lines(this.filePath);
 
-            if (line.startsWith(">")) {
-                String[] split = line.split(",");
-                if (split.length != 4)
-                    return;
+            lines.forEach(line -> {
 
-                exclude = split[3].trim().equalsIgnoreCase(partNumber.trim());
-            }
+                if (line.startsWith(">")) {
+                    String[] split = line.split(",");
+                    if (split.length != 4)
+                        return;
 
-            if (exclude) return;
+                    exclude = split[3].trim().equalsIgnoreCase(partNumber.trim());
+                }
 
-            try {
-                Files.write(tmpFile, (line + "\n").getBytes(), StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                Logger.error(e);
-            }
-        });
+                if (exclude) return;
 
-        Files.move(tmpFile, filePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+                try {
+                    Files.write(tmpFile, (line + "\n").getBytes(), StandardOpenOption.APPEND);
+                } catch (IOException e) {
+                    Logger.error(e);
+                }
+            });
+
+            Files.move(tmpFile, filePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        } finally {
+            releaseLock(lockFile);
+        }
     }
 }

@@ -1,39 +1,19 @@
 package org.jbei.ice.lib.parsers.genbank;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.parsers.AbstractParser;
-import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Iterator;
 
 /**
- * Genbank parser and generator. The Genbank file format is defined in gbrel.txt located at
- * ftp://ftp.ncbi.nlm.nih.gov/genbank/gbrel.txt
- * <p>
- * This parser also handles some incorrectly formatted and obsolete genbank files.
+ * Parser for a GenBank file
  *
- * @author Timothy Ham
+ * @author Hector Plahar
  */
 public class GenBankParser extends AbstractParser {
 
-    private static final String END_TAG = "//";
-
-    private List<String> errors = new ArrayList<>();
     private FeaturedDNASequence sequence;
-
-    public GenBankParser() {
-    }
-
-    public List<String> getErrors() {
-        return errors;
-    }
 
     private String getFirstWordFromLine(String line) {
         if (StringUtils.isBlank(line))
@@ -46,58 +26,52 @@ public class GenBankParser extends AbstractParser {
         return chunks[0];
     }
 
-    private Tag process(GenbankTag genbankTag) {
+    /**
+     * More like a section factory.
+     * Uses the GenBank tag that has been detected to obtain the appropriate GenBank section
+     *
+     * @param genbankTag tag to use to determine section class
+     * @return section class based on tag or null
+     */
+    private GenBankSection process(GenbankTag genbankTag) {
         switch (genbankTag) {
             case LOCUS:
-                return new LocusTag(sequence);
+                return new LocusSection(sequence);
 
             case ORIGIN:
-                return new OriginTag(sequence);
+                return new OriginSection(sequence);
 
             case ACCESSION:
-                return new Accession(sequence);
+                return new AccessionSection(sequence);
 
             case FEATURES:
-                return new FeaturesTag(sequence);
+                return new FeaturesSection(sequence);
 
             case REFERENCE:
-                return new ReferenceTag(sequence);
+                return new ReferenceSection(sequence);
         }
         return null;
     }
 
     @Override
-    public FeaturedDNASequence parse(InputStream stream, String... entryType) throws InvalidFormatParserException {
+    public FeaturedDNASequence parse(Iterator<String> iterator, String... entryType) {
         sequence = new FeaturedDNASequence();
+        GenBankSection currentSection = null;
 
-        try (LineIterator iterator = IOUtils.lineIterator(stream, StandardCharsets.UTF_8)) {
-            Tag currentTag = null;
+        while (iterator.hasNext()) {
+            String line = iterator.next();
+            String firstWord = getFirstWordFromLine(line);
+            GenbankTag genbankTag = GenbankTag.getTagForString(firstWord);
 
-            while (iterator.hasNext()) {
-                String line = iterator.nextLine();
-//                if (line.trim().equalsIgnoreCase(END_TAG)) // end tag ends the sequence
-//                    break;
-
-                String firstWord = getFirstWordFromLine(line);
-                GenbankTag genbankTag = GenbankTag.getTagForString(firstWord);
-
-                // encountered new tag
-                if (genbankTag != null) {
-                    currentTag = process(genbankTag);
-                }
-
-                if (currentTag != null)
-                    currentTag.process(line);
+            // encountered new tag
+            if (genbankTag != null) {
+                currentSection = process(genbankTag);
             }
 
-            return sequence;
-        } catch (IOException e) {
-            throw new InvalidFormatParserException(e);
+            if (currentSection != null)
+                currentSection.process(line);
         }
-    }
 
-    // TODO
-    private void parseReferenceTag(String text) throws InvalidFormatParserException {
-
+        return sequence;
     }
 }

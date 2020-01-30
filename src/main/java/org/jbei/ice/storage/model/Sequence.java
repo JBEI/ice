@@ -195,12 +195,12 @@ public class Sequence implements DataModel {
         this.fileName = fileName;
     }
 
-    public void setFormat(SequenceFormat format) {
-        this.format = format;
-    }
-
     public SequenceFormat getFormat() {
         return this.format;
+    }
+
+    public void setFormat(SequenceFormat format) {
+        this.format = format;
     }
 
     @Override
@@ -210,6 +210,8 @@ public class Sequence implements DataModel {
             info.setEntryId(entry.getId());
         }
         info.setFilename(fileName);
+        if (this.format != null)
+            info.setFormat(this.format);
         return info;
     }
 }

@@ -12,22 +12,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * <code>FEATURES</code> section of a GenBank file
+ *
  * @author Hector Plahar
  */
-public class FeaturesTag extends Tag {
+public class FeaturesSection extends GenBankSection {
 
     private static final Pattern startStopPattern = Pattern.compile("[<>]*(\\d+)\\.\\.[<>]*(\\d+)");
     private static final Pattern startOnlyPattern = Pattern.compile("\\d+");
     private DNAFeature currentFeature;
     private DNAFeatureNote currentNote;
 
-    public FeaturesTag(FeaturedDNASequence sequence) {
+    public FeaturesSection(FeaturedDNASequence sequence) {
         super(sequence);
         currentFeature = null;
     }
 
     /**
-     * Expecting a format as follows
+     * Expecting a format as follows:
      * <code>
      * type   startBP..stopBP
      * </code>
@@ -136,11 +138,22 @@ public class FeaturesTag extends Tag {
         return true;
     }
 
-    // /label = SEC13 or
-    // /locus_tag="PAS_cacsr"
+    /**
+     * e.g. qualifier
+     * <code>
+     * /label = SEC13 or
+     * /locus_tag="PAS_cacsr"
+     * </code>
+     *
+     * @param line qualifier line
+     */
     private void parseQualifierLine(String line) {
         String[] chunks = line.split("=");
         if (chunks.length < 2)
+            return;
+
+        final String putativeName = chunks[0].trim().substring(1);
+        if ("source".equalsIgnoreCase(putativeName)) // and spans the entire sequence
             return;
 
         // starting a new note
@@ -148,7 +161,6 @@ public class FeaturesTag extends Tag {
         currentFeature.getNotes().add(currentNote);
 
         // set name
-        final String putativeName = chunks[0].trim().substring(1);
         currentNote.setName(putativeName);
 
         // set value

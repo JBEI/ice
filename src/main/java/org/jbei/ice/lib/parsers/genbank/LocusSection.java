@@ -5,11 +5,13 @@ import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import java.util.Arrays;
 
 /**
+ * <code>LOCUS</code> section of a GenBank file
+ *
  * @author Hector Plahar
  */
-public class LocusTag extends Tag {
+public class LocusSection extends GenBankSection {
 
-    public LocusTag(FeaturedDNASequence sequence) {
+    public LocusSection(FeaturedDNASequence sequence) {
         super(sequence);
     }
 

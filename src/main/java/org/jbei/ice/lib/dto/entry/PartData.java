@@ -45,7 +45,7 @@ public class PartData implements IDataTransferModel {
     private long principalInvestigatorId;
     private ArrayList<String> selectionMarkers;
     private String fundingSource;
-    private long basePairCount;
+    private String basePairCount;
     private long featureCount;
     private long viewCount;
 
@@ -430,11 +430,11 @@ public class PartData implements IDataTransferModel {
         this.proteinData = proteinData;
     }
 
-    public long getBasePairCount() {
+    public String getBasePairCount() {
         return basePairCount;
     }
 
-    public void setBasePairCount(long basePairCount) {
+    public void setBasePairCount(String basePairCount) {
         this.basePairCount = basePairCount;
     }
 

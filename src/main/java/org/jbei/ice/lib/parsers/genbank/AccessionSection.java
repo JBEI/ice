@@ -5,9 +5,14 @@ import org.jbei.ice.lib.utils.Utils;
 
 import java.util.Arrays;
 
-public class Accession extends Tag {
+/**
+ * <code>ACCESSION</code> section of a GenBank file
+ *
+ * @author Hector Plahar
+ */
+public class AccessionSection extends GenBankSection {
 
-    public Accession(FeaturedDNASequence sequence) {
+    public AccessionSection(FeaturedDNASequence sequence) {
         super(sequence);
     }
 

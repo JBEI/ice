@@ -7,12 +7,11 @@ import org.biojavax.bio.seq.RichSequenceIterator;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
-import org.jbei.ice.lib.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringReader;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
@@ -23,9 +22,9 @@ import java.util.LinkedList;
 public class FastaParser extends AbstractParser {
 
     @Override
-    public FeaturedDNASequence parse(InputStream stream, String... entryType) throws InvalidFormatParserException {
+    public FeaturedDNASequence parse(Iterator<String> iterator, String... entryType) throws InvalidFormatParserException {
         try {
-            String textSequence = Utils.getString(stream);
+            String textSequence = getSequence(iterator);
             textSequence = cleanSequence(textSequence);
             textSequence = textSequence.replaceAll("\t", "\n");
             try (BufferedReader br = new BufferedReader(new StringReader(textSequence))) {
