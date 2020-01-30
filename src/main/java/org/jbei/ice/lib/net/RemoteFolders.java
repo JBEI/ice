@@ -28,8 +28,8 @@ public class RemoteFolders {
     public List<FolderDetails> getAvailableFolders() {
         try {
             String restPath = "rest/folders/public";
-            IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey(), restPath);
-            return client.get(ArrayList.class);
+            IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey());
+            return client.get(restPath, ArrayList.class);
         } catch (Exception e) {
             Logger.error(e);
             return null;

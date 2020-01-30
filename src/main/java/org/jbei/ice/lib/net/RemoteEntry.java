@@ -48,9 +48,9 @@ public class RemoteEntry {
 
     public List<TraceSequenceAnalysis> getTraces() {
         try {
+            IceRestClient client = new IceRestClient(partner.getUrl(), this.partner.getApiKey());
             String restPath = "/rest/parts/" + remotePartId + "/traces";
-            IceRestClient client = new IceRestClient(partner.getUrl(), this.partner.getApiKey(), restPath);
-            return client.get(ArrayList.class);
+            return client.get(restPath, ArrayList.class);
         } catch (Exception e) {
             Logger.error(e.getMessage());
             return null;
@@ -58,14 +58,14 @@ public class RemoteEntry {
     }
 
     public List<PartSample> getSamples() {
+        IceRestClient client = new IceRestClient(partner.getUrl(), this.partner.getApiKey());
         String restPath = "rest/parts/" + remotePartId + "/samples";
-        IceRestClient client = new IceRestClient(partner.getUrl(), this.partner.getApiKey(), restPath);
-        return client.get(ArrayList.class);
+        return client.get(restPath, ArrayList.class);
     }
 
     public List<UserComment> getComments() {
+        IceRestClient client = new IceRestClient(partner.getUrl(), this.partner.getApiKey());
         String restPath = "rest/parts/" + remotePartId + "/comments";
-        IceRestClient client = new IceRestClient(partner.getUrl(), this.partner.getApiKey(), restPath);
-        return client.get(ArrayList.class);
+        return client.get(restPath, ArrayList.class);
     }
 }

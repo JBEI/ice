@@ -7,7 +7,6 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Account;
-import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Group;
 
 import java.util.ArrayList;
@@ -45,11 +44,11 @@ public class SharedEntries {
         Group publicGroup = groupController.createOrRetrievePublicGroup();
         Set<Group> accountGroups = account.getGroups();
         accountGroups.remove(publicGroup);
-        List<Entry> entries = this.entryDAO.sharedWithUserEntries(account, accountGroups, field, asc, start, limit, filter);
+        List<Long> entries = this.entryDAO.sharedWithUserEntries(account, accountGroups, field, asc, start, limit, filter);
 
         ArrayList<PartData> data = new ArrayList<>();
-        for (Entry entry : entries) {
-            PartData info = ModelToInfoFactory.createTableViewData(entry, false, fields);
+        for (Long id : entries) {
+            PartData info = ModelToInfoFactory.createTableView(id, fields);
             data.add(info);
         }
         return data;

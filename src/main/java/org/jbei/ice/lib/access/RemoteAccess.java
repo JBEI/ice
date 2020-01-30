@@ -127,8 +127,8 @@ public class RemoteAccess {
         if (partner == null)
             return null;
 
-        IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey(), "rest/users/" + email);
-        return client.get(AccountTransfer.class);
+        IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey());
+        return client.get("rest/users/" + email, AccountTransfer.class);
     }
 
     /**

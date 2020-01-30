@@ -1,6 +1,8 @@
 package org.jbei.ice.storage.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.dto.History;
+import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.storage.DataModel;
 
 import javax.persistence.*;
@@ -51,6 +53,13 @@ public class Audit implements DataModel {
     @ManyToOne
     @JoinColumn(name = "entry_id")
     private Entry entry;
+
+    @Column(name = "entry_field")
+    @Enumerated(EnumType.STRING)
+    private EntryField entryField;
+
+    @Column(name = "old_value")
+    private String oldValue;
 
     public long getId() {
         return id;
@@ -120,6 +129,22 @@ public class Audit implements DataModel {
         this.remoteClientModel = remoteClientModel;
     }
 
+    public String getOldValue() {
+        return oldValue;
+    }
+
+    public void setOldValue(String oldValue) {
+        this.oldValue = oldValue;
+    }
+
+    public EntryField getEntryField() {
+        return entryField;
+    }
+
+    public void setEntryField(EntryField entryField) {
+        this.entryField = entryField;
+    }
+
     @Override
     public History toDataTransferObject() {
         History history = new History();
@@ -130,6 +155,10 @@ public class Audit implements DataModel {
         if (remoteClientModel != null) {
             history.setPartner(remoteClientModel.getRemotePartner().toDataTransferObject());
         }
+        if (StringUtils.isNotBlank(oldValue))
+            history.setOldValue(oldValue);
+
+        history.setEntryField(entryField);
         return history;
     }
 }

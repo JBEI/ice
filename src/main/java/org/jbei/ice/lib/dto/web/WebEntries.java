@@ -18,6 +18,7 @@ import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.RemotePartner;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -112,6 +113,7 @@ public class WebEntries {
 
         WebEntriesIterator() {
             partners = DAOFactory.getRemotePartnerDAO().getRegistryPartners();
+            parts = new ArrayList<>();
             nextPartner = partners.remove(0);
             fetchMore();
         }
@@ -176,9 +178,9 @@ public class WebEntries {
 
                 if (result.isHasSequence()) {
                     // retrieve sequence
+                    IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey());
                     String path = "/rest/web/" + partner.getId() + "/entries/" + result.getRecordId() + "/sequence";
-                    IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey(), path);
-                    FeaturedDNASequence sequence = client.get(FeaturedDNASequence.class);
+                    FeaturedDNASequence sequence = client.get(path, FeaturedDNASequence.class);
                     if (sequence != null) {
                         partSequence.setSequence(sequence);
                     }
@@ -191,11 +193,11 @@ public class WebEntries {
         }
 
         private PartnerEntries getPartnerEntries(RemotePartner partner) {
-            String path = "/rest/partners/" + partner.getId() + "/entries";
             IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey());
             client.queryParam("offset", start);
             client.queryParam("limit", fetchCount);
-            return client.get(PartnerEntries.class);
+            String path = "/rest/partners/" + partner.getId() + "/entries";
+            return client.get(path, PartnerEntries.class);
         }
     }
 }

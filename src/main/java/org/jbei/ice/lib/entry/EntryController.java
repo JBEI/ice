@@ -5,6 +5,7 @@ import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.AuditType;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.sample.PartSample;
@@ -26,12 +27,12 @@ import java.util.*;
  */
 public class EntryController extends HasEntry {
 
+    private final EntryAuthorization authorization;
     private EntryDAO dao;
     private CommentDAO commentDAO;
     private SequenceDAO sequenceDAO;
     private PermissionsController permissionsController;
     private AccountController accountController;
-    private final EntryAuthorization authorization;
 
     public EntryController() {
         dao = DAOFactory.getEntryDAO();
@@ -205,14 +206,22 @@ public class EntryController extends HasEntry {
 
         // add to bin
         try {
+            EntryAudit audit = new EntryAudit(userId);
             for (Entry entry : toTrash) {
+                AuditType auditType;
                 if (entry.getVisibility() == Visibility.DELETED.getValue()) {
                     entry.setVisibility(Visibility.PERMANENTLY_DELETED.getValue());
+                    auditType = AuditType.PERMANENTLY_DELETE;
                 } else {
                     entry.setVisibility(Visibility.DELETED.getValue());
+                    auditType = AuditType.DELETE;
                 }
 
+                Date modificationDate = new Date();
+                entry.setModificationTime(modificationDate);
                 dao.update(entry);
+
+                audit.action(entry.getId(), auditType, modificationDate);
             }
         } catch (DAOException de) {
             Logger.error(de);

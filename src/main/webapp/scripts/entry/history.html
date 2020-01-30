@@ -10,18 +10,26 @@
             <table cellspacing="0" class="table table-condensed table-hover table-border-bottom font-95em">
                 <thead>
                 <tr>
-                    <th></th>
-                    <th class="entry-table-header"><b>Action</b></th>
-                    <th class="entry-table-header"><b>By</b></th>
-                    <th class="entry-table-header"><b>On</b></th>
-                    <th ng-if="user.isAdmin">&nbsp;</th>
+                    <td colspan="4">
+                        <strong>Actions</strong>
+                    </td>
                 </tr>
                 </thead>
                 <tbody>
                 <tr ng-repeat="item in history.data">
-                    <td style="line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff;"><b>{{$index+historyParams.offset+1
-                        | number}}</b></td>
-                    <td ng-if="item.action==='+r'"><i class="fa fa-eye"></i> Read</td>
+                    <td style="line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff">
+                        <b>{{$index+historyParams.offset+1 | number}}</b>
+                    </td>
+                    <td ng-if="item.action==='d'">
+                        <span class="entry-type">DELETED</span>
+                    </td>
+                    <td ng-if="item.action==='+r'">
+                        <span class="entry-type">READ</span>
+                    </td>
+                    <td ng-if="item.action==='e'">
+                        <span class="entry-type">{{item.entryField}}</span><br>
+                        <small class="text-muted">Changed from:</small> {{item.oldValue}}
+                    </td>
                     <td><a ng-href="profile/{{item.account.id}}">{{item.account.firstName}}
                         {{item.account.lastName}}</a></td>
                     <td>{{item.time | date:'MMM d, y, h:mm a'}}</td>
@@ -35,9 +43,9 @@
 
         <div class="col-sm-6">
             <ul uib-pagination total-items="history.resultCount" ng-change="historyPageChanged()"
-                            ng-model="historyParams.currentPage"
-                            max-size="historyParams.maxSize" class="pagination-sm" items-per-page="historyParams.limit"
-                            boundary-links="true">
+                ng-model="historyParams.currentPage"
+                max-size="historyParams.maxSize" class="pagination-sm" items-per-page="historyParams.limit"
+                boundary-links="true">
             </ul>
         </div>
 

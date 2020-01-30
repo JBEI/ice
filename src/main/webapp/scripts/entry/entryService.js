@@ -203,7 +203,7 @@ angular.module('ice.entry.service', [])
                 ]
             },
             {
-                label: "Bio Safety Level", schema: 'bioSafetyLevel', required: true, options: [
+                label: "BioSafety Level", schema: 'bioSafetyLevel', required: true, options: [
                     {value: "1", text: "Level 1"},
                     {value: "2", text: "Level 2"},
                     {value: "-1", text: "Restricted"}

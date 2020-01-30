@@ -49,15 +49,15 @@ public class RemoteContact {
     // send to remote in order to trigger an api exchange. Note that the remote partner will
     public RegistryPartner contactPotentialPartner(RegistryPartner thisPartner, String remotePartnerUrl) {
         AccessTokens.setToken(remotePartnerUrl, thisPartner.getApiKey());
-        IceRestClient client = new IceRestClient(remotePartnerUrl, "/rest/partners");
-        RegistryPartner newPartner = client.post(thisPartner, RegistryPartner.class);
+        IceRestClient client = new IceRestClient(remotePartnerUrl);
+        RegistryPartner newPartner = client.post("/rest/partners", thisPartner, RegistryPartner.class);
         AccessTokens.removeToken(remotePartnerUrl);
         return newPartner;
     }
 
     public RegistryPartner refreshPartnerKey(RegistryPartner partner, String url, String worToken) {
-        IceRestClient client = new IceRestClient(url, worToken, "/rest/partners");
-        return client.put(partner, RegistryPartner.class);
+        IceRestClient client = new IceRestClient(url, worToken);
+        return client.put("/rest/partners", partner, RegistryPartner.class);
     }
 
     /**
@@ -72,9 +72,9 @@ public class RemoteContact {
         if (StringUtils.isEmpty(registryPartner.getApiKey()))
             return false;
 
-        IceRestClient client = new IceRestClient(registryPartner.getUrl(), registryPartner.getApiKey(), "/rest/accesstokens/web");
+        IceRestClient client = new IceRestClient(registryPartner.getUrl(), registryPartner.getApiKey());
         client.queryParam("url", myURL);
-        RegistryPartner response = client.get(RegistryPartner.class);
+        RegistryPartner response = client.get("/rest/accesstokens/web", RegistryPartner.class);
         if (response == null) { // todo : should retry up to a certain number of times
             Logger.error("Could not validate request");
             return false;
@@ -101,45 +101,45 @@ public class RemoteContact {
     }
 
     PartData transferPart(String url, PartData data) {
-        IceRestClient client = new IceRestClient(url, "/rest/parts/transfer");
-        return client.put(data, PartData.class);
+        IceRestClient client = new IceRestClient(url);
+        return client.put("/rest/parts/transfer", data, PartData.class);
     }
 
     void transferSequence(String url, String recordId, EntryType entryType, String sequenceString) {
-        IceRestClient client = new IceRestClient(url, "/rest/file/sequence");
-        client.postSequenceFile(recordId, entryType, sequenceString);
+        IceRestClient client = new IceRestClient(url);
+        client.postSequenceFile(recordId, entryType, sequenceString, "/rest/file/sequence");
     }
 
     FolderDetails transferFolder(String url, FolderDetails folderDetails) {
-        IceRestClient client = new IceRestClient(url, "/rest/folders");
+        IceRestClient client = new IceRestClient(url);
         client.queryParam("isTransfer", true);
-        return client.post(folderDetails, FolderDetails.class);
+        return client.post("/rest/folders", folderDetails, FolderDetails.class);
     }
 
     void addTransferredEntriesToFolder(String url, EntrySelection entrySelection) {
-        IceRestClient client = new IceRestClient(url, "/rest/folders/entries");
-        client.put(entrySelection, FolderDetails.class);
+        IceRestClient client = new IceRestClient(url);
+        client.put("/rest/folders/entries", entrySelection, FolderDetails.class);
     }
 
     @SuppressWarnings("unchecked")
     List<RegistryPartner> getPartners(String url, String token) {
-        IceRestClient client = new IceRestClient(url, token, "/rest/partners");
-        return client.get(ArrayList.class);
+        IceRestClient client = new IceRestClient(url, token);
+        return client.get("/rest/partners", ArrayList.class);
     }
 
     public AccountTransfer getUser(String url, String email, String token) {
-        IceRestClient client = new IceRestClient(url, token, "/rest/users/" + email);
-        return client.get(AccountTransfer.class);
+        IceRestClient client = new IceRestClient(url, token);
+        return client.get("/rest/users/" + email, AccountTransfer.class);
     }
 
     public AccessPermission shareFolder(String url, AccessPermission permission, String token) {
-        IceRestClient client = new IceRestClient(url, token, "rest/permissions/remote");
-        return client.post(permission, AccessPermission.class);
+        IceRestClient client = new IceRestClient(url, token);
+        return client.post("rest/permissions/remote", permission, AccessPermission.class);
     }
 
     public FolderDetails getRemoteContents(String url, String userId, long folderId, String token,
                                            PageParameters pageParameters, String worToken) {
-        IceRestClient client = new IceRestClient(url, worToken, "rest/folders/" + folderId + "/entries");
+        IceRestClient client = new IceRestClient(url, worToken);
         try {
             String encodedToken = URLEncoder.encode(token, "UTF-8");
             client.queryParam("token", encodedToken);
@@ -148,7 +148,7 @@ public class RemoteContact {
             client.queryParam("asc", Boolean.toString(pageParameters.isAscending()));
             client.queryParam("offset", pageParameters.getOffset());
             client.queryParam("limit", pageParameters.getLimit());
-            return client.get(FolderDetails.class);
+            return client.get("rest/folders/" + folderId + "/entries", FolderDetails.class);
         } catch (IOException e) {
             Logger.error(e);
             return null;
@@ -156,29 +156,29 @@ public class RemoteContact {
     }
 
     FolderDetails getFolderEntries(String url, Map<String, Object> queryParams, String apiKey) {
-        IceRestClient client = new IceRestClient(url, apiKey, "rest/folders/public/entries");
+        IceRestClient client = new IceRestClient(url, apiKey);
         for (Map.Entry<String, Object> entry : queryParams.entrySet())
             client.queryParam(entry.getKey(), entry.getValue());
         client.queryParam("fields", "hasSequence", "status", "creationTime");
-        return client.get(FolderDetails.class);
+        return client.get("rest/folders/public/entries", FolderDetails.class);
     }
 
     @SuppressWarnings("unchecked")
     List<AttachmentInfo> getAttachmentList(String url, long entryId, String apiKey) {
         String path = "rest/parts/" + entryId + "/attachments";
-        IceRestClient client = new IceRestClient(url, apiKey, path);
-        return client.get(ArrayList.class);
+        IceRestClient client = new IceRestClient(url, apiKey);
+        return client.get(path, ArrayList.class);
     }
 
     public void addTransferredEntriesToFolder(String url, String userId, EntrySelection entrySelection, long folderId,
                                               String token, String worToken) {
         try {
-            IceRestClient client = new IceRestClient(url, worToken, "rest/folders/entries");
+            IceRestClient client = new IceRestClient(url, worToken);
             String encodedToken = URLEncoder.encode(token, "UTF-8");
             client.queryParam("token", encodedToken);
             client.queryParam("userId", userId);
             client.queryParam("folderId", folderId);
-            client.put(entrySelection, FolderDetails.class);
+            client.put("rest/folders/entries", entrySelection, FolderDetails.class);
         } catch (Exception e) {
             Logger.error(e);
         }
@@ -186,11 +186,11 @@ public class RemoteContact {
 
     PartData getToolTipDetails(String url, String userId, long partId, String token, String worToken) {
         try {
-            IceRestClient client = new IceRestClient(url, worToken, "rest/parts/" + partId + "/tooltip");
+            IceRestClient client = new IceRestClient(url, worToken);
             String encodedToken = URLEncoder.encode(token, "UTF-8");
             client.queryParam("token", encodedToken);
             client.queryParam("userId", userId);
-            return client.get(PartData.class);
+            return client.get("rest/parts/" + partId + "/tooltip", PartData.class);
         } catch (Exception e) {
             Logger.error(e);
             return null;
@@ -199,21 +199,21 @@ public class RemoteContact {
 
     PartData getPublicTooltipDetails(String url, long partId, String apiKey) {
         String path = "rest/parts/" + partId + "/tooltip";
-        IceRestClient client = new IceRestClient(url, apiKey, path);
-        return client.get(PartData.class);
+        IceRestClient client = new IceRestClient(url, apiKey);
+        return client.get(path, PartData.class);
     }
 
     PartStatistics getPublicEntryStatistics(String url, long partId, String apiKey) {
         String path = "/rest/parts/" + partId + "/statistics";
-        IceRestClient client = new IceRestClient(url, apiKey, path);
-        return client.get(PartStatistics.class);
+        IceRestClient client = new IceRestClient(url, apiKey);
+        return client.get(path, PartStatistics.class);
     }
 
     public FeaturedDNASequence getPublicEntrySequence(String url, String partId, String apiKey) {
         try {
             String path = "/rest/parts/" + partId + "/sequence";
-            IceRestClient client = new IceRestClient(url, apiKey, path);
-            return client.get(FeaturedDNASequence.class);
+            IceRestClient client = new IceRestClient(url, apiKey);
+            return client.get(path, FeaturedDNASequence.class);
         } catch (Exception e) {
             // this is fine since it could be searching multiple instances
             return null;
@@ -225,11 +225,11 @@ public class RemoteContact {
         try {
             String path = "rest/parts/" + partId + "/sequence";
             String encodedToken = URLEncoder.encode(token, "UTF-8");
-            IceRestClient client = new IceRestClient(url, apiKey, path);
+            IceRestClient client = new IceRestClient(url, apiKey);
             client.queryParam("token", encodedToken);
             client.queryParam("userId", userId);
             client.queryParam("folderId", folderId);
-            return client.get(FeaturedDNASequence.class);
+            return client.get(path, FeaturedDNASequence.class);
         } catch (Exception e) {
             Logger.error(e);
             return null;
@@ -239,11 +239,11 @@ public class RemoteContact {
     PartData getRemoteEntry(String url, String userId, long partId, long folderId, String token, String worToken) {
         try {
             String encodedToken = URLEncoder.encode(token, "UTF-8");
-            IceRestClient client = new IceRestClient(url, worToken, "rest/parts/" + partId);
+            IceRestClient client = new IceRestClient(url, worToken);
             client.queryParam("token", encodedToken);
             client.queryParam("userId", userId);
             client.queryParam("folderId", folderId);
-            return client.get(PartData.class);
+            return client.get("rest/parts/" + partId, PartData.class);
         } catch (Exception e) {
             Logger.error(e);
             return null;
@@ -252,8 +252,8 @@ public class RemoteContact {
 
     public PartData getPublicEntry(String url, String entryId, String apiKey) {
         try {
-            IceRestClient client = new IceRestClient(url, apiKey, "rest/parts/" + entryId);
-            return client.get(PartData.class);
+            IceRestClient client = new IceRestClient(url, apiKey);
+            return client.get("rest/parts/" + entryId, PartData.class);
         } catch (Exception e) {
             // this is fine since it could be searching all instances
             return null;
@@ -265,13 +265,13 @@ public class RemoteContact {
      *
      * @return true, if the master reports correct execution of the request. false otherwise
      */
-    boolean deleteInstanceFromMaster(String thisUrl) {
+    void deleteInstanceFromMaster(String thisUrl) {
         final String NODE_MASTER = Utils.getConfigValue(ConfigurationKey.WEB_OF_REGISTRIES_MASTER);
         RemotePartner masterPartner = DAOFactory.getRemotePartnerDAO().getByUrl(NODE_MASTER);
         if (masterPartner == null)
-            return false;
+            return;
 
-        IceRestClient client = new IceRestClient(masterPartner.getUrl(), masterPartner.getApiKey(), "rest/partners/" + thisUrl);
-        return client.delete();
+        IceRestClient client = new IceRestClient(masterPartner.getUrl(), masterPartner.getApiKey());
+        client.delete("rest/partners/" + thisUrl);
     }
 }

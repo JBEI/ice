@@ -11,7 +11,9 @@ import org.jbei.ice.storage.model.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Factory for converting {@link Entry}s to a {@link org.jbei.ice.lib.dto.entry.PartData}
@@ -263,6 +265,70 @@ public class ModelToInfoFactory {
             return 0;
 
         return account.getId();
+    }
+
+    public static PartData createTableView(long entryId, List<String> fields) {
+        Set<String> fieldsToProcess;
+        if (fields == null)
+            fieldsToProcess = new HashSet<>();
+        else
+            fieldsToProcess = new HashSet<>(fields);
+
+        fieldsToProcess.add("name");
+        fieldsToProcess.add("status");
+        fieldsToProcess.add("recordType");
+        fieldsToProcess.add("creation_time");
+        fieldsToProcess.add("short_description");
+
+        // minimum set of values
+        Entry entry = DAOFactory.getEntryDAO().get(entryId);
+        EntryType type = EntryType.nameToType(entry.getRecordType());
+        PartData view = new PartData(type);
+        view.setId(entry.getId());
+        view.setRecordId(entry.getRecordId());
+        view.setPartId(entry.getPartNumber());
+        view.setName(entry.getName());
+        view.setShortDescription(entry.getShortDescription());
+        view.setCreationTime(entry.getCreationTime().getTime());
+        view.setStatus(entry.getStatus());
+        view.setShortDescription(entry.getShortDescription());
+
+        // has sample
+        view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));
+
+        // has sequence
+        Visibility visibility = Visibility.valueToEnum(entry.getVisibility());
+        if (visibility == Visibility.REMOTE) {
+            view.setHasSequence(entry.getLongDescriptionType().equalsIgnoreCase("sequence"));
+        } else {
+            SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
+            view.setHasSequence(sequenceDAO.hasSequence(entry.getId()));
+            view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
+        }
+
+        // optional values
+        if (fieldsToProcess.contains("alias")) {
+            view.setAlias(entry.getAlias());
+        }
+
+        if (fieldsToProcess.contains("links")) {
+            for (Entry linkedEntry : entry.getLinkedEntries()) {
+                PartData linkedPartData = new PartData(EntryType.nameToType(linkedEntry.getRecordType()));
+                linkedPartData.setId(linkedEntry.getId());
+                view.getLinkedParts().add(linkedPartData);
+            }
+
+            List<Entry> parents = DAOFactory.getEntryDAO().getParents(entry.getId());
+            if (parents != null) {
+                for (Entry parentEntry : parents) {
+                    PartData partData = new PartData(EntryType.nameToType(parentEntry.getRecordType()));
+                    partData.setId(parentEntry.getId());
+                    view.getParents().add(partData);
+                }
+            }
+        }
+
+        return view;
     }
 
     public static PartData createTableViewData(Entry entry, boolean includeOwnerInfo, List<String> fields) {

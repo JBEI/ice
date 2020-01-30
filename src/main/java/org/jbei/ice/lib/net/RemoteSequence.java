@@ -52,9 +52,9 @@ public class RemoteSequence {
 
     public FeaturedDNASequence getRemoteSequence() {
         try {
+            IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey());
             String restPath = "rest/parts/" + remotePartId + "/sequence";
-            IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey(), restPath);
-            return client.get(FeaturedDNASequence.class);
+            return client.get(restPath, FeaturedDNASequence.class);
         } catch (Exception e) {
             Logger.error(e.getMessage());
             return null;

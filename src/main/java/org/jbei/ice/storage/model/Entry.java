@@ -219,7 +219,7 @@ public class Entry implements DataModel {
     @IndexedEmbedded(depth = 1)
     private final Set<Permission> permissions = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "contents")
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "contents", fetch = FetchType.LAZY)
     @IndexedEmbedded(depth = 1)
     private Set<Folder> folders = new HashSet<>();
 

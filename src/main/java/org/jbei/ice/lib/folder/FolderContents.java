@@ -368,10 +368,12 @@ public class FolderContents {
         // check for sample request information
         if (folder.getType() == FolderType.SAMPLE) {
             SampleCreateModel model = DAOFactory.getSampleCreateModelDAO().getByFolder(folder);
-            SampleRequest request = new SampleRequest();
-            request.setStatus(model.getStatus());
-            request.setId(model.getId());
-            details.setSampleRequest(request);
+            if (model != null) {
+                SampleRequest request = new SampleRequest();
+                request.setStatus(model.getStatus());
+                request.setId(model.getId());
+                details.setSampleRequest(request);
+            }
         }
 
         // retrieve folder contents
