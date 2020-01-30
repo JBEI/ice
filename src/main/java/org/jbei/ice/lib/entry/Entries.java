@@ -113,9 +113,17 @@ public class Entries extends HasEntry {
         Entry entry = super.getEntry(partId);
         authorization.expectWrite(userId, entry);
 
+        String oldValue = EntryUtil.entryFieldToValue(entry, field);
         InfoToModelFactory.infoToEntryForField(entry, values.toArray(new String[0]), field);
-        entry.setModificationTime(new Date());
+        long modificationDate = new Date().getTime();
+        entry.setModificationTime(new Date(modificationDate));
         dao.update(entry);
+
+        try {
+            new EntryAudit(this.userId).fieldUpdated(entry.getId(), field, oldValue, modificationDate);
+        } catch (Exception e) {
+            Logger.error(e);
+        }
     }
 
     private void updateOrCreateCustomFieldValues(Entry entry, PartData data) {
