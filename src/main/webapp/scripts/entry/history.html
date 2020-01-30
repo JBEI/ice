@@ -20,6 +20,9 @@
                     <td style="line-height:1; opacity:0.2; text-shadow:0 1px 0 #fff">
                         <b>{{$index+historyParams.offset+1 | number}}</b>
                     </td>
+                    <td ng-if="item.action==='d'">
+                        <span class="entry-type">DELETED</span>
+                    </td>
                     <td ng-if="item.action==='+r'">
                         <span class="entry-type">READ</span>
                     </td>

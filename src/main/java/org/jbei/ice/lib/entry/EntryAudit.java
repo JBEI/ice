@@ -34,4 +34,18 @@ public class EntryAudit {
 
         dao.create(audit);
     }
+
+    public void action(long entryId, AuditType type, Date modificationDate) {
+        Entry entry = DAOFactory.getEntryDAO().get(entryId);
+        if (entry == null)
+            return;
+
+        Audit audit = new Audit();
+        audit.setAction(type.getAbbrev());
+        audit.setUserId(this.userId);
+        audit.setTime(modificationDate);
+        audit.setEntry(entry);
+
+        dao.create(audit);
+    }
 }
