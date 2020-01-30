@@ -23,12 +23,8 @@ import java.util.List;
  */
 public class BlastPlus {
 
-    private final Path blastInstallDirectory;
-
-    public BlastPlus() {
-        this.blastInstallDirectory = Paths.get(Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR));
-        if (!Files.exists(this.blastInstallDirectory))
-            throw new IllegalArgumentException("Cannot locate blast in " + this.blastInstallDirectory + ". Please install");
+    private Path getBlastInstallDirectory() {
+        return Paths.get(Utils.getConfigValue(ConfigurationKey.BLAST_INSTALL_DIR));
     }
 
     /**
@@ -89,7 +85,7 @@ public class BlastPlus {
     public void formatBlastDb(BlastFastaFile fastaFile, String dbName) throws BlastException {
         ArrayList<String> commands = new ArrayList<>();
         Path filePath = fastaFile.getFilePath();
-        String makeBlastDbCmd = this.blastInstallDirectory.toAbsolutePath().toString() + File.separator + "makeblastdb";
+        String makeBlastDbCmd = getBlastInstallDirectory().toAbsolutePath().toString() + File.separator + "makeblastdb";
         commands.add(makeBlastDbCmd);
         commands.add("-dbtype nucl");
         commands.add("-in");
@@ -124,7 +120,7 @@ public class BlastPlus {
                 throw new IOException("Could not make blast db");
             }
         } catch (InterruptedException e) {
-            throw new BlastException("Could not run makeblastdb [BlastDBPath is " + blastInstallDirectory.toString() + "]", e);
+            throw new BlastException("Could not run makeblastdb [BlastDBPath is " + getBlastInstallDirectory().toString() + "]", e);
         } catch (IOException e) {
             throw new BlastException(e);
         }
