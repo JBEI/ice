@@ -11,12 +11,14 @@ import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebEntries;
-import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
-import org.jbei.ice.storage.hibernate.dao.*;
+import org.jbei.ice.storage.hibernate.dao.CommentDAO;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.hibernate.dao.SampleDAO;
+import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.util.*;
@@ -117,45 +119,6 @@ public class EntryController extends HasEntry {
         comment.setBody(userComment.getMessage());
         comment.setModificationTime(new Date());
         return commentDAO.update(comment).toDataTransferObject();
-    }
-
-    public boolean deleteTraceSequence(String userId, long entryId, long traceId) {
-        Entry entry = dao.get(entryId);
-        if (entry == null)
-            return false;
-
-        TraceSequenceDAO traceSequenceDAO = DAOFactory.getTraceSequenceDAO();
-        TraceSequence traceSequence = traceSequenceDAO.get(traceId);
-        if (traceSequence == null || !canEdit(userId, traceSequence.getDepositor(), entry))
-            return false;
-
-        try {
-            new SequenceAnalysisController().removeTraceSequence(traceSequence);
-        } catch (Exception e) {
-            Logger.error(e);
-            return false;
-        }
-        return true;
-    }
-
-    public boolean deleteShotgunSequence(String userId, long entryId, long shotgunId) {
-        Entry entry = dao.get(entryId);
-        if (entry == null)
-            return false;
-
-        ShotgunSequenceDAO shotgunSequenceDAO = DAOFactory.getShotgunSequenceDAO();
-        ShotgunSequence shotgunSequence = shotgunSequenceDAO.get(shotgunId);
-        if (shotgunSequence == null || !canEdit(userId, shotgunSequence.getDepositor(), entry))
-            return false;
-
-        try {
-            new SequenceAnalysisController().removeShotgunSequence(shotgunSequence);
-        } catch (Exception e) {
-            Logger.error(e);
-            return false;
-        }
-
-        return true;
     }
 
     protected boolean canEdit(String userId, String depositor, Entry entry) {

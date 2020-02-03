@@ -18,7 +18,11 @@ import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntriesAsCSV;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.attachment.Attachments;
-import org.jbei.ice.lib.entry.sequence.*;
+import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
+import org.jbei.ice.lib.entry.sequence.PartSequence;
+import org.jbei.ice.lib.entry.sequence.SequenceFormat;
+import org.jbei.ice.lib.entry.sequence.Sequences;
+import org.jbei.ice.lib.entry.sequence.analysis.TraceSequences;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.RemoteSequence;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
@@ -197,10 +201,10 @@ public class FileResource extends RestResource {
     @GET
     @Path("trace/{fileId}")
     public Response getTraceSequenceFile(@PathParam("fileId") String fileId, @QueryParam("sid") String sid) {
-        final SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
-        final TraceSequence traceSequence = sequenceAnalysisController.getTraceSequenceByFileId(fileId);
+        TraceSequences traceSequences = new TraceSequences();
+        final TraceSequence traceSequence = traceSequences.getTraceSequenceByFileId(fileId);
         if (traceSequence != null) {
-            final File file = sequenceAnalysisController.getFile(traceSequence);
+            final File file = traceSequences.getFile(traceSequence);
             return addHeaders(Response.ok(file), traceSequence.getFilename());
         }
         return Response.serverError().build();

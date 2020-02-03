@@ -24,6 +24,8 @@ import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.entry.sequence.PartTraceSequences;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.lib.entry.sequence.Sequences;
+import org.jbei.ice.lib.entry.sequence.analysis.Shotgun;
+import org.jbei.ice.lib.entry.sequence.analysis.TraceSequences;
 import org.jbei.ice.lib.entry.sequence.annotation.Annotations;
 import org.jbei.ice.lib.experiment.Experiments;
 import org.jbei.ice.lib.experiment.Study;
@@ -466,7 +468,8 @@ public class PartResource extends RestResource {
                                 @PathParam("id") final long partId,
                                 @PathParam("traceId") final long traceId) {
         final String userId = getUserId();
-        if (!controller.deleteTraceSequence(userId, partId, traceId)) {
+        TraceSequences traceSequences = new TraceSequences();
+        if (!traceSequences.deleteTraceSequence(userId, partId, traceId)) {
             return super.respond(Response.Status.UNAUTHORIZED);
         }
         return super.respond(Response.Status.OK);
@@ -478,8 +481,8 @@ public class PartResource extends RestResource {
                                           @PathParam("id") final long partId,
                                           @PathParam("shotgunId") final long shotgunId) {
         final String userId = getUserId();
-        controller.deleteShotgunSequence(userId, partId, shotgunId);
-        return super.respond(Response.Status.OK);
+        Shotgun shotgun = new Shotgun(userId);
+        return super.respond(shotgun.delete(partId, shotgunId));
     }
 
     @GET

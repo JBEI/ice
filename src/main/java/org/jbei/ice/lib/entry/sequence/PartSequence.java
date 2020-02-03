@@ -13,6 +13,7 @@ import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.HasEntry;
+import org.jbei.ice.lib.entry.sequence.analysis.TraceSequences;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.parsers.AbstractParser;
@@ -180,7 +181,7 @@ public class PartSequence {
                 if (sequence == null)
                     throw new IOException("Could not create sequence object");
 
-//            sequence.setSequenceUser(sequenceString); // todo sequence user now might not be such a good idea
+//            sequence.setSequenceUser(sequenceString); // todo sequence user now might not be such a good idea or store on file similar to attachments
                 sequence.setFileName(fileName);
                 sequence.setFormat(format);
                 sequence = saveSequenceObject(sequence);
@@ -547,8 +548,7 @@ public class PartSequence {
     }
 
     private void rebuildTraceAlignments() {
-        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
-        sequenceAnalysisController.rebuildAllAlignments(entry);
+        new TraceSequences().rebuildAllAlignments(entry);
     }
 
     private FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {
