@@ -19,6 +19,7 @@ import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.entry.*;
 import org.jbei.ice.lib.entry.attachment.Attachments;
+import org.jbei.ice.lib.entry.export.CustomExportTask;
 import org.jbei.ice.lib.entry.sample.SampleService;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.entry.sequence.PartTraceSequences;
@@ -27,6 +28,7 @@ import org.jbei.ice.lib.entry.sequence.Sequences;
 import org.jbei.ice.lib.entry.sequence.analysis.Shotgun;
 import org.jbei.ice.lib.entry.sequence.analysis.TraceSequences;
 import org.jbei.ice.lib.entry.sequence.annotation.Annotations;
+import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.experiment.Experiments;
 import org.jbei.ice.lib.experiment.Study;
 import org.jbei.ice.lib.net.RemoteEntries;
@@ -743,18 +745,12 @@ public class PartResource extends RestResource {
 
     @POST
     @Path("/custom")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @Produces(MediaType.APPLICATION_JSON)
     public Response customExport(@QueryParam("sequenceFormat") String sequenceFormat, EntrySelection selection) {
         String userId = super.requireUserId();
-        EntriesAsCSV entriesAsCSV = new EntriesAsCSV(userId);
         SequenceFormat format = SequenceFormat.fromString(sequenceFormat.toUpperCase());
-
-        try (ByteArrayOutputStream outputStream = entriesAsCSV.customize(selection, format)) {
-            StreamingOutput stream = outputStream::writeTo;
-            return Response.ok(stream).header("Content-Disposition", "attachment;filename=\"ice-export-data.zip\"").build();
-        } catch (IOException e) {
-            Logger.error(e);
-            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
-        }
+        CustomExportTask task = new CustomExportTask(userId, selection, format);
+        IceExecutorService.getInstance().runTask(task);
+        return super.respond(true);
     }
 }

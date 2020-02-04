@@ -91,6 +91,8 @@ public class BlastFastaFile {
 
     public boolean write(Iterable<String> iterable) {
         File lockFile = createLock();
+        if (lockFile == null)
+            return false;
 
         try {
             if (!Files.exists(this.filePath))
@@ -111,6 +113,8 @@ public class BlastFastaFile {
 
     public void delete(String partNumber) throws IOException {
         File lockFile = createLock();
+        if (lockFile == null)
+            return;
 
         try {
             Path tmpFile = Paths.get(filePath.getParent().toString(), FILE_NAME + ".tmp");
@@ -139,10 +143,13 @@ public class BlastFastaFile {
                     Logger.error(e);
                 }
             });
-
             Files.move(tmpFile, filePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         } finally {
             releaseLock(lockFile);
         }
+    }
+
+    public boolean isLocked() {
+        return lock == null || lock.isValid();
     }
 }

@@ -44,7 +44,10 @@ public class DevelopmentServer {
         HttpHandler servletHandler = manager.start();
 
         PredicatesHandler handler = Handlers.predicates(PredicatedHandlersParser.parse(
-                "path-prefix('search') or path-prefix('folders') or path-prefix('entry') or path-prefix('admin') and regex('/.+') -> rewrite('/')",
+                "path-prefix('search') or " +
+                        "path-prefix('folders') or " +
+                        "path-prefix('download') or " +
+                        "path-prefix('entry') or path-prefix('admin') and regex('/.+') -> rewrite('/')",
                 ClassLoader.getSystemClassLoader()), servletHandler);
 
         PathHandler path = Handlers.path(Handlers.redirect("/"))
