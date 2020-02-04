@@ -298,7 +298,7 @@ public class EntriesAsCSV {
         Entries retriever = new Entries(this.userId);
         this.entries = retriever.getEntriesFromSelectionContext(selection);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        EntryAuthorization entryAuthorization = new EntryAuthorization();
+//        EntryAuthorization entryAuthorization = new EntryAuthorization();
 
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
             for (long entryId : this.entries) {
@@ -309,14 +309,8 @@ public class EntriesAsCSV {
                     continue;
                 }
 
-                if (!entryAuthorization.canRead(userId, entry)) {
-                    Logger.error("ERROR : cannot read " + entryId);
-                    continue;
-                }
-
                 Sequence sequence = sequenceDAO.getByEntry(entry);
                 if (sequence == null) {
-                    Logger.error("no sequence");
                     continue;
                 }
 

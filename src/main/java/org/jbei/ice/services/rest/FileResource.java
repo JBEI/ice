@@ -36,6 +36,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +60,24 @@ public class FileResource extends RestResource {
         if (assetFile == null)
             return super.respond(Response.Status.NOT_FOUND);
         return addHeaders(Response.ok(assetFile), assetFile.getName());
+    }
+
+    @GET
+    @Path("/exports/{fileId}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response downloadExportedFile(@PathParam("fileId") String fileId) {
+        String userId = requireUserId();
+        final java.nio.file.Path tmpFile = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY));
+        String fileName = userId + "_" + fileId + "_export-data.zip";
+        if (!Files.exists(Paths.get(tmpFile.toString(), "export", fileName)))
+            return super.respond(Response.Status.NOT_FOUND);
+
+        StreamingOutput stream = output -> {
+            java.nio.file.Path file = Paths.get(tmpFile.toString(), "export", fileName);
+            final ByteArrayInputStream input = new ByteArrayInputStream(FileUtils.readFileToByteArray(file.toFile()));
+            IOUtils.copy(input, output);
+        };
+        return addHeaders(Response.ok(stream), "ice-export-data.zip");
     }
 
     /**
