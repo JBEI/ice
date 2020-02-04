@@ -156,6 +156,10 @@ angular
                 controller: 'UploadController',
                 templateUrl: 'scripts/upload/import.html'
             })
+            .state('download', {
+                url: '/download/:uuid',
+                controller: 'DownloadFile'
+            })
             //backward compatibility with older ice version urls where links were submitted with publications
             .state('redirect', {
                 url: '/page=collections;id=:id',
