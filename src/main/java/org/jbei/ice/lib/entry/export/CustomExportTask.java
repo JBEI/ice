@@ -73,7 +73,7 @@ public class CustomExportTask extends Task {
         body += "You may download the exported file using the personalized link below :";
         body += "\n\n\thttps://" + Utils.getConfigValue(ConfigurationKey.URI_PREFIX) + "/download/" + uuid;
         body += "\n\nPlease report any issues you have with this download to your site administrator. ";
-        body += "Be sure to include the unique identifier \"" + uuid + "\" in your report";
+        body += "Be sure to include the unique identifier \"" + uuid + "\" in your report.";
         body += "\n\nThank you.";
         EmailFactory.getEmail().send(userId, subject, body);
     }
