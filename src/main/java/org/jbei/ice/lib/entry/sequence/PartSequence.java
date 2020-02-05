@@ -153,6 +153,7 @@ public class PartSequence {
                         break;
                 }
 
+                //todo: why custom iterator
                 Iterator<String> customIterator = new Iterator<String>() {
 
                     private boolean firstLineRetrieved = false;
@@ -181,7 +182,8 @@ public class PartSequence {
                 if (sequence == null)
                     throw new IOException("Could not create sequence object");
 
-//            sequence.setSequenceUser(sequenceString); // todo sequence user now might not be such a good idea or store on file similar to attachments
+                // todo : write to file?
+//            sequence.setSequenceUser(sequenceString);
                 sequence.setFileName(fileName);
                 sequence.setFormat(format);
                 sequence = saveSequenceObject(sequence);

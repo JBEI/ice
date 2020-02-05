@@ -256,16 +256,7 @@ public class ModelToInfoFactory {
         return view;
     }
 
-    private static long getAccountId(String email) {
-        if (email == null || email.isEmpty())
-            return 0;
 
-        Account account = DAOFactory.getAccountDAO().getByEmail(email);
-        if (account == null)
-            return 0;
-
-        return account.getId();
-    }
 
     public static PartData createTableView(long entryId, List<String> fields) {
         Set<String> fieldsToProcess;
@@ -328,84 +319,6 @@ public class ModelToInfoFactory {
             }
         }
 
-        return view;
-    }
-
-    public static PartData createTableViewData(Entry entry, boolean includeOwnerInfo, List<String> fields) {
-        if (entry == null)
-            return null;
-
-        EntryType type = EntryType.nameToType(entry.getRecordType());
-        PartData view = new PartData(type);
-        view.setId(entry.getId());
-        view.setRecordId(entry.getRecordId());
-        view.setPartId(entry.getPartNumber());
-        view.setName(entry.getName());
-        view.setShortDescription(entry.getShortDescription());
-
-        if (fields == null || fields.contains("creationTime")) {
-            view.setCreationTime(entry.getCreationTime().getTime());
-        }
-
-        if (fields == null || fields.contains("status")) {
-            view.setStatus(entry.getStatus());
-        }
-
-        if (fields == null || fields.contains("alias")) {
-            view.setAlias(entry.getAlias());
-        }
-
-        // information about the owner and creator
-        if (includeOwnerInfo) {
-            view.setOwner(entry.getOwner());
-            view.setOwnerId(getAccountId(entry.getOwnerEmail()));
-
-            // creator
-            view.setCreator(entry.getCreator());
-            view.setCreatorEmail(entry.getCreatorEmail());
-            view.setCreatorId(getAccountId(entry.getCreatorEmail()));
-        }
-
-        // has sample
-        if (fields == null || fields.contains("hasSample")) {
-            view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));
-        }
-
-        // has sequence
-        if (fields == null || fields.contains("hasSequence")) {
-            Visibility visibility = Visibility.valueToEnum(entry.getVisibility());
-            if (visibility == Visibility.REMOTE) {
-                view.setHasSequence(entry.getLongDescriptionType().equalsIgnoreCase("sequence"));
-            } else {
-                SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
-                view.setHasSequence(sequenceDAO.hasSequence(entry.getId()));
-                view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
-            }
-        }
-
-        // has parents
-        if (fields == null || fields.contains("links")) {
-            for (Entry linkedEntry : entry.getLinkedEntries()) {
-                // todo : authorization
-//            if (!authorization.canRead(userId, parent))
-//                continue;
-                PartData linkedPartData = new PartData(EntryType.nameToType(linkedEntry.getRecordType()));
-                linkedPartData.setId(linkedEntry.getId());
-                view.getLinkedParts().add(linkedPartData);
-            }
-
-            List<Entry> parents = DAOFactory.getEntryDAO().getParents(entry.getId());
-            if (parents != null) {
-                for (Entry parentEntry : parents) {
-                    PartData partData = new PartData(EntryType.nameToType(parentEntry.getRecordType()));
-                    partData.setId(parentEntry.getId());
-                    view.getParents().add(partData);
-                }
-            }
-        }
-
-        // entry count
-        view.setViewCount(DAOFactory.getAuditDAO().getAuditsForEntryCount(entry));
         return view;
     }
 

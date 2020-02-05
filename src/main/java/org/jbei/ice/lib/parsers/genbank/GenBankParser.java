@@ -72,6 +72,8 @@ public class GenBankParser extends AbstractParser {
                 currentSection.process(line);
         }
 
+        // todo : at this point we have the entire sequence converted into this object
+        // todo : however, it is still being held in memory
         return sequence;
     }
 }
