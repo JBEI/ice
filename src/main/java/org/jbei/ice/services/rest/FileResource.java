@@ -18,7 +18,7 @@ import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntriesAsCSV;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.attachment.Attachments;
-import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
+import org.jbei.ice.lib.entry.sequence.InputStreamWrapper;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.lib.entry.sequence.Sequences;
@@ -136,12 +136,14 @@ public class FileResource extends RestResource {
     public Response getAttachment(@PathParam("fileId") String fileId) {
         String userId = requireUserId();
         try {
-            ByteArrayWrapper wrapper = attachments.getAttachmentByFileId(userId, fileId);
+            InputStreamWrapper wrapper = attachments.getAttachmentByFileId(userId, fileId);
             if (wrapper == null) {
                 return respond(Response.Status.NOT_FOUND);
             }
 
-            return addHeaders(Response.ok(wrapper.getBytes()), wrapper.getName());
+            StreamingOutput stream = output -> IOUtils.copy(wrapper.getInputStream(), output);
+
+            return addHeaders(Response.ok(stream), wrapper.getName());
         } catch (IOException e) {
             Logger.error(e);
             throw new WebApplicationException(e);
@@ -201,20 +203,17 @@ public class FileResource extends RestResource {
             sessionId = sid;
 
         final String userId = getUserId(sessionId);
-        final ByteArrayWrapper wrapper;
         if (remoteId != -1) {
             RemoteSequence sequence = new RemoteSequence(remoteId, Long.decode(partId));
-            wrapper = sequence.get(downloadType);
+            final InputStreamWrapper wrapper = sequence.get(downloadType);
+            StreamingOutput stream = output -> IOUtils.copy(wrapper.getInputStream(), output);
+
+            return addHeaders(Response.ok(stream), wrapper.getName());
         } else {
-            wrapper = new PartSequence(userId, partId).toFile(SequenceFormat.fromString(downloadType));
+            InputStreamWrapper wrapper = new PartSequence(userId, partId).toFile(SequenceFormat.fromString(downloadType));
+            StreamingOutput stream = output -> IOUtils.copy(wrapper.getInputStream(), output);
+            return addHeaders(Response.ok(stream), wrapper.getName());
         }
-
-        StreamingOutput stream = output -> {
-            final ByteArrayInputStream input = new ByteArrayInputStream(wrapper.getBytes());
-            IOUtils.copy(input, output);
-        };
-
-        return addHeaders(Response.ok(stream), wrapper.getName());
     }
 
     @GET

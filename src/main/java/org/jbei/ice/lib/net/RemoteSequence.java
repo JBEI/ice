@@ -3,7 +3,7 @@ package org.jbei.ice.lib.net;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
-import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
+import org.jbei.ice.lib.entry.sequence.InputStreamWrapper;
 import org.jbei.ice.lib.entry.sequence.SequenceUtil;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.utils.Utils;
@@ -61,12 +61,12 @@ public class RemoteSequence {
         }
     }
 
-    public ByteArrayWrapper get(String type) {
+    public InputStreamWrapper get(String type) {
         FeaturedDNASequence featuredDNASequence = remoteContact.getPublicEntrySequence(partner.getUrl(),
                 Long.toString(remotePartId),
                 partner.getApiKey());
         if (featuredDNASequence == null)
-            return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
+            return new InputStreamWrapper(new byte[]{'\0'}, "no_sequence");
 
         String name = featuredDNASequence.getName();
 
@@ -103,10 +103,10 @@ public class RemoteSequence {
             }
 
             formatter.format(sequence, byteStream);
-            return new ByteArrayWrapper(byteStream.toByteArray(), name);
+            return new InputStreamWrapper(byteStream.toByteArray(), name);
         } catch (Exception e) {
             Logger.error(e);
-            return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
+            return new InputStreamWrapper(new byte[]{'\0'}, "no_sequence");
         }
     }
 }
