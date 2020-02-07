@@ -13,7 +13,7 @@ angular.module('iceApp.services', ['ngCookies', 'ngResource'])
                             $rootScope.user = success;
                             $cookies.put('userId', success.email);
                             $cookies.put('sessionId', success.sessionId);
-                            var loginDestination = $cookies.loginDestination || '/';
+                            const loginDestination = $cookies.loginDestination || '/';
                             $cookies.loginDestination = null;
                             $location.path(loginDestination);
                         } else {
@@ -21,6 +21,10 @@ angular.module('iceApp.services', ['ngCookies', 'ngResource'])
                             $cookies.remove('sessionId');
                         }
                     });
+            },
+
+            getUserId: function () {
+                return $cookies.get('userId');
             },
 
             getSessionId: function () {
@@ -42,7 +46,7 @@ angular.module('iceApp.services', ['ngCookies', 'ngResource'])
 
             // logs out user by invalidating the session id
             logout: function () {
-                Util.remove("rest/accesstokens", {}, function (result) {
+                Util.remove("rest/accesstokens", {}, function () {
                     $rootScope.user = undefined;
                     $cookies.remove('userId');
                     $cookies.remove('sessionId');
@@ -54,7 +58,7 @@ angular.module('iceApp.services', ['ngCookies', 'ngResource'])
 
     .factory('EntryContextUtil', function () {
         // default search filters
-        var context;
+        let context;
 
         return {
             getContext: function () {

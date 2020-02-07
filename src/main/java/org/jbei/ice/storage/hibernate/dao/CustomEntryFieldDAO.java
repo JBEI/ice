@@ -33,7 +33,7 @@ public class CustomEntryFieldDAO extends HibernateRepository<CustomEntryFieldMod
      *
      * @param type  entry type
      * @param label field label
-     * @return containing that contains result of null if no matches
+     * @return container with result, or null if no matches
      */
     public Optional<CustomEntryFieldModel> getLabelForType(EntryType type, String label) {
         CriteriaQuery<CustomEntryFieldModel> query = getBuilder().createQuery(CustomEntryFieldModel.class);

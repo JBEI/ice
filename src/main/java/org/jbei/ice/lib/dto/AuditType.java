@@ -6,6 +6,9 @@ package org.jbei.ice.lib.dto;
 public enum AuditType {
 
     READ("+r"),
+    DELETE("d"),
+    PERMANENTLY_DELETE("+d"),
+    RESTORE("-d"),
     EDIT("e");
 
     private String abbrev;

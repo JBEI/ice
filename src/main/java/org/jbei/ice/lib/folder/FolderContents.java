@@ -377,9 +377,9 @@ public class FolderContents {
         }
 
         // retrieve folder contents
-        List<Entry> results = folderDAO.retrieveFolderContents(folderId, pageParameters, visibleOnly);
-        for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(entry, false, fields);
+        List<Long> results = folderDAO.retrieveFolderContents(folderId, pageParameters, visibleOnly);
+        for (Long entryId : results) {
+            PartData info = ModelToInfoFactory.createTableView(entryId, fields);
             details.getEntries().add(info);
         }
         return details;
@@ -486,9 +486,9 @@ public class FolderContents {
         details.setCount(folderSize);
 
         // retrieve folder contents
-        List<Entry> results = folderDAO.retrieveFolderContents(folderId, pageParameters, true);
-        for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(entry, false, fields);
+        List<Long> results = folderDAO.retrieveFolderContents(folderId, pageParameters, true);
+        for (Long entryId : results) {
+            PartData info = ModelToInfoFactory.createTableView(entryId, fields);
             info.setCanEdit(canEdit);
             details.getEntries().add(info);
         }

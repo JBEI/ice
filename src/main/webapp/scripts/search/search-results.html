@@ -188,7 +188,7 @@
                        target="_blank">{{result.partner.name}}</a>
                 </td>
                 <td>
-                    {{result.alignment/result.queryLength * 100}}%
+                    {{result.alignment/result.queryLength * 100 | number}}%
                     <br>
                     <small class="text-muted">{{result.alignment}}/{{result.queryLength}}</small>
                 </td>
@@ -267,7 +267,7 @@
                 </td>
                 <td></td>
                 <td>
-                    {{result.alignment/result.queryLength * 100}}%
+                    {{result.alignment/result.queryLength * 100 | number}}%
                     <br>
                     <small class="text-muted">{{result.alignment}}/{{result.queryLength}}</small>
                 </td>
@@ -389,7 +389,7 @@
                 </td>
                 <td style="vertical-align: middle">
                     <div>
-                        <a ng-href="profile/{{result.entryInfo.ownerId}}">{{result.entryInfo.owner}}</a>
+                        {{result.entryInfo.owner}}
                     </div>
                 </td>
                 <td style="vertical-align: middle">
@@ -414,8 +414,8 @@
     <div class="row" data-ng-if="searchResults && searchResults.results.length > 0" style="margin-top: -15px">
         <div class="col-md-6" style="padding-left: 0">
             <ul uib-pagination total-items="searchResults.resultCount" ng-change="searchResultPageChanged()"
-                            ng-model="params.currentPage" max-size="maxSize"
-                            class="pagination-sm" items-per-page="params.limit" boundary-links="true">
+                ng-model="params.currentPage" max-size="maxSize"
+                class="pagination-sm" items-per-page="params.limit" boundary-links="true">
             </ul>
         </div>
         <div class="col-md-4" style="margin: 22px 0;">

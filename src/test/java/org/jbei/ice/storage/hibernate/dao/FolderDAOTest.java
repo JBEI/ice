@@ -202,10 +202,12 @@ public class FolderDAOTest extends HibernateRepositoryTest {
         folder = dao.addFolderContents(folder, entries);
         Assert.assertNotNull(folder);
 
-        List<Entry> result = dao.retrieveFolderContents(folder.getId(), new PageParameters(0, 15, ColumnField.NAME, true, null), false);
+        List<Long> result = dao.retrieveFolderContents(folder.getId(), new PageParameters(0, 15, ColumnField.NAME, true, null), false);
         Assert.assertNotNull(result);
         for (int i = 1; i <= 9; i += 1) {
-            Entry entry = result.get(i - 1);
+            long entryId = result.get(i - 1);
+            Entry entry = DAOFactory.getEntryDAO().get(entryId);
+            Assert.assertNotNull(entry);
             Assert.assertEquals(entry.getName(), "name" + i);
         }
     }

@@ -143,7 +143,6 @@ public class BlastFastaFile {
                     Logger.error(e);
                 }
             });
-
             Files.move(tmpFile, filePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         } finally {
             releaseLock(lockFile);
@@ -151,6 +150,6 @@ public class BlastFastaFile {
     }
 
     public boolean isLocked() {
-        return lock == null || lock.isValid();
+        return lock != null && lock.isValid();
     }
 }

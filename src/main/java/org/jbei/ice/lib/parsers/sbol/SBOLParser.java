@@ -1,5 +1,6 @@
 package org.jbei.ice.lib.parsers.sbol;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
@@ -8,6 +9,7 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryLinks;
+import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.lib.entry.LinkType;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.lib.entry.sequence.SequenceUtil;
@@ -15,15 +17,16 @@ import org.jbei.ice.lib.parsers.AbstractParser;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.storage.DAOFactory;
+import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Sequence;
-import org.sbolstandard.core2.Module;
 import org.sbolstandard.core2.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,19 +39,28 @@ import java.util.Map;
  */
 public class SBOLParser extends AbstractParser {
 
+    protected final Entry entry;
+    protected final PartData partData;
+    protected final String userId;
     private boolean extractHierarchy;
     // map of component identity to entry id
     private Map<String, Long> identityEntryMap = new HashMap<>();
 
     public SBOLParser(String userId, String entryId, boolean extractHierarchy) {
-        super(userId, entryId);
+        super();
+
         this.extractHierarchy = extractHierarchy;
+        this.entry = new HasEntry().getEntry(entryId);
+        if (this.entry == null)
+            throw new IllegalArgumentException("Could not retrieve entry with id " + entryId);
+        this.partData = ModelToInfoFactory.getInfo(entry);
+        this.userId = userId;
     }
 
-    public SequenceInfo parseToEntry(String textSequence, String fileName) throws InvalidFormatParserException {
+    public SequenceInfo parseToEntry(InputStream stream, String fileName) throws InvalidFormatParserException {
         SBOLDocument document;
         try {
-            document = SBOLReader.read(new ByteArrayInputStream(textSequence.getBytes(StandardCharsets.UTF_8)));
+            document = SBOLReader.read(stream);
         } catch (SBOLValidationException e) {
             Logger.error(e);
             throw new InvalidFormatParserException("Invalid SBOL file: " + e.getMessage());
@@ -116,11 +128,9 @@ public class SBOLParser extends AbstractParser {
             SBOLWriter.write(sbolDocument, out, "GENBANK");
             if (out.size() > 0) {
                 GenBankParser parser = new GenBankParser();
-                dnaSequence = parser.parse(new String(out.toByteArray()));
+                dnaSequence = parser.parse(IOUtils.lineIterator(new ByteArrayInputStream(out.toByteArray()), Charset.defaultCharset()));
                 sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
             }
-        } catch (InvalidFormatParserException e) {
-            Logger.error("Error parsing generated genBank: " + e.getMessage());
         } catch (SBOLConversionException | IOException e) {
             Logger.error("Error converting SBOL to genBank: " + e.getMessage());
         }
@@ -170,7 +180,7 @@ public class SBOLParser extends AbstractParser {
 
         Entries entryCreator = new Entries(partData.getCreatorEmail());
         partData = entryCreator.create(partData);
-        Entry entry = entryDAO.get(partData.getId());
+        Entry entry = DAOFactory.getEntryDAO().get(partData.getId());
         parseToGenBank(document, entry.getName(), entry, moduleDefinition.getIdentity().toString());
 
         identityEntryMap.put(identity, entry.getId());

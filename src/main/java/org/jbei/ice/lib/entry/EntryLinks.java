@@ -211,10 +211,8 @@ public class EntryLinks extends HasEntry {
             if (sequenceString.isPresent()) {
                 String sequence = sequenceString.get();
                 int featureCount = sequenceFeatureDAO.getFeatureCount(entry);
-                partData.setBasePairCount(sequence.trim().length());
+                partData.setBasePairCount(Integer.toString(sequence.trim().length()));
                 partData.setFeatureCount(featureCount);
-            } else {
-                partData.setBasePairCount(0);
             }
 
             results.add(partData);

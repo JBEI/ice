@@ -7,7 +7,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
@@ -26,6 +25,8 @@ import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.entry.sequence.PartTraceSequences;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.lib.entry.sequence.Sequences;
+import org.jbei.ice.lib.entry.sequence.analysis.Shotgun;
+import org.jbei.ice.lib.entry.sequence.analysis.TraceSequences;
 import org.jbei.ice.lib.entry.sequence.annotation.Annotations;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.experiment.Experiments;
@@ -84,17 +85,13 @@ public class PartResource extends RestResource {
             data.setVisibility(Visibility.REMOTE);
             return super.respond(data);
         } else {
-            try {
-                if (StringUtils.isEmpty(userId)) {
-                    RegistryPartner partner = requireWebPartner();
-                    log(partner.getUrl(), "retrieving details for " + id);
-                    return super.respond(controller.getRequestedEntry(remoteUserId, remoteUserToken, id, fid, partner));
-                } else {
-                    log(userId, "retrieving details for " + id);
-                    return super.respond(controller.retrieveEntryDetails(userId, id));
-                }
-            } catch (final PermissionException pe) {
-                throw new WebApplicationException(Response.Status.FORBIDDEN);
+            if (StringUtils.isEmpty(userId)) {
+                RegistryPartner partner = requireWebPartner();
+                log(partner.getUrl(), "retrieving details for " + id);
+                return super.respond(controller.getRequestedEntry(remoteUserId, remoteUserToken, id, fid, partner));
+            } else {
+                log(userId, "retrieving details for " + id);
+                return super.respond(controller.retrieveEntryDetails(userId, id));
             }
         }
     }
@@ -168,13 +165,9 @@ public class PartResource extends RestResource {
     @Path("/{id}/permissions")
     public Response getPermissions(@PathParam("id") final String id) {
         final String userId = requireUserId();
-        try {
-            EntryPermissions entryPermissions = new EntryPermissions(id, userId);
-            List<AccessPermission> permissions = entryPermissions.getEntryPermissions();
-            return super.respond(permissions);
-        } catch (PermissionException pe) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
-        }
+        EntryPermissions entryPermissions = new EntryPermissions(id, userId);
+        List<AccessPermission> permissions = entryPermissions.getEntryPermissions();
+        return super.respond(permissions);
     }
 
     @POST
@@ -183,12 +176,8 @@ public class PartResource extends RestResource {
     public AccessPermission createPermission(@PathParam("id") final String partId,
                                              final AccessPermission permission) {
         final String userId = requireUserId();
-        try {
-            EntryPermissions permissions = new EntryPermissions(partId, userId);
-            return permissions.addAccount(permission);
-        } catch (PermissionException pe) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
-        }
+        EntryPermissions permissions = new EntryPermissions(partId, userId);
+        return permissions.addAccount(permission);
     }
 
     @DELETE
@@ -198,13 +187,9 @@ public class PartResource extends RestResource {
                                      @PathParam("permissionId") final long permissionId) {
         final String userId = requireUserId();
         log(userId, "removing permission " + permissionId + " from entry " + partId);
-        try {
-            EntryPermissions entryPermissions = new EntryPermissions(partId, userId);
-            entryPermissions.removePermission(permissionId);
-            return Response.ok().build();
-        } catch (PermissionException pe) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
-        }
+        EntryPermissions entryPermissions = new EntryPermissions(partId, userId);
+        entryPermissions.removePermission(permissionId);
+        return Response.ok().build();
     }
 
     @GET
@@ -216,8 +201,6 @@ public class PartResource extends RestResource {
             Experiments experiments = new Experiments(userId, partId);
             final List<Study> studies = experiments.getPartStudies();
             return respond(Response.Status.OK, studies);
-        } catch (PermissionException e) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
         } catch (IllegalArgumentException ile) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
@@ -234,8 +217,6 @@ public class PartResource extends RestResource {
             Experiments experiments = new Experiments(userId, partId);
             final Study created = experiments.createOrUpdateStudy(study);
             return respond(Response.Status.OK, created);
-        } catch (PermissionException e) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
         } catch (IllegalArgumentException ile) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
@@ -251,8 +232,6 @@ public class PartResource extends RestResource {
             log(userId, "deleting experiment " + experimentId + " for entry " + partId);
             Experiments experiments = new Experiments(userId, partId);
             return super.respond(experiments.deleteStudy(experimentId));
-        } catch (PermissionException e) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
         } catch (IllegalArgumentException ile) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
@@ -264,13 +243,9 @@ public class PartResource extends RestResource {
     public Response enablePublicAccess(@PathParam("id") final String partId) {
         final String userId = requireUserId();
         log(userId, "adding public read access for part " + partId);
-        try {
-            EntryPermissions entryPermissions = new EntryPermissions(partId, userId);
-            entryPermissions.enablePublicReadAccess();
-            return Response.ok().build();
-        } catch (PermissionException pe) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
-        }
+        EntryPermissions entryPermissions = new EntryPermissions(partId, userId);
+        entryPermissions.enablePublicReadAccess();
+        return Response.ok().build();
     }
 
     @DELETE
@@ -279,13 +254,9 @@ public class PartResource extends RestResource {
     public Response disablePublicAccess(@PathParam("id") final String partId) {
         final String userId = requireUserId();
         log(userId, "removing public read access for part " + partId);
-        try {
-            EntryPermissions entryPermissions = new EntryPermissions(partId, userId);
-            entryPermissions.disablePublicReadAccess();
-            return Response.ok().build();
-        } catch (PermissionException pe) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
-        }
+        EntryPermissions entryPermissions = new EntryPermissions(partId, userId);
+        entryPermissions.disablePublicReadAccess();
+        return Response.ok().build();
     }
 
     @GET
@@ -293,11 +264,7 @@ public class PartResource extends RestResource {
     @Path("/{id}/statistics")
     public PartStatistics getStatistics(@PathParam("id") final long partId) {
         final String userId = getUserId();
-        try {
-            return controller.retrieveEntryStatistics(userId, partId);
-        } catch (PermissionException pe) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
-        }
+        return controller.retrieveEntryStatistics(userId, partId);
     }
 
     @GET
@@ -443,7 +410,6 @@ public class PartResource extends RestResource {
 
         ArrayList<ShotgunSequenceDTO> returns = new ArrayList<>();
         List<ShotgunSequence> results = dao.getByEntry(entry);
-
         for (ShotgunSequence ret : results) {
             returns.add(new ShotgunSequenceDTO(ret));
         }
@@ -489,7 +455,7 @@ public class PartResource extends RestResource {
             String storageName = Utils.generateUUID();
             dao.writeSequenceFileToDisk(storageName, fileInputStream);
             dao.create(fileName, userId, entry, storageName, new Date());
-        } catch (Exception e) {
+        } catch (IOException e) {
             Logger.error(e);
             return respond(Response.Status.INTERNAL_SERVER_ERROR);
         }
@@ -504,7 +470,8 @@ public class PartResource extends RestResource {
                                 @PathParam("id") final long partId,
                                 @PathParam("traceId") final long traceId) {
         final String userId = getUserId();
-        if (!controller.deleteTraceSequence(userId, partId, traceId)) {
+        TraceSequences traceSequences = new TraceSequences();
+        if (!traceSequences.deleteTraceSequence(userId, partId, traceId)) {
             return super.respond(Response.Status.UNAUTHORIZED);
         }
         return super.respond(Response.Status.OK);
@@ -516,8 +483,8 @@ public class PartResource extends RestResource {
                                           @PathParam("id") final long partId,
                                           @PathParam("shotgunId") final long shotgunId) {
         final String userId = getUserId();
-        controller.deleteShotgunSequence(userId, partId, shotgunId);
-        return super.respond(Response.Status.OK);
+        Shotgun shotgun = new Shotgun(userId);
+        return super.respond(shotgun.delete(partId, shotgunId));
     }
 
     @GET
@@ -566,28 +533,24 @@ public class PartResource extends RestResource {
         final String userId = getUserId();
         Sequences sequences = new Sequences(userId);
 
-        try {
-            if (isRemote) {
-                // entry exists remotely
-                sequence = remoteEntries.getSequence(userId, fid, partId);
-            } else {
-                // what request is being responded to (local or remote)
-                if (StringUtils.isEmpty(userId)) {
-                    RegistryPartner partner = requireWebPartner();
-                    if (StringUtils.isEmpty(remoteUserToken) || fid == 0) {
-                        sequence = new PartSequence(userId, partId).get();
-                    } else {
-                        sequence = sequences.getRequestedSequence(partner, remoteUserId, remoteUserToken, partId, fid);
-                    }
-                } else {
-                    // user id can be null if partId is public
+        if (isRemote) {
+            // entry exists remotely
+            sequence = remoteEntries.getSequence(userId, fid, partId);
+        } else {
+            // what request is being responded to (local or remote)
+            if (StringUtils.isEmpty(userId)) {
+                RegistryPartner partner = requireWebPartner();
+                if (StringUtils.isEmpty(remoteUserToken) || fid == 0) {
                     sequence = new PartSequence(userId, partId).get();
+                } else {
+                    sequence = sequences.getRequestedSequence(partner, remoteUserId, remoteUserToken, partId, fid);
                 }
+            } else {
+                // user id can be null if partId is public
+                sequence = new PartSequence(userId, partId).get();
             }
-            return Response.status(Response.Status.OK).entity(sequence).build();
-        } catch (PermissionException pe) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
+        return Response.status(Response.Status.OK).entity(sequence).build();
     }
 
     @PUT
@@ -597,16 +560,11 @@ public class PartResource extends RestResource {
                                    @DefaultValue("false") @QueryParam("add") boolean add,
                                    @QueryParam("isPaste") boolean isPaste,
                                    FeaturedDNASequence sequence) {
-        try {
-            final String userId = requireUserId();
-            log(userId, "updating sequence for entry " + partId);
-            PartSequence partSequence = new PartSequence(userId, partId);
-            partSequence.update(sequence, isPaste);
-            return super.respond(true);
-        } catch (Exception e) {
-            Logger.error(e);
-            throw new WebApplicationException(e);
-        }
+        final String userId = requireUserId();
+        log(userId, "updating sequence for entry " + partId);
+        PartSequence partSequence = new PartSequence(userId, partId);
+        partSequence.update(sequence, isPaste);
+        return super.respond(true);
     }
 
     @DELETE
@@ -635,14 +593,9 @@ public class PartResource extends RestResource {
     public Response create(@QueryParam("source") String sourceId, PartData partData) {
         final String userId = requireUserId();
         final Entries creator = new Entries(userId);
-        try {
-            if (StringUtils.isEmpty(sourceId)) {
-                log(userId, "created new " + partData.getType().getDisplay());
-                return super.respond(creator.create(partData));
-            }
-        } catch (Exception e) {
-            Logger.error(e);
-            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
+        if (StringUtils.isEmpty(sourceId)) {
+            log(userId, "created new " + partData.getType().getDisplay());
+            return super.respond(creator.create(partData));
         }
 
         try {
@@ -684,8 +637,6 @@ public class PartResource extends RestResource {
             return super.respond(partData);
         } catch (IllegalArgumentException e) {
             throw new WebApplicationException(Response.Status.NOT_FOUND);
-        } catch (PermissionException pe) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
         }
     }
 
@@ -708,17 +659,13 @@ public class PartResource extends RestResource {
     @Path("/trash")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response moveToTrash(final ArrayList<PartData> list) {
-        try {
-            final String userId = getUserId();
-            final Type fooType = new TypeToken<ArrayList<PartData>>() {
-            }.getType();
-            final Gson gson = new GsonBuilder().create();
-            final ArrayList<PartData> data = gson.fromJson(gson.toJsonTree(list), fooType);
-            final boolean success = controller.moveEntriesToTrash(userId, data);
-            return respond(success);
-        } catch (PermissionException pe) {
-            throw new WebApplicationException(Response.Status.FORBIDDEN);
-        }
+        final String userId = getUserId();
+        final Type fooType = new TypeToken<ArrayList<PartData>>() {
+        }.getType();
+        final Gson gson = new GsonBuilder().create();
+        final ArrayList<PartData> data = gson.fromJson(gson.toJsonTree(list), fooType);
+        final boolean success = controller.moveEntriesToTrash(userId, data);
+        return respond(success);
     }
 
     /**

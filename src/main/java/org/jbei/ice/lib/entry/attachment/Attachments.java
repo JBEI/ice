@@ -1,6 +1,6 @@
 package org.jbei.ice.lib.entry.attachment;
 
-import com.google.common.io.ByteStreams;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -8,7 +8,7 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.EntryAuthorization;
-import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
+import org.jbei.ice.lib.entry.sequence.InputStreamWrapper;
 import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
@@ -53,7 +53,7 @@ public class Attachments {
      *                             the user does not have read permissions on the entry associated with the attachment
      * @throws IOException         on exception retrieving file
      */
-    public ByteArrayWrapper getAttachmentByFileId(String userId, String fileId) throws IOException {
+    public InputStreamWrapper getAttachmentByFileId(String userId, String fileId) throws IOException {
         Attachment attachment = dao.getByFileId(fileId);
         if (attachment == null)
             return null;
@@ -61,7 +61,7 @@ public class Attachments {
         entryAuthorization.expectRead(userId, attachment.getEntry());
         String dataDir = Utils.getConfigValue(ConfigurationKey.DATA_DIRECTORY);
         byte[] bytes = Files.readAllBytes(Paths.get(dataDir, attachmentDirName, attachment.getFileId()));
-        return new ByteArrayWrapper(bytes, attachment.getFileName());
+        return new InputStreamWrapper(bytes, attachment.getFileName());
     }
 
     /**
@@ -108,7 +108,7 @@ public class Attachments {
         try {
             if (inputStream != null) {
                 Path path = Paths.get(dataDir, attachmentDirName, attachment.getFileId());
-                Files.write(path, ByteStreams.toByteArray(inputStream));
+                Files.write(path, IOUtils.toByteArray(inputStream));
             }
         } catch (IOException e) {
             Logger.error(e);

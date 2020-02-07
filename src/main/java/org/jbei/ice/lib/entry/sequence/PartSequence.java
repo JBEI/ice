@@ -1,5 +1,7 @@
 package org.jbei.ice.lib.entry.sequence;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -11,6 +13,7 @@ import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntryAuthorization;
 import org.jbei.ice.lib.entry.HasEntry;
+import org.jbei.ice.lib.entry.sequence.analysis.TraceSequences;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.executor.IceExecutorService;
 import org.jbei.ice.lib.parsers.AbstractParser;
@@ -22,16 +25,17 @@ import org.jbei.ice.lib.parsers.genbank.GenBankParser;
 import org.jbei.ice.lib.parsers.sbol.SBOLParser;
 import org.jbei.ice.lib.search.blast.Action;
 import org.jbei.ice.lib.search.blast.RebuildBlastIndexTask;
-import org.jbei.ice.lib.utils.Utils;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.FeatureDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.hibernate.dao.SequenceFeatureDAO;
 import org.jbei.ice.storage.model.*;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -56,7 +60,7 @@ public class PartSequence {
      */
     public PartSequence(String userId, EntryType type) {
         long partId = createNewPart(userId, type);
-        entry = DAOFactory.getEntryDAO().get(partId);
+        this.entry = DAOFactory.getEntryDAO().get(partId);
         this.sequenceDAO = DAOFactory.getSequenceDAO();
         this.sequenceFeatureDAO = DAOFactory.getSequenceFeatureDAO();
         this.featureDAO = DAOFactory.getFeatureDAO();
@@ -124,43 +128,97 @@ public class PartSequence {
             throws IOException {
         try {
             AbstractParser parser;
-            String sequenceString = Utils.getString(inputStream);
-            SequenceFormat format = SequenceUtil.detectFormat(sequenceString);
+            try (LineIterator iterator = IOUtils.lineIterator(inputStream, StandardCharsets.UTF_8)) {
+                if (!iterator.hasNext())
+                    throw new IOException("Cannot read stream for " + fileName);
 
-            switch (format) {
-                case GENBANK:
-                    parser = new GenBankParser();
-                    break;
+                String firstLine = iterator.next();
+                SequenceFormat format = SequenceUtil.detectFormat(firstLine);
 
-                case SBOL2:
-                    SBOLParser sbolParser = new SBOLParser(this.userId, Long.toString(this.entry.getId()), extractHierarchy);
-                    return sbolParser.parseToEntry(sequenceString, fileName);
+                switch (format) {
+                    case GENBANK:
+                        parser = new GenBankParser();
+                        break;
 
-                case FASTA:
-                    parser = new FastaParser();
-                    break;
+                    case SBOL2:
+                        SBOLParser sbolParser = new SBOLParser(this.userId, Long.toString(this.entry.getId()), extractHierarchy);
+                        return sbolParser.parseToEntry(inputStream, fileName);
 
-                default:
-                case PLAIN:
-                    parser = new PlainParser();
-                    break;
+                    case FASTA:
+                        parser = new FastaParser();
+                        break;
+
+                    default:
+                    case PLAIN:
+                        parser = new PlainParser();
+                        break;
+                }
+
+                SequenceFile sequenceFile = new SequenceFile();
+
+                // using a custom iterator that is backed by a line iterator
+                // since the first line has already been retrieved. This iterator detects if the first line has
+                // been requested, and if not, returns firstLine otherwise transfers the duties to the line iterator
+                Iterator<String> customIterator = new Iterator<String>() {
+
+                    private boolean firstLineRetrieved = false;
+                    private boolean exceptionWhileWriting = false;
+
+                    @Override
+                    public boolean hasNext() {
+                        if (firstLineRetrieved)
+                            return iterator.hasNext();
+                        return true;
+                    }
+
+                    @Override
+                    public String next() {
+                        String line;
+                        if (firstLineRetrieved)
+                            line = iterator.next();
+                        else {
+                            firstLineRetrieved = true;
+                            line = firstLine;
+                        }
+
+                        // if an IOException is caught at least once while writing to file, do not attempt to write to
+                        // file anymore
+                        if (!exceptionWhileWriting) {
+                            try {
+                                sequenceFile.writeLine(line);
+                            } catch (IOException e) {
+                                Logger.error("Exception caught writing sequence to file: ", e);
+                                exceptionWhileWriting = true;
+                                try {
+                                    sequenceFile.delete();
+                                } catch (IOException ie) {
+                                    Logger.error("Exception while deleting corrupted sequence file", ie);
+                                }
+                            }
+                        }
+
+                        // write line
+                        return line;
+                    }
+                };
+
+                // parse actual sequence
+                String entryType = this.entry.getRecordType();
+
+                FeaturedDNASequence dnaSequence = parser.parse(customIterator, entryType);
+                Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
+                if (sequence == null)
+                    throw new IOException("Could not create sequence object");
+
+                sequence.setSequenceUser(sequenceFile.getFileName());
+                sequence.setFileName(fileName);
+                sequence.setFormat(format);
+                sequence = saveSequenceObject(sequence);
+
+                SequenceInfo info = sequence.toDataTransferObject();
+                info.setSequence(dnaSequence);
+                return info;
             }
-
-            // parse actual sequence
-            String entryType = this.entry.getRecordType();
-            FeaturedDNASequence dnaSequence = parser.parse(sequenceString, entryType);
-            Sequence sequence = SequenceUtil.dnaSequenceToSequence(dnaSequence);
-            if (sequence == null)
-                throw new IOException("Could not create sequence object");
-
-            sequence.setSequenceUser(sequenceString);
-            sequence.setFileName(fileName);
-            sequence.setFormat(format);
-            sequence = saveSequenceObject(sequence);
-
-            SequenceInfo info = sequence.toDataTransferObject();
-            info.setSequence(dnaSequence);
-            return info;
         } catch (InvalidFormatParserException e) {
             Logger.error(e);
             throw new IOException(e);
@@ -440,13 +498,13 @@ public class PartSequence {
      * Convert sequence to a byte array of the specified format with the intention of being written to a file
      *
      * @param format specified format for sequence conversion
-     * @return wrapper around the byte array for the converted format
+     * @return wrapper around the outputstream for the converted format and name
      */
-    public ByteArrayWrapper toFile(SequenceFormat format) {
+    public InputStreamWrapper toFile(SequenceFormat format) {
         entryAuthorization.expectRead(userId, entry);
         Sequence sequence = sequenceDAO.getByEntry(entry);
         if (sequence == null)
-            return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
+            return null;
 
         // if requested format is the same as the original format (if original exist) then get the original instead
         if (sequence.getFormat() == format && DAOFactory.getSequenceDAO().hasOriginalSequence(entry.getId()))
@@ -462,7 +520,13 @@ public class PartSequence {
                     name = sequence.getFileName();
                     if (StringUtils.isEmpty(name))
                         name = entry.getPartNumber() + ".gb";
-                    break;
+                    try {
+                        SequenceFile sequenceFile = new SequenceFile(sequenceString);
+                        return new InputStreamWrapper(sequenceFile.getStream(), name);
+                    } catch (Exception e) {
+                        Logger.error(e);
+                        break;
+                    }
 
                 case GENBANK:
                 default:
@@ -495,10 +559,11 @@ public class PartSequence {
             }
         } catch (Exception e) {
             Logger.error("Failed to generate " + format.name() + " file for download!", e);
-            return new ByteArrayWrapper(new byte[]{'\0'}, "sequence_error");
+            return null;
         }
 
-        return new ByteArrayWrapper(sequenceString.getBytes(), name);
+        ByteArrayInputStream stream = new ByteArrayInputStream(sequenceString.getBytes());
+        return new InputStreamWrapper(stream, name);
     }
 
     /**
@@ -519,8 +584,7 @@ public class PartSequence {
     }
 
     private void rebuildTraceAlignments() {
-        SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
-        sequenceAnalysisController.rebuildAllAlignments(entry);
+        new TraceSequences().rebuildAllAlignments(entry);
     }
 
     private FeaturedDNASequence getFeaturedSequence(Entry entry, boolean canEdit) {

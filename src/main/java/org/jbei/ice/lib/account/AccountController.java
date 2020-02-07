@@ -386,9 +386,7 @@ public class AccountController {
         try {
             if (groups != null) {
                 for (Group group : groups) {
-                    if (!account.getGroups().contains(group)) {
-                        account.getGroups().add(group);
-                    }
+                    account.getGroups().add(group);
                 }
                 dao.update(account);
             }

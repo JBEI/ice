@@ -34,6 +34,7 @@ import static org.jbei.ice.lib.utils.SequenceUtils.breakUpLines;
 public class StandardBlastDatabase extends BlastDatabase {
 
     private static StandardBlastDatabase INSTANCE;
+    private final Object LOCK;
     private BlastPlus blastPlus;
     private BlastFastaFile blastFastaFile;
     private SequenceDAO sequenceDAO;
@@ -43,6 +44,7 @@ public class StandardBlastDatabase extends BlastDatabase {
         blastPlus = new BlastPlus();
         sequenceDAO = DAOFactory.getSequenceDAO();
         blastFastaFile = new BlastFastaFile(indexPath);
+        LOCK = new Object();
     }
 
     public static StandardBlastDatabase getInstance() {
@@ -52,8 +54,6 @@ public class StandardBlastDatabase extends BlastDatabase {
     }
 
     private static String getSequenceFasta(Sequence sequence) {
-        long id = sequence.getEntry().getId();
-
         String sequenceString = "";
         String temp = sequence.getSequence();
 
@@ -80,6 +80,7 @@ public class StandardBlastDatabase extends BlastDatabase {
         if (StringUtils.isEmpty(sequenceString))
             return null;
 
+        long id = sequence.getEntry().getId();
         String idString = ">" + id;
         idString += DELIMITER + sequence.getEntry().getRecordType();
         String name = sequence.getEntry().getName() == null ? "None" : sequence.getEntry().getName();

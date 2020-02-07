@@ -224,7 +224,6 @@ public class SequenceUtil {
         return sequence;
     }
 
-
     /**
      * Attempts to detect the sequence format from the first line of a stream using the following heuristics
      * <ul>
@@ -244,6 +243,8 @@ public class SequenceUtil {
         if (line == null)
             throw new IOException("Could not obtain line from document");
 
+        line = line.trim();
+
         if (line.startsWith("LOCUS"))
             return SequenceFormat.GENBANK;
 
@@ -255,5 +256,4 @@ public class SequenceUtil {
 
         return SequenceFormat.PLAIN;
     }
-
 }
