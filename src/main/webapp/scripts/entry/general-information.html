@@ -494,7 +494,8 @@
             <ice-vector-viewer entry="entry" remote="remoteParams" reload-info="reloadInfo"></ice-vector-viewer>
         </div>
 
-        <div ng-if="entry.hasSequence && !entry.basePairCount" class="alert alert-info font-90em"
+        <div ng-if="entry.hasSequence && (entry.basePairCount == 'SBOL1' || entry.basePairCount == 'SBOL2')"
+             class="alert alert-info font-90em"
              style="margin-bottom: 10px; margin-top: 10px">
             <i style="font-size: 18px" class="fa fa-info-circle pull-left"></i>
             <span>The SBOL information associated with this entry cannot be visualized. Use the download links to access it</span>

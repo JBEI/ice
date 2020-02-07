@@ -2,6 +2,7 @@ package org.jbei.ice.lib.search;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.search.*;
 import org.jbei.ice.lib.executor.IceExecutorService;
@@ -76,11 +77,11 @@ public class SearchIndexes {
      * @throws IllegalArgumentException on unsupported index type
      */
     public void rebuildIndexes(String userId, IndexType type) {
-//        if (!accountController.isAdministrator(userId)) {
-//            Logger.warn(userId + " attempting to rebuild search index " + type + " without admin privs");
-//            throw new PermissionException("Administrative privileges required to perform this action");
-//        }
-//
+        if (!new AccountController().isAdministrator(userId)) {
+            Logger.warn(userId + " attempting to rebuild search index " + type + " without admin privs");
+            throw new PermissionException("Administrative privileges required to perform this action");
+        }
+
         Logger.info(userId + ": rebuilding search index " + type);
         switch (type) {
             case LUCENE:
@@ -88,12 +89,11 @@ public class SearchIndexes {
                 break;
 
             case BLAST:
-                // todo
-//                try {
-//                    blastPlus.rebuildDatabase(true);
-//                } catch (BlastException e) {
-//                    Logger.error(e);
-//                }
+                try {
+                    StandardBlastDatabase.getInstance().checkRebuild(true);
+                } catch (BlastException e) {
+                    Logger.error(e);
+                }
                 break;
 
             default:

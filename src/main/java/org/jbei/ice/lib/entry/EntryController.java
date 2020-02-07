@@ -5,16 +5,20 @@ import org.jbei.ice.lib.access.PermissionsController;
 import org.jbei.ice.lib.account.AccountController;
 import org.jbei.ice.lib.account.TokenHash;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.AuditType;
 import org.jbei.ice.lib.dto.comment.UserComment;
 import org.jbei.ice.lib.dto.entry.*;
 import org.jbei.ice.lib.dto.sample.PartSample;
 import org.jbei.ice.lib.dto.web.RegistryPartner;
 import org.jbei.ice.lib.dto.web.WebEntries;
-import org.jbei.ice.lib.entry.sequence.SequenceAnalysisController;
+import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
-import org.jbei.ice.storage.hibernate.dao.*;
+import org.jbei.ice.storage.hibernate.dao.CommentDAO;
+import org.jbei.ice.storage.hibernate.dao.EntryDAO;
+import org.jbei.ice.storage.hibernate.dao.SampleDAO;
+import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.*;
 
 import java.util.*;
@@ -26,12 +30,12 @@ import java.util.*;
  */
 public class EntryController extends HasEntry {
 
+    private final EntryAuthorization authorization;
     private EntryDAO dao;
     private CommentDAO commentDAO;
     private SequenceDAO sequenceDAO;
     private PermissionsController permissionsController;
     private AccountController accountController;
-    private final EntryAuthorization authorization;
 
     public EntryController() {
         dao = DAOFactory.getEntryDAO();
@@ -117,45 +121,6 @@ public class EntryController extends HasEntry {
         return commentDAO.update(comment).toDataTransferObject();
     }
 
-    public boolean deleteTraceSequence(String userId, long entryId, long traceId) {
-        Entry entry = dao.get(entryId);
-        if (entry == null)
-            return false;
-
-        TraceSequenceDAO traceSequenceDAO = DAOFactory.getTraceSequenceDAO();
-        TraceSequence traceSequence = traceSequenceDAO.get(traceId);
-        if (traceSequence == null || !canEdit(userId, traceSequence.getDepositor(), entry))
-            return false;
-
-        try {
-            new SequenceAnalysisController().removeTraceSequence(traceSequence);
-        } catch (Exception e) {
-            Logger.error(e);
-            return false;
-        }
-        return true;
-    }
-
-    public boolean deleteShotgunSequence(String userId, long entryId, long shotgunId) {
-        Entry entry = dao.get(entryId);
-        if (entry == null)
-            return false;
-
-        ShotgunSequenceDAO shotgunSequenceDAO = DAOFactory.getShotgunSequenceDAO();
-        ShotgunSequence shotgunSequence = shotgunSequenceDAO.get(shotgunId);
-        if (shotgunSequence == null || !canEdit(userId, shotgunSequence.getDepositor(), entry))
-            return false;
-
-        try {
-            new SequenceAnalysisController().removeShotgunSequence(shotgunSequence);
-        } catch (Exception e) {
-            Logger.error(e);
-            return false;
-        }
-
-        return true;
-    }
-
     protected boolean canEdit(String userId, String depositor, Entry entry) {
         return userId.equalsIgnoreCase(depositor) || authorization.canWrite(userId, entry);
     }
@@ -205,14 +170,22 @@ public class EntryController extends HasEntry {
 
         // add to bin
         try {
+            EntryAudit audit = new EntryAudit(userId);
             for (Entry entry : toTrash) {
+                AuditType auditType;
                 if (entry.getVisibility() == Visibility.DELETED.getValue()) {
                     entry.setVisibility(Visibility.PERMANENTLY_DELETED.getValue());
+                    auditType = AuditType.PERMANENTLY_DELETE;
                 } else {
                     entry.setVisibility(Visibility.DELETED.getValue());
+                    auditType = AuditType.DELETE;
                 }
 
+                Date modificationDate = new Date();
+                entry.setModificationTime(modificationDate);
                 dao.update(entry);
+
+                audit.action(entry.getId(), auditType, modificationDate);
             }
         } catch (DAOException de) {
             Logger.error(de);
@@ -263,8 +236,7 @@ public class EntryController extends HasEntry {
             return null;
 
         // user must be able to read if not public entry
-        if (!permissionsController.isPubliclyVisible(entry))
-            authorization.expectRead(userId, entry);
+        authorization.expectRead(userId, entry);
 
         PartData partData = retrieveEntryDetails(userId, entry);
         if (partData.getVisibility() == Visibility.REMOTE)
@@ -273,6 +245,8 @@ public class EntryController extends HasEntry {
             partData.setCanEdit(authorization.canWrite(userId, entry));
             partData.setPublicRead(permissionsController.isPubliclyVisible(entry));
         }
+        Optional<SequenceFormat> format = sequenceDAO.getSequenceFormat(entry.getId());
+        format.ifPresent(sequenceFormat -> partData.setBasePairCount(sequenceFormat.toString()));
         return partData;
     }
 
@@ -299,10 +273,7 @@ public class EntryController extends HasEntry {
         boolean hasOriginalSequence = sequenceDAO.hasOriginalSequence(entry.getId());
         partData.setHasOriginalSequence(hasOriginalSequence);
         Optional<String> sequenceString = sequenceDAO.getSequenceString(entry);
-        if (sequenceString.isPresent())
-            partData.setBasePairCount(sequenceString.get().trim().length());
-        else
-            partData.setBasePairCount(0);
+        sequenceString.ifPresent(s -> partData.setBasePairCount(Integer.toString(s.trim().length())));
 
         // create audit event if not owner
         // todo : remote access check
@@ -325,7 +296,7 @@ public class EntryController extends HasEntry {
                 Optional<String> linkedSequenceString = sequenceDAO.getSequenceString(linkedEntry);
 
                 if (linkedSequenceString.isPresent()) {
-                    link.setBasePairCount(linkedSequenceString.get().trim().length());
+                    link.setBasePairCount(Integer.toString(linkedSequenceString.get().trim().length()));
                     link.setFeatureCount(DAOFactory.getSequenceFeatureDAO().getFeatureCount(linkedEntry));
                 }
 

@@ -171,6 +171,12 @@ angular.module('ice.entry.directives', [])
                     });
                 };
 
+                function compareLocations(l1, l2) {
+                    if (l1.genbankStart - l2.genbankStart === 0)
+                        return l1.end - l2.end;
+                    return l1.genbankStart - l2.genbankStart;
+                }
+
                 let convertToVEModel = function (result) {
                     let data;
                     if ($scope.entry.type === 'PROTEIN') {
@@ -185,7 +191,7 @@ angular.module('ice.entry.directives', [])
                         data = {
                             sequenceData: {
                                 sequence: result.sequence,
-                                features: [],
+                                features: {},
                                 name: $scope.entry.name,
                                 circular: result.isCircular
                             },
@@ -205,20 +211,35 @@ angular.module('ice.entry.directives', [])
                             continue;
 
                         let notes = feature.notes.length ? feature.notes[0].value : "";
+                        feature.locations.sort(compareLocations);
 
                         for (let j = 0; j < feature.locations.length; j += 1) {
                             let location = feature.locations[j];
-                            let featureObject = {
-                                start: location.genbankStart - 1,
-                                end: location.end - 1,
-                                fid: feature.id,
-                                forward: feature.strand === 1,
-                                type: feature.type,
-                                name: feature.name,
-                                notes: notes,
-                                annotationType: feature.type
-                            };
-                            data.sequenceData.features.push(featureObject);
+                            let featureObject = data.sequenceData.features[feature.id];
+                            if (featureObject) {
+                                // update locations
+                                let locations = featureObject.locations;
+                                if (!locations) {
+                                    locations = [];
+                                    locations.push({start: featureObject.start, end: featureObject.end});
+                                }
+                                locations.push({start: location.genbankStart - 1, end: location.end - 1});
+                                featureObject.end = location.end - 1;
+                                featureObject.locations = locations;
+                            } else {
+                                featureObject = {
+                                    start: location.genbankStart - 1,
+                                    end: location.end - 1,
+                                    fid: feature.id,
+                                    forward: feature.strand === 1,
+                                    type: feature.type,
+                                    name: feature.name,
+                                    notes: notes,
+                                    annotationType: feature.type
+                                };
+                            }
+
+                            data.sequenceData.features[featureObject.fid] = featureObject;
                         }
                     }
                     return data;

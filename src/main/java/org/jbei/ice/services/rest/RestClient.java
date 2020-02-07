@@ -7,11 +7,11 @@ package org.jbei.ice.services.rest;
  */
 public abstract class RestClient {
 
-    public abstract <T> T get(Class<T> responseClass);
+    public abstract <T> T get(String path, Class<T> responseClass);
 
-    public abstract <T> T post(Object object, Class<T> responseClass);
+    public abstract <T> T post(String path, Object object, Class<T> responseClass);
 
-    public abstract <T> T put(Object object, Class<T> responseClass);
+    public abstract <T> T put(String path, Object object, Class<T> responseClass);
 
-    public abstract boolean delete();
+    public abstract boolean delete(String path);
 }

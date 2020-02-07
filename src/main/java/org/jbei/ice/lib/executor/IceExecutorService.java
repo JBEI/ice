@@ -12,9 +12,20 @@ import java.util.concurrent.TimeUnit;
 public class IceExecutorService {
 
     private static final IceExecutorService INSTANCE = new IceExecutorService();
-    private final ExecutorService pool;
+    private ExecutorService pool;
 
     private IceExecutorService() {
+    }
+
+    public static IceExecutorService getInstance() {
+        return INSTANCE;
+    }
+
+    public void startService() {
+        if (pool != null)
+            return;
+
+        Logger.info("Starting executor service");
         pool = Executors.newFixedThreadPool(5, r -> {
             Thread thread = new Thread(r);
             thread.setPriority(Thread.MIN_PRIORITY);
@@ -22,11 +33,10 @@ public class IceExecutorService {
         });
     }
 
-    public static IceExecutorService getInstance() {
-        return INSTANCE;
-    }
-
     public void stopService() {
+        if (pool == null)
+            return;
+
         Logger.info("Shutting down executor service");
         pool.shutdown(); // Disable new tasks from being submitted
         try {
@@ -46,7 +56,7 @@ public class IceExecutorService {
     }
 
     public void runTask(Task task) {
-        if (task == null)
+        if (task == null || pool == null)
             return;
 
         Logger.info("Adding task to executor service");

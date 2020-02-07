@@ -1040,7 +1040,6 @@ angular.module('ice.entry.controller', [])
                 if ($scope.entry.canEdit)
                     $scope.newParameter = {edit: false};
 
-                // $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
                 $scope.entry.remote = params.remote;
 
                 // get sample count, comment count etc

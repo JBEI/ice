@@ -12,6 +12,7 @@ import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.search.BlastProgram;
 import org.jbei.ice.lib.dto.search.BlastQuery;
 import org.jbei.ice.lib.dto.search.SearchResult;
+import org.jbei.ice.lib.entry.HasEntry;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.SequenceDAO;
 import org.jbei.ice.storage.model.Entry;
@@ -33,6 +34,7 @@ import static org.jbei.ice.lib.utils.SequenceUtils.breakUpLines;
 public class StandardBlastDatabase extends BlastDatabase {
 
     private static StandardBlastDatabase INSTANCE;
+    private final Object LOCK;
     private BlastPlus blastPlus;
     private BlastFastaFile blastFastaFile;
     private SequenceDAO sequenceDAO;
@@ -42,6 +44,7 @@ public class StandardBlastDatabase extends BlastDatabase {
         blastPlus = new BlastPlus();
         sequenceDAO = DAOFactory.getSequenceDAO();
         blastFastaFile = new BlastFastaFile(indexPath);
+        LOCK = new Object();
     }
 
     public static StandardBlastDatabase getInstance() {
@@ -51,8 +54,6 @@ public class StandardBlastDatabase extends BlastDatabase {
     }
 
     private static String getSequenceFasta(Sequence sequence) {
-        long id = sequence.getEntry().getId();
-
         String sequenceString = "";
         String temp = sequence.getSequence();
 
@@ -79,6 +80,7 @@ public class StandardBlastDatabase extends BlastDatabase {
         if (StringUtils.isEmpty(sequenceString))
             return null;
 
+        long id = sequence.getEntry().getId();
         String idString = ">" + id;
         idString += DELIMITER + sequence.getEntry().getRecordType();
         String name = sequence.getEntry().getName() == null ? "None" : sequence.getEntry().getName();
@@ -89,6 +91,9 @@ public class StandardBlastDatabase extends BlastDatabase {
         return (idString + sequenceString + "\n");
     }
 
+    public boolean isLocked() {
+        return blastFastaFile.isLocked();
+    }
 
     /**
      * Run a blast query using the following output format options
@@ -201,13 +206,15 @@ public class StandardBlastDatabase extends BlastDatabase {
             return;
         }
 
+        // delete fasta file and create a new one with all sequences in database
+        blastFastaFile.createNew();
         Iterable<String> iterable = () -> new AllSequencesStream(sequenceDAO);
         blastFastaFile.write(iterable);
-        blastPlus.formatBlastDb(blastFastaFile, this.dbName); // todo
+        blastPlus.formatBlastDb(blastFastaFile, this.dbName);
     }
 
     public void addSequence(String partId) {
-        Entry entry = DAOFactory.getEntryDAO().getByPartNumber(partId);
+        Entry entry = new HasEntry().getEntry(partId);
         if (entry == null) {
             Logger.error("Could not retrieve entry with id " + partId);
             return;

@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.entry;
 
 import com.opencsv.CSVWriter;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.common.logging.Logger;
@@ -9,7 +8,7 @@ import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.entry.EntryField;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
-import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
+import org.jbei.ice.lib.entry.sequence.InputStreamWrapper;
 import org.jbei.ice.lib.entry.sequence.PartSequence;
 import org.jbei.ice.lib.entry.sequence.SequenceFormat;
 import org.jbei.ice.lib.group.GroupController;
@@ -227,14 +226,14 @@ public class EntriesAsCSV {
             // get sequence formats
             for (long entryId : sequenceSet) {
                 for (String format : formats) {
-                    ByteArrayWrapper wrapper = new PartSequence(userId, Long.toString(entryId)).toFile(SequenceFormat.fromString(format));
+                    InputStreamWrapper wrapper = new PartSequence(userId, Long.toString(entryId)).toFile(SequenceFormat.fromString(format));
                     putZipEntry(wrapper, zos);
                 }
             }
 
             // write the csv file
             FileInputStream fis = new FileInputStream(csvPath.toFile());
-            ByteArrayWrapper wrapper = new ByteArrayWrapper(IOUtils.toByteArray(fis), "entries.csv");
+            InputStreamWrapper wrapper = new InputStreamWrapper(fis, "entries.csv");
             putZipEntry(wrapper, zos);
             zos.close();
             csvPath = tmpZip.toPath();
@@ -243,13 +242,11 @@ public class EntriesAsCSV {
         }
     }
 
-    private void putZipEntry(ByteArrayWrapper wrapper, ZipOutputStream zos) {
+    private void putZipEntry(InputStreamWrapper wrapper, ZipOutputStream zos) {
         try {
             byte[] buffer = new byte[1024];
-
             zos.putNextEntry(new ZipEntry(wrapper.getName()));
-
-            ByteArrayInputStream bis = new ByteArrayInputStream(wrapper.getBytes());
+            InputStream bis = wrapper.getInputStream();
             int length;
             while ((length = bis.read(buffer)) > 0) {
                 zos.write(buffer, 0, length);
@@ -298,7 +295,7 @@ public class EntriesAsCSV {
         Entries retriever = new Entries(this.userId);
         this.entries = retriever.getEntriesFromSelectionContext(selection);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        EntryAuthorization entryAuthorization = new EntryAuthorization();
+//        EntryAuthorization entryAuthorization = new EntryAuthorization();
 
         try (ZipOutputStream zos = new ZipOutputStream(baos)) {
             for (long entryId : this.entries) {
@@ -309,35 +306,26 @@ public class EntriesAsCSV {
                     continue;
                 }
 
-                if (!entryAuthorization.canRead(userId, entry)) {
-                    Logger.error("ERROR : cannot read " + entryId);
-                    continue;
-                }
-
                 Sequence sequence = sequenceDAO.getByEntry(entry);
                 if (sequence == null) {
-                    Logger.error("no sequence");
                     continue;
                 }
 
                 // get the sequence
-                ByteArrayWrapper wrapper = new PartSequence(userId, Long.toString(entryId)).toFile(format);
+                InputStreamWrapper wrapper = new PartSequence(userId, Long.toString(entryId)).toFile(format);
                 if (wrapper == null) {
                     Logger.error("ERROR : no sequence " + entryId);
                     continue;
                 }
 
-                ZipEntry zipEntry = new ZipEntry(entry.getPartNumber() + File.separatorChar + wrapper.getName());
-                zos.putNextEntry(zipEntry);
-                zos.write(wrapper.getBytes());
-                zos.closeEntry();
+                putZipEntry(wrapper, zos);
             }
             this.includeSequences = false;
             writeList(selection.getFields().toArray(new EntryField[0]));
 
             // write the csv file to zip file
             FileInputStream fis = new FileInputStream(csvPath.toFile());
-            ByteArrayWrapper wrapper = new ByteArrayWrapper(IOUtils.toByteArray(fis), "entries.csv");
+            InputStreamWrapper wrapper = new InputStreamWrapper(fis, "entries.csv");
             putZipEntry(wrapper, zos);
         }
         return baos;

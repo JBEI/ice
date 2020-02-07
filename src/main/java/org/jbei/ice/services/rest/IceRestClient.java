@@ -27,17 +27,17 @@ public class IceRestClient extends RestClient {
     private WebTarget target;
     private String token;
 
-    public IceRestClient(String url, String path) {
+    public IceRestClient(String url) {
         ClientConfig clientConfig = new ClientConfig();
         clientConfig.register(IceRequestFilter.class);
         clientConfig.register(PartDataJSONHandler.class);
         clientConfig.register(ArrayDataJSONHandler.class);
         clientConfig.register(MultiPartFeature.class);
-        target = ClientBuilder.newClient(clientConfig).target("https://" + url).path(path);
+        target = ClientBuilder.newClient(clientConfig).target("https://" + url);
     }
 
-    public IceRestClient(String url, String token, String path) {
-        this(url, path);
+    public IceRestClient(String url, String token) {
+        this(url);
         this.token = token;
     }
 
@@ -46,15 +46,15 @@ public class IceRestClient extends RestClient {
     }
 
     @Override
-    public <T> T get(Class<T> clazz) {
-        Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
+    public <T> T get(String path, Class<T> clazz) {
+        Invocation.Builder invocationBuilder = target.path(path).request(MediaType.APPLICATION_JSON_TYPE);
         setHeaders(invocationBuilder);
         return invocationBuilder.buildGet().invoke(clazz);
     }
 
     @Override
-    public <T> T post(Object object, Class<T> responseClass) {
-        Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
+    public <T> T post(String path, Object object, Class<T> responseClass) {
+        Invocation.Builder invocationBuilder = target.path(path).request(MediaType.APPLICATION_JSON_TYPE);
         setHeaders(invocationBuilder);
         Response postResponse = invocationBuilder.post(Entity.entity(object, MediaType.APPLICATION_JSON_TYPE));
         if (postResponse.hasEntity() && postResponse.getStatus() == Response.Status.OK.getStatusCode())
@@ -63,8 +63,8 @@ public class IceRestClient extends RestClient {
     }
 
     @Override
-    public <T> T put(Object object, Class<T> responseClass) {
-        Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
+    public <T> T put(String path, Object object, Class<T> responseClass) {
+        Invocation.Builder invocationBuilder = target.path(path).request(MediaType.APPLICATION_JSON_TYPE);
         Response response = invocationBuilder.put(Entity.entity(object, MediaType.APPLICATION_JSON_TYPE));
         setHeaders(invocationBuilder);
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
@@ -78,21 +78,21 @@ public class IceRestClient extends RestClient {
     }
 
     @Override
-    public boolean delete() {
-        Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
+    public boolean delete(String path) {
+        Invocation.Builder invocationBuilder = target.path(path).request(MediaType.APPLICATION_JSON_TYPE);
         setHeaders(invocationBuilder);
         Response response = invocationBuilder.delete();
         return response.getStatus() == Response.Status.OK.getStatusCode();
     }
 
-    public void postSequenceFile(String recordId, EntryType entryType, String sequence) {
+    public void postSequenceFile(String recordId, EntryType entryType, String sequence, String path) {
         try {
             final FormDataMultiPart multiPart = new FormDataMultiPart();
             multiPart.field("file", IOUtils.toInputStream(sequence, "UTF-8"), MediaType.TEXT_PLAIN_TYPE);
             multiPart.field("entryRecordId", recordId);
             multiPart.field("entryType", entryType.name());
 
-            Invocation.Builder invocationBuilder = target.request(MediaType.APPLICATION_JSON_TYPE);
+            Invocation.Builder invocationBuilder = target.path(path).request(MediaType.APPLICATION_JSON_TYPE);
             invocationBuilder.post(Entity.entity(multiPart, MediaType.MULTIPART_FORM_DATA_TYPE));
         } catch (Exception e) {
             Logger.error(e);

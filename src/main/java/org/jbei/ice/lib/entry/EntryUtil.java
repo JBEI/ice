@@ -317,8 +317,7 @@ public class EntryUtil {
         return plasmidData;
     }
 
-    private static SeedData setSeedDataFromField(SeedData seedData, String value,
-                                                 EntryField field) {
+    private static SeedData setSeedDataFromField(SeedData seedData, String value, EntryField field) {
         if (seedData == null)
             seedData = new SeedData();
 
@@ -359,8 +358,7 @@ public class EntryUtil {
         return seedData;
     }
 
-    private static ProteinData setProteinDataFromField(ProteinData proteinData, String value,
-                                                       EntryField field) {
+    private static ProteinData setProteinDataFromField(ProteinData proteinData, String value, EntryField field) {
         if (proteinData == null)
             proteinData = new ProteinData();
 

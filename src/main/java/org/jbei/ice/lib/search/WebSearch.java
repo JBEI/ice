@@ -130,8 +130,8 @@ public class WebSearch {
 
         @Override
         public void execute() {
-            IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey(), "/rest/search");
-            SearchResults results = client.post(query, SearchResults.class);
+            IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey());
+            SearchResults results = client.post("/rest/search", query, SearchResults.class);
             if (results == null)
                 return;
 

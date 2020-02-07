@@ -1,119 +1,17 @@
 package org.jbei.ice.lib.parsers.genbank;
 
-import org.jbei.ice.lib.dto.DNAFeatureNote;
+import org.apache.commons.io.IOUtils;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.Charset;
 
 /**
  * @author Hector Plahar
  */
 public class GenBankParserTest {
-
-    @Test
-    public void testParse() throws Exception {
-        GenBankParser parser = new GenBankParser();
-        FeaturedDNASequence sequence = parser.parse(genbank);
-        Assert.assertNotNull(sequence);
-        Assert.assertEquals(3, sequence.getFeatures().size());
-        Assert.assertEquals(936, sequence.getSequence().length());
-
-        // parse genbank 2
-        FeaturedDNASequence sequence2 = parser.parse(getGenbank2);
-        Assert.assertNotNull(sequence2);
-        Assert.assertEquals(3, sequence2.getFeatures().size());
-    }
-
-    @Test
-    public void testParseFeaturesTag() throws Exception {
-        GenBankParser parser = new GenBankParser();
-        Tag tag = new Tag(Tag.Type.REGULAR);
-        tag.setKey("FEATURES");
-        tag.setRawBody(features);
-        FeaturesTag featuresTag = parser.parseFeaturesTag(tag);
-        Assert.assertNotNull(featuresTag);
-        Assert.assertEquals(3, featuresTag.getFeatures().size());
-
-        tag.setRawBody(features2);
-        featuresTag = parser.parseFeaturesTag(tag);
-        Assert.assertNotNull(featuresTag);
-        Assert.assertEquals(3, featuresTag.getFeatures().size());
-        Assert.assertEquals(8, featuresTag.getFeatures().get(0).getNotes().size());
-        Assert.assertEquals(1, featuresTag.getFeatures().get(1).getNotes().size());
-        Assert.assertEquals(7, featuresTag.getFeatures().get(2).getNotes().size());
-
-        DNAFeatureNote note = featuresTag.getFeatures().get(2).getNotes().get(6);
-        Assert.assertEquals("translation", note.getName());
-        Assert.assertEquals("GVARKPGMDRSDLFNVNAGIVKNLVQQVAKTCPKACIGIITNPVNTTVAIAAEVLKKAGVYDKNKLFGVTTLDIIRSNTFVAELKGKQPGEVEVPVIGGHSGVTILPLLSQVPGVSFTEQEVADLTKRIQNAGTEVVEAKAGGGSATLSMG", note.getValue());
-
-        note = featuresTag.getFeatures().get(2).getNotes().get(1);
-        Assert.assertEquals("codon_start", note.getName());
-        Assert.assertEquals("1", note.getValue());
-
-        // parse features 3
-        tag.setRawBody(features3);
-        featuresTag = parser.parseFeaturesTag(tag);
-        Assert.assertNotNull(featuresTag);
-        Assert.assertEquals(4, featuresTag.getFeatures().size());
-        Assert.assertEquals(2, featuresTag.getFeatures().get(0).getNotes().size());
-        Assert.assertEquals(2, featuresTag.getFeatures().get(1).getNotes().size());
-        Assert.assertEquals(1, featuresTag.getFeatures().get(2).getNotes().size());
-        Assert.assertEquals(5, featuresTag.getFeatures().get(3).getNotes().size());
-    }
-
-    public static final String features =
-            "FEATURES             Location/Qualifiers\n" +
-                    "     RBS             1..12\n" +
-                    "                     /=\n" +
-                    "     CDS             19..774\n" +
-                    "     terminator      808..936\n" +
-                    "                     /ApEinfo_graphicformat=\"arrow_data {{0 1 2 0 0 -1} {} 0}\n" +
-                    "                     width 5 offset 0";
-
-    public static final String features2 =
-            "FEATURES             Location/Qualifiers\n" +
-                    "     source          1..452\n" +
-                    "                     /organism=\"Escherichia coli\"\n" +
-                    "                     /mol_type=\"genomic DNA\"\n" +
-                    "                     /serovar=\"OUT:H34\"\n" +
-                    "                     /isolate=\"EC04-81\"\n" +
-                    "                     /isolation_source=\"feces\"\n" +
-                    "                     /host=\"Homo sapiens\"\n" +
-                    "                     /db_xref=\"taxon:562\"\n" +
-                    "                     /country=\"Japan\"\n" +
-                    "     gene            <1..>452\n" +
-                    "                     /gene=\"mdh\"\n" +
-                    "     CDS             <1..>452\n" +
-                    "                     /gene=\"mdh\"\n" +
-                    "                     /codon_start=1\n" +
-                    "                     /transl_table=11\n" +
-                    "                     /product=\"malate dehydrogenase\"\n" +
-                    "                     /protein_id=\"BAL48036.1\"\n" +
-                    "                     /db_xref=\"GI:374345323\"\n" +
-                    "                     /translation=\"GVARKPGMDRSDLFNVNAGIVKNLVQQVAKTCPKACIGIITNPV\n" +
-                    "                     NTTVAIAAEVLKKAGVYDKNKLFGVTTLDIIRSNTFVAELKGKQPGEVEVPVIGGHSG\n" +
-                    "                     VTILPLLSQVPGVSFTEQEVADLTKRIQNAGTEVVEAKAGGGSATLSMG\"\n";
-
-    public static final String features3 =
-            "FEATURES             Location/Qualifiers\n" +
-                    "     exon            255..457\n" +
-                    "                     /number=3\n" +
-                    "                     /gene=\"PGAM-M\"\n" +
-                    "     intron          order(M55673:2559..>3688,<1..254)\n" +
-                    "                     /number=2\n" +
-                    "                     /gene=\"PGAM-M\"\n" +
-                    "     mRNA            join(M55673:1820..2274,M55673:2378..2558,255..457)\n" +
-                    "                     /gene=\"PGAM-M\"\n" +
-                    "     CDS             join(M55673:1861..2274,M55673:2378..2558,255..421)\n" +
-                    "                     /note=\"muscle-specific isozyme\"\n" +
-                    "                     /gene=\"PGAM2\"\n" +
-                    "                     /product=\"phosphoglycerate mutase\"\n" +
-                    "                     /codon_start=1\n" +
-                    "                     /translation=\"MATHRLVMVRHGESTWNQENRFCGWFDAELSEKGTEEAKRGAKA\n" +
-                    "                     IKDAKMEFDICYTSVLKRAIRTLWAILDGTDQMWLPVVRTWRLNERHYGGLTGLNKAE\n" +
-                    "                     TAAKHGEEQVKIWRRSFDIPPPPMDEKHPYYNSISKERRYAGLKPGELPTCESLKDTI\n" +
-                    "                     ARALPFWNEEIVPQIKAGKRVLIAAHGNSLRGIVKHLEGMSDQAIMELNLPTGIPIVY\n" +
-                    "                     ELNKELKPTKPMQFLGDEETVRKAMEAVAAQGKAK\"";
 
     public static final String genbank =
             "LOCUS       BBa_I0462                936 bp    DNA     linear   UNK 11-May-2016\n" +
@@ -145,8 +43,6 @@ public class GenBankParserTest {
                     "      841 aagactgggc ctttcgtttt atctgttgtt tgtcggtgaa cgctctctac tagagtcaca\n" +
                     "      901 ctggctcacc ttcgggtggg cctttctgcg tttata\n" +
                     "//\n";
-
-
     public static final String getGenbank2 =
             "LOCUS       AB648464                 452 bp    DNA     linear   BCT 05-SEP-2013\n" +
                     "DEFINITION  Escherichia coli mdh gene for malate dehydrogenase, partial cds,\n" +
@@ -205,4 +101,18 @@ public class GenBankParserTest {
                     "      361 gaagtggctg atctgaccaa acgtatccag aacgcgggta ctgaggtggt tgaagcgaaa\n" +
                     "      421 gccggtggcg ggtctgcaac cctgtctatg gg\n" +
                     "//\n";
+
+    @Test
+    public void testParse() throws Exception {
+        GenBankParser parser = new GenBankParser();
+        FeaturedDNASequence sequence = parser.parse(IOUtils.lineIterator(new ByteArrayInputStream(genbank.getBytes()), Charset.defaultCharset()));
+        Assert.assertNotNull(sequence);
+        Assert.assertEquals(3, sequence.getFeatures().size());
+        Assert.assertEquals(936, sequence.getSequence().length());
+
+        // parse genbank 2
+        FeaturedDNASequence sequence2 = parser.parse(IOUtils.lineIterator(new ByteArrayInputStream(getGenbank2.getBytes()), Charset.defaultCharset()));
+        Assert.assertNotNull(sequence2);
+        Assert.assertEquals(3, sequence2.getFeatures().size());
+    }
 }

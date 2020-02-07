@@ -12,9 +12,7 @@ import org.jbei.ice.storage.hibernate.HibernateRepository;
 import org.jbei.ice.storage.model.*;
 
 import javax.persistence.criteria.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * DAO to manipulate {@link Entry} objects in the database.
@@ -161,10 +159,10 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @return Number of visible entries.
      * @throws DAOException on hibernate exception
      */
-    public List<Entry> retrieveVisibleEntries(Account account, Set<Group> groups, ColumnField sortField, boolean asc,
-                                              int start, int count, String filter) {
+    public List<Long> retrieveVisibleEntries(Account account, Set<Group> groups, ColumnField sortField, boolean asc,
+                                             int start, int count, String filter) {
         try {
-            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class).distinct(true);
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Entry> from = query.from(Entry.class);
             Join<Entry, Permission> entryPermission = from.join("permissions");
 
@@ -178,22 +176,14 @@ public class EntryDAO extends HibernateRepository<Entry> {
                         getBuilder().equal(entryPermission.get("account"), account),
                         entryPermission.get("group").in(groups)
                 ));
-
             } else if (!groups.isEmpty()) {
                 predicates.add(entryPermission.get("group").in(groups));
             }
 
             // check filter
-            if (filter != null && !filter.trim().isEmpty()) {
-                filter = filter.toLowerCase();
-                predicates.add(getBuilder().or(
-                        getBuilder().like(getBuilder().lower(from.get("name")), "%" + filter + "%"),
-                        getBuilder().like(getBuilder().lower(from.get("alias")), "%" + filter + "%"),
-                        getBuilder().like(getBuilder().lower(from.get("partNumber")), "%" + filter + "%")
-                ));
-            }
+            createFilterPredicate(from, filter, predicates);
 
-            query.where(predicates.toArray(new Predicate[0]));
+            query.select(from.get("id")).where(predicates.toArray(new Predicate[0]));
             query.orderBy(asc ? getBuilder().asc(from.get(fieldName)) : getBuilder().desc(from.get(fieldName)));
             return currentSession().createQuery(query).setMaxResults(count).setFirstResult(start).list();
         } catch (HibernateException he) {
@@ -227,8 +217,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
                 ));
             }
             predicates.add(getBuilder().equal(entry.get("visibility"), Visibility.OK.getValue()));
-            query.select(getBuilder().countDistinct(entry.get("id")))
-                    .where(predicates.toArray(new Predicate[predicates.size()]));
+            query.select(getBuilder().countDistinct(entry.get("id"))).where(predicates.toArray(new Predicate[0]));
             return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);
@@ -249,6 +238,61 @@ public class EntryDAO extends HibernateRepository<Entry> {
         );
     }
 
+    private void createFilterPredicate(Path<Entry> entry, String filter, List<Predicate> predicates) {
+        if (filter != null && !filter.trim().isEmpty()) {
+            filter = filter.toLowerCase();
+            predicates.add(getBuilder().or(
+                    getBuilder().like(getBuilder().lower(entry.get("name")), "%" + filter + "%"),
+                    getBuilder().like(getBuilder().lower(entry.get("alias")), "%" + filter + "%"),
+                    getBuilder().like(getBuilder().lower(entry.get("partNumber")), "%" + filter + "%")
+                    )
+            );
+        }
+    }
+
+    /**
+     * Generate CriteriaQuery for shared entries
+     *
+     * @param requester     account of user making request
+     * @param accountGroups groups of user making request
+     * @param filter        filter string
+     * @param isCount       set to true, if generating query for a count, false if query is to retrieve objects
+     * @param sort          entry id retrieve sort order; ignored if <code>isCount</code> is true
+     * @param asc           entry id sort asc or desc
+     * @return generated criteria query
+     */
+    private CriteriaQuery<Long> createSharedEntryQuery(Account requester, Set<Group> accountGroups, String filter,
+                                                       boolean isCount, ColumnField sort, boolean asc) {
+        CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+        Root<Permission> root = query.from(Permission.class);
+
+        Predicate predicate = getBuilder().or(getBuilder().equal(root.get("account"), requester));
+        if (!accountGroups.isEmpty()) {
+            predicate.getExpressions().add(root.get("group").in(accountGroups));
+        }
+
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(predicate);
+
+        // not a bulk upload permission
+        predicates.add(getBuilder().isNotNull(root.get("entry")));
+
+        Join<Permission, Entry> entry = root.join("entry");
+        predicates.add(getBuilder().notEqual(entry.get("ownerEmail"), requester.getEmail()));
+        predicates.add(getBuilder().equal(entry.get("visibility"), Visibility.OK.getValue()));
+
+        createFilterPredicate(entry, filter, predicates);
+
+        if (isCount) {
+            query.select(getBuilder().countDistinct(entry.get("id"))).where(predicates.toArray(new Predicate[0]));
+        } else {
+            query.select(entry.get("id")).where(predicates.toArray(new Predicate[0])).distinct(true);
+            String fieldName = sort == ColumnField.CREATED ? "id" : EntryAccessorUtilities.columnFieldToString(sort);
+            query.orderBy(asc ? getBuilder().asc(entry.get(fieldName)) : getBuilder().desc(entry.get(fieldName)));
+        }
+        return query;
+    }
+
     /**
      * An entry is shared if requester has explicit read or write permissions of belongs
      * to a group that have explicit read or write permissions
@@ -259,34 +303,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
      */
     public long sharedEntryCount(Account requester, Set<Group> accountGroups, String filter) {
         try {
-            ArrayList<Predicate> predicates = new ArrayList<>();
-            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
-            Root<Permission> root = query.from(Permission.class);
-
-            Predicate predicate = getBuilder().or(getBuilder().equal(root.get("account"), requester));
-            if (!accountGroups.isEmpty()) {
-                predicate.getExpressions().add(root.get("group").in(accountGroups));
-            }
-            predicates.add(predicate);
-
-            // not a bulk upload permission
-            predicates.add(getBuilder().isNotNull(root.get("entry")));
-
-            Join<Permission, Entry> entry = root.join("entry");
-            predicates.add(getBuilder().notEqual(entry.get("ownerEmail"), requester.getEmail()));
-            predicates.add(getBuilder().equal(entry.get("visibility"), Visibility.OK.getValue()));
-
-            if (filter != null && !filter.trim().isEmpty()) {
-                filter = filter.toLowerCase();
-                predicates.add(getBuilder().or(
-                        getBuilder().like(getBuilder().lower(entry.get("name")), "%" + filter + "%"),
-                        getBuilder().like(getBuilder().lower(entry.get("alias")), "%" + filter + "%"),
-                        getBuilder().like(getBuilder().lower(entry.get("partNumber")), "%" + filter + "%")
-                        )
-                );
-            }
-            query.select(getBuilder().countDistinct(entry.get("id")))
-                    .where(predicates.toArray(new Predicate[predicates.size()]));
+            CriteriaQuery<Long> query = createSharedEntryQuery(requester, accountGroups, filter, true, null, false);
             return currentSession().createQuery(query).uniqueResult();
         } catch (HibernateException he) {
             Logger.error(he);
@@ -295,38 +312,52 @@ public class EntryDAO extends HibernateRepository<Entry> {
     }
 
     // retrieves list of entries based on the paging parameters and the different ways entries can be shared
-    public List<Entry> sharedWithUserEntries(Account requester, Set<Group> accountGroups, ColumnField sort,
-                                             boolean asc, int start, int limit, String filter) {
+    public List<Long> sharedWithUserEntries(Account requester, Set<Group> accountGroups, ColumnField sort,
+                                            boolean asc, int start, int limit, String filter) {
         try {
+            CriteriaQuery<Long> query = createSharedEntryQuery(requester, accountGroups, filter, false, sort, asc);
+            return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he);
+        }
+    }
+
+    /**
+     * Retrieves the entries for the specified owner, that the requester has read access to
+     *
+     * @param requester       account for user making request. This is used to check for access controls
+     * @param owner           user id of entries' owner
+     * @param requesterGroups groups that the requester is a member of. Used to check access permissions
+     * @param sortField       field for sort
+     * @param asc             sort order
+     * @param start           index to start retrieving records from
+     * @param limit           maximum number of entries to retrieve
+     * @return list of entries matching specified criteria
+     * @throws DAOException on HibernateException
+     */
+    public List<Long> retrieveUserEntries(Account requester, String owner, Set<Group> requesterGroups,
+                                          ColumnField sortField, boolean asc, int start, int limit, String filter) {
+        try {
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<Permission> from = query.from(Permission.class);
+            Join<Permission, Entry> join = from.join("entry");
+
+            query.select(join.get("id"));
+
             ArrayList<Predicate> predicates = new ArrayList<>();
-            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
-            Root<Permission> root = query.from(Permission.class);
+            predicates.add(getBuilder().or(
+                    from.get("group").in(requesterGroups),
+                    getBuilder().equal(from.get("account"), requester)
+            ));
+            predicates.add(getBuilder().equal(join.get("visibility"), Visibility.OK.getValue()));
+            predicates.add(getBuilder().equal(join.get("ownerEmail"), owner));
 
-            Predicate predicate = getBuilder().or(getBuilder().equal(root.get("account"), requester));
-            if (!accountGroups.isEmpty()) {
-                predicate.getExpressions().add(root.get("group").in(accountGroups));
-            }
-            predicates.add(predicate);
+            createFilterPredicate(join, filter, predicates);
 
-            // not a bulk upload permission
-            predicates.add(getBuilder().isNotNull(root.get("entry")));
-
-            Join<Permission, Entry> entry = root.join("entry");
-            predicates.add(getBuilder().notEqual(entry.get("ownerEmail"), requester.getEmail()));
-            predicates.add(getBuilder().equal(entry.get("visibility"), Visibility.OK.getValue()));
-
-            if (filter != null && !filter.trim().isEmpty()) {
-                filter = filter.toLowerCase();
-                predicates.add(getBuilder().or(
-                        getBuilder().like(getBuilder().lower(entry.get("name")), "%" + filter + "%"),
-                        getBuilder().like(getBuilder().lower(entry.get("alias")), "%" + filter + "%"),
-                        getBuilder().like(getBuilder().lower(entry.get("partNumber")), "%" + filter + "%")
-                        )
-                );
-            }
-            query.select(entry).where(predicates.toArray(new Predicate[predicates.size()])).distinct(true);
-            String fieldName = sort == ColumnField.CREATED ? "id" : EntryAccessorUtilities.columnFieldToString(sort);
-            query.orderBy(asc ? getBuilder().asc(entry.get(fieldName)) : getBuilder().desc(entry.get(fieldName)));
+            query.where(predicates.toArray(new Predicate[0]));
+            String fieldName = sortField == ColumnField.CREATED ? "id" : EntryAccessorUtilities.columnFieldToString(sortField);
+            query.orderBy(asc ? getBuilder().asc(join.get(fieldName)) : getBuilder().desc(join.get(fieldName)));
             return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
         } catch (HibernateException he) {
             Logger.error(he);
@@ -352,56 +383,8 @@ public class EntryDAO extends HibernateRepository<Entry> {
             predicates.add(getBuilder().isNotNull(root.get("entry")));
             predicates.add(getBuilder().notEqual(entry.get("ownerEmail"), account.getEmail()));
             predicates.add(getBuilder().equal(entry.get("visibility"), Visibility.OK.getValue()));
-            query.where(predicates.toArray(new Predicate[predicates.size()]));
-            return currentSession().createQuery(query).list();
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
-    }
-
-    /**
-     * Retrieves the entries for the specified owner, that the requester has read access to
-     *
-     * @param requester       account for user making request
-     * @param owner           user id of entries' owner
-     * @param requesterGroups groups that the requester is a member of. Used to check access permissions
-     * @param sortField       field for sort
-     * @param asc             sort order
-     * @param start           index to start retrieving records from
-     * @param limit           maximum number of entries to retrieve
-     * @return list of entries matching specified criteria
-     * @throws DAOException on HibernateException
-     */
-    public List<Entry> retrieveUserEntries(Account requester, String owner, Set<Group> requesterGroups,
-                                           ColumnField sortField, boolean asc, int start, int limit, String filter) {
-        try {
-            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
-            Root<Permission> from = query.from(Permission.class);
-            Join<Permission, Entry> join = from.join("entry");
-            query.select(join).distinct(true);
-
-            ArrayList<Predicate> predicates = new ArrayList<>();
-            predicates.add(getBuilder().or(
-                    from.get("group").in(requesterGroups),
-                    getBuilder().equal(from.get("account"), requester)
-            ));
-            predicates.add(getBuilder().equal(join.get("visibility"), Visibility.OK.getValue()));
-            predicates.add(getBuilder().equal(join.get("ownerEmail"), owner));
-
-            if (filter != null && !filter.trim().isEmpty()) {
-                filter = filter.toLowerCase();
-                predicates.add(getBuilder().or(
-                        getBuilder().like(getBuilder().lower(join.get("name")), "%" + filter + "%"),
-                        getBuilder().like(getBuilder().lower(join.get("alias")), "%" + filter + "%"),
-                        getBuilder().like(getBuilder().lower(join.get("partNumber")), "%" + filter + "%")
-                        )
-                );
-            }
             query.where(predicates.toArray(new Predicate[0]));
-            String fieldName = sortField == ColumnField.CREATED ? "id" : EntryAccessorUtilities.columnFieldToString(sortField);
-            query.orderBy(asc ? getBuilder().asc(join.get(fieldName)) : getBuilder().desc(join.get(fieldName)));
-            return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
+            return currentSession().createQuery(query).list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);
@@ -461,10 +444,10 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
-    public List<Entry> getByVisibility(String ownerEmail, Visibility visibility, ColumnField field, boolean asc,
-                                       int start, int limit, String filter) {
+    public List<Long> getByVisibility(String ownerEmail, Visibility visibility, ColumnField field, boolean asc,
+                                      int start, int limit, String filter) {
         try {
-            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Entry> from = query.from(Entry.class);
             ArrayList<Predicate> predicates = new ArrayList<>();
             predicates.add(getBuilder().equal(from.get("visibility"), visibility.getValue()));
@@ -475,6 +458,7 @@ public class EntryDAO extends HibernateRepository<Entry> {
 
             checkAddFilter(predicates, from, filter);
             String fieldName = EntryAccessorUtilities.columnFieldToString(field);
+            query.select(from.get("id"));
             query.where(predicates.toArray(new Predicate[0]))
                     .orderBy(asc ? getBuilder().asc(from.get(fieldName)) : getBuilder().desc(from.get(fieldName)));
             return currentSession().createQuery(query).setFirstResult(start).setMaxResults(limit).list();
@@ -515,8 +499,45 @@ public class EntryDAO extends HibernateRepository<Entry> {
         }
     }
 
+    @SafeVarargs
+    private final List<Long> getResultList(int start, int limit, ColumnField sort, boolean asc, String filter,
+                                           Map<String, String>... predicatesMap) {
+        if (sort == null)
+            sort = ColumnField.CREATED;
+
+        try {
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
+            Root<Entry> from = query.from(Entry.class);
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(getBuilder().or(
+                    getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()),
+                    getBuilder().equal(from.get("visibility"), Visibility.PENDING.getValue())
+            ));
+
+            for (Map<String, String> predicate : predicatesMap) {
+                for (Map.Entry<String, String> keySet : predicate.entrySet()) {
+                    predicates.add(getBuilder().equal(from.get(keySet.getKey()), keySet.getValue()));
+                }
+            }
+
+            query.select(from.get("id"));
+            checkAddFilter(predicates, from, filter);
+            query.where(predicates.toArray(new Predicate[0]));
+            String fieldName = EntryAccessorUtilities.columnFieldToString(sort);
+            query.orderBy(asc ? getBuilder().asc(from.get(fieldName)) : getBuilder().desc(from.get(fieldName)));
+            return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
+        } catch (HibernateException he) {
+            Logger.error(he);
+            throw new DAOException(he.getMessage());
+        }
+    }
+
+    public List<Long> retrieveAllEntryIds(ColumnField sort, boolean asc, int start, int limit, String filter) {
+        return getResultList(start, limit, sort, asc, filter);
+    }
+
     /**
-     * Retrieves entries owned by account with specified email and with visibility of "pending" or "ok"
+     * Retrieves entry ids owned by account with specified email and with visibility of "pending" or "ok"
      *
      * @param ownerEmail email for account whose entries are to be retrieved
      * @param sort       field to sort results on
@@ -527,22 +548,11 @@ public class EntryDAO extends HibernateRepository<Entry> {
      * @return list of matching entries
      * @throws DAOException on Hibernate Exception
      */
-    public List<Entry> retrieveOwnerEntries(String ownerEmail, ColumnField sort, boolean asc, int start,
-                                            int limit, String filter) {
-        try {
-            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
-            Root<Entry> from = query.from(Entry.class);
-
-            List<Predicate> predicates = getOwnerPredicate(from, ownerEmail);
-            checkAddFilter(predicates, from, filter);
-            query.where(predicates.toArray(new Predicate[0]));
-            String fieldName = EntryAccessorUtilities.columnFieldToString(sort);
-            query.orderBy(asc ? getBuilder().asc(from.get(fieldName)) : getBuilder().desc(from.get(fieldName)));
-            return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
+    public List<Long> retrieveOwnerEntries(String ownerEmail, ColumnField sort, boolean asc, int start,
+                                           int limit, String filter) {
+        Map<String, String> predicatesMap = new HashMap<>();
+        predicatesMap.put("ownerEmail", ownerEmail);
+        return getResultList(start, limit, sort, asc, filter, predicatesMap);
     }
 
     private List<Predicate> getOwnerPredicate(Root<Entry> from, String ownerEmail) {
@@ -627,29 +637,6 @@ public class EntryDAO extends HibernateRepository<Entry> {
             ));
             query.where(predicates.toArray(new Predicate[0]));
             return currentSession().createQuery(query).uniqueResult();
-        } catch (HibernateException he) {
-            Logger.error(he);
-            throw new DAOException(he);
-        }
-    }
-
-    public List<Entry> retrieveAllEntries(ColumnField sort, boolean asc, int start, int limit, String filter) {
-        if (sort == null)
-            sort = ColumnField.CREATED;
-
-        try {
-            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class).distinct(true);
-            Root<Entry> from = query.from(Entry.class);
-            ArrayList<Predicate> predicates = new ArrayList<>();
-            String fieldName = EntryAccessorUtilities.columnFieldToString(sort);
-            checkAddFilter(predicates, from, filter);
-            predicates.add(getBuilder().or(
-                    getBuilder().equal(from.get("visibility"), Visibility.OK.getValue()),
-                    getBuilder().equal(from.get("visibility"), Visibility.PENDING.getValue())
-            ));
-            query.where(predicates.toArray(new Predicate[0]));
-            query.orderBy(asc ? getBuilder().asc(from.get(fieldName)) : getBuilder().desc(from.get(fieldName)));
-            return currentSession().createQuery(query).setMaxResults(limit).setFirstResult(start).list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

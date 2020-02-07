@@ -1,7 +1,6 @@
 package org.jbei.ice.lib.net;
 
 import com.opencsv.CSVWriter;
-import org.apache.commons.io.IOUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
@@ -12,7 +11,7 @@ import org.jbei.ice.lib.dto.web.PartnerEntries;
 import org.jbei.ice.lib.entry.EntryFields;
 import org.jbei.ice.lib.entry.EntryUtil;
 import org.jbei.ice.lib.entry.PartDataUtil;
-import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
+import org.jbei.ice.lib.entry.sequence.InputStreamWrapper;
 import org.jbei.ice.lib.entry.sequence.SequenceUtil;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.GenbankFormatter;
 import org.jbei.ice.lib.group.GroupController;
@@ -124,7 +123,7 @@ public class RemoteEntriesAsCSV {
                 groups.add(publicGroup);
 
                 EntryDAO entryDAO = DAOFactory.getEntryDAO();
-                List<Entry> results = entryDAO.retrieveVisibleEntries(null, groups, ColumnField.CREATED, true, 0, Integer.MAX_VALUE, null);
+                List<Long> results = entryDAO.retrieveVisibleEntries(null, groups, ColumnField.CREATED, true, 0, Integer.MAX_VALUE, null);
                 writeLocalEntries(results, fields, writer, zos);
             }
 
@@ -168,7 +167,8 @@ public class RemoteEntriesAsCSV {
                         GenbankFormatter genbankFormatter = new GenbankFormatter(name);
                         ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
                         genbankFormatter.format(sequence, byteStream);
-                        ByteArrayWrapper wrapper = new ByteArrayWrapper(byteStream.toByteArray(), name);
+                        ByteArrayInputStream inputStream = new ByteArrayInputStream(byteStream.toByteArray());
+                        InputStreamWrapper wrapper = new InputStreamWrapper(inputStream, name);
                         putZipEntry(wrapper, zos);
                     } else {
                         line[i + 1] = "";
@@ -184,8 +184,7 @@ public class RemoteEntriesAsCSV {
         }
     }
 
-    protected void writeLocalEntries(List<Entry> entries, List<EntryField> fields,
-                                     CSVWriter writer, ZipOutputStream zos) {
+    protected void writeLocalEntries(List<Long> entries, List<EntryField> fields, CSVWriter writer, ZipOutputStream zos) {
         if (entries == null)
             return;
 
@@ -193,7 +192,8 @@ public class RemoteEntriesAsCSV {
         Configuration configuration = DAOFactory.getConfigurationDAO().get(ConfigurationKey.URI_PREFIX);
         String thisUrl = configuration == null ? "" : configuration.getValue();
 
-        for (Entry entry : entries) {
+        for (Long id : entries) {
+            Entry entry = DAOFactory.getEntryDAO().get(id);
             String[] line = new String[fields.size() + 4];
             line[0] = thisUrl;
             line[1] = entry.getCreationTime().toString();
@@ -217,7 +217,8 @@ public class RemoteEntriesAsCSV {
                     GenbankFormatter genbankFormatter = new GenbankFormatter(name);
                     ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
                     genbankFormatter.format(sequence, byteStream);
-                    ByteArrayWrapper wrapper = new ByteArrayWrapper(byteStream.toByteArray(), name);
+                    ByteArrayInputStream inputStream = new ByteArrayInputStream(byteStream.toByteArray());
+                    InputStreamWrapper wrapper = new InputStreamWrapper(inputStream, name);
                     putZipEntry(wrapper, zos);
                 } catch (Exception e) {
                     line[i + 1] = "";
@@ -244,7 +245,7 @@ public class RemoteEntriesAsCSV {
         try {
             // write the csv file
             FileInputStream fis = new FileInputStream(csvPath.toFile());
-            ByteArrayWrapper wrapper = new ByteArrayWrapper(IOUtils.toByteArray(fis), "entries.csv");
+            InputStreamWrapper wrapper = new InputStreamWrapper(fis, "entries.csv");
             putZipEntry(wrapper, zos);
             zos.close();
             csvPath = tmpZip.toPath();
@@ -255,16 +256,16 @@ public class RemoteEntriesAsCSV {
         }
     }
 
-    protected void putZipEntry(ByteArrayWrapper wrapper, ZipOutputStream zos) {
-        try (ByteArrayInputStream bis = new ByteArrayInputStream(wrapper.getBytes())) {
+    private void putZipEntry(InputStreamWrapper wrapper, ZipOutputStream zos) {
+        try {
             byte[] buffer = new byte[1024];
-
             zos.putNextEntry(new ZipEntry(wrapper.getName()));
-
+            InputStream bis = wrapper.getInputStream();
             int length;
             while ((length = bis.read(buffer)) > 0) {
                 zos.write(buffer, 0, length);
             }
+            bis.close();
             zos.closeEntry();
         } catch (Exception e) {
             Logger.error(e);

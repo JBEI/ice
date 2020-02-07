@@ -3,17 +3,16 @@
 angular.module('ice.entry.export.controller', [])
     .controller('CustomExportController', function ($scope, $uibModalInstance, selectedTypes, selection, ExportFields,
                                                     Util) {
-            $scope.selected = {all: selection.all, types: []};
+            $scope.processingDownload = false;
+        $scope.selected = {all: selection.all, types: []};
             for (const key in selectedTypes) {
                 if (selectedTypes.hasOwnProperty(key)) {
                     $scope.selected.types.push(key);
                 }
             }
-            console.log($scope.selected);
 
             // get the fields for display for user
             $scope.fields = ExportFields.fields();
-
             $scope.sequence = {format: "FASTA"};
             $scope.general = {};
 
@@ -22,7 +21,8 @@ angular.module('ice.entry.export.controller', [])
             };
 
             $scope.customExport = function () {
-                $scope.processingDownload = true;
+                $scope.processingDownload = false;
+                $scope.errorSubmitting = false;
                 selection.fields = [];
 
                 // get fields user wishes to export
@@ -44,23 +44,13 @@ angular.module('ice.entry.export.controller', [])
                     }
                 }
 
-                const clickEvent = new MouseEvent("click", {
-                    "view": window,
-                    "bubbles": true,
-                    "cancelable": false
-                });
-
-                Util.download("rest/parts/custom?sequenceFormat=" + $scope.sequence.format, selection).$promise.then(function (result) {
-                    let url = URL.createObjectURL(new Blob([result.data]));
-                    let a = document.createElement('a');
-                    a.href = url;
-                    a.download = result.filename();
-                    a.target = '_blank';
-                    a.dispatchEvent(clickEvent);
-
-                    // close dialog
+                Util.post("rest/parts/custom?sequenceFormat=" + $scope.sequence.format, selection, function (success) {
+                    $scope.processingDownload = true;
+                    $scope.errorSubmitting = false;
+                }, {}, function (error) {
+                    console.error(error);
                     $scope.processingDownload = false;
-                    $uibModalInstance.close()
+                    $scope.errorSubmitting = true;
                 });
             };
         }

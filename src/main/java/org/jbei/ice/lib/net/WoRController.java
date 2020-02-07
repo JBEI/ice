@@ -96,9 +96,9 @@ public class WoRController {
         thisPartner.setName(myName);
         thisPartner.setApiKey(apiKey);  // key to use in contacting this instance
 
-        IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey(), "/rest/web/partner/remote");
+        IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey());
         try {
-            client.post(thisPartner, RegistryPartner.class);
+            client.post("/rest/web/partner/remote", thisPartner, RegistryPartner.class);
             existing.setPartnerStatus(partner.getStatus());
             existing.setAuthenticationToken(apiKey);
             dao.update(existing);
