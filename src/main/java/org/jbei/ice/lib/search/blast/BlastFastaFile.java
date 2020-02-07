@@ -150,6 +150,6 @@ public class BlastFastaFile {
     }
 
     public boolean isLocked() {
-        return lock == null || lock.isValid();
+        return lock != null && lock.isValid();
     }
 }
