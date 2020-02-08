@@ -1,15 +1,21 @@
 FROM maven:3-jdk-13 as maven
 
-COPY . /tmp
-
+COPY ./pom.xml /tmp
 WORKDIR /tmp
+
+# attempting to grab all dependencies
+# NOTE: go-offline does *NOT* prevent re-download of core Maven plugins
+# Including a package goal here w/o source will force refresh Maven
+RUN mvn dependency:go-offline package
+
+COPY . /tmp
 
 RUN sed -i.bak -E \
         -e 's|<security-constraint>|<!--<security-constraint>|;' \
         -e 's|</security-constraint>|</security-constraint>-->|;' \
         /tmp/src/main/webapp/WEB-INF/web.xml \
     && rm /tmp/src/main/webapp/WEB-INF/web.xml.bak \
-    && mvn -Dwar.warName=ice -DskipTests=true package
+    && mvn -DskipTests=true package
 
 # -----
 
@@ -23,4 +29,4 @@ RUN apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /usr/local/tomcat/webapps/*
 
-COPY --from=maven /tmp/target/ice-5.7.0.war /usr/local/tomcat/webapps/ROOT.war
+COPY --from=maven /tmp/target/ice-*.war /usr/local/tomcat/webapps/ROOT.war
