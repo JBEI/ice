@@ -8,12 +8,10 @@ import org.jbei.ice.lib.dto.FeaturedDNASequence;
 import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.SequenceInfo;
 import org.jbei.ice.lib.parsers.GeneralParser;
-import org.jbei.ice.storage.hibernate.HibernateUtil;
+import org.jbei.ice.storage.hibernate.HibernateRepositoryTest;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Strain;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -22,18 +20,27 @@ import java.util.List;
 /**
  * @author Hector Plahar
  */
-public class PartSequenceTest {
+public class PartSequenceTest extends HibernateRepositoryTest {
 
-    @Before
-    public void setUp() throws Exception {
-        HibernateUtil.initializeMock();
-        HibernateUtil.beginTransaction();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        HibernateUtil.commitTransaction();
-    }
+    private static String genbank =
+            "LOCUS       pTrc                     234 bp    DNA     linear\n" +
+                    "ACCESSION   pTrc\n" +
+                    "VERSION     pTrc.1\n" +
+                    "KEYWORDS    .\n" +
+                    "FEATURES             Location/Qualifiers\n" +
+                    "     promoter        1..234\n" +
+                    "                     /label=\"pTrc promoter\"\n" +
+                    "                     /vntifkey=\"30\"\n" +
+                    "ORIGIN\n" +
+                    "        1 cgactgcacg gtgcaccaat gcttctggcg tcaggcagcc atcggaagct gtggtatggc\n" +
+                    "       61 tgtgcaggtc gtaaatcact gcataattcg tgtcgctcaa ggcgcactcc cgttctggat\n" +
+                    "      121 aatgtttttt gcgccgacat cataacggtt ctggcaaata ttctgaaatg agctgttgac\n" +
+                    "      181 aattaatcat ccggctcgta taatgtgtgg aattgtgagc ggataacaat ttca\n" +
+                    "//";
+    private static String fasta =
+            ">org.jbei|test.1| \n" +
+                    "ccggcttatcggtcagtttcacttcttcataaaacccgcttcggcgggtttttgcttttacagggcggcaggatgaatga\n" +
+                    "ctgtccacgacgctatacccaaaagaaa";
 
     @Test
     public void testGet() throws Exception {
@@ -175,25 +182,4 @@ public class PartSequenceTest {
         partSequence.delete();
         Assert.assertNull(partSequence.get());
     }
-
-    private static String genbank =
-            "LOCUS       pTrc                     234 bp    DNA     linear\n" +
-                    "ACCESSION   pTrc\n" +
-                    "VERSION     pTrc.1\n" +
-                    "KEYWORDS    .\n" +
-                    "FEATURES             Location/Qualifiers\n" +
-                    "     promoter        1..234\n" +
-                    "                     /label=\"pTrc promoter\"\n" +
-                    "                     /vntifkey=\"30\"\n" +
-                    "ORIGIN\n" +
-                    "        1 cgactgcacg gtgcaccaat gcttctggcg tcaggcagcc atcggaagct gtggtatggc\n" +
-                    "       61 tgtgcaggtc gtaaatcact gcataattcg tgtcgctcaa ggcgcactcc cgttctggat\n" +
-                    "      121 aatgtttttt gcgccgacat cataacggtt ctggcaaata ttctgaaatg agctgttgac\n" +
-                    "      181 aattaatcat ccggctcgta taatgtgtgg aattgtgagc ggataacaat ttca\n" +
-                    "//";
-
-    private static String fasta =
-            ">org.jbei|test.1| \n" +
-                    "ccggcttatcggtcagtttcacttcttcataaaacccgcttcggcgggtttttgcttttacagggcggcaggatgaatga\n" +
-                    "ctgtccacgacgctatacccaaaagaaa";
 }

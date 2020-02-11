@@ -6,7 +6,7 @@ angular.module('ice.search.controller', [])
 
         $scope.params = {asc: false, sort: 'RELEVANCE', currentPage: 1, hstep: [15, 30, 50, 100], limit: 30};
         $scope.maxSize = 5;  // number of clickable pages to show in pagination
-        var query = {entryTypes: ['STRAIN', 'PLASMID', 'PART', 'SEED', 'PROTEIN'], queryString: undefined};
+        let query = {entryTypes: ['STRAIN', 'PLASMID', 'PART', 'SEED', 'PROTEIN'], queryString: undefined};
 
         $scope.$on("RunSearch", function (event, filters) {
             query = filters;
@@ -25,6 +25,8 @@ angular.module('ice.search.controller', [])
 
             //console.log(filters);
             Util.post("rest/search", filters, function (result) {
+                console.log(result);
+
                 $scope.searchResults = result;
                 $scope.loadingSearchResults = false;
             }, {webSearch: filters.webSearch}, function () {

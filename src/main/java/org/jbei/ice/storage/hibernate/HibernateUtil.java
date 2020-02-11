@@ -61,6 +61,24 @@ public class HibernateUtil {
         initialize(Type.MOCK);
     }
 
+    /**
+     * Checks user defined connection properties from a pre-determined location
+     * and loads it (if available) in configuration
+     *
+     * @param configuration hibernate configuration
+     */
+    private static void getConnectionProperties(Configuration configuration) {
+        // get connection properties from properties file
+//        Properties connectionProps = new Properties();
+//        connectionProps.put("hibernate.connection.url", "");
+//        connectionProps.put("hibernate.connection.username", "");
+//        connectionProps.put("hibernate.connection.password", "");
+//        connectionProps.put("hibernate.search.default.indexBase", "");
+//
+//        // todo : if available
+//        configuration.setProperties(connectionProps);
+    }
+
     private static synchronized void initialize(Type type) {
         if (sessionFactory == null) {
             Logger.info("Initializing session factory for type " + type.name());
@@ -77,7 +95,8 @@ public class HibernateUtil {
                     configuration.setProperty("hibernate.search.default.directory_provider",
                             "org.hibernate.search.store.impl.RAMDirectoryProvider");
                 } else {
-                    configuration.configure();
+                    configuration.configure();                                  // load base configuration
+                    getConnectionProperties(configuration);
                 }
 
                 ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(

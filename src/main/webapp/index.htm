@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <title>ICE - Inventory of Composable Elements</title>
 
-    <link rel="stylesheet" type="text/css" href="scripts/lib/open-vector-editor-10.1.1/main.css">
+    <link rel="stylesheet" type="text/css" href="scripts/lib/open-vector-editor-10.1.40/main.css">
     <link href="css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="scripts/lib/handsontable-7.1.0/pikaday.css">
     <link rel="stylesheet" media="screen" href="scripts/lib/handsontable-7.1.0/handsontable.full.min.css">
@@ -55,15 +55,22 @@
     <script src="scripts/wor/worDirectives.js"></script>
 
     <script src="scripts/controllers.js"></script>
+    <script src="scripts/download/downloadController.js"></script>
+    <script src="scripts/download/ice.download.js"></script>
     <script src="scripts/search/searchController.js"></script>
     <script src="scripts/upload/uploadController.js"></script>
+    <script src="scripts/upload/fileUploadController.js"></script>
     <script src="scripts/entry/entryController.js"></script>
+    <script src="scripts/entry/edit/editEntryController.js"></script>
+    <script src="scripts/entry/create/createEntryController.js"></script>
     <script src="scripts/entry/sample/sampleController.js"></script>
     <script src="scripts/entry/sample/sampleService.js"></script>
     <script src="scripts/entry/traces/tracesController.js"></script>
     <script src="scripts/entry/export/exportController.js"></script>
     <script src="scripts/entry/export/exportService.js"></script>
     <script src="scripts/entry/entryService.js"></script>
+    <script src="scripts/entry/create/createEntryService.js"></script>
+    <script src="scripts/entry/edit/editEntryService.js"></script>
     <script src="scripts/entry/entryDirectives.js"></script>
     <script src="scripts/collection/collectionController.js"></script>
     <script src="scripts/collection/collectionService.js"></script>
@@ -87,11 +94,11 @@
 </head>
 
 <body>
-<script type="text/javascript" src="scripts/lib/open-vector-editor-10.1.1/open-vector-editor.min.js"></script>
+<script type="text/javascript" src="scripts/lib/open-vector-editor-10.1.40/open-vector-editor.min.js"></script>
 
 <div id="container">
     <div id="body" ui-view></div>
-    <div class="navbar-fixed-bottom" style="border-top: 1px solid #BBBAAA; background-color: white;">
+    <div class="navbar-fixed-bottom" style="border-top: 1px solid #BBBAAA; background-color: white">
         <div class="container-fluid font-90em" style="margin-top: 3px">
             <ng-include src="siteSettings.footer"></ng-include>
         </div>

@@ -342,10 +342,11 @@ public class FolderContents {
         // should have permission to read folder
         folderAuthorization.expectRead(userId, folder);
 
+        // check if folder doesn't exist on this instance and has to be retrieved from another
         if (folder.getType() == FolderType.REMOTE)
             return getRemoteContents(userId, folder, pageParameters);
 
-        boolean visibleOnly = folder.getType() != FolderType.TRANSFERRED && !userId.equalsIgnoreCase(folder.getOwnerEmail()) && !folderAuthorization.isAdmin(userId);
+        boolean visibleOnly = showVisibleOnlyEntries(userId, folder);
         FolderDetails details = folder.toDataTransferObject();
 
         // all local entries at this point
@@ -367,19 +368,37 @@ public class FolderContents {
         // check for sample request information
         if (folder.getType() == FolderType.SAMPLE) {
             SampleCreateModel model = DAOFactory.getSampleCreateModelDAO().getByFolder(folder);
-            SampleRequest request = new SampleRequest();
-            request.setStatus(model.getStatus());
-            request.setId(model.getId());
-            details.setSampleRequest(request);
+            if (model != null) {
+                SampleRequest request = new SampleRequest();
+                request.setStatus(model.getStatus());
+                request.setId(model.getId());
+                details.setSampleRequest(request);
+            }
         }
 
         // retrieve folder contents
-        List<Entry> results = folderDAO.retrieveFolderContents(folderId, pageParameters, visibleOnly);
-        for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false, fields);
+        List<Long> results = folderDAO.retrieveFolderContents(folderId, pageParameters, visibleOnly);
+        for (Long entryId : results) {
+            PartData info = ModelToInfoFactory.createTableView(entryId, fields);
             details.getEntries().add(info);
         }
         return details;
+    }
+
+    /**
+     * Determines (based on user access privileges and folder type), if the
+     *
+     * @return true if folder contents with visibility of "OK" or "REMOTE" should be displayed
+     */
+    private boolean showVisibleOnlyEntries(String userId, Folder folder) {
+        if (folder.getType() == FolderType.TRANSFERRED)
+            return false;
+
+        // owners can see everything in the folder
+        if (StringUtils.isEmpty(userId) || folder.getOwnerEmail().equalsIgnoreCase(userId))
+            return false;
+
+        return !folderAuthorization.isAdmin(userId);
     }
 
     /**
@@ -467,9 +486,9 @@ public class FolderContents {
         details.setCount(folderSize);
 
         // retrieve folder contents
-        List<Entry> results = folderDAO.retrieveFolderContents(folderId, pageParameters, true);
-        for (Entry entry : results) {
-            PartData info = ModelToInfoFactory.createTableViewData(null, entry, false, fields);
+        List<Long> results = folderDAO.retrieveFolderContents(folderId, pageParameters, true);
+        for (Long entryId : results) {
+            PartData info = ModelToInfoFactory.createTableView(entryId, fields);
             info.setCanEdit(canEdit);
             details.getEntries().add(info);
         }

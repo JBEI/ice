@@ -9,33 +9,32 @@ import org.sbolstandard.core.SBOLFactory;
 import org.sbolstandard.core.SBOLRootObject;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 
 /**
  * Bulk upload with multiple components in a single SBOL document
  *
  * @author Hector Plahar
  */
-public class BulkFileSBOLUpload {
+class BulkFileSBOLUpload {
 
-    private final Path filePath;
     private final EntryType addType;
     private final String userId;
+    private final InputStream inputStream;
 
-    public BulkFileSBOLUpload(String userId, Path path, EntryType addType) {
+    BulkFileSBOLUpload(String userId, InputStream inputStream, EntryType addType) {
         this.userId = userId;
-        this.filePath = path;
         this.addType = addType;
+        this.inputStream = inputStream;
     }
 
     public long processUpload() throws IOException {
-        BulkUploadController controller = new BulkUploadController();
+        BulkUploads controller = new BulkUploads();
         long bulkUploadId = 0;
 
-        SBOLDocument document = SBOLFactory.read(new FileInputStream(filePath.toFile()));
+        SBOLDocument document = SBOLFactory.read(inputStream);
         try {
             // walk top level object
             for (SBOLRootObject rootObject : document.getContents()) {
@@ -45,7 +44,7 @@ public class BulkFileSBOLUpload {
                 update.setBulkUploadId(bulkUploadId);
                 Logger.info(userId + ": " + update.toString());
 
-                update = controller.autoUpdateBulkUpload(userId, update, addType);
+                update = controller.autoUpdateBulkUpload(userId, update);
                 if (bulkUploadId == 0)
                     bulkUploadId = update.getBulkUploadId();
 

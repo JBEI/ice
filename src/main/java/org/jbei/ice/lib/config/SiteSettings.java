@@ -9,7 +9,7 @@ import org.jbei.ice.storage.IDataTransferModel;
  */
 public class SiteSettings implements IDataTransferModel {
 
-    private String version = "5.6.0";
+    private String version = "5.7.0";
     private String assetName;
     private boolean hasLogo;
     private boolean hasLoginMessage;
@@ -27,16 +27,16 @@ public class SiteSettings implements IDataTransferModel {
         return hasLogo;
     }
 
+    public void setHasLogo(boolean hasLogo) {
+        this.hasLogo = hasLogo;
+    }
+
     public String getAssetName() {
         return assetName;
     }
 
     public void setAssetName(String assetName) {
         this.assetName = assetName;
-    }
-
-    public void setHasLogo(boolean hasLogo) {
-        this.hasLogo = hasLogo;
     }
 
     public boolean isHasLoginMessage() {

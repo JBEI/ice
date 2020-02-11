@@ -1,7 +1,5 @@
 package org.jbei.ice.services.rest;
 
-import java.util.Map;
-
 /**
  * Parent Rest Client class
  *
@@ -9,8 +7,11 @@ import java.util.Map;
  */
 public abstract class RestClient {
 
-    public abstract <T> T get(String url, String path, Class<T> clazz, Map<String, Object> queryParams);
+    public abstract <T> T get(String path, Class<T> responseClass);
 
-    public abstract <T> T post(String url, String resourcePath, Object object, Class<T> responseClass,
-                               Map<String, Object> queryParams);
+    public abstract <T> T post(String path, Object object, Class<T> responseClass);
+
+    public abstract <T> T put(String path, Object object, Class<T> responseClass);
+
+    public abstract boolean delete(String path);
 }

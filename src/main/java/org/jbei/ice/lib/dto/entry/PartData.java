@@ -45,7 +45,7 @@ public class PartData implements IDataTransferModel {
     private long principalInvestigatorId;
     private ArrayList<String> selectionMarkers;
     private String fundingSource;
-    private long basePairCount;
+    private String basePairCount;
     private long featureCount;
     private long viewCount;
 
@@ -64,7 +64,7 @@ public class PartData implements IDataTransferModel {
 
     private StrainData strainData;
     private PlasmidData plasmidData;
-    private ArabidopsisSeedData arabidopsisSeedData;
+    private SeedData seedData;
     private ProteinData proteinData;
 
     public PartData(EntryType type) {
@@ -414,12 +414,12 @@ public class PartData implements IDataTransferModel {
         this.plasmidData = plasmidData;
     }
 
-    public ArabidopsisSeedData getArabidopsisSeedData() {
-        return arabidopsisSeedData;
+    public SeedData getSeedData() {
+        return seedData;
     }
 
-    public void setArabidopsisSeedData(ArabidopsisSeedData arabidopsisSeedData) {
-        this.arabidopsisSeedData = arabidopsisSeedData;
+    public void setSeedData(SeedData seedData) {
+        this.seedData = seedData;
     }
 
     public ProteinData getProteinData() {
@@ -430,11 +430,11 @@ public class PartData implements IDataTransferModel {
         this.proteinData = proteinData;
     }
 
-    public long getBasePairCount() {
+    public String getBasePairCount() {
         return basePairCount;
     }
 
-    public void setBasePairCount(long basePairCount) {
+    public void setBasePairCount(String basePairCount) {
         this.basePairCount = basePairCount;
     }
 

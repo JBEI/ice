@@ -99,21 +99,19 @@ angular.module('ice.wor.controller', [])
         }
     })
     .controller('WorFolderContentController', function ($location, $rootScope, $scope, $stateParams, WorService, Util) {
-        var id = $stateParams.folderId;
+        const id = $stateParams.folderId;
         $scope.remoteRetrieveError = undefined;
-
         $scope.maxSize = 5;
         $scope.itemsPerPage = 15;
-
         $scope.params = {folderId: id, id: $stateParams.partner, offset: 0, currentPage: 1};
 
-        var getRemoteFolderEntries = function () {
+        const getRemoteFolderEntries = function () {
             Util.get('rest/partners/' + $stateParams.partner + '/folders/' + id, function (result) {
                 $scope.selectedPartnerFolder = result;
                 $scope.selectedPartner = WorService.getSelectedPartner();
-                if ($scope.selectedPartner == undefined) {
+                if (!$scope.selectedPartner) {
                     $scope.selectedPartner = {id: $stateParams.partner};
-                    WorService.setSelectedPartner($scope.selectedPartner)
+                    WorService.setSelectedPartner($scope.selectedPartner);
                 }
                 $scope.loadingPage = false;
             }, $scope.params, function () {

@@ -7,6 +7,7 @@ import org.biojava.bio.symbol.SymbolList;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Parser to handle file with simply nucleotide sequences. Technically these files are not FASTA
@@ -17,9 +18,10 @@ import java.util.ArrayList;
 public class PlainParser extends AbstractParser {
 
     @Override
-    public FeaturedDNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
+    public FeaturedDNASequence parse(Iterator<String> iterator, String... entryType) throws InvalidFormatParserException {
         SymbolList sl;
         try {
+            String textSequence = getSequence(iterator);
             textSequence = cleanSequence(textSequence);
             sl = new SimpleSymbolList(DNATools.getDNA().getTokenization("token"), textSequence
                     .replaceAll("\\s+", "").replaceAll("[\\.|~]", "-").replaceAll("[0-9]", ""));

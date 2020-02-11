@@ -34,7 +34,7 @@ public class WoRController {
      * @return true if the administrator of this registry instance has explicitly
      * enable the web of registries functionality
      */
-    public boolean isWebEnabled() {
+    private boolean isWebEnabled() {
         String value = new ConfigurationSettings().getPropertyValue(ConfigurationKey.JOIN_WEB_OF_REGISTRIES);
         return "yes".equalsIgnoreCase(value) || "true".equalsIgnoreCase(value);
     }
@@ -96,9 +96,9 @@ public class WoRController {
         thisPartner.setName(myName);
         thisPartner.setApiKey(apiKey);  // key to use in contacting this instance
 
-        IceRestClient client = IceRestClient.getInstance();
+        IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey());
         try {
-            client.post(partner.getUrl(), "/rest/web/partner/remote", thisPartner, RegistryPartner.class, null);
+            client.post("/rest/web/partner/remote", thisPartner, RegistryPartner.class);
             existing.setPartnerStatus(partner.getStatus());
             existing.setAuthenticationToken(apiKey);
             dao.update(existing);

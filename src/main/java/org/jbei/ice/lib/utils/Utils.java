@@ -82,7 +82,7 @@ public class Utils {
      * Retrieve the stack trace from the given Throwable, and output the string.
      *
      * @param throwable Throwable to process.
-     * @return String output of the thorwable's stack trace.
+     * @return String output of the throwable's stack trace.
      */
     public static String stackTraceToString(Throwable throwable) {
         final Writer result = new StringWriter();

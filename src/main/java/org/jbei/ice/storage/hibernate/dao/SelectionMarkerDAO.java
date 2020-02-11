@@ -27,12 +27,6 @@ public class SelectionMarkerDAO extends HibernateRepository<SelectionMarker> {
             query.where(getBuilder().like(getBuilder().lower(from.get("name")), "%" + token.toLowerCase() + "%"));
             query.select(from.get("name")).distinct(true);
             return currentSession().createQuery(query).setMaxResults(limit).list();
-
-//            return currentSession().createCriteria(SelectionMarker.class)
-//                    .add(Restrictions.ilike("name", token, MatchMode.ANYWHERE))
-//                    .setMaxResults(limit)
-//                    .setProjection(Projections.distinct(Projections.property("name")))
-//                    .list();
         } catch (HibernateException he) {
             Logger.error(he);
             throw new DAOException(he);

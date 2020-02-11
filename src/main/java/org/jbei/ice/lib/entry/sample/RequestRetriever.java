@@ -12,9 +12,7 @@ import org.jbei.ice.lib.dto.folder.FolderDetails;
 import org.jbei.ice.lib.dto.sample.*;
 import org.jbei.ice.lib.email.EmailFactory;
 import org.jbei.ice.lib.utils.Utils;
-import org.jbei.ice.storage.DAOException;
 import org.jbei.ice.storage.DAOFactory;
-import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.hibernate.dao.RequestDAO;
 import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
@@ -34,47 +32,9 @@ import java.util.*;
 public class RequestRetriever {
 
     private final RequestDAO dao;
-    private final EntryDAO entryDAO;
 
     public RequestRetriever() {
         this.dao = DAOFactory.getRequestDAO();
-        this.entryDAO = DAOFactory.getEntryDAO();
-    }
-
-    /**
-     * Creates a new sample request for the specified user and specified entry.
-     * The default status is "IN CART"
-     */
-    public boolean placeSampleInCart(String userId, SampleRequest sampleRequest) {
-        long partId = sampleRequest.getPartData().getId();
-        Entry entry = entryDAO.get(sampleRequest.getPartData().getId());
-
-        if (entry == null)
-            throw new IllegalArgumentException("Cannot find entry with id: " + partId);
-
-        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
-
-        // check if sample is already in cart with status of "IN CART"
-        try {
-            List<Request> requests = dao.getSampleRequestByStatus(account, entry, SampleRequestStatus.IN_CART);
-            if (requests != null && !requests.isEmpty())
-                return true;
-
-            Request request = new Request();
-            request.setAccount(account);
-            request.setGrowthTemperature(sampleRequest.getGrowthTemperature());
-            request.setEntry(entry);
-            if (sampleRequest.getRequestType() == null)
-                sampleRequest.setRequestType(SampleRequestType.LIQUID_CULTURE);
-            request.setType(sampleRequest.getRequestType());
-            request.setRequested(new Date(System.currentTimeMillis()));
-            request.setUpdated(request.getRequested());
-            request.setPlateDescription(sampleRequest.getPlateDescription());
-            return dao.create(request) != null;
-        } catch (DAOException e) {
-            Logger.error(e);
-            return false;
-        }
     }
 
     public UserSamples getUserSamples(String userId, SampleRequestStatus status, int start, int limit, String sort,
@@ -106,6 +66,7 @@ public class RequestRetriever {
             request.setStatus(model.getStatus());
 
             FolderDetails details = model.getFolder().toDataTransferObject();
+            details.setCount(DAOFactory.getFolderDAO().getFolderSize(details.getId(), null, true));
             request.setFolderDetails(details);
 
             request.setRequester(model.getAccount().toDataTransferObject());
@@ -143,23 +104,6 @@ public class RequestRetriever {
         return samples;
     }
 
-    public SampleRequest removeSampleFromCart(String userId, long requestId) {
-        try {
-            Request request = dao.get(requestId);
-            if (request == null)
-                return null;
-
-            if (!request.getAccount().getEmail().equalsIgnoreCase(userId))
-                return null;
-
-            Logger.info(userId + ": Removing sample from cart for entry " + request.getEntry().getId());
-            dao.delete(request);
-            return request.toDataTransferObject();
-        } catch (DAOException de) {
-            Logger.error(de);
-            return null;
-        }
-    }
 
     public SampleRequest updateStatus(String userId, long requestId, SampleRequestStatus newStatus, boolean isFolder) {
         if (!new AccountController().isAdministrator(userId)) {
@@ -254,27 +198,28 @@ public class RequestRetriever {
                 line[0] = entry.getName();
 
                 List<PartSample> samples = sampleService.retrieveEntrySamples(userId, Long.toString(request.getEntry().getId()));
+                if (samples.isEmpty()) {
+                    Logger.info("No samples found for " + line[0]);
+                    continue;
+                }
+
                 String plate = null;
                 String well = null;
 
-                if (samples.size() == 1) {
-                    if (samples.get(0).getLocation().getType() == SampleType.GENERIC) {
+                for (PartSample sample : samples) {
+                    StorageLocation location = sample.getLocation();
+                    if (location == null)
+                        continue;
+
+                    if (location.getType() == SampleType.GENERIC) {
                         plate = "generic";
                         well = "";
-                    }
-                } else {
-                    for (PartSample partSample : samples) {
-                        if (partSample.getLabel().contains("backup"))
+                        break;
+                    } else if (location.getType() == SampleType.PLATE96) {
+                        if (sample.getLabel().contains("backup"))
                             continue;
 
-                        // get plate
-                        StorageLocation location = partSample.getLocation();
-                        if (location == null)
-                            continue;
-
-                        if (location.getType() == SampleType.PLATE96) {
-                            plate = location.getDisplay().replaceFirst("^0+(?!$)", "");
-                        }
+                        plate = location.getDisplay().replaceFirst("^0+(?!$)", "");
 
                         StorageLocation child = location.getChild();
                         while (child != null) {

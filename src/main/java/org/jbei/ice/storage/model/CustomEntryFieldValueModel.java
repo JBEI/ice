@@ -56,11 +56,8 @@ public class CustomEntryFieldValueModel implements DataModel {
 
     @Override
     public CustomEntryField toDataTransferObject() {
-        CustomEntryField field = new CustomEntryField();
-        field.setFieldType(this.field.getFieldType());
-        field.setId(this.id);
-        field.setLabel(this.field.getLabel());
-        field.setValue(this.value);
-        return field;
+        CustomEntryField customEntryField = this.field.toDataTransferObject();
+        customEntryField.setValue(value);
+        return customEntryField;
     }
 }

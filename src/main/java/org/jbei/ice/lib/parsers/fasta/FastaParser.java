@@ -11,6 +11,7 @@ import org.jbei.ice.lib.parsers.InvalidFormatParserException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
@@ -21,8 +22,9 @@ import java.util.LinkedList;
 public class FastaParser extends AbstractParser {
 
     @Override
-    public FeaturedDNASequence parse(String textSequence, String... entryType) throws InvalidFormatParserException {
+    public FeaturedDNASequence parse(Iterator<String> iterator, String... entryType) throws InvalidFormatParserException {
         try {
+            String textSequence = getSequence(iterator);
             textSequence = cleanSequence(textSequence);
             textSequence = textSequence.replaceAll("\t", "\n");
             try (BufferedReader br = new BufferedReader(new StringReader(textSequence))) {

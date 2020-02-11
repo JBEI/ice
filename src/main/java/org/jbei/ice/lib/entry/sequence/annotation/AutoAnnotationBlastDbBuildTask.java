@@ -2,9 +2,9 @@ package org.jbei.ice.lib.entry.sequence.annotation;
 
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.executor.Task;
-import org.jbei.ice.lib.search.blast.BlastPlus;
+import org.jbei.ice.lib.search.blast.BlastException;
+import org.jbei.ice.lib.search.blast.FeaturesBlastDatabase;
 
-import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Timer;
@@ -26,11 +26,11 @@ public class AutoAnnotationBlastDbBuildTask extends Task {
     private int exceptionCount;
     private static final int RUN_HOUR = 1;    // make config param
     private final boolean runOnce;
-    private final BlastPlus blastPlus;
+    private FeaturesBlastDatabase featuresBlastDatabase;
 
     AutoAnnotationBlastDbBuildTask(boolean runOnce) {
         this.runOnce = runOnce;
-        this.blastPlus = new BlastPlus("auto-annotation", "ice");
+        featuresBlastDatabase = new FeaturesBlastDatabase();
     }
 
     public AutoAnnotationBlastDbBuildTask() {
@@ -43,8 +43,8 @@ public class AutoAnnotationBlastDbBuildTask extends Task {
 
         // first run on task start up
         try {
-            blastPlus.rebuildFeaturesBlastDatabase();
-        } catch (IOException e) {
+            featuresBlastDatabase.rebuild();
+        } catch (BlastException e) {
             Logger.error(e);
             exceptionCount += 1;
         }
@@ -57,8 +57,8 @@ public class AutoAnnotationBlastDbBuildTask extends Task {
 
             try {
                 Logger.info("Rebuilding auto annotation blast database");
-                blastPlus.rebuildFeaturesBlastDatabase();
-            } catch (IOException ioe) {
+                featuresBlastDatabase.rebuild();
+            } catch (BlastException ioe) {
                 Logger.error(ioe);
                 if (exceptionCount++ >= 10) {
                     Logger.error(exceptionCount + " exceptions encountered. Aborting annotation rebuild");

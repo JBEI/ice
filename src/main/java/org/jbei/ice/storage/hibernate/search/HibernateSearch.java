@@ -7,6 +7,7 @@ import org.hibernate.Session;
 import org.hibernate.search.FullTextQuery;
 import org.hibernate.search.FullTextSession;
 import org.hibernate.search.Search;
+import org.hibernate.search.engine.ProjectionConstants;
 import org.hibernate.search.query.dsl.QueryBuilder;
 import org.hibernate.search.query.dsl.TermContext;
 import org.jbei.ice.lib.account.AccountController;
@@ -41,10 +42,6 @@ public class HibernateSearch {
     private HibernateSearch() {
     }
 
-    private static class SingletonHolder {
-        private static final HibernateSearch INSTANCE = new HibernateSearch();
-    }
-
     /**
      * Retrieve the singleton instance of this class.
      *
@@ -52,6 +49,34 @@ public class HibernateSearch {
      */
     public static HibernateSearch getInstance() {
         return SingletonHolder.INSTANCE;
+    }
+
+    private static String cleanQuery(String query) {
+        if (query == null)
+            return null;
+        String cleanedQuery = query;
+        cleanedQuery = cleanedQuery.replace(":", " ");
+        cleanedQuery = cleanedQuery.replace(";", " ");
+        cleanedQuery = cleanedQuery.replace("\\", " ");
+        cleanedQuery = cleanedQuery.replace("/", " ");
+        cleanedQuery = cleanedQuery.replace("!", " ");
+        cleanedQuery = cleanedQuery.replace("[", "\\[");
+        cleanedQuery = cleanedQuery.replace("]", "\\]");
+        cleanedQuery = cleanedQuery.replace("{", "\\{");
+        cleanedQuery = cleanedQuery.replace("}", "\\}");
+        cleanedQuery = cleanedQuery.replace("(", "\\(");
+        cleanedQuery = cleanedQuery.replace(")", "\\)");
+        cleanedQuery = cleanedQuery.replace("+", "\\+");
+        cleanedQuery = cleanedQuery.replace("-", "\\-");
+        cleanedQuery = cleanedQuery.replace("'", "\\'");
+//        cleanedQuery = cleanedQuery.replace("\"", "\\\"");
+        cleanedQuery = cleanedQuery.replace("^", "\\^");
+        cleanedQuery = cleanedQuery.replace("&", "\\&");
+
+        cleanedQuery = cleanedQuery.endsWith("'") ? cleanedQuery.substring(0, cleanedQuery.length() - 1) : cleanedQuery;
+        cleanedQuery = (cleanedQuery.endsWith("\\") ? cleanedQuery.substring(0,
+                cleanedQuery.length() - 1) : cleanedQuery);
+        return cleanedQuery;
     }
 
     public SearchResults executeSearchNoTerms(String userId, HashMap<String, SearchResult> blastResults, SearchQuery searchQuery) {
@@ -113,6 +138,7 @@ public class HibernateSearch {
         // get sorting values
         Sort sort = getSort(searchQuery.getParameters().isSortAscending(), searchQuery.getParameters().getSortField());
         fullTextQuery.setSort(sort);
+        fullTextQuery.setProjection(ProjectionConstants.ID, "owner");
 
         // enable security filter if needed
         checkEnableSecurityFilter(userId, fullTextQuery);
@@ -125,21 +151,24 @@ public class HibernateSearch {
         fullTextQuery.setMaxResults(searchQuery.getParameters().getRetrieveCount());
 
         resultCount = fullTextQuery.getResultSize();
-        List result = fullTextQuery.list();
+        List<?> result = fullTextQuery.list();
 
         LinkedList<SearchResult> searchResults = new LinkedList<>();
 
+        // since we are using projection, result is an arraylist of objects
         for (Object object : result) {
-            Entry entry = (Entry) object;
+            Object[] objects = (Object[]) object;
+            long entryId = (Long) objects[0];
             SearchResult searchResult;
             if (blastResults != null) {
-                searchResult = blastResults.get(Long.toString(entry.getId()));
+                searchResult = blastResults.get(Long.toString(entryId));
                 if (searchResult == null) // this should not really happen since we already filter
                     continue;
             } else {
                 searchResult = new SearchResult();
                 searchResult.setScore(1f);
-                PartData info = ModelToInfoFactory.createTableViewData(userId, entry, true, null);
+                PartData info = ModelToInfoFactory.createTableView(entryId, null);
+                info.setOwner((String) objects[1]);
                 searchResult.setEntryInfo(info);
             }
 
@@ -201,7 +230,7 @@ public class HibernateSearch {
         fullTextQuery.setProjection("id");
 
         // list contains an object array with one Long object
-        List luceneResult = fullTextQuery.list();
+        List<?> luceneResult = fullTextQuery.list();
         HashSet<String> resultSet = new HashSet<>();
 
         // page
@@ -210,15 +239,10 @@ public class HibernateSearch {
             resultSet.add(result.toString());
         }
 
-        Iterator<String> iterator = blastResults.keySet().iterator();
-        while (iterator.hasNext()) {
-            String key = iterator.next();
-            if (!resultSet.contains(key))
-                iterator.remove();
-        }
+        blastResults.keySet().removeIf(key -> !resultSet.contains(key));
 
-        SearchResult searchResults[] = new SearchResult[count];
-        int limit = (start + count) > blastResults.size() ? blastResults.size() : (start + count);
+        SearchResult[] searchResults = new SearchResult[count];
+        int limit = Math.min((start + count), blastResults.size());
         LinkedList<SearchResult> list = new LinkedList<>(Arrays.asList(blastResults.values().toArray(searchResults))
                 .subList(start, limit));
 
@@ -238,8 +262,7 @@ public class HibernateSearch {
         BooleanQuery.Builder builder = new BooleanQuery.Builder();
 
         // get classes for search
-        HashSet<String> fields = new HashSet<>();
-        fields.addAll(SearchFieldFactory.entryFields(searchQuery.getEntryTypes()));
+        HashSet<String> fields = new HashSet<>(SearchFieldFactory.entryFields(searchQuery.getEntryTypes()));
         Class<?>[] classes = SearchFieldFactory.classesForTypes(searchQuery.getEntryTypes());
 
         // generate queries for terms filtering stop words
@@ -262,7 +285,7 @@ public class HibernateSearch {
         fullTextQuery.setFirstResult(0);
         fullTextQuery.setMaxResults(1);
         fullTextQuery.setProjection(FullTextQuery.SCORE);
-        List result = fullTextQuery.list();
+        List<?> result = fullTextQuery.list();
         float maxScore = -1f;
         if (result.size() == 1) {
             maxScore = (Float) ((Object[]) (result.get(0)))[0];
@@ -274,10 +297,10 @@ public class HibernateSearch {
         fullTextQuery.setSort(sort);
 
         // projection (specified properties must be stored in the index @Field(store=Store.YES))
-        fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.THIS);
+        fullTextQuery.setProjection(FullTextQuery.SCORE, FullTextQuery.ID, "owner");
 
         // enable security filter if needed
-        fullTextQuery = checkEnableSecurityFilter(userId.toLowerCase(), fullTextQuery);
+        checkEnableSecurityFilter(userId.toLowerCase(), fullTextQuery);
 
         // check sample
         checkEnableHasAttribute(fullTextQuery, searchQuery.getParameters());
@@ -295,18 +318,17 @@ public class HibernateSearch {
         LinkedList<SearchResult> searchResults = new LinkedList<>();
         for (Object[] objects : (Iterable<Object[]>) result) {
             float score = (Float) objects[0];
-            Entry entry = (Entry) objects[1];
+            Long entryId = (Long) objects[1];
             SearchResult searchResult;
             if (blastResults != null) {
-                searchResult = blastResults.get(Long.toString(entry.getId()));
+                searchResult = blastResults.get(Long.toString(entryId));
                 if (searchResult == null) // this should not really happen since we already filter
                     continue;
             } else {
                 searchResult = new SearchResult();
                 searchResult.setScore(score);
-                PartData info = ModelToInfoFactory.createTableViewData(userId, entry, true, null);
-                if (info == null)
-                    continue;
+                PartData info = ModelToInfoFactory.createTableView(entryId, null);
+                info.setOwner((String) objects[2]);
                 searchResult.setEntryInfo(info);
             }
 
@@ -320,14 +342,14 @@ public class HibernateSearch {
         return results;
     }
 
-    protected BooleanQuery.Builder generateQueriesForType(FullTextSession fullTextSession, HashSet<String> fields,
-                                                          BooleanQuery.Builder builder, String term, QueryType type,
-                                                          BioSafetyOption option) {
+    private void generateQueriesForType(FullTextSession fullTextSession, HashSet<String> fields,
+                                        BooleanQuery.Builder builder, String term, QueryType type,
+                                        BioSafetyOption option) {
         QueryBuilder qb = fullTextSession.getSearchFactory().buildQueryBuilder().forEntity(Entry.class).get();
         if (!StringUtils.isEmpty(term)) {
             // generate term queries for each search term
             Query query;
-            String[] queryFields = fields.toArray(new String[fields.size()]);
+            String[] queryFields = fields.toArray(new String[0]);
             if (type == QueryType.PHRASE) {
                 // phrase types are for quotes so slop is omitted
                 for (String field : fields) {
@@ -366,10 +388,9 @@ public class HibernateSearch {
                 builder.add(biosafetyQuery, BooleanClause.Occur.MUST);
             }
         }
-        return builder;
     }
 
-    protected Sort getSort(boolean asc, ColumnField sortField) {
+    private Sort getSort(boolean asc, ColumnField sortField) {
         if (sortField == null)
             sortField = ColumnField.CREATED;
 
@@ -390,9 +411,9 @@ public class HibernateSearch {
     }
 
     // empty blast results indicates valid results
-    protected void createBlastFilterQuery(FullTextSession fullTextSession,
-                                          final HashMap<String, SearchResult> blastResults,
-                                          BooleanQuery.Builder builder) {
+    private void createBlastFilterQuery(FullTextSession fullTextSession,
+                                        final HashMap<String, SearchResult> blastResults,
+                                        BooleanQuery.Builder builder) {
         // null blast results indicates no blast query
         if (blastResults == null)
             return;
@@ -413,7 +434,7 @@ public class HibernateSearch {
      * @param userId        identifier for account which is checked for administrative privs
      * @param fullTextQuery search fulltextquery for which filter is enabled
      */
-    protected FullTextQuery checkEnableSecurityFilter(String userId, FullTextQuery fullTextQuery) {
+    private void checkEnableSecurityFilter(String userId, FullTextQuery fullTextQuery) {
         Set<String> groupUUIDs = new HashSet<>();
         Set<String> folderIds = new HashSet<>();
 
@@ -422,7 +443,7 @@ public class HibernateSearch {
         } else {
             AccountController accountController = new AccountController();
             if (accountController.isAdministrator(userId)) {
-                return fullTextQuery;
+                return;
             }
             groupUUIDs = new GroupController().retrieveAccountGroupUUIDs(userId);
             folderIds = new Folders(userId).getCanReadFolderIds();
@@ -432,10 +453,9 @@ public class HibernateSearch {
                 .setParameter("account", userId)
                 .setParameter("folderIds", folderIds)
                 .setParameter("groupUUids", groupUUIDs);
-        return fullTextQuery;
     }
 
-    protected void checkEnableHasAttribute(FullTextQuery fullTextQuery, SearchQuery.Parameters parameters) {
+    private void checkEnableHasAttribute(FullTextQuery fullTextQuery, SearchQuery.Parameters parameters) {
         if (parameters == null)
             return;
 
@@ -459,31 +479,7 @@ public class HibernateSearch {
         fullTextQuery.enableFullTextFilter("boolean").setParameter("field", terms);
     }
 
-    private static String cleanQuery(String query) {
-        if (query == null)
-            return null;
-        String cleanedQuery = query;
-        cleanedQuery = cleanedQuery.replace(":", " ");
-        cleanedQuery = cleanedQuery.replace(";", " ");
-        cleanedQuery = cleanedQuery.replace("\\", " ");
-        cleanedQuery = cleanedQuery.replace("/", " ");
-        cleanedQuery = cleanedQuery.replace("!", " ");
-        cleanedQuery = cleanedQuery.replace("[", "\\[");
-        cleanedQuery = cleanedQuery.replace("]", "\\]");
-        cleanedQuery = cleanedQuery.replace("{", "\\{");
-        cleanedQuery = cleanedQuery.replace("}", "\\}");
-        cleanedQuery = cleanedQuery.replace("(", "\\(");
-        cleanedQuery = cleanedQuery.replace(")", "\\)");
-        cleanedQuery = cleanedQuery.replace("+", "\\+");
-        cleanedQuery = cleanedQuery.replace("-", "\\-");
-        cleanedQuery = cleanedQuery.replace("'", "\\'");
-//        cleanedQuery = cleanedQuery.replace("\"", "\\\"");
-        cleanedQuery = cleanedQuery.replace("^", "\\^");
-        cleanedQuery = cleanedQuery.replace("&", "\\&");
-
-        cleanedQuery = cleanedQuery.endsWith("'") ? cleanedQuery.substring(0, cleanedQuery.length() - 1) : cleanedQuery;
-        cleanedQuery = (cleanedQuery.endsWith("\\") ? cleanedQuery.substring(0,
-                cleanedQuery.length() - 1) : cleanedQuery);
-        return cleanedQuery;
+    private static class SingletonHolder {
+        private static final HibernateSearch INSTANCE = new HibernateSearch();
     }
 }

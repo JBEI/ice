@@ -6,6 +6,7 @@ import org.jbei.ice.lib.dto.access.AccessPermission;
 import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.hibernate.dao.PermissionDAO;
+import org.jbei.ice.storage.model.Account;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Group;
 import org.jbei.ice.storage.model.Permission;
@@ -83,7 +84,7 @@ public class EntryPermissions extends Permissions {
      * @return created permission if successful, null otherwise
      * @throws PermissionException if the requesting user does not have write permissions on the entry
      */
-    public AccessPermission add(AccessPermission access) {
+    public AccessPermission addAccount(AccessPermission access) {
         if (access == null)
             return null;
 
@@ -96,7 +97,28 @@ public class EntryPermissions extends Permissions {
         return permission.toDataTransferObject();
     }
 
-    public boolean enablePublicReadAccess() {
+    public void addAccount(String userId, boolean isWrite) {
+        AccessPermission permission = new AccessPermission();
+        permission.setType(isWrite ? AccessPermission.Type.WRITE_ENTRY : AccessPermission.Type.READ_ENTRY);
+        permission.setTypeId(this.entry.getId());
+        permission.setArticle(AccessPermission.Article.ACCOUNT);
+        Account account = accountDAO.getByEmail(userId);
+        if (account == null)
+            return;
+        permission.setArticleId(account.getId());
+        addPermission(permission, entry, null, null);
+    }
+
+    public void addGroup(long groupId, boolean isWrite) {
+        AccessPermission permission = new AccessPermission();
+        permission.setType(isWrite ? AccessPermission.Type.WRITE_ENTRY : AccessPermission.Type.READ_ENTRY);
+        permission.setTypeId(this.entry.getId());
+        permission.setArticle(AccessPermission.Article.GROUP);
+        permission.setArticleId(groupId);
+        addPermission(permission, entry, null, null);
+    }
+
+    public void enablePublicReadAccess() {
         AccessPermission permission = new AccessPermission();
         permission.setType(AccessPermission.Type.READ_ENTRY);
         permission.setTypeId(this.entry.getId());
@@ -104,13 +126,12 @@ public class EntryPermissions extends Permissions {
         permission.setArticleId(groupController.createOrRetrievePublicGroup().getId());
 
         authorization.expectWrite(userId, entry);
-        return addPermission(permission, entry, null, null) != null;
+        addPermission(permission, entry, null, null);
     }
 
-    public boolean disablePublicReadAccess() {
+    public void disablePublicReadAccess() {
         authorization.expectWrite(userId, entry);
         Group publicGroup = groupController.createOrRetrievePublicGroup();
         permissionDAO.removePermission(entry, null, null, null, publicGroup, true, false);
-        return true;
     }
 }

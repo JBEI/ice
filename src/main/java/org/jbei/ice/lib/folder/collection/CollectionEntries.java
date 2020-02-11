@@ -1,19 +1,24 @@
 package org.jbei.ice.lib.folder.collection;
 
 import org.jbei.ice.lib.access.PermissionException;
+import org.jbei.ice.lib.account.AccountType;
 import org.jbei.ice.lib.dto.common.Results;
+import org.jbei.ice.lib.dto.entry.EntryType;
 import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.dto.entry.Visibility;
 import org.jbei.ice.lib.entry.OwnerEntries;
 import org.jbei.ice.lib.entry.SampleEntries;
 import org.jbei.ice.lib.entry.SharedEntries;
 import org.jbei.ice.lib.entry.VisibleEntries;
+import org.jbei.ice.lib.group.GroupController;
 import org.jbei.ice.lib.shared.ColumnField;
 import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
-import org.jbei.ice.storage.model.Entry;
+import org.jbei.ice.storage.model.Account;
+import org.jbei.ice.storage.model.Group;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,6 +52,32 @@ public class CollectionEntries {
      */
     public Results<PartData> getEntries(ColumnField field, boolean asc, int offset, int limit) {
         return this.getEntries(field, asc, offset, limit, null, null);
+    }
+
+    /**
+     * Retrieves list of collection entries and returns their ids
+     *
+     * @param filterType type of entries to return e.g. strains only or plasmids only. If set to null, then all entries are returned
+     * @return list of retrieved entries
+     */
+    public List<Long> getEntriesById(EntryType filterType) {
+        Account account = DAOFactory.getAccountDAO().getByEmail(userId);
+
+        switch (this.type) {
+            case PERSONAL:
+                return entryDAO.getOwnerEntryIds(userId, filterType);
+
+            case SHARED:
+                return entryDAO.sharedWithUserEntryIds(account, account.getGroups());
+
+            case AVAILABLE:
+            case FEATURED:
+                Group publicGroup = new GroupController().createOrRetrievePublicGroup();
+                return entryDAO.getVisibleEntryIds(account.getType() == AccountType.ADMIN, publicGroup);
+
+            default:
+                return new ArrayList<>();
+        }
     }
 
     /**
@@ -185,12 +216,13 @@ public class CollectionEntries {
      */
     private Results<PartData> getEntriesByVisibility(Visibility visibility, ColumnField field, boolean asc,
                                                      int offset, int limit, String user, String filter, List<String> fields) {
-        List<Entry> entries = entryDAO.getByVisibility(user, visibility, field, asc, offset, limit, filter);
+        List<Long> entries = entryDAO.getByVisibility(user, visibility, field, asc, offset, limit, filter);
         Results<PartData> results = new Results<>();
-        for (Entry entry : entries) {
-            PartData info = ModelToInfoFactory.createTableViewData(userId, entry, false, fields);
+        for (Long id : entries) {
+            PartData info = ModelToInfoFactory.createTableView(id, fields);
             results.getData().add(info);
         }
+
         results.setResultCount(entryDAO.getByVisibilityCount(user, visibility, filter));
         return results;
     }

@@ -7,7 +7,6 @@ import org.jbei.ice.storage.DAOFactory;
 import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.FolderDAO;
 import org.jbei.ice.storage.model.Account;
-import org.jbei.ice.storage.model.Entry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,11 +33,11 @@ public class SampleEntries {
     }
 
     public List<PartData> get(ColumnField field, boolean asc, int start, int limit, String filter, List<String> fields) {
-        List<Entry> entries = this.dao.getEntrysByFolderType(FolderType.SAMPLE, field, asc, start, limit, filter);
+        List<Long> entries = this.dao.getEntrysByFolderType(FolderType.SAMPLE, field, asc, start, limit, filter);
 
         ArrayList<PartData> data = new ArrayList<>();
-        for (Entry entry : entries) {
-            PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false, fields);
+        for (Long entry : entries) {
+            PartData info = ModelToInfoFactory.createTableView(entry, fields);
             data.add(info);
         }
         return data;

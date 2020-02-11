@@ -311,6 +311,8 @@ angular.module('ice.admin.controller', [])
             const params = angular.copy($scope.params);
 
             Util.get("rest/samples/requests", function (result) {
+                console.log(result);
+
                 $scope.sampleRequests = result;
                 $scope.loadingPage = false;
                 $scope.indexStart = ($scope.currentPage - 1) * $scope.params.limit;
@@ -361,15 +363,35 @@ angular.module('ice.admin.controller', [])
             });
         };
 
+        $scope.sortFolderRequests = function (sort) {
+            $scope.folderRequests.params.asc = ($scope.folderRequests.params.sort === sort ? !$scope.folderRequests.params.asc : false);
+            $scope.folderRequests.params.currentPage = 1;
+            $scope.folderRequests.params.sort = sort;
+            $scope.folderRequestPageChanged();
+        };
+
         $scope.folderRequestPageChanged = function () {
+            $scope.folderRequests.params.offset = ($scope.folderRequests.params.currentPage - 1) * $scope.folderRequests.params.limit;
+
             Util.get("rest/samples/requests", function (result) {
                 $scope.folderRequests.available = result.count;
                 $scope.folderRequests.results = result.requests;
-            }, {isFolder: true});
+            }, $scope.folderRequests.params);
         };
 
         $scope.initFolderRequests = function () {
-            $scope.folderRequests = {available: 0, results: [], params: {limit: 15, currentPage: 1}};
+            $scope.folderRequests = {
+                available: 0,
+                results: [],
+                params: {
+                    asc: false,
+                    sort: 'requested',
+                    limit: 15,
+                    currentPage: 1,
+                    hstep: [15, 30, 50, 100],
+                    isFolder: true
+                },
+            };
             $scope.folderRequestPageChanged();
         };
 
@@ -884,15 +906,15 @@ angular.module('ice.admin.controller', [])
         $scope.selectedFeature = undefined;
         $scope.dynamicPopover = {templateUrl: 'entryPopoverTemplate.html'}
 
-        let getFeatures = function () {
+        const getFeatures = function () {
             $scope.loadingCurationTableData = true;
             Util.get("rest/annotations", function (result) {
                 $scope.features = result.data;
 
                 angular.forEach($scope.features, function (feature) {
                     for (let i = 0; i < feature.features.length; i += 1) {
-                        let f = feature.features[i];
-                        if (f.curation == undefined || !f.curation.exclude) {
+                        const f = feature.features[i];
+                        if (!f.curation || !f.curation.exclude) {
                             feature.allSelected = false;
                             return;
                         }
@@ -921,7 +943,7 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.selectAllFeatures = function (feature) {
-            let features = [];
+            const features = [];
             for (let i = 0; i < feature.features.length; i += 1) {
                 let f = feature.features[i];
                 features.push({id: f.id, curation: {exclude: !feature.allSelected}});
@@ -968,7 +990,6 @@ angular.module('ice.admin.controller', [])
             $scope.loading = true;
             Util.get("rest/fields/" + $scope.selection, function (result) {
                 $scope.partCustomFields = result.data;
-                console.log(result);
             }, {}, function (error) {
                 $scope.loading = false;
             })
@@ -1024,7 +1045,6 @@ angular.module('ice.admin.controller', [])
             {name: 'Options with Text', value: 'MULTI_CHOICE_PLUS'}];
 
         $scope.existingOptions = EntryService.getFieldsForType(entryType);
-        console.log($scope.existingOptions);
 
         // adds option
         $scope.addOption = function (afterIndex) {
@@ -1048,10 +1068,10 @@ angular.module('ice.admin.controller', [])
         };
 
         $scope.existingFieldSelected = function () {
-            console.log($scope.field.existingField);
-            $scope.field.required = $scope.field.existingField.required;
-            $scope.field.label = $scope.field.existingField.label;
-            $scope.field.options = [{name: "schema", value: $scope.field.existingField.schema}]
+            $scope.field.required = $scope.field.existingFieldObject.required;
+            $scope.field.label = $scope.field.existingFieldObject.label;
+            $scope.field.options = [{name: "schema", value: $scope.field.existingFieldObject.schema}]
+            $scope.field.existingField = $scope.field.existingFieldObject.label.toUpperCase();
         };
 
         $scope.createCustomLink = function () {

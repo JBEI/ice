@@ -18,10 +18,9 @@ import org.jbei.ice.storage.hibernate.dao.RemotePartnerDAO;
 import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.RemotePartner;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents entries that are available for the web (public)
@@ -114,6 +113,7 @@ public class WebEntries {
 
         WebEntriesIterator() {
             partners = DAOFactory.getRemotePartnerDAO().getRegistryPartners();
+            parts = new ArrayList<>();
             nextPartner = partners.remove(0);
             fetchMore();
         }
@@ -178,7 +178,9 @@ public class WebEntries {
 
                 if (result.isHasSequence()) {
                     // retrieve sequence
-                    FeaturedDNASequence sequence = IceRestClient.getInstance().getWor(partner.getUrl(), "/rest/web/" + partner.getId() + "/entries/" + result.getRecordId() + "/sequence", FeaturedDNASequence.class, null, partner.getApiKey());
+                    IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey());
+                    String path = "/rest/web/" + partner.getId() + "/entries/" + result.getRecordId() + "/sequence";
+                    FeaturedDNASequence sequence = client.get(path, FeaturedDNASequence.class);
                     if (sequence != null) {
                         partSequence.setSequence(sequence);
                     }
@@ -191,11 +193,11 @@ public class WebEntries {
         }
 
         private PartnerEntries getPartnerEntries(RemotePartner partner) {
-            Map<String, Object> queryParams = new HashMap<>();
-            queryParams.put("offset", start);
-            queryParams.put("limit", fetchCount);
-
-            return IceRestClient.getInstance().getWor(partner.getUrl(), "/rest/partners/" + partner.getId() + "/entries", PartnerEntries.class, queryParams, partner.getApiKey());
+            IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey());
+            client.queryParam("offset", start);
+            client.queryParam("limit", fetchCount);
+            String path = "/rest/partners/" + partner.getId() + "/entries";
+            return client.get(path, PartnerEntries.class);
         }
     }
 }

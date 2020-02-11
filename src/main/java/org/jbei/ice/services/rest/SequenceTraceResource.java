@@ -2,7 +2,7 @@ package org.jbei.ice.services.rest;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.jbei.ice.lib.entry.sequence.TraceSequences;
+import org.jbei.ice.lib.entry.sequence.analysis.TraceSequences;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
@@ -27,8 +27,8 @@ public class SequenceTraceResource extends RestResource {
     public Response updateSequences(@FormDataParam("file") InputStream fileInputStream,
                                     @FormDataParam("file") FormDataContentDisposition contentDisposition) {
         String userId = requireUserId();
-        TraceSequences sequences = new TraceSequences(userId);
-        List<String> errors = sequences.bulkUpdate(fileInputStream);
+        TraceSequences sequences = new TraceSequences();
+        List<String> errors = sequences.bulkUpdate(userId, fileInputStream);
         return super.respond(errors);
     }
 }

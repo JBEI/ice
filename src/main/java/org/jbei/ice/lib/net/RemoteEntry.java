@@ -20,10 +20,8 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public class RemoteEntry {
 
-    //    private final RemoteContact remoteContact;
     private final RemotePartner partner;
     private final long remotePartId;
-    private final IceRestClient iceRestClient;
 
     public RemoteEntry(long partnerId, long remotePartId) {
         if (!hasRemoteAccessEnabled())
@@ -34,9 +32,7 @@ public class RemoteEntry {
         if (partner == null)
             throw new IllegalArgumentException("Cannot retrieve partner with id " + partnerId);
 
-//        this.remoteContact = new RemoteContact();
         this.remotePartId = remotePartId;
-        this.iceRestClient = IceRestClient.getInstance();
     }
 
     /**
@@ -52,13 +48,9 @@ public class RemoteEntry {
 
     public List<TraceSequenceAnalysis> getTraces() {
         try {
+            IceRestClient client = new IceRestClient(partner.getUrl(), this.partner.getApiKey());
             String restPath = "/rest/parts/" + remotePartId + "/traces";
-            ArrayList<TraceSequenceAnalysis> result = iceRestClient.getWor(partner.getUrl(), restPath, ArrayList.class,
-                    null, partner.getApiKey());
-            if (result == null)
-                return null;
-
-            return result;
+            return client.get(restPath, ArrayList.class);
         } catch (Exception e) {
             Logger.error(e.getMessage());
             return null;
@@ -66,12 +58,14 @@ public class RemoteEntry {
     }
 
     public List<PartSample> getSamples() {
+        IceRestClient client = new IceRestClient(partner.getUrl(), this.partner.getApiKey());
         String restPath = "rest/parts/" + remotePartId + "/samples";
-        return iceRestClient.getWor(partner.getUrl(), restPath, ArrayList.class, null, this.partner.getApiKey());
+        return client.get(restPath, ArrayList.class);
     }
 
     public List<UserComment> getComments() {
+        IceRestClient client = new IceRestClient(partner.getUrl(), this.partner.getApiKey());
         String restPath = "rest/parts/" + remotePartId + "/comments";
-        return iceRestClient.getWor(partner.getUrl(), restPath, ArrayList.class, null, this.partner.getApiKey());
+        return client.get(restPath, ArrayList.class);
     }
 }

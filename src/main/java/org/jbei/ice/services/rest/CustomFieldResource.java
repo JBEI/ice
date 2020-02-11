@@ -22,8 +22,7 @@ public class CustomFieldResource extends RestResource {
     @Path("/parts")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response getPartByCustomFields(
-            @Context UriInfo uriInfo) {
+    public Response getPartByCustomFields(@Context UriInfo uriInfo) {
         MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
         if (queryParams.isEmpty())
             return super.respond(new ArrayList<>());

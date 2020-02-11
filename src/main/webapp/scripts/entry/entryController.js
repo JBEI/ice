@@ -276,456 +276,7 @@ angular.module('ice.entry.controller', [])
             });
         }
     })
-    .controller('EditEntryController', function ($scope, $http, $location, Authentication, $rootScope, FileUploader,
-                                                 $stateParams, EntryService, Util, $anchorScroll) {
-        let partLinks;
-        $scope.entry = {id: $stateParams.id};
 
-        Util.get("rest/parts/" + $stateParams.id, function (result) {
-            $scope.entry = EntryService.convertToUIForm(result);
-            partLinks = angular.copy($scope.entry.linkedParts);
-            $scope.entry.linkedParts = [];
-
-            // todo : this is used in other places and should be in a service
-            // convert selection markers from array of strings to array of objects for the ui
-            let arrayLength = result.selectionMarkers.length;
-            if (arrayLength) {
-                let tmp = [];
-                for (let i = 0; i < arrayLength; i++) {
-                    tmp.push({value: result.selectionMarkers[i]});
-                }
-                angular.copy(tmp, $scope.entry.selectionMarkers);
-            } else {
-                $scope.entry.selectionMarkers = [
-                    {}
-                ];
-            }
-
-            // convert links from array of strings to array of objects for the ui
-            let linkLength = result.links.length;
-
-            if (linkLength) {
-                let tmpLinkObjectArray = [];
-                for (let j = 0; j < linkLength; j++) {
-                    tmpLinkObjectArray.push({value: result.links[j]});
-                }
-                angular.copy(tmpLinkObjectArray, $scope.entry.links);
-            } else {
-                $scope.entry.links = [
-                    {}
-                ];
-            }
-
-            if (result.bioSafetyLevel) {
-                if (result.bioSafetyLevel === -1)
-                    $scope.entry.bioSafetyLevel = "Restricted";
-                else
-                    $scope.entry.bioSafetyLevel = "Level " + result.bioSafetyLevel;
-            }
-
-            $scope.linkOptions = EntryService.linkOptions(result.type);
-            $scope.selectedFields = $scope.entry.fields; // EntryService.getFieldsForType(result.type);
-            $scope.activePart = $scope.entry;
-        });
-
-        // file upload
-        const uploader = $scope.sequenceFileUpload = new FileUploader({
-            scope: $scope, // to automatically update the html. Default: $rootScope
-            url: "rest/file/sequence",
-            method: 'POST',
-            removeAfterUpload: true,
-            headers: {"X-ICE-Authentication-SessionId": Authentication.getSessionId()},
-            autoUpload: true,
-            queueLimit: 1 // can only upload 1 file
-        });
-
-        uploader.onProgressItem = function (item, progress) {
-            $scope.serverError = undefined;
-
-            if (progress !== "100")  // isUploading is always true until it returns
-                return;
-
-            // upload complete. have processing
-            $scope.processingFile = item.file.name;
-        };
-
-        uploader.onSuccessItem = function () {
-            $scope.entry.hasSequence = true;
-        };
-
-        uploader.onCompleteAll = function () {
-            $scope.processingFile = undefined;
-        };
-
-        uploader.onBeforeUploadItem = function (item) {
-            item.formData.push({entryType: $scope.entry.type});
-            item.formData.push({entryRecordId: $scope.entry.recordId});
-        };
-
-        uploader.onErrorItem = function () {
-            $scope.serverError = true;
-        };
-
-        $scope.addLink = function (schema, index) {
-            $scope.activePart[schema].splice(index + 1, 0, {value: ''});
-        };
-
-        // todo : make name more generic
-        $scope.removeLink = function (schema, index) {
-            $scope.activePart[schema].splice(index, 1);
-        };
-
-        $scope.cancelEdit = function () {
-            $location.path("entry/" + $stateParams.id);
-        };
-
-        $scope.getLocation = function (inputField, val) {
-            return $http.get('rest/search/filter', {
-                headers: {'X-ICE-Authentication-SessionId': Authentication.getSessionId()},
-                params: {
-                    token: val,
-                    field: inputField
-                }
-            }).then(function (res) {
-                return res.data;
-            });
-        };
-
-        $scope.editEntry = function () {
-            let canSubmit = EntryService.validateFields($scope.entry, $scope.selectedFields);
-            $scope.entry.type = $scope.entry.type.toUpperCase();
-
-            if (!canSubmit) {
-                Util.setFeedback('Missing required fields', 'danger');
-                $anchorScroll();
-                return;
-            }
-
-            if ($scope.entry.bioSafetyLevel === 'Level 1')
-                $scope.entry.bioSafetyLevel = 1;
-            else
-                $scope.entry.bioSafetyLevel = 2;
-
-            // convert arrays of objects to array strings
-            $scope.entry.links = EntryService.toStringArray($scope.entry.links);
-            $scope.entry.selectionMarkers = EntryService.toStringArray($scope.entry.selectionMarkers);
-
-            // convert the part to a form the server can work with
-            $scope.entry = EntryService.getTypeData($scope.entry);
-            $scope.entry.linkedParts = partLinks;
-
-            Util.update("rest/parts/" + $scope.entry.id, $scope.entry, {}, function (result) {
-                $location.path("entry/" + result.id);
-                Util.setFeedback('Part successfully updated', 'success');
-            });
-        };
-
-        $scope.setActive = function (index) {
-            if (!isNaN(index) && $scope.entry.linkedParts.length <= index)
-                return;
-
-            $scope.active = index;
-            if (isNaN(index))
-                $scope.activePart = $scope.entry;
-            else
-                $scope.activePart = $scope.entry.linkedParts[index];
-            $scope.activePart.fields = EntryService.getFieldsForType($scope.activePart.type);
-        };
-    })
-    .controller('CreateEntryController', function ($http, $scope, $uibModal, $rootScope, FileUploader, $location,
-                                                   $stateParams, Authentication, EntryService, Util, $anchorScroll) {
-        $scope.createType = $stateParams.type;
-        $scope.showMain = true;
-
-        // generate the various link options for selected option
-        $scope.linkOptions = EntryService.linkOptions($scope.createType.toLowerCase());
-
-        // retrieves the defaults for the specified type. Note that $scope.part is the main part
-        const getPartDefaults = function (type, isMain) {
-            Util.get("rest/parts/defaults/" + type, function (result) {
-                if (isMain) { // or if !$scope.part
-                    $scope.part = result;
-                    $scope.part = EntryService.setNewEntryFields($scope.part);
-                    $scope.part.linkedParts = [];
-                    $scope.activePart = $scope.part;
-
-                    $scope.activePart.fields.forEach(function (field) {
-                        field.invalid = false;
-                    })
-                } else {
-                    let newPart = result;
-                    newPart = EntryService.setNewEntryFields(newPart);
-                    $scope.part.linkedParts.push(newPart);
-
-                    $scope.colLength = 11 - $scope.part.linkedParts.length;
-                    $scope.active = $scope.part.linkedParts.length - 1;
-                    $scope.activePart = $scope.part.linkedParts[$scope.active];
-                }
-            });
-        };
-
-        // init : get defaults for main entry
-        getPartDefaults($scope.createType, true);
-
-        $scope.addLink = function (schema) {
-            $scope.part[schema].push({value: ''});
-        };
-
-        $scope.removeLink = function (schema, index) {
-            $scope.part[schema].splice(index, 1);
-        };
-
-        $scope.addNewPartLink = function (type) {
-            getPartDefaults(type, false);
-        };
-
-        $scope.addExistingPartLink = function ($item, $model) {
-            Util.get("rest/parts/" + $model, function (result) {
-                $scope.activePart = result;
-                $scope.activePart.isExistingPart = true;
-                if (!$scope.activePart.parameters)
-                    $scope.activePart.parameters = [];
-                $scope.addExisting = false;
-                $scope.activePart.fields = EntryService.getFieldsForType($scope.activePart.type);
-                $scope.part.linkedParts.push($scope.activePart);
-
-                $scope.colLength = 11 - $scope.part.linkedParts.length;
-                $scope.active = $scope.part.linkedParts.length - 1;
-            });
-        };
-
-        $scope.deleteNewPartLink = function (linkedPart) {
-            let indexOf = $scope.part.linkedParts.indexOf(linkedPart);
-            if (indexOf < 0 || indexOf >= $scope.part.linkedParts.length)
-                return;
-
-            console.log("delete", linkedPart, "at", indexOf);
-            $scope.part.linkedParts.splice(indexOf, 1);
-
-            // todo: will need to actually delete it if has an id (linkedPart.id)
-
-            // remove from array of linked parts
-            if ($scope.active === indexOf) {
-                let newActive;
-                // set new active
-                console.log("set new active", $scope.part.linkedParts.length);
-                if (indexOf + 1 < $scope.part.linkedParts.length)
-                    newActive = indexOf + 1;
-                else {
-                    if ($scope.part.linkedParts.length === 0)
-                    // not really needed since when main will not be shown if no other tabs present
-                        newActive = 'main';
-                    else
-                        newActive = indexOf - 1;
-                }
-                $scope.setActive(newActive);
-            }
-        };
-
-        $scope.active = 'main';
-        $scope.setActive = function (index) {
-            if (!isNaN(index) && $scope.part.linkedParts.length <= index)
-                return;
-
-            $scope.active = index;
-            if (isNaN(index))
-                $scope.activePart = $scope.part;
-            else
-                $scope.activePart = $scope.part.linkedParts[index];
-        };
-
-        $scope.getLocation = function (inputField, val) {
-            return $http.get('rest/search/filter', {
-                headers: {'X-ICE-Authentication-SessionId': Authentication.getSessionId()},
-                params: {
-                    token: val,
-                    field: inputField
-                }
-            }).then(function (res) {
-                return res.data;
-            });
-        };
-
-        $scope.submitPart = function () {
-            let errorTabActive = false;
-
-            // validate main part
-            let canSubmit = EntryService.validateFields($scope.part, $scope.part.fields);
-            if (!canSubmit) {
-                $scope.setActive('main');
-                errorTabActive = true;
-            }
-            $scope.part.type = $scope.part.type.toUpperCase();
-
-            // validate contained parts, if any
-            if ($scope.part.linkedParts && $scope.part.linkedParts.length) {
-                for (let idx = 0; idx < $scope.part.linkedParts.length; idx += 1) {
-                    let linkedPart = $scope.part.linkedParts[idx];
-
-                    // do not attempt to validate existing part
-                    if (linkedPart.isExistingPart)
-                        continue;
-
-                    //$scope.selectedFields = EntryService.getFieldsForType(linkedPart.type);
-
-                    let canSubmitLinked = EntryService.validateFields(linkedPart, linkedPart.fields);
-                    if (!canSubmitLinked) {
-                        if (!errorTabActive) {
-                            $scope.setActive(idx);
-                            errorTabActive = true;
-                        }
-                        canSubmit = canSubmitLinked;
-                    }
-                }
-            }
-
-            if (!canSubmit) {
-                Util.setFeedback("Missing required fields", "danger");
-                $anchorScroll();
-                return;
-            }
-
-            // convert arrays of objects to array strings
-            $scope.part.links = EntryService.toStringArray($scope.part.links);
-            $scope.part.selectionMarkers = EntryService.toStringArray($scope.part.selectionMarkers);
-
-            for (let i = 0; i < $scope.part.linkedParts.length; i += 1) {
-                $scope.part.linkedParts[i].links = EntryService.toStringArray($scope.part.linkedParts[i].links);
-                $scope.part.linkedParts[i].selectionMarkers = EntryService.toStringArray($scope.part.linkedParts[i].selectionMarkers);
-            }
-
-            // convert the part to a form the server can work with (including custom fields)
-            $scope.part = EntryService.getTypeData($scope.part);
-
-            // create or update the part depending on whether there is a current part id
-            // which might be the case if a sequence is uploaded first
-            if ($scope.part.id) {
-                Util.update("rest/parts/" + $scope.part.id, $scope.part, {}, function (result) {
-                    $location.path('/entry/' + result.id);
-                });
-            } else {
-                Util.post("rest/parts", $scope.part, function (result) {
-                    $scope.$emit("UpdateCollectionCounts");
-                    if ($scope.part.pastedSequence) {
-                        // todo : also handle linked parts
-                        Util.update("rest/parts/" + result.id + "/sequence", {sequence: $scope.part.pastedSequence}, {}, function () {
-                            $location.path('/entry/' + result.id);
-                            $scope.showSBOL = false;
-                        })
-                    } else {
-                        $location.path('/entry/' + result.id);
-                        $scope.showSBOL = false;
-                    }
-                });
-            }
-        };
-
-        $scope.format = 'MMM d, yyyy h:mm:ss a';
-
-        $scope.getEntriesByPartNumber = function (val) {
-            return $http.get('rest/search/filter', {
-                headers: {'X-ICE-Authentication-SessionId': Authentication.getSessionId()},
-                params: {
-                    token: val,
-                    field: 'PART_NUMBER'
-                }
-            }).then(function (res) {
-                return res.data;
-            });
-        };
-
-        // for the date picker TODO : make it a directive ???
-        $scope.today = function () {
-            $scope.dt = new Date();
-        };
-        $scope.today();
-
-        $scope.clear = function () {
-            $scope.dt = null;
-        };
-
-        $scope.addCustomParameter = function () {
-            $scope.activePart.parameters.push({key: '', value: ''});
-        };
-
-        $scope.removeCustomParameter = function (index) {
-            $scope.activePart.parameters.splice(index, 1);
-        };
-
-        $scope.dateOptions = {
-            'year-format': "'yy'",
-            'starting-day': 1
-        };
-
-        $scope.cancelEntryCreate = function () {
-            $location.path("folders/personal");
-        };
-
-        // file upload
-        let uploader = $scope.sequenceFileUpload = new FileUploader({
-            scope: $scope, // to automatically update the html. Default: $rootScope
-            url: "rest/file/sequence",
-            method: 'POST',
-            removeAfterUpload: true,
-            headers: {"X-ICE-Authentication-SessionId": Authentication.getSessionId()},
-            autoUpload: true,
-            queueLimit: 1 // can only upload 1 file
-        });
-
-        $scope.uploadFile = function () {
-            if (!$scope.isPaste) {
-                uploader.queue[0].upload();
-            }
-        };
-
-        // REGISTER HANDLERS
-        uploader.onAfterAddingAll = function () {
-            $scope.serverError = false;
-        };
-
-        uploader.onBeforeUploadItem = function (item) {
-            let entryTypeForm;
-            if ($scope.active === 'main')
-                entryTypeForm = {entryType: $scope.part.type.toUpperCase()};
-            else
-                entryTypeForm = {entryType: $scope.part.linkedParts[$scope.active].type};
-            item.formData.push(entryTypeForm);
-        };
-
-        uploader.onProgressItem = function (item, progress) {
-            if (progress !== "100")  // isUploading is always true until it returns
-                return;
-
-            // upload complete. have processing
-            $scope.processingFile = item.file.name;
-        };
-
-        uploader.onSuccessItem = function (item, response) {
-            if ($scope.active === undefined || isNaN($scope.active)) {
-                // set main entry id
-                $scope.part.id = response.entryId;
-                $scope.part.hasSequence = true;
-            } else {
-                // set linked parts id
-                $scope.part.linkedParts[$scope.active].id = response.entryId;
-                $scope.part.linkedParts[$scope.active].hasSequence = true;
-            }
-
-            $scope.activePart.hasSequence = true;
-        };
-
-        uploader.onErrorItem = function (item, response, status, headers) {
-            item.remove();
-            console.log(item, response, status, headers);
-            $scope.serverError = true;
-            $scope.processingFile = undefined;
-        };
-
-        uploader.onCompleteAll = function () {
-            $scope.processingFile = undefined;
-            $scope.serverError = false;
-        };
-    })
     .controller('EntryPermissionController', function ($rootScope, $scope, filterFilter, Util) {
         let panes = $scope.panes = [];
         $scope.userFilterInput = undefined;
@@ -950,8 +501,9 @@ angular.module('ice.entry.controller', [])
 
             // determines if the specified field has a value that allows is to be displayed
             $scope.fieldHasValue = function (field) {
-                if (field.isCustom)
-                    return true;
+                if (field.isCustom) {
+                    return field.value;
+                }
 
                 return $scope.entry[field.schema] != null && $scope.entry[field.schema].toString().length !== 0;
             };
@@ -1488,7 +1040,6 @@ angular.module('ice.entry.controller', [])
                 if ($scope.entry.canEdit)
                     $scope.newParameter = {edit: false};
 
-                // $scope.entryFields = EntryService.getFieldsForType(result.type.toLowerCase());
                 $scope.entry.remote = params.remote;
 
                 // get sample count, comment count etc
@@ -1504,6 +1055,53 @@ angular.module('ice.entry.controller', [])
             });
 
             let menuSubDetails = $scope.subDetails = EntryService.getMenuSubDetails(params.remote);
+
+            $scope.enableQuickEdit = function (field) {
+
+                //
+                // converts autoCompleteAdd array of strings to object
+                //
+                if (field.inputType === 'autoCompleteAdd' && angular.isArray($scope.entry[field.schema])) {
+                    $scope.convertedAutoCompleteAdd = [];
+
+                    for (let i = 0; i < $scope.entry[field.schema].length; i += 1) {
+                        $scope.convertedAutoCompleteAdd[i] = {value: $scope.entry[field.schema][i]};
+                    }
+                }
+                //
+                // end
+                //
+
+                $scope.quickEdit = {};
+                field.edit = true; //
+
+                // for custom fields
+                if (field.isCustom) {
+                    $scope.quickEdit[field.label] = field.value;
+                }
+
+                // special treatment for biosafety
+                if (field.schema !== "bioSafetyLevel") {
+                    $scope.quickEdit[field.schema] = $scope.entry[field.schema];
+                } else {
+                    switch ($scope.entry[field.schema]) {
+                        case "Level 2":
+                            $scope.quickEdit[field.schema] = '2';
+                            break;
+
+                        case "Restricted":
+                            $scope.quickEdit[field.schema] = '-1';
+                            break;
+
+                        default:
+                            $scope.quickEdit[field.schema] = '1';
+                    }
+                }
+
+                if (field.inputType === 'withEmail') {
+                    $scope.quickEdit[field.schema + 'Email'] = $scope.entry[field.schema + 'Email']
+                }
+            };
 
             $scope.showSelection = function (index) {
                 angular.forEach(menuSubDetails, function (details) {
@@ -1551,15 +1149,25 @@ angular.module('ice.entry.controller', [])
                 $scope[type] = val;
             };
 
-            $scope.quickEdit = {};
-
             $scope.quickEditEntry = function (field) {
                 field.errorUpdating = false;
                 field.updating = true;
                 field.invalid = false;
 
+                const values = [];
+
                 if (field.inputType === "autoCompleteAdd") {
                     $scope.quickEdit[field.schema] = $scope.convertedAutoCompleteAdd;
+                    angular.forEach($scope.convertedAutoCompleteAdd, function (obj) {
+                        values.push(obj.value);
+                    })
+                } else {
+                    for (const property in $scope.quickEdit) {
+                        if (!$scope.quickEdit.hasOwnProperty(property))
+                            continue;
+
+                        values.push($scope.quickEdit[property]);
+                    }
                 }
 
                 // validate
@@ -1568,31 +1176,26 @@ angular.module('ice.entry.controller', [])
                     field.updating = false;
                     return;
                 }
-                // getTypeData is not converting selection markers for some reason
-                if (field.inputType === "autoCompleteAdd") {
-                    $scope.entry[field.schema] = [];
-                    angular.forEach($scope.convertedAutoCompleteAdd, function (val) {
-                        if (val.value.trim() === "")
-                            return;
 
-                        $scope.entry[field.schema].push(val.value);
-                    });
-                } else {
-                    // update the main entry with quickEdit (which is the model)
-                    $scope.entry[field.schema] = $scope.quickEdit[field.schema];
-                    if (field.inputType === 'withEmail') {
-                        $scope.entry[field.schema + 'Email'] = $scope.quickEdit[field.schema + 'Email'];
-                    }
-                }
+                // update on server with field.label
+                Util.update("rest/parts/" + $scope.entry.id + "/" + field.label, values, {}, function (result) {
+                    $scope.entry = EntryService.convertToUIForm(result);
+                    // switch (field.inputType) {
+                    //     default:
+                    //         $scope.entry[field.schema] = $scope.quickEdit[field.schema];
+                    //         break;
+                    //
+                    //     case "withEmail":
+                    //         $scope.entry[field.schema + 'Email'] = $scope.quickEdit[field.schema + 'Email'];
+                    //         break;
+                    //
+                    //     case "autoCompleteAdd":
+                    //         console.log(field, values);
+                    //         $scope.entry[field.schema] = values;
+                    //         break;
+                    // }
 
-                $scope.entry = EntryService.getTypeData($scope.entry);
-
-                Util.update("rest/parts/" + $scope.entry.id, $scope.entry, {}, function (result) {
                     field.edit = false;
-
-                    if (result)
-                        $scope.entry = EntryService.convertToUIForm(result);
-
                     field.dirty = false;
                     field.updating = false;
                 }, function (error) {
@@ -1607,20 +1210,6 @@ angular.module('ice.entry.controller', [])
                 if (bslValue === -1)
                     return "Restricted";
                 return bslValue;
-            };
-
-// converts an array of string (currently only for autoCompleteAdd) to object so it can be edited
-            $scope.checkConvertFieldToObject = function (field) {
-                $scope.convertedAutoCompleteAdd = [];
-                if (!angular.isArray($scope.entry[field.schema]))
-                    return;
-
-                if (field.inputType !== 'autoCompleteAdd')
-                    return;
-
-                for (let i = 0; i < $scope.entry[field.schema].length; i += 1) {
-                    $scope.convertedAutoCompleteAdd[i] = {value: $scope.entry[field.schema][i]};
-                }
             };
 
             $scope.deleteCustomField = function (parameter) {

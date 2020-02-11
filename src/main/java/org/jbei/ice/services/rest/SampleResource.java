@@ -9,6 +9,7 @@ import org.jbei.ice.lib.dto.entry.AttachmentInfo;
 import org.jbei.ice.lib.dto.sample.*;
 import org.jbei.ice.lib.entry.sample.RequestRetriever;
 import org.jbei.ice.lib.entry.sample.SampleCSV;
+import org.jbei.ice.lib.entry.sample.SampleCart;
 import org.jbei.ice.lib.entry.sample.SampleService;
 
 import javax.ws.rs.*;
@@ -141,7 +142,9 @@ public class SampleResource extends RestResource {
     @Path("/requests/{id}")
     public Response deleteSampleRequest(@PathParam("id") long requestId) {
         String userId = requireUserId();
-        return respond(Response.Status.OK, requestRetriever.removeSampleFromCart(userId, requestId));
+        Logger.info(userId + ": Removing sample from cart for entry " + requestId);
+        SampleCart cart = new SampleCart(userId);
+        return respond(Response.Status.OK, cart.removeRequest(requestId));
     }
 
     /**
@@ -184,7 +187,8 @@ public class SampleResource extends RestResource {
     public Response addRequest(SampleRequest request) {
         String userId = requireUserId();
         log(userId, "add sample request to cart for " + request.getPartData().getId());
-        return super.respond(requestRetriever.placeSampleInCart(userId, request));
+        SampleCart cart = new SampleCart(userId);
+        return super.respond(cart.addRequest(request));
     }
 
     @POST

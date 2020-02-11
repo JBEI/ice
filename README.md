@@ -20,7 +20,7 @@ To install in a production environment, please [consult our manual](http://ice.j
 ### Development
 To set up a development environment or local machine installation make sure you have the following dependencies installed
 
-* [Java OpenJDK 12](https://jdk.java.net/12/)
+* [Java JDK 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
 * [Maven 3](https://maven.apache.org/download.cgi)
 * [Git](https://git-scm.com/downloads)
 
@@ -35,18 +35,6 @@ Command line installation steps (linux environment):
 
         mvn clean install -DskipTests=true
         
-  If you run into problems at this step, make sure maven is using Java version 12 by running
-  
-        mvn -version
-        
-  The output should look similar to the following
-  
-        Apache Maven 3.6.0
-        Maven home: /usr/share/maven
-        Java version: 12.x.x, vendor: Private Build, runtime: /usr/lib/jvm/java-12-openjdk-amd64
-        Default locale: en_US, platform encoding: UTF-8
-        OS name: "linux", version: "5.0.0-27-generic", arch: "amd64", family: "unix" 
-
 * Start the embedded undertow server 
         
         java -cp "./target/ice-{version-number}-classes.jar:./target/ice-{version-number}/WEB-INF/lib/*" DevelopmentServer

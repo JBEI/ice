@@ -3,7 +3,7 @@ package org.jbei.ice.lib.net;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
 import org.jbei.ice.lib.dto.FeaturedDNASequence;
-import org.jbei.ice.lib.entry.sequence.ByteArrayWrapper;
+import org.jbei.ice.lib.entry.sequence.InputStreamWrapper;
 import org.jbei.ice.lib.entry.sequence.SequenceUtil;
 import org.jbei.ice.lib.entry.sequence.composers.formatters.*;
 import org.jbei.ice.lib.utils.Utils;
@@ -25,7 +25,6 @@ public class RemoteSequence {
     private final RemoteContact remoteContact;
     private final RemotePartner partner;
     private final long remotePartId;
-    private final IceRestClient iceRestClient;
 
     public RemoteSequence(long remoteId, long remotePartId) {
         if (!hasRemoteAccessEnabled())
@@ -38,7 +37,6 @@ public class RemoteSequence {
 
         this.remoteContact = new RemoteContact();
         this.remotePartId = remotePartId;
-        this.iceRestClient = IceRestClient.getInstance();
     }
 
     /**
@@ -54,24 +52,21 @@ public class RemoteSequence {
 
     public FeaturedDNASequence getRemoteSequence() {
         try {
+            IceRestClient client = new IceRestClient(partner.getUrl(), partner.getApiKey());
             String restPath = "rest/parts/" + remotePartId + "/sequence";
-            Object result = iceRestClient.getWor(partner.getUrl(), restPath, FeaturedDNASequence.class, null, partner.getApiKey());
-            if (result == null)
-                return null;
-
-            return (FeaturedDNASequence) result;
+            return client.get(restPath, FeaturedDNASequence.class);
         } catch (Exception e) {
             Logger.error(e.getMessage());
             return null;
         }
     }
 
-    public ByteArrayWrapper get(String type) {
+    public InputStreamWrapper get(String type) {
         FeaturedDNASequence featuredDNASequence = remoteContact.getPublicEntrySequence(partner.getUrl(),
                 Long.toString(remotePartId),
                 partner.getApiKey());
         if (featuredDNASequence == null)
-            return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
+            return new InputStreamWrapper(new byte[]{'\0'}, "no_sequence");
 
         String name = featuredDNASequence.getName();
 
@@ -108,10 +103,10 @@ public class RemoteSequence {
             }
 
             formatter.format(sequence, byteStream);
-            return new ByteArrayWrapper(byteStream.toByteArray(), name);
+            return new InputStreamWrapper(byteStream.toByteArray(), name);
         } catch (Exception e) {
             Logger.error(e);
-            return new ByteArrayWrapper(new byte[]{'\0'}, "no_sequence");
+            return new InputStreamWrapper(new byte[]{'\0'}, "no_sequence");
         }
     }
 }

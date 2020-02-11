@@ -50,15 +50,19 @@
 
 </div>
 
-<div class="modal-footer">
-    <div class="pull-left" ng-if="processingDownload">
-        <img src="img/loader-mini.gif"/> <i>Processing request...</i>
-    </div>
-
+<div class="modal-footer" ng-if="!processingDownload">
     <div class="pull-right">
         <button class="btn btn-sm btn-link" ng-click="$dismiss('cancel')">Cancel</button>
         <button class="btn btn-sm btn-primary" ng-disabled='processingDownload' ng-click="customExport()">Export
         </button>
+    </div>
+</div>
+
+<div class="modal-footer" ng-if="processingDownload">
+    <i>Your request has been submitted. You will be notified by email when it is processed.</i>
+
+    <div class="pull-right">
+        <button class="btn btn-sm btn-default" ng-click="$dismiss('cancel')">Close</button>
     </div>
 </div>
 

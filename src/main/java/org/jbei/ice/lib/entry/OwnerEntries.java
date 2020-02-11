@@ -8,7 +8,6 @@ import org.jbei.ice.storage.ModelToInfoFactory;
 import org.jbei.ice.storage.hibernate.dao.AccountDAO;
 import org.jbei.ice.storage.hibernate.dao.EntryDAO;
 import org.jbei.ice.storage.model.Account;
-import org.jbei.ice.storage.model.Entry;
 import org.jbei.ice.storage.model.Group;
 
 import java.util.ArrayList;
@@ -59,7 +58,7 @@ public class OwnerEntries {
     }
 
     public List<PartData> retrieveOwnerEntries(ColumnField sort, boolean asc, int start, int limit, String filter, List<String> fields) {
-        List<Entry> entries;
+        List<Long> entries;
 
         if (this.isAdmin || this.isSelf) {
             entries = entryDAO.retrieveOwnerEntries(this.ownerAccount.getEmail(), sort, asc, start, limit, filter);
@@ -74,10 +73,11 @@ public class OwnerEntries {
         }
 
         ArrayList<PartData> data = new ArrayList<>();
-        for (Entry entry : entries) {
-            PartData info = ModelToInfoFactory.createTableViewData(account.getEmail(), entry, false, fields);
+        for (Long id : entries) {
+            PartData info = ModelToInfoFactory.createTableView(id, fields);
             data.add(info);
         }
+
         return data;
     }
 

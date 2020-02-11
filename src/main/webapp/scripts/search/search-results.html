@@ -29,7 +29,7 @@
         <!--non-blast results remote search results-->
         <table cellspacing="0"
                class="table table-hover font-95em table-condensed table-border-bottom"
-               ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
+               ng-if="!searchFilters.blastQuery|| !searchFilters.blastQuery.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
             <tr ng-show="searchResults.results.length>0">
@@ -127,7 +127,7 @@
         <!-- remote blast results -->
         <table cellspacing="0"
                class="table table-condensed table-border-bottom table-hover font-95em"
-               ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
+               ng-if="searchFilters.blastQuery&& searchFilters.blastQuery.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
             <tr data-ng-show="searchResults.results.length>0">
@@ -188,7 +188,7 @@
                        target="_blank">{{result.partner.name}}</a>
                 </td>
                 <td>
-                    {{result.alignment/result.queryLength * 100}}%
+                    {{result.alignment/result.queryLength * 100 | number}}%
                     <br>
                     <small class="text-muted">{{result.alignment}}/{{result.queryLength}}</small>
                 </td>
@@ -203,7 +203,7 @@
         <!--local blast search results-->
         <table cellspacing="0"
                class="table table-hover table-condensed table-border-bottom font-95em"
-               ng-if="searchFilters.blastQuery && searchFilters.blastQuery.sequence"
+               ng-if="searchFilters.blastQuery&& searchFilters.blastQuery.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
             <tr data-ng-show="searchResults.results.length>0">
@@ -267,7 +267,7 @@
                 </td>
                 <td></td>
                 <td>
-                    {{result.alignment/result.queryLength * 100}}%
+                    {{result.alignment/result.queryLength * 100 | number}}%
                     <br>
                     <small class="text-muted">{{result.alignment}}/{{result.queryLength}}</small>
                 </td>
@@ -279,7 +279,7 @@
 
         <!--local non-blast search results-->
         <table cellspacing="0" class="table table-hover table-condensed font-95em table-border-bottom"
-               ng-if="!searchFilters.blastQuery || !searchFilters.blastQuery.sequence"
+               ng-if="!searchFilters.blastQuery|| !searchFilters.blastQuery.sequence"
                ng-class="{'opacity_4':loadingSearchResults}">
             <thead>
             <tr data-ng-show='!searchResults'>
@@ -389,7 +389,7 @@
                 </td>
                 <td style="vertical-align: middle">
                     <div>
-                        <a ng-href="profile/{{result.entryInfo.ownerId}}">{{result.entryInfo.owner}}</a>
+                        {{result.entryInfo.owner}}
                     </div>
                 </td>
                 <td style="vertical-align: middle">
@@ -414,8 +414,8 @@
     <div class="row" data-ng-if="searchResults && searchResults.results.length > 0" style="margin-top: -15px">
         <div class="col-md-6" style="padding-left: 0">
             <ul uib-pagination total-items="searchResults.resultCount" ng-change="searchResultPageChanged()"
-                            ng-model="params.currentPage" max-size="maxSize"
-                            class="pagination-sm" items-per-page="params.limit" boundary-links="true">
+                ng-model="params.currentPage" max-size="maxSize"
+                class="pagination-sm" items-per-page="params.limit" boundary-links="true">
             </ul>
         </div>
         <div class="col-md-4" style="margin: 22px 0;">
@@ -427,7 +427,8 @@
         <div class="col-md-2" style="margin-top: 25px;">
             <small class="text-muted pull-right">Show:
                 <select ng-change="hStepChanged()" ng-model="params.limit"
-                        ng-options="opt for opt in params.hstep"></select></small>
+                        ng-options="opt for opt in params.hstep"></select>
+            </small>
         </div>
     </div>
 </div>

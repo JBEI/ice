@@ -127,7 +127,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
             if (type != null) {
                 predicates.add(getBuilder().equal(entry.get("recordType"), type.getName()));
             }
-            query.select(entry.get("id")).where(predicates.toArray(new Predicate[predicates.size()]));
+            query.select(entry.get("id")).where(predicates.toArray(new Predicate[0]));
             return currentSession().createQuery(query).list();
         } catch (Exception he) {
             Logger.error(he);
@@ -144,7 +144,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
      * @return list of found entries
      * @throws DAOException on Exception retrieving
      */
-    public List<Entry> retrieveFolderContents(long folderId, PageParameters pageParameters, boolean visibleOnly) {
+    public List<Long> retrieveFolderContents(long folderId, PageParameters pageParameters, boolean visibleOnly) {
         try {
             String sortString;
             switch (pageParameters.getSortField()) {
@@ -170,7 +170,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
                     break;
             }
 
-            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class);
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Folder> from = query.from(Folder.class);
             Join<Folder, Entry> entry = from.join("contents");
 
@@ -181,7 +181,7 @@ public class FolderDAO extends HibernateRepository<Folder> {
                 predicates.add(entry.get("visibility").in(Arrays.asList(Visibility.OK.getValue(),
                         Visibility.REMOTE.getValue())));
             }
-            query.select(entry).where(predicates.toArray(new Predicate[0]));
+            query.select(entry.get("id")).where(predicates.toArray(new Predicate[0]));
             query.orderBy(pageParameters.isAscending() ? getBuilder().asc(entry.get(sortString)) :
                     getBuilder().desc(entry.get(sortString)));
             return currentSession().createQuery(query).setFirstResult(pageParameters.getOffset())
@@ -353,15 +353,15 @@ public class FolderDAO extends HibernateRepository<Folder> {
         }
     }
 
-    public List<Entry> getEntrysByFolderType(FolderType type, ColumnField field, boolean asc, int start, int limit, String filter) {
+    public List<Long> getEntrysByFolderType(FolderType type, ColumnField field, boolean asc, int start, int limit, String filter) {
         try {
-            CriteriaQuery<Entry> query = getBuilder().createQuery(Entry.class).distinct(true);
+            CriteriaQuery<Long> query = getBuilder().createQuery(Long.class);
             Root<Folder> from = query.from(Folder.class);
             Join<Folder, Entry> entry = from.join("contents");
             List<Predicate> predicates = getPredicates(entry, filter);
             predicates.add(getBuilder().equal(from.get("type"), type));
 
-            query.select(entry).where(predicates.toArray(new Predicate[0]));
+            query.select(entry.get("id")).where(predicates.toArray(new Predicate[0]));
             String sortString = EntryAccessorUtilities.columnFieldToString(field);
 
             query.orderBy(asc ? getBuilder().asc(entry.get(sortString)) : getBuilder().desc(entry.get(sortString)));

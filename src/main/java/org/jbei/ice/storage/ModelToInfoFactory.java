@@ -11,7 +11,9 @@ import org.jbei.ice.storage.model.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Factory for converting {@link Entry}s to a {@link org.jbei.ice.lib.dto.entry.PartData}
@@ -24,7 +26,7 @@ public class ModelToInfoFactory {
     public static PartData getInfo(Entry entry) {
         EntryType type = EntryType.nameToType(entry.getRecordType());
         if (type == null)
-            return null;
+            throw new IllegalArgumentException("Invalid entry type: " + entry.getRecordType());
 
         PartData partData = new PartData(type);
         PartData part = getCommon(partData, entry);
@@ -39,7 +41,7 @@ public class ModelToInfoFactory {
                 break;
 
             case SEED:
-                part.setArabidopsisSeedData(seedInfo(entry));
+                part.setSeedData(seedInfo(entry));
                 break;
 
             case PROTEIN:
@@ -71,8 +73,8 @@ public class ModelToInfoFactory {
         return infos;
     }
 
-    private static ArabidopsisSeedData seedInfo(Entry entry) {
-        ArabidopsisSeedData data = new ArabidopsisSeedData();
+    private static SeedData seedInfo(Entry entry) {
+        SeedData data = new SeedData();
 
         // seed specific
         ArabidopsisSeed seed = (ArabidopsisSeed) entry;
@@ -225,6 +227,8 @@ public class ModelToInfoFactory {
         view.setRecordId(entry.getRecordId());
         view.setPartId(entry.getPartNumber());
         view.setName(entry.getName());
+        view.setShortDescription(entry.getShortDescription());
+
         view.setAlias(entry.getAlias());
         view.setCreator(entry.getCreator());
         view.setCreatorEmail(entry.getCreatorEmail());
@@ -244,7 +248,6 @@ public class ModelToInfoFactory {
             view.setCreatorId(account.getId());
 
         view.setKeywords(entry.getKeywords());
-        view.setShortDescription(entry.getShortDescription());
         view.setCreationTime(entry.getCreationTime().getTime());
         view.setModificationTime(entry.getModificationTime().getTime());
         view.setBioSafetyLevel(entry.getBioSafetyLevel());
@@ -253,21 +256,23 @@ public class ModelToInfoFactory {
         return view;
     }
 
-    private static long getAccountId(String email) {
-        if (email == null || email.isEmpty())
-            return 0;
 
-        Account account = DAOFactory.getAccountDAO().getByEmail(email);
-        if (account == null)
-            return 0;
 
-        return account.getId();
-    }
+    public static PartData createTableView(long entryId, List<String> fields) {
+        Set<String> fieldsToProcess;
+        if (fields == null)
+            fieldsToProcess = new HashSet<>();
+        else
+            fieldsToProcess = new HashSet<>(fields);
 
-    public static PartData createTableViewData(String userId, Entry entry, boolean includeOwnerInfo, List<String> fields) {
-        if (entry == null)
-            return null;
+        fieldsToProcess.add("name");
+        fieldsToProcess.add("status");
+        fieldsToProcess.add("recordType");
+        fieldsToProcess.add("creation_time");
+        fieldsToProcess.add("short_description");
 
+        // minimum set of values
+        Entry entry = DAOFactory.getEntryDAO().get(entryId);
         EntryType type = EntryType.nameToType(entry.getRecordType());
         PartData view = new PartData(type);
         view.setId(entry.getId());
@@ -275,53 +280,30 @@ public class ModelToInfoFactory {
         view.setPartId(entry.getPartNumber());
         view.setName(entry.getName());
         view.setShortDescription(entry.getShortDescription());
+        view.setCreationTime(entry.getCreationTime().getTime());
+        view.setStatus(entry.getStatus());
+        view.setShortDescription(entry.getShortDescription());
 
-        if (fields == null || fields.contains("creationTime")) {
-            view.setCreationTime(entry.getCreationTime().getTime());
+        // has sample
+        view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));
+
+        // has sequence
+        Visibility visibility = Visibility.valueToEnum(entry.getVisibility());
+        if (visibility == Visibility.REMOTE) {
+            view.setHasSequence(entry.getLongDescriptionType().equalsIgnoreCase("sequence"));
+        } else {
+            SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
+            view.setHasSequence(sequenceDAO.hasSequence(entry.getId()));
+            view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
         }
 
-        if (fields == null || fields.contains("status")) {
-            view.setStatus(entry.getStatus());
-        }
-
-        if (fields == null || fields.contains("alias")) {
+        // optional values
+        if (fieldsToProcess.contains("alias")) {
             view.setAlias(entry.getAlias());
         }
 
-        // information about the owner and creator
-        if (includeOwnerInfo) {
-            view.setOwner(entry.getOwner());
-            view.setOwnerId(getAccountId(entry.getOwnerEmail()));
-
-            // creator
-            view.setCreator(entry.getCreator());
-            view.setCreatorEmail(entry.getCreatorEmail());
-            view.setCreatorId(getAccountId(entry.getCreatorEmail()));
-        }
-
-        // has sample
-        if (fields == null || fields.contains("hasSample")) {
-            view.setHasSample(DAOFactory.getSampleDAO().hasSample(entry));
-        }
-
-        // has sequence
-        if (fields == null || fields.contains("hasSequence")) {
-            Visibility visibility = Visibility.valueToEnum(entry.getVisibility());
-            if (visibility == Visibility.REMOTE) {
-                view.setHasSequence(entry.getLongDescriptionType().equalsIgnoreCase("sequence"));
-            } else {
-                SequenceDAO sequenceDAO = DAOFactory.getSequenceDAO();
-                view.setHasSequence(sequenceDAO.hasSequence(entry.getId()));
-                view.setHasOriginalSequence(sequenceDAO.hasOriginalSequence(entry.getId()));
-            }
-        }
-
-        // has parents
-        if (fields == null || fields.contains("links")) {
+        if (fieldsToProcess.contains("links")) {
             for (Entry linkedEntry : entry.getLinkedEntries()) {
-                // todo : authorization
-//            if (!authorization.canRead(userId, parent))
-//                continue;
                 PartData linkedPartData = new PartData(EntryType.nameToType(linkedEntry.getRecordType()));
                 linkedPartData.setId(linkedEntry.getId());
                 view.getLinkedParts().add(linkedPartData);
@@ -337,8 +319,6 @@ public class ModelToInfoFactory {
             }
         }
 
-        // entry count
-        view.setViewCount(DAOFactory.getAuditDAO().getAuditsForEntryCount(entry));
         return view;
     }
 
@@ -361,7 +341,7 @@ public class ModelToInfoFactory {
                 break;
 
             case SEED:
-                ArabidopsisSeedData seedData = new ArabidopsisSeedData();
+                SeedData seedData = new SeedData();
                 ArabidopsisSeed seed = (ArabidopsisSeed) entry;
                 PlantType plantType = PlantType.fromString(seed.getPlantType().toString());
                 seedData.setPlantType(plantType);
@@ -376,7 +356,7 @@ public class ModelToInfoFactory {
                     String dateFormat = format.format(seed.getHarvestDate());
                     seedData.setHarvestDate(dateFormat);
                 }
-                part.setArabidopsisSeedData(seedData);
+                part.setSeedData(seedData);
                 break;
 
             default:

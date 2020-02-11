@@ -1,6 +1,5 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.access.AuthorizationException;
 import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.common.logging.Logger;
 
@@ -26,8 +25,6 @@ public class ICEExceptionMapper implements ExceptionMapper<Exception> {
             response = webEx.getResponse();
         } else if (exception instanceof PermissionException) {
             response = Response.status(Response.Status.FORBIDDEN).build();
-        } else if (exception instanceof AuthorizationException) {
-            response = Response.status(Response.Status.UNAUTHORIZED).build();
         } else {
             response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }

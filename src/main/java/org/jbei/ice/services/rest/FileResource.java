@@ -1,7 +1,7 @@
 package org.jbei.ice.services.rest;
 
-import com.google.common.io.ByteStreams;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -18,7 +18,11 @@ import org.jbei.ice.lib.entry.Entries;
 import org.jbei.ice.lib.entry.EntriesAsCSV;
 import org.jbei.ice.lib.entry.EntrySelection;
 import org.jbei.ice.lib.entry.attachment.Attachments;
-import org.jbei.ice.lib.entry.sequence.*;
+import org.jbei.ice.lib.entry.sequence.InputStreamWrapper;
+import org.jbei.ice.lib.entry.sequence.PartSequence;
+import org.jbei.ice.lib.entry.sequence.SequenceFormat;
+import org.jbei.ice.lib.entry.sequence.Sequences;
+import org.jbei.ice.lib.entry.sequence.analysis.TraceSequences;
 import org.jbei.ice.lib.net.RemoteEntries;
 import org.jbei.ice.lib.net.RemoteSequence;
 import org.jbei.ice.lib.parsers.InvalidFormatParserException;
@@ -36,6 +40,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +64,24 @@ public class FileResource extends RestResource {
         if (assetFile == null)
             return super.respond(Response.Status.NOT_FOUND);
         return addHeaders(Response.ok(assetFile), assetFile.getName());
+    }
+
+    @GET
+    @Path("/exports/{fileId}")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    public Response downloadExportedFile(@PathParam("fileId") String fileId) {
+        String userId = requireUserId();
+        final java.nio.file.Path tmpFile = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY));
+        String fileName = userId + "_" + fileId + "_export-data.zip";
+        if (!Files.exists(Paths.get(tmpFile.toString(), "export", fileName)))
+            return super.respond(Response.Status.NOT_FOUND);
+
+        StreamingOutput stream = output -> {
+            java.nio.file.Path file = Paths.get(tmpFile.toString(), "export", fileName);
+            final ByteArrayInputStream input = new ByteArrayInputStream(FileUtils.readFileToByteArray(file.toFile()));
+            IOUtils.copy(input, output);
+        };
+        return addHeaders(Response.ok(stream), "ice-export-data.zip");
     }
 
     /**
@@ -96,7 +119,7 @@ public class FileResource extends RestResource {
                                @QueryParam("filename") String fileName,
                                @DefaultValue("false") @QueryParam("delete") boolean delete) {
         final File tmpFile = Paths.get(Utils.getConfigValue(ConfigurationKey.TEMPORARY_DIRECTORY), fileId).toFile();
-        if (tmpFile == null || !tmpFile.exists()) {
+        if (!tmpFile.exists()) {
             return super.respond(Response.Status.NOT_FOUND);
         }
         if (StringUtils.isEmpty(fileName))
@@ -113,12 +136,14 @@ public class FileResource extends RestResource {
     public Response getAttachment(@PathParam("fileId") String fileId) {
         String userId = requireUserId();
         try {
-            ByteArrayWrapper wrapper = attachments.getAttachmentByFileId(userId, fileId);
+            InputStreamWrapper wrapper = attachments.getAttachmentByFileId(userId, fileId);
             if (wrapper == null) {
                 return respond(Response.Status.NOT_FOUND);
             }
 
-            return addHeaders(Response.ok(wrapper.getBytes()), wrapper.getName());
+            StreamingOutput stream = output -> IOUtils.copy(wrapper.getInputStream(), output);
+
+            return addHeaders(Response.ok(stream), wrapper.getName());
         } catch (IOException e) {
             Logger.error(e);
             throw new WebApplicationException(e);
@@ -151,11 +176,12 @@ public class FileResource extends RestResource {
             linked = null;
         }
 
+        final byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType, linked,
+                "existing".equalsIgnoreCase(linkedType));
+
         final StreamingOutput stream = output -> {
-            byte[] template = FileBulkUpload.getCSVTemplateBytes(entryAddType, linked,
-                    "existing".equalsIgnoreCase(linkedType));
             ByteArrayInputStream input = new ByteArrayInputStream(template);
-            ByteStreams.copy(input, output);
+            IOUtils.copy(input, output);
         };
 
         String filename = type.toLowerCase();
@@ -177,30 +203,26 @@ public class FileResource extends RestResource {
             sessionId = sid;
 
         final String userId = getUserId(sessionId);
-        final ByteArrayWrapper wrapper;
         if (remoteId != -1) {
             RemoteSequence sequence = new RemoteSequence(remoteId, Long.decode(partId));
-            wrapper = sequence.get(downloadType);
+            final InputStreamWrapper wrapper = sequence.get(downloadType);
+            StreamingOutput stream = output -> IOUtils.copy(wrapper.getInputStream(), output);
+
+            return addHeaders(Response.ok(stream), wrapper.getName());
         } else {
-            wrapper = new PartSequence(userId, partId).toFile(SequenceFormat.fromString(downloadType));
+            InputStreamWrapper wrapper = new PartSequence(userId, partId).toFile(SequenceFormat.fromString(downloadType));
+            StreamingOutput stream = output -> IOUtils.copy(wrapper.getInputStream(), output);
+            return addHeaders(Response.ok(stream), wrapper.getName());
         }
-
-        StreamingOutput stream = output -> {
-            final ByteArrayInputStream input = new ByteArrayInputStream(wrapper.getBytes());
-            ByteStreams.copy(input, output);
-        };
-
-        return addHeaders(Response.ok(stream), wrapper.getName());
     }
 
     @GET
     @Path("trace/{fileId}")
-    public Response getTraceSequenceFile(@PathParam("fileId") String fileId,
-                                         @QueryParam("sid") String sid) {
-        final SequenceAnalysisController sequenceAnalysisController = new SequenceAnalysisController();
-        final TraceSequence traceSequence = sequenceAnalysisController.getTraceSequenceByFileId(fileId);
+    public Response getTraceSequenceFile(@PathParam("fileId") String fileId, @QueryParam("sid") String sid) {
+        TraceSequences traceSequences = new TraceSequences();
+        final TraceSequence traceSequence = traceSequences.getTraceSequenceByFileId(fileId);
         if (traceSequence != null) {
-            final File file = sequenceAnalysisController.getFile(traceSequence);
+            final File file = traceSequences.getFile(traceSequence);
             return addHeaders(Response.ok(file), traceSequence.getFilename());
         }
         return Response.serverError().build();

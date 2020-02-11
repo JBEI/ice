@@ -1,7 +1,8 @@
 package org.jbei.ice.services.rest;
 
-import org.jbei.ice.lib.access.PermissionException;
 import org.jbei.ice.lib.common.logging.Logger;
+import org.jbei.ice.lib.dto.common.Results;
+import org.jbei.ice.lib.dto.entry.PartData;
 import org.jbei.ice.lib.folder.collection.Collection;
 import org.jbei.ice.lib.folder.collection.CollectionEntries;
 import org.jbei.ice.lib.folder.collection.CollectionType;
@@ -91,20 +92,11 @@ public class CollectionResource extends RestResource {
                          @DefaultValue("") @QueryParam("filter") String filter,
                          @QueryParam("fields") List<String> fields) {
         String userId = requireUserId();
-
-        try {
-            CollectionType type = CollectionType.valueOf(collectionType.toUpperCase());
-            ColumnField sortField = ColumnField.valueOf(sort.toUpperCase());
-            log(userId, "retrieving entries for collection " + type);
-            CollectionEntries entries = new CollectionEntries(userId, type);
-            return super.respond(entries.getEntries(sortField, asc, offset, limit, filter, fields));
-        } catch (PermissionException pe) {
-            return super.respond(Response.Status.FORBIDDEN);
-        } catch (IllegalArgumentException ie) {
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
-        } catch (Exception e) {
-            Logger.error(e);
-            throw new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR);
-        }
+        CollectionType type = CollectionType.valueOf(collectionType.toUpperCase());
+        ColumnField sortField = ColumnField.valueOf(sort.toUpperCase());
+        log(userId, "retrieving entries for collection " + type);
+        CollectionEntries entries = new CollectionEntries(userId, type);
+        Results<PartData> results = entries.getEntries(sortField, asc, offset, limit, filter, fields);
+        return super.respond(results);
     }
 }

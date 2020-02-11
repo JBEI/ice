@@ -52,10 +52,12 @@ public class UserFolders {
         // get sample details
         if (folder.getType() == FolderType.SAMPLE) {
             SampleCreateModel model = DAOFactory.getSampleCreateModelDAO().getByFolder(folder);
-            SampleRequest request = new SampleRequest();
-            request.setId(model.getId());
-            request.setStatus(model.getStatus());
-            folderDetails.setSampleRequest(request);
+            if (model != null) {
+                SampleRequest request = new SampleRequest();
+                request.setId(model.getId());
+                request.setStatus(model.getStatus());
+                folderDetails.setSampleRequest(request);
+            }
         }
 
         return folderDetails;

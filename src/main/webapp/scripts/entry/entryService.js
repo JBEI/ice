@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ice.entry.service', [])
-    .factory('Selection', function ($rootScope, $cookies) {
+    .factory('Selection', function ($rootScope, Authentication) {
         let selectedEntries = {};
         let selectedSearchResultsCount = 0;
         let selectedSearchNotificationSent = false;  // send notification when at least one is selected and then none
@@ -9,7 +9,6 @@ angular.module('ice.entry.service', [])
         let canDelete = false;
         let selectedTypes = {};
         let searchQuery = undefined;
-        let userId = $cookies.get('userId');
 
         return {
             selectEntry: function (entry) {
@@ -17,7 +16,7 @@ angular.module('ice.entry.service', [])
                     return;
                 }
 
-                canDelete = entry.ownerEmail === userId;
+                canDelete = entry.ownerEmail === Authentication.getUserId();
 
                 if (selectedEntries[entry.id]) {
                     // remove entry id
@@ -203,7 +202,7 @@ angular.module('ice.entry.service', [])
                 ]
             },
             {
-                label: "Bio Safety Level", schema: 'bioSafetyLevel', required: true, options: [
+                label: "BioSafety Level", schema: 'bioSafetyLevel', required: true, options: [
                     {value: "1", text: "Level 1"},
                     {value: "2", text: "Level 2"},
                     {value: "-1", text: "Restricted"}
@@ -252,10 +251,10 @@ angular.module('ice.entry.service', [])
                 schema: 'sentToABRC',
                 help: "Help Text",
                 inputType: 'bool',
-                subSchema: 'arabidopsisSeedData'
+                subSchema: 'seedData'
             },
             {
-                label: "Plant Type", schema: 'plantType', subSchema: 'arabidopsisSeedData', options: [
+                label: "Plant Type", schema: 'plantType', subSchema: 'seedData', options: [
                     {value: "EMS", text: "EMS"},
                     {value: "OVER_EXPRESSION", text: "OVER_EXPRESSION"},
                     {value: "RNAI", text: "RNAi"},
@@ -265,7 +264,7 @@ angular.module('ice.entry.service', [])
                 ]
             },
             {
-                label: "Generation", schema: 'generation', subSchema: 'arabidopsisSeedData', options: [
+                label: "Generation", schema: 'generation', subSchema: 'seedData', options: [
                     {value: "UNKNOWN", text: "UNKNOWN"},
                     {value: "F1", text: "F1"},
                     {value: "F2", text: "F2"},
@@ -281,9 +280,9 @@ angular.module('ice.entry.service', [])
                     {value: "T5", text: "T5"}
                 ]
             },
-            {label: "Harvest Date", schema: 'harvestDate', subSchema: 'arabidopsisSeedData', inputType: 'date'},
-            {label: "Homozygosity", schema: 'homozygosity', subSchema: 'arabidopsisSeedData', inputType: 'medium'},
-            {label: "Ecotype", schema: 'ecotype', subSchema: 'arabidopsisSeedData', inputType: 'medium'},
+            {label: "Harvest Date", schema: 'harvestDate', subSchema: 'seedData', inputType: 'date'},
+            {label: "Homozygosity", schema: 'homozygosity', subSchema: 'seedData', inputType: 'medium'},
+            {label: "Ecotype", schema: 'ecotype', subSchema: 'seedData', inputType: 'medium'},
             {
                 label: "Selection Markers", required: true, schema: 'selectionMarkers', inputType: 'autoCompleteAdd',
                 autoCompleteField: 'SELECTION_MARKERS'
@@ -465,6 +464,56 @@ angular.module('ice.entry.service', [])
             return sortedFields;
         };
 
+        // add custom fields to set of regular fields and sorts the fields
+        const addEntryCustomFields = function (entry, fields) {
+            entry.customFields.forEach(function (custom) {
+                if (!custom.label)
+                    return;
+                //
+                // entry[custom.label] = custom.value;
+                // fields.push({schema: custom.label, label: custom.label});
+                const customField = {
+                    label: custom.label,
+                    required: custom.required,
+                    isCustom: true,
+                    value: custom.value
+                };
+
+                switch (custom.fieldType) {
+                    case "MULTI_CHOICE":
+                    case "MULTI_CHOICE_PLUS":
+                        customField.options = [];
+                        customField.inputType = "options";
+                        custom.options.forEach(function (each) {
+                            customField.options.push({value: each.name, text: each.name})
+                        });
+
+                        if (custom.fieldType === "MULTI_CHOICE_PLUS")
+                            customField.options.push({value: "Other", text: "Other"});
+
+                        fields.push(customField);
+                        break;
+
+                    case "EXISTING":
+                        if (!custom.options || !custom.options.length)
+                            return;
+
+                        // schema is contained in options. assuming only one
+                        // todo : it is set as {name: 'schema', value: schema_value}
+                        const schema = custom.options[0].name;
+                        for (let i = 0; i < fields.length; i += 1) {
+                            if (fields[i].schema === schema) {
+                                fields[i].required = custom.required;
+                                fields[i].label = custom.label;
+                                break;
+                            }
+                        }
+                }
+            });
+            entry.fields = sortEntryFields(fields);
+            return entry;
+        };
+
         return {
             toStringArray: function (obj) {
                 return toStringArray(obj);
@@ -482,7 +531,6 @@ angular.module('ice.entry.service', [])
             getTypeData: function (entry) {
                 // let type = entry.type.toLowerCase();
                 // let fields = getFieldsForType(type);
-                console.log(entry);
 
                 entry.fields.forEach(function (field) {
                     if (field.subSchema) {
@@ -499,7 +547,6 @@ angular.module('ice.entry.service', [])
                                 return;
                             }
 
-                            console.log(custom);
                             custom.value = entry[custom.label];
                             if (custom.fieldType === 'MULTI_CHOICE_PLUS' && custom.value === 'Other') {
                                 custom.value = entry[custom.label + '_plus'];
@@ -511,6 +558,14 @@ angular.module('ice.entry.service', [])
                     }
                 });
 
+                // check biosafety
+                if (entry.bioSafetyLevel === "Level 2")
+                    entry.bioSafetyLevel = 2;
+                else if (entry.bioSafetyLevel === "Restricted")
+                    entry.bioSafetyLevel = -1;
+                else
+                    entry.bioSafetyLevel = 1;
+
                 return entry;
             },
 
@@ -518,6 +573,7 @@ angular.module('ice.entry.service', [])
             convertToUIForm: function (entry) {
                 let type = entry.type.toLowerCase();
 
+                // note that this is for display; when in edit mode this will not work for options bSL field
                 if (entry.bioSafetyLevel === 2)
                     entry.bioSafetyLevel = "Level 2";
                 else if (entry.bioSafetyLevel === -1)
@@ -538,53 +594,7 @@ angular.module('ice.entry.service', [])
                     return entry;
                 }
 
-                entry.customFields.forEach(function (custom) {
-                    if (!custom.label)
-                        return;
-                    //
-                    // entry[custom.label] = custom.value;
-                    // fields.push({schema: custom.label, label: custom.label});
-                    const customField = {
-                        label: custom.label,
-                        required: custom.required,
-                        isCustom: true,
-                        value: custom.value
-                    };
-
-                    switch (custom.fieldType) {
-                        case "MULTI_CHOICE":
-                        case "MULTI_CHOICE_PLUS":
-                            customField.options = [];
-                            customField.inputType = "options";
-                            custom.options.forEach(function (each) {
-                                customField.options.push({value: each.name, text: each.name})
-                            });
-
-                            if (custom.fieldType === "MULTI_CHOICE_PLUS")
-                                customField.options.push({value: "Other", text: "Other"});
-
-                            fields.push(customField);
-                            break;
-
-                        case "EXISTING":
-                            if (!custom.options || !custom.options.length)
-                                return;
-
-                            // schema is contained in options. assuming only one
-                            // todo : it is set as {name: 'schema', value: schema_value}
-                            const schema = custom.options[0].name;
-                            for (let i = 0; i < fields.length; i += 1) {
-                                if (fields[i].schema === schema) {
-                                    fields[i].required = custom.required;
-                                    fields[i].label = custom.label;
-                                    break;
-                                }
-                            }
-                    }
-                });
-
-                entry.fields = sortEntryFields(fields);
-                return entry;
+                return addEntryCustomFields(entry, fields);
             },
 
             validateFields: function (part, fields) {
@@ -629,42 +639,7 @@ angular.module('ice.entry.service', [])
                     return entry;
                 }
 
-                entry.customFields.forEach(function (custom) {
-                    const customField = {label: custom.label, required: custom.required, isCustom: true};
-                    switch (custom.fieldType) {
-                        case "MULTI_CHOICE":
-                        case "MULTI_CHOICE_PLUS":
-                            customField.options = [];
-                            customField.inputType = "options";
-                            custom.options.forEach(function (each) {
-                                customField.options.push({value: each.name, text: each.name})
-                            });
-
-                            if (custom.fieldType === "MULTI_CHOICE_PLUS")
-                                customField.options.push({value: "Other", text: "Other"});
-
-                            fields.push(customField);
-                            break;
-
-                        case "EXISTING":
-                            if (!custom.options || !custom.options.length)
-                                return;
-
-                            // schema is contained in options. assuming only one
-                            // todo : it is set as {name: 'schema', value: schema_value}
-                            const schema = custom.options[0].name;
-                            for (let i = 0; i < fields.length; i += 1) {
-                                if (fields[i].schema === schema) {
-                                    fields[i].required = custom.required;
-                                    fields[i].label = custom.label;
-                                    break;
-                                }
-                            }
-                    }
-                });
-
-                entry.fields = sortEntryFields(fields);
-                return entry;
+                return addEntryCustomFields(entry, fields);
             },
 
             // retrieves the submenu options for entry (if param set to true then it is for a remote entry)

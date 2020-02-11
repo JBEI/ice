@@ -19,14 +19,16 @@ import java.util.Optional;
  */
 public class CustomFields {
 
-    private EntryAuthorization authorization;
     private final ParameterDAO dao;
     private final EntryDAO entryDAO;
+    private final CustomEntryFieldDAO customEntryFieldDAO;
+    private EntryAuthorization authorization;
 
     public CustomFields() {
         this.authorization = new EntryAuthorization();
         this.dao = DAOFactory.getParameterDAO();
         this.entryDAO = DAOFactory.getEntryDAO();
+        this.customEntryFieldDAO = DAOFactory.getCustomEntryFieldDAO();
     }
 
     public CustomField createField(String userId, long partId, CustomField field) {
@@ -114,8 +116,7 @@ public class CustomFields {
 
     public CustomEntryField create(String userId, CustomEntryField customField) {
         authorization.expectAdmin(userId);
-        CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
-        Optional<CustomEntryFieldModel> result = dao.getLabelForType(customField.getEntryType(), customField.getLabel());
+        Optional<CustomEntryFieldModel> result = customEntryFieldDAO.getLabelForType(customField.getEntryType(), customField.getLabel());
         if (result.isPresent() && !result.get().getDisabled())
             throw new IllegalArgumentException("Field with label \"" + customField.getLabel() + "\" already exists for entry type \"" + customField.getEntryType() + "\"");
 
@@ -124,20 +125,20 @@ public class CustomFields {
         model.setRequired(customField.isRequired());
         model.setFieldType(customField.getFieldType()); // todo : validate field type
         model.setEntryType(customField.getEntryType()); // todo : validate
+        model.setExistingField(customField.getExistingField());
 
         for (CustomField field : customField.getOptions()) {
             model.getCustomFieldLabels().add(new CustomEntryFieldOptionModel(field.getValue()));
         }
 
-        model = dao.create(model);
+        model = customEntryFieldDAO.create(model);
         return model.toDataTransferObject();
     }
 
     public Results<CustomEntryField> get(EntryType entryType) {
         Results<CustomEntryField> fields = new Results<>();
 
-        CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
-        List<CustomEntryFieldModel> results = dao.getFieldsForType(entryType, false);
+        List<CustomEntryFieldModel> results = customEntryFieldDAO.getFieldsForType(entryType, false);
         for (CustomEntryFieldModel model : results) {
             fields.getData().add(model.toDataTransferObject());
         }
@@ -152,7 +153,7 @@ public class CustomFields {
 
         // get fields for entry type
         EntryType type = EntryType.nameToType(entry.getRecordType());
-        List<CustomEntryFieldModel> typeFields = DAOFactory.getCustomEntryFieldDAO().getFieldsForType(type, false);
+        List<CustomEntryFieldModel> typeFields = customEntryFieldDAO.getFieldsForType(type, false);
 
         // get custom fields values
         CustomEntryFieldValueDAO dao = DAOFactory.getCustomEntryFieldValueDAO();
@@ -161,7 +162,7 @@ public class CustomFields {
             fields.add(valueModel.toDataTransferObject());
         }
 
-        // add entry field types that are not in custom field values (I am sure there is a query for this)
+        // add entry field types that are not in custom field values
         Iterator<CustomEntryFieldModel> iterator = typeFields.iterator();
         while (iterator.hasNext()) {
             CustomEntryFieldModel next = iterator.next();
@@ -182,7 +183,7 @@ public class CustomFields {
 
     public void deleteCustomField(String userId, EntryType type, long fieldId) {
         authorization.expectAdmin(userId);
-        CustomEntryFieldDAO dao = DAOFactory.getCustomEntryFieldDAO();
+        CustomEntryFieldDAO dao = customEntryFieldDAO;
 
         CustomEntryFieldModel value = dao.get(fieldId);
         if (value == null || value.getEntryType() != type)
