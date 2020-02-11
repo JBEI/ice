@@ -39,6 +39,7 @@ import java.util.zip.ZipOutputStream;
  */
 public class EntriesAsCSV {
 
+    private final String userId;
     private Path csvPath;
     private List<Long> entries;
     private boolean includeSequences;
@@ -47,7 +48,6 @@ public class EntriesAsCSV {
     private SequenceDAO sequenceDAO;
     private AccountDAO accountDAO;
     private PermissionDAO permissionDAO;
-    private final String userId;
 
     /**
      * @param formats optional list of formats of sequences to include
@@ -318,6 +318,7 @@ public class EntriesAsCSV {
                     continue;
                 }
 
+                wrapper.setName(entry.getPartNumber() + File.separatorChar + wrapper.getName());
                 putZipEntry(wrapper, zos);
             }
             this.includeSequences = false;

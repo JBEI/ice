@@ -6,7 +6,7 @@ import java.io.InputStream;
 public class InputStreamWrapper {
 
     private final InputStream inputStream;
-    private final String name;
+    private String name;
 
     public InputStreamWrapper(InputStream inputStream, String name) {
         this.inputStream = inputStream;
@@ -20,6 +20,10 @@ public class InputStreamWrapper {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public InputStream getInputStream() {
