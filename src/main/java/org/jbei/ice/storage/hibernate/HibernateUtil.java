@@ -1,5 +1,6 @@
 package org.jbei.ice.storage.hibernate;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
@@ -7,6 +8,10 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.storage.model.*;
+
+import java.io.IOException;
+import java.util.Objects;
+import java.util.Properties;
 
 /**
  * Helper class to Initialize Hibernate, and obtain new sessions.
@@ -63,20 +68,35 @@ public class HibernateUtil {
 
     /**
      * Checks user defined connection properties from a pre-determined location
-     * and loads it (if available) in configuration
+     * and loads it (if available) in configuration.
+     * <br>
+     * The location of the property file can either be an environ property with
+     * key <code>ICE_PROPERTIES</code>, a system property (using -D in the tomcat startup
+     * script) with same key or in the classpath with the name <code>ice.properties</code>
      *
      * @param configuration hibernate configuration
      */
     private static void getConnectionProperties(Configuration configuration) {
-        // get connection properties from properties file
-//        Properties connectionProps = new Properties();
-//        connectionProps.put("hibernate.connection.url", "");
-//        connectionProps.put("hibernate.connection.username", "");
-//        connectionProps.put("hibernate.connection.password", "");
-//        connectionProps.put("hibernate.search.default.indexBase", "");
-//
-//        // todo : if available
-//        configuration.setProperties(connectionProps);
+        // first check environ variable
+        String propertyHome = System.getenv("ICE_DB_PROPERTIES");
+        if (null == propertyHome) {
+            // check system property
+            propertyHome = System.getProperty("ICE_DB_PROPERTIES");
+        }
+
+        try {
+            String filePath;
+            if (StringUtils.isNotBlank(propertyHome))
+                filePath = propertyHome + "/ice.properties";
+            else
+                filePath = "ice.properties";
+
+            Properties properties = new Properties();
+            properties.load(Objects.requireNonNull(HibernateUtil.class.getClassLoader().getResourceAsStream(filePath)));
+            configuration.setProperties(properties);
+        } catch (IOException e) {
+            Logger.error(e);
+        }
     }
 
     private static synchronized void initialize(Type type) {
@@ -95,8 +115,9 @@ public class HibernateUtil {
                     configuration.setProperty("hibernate.search.default.directory_provider",
                             "org.hibernate.search.store.impl.RAMDirectoryProvider");
                 } else {
-                    configuration.configure();                                  // load base configuration
-                    getConnectionProperties(configuration);
+                    // note that the order here is important
+                    getConnectionProperties(configuration);                     // get additional config properties
+                    configuration.configure();                                  // load (additional) base configuration
                 }
 
                 ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(
