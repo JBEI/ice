@@ -1,5 +1,6 @@
 package org.jbei.ice.services.rest;
 
+import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -200,7 +201,7 @@ public class SampleResource extends RestResource {
         try {
             SampleCSV sampleCSV = new SampleCSV(userId, fileInputStream);
             return super.respond(sampleCSV.parse());
-        } catch (IOException e) {
+        } catch (CsvException | IOException e) {
             throw new WebApplicationException(e);
         }
     }

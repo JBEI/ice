@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.search.blast;
 
 import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
 import org.biojava.bio.seq.DNATools;
 import org.biojava.bio.seq.RNATools;
@@ -154,7 +155,7 @@ public class StandardBlastDatabase extends BlastDatabase {
                 // if there is an existing record for same entry with a lower relative score then replace
                 hashMap.putIfAbsent(idString, info);
             }
-        } catch (IOException e) {
+        } catch (CsvException | IOException e) {
             Logger.error(e);
             return null;
         }

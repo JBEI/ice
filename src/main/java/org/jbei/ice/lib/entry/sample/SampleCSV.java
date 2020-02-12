@@ -2,6 +2,7 @@ package org.jbei.ice.lib.entry.sample;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
+import com.opencsv.exceptions.CsvValidationException;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.ConfigurationKey;
@@ -46,7 +47,7 @@ public class SampleCSV implements Closeable {
         this.sampleService = new SampleService();
     }
 
-    public List<String> parse() throws IOException {
+    public List<String> parse() throws IOException, CsvValidationException {
         List<String> errors = new ArrayList<>();
         String[] header = reader.readNext();
 
@@ -153,7 +154,7 @@ public class SampleCSV implements Closeable {
         return errors;
     }
 
-    public String generate() throws IOException {
+    public String generate() throws IOException, CsvValidationException {
         String[] header = reader.readNext();
         int headerLength = header.length;
         EntryDAO dao = DAOFactory.getEntryDAO();

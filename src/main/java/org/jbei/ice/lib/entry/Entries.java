@@ -1,6 +1,7 @@
 package org.jbei.ice.lib.entry;
 
 import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import org.apache.commons.lang3.StringUtils;
 import org.jbei.ice.lib.common.logging.Logger;
 import org.jbei.ice.lib.dto.access.AccessPermission;
@@ -257,6 +258,8 @@ public class Entries extends HasEntry {
                     }
                 }
             }
+        } catch (CsvException e) {
+            Logger.error(e);
         }
         return accepted;
     }
