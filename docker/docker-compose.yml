@@ -1,0 +1,22 @@
+---
+version: "3.7"
+volumes:
+  ice_index:
+  ice_home:
+  postgres_db:
+services:
+  ice:
+    image: jbei/ice:latest
+    ports:
+    - 127.0.0.1:9999:8080
+    volumes:
+    - ice_index:/var/lib/ice/lucene
+    - ice_home:/usr/local/tomcat/data
+  postgres:
+    image: library/postgres:latest
+    environment:
+      POSTGRES_DB: ice
+      POSTGRES_PASS: icepass
+      POSTGRES_USER: iceuser
+    volumes:
+    - postgres_db:/var/lib/postgresql/data

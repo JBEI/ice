@@ -15,6 +15,7 @@ RUN sed -i.bak -E \
         -e 's|</security-constraint>|</security-constraint>-->|;' \
         /tmp/src/main/webapp/WEB-INF/web.xml \
     && rm /tmp/src/main/webapp/WEB-INF/web.xml.bak \
+    && cp /tmp/docker/hibernate.cfg.xml /tmp/src/main/resources/hibernate.cfg.xml \
     && mvn -DskipTests=true package
 
 # -----
