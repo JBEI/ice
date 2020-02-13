@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Logger {
 
-    private static final ch.qos.logback.classic.Logger LOGGER = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("org.jbei.ice");
+    private static final ch.qos.logback.classic.Logger LOGGER = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger("[ICE]");
 
     public static void error(String message) {
         LOGGER.error(message);
